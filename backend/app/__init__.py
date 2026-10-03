@@ -1,0 +1,1 @@
+"""BottleMap FastAPI application package."""
