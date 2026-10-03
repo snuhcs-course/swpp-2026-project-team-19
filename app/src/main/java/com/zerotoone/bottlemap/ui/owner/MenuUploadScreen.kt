@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -46,6 +45,7 @@ fun MenuUploadScreen(
         if (state == MenuUploadUiState.PROCESSING) {
             // P19-only fake processing delay. No API call is made here.
             delay(900)
+            stateName = MenuUploadUiState.SELECTED.name
             onOpenReview()
         }
     }
@@ -185,7 +185,7 @@ private fun SelectedUploadState(
     }
 
     TextButton(onClick = onPreviewError) {
-        Text("Preview error state")
+        Text("Simulate upload error (P19 mock)")
     }
 }
 
