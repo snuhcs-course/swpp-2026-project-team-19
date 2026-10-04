@@ -8,3 +8,8 @@
 /captures
 .externalNativeBuild
 .cxx
+/backend/.venv/
+/backend/.env
+/backend/__pycache__/
+/backend/**/__pycache__/
+/backend/.pytest_cache/
