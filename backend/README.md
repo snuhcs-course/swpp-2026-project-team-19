@@ -95,3 +95,15 @@ uv run --env-file .env python scripts/seed_catalog.py
 ```
 
 The script is safe to re-run. Bars, brands, and products are upserted by id, so edits in the JSON are applied on the next run. Aliases get `normalized_alias` from `app/core/normalize.py`; aliases that normalize to a value the same brand or product already has are skipped. Rows removed from the JSON are not deleted from the database. See `ai/catalog/README.md` for the JSON-to-table mapping.
+
+### Changing the normalization rules
+
+`normalized_alias` is stored, so after changing `app/core/normalize.py` recompute it for every brand and product alias before the new backend serves lookups:
+
+```sh
+uv run --env-file .env python scripts/renormalize_aliases.py           # dry run: report only
+uv run --env-file .env python scripts/renormalize_aliases.py --apply
+uv run --env-file .env python scripts/seed_catalog.py
+```
+
+The dry run counts value changes and lists aliases that would be deleted because they now collide with another alias of the same brand or product, and values that become shared by different products (these turn exact matches into ambiguous ones). Re-running the seed afterwards adds aliases that were skipped under the old rules but are now distinct.
