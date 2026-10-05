@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Annotated
 
-from pydantic import PlainSerializer
+from pydantic import PlainSerializer, WithJsonSchema
 
 
 def _to_utc_string(value: datetime) -> str:
@@ -9,4 +9,9 @@ def _to_utc_string(value: datetime) -> str:
 
 
 # The database session may return local time; the API always sends UTC RFC 3339 strings.
-UtcDateTime = Annotated[datetime, PlainSerializer(_to_utc_string, return_type=str)]
+# Fractional seconds may be present, e.g. 2026-10-04T09:15:00.123456Z.
+UtcDateTime = Annotated[
+    datetime,
+    PlainSerializer(_to_utc_string, return_type=str),
+    WithJsonSchema({"type": "string", "format": "date-time"}),
+]
