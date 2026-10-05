@@ -1,0 +1,2253 @@
+{
+ "version": "labels_v1.1",
+ "created": "2026-10-04",
+ "guideline": "BottleMap 메뉴 라벨링 가이드라인 v2.1",
+ "labeling": "Claude draft, full human review by Jinwoo Park (0 corrections)",
+ "photos_source": "Google Drive: 설문조사/BottleMap_메뉴판_수집 (007_위스키복춘, 008_서로상)",
+ "item_count": 219,
+ "photos": [
+  {
+   "photo_id": "007_위스키복춘_01",
+   "bar": "위스키복춘",
+   "items": [
+    {
+     "raw_name": "글렌그란트 15Y",
+     "price_krw": 18000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glen-grant-15",
+     "product_id": "3f4d6495-d607-5334-b11d-7801deacfd32",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌그란트 15Y",
+     "price_krw": 360000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glen-grant-15",
+     "product_id": "3f4d6495-d607-5334-b11d-7801deacfd32",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌드로낙 12Y",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glendronach-12",
+     "product_id": "e5de7281-878c-59d1-9504-6f057c69e860",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌드로낙 12Y",
+     "price_krw": 260000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glendronach-12",
+     "product_id": "e5de7281-878c-59d1-9504-6f057c69e860",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌드로낙 15Y",
+     "price_krw": 26000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glendronach-15",
+     "product_id": "65a7ff41-1a34-5fab-ae14-399c9080f542",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌드로낙 15Y",
+     "price_krw": 500000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glendronach-15",
+     "product_id": "65a7ff41-1a34-5fab-ae14-399c9080f542",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌리벳 12Y",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenlivet-12",
+     "product_id": "293b9d2b-8fdb-52c2-b6cd-eb0a77910eae",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌리벳 12Y",
+     "price_krw": 260000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenlivet-12",
+     "product_id": "293b9d2b-8fdb-52c2-b6cd-eb0a77910eae",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 오리지널",
+     "price_krw": 11000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-original",
+     "product_id": "ec660a60-db4b-5562-ad97-d0349b0be56b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 오리지널",
+     "price_krw": 220000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-original",
+     "product_id": "ec660a60-db4b-5562-ad97-d0349b0be56b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 넥타도르",
+     "price_krw": 19000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-nectar-dor",
+     "product_id": "55e09dbb-9496-5863-8f4e-c85ab200967c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 넥타도르",
+     "price_krw": 380000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-nectar-dor",
+     "product_id": "55e09dbb-9496-5863-8f4e-c85ab200967c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 라산타",
+     "price_krw": 17000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-lasanta",
+     "product_id": "a2688e71-6071-5151-acf9-af69db359d70",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 라산타",
+     "price_krw": 340000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-lasanta",
+     "product_id": "a2688e71-6071-5151-acf9-af69db359d70",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 퀸타루반",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-quinta-ruban",
+     "product_id": "59218382-d515-5e3f-b066-1b8662e98f4d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 퀸타루반",
+     "price_krw": 310000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-quinta-ruban",
+     "product_id": "59218382-d515-5e3f-b066-1b8662e98f4d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 시그넷",
+     "price_krw": 41000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-signet",
+     "product_id": "a1d82f86-d995-58a4-bb88-a009c422b090",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 시그넷",
+     "price_krw": 830000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-signet",
+     "product_id": "a1d82f86-d995-58a4-bb88-a009c422b090",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 18Y",
+     "price_krw": 35000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-18",
+     "product_id": "078bdd87-d120-52db-976d-23648ffeec99",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌모렌지 18Y",
+     "price_krw": 690000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-18",
+     "product_id": "078bdd87-d120-52db-976d-23648ffeec99",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌알라키 12Y",
+     "price_krw": 16000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenallachie-12",
+     "product_id": "1e71c22c-2bba-5ae0-8798-d054d062da6d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌알라키 12Y",
+     "price_krw": 320000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenallachie-12",
+     "product_id": "1e71c22c-2bba-5ae0-8798-d054d062da6d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌알라키 15Y",
+     "price_krw": 26000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenallachie-15",
+     "product_id": "54abee4e-7e03-5d52-852a-2ca1b288df26",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌알라키 15Y",
+     "price_krw": 520000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenallachie-15",
+     "product_id": "54abee4e-7e03-5d52-852a-2ca1b288df26",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌파클라스 105",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenfarclas-105",
+     "product_id": "3eff6768-0c6e-58c1-8fd1-a0c0ce70fe69",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌파클라스 105",
+     "price_krw": 300000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenfarclas-105",
+     "product_id": "3eff6768-0c6e-58c1-8fd1-a0c0ce70fe69",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌피딕 12Y",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenfiddich-12",
+     "product_id": "3531ffb6-7204-58a6-841b-23b6e94c878d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌피딕 12Y",
+     "price_krw": 260000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenfiddich-12",
+     "product_id": "3531ffb6-7204-58a6-841b-23b6e94c878d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌피딕 15Y",
+     "price_krw": 16000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenfiddich-15",
+     "product_id": "8c8191a6-0bae-5f5f-b803-9c7ee6798542",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글렌피딕 15Y",
+     "price_krw": 330000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenfiddich-15",
+     "product_id": "8c8191a6-0bae-5f5f-b803-9c7ee6798542",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 12Y",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "dalmore-12",
+     "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 12Y",
+     "price_krw": 300000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "dalmore-12",
+     "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 12Y 쉐리",
+     "price_krw": 24000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "dalmore-12-sherry-cask-select",
+     "product_id": "461acdf2-1256-5a0f-b9ed-e18b44baf4e1",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 12Y 쉐리",
+     "price_krw": 480000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "dalmore-12-sherry-cask-select",
+     "product_id": "461acdf2-1256-5a0f-b9ed-e18b44baf4e1",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 15Y",
+     "price_krw": 30000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "dalmore-15",
+     "product_id": "ee00403f-4ece-56ff-bbc6-7dfa4737ed62",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 15Y",
+     "price_krw": 600000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "dalmore-15",
+     "product_id": "ee00403f-4ece-56ff-bbc6-7dfa4737ed62",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 포트우드 리저브",
+     "price_krw": 24000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "dalmore-port-wood",
+     "product_id": "81bd91d9-2949-516c-9a25-b0aed5507eb3",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 포트우드 리저브",
+     "price_krw": 480000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "dalmore-port-wood",
+     "product_id": "81bd91d9-2949-516c-9a25-b0aed5507eb3",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 시가몰트 리저브",
+     "price_krw": 36000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "dalmore-cigar-malt",
+     "product_id": "2f557cc3-4552-50c8-a10a-a838c806546c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어 시가몰트 리저브",
+     "price_krw": 720000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "dalmore-cigar-malt",
+     "product_id": "2f557cc3-4552-50c8-a10a-a838c806546c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "로얄브라클라 12Y",
+     "price_krw": 14000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "royal-brackla-12",
+     "product_id": "4b7de0cc-a5a7-5cb3-9794-bc7bdec09e97",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "로얄브라클라 12Y",
+     "price_krw": 280000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "royal-brackla-12",
+     "product_id": "4b7de0cc-a5a7-5cb3-9794-bc7bdec09e97",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "로얄브라클라 18Y",
+     "price_krw": 34000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "royal-brackla-18",
+     "product_id": "18df9675-a0df-5d70-b9db-bbc91203554a",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "로얄브라클라 18Y",
+     "price_krw": 680000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "royal-brackla-18",
+     "product_id": "18df9675-a0df-5d70-b9db-bbc91203554a",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "맥캘란 더블캐스크 12Y",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "macallan-12-double-cask",
+     "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "맥캘란 더블캐스크 12Y",
+     "price_krw": 270000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "macallan-12-double-cask",
+     "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "맥캘란 더블캐스크 15Y",
+     "price_krw": 27000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "macallan-15-double-cask",
+     "product_id": "30ac644f-a7ae-51a2-a3a8-cda1fe7d1d7f",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "맥캘란 더블캐스크 15Y",
+     "price_krw": 550000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "macallan-15-double-cask",
+     "product_id": "30ac644f-a7ae-51a2-a3a8-cda1fe7d1d7f",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "부나하벤 12Y",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "bunnahabhain-12",
+     "product_id": "b72f246e-aa1e-50ca-9011-e09df8af55c1",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "부나하벤 12Y",
+     "price_krw": 270000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "bunnahabhain-12",
+     "product_id": "b72f246e-aa1e-50ca-9011-e09df8af55c1",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아란 10Y",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "arran-10",
+     "product_id": "4a898091-d81b-55ac-ab1f-9103e787b1d8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아란 10Y",
+     "price_krw": 270000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "arran-10",
+     "product_id": "4a898091-d81b-55ac-ab1f-9103e787b1d8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아란 보데가 셰리 캐스크",
+     "price_krw": 22000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "arran-sherry-cask",
+     "product_id": "58b6da39-cc5a-52ca-a299-d75bbee54ff8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아란 보데가 셰리 캐스크",
+     "price_krw": 440000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "arran-sherry-cask",
+     "product_id": "58b6da39-cc5a-52ca-a299-d75bbee54ff8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아벨라워 아부나흐",
+     "price_krw": 30000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "aberlour-abunadh",
+     "product_id": "b7c26636-4251-5ac9-999a-3c7d9341e402",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아벨라워 아부나흐",
+     "price_krw": 600000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "aberlour-abunadh",
+     "product_id": "b7c26636-4251-5ac9-999a-3c7d9341e402",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "오반 14Y",
+     "price_krw": 18000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "oban-14",
+     "product_id": "938bf4dc-4f00-5924-ab81-75ed37a5939c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "오반 14Y",
+     "price_krw": 360000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "oban-14",
+     "product_id": "938bf4dc-4f00-5924-ab81-75ed37a5939c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "카발란 솔리스트 셰리 오크",
+     "price_krw": 33000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "kavalan-solist-sherry",
+     "product_id": "609f1199-f627-5ce1-bab9-b4dfd9acb9ec",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "카발란 솔리스트 셰리 오크",
+     "price_krw": 660000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "kavalan-solist-sherry",
+     "product_id": "609f1199-f627-5ce1-bab9-b4dfd9acb9ec",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "카발란 솔리스트 비노 바리끄",
+     "price_krw": 46000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "kavalan-solist-vinho-barrique",
+     "product_id": "abe4e50e-f84d-5fc8-9d9e-d4cfc345754a",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "카발란 솔리스트 비노 바리끄",
+     "price_krw": 920000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "kavalan-solist-vinho-barrique",
+     "product_id": "abe4e50e-f84d-5fc8-9d9e-d4cfc345754a",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "카발란 트리플 셰리",
+     "price_krw": 25000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "kavalan-triple-sherry",
+     "product_id": "cbe5c81b-5886-57c3-8e75-6b474eff02b0",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "카발란 트리플 셰리",
+     "price_krw": 500000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "kavalan-triple-sherry",
+     "product_id": "cbe5c81b-5886-57c3-8e75-6b474eff02b0",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "클라이넬리쉬 14Y",
+     "price_krw": 12000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "clynelish-14",
+     "product_id": "e575169b-7f33-585c-9238-1d02b475ea18",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "클라이넬리쉬 14Y",
+     "price_krw": 240000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "clynelish-14",
+     "product_id": "e575169b-7f33-585c-9238-1d02b475ea18",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "발베니 12Y",
+     "price_krw": 14000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "balvenie-12-doublewood",
+     "product_id": "ee5db3dd-cd58-5d2d-b70d-ae95964f96fc",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "발베니 12Y",
+     "price_krw": 280000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "balvenie-12-doublewood",
+     "product_id": "ee5db3dd-cd58-5d2d-b70d-ae95964f96fc",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "발베니 14Y",
+     "price_krw": 22000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "balvenie-14-caribbean",
+     "product_id": "9aacd9a4-764a-5087-ad74-9f6e27235b4d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "발베니 14Y",
+     "price_krw": 450000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "balvenie-14-caribbean",
+     "product_id": "9aacd9a4-764a-5087-ad74-9f6e27235b4d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "츠누키 에디션 2025",
+     "price_krw": 24000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "tsunuki-the-edition-2025",
+     "product_id": "f5e7c74f-959b-5c2c-8b30-8802060af095",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "츠누키 에디션 2025",
+     "price_krw": 490000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "tsunuki-the-edition-2025",
+     "product_id": "f5e7c74f-959b-5c2c-8b30-8802060af095",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "요이치 싱글몰트",
+     "price_krw": 16000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "yoichi-single-malt",
+     "product_id": "2863a517-df5c-5a4b-93a7-61ea6df1553d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "요이치 싱글몰트",
+     "price_krw": 330000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "yoichi-single-malt",
+     "product_id": "2863a517-df5c-5a4b-93a7-61ea6df1553d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "에드라두어 10Y",
+     "price_krw": 17000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "edradour-10",
+     "product_id": "b9055c7f-cab5-5145-b2d1-d900c0924d09",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "노마드",
+     "price_krw": 10000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "nomad-outland",
+     "product_id": "cd435eaa-609d-5b0d-aa36-d613b73f9659",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "노마드",
+     "price_krw": 200000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "nomad-outland",
+     "product_id": "cd435eaa-609d-5b0d-aa36-d613b73f9659",
+     "expected_resolution": "matched"
+    }
+   ]
+  },
+  {
+   "photo_id": "007_위스키복춘_02",
+   "bar": "위스키복춘",
+   "items": [
+    {
+     "raw_name": "1792 스몰배치",
+     "price_krw": 8000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "1792-small-batch",
+     "product_id": "d097d4a5-7c64-567d-b160-2c8d92b45434",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "1792 스몰배치",
+     "price_krw": 160000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "1792-small-batch",
+     "product_id": "d097d4a5-7c64-567d-b160-2c8d92b45434",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "노아스 밀",
+     "price_krw": 20000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "noahs-mill",
+     "product_id": "b66aac77-d894-5f0c-97eb-d8971207e003",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "노아스 밀",
+     "price_krw": 410000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "noahs-mill",
+     "product_id": "b66aac77-d894-5f0c-97eb-d8971207e003",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "러셀 리저브 싱글배럴",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "russells-reserve-single-barrel",
+     "product_id": "0c5e090d-5461-5e0a-b164-b33da68b96db",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "러셀 리저브 싱글배럴",
+     "price_krw": 270000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "russells-reserve-single-barrel",
+     "product_id": "0c5e090d-5461-5e0a-b164-b33da68b96db",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "로완스 크릭",
+     "price_krw": 17000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "rowans-creek",
+     "product_id": "9abe3f23-4d5f-519e-9a12-3be06f709e14",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "로완스 크릭",
+     "price_krw": 340000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "rowans-creek",
+     "product_id": "9abe3f23-4d5f-519e-9a12-3be06f709e14",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "메이커스 마크",
+     "price_krw": 8000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "makers-mark",
+     "product_id": "f95e81a0-b8f5-5cb3-adb0-998b5956f588",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "메이커스 마크",
+     "price_krw": 120000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "makers-mark",
+     "product_id": "f95e81a0-b8f5-5cb3-adb0-998b5956f588",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "우드포드 리저브",
+     "price_krw": 10000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "woodford-reserve",
+     "product_id": "a342821c-15b8-5db7-bb72-6fbb058f6dd4",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "우드포드 리저브",
+     "price_krw": 210000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "woodford-reserve",
+     "product_id": "a342821c-15b8-5db7-bb72-6fbb058f6dd4",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "우드포드 리저브 더블오크",
+     "price_krw": 16000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "woodford-reserve-double-oaked",
+     "product_id": "5d724848-d758-59ad-b4bd-14b4e4b850f1",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "우드포드 리저브 더블오크",
+     "price_krw": 330000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "woodford-reserve-double-oaked",
+     "product_id": "5d724848-d758-59ad-b4bd-14b4e4b850f1",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "와일드터키 101 8Y",
+     "price_krw": 8000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "wild-turkey-101-8",
+     "product_id": "f626dbc2-6a44-5e95-83b4-35af8023e497",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "와일드터키 101 8Y",
+     "price_krw": 160000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "wild-turkey-101-8",
+     "product_id": "f626dbc2-6a44-5e95-83b4-35af8023e497",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "와일드터키 레어브리드",
+     "price_krw": 12000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "wild-turkey-rare-breed",
+     "product_id": "e542add8-783a-53b6-9c5f-c0064e512334",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "와일드터키 레어브리드",
+     "price_krw": 250000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "wild-turkey-rare-breed",
+     "product_id": "e542add8-783a-53b6-9c5f-c0064e512334",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "이글 레어 10Y",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "eagle-rare-10",
+     "product_id": "cadd2c4a-0ac9-555b-a1be-33742d66d8c6",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "이글 레어 10Y",
+     "price_krw": 300000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "eagle-rare-10",
+     "product_id": "cadd2c4a-0ac9-555b-a1be-33742d66d8c6",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "납크릭",
+     "price_krw": 10000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "knob-creek",
+     "product_id": "ccf8c7b3-4b19-5ef2-8056-f714c4c2d468",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "납크릭",
+     "price_krw": 200000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "knob-creek",
+     "product_id": "ccf8c7b3-4b19-5ef2-8056-f714c4c2d468",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "부커스",
+     "price_krw": 35000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "bookers",
+     "product_id": "267e4a32-091f-5d9b-a19a-ec5098c1fb4e",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라가불린 16Y",
+     "price_krw": 23000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "lagavulin-16",
+     "product_id": "08cd7921-e646-5b8e-96dc-9b6a25c03bb6",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라가불린 16Y",
+     "price_krw": 460000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "lagavulin-16",
+     "product_id": "08cd7921-e646-5b8e-96dc-9b6a25c03bb6",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라프로익 10Y",
+     "price_krw": 9000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "laphroaig-10",
+     "product_id": "dbc5af99-05b2-5538-a5ef-8aa53cdc660b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라프로익 10Y",
+     "price_krw": 180000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "laphroaig-10",
+     "product_id": "dbc5af99-05b2-5538-a5ef-8aa53cdc660b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라프로익 쿼터캐스크",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "laphroaig-quarter-cask",
+     "product_id": "4658648a-d8cb-54da-ad58-f506a5cac3ef",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라프로익 쿼터캐스크",
+     "price_krw": 250000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "laphroaig-quarter-cask",
+     "product_id": "4658648a-d8cb-54da-ad58-f506a5cac3ef",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 10Y",
+     "price_krw": 14000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "ardbeg-10",
+     "product_id": "583b633a-c820-574d-8f77-521d6ac268b2",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 10Y",
+     "price_krw": 280000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "ardbeg-10",
+     "product_id": "583b633a-c820-574d-8f77-521d6ac268b2",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 우거다일",
+     "price_krw": 21000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "ardbeg-uigeadail",
+     "product_id": "a7d15e7d-18f7-5fab-9cd3-c1cce827c828",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 우거다일",
+     "price_krw": 420000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "ardbeg-uigeadail",
+     "product_id": "a7d15e7d-18f7-5fab-9cd3-c1cce827c828",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 코리브레칸",
+     "price_krw": 25000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "ardbeg-corryvreckan",
+     "product_id": "512a9037-d050-5199-9745-5dd10b06bb36",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 코리브레칸",
+     "price_krw": 510000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "ardbeg-corryvreckan",
+     "product_id": "512a9037-d050-5199-9745-5dd10b06bb36",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "옥토모어 16.1",
+     "price_krw": 52000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "octomore-16-1",
+     "product_id": "cb4325eb-e221-5870-9768-295b67a1a465",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "옥토모어 16.1",
+     "price_krw": 1040000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "octomore-16-1",
+     "product_id": "cb4325eb-e221-5870-9768-295b67a1a465",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "포트샬롯 10Y",
+     "price_krw": 21000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "port-charlotte-10",
+     "product_id": "e3b37fa7-db17-5fb3-a0f0-03c59c6b29f8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "포트샬롯 10Y",
+     "price_krw": 420000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "port-charlotte-10",
+     "product_id": "e3b37fa7-db17-5fb3-a0f0-03c59c6b29f8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "하이랜드 파크 12Y",
+     "price_krw": 12000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "highland-park-12",
+     "product_id": "8ab09688-478e-5a77-ae5c-bb7f1d603d1e",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "하이랜드 파크 12Y",
+     "price_krw": 250000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "highland-park-12",
+     "product_id": "8ab09688-478e-5a77-ae5c-bb7f1d603d1e",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "탈리스커 10Y",
+     "price_krw": 11000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "talisker-10",
+     "product_id": "8886fde4-53a8-5a6b-a5c8-13d5ac1a55d9",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "탈리스커 10Y",
+     "price_krw": 220000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "talisker-10",
+     "product_id": "8886fde4-53a8-5a6b-a5c8-13d5ac1a55d9",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "벤로막 10Y",
+     "price_krw": 11000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "benromach-10",
+     "product_id": "345cee60-385f-5ae9-a260-f5c32b4f746b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "벤로막 10Y",
+     "price_krw": 220000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "benromach-10",
+     "product_id": "345cee60-385f-5ae9-a260-f5c32b4f746b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "벤로막 15Y",
+     "price_krw": 24000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "benromach-15",
+     "product_id": "136d682b-bd86-59c3-adac-cacdc6830c05",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "벤로막 15Y",
+     "price_krw": 490000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "benromach-15",
+     "product_id": "136d682b-bd86-59c3-adac-cacdc6830c05",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "보모어 12Y",
+     "price_krw": 11000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "bowmore-12",
+     "product_id": "deabfe81-7c98-54c8-96d6-fd839a61b3e2",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "보모어 12Y",
+     "price_krw": 220000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "bowmore-12",
+     "product_id": "deabfe81-7c98-54c8-96d6-fd839a61b3e2",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "보모어 15Y",
+     "price_krw": 18000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "bowmore-15",
+     "product_id": "66038b0f-4916-5d93-bf59-1a881862fcbb",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "보모어 15Y",
+     "price_krw": 370000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "bowmore-15",
+     "product_id": "66038b0f-4916-5d93-bf59-1a881862fcbb",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "야마자키 스모키",
+     "price_krw": 33000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "yamazaki-smoky",
+     "product_id": "47d1007c-3e9e-5471-b7ea-9b7caa1b49bb",
+     "expected_resolution": "matched"
+    }
+   ]
+  },
+  {
+   "photo_id": "007_위스키복춘_03",
+   "bar": "위스키복춘",
+   "items": [
+    {
+     "raw_name": "로얄살루트 21Y",
+     "price_krw": 39000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "royal-salute-21",
+     "product_id": "aa962c28-85d0-5985-806a-34791429e57a",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "로얄살루트 21Y",
+     "price_krw": 790000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "royal-salute-21",
+     "product_id": "aa962c28-85d0-5985-806a-34791429e57a",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "몽키숄더",
+     "price_krw": 8000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "monkey-shoulder",
+     "product_id": "504c7a9c-f7d0-5902-9fd2-652fdd0e884f",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "몽키숄더",
+     "price_krw": 140000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "monkey-shoulder",
+     "product_id": "504c7a9c-f7d0-5902-9fd2-652fdd0e884f",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "조니워커 블랙",
+     "price_krw": 8000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "johnnie-walker-black",
+     "product_id": "1e7a47f7-726c-5598-b833-e8375e07b236",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "조니워커 블랙",
+     "price_krw": 140000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "johnnie-walker-black",
+     "product_id": "1e7a47f7-726c-5598-b833-e8375e07b236",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "조니워커 블루",
+     "price_krw": 41000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "johnnie-walker-blue",
+     "product_id": "7b18f29a-1d4f-5ba8-b389-d302dde596ff",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "조니워커 블루",
+     "price_krw": 830000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "johnnie-walker-blue",
+     "product_id": "7b18f29a-1d4f-5ba8-b389-d302dde596ff",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "폴존 올로로소 셀렉트 캐스크",
+     "price_krw": 22000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "paul-john-oloroso",
+     "product_id": "2d4bc9a9-cab3-5b49-86e3-241232b950d3",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "폴존 올로로소 셀렉트 캐스크",
+     "price_krw": 450000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "paul-john-oloroso",
+     "product_id": "2d4bc9a9-cab3-5b49-86e3-241232b950d3",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "폴존 피티드 셀렉트 캐스크",
+     "price_krw": 18000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "paul-john-peated",
+     "product_id": "2059414f-d992-5721-9116-3d65f3ca230c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "폴존 피티드 셀렉트 캐스크",
+     "price_krw": 360000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "paul-john-peated",
+     "product_id": "2059414f-d992-5721-9116-3d65f3ca230c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "시그나토리 벤리악 12Y",
+     "price_krw": 18000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "signatory-benriach-12",
+     "product_id": "010f11a9-1f55-57b5-a012-90c4af97a776",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "시그나토리 맥더프 13Y",
+     "price_krw": 17000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "signatory-macduff-13",
+     "product_id": "075cfe24-7259-5d13-aa7c-8554a5546171",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "올트모어 디스틸러리 12Y",
+     "price_krw": 38000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "aultmore-12",
+     "product_id": "b7ac293e-fa4e-5cd6-a7c9-dc4beebd8c87",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "시그나토리 스페이사이드 GL",
+     "price_krw": 33000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "signatory-speyside-gl",
+     "product_id": "0bb54c98-1192-5bfa-801f-8e309d48772a",
+     "expected_resolution": "matched"
+    }
+   ]
+  },
+  {
+   "photo_id": "007_위스키복춘_04",
+   "bar": "위스키복춘",
+   "items": []
+  },
+  {
+   "photo_id": "008_서로상_01",
+   "bar": "서로상",
+   "items": [
+    {
+     "raw_name": "헤네시vsop / Hennessy vsop",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": null,
+     "product_id": null,
+     "expected_resolution": "unmatched"
+    },
+    {
+     "raw_name": "헤네시vsop / Hennessy vsop",
+     "price_krw": 210000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": null,
+     "product_id": null,
+     "expected_resolution": "unmatched"
+    },
+    {
+     "raw_name": "레미마틴vsop / Remy Martin vsop",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": null,
+     "product_id": null,
+     "expected_resolution": "unmatched"
+    },
+    {
+     "raw_name": "레미마틴vsop / Remy Martin vsop",
+     "price_krw": 240000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": null,
+     "product_id": null,
+     "expected_resolution": "unmatched"
+    },
+    {
+     "raw_name": "조니워커 블랙 / Jonnie walker black",
+     "price_krw": 11000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "johnnie-walker-black",
+     "product_id": "1e7a47f7-726c-5598-b833-e8375e07b236",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "조니워커 블랙 / Jonnie walker black",
+     "price_krw": 150000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "johnnie-walker-black",
+     "product_id": "1e7a47f7-726c-5598-b833-e8375e07b236",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "조니워커 블루 / Jonnie walker blue",
+     "price_krw": 36000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "johnnie-walker-blue",
+     "product_id": "7b18f29a-1d4f-5ba8-b389-d302dde596ff",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "조니워커 블루 / Jonnie walker blue",
+     "price_krw": 590000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "johnnie-walker-blue",
+     "product_id": "7b18f29a-1d4f-5ba8-b389-d302dde596ff",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "몽키숄더 / Monkey Shoulder",
+     "price_krw": 11000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "monkey-shoulder",
+     "product_id": "504c7a9c-f7d0-5902-9fd2-652fdd0e884f",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "몽키숄더 / Monkey Shoulder",
+     "price_krw": 150000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "monkey-shoulder",
+     "product_id": "504c7a9c-f7d0-5902-9fd2-652fdd0e884f",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "제임슨 / Jameson",
+     "price_krw": 10000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "jameson",
+     "product_id": "dc0e99bd-2f2e-5bef-b1e2-5e65ab443e7f",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "제임슨 / Jameson",
+     "price_krw": 110000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "jameson",
+     "product_id": "dc0e99bd-2f2e-5bef-b1e2-5e65ab443e7f",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "잭 다니엘스 / Jack Daniel's",
+     "price_krw": 11000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "jack-daniels-old-no7",
+     "product_id": "7faa0f75-2b5f-544a-a6d6-e992157cbdd4",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "잭 다니엘스 / Jack Daniel's",
+     "price_krw": 140000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "jack-daniels-old-no7",
+     "product_id": "7faa0f75-2b5f-544a-a6d6-e992157cbdd4",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "1792 스몰배치 / 1792 Small Batch",
+     "price_krw": 12000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "1792-small-batch",
+     "product_id": "d097d4a5-7c64-567d-b160-2c8d92b45434",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "1792 스몰배치 / 1792 Small Batch",
+     "price_krw": 160000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "1792-small-batch",
+     "product_id": "d097d4a5-7c64-567d-b160-2c8d92b45434",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "우드포트리저브 / Woodford Reserve",
+     "price_krw": 14000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "woodford-reserve",
+     "product_id": "a342821c-15b8-5db7-bb72-6fbb058f6dd4",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "우드포트리저브 / Woodford Reserve",
+     "price_krw": 210000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "woodford-reserve",
+     "product_id": "a342821c-15b8-5db7-bb72-6fbb058f6dd4",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "노아스밀 / Noahsmill",
+     "price_krw": 23000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "noahs-mill",
+     "product_id": "b66aac77-d894-5f0c-97eb-d8971207e003",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "노아스밀 / Noahsmill",
+     "price_krw": 370000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "noahs-mill",
+     "product_id": "b66aac77-d894-5f0c-97eb-d8971207e003",
+     "expected_resolution": "matched"
+    }
+   ]
+  },
+  {
+   "photo_id": "008_서로상_02",
+   "bar": "서로상",
+   "items": [
+    {
+     "raw_name": "아드벡10년 / Ardbeg 10Y",
+     "price_krw": 16000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "ardbeg-10",
+     "product_id": "583b633a-c820-574d-8f77-521d6ac268b2",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡10년 / Ardbeg 10Y",
+     "price_krw": 250000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "ardbeg-10",
+     "product_id": "583b633a-c820-574d-8f77-521d6ac268b2",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+     "price_krw": 24000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "ardbeg-uigeadail",
+     "product_id": "a7d15e7d-18f7-5fab-9cd3-c1cce827c828",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+     "price_krw": 390000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "ardbeg-uigeadail",
+     "product_id": "a7d15e7d-18f7-5fab-9cd3-c1cce827c828",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+     "price_krw": 29000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "ardbeg-corryvreckan",
+     "product_id": "512a9037-d050-5199-9745-5dd10b06bb36",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+     "price_krw": 470000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "ardbeg-corryvreckan",
+     "product_id": "512a9037-d050-5199-9745-5dd10b06bb36",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라프로익10년 / Laphroaig 10Y",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "laphroaig-10",
+     "product_id": "dbc5af99-05b2-5538-a5ef-8aa53cdc660b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라프로익10년 / Laphroaig 10Y",
+     "price_krw": 200000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "laphroaig-10",
+     "product_id": "dbc5af99-05b2-5538-a5ef-8aa53cdc660b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "laphroaig-quarter-cask",
+     "product_id": "4658648a-d8cb-54da-ad58-f506a5cac3ef",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+     "price_krw": 230000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "laphroaig-quarter-cask",
+     "product_id": "4658648a-d8cb-54da-ad58-f506a5cac3ef",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라가불린16년 / Lagavulin 16Y",
+     "price_krw": 28000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "lagavulin-16",
+     "product_id": "08cd7921-e646-5b8e-96dc-9b6a25c03bb6",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "라가불린16년 / Lagavulin 16Y",
+     "price_krw": 450000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "lagavulin-16",
+     "product_id": "08cd7921-e646-5b8e-96dc-9b6a25c03bb6",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "탈리스커10년 / Talisker 10Y",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "talisker-10",
+     "product_id": "8886fde4-53a8-5a6b-a5c8-13d5ac1a55d9",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "탈리스커10년 / Talisker 10Y",
+     "price_krw": 200000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "talisker-10",
+     "product_id": "8886fde4-53a8-5a6b-a5c8-13d5ac1a55d9",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아란10년 / Arran 10Y",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "arran-10",
+     "product_id": "4a898091-d81b-55ac-ab1f-9103e787b1d8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "아란10년 / Arran 10Y",
+     "price_krw": 240000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "arran-10",
+     "product_id": "4a898091-d81b-55ac-ab1f-9103e787b1d8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenkinchie-12",
+     "product_id": "38bc691c-82cb-509f-b596-f3ee5ade4999",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+     "price_krw": 240000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenkinchie-12",
+     "product_id": "38bc691c-82cb-509f-b596-f3ee5ade4999",
+     "expected_resolution": "matched"
+    }
+   ]
+  },
+  {
+   "photo_id": "008_서로상_03",
+   "bar": "서로상",
+   "items": [
+    {
+     "raw_name": "달위니15년 / Dalwhinnie 15Y",
+     "price_krw": 18000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "dalwhinnie-15",
+     "product_id": "124c046d-034f-559d-9442-abf5e5ef22b6",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달위니15년 / Dalwhinnie 15Y",
+     "price_krw": 280000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "dalwhinnie-15",
+     "product_id": "124c046d-034f-559d-9442-abf5e5ef22b6",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어12년 / Dalmore 12Y",
+     "price_krw": 17000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "dalmore-12",
+     "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어12년 / Dalmore 12Y",
+     "price_krw": 270000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "dalmore-12",
+     "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어15년 / Dalmore 15Y",
+     "price_krw": 24000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "dalmore-15",
+     "product_id": "ee00403f-4ece-56ff-bbc6-7dfa4737ed62",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "달모어15년 / Dalmore 15Y",
+     "price_krw": 380000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "dalmore-15",
+     "product_id": "ee00403f-4ece-56ff-bbc6-7dfa4737ed62",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+     "price_krw": 12000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-original",
+     "product_id": "ec660a60-db4b-5562-ad97-d0349b0be56b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+     "price_krw": 200000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-original",
+     "product_id": "ec660a60-db4b-5562-ad97-d0349b0be56b",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-lasanta",
+     "product_id": "a2688e71-6071-5151-acf9-af69db359d70",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+     "price_krw": 240000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-lasanta",
+     "product_id": "a2688e71-6071-5151-acf9-af69db359d70",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+     "price_krw": 17000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-nectar-dor",
+     "product_id": "55e09dbb-9496-5863-8f4e-c85ab200967c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+     "price_krw": 270000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-nectar-dor",
+     "product_id": "55e09dbb-9496-5863-8f4e-c85ab200967c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+     "price_krw": 18000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-quinta-ruban",
+     "product_id": "59218382-d515-5e3f-b066-1b8662e98f4d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+     "price_krw": 280000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-quinta-ruban",
+     "product_id": "59218382-d515-5e3f-b066-1b8662e98f4d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+     "price_krw": 28000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenmorangie-18",
+     "product_id": "078bdd87-d120-52db-976d-23648ffeec99",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+     "price_krw": 450000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenmorangie-18",
+     "product_id": "078bdd87-d120-52db-976d-23648ffeec99",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glendronach-12",
+     "product_id": "e5de7281-878c-59d1-9504-6f057c69e860",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+     "price_krw": 230000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glendronach-12",
+     "product_id": "e5de7281-878c-59d1-9504-6f057c69e860",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜고인12년 / Glengoyne 12Y",
+     "price_krw": 14000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glengoyne-12",
+     "product_id": "df567231-f56c-59e6-ac64-7aa355c61f84",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜고인12년 / Glengoyne 12Y",
+     "price_krw": 220000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glengoyne-12",
+     "product_id": "df567231-f56c-59e6-ac64-7aa355c61f84",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "오반14년 / Oban 14Y",
+     "price_krw": 20000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "oban-14",
+     "product_id": "938bf4dc-4f00-5924-ab81-75ed37a5939c",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "오반14년 / Oban 14Y",
+     "price_krw": 320000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "oban-14",
+     "product_id": "938bf4dc-4f00-5924-ab81-75ed37a5939c",
+     "expected_resolution": "matched"
+    }
+   ]
+  },
+  {
+   "photo_id": "008_서로상_04",
+   "bar": "서로상",
+   "items": []
+  },
+  {
+   "photo_id": "008_서로상_05",
+   "bar": "서로상",
+   "items": [
+    {
+     "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+     "price_krw": 14000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenfiddich-12",
+     "product_id": "3531ffb6-7204-58a6-841b-23b6e94c878d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+     "price_krw": 220000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenfiddich-12",
+     "product_id": "3531ffb6-7204-58a6-841b-23b6e94c878d",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+     "price_krw": 19000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenfiddich-15",
+     "product_id": "8c8191a6-0bae-5f5f-b803-9c7ee6798542",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+     "price_krw": 300000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenfiddich-15",
+     "product_id": "8c8191a6-0bae-5f5f-b803-9c7ee6798542",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+     "price_krw": 16000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "balvenie-12-doublewood",
+     "product_id": "ee5db3dd-cd58-5d2d-b70d-ae95964f96fc",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+     "price_krw": 250000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "balvenie-12-doublewood",
+     "product_id": "ee5db3dd-cd58-5d2d-b70d-ae95964f96fc",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+     "price_krw": 13000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "glenrothes-12",
+     "product_id": "9df343da-2d54-546c-a9df-ef5b2a931625",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+     "price_krw": 210000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "glenrothes-12",
+     "product_id": "9df343da-2d54-546c-a9df-ef5b2a931625",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+     "price_krw": 17000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "macallan-12-sherry-oak",
+     "product_id": "854c6973-b222-5298-b1fe-4fa0ef6264f8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+     "price_krw": 270000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "macallan-12-sherry-oak",
+     "product_id": "854c6973-b222-5298-b1fe-4fa0ef6264f8",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+     "price_krw": 15000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "macallan-12-double-cask",
+     "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+     "price_krw": 240000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "macallan-12-double-cask",
+     "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+     "price_krw": 14000,
+     "pour_ml": null,
+     "unit": "glass",
+     "note": null,
+     "product_key": "cragganmore-12",
+     "product_id": "68dbee4d-dc5b-5bf7-84f7-a3faf4c24571",
+     "expected_resolution": "matched"
+    },
+    {
+     "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+     "price_krw": 230000,
+     "pour_ml": null,
+     "unit": "bottle",
+     "note": null,
+     "product_key": "cragganmore-12",
+     "product_id": "68dbee4d-dc5b-5bf7-84f7-a3faf4c24571",
+     "expected_resolution": "matched"
+    }
+   ]
+  }
+ ],
+ "product_keys_from": "catalog_v1_draft"
+}
