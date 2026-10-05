@@ -96,6 +96,14 @@ uv run --env-file .env python scripts/seed_catalog.py
 
 The script is safe to re-run. Bars, brands, and products are upserted by id, so edits in the JSON are applied on the next run. Aliases get `normalized_alias` from `app/core/normalize.py`; aliases that normalize to a value the same brand or product already has are skipped. Rows removed from the JSON are not deleted from the database. See `ai/catalog/README.md` for the JSON-to-table mapping.
 
+`scripts/seed_menu.py` publishes the Seorosang demo menu (`ai/catalog/menu_seed_seorosang_v1.json`, 35 entries) so product search and menu lookup return results during development. Run it after `seed_catalog.py`:
+
+```sh
+uv run --env-file .env python scripts/seed_menu.py
+```
+
+Each run resets that bar's current menu board to the seed contents and sets `published_at` to now, so it also restores the menu after testing uploads or publishing. Existing bar menu items are reused by bar and product. Whisky Bokchun has no seeded menu and is kept empty for the live registration demo.
+
 ### Changing the normalization rules
 
 `normalized_alias` is stored, so after changing `app/core/normalize.py` recompute it for every brand and product alias before the new backend serves lookups:
