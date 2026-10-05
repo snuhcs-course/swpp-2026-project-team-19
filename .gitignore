@@ -4,7 +4,7 @@
 /.idea
 .DS_Store
 /build
-/app/build
+/android/app/build
 /captures
 .externalNativeBuild
 .cxx
@@ -13,4 +13,4 @@
 /backend/__pycache__/
 /backend/**/__pycache__/
 /backend/.pytest_cache/
-_ref/
+/_ref/
