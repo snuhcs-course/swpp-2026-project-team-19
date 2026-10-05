@@ -54,5 +54,5 @@
 
 ### 사용 중 있었던 문제
 - Claude가 seed 커밋 제목에 근거 없이 태스크 번호 `P16`을 붙였다가, 푸시 직후 스스로 발견해 번호를 지우고 다시 푸시함 (본인 브랜치, 다른 사람이 받기 전).
-- 이 PC에 `gh` CLI가 없고 내장 브라우저도 GitHub에 로그인돼 있지 않아, Claude는 브랜치 푸시와 PR 본문 작성까지 하고 PR 생성은 담당자가 GitHub 웹에서 직접 함.
+- 처음에는 이 PC에 `gh` CLI가 없어 PR을 만들지 못함. 담당자가 `gh`를 설치하고 직접 로그인한 뒤, Claude가 `gh pr create`로 seed PR(#4)과 매칭 Draft PR(#5, base `feature/ai-catalog-seed`)을 생성함.
 - 샌드박스에서 pytest 기본 임시 폴더(`%TEMP%\pytest-of-user`) 접근이 막혀 `--basetemp`를 따로 지정해 실행함. 코드 문제는 아님.
