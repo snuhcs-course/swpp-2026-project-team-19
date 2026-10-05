@@ -67,6 +67,15 @@ def get_current_user(
     return claims
 
 
+def get_optional_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+) -> dict[str, Any] | None:
+    """For public routes: None without an Authorization header; a token that is sent must be valid."""
+    if credentials is None:
+        return None
+    return get_current_user(credentials)
+
+
 def require_operator(claims: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
     """Require an authenticated operator for operator-only API routes."""
     if claims.get("user_type") != "operator":
