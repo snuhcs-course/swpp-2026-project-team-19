@@ -1,0 +1,33 @@
+{
+  "version": "bars_v1",
+  "source": "Kakao Map (place page + place panel API), looked up 2026-10-05",
+  "notes": [
+    "kakao_place_id is seed metadata for later Kakao Map linking; not a DBML column yet."
+  ],
+  "bars": [
+    {
+      "id": "564384a5-b81e-5169-a09f-482da9310223",
+      "key": "whisky-bokchun",
+      "name": "위스키복춘",
+      "address": "서울 관악구 솔밭로 8 1층",
+      "latitude": 37.478225,
+      "longitude": 126.96294,
+      "phone": "0502-5553-7423",
+      "status": "active",
+      "kakao_place_id": "1848001977",
+      "label_bar_name": "위스키복춘"
+    },
+    {
+      "id": "0d079e49-4d71-5fac-8b04-9bc4ea6a343d",
+      "key": "seorosang",
+      "name": "서로상",
+      "address": "서울 관악구 남부순환로 1929-9 더게이트 지하 1층 01호",
+      "latitude": 37.477648,
+      "longitude": 126.963763,
+      "phone": "0507-1348-5841",
+      "status": "active",
+      "kakao_place_id": "730910489",
+      "label_bar_name": "서로상"
+    }
+  ]
+}
