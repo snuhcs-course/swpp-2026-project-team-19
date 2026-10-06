@@ -153,7 +153,13 @@ Request and response details, error codes, and rules not covered by the API spec
 | --- | --- | --- |
 | `IMAGE_STORAGE` | `local` | Where photos are stored. Only `local` for now; object storage comes with deployment. |
 | `IMAGE_STORAGE_DIR` | `backend/var/images` | Directory for `local` storage (ignored by git). Files are served at `/media/...` for local development only. |
-| `MENU_EXTRACTOR` | `mock` | Extraction backend. Only `mock` until the AI extractor is connected. |
+| `MENU_EXTRACTOR` | `mock` | Extraction backend: `mock` (fixed results, see below) or `gemini` (the vision LLM in `app/extraction`). |
+| `GEMINI_API_KEY` | — | Required with `gemini`. Never commit it. |
+| `EXTRACTION_MODEL` | — | Required with `gemini`. Exact model ID; P14 adopted `gemini-3.5-flash-lite`. |
+| `EXTRACTION_THINKING_LEVEL` | — | Required with `gemini`: `minimal`, `low`, `medium` or `high`; P14 adopted `medium`. |
+| `EXTRACTION_MAX_ATTEMPTS`, `EXTRACTION_REQUEST_TIMEOUT_S`, `EXTRACTION_WALL_TIMEOUT_S` | `6`, `300`, `330` | Optional retry and timeout settings for `gemini` (P14 values). |
+
+With `gemini`, the server checks these settings at start-up and refuses to start if one is missing or invalid. Each photo is one model call (a few seconds to a few minutes with retries) in the background job. A successful run stores the model's original output, model ID, tokens, latency and attempts in `extraction_runs.raw_output`; a failed run stores the error and, when the model answered, its text.
 
 Matching uses the product aliases in the database, so load the catalog first (see [Seed data](#seed-data)).
 
@@ -167,7 +173,7 @@ The mock ignores the image content and picks a fixed result by the uploaded **fi
 | contains `sample` | 5 lines: a section header, an exact match (`글렌피딕 12년`), the same product with a conflicting age (ambiguous), an unknown product (unmatched), and a description. |
 | anything else | A labeled real menu photo: 8 whiskies (exact matches) and 2 cognacs (unmatched), with `잔`/`병` prices, plus a header and a description. |
 
-Every photo in one upload gets the same result. A real extractor implements `MenuExtractor` in `app/adapters/extraction.py`.
+Every photo in one upload gets the same result. Extractors implement `MenuExtractor` in `app/adapters/extraction.py`; the Gemini one is `app/adapters/gemini_extraction.py`.
 
 ### Try it
 

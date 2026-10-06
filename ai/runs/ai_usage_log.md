@@ -151,3 +151,47 @@
 - google-genai 추가로 `websockets`가 17.2 → 16.1.1로 내려감. 기동 확인으로 대응.
 - 실제 API 확인 스크립트를 처음에 import 경로 없이 실행해 실패(API 호출 전). `PYTHONPATH` 지정 후 1회 실행.
 - 테스트 1건을 Claude가 잘못 작성(모든 상품 필드가 null인 description을 실패 사례로 둠). 실행에서 드러나 수정.
+
+---
+
+## 2026-10-06 · A6 Gemini 추출기를 메뉴 업로드 처리에 연결
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 실제 API 확인 1회는 Gemini `gemini-3.5-flash-lite` (thinking medium)
+- **브랜치/PR:** `feature/a6-gemini-extractor` (base `main`, `origin/main` ad453b0에서 생성)
+- **시간(대략):** 약 1시간 (현황 파악 15분, 구현 15분, 테스트 15분, 실제 확인·마무리 15분)
+- **토큰(대략):** Gemini 7,340 (실제 API 확인 1회: 입력 2,333 / 출력 2,514 / thought 2,493)
+
+### 진행 순서
+1. 담당자가 단계와 멈춤 지점(현황 파악, 실제 확인, 마무리)과 금지 사항(A4 로직·프롬프트·설정값, 업로드 처리 서비스, models/alembic, 기본값 변경, 머지)을 지정.
+2. Claude가 현황을 보고: adapter 규격(`MenuExtractor`, `ExtractionResult`, `ExtractionError(raw_output)`), deps가 첫 요청 때에야 추출기를 만드는 구조, processing이 실패 시 `raw_output`에 남기는 형식, A4 반환값·예외 4종, 이미지 형식(둘 다 jpeg/png). 필드 매핑·예외 변환 표 제안.
+3. 담당자가 제안 4건 승인, Claude가 구현·테스트·실제 확인 1회·PR 작성.
+
+### 사람 결정
+- 서버 시작 시 설정 검사를 위해 공용 파일 `app/main.py`에 lifespan 추가 (mock일 때는 영향 없음). PR 설명에 공용 파일 변경으로 명시.
+- `adapters/extraction.py`는 import만 하고 수정하지 않음.
+- 로컬 Postgres가 없어 실제 확인은 `GeminiMenuExtractor` 직접 호출로 대신하고, 서버 경유 확인은 못 했다고 PR에 명시.
+- `ModelCallError`는 모델 출력이 없어도 `raw_output={"attempts": n}`을 남김.
+- `provider="google"`, `model_name`=`EXTRACTION_MODEL` 값, `pipeline_version="bottlemap-menu-gemini-promptv1-thinking-medium"` (thinking 수준을 포함).
+- 기본값은 `MENU_EXTRACTOR=mock` 유지.
+
+### AI가 만든 것
+- `backend/app/adapters/gemini_extraction.py` (`GeminiMenuExtractor`)
+- `backend/app/api/deps.py` gemini 선택지, `backend/app/main.py` lifespan
+- `backend/tests/test_gemini_extraction_adapter.py` (21개)
+- `backend/.env.example`·`backend/README.md` 환경변수 설명, 이 로그 항목, 커밋 메시지, PR 설명
+
+### AI가 제안해 반영된 것 (사람 확인)
+- 성공 시 `raw_output`은 A4 `meta` 전체(변환 전 v1 출력, 모델, 토큰, 지연, 재시도 횟수).
+- 실패 메시지 앞에 A4 예외 이름을 붙임. processing은 `raw_output.error`에 adapter 클래스 이름(`ExtractionError`)만 남기기 때문.
+- `InvalidModelOutputError`는 `meta`와 모델 원문(`rawText`)을 함께 남김. A4가 성공했는데 adapter 검증에서 걸리는 경우도 `meta`를 붙여 다시 던짐.
+- mock일 때는 Gemini SDK를 import하지 않도록 deps에서 지연 import.
+
+### 검증
+- 전체 pytest: 219 passed, 186 skipped (신규 21개 포함). 건너뛴 186개는 DB 테스트로, 로컬에 Postgres(`POSTGRES_TEST_DATABASE`)가 없어서임. 테스트에서 실제 API 호출 0회(`extract_menu`를 가짜로 바꾸고, 실제 클라이언트 생성은 실패하게 막음).
+- 실제 API 1회 (`fewshot_78_kr_en_glass_bottle.png`, `MENU_EXTRACTOR=gemini`로 deps를 거쳐 생성): completed, 재시도 없음, 14.6초. v1 출력 38항목 → 21항목. seed 카탈로그(`InMemoryCatalog`)로 매칭하니 exact_match 18, unmatched 3(글렌알라키 10년 CS 배치 #9~#11). 가이드라인 예시 원본 사진이라 매칭률이 실제보다 높을 수 있음. 일반 성능 근거는 평가셋 결과.
+- 커밋 전 검사: `uv.lock`·`pyproject.toml` 변경 없음, `.env`·키·사진 커밋 목록에 없음.
+
+### 사용 중 있었던 문제
+- 이 PC의 `backend/.venv`는 Python 3.14.7이고(A4 기록의 3.12 venv와 다름), P18 이후 추가된 `python-multipart`가 없어 업로드 라우트 테스트가 실패. `uv sync --locked`로 맞춤(lock 파일 변경 없음). `uv`가 PATH에 없어 절대 경로로 실행.
+- 샌드박스가 시스템 Temp 접근을 막아 `tmp_path` 테스트 12개가 에러. `--basetemp`를 작업 폴더로 지정해 재실행, 모두 통과.
+- 로컬 Postgres가 없어 업로드 API → 처리 → 리뷰 데이터 조회 흐름은 확인하지 못함.

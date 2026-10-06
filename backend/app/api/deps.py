@@ -24,4 +24,13 @@ def get_menu_extractor() -> MenuExtractor:
     kind = os.getenv("MENU_EXTRACTOR", "mock")
     if kind == "mock":
         return MockMenuExtractor()
-    raise RuntimeError(f"Unsupported MENU_EXTRACTOR: {kind!r} (supported: mock)")
+    if kind == "gemini":
+        # Imported here so the mock does not load the Gemini SDK.
+        from app.adapters.gemini_extraction import GeminiMenuExtractor
+        from app.extraction import ExtractionConfigError
+
+        try:
+            return GeminiMenuExtractor()
+        except ExtractionConfigError as error:
+            raise RuntimeError(f"MENU_EXTRACTOR=gemini is not configured: {error}") from error
+    raise RuntimeError(f"Unsupported MENU_EXTRACTOR: {kind!r} (supported: mock, gemini)")
