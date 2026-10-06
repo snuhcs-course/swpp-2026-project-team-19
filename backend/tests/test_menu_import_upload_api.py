@@ -251,6 +251,23 @@ def test_storage_failure_removes_already_stored_images(client, db_session, image
     assert import_count(db_session) == 0
 
 
+def test_cleanup_failure_keeps_the_original_error(client, db_session, image_storage, operator, bar, caplog):
+    from app.api.deps import get_image_storage
+    from app.main import app
+
+    class StuckStorage(FailingStorage):
+        def delete(self, key):
+            raise OSError("bucket unreachable")
+
+    app.dependency_overrides[get_image_storage] = lambda: StuckStorage(image_storage, fail_on_save=2)
+
+    with pytest.raises(OSError, match="disk full"):
+        upload(client, bar.id, operator)
+
+    assert "Could not delete menus/" in caplog.text
+    assert import_count(db_session) == 0
+
+
 def test_concurrent_retry_that_loses_the_insert_race_returns_the_winner(
     client, db_session, image_storage, operator, bar, monkeypatch
 ):

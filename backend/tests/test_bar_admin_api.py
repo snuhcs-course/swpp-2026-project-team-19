@@ -108,6 +108,7 @@ def test_bar_pages(client, db_session, operator):
         ({"cursor": encode_cursor(["A"])}, "cursor", "INVALID_CURSOR"),
         ({"cursor": encode_cursor(["A", "not-a-uuid"])}, "cursor", "INVALID_CURSOR"),
         ({"cursor": encode_cursor([1, str(uuid4())])}, "cursor", "INVALID_CURSOR"),
+        ({"cursor": encode_cursor({"name": "A"})}, "cursor", "INVALID_CURSOR"),
     ],
 )
 def test_bar_list_validation(client, operator, params, path, code):

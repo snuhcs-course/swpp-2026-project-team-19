@@ -60,6 +60,7 @@ def test_optional_fields_may_be_missing():
         {"options": [{"priceKrw": 9.5}]},
         {"options": [{"pourMl": 0}]},
         {"options": "15ml"},
+        {"options": ["15ml"]},
     ],
 )
 def test_invalid_items_are_rejected(change):

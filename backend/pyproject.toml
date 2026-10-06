@@ -39,4 +39,4 @@ branch = true
 show_missing = true
 skip_covered = true
 # CI fails below this; database tests that silently skip would drop well under it.
-fail_under = 95
+fail_under = 98
