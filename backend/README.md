@@ -2,6 +2,8 @@
 
 FastAPI service backed by PostgreSQL (RDS in deployed environments). Run commands in this directory.
 
+Deploying to AWS (EC2, RDS, S3, HTTPS) is described in [DEPLOY.md](DEPLOY.md).
+
 ## Requirements
 
 - Python 3.12 or newer
