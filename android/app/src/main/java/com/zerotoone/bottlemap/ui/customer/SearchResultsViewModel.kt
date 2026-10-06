@@ -52,7 +52,7 @@ class SearchResultsViewModel : ViewModel() {
     }
 }
 
-private fun SearchBarsResponseDto.toUiState(): CustomerSearchUiState {
+internal fun SearchBarsResponseDto.toUiState(): CustomerSearchUiState {
     if (matchedProducts.isEmpty()) {
         return CustomerSearchUiState.Empty(EmptySearchReason.UNKNOWN_PRODUCT)
     }
@@ -85,7 +85,7 @@ private fun SearchBarsResponseDto.toUiState(): CustomerSearchUiState {
 private val menuDateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
     .withZone(ZoneId.systemDefault())
 
-private fun formatMenuTimestamp(value: String): String =
+internal fun formatMenuTimestamp(value: String): String =
     runCatching {
         "Updated " + menuDateFormatter.format(Instant.parse(value))
     }.getOrElse {

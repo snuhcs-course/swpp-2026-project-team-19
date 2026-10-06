@@ -62,5 +62,7 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.moshi.kotlin)
 
+    testImplementation(libs.junit4)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

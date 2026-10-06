@@ -199,7 +199,7 @@ private fun MenuImportStatusDto.toReviewUiModelOrNull(): ReviewUiModel? {
     )
 }
 
-private fun MenuImportStatusDto.buildDefaultReviewRequest(): ReviewAndApplyRequestDto {
+internal fun MenuImportStatusDto.buildDefaultReviewRequest(): ReviewAndApplyRequestDto {
     val version = reviewVersion ?: error("Review version is missing.")
     val itemDecisions = images
         .sortedBy { it.imageOrder }
@@ -218,7 +218,7 @@ private fun MenuImportStatusDto.buildDefaultReviewRequest(): ReviewAndApplyReque
     )
 }
 
-private fun ReviewItemDto.defaultDecision(): Map<String, Any?> {
+internal fun ReviewItemDto.defaultDecision(): Map<String, Any?> {
     val base = linkedMapOf<String, Any?>(
         "extractedItemId" to extractedItemId,
         "finalLineType" to effectiveLineType,
