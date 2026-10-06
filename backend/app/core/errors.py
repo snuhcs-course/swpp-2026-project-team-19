@@ -41,6 +41,16 @@ class ApiError(Exception):
         self.field_errors = field_errors or []
 
 
+def validation_failed(path: str, code: str, message: str) -> ApiError:
+    """422 VALIDATION_FAILED for one field, for checks FastAPI's request validation cannot express."""
+    return ApiError(
+        422,
+        "VALIDATION_FAILED",
+        "입력값을 확인해 주세요.",
+        field_errors=[{"path": path, "code": code, "message": message}],
+    )
+
+
 def error_response(
     status_code: int,
     code: str,
