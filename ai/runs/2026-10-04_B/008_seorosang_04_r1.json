@@ -1,0 +1,72 @@
+{
+  "condition": "B",
+  "model": "gemini-3.6-flash",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "source_image": "008_seorosang_04.png",
+  "prepared_image": "008_seorosang_04.png",
+  "prepared_sha256": "4c3886715fed44180129ef76dfc40a64b766593ba2388841f32c92d95c5d93ca",
+  "started_at": "2026-10-04T03:18:38.646235+00:00",
+  "latency_ms": 5038,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2319,
+  "output_tokens": 5,
+  "thought_tokens": 327,
+  "total_tokens": 2651,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-04T03:18:43Z",
+    "id": "",
+    "model": "gemini-3.6-flash",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EvIICu8IAWkUfRMD1zvxdXTCZ4/mLzVrVv+c1f9Vvfr3lBChh0gEPG54899si1aprJ4/gVXVtCEkHFIBdB7kXVXsifIuTkPDthrBa6usuVHKcCpCmHfbNdROJHJLCSnhHZkTTBZi780pXYwfjwVDsyqxCIXO8+fXt/uM/dMnP8kvVqUCDEO8dB5XEAcf9RYLnArbrboHf6490ascIs9Fv9HOFyv9pSBAH1lBqP1ypQhr9+OcrtQ6j2YbwCvt4ts6vzXuDPckDBYmzOnANK0wi1jS7c8nFd/PHH9dVNdh7u83Xfe9W+kVRDAEjuzxUUH9jRk4Zq+7O7dsaowNfamEAxKTZVKfa7BRLgeqe+8KNedfct3R/YuVYsVjq8YxMoEgLhw17w8OvA1GPcGUkBYjNJZSc5nKx+V8Ex2nwAJGmuE/O3HKlftKvTBv5CNHUr4CzcJ+kYpBQ5DAfpbPCXtuN9P8GM+HdJfrRAlfdecBn0TzhDEBst1aInVvzSLlw9JOLZGVS9b5eJobiFF2+ueQKikAP8yBy8K6QHEVSBoSGlJnK0MOXzowd7g7BBcLtkPmdR6mHIG8xPq3SIWDknhvSRj2/RHyPG7+ZwH9qL9rhUw98S5mVcqto56cbU4qCQLl763rbQ+MrwHiCKFU8v3ZtjNr3DqG3RDCedflwPtzbl50c2lhbDCWgp2jYacmdUSlu/6o2q+yT6/Qio0uKp8liTb7q6kvXsLcK75bosrFPS1JWip3XxDU8V9K3CxAm8QMqS42gWvkPhi5Ya6fc5a0zxb1cOwQ9F/6Q+l4AVrhH+pac2UFGYxB9H1FKKtROYahifKPTTn+a3G/tUqJSQtP1ivqrrbhgu9zM1C5gOtJ1ON/7/skPu/+nrbzdrJJG8UL0PGw4474mDjsaezthCarUowTN8lDjEk1kB7hxdDViUPCH1ZLmxhoY8D5P3YSzsTs82zxHwnfNvoucuegLPBE2xpetuD/kFqLs8OGBRPObRqxCSmuw0JT8X+PbPQvp3HMD3SZ4pbeT3nyDxfHl65cs+8Xfs7HYRQA3h3uUgnSD+Z4KueMDN3u+eFW9biz9myfPfwtRlKfrwmFbMog1jNDSCBfOn4ployTRq26FNyeWlEya32CgoGCrnpA5qzZjshIK/i/SrVytDCkkO/LScXr0jp8s+dE8g83dQCpo1Ibf67FLVL8016scgYoA0ZbvJlNiSMaHx5xNNEn07Rh07DqEssUCEuHiGBQB9CUIBtQDgkZoFipTvAL1c8Ig84HQfsocKFprn4GU5i/bXppdPFDrSyIB16CatIE/nh2gVaXSwO3vE27FOlvdGlFkWkQ7JA9rMBZ8Jg7xCAIcZAkHqbSmGllRdb3PLbuGEehUCEWRkwsbxQ/fJobRBCDWi24POCSnH9iOhj+VbWZ5uCLi9GRNRAkS2w1JSTPBGyjRxxavrQb7GdmbJDOeNCjhekUU0GCj4ZFlK221B0IUSblxNEEL3MXGJc6xrt/AoF3xEwfsJnJ3jw6TQ==",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-04T03:18:43Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1078
+        },
+        {
+          "modality": "text",
+          "tokens": 1241
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2319,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 327,
+      "total_tokens": 2651,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 1
+}
