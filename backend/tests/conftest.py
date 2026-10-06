@@ -61,6 +61,9 @@ def db_session(db_engine: Engine) -> Iterator[Session]:
             transaction.rollback()
 
 
+TEST_JWT_SECRET = "test-secret-for-temporary-auth-0123456789"
+
+
 @pytest.fixture
 def client(db_session: Session) -> Iterator[TestClient]:
     """API client whose requests use `db_session`."""
@@ -72,3 +75,31 @@ def client(db_session: Session) -> Iterator[TestClient]:
         yield TestClient(app)
     finally:
         app.dependency_overrides.pop(get_session, None)
+
+
+@pytest.fixture
+def token_for(client: TestClient, monkeypatch: pytest.MonkeyPatch):
+    """Issue a temporary-auth access token for a user type: token_for("operator")."""
+    monkeypatch.setenv("TEMP_AUTH_ENABLED", "true")
+    monkeypatch.setenv("TEMP_AUTH_JWT_SECRET", TEST_JWT_SECRET)
+
+    def issue(user_type: str) -> str:
+        monkeypatch.setenv("TEMP_AUTH_USER_TYPE", user_type)
+        return client.post("/api/auth/temp-login").json()["accessToken"]
+
+    return issue
+
+
+@pytest.fixture
+def image_storage(tmp_path: Path) -> Iterator["LocalImageStorage"]:
+    """Image storage in a temporary directory, used by the API instead of the configured one."""
+    from app.adapters.storage import LocalImageStorage
+    from app.api.deps import get_image_storage
+    from app.main import app
+
+    storage = LocalImageStorage(tmp_path / "images")
+    app.dependency_overrides[get_image_storage] = lambda: storage
+    try:
+        yield storage
+    finally:
+        app.dependency_overrides.pop(get_image_storage, None)
