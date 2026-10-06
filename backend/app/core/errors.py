@@ -43,12 +43,12 @@ class ApiError(Exception):
 
 def validation_failed(path: str, code: str, message: str) -> ApiError:
     """422 VALIDATION_FAILED for one field, for checks FastAPI's request validation cannot express."""
-    return ApiError(
-        422,
-        "VALIDATION_FAILED",
-        "입력값을 확인해 주세요.",
-        field_errors=[{"path": path, "code": code, "message": message}],
-    )
+    return validation_failed_fields([{"path": path, "code": code, "message": message}])
+
+
+def validation_failed_fields(field_errors: list[dict[str, str]]) -> ApiError:
+    """422 VALIDATION_FAILED listing several fields at once."""
+    return ApiError(422, "VALIDATION_FAILED", "입력값을 확인해 주세요.", field_errors=field_errors)
 
 
 def error_response(
@@ -63,12 +63,23 @@ def error_response(
     return JSONResponse(status_code=status_code, content=body, headers=headers)
 
 
+# Discriminator values of tagged unions in request bodies. Pydantic puts the matched tag in
+# error locations ("itemDecisions", 0, "reject", "finalLineType"), but it is not a request field.
+_UNION_TAGS: set[str] = set()
+
+
+def register_union_tags(*tags: str) -> None:
+    _UNION_TAGS.update(tags)
+
+
 def field_path(loc: tuple[str | int, ...]) -> str:
     """("query", "lat") -> "lat"; ("body", "items", 0, "price") -> "items[0].price"."""
     if loc and loc[0] in {"query", "path", "body", "header"}:
         loc = loc[1:]
     path = ""
     for part in loc:
+        if isinstance(part, str) and part in _UNION_TAGS:
+            continue
         if isinstance(part, int):
             path += f"[{part}]"
         elif path:
