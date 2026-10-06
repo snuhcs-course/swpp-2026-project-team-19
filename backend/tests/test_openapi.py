@@ -17,6 +17,8 @@ def schema():
     [
         ("get", "/api/search/bars", {"422"}),
         ("get", "/api/bars/{barId}/menu", {"401", "404", "422"}),
+        ("get", "/api/bars", {"401", "403", "422"}),
+        ("get", "/api/bars/{barId}/menu-imports", {"401", "403", "404", "422"}),
         ("post", "/api/bars/{barId}/menu-imports", {"401", "403", "404", "409", "413", "415", "422"}),
         ("get", "/api/menu-imports/{menuImportId}", {"401", "403", "404", "422"}),
         ("post", "/api/menu-imports/{menuImportId}/review-and-apply", {"401", "403", "404", "409", "422", "503"}),
