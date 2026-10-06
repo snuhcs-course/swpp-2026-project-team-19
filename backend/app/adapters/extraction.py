@@ -22,7 +22,15 @@ _SMALLINT_MAX = 32767
 
 
 class ExtractionError(Exception):
-    """The image could not be extracted or the response is not in the expected format."""
+    """The image could not be extracted or the response is not in the expected format.
+
+    `raw_output` is what the model returned, if anything (e.g. its text and call metadata);
+    it is stored on the failed run (API spec 4.3).
+    """
+
+    def __init__(self, message: str, *, raw_output: dict[str, Any] | None = None) -> None:
+        super().__init__(message)
+        self.raw_output = raw_output
 
 
 @dataclass(frozen=True)

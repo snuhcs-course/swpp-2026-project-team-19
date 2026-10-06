@@ -96,16 +96,21 @@ def _extract_all(session: Session, storage: ImageStorage, extractor: MenuExtract
         run = image.extraction_run
         if run.status != PipelineStatus.QUEUED:
             continue
+        # Read before the commit: after it, attribute access would open a new transaction and
+        # hold it for the whole extraction call, which can take minutes with a real model.
+        storage_key, filename = image.storage_key, image.original_filename
         run.status = PipelineStatus.RUNNING
         run.started_at = _now()
         session.commit()
         try:
-            data = storage.read(image.storage_key)
+            data = storage.read(storage_key)
             detected = detect_image_type(data)
-            result = extractor.extract(data, detected[1] if detected else "application/octet-stream", image.original_filename)
+            result = extractor.extract(data, detected[1] if detected else "application/octet-stream", filename)
         except (ExtractionError, OSError) as error:
             run.status = PipelineStatus.FAILED
             run.raw_output = {"error": type(error).__name__, "message": str(error)}
+            if isinstance(error, ExtractionError) and error.raw_output is not None:
+                run.raw_output["output"] = error.raw_output
             run.completed_at = _now()
             session.commit()
             return False

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import select
 
-from app.adapters.extraction import MockMenuExtractor, load_fixture
+from app.adapters.extraction import ExtractionError, MockMenuExtractor, load_fixture
 from app.api.deps import get_menu_extractor
 from app.main import app
 from app.models import (
@@ -206,6 +206,38 @@ def test_first_failed_image_stops_the_remaining_ones(client, db_session, image_s
     # Results of the image that succeeded are kept for later analysis.
     assert len(menu_import.images[0].extraction_run.items) == 5
     assert changes_of(db_session, menu_import) == []
+
+
+def test_failed_run_keeps_the_model_output(client, db_session, image_storage, operator, use_extractor):
+    class UnparseableExtractor(MockMenuExtractor):
+        def extract(self, image, content_type, filename):
+            raise ExtractionError("not valid JSON", raw_output={"text": "{items: [", "attempts": 1})
+
+    use_extractor(UnparseableExtractor())
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    assert menu_import.images[0].extraction_run.raw_output == {
+        "error": "ExtractionError",
+        "message": "not valid JSON",
+        "output": {"text": "{items: [", "attempts": 1},
+    }
+
+
+def test_no_transaction_is_open_while_extracting(client, db_session, image_storage, operator, use_extractor):
+    in_transaction = []
+
+    class CheckingExtractor(MockMenuExtractor):
+        def extract(self, image, content_type, filename):
+            # A real model call takes minutes; it must not hold a database transaction.
+            in_transaction.append(db_session.in_transaction())
+            return super().extract(image, content_type, filename)
+
+    use_extractor(CheckingExtractor())
+
+    upload(client, make_bar(db_session), operator, filenames=("sample.jpg", "sample-2.jpg"))
+
+    assert in_transaction == [False, False]
 
 
 def test_missing_image_file_fails_the_import(client, db_session, image_storage, operator, monkeypatch):
