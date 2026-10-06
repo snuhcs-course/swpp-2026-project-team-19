@@ -10,7 +10,7 @@ How the backend runs for the demo: one EC2 instance serving the API over HTTPS, 
 
 | Resource | Name |
 | --- | --- |
-| Domain | `bottlemap.kro.kr` (free domain from 내도메인.한국) |
+| Domain | `bottlemap.o-r.kr` (free domain from 내도메인.한국) |
 | S3 bucket | `bottlemap-menu-photos` |
 | IAM role (EC2 instance profile) | `bottlemap-ec2-role`, inline policy `bottlemap-s3-photos` |
 | EC2 instance / security group | `bottlemap-api` / `bottlemap-ec2` |
@@ -44,7 +44,7 @@ Never commit or paste secrets (the RDS password, `TEMP_AUTH_JWT_SECRET`, `GEMINI
    - New security group `bottlemap-ec2`: SSH (22) from **my IP** only, HTTP (80) and HTTPS (443) from anywhere. Port 80 is needed for the certificate.
    - Advanced details → IAM instance profile: `bottlemap-ec2-role`.
 5. **Elastic IP**: EC2 → Elastic IPs → allocate, then associate it with `bottlemap-api`.
-6. **DNS**: at 내도메인.한국, set the A record of `bottlemap.kro.kr` to the Elastic IP. Check with `nslookup bottlemap.kro.kr` until it returns the IP.
+6. **DNS**: at 내도메인.한국, set the A record of `bottlemap.o-r.kr` to the Elastic IP. Check with `nslookup bottlemap.o-r.kr` until it returns the IP.
 7. **RDS** `bottlemap-db`: standard create, PostgreSQL (latest available), template **Free tier**, master user `bottlemap` with a self-managed password, `db.t4g.micro` or `db.t3.micro`, gp3 20 GiB with storage autoscaling off.
    - Connectivity: **Connect to an EC2 compute resource** → `bottlemap-api`. This sets up the security groups and keeps public access off.
    - Additional configuration → **Initial database name: `bottlemap`**.
@@ -109,11 +109,9 @@ sudo systemctl reload caddy
 journalctl -u caddy -f                     # wait for "certificate obtained successfully"
 ```
 
-If Let's Encrypt refuses the domain (for example a rate limit on the shared `kro.kr` suffix), replace `bottlemap.kro.kr` in `/etc/caddy/Caddyfile` with `<elastic-ip-with-dashes>.sslip.io` (e.g. `3-35-10-20.sslip.io`) and reload; the app then uses that host.
-
 ## 3. Check
 
-From your PC, with `BASE=https://bottlemap.kro.kr`:
+From your PC, with `BASE=https://bottlemap.o-r.kr`:
 
 - `curl $BASE/health` returns `{"status":"ok"}`, and `$BASE/docs` opens Swagger UI.
 - The full flow, as in the [README](README.md#menu-import-upload-review-publish):
@@ -122,7 +120,7 @@ From your PC, with `BASE=https://bottlemap.kro.kr`:
   3. `imageUrl` is an `https://bottlemap-menu-photos.s3.ap-northeast-2.amazonaws.com/...` presigned URL that opens, and `imageUrlExpiresAt` is about 15 minutes later. The object appears in the S3 console under `menus/<barId>/<menuImportId>/`.
   4. Submit `review-and-apply`; the new menu shows in `GET $BASE/api/bars/<barId>/menu` and customer search.
 - `sudo reboot`, wait a minute, and check `/health` again: both services start by themselves.
-- In the Android app, set the base URL to `https://bottlemap.kro.kr`.
+- In the Android app, set the base URL to `https://bottlemap.o-r.kr`.
 
 Afterwards, restore the demo menu with `seed_menu.py`, and remove test imports that were never applied with `scripts/reset_menu_imports.py`.
 

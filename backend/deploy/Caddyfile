@@ -2,7 +2,7 @@
 # (ports 80 and 443 must be open). Install with:
 #   sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
 
-bottlemap.kro.kr {
+bottlemap.o-r.kr {
 	encode gzip
 	# Uploads are at most 30 MB (5 photos); refuse anything far larger before it reaches the API.
 	request_body {
