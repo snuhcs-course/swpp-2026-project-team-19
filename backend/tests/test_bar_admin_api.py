@@ -118,8 +118,80 @@ def test_bar_list_validation(client, operator, params, path, code):
     assert (error["path"], error["code"]) == (path, code)
 
 
-def test_operators_only(client, token_for):
-    url = "/api/bars"
+# ---- GET /api/bars/{barId}/menu-imports ----
+
+
+def test_menu_import_history(client, db_session, operator):
+    bar = make_bar(db_session)
+    other = make_bar(db_session, "Other")
+    old = make_import(db_session, bar, ImportStatus.APPLIED, minutes=0, images=2, note="10월 메뉴")
+    old.completed_at = T0 + timedelta(minutes=5)
+    failed = make_import(db_session, bar, ImportStatus.FAILED, minutes=10)
+    pending = make_import(db_session, bar, ImportStatus.PROCESSING, minutes=20)
+    make_import(db_session, other, ImportStatus.UPLOADED, minutes=30)
+    db_session.flush()
+
+    body = get(client, f"/api/bars/{bar.id}/menu-imports", operator)
+
+    assert [i["menuImportId"] for i in body["items"]] == [str(pending.id), str(failed.id), str(old.id)]
+    assert body["items"][2] == {
+        "menuImportId": str(old.id),
+        "mode": "full_replace",
+        "status": "applied",
+        "imageCount": 2,
+        "reviewVersion": 0,
+        "ownerNote": "10월 메뉴",
+        "createdAt": "2026-10-04T09:00:00Z",
+        "completedAt": "2026-10-04T09:05:00Z",
+    }
+    assert body["nextCursor"] is None
+
+
+@pytest.mark.parametrize(
+    ("status", "expected"),
+    [("active", ["processing", "uploaded"]), ("failed", ["failed"]), ("all", ["processing", "failed", "uploaded"])],
+)
+def test_menu_import_status_filter(client, db_session, operator, status, expected):
+    bar = make_bar(db_session)
+    make_import(db_session, bar, ImportStatus.UPLOADED, minutes=0)
+    make_import(db_session, bar, ImportStatus.FAILED, minutes=1)
+    make_import(db_session, bar, ImportStatus.PROCESSING, minutes=2)
+
+    body = get(client, f"/api/bars/{bar.id}/menu-imports", operator, status=status)
+
+    assert [i["status"] for i in body["items"]] == expected
+
+
+def test_menu_import_pages_with_the_same_creation_time(client, db_session, operator):
+    bar = make_bar(db_session)
+    imports = [make_import(db_session, bar, ImportStatus.FAILED) for _ in range(3)]
+
+    first = get(client, f"/api/bars/{bar.id}/menu-imports", operator, limit=2)
+    second = get(client, f"/api/bars/{bar.id}/menu-imports", operator, limit=2, cursor=first["nextCursor"])
+
+    seen = [i["menuImportId"] for i in first["items"] + second["items"]]
+    assert sorted(seen) == sorted(str(i.id) for i in imports)
+    assert second["nextCursor"] is None
+
+
+def test_menu_imports_of_inactive_bars_are_listed(client, db_session, operator):
+    bar = make_bar(db_session, status=BarStatus.INACTIVE)
+    make_import(db_session, bar, ImportStatus.APPLIED)
+
+    assert len(get(client, f"/api/bars/{bar.id}/menu-imports", operator)["items"]) == 1
+
+
+@pytest.mark.parametrize("bar_id", [str(uuid4()), "not-a-uuid"])
+def test_menu_imports_of_an_unknown_bar(client, operator, bar_id):
+    response = client.get(f"/api/bars/{bar_id}/menu-imports", headers=operator)
+
+    assert (response.status_code, response.json()["error"]["code"]) == (404, "BAR_NOT_FOUND")
+
+
+@pytest.mark.parametrize("path", ["/api/bars", "/api/bars/{bar_id}/menu-imports"])
+def test_operators_only(client, db_session, token_for, path):
+    bar = make_bar(db_session)
+    url = path.format(bar_id=bar.id)
     customer = {"Authorization": f"Bearer {token_for('customer')}"}
 
     assert client.get(url, headers=customer).status_code == 403

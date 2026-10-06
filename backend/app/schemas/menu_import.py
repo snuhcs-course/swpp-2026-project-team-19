@@ -166,3 +166,19 @@ class ImportAppliedResponse(BaseModel):
 
 
 MenuImportStatusResponse = ImportProcessingResponse | ImportFailedResponse | ImportReviewResponse | ImportAppliedResponse
+
+
+class MenuImportListItem(BaseModel):
+    menuImportId: UUID
+    mode: ImportMode
+    status: ImportStatus
+    imageCount: int
+    reviewVersion: int = Field(description="0 until the first review data is ready")
+    ownerNote: str | None
+    createdAt: UtcDateTime
+    completedAt: UtcDateTime | None = Field(description="When it was applied or failed; null while unfinished")
+
+
+class MenuImportListResponse(BaseModel):
+    items: list[MenuImportListItem] = Field(description="Newest first")
+    nextCursor: str | None = Field(description="Pass as `cursor` for the next page; null on the last page")

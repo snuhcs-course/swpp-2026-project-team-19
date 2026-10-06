@@ -8,7 +8,8 @@ from app.db.session import get_session
 from app.schemas.bar import BarListResponse
 from app.schemas.errors import error_responses
 from app.schemas.menu import BarMenuResponse
-from app.services.bar_admin import BarStatusFilter, list_bars
+from app.schemas.menu_import import MenuImportListResponse
+from app.services.bar_admin import BarStatusFilter, ImportStatusFilter, list_bars, list_menu_imports
 from app.services.bar_menu import get_bar_menu
 
 router = APIRouter(prefix="/api/bars", tags=["bars"])
@@ -52,6 +53,40 @@ def read_bars(
     _operator: dict[str, Any] = Depends(require_operator),
 ) -> BarListResponse:
     return list_bars(session, query=query, status=status, limit=limit, cursor=cursor)
+
+
+@router.get(
+    "/{barId}/menu-imports",
+    response_model=MenuImportListResponse,
+    summary="A bar's menu imports",
+    description=(
+        "Operator only. Newest first, to return to an unfinished import after closing the app and to "
+        "look back at applied or failed ones. Open one with `GET /api/menu-imports/{menuImportId}`.\n\n"
+        "`status=active` means unfinished: `uploaded`, `processing` and `ready_for_review`. "
+        "Imports of inactive bars are listed too.\n\n" + _PAGING
+    ),
+    responses=error_responses(
+        *_OPERATOR_ERRORS,
+        (404, "`BAR_NOT_FOUND`: no such bar or a malformed id."),
+        (
+            422,
+            "`VALIDATION_FAILED`: `status` not one of the values; `limit` out of range; `cursor` "
+            "`INVALID_CURSOR`.",
+        ),
+    ),
+)
+def read_bar_menu_imports(
+    bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
+    status: Annotated[
+        ImportStatusFilter,
+        Query(description="`active`, `uploaded`, `processing`, `ready_for_review`, `applied`, `failed` or `all`"),
+    ] = "all",
+    limit: Limit = 20,
+    cursor: Cursor = None,
+    session: Session = Depends(get_session),
+    _operator: dict[str, Any] = Depends(require_operator),
+) -> MenuImportListResponse:
+    return list_menu_imports(session, bar_id, status=status, limit=limit, cursor=cursor)
 
 
 @router.get(

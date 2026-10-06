@@ -143,7 +143,7 @@ uploaded → processing → ready_for_review → applied
                       ↘ failed
 ```
 
-To find where to upload or what to continue, `GET /api/bars` lists the bars with each one's unfinished import.
+To find where to upload or what to continue, `GET /api/bars` lists the bars with each one's unfinished import, and `GET /api/bars/{barId}/menu-imports` lists a bar's imports, newest first.
 
 Request and response details, error codes, and rules not covered by the API spec draft are in Swagger UI (`/docs`).
 
