@@ -19,9 +19,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - uses: android-actions/setup-android@v3
       - name: Install Android SDK platform
-        run: sdkmanager "platforms;android-37"
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-37"
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
       - name: Run JVM unit tests
