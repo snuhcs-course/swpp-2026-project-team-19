@@ -1,0 +1,72 @@
+{
+  "mock": "Short sample for API testing: an exact alias match, an alias match with a conflicting age (ambiguous), an unknown product, a section header and a description.",
+  "items": [
+    {
+      "itemOrder": 1,
+      "rawText": "SINGLE MALT",
+      "lineType": "section_header",
+      "productName": null,
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [],
+      "confidence": 0.99
+    },
+    {
+      "itemOrder": 2,
+      "rawText": "글렌피딕 12년 15ml 9.0 / 30ml 17.0",
+      "lineType": "product",
+      "productName": "글렌피딕 12년",
+      "brandText": "글렌피딕",
+      "ageYears": 12,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {"optionLabel": null, "pourMl": 15, "priceKrw": 9000},
+        {"optionLabel": null, "pourMl": 30, "priceKrw": 17000}
+      ],
+      "confidence": 0.93
+    },
+    {
+      "itemOrder": 3,
+      "rawText": "Glenfiddich 12 (15yo) 30ml 21.0",
+      "lineType": "product",
+      "productName": "Glenfiddich 12",
+      "brandText": "Glenfiddich",
+      "ageYears": 15,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {"optionLabel": null, "pourMl": 30, "priceKrw": 21000}
+      ],
+      "confidence": 0.71
+    },
+    {
+      "itemOrder": 4,
+      "rawText": "Unknown Distillery 25yo 잔 45,000",
+      "lineType": "product",
+      "productName": "Unknown Distillery 25",
+      "brandText": "Unknown Distillery",
+      "ageYears": 25,
+      "editionName": null,
+      "abv": 48.0,
+      "options": [
+        {"optionLabel": "잔", "pourMl": null, "priceKrw": 45000}
+      ],
+      "confidence": 0.88
+    },
+    {
+      "itemOrder": 5,
+      "rawText": "Ask the bartender for today's specials",
+      "lineType": "description",
+      "productName": null,
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [],
+      "confidence": 0.9
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "mock": "Labeled photo 008_서로상_01 from eval/labels_v1.json with a section header and a description added. brandText and ageYears are null because the labels have product names only.",
+  "items": [
+    {
+      "itemOrder": 1,
+      "rawText": "WHISKY & COGNAC",
+      "lineType": "section_header",
+      "productName": null,
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [],
+      "confidence": 0.98
+    },
+    {
+      "itemOrder": 2,
+      "rawText": "헤네시vsop / Hennessy vsop  잔 13,000 / 병 210,000",
+      "lineType": "product",
+      "productName": "헤네시vsop / Hennessy vsop",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 13000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 210000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 3,
+      "rawText": "레미마틴vsop / Remy Martin vsop  잔 15,000 / 병 240,000",
+      "lineType": "product",
+      "productName": "레미마틴vsop / Remy Martin vsop",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 15000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 240000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 4,
+      "rawText": "조니워커 블랙 / Jonnie walker black  잔 11,000 / 병 150,000",
+      "lineType": "product",
+      "productName": "조니워커 블랙 / Jonnie walker black",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 11000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 150000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 5,
+      "rawText": "조니워커 블루 / Jonnie walker blue  잔 36,000 / 병 590,000",
+      "lineType": "product",
+      "productName": "조니워커 블루 / Jonnie walker blue",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 36000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 590000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 6,
+      "rawText": "몽키숄더 / Monkey Shoulder  잔 11,000 / 병 150,000",
+      "lineType": "product",
+      "productName": "몽키숄더 / Monkey Shoulder",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 11000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 150000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 7,
+      "rawText": "제임슨 / Jameson  잔 10,000 / 병 110,000",
+      "lineType": "product",
+      "productName": "제임슨 / Jameson",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 10000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 110000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 8,
+      "rawText": "잭 다니엘스 / Jack Daniel's  잔 11,000 / 병 140,000",
+      "lineType": "product",
+      "productName": "잭 다니엘스 / Jack Daniel's",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 11000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 140000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 9,
+      "rawText": "1792 스몰배치 / 1792 Small Batch  잔 12,000 / 병 160,000",
+      "lineType": "product",
+      "productName": "1792 스몰배치 / 1792 Small Batch",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 12000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 160000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 10,
+      "rawText": "우드포트리저브 / Woodford Reserve  잔 14,000 / 병 210,000",
+      "lineType": "product",
+      "productName": "우드포트리저브 / Woodford Reserve",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 14000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 210000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 11,
+      "rawText": "노아스밀 / Noahsmill  잔 23,000 / 병 370,000",
+      "lineType": "product",
+      "productName": "노아스밀 / Noahsmill",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 23000
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 370000
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "itemOrder": 12,
+      "rawText": "* 모든 가격은 부가세 포함입니다.",
+      "lineType": "description",
+      "productName": null,
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [],
+      "confidence": 0.9
+    }
+  ]
+}

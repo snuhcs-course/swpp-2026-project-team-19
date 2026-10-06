@@ -6,22 +6,6 @@ import pytest
 from app.models import BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption
 from tests.factories import make_bar, make_brand, make_product, publish_menu
 
-SECRET = "test-secret-for-temporary-auth-0123456789"
-
-
-@pytest.fixture
-def token_for(client, monkeypatch):
-    """Issue a temporary-auth access token for the given user type."""
-    monkeypatch.setenv("TEMP_AUTH_ENABLED", "true")
-    monkeypatch.setenv("TEMP_AUTH_JWT_SECRET", SECRET)
-
-    def issue(user_type: str) -> str:
-        monkeypatch.setenv("TEMP_AUTH_USER_TYPE", user_type)
-        return client.post("/api/auth/temp-login").json()["accessToken"]
-
-    return issue
-
-
 def test_returns_bar_and_menu_in_display_order(client, db_session):
     bar = make_bar(db_session, "Seorosang", latitude="37.477648", longitude="126.963763")
     brand = make_brand(db_session, "GlenDronach")

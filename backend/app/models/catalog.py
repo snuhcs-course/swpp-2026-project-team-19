@@ -85,9 +85,9 @@ class Product(Base):
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default=text("true")
     )
-    # References extracted_items.id; the FK is added together with the AI menu import tables.
+    # The extracted item whose review created this product; null for pre-registered products.
     created_from_extracted_item_id: Mapped[UUID | None] = mapped_column(
-        Uuid(as_uuid=True), nullable=True
+        Uuid(as_uuid=True), ForeignKey("extracted_items.id"), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
