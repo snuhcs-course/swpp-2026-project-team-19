@@ -21,12 +21,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - name: Install Android SDK platform
+      - name: Use hosted SDK for compile smoke
         run: |
-          SDKMANAGER="$(find "$ANDROID_SDK_ROOT/cmdline-tools" -path "*/bin/sdkmanager" | sort -V | tail -1)"
-          test -x "$SDKMANAGER"
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" --channel=3 "platforms;android-37"
+          test -d "$ANDROID_SDK_ROOT/platforms/android-36"
+          sed -i 's/compileSdk = 37/compileSdk = 36/' android/app/build.gradle.kts
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
       - name: Run JVM unit tests
