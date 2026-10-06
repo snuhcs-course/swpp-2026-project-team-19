@@ -86,7 +86,17 @@ Check that the server is running with `pg_isready -h localhost -p 5432`.
 uv run --env-file .env pytest
 ```
 
-Tests that need PostgreSQL use the database named by `POSTGRES_TEST_DATABASE` (same host and credentials as `POSTGRES_*`). Each test run drops and rebuilds that database's schema from the migrations, and each test is rolled back afterwards, so the name must end with `_test`; any other name stops the run. If the variable is not set, the database tests are skipped and the other tests still run. Shared fixtures (`db_session`, `client`) are in `tests/conftest.py`.
+Tests that need PostgreSQL use the database named by `POSTGRES_TEST_DATABASE` (same host and credentials as `POSTGRES_*`). Each test run drops and rebuilds that database's schema from the migrations, and each test is rolled back afterwards, so the name must end with `_test`; any other name stops the run. If the variable is not set, the database tests are skipped and the other tests still run. Shared fixtures (`db_session`, `client`) are in `tests/conftest.py`. Tests always use the mock extractor, whatever `MENU_EXTRACTOR` says, so they never call the Gemini API.
+
+To measure coverage of `app/` (line and branch):
+
+```sh
+uv run --env-file .env pytest --cov
+```
+
+The run fails below 95% total coverage (`[tool.coverage.report]` in `pyproject.toml`). Skipping the database tests drops coverage well under that, so a missing test database cannot go unnoticed.
+
+GitHub Actions runs the same command on every pull request and on pushes to `main` that touch the backend (`.github/workflows/backend-ci.yml`), against a PostgreSQL 18 service container like the RDS instance. The run page shows a coverage table, and the full `coverage.xml` is attached as an artifact.
 
 ## Migrations
 
