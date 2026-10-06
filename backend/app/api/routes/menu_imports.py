@@ -1,6 +1,7 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, Path, Response, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, Path, Request, Response, UploadFile
+from pydantic import WithJsonSchema
 from sqlalchemy.orm import Session
 
 from app.adapters.extraction import MenuExtractor
@@ -10,14 +11,17 @@ from app.core.security import require_operator
 from app.db.session import get_session, get_session_factory
 from app.models import ImportMode
 from app.schemas.errors import error_responses
-from app.schemas.menu_import import MenuImportAcceptedResponse
+from app.schemas.menu_import import MenuImportAcceptedResponse, MenuImportStatusResponse
 from app.services import menu_import_upload as upload
 from app.services.menu_import_processing import SessionFactory, start_processing
+from app.services.menu_import_review import POLL_AFTER_MS, get_menu_import_status
 from app.services.menu_import_upload import ImageUpload, create_menu_import
 
 router = APIRouter(prefix="/api", tags=["menu imports"])
 
-POLL_AFTER_SECONDS = 3
+# OpenAPI 3.1 describes files with contentMediaType, which Swagger UI shows as text inputs;
+# format: binary makes it render file pickers. The request itself is unaffected.
+UploadedImage = Annotated[UploadFile, WithJsonSchema({"type": "string", "format": "binary"})]
 
 
 @router.post(
@@ -61,7 +65,7 @@ def upload_menu_import(
         Header(alias="Idempotency-Key", min_length=1, max_length=255, description="Client-generated UUID, reused on retry"),
     ],
     mode: Annotated[ImportMode, Form(description="`full_replace` or `partial_update`")],
-    images: Annotated[list[UploadFile], File(description="Menu photos in display order")],
+    images: Annotated[list[UploadedImage], File(description="Menu photos in display order")],
     owner_note: Annotated[str | None, Form(alias="ownerNote", max_length=1000, description="Optional memo")] = None,
     session: Session = Depends(get_session),
     storage: ImageStorage = Depends(get_image_storage),
@@ -90,11 +94,42 @@ def upload_menu_import(
         )
     status_url = f"/api/menu-imports/{menu_import.id}"
     response.headers["Location"] = status_url
-    response.headers["Retry-After"] = str(POLL_AFTER_SECONDS)
+    response.headers["Retry-After"] = str(POLL_AFTER_MS // 1000)
     return MenuImportAcceptedResponse(
         menuImportId=menu_import.id,
         status=menu_import.status,
         imageCount=len(menu_import.images),
         statusUrl=status_url,
-        pollAfterMs=POLL_AFTER_SECONDS * 1000,
+        pollAfterMs=POLL_AFTER_MS,
     )
+
+
+@router.get(
+    "/menu-imports/{menuImportId}",
+    response_model=MenuImportStatusResponse,
+    summary="Import status, or the full review data when ready",
+    description=(
+        "Operator only. Poll every `pollAfterMs` after uploading. The body depends on `status`:\n\n"
+        "- `uploaded` / `processing`: `progress` and `pollAfterMs`. Keep polling.\n"
+        "- `failed`: `progress` and `failure` (`IMAGE_EXTRACTION_FAILED` or `PROCESSING_FAILED`). "
+        "Stop polling; a failed import is not resumed, so start a new upload.\n"
+        "- `ready_for_review`: everything the review screen needs in one response: images with URLs, "
+        "every extracted item (non-products too) with options, candidates and `proposedProductId`, "
+        "and the draft `proposedChanges` against the current menu. Stop polling.\n"
+        "- `applied`: when it was applied and the resulting menu board.\n\n"
+        "Proposed products and changes are suggestions; nothing is published until the review is submitted."
+    ),
+    responses=error_responses(
+        (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+        (403, "`FORBIDDEN`: the caller is not an operator."),
+        (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
+    ),
+)
+def read_menu_import(
+    request: Request,
+    menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
+    session: Session = Depends(get_session),
+    storage: ImageStorage = Depends(get_image_storage),
+    _operator: dict[str, Any] = Depends(require_operator),
+) -> MenuImportStatusResponse:
+    return get_menu_import_status(session, menu_import_id, storage, str(request.base_url))
