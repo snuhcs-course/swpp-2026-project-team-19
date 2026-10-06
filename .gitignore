@@ -14,3 +14,11 @@
 /backend/**/__pycache__/
 /backend/.pytest_cache/
 /_ref/
+
+# Secrets: never commit any .env (only .env.example)
+.env
+# Menu photos stay outside the repo (owner consent scope; repo is public)
+/data/
+__pycache__/
+*.pyc
+.pytest_cache/
