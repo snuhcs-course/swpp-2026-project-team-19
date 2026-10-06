@@ -151,8 +151,11 @@ Request and response details, error codes, and rules not covered by the API spec
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `IMAGE_STORAGE` | `local` | Where photos are stored. Only `local` for now; object storage comes with deployment. |
+| `IMAGE_STORAGE` | `local` | Where photos are stored: `local` (development) or `s3` (deployment). |
 | `IMAGE_STORAGE_DIR` | `backend/var/images` | Directory for `local` storage (ignored by git). Files are served at `/media/...` for local development only. |
+| `S3_BUCKET` | — | Private bucket for `s3` storage. Review responses link photos through presigned URLs. |
+| `AWS_REGION` | `ap-northeast-2` | Region of the bucket. Credentials come from the EC2 instance role (or `AWS_*` variables locally). |
+| `S3_URL_TTL_SECONDS` | `900` | How long a presigned photo URL works; `imageUrlExpiresAt` tells clients when to fetch a new one. |
 | `MENU_EXTRACTOR` | `mock` | Extraction backend: `mock` (fixed results, see below) or `gemini` (the vision LLM in `app/extraction`). |
 | `GEMINI_API_KEY` | — | Required with `gemini`. Never commit it. |
 | `EXTRACTION_MODEL` | — | Required with `gemini`. Exact model ID; P14 adopted `gemini-3.5-flash-lite`. |
