@@ -1,0 +1,2 @@
+# The prompt is hashed and sent byte for byte; keep LF on every checkout.
+*.md text eol=lf

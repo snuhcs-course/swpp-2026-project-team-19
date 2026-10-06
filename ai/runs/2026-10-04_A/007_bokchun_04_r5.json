@@ -1,0 +1,73 @@
+{
+  "condition": "A",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "minimal",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "source_image": "007_bokchun_04.jpg",
+  "prepared_image": "007_bokchun_04.jpg",
+  "prepared_sha256": "5228aac6adeece3c026c1365f6f15d8f3e1798464796396dc4b0053cfecf9498",
+  "started_at": "2026-10-04T04:40:22.725973+00:00",
+  "latency_ms": 2690,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2305,
+  "output_tokens": 5,
+  "thought_tokens": 0,
+  "total_tokens": 2310,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-04T04:40:25Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0TSy580RkHFkS0cmYXUlKwAmA+0+fGBuldUMaFECNJjjwMpQkdBgrx4ow6Yv3v6AA9z7RxqVwF/yBzaFgmOY3G7lzh6SU0+MrCKAzS8WDM1LOEf7/zs6gN+K4=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-04T04:40:25Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1241
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2305,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 0,
+      "total_tokens": 2310,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 5
+}

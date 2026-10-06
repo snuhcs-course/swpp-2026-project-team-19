@@ -1,0 +1,169 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "source_image": "007_bokchun_03.jpg",
+  "prepared_image": "007_bokchun_03.jpg",
+  "prepared_sha256": "427f3c129446e60e6f7f37f47b02580873807af3b1e8ad22a600700b05ae16d6",
+  "started_at": "2026-10-04T02:08:52.869460+00:00",
+  "latency_ms": 8267,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2305,
+  "output_tokens": 901,
+  "thought_tokens": 2007,
+  "total_tokens": 5213,
+  "output": {
+    "items": [
+      {
+        "raw_name": "로얄살루트 21Y",
+        "price_krw": 790000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "로얄살루트 21Y",
+        "price_krw": 39000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "몽키숄더",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "몽키숄더",
+        "price_krw": 8000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커 블랙",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "조니워커 블랙",
+        "price_krw": 8000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커 블루",
+        "price_krw": 830000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "조니워커 블루",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "폴존 올로로소 셀렉트 캐스크",
+        "price_krw": 450000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "폴존 올로로소 셀렉트 캐스크",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "폴존 피티드 셀렉트 캐스크",
+        "price_krw": 360000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "폴존 피티드 셀렉트 캐스크",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "시그나토리 벤리악 12Y",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "시그나토리 맥더프 13Y",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올트모어 디스틸러리 12Y",
+        "price_krw": 38000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "시그나토리 스페이사이드 GL",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 790000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 39000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 830000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 벤리악 12Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 맥더프 13Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어 디스틸러리 12Y\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 스페이사이드 GL\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-04T02:09:00Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 790000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 39000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 830000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 벤리악 12Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 맥더프 13Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어 디스틸러리 12Y\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 스페이사이드 GL\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 790000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 39000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 830000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 벤리악 12Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 맥더프 13Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어 디스틸러리 12Y\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 스페이사이드 GL\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-04T02:09:00Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1241
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2305,
+      "total_output_tokens": 901,
+      "total_thought_tokens": 2007,
+      "total_tokens": 5213,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 1
+}

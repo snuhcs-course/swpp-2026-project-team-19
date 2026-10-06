@@ -1,0 +1,194 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "source_image": "008_seorosang_01.png",
+  "prepared_image": "008_seorosang_01.png",
+  "prepared_sha256": "c1c304b23f92853ef046d2e3862410110533806fedb1a8dce3685b106f0bfffa",
+  "started_at": "2026-10-04T04:37:24.500079+00:00",
+  "latency_ms": 7140,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2319,
+  "output_tokens": 1154,
+  "thought_tokens": 1176,
+  "total_tokens": 4649,
+  "output": {
+    "items": [
+      {
+        "raw_name": "헤네시vsop / Hennessy vsop",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "헤네시vsop / Hennessy vsop",
+        "price_krw": 210000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "레미마틴vsop / Remy Martin vsop",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "레미마틴vsop / Remy Martin vsop",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "조니워커 블랙 / Jonnie walker black",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커 블랙 / Jonnie walker black",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "조니워커 블루 / Jonnie walker blue",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커 블루 / Jonnie walker blue",
+        "price_krw": 590000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "몽키숄더 / Monkey Shoulder",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "몽키숄더 / Monkey Shoulder",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "제임슨 / Jameson",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "제임슨 / Jameson",
+        "price_krw": 110000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "잭 다니엘스 / Jack Daniel's",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭 다니엘스 / Jack Daniel's",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "1792 스몰배치 / 1792 Small Batch",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "1792 스몰배치 / 1792 Small Batch",
+        "price_krw": 160000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "우드포트리저브 / Woodford Reserve",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "우드포트리저브 / Woodford Reserve",
+        "price_krw": 210000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "노아스밀 / Noahsmill",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "노아스밀 / Noahsmill",
+        "price_krw": 370000,
+        "pour_ml": null,
+        "unit": "bottle"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"헤네시vsop / Hennessy vsop\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"헤네시vsop / Hennessy vsop\",\n      \"price_krw\": 210000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"레미마틴vsop / Remy Martin vsop\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"레미마틴vsop / Remy Martin vsop\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙 / Jonnie walker black\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙 / Jonnie walker black\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루 / Jonnie walker blue\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루 / Jonnie walker blue\",\n      \"price_krw\": 590000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"몽키숄더 / Monkey Shoulder\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"몽키숄더 / Monkey Shoulder\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"제임슨 / Jameson\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"제임슨 / Jameson\",\n      \"price_krw\": 110000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"잭 다니엘스 / Jack Daniel's\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭 다니엘스 / Jack Daniel's\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"1792 스몰배치 / 1792 Small Batch\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"1792 스몰배치 / 1792 Small Batch\",\n      \"price_krw\": 160000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"우드포트리저브 / Woodford Reserve\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포트리저브 / Woodford Reserve\",\n      \"price_krw\": 210000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"노아스밀 / Noahsmill\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"노아스밀 / Noahsmill\",\n      \"price_krw\": 370000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-04T04:37:31Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"헤네시vsop / Hennessy vsop\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"헤네시vsop / Hennessy vsop\",\n      \"price_krw\": 210000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"레미마틴vsop / Remy Martin vsop\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"레미마틴vsop / Remy Martin vsop\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙 / Jonnie walker black\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙 / Jonnie walker black\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루 / Jonnie walker blue\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루 / Jonnie walker blue\",\n      \"price_krw\": 590000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"몽키숄더 / Monkey Shoulder\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"몽키숄더 / Monkey Shoulder\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"제임슨 / Jameson\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"제임슨 / Jameson\",\n      \"price_krw\": 110000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"잭 다니엘스 / Jack Daniel's\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭 다니엘스 / Jack Daniel's\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"1792 스몰배치 / 1792 Small Batch\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"1792 스몰배치 / 1792 Small Batch\",\n      \"price_krw\": 160000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"우드포트리저브 / Woodford Reserve\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포트리저브 / Woodford Reserve\",\n      \"price_krw\": 210000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"노아스밀 / Noahsmill\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"노아스밀 / Noahsmill\",\n      \"price_krw\": 370000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"헤네시vsop / Hennessy vsop\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"헤네시vsop / Hennessy vsop\",\n      \"price_krw\": 210000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"레미마틴vsop / Remy Martin vsop\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"레미마틴vsop / Remy Martin vsop\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙 / Jonnie walker black\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙 / Jonnie walker black\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루 / Jonnie walker blue\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루 / Jonnie walker blue\",\n      \"price_krw\": 590000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"몽키숄더 / Monkey Shoulder\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"몽키숄더 / Monkey Shoulder\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"제임슨 / Jameson\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"제임슨 / Jameson\",\n      \"price_krw\": 110000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"잭 다니엘스 / Jack Daniel's\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭 다니엘스 / Jack Daniel's\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"1792 스몰배치 / 1792 Small Batch\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"1792 스몰배치 / 1792 Small Batch\",\n      \"price_krw\": 160000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"우드포트리저브 / Woodford Reserve\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포트리저브 / Woodford Reserve\",\n      \"price_krw\": 210000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"노아스밀 / Noahsmill\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"노아스밀 / Noahsmill\",\n      \"price_krw\": 370000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-04T04:37:31Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1078
+        },
+        {
+          "modality": "text",
+          "tokens": 1241
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2319,
+      "total_output_tokens": 1154,
+      "total_thought_tokens": 1176,
+      "total_tokens": 4649,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3
+}

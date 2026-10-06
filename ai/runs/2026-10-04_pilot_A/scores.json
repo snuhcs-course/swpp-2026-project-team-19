@@ -1,0 +1,101 @@
+{
+  "run_dir": "2026-10-04_pilot_A",
+  "failed_calls": [],
+  "summary": {
+    "item_accuracy": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 1
+    },
+    "f1_strict": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 1
+    },
+    "f1_lenient": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 1
+    },
+    "price_accuracy": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 1
+    },
+    "unit_confusion": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+    },
+    "fp": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+    },
+    "fn": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+    }
+  },
+  "per_photo_accuracy": {
+    "007_위스키복춘_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    }
+  },
+  "runs": {
+    "1": {
+      "missing_photos": [
+        "007_위스키복춘_01",
+        "007_위스키복춘_02",
+        "007_위스키복춘_04",
+        "008_서로상_01",
+        "008_서로상_02",
+        "008_서로상_03",
+        "008_서로상_04",
+        "008_서로상_05"
+      ],
+      "total": {
+        "n_gt": 16,
+        "n_out": 16,
+        "matched_strict": 16,
+        "matched": 16,
+        "correct": 16,
+        "fp": 0,
+        "fn": 0,
+        "priced": 16,
+        "price_correct": 16,
+        "unit_confusion": 0,
+        "item_accuracy": 1.0,
+        "f1_strict": 1.0,
+        "f1_lenient": 1.0,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    }
+  }
+}

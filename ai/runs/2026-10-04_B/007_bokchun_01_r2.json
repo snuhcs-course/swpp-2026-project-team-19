@@ -1,0 +1,535 @@
+{
+  "condition": "B",
+  "model": "gemini-3.6-flash",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "source_image": "007_bokchun_01.jpg",
+  "prepared_image": "007_bokchun_01.jpg",
+  "prepared_sha256": "d15fad48bc5b84ca42834a5640a00bcac0e96dc8b0a6af03e86e022a79178f3d",
+  "started_at": "2026-10-04T03:21:28.239731+00:00",
+  "latency_ms": 30682,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2305,
+  "output_tokens": 4324,
+  "thought_tokens": 3327,
+  "total_tokens": 9956,
+  "output": {
+    "items": [
+      {
+        "raw_name": "글렌그란트 15Y",
+        "price_krw": 360000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌그란트 15Y",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌드로낙 12Y",
+        "price_krw": 260000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌드로낙 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌드로낙 15Y",
+        "price_krw": 500000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌드로낙 15Y",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌리벳 12Y",
+        "price_krw": 260000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌리벳 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 오리지널",
+        "price_krw": 220000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 오리지널",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 넥타도르",
+        "price_krw": 380000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 넥타도르",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 라산타",
+        "price_krw": 340000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 라산타",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 퀸타루반",
+        "price_krw": 310000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 퀸타루반",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 시그넷",
+        "price_krw": 830000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 시그넷",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 18Y",
+        "price_krw": 690000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 18Y",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키 12Y",
+        "price_krw": 320000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌알라키 12Y",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키 15Y",
+        "price_krw": 520000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌알라키 15Y",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌파클라스 105",
+        "price_krw": 300000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌파클라스 105",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕 12Y",
+        "price_krw": 260000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌피딕 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕 15Y",
+        "price_krw": 330000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌피딕 15Y",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 12Y",
+        "price_krw": 300000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 12Y",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 12Y 쉐리",
+        "price_krw": 480000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 12Y 쉐리",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 15Y",
+        "price_krw": 600000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 15Y",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 포트우드 리저브",
+        "price_krw": 480000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 포트우드 리저브",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 시가몰트 리저브",
+        "price_krw": 720000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 시가몰트 리저브",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "로얄브라클라 12Y",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "로얄브라클라 12Y",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "로얄브라클라 18Y",
+        "price_krw": 680000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "로얄브라클라 18Y",
+        "price_krw": 34000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥캘란 더블캐스크 12Y",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "맥캘란 더블캐스크 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥캘란 더블캐스크 15Y",
+        "price_krw": 550000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "맥캘란 더블캐스크 15Y",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤 12Y",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "부나하벤 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란 10Y",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "아란 10Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란 보데가 세리 캐스크",
+        "price_krw": 440000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "아란 보데가 세리 캐스크",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아벨라워 아부나흐",
+        "price_krw": 600000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "아벨라워 아부나흐",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "오반 14Y",
+        "price_krw": 360000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "오반 14Y",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 솔리스트 세리 오크",
+        "price_krw": 660000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "카발란 솔리스트 세리 오크",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 솔리스트 비노 바리끄",
+        "price_krw": 920000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "카발란 솔리스트 비노 바리끄",
+        "price_krw": 46000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 트리플 세리",
+        "price_krw": 500000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "카발란 트리플 세리",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "클라이넬리쉬 14Y",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "클라이넬리쉬 14Y",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니 12Y",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "발베니 12Y",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니 14Y",
+        "price_krw": 450000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "발베니 14Y",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "츠누키 에디션 2025",
+        "price_krw": 490000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "츠누키 에디션 2025",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "요이치 싱글몰트",
+        "price_krw": 330000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "요이치 싱글몰트",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "에드라두어 10Y",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "노마드",
+        "price_krw": 200000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "노마드",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌그란트 15Y\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌그란트 15Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12Y\",\n      \"price_krw\": 260000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 15Y\",\n      \"price_krw\": 500000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 15Y\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳 12Y\",\n      \"price_krw\": 260000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌리벳 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 넥타도르\",\n      \"price_krw\": 380000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 넥타도르\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타\",\n      \"price_krw\": 340000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 퀸타루반\",\n      \"price_krw\": 310000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 퀸타루반\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 830000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 18Y\",\n      \"price_krw\": 690000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 18Y\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 12Y\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 12Y\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 15Y\",\n      \"price_krw\": 520000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 15Y\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌파클라스 105\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌파클라스 105\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 12Y\",\n      \"price_krw\": 260000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 15Y\",\n      \"price_krw\": 330000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 15Y\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y 쉐리\",\n      \"price_krw\": 480000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y 쉐리\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 15Y\",\n      \"price_krw\": 600000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 15Y\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 포트우드 리저브\",\n      \"price_krw\": 480000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 포트우드 리저브\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 시가몰트 리저브\",\n      \"price_krw\": 720000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 시가몰트 리저브\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 12Y\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 18Y\",\n      \"price_krw\": 680000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 18Y\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 12Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 15Y\",\n      \"price_krw\": 550000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 15Y\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"부나하벤 12Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"부나하벤 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아란 10Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아란 10Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아란 보데가 세리 캐스크\",\n      \"price_krw\": 440000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아란 보데가 세리 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아벨라워 아부나흐\",\n      \"price_krw\": 600000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아벨라워 아부나흐\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오반 14Y\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"오반 14Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 세리 오크\",\n      \"price_krw\": 660000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 세리 오크\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 비노 바리끄\",\n      \"price_krw\": 920000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 비노 바리끄\",\n      \"price_krw\": 46000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 트리플 세리\",\n      \"price_krw\": 500000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"카발란 트리플 세리\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"클라이넬리쉬 14Y\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"클라이넬리쉬 14Y\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니 12Y\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"발베니 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니 14Y\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"발베니 14Y\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"츠누키 에디션 2025\",\n      \"price_krw\": 490000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"츠누키 에디션 2025\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"요이치 싱글몰트\",\n      \"price_krw\": 330000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"요이치 싱글몰트\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에드라두어 10Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"노마드\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"노마드\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-04T03:21:58Z",
+    "id": "",
+    "model": "gemini-3.6-flash",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌그란트 15Y\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌그란트 15Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12Y\",\n      \"price_krw\": 260000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 15Y\",\n      \"price_krw\": 500000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 15Y\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳 12Y\",\n      \"price_krw\": 260000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌리벳 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 넥타도르\",\n      \"price_krw\": 380000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 넥타도르\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타\",\n      \"price_krw\": 340000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 퀸타루반\",\n      \"price_krw\": 310000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 퀸타루반\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 830000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 18Y\",\n      \"price_krw\": 690000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 18Y\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 12Y\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 12Y\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 15Y\",\n      \"price_krw\": 520000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 15Y\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌파클라스 105\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌파클라스 105\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 12Y\",\n      \"price_krw\": 260000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 15Y\",\n      \"price_krw\": 330000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 15Y\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y 쉐리\",\n      \"price_krw\": 480000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y 쉐리\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 15Y\",\n      \"price_krw\": 600000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 15Y\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 포트우드 리저브\",\n      \"price_krw\": 480000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 포트우드 리저브\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 시가몰트 리저브\",\n      \"price_krw\": 720000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 시가몰트 리저브\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 12Y\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 18Y\",\n      \"price_krw\": 680000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 18Y\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 12Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 15Y\",\n      \"price_krw\": 550000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 15Y\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"부나하벤 12Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"부나하벤 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아란 10Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아란 10Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아란 보데가 세리 캐스크\",\n      \"price_krw\": 440000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아란 보데가 세리 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아벨라워 아부나흐\",\n      \"price_krw\": 600000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아벨라워 아부나흐\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오반 14Y\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"오반 14Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 세리 오크\",\n      \"price_krw\": 660000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 세리 오크\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 비노 바리끄\",\n      \"price_krw\": 920000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 비노 바리끄\",\n      \"price_krw\": 46000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 트리플 세리\",\n      \"price_krw\": 500000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"카발란 트리플 세리\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"클라이넬리쉬 14Y\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"클라이넬리쉬 14Y\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니 12Y\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"발베니 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니 14Y\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"발베니 14Y\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"츠누키 에디션 2025\",\n      \"price_krw\": 490000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"츠누키 에디션 2025\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"요이치 싱글몰트\",\n      \"price_krw\": 330000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"요이치 싱글몰트\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에드라두어 10Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"노마드\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"노마드\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌그란트 15Y\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌그란트 15Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12Y\",\n      \"price_krw\": 260000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 15Y\",\n      \"price_krw\": 500000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌드로낙 15Y\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳 12Y\",\n      \"price_krw\": 260000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌리벳 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 넥타도르\",\n      \"price_krw\": 380000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 넥타도르\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타\",\n      \"price_krw\": 340000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 퀸타루반\",\n      \"price_krw\": 310000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 퀸타루반\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 830000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 18Y\",\n      \"price_krw\": 690000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌모렌지 18Y\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 12Y\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 12Y\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 15Y\",\n      \"price_krw\": 520000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌알라키 15Y\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌파클라스 105\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌파클라스 105\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 12Y\",\n      \"price_krw\": 260000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 15Y\",\n      \"price_krw\": 330000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌피딕 15Y\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y 쉐리\",\n      \"price_krw\": 480000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 12Y 쉐리\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 15Y\",\n      \"price_krw\": 600000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 15Y\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 포트우드 리저브\",\n      \"price_krw\": 480000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 포트우드 리저브\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어 시가몰트 리저브\",\n      \"price_krw\": 720000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어 시가몰트 리저브\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 12Y\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 18Y\",\n      \"price_krw\": 680000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄브라클라 18Y\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 12Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 15Y\",\n      \"price_krw\": 550000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥캘란 더블캐스크 15Y\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"부나하벤 12Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"부나하벤 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아란 10Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아란 10Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아란 보데가 세리 캐스크\",\n      \"price_krw\": 440000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아란 보데가 세리 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아벨라워 아부나흐\",\n      \"price_krw\": 600000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아벨라워 아부나흐\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오반 14Y\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"오반 14Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 세리 오크\",\n      \"price_krw\": 660000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 세리 오크\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 비노 바리끄\",\n      \"price_krw\": 920000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 비노 바리끄\",\n      \"price_krw\": 46000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 트리플 세리\",\n      \"price_krw\": 500000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"카발란 트리플 세리\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"클라이넬리쉬 14Y\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"클라이넬리쉬 14Y\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니 12Y\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"발베니 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니 14Y\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"발베니 14Y\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"츠누키 에디션 2025\",\n      \"price_krw\": 490000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"츠누키 에디션 2025\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"요이치 싱글몰트\",\n      \"price_krw\": 330000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"요이치 싱글몰트\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에드라두어 10Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"노마드\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"노마드\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-04T03:21:58Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 1241
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2305,
+      "total_output_tokens": 4324,
+      "total_thought_tokens": 3327,
+      "total_tokens": 9956,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 2
+}

@@ -1,0 +1,5507 @@
+{
+  "run_dir": "2026-10-04_A",
+  "failed_calls": [],
+  "summary": {
+    "item_accuracy": {
+      "mean": 0.6738927677998291,
+      "min": 0.5884476534296029,
+      "max": 0.8723404255319149,
+      "n": 5
+    },
+    "f1_strict": {
+      "mean": 0.7741178912411789,
+      "min": 0.7227272727272728,
+      "max": 0.8954545454545454,
+      "n": 5
+    },
+    "f1_lenient": {
+      "mean": 0.8005271897052719,
+      "min": 0.7409090909090909,
+      "max": 0.9318181818181818,
+      "n": 5
+    },
+    "price_accuracy": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 5
+    },
+    "unit_confusion": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 5
+    },
+    "fp": {
+      "mean": 44.4,
+      "min": 16,
+      "max": 58,
+      "n": 5
+    },
+    "fn": {
+      "mean": 43.2,
+      "min": 14,
+      "max": 56,
+      "n": 5
+    }
+  },
+  "per_photo_accuracy": {
+    "007_위스키복춘_01": {
+      "mean": 0.979746835443038,
+      "min": 0.9493670886075949,
+      "max": 1.0
+    },
+    "007_위스키복춘_02": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "007_위스키복춘_03": {
+      "mean": 0.9333333333333333,
+      "min": 0.8888888888888888,
+      "max": 1.0
+    },
+    "007_위스키복춘_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_02": {
+      "mean": 0.4,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "008_서로상_03": {
+      "mean": 0.2,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "008_서로상_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_05": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0
+    }
+  },
+  "runs": {
+    "1": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 221,
+        "matched_strict": 197,
+        "matched": 205,
+        "correct": 205,
+        "fp": 16,
+        "fn": 14,
+        "priced": 205,
+        "price_correct": 205,
+        "unit_confusion": 0,
+        "item_accuracy": 0.8723404255319149,
+        "f1_strict": 0.8954545454545454,
+        "f1_lenient": 0.9318181818181818,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 69,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 쉐리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 쉐리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 52,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 18,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 2,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "헤네시 VSOP",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "다니엘 부쥬 로얄",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 14,
+          "fn": 14,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스 12년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스 12년",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥캘란12년 셰리",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥캘란12년 셰리",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥캘란12년 더블",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥캘란12년 더블",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 219,
+        "matched_strict": 176,
+        "matched": 181,
+        "correct": 181,
+        "fp": 38,
+        "fn": 38,
+        "priced": 181,
+        "price_correct": 181,
+        "unit_confusion": 0,
+        "item_accuracy": 0.7042801556420234,
+        "f1_strict": 0.8036529680365295,
+        "f1_lenient": 0.8264840182648402,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 72,
+          "matched": 75,
+          "correct": 75,
+          "fp": 2,
+          "fn": 2,
+          "priced": 75,
+          "price_correct": 75,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 12Y 쉐리",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 12Y 셰리",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 12Y 쉐리",
+                "price_krw": 480000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 12Y 셰리",
+                "price_krw": 480000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어 10Y",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "エ드라두어 10Y",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "아벨아워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "아벨아워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 50,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 22,
+          "fn": 22,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalwhinnie 15Y\n달위니15년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalwhinnie 15Y\n달위니15년",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 12Y\n달모어12년",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 12Y\n달모어12년",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 15Y\n달모어15년",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 15Y\n달모어15년",
+                "price_krw": 380000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie OG\n글렌모렌지 오리지날",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie OG\n글렌모렌지 오리지날",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Lasanta\n글렌모렌지 라산타",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Lasanta\n글렌모렌지 라산타",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Nectar D'or\n글렌모렌지 넥타도르",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Nectar D'or\n글렌모렌지 넥타도르",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Quinta Ruban\n글렌모렌지 퀸타루반",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Quinta Ruban\n글렌모렌지 퀸타루반",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie 18Y\n글렌모렌지18년",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie 18Y\n글렌모렌지18년",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glendronach 12Y\n글랜드로낙12년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glendronach 12Y\n글랜드로낙12년",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glengoyne 12Y\n글렌고인12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glengoyne 12Y\n글렌고인12년",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Oban 14Y\n오반14년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Oban 14Y\n오반14년",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달위니15년 / Dalwhinnie 15Y",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달위니15년 / Dalwhinnie 15Y",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어12년 / Dalmore 12Y",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어12년 / Dalmore 12Y",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어15년 / Dalmore 15Y",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어15년 / Dalmore 15Y",
+                "price_krw": 380000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜고인12년 / Glengoyne 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜고인12년 / Glengoyne 12Y",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "오반14년 / Oban 14Y",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "오반14년 / Oban 14Y",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 14,
+          "fn": 14,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스 12년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스 12년",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥켈란12년 쉐리",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥켈란12년 쉐리",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥켈란12년 더블",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥켈란12년 더블",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "3": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 221,
+        "matched_strict": 159,
+        "matched": 163,
+        "correct": 163,
+        "fp": 58,
+        "fn": 56,
+        "priced": 163,
+        "price_correct": 163,
+        "unit_confusion": 0,
+        "item_accuracy": 0.5884476534296029,
+        "f1_strict": 0.7227272727272728,
+        "f1_lenient": 0.7409090909090909,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 73,
+          "matched": 75,
+          "correct": 75,
+          "fp": 2,
+          "fn": 2,
+          "priced": 75,
+          "price_correct": 75,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 쉐리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 쉐리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "아베릴워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "아베릴워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 50,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 18,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 2,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "헤네시 VSOP",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "다니엘 부쥬 로얄",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 18,
+          "fn": 18,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg 10Y\n아드벡10년",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg 10Y\n아드벡10년",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Uigeadail\n아드벡 우거다일",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Uigeadail\n아드벡 우거다일",
+                "price_krw": 390000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Corryvreckan\n아드벡 코리브레칸",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Corryvreckan\n아드벡 코리브레칸",
+                "price_krw": 470000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig 10Y\n라프로익10년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig 10Y\n라프로익10년",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig Quarter Cask\n라프로익 쿼터캐스크",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig Quarter Cask\n라프로익 쿼터캐스크",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Lagavulin 16Y\n라가불린16년",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Lagavulin 16Y\n라가불린16년",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Talisker 10Y\n탈리스커10년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Talisker 10Y\n탈리스커10년",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Arran 10Y\n아란10년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Arran 10Y\n아란10년",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenkinchie 12Y\n글렌킨치12년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenkinchie 12Y\n글렌킨치12년",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡10년 / Ardbeg 10Y",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡10년 / Ardbeg 10Y",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+                "price_krw": 390000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+                "price_krw": 470000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익10년 / Laphroaig 10Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익10년 / Laphroaig 10Y",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라가불린16년 / Lagavulin 16Y",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라가불린16년 / Lagavulin 16Y",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "탈리스커10년 / Talisker 10Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "탈리스커10년 / Talisker 10Y",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란10년 / Arran 10Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란10년 / Arran 10Y",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 22,
+          "fn": 22,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalwhinnie 15Y\n달위니15년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalwhinnie 15Y\n달위니15년",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 12Y\n달모어12년",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 12Y\n달모어12년",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 15Y\n달모어15년",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 15Y\n달모어15년",
+                "price_krw": 380000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie OG\n글렌모렌지 오리지날",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie OG\n글렌모렌지 오리지날",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Lasanta\n글렌모렌지 라산타",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Lasanta\n글렌모렌지 라산타",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Nectar D'or\n글렌모렌지 넥타도르",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Nectar D'or\n글렌모렌지 넥타도르",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Quinta Ruban\n글렌모렌지 퀸타루반",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Quinta Ruban\n글렌모렌지 퀸타루반",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie 18Y\n글렌모렌지18년",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie 18Y\n글렌모렌지18년",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glendronach 12Y\n글렌드로낙12년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glendronach 12Y\n글렌드로낙12년",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glengoyne 12Y\n글렌고인12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glengoyne 12Y\n글렌고인12년",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Oban 14Y\n오반14년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Oban 14Y\n오반14년",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달위니15년 / Dalwhinnie 15Y",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달위니15년 / Dalwhinnie 15Y",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어12년 / Dalmore 12Y",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어12년 / Dalmore 12Y",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어15년 / Dalmore 15Y",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어15년 / Dalmore 15Y",
+                "price_krw": 380000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜고인12년 / Glengoyne 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜고인12년 / Glengoyne 12Y",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "오반14년 / Oban 14Y",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "오반14년 / Oban 14Y",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 14,
+          "fn": 14,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스 12년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스 12년",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥켈란12년 쉐리",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥켈란12년 쉐리",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥켈란12년 더블",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥켈란12년 더블",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "4": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 219,
+        "matched_strict": 159,
+        "matched": 165,
+        "correct": 165,
+        "fp": 54,
+        "fn": 54,
+        "priced": 165,
+        "price_correct": 165,
+        "unit_confusion": 0,
+        "item_accuracy": 0.6043956043956044,
+        "f1_strict": 0.726027397260274,
+        "f1_lenient": 0.7534246575342466,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 73,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 쉐리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 쉐리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 50,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 18,
+          "fn": 18,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg 10Y\n아드벡10년",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg 10Y\n아드벡10년",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Uigeadail\n아드벡 우거다일",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Uigeadail\n아드벡 우거다일",
+                "price_krw": 390000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Corryvreckan\n아드벡 코리브레칸",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Corryvreckan\n아드벡 코리브레칸",
+                "price_krw": 470000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig 10Y\n라프로익10년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig 10Y\n라프로익10년",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig Quarter Cask\n라프로익 쿼터캐스크",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig Quarter Cask\n라프로익 쿼터캐스크",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Lagavulin 16Y\n라가블린16년",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Lagavulin 16Y\n라가블린16년",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Talisker 10Y\n탈리스커10년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Talisker 10Y\n탈리스커10년",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Arran 10Y\n아란10년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Arran 10Y\n아란10년",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenkinchie 12Y\n글렌킨치12년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenkinchie 12Y\n글렌킨치12년",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡10년 / Ardbeg 10Y",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡10년 / Ardbeg 10Y",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+                "price_krw": 390000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+                "price_krw": 470000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익10년 / Laphroaig 10Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익10년 / Laphroaig 10Y",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라가불린16년 / Lagavulin 16Y",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라가불린16년 / Lagavulin 16Y",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "탈리스커10년 / Talisker 10Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "탈리스커10년 / Talisker 10Y",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란10년 / Arran 10Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란10년 / Arran 10Y",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 22,
+          "fn": 22,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalwhinnie 15Y\n달위니15년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalwhinnie 15Y\n달위니15년",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 12Y\n달모어12년",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 12Y\n달모어12년",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 15Y\n달모어15년",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 15Y\n달모어15년",
+                "price_krw": 380000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie OG\n글렌모렌지 오리지날",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie OG\n글렌모렌지 오리지날",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Lasanta\n글렌모렌지 라산타",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Lasanta\n글렌모렌지 라산타",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Nectar D'or\n글렌모렌지 넥타도르",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Nectar D'or\n글렌모렌지 넥타도르",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Quinta Ruban\n글렌모렌지 퀸타루반",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Quinta Ruban\n글렌모렌지 퀸타루반",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie 18Y\n글렌모렌지 18년",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie 18Y\n글렌모렌지 18년",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glendronach 12Y\n글렌드로낙12년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glendronach 12Y\n글렌드로낙12년",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glengoyne 12Y\n글렌고인12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glengoyne 12Y\n글렌고인12년",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Oban 14Y\n오반14년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Oban 14Y\n오반14년",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달위니15년 / Dalwhinnie 15Y",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달위니15년 / Dalwhinnie 15Y",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어12년 / Dalmore 12Y",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어12년 / Dalmore 12Y",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어15년 / Dalmore 15Y",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어15년 / Dalmore 15Y",
+                "price_krw": 380000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜고인12년 / Glengoyne 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜고인12년 / Glengoyne 12Y",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "오반14년 / Oban 14Y",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "오반14년 / Oban 14Y",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 14,
+          "fn": 14,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스 12년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스 12년",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥켈란12년 쉐리",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥켈란12년 쉐리",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥켈란12년 더블",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥켈란12년 더블",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "5": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 221,
+        "matched_strict": 159,
+        "matched": 165,
+        "correct": 165,
+        "fp": 56,
+        "fn": 54,
+        "priced": 165,
+        "price_correct": 165,
+        "unit_confusion": 0,
+        "item_accuracy": 0.6,
+        "f1_strict": 0.7227272727272728,
+        "f1_lenient": 0.75,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 73,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 12Y 쉐리",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 12Y 셰리",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 12Y 쉐리",
+                "price_krw": 480000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 12Y 셰리",
+                "price_krw": 480000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 50,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 18,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 2,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "헤네시 VSOP",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "다니엘 부쥬 로얄",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 18,
+          "fn": 18,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg 10Y\n아드벡 10년",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg 10Y\n아드벡 10년",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Uigeadail\n아드벡 우거다일",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Uigeadail\n아드벡 우거다일",
+                "price_krw": 390000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Corryvreckan\n아드벡 코리브레칸",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Ardbeg Corryvreckan\n아드벡 코리브레칸",
+                "price_krw": 470000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig 10Y\n라프로익 10년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig 10Y\n라프로익 10년",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig Quarter Cask\n라프로익 쿼터캐스크",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Laphroaig Quarter Cask\n라프로익 쿼터캐스크",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Lagavulin 16Y\n라가불린 16년",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Lagavulin 16Y\n라가불린 16년",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Talisker 10Y\n탈리스커 10년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Talisker 10Y\n탈리스커 10년",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Arran 10Y\n아란 10년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Arran 10Y\n아란 10년",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenkinchie 12Y\n글렌킨치 12년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenkinchie 12Y\n글렌킨치 12년",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡10년 / Ardbeg 10Y",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡10년 / Ardbeg 10Y",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+                "price_krw": 390000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+                "price_krw": 470000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익10년 / Laphroaig 10Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익10년 / Laphroaig 10Y",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라가불린16년 / Lagavulin 16Y",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라가불린16년 / Lagavulin 16Y",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "탈리스커10년 / Talisker 10Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "탈리스커10년 / Talisker 10Y",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란10년 / Arran 10Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란10년 / Arran 10Y",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 22,
+          "fn": 22,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalwhinnie 15Y\n달위니15년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalwhinnie 15Y\n달위니15년",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 12Y\n달모어12년",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 12Y\n달모어12년",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 15Y\n달모어15년",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Dalmore 15Y\n달모어15년",
+                "price_krw": 380000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie OG\n글렌모렌지 오리지날",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie OG\n글렌모렌지 오리지날",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Lasanta\n글렌모렌지 라산타",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Lasanta\n글렌모렌지 라산타",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Nectar D'or\n글렌모렌지 넥타도르",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Nectar D'or\n글렌모렌지 넥타도르",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Quinta Ruban\n글렌모렌지 퀸타루반",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie Quinta Ruban\n글렌모렌지 퀸타루반",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie 18Y\n글렌모렌지18년",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenmorangie 18Y\n글렌모렌지18년",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glendronach 12Y\n글랜드로낙12년",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glendronach 12Y\n글랜드로낙12년",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glengoyne 12Y\n글렌고인12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glengoyne 12Y\n글렌고인12년",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Oban 14Y\n오반14년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Oban 14Y\n오반14년",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달위니15년 / Dalwhinnie 15Y",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달위니15년 / Dalwhinnie 15Y",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어12년 / Dalmore 12Y",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어12년 / Dalmore 12Y",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어15년 / Dalmore 15Y",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "달모어15년 / Dalmore 15Y",
+                "price_krw": 380000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+                "price_krw": 450000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜고인12년 / Glengoyne 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜고인12년 / Glengoyne 12Y",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "오반14년 / Oban 14Y",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "오반14년 / Oban 14Y",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 14,
+          "fn": 14,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 12Y\n글렌피딕12년",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenfiddich 15Y\n글렌피딕15년",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 12yDW\n발베니12년 더블우드",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스12년",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Glenrothes 12Y\n글렌로시스12년",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥캘란12년 셰리",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12ySC\n맥캘란12년 셰리",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥캘란12년 더블",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Macallan 12yDC\n맥캘란12년 더블",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Cragganmore 12Y\n크라겐모어 12년",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕12년 / Glenfiddich 12Y",
+                "price_krw": 220000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜피딕15년 / Glenfiddich 15Y",
+                "price_krw": 300000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글랜로시스12년 / Glenrothes 12Y",
+                "price_krw": 210000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 쉐리 / Macallan 12ySC",
+                "price_krw": 270000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "맥켈란12년 더블 / Macallan 12yDC",
+                "price_krw": 240000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "크라겐모어12년 / Cragganmore 12Y",
+                "price_krw": 230000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

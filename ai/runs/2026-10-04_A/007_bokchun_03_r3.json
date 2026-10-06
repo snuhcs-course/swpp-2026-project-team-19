@@ -1,0 +1,182 @@
+{
+  "condition": "A",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "minimal",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "source_image": "007_bokchun_03.jpg",
+  "prepared_image": "007_bokchun_03.jpg",
+  "prepared_sha256": "427f3c129446e60e6f7f37f47b02580873807af3b1e8ad22a600700b05ae16d6",
+  "started_at": "2026-10-04T04:36:15.216041+00:00",
+  "latency_ms": 4451,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2305,
+  "output_tokens": 1007,
+  "thought_tokens": 0,
+  "total_tokens": 3312,
+  "output": {
+    "items": [
+      {
+        "raw_name": "로얄살루트 21Y",
+        "price_krw": 790000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "로얄살루트 21Y",
+        "price_krw": 39000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "몽키숄더",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "몽키숄더",
+        "price_krw": 8000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커 블랙",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "조니워커 블랙",
+        "price_krw": 8000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커 블루",
+        "price_krw": 830000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "조니워커 블루",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "폴존 올로로소 셀렉트 캐스크",
+        "price_krw": 450000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "폴존 올로로소 셀렉트 캐스크",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "폴존 피티드 셀렉트 캐스크",
+        "price_krw": 360000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "폴존 피티드 셀렉트 캐스크",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "시그나토리 벤리악 12Y",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "시그나토리 맥더프 13Y",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올트모어 디스틸러리 12Y",
+        "price_krw": 38000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "시그나토리 스페이사이드 GL",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "헤네시 VSOP",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "다니엘 부쥬 로얄",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 790000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 39000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 830000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 벤리악 12Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 맥더프 13Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어 디스틸러리 12Y\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 스페이사이드 GL\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"헤네시 VSOP\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"다니엘 부쥬 로얄\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-04T04:36:19Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 790000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 39000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 830000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 벤리악 12Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 맥더프 13Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어 디스틸러리 12Y\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 스페이사이드 GL\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"헤네시 VSOP\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"다니엘 부쥬 로얄\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0TaKBJ7r0HYYfOAU+YxNCBH6l3ulVjoPCsrw8fxjWqKm99/wM3C+nHhb8Iw8jPB1wmA6qTTj5jqyPie+zooJKsr7bDE7x0mLH9flAOdLijRjl9iK0d4WVrYpc=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 790000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"로얄살루트 21Y\",\n      \"price_krw\": 39000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 140000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 8000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 830000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 올로로소 셀렉트 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 360000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"폴존 피티드 셀렉트 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 벤리악 12Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 맥더프 13Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어 디스틸러리 12Y\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"시그나토리 스페이사이드 GL\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"헤네시 VSOP\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"다니엘 부쥬 로얄\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-04T04:36:19Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 1241
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2305,
+      "total_output_tokens": 1007,
+      "total_thought_tokens": 0,
+      "total_tokens": 3312,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3
+}

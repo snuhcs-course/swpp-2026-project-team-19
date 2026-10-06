@@ -1,0 +1,1884 @@
+{
+  "run_dir": "2026-10-04_A2",
+  "failed_calls": [],
+  "summary": {
+    "item_accuracy": {
+      "mean": 0.9963800904977376,
+      "min": 0.9819004524886877,
+      "max": 1.0,
+      "n": 5
+    },
+    "f1_strict": {
+      "mean": 0.9442922374429223,
+      "min": 0.9360730593607306,
+      "max": 0.954337899543379,
+      "n": 5
+    },
+    "f1_lenient": {
+      "mean": 0.9981735159817352,
+      "min": 0.9908675799086758,
+      "max": 1.0,
+      "n": 5
+    },
+    "price_accuracy": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 5
+    },
+    "unit_confusion": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 5
+    },
+    "fp": {
+      "mean": 0.4,
+      "min": 0,
+      "max": 2,
+      "n": 5
+    },
+    "fn": {
+      "mean": 0.4,
+      "min": 0,
+      "max": 2,
+      "n": 5
+    }
+  },
+  "per_photo_accuracy": {
+    "007_위스키복춘_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "007_위스키복춘_02": {
+      "mean": 0.9851851851851852,
+      "min": 0.9259259259259259,
+      "max": 1.0
+    },
+    "007_위스키복춘_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "007_위스키복춘_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_02": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_05": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    }
+  },
+  "runs": {
+    "1": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 219,
+        "matched_strict": 205,
+        "matched": 219,
+        "correct": 219,
+        "fp": 0,
+        "fn": 0,
+        "priced": 219,
+        "price_correct": 219,
+        "unit_confusion": 0,
+        "item_accuracy": 1.0,
+        "f1_strict": 0.9360730593607306,
+        "f1_lenient": 1.0,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 65,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 콴타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 콴타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 시가몰트 리저브",
+                "price_krw": 36000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 시가모트 리저브",
+                "price_krw": 36000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 시가몰트 리저브",
+                "price_krw": 720000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 시가모트 리저브",
+                "price_krw": 720000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 쉐리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 쉐리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 52,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 14,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "로얄살루트 21Y",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "로알살루트 21Y",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "로얄살루트 21Y",
+                "price_krw": 790000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "로알살루트 21Y",
+                "price_krw": 790000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    },
+    "2": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 219,
+        "matched_strict": 207,
+        "matched": 217,
+        "correct": 217,
+        "fp": 2,
+        "fn": 2,
+        "priced": 217,
+        "price_correct": 217,
+        "unit_confusion": 0,
+        "item_accuracy": 0.9819004524886877,
+        "f1_strict": 0.9452054794520548,
+        "f1_lenient": 0.9908675799086758,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 69,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 50,
+          "matched": 50,
+          "correct": 50,
+          "fp": 2,
+          "fn": 2,
+          "priced": 50,
+          "price_correct": 50,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "옥토모어 13.1",
+                "price_krw": 1040000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "옥토모어 13.1",
+                "price_krw": 52000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 52000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 1040000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 14,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "로얄살루트 21Y",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "로알살루트 21Y",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "로얄살루트 21Y",
+                "price_krw": 790000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "로알살루트 21Y",
+                "price_krw": 790000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    },
+    "3": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 219,
+        "matched_strict": 209,
+        "matched": 219,
+        "correct": 219,
+        "fp": 0,
+        "fn": 0,
+        "priced": 219,
+        "price_correct": 219,
+        "unit_confusion": 0,
+        "item_accuracy": 1.0,
+        "f1_strict": 0.954337899543379,
+        "f1_lenient": 1.0,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 67,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 12Y 쉐리",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 12Y 셰리",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 12Y 쉐리",
+                "price_krw": 480000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 12Y 셰리",
+                "price_krw": 480000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 세리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 세리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 52,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    },
+    "4": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 219,
+        "matched_strict": 207,
+        "matched": 219,
+        "correct": 219,
+        "fp": 0,
+        "fn": 0,
+        "priced": 219,
+        "price_correct": 219,
+        "unit_confusion": 0,
+        "item_accuracy": 1.0,
+        "f1_strict": 0.9452054794520548,
+        "f1_lenient": 1.0,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 67,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 12Y 쉐리",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 12Y 셰리",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어 12Y 쉐리",
+                "price_krw": 480000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어 12Y 셰리",
+                "price_krw": 480000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 세리 캐스크",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 보데가 셰리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 보데가 세리 캐스크",
+                "price_krw": 440000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 52,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 14,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "로얄살루트 21Y",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "로알살루트 21Y",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "로얄살루트 21Y",
+                "price_krw": 790000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "로알살루트 21Y",
+                "price_krw": 790000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    },
+    "5": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 219,
+        "matched_strict": 206,
+        "matched": 219,
+        "correct": 219,
+        "fp": 0,
+        "fn": 0,
+        "priced": 219,
+        "price_correct": 219,
+        "unit_confusion": 0,
+        "item_accuracy": 1.0,
+        "f1_strict": 0.9406392694063926,
+        "f1_lenient": 1.0,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 69,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나호",
+                "price_krw": 600000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 세리 오크",
+                "price_krw": 660000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "카발란 트리플 셰리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 트리플 세리",
+                "price_krw": 500000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 50,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우가다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 13,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "로얄살루트 21Y",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "로알살루트 21Y",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "로얄살루트 21Y",
+                "price_krw": 790000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "로알살루트 21Y",
+                "price_krw": 790000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "시그나토리 벤리악 12Y",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "시그나토리 벤리아악 12Y",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    }
+  }
+}

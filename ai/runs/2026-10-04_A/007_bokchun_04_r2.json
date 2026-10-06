@@ -1,0 +1,72 @@
+{
+  "condition": "A",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "minimal",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "source_image": "007_bokchun_04.jpg",
+  "prepared_image": "007_bokchun_04.jpg",
+  "prepared_sha256": "5228aac6adeece3c026c1365f6f15d8f3e1798464796396dc4b0053cfecf9498",
+  "started_at": "2026-10-04T03:19:48.856206+00:00",
+  "latency_ms": 3390,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2305,
+  "output_tokens": 9,
+  "thought_tokens": 0,
+  "total_tokens": 2314,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": []\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-04T03:19:51Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": []\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0TDfKkR4Z8lxpf0NCI4mqm1Me6HRjh18KGHFUtJzRF59YiFwfaiL8U20Kvxe41BOsCSAswDX/a7NYjZpejnW8HiialNuTU3EKsQV5H5diZ9yfPg7v6aagkQRE=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": []\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-04T03:19:51Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 1241
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2305,
+      "total_output_tokens": 9,
+      "total_thought_tokens": 0,
+      "total_tokens": 2314,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 2
+}

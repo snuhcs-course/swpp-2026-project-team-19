@@ -1,0 +1,54 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "media_resolution": "default",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "labels_sha256": "c8a29533cc53fb17fb1bfd96f630c7876c8ab5685706b07ad2abd5cff3f81dac",
+  "runs": 5,
+  "photos": {
+    "007_bokchun_01.jpg": {
+      "prepared": "007_bokchun_01.jpg",
+      "prepared_sha256": "d15fad48bc5b84ca42834a5640a00bcac0e96dc8b0a6af03e86e022a79178f3d"
+    },
+    "007_bokchun_02.jpg": {
+      "prepared": "007_bokchun_02.jpg",
+      "prepared_sha256": "3eeaa05936f34bf17b16bf7ba4a3f87c6e935f1ffdb5868e453da423a6b9e470"
+    },
+    "007_bokchun_03.jpg": {
+      "prepared": "007_bokchun_03.jpg",
+      "prepared_sha256": "427f3c129446e60e6f7f37f47b02580873807af3b1e8ad22a600700b05ae16d6"
+    },
+    "007_bokchun_04.jpg": {
+      "prepared": "007_bokchun_04.jpg",
+      "prepared_sha256": "5228aac6adeece3c026c1365f6f15d8f3e1798464796396dc4b0053cfecf9498"
+    },
+    "008_seorosang_01.png": {
+      "prepared": "008_seorosang_01.png",
+      "prepared_sha256": "c1c304b23f92853ef046d2e3862410110533806fedb1a8dce3685b106f0bfffa"
+    },
+    "008_seorosang_02.png": {
+      "prepared": "008_seorosang_02.png",
+      "prepared_sha256": "0951efa0152bc4d37d6f335ed08769321555efa515ab431070ebbd1a0c9c8fd6"
+    },
+    "008_seorosang_03.png": {
+      "prepared": "008_seorosang_03.png",
+      "prepared_sha256": "707b0034dfeb178db9087e8adec17f1dc69e05225fbe9211920e450c150f5241"
+    },
+    "008_seorosang_04.png": {
+      "prepared": "008_seorosang_04.png",
+      "prepared_sha256": "4c3886715fed44180129ef76dfc40a64b766593ba2388841f32c92d95c5d93ca"
+    },
+    "008_seorosang_05.png": {
+      "prepared": "008_seorosang_05.png",
+      "prepared_sha256": "0267b1102ead2147cc49471ec8b3bacd2610d2e01988f550874936a7e6d26f63"
+    }
+  },
+  "api_tier": "free (inputs may be used to improve Google products)",
+  "written_at": "2026-10-04T04:35:57.449658+00:00"
+}
