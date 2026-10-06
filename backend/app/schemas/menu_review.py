@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.errors import register_union_tags
 from app.models import LineType
+from app.schemas.common import UtcDateTime
 
 MAX_PRICE_KRW = 2**31 - 1
 MAX_POUR_ML = 32767
@@ -120,3 +121,24 @@ class ReviewAndApplyRequest(_Strict):
 
 
 register_union_tags("select_existing_product", "create_product", "confirm_non_product", "reject", "existing", "new")
+
+
+# ---- Response ----
+
+
+class ReviewResult(BaseModel):
+    added: int = Field(description="Products added to the board")
+    updated: int = Field(description="Board products whose options changed")
+    removed: int = Field(description="Products removed from the board")
+    ignored: int = Field(description="Proposed changes the reviewer ignored")
+    createdBrands: int
+    createdProducts: int
+
+
+class ReviewAppliedResponse(BaseModel):
+    menuImportId: UUID
+    status: Literal["applied"]
+    reviewVersion: int
+    appliedAt: UtcDateTime
+    menuBoardId: UUID
+    result: ReviewResult
