@@ -13,4 +13,5 @@
 /backend/__pycache__/
 /backend/**/__pycache__/
 /backend/.pytest_cache/
+/backend/var/
 /_ref/
