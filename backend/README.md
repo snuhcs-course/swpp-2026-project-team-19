@@ -23,7 +23,7 @@ uv run --env-file .env uvicorn app.main:app --reload
 ```
 
 The API is available at `http://127.0.0.1:8000`; interactive docs are at `/docs`.
-`GET /health` returns `{"status":"ok"}` and does not require a database connection.
+`GET /health` returns `{"status":"ok","version":"<commit>"}` and does not require a database connection. `version` is the short hash of the commit the server started from (`null` outside a git checkout), so a deployment can be checked from outside.
 
 For local frontend integration before Supabase Auth is connected, a temporary login endpoint can issue a three-hour development JWT:
 
@@ -96,7 +96,7 @@ uv run --env-file .env pytest --cov
 
 The run fails below 98% total coverage (`[tool.coverage.report]` in `pyproject.toml`). Skipping the database tests drops coverage well under that, so a missing test database cannot go unnoticed.
 
-GitHub Actions runs the same command on every pull request and on pushes to `main` that touch the backend (`.github/workflows/backend-ci.yml`), against a PostgreSQL 18 service container like the RDS instance. The run page shows a coverage table, and the full `coverage.xml` is attached as an artifact.
+GitHub Actions runs the same command on every pull request and on pushes to `main` that touch the backend (`.github/workflows/backend-ci-cd.yml`), against a PostgreSQL 18 service container like the RDS instance. The run page shows a coverage table, and the full `coverage.xml` is attached as an artifact.
 
 ## Migrations
 

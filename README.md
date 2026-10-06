@@ -142,7 +142,7 @@ cd backend
 uv run --env-file .env pytest --cov
 ```
 
-Backend CI runs on relevant pull requests and pushes to `main`. The current Iteration 1 baseline reports **434 passing tests** and about **99% line-and-branch coverage**.
+Backend CI/CD runs the tests on relevant pull requests and pushes to `main`, and deploys `main` to the server after they pass. The current Iteration 1 baseline reports **434 passing tests** and about **99% line-and-branch coverage**.
 
 ## Live Demo Flow
 
