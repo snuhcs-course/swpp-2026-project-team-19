@@ -137,7 +137,7 @@ It pulls, runs `uv sync --frozen --no-dev` and the migrations, restarts the serv
 
 ## 5. Automatic deployment (GitHub Actions)
 
-When a push to `main` changes the backend, the **Backend CI** workflow (`.github/workflows/backend-ci.yml`) runs the tests. If they pass, its `deploy` job connects over SSH, runs `deploy.sh main`, and checks `https://bottlemap.o-r.kr/health` from outside. Pull requests only run the tests. A deployment can also be started from the Actions tab (Backend CI → Run workflow on `main`); it runs the tests first as well.
+When a push to `main` changes the backend, the **Backend CI/CD** workflow (`.github/workflows/backend-ci-cd.yml`) runs the tests. If they pass, its `deploy` job connects over SSH, runs `deploy.sh main`, and checks `https://bottlemap.o-r.kr/health` from outside. Pull requests only run the tests. A deployment can also be started from the Actions tab (Backend CI/CD → Run workflow on `main`); it runs the tests first as well.
 
 Deployments run one at a time, and a running one is never cancelled. Each deploys the latest `main`.
 

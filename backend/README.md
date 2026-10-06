@@ -96,7 +96,7 @@ uv run --env-file .env pytest --cov
 
 The run fails below 98% total coverage (`[tool.coverage.report]` in `pyproject.toml`). Skipping the database tests drops coverage well under that, so a missing test database cannot go unnoticed.
 
-GitHub Actions runs the same command on every pull request and on pushes to `main` that touch the backend (`.github/workflows/backend-ci.yml`), against a PostgreSQL 18 service container like the RDS instance. The run page shows a coverage table, and the full `coverage.xml` is attached as an artifact.
+GitHub Actions runs the same command on every pull request and on pushes to `main` that touch the backend (`.github/workflows/backend-ci-cd.yml`), against a PostgreSQL 18 service container like the RDS instance. The run page shows a coverage table, and the full `coverage.xml` is attached as an artifact.
 
 ## Migrations
 

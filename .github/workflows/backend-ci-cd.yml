@@ -1,4 +1,4 @@
-name: Backend CI
+name: Backend CI/CD
 
 on:
   pull_request:
@@ -6,18 +6,18 @@ on:
       - "backend/**"
       - "ai/catalog/**"
       - "eval/**"
-      - ".github/workflows/backend-ci.yml"
+      - ".github/workflows/backend-ci-cd.yml"
   push:
     branches: [main]
     paths:
       - "backend/**"
       - "ai/catalog/**"
       - "eval/**"
-      - ".github/workflows/backend-ci.yml"
+      - ".github/workflows/backend-ci-cd.yml"
   workflow_dispatch:
 
 concurrency:
-  group: backend-ci-${{ github.ref }}
+  group: backend-ci-cd-${{ github.ref }}
   # A newer push cancels an outdated PR run, but never a run on main that may be deploying.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
