@@ -154,7 +154,7 @@ Request and response details, error codes, and rules not covered by the API spec
 | --- | --- | --- |
 | `IMAGE_STORAGE` | `local` | Where photos are stored: `local` (development) or `s3` (deployment). |
 | `IMAGE_STORAGE_DIR` | `backend/var/images` | Directory for `local` storage (ignored by git). Files are served at `/media/...` for local development only. |
-| `S3_BUCKET` | — | Private bucket for `s3` storage. Review responses link photos through presigned URLs. |
+| `S3_BUCKET` | — | Required with `s3` (checked at start-up). Private bucket; review responses link photos through presigned URLs. |
 | `AWS_REGION` | `ap-northeast-2` | Region of the bucket. Credentials come from the EC2 instance role (or `AWS_*` variables locally). |
 | `S3_URL_TTL_SECONDS` | `900` | How long a presigned photo URL works; `imageUrlExpiresAt` tells clients when to fetch a new one. |
 | `MENU_EXTRACTOR` | `mock` | Extraction backend: `mock` (fixed results, see below) or `gemini` (the vision LLM in `app/extraction`). |

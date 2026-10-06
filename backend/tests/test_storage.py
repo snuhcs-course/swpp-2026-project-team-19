@@ -152,6 +152,16 @@ def test_invalid_storage_settings(configured, env, message):
         configured(**env)
 
 
+def test_server_start_fails_when_s3_is_not_configured(configured, monkeypatch):
+    monkeypatch.setenv("IMAGE_STORAGE", "s3")
+    monkeypatch.delenv("S3_BUCKET", raising=False)
+    get_image_storage.cache_clear()
+
+    with pytest.raises(RuntimeError, match="S3_BUCKET"):
+        with TestClient(app):
+            pass
+
+
 def test_media_route_is_off_with_s3(s3):
     app.dependency_overrides[get_image_storage] = lambda: S3ImageStorage(s3, "menu-photos")
     try:
