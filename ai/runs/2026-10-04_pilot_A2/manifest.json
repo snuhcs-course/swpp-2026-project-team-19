@@ -1,0 +1,22 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "media_resolution": "default",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "labels_sha256": "c8a29533cc53fb17fb1bfd96f630c7876c8ab5685706b07ad2abd5cff3f81dac",
+  "runs": 1,
+  "photos": {
+    "007_bokchun_03.jpg": {
+      "prepared": "007_bokchun_03.jpg",
+      "prepared_sha256": "427f3c129446e60e6f7f37f47b02580873807af3b1e8ad22a600700b05ae16d6"
+    }
+  },
+  "api_tier": "free (inputs may be used to improve Google products)",
+  "written_at": "2026-10-04T02:08:47.800870+00:00"
+}

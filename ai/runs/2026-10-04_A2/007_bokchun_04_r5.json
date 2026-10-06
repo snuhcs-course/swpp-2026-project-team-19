@@ -1,0 +1,73 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "source_image": "007_bokchun_04.jpg",
+  "prepared_image": "007_bokchun_04.jpg",
+  "prepared_sha256": "5228aac6adeece3c026c1365f6f15d8f3e1798464796396dc4b0053cfecf9498",
+  "started_at": "2026-10-04T04:41:31.448949+00:00",
+  "latency_ms": 5017,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2305,
+  "output_tokens": 5,
+  "thought_tokens": 494,
+  "total_tokens": 2804,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-04T04:41:36Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-04T04:41:36Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1241
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2305,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 494,
+      "total_tokens": 2804,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 5
+}

@@ -1,0 +1,73 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v1",
+  "prompt_sha256": "1b4414e1943b0035921d2abf4380901d084b724f4395d3f3d12f6319c46b9ef8",
+  "source_image": "007_bokchun_04.jpg",
+  "prepared_image": "007_bokchun_04.jpg",
+  "prepared_sha256": "5228aac6adeece3c026c1365f6f15d8f3e1798464796396dc4b0053cfecf9498",
+  "started_at": "2026-10-04T04:37:20.160640+00:00",
+  "latency_ms": 4321,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2305,
+  "output_tokens": 5,
+  "thought_tokens": 454,
+  "total_tokens": 2764,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-04T04:37:24Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-04T04:37:24Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1241
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2305,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 454,
+      "total_tokens": 2764,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3
+}
