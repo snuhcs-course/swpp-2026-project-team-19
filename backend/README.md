@@ -46,6 +46,7 @@ Local defaults are in the ignored `backend/.env` file. Run `uv` commands from `b
 | `POSTGRES_USER` | Yes | — | Database username |
 | `POSTGRES_PASSWORD` | Yes | — | Database password |
 | `POSTGRES_DATABASE` | Yes | — | Database name |
+| `POSTGRES_TEST_DATABASE` | For DB tests | — | Test database name; must end with `_test` (see Tests) |
 
 Do not commit credentials. Export them in your shell or inject them through the deployment environment.
 
@@ -67,7 +68,22 @@ psql postgres -c "CREATE ROLE bottlemap LOGIN PASSWORD 'change-me';"
 psql postgres -c "CREATE DATABASE bottlemap OWNER bottlemap;"
 ```
 
+To run the database tests, also create a separate test database (same commands with `bottlemap_test`):
+
+```sh
+sudo -u postgres psql -c "CREATE DATABASE bottlemap_test OWNER bottlemap;"   # Ubuntu / WSL
+psql postgres -c "CREATE DATABASE bottlemap_test OWNER bottlemap;"           # macOS
+```
+
 Check that the server is running with `pg_isready -h localhost -p 5432`.
+
+## Tests
+
+```sh
+uv run --env-file .env pytest
+```
+
+Tests that need PostgreSQL use the database named by `POSTGRES_TEST_DATABASE` (same host and credentials as `POSTGRES_*`). Each test run drops and rebuilds that database's schema from the migrations, and each test is rolled back afterwards, so the name must end with `_test`; any other name stops the run. If the variable is not set, the database tests are skipped and the other tests still run. Shared fixtures (`db_session`, `client`) are in `tests/conftest.py`.
 
 ## Migrations
 
@@ -95,6 +111,14 @@ uv run --env-file .env python scripts/seed_catalog.py
 ```
 
 The script is safe to re-run. Bars, brands, and products are upserted by id, so edits in the JSON are applied on the next run. Aliases get `normalized_alias` from `app/core/normalize.py`; aliases that normalize to a value the same brand or product already has are skipped. Rows removed from the JSON are not deleted from the database. See `ai/catalog/README.md` for the JSON-to-table mapping.
+
+`scripts/seed_menu.py` publishes the Seorosang demo menu (`ai/catalog/menu_seed_seorosang_v1.json`, 35 entries) so product search and menu lookup return results during development. Run it after `seed_catalog.py`:
+
+```sh
+uv run --env-file .env python scripts/seed_menu.py
+```
+
+Each run resets that bar's current menu board to the seed contents and sets `published_at` to now, so it also restores the menu after testing uploads or publishing. Existing bar menu items are reused by bar and product. Whisky Bokchun has no seeded menu and is kept empty for the live registration demo.
 
 ### Changing the normalization rules
 
