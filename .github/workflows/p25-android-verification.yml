@@ -1,0 +1,27 @@
+name: P25 Android Verification
+
+on:
+  push:
+    branches:
+      - feature/p25-frontend-api-integration
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK platform
+        run: sdkmanager "platforms;android-37"
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+      - name: Run JVM unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
