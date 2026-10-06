@@ -3,6 +3,9 @@ from uuid import uuid4
 
 import pytest
 
+from app.adapters.storage import S3ImageStorage
+from app.api.deps import get_image_storage
+from app.main import app
 from app.models import (
     Bar,
     ExtractionApproach,
@@ -14,6 +17,7 @@ from app.models import (
     PipelineStatus,
 )
 from tests.factories import make_bar, make_brand, make_product, publish_menu
+from tests.fake_s3 import FakeS3Client
 
 JPEG = b"\xff\xd8\xff\xe0" + b"jpeg-body"
 
@@ -251,3 +255,23 @@ def test_operators_only(client, db_session, token_for):
 
     assert client.get(f"/api/menu-imports/{menu_import.id}", headers=customer).status_code == 403
     assert client.get(f"/api/menu-imports/{menu_import.id}").status_code == 401
+
+
+def test_review_with_s3_storage_returns_presigned_urls(client, db_session, operator, glenfiddich):
+    s3 = FakeS3Client()
+    app.dependency_overrides[get_image_storage] = lambda: S3ImageStorage(s3, "menu-photos")
+    try:
+        bar = make_bar(db_session)
+        import_id = upload(client, bar, operator)
+
+        [image] = get_import(client, import_id, operator)["images"]
+    finally:
+        app.dependency_overrides.pop(get_image_storage, None)
+
+    key = f"menus/{bar.id}/{import_id}/page-1.jpg"
+    assert s3.objects[("menu-photos", key)] == (JPEG, "image/jpeg")
+    # Object storage URLs are absolute already and are returned unchanged.
+    assert image["imageUrl"] == f"https://menu-photos.s3.example.com/{key}?expires=900"
+    assert image["imageUrlExpiresAt"] is not None
+    # The extraction read the photo back from the bucket.
+    assert len(image["items"]) == 5

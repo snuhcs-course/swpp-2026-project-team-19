@@ -25,6 +25,21 @@ from sqlalchemy.orm import Session
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture(autouse=True)
+def mock_extractor(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Use the mock extractor even when .env selects gemini, so no test calls the real API.
+
+    Tests that need other settings set them on top of this.
+    """
+    from app.api.deps import get_menu_extractor
+
+    monkeypatch.setenv("MENU_EXTRACTOR", "mock")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    get_menu_extractor.cache_clear()
+    yield
+    get_menu_extractor.cache_clear()
+
+
 @pytest.fixture(scope="session")
 def db_engine() -> Iterator[Engine]:
     test_database = os.getenv("POSTGRES_TEST_DATABASE")

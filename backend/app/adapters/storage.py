@@ -1,14 +1,16 @@
 """Storage for uploaded menu photos.
 
 The database keeps only the storage key. `LocalImageStorage` writes to disk for local
-development and tests; deployment can add an object-storage implementation (P21)
-without changing the callers.
+development and tests; `S3ImageStorage` keeps the photos in a private S3 bucket for
+deployment. Callers do not depend on which one is used.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
-from typing import Protocol
+from typing import Any, Protocol
 from urllib.parse import quote
+
+from botocore.exceptions import ClientError
 
 MEDIA_PATH_PREFIX = "/media"
 
@@ -60,3 +62,42 @@ class LocalImageStorage:
         # A path, not an absolute URL: the API joins it with the request's base URL,
         # which differs between a phone, an emulator (10.0.2.2) and localhost.
         return f"{MEDIA_PATH_PREFIX}/{quote(key)}", None
+
+
+class S3ImageStorage:
+    """Objects in a private S3 bucket, viewed through presigned GET URLs.
+
+    `client` is a boto3 S3 client. On EC2 it takes its credentials from the instance's IAM
+    role, so no keys are configured. A URL stops working after `url_ttl`; clients fetch
+    the review data again for a fresh one.
+    """
+
+    def __init__(self, client: Any, bucket: str, url_ttl: timedelta = timedelta(minutes=15)) -> None:
+        self.client = client
+        self.bucket = bucket
+        self.url_ttl = url_ttl
+
+    def save(self, key: str, data: bytes, content_type: str) -> None:
+        self.client.put_object(Bucket=self.bucket, Key=key, Body=data, ContentType=content_type)
+
+    def read(self, key: str) -> bytes:
+        try:
+            response = self.client.get_object(Bucket=self.bucket, Key=key)
+        except ClientError as error:
+            if error.response.get("Error", {}).get("Code") in {"NoSuchKey", "404"}:
+                raise FileNotFoundError(key) from error
+            raise
+        return response["Body"].read()
+
+    def delete(self, key: str) -> None:
+        # S3 answers a delete of a missing key with success.
+        self.client.delete_object(Bucket=self.bucket, Key=key)
+
+    def url(self, key: str) -> tuple[str, datetime | None]:
+        expires_at = datetime.now(timezone.utc) + self.url_ttl
+        url = self.client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": self.bucket, "Key": key},
+            ExpiresIn=int(self.url_ttl.total_seconds()),
+        )
+        return url, expires_at

@@ -7,6 +7,7 @@ the caller after the commit.
 
 import hashlib
 import json
+import logging
 from dataclasses import dataclass
 from typing import BinaryIO
 from uuid import UUID, uuid4
@@ -28,6 +29,8 @@ from app.models import (
     MenuImport,
 )
 from app.services.bar_menu import bar_not_found
+
+logger = logging.getLogger(__name__)
 
 MAX_IMAGES = 5
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
@@ -211,7 +214,11 @@ def create_menu_import(
         # Storage and the database share no transaction: undo the stored images by hand.
         session.rollback()
         for key in saved:
-            storage.delete(key)
+            try:
+                storage.delete(key)
+            except Exception:
+                # Keep the original error; an orphaned object is only wasted space.
+                logger.warning("Could not delete %s after a failed upload", key, exc_info=True)
         if isinstance(error, IntegrityError):
             # A concurrent request with the same key committed first.
             existing = _find_by_key(session, idempotency_key)

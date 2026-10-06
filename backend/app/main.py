@@ -3,16 +3,18 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.api.deps import get_menu_extractor
+from app.api.deps import get_image_storage, get_menu_extractor
 from app.api.router import api_router
 from app.core.errors import register_error_handlers
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    # Check the extractor settings at start-up (e.g. MENU_EXTRACTOR=gemini without
-    # GEMINI_API_KEY) instead of failing on the first upload. The mock needs nothing.
+    # Check the extractor and storage settings at start-up (e.g. MENU_EXTRACTOR=gemini
+    # without GEMINI_API_KEY, IMAGE_STORAGE=s3 without S3_BUCKET) instead of failing on
+    # the first upload. The local defaults need nothing.
     get_menu_extractor()
+    get_image_storage()
     yield
 
 
