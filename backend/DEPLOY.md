@@ -18,7 +18,7 @@ How the backend runs for the demo: one EC2 instance serving the API over HTTPS, 
 
 Files used on the server are in [`deploy/`](deploy/): the systemd service, the Caddyfile, `env.production.example`, and `deploy.sh`.
 
-Never commit or paste secrets (the RDS password, `TEMP_AUTH_JWT_SECRET`, `GEMINI_API_KEY`); they live only in `backend/.env` on the server.
+Never commit or paste secrets (the RDS password, `TEMP_AUTH_JWT_SECRET`, `GEMINI_API_KEY`); they live only in `backend/.env` on the server. The deploy key for automatic deployment lives only in GitHub secrets.
 
 ## 1. AWS resources (console)
 
@@ -41,7 +41,7 @@ Never commit or paste secrets (the RDS password, `TEMP_AUTH_JWT_SECRET`, `GEMINI
 
 4. **EC2** `bottlemap-api`:
    - Ubuntu Server 24.04 LTS, a free-tier eligible type (e.g. `t3.micro`), 20 GiB gp3. Keep the key pair `.pem` file safe.
-   - New security group `bottlemap-ec2`: SSH (22) from **my IP** only, HTTP (80) and HTTPS (443) from anywhere. Port 80 is needed for the certificate.
+   - New security group `bottlemap-ec2`: SSH (22) from **my IP** only, HTTP (80) and HTTPS (443) from anywhere. Port 80 is needed for the certificate. Automatic deployment later opens SSH to anywhere (section 5).
    - Advanced details → IAM instance profile: `bottlemap-ec2-role`.
 5. **Elastic IP**: EC2 → Elastic IPs → allocate, then associate it with `bottlemap-api`.
 6. **DNS**: at 내도메인.한국, set the A record of `bottlemap.o-r.kr` to the Elastic IP. Check with `nslookup bottlemap.o-r.kr` until it returns the IP.
@@ -126,6 +126,8 @@ Afterwards, restore the demo menu with `seed_menu.py`, and remove test imports t
 
 ## 4. Redeploy
 
+Pushes to `main` are deployed automatically once section 5 is set up. To deploy by hand (another branch, or before that setup), run on the server:
+
 ```sh
 ~/swpp-2026-project-team-19/backend/deploy/deploy.sh          # current branch
 ~/swpp-2026-project-team-19/backend/deploy/deploy.sh main     # switch branch first
@@ -133,7 +135,62 @@ Afterwards, restore the demo menu with `seed_menu.py`, and remove test imports t
 
 It pulls, runs `uv sync --frozen --no-dev` and the migrations, restarts the service, and waits for `/health`; on failure it prints the last log lines.
 
-## 5. Operations
+## 5. Automatic deployment (GitHub Actions)
+
+When a push to `main` changes the backend, the **Backend CI** workflow (`.github/workflows/backend-ci.yml`) runs the tests. If they pass, its `deploy` job connects over SSH, runs `deploy.sh main`, and checks `https://bottlemap.o-r.kr/health` from outside. Pull requests only run the tests. A deployment can also be started from the Actions tab (Backend CI → Run workflow on `main`); it runs the tests first as well.
+
+Deployments run one at a time, and a running one is never cancelled. Each deploys the latest `main`.
+
+### One-time setup
+
+1. **Deploy key.** On your PC, create a key used only by GitHub Actions, without a passphrase:
+
+   ```sh
+   ssh-keygen -t ed25519 -N "" -C bottlemap-deploy -f bottlemap-deploy
+   ```
+
+   This writes `bottlemap-deploy` (private) and `bottlemap-deploy.pub` (public).
+
+2. **Allow the key on the server, for `deploy.sh` only.** Add the public key to `~/.ssh/authorized_keys` with options in front:
+
+   ```sh
+   printf 'restrict,command="/home/ubuntu/swpp-2026-project-team-19/backend/deploy/deploy.sh main" %s\n' \
+     "$(cat bottlemap-deploy.pub)" | ssh -i bottlemap-key.pem ubuntu@bottlemap.o-r.kr 'cat >> ~/.ssh/authorized_keys'
+   ```
+
+   - `command=` makes every connection with this key run `deploy.sh main`, whatever command the client sends.
+   - `restrict` turns off terminals and port forwarding.
+   - A leaked deploy key can therefore only redeploy `main`.
+   - Check it: `ssh -i bottlemap-deploy ubuntu@bottlemap.o-r.kr ls` runs a deployment instead of `ls`.
+
+3. **Host key.** Get the server's host key line, and check that its fingerprint matches the one the server reports over your usual SSH session:
+
+   ```sh
+   ssh-keyscan -t ed25519 bottlemap.o-r.kr                             # the line for the secret
+   ssh-keyscan -t ed25519 bottlemap.o-r.kr | ssh-keygen -lf -          # its fingerprint
+   ssh -i bottlemap-key.pem ubuntu@bottlemap.o-r.kr 'ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub'
+   ```
+
+   The workflow refuses to connect when the server answers with any other key. A new EC2 instance has a new host key, so update the secret then.
+
+4. **GitHub secrets.** Settings → Environments → New environment `production` → Environment secrets:
+
+   | Secret | Value |
+   | --- | --- |
+   | `DEPLOY_SSH_KEY` | The whole private key file `bottlemap-deploy`, including the `BEGIN` and `END` lines |
+   | `DEPLOY_KNOWN_HOSTS` | The `bottlemap.o-r.kr ssh-ed25519 AAAA...` line from step 3 |
+
+   Only the `deploy` job, which declares the `production` environment, can read them. After saving, delete the local private key; GitHub is the only place that needs it.
+
+5. **Security group.** GitHub-hosted runners connect from changing addresses, so `bottlemap-ec2` must allow SSH (22) from anywhere (`0.0.0.0/0`). Password login is off on Ubuntu EC2 images, so only the two keys in `authorized_keys` can log in, and the deploy key can only run `deploy.sh`.
+
+### When a deployment fails
+
+- Open the failed run → `deploy` → **Run deploy.sh on the server**. It shows the output of `deploy.sh`, including the last 50 service log lines when `/health` does not come up.
+- To roll back, revert the commit on `main` (`git revert <commit>`) and push. The revert is tested and deployed like any other change.
+- To pause automatic deployment, remove the deploy key line from `authorized_keys`. Deploy jobs then fail at SSH; the tests still run.
+
+## 6. Operations
 
 - **Logs:** `journalctl -u bottlemap-api -f` (API), `journalctl -u caddy -f` (HTTPS, proxy).
 - **Settings:** edit `backend/.env`, then `sudo systemctl restart bottlemap-api`.
@@ -142,6 +199,6 @@ It pulls, runs `uv sync --frozen --no-dev` and the migrations, restarts the serv
 - **Known limitation:** an import that is `processing` when the service restarts stays there; delete it with `reset_menu_imports.py` and upload again.
 - **Cost:** stop the EC2 and RDS instances when idle. A stopped RDS instance starts again by itself after 7 days, and the Elastic IP is billed while the instance is stopped.
 
-## 6. Teardown
+## 7. Teardown
 
-When the project ends: delete the RDS instance (and any snapshots), terminate the EC2 instance, release the Elastic IP, empty and delete the S3 bucket, delete the IAM role and the `bottlemap-*` security groups, and remove the DNS record.
+When the project ends: delete the RDS instance (and any snapshots), terminate the EC2 instance, release the Elastic IP, empty and delete the S3 bucket, delete the IAM role and the `bottlemap-*` security groups, remove the DNS record, and delete the `production` environment (with its deploy key) on GitHub.
