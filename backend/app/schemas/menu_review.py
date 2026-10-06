@@ -20,7 +20,8 @@ NonProductLineType = Literal["section_header", "description", "unknown"]
 
 
 class _Strict(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    # Names are stored as sent, so surrounding spaces are dropped; a blank name then fails min_length.
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
 
 class ProductAliasInput(_Strict):

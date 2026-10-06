@@ -4,12 +4,11 @@ import pytest
 from pydantic import ValidationError
 
 from app.core.errors import ApiError, field_path
-from app.models import MenuChangeType, MenuImport
+from app.models import MenuChangeType
 from app.schemas.menu_review import ReviewAndApplyRequest
-from app.services.menu_review_validation import load_items, pending_changes, validate_review
-from tests.factories import make_bar, make_brand, make_product, publish_menu
-
-JPEG = b"\xff\xd8\xff\xe0" + b"jpeg-body"
+from app.services.menu_review_validation import validate_review
+from tests.review_support import make_glenfiddich, upload_sample_review
+from tests.review_support import valid_body as sample_body
 
 
 @pytest.fixture
@@ -19,70 +18,17 @@ def operator(token_for):
 
 @pytest.fixture
 def glenfiddich(db_session):
-    brand = make_brand(db_session, "Glenfiddich", aliases=("글렌피딕",))
-    return {
-        "brand": brand,
-        12: make_product(db_session, brand, "Glenfiddich 12", aliases=("글렌피딕 12년",), age_years=12),
-        15: make_product(db_session, brand, "Glenfiddich 15", aliases=("글렌피딕 15년",), age_years=15),
-        21: make_product(db_session, brand, "Glenfiddich 21", age_years=21, is_active=False),
-    }
+    return make_glenfiddich(db_session)
 
 
 @pytest.fixture
 def review(client, db_session, image_storage, operator, glenfiddich):
-    """A sample import against a board selling Glenfiddich 12 (older price) and 15.
-
-    Items: header, 글렌피딕 12년 (exact), Glenfiddich 12 with age 15 (ambiguous), Unknown
-    Distillery 25 (unmatched), description. Changes: update 12, add unknown, remove 15.
-    """
-    bar = make_bar(db_session)
-    publish_menu(
-        db_session,
-        bar,
-        [
-            (glenfiddich[12], "글렌피딕 12년", [(None, 15, 8000), (None, 30, 17000)]),
-            (glenfiddich[15], "글렌피딕 15년", [(None, 30, 21000)]),
-        ],
-    )
-    response = client.post(
-        f"/api/bars/{bar.id}/menu-imports",
-        headers={**operator, "Idempotency-Key": str(uuid4())},
-        data={"mode": "full_replace"},
-        files=[("images", ("sample.jpg", JPEG, "image/jpeg"))],
-    )
-    assert response.status_code == 202, response.text
-    db_session.expire_all()
-    menu_import = db_session.get(MenuImport, response.json()["menuImportId"])
-    items = load_items(db_session, menu_import)
-    changes = {c.change_type: c for c in pending_changes(db_session, menu_import)}
-    assert set(changes) == {MenuChangeType.UPDATE, MenuChangeType.ADD, MenuChangeType.REMOVE}
-    return menu_import, items, changes
+    sample = upload_sample_review(client, db_session, operator, glenfiddich)
+    return sample.menu_import, sample.items, sample.changes, sample
 
 
 def valid_body(review, glenfiddich):
-    _, (header, exact, conflict, unknown, description), changes = review
-    return {
-        "reviewVersion": 1,
-        "itemDecisions": [
-            {"action": "confirm_non_product", "extractedItemId": str(header.id), "finalLineType": "section_header"},
-            {
-                "action": "select_existing_product",
-                "extractedItemId": str(exact.id),
-                "finalLineType": "product",
-                "productId": str(glenfiddich[12].id),
-            },
-            {"action": "reject", "extractedItemId": str(conflict.id), "finalLineType": "product"},
-            {
-                "action": "create_product",
-                "extractedItemId": str(unknown.id),
-                "finalLineType": "product",
-                "brand": {"type": "new", "canonicalName": "Unknown Distillery"},
-                "product": {"displayName": "Unknown Distillery 25", "ageYears": 25},
-            },
-            {"action": "confirm_non_product", "extractedItemId": str(description.id), "finalLineType": "description"},
-        ],
-        "changeDecisions": [{"changeId": str(c.id), "decision": "apply"} for c in changes.values()],
-    }
+    return sample_body(review[3], glenfiddich)
 
 
 def validate(db_session, review, body):
@@ -270,3 +216,29 @@ def test_request_shape_errors_use_request_paths(decision, expected):
         ReviewAndApplyRequest.model_validate(body)
 
     assert expected in {(field_path(tuple(e["loc"])), e["type"].upper()) for e in caught.value.errors()}
+
+
+def test_names_are_trimmed_and_blank_names_rejected():
+    body = {
+        "reviewVersion": 1,
+        "itemDecisions": [
+            {
+                "action": "create_product",
+                "extractedItemId": str(uuid4()),
+                "finalLineType": "product",
+                "brand": {"type": "new", "canonicalName": "  New Distillery "},
+                "product": {"displayName": "   "},
+            }
+        ],
+        "changeDecisions": [],
+    }
+
+    with pytest.raises(ValidationError) as caught:
+        ReviewAndApplyRequest.model_validate(body)
+    assert [(field_path(tuple(e["loc"])), e["type"]) for e in caught.value.errors()] == [
+        ("itemDecisions[0].product.displayName", "string_too_short")
+    ]
+
+    body["itemDecisions"][0]["product"]["displayName"] = " New Distillery 12 "
+    decision = ReviewAndApplyRequest.model_validate(body).itemDecisions[0]
+    assert (decision.brand.canonicalName, decision.product.displayName) == ("New Distillery", "New Distillery 12")
