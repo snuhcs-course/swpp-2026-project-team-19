@@ -26,7 +26,7 @@ jobs:
           SDKMANAGER="$(find "$ANDROID_SDK_ROOT/cmdline-tools" -path "*/bin/sdkmanager" | sort -V | tail -1)"
           test -x "$SDKMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" "platforms;android-37"
+          "$SDKMANAGER" --channel=3 "platforms;android-37"
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
       - name: Run JVM unit tests
