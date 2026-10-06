@@ -1,7 +1,8 @@
 """Input, output and catalog access types for product matching.
 
 These are plain dataclasses so matching does not depend on SQLAlchemy models.
-A DB-backed `CatalogLookup` can be added once the catalog models exist.
+`CatalogLookup` is implemented by `InMemoryCatalog` (seed JSON, tests and evaluation)
+and `DbCatalog` (catalog tables, menu import processing).
 """
 
 from dataclasses import dataclass, field
