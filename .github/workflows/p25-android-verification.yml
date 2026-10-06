@@ -12,7 +12,7 @@ permissions:
 jobs:
   android:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
@@ -21,10 +21,15 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - name: Use hosted SDK for compile smoke
+      - name: Install current Android SDK tooling and API 37
         run: |
-          test -d "$ANDROID_SDK_ROOT/platforms/android-36"
-          sed -i 's/compileSdk = 37/compileSdk = 36/' android/app/build.gradle.kts
+          SDKMANAGER="$(find "$ANDROID_SDK_ROOT/cmdline-tools" -path "*/bin/sdkmanager" | sort -V | tail -1)"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "cmdline-tools;latest"
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" --channel=3 "platforms;android-37"
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
       - name: Run JVM unit tests
