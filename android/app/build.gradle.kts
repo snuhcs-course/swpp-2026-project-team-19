@@ -3,7 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-val configuredApiBaseUrl = providers.gradleProperty("BOTTLEMAP_API_BASE_URL").orNull
+val configuredApiBaseUrl = providers.gradleProperty("BOTTLEMAP_API_BASE_URL")
+    .orNull
+    ?.let { if (it.endsWith("/")) it else it + "/" }
 val debugApiBaseUrl = configuredApiBaseUrl ?: "http://10.0.2.2:8000/"
 val releaseApiBaseUrl = configuredApiBaseUrl ?: "https://api.example.invalid/"
 

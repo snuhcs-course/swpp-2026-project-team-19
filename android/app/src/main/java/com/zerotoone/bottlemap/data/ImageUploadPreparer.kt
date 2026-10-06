@@ -39,10 +39,19 @@ class ImageUploadPreparer(
     suspend fun prepare(uri: Uri): PreparedMenuImage = withContext(Dispatchers.IO) {
         val displayName = queryDisplayName(uri) ?: "menu-photo"
         val declaredType = contentResolver.getType(uri)?.lowercase()
+        val orientation = readOrientation(uri)
 
         if (declaredType == "image/jpeg" || declaredType == "image/png") {
             val direct = readAtMost(uri, MAX_IMAGE_BYTES + 1)
-            if (direct.size <= MAX_IMAGE_BYTES) {
+            val signatureMatches = when (declaredType) {
+                "image/jpeg" -> isJpeg(direct)
+                "image/png" -> isPng(direct)
+                else -> false
+            }
+            val orientationIsSafe = declaredType == "image/png" ||
+                orientation == ExifInterface.ORIENTATION_NORMAL ||
+                orientation == ExifInterface.ORIENTATION_UNDEFINED
+            if (direct.size <= MAX_IMAGE_BYTES && signatureMatches && orientationIsSafe) {
                 return@withContext PreparedMenuImage(
                     filename = displayName,
                     mimeType = declaredType,
@@ -52,7 +61,7 @@ class ImageUploadPreparer(
         }
 
         val bitmap = decodeSampled(uri)
-        val oriented = applyOrientation(uri, bitmap)
+        val oriented = applyOrientation(bitmap, orientation)
         if (oriented !== bitmap) {
             bitmap.recycle()
         }
@@ -120,8 +129,8 @@ class ImageUploadPreparer(
         } ?: throw IOException("This image format cannot be decoded on this device.")
     }
 
-    private fun applyOrientation(uri: Uri, bitmap: Bitmap): Bitmap {
-        val orientation = runCatching {
+    private fun readOrientation(uri: Uri): Int =
+        runCatching {
             contentResolver.openInputStream(uri)?.use {
                 ExifInterface(it).getAttributeInt(
                     ExifInterface.TAG_ORIENTATION,
@@ -130,6 +139,7 @@ class ImageUploadPreparer(
             }
         }.getOrNull() ?: ExifInterface.ORIENTATION_NORMAL
 
+    private fun applyOrientation(bitmap: Bitmap, orientation: Int): Bitmap {
         val matrix = Matrix()
         when (orientation) {
             ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
@@ -148,6 +158,27 @@ class ImageUploadPreparer(
             else -> return bitmap
         }
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    }
+
+    private fun isJpeg(bytes: ByteArray): Boolean =
+        bytes.size >= 3 &&
+            bytes[0] == 0xFF.toByte() &&
+            bytes[1] == 0xD8.toByte() &&
+            bytes[2] == 0xFF.toByte()
+
+    private fun isPng(bytes: ByteArray): Boolean {
+        val signature = byteArrayOf(
+            0x89.toByte(),
+            0x50,
+            0x4E,
+            0x47,
+            0x0D,
+            0x0A,
+            0x1A,
+            0x0A,
+        )
+        return bytes.size >= signature.size &&
+            signature.indices.all { bytes[it] == signature[it] }
     }
 
     private fun compressWithinLimit(bitmap: Bitmap): ByteArray {
