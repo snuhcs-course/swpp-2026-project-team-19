@@ -105,8 +105,10 @@ class ImageUploadPreparer(
 
     private fun decodeSampled(uri: Uri): Bitmap {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+        // With inJustDecodeBounds the call fills `bounds` and always returns null.
+        val stream = contentResolver.openInputStream(uri)
             ?: throw IOException("Unable to inspect the selected image.")
+        stream.use { BitmapFactory.decodeStream(it, null, bounds) }
 
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
             throw IOException("This image format cannot be decoded on this device.")
