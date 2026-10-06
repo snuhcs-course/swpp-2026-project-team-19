@@ -23,11 +23,14 @@ private object Routes {
     const val CUSTOMER_SEARCH_RESULTS = "customer/search-results"
     const val CUSTOMER_QUERY_ARGUMENT = "query"
     const val CUSTOMER_SEARCH_RESULTS_ROUTE =
-        "$CUSTOMER_SEARCH_RESULTS?$CUSTOMER_QUERY_ARGUMENT={$CUSTOMER_QUERY_ARGUMENT}"
+        CUSTOMER_SEARCH_RESULTS + "?" + CUSTOMER_QUERY_ARGUMENT + "={" + CUSTOMER_QUERY_ARGUMENT + "}"
 
     const val OWNER_GRAPH = "owner"
     const val OWNER_MENU_UPLOAD = "owner/menu-upload"
     const val OWNER_EXTRACTION_REVIEW = "owner/extraction-review"
+    const val MENU_IMPORT_ID_ARGUMENT = "menuImportId"
+    const val OWNER_EXTRACTION_REVIEW_ROUTE =
+        OWNER_EXTRACTION_REVIEW + "/{" + MENU_IMPORT_ID_ARGUMENT + "}"
 }
 
 @Composable
@@ -49,14 +52,19 @@ fun BottleMapNavHost() {
             onOpenResults = { query ->
                 val encodedQuery = Uri.encode(query)
                 navController.navigate(
-                    "${Routes.CUSTOMER_SEARCH_RESULTS}?${Routes.CUSTOMER_QUERY_ARGUMENT}=$encodedQuery",
+                    Routes.CUSTOMER_SEARCH_RESULTS + "?" +
+                        Routes.CUSTOMER_QUERY_ARGUMENT + "=" + encodedQuery,
                 )
             },
             onBack = { navController.popBackStack() },
         )
 
         ownerGraph(
-            onOpenReview = { navController.navigate(Routes.OWNER_EXTRACTION_REVIEW) },
+            onOpenReview = { importId ->
+                navController.navigate(
+                    Routes.OWNER_EXTRACTION_REVIEW + "/" + Uri.encode(importId)
+                )
+            },
             onBack = { navController.popBackStack() },
         )
     }
@@ -93,7 +101,7 @@ private fun NavGraphBuilder.customerGraph(
 }
 
 private fun NavGraphBuilder.ownerGraph(
-    onOpenReview: () -> Unit,
+    onOpenReview: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     navigation(
@@ -103,8 +111,20 @@ private fun NavGraphBuilder.ownerGraph(
         composable(Routes.OWNER_MENU_UPLOAD) {
             MenuUploadScreen(onOpenReview = onOpenReview)
         }
-        composable(Routes.OWNER_EXTRACTION_REVIEW) {
-            ExtractionReviewScreen(onBack = onBack)
+        composable(
+            route = Routes.OWNER_EXTRACTION_REVIEW_ROUTE,
+            arguments = listOf(
+                navArgument(Routes.MENU_IMPORT_ID_ARGUMENT) {
+                    type = NavType.StringType
+                },
+            ),
+        ) { backStackEntry ->
+            ExtractionReviewScreen(
+                menuImportId = backStackEntry.arguments
+                    ?.getString(Routes.MENU_IMPORT_ID_ARGUMENT)
+                    .orEmpty(),
+                onBack = onBack,
+            )
         }
     }
 }
