@@ -7,7 +7,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.core.errors import ApiError
+from app.core.errors import validation_failed
 from app.core.normalize import normalize
 from app.models import Bar, BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry
 from app.schemas.search import (
@@ -31,25 +31,30 @@ def distance_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> int:
     return round(2 * EARTH_RADIUS_METERS * math.asin(math.sqrt(a)))
 
 
-def _validation_error(path: str, code: str, message: str) -> ApiError:
-    return ApiError(
-        422,
-        "VALIDATION_FAILED",
-        "입력값을 확인해 주세요.",
-        field_errors=[{"path": path, "code": code, "message": message}],
-    )
+def validate_query_text(query: str) -> str:
+    """Blank and length checks FastAPI's Query constraints cannot express. Returns the trimmed query."""
+    trimmed = query.strip()
+    if not trimmed:
+        raise validation_failed("query", "BLANK", "검색어를 입력해 주세요.")
+    if len(trimmed) > MAX_QUERY_LENGTH:
+        raise validation_failed("query", "STRING_TOO_LONG", f"검색어는 {MAX_QUERY_LENGTH}자 이하여야 합니다.")
+    return trimmed
+
+
+def require_searchable(trimmed: str) -> str:
+    """The normalized query; rejects one with nothing left after normalization (e.g. "!!!")."""
+    normalized = normalize(trimmed)
+    if not normalized:
+        raise validation_failed("query", "NOT_SEARCHABLE", "검색할 수 있는 문자가 없습니다.")
+    return normalized
 
 
 def validate_search_input(query: str, lat: float | None, lng: float | None) -> str:
     """Checks FastAPI's Query constraints cannot express. Returns the trimmed query."""
-    trimmed = query.strip()
-    if not trimmed:
-        raise _validation_error("query", "BLANK", "검색어를 입력해 주세요.")
-    if len(trimmed) > MAX_QUERY_LENGTH:
-        raise _validation_error("query", "STRING_TOO_LONG", f"검색어는 {MAX_QUERY_LENGTH}자 이하여야 합니다.")
+    trimmed = validate_query_text(query)
     if (lat is None) != (lng is None):
         missing = "lng" if lng is None else "lat"
-        raise _validation_error(missing, "LAT_LNG_REQUIRED_TOGETHER", "위도와 경도는 함께 보내야 합니다.")
+        raise validation_failed(missing, "LAT_LNG_REQUIRED_TOGETHER", "위도와 경도는 함께 보내야 합니다.")
     return trimmed
 
 
@@ -81,8 +86,7 @@ def search_bars(
     session: Session, query: str, *, lat: float | None = None, lng: float | None = None, limit: int = 50
 ) -> SearchBarsResponse:
     trimmed = validate_search_input(query, lat, lng)
-    if not normalize(trimmed):
-        raise _validation_error("query", "NOT_SEARCHABLE", "검색할 수 있는 문자가 없습니다.")
+    require_searchable(trimmed)
     resolution = resolve_search_query(session, trimmed)
 
     products = {product.id: product for product in resolution.products}

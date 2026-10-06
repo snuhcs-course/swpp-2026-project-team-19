@@ -26,3 +26,10 @@ def get_session_factory() -> Callable[[], AbstractContextManager[Session]]:
     Each call of the returned factory opens a new session; tests override it.
     """
     return lambda: Session(get_engine())
+
+
+def get_serializable_session_factory() -> Callable[[], AbstractContextManager[Session]]:
+    """FastAPI dependency for review submission, whose transaction runs at SERIALIZABLE and is
+    retried as a whole on a serialization failure. Tests override it."""
+    engine = get_engine().execution_options(isolation_level="SERIALIZABLE")
+    return lambda: Session(engine)

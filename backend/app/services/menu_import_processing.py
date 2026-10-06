@@ -14,8 +14,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from fastapi import BackgroundTasks
-from sqlalchemy import delete, select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from app.adapters.extraction import ExtractedItemData, ExtractionError, MenuExtractor
 from app.adapters.storage import ImageStorage
@@ -26,18 +25,13 @@ from app.models import (
     ExtractedOption,
     ExtractionRun,
     ImportStatus,
-    LineType,
     MatchMethod,
-    MenuBoard,
-    MenuBoardEntry,
-    MenuImage,
     MenuImport,
-    MenuImportChange,
     PipelineStatus,
     ResolutionCandidate,
     ResolutionStatus,
 )
-from app.services.menu_diff import CurrentEntry, ProposedEntry, compute_draft_changes
+from app.services.menu_draft import product_items, replace_draft
 from app.services.menu_import_upload import detect_image_type
 
 logger = logging.getLogger(__name__)
@@ -150,44 +144,9 @@ def _store_item(session: Session, run: ExtractionRun, data: ExtractedItemData) -
         )
 
 
-def _product_items(session: Session, menu_import: MenuImport) -> list[ExtractedItem]:
-    """Items the AI classified as products, in menu order (image, then line)."""
-    query = (
-        select(ExtractedItem)
-        .join(ExtractionRun, ExtractionRun.id == ExtractedItem.extraction_run_id)
-        .join(MenuImage, MenuImage.id == ExtractionRun.menu_image_id)
-        .where(MenuImage.menu_import_id == menu_import.id, ExtractedItem.extracted_line_type == LineType.PRODUCT)
-        .order_by(MenuImage.image_order, ExtractedItem.item_order)
-        .options(selectinload(ExtractedItem.options))
-    )
-    return list(session.scalars(query))
-
-
-def _current_board(session: Session, bar_id: UUID) -> list[CurrentEntry]:
-    board = session.scalar(
-        select(MenuBoard)
-        .where(MenuBoard.bar_id == bar_id)
-        .options(
-            selectinload(MenuBoard.entries).selectinload(MenuBoardEntry.options),
-            selectinload(MenuBoard.entries).selectinload(MenuBoardEntry.bar_menu_item),
-        )
-    )
-    if board is None:
-        return []
-    return [
-        CurrentEntry(
-            bar_menu_item_id=entry.bar_menu_item_id,
-            product_id=entry.bar_menu_item.product_id,
-            options=tuple((o.option_label, o.pour_ml, o.price_krw) for o in entry.options),
-        )
-        for entry in board.entries
-    ]
-
-
 def _resolve_and_draft(session: Session, menu_import: MenuImport) -> None:
     catalog = DbCatalog(session)
-    proposed: list[ProposedEntry] = []
-    for item in _product_items(session, menu_import):
+    for item in product_items(session, menu_import):
         result = resolve_product(
             ExtractedProduct(
                 product_name=item.extracted_product_name,
@@ -210,25 +169,5 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport) -> None:
                     evidence=candidate.evidence,
                 )
             )
-        proposed.append(
-            ProposedEntry(
-                extracted_item_id=item.id,
-                product_id=result.proposed_product_id,
-                options=tuple(
-                    (o.extracted_option_label, o.extracted_pour_ml, o.extracted_price_krw) for o in item.options
-                ),
-            )
-        )
-
-    # Only the latest draft is kept; regenerating it bumps review_version.
-    session.execute(delete(MenuImportChange).where(MenuImportChange.menu_import_id == menu_import.id))
-    for change in compute_draft_changes(proposed, _current_board(session, menu_import.bar_id), menu_import.mode):
-        session.add(
-            MenuImportChange(
-                menu_import_id=menu_import.id,
-                change_type=change.change_type,
-                bar_menu_item_id=change.bar_menu_item_id,
-                extracted_item_id=change.extracted_item_id,
-            )
-        )
-    menu_import.review_version += 1
+    session.flush()
+    replace_draft(session, menu_import)
