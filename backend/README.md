@@ -131,3 +131,62 @@ uv run --env-file .env python scripts/seed_catalog.py
 ```
 
 The dry run counts value changes and lists aliases that would be deleted because they now collide with another alias of the same brand or product, and values that become shared by different products (these turn exact matches into ambiguous ones). Re-running the seed afterwards adds aliases that were skipped under the old rules but are now distinct.
+
+## Menu import (photo upload)
+
+An operator uploads menu photos with `POST /api/bars/{barId}/menu-imports`. The request stores the photos and returns `202` right away; extraction, product matching, and a draft diff against the bar's current menu run in the background. The app polls `GET /api/menu-imports/{menuImportId}` until the status is `ready_for_review` (full review data in the same response) or `failed`. Nothing is published until the review is submitted (not implemented yet).
+
+```text
+uploaded → processing → ready_for_review → (review submission) → applied
+                      ↘ failed
+```
+
+Request and response details, error codes, and rules not covered by the API spec draft are in Swagger UI (`/docs`).
+
+### Configuration
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `IMAGE_STORAGE` | `local` | Where photos are stored. Only `local` for now; object storage comes with deployment. |
+| `IMAGE_STORAGE_DIR` | `backend/var/images` | Directory for `local` storage (ignored by git). Files are served at `/media/...` for local development only. |
+| `MENU_EXTRACTOR` | `mock` | Extraction backend. Only `mock` until the AI extractor is connected. |
+
+Matching uses the product aliases in the database, so load the catalog first (see [Seed data](#seed-data)).
+
+### Mock extraction
+
+The mock ignores the image content and picks a fixed result by the uploaded **file name**:
+
+| File name | Result |
+| --- | --- |
+| contains `fail` | Extraction fails; the import becomes `failed`. |
+| contains `sample` | 5 lines: a section header, an exact match (`글렌피딕 12년`), the same product with a conflicting age (ambiguous), an unknown product (unmatched), and a description. |
+| anything else | A labeled real menu photo: 8 whiskies (exact matches) and 2 cognacs (unmatched), with `잔`/`병` prices, plus a header and a description. |
+
+Every photo in one upload gets the same result. A real extractor implements `MenuExtractor` in `app/adapters/extraction.py`.
+
+### Try it
+
+With the server running and `TEMP_AUTH_ENABLED=true`, `TEMP_AUTH_USER_TYPE=operator` in `.env`:
+
+- **Swagger UI:** open `/docs`, run `POST /api/auth/temp-login`, paste the token into **Authorize**, then call the upload endpoint (choose files under `images`) and the status endpoint with the returned `menuImportId`.
+- **curl** (Whisky Bokchun has no seeded menu, so every item is an `add`):
+
+```sh
+TOKEN=$(curl -s -X POST localhost:8000/api/auth/temp-login | python3 -c "import sys,json; print(json.load(sys.stdin)['accessToken'])")
+curl -s -H "Authorization: Bearer $TOKEN" -H "Idempotency-Key: $(uuidgen)" \
+  -F mode=full_replace -F images=@sample.jpg \
+  localhost:8000/api/bars/564384a5-b81e-5169-a09f-482da9310223/menu-imports
+curl -s -H "Authorization: Bearer $TOKEN" localhost:8000/api/menu-imports/<menuImportId>
+```
+
+The upload accepts any real JPEG, PNG, or HEIC (checked by its first bytes), so any photo renamed to `sample.jpg` works.
+
+### Current limitations
+
+- A bar allows one unfinished import (`uploaded`, `processing`, `ready_for_review`). Until review submission exists, an import stays `ready_for_review` and blocks the next upload for that bar with `409 ACTIVE_IMPORT_EXISTS`. Delete test imports and their photos with the reset script (lists only without `--apply`; `applied` imports are never deleted):
+
+  ```sh
+  uv run --env-file .env python scripts/reset_menu_imports.py --bar <barId> --apply   # or --import <id>, --all
+  ```
+- Processing runs inside the API process (FastAPI background tasks). If the server stops while an import is `processing`, it stays there.
