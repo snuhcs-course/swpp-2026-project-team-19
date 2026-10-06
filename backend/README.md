@@ -47,6 +47,7 @@ Local defaults are in the ignored `backend/.env` file. Run `uv` commands from `b
 | `POSTGRES_PASSWORD` | Yes | — | Database password |
 | `POSTGRES_DATABASE` | Yes | — | Database name |
 | `POSTGRES_TEST_DATABASE` | For DB tests | — | Test database name; must end with `_test` (see Tests) |
+| `POSTGRES_SSLMODE` | No | libpq default (`prefer`) | Set `require` for RDS so the connection never falls back to plain text |
 
 Do not commit credentials. Export them in your shell or inject them through the deployment environment.
 
