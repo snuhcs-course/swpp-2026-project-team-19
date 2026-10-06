@@ -53,3 +53,10 @@ def test_the_app_starts_with_the_production_settings(monkeypatch, clean_caches):
     storage = deps.get_image_storage()
     assert isinstance(storage, S3ImageStorage)
     assert storage.bucket == "bottlemap-menu-photos"
+
+
+def test_deploy_script_finds_uv_without_a_login_shell():
+    script = (DEPLOY_DIR / "deploy.sh").read_text()
+
+    # Automatic deployment runs the script over SSH, where ~/.local/bin is not on PATH.
+    assert script.index('export PATH="$HOME/.local/bin:$PATH"') < script.index("uv sync")

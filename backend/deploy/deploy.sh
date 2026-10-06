@@ -5,6 +5,9 @@
 #   ~/swpp-2026-project-team-19/backend/deploy/deploy.sh main       # switch to a branch first
 set -euo pipefail
 
+# A command run over SSH (automatic deployment) skips the login profile that puts uv on PATH.
+export PATH="$HOME/.local/bin:$PATH"
+
 BACKEND_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$BACKEND_DIR"
 
