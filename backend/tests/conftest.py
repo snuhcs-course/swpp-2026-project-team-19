@@ -12,6 +12,7 @@ runs inside a transaction that is rolled back afterwards.
 
 import os
 from collections.abc import Iterator
+from contextlib import nullcontext
 from pathlib import Path
 
 import pytest
@@ -67,14 +68,17 @@ TEST_JWT_SECRET = "test-secret-for-temporary-auth-0123456789"
 @pytest.fixture
 def client(db_session: Session) -> Iterator[TestClient]:
     """API client whose requests use `db_session`."""
-    from app.db.session import get_session
+    from app.db.session import get_session, get_session_factory
     from app.main import app
 
     app.dependency_overrides[get_session] = lambda: db_session
+    # Background work (run by TestClient right after the response) uses the same session.
+    app.dependency_overrides[get_session_factory] = lambda: (lambda: nullcontext(db_session))
     try:
         yield TestClient(app)
     finally:
         app.dependency_overrides.pop(get_session, None)
+        app.dependency_overrides.pop(get_session_factory, None)
 
 
 @pytest.fixture

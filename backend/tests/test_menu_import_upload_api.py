@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import func, select
 
-from app.models import BarStatus, ExtractionApproach, ImportStatus, MenuImport, PipelineStatus
+from app.models import BarStatus, ExtractionApproach, ImportStatus, MenuImport
 from app.services import menu_import_upload
 from tests.factories import make_bar
 
@@ -44,7 +44,8 @@ def test_upload_stores_images_and_creates_rows(client, db_session, image_storage
 
     assert response.status_code == 202, response.text
     body = response.json()
-    assert body["status"] == "uploaded"
+    # Processing is scheduled before the response; TestClient runs it right after.
+    assert body["status"] == "processing"
     assert body["imageCount"] == 2
     assert body["statusUrl"] == f"/api/menu-imports/{body['menuImportId']}"
     assert body["pollAfterMs"] == 3000
@@ -52,7 +53,7 @@ def test_upload_stores_images_and_creates_rows(client, db_session, image_storage
     assert response.headers["Retry-After"] == "3"
 
     menu_import = db_session.get(MenuImport, body["menuImportId"])
-    assert (menu_import.bar_id, menu_import.mode.value, menu_import.status) == (bar.id, "full_replace", ImportStatus.UPLOADED)
+    assert (menu_import.bar_id, menu_import.mode.value) == (bar.id, "full_replace")
     assert menu_import.owner_note == "2026년 10월 메뉴판"
     assert re.fullmatch(r"[0-9a-f]{64}", menu_import.request_fingerprint)
     images = menu_import.images
@@ -62,8 +63,7 @@ def test_upload_stores_images_and_creates_rows(client, db_session, image_storage
     assert [image_storage.read(i.storage_key) for i in images] == [JPEG, PNG]
     for image in images:
         run = image.extraction_run
-        assert (run.status, run.approach, run.provider, run.pipeline_version) == (
-            PipelineStatus.QUEUED,
+        assert (run.approach, run.provider, run.pipeline_version) == (
             ExtractionApproach.VISION_LLM,
             "mock",
             "bottlemap-menu-mock-v1",
@@ -92,7 +92,7 @@ def test_retry_with_same_key_and_content_returns_the_existing_import(client, db_
     retry = upload(client, bar.id, operator)
 
     assert retry.status_code == 202
-    assert retry.json() == first.json()
+    assert retry.json() == {**first.json(), "status": "ready_for_review"}  # the import's current status
     assert import_count(db_session) == 1
     assert sorted(p for p in image_storage.root.rglob("*") if p.is_file()) == stored
 
@@ -129,7 +129,7 @@ def test_unfinished_import_blocks_a_new_one_for_the_same_bar(client, db_session,
     assert response.status_code == 409
     error = response.json()["error"]
     assert error["code"] == "ACTIVE_IMPORT_EXISTS"
-    assert error["details"] == {"menuImportId": first.json()["menuImportId"], "status": "uploaded"}
+    assert error["details"] == {"menuImportId": first.json()["menuImportId"], "status": "ready_for_review"}
 
 
 @pytest.mark.parametrize("finished", [ImportStatus.APPLIED, ImportStatus.FAILED])

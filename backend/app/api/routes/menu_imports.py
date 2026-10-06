@@ -1,17 +1,18 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, File, Form, Header, Path, Response, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, Path, Response, UploadFile
 from sqlalchemy.orm import Session
 
 from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.api.deps import get_image_storage, get_menu_extractor
 from app.core.security import require_operator
-from app.db.session import get_session
+from app.db.session import get_session, get_session_factory
 from app.models import ImportMode
 from app.schemas.errors import error_responses
 from app.schemas.menu_import import MenuImportAcceptedResponse
 from app.services import menu_import_upload as upload
+from app.services.menu_import_processing import SessionFactory, start_processing
 from app.services.menu_import_upload import ImageUpload, create_menu_import
 
 router = APIRouter(prefix="/api", tags=["menu imports"])
@@ -25,7 +26,8 @@ POLL_AFTER_SECONDS = 3
     response_model=MenuImportAcceptedResponse,
     summary="Upload menu photos and start extraction",
     description=(
-        "Operator only. Stores the photos, creates the import, and returns `202` without waiting for AI. "
+        "Operator only. Stores the photos, creates the import, schedules extraction and matching in the "
+        "background, and returns `202` with `status: processing` without waiting for them. "
         "Poll `statusUrl` until the status is `ready_for_review` or `failed`.\n\n"
         f"- Up to {upload.MAX_IMAGES} JPEG, PNG or HEIC photos in display order, "
         f"{upload.MAX_IMAGE_BYTES // 2**20} MB each and {upload.MAX_TOTAL_BYTES // 2**20} MB in total. "
@@ -52,6 +54,7 @@ POLL_AFTER_SECONDS = 3
 )
 def upload_menu_import(
     response: Response,
+    background_tasks: BackgroundTasks,
     bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
     idempotency_key: Annotated[
         str,
@@ -63,9 +66,10 @@ def upload_menu_import(
     session: Session = Depends(get_session),
     storage: ImageStorage = Depends(get_image_storage),
     extractor: MenuExtractor = Depends(get_menu_extractor),
+    session_factory: SessionFactory = Depends(get_session_factory),
     _operator: dict[str, Any] = Depends(require_operator),
 ) -> MenuImportAcceptedResponse:
-    menu_import, _created = create_menu_import(
+    menu_import, created = create_menu_import(
         session,
         storage,
         extractor,
@@ -75,6 +79,15 @@ def upload_menu_import(
         owner_note=owner_note,
         uploads=[ImageUpload(image.filename, image.content_type, image.file) for image in images],
     )
+    if created:
+        start_processing(
+            session,
+            background_tasks,
+            menu_import,
+            session_factory=session_factory,
+            storage=storage,
+            extractor=extractor,
+        )
     status_url = f"/api/menu-imports/{menu_import.id}"
     response.headers["Location"] = status_url
     response.headers["Retry-After"] = str(POLL_AFTER_SECONDS)
