@@ -35,7 +35,6 @@ MAX_TOTAL_BYTES = 30 * 1024 * 1024
 UNFINISHED_STATUSES = (ImportStatus.UPLOADED, ImportStatus.PROCESSING, ImportStatus.READY_FOR_REVIEW)
 # Declared types that say nothing about the format, so only the detected type counts.
 _GENERIC_CONTENT_TYPES = {None, "", "application/octet-stream"}
-_HEIF_BRANDS = {b"heic", b"heix", b"hevc", b"hevx", b"heim", b"heis", b"mif1", b"msf1"}
 
 
 @dataclass
@@ -54,13 +53,15 @@ class _CheckedImage:
 
 
 def detect_image_type(data: bytes) -> tuple[str, str] | None:
-    """(file extension, MIME type) from the file signature, or None if not JPEG, PNG or HEIC."""
+    """(file extension, MIME type) from the file signature, or None if not JPEG or PNG.
+
+    HEIC is not accepted because extraction sends only JPEG and PNG to the model; the app
+    converts other formats to JPEG before uploading.
+    """
     if data.startswith(b"\xff\xd8\xff"):
         return "jpg", "image/jpeg"
     if data.startswith(b"\x89PNG\r\n\x1a\n"):
         return "png", "image/png"
-    if data[4:8] == b"ftyp" and data[8:12] in _HEIF_BRANDS:
-        return "heic", "image/heic"
     return None
 
 
@@ -104,7 +105,7 @@ def _check_images(uploads: list[ImageUpload]) -> list[_CheckedImage]:
             raise ApiError(
                 415,
                 "UNSUPPORTED_IMAGE_TYPE",
-                "JPEG, PNG, HEIC 사진만 올릴 수 있습니다.",
+                "JPEG, PNG 사진만 올릴 수 있습니다.",
                 details={"imageOrder": order, "filename": upload.filename, "contentType": upload.content_type},
             )
         checked.append(_CheckedImage(upload.filename, data, detected[0], detected[1]))

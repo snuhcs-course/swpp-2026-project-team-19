@@ -70,13 +70,11 @@ def test_upload_stores_images_and_creates_rows(client, db_session, image_storage
         )
 
 
-def test_heic_is_accepted_and_blank_note_becomes_null(client, db_session, image_storage, operator, bar):
-    response = upload(client, bar.id, operator, images=[("menu.heic", HEIC, "image/heic")], note="   ")
+def test_blank_note_becomes_null(client, db_session, image_storage, operator, bar):
+    response = upload(client, bar.id, operator, note="   ")
 
     assert response.status_code == 202, response.text
-    menu_import = db_session.get(MenuImport, response.json()["menuImportId"])
-    assert menu_import.owner_note is None
-    assert menu_import.images[0].storage_key.endswith("/page-1.heic")
+    assert db_session.get(MenuImport, response.json()["menuImportId"]).owner_note is None
 
 
 def test_generic_content_type_is_judged_by_the_file_content(client, image_storage, operator, bar):
@@ -196,6 +194,7 @@ def test_image_at_exactly_the_size_limit_is_accepted(client, image_storage, oper
     "images",
     [
         [("a.jpg", JPEG, "image/jpeg"), ("b.gif", GIF, "image/gif")],
+        [("a.jpg", JPEG, "image/jpeg"), ("b.heic", HEIC, "image/heic")],  # extraction takes JPEG and PNG only
         [("a.jpg", JPEG, "image/jpeg"), ("b.jpg", PNG, "image/jpeg")],  # declared type disagrees
     ],
 )

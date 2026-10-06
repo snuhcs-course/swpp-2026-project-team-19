@@ -33,7 +33,7 @@ UploadedImage = Annotated[UploadFile, WithJsonSchema({"type": "string", "format"
         "Operator only. Stores the photos, creates the import, schedules extraction and matching in the "
         "background, and returns `202` with `status: processing` without waiting for them. "
         "Poll `statusUrl` until the status is `ready_for_review` or `failed`.\n\n"
-        f"- Up to {upload.MAX_IMAGES} JPEG, PNG or HEIC photos in display order, "
+        f"- Up to {upload.MAX_IMAGES} JPEG or PNG photos in display order, "
         f"{upload.MAX_IMAGE_BYTES // 2**20} MB each and {upload.MAX_TOTAL_BYTES // 2**20} MB in total. "
         "The type is read from the file content; a declared image type that disagrees is rejected.\n"
         "- `Idempotency-Key`: retrying with the same key and the same content returns the existing import "
@@ -52,7 +52,7 @@ UploadedImage = Annotated[UploadFile, WithJsonSchema({"type": "string", "format"
             "(`details.menuImportId` is the unfinished import to continue).",
         ),
         (413, "`UPLOAD_TOO_LARGE`: too many photos, or a photo or the total is too large; limits in `details`."),
-        (415, "`UNSUPPORTED_IMAGE_TYPE`: not JPEG, PNG or HEIC; `details.imageOrder` names the photo."),
+        (415, "`UNSUPPORTED_IMAGE_TYPE`: not JPEG or PNG (HEIC included); `details.imageOrder` names the photo."),
         (422, "`VALIDATION_FAILED`: e.g. `Idempotency-Key` or `images` `MISSING`, or an unknown `mode`."),
     ),
 )

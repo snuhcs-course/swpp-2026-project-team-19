@@ -180,7 +180,7 @@ curl -s -H "Authorization: Bearer $TOKEN" -H "Idempotency-Key: $(uuidgen)" \
 curl -s -H "Authorization: Bearer $TOKEN" localhost:8000/api/menu-imports/<menuImportId>
 ```
 
-The upload accepts any real JPEG, PNG, or HEIC (checked by its first bytes), so any photo renamed to `sample.jpg` works.
+The upload accepts any real JPEG or PNG (checked by its first bytes), so any photo renamed to `sample.jpg` works. HEIC is rejected because the AI extractor accepts only JPEG and PNG.
 
 ### Current limitations
 

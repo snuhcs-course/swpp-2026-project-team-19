@@ -80,7 +80,7 @@ def test_repeated_item_order_is_rejected():
 
 @pytest.mark.parametrize(
     ("filename", "fixture"),
-    [("menu.jpg", "label"), (None, "label"), ("SAMPLE-1.png", "sample"), ("my_sample.heic", "sample")],
+    [("menu.jpg", "label"), (None, "label"), ("SAMPLE-1.png", "sample"), ("my_sample.jpeg", "sample")],
 )
 def test_mock_chooses_the_fixture_by_file_name(filename, fixture):
     result = MockMenuExtractor().extract(b"image", "image/jpeg", filename)
