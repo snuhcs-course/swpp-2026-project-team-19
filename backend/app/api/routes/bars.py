@@ -1,15 +1,57 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
 
-from app.core.security import get_optional_user
+from app.core.security import get_optional_user, require_operator
 from app.db.session import get_session
+from app.schemas.bar import BarListResponse
 from app.schemas.errors import error_responses
 from app.schemas.menu import BarMenuResponse
+from app.services.bar_admin import BarStatusFilter, list_bars
 from app.services.bar_menu import get_bar_menu
 
 router = APIRouter(prefix="/api/bars", tags=["bars"])
+
+_OPERATOR_ERRORS = (
+    (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+    (403, "`FORBIDDEN`: the caller is not an operator."),
+)
+_PAGING = (
+    "Pages use a cursor: pass the response's `nextCursor` as `cursor` to get the next page; "
+    "`nextCursor` is null on the last page. Treat the cursor as an opaque string."
+)
+Cursor = Annotated[str | None, Query(description="`nextCursor` of the previous page")]
+Limit = Annotated[int, Query(ge=1, le=100, description="Maximum number of items per page")]
+
+
+@router.get(
+    "",
+    response_model=BarListResponse,
+    summary="Bars an operator manages",
+    description=(
+        "Operator only. Bars sorted by name. `query` matches part of the name or address, ignoring case. "
+        "`activeMenuImport` is the bar's unfinished import (`uploaded`, `processing` or "
+        "`ready_for_review`), so the app can continue it directly; null when none.\n\n" + _PAGING
+    ),
+    responses=error_responses(
+        *_OPERATOR_ERRORS,
+        (
+            422,
+            "`VALIDATION_FAILED`: `query` `BLANK` or `STRING_TOO_LONG` (over 100 characters); `status` not "
+            "one of the values; `limit` out of range; `cursor` `INVALID_CURSOR`.",
+        ),
+    ),
+)
+def read_bars(
+    query: Annotated[str | None, Query(description="Part of the name or address; 1-100 characters")] = None,
+    status: Annotated[BarStatusFilter, Query(description="`active`, `inactive` or `all`")] = "active",
+    limit: Limit = 20,
+    cursor: Cursor = None,
+    session: Session = Depends(get_session),
+    _operator: dict[str, Any] = Depends(require_operator),
+) -> BarListResponse:
+    return list_bars(session, query=query, status=status, limit=limit, cursor=cursor)
 
 
 @router.get(
