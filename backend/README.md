@@ -132,12 +132,14 @@ uv run --env-file .env python scripts/seed_catalog.py
 
 The dry run counts value changes and lists aliases that would be deleted because they now collide with another alias of the same brand or product, and values that become shared by different products (these turn exact matches into ambiguous ones). Re-running the seed afterwards adds aliases that were skipped under the old rules but are now distinct.
 
-## Menu import (photo upload)
+## Menu import (upload, review, publish)
 
-An operator uploads menu photos with `POST /api/bars/{barId}/menu-imports`. The request stores the photos and returns `202` right away; extraction, product matching, and a draft diff against the bar's current menu run in the background. The app polls `GET /api/menu-imports/{menuImportId}` until the status is `ready_for_review` (full review data in the same response) or `failed`. Nothing is published until the review is submitted (not implemented yet).
+An operator uploads menu photos with `POST /api/bars/{barId}/menu-imports`. The request stores the photos and returns `202` right away; extraction, product matching, and a draft diff against the bar's current menu run in the background. The app polls `GET /api/menu-imports/{menuImportId}` until the status is `ready_for_review` (full review data in the same response) or `failed`.
+
+The operator then submits every decision at once with `POST /api/menu-imports/{menuImportId}/review-and-apply`. New brands, products and aliases, the decisions, and the new menu board are saved in one transaction, and the import becomes `applied`. Nothing reaches the catalog or the customer-facing menu before that. `GET /api/catalog/brands` and `GET /api/catalog/products` let the review screen find an existing brand or product before creating one.
 
 ```text
-uploaded → processing → ready_for_review → (review submission) → applied
+uploaded → processing → ready_for_review → applied
                       ↘ failed
 ```
 
@@ -182,11 +184,35 @@ curl -s -H "Authorization: Bearer $TOKEN" localhost:8000/api/menu-imports/<menuI
 
 The upload accepts any real JPEG or PNG (checked by its first bytes), so any photo renamed to `sample.jpg` works. HEIC is rejected because the AI extractor accepts only JPEG and PNG.
 
-### Current limitations
+### Submitting the review
 
-- A bar allows one unfinished import (`uploaded`, `processing`, `ready_for_review`). Until review submission exists, an import stays `ready_for_review` and blocks the next upload for that bar with `409 ACTIVE_IMPORT_EXISTS`. Delete test imports and their photos with the reset script (lists only without `--apply`; `applied` imports are never deleted):
+Build the request from the `ready_for_review` response: one entry in `itemDecisions` for every item of every image, and one entry in `changeDecisions` for every `proposedChanges` entry. Accepting every proposal looks like this:
+
+| Item | Decision |
+| --- | --- |
+| `effectiveLineType` is not `product` | `{"action": "confirm_non_product", "finalLineType": <effectiveLineType>}` |
+| has `proposedProductId` | `{"action": "select_existing_product", "finalLineType": "product", "productId": <proposedProductId>}` |
+| no candidate | `{"action": "create_product", "finalLineType": "product", "brand": {"type": "new", "canonicalName": ...}, "product": {"displayName": ...}}`, prefilled from `newProductDraft`; use `{"type": "existing", "brandId": ...}` for a brand found with `/api/catalog/brands` |
+
+Each item also carries `extractedItemId`, and the body carries `reviewVersion` from the response. Mark each change `apply` or `ignore`; only applied `remove` changes take products off the board. Option corrections go in `optionDecisions`, and `reject` drops a misread line. Swagger UI shows every field and error code.
+
+```sh
+curl -s -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d @review.json localhost:8000/api/menu-imports/<menuImportId>/review-and-apply
+```
+
+The response has the counts of added, updated, removed and ignored changes and of created brands and products; `GET /api/bars/{barId}/menu` and customer search show the new menu right away. Sending the same request again returns the same result without applying it twice.
+
+### Resetting test data
+
+- `scripts/seed_menu.py` restores the Seorosang board after a test publish. Brands, products and aliases created by a review stay in the catalog.
+- `scripts/reset_menu_imports.py` deletes imports that were never applied, with their photos, for example one left in `ready_for_review` that blocks the bar's next upload (`409 ACTIVE_IMPORT_EXISTS`). It lists only without `--apply`. Applied imports are kept, since the board and created products refer to them.
 
   ```sh
   uv run --env-file .env python scripts/reset_menu_imports.py --bar <barId> --apply   # or --import <id>, --all
   ```
+
+### Current limitations
+
 - Processing runs inside the API process (FastAPI background tasks). If the server stops while an import is `processing`, it stays there.
+- A product cannot be reactivated during review: selecting an inactive product is rejected (`PRODUCT_INACTIVE`).
