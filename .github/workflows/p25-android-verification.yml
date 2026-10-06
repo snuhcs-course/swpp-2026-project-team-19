@@ -1,3 +1,4 @@
+# P25 branch-only verification; remove after integration verification.
 name: P25 Android Verification
 
 on:
