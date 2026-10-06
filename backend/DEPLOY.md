@@ -96,7 +96,7 @@ If the connection fails, check the RDS endpoint and password, and that the RDS s
 sudo cp deploy/bottlemap-api.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now bottlemap-api
-curl http://127.0.0.1:8000/health          # {"status":"ok"}
+curl http://127.0.0.1:8000/health          # {"status":"ok","version":"<commit>"}
 ```
 
 The server refuses to start when a setting is missing (e.g. `IMAGE_STORAGE=s3` without `S3_BUCKET`); `journalctl -u bottlemap-api -n 50` shows why.
@@ -113,7 +113,7 @@ journalctl -u caddy -f                     # wait for "certificate obtained succ
 
 From your PC, with `BASE=https://bottlemap.o-r.kr`:
 
-- `curl $BASE/health` returns `{"status":"ok"}`, and `$BASE/docs` opens Swagger UI.
+- `curl $BASE/health` returns `{"status":"ok","version":"<commit>"}`, and `$BASE/docs` opens Swagger UI.
 - The full flow, as in the [README](README.md#menu-import-upload-review-publish):
   1. `POST $BASE/api/auth/temp-login` for an operator token; `GET $BASE/api/bars` for a bar id.
   2. Upload a photo named `sample.jpg` to that bar, then poll `GET $BASE/api/menu-imports/<id>` until `ready_for_review`.
@@ -137,7 +137,7 @@ It pulls, runs `uv sync --frozen --no-dev` and the migrations, restarts the serv
 
 ## 5. Automatic deployment (GitHub Actions)
 
-When a push to `main` changes the backend, the **Backend CI/CD** workflow (`.github/workflows/backend-ci-cd.yml`) runs the tests. If they pass, its `deploy` job connects over SSH, runs `deploy.sh main`, and checks `https://bottlemap.o-r.kr/health` from outside. Pull requests only run the tests. A deployment can also be started from the Actions tab (Backend CI/CD → Run workflow on `main`); it runs the tests first as well.
+When a push to `main` changes the backend, the **Backend CI/CD** workflow (`.github/workflows/backend-ci-cd.yml`) runs the tests. If they pass, its `deploy` job connects over SSH, runs `deploy.sh main`, and checks from outside that `https://bottlemap.o-r.kr/health` reports the commit it deployed (`version`). Pull requests only run the tests. A deployment can also be started from the Actions tab (Backend CI/CD → Run workflow on `main`); it runs the tests first as well.
 
 Deployments run one at a time, and a running one is never cancelled. Each deploys the latest `main`.
 

@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from app.api.deps import get_image_storage, get_menu_extractor
 from app.api.router import api_router
 from app.core.errors import register_error_handlers
+from app.core.version import get_version
 
 
 @asynccontextmanager
@@ -15,6 +16,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # the first upload. The local defaults need nothing.
     get_menu_extractor()
     get_image_storage()
+    # Pin the reported version to the code this process loaded.
+    get_version()
     yield
 
 

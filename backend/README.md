@@ -23,7 +23,7 @@ uv run --env-file .env uvicorn app.main:app --reload
 ```
 
 The API is available at `http://127.0.0.1:8000`; interactive docs are at `/docs`.
-`GET /health` returns `{"status":"ok"}` and does not require a database connection.
+`GET /health` returns `{"status":"ok","version":"<commit>"}` and does not require a database connection. `version` is the short hash of the commit the server started from (`null` outside a git checkout), so a deployment can be checked from outside.
 
 For local frontend integration before Supabase Auth is connected, a temporary login endpoint can issue a three-hour development JWT:
 

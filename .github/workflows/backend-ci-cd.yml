@@ -122,5 +122,17 @@ jobs:
           -o BatchMode=yes -o StrictHostKeyChecking=yes -o ServerAliveInterval=30
           "$DEPLOY_USER@$DEPLOY_HOST"
 
-      - name: Check the public endpoint
-        run: curl -fsS --retry 5 --retry-delay 3 --retry-all-errors "https://$DEPLOY_HOST/health"
+      - name: Check the deployed version
+        # /health reports the commit the server started from; it must be this run's commit.
+        run: |
+          version=""
+          for _ in $(seq 1 10); do
+            version="$(curl -fsS "https://$DEPLOY_HOST/health" | jq -r '.version // empty')" || version=""
+            if [ -n "$version" ] && [[ "$GITHUB_SHA" == "$version"* ]]; then
+              echo "Deployed $version to https://$DEPLOY_HOST" | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::/health reports version '${version:-none}', expected ${GITHUB_SHA::7}. If main moved on during this run, a newer commit was deployed; check the latest run."
+          exit 1

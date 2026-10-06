@@ -49,7 +49,7 @@ def test_the_app_starts_with_the_production_settings(monkeypatch, clean_caches):
     monkeypatch.setenv("TEMP_AUTH_JWT_SECRET", "x" * 64)
 
     with TestClient(app) as client:
-        assert client.get("/health").json() == {"status": "ok"}
+        assert client.get("/health").json()["status"] == "ok"
     storage = deps.get_image_storage()
     assert isinstance(storage, S3ImageStorage)
     assert storage.bucket == "bottlemap-menu-photos"
