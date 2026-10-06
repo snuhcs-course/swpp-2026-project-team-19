@@ -44,8 +44,10 @@ class MenuBoard(Base):
     bar_id: Mapped[UUID] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("bars.id"), nullable=False, unique=True
     )
-    # References menu_imports.id; the FK is added together with the AI menu import tables.
-    last_import_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True)
+    # The import that last changed this board; null for boards loaded from seed data.
+    last_import_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("menu_imports.id"), nullable=True
+    )
     published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     entries: Mapped[list["MenuBoardEntry"]] = relationship(
@@ -108,8 +110,10 @@ class MenuEntryOption(Base):
     menu_board_entry_id: Mapped[UUID] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("menu_board_entries.id"), nullable=False
     )
-    # References extracted_options.id; the FK is added together with the AI menu import tables.
-    source_extracted_option_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True)
+    # The reviewed extracted option this was published from; null for manual or seed entries.
+    source_extracted_option_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("extracted_options.id"), nullable=True
+    )
     option_label: Mapped[str | None] = mapped_column(String(100), nullable=True)
     pour_ml: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
     price_krw: Mapped[int] = mapped_column(Integer, nullable=False)
