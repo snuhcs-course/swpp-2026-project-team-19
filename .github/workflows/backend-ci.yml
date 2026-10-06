@@ -1,0 +1,85 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "ai/catalog/**"
+      - "eval/**"
+      - ".github/workflows/backend-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "ai/catalog/**"
+      - "eval/**"
+      - ".github/workflows/backend-ci.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        # Same major version as the RDS instance.
+        image: postgres:18
+        env:
+          POSTGRES_USER: bottlemap
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: bottlemap_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bottlemap"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: bottlemap
+      POSTGRES_PASSWORD: ci-only-password
+      # Only the test database is used; the tests rebuild its schema on every run.
+      POSTGRES_DATABASE: bottlemap
+      POSTGRES_TEST_DATABASE: bottlemap_test
+      UV_PYTHON: "3.12"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run tests with coverage
+        run: uv run --no-sync pytest --cov --cov-report=term --cov-report=xml
+
+      - name: Write coverage summary
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo "## Backend coverage"
+            uv run --no-sync coverage report --format=markdown
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-coverage
+          path: backend/coverage.xml
+          if-no-files-found: ignore

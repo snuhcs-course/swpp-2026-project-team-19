@@ -13,6 +13,8 @@
 /backend/__pycache__/
 /backend/**/__pycache__/
 /backend/.pytest_cache/
+/backend/.coverage
+/backend/coverage.xml
 /backend/var/
 /_ref/
 
