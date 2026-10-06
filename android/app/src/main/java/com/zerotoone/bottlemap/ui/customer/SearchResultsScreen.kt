@@ -21,48 +21,34 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.NumberFormat
 import java.util.Locale
-import kotlinx.coroutines.delay
 
 @Composable
 fun SearchResultsScreen(
     query: String,
     onBack: () -> Unit,
+    viewModel: SearchResultsViewModel = viewModel(),
 ) {
-    var retrying by rememberSaveable { mutableStateOf(false) }
-    var retryCount by rememberSaveable { mutableIntStateOf(0) }
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(retrying) {
-        if (retrying) {
-            // P22-only fake retry. P25 will replace this with the real GET search request.
-            delay(600)
-            retrying = false
-            retryCount += 1
-        }
-    }
-
-    val state = when {
-        retrying -> CustomerSearchUiState.Loading
-        retryCount > 0 -> CustomerSearchUiState.Success(mockSearchResults)
-        else -> mockSearchStateForQuery(query)
+    LaunchedEffect(query) {
+        viewModel.search(query)
     }
 
     SearchResultsContent(
         query = query,
         state = state,
         onBack = onBack,
-        onRetry = { retrying = true },
+        onRetry = viewModel::retry,
     )
 }
 
@@ -88,9 +74,7 @@ private fun SearchResultsContent(
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TextButton(onClick = onBack) {
-                    Text("Back")
-                }
+                TextButton(onClick = onBack) { Text("Back") }
                 Text(
                     text = "Search Results",
                     style = MaterialTheme.typography.titleLarge,
@@ -100,35 +84,16 @@ private fun SearchResultsContent(
         }
 
         when (state) {
-            CustomerSearchUiState.Idle -> Unit
-
-            CustomerSearchUiState.Loading -> ResultsLoadingState(query = query)
-
-            is CustomerSearchUiState.Success -> ResultsSuccessState(
-                query = query,
-                results = state.results,
-            )
-
-            is CustomerSearchUiState.Empty -> ResultsEmptyState(
-                query = query,
-                reason = state.reason,
-                onBack = onBack,
-            )
-
-            is CustomerSearchUiState.Error -> ResultsErrorState(
-                query = query,
-                message = state.message,
-                onRetry = onRetry,
-                onBack = onBack,
-            )
+            CustomerSearchUiState.Loading -> ResultsLoadingState(query)
+            is CustomerSearchUiState.Success -> ResultsSuccessState(query, state)
+            is CustomerSearchUiState.Empty -> ResultsEmptyState(query, state.reason, onBack)
+            is CustomerSearchUiState.Error -> ResultsErrorState(query, state.message, onRetry, onBack)
         }
     }
 }
 
 @Composable
-private fun ResultsLoadingState(
-    query: String,
-) {
+private fun ResultsLoadingState(query: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,22 +102,19 @@ private fun ResultsLoadingState(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = "Search: $query",
+            text = "Search: " + query,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         CircularProgressIndicator()
-        Text(
-            text = "Searching bars…",
-            style = MaterialTheme.typography.titleMedium,
-        )
+        Text("Searching bars…", style = MaterialTheme.typography.titleMedium)
     }
 }
 
 @Composable
 private fun ResultsSuccessState(
     query: String,
-    results: List<MockSearchResult>,
+    state: CustomerSearchUiState.Success,
 ) {
     Column(
         modifier = Modifier
@@ -161,16 +123,23 @@ private fun ResultsSuccessState(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = "Search: $query",
+            text = "Search: " + query,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-
+        val countLabel = if (state.results.size == 1) "1 menu result" else state.results.size.toString() + " menu results"
         Text(
-            text = "${results.size} bars found",
+            text = countLabel,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
         )
+        if (state.truncated) {
+            Text(
+                text = "More matching menu rows exist. Refine the search to narrow the result.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         LazyColumn(
             modifier = Modifier
@@ -178,29 +147,25 @@ private fun ResultsSuccessState(
                 .weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(results) { result ->
-                SearchResultCard(result = result)
+            items(
+                items = state.results,
+                key = { it.barId + ":" + it.productDisplayName },
+            ) { result ->
+                SearchResultCard(result)
             }
         }
     }
 }
 
 @Composable
-private fun SearchResultCard(
-    result: MockSearchResult,
-) {
+private fun SearchResultCard(result: SearchResultUiModel) {
     val priceFormatter = NumberFormat.getIntegerInstance(Locale.KOREA)
-
     Surface(
         shape = RoundedCornerShape(12.dp),
         tonalElevation = 1.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(12.dp),
-            ),
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -213,21 +178,37 @@ private fun SearchResultCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-
             Text(
                 text = result.productDisplayName,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-
-            result.options.forEach { option ->
+            if (result.menuDisplayName != result.productDisplayName) {
                 Text(
-                    text = "₩${priceFormatter.format(option.priceKrw)} · ${option.pourMl} ml",
+                    text = "Menu: " + result.menuDisplayName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            result.options.forEach { option ->
+                val detail = listOfNotNull(
+                    option.optionLabel,
+                    option.pourMl?.let { it.toString() + " ml" },
+                ).joinToString(" · ")
+                val optionText = buildString {
+                    append("₩")
+                    append(priceFormatter.format(option.priceKrw))
+                    if (detail.isNotBlank()) {
+                        append(" · ")
+                        append(detail)
+                    }
+                }
+                Text(
+                    text = optionText,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                 )
             }
-
             Text(
                 text = result.menuUpdatedText,
                 style = MaterialTheme.typography.bodySmall,
@@ -245,13 +226,11 @@ private fun ResultsEmptyState(
 ) {
     val title = when (reason) {
         EmptySearchReason.UNKNOWN_PRODUCT -> "We couldn't find that whisky"
-        EmptySearchReason.NO_BARS -> "No matching bars found"
+        EmptySearchReason.NO_BARS -> "No current menu lists this whisky"
     }
     val message = when (reason) {
-        EmptySearchReason.UNKNOWN_PRODUCT ->
-            "Try another spelling or a different whisky name."
-        EmptySearchReason.NO_BARS ->
-            "We know this whisky, but no current menu lists it."
+        EmptySearchReason.UNKNOWN_PRODUCT -> "Try another spelling or a different whisky name."
+        EmptySearchReason.NO_BARS -> "BottleMap recognizes the product, but no published bar menu currently sells it."
     }
 
     Column(
@@ -260,23 +239,10 @@ private fun ResultsEmptyState(
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Text(
-            text = "Search: $query",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            text = message,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        OutlinedButton(onClick = onBack) {
-            Text("Back to Search")
-        }
+        Text("Search: " + query, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(message, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        OutlinedButton(onClick = onBack) { Text("Back to Search") }
     }
 }
 
@@ -293,12 +259,7 @@ private fun ResultsErrorState(
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Text(
-            text = "Search: $query",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
+        Text("Search: " + query, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Surface(
             color = MaterialTheme.colorScheme.errorContainer,
             shape = RoundedCornerShape(12.dp),
@@ -310,40 +271,11 @@ private fun ResultsErrorState(
                 modifier = Modifier.padding(16.dp),
             )
         }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Button(onClick = onRetry) {
-                Text("Retry")
-            }
-            OutlinedButton(onClick = onBack) {
-                Text("Back")
-            }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Button(onClick = onRetry) { Text("Retry") }
+            OutlinedButton(onClick = onBack) { Text("Back") }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SearchResultsSuccessPreview() {
-    SearchResultsContent(
-        query = "Deanston 12",
-        state = CustomerSearchUiState.Success(mockSearchResults),
-        onBack = {},
-        onRetry = {},
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SearchResultsLoadingPreview() {
-    SearchResultsContent(
-        query = "Deanston 12",
-        state = CustomerSearchUiState.Loading,
-        onBack = {},
-        onRetry = {},
-    )
 }
 
 @Preview(showBackground = true)
@@ -352,17 +284,6 @@ private fun SearchResultsUnknownPreview() {
     SearchResultsContent(
         query = "Unknown whisky",
         state = CustomerSearchUiState.Empty(EmptySearchReason.UNKNOWN_PRODUCT),
-        onBack = {},
-        onRetry = {},
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SearchResultsErrorPreview() {
-    SearchResultsContent(
-        query = "Deanston 12",
-        state = CustomerSearchUiState.Error("We couldn't load search results."),
         onBack = {},
         onRetry = {},
     )
