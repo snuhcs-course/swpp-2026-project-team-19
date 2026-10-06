@@ -142,10 +142,17 @@ class MenuUploadViewModel(
                         return@launch
                     }
                 }
+                if (error.code == "IDEMPOTENCY_KEY_REUSED") {
+                    pendingIdempotencyKey = null
+                }
                 _state.value = _state.value.copy(
                     working = false,
                     statusMessage = null,
-                    errorMessage = error.message,
+                    errorMessage = if (error.code == "IDEMPOTENCY_KEY_REUSED") {
+                        "This upload key was already used with different content. Tap Upload again to start a new submit attempt."
+                    } else {
+                        error.message
+                    },
                 )
             } catch (error: Throwable) {
                 _state.value = _state.value.copy(
@@ -220,7 +227,6 @@ class MenuUploadViewModel(
                             statusMessage = null,
                             errorMessage = status.failure?.message ?: "Menu extraction failed.",
                         )
-                        loadBars()
                         return
                     }
 
