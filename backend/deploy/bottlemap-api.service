@@ -1,0 +1,22 @@
+# systemd service for the API. Install with:
+#   sudo cp bottlemap-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now bottlemap-api
+# Paths assume the repository is cloned to /home/ubuntu/swpp-2026-project-team-19.
+
+[Unit]
+Description=BottleMap API (FastAPI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/swpp-2026-project-team-19/backend
+EnvironmentFile=/home/ubuntu/swpp-2026-project-team-19/backend/.env
+# One process on localhost only; Caddy terminates HTTPS in front of it. Menu import
+# processing runs as background tasks inside this process, so do not add workers.
+ExecStart=/home/ubuntu/swpp-2026-project-team-19/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips 127.0.0.1
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

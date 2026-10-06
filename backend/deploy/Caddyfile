@@ -1,0 +1,12 @@
+# Caddy obtains and renews the Let's Encrypt certificate for this domain by itself
+# (ports 80 and 443 must be open). Install with:
+#   sudo cp Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
+
+bottlemap.kro.kr {
+	encode gzip
+	# Uploads are at most 30 MB (5 photos); refuse anything far larger before it reaches the API.
+	request_body {
+		max_size 35MB
+	}
+	reverse_proxy 127.0.0.1:8000
+}
