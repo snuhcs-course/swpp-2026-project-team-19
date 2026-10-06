@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,28 +18,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun ExtractionReviewScreen(
+    menuImportId: String,
     onBack: () -> Unit,
+    viewModel: ExtractionReviewViewModel = viewModel(),
 ) {
-    ExtractionReviewContent(
-        state = ExtractionReviewUiState.Success(mockExtractedMenuItems),
-        onBack = onBack,
-    )
-}
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-@Composable
-private fun ExtractionReviewContent(
-    state: ExtractionReviewUiState,
-    onBack: () -> Unit,
-) {
+    LaunchedEffect(menuImportId) {
+        viewModel.load(menuImportId)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -48,25 +50,32 @@ private fun ExtractionReviewContent(
             tonalElevation = 1.dp,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(
-                text = "Extraction Review",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = onBack) { Text("Back") }
+                Text(
+                    text = "Extraction Review",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
         }
 
-        when (state) {
+        when (val current = state) {
             ExtractionReviewUiState.Loading -> ReviewLoadingState()
-
-            is ExtractionReviewUiState.Success -> ReviewSuccessState(
-                items = state.items,
-                onBack = onBack,
+            is ExtractionReviewUiState.Ready -> ReviewReadyState(
+                current,
+                onApply = viewModel::applyDefaultReview,
             )
-
-            ExtractionReviewUiState.Empty -> ReviewEmptyState(onBack = onBack)
-
+            is ExtractionReviewUiState.Applying -> ReviewApplyingState(current.review)
+            is ExtractionReviewUiState.Applied -> ReviewAppliedState(current.result, onBack)
             is ExtractionReviewUiState.Error -> ReviewErrorState(
-                message = state.message,
+                current.message,
+                onRetry = { viewModel.load(menuImportId, force = true) },
                 onBack = onBack,
             )
         }
@@ -78,61 +87,84 @@ private fun ReviewLoadingState() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         CircularProgressIndicator()
-        Text(
-            text = "Preparing extracted items…",
-            style = MaterialTheme.typography.titleMedium,
-        )
+        Text("Loading review data…")
     }
 }
 
 @Composable
-private fun ReviewSuccessState(
-    items: List<MockExtractedMenuItem>,
-    onBack: () -> Unit,
+private fun ReviewReadyState(
+    state: ExtractionReviewUiState.Ready,
+    onApply: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            text = "Review the extracted items before publishing.",
-            style = MaterialTheme.typography.bodyLarge,
-        )
+        item {
+            Text(
+                "Review backend proposals before publishing.",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
 
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(items) { item ->
-                ExtractedMenuItemRow(item = item)
+        if (state.message != null) {
+            item {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        state.message,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(14.dp),
+                    )
+                }
             }
         }
 
-        Text(
-            text = "Editing and publishing are intentionally deferred beyond P19.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        items(
+            items = state.review.items,
+            key = { it.extractedItemId },
+        ) { item ->
+            ReviewItemCard(item)
+        }
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            OutlinedButton(onClick = onBack) {
-                Text("Back")
+        if (state.review.proposedChanges.isNotEmpty()) {
+            item {
+                Text(
+                    "Proposed menu changes",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
             }
-            Button(
-                onClick = {},
-                enabled = false,
+            items(state.review.proposedChanges) { summary ->
+                Text("• " + summary)
+            }
+        }
+
+        item {
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
+                Text(
+                    "Confirm & Publish accepts the backend's current product proposals and applies every proposed menu change. Items without a match use the backend new-product draft.",
+                    modifier = Modifier.padding(14.dp),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+        }
+
+        item {
+            Button(onClick = onApply) {
                 Text("Confirm & Publish")
             }
         }
@@ -140,115 +172,111 @@ private fun ReviewSuccessState(
 }
 
 @Composable
-private fun ExtractedMenuItemRow(
-    item: MockExtractedMenuItem,
-) {
+private fun ReviewItemCard(item: ReviewItemUiModel) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         tonalElevation = 1.dp,
         modifier = Modifier
             .fillMaxWidth()
             .border(
-                width = 1.dp,
-                color = if (item.needsReview) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.outlineVariant
-                },
-                shape = RoundedCornerShape(12.dp),
+                1.dp,
+                if (item.needsReview) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant,
+                RoundedCornerShape(12.dp),
             ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = item.productName,
+                    item.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f),
                 )
                 if (item.needsReview) {
                     Text(
-                        text = "Needs Review",
-                        style = MaterialTheme.typography.labelMedium,
+                        "Needs Review",
                         color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelMedium,
                     )
                 }
             }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                ReadOnlyField(
-                    label = "Price",
-                    value = item.priceText,
-                    modifier = Modifier.weight(1f),
-                )
-                ReadOnlyField(
-                    label = "Pour",
-                    value = item.pourSizeText,
-                    modifier = Modifier.weight(1f),
+            Text(
+                item.lineType,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (item.rawText != item.title) {
+                Text(
+                    item.rawText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            item.options.forEach { option ->
+                Text(option.label + ": " + option.priceText)
+            }
+            Text(
+                item.decisionText,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+            )
         }
     }
 }
 
 @Composable
-private fun ReadOnlyField(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
+private fun ReviewApplyingState(review: ReviewUiModel) {
     Column(
-        modifier = modifier
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(8.dp),
-            )
-            .padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        CircularProgressIndicator()
+        Text("Publishing reviewed menu…")
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
+            review.items.size.toString() + " extracted item(s)",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
         )
     }
 }
 
 @Composable
-private fun ReviewEmptyState(
+private fun ReviewAppliedState(
+    result: AppliedUiModel,
     onBack: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp),
+        modifier = Modifier.padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text(
-            text = "No menu items were extracted.",
+            "Menu published",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
+        Text("The backend returned status=applied.")
+        if (result.added != null) {
+            Text(
+                "Added " + result.added +
+                    " · Updated " + result.updated +
+                    " · Removed " + result.removed +
+                    " · Ignored " + result.ignored
+            )
+        }
         Text(
-            text = "Try another menu image when the upload flow is connected.",
+            "Switch to Customer mode and search for a product from this menu to verify the final P25 slice.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        OutlinedButton(onClick = onBack) {
-            Text("Back")
+        Button(onClick = onBack) {
+            Text("Back to Owner")
         }
     }
 }
@@ -256,12 +284,11 @@ private fun ReviewEmptyState(
 @Composable
 private fun ReviewErrorState(
     message: String,
+    onRetry: () -> Unit,
     onBack: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp),
+        modifier = Modifier.padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Surface(
@@ -270,49 +297,14 @@ private fun ReviewErrorState(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = message,
+                message,
                 color = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier.padding(16.dp),
             )
         }
-        OutlinedButton(onClick = onBack) {
-            Text("Back")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = onRetry) { Text("Retry") }
+            OutlinedButton(onClick = onBack) { Text("Back") }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ReviewSuccessPreview() {
-    ExtractionReviewContent(
-        state = ExtractionReviewUiState.Success(mockExtractedMenuItems),
-        onBack = {},
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ReviewLoadingPreview() {
-    ExtractionReviewContent(
-        state = ExtractionReviewUiState.Loading,
-        onBack = {},
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ReviewEmptyPreview() {
-    ExtractionReviewContent(
-        state = ExtractionReviewUiState.Empty,
-        onBack = {},
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ReviewErrorPreview() {
-    ExtractionReviewContent(
-        state = ExtractionReviewUiState.Error("Extraction failed. Try another menu image."),
-        onBack = {},
-    )
 }

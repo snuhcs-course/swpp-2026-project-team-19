@@ -1,16 +1,19 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -18,59 +21,36 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun MenuUploadScreen(
-    onOpenReview: () -> Unit,
+    onOpenReview: (String) -> Unit,
+    viewModel: MenuUploadViewModel = viewModel(),
 ) {
-    var stateName by rememberSaveable {
-        mutableStateOf(MenuUploadUiState.EMPTY.name)
-    }
-    val state = MenuUploadUiState.valueOf(stateName)
-
-    LaunchedEffect(state) {
-        if (state == MenuUploadUiState.PROCESSING) {
-            // P19-only fake processing delay. No API call is made here.
-            delay(900)
-            stateName = MenuUploadUiState.SELECTED.name
-            onOpenReview()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val picker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            viewModel.selectImage(uri)
         }
     }
 
-    MenuUploadContent(
-        state = state,
-        onChoosePhoto = { stateName = MenuUploadUiState.SELECTED.name },
-        onTakePhoto = { stateName = MenuUploadUiState.SELECTED.name },
-        onChangePhoto = { stateName = MenuUploadUiState.EMPTY.name },
-        onUpload = { stateName = MenuUploadUiState.PROCESSING.name },
-        onRetry = { stateName = MenuUploadUiState.PROCESSING.name },
-        onPreviewError = { stateName = MenuUploadUiState.ERROR.name },
-    )
-}
+    LaunchedEffect(state.openReviewImportId) {
+        val importId = state.openReviewImportId ?: return@LaunchedEffect
+        onOpenReview(importId)
+        viewModel.consumeReviewNavigation()
+    }
 
-@Composable
-private fun MenuUploadContent(
-    state: MenuUploadUiState,
-    onChoosePhoto: () -> Unit,
-    onTakePhoto: () -> Unit,
-    onChangePhoto: () -> Unit,
-    onUpload: () -> Unit,
-    onRetry: () -> Unit,
-    onPreviewError: () -> Unit,
-) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -87,270 +67,286 @@ private fun MenuUploadContent(
             )
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            when (state) {
-                MenuUploadUiState.EMPTY -> EmptyUploadState(
-                    onChoosePhoto = onChoosePhoto,
-                    onTakePhoto = onTakePhoto,
-                )
-
-                MenuUploadUiState.SELECTED -> SelectedUploadState(
-                    onChangePhoto = onChangePhoto,
-                    onUpload = onUpload,
-                    onPreviewError = onPreviewError,
-                )
-
-                MenuUploadUiState.PROCESSING -> ProcessingUploadState()
-
-                MenuUploadUiState.ERROR -> ErrorUploadState(
-                    onRetry = onRetry,
-                    onChangePhoto = onChangePhoto,
-                )
-            }
+        when {
+            state.loadingBars -> LoadingOwnerState()
+            state.bars.isEmpty() -> EmptyBarsState(
+                message = state.errorMessage ?: "No active bars are available.",
+                onRetry = viewModel::loadBars,
+            )
+            else -> OwnerUploadContent(
+                state = state,
+                onSelectBar = viewModel::selectBar,
+                onPickPhoto = {
+                    picker.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                onClearPhoto = viewModel::clearImage,
+                onSetMode = viewModel::setMode,
+                onUpload = viewModel::upload,
+                onContinueImport = viewModel::continueActiveImport,
+                onReloadBars = viewModel::loadBars,
+            )
         }
     }
 }
 
 @Composable
-private fun EmptyUploadState(
-    onChoosePhoto: () -> Unit,
-    onTakePhoto: () -> Unit,
-) {
-    Text(
-        text = "Upload a whisky menu",
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-    )
-    Text(
-        text = "Choose an existing image or use the system camera.",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-
-    MenuImageArea(selected = false)
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        OutlinedButton(onClick = onChoosePhoto) {
-            Text("Choose Photo")
-        }
-        OutlinedButton(onClick = onTakePhoto) {
-            Text("Take Photo")
-        }
-    }
-
-    Button(
-        onClick = {},
-        enabled = false,
-    ) {
-        Text("Upload & Extract")
-    }
-}
-
-@Composable
-private fun SelectedUploadState(
-    onChangePhoto: () -> Unit,
-    onUpload: () -> Unit,
-    onPreviewError: () -> Unit,
-) {
-    Text(
-        text = "Check this menu photo",
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-    )
-
-    MenuImageArea(selected = true)
-
-    Text(
-        text = "menu_photo.jpg · ready to upload",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        OutlinedButton(onClick = onChangePhoto) {
-            Text("Change Photo")
-        }
-        Button(onClick = onUpload) {
-            Text("Upload & Extract")
-        }
-    }
-
-    TextButton(onClick = onPreviewError) {
-        Text("Simulate upload error (P19 mock)")
-    }
-}
-
-@Composable
-private fun ProcessingUploadState() {
-    MenuImageArea(selected = true)
-
-    Spacer(modifier = Modifier.height(6.dp))
-
+private fun LoadingOwnerState() {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        CircularProgressIndicator()
-        Text(
-            text = "Uploading menu…",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-
-    Text(
-        text = "Reading menu after upload: product name, price, and pour size.",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-@Composable
-private fun ErrorUploadState(
-    onRetry: () -> Unit,
-    onChangePhoto: () -> Unit,
-) {
-    Text(
-        text = "We couldn't process this menu",
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-    )
-
-    MenuImageArea(selected = true)
-
-    Surface(
-        color = MaterialTheme.colorScheme.errorContainer,
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(
-            text = "Upload failed. Retry with the same image or choose another photo.",
-            color = MaterialTheme.colorScheme.onErrorContainer,
-            modifier = Modifier.padding(16.dp),
-        )
-    }
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Button(onClick = onRetry) {
-            Text("Retry")
-        }
-        OutlinedButton(onClick = onChangePhoto) {
-            Text("Change Photo")
-        }
-    }
-}
-
-@Composable
-private fun MenuImageArea(
-    selected: Boolean,
-) {
-    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp)
-            .background(
-                color = if (selected) {
-                    MaterialTheme.colorScheme.surface
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
-                shape = RoundedCornerShape(12.dp),
-            )
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(12.dp),
-            ),
-        contentAlignment = Alignment.Center,
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
+        CircularProgressIndicator()
+        Text("Signing in and loading bars…")
+    }
+}
+
+@Composable
+private fun EmptyBarsState(
+    message: String,
+    onRetry: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(message)
+        Button(onClick = onRetry) { Text("Retry") }
+    }
+}
+
+@Composable
+private fun OwnerUploadContent(
+    state: MenuUploadUiState,
+    onSelectBar: (String) -> Unit,
+    onPickPhoto: () -> Unit,
+    onClearPhoto: () -> Unit,
+    onSetMode: (ImportModeUi) -> Unit,
+    onUpload: () -> Unit,
+    onContinueImport: () -> Unit,
+    onReloadBars: () -> Unit,
+) {
+    val selectedBar = state.bars.firstOrNull { it.barId == state.selectedBarId }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        item {
             Text(
-                text = if (selected) "MENU PHOTO" else "PHOTO",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = if (selected) "menu_photo.jpg" else "Choose a menu photo",
+                text = "1. Choose a bar",
                 style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
             )
-            if (selected) {
+        }
+
+        items(state.bars, key = { it.barId }) { bar ->
+            val selected = bar.barId == state.selectedBarId
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                tonalElevation = if (selected) 3.dp else 0.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        1.dp,
+                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                        RoundedCornerShape(12.dp),
+                    ),
+            ) {
+                Column(
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(bar.name, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        bar.address,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (bar.activeImportId != null) {
+                        Text(
+                            "Active import: " + bar.activeImportStatus,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = { onSelectBar(bar.barId) },
+                        enabled = !state.working && !selected,
+                    ) {
+                        Text(if (selected) "Selected" else "Select")
+                    }
+                }
+            }
+        }
+
+        if (selectedBar?.activeImportId != null) {
+            item {
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text(
+                            "This bar already has an unfinished import.",
+                            fontWeight = FontWeight.Medium,
+                        )
+                        Text(
+                            "Continue it instead of creating a duplicate upload.",
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                        Button(
+                            onClick = onContinueImport,
+                            enabled = !state.working,
+                        ) {
+                            Text("Continue active import")
+                        }
+                    }
+                }
+            }
+        } else {
+            item {
                 Text(
-                    text = "Selected image preview",
+                    text = "2. Upload mode",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ImportModeUi.entries.forEach { mode ->
+                        if (state.mode == mode) {
+                            Button(
+                                onClick = { onSetMode(mode) },
+                                enabled = !state.working,
+                            ) {
+                                Text(mode.label)
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = { onSetMode(mode) },
+                                enabled = !state.working,
+                            ) {
+                                Text(mode.label)
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                Text(
+                    text = state.mode.description,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+
+            item {
+                Text(
+                    text = "3. Choose a menu photo",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+
+            item {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text(
+                            state.selectedImage?.displayName ?: "No photo selected",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Text(
+                            "JPEG/PNG are uploaded directly when safe; unsupported formats are converted to JPEG.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(
+                                onClick = onPickPhoto,
+                                enabled = !state.working,
+                            ) {
+                                Text(if (state.selectedImage == null) "Choose Photo" else "Change Photo")
+                            }
+                            if (state.selectedImage != null) {
+                                OutlinedButton(
+                                    onClick = onClearPhoto,
+                                    enabled = !state.working,
+                                ) {
+                                    Text("Remove")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                Button(
+                    onClick = onUpload,
+                    enabled = !state.working && state.selectedImage != null && selectedBar != null,
+                ) {
+                    Text("Upload & Extract")
+                }
+            }
+        }
+
+        if (state.working) {
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    CircularProgressIndicator()
+                    Text(state.statusMessage ?: "Working…")
+                }
+            }
+        }
+
+        if (state.errorMessage != null) {
+            item {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text(
+                            state.errorMessage,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                        OutlinedButton(
+                            onClick = onReloadBars,
+                            enabled = !state.working,
+                        ) {
+                            Text("Refresh bars")
+                        }
+                    }
+                }
+            }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun EmptyUploadPreview() {
-    MenuUploadContent(
-        state = MenuUploadUiState.EMPTY,
-        onChoosePhoto = {},
-        onTakePhoto = {},
-        onChangePhoto = {},
-        onUpload = {},
-        onRetry = {},
-        onPreviewError = {},
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SelectedUploadPreview() {
-    MenuUploadContent(
-        state = MenuUploadUiState.SELECTED,
-        onChoosePhoto = {},
-        onTakePhoto = {},
-        onChangePhoto = {},
-        onUpload = {},
-        onRetry = {},
-        onPreviewError = {},
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ProcessingUploadPreview() {
-    MenuUploadContent(
-        state = MenuUploadUiState.PROCESSING,
-        onChoosePhoto = {},
-        onTakePhoto = {},
-        onChangePhoto = {},
-        onUpload = {},
-        onRetry = {},
-        onPreviewError = {},
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ErrorUploadPreview() {
-    MenuUploadContent(
-        state = MenuUploadUiState.ERROR,
-        onChoosePhoto = {},
-        onTakePhoto = {},
-        onChangePhoto = {},
-        onUpload = {},
-        onRetry = {},
-        onPreviewError = {},
-    )
 }
