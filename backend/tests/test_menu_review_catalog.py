@@ -37,10 +37,9 @@ def conflict(db_session, sample, body):
 
 
 def aliases_of(db_session, model, owner_column, owner_id):
-    rows = db_session.execute(
-        select(model.alias_text, model.normalized_alias).where(owner_column == owner_id).order_by(model.alias_text)
-    )
-    return [tuple(row) for row in rows]
+    rows = db_session.execute(select(model.alias_text, model.normalized_alias).where(owner_column == owner_id))
+    # Sorted here: the database collation orders Korean and Latin text differently (C locally, en_US on RDS).
+    return sorted(tuple(row) for row in rows)
 
 
 def test_new_brand_and_product(db_session, sample, glenfiddich):

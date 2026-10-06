@@ -24,7 +24,8 @@ def test_lookup_uses_active_products_and_every_alias(db_session):
     assert catalog.find_product_ids_by_alias("조니워커블랙") == [black.id]
     # Hidden from customer search, but still used to match menu lines.
     assert catalog.find_product_ids_by_alias("jonniewalkerblack") == [black.id]
-    assert catalog.get_normalized_aliases(black.id) == ["johnniewalkerblack", "jonniewalkerblack", "조니워커블랙"]
+    # Order follows the database collation, so compare as sorted.
+    assert sorted(catalog.get_normalized_aliases(black.id)) == ["johnniewalkerblack", "jonniewalkerblack", "조니워커블랙"]
 
 
 def test_get_product_returns_none_for_inactive_or_missing(db_session):
