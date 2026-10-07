@@ -62,7 +62,16 @@ def delete_imports(session: Session, storage: ImageStorage, imports: list[MenuIm
     """Delete the imports' rows children first, then their image files. Returns the number of files."""
     if not imports:
         return 0
-    import_ids = [i.id for i in imports]
+    keys = delete_import_rows(session, [i.id for i in imports])
+    # Files go after the rows so a failed delete never leaves rows pointing at missing files.
+    for key in keys:
+        storage.delete(key)
+    return len(keys)
+
+
+def delete_import_rows(session: Session, import_ids: list[UUID]) -> list[str]:
+    """Delete the imports and every row below them, children first. Returns their image keys;
+    the caller deletes the files."""
     keys = list(session.scalars(select(MenuImage.storage_key).where(MenuImage.menu_import_id.in_(import_ids))))
     image_ids = select(MenuImage.id).where(MenuImage.menu_import_id.in_(import_ids))
     run_ids = select(ExtractionRun.id).where(ExtractionRun.menu_image_id.in_(image_ids))
@@ -76,10 +85,7 @@ def delete_imports(session: Session, storage: ImageStorage, imports: list[MenuIm
     session.execute(delete(MenuImage).where(MenuImage.menu_import_id.in_(import_ids)))
     session.execute(delete(MenuImport).where(MenuImport.id.in_(import_ids)))
     session.flush()
-    # Files go after the rows so a failed delete never leaves rows pointing at missing files.
-    for key in keys:
-        storage.delete(key)
-    return len(keys)
+    return keys
 
 
 def main() -> None:
