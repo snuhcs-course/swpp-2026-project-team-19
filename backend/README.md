@@ -229,6 +229,13 @@ The response has the counts of added, updated, removed and ignored changes and o
 
 ### Resetting test data
 
+- `scripts/reset_demo.py` brings the whole database back to the state right after seeding, for example after rehearsing the demo. It deletes every menu import (applied ones too) with its photos, every menu board, and every bar, brand, product, and alias that is not in the seed files, then runs the catalog and Seorosang menu seeds again. Other bars are left without a menu, and users are kept. It shows what it would delete without `--apply`.
+
+  ```sh
+  uv run --env-file .env python scripts/reset_demo.py            # show what would be deleted
+  uv run --env-file .env python scripts/reset_demo.py --apply
+  ```
+
 - `scripts/seed_menu.py` restores the Seorosang board after a test publish. Brands, products and aliases created by a review stay in the catalog.
 - `scripts/reset_menu_imports.py` deletes imports that were never applied, with their photos, for example one left in `ready_for_review` that blocks the bar's next upload (`409 ACTIVE_IMPORT_EXISTS`). It lists only without `--apply`. Applied imports are kept, since the board and created products refer to them.
 

@@ -122,7 +122,17 @@ From your PC, with `BASE=https://bottlemap.o-r.kr`:
 - `sudo reboot`, wait a minute, and check `/health` again: both services start by themselves.
 - In the Android app, set the base URL to `https://bottlemap.o-r.kr`.
 
-Afterwards, restore the demo menu with `seed_menu.py`, and remove test imports that were never applied with `scripts/reset_menu_imports.py`.
+Afterwards, reset the demo data (next paragraph).
+
+**Reset the demo data** after a rehearsal, so the demo starts from the freshly seeded state. On the server, while nobody is uploading:
+
+```sh
+cd ~/swpp-2026-project-team-19/backend
+uv run --no-sync --env-file .env python scripts/reset_demo.py            # shows what would be deleted
+uv run --no-sync --env-file .env python scripts/reset_demo.py --apply
+```
+
+It deletes every menu import with its photos in S3, every menu board, and the bars, brands, products, and aliases added after seeding, then seeds the catalog and the Seorosang menu again. The first line of its output names the database, so check that it is RDS.
 
 ## 4. Redeploy
 
