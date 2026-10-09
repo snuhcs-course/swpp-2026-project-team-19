@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #14). Reviewed by Jinwoo Park.
 """Menu extraction with Gemini: connects `app.extraction.extract_menu` (A4) to `MenuExtractor`.
 
 Settings are read when the extractor is created, so a missing key or model fails at server

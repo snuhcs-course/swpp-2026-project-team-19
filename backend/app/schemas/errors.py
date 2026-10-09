@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
 """OpenAPI models for the common error format produced by app.core.errors."""
 
 from typing import Any

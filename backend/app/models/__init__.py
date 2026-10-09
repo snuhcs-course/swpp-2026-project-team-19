@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #8, #9, #11). Reviewed by Haeul Yang.
 """SQLAlchemy model package. Import models here for Alembic autogeneration."""
 
 from app.models.bar import Bar, BarStatus

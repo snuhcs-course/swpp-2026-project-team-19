@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #13). Reviewed by Haeul Yang.
 """Operator lookups: the bar list (API spec 3.4) and a bar's menu imports (3.8)."""
 
 from datetime import datetime

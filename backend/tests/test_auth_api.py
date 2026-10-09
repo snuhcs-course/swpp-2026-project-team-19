@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-07, PR #17). Reviewed by Haeul Yang.
 """Temporary login and token checks. No database: /api/me only reads the token."""
 
 from datetime import datetime, timedelta, timezone

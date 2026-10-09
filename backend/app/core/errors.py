@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #12). Reviewed by Haeul Yang.
 """Common error response format (API spec, section 9).
 
 Every error is returned as {"error": {"code", "message", "details", "fieldErrors"}}.

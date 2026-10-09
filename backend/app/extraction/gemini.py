@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """Gemini Interactions API call with the P14 retry and timeout policy (ai/extract/extract.py).
 
 The SDK's own retries are off so `attempts` is the real number of calls. Timeouts,

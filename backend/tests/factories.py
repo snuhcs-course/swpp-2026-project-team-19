@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
 """Builders for database test data. Each helper flushes so generated ids are available."""
 
 from datetime import datetime, timezone

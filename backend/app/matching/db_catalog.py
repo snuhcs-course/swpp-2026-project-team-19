@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Haeul Yang.
 """`CatalogLookup` backed by the catalog tables, used when processing a menu import."""
 
 from uuid import UUID

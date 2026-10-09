@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #12). Reviewed by Haeul Yang.
 """Background processing of a menu import after the upload request has returned.
 
 For each image in order: extract → store items and options (committed per image so

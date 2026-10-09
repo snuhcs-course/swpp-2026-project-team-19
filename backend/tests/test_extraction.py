@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """Menu extraction tests. The Gemini client is always a fake; no test calls the real API."""
 
 import base64

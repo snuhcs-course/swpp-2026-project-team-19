@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5). Reviewed by Jinwoo Park.
 """Shared string normalization for alias matching (matching flow doc, section 7).
 
 The same function must be used when storing `brand_aliases.normalized_alias` /

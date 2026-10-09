@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """Response models: what the model returns (prompt v1) and what extract_menu returns (flow v2 4.3).
 
 The v1 models must stay identical to ai/extract/extract.py: their JSON schema is sent

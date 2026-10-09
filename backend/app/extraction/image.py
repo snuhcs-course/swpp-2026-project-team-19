@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """Image preprocessing, the same as ai/extract/extract.py prepare_image but in memory.
 
 EXIF orientation present (!= 1): rotate, drop EXIF, re-encode as JPEG q95.

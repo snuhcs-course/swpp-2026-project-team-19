@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """Run the P14 experiment (ai/docs/experiment_p14.md): photos x runs x conditions.
 
     python ai/extract/run_experiment.py                      # 9 photos x 5 runs x A/A2/B

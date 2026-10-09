@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """extract_menu: one menu photo -> flow v2 4.3 items plus call metadata. No DB access."""
 
 import hashlib

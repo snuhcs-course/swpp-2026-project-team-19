@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5); ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Jinwoo Park and Haeul Yang.
 """Input, output and catalog access types for product matching.
 
 These are plain dataclasses so matching does not depend on SQLAlchemy models.

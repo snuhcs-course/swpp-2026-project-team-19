@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #16, #18, #19). Reviewed by Haeul Yang.
 """Keep the deployment templates in step with the code."""
 
 import re

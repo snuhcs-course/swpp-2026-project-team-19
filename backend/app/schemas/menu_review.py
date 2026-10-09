@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
 """Request body of POST /api/menu-imports/{menuImportId}/review-and-apply (API spec, section 8).
 
 Each item decision is one of four shapes picked by `action`, and a new product's brand is

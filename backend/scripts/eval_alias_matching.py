@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5). Reviewed by Jinwoo Park.
 """Evaluate Iteration 1 matching (normalize + exact alias) against the labeled menu items.
 
 Each label's `raw_name` is passed to `resolve_product` as is, so the

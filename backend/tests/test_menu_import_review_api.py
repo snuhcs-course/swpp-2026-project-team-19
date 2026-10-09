@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #16). Reviewed by Haeul Yang.
 from datetime import datetime, timezone
 from uuid import uuid4
 

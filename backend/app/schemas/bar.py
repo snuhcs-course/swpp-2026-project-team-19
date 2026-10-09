@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #13). Reviewed by Haeul Yang.
 from typing import Literal
 from uuid import UUID
 

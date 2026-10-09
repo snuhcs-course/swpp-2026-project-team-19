@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
 """Publishing a reviewed import to the bar's menu board (flow doc, chapter 17).
 
 The reviewer's decisions are final, with one safeguard: nothing leaves the board unless the

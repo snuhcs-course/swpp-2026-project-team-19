@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #8). Reviewed by Haeul Yang.
 """Recompute `normalized_alias` for every brand and product alias with the current `normalize()`.
 
 Run this when the normalization rules in `app/core/normalize.py` change (matching flow

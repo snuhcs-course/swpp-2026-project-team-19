@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #16); Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #14). Reviewed by Haeul Yang and Jinwoo Park.
 """Shared dependencies for adapters, chosen by environment variables. Tests override them."""
 
 import os

@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-07, PR #19). Reviewed by Haeul Yang.
 import subprocess
 from pathlib import Path
 

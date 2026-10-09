@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """Menu photo -> structured items with Gemini (P14 PoC).
 
 Settings follow ai/docs/experiment_p14.md. Photos are read from BOTTLEMAP_DATA_DIR

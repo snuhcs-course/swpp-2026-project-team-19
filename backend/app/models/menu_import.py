@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Haeul Yang.
 """AI menu import: uploaded photos, extraction runs and results, match candidates, and the draft diff.
 
 Nothing here changes the published menu; only the final review applies an import.
