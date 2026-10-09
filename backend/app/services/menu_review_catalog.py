@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
 """Catalog rows created by a review submission (flow doc, chapter 16): new brands, new
 products, and the aliases the reviewer confirmed. Runs inside the apply transaction.
 

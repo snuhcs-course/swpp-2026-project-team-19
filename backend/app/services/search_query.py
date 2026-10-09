@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
 """Resolve a customer search query to catalog products (API spec, section 3.10.1).
 
 The steps run in order and stop at the first one that finds an active product:

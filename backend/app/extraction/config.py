@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """Extraction settings from environment variables.
 
 The model and thinking level are required so a deployment states them explicitly;

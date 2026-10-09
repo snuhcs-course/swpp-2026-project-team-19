@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """Tables for the P14 summary from scored run directories.
 
     python ai/eval/report.py ai/runs/2026-10-04_A ai/runs/2026-10-04_A2 ai/runs/2026-10-04_B

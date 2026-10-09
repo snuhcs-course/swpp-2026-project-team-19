@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #16, #18). Reviewed by Haeul Yang.
 # Redeploy on the server: update the code, install dependencies, migrate, restart, check.
 #
 #   ~/swpp-2026-project-team-19/backend/deploy/deploy.sh            # current branch

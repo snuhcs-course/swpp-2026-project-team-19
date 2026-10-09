@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
 """Brand and product lookup for the menu review screen (API spec, sections 6 and 7).
 
 The query is normalized with the same function as catalog aliases and compared with

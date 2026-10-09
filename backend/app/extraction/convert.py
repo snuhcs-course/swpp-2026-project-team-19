@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
 """Convert prompt v1 output to the flow v2 4.3 item format.
 
 Prompt v1 returns one item per (name, glass/bottle) and leaves out section titles,

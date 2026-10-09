@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #8). Reviewed by Haeul Yang.
 """Load the pilot bars and the product catalog seed (ai/catalog/) into the database.
 
 Brands, products, and bars are upserted by id, so re-running after editing the JSON

@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
 """Checks on a review submission that need the import's rows (API spec 8.7). Reads only.
 
 The request body's own shape is checked by the schema. This checks the decisions against

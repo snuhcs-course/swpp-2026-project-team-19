@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Haeul Yang.
 """Development-only file serving for LocalImageStorage, so review image URLs open locally.
 
 With object storage (P21) the review API returns signed URLs instead and this route

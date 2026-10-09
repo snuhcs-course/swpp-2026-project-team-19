@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11, #12, #13). Reviewed by Haeul Yang.
 """The generated OpenAPI document serves as the API reference, so keep it matching real responses."""
 
 import pytest

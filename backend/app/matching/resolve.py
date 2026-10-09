@@ -1,3 +1,4 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5). Reviewed by Jinwoo Park.
 """Initial product resolution for one extracted menu line (matching flow doc, sections 6, 8, 10).
 
 Iteration 1 covers normalization and exact alias matching only. Brand lookup,

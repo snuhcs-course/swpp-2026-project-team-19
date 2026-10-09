@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
 """Draft diff of a menu import against its bar's current menu board, built from stored rows.
 
 The proposal for each product item is its rank-1 resolution candidate (none when unmatched)

@@ -1,3 +1,4 @@
+// AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #15). Reviewed by Hojin Nam.
 package com.zerotoone.bottlemap.ui.customer
 
 import com.zerotoone.bottlemap.network.MatchedProductDto

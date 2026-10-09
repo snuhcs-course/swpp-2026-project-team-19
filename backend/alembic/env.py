@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #17). Reviewed by Haeul Yang.
 from logging.config import fileConfig
 
 from alembic import context

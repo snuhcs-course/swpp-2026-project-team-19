@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-07, PR #20). Reviewed by Haeul Yang.
 """Reset the database to the state right after seeding, e.g. after rehearsing the demo.
 
 What a rehearsal leaves behind is removed:

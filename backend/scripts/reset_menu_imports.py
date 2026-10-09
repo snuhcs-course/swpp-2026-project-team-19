@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #20). Reviewed by Haeul Yang.
 """Delete menu imports and their stored photos, for local development and testing.
 
 Until review submission exists, an import stays in ready_for_review and blocks the next

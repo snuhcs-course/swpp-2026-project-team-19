@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #16). Reviewed by Haeul Yang.
 import pytest
 
 from app.core.config import get_database_url

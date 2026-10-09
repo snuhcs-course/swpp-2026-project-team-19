@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #17). Reviewed by Haeul Yang.
 import re
 from uuid import uuid4
 

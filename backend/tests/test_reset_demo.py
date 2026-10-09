@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-07, PR #20). Reviewed by Haeul Yang.
 """reset_demo.py brings a rehearsed database back to the state right after seeding."""
 
 from uuid import UUID, uuid4

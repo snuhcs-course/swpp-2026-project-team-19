@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Haeul Yang.
 """Menu extraction: one image in, the recognized menu blocks out (API spec 4.3 response format).
 
 `MockMenuExtractor` stands in until the AI pipeline (P14) is ready; a real extractor

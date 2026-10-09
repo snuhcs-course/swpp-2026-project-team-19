@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #9, #11, #12). Reviewed by Haeul Yang.
 from collections.abc import Callable, Iterator
 from contextlib import AbstractContextManager
 from functools import lru_cache

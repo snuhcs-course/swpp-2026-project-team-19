@@ -1,3 +1,4 @@
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #16). Reviewed by Haeul Yang.
 """Accept a menu photo upload: validate, deduplicate retries, store images, and create the import rows.
 
 Order of checks: bar → image count, size and type → idempotency key → one unfinished import
