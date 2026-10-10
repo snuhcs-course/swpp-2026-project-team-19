@@ -23,6 +23,10 @@ Owner uploads menu photo
 
 Iteration 1 is demonstrated through a **live demo on Android devices**.
 
+### Demo Video
+
+[Iteration 1 demo video](./iteration1_demo.mp4) (58 s, Korean subtitles) shows the full flow: customer whisky search, owner menu photo upload, extraction review, publishing, and a follow-up search that returns the newly published bar.
+
 ## Features
 
 ### Customer
