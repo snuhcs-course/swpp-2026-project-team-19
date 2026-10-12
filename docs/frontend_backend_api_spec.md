@@ -604,24 +604,24 @@ GET /api/bars/{barId}/menu
 
 ### 3.10 고객 상품 검색
 
-고객이 위스키 이름을 입력하면 해당 상품을 현재 게시 메뉴에 포함한 업장 목록을 반환한다. 로그인 없이 호출할 수 있다.
+고객이 위스키 이름을 입력하면 해당 상품을 현재 게시 메뉴에 포함한 업장 목록을 반환한다. 로그인 없이 호출할 수 있는 공개 API이며, `Authorization` 헤더를 보내도 사용하지 않는다.
 
 ```http
-GET /api/search/bars?query=%EB%94%98%EC%8A%A4%ED%86%A4%2012&lat=37.478&lng=126.951
+GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=126.951
 ```
 
 | Query | 필수 | 기본값 | 설명 |
 |---|---|---|---|
-| `query` | 예 | 없음 | 검색어. 앞뒤 공백 제거 후 1~100자 |
-| `lat` | 아니오 | 없음 | 고객 위치 위도. `lng`와 함께 보내야 한다 |
-| `lng` | 아니오 | 없음 | 고객 위치 경도. `lat`과 함께 보내야 한다 |
-| `limit` | 아니오 | `50` | 최대 `100` |
+| `query` | 예 | 없음 | 검색어. 앞뒤 공백을 지운 뒤 1~100자 |
+| `lat` | 아니오 | 없음 | 고객 위치 위도. -90~90. `lng`와 함께 보내야 한다 |
+| `lng` | 아니오 | 없음 | 고객 위치 경도. -180~180. `lat`과 함께 보내야 한다 |
+| `limit` | 아니오 | `50` | 반환할 결과 행(`items`)의 최대 개수. 1~100 |
 
 고객 위치는 거리 계산에만 사용하며 서버에 저장하지 않는다.
 
 #### 3.10.1 검색어 해석
 
-검색어는 메뉴 등록의 상품 매칭과 같은 백엔드 공통 정규화 함수로 정규화한다. 검색 시점에는 임베딩과 LLM을 호출하지 않고, 아래 단계를 순서대로 시도해 처음으로 결과가 나온 단계에서 멈춘다.
+검색어는 메뉴 등록의 상품 매칭과 같은 백엔드 공통 정규화 함수로 정규화한다. 검색 시점에는 임베딩과 LLM을 호출하지 않고, 아래 단계를 순서대로 시도해 활성 상품을 하나라도 찾은 단계에서 멈춘다. 찾은 상품을 판매하는 업장이 없어도 다음 단계로 넘어가지 않는다.
 
 ```text
 1. alias_exact
@@ -634,7 +634,7 @@ GET /api/search/bars?query=%EB%94%98%EC%8A%A4%ED%86%A4%2012&lat=37.478&lng=126.9
 
 3. partial
    is_searchable 상품 별칭 중 정규화 검색어를 포함하는 별칭
-   → 일치한 상품 최대 10개
+   → 일치한 상품 최대 10개 (일치한 별칭이 짧은 상품부터)
 
 4. none
    일치하는 상품 없음
@@ -650,23 +650,49 @@ GET /api/search/bars?query=%EB%94%98%EC%8A%A4%ED%86%A4%2012&lat=37.478&lng=126.9
 
 #### 3.10.2 결과 구성
 
-결과 한 행은 `업장 × 상품` 조합이다. 다음 조건을 모두 만족하는 항목만 포함한다.
+결과 한 행은 `업장 × 상품` 조합이며, 같은 업장과 같은 상품의 행은 하나뿐이다. 다음 조건을 모두 만족하는 항목만 포함한다.
 
-- 일치한 상품이 `bar_menu_items`로 연결되어 있다.
+- 일치한 상품이 `bar_menu_items`로 업장과 연결되어 있다.
 - 해당 `bar_menu_item`이 업장의 현재 `menu_board_entries`에 포함되어 있다.
 - 업장의 `status`가 `active`다.
+
+다음 대상은 결과에서 빠진다.
+
+| 대상 | 이유 |
+|---|---|
+| 게시되지 않은 메뉴 | 처리 중, 검수 중(`ready_for_review`), 실패한 메뉴 등록 작업은 현재 메뉴판을 바꾸지 않는다. `review-and-apply`로 반영된 뒤부터 검색된다 |
+| 현재 메뉴판에서 내려간 항목 | `bar_menu_items`에 남아 있어도 현재 `menu_board_entries`에 없으면 제외한다 |
+| 비활성 업장 | `bars.status = inactive` |
+| 메뉴판이 없는 업장 | 반영된 메뉴가 아직 없다 |
+| 비상품 항목 | 섹션 제목, 설명 등 상품이 아닌 줄은 상품과 연결된 메뉴 항목이 되지 않는다 |
+| 비활성 상품 | `products.is_active = false`인 상품은 어느 단계에서도 일치하지 않는다 |
+| 검색 제외 별칭 | `is_searchable = false`인 상품 별칭으로는 `alias_exact`와 `partial`에서 일치하지 않는다 |
 
 정렬 기준:
 
 ```text
-lat·lng가 있으면  distanceMeters 오름차순
-lat·lng가 없으면  menuUpdatedAt 내림차순
-동점이면          barName 오름차순
+items
+  lat·lng가 있으면  distanceMeters 오름차순
+  lat·lng가 없으면  menuUpdatedAt 내림차순
+  동점이면          barName → productDisplayName → barId → productId 오름차순
+
+matchedProducts
+  alias_exact, brand  displayName 오름차순
+  partial             일치한 별칭이 짧은 상품부터, 같으면 displayName 오름차순
+
+options
+  sortOrder 오름차순
 ```
 
-MVP의 업장 수가 약 20곳이므로 cursor 페이지네이션은 두지 않고 `limit`까지만 반환한다. 결과가 잘렸으면 `truncated = true`다.
+개수 제한:
+
+- MVP의 업장 수가 약 20곳이므로 cursor 페이지네이션은 두지 않는다. `items`는 정렬한 뒤 앞에서부터 `limit`개까지만 반환하고, 잘렸으면 `truncated = true`다.
+- `matchedProducts`는 `limit`의 영향을 받지 않는다. `partial`은 최대 10개, `brand`는 해당 브랜드의 활성 상품 전체다.
+- `matchedProducts[].resultCount`는 `limit`을 적용하기 전의 행 수다. 따라서 `truncated = true`이면 `resultCount`의 합이 `items` 개수보다 크다.
 
 #### 3.10.3 응답
+
+`200 OK`
 
 ```json
 {
@@ -674,7 +700,7 @@ MVP의 업장 수가 약 20곳이므로 cursor 페이지네이션은 두지 않�
   "matchType": "brand",
   "matchedProducts": [
     {
-      "productId": "product-glenfiddich-12",
+      "productId": "44444444-4444-4444-8444-444444444444",
       "displayName": "Glenfiddich 12",
       "brandName": "Glenfiddich",
       "ageYears": 12,
@@ -682,7 +708,7 @@ MVP의 업장 수가 약 20곳이므로 cursor 페이지네이션은 두지 않�
       "resultCount": 2
     },
     {
-      "productId": "product-glenfiddich-15",
+      "productId": "55555555-5555-4555-8555-555555555555",
       "displayName": "Glenfiddich 15",
       "brandName": "Glenfiddich",
       "ageYears": 15,
@@ -692,62 +718,121 @@ MVP의 업장 수가 약 20곳이므로 cursor 페이지네이션은 두지 않�
   ],
   "items": [
     {
-      "barId": "bar-001",
+      "barId": "22222222-2222-4222-8222-222222222222",
       "barName": "관악 위스키 바",
-      "address": "서울특별시 관악구 관악로 1, 2층",
-      "latitude": 37.123456,
-      "longitude": 126.123456,
-      "distanceMeters": 420,
-      "productId": "product-glenfiddich-12",
+      "address": "서울특별시 관악구 관악로 1 2층",
+      "latitude": 37.478321,
+      "longitude": 126.951234,
+      "distanceMeters": 41,
+      "productId": "44444444-4444-4444-8444-444444444444",
       "productDisplayName": "Glenfiddich 12",
       "menuDisplayName": "글렌피딕 12년",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": 30,
+          "priceKrw": 17000,
+          "sortOrder": 1
+        },
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 160000,
+          "sortOrder": 2
+        }
+      ],
+      "menuUpdatedAt": "2026-10-04T09:15:00Z"
+    },
+    {
+      "barId": "33333333-3333-4333-8333-333333333333",
+      "barName": "신림 몰트 하우스",
+      "address": "서울특별시 관악구 신림로 2 3층",
+      "latitude": 37.484102,
+      "longitude": 126.929815,
+      "distanceMeters": 1989,
+      "productId": "44444444-4444-4444-8444-444444444444",
+      "productDisplayName": "Glenfiddich 12",
+      "menuDisplayName": "Glenfiddich 12Y",
       "options": [
         {
           "optionLabel": null,
           "pourMl": 15,
           "priceKrw": 9000,
           "sortOrder": 1
-        },
-        {
-          "optionLabel": null,
-          "pourMl": 30,
-          "priceKrw": 17000,
-          "sortOrder": 2
         }
       ],
-      "menuUpdatedAt": "2026-10-04T09:15:00Z"
+      "menuUpdatedAt": "2026-10-02T11:00:00Z"
     }
   ],
   "truncated": false
 }
 ```
 
-| 필드 | 설명 |
-|---|---|
-| `matchType` | 검색어를 해석한 단계. `alias_exact`, `brand`, `partial`, `none` |
-| `matchedProducts` | 검색어로 해석된 상품 전체. 판매 업장이 없는 상품도 `resultCount = 0`으로 포함한다 |
-| `distanceMeters` | 고객 위치와 업장 좌표 사이의 직선 거리. 위치를 보내지 않으면 `null` |
-| `productDisplayName` | 정규 상품명(`products.display_name`) |
-| `menuDisplayName` | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`) |
-| `options` | 해당 항목의 가격·용량 옵션 전체. 결과 카드에 어떤 옵션을 표시할지는 프론트엔드가 정한다 |
-| `menuUpdatedAt` | 업장 현재 메뉴판의 `menu_boards.published_at` |
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `query` | 문자열 | 아니오 | 앞뒤 공백을 지운 검색어. 정규화한 값이 아니다 |
+| `matchType` | `alias_exact` \| `brand` \| `partial` \| `none` | 아니오 | 검색어를 해석한 단계(3.10.1) |
+| `matchedProducts` | 배열 | 아니오 | 검색어로 해석된 상품 전체. 판매 업장이 없는 상품도 포함한다. 없으면 `[]` |
+| `matchedProducts[].productId` | UUID 문자열 | 아니오 | |
+| `matchedProducts[].displayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`) |
+| `matchedProducts[].brandName` | 문자열 | 아니오 | 브랜드 대표명(`brands.canonical_name`) |
+| `matchedProducts[].ageYears` | 정수 | 예 | 숙성 연수. 표기가 없는 상품은 `null` |
+| `matchedProducts[].editionName` | 문자열 | 예 | 에디션명. 없으면 `null` |
+| `matchedProducts[].resultCount` | 정수 | 아니오 | `limit` 적용 전 이 상품의 결과 행 수. 판매 업장이 없으면 `0` |
+| `items` | 배열 | 아니오 | 결과 행. 없으면 `[]` |
+| `items[].barId` | UUID 문자열 | 아니오 | |
+| `items[].barName` | 문자열 | 아니오 | |
+| `items[].address` | 문자열 | 아니오 | |
+| `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표 |
+| `items[].distanceMeters` | 정수 | 예 | 고객 위치와 업장 사이의 직선 거리(미터). 위치를 보내지 않으면 `null` |
+| `items[].productId` | UUID 문자열 | 아니오 | `matchedProducts`의 상품 중 하나 |
+| `items[].productDisplayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`) |
+| `items[].menuDisplayName` | 문자열 | 아니오 | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`) |
+| `items[].options` | 배열 | 아니오 | 해당 항목의 가격·용량 옵션 전체. 최소 1개. 결과 카드에 어떤 옵션을 표시할지는 프론트엔드가 정한다 |
+| `items[].options[].optionLabel` | 문자열 | 예 | 메뉴판의 `잔`, `병` 같은 표기. 없으면 `null` |
+| `items[].options[].pourMl` | 정수 | 예 | 용량(ml). 메뉴판에 없으면 `null` |
+| `items[].options[].priceKrw` | 정수 | 아니오 | 가격(원) |
+| `items[].options[].sortOrder` | 정수 | 아니오 | 옵션 표시 순서 |
+| `items[].menuUpdatedAt` | RFC 3339 문자열 | 아니오 | 업장 현재 메뉴판의 `menu_boards.published_at` |
+| `truncated` | 불리언 | 아니오 | `limit`보다 많은 행이 일치했으면 `true` |
 
-빈 결과도 `200 OK`로 반환하며, 프론트엔드는 다음 두 경우를 구분해 빈 상태를 표시한다.
+#### 3.10.4 결과가 0건일 때
+
+결과가 없어도 `200 OK`이며 `items = []`, `truncated = false`다. 프론트엔드는 다음 두 경우를 구분해 빈 상태를 표시한다.
 
 ```text
-matchedProducts = []                 → 인식할 수 없는 상품명
-matchedProducts ≠ [] 이고 items = [] → 상품은 확인했지만 현재 판매하는 업장 없음
+matchType = none, matchedProducts = []  → 인식할 수 없는 상품명. 다른 이름으로 검색하도록 안내
+matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재 판매하는 업장 없음. matchedProducts의 상품명을 함께 표시
 ```
 
-#### 3.10.4 검증 오류
+```json
+{
+  "query": "없는 위스키",
+  "matchType": "none",
+  "matchedProducts": [],
+  "items": [],
+  "truncated": false
+}
+```
 
-다음 경우 `422 VALIDATION_FAILED`를 반환한다.
+#### 3.10.5 검증 오류와 프론트엔드 처리
 
-- `query`가 없거나 공백뿐이거나, 정규화 후 빈 문자열이다.
-- `query`가 100자를 넘는다.
-- `lat`과 `lng` 중 하나만 있다.
-- `lat`이 -90~90, `lng`가 -180~180 범위를 벗어난다.
-- `limit`이 1~100 범위를 벗어난다.
+입력이 잘못되면 `422 VALIDATION_FAILED`를 반환한다(9.1, 9.3).
+
+| 상황 | `fieldErrors[].path` | `fieldErrors[].code` | 프론트엔드 처리 |
+|---|---|---|---|
+| `query` 파라미터 없음 | `query` | `MISSING` | 앱 버그. 일반 오류와 재시도 |
+| 빈 문자열이거나 공백뿐 | `query` | `BLANK` | 검색창 아래에 검색어 입력 안내 |
+| 앞뒤 공백을 지운 뒤 100자 초과 | `query` | `STRING_TOO_LONG` | 검색창 아래에 100자 제한 안내 |
+| 정규화하면 남는 문자가 없음 (예: `!!!`) | `query` | `NOT_SEARCHABLE` | 검색창 아래에 검색할 수 있는 문자가 없다는 안내 |
+| `lat`과 `lng` 중 하나만 보냄 | 빠진 쪽 (`lat` 또는 `lng`) | `LAT_LNG_REQUIRED_TOGETHER` | 앱 버그. 일반 오류와 재시도 |
+| `lat`, `lng`, `limit`이 범위를 벗어남 | 해당 파라미터 | `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL` | 앱 버그. 일반 오류와 재시도 |
+| `lat`, `lng`, `limit`이 숫자가 아님 | 해당 파라미터 | `FLOAT_PARSING`(`lat`, `lng`), `INT_PARSING`(`limit`) | 앱 버그. 일반 오류와 재시도 |
+
+- 파라미터 누락, 범위, 숫자 형식 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `BLANK`, `STRING_TOO_LONG`, `LAT_LNG_REQUIRED_TOGETHER`, `NOT_SEARCHABLE`을 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
+- 프론트엔드는 요청 전에 검색어의 앞뒤 공백을 지우고, 빈 검색어면 API를 호출하지 않는다. 검색 입력 칸은 100자로 제한한다. 그래도 서버가 `query` 오류를 반환하면 위 표대로 `code`를 기준으로 문구를 보여 준다.
+- 위치 권한이 없거나 위치를 얻지 못하면 `lat`과 `lng`를 둘 다 빼고 요청한다. 결과는 `menuUpdatedAt` 순으로 정렬되고 `distanceMeters`는 `null`이다.
+- 네트워크 오류와 `5xx`는 오류 상태와 재시도 버튼을 보여 준다.
 
 ## 4. 메뉴 등록 요청
 
@@ -1434,7 +1519,7 @@ HTTP/1.1 200 OK
 
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
-- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `EXTRA_FORBIDDEN`. `message`는 Pydantic의 영어 기본 문구다.
+- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `EXTRA_FORBIDDEN`. `message`는 Pydantic의 영어 기본 문구다.
 - **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`.
 
 ### 9.4 검수 버전 충돌
