@@ -138,7 +138,7 @@ ignore
 | `PATCH` | `/api/me` | 로그인 사용자 표시 이름 수정 |
 | `GET` | `/api/bars` | 운영 대상 업장 목록 및 검색 |
 | `POST` | `/api/bars` | 업장 생성 |
-| `GET` | `/api/bars/{barId}` | 업장 상세 조회 |
+| `GET` | `/api/bars/{barId}` | 운영자용 업장 상세와 관리 상태 조회 |
 | `PATCH` | `/api/bars/{barId}` | 업장 정보 또는 활성 상태 수정 |
 | `GET` | `/api/bars/{barId}/menu-imports` | 업장의 진행 중·과거 메뉴 등록 작업 조회 |
 | `GET` | `/api/bars/{barId}/menu` | 업장 정보와 현재 게시 메뉴판 조회 (공개) |
@@ -443,29 +443,62 @@ Location: /api/bars/bar-001
 
 ### 3.6 업장 상세 조회
 
+운영자 업장 관리 화면용 API다. 업장 정보와 관리 상태(진행 중인 메뉴 등록 작업, 현재 메뉴판 요약)를 반환하며 메뉴 항목은 포함하지 않는다. 메뉴 항목은 3.9로 조회한다. 업장 생성 직후(3.5의 `Location`), 업장 수정 뒤 재조회, 운영자 화면 직접 진입에 사용한다.
+
+operator만 호출할 수 있다. 비활성 업장도 `200 OK`로 반환한다.
+
 ```http
 GET /api/bars/{barId}
 Authorization: Bearer <access-token>
 ```
 
+`200 OK`
+
 ```json
 {
-  "barId": "bar-001",
+  "barId": "22222222-2222-4222-8222-222222222222",
   "name": "관악 위스키 바",
-  "address": "서울특별시 관악구 관악로 1, 2층",
-  "latitude": 37.123456,
-  "longitude": 126.123456,
+  "address": "서울특별시 관악구 관악로 1 2층",
+  "latitude": 37.478321,
+  "longitude": 126.951234,
   "phone": "02-000-0000",
   "status": "active",
-  "activeMenuImport": null,
+  "activeMenuImport": {
+    "menuImportId": "77777777-7777-4777-8777-777777777777",
+    "status": "ready_for_review"
+  },
   "currentMenu": {
-    "menuBoardId": "menu-board-001",
+    "menuBoardId": "66666666-6666-4666-8666-666666666666",
     "publishedAt": "2026-10-04T09:15:00Z"
   },
   "createdAt": "2026-10-01T03:00:00Z",
   "updatedAt": "2026-10-04T09:15:00Z"
 }
 ```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `barId` | UUID 문자열 | 아니오 | |
+| `name` | 문자열 | 아니오 | 업장명 |
+| `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
+| `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표 |
+| `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
+| `status` | `active` \| `inactive` | 아니오 | |
+| `activeMenuImport` | 객체 | 예 | 미완료 메뉴 등록 작업. 없으면 `null`. 3.4와 같다 |
+| `activeMenuImport.menuImportId` | UUID 문자열 | 아니오 | `GET /api/menu-imports/{menuImportId}`로 이어서 진행한다 |
+| `activeMenuImport.status` | `uploaded` \| `processing` \| `ready_for_review` | 아니오 | |
+| `currentMenu` | 객체 | 예 | 현재 메뉴판 요약. 반영된 메뉴가 없으면 `null` |
+| `currentMenu.menuBoardId` | UUID 문자열 | 아니오 | |
+| `currentMenu.publishedAt` | RFC 3339 문자열 | 아니오 | 현재 메뉴판이 마지막으로 반영된 시각 |
+| `createdAt`, `updatedAt` | RFC 3339 문자열 | 아니오 | |
+
+오류와 프론트엔드 처리:
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | token 없음, 만료, 검증 실패 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator가 아닌 사용자 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님. `details.barId`에 요청한 값을 담는다 | "업장을 찾을 수 없습니다" 안내 후 업장 목록으로 이동 |
 
 ### 3.7 업장 수정과 비활성화
 
@@ -538,45 +571,68 @@ Authorization: Bearer <access-token>
 
 ### 3.9 현재 게시 메뉴 조회
 
+고객 업장 상세 화면용 공개 API다. 업장 기본 정보와 현재 게시 메뉴 전체를 한 번에 반환하므로, 고객 화면은 별도 요청 없이 이름, 주소, 지도 위치와 메뉴를 표시할 수 있다. 운영자도 현재 게시 메뉴를 확인할 때 사용한다.
+
 ```http
 GET /api/bars/{barId}/menu
 ```
 
-고객 업장 상세 화면과 운영자 화면이 함께 사용한다. 활성 업장의 현재 메뉴 조회는 인증 없이 허용한다. 비활성 업장은 operator만 조회할 수 있으며, 인증하지 않은 호출에는 업장이 없는 경우와 같은 `404 BAR_NOT_FOUND`를 반환한다.
+`Authorization` 헤더는 선택이다. 보내면 token을 검증하며, 잘못된 token은 `401`이다(3.1.5).
 
-고객 업장 상세 화면이 별도 요청 없이 이름, 주소와 지도 위치를 표시할 수 있도록 업장 기본 정보를 함께 반환한다.
+| 호출자 | 활성 업장 | 비활성 업장 |
+|---|---|---|
+| 비로그인 사용자, customer | `200` | `404 BAR_NOT_FOUND` (업장이 없는 경우와 구분하지 않는다) |
+| operator | `200` | `200` |
+
+`200 OK`
 
 ```json
 {
-  "barId": "bar-001",
+  "barId": "22222222-2222-4222-8222-222222222222",
   "name": "관악 위스키 바",
-  "address": "서울특별시 관악구 관악로 1, 2층",
-  "latitude": 37.123456,
-  "longitude": 126.123456,
+  "address": "서울특별시 관악구 관악로 1 2층",
+  "latitude": 37.478321,
+  "longitude": 126.951234,
   "phone": "02-000-0000",
-  "menuBoardId": "menu-board-001",
+  "menuBoardId": "66666666-6666-4666-8666-666666666666",
   "publishedAt": "2026-10-04T09:15:00Z",
   "items": [
     {
-      "menuBoardEntryId": "entry-001",
-      "barMenuItemId": "bar-menu-item-001",
-      "productId": "product-deanston-12",
-      "displayName": "Deanston 12",
+      "menuBoardEntryId": "88888888-8888-4888-8888-888888888881",
+      "barMenuItemId": "99999999-9999-4999-8999-999999999991",
+      "productId": "44444444-4444-4444-8444-444444444444",
+      "displayName": "글렌피딕 12년",
       "sortOrder": 1,
       "options": [
         {
-          "menuEntryOptionId": "entry-option-001",
+          "menuEntryOptionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+          "optionLabel": "잔",
+          "pourMl": 30,
+          "priceKrw": 17000,
+          "sortOrder": 1
+        },
+        {
+          "menuEntryOptionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 160000,
+          "sortOrder": 2
+        }
+      ]
+    },
+    {
+      "menuBoardEntryId": "88888888-8888-4888-8888-888888888882",
+      "barMenuItemId": "99999999-9999-4999-8999-999999999992",
+      "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+      "displayName": "Deanston 12",
+      "sortOrder": 2,
+      "options": [
+        {
+          "menuEntryOptionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
           "optionLabel": null,
           "pourMl": 15,
           "priceKrw": 8000,
           "sortOrder": 1
-        },
-        {
-          "menuEntryOptionId": "entry-option-002",
-          "optionLabel": null,
-          "pourMl": 30,
-          "priceKrw": 15000,
-          "sortOrder": 2
         }
       ]
     }
@@ -584,23 +640,67 @@ GET /api/bars/{barId}/menu
 }
 ```
 
-현재 게시 메뉴가 없으면 `200 OK`로 빈 상태를 반환한다.
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `barId` | UUID 문자열 | 아니오 | |
+| `name` | 문자열 | 아니오 | 업장명 |
+| `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
+| `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표 |
+| `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
+| `menuBoardId` | UUID 문자열 | 예 | 현재 메뉴판. 반영된 메뉴가 없으면 `null` |
+| `publishedAt` | RFC 3339 문자열 | 예 | 현재 메뉴판이 마지막으로 반영된 시각. 반영된 메뉴가 없으면 `null` |
+| `items` | 배열 | 아니오 | 현재 메뉴판의 상품 항목. 없으면 `[]` |
+| `items[].menuBoardEntryId` | UUID 문자열 | 아니오 | |
+| `items[].barMenuItemId` | UUID 문자열 | 아니오 | |
+| `items[].productId` | UUID 문자열 | 아니오 | 정규 상품 ID |
+| `items[].displayName` | 문자열 | 아니오 | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`). 정규 상품명이 아니다 |
+| `items[].sortOrder` | 정수 | 아니오 | 메뉴판 표시 순서 |
+| `items[].options` | 배열 | 아니오 | 가격·용량 옵션. 최소 1개 |
+| `items[].options[].menuEntryOptionId` | UUID 문자열 | 아니오 | |
+| `items[].options[].optionLabel` | 문자열 | 예 | 메뉴판의 `잔`, `병` 같은 표기. 없으면 `null` |
+| `items[].options[].pourMl` | 정수 | 예 | 용량(ml). 메뉴판에 없으면 `null` |
+| `items[].options[].priceKrw` | 정수 | 아니오 | 가격(원) |
+| `items[].options[].sortOrder` | 정수 | 아니오 | 옵션 표시 순서 |
+
+정렬 기준: `items`는 `sortOrder` 오름차순이고, 각 항목의 `options`도 `sortOrder` 오름차순이다. 프론트엔드는 받은 순서대로 표시한다.
+
+`items`에는 상품으로 확정되어 현재 메뉴판에 반영된 항목만 있다. 섹션 제목, 설명 등 비상품 줄은 포함하지 않는다. 검색 결과에서 진입한 경우 프론트엔드는 검색한 `productId`와 같은 항목을 강조해 표시할 수 있다.
+
+#### 3.9.1 게시된 메뉴가 없을 때
+
+모두 `200 OK`이며 업장 기본 정보는 그대로 반환한다.
+
+반영된 메뉴가 한 번도 없으면 `menuBoardId`, `publishedAt`이 `null`이고 `items`가 `[]`다. 프론트엔드는 "등록된 메뉴가 없습니다"를 표시한다.
 
 ```json
 {
-  "barId": "bar-001",
+  "barId": "22222222-2222-4222-8222-222222222222",
   "name": "관악 위스키 바",
-  "address": "서울특별시 관악구 관악로 1, 2층",
-  "latitude": 37.123456,
-  "longitude": 126.123456,
-  "phone": "02-000-0000",
+  "address": "서울특별시 관악구 관악로 1 2층",
+  "latitude": 37.478321,
+  "longitude": 126.951234,
+  "phone": null,
   "menuBoardId": null,
   "publishedAt": null,
   "items": []
 }
 ```
 
-`items[].displayName`은 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`)이고, `productId`는 정규 상품 ID다. 검색 결과에서 진입한 경우 프론트엔드는 검색한 `productId`와 같은 항목을 강조해 표시할 수 있다.
+메뉴판은 있지만 검수에서 모든 항목을 내렸으면 `menuBoardId`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
+
+#### 3.9.2 메뉴 등록이 진행 중일 때
+
+이 API는 메뉴 등록 작업의 상태를 반영하지 않는다. 등록 작업이 처리 중(`uploaded`, `processing`)이거나 검수 대기(`ready_for_review`)이거나 실패(`failed`)여도 현재 게시된 메뉴를 그대로 반환하며, 진행 중이라는 표시도 하지 않는다. 고객은 검수를 마치고 `review-and-apply`로 반영된 메뉴만 본다. 운영자가 진행 중인 작업을 확인할 때는 3.6의 `activeMenuImport`를 사용한다.
+
+#### 3.9.3 오류와 프론트엔드 처리
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | `Authorization` 헤더로 보낸 token이 만료되었거나 검증 실패 | 3.1.5. 세션 갱신에 실패하면 헤더 없이 비로그인 사용자로 다시 요청 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없음, `barId`가 UUID 형식이 아님, operator가 아닌 호출자의 비활성 업장 조회. `details.barId`에 요청한 값을 담는다 | "업장을 찾을 수 없습니다" 안내 후 이전 화면으로 이동. 검색 결과에서 진입했다면 검색 결과를 다시 불러온다 |
+| 네트워크 오류, `5xx` | | | 오류 상태와 재시도 버튼 |
+
+이 API는 공개 API이므로 `403`을 반환하지 않는다.
 
 ### 3.10 고객 상품 검색
 
@@ -1477,7 +1577,7 @@ HTTP/1.1 200 OK
 | `400` | `INVALID_REQUEST` | JSON 또는 multipart 형식 오류 | 요청 구성 확인 |
 | `401` | `UNAUTHENTICATED` | 토큰 없음, 만료, 서명·claim 오류 (3.1.5) | 세션 갱신 후 한 번 재시도. 실패하면 로그인 이동 |
 | `403` | `FORBIDDEN` | operator가 아닌 사용자의 operator 전용 API 호출, 또는 업장·작업 접근 권한 없음 | 접근 차단 |
-| `404` | `BAR_NOT_FOUND` | 업장이 없음 | 이전 화면 이동 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없음, `barId` 형식 오류, operator가 아닌 호출자의 비활성 업장 조회 (3.6, 3.9) | 안내 후 이전 화면 이동 |
 | `404` | `MENU_IMPORT_NOT_FOUND` | 등록 작업이 없음 | 작업 목록 이동 |
 | `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me` 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
