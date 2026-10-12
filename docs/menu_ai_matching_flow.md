@@ -62,7 +62,7 @@ AI
 
 백엔드는 다음 작업을 담당한다.
 
-- 사용자 인증 및 `users.user_type = operator` 권한 확인
+- 사용자 인증 및 권한 확인: `users.user_type = operator`이거나 해당 업장의 현재 업주(`bar_owners`)
 - `menu_imports`와 `menu_images` 생성
 - 원본 이미지의 객체 저장소 보관
 - AI 실행 작업 큐 관리
@@ -119,7 +119,7 @@ images[]   = menu-page-1.jpg
 images[]   = menu-page-2.jpg
 ~~~
 
-백엔드는 먼저 로그인 사용자의 user_type이 operator인지 확인한다.
+백엔드는 먼저 로그인 사용자가 operator이거나 해당 업장의 현재 업주인지 확인한다.
 
 업로드 제한은 다음과 같다.
 

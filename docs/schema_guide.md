@@ -6,7 +6,7 @@
 
 메뉴 등록 화면과 백엔드의 구체적인 요청·응답 계약은 [frontend_backend_api_spec.md](frontend_backend_api_spec.md)를 따른다.
 
-현재 DBML은 PostgreSQL을 대상으로 하는 논리 설계 초안이다. PostgreSQL의 네이티브 `uuid`, `timestamptz`와 JSON 계열 타입을 사용하며, ID 생성 위치와 인증 제공자는 아직 확정되지 않았다. 세부 인덱스와 CHECK 제약은 실제 DDL 작성 단계에서 확정한다.
+현재 DBML은 PostgreSQL을 대상으로 하는 논리 설계 초안이다. PostgreSQL의 네이티브 `uuid`, `timestamptz`와 JSON 계열 타입을 사용하며, 인증 제공자는 Supabase Auth(Google)로 확정했다. ID 생성 위치는 아직 확정되지 않았다. 세부 인덱스와 CHECK 제약은 실제 DDL 작성 단계에서 확정한다.
 
 ## 2 핵심 용어
 
@@ -19,22 +19,24 @@
 | 메뉴판 | 한 업장에서 현재 고객에게 보여주는 업장 메뉴 항목의 묶음 | A바 현재 위스키 메뉴판 |
 | 메뉴판 구성 | 메뉴판에 어떤 업장 메뉴 항목이 들어가는지 나타내는 연결 | 현재 메뉴판에 Deanston 12 포함 |
 | 판매 옵션 | 같은 술의 용량과 가격 조합 | 15ml 8,000원, 30ml 15,000원 |
-| 메뉴 등록 작업 | 운영자가 한 번에 올린 메뉴 사진 묶음과 처리 과정 | 사진 3장을 전체 교체 모드로 업로드 |
+| 메뉴 등록 작업 | 운영자 또는 업주가 한 번에 올린 메뉴 사진 묶음과 처리 과정 | 사진 3장을 전체 교체 모드로 업로드 |
 | 추출 항목 | AI가 인식한 상품 또는 비상품 블록 | 딘스톤 12년, 싱글 몰트 제목 |
 | 추출 옵션 | 추출 상품 항목에 속한 가격·용량 조합 | 15ml 8,000원, 30ml 15,000원 |
 | 평가 세트 | 성능 측정에 사용할 고정된 이미지 묶음 | Iteration 1 Held-out Set |
+| 업주 | 운영자 승인을 받아 특정 업장을 관리하는 사용자. 사용자 유형이 아니라 사용자와 업장의 관계다 | 관악 위스키 바의 사장 |
+| 업주 신청 | 사용자가 기존 업장 또는 새 업장의 업주가 되겠다고 낸 요청 | 사업자등록번호와 연락처를 적어 관악 위스키 바 업주 신청 |
 
 ## 3 전체 데이터 흐름
 
 ### 3.1 메뉴 등록과 게시
 
-1. 운영자가 `menu_imports`를 생성하고 전체 교체 또는 일부 수정 모드를 선택한다.
+1. 운영자 또는 해당 업장의 업주가 `menu_imports`를 생성하고 전체 교체 또는 일부 수정 모드를 선택한다.
 2. 한 번의 등록 작업에 여러 `menu_images`를 추가한다.
 3. 구현 전에 선택한 하나의 추출 방식으로 각 이미지마다 `extraction_runs`를 정확히 하나 실행한다.
 4. AI가 인식한 상품·비상품 블록을 `extracted_items`에 저장하고 각 상품의 가격·용량 선택지를 `extracted_options`에 저장한다.
 5. `extracted_line_type = product`인 항목은 정확한 상품 별칭이 하나만 일치할 때 단일 후보로 처리한다. 최초 매칭 결과는 `initial_resolution_status`에 고정하고, 후보는 `resolution_candidates`에 저장한다. 그 외 경로에서 후보가 2개 이상이면 점수 차이와 관계없이 LLM으로 재정렬한다.
 6. 백엔드가 상위 상품 후보를 임시 선택해 현재 메뉴판과의 변경 초안을 `menu_import_changes`에 저장한다.
-7. 운영자가 한 화면에서 항목 역할, 상품명, 가격·용량 옵션, 상품 연결, 신규 카탈로그 제안, 메뉴 변경 초안을 통합 검수한다. 신규 상품은 기존 `brand_id`를 선택하거나 신규 브랜드의 대표 이름과 별칭을 직접 확정해야 한다.
+7. 운영자 또는 업주가 한 화면에서 항목 역할, 상품명, 가격·용량 옵션, 상품 연결, 신규 카탈로그 제안, 메뉴 변경 초안을 통합 검수한다. 신규 상품은 기존 `brand_id`를 선택하거나 신규 브랜드의 대표 이름과 별칭을 직접 확정해야 한다.
 8. 최종 제출 시 백엔드가 모든 결정을 재검증하고 diff를 다시 계산한 뒤 `bar_menu_items`, `menu_board_entries`, `menu_entry_options`에 원자적으로 반영한다.
 
 ### 3.2 고객 검색
@@ -56,6 +58,19 @@
 4. 구현 전에 선택한 추출 방식으로 각 이미지의 `extraction_runs`를 실행한다.
 5. 정답과 실행 결과를 비교해 이름 F1, 가격 정확도, Top-1 정확도, false-merge 비율을 계산한다. 특히 `initial_resolution_status = exact_match`였지만 정답 상품과 다른 경우를 확실하다고 판단한 잘못된 병합으로 집계할 수 있다. OCR+LLM과 Vision LLM 중 어떤 방식을 사용할지는 구현 전 별도 실험으로 결정한다.
 
+### 3.4 업주 등록과 승인
+
+1. 로그인한 사용자가 업주 신청을 낸다. 기존 업장이면 `bar_id`를, 새 업장이면 업장명·주소·전화번호를 적고, 사업자등록번호와 연락처를 함께 `bar_owner_applications`에 `pending`으로 저장한다.
+2. 운영자가 대기 중인 신청 목록을 보고, 사업자등록번호와 연락처를 앱 밖에서 확인한다.
+3. 승인하면 같은 트랜잭션에서 다음을 처리한다.
+   - 기존 업장: 현재 업주가 없는지 다시 확인하고 `bar_owners` 행을 만든다.
+   - 새 업장: 운영자가 확인한 업장 정보(좌표 포함)로 `bars` 행을 만들고, 신청의 `bar_id`에 저장한 뒤 `bar_owners` 행을 만든다.
+4. 거절하면 사유를 `rejection_reason`에 남긴다. 신청자는 대기 중인 신청을 직접 취소할 수 있다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
+5. 승인된 업주는 자기 업장의 정보 수정과 메뉴 등록·검수·반영을 할 수 있다. 권한은 매 요청 `bar_owners`에서 확인하므로 승인이나 해제가 다음 요청부터 반영된다.
+6. 운영자는 업주 관계를 해제할 수 있다. 행을 지우지 않고 `revoked_at`을 기록한다.
+
+구체적인 요청·응답 형식은 API 명세의 업주 신청과 승인 절을 따른다.
+
 ## 4 Enum 설명
 
 ### 4.1 user_type
@@ -65,7 +80,7 @@
 | `customer` | 선택적으로 로그인한 일반 고객 | 고객용 추가 기능을 제공할 계정을 나타낸다. 처음 로그인해 생성되는 계정은 모두 이 유형이다. 익명 고객은 `users` 행이 없다. |
 | `operator` | 업장 상품 메뉴판을 관리하는 프로젝트 운영자 | 메뉴 등록과 검수 권한을 일반 고객 계정과 분리한다. 운영자도 공개 고객 기능은 이용할 수 있다. |
 
-한 계정은 하나의 전역 사용자 유형만 가진다. 업주나 업장 관리자는 전역 사용자 유형이 아니라 특정 업장과 사용자의 관계이므로, MVP 이후 별도의 업장-사용자 관계 테이블로 모델링한다.
+한 계정은 하나의 전역 사용자 유형만 가진다. 업주는 전역 사용자 유형이 아니라 특정 업장과 사용자의 관계이므로 `bar_owners`로 표현한다(5.4). 업주가 되어도 `user_type`은 바뀌지 않는다.
 
 ### 4.2 bar_status
 
@@ -173,6 +188,24 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `real` | 실제 업장의 메뉴 이미지 |
 | `synthetic` | 엣지 케이스 검증을 위한 합성 이미지 |
 
+### 4.14 owner_application_type
+
+| 값 | 의미 |
+|---|---|
+| `existing_bar` | 이미 `bars`에 있는 업장의 업주가 되겠다는 신청 |
+| `new_bar` | 아직 `bars`에 없는 업장을 등록하면서 업주가 되겠다는 신청 |
+
+### 4.15 owner_application_status
+
+| 값 | 의미 |
+|---|---|
+| `pending` | 운영자 결정 대기 |
+| `approved` | 운영자가 승인함. `bar_owners` 행이 만들어졌다 |
+| `rejected` | 운영자가 거절함. `rejection_reason`을 신청자에게 보여 준다 |
+| `canceled` | 신청자가 대기 중에 취소함 |
+
+`approved`, `rejected`, `canceled`는 최종 상태이며 다시 바뀌지 않는다. 승인 뒤 업주 관계를 해제해도 신청은 `approved`로 남고, 해제는 `bar_owners.revoked_at`으로 표현한다.
+
 ## 5 Accounts and Bars
 
 ### 5.1 users
@@ -189,7 +222,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:00:00Z` | 계정 생성 시점을 기록한다. |
 | `updated_at` | `timestamptz`, NOT NULL | `2026-09-28T04:00:00Z` | 계정 정보가 마지막으로 변경된 시점을 기록한다. |
 
-**핵심 제약:** `auth_subject`와 `email`의 중복을 막고 `user_type`을 반드시 저장한다. PostgreSQL의 UNIQUE 제약은 NULL끼리 같다고 보지 않으므로 `email`이 `null`인 행은 여러 개 있을 수 있다. 업주 권한은 특정 업장에 종속되므로 `user_type`에 추가하지 않고 향후 별도 관계로 표현한다.
+**핵심 제약:** `auth_subject`와 `email`의 중복을 막고 `user_type`을 반드시 저장한다. PostgreSQL의 UNIQUE 제약은 NULL끼리 같다고 보지 않으므로 `email`이 `null`인 행은 여러 개 있을 수 있다. 업주 권한은 특정 업장에 종속되므로 `user_type`에 추가하지 않고 `bar_owners`로 표현한다.
 
 ### 5.2 bars
 
@@ -208,6 +241,54 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `updated_at` | `timestamptz`, NOT NULL | `2026-09-28T04:10:00Z` | 주소 전화번호 등의 최종 변경 시점이다. |
 
 **필요한 이유:** 상품 검색 결과를 업장 단위로 묶고 가격 용량 거리 지도 위치를 제공하려면 독립된 업장 엔터티가 필요하다. 
+
+### 5.3 bar_owner_applications
+
+**역할:** 사용자가 기존 업장 또는 새 업장의 업주가 되겠다고 낸 신청과 운영자의 결정을 저장한다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 신청 ID | |
+| `applicant_user_id` | `uuid`, NOT NULL, FK → `users.id` | 신청자 ID | 누가 신청했는지 나타낸다. 승인되면 이 사용자가 업주가 된다. |
+| `application_type` | `owner_application_type`, NOT NULL | `existing_bar` | 기존 업장 신청인지 새 업장 등록 신청인지 구분한다. |
+| `bar_id` | `uuid`, nullable, FK → `bars.id` | 관악 위스키 바 ID | `existing_bar`는 신청 대상 업장이다. `new_bar`는 승인 전에는 `null`이고, 승인으로 만든 업장 ID를 저장한다. |
+| `proposed_bar_name` | `varchar(150)`, nullable | `신림 몰트 하우스` | `new_bar`에서만 쓰며 필수다. 승인할 때 운영자가 고칠 수 있다. |
+| `proposed_address` | `varchar(500)`, nullable | `서울특별시 관악구 신림로 2 3층` | `new_bar`에서만 쓰며 필수다. |
+| `proposed_phone` | `varchar(30)`, nullable | `02-1234-5678` | `new_bar`에서만 쓰며 선택이다. |
+| `business_registration_number` | `char(10)`, NOT NULL | `1234567890` | 하이픈을 뺀 사업자등록번호 10자리다. 운영자가 실제 사업자인지 확인하는 근거다. |
+| `contact_phone` | `varchar(30)`, NOT NULL | `010-1234-5678` | 운영자가 확인을 위해 연락할 번호다. 업장 전화번호와 다를 수 있다. |
+| `applicant_note` | `varchar(500)`, nullable | `대표 본인입니다` | 신청자가 남긴 메모다. |
+| `status` | `owner_application_status`, NOT NULL, 기본 `pending` | `pending` | 신청 처리 상태다. |
+| `reviewed_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 승인하거나 거절한 운영자다. 권한을 준 결정이므로 누가 했는지 남긴다. |
+| `reviewed_at` | `timestamptz`, nullable | `2026-10-14T05:00:00Z` | 승인 또는 거절 시각이다. |
+| `rejection_reason` | `varchar(500)`, nullable | `사업자등록번호를 확인할 수 없습니다` | 거절할 때 필수이며 신청자에게 보여 준다. |
+| `created_at` | `timestamptz`, NOT NULL | `2026-10-14T03:00:00Z` | 신청 시각이다. |
+| `updated_at` | `timestamptz`, NOT NULL | `2026-10-14T05:00:00Z` | 상태가 마지막으로 바뀐 시각이다. |
+
+**핵심 제약:**
+
+- `existing_bar`는 `bar_id`가 필수이고 `proposed_*`가 모두 `null`이다. `new_bar`는 `proposed_bar_name`과 `proposed_address`가 필수이고, `bar_id`는 `approved`일 때만 값이 있다.
+- 한 사용자는 같은 기존 업장에 `pending` 신청을 하나만 가질 수 있다. 서로 다른 사용자가 같은 업장에 동시에 신청할 수는 있지만, 하나가 승인되면 나머지는 승인할 수 없고 운영자가 거절한다.
+- `rejected`이면 `rejection_reason`이 필수다. `approved`와 `rejected`이면 `reviewed_by_user_id`와 `reviewed_at`이 필수다.
+- 사업자등록번호와 연락처는 신청자와 운영자에게만 보여 주며 공개 API에 포함하지 않는다. 실제 값은 저장소에 커밋하지 않는다.
+
+### 5.4 bar_owners
+
+**역할:** 운영자가 승인한 업주와 업장의 관계를 저장한다. 업장별 권한 검사는 이 테이블을 기준으로 한다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 업주 관계 ID | |
+| `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | 관리 대상 업장이다. |
+| `user_id` | `uuid`, NOT NULL, FK → `users.id` | 업주 사용자 ID | 한 사용자는 여러 업장의 업주가 될 수 있다. |
+| `application_id` | `uuid`, NOT NULL, UNIQUE, FK → `bar_owner_applications.id` | 승인한 신청 ID | 이 관계를 만든 신청이다. 신청 하나는 관계 하나만 만든다. |
+| `created_at` | `timestamptz`, NOT NULL | `2026-10-14T05:00:00Z` | 승인으로 관계가 시작된 시각이다. |
+| `revoked_at` | `timestamptz`, nullable | `null` | 운영자가 관계를 해제한 시각이다. `null`이면 현재 업주다. |
+| `revoked_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 관계를 해제한 운영자다. |
+
+**핵심 제약:** 한 업장에는 현재 업주(`revoked_at`이 `null`인 행)가 최대 한 명이다. PostgreSQL 부분 unique 인덱스(`bar_id` WHERE `revoked_at IS NULL`)와 승인 시 업장 행 잠금으로 보장한다. 해제는 행을 지우지 않고 `revoked_at`을 기록해 이력을 남긴다. 업주가 되어도 `users.user_type`은 바뀌지 않는다.
+
+**필요한 이유:** 업주 권한은 업장마다 다르므로 전역 `user_type`으로 표현할 수 없다. 신청과 관계를 나누면 신청 이력(증빙, 거절 사유)과 현재 권한을 따로 관리할 수 있고, 권한 검사는 작은 관계 테이블만 조회하면 된다.
 
 ## 6 Product Catalog
 
@@ -347,7 +428,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 ### 8.1 menu_imports
 
-**역할:** 운영자가 한 번에 수행한 메뉴 사진 등록과 검수 게시 작업의 최상위 단위다.
+**역할:** 운영자 또는 해당 업장의 업주가 한 번에 수행한 메뉴 사진 등록과 검수 게시 작업의 최상위 단위다.
 
 | 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
 |---|---|---|---|
@@ -620,6 +701,10 @@ A와 C는 사진에 없어도 remove 후보가 되지 않으며 현재 메뉴판
 
 | 부모 | 자식 | 관계 | 의미 |
 |---|---|---|---|
+| `users` | `bar_owner_applications` | 1:N | 한 사용자가 여러 업주 신청을 낼 수 있다. |
+| `bars` | `bar_owner_applications` | 1:N | 한 업장에 여러 사용자가 신청할 수 있다. 새 업장 신청은 승인 전까지 업장이 없다. |
+| `bar_owner_applications` | `bar_owners` | 1:0..1 | 승인된 신청 하나가 업주 관계 하나를 만든다. |
+| `bars` + `users` | `bar_owners` | N:M 해소 | 한 사용자는 여러 업장의 업주가 될 수 있고, 한 업장에는 현재 업주가 최대 한 명이다. |
 | `bars` | `menu_imports` | 1:N | 한 업장에 여러 메뉴 등록 작업이 누적된다. |
 | `menu_imports` | `menu_images` | 1:N | 한 번의 등록에 여러 사진을 올릴 수 있다. |
 | `menu_images` | `extraction_runs` | 1:1 | 구현 전에 선택한 방식으로 사진마다 실행 하나를 만든다. |
@@ -654,6 +739,9 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 전체 교체 또는 일부 수정의 적용은 트랜잭션으로 처리해 메뉴판이 중간 상태로 노출되지 않게 한다.
 - 최종 확정은 신규 브랜드·상품 중복 재검사와 생성, 추출 결과 확정, diff 재계산, 현재 메뉴판 반영을 모두 포함한 하나의 `SERIALIZABLE` 트랜잭션으로 실행한다. 직렬화 충돌이면 전체를 롤백하고 처음부터 최대 3회 재시도한다. AI 호출과 객체 저장소 작업 같은 외부 부수 효과는 재시도될 수 있는 이 트랜잭션 안에서 실행하지 않는다.
 - 한 업장에는 `uploaded`, `processing`, `ready_for_review` 상태의 `menu_imports`가 동시에 하나만 존재해야 한다. PostgreSQL 부분 unique 인덱스와 업장 행 잠금·트랜잭션 검사를 함께 사용해 보장한다.
+- 한 업장에는 `revoked_at IS NULL`인 `bar_owners`가 최대 하나여야 한다. PostgreSQL 부분 unique 인덱스로 보장한다.
+- 한 사용자는 같은 업장에 `status = pending`인 `bar_owner_applications`를 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending'`)로 보장한다.
+- `bar_owner_applications.business_registration_number`는 숫자 10자리여야 한다.
 - 외래키 삭제 정책은 이력 보존을 우선해 핵심 사용자 업장 상품 이미지에 `RESTRICT` 또는 soft delete를 검토한다.
 
 > **현재 구현과의 차이 (수정 예정):** 지금 Alembic 마이그레이션에는 위의 `CHECK` 제약과 부분 unique 인덱스가 없다. 그동안은 백엔드가 다음처럼 규칙을 지킨다. 위 제약을 추가하는 마이그레이션을 만들 예정이며, 그 전에 기존 데이터가 규칙을 어기지 않는지 확인한다.
@@ -669,7 +757,6 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 
 - PostgreSQL `uuid` 값의 버전과 생성 위치
 - 고객 로그인 후 제공할 추가 기능과 관련 테이블
-- 업주 계정, 업장 소유권 신청, 업주 직접 메뉴 관리 구조
 - 공간 검색을 일반 위도 경도로 계산할지 공간 타입과 인덱스를 사용할지
 - enum을 DB enum으로 구현할지 문자열과 CHECK 제약으로 구현할지
 - 가격이 반드시 존재해야 하는지, `가격 문의` 같은 값을 허용할지

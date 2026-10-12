@@ -7,6 +7,7 @@
 포함 범위:
 
 - Google 로그인 후 BottleMap 사용자 확인, 인증 오류 처리
+- 업주 신청, operator 승인과 업주 권한
 - 메뉴 사진 업로드와 비동기 처리 시작
 - 처리 상태 polling
 - 추출 항목·옵션·상품 후보·임시 diff 통합 조회
@@ -61,13 +62,37 @@ GET 상품 검색 (검색어 + 선택적 위치)
 
 ### 2.2 권한
 
-현재 MVP에서 메뉴 등록·검수, 업장 관리와 카탈로그 검색 API는 `users.user_type = operator`만 호출할 수 있다. `GET /api/me`는 로그인한 customer와 operator가 모두 호출할 수 있다. 고객 검색 `GET /api/search/bars`와 활성 업장의 `GET /api/bars/{barId}/menu`는 로그인 없이(비로그인 사용자) 호출할 수 있는 공개 API다. 향후 업주 계정이 추가되어도 API 형식은 유지하고 백엔드의 업장별 권한 검사만 확장한다.
+호출자는 다음 넷으로 나뉜다.
 
-인증이 필요한 요청에서 백엔드는 다음을 검증한다.
+- **비로그인 사용자**: `Authorization` 헤더 없이 호출한다.
+- **customer**: 로그인한 일반 사용자(`userType = customer`).
+- **업주**: 운영자 승인을 받아 특정 업장을 관리하는 사용자(3.11). `userType`이 아니라 업장별 관계이므로, 같은 사용자도 자기 업장에서만 업주다. 보통 `userType = customer`다.
+- **operator**: 프로젝트 운영자(`userType = operator`). 모든 업장을 관리한다.
 
-- 토큰이 유효한가
-- 호출자가 메뉴 등록 권한을 가졌는가
-- 요청한 `barId` 또는 `menuImportId`가 호출자에게 허용되는가
+| API | 비로그인 | customer | 해당 업장의 업주 | operator |
+|---|---|---|---|---|
+| `GET /api/search/bars` | O | O | O | O |
+| `GET /api/bars/{barId}/menu` | 활성 업장만 | 활성 업장만 | O | O |
+| `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
+| `POST /api/owner-applications`, `GET /api/me/owner-applications` | | O | O | O |
+| `GET /api/owner-applications/{applicationId}` | | 본인 신청만 | 본인 신청만 | O |
+| `POST /api/owner-applications/{applicationId}/cancel` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
+| `GET /api/owner-applications`, `POST .../approve`, `POST .../reject` | | | | O |
+| `DELETE /api/bars/{barId}/owner` | | | | O |
+| `GET /api/bars`, `POST /api/bars` | | | | O |
+| `GET /api/bars/{barId}` | | | O | O |
+| `PATCH /api/bars/{barId}` | | | O (`status` 제외) | O |
+| `GET /api/bars/{barId}/menu-imports`, `POST /api/bars/{barId}/menu-imports` | | | O | O |
+| `GET /api/menu-imports/{menuImportId}`, `POST .../review-and-apply` | | | 해당 업장의 작업만 | O |
+| `GET /api/catalog/brands`, `GET /api/catalog/products` | | | 업장이 하나 이상이면 O | O |
+
+인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다.
+
+1. token이 유효한가 (아니면 `401`, 3.1.5)
+2. 요청한 `barId`, `menuImportId`, `applicationId`가 존재하는가 (아니면 각 API의 `404`)
+3. 호출자가 operator이거나, 요청 대상 업장의 현재 업주인가 (아니면 `403 FORBIDDEN`)
+
+업주 여부는 매 요청 DB에서 확인하므로 승인과 해제가 다음 요청부터 반영된다. 업주 신청은 다른 사람의 신청이 있는지 알리지 않도록 권한이 없을 때도 `404 OWNER_APPLICATION_NOT_FOUND`를 반환한다(3.11.4).
 
 ### 2.3 주요 Enum
 
@@ -138,7 +163,7 @@ ignore
 | `PATCH` | `/api/me` | 로그인 사용자 표시 이름 수정 |
 | `GET` | `/api/bars` | 운영 대상 업장 목록 및 검색 |
 | `POST` | `/api/bars` | 업장 생성 |
-| `GET` | `/api/bars/{barId}` | 운영자용 업장 상세와 관리 상태 조회 |
+| `GET` | `/api/bars/{barId}` | 관리자용(operator, 업주) 업장 상세와 관리 상태 조회 |
 | `PATCH` | `/api/bars/{barId}` | 업장 정보 또는 활성 상태 수정 |
 | `GET` | `/api/bars/{barId}/menu-imports` | 업장의 진행 중·과거 메뉴 등록 작업 조회 |
 | `GET` | `/api/bars/{barId}/menu` | 업장 정보와 현재 게시 메뉴판 조회 (공개) |
@@ -148,6 +173,15 @@ ignore
 | `GET` | `/api/catalog/brands` | 검수 중 기존 브랜드 검색 |
 | `GET` | `/api/catalog/products` | 검수 중 기존 상품 검색 |
 | `POST` | `/api/menu-imports/{menuImportId}/review-and-apply` | 전체 검수 결정 제출과 원자적 반영 |
+| `POST` | `/api/owner-applications` | 업주 신청 |
+| `GET` | `/api/me/owner-applications` | 내 업주 신청 목록 |
+| `GET` | `/api/owner-applications/{applicationId}` | 업주 신청 상세 |
+| `POST` | `/api/owner-applications/{applicationId}/cancel` | 업주 신청 취소 |
+| `GET` | `/api/owner-applications` | operator의 업주 신청 목록 |
+| `POST` | `/api/owner-applications/{applicationId}/approve` | 업주 신청 승인 |
+| `POST` | `/api/owner-applications/{applicationId}/reject` | 업주 신청 거절 |
+| `GET` | `/api/me/bars` | 내가 업주인 업장 목록 |
+| `DELETE` | `/api/bars/{barId}/owner` | 업주 해제 |
 
 별도의 신규 브랜드·상품 생성 API는 두지 않는다. 신규 카탈로그 데이터는 `review-and-apply` 요청 안에서 제안하고 최종 트랜잭션에서 생성한다.
 
@@ -173,7 +207,7 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 4. Supabase 세션 수신 (access token, refresh token). 세션 저장과 자동 갱신은 SDK가 담당
 5. GET /api/me
    Authorization: Bearer <Supabase access token>
-6. 응답의 userType으로 고객 화면과 운영자 화면 분기
+6. 응답의 userType으로 고객 화면과 운영자 화면 분기. 업주 화면은 GET /api/me/bars가 비어 있지 않을 때 보여 줌(3.11.9)
 
 [BottleMap 백엔드]
 1. Supabase JWKS 공개 키로 token 서명 검증 (header의 kid로 키 선택)
@@ -233,8 +267,9 @@ POST /api/auth/temp-login
 
 - 최초 가입한 사용자는 항상 `customer`다. 신규 가입자를 자동으로 `operator`로 만들지 않는다.
 - 클라이언트 요청이나 token claim(`user_metadata` 포함)으로 `userType`을 바꿀 수 없다. 권한은 매 요청 BottleMap DB의 `users.user_type`에서 읽는다.
-- `operator` 전환과 업주(바 사장) 등록은 이후 별도 기능으로 정의하며 이 문서의 범위가 아니다. 그전까지 로컬에서 operator API를 시험할 때는 임시 로그인과 `TEMP_AUTH_USER_TYPE=operator`를 사용한다.
-- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator 전용 API는 `403 FORBIDDEN`이다. `PATCH /api/me`는 `404 USER_NOT_FOUND`다(3.3).
+- `operator` 전환은 이후 별도 기능으로 정의하며 이 문서의 범위가 아니다. 그전까지 로컬에서 operator API를 시험할 때는 임시 로그인과 `TEMP_AUTH_USER_TYPE=operator`를 사용한다.
+- 업주는 `userType`이 아니라 업장별 관계다. 신청과 승인은 3.11, 권한은 2.2를 따른다.
+- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`는 `404 USER_NOT_FOUND`다(3.3, 3.11.2).
 
 #### 3.1.5 인증 오류와 프론트엔드 처리
 
@@ -245,7 +280,7 @@ POST /api/auth/temp-login
 | `401` | `UNAUTHENTICATED` | 인증이 필요한 API에 `Authorization` 헤더가 없음 | 로그인 화면으로 이동 |
 | `401` | `UNAUTHENTICATED` | access token 만료 | 아래 재시도 흐름 |
 | `401` | `UNAUTHENTICATED` | 서명 오류, 알 수 없는 `kid`, `iss`·`aud` 불일치, 필수 claim 누락, `is_anonymous = true`, 임시 로그인이 꺼진 서버에 보낸 임시 token | 아래 재시도 흐름 |
-| `403` | `FORBIDDEN` | 로그인했지만 `operator`가 아닌 사용자가 operator 전용 API 호출 | 접근 차단 안내. 재시도하거나 로그인 화면으로 보내지 않는다. `GET /api/me`를 다시 불러 화면 권한을 갱신할 수 있다 |
+| `403` | `FORBIDDEN` | 로그인했지만 권한이 없는 API 호출 (2.2). 예: operator 전용 API, 업주가 아닌 업장의 관리 API | 접근 차단 안내. 재시도하거나 로그인 화면으로 보내지 않는다. `GET /api/me`를 다시 불러 화면 권한을 갱신할 수 있다 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버 인증 설정 누락(`SUPABASE_URL` 등), Supabase JWKS 조회 실패, 임시 인증 설정 오류 | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않고 저장된 세션을 유지한다 |
 
 `401` 재시도 흐름:
@@ -329,7 +364,7 @@ Google 계정 claim이 없을 때:
 | `user_metadata.name` | 없거나 공백뿐 | `displayName = null` |
 | `is_anonymous` | `true` | `401 UNAUTHENTICATED` |
 
-운영자 전용 화면은 `userType = operator`일 때만 보여 준다. 오류는 3.1.5를 따른다.
+운영자 전용 화면은 `userType = operator`일 때만 보여 준다. 업주 여부는 `userType`에 나타나지 않으므로 `GET /api/me/bars`(3.11.9)로 확인한다. 오류는 3.1.5를 따른다.
 
 ### 3.3 현재 사용자 수정
 
@@ -441,11 +476,13 @@ Location: /api/bars/bar-001
 
 백엔드는 이름·주소가 비슷한 기존 업장을 조회해 중복 가능성을 경고할 수 있지만 이름 유사성만으로 생성을 자동 차단하지 않는다.
 
+operator가 업장을 직접 만드는 API다. 업주가 있는 업장은 업주의 `new_bar` 신청과 승인(3.11)으로 만드는 것을 기본으로 한다.
+
 ### 3.6 업장 상세 조회
 
-운영자 업장 관리 화면용 API다. 업장 정보와 관리 상태(진행 중인 메뉴 등록 작업, 현재 메뉴판 요약)를 반환하며 메뉴 항목은 포함하지 않는다. 메뉴 항목은 3.9로 조회한다. 업장 생성 직후(3.5의 `Location`), 업장 수정 뒤 재조회, 운영자 화면 직접 진입에 사용한다.
+operator와 업주의 업장 관리 화면용 API다. 업장 정보와 관리 상태(진행 중인 메뉴 등록 작업, 현재 메뉴판 요약, 업주)를 반환하며 메뉴 항목은 포함하지 않는다. 메뉴 항목은 3.9로 조회한다. 업장 생성 직후(3.5의 `Location`), 업장 수정 뒤 재조회, 관리 화면 직접 진입에 사용한다.
 
-operator만 호출할 수 있다. 비활성 업장도 `200 OK`로 반환한다.
+operator와 해당 업장의 현재 업주만 호출할 수 있다. 비활성 업장도 `200 OK`로 반환한다.
 
 ```http
 GET /api/bars/{barId}
@@ -471,6 +508,12 @@ Authorization: Bearer <access-token>
     "menuBoardId": "66666666-6666-4666-8666-666666666666",
     "publishedAt": "2026-10-04T09:15:00Z"
   },
+  "owner": {
+    "userId": "11111111-1111-4111-8111-111111111111",
+    "email": "owner@example.com",
+    "displayName": "김사장",
+    "ownerSince": "2026-10-14T05:00:00Z"
+  },
   "createdAt": "2026-10-01T03:00:00Z",
   "updatedAt": "2026-10-04T09:15:00Z"
 }
@@ -490,6 +533,10 @@ Authorization: Bearer <access-token>
 | `currentMenu` | 객체 | 예 | 현재 메뉴판 요약. 반영된 메뉴가 없으면 `null` |
 | `currentMenu.menuBoardId` | UUID 문자열 | 아니오 | |
 | `currentMenu.publishedAt` | RFC 3339 문자열 | 아니오 | 현재 메뉴판이 마지막으로 반영된 시각 |
+| `owner` | 객체 | 예 | 현재 업주(3.11). 없으면 `null` |
+| `owner.userId` | UUID 문자열 | 아니오 | |
+| `owner.email`, `owner.displayName` | 문자열 | 예 | 3.2와 같다 |
+| `owner.ownerSince` | RFC 3339 문자열 | 아니오 | 업주 신청이 승인된 시각 |
 | `createdAt`, `updatedAt` | RFC 3339 문자열 | 아니오 | |
 
 오류와 프론트엔드 처리:
@@ -497,7 +544,7 @@ Authorization: Bearer <access-token>
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `401` | `UNAUTHENTICATED` | token 없음, 만료, 검증 실패 | 3.1.5 |
-| `403` | `FORBIDDEN` | operator가 아닌 사용자 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님. `details.barId`에 요청한 값을 담는다 | "업장을 찾을 수 없습니다" 안내 후 업장 목록으로 이동 |
 
 ### 3.7 업장 수정과 비활성화
@@ -531,6 +578,8 @@ Content-Type: application/json
 ```
 
 업장을 물리 삭제하는 API는 두지 않는다. 운영 중단은 `status = inactive`로 처리해 메뉴 등록과 이미지 이력을 유지한다.
+
+해당 업장의 업주도 이 API를 호출할 수 있지만 `status`는 바꿀 수 없다. 업주가 `status`를 보내면 `403 FORBIDDEN`이다. 업장의 비활성화와 재활성화는 operator가 한다.
 
 ### 3.8 업장별 메뉴 등록 작업 목록
 
@@ -571,7 +620,7 @@ Authorization: Bearer <access-token>
 
 ### 3.9 현재 게시 메뉴 조회
 
-고객 업장 상세 화면용 공개 API다. 업장 기본 정보와 현재 게시 메뉴 전체를 한 번에 반환하므로, 고객 화면은 별도 요청 없이 이름, 주소, 지도 위치와 메뉴를 표시할 수 있다. 운영자도 현재 게시 메뉴를 확인할 때 사용한다.
+고객 업장 상세 화면용 공개 API다. 업장 기본 정보와 현재 게시 메뉴 전체를 한 번에 반환하므로, 고객 화면은 별도 요청 없이 이름, 주소, 지도 위치와 메뉴를 표시할 수 있다. operator와 업주도 현재 게시 메뉴를 확인할 때 사용한다.
 
 ```http
 GET /api/bars/{barId}/menu
@@ -582,6 +631,7 @@ GET /api/bars/{barId}/menu
 | 호출자 | 활성 업장 | 비활성 업장 |
 |---|---|---|
 | 비로그인 사용자, customer | `200` | `404 BAR_NOT_FOUND` (업장이 없는 경우와 구분하지 않는다) |
+| 해당 업장의 업주 | `200` | `200` |
 | operator | `200` | `200` |
 
 `200 OK`
@@ -690,14 +740,14 @@ GET /api/bars/{barId}/menu
 
 #### 3.9.2 메뉴 등록이 진행 중일 때
 
-이 API는 메뉴 등록 작업의 상태를 반영하지 않는다. 등록 작업이 처리 중(`uploaded`, `processing`)이거나 검수 대기(`ready_for_review`)이거나 실패(`failed`)여도 현재 게시된 메뉴를 그대로 반환하며, 진행 중이라는 표시도 하지 않는다. 고객은 검수를 마치고 `review-and-apply`로 반영된 메뉴만 본다. 운영자가 진행 중인 작업을 확인할 때는 3.6의 `activeMenuImport`를 사용한다.
+이 API는 메뉴 등록 작업의 상태를 반영하지 않는다. 등록 작업이 처리 중(`uploaded`, `processing`)이거나 검수 대기(`ready_for_review`)이거나 실패(`failed`)여도 현재 게시된 메뉴를 그대로 반환하며, 진행 중이라는 표시도 하지 않는다. 고객은 검수를 마치고 `review-and-apply`로 반영된 메뉴만 본다. operator와 업주가 진행 중인 작업을 확인할 때는 3.6의 `activeMenuImport`를 사용한다.
 
 #### 3.9.3 오류와 프론트엔드 처리
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `401` | `UNAUTHENTICATED` | `Authorization` 헤더로 보낸 token이 만료되었거나 검증 실패 | 3.1.5. 세션 갱신에 실패하면 헤더 없이 비로그인 사용자로 다시 요청 |
-| `404` | `BAR_NOT_FOUND` | 업장이 없음, `barId`가 UUID 형식이 아님, operator가 아닌 호출자의 비활성 업장 조회. `details.barId`에 요청한 값을 담는다 | "업장을 찾을 수 없습니다" 안내 후 이전 화면으로 이동. 검색 결과에서 진입했다면 검색 결과를 다시 불러온다 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없음, `barId`가 UUID 형식이 아님, operator나 해당 업장의 업주가 아닌 호출자의 비활성 업장 조회. `details.barId`에 요청한 값을 담는다 | "업장을 찾을 수 없습니다" 안내 후 이전 화면으로 이동. 검색 결과에서 진입했다면 검색 결과를 다시 불러온다 |
 | 네트워크 오류, `5xx` | | | 오류 상태와 재시도 버튼 |
 
 이 API는 공개 API이므로 `403`을 반환하지 않는다.
@@ -933,6 +983,335 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 - 프론트엔드는 요청 전에 검색어의 앞뒤 공백을 지우고, 빈 검색어면 API를 호출하지 않는다. 검색 입력 칸은 100자로 제한한다. 그래도 서버가 `query` 오류를 반환하면 위 표대로 `code`를 기준으로 문구를 보여 준다.
 - 위치 권한이 없거나 위치를 얻지 못하면 `lat`과 `lng`를 둘 다 빼고 요청한다. 결과는 `menuUpdatedAt` 순으로 정렬되고 `distanceMeters`는 `null`이다.
 - 네트워크 오류와 `5xx`는 오류 상태와 재시도 버튼을 보여 준다.
+
+### 3.11 업주 신청과 승인
+
+업주는 `user_type`이 아니라 사용자와 업장의 관계다. 로그인한 사용자가 업주 신청을 내고 operator가 승인하면, 그 사용자는 해당 업장의 업주가 된다. 업주가 되어도 `userType`은 바뀌지 않는다(보통 `customer`). 업주가 할 수 있는 일은 2.2의 권한 표를 따른다.
+
+서비스 규모가 커지면 업장 등록은 operator가 하나씩 입력하는 방식(3.5)이 아니라, 업주가 `new_bar` 신청으로 직접 등록하고 operator가 승인하는 방식을 기본으로 한다.
+
+- 한 업장에는 현재 업주가 최대 한 명이다. 한 사용자는 여러 업장의 업주가 될 수 있다.
+- 신청은 두 종류다. `existing_bar`는 이미 등록된 업장의 업주 신청이고, `new_bar`는 아직 없는 업장을 등록하면서 업주가 되는 신청이다.
+- 신청자는 사업자등록번호와 연락처를 제출한다. operator는 이 값을 앱 밖에서 확인한 뒤 승인하거나 거절한다. 사업자등록번호와 연락처는 신청자 본인과 operator에게만 보여 준다.
+- 신청 결과는 알림으로 보내지 않는다. 신청자는 3.11.3으로 상태를 확인한다.
+
+```text
+[신청자]
+GET /api/me                                  (users 행이 없으면 먼저 생성)
+POST /api/owner-applications                 → pending
+GET /api/me/owner-applications               → 상태 확인
+POST /api/owner-applications/{id}/cancel     → canceled (pending일 때만)
+
+[operator]
+GET /api/owner-applications?status=pending  → 대기 목록
+사업자등록번호·연락처를 앱 밖에서 확인
+POST /api/owner-applications/{id}/approve    → approved, 업주 관계 생성 (new_bar는 업장도 생성)
+POST /api/owner-applications/{id}/reject     → rejected
+
+[승인 후 업주]
+GET /api/me/bars                             → 내가 관리하는 업장
+업장 정보 수정(3.7), 메뉴 등록·검수·반영(3.8, 4~8장)
+```
+
+`OwnerApplicationStatus`
+
+```text
+pending
+approved
+rejected
+canceled
+```
+
+`approved`, `rejected`, `canceled`는 최종 상태이며 다시 바뀌지 않는다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
+
+#### 3.11.1 업주 신청 응답 형식
+
+3.11의 신청 API는 모두 다음 `OwnerApplication` 형식으로 신청을 반환한다.
+
+```json
+{
+  "applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+  "applicationType": "existing_bar",
+  "status": "pending",
+  "applicant": {
+    "userId": "11111111-1111-4111-8111-111111111111",
+    "email": "owner@example.com",
+    "displayName": "김사장"
+  },
+  "bar": {
+    "barId": "22222222-2222-4222-8222-222222222222",
+    "name": "관악 위스키 바",
+    "address": "서울특별시 관악구 관악로 1 2층"
+  },
+  "proposedBar": null,
+  "businessRegistrationNumber": "1234567890",
+  "contactPhone": "010-1234-5678",
+  "applicantNote": "대표 본인입니다",
+  "rejectionReason": null,
+  "reviewedAt": null,
+  "createdAt": "2026-10-14T03:00:00Z",
+  "updatedAt": "2026-10-14T03:00:00Z"
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `applicationId` | UUID 문자열 | 아니오 | |
+| `applicationType` | `existing_bar` \| `new_bar` | 아니오 | |
+| `status` | `OwnerApplicationStatus` | 아니오 | |
+| `applicant.userId` | UUID 문자열 | 아니오 | 신청자 |
+| `applicant.email` | 문자열 | 예 | 3.2와 같다 |
+| `applicant.displayName` | 문자열 | 예 | 3.2와 같다 |
+| `bar` | 객체 | 예 | `existing_bar`는 신청 대상 업장, `new_bar`는 승인으로 만든 업장. `new_bar`가 승인되기 전에는 `null` |
+| `bar.barId`, `bar.name`, `bar.address` | 문자열 | 아니오 | |
+| `proposedBar` | 객체 | 예 | `new_bar`에서 신청자가 적은 업장 정보. `existing_bar`는 `null` |
+| `proposedBar.name`, `proposedBar.address` | 문자열 | 아니오 | |
+| `proposedBar.phone` | 문자열 | 예 | |
+| `businessRegistrationNumber` | 문자열 | 아니오 | 하이픈을 뺀 숫자 10자리 |
+| `contactPhone` | 문자열 | 아니오 | 운영자가 확인을 위해 연락할 번호 |
+| `applicantNote` | 문자열 | 예 | 신청자 메모 |
+| `rejectionReason` | 문자열 | 예 | `rejected`일 때만 값이 있다 |
+| `reviewedAt` | RFC 3339 문자열 | 예 | 승인 또는 거절 시각. 그 전에는 `null` |
+| `createdAt`, `updatedAt` | RFC 3339 문자열 | 아니오 | |
+
+#### 3.11.2 업주 신청
+
+로그인한 사용자 누구나 호출할 수 있다. `users` 행이 없으면 `404 USER_NOT_FOUND`이므로 먼저 `GET /api/me`를 호출한다.
+
+```http
+POST /api/owner-applications
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+기존 업장 신청:
+
+```json
+{
+  "applicationType": "existing_bar",
+  "barId": "22222222-2222-4222-8222-222222222222",
+  "businessRegistrationNumber": "123-45-67890",
+  "contactPhone": "010-1234-5678",
+  "applicantNote": "대표 본인입니다"
+}
+```
+
+새 업장 등록 신청:
+
+```json
+{
+  "applicationType": "new_bar",
+  "proposedBar": {
+    "name": "신림 몰트 하우스",
+    "address": "서울특별시 관악구 신림로 2 3층",
+    "phone": "02-1234-5678"
+  },
+  "businessRegistrationNumber": "123-45-67890",
+  "contactPhone": "010-1234-5678",
+  "applicantNote": null
+}
+```
+
+| 필드 | 필수 | 규칙 |
+|---|---|---|
+| `applicationType` | 예 | `existing_bar` 또는 `new_bar` |
+| `barId` | `existing_bar`만 필수 | 활성 업장의 UUID. `new_bar`에서 보내면 `EXTRA_FORBIDDEN` |
+| `proposedBar` | `new_bar`만 필수 | `existing_bar`에서 보내면 `EXTRA_FORBIDDEN` |
+| `proposedBar.name` | 예 | 앞뒤 공백을 지운 뒤 1~150자 |
+| `proposedBar.address` | 예 | 앞뒤 공백을 지운 뒤 1~500자 |
+| `proposedBar.phone` | 아니오 | 30자 이하. 없으면 `null` |
+| `businessRegistrationNumber` | 예 | 하이픈과 공백을 지운 뒤 숫자 10자리. 하이픈 없이 저장한다 |
+| `contactPhone` | 예 | 앞뒤 공백을 지운 뒤 1~30자 |
+| `applicantNote` | 아니오 | 500자 이하. 공백뿐이면 `null`로 저장한다 |
+
+새 업장의 좌표는 신청자가 보내지 않는다. 승인할 때 operator가 주소를 확인하고 좌표를 입력한다(3.11.7).
+
+`201 Created`, `Location: /api/owner-applications/{applicationId}`, 본문은 `OwnerApplication`(`status = pending`)이다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `404` | `USER_NOT_FOUND` | `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도 |
+| `404` | `BAR_NOT_FOUND` | `existing_bar`의 업장이 없거나, 비활성이거나, `barId`가 UUID 형식이 아님 | 업장 선택 화면으로 돌아가 다시 선택 |
+| `409` | `BAR_OWNER_EXISTS` | 업장에 이미 현재 업주가 있음(본인 포함) | "이미 업주가 등록된 업장입니다" 안내 |
+| `409` | `OWNER_APPLICATION_EXISTS` | 같은 사용자가 같은 업장에 대기 중인 신청이 있음. `details.applicationId`에 기존 신청 ID | 기존 신청 상세로 이동 |
+| `422` | `VALIDATION_FAILED` | 위 규칙 위반. 사업자등록번호 형식 오류는 `fieldErrors[].code = INVALID_BUSINESS_NUMBER` | `fieldErrors` 표시 |
+
+#### 3.11.3 내 업주 신청 목록
+
+```http
+GET /api/me/owner-applications
+Authorization: Bearer <access-token>
+```
+
+호출자 본인의 신청을 모든 상태에 대해 최근 신청부터 반환한다. 페이지네이션은 두지 않는다. 신청이 없으면 `items = []`다.
+
+```json
+{
+  "items": [
+    { "applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1", "status": "pending", "...": "OwnerApplication 형식" }
+  ]
+}
+```
+
+#### 3.11.4 업주 신청 상세
+
+```http
+GET /api/owner-applications/{applicationId}
+Authorization: Bearer <access-token>
+```
+
+신청자 본인과 operator만 조회할 수 있다. 응답은 `OwnerApplication`이다. 신청이 없거나, 다른 사람의 신청이거나, `applicationId`가 UUID 형식이 아니면 `404 OWNER_APPLICATION_NOT_FOUND`다. 다른 사람의 신청이 있는지는 알려 주지 않는다.
+
+#### 3.11.5 업주 신청 취소
+
+```http
+POST /api/owner-applications/{applicationId}/cancel
+Authorization: Bearer <access-token>
+```
+
+신청자 본인만 호출할 수 있다. 요청 본문은 없다. `pending`이면 `canceled`로 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없거나 본인의 신청이 아님 | 신청 목록 재조회 |
+| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회 |
+
+#### 3.11.6 operator의 업주 신청 목록
+
+```http
+GET /api/owner-applications?status=pending&applicationType=new_bar&limit=20&cursor=<cursor>
+Authorization: Bearer <access-token>
+```
+
+operator만 호출할 수 있다.
+
+| Query | 필수 | 기본값 | 설명 |
+|---|---|---|---|
+| `status` | 아니오 | `pending` | `pending`, `approved`, `rejected`, `canceled`, `all` |
+| `applicationType` | 아니오 | 없음 | `existing_bar`, `new_bar`. 없으면 둘 다 |
+| `limit` | 아니오 | `20` | 1~100 |
+| `cursor` | 아니오 | 없음 | 다음 페이지 cursor |
+
+정렬은 `status = pending`이면 오래된 신청부터(처리 순서), 그 외에는 최근 신청부터다.
+
+```json
+{
+  "items": [
+    { "applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1", "status": "pending", "...": "OwnerApplication 형식" }
+  ],
+  "nextCursor": null
+}
+```
+
+#### 3.11.7 업주 신청 승인
+
+```http
+POST /api/owner-applications/{applicationId}/approve
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+operator만 호출할 수 있다.
+
+- `existing_bar`: 요청 본문이 없거나 `{}`다.
+- `new_bar`: operator가 확인한 업장 정보를 보낸다. 프론트엔드는 `proposedBar`를 초기값으로 채우고, operator가 주소를 확인해 좌표를 입력한다. 필드 규칙은 3.5와 같다.
+
+```json
+{
+  "bar": {
+    "name": "신림 몰트 하우스",
+    "address": "서울특별시 관악구 신림로 2 3층",
+    "latitude": 37.484102,
+    "longitude": 126.929815,
+    "phone": "02-1234-5678"
+  }
+}
+```
+
+승인은 하나의 트랜잭션에서 처리한다.
+
+- `existing_bar`: 업장 행을 잠그고 현재 업주가 없는지 다시 확인한 뒤 업주 관계를 만든다. 신청 뒤 업장이 비활성화되었어도 승인할 수 있다.
+- `new_bar`: `bar`로 `status = active`인 업장을 만들고 업주 관계를 만든다. 만든 업장은 응답의 `bar`에 담긴다. 메뉴가 없으므로 상품 검색에는 메뉴를 반영한 뒤부터 나온다.
+
+`200 OK`, 본문은 `OwnerApplication`(`status = approved`)이다. 신청자는 다음 요청부터 업주 권한을 가진다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없음 | 신청 목록 재조회 |
+| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회 |
+| `409` | `BAR_OWNER_EXISTS` | 업장에 이미 현재 업주가 있음. 같은 업장의 다른 신청이 먼저 승인된 경우 | 이 신청은 거절 처리 |
+| `422` | `VALIDATION_FAILED` | `new_bar`인데 `bar`가 없거나 규칙 위반, `existing_bar`인데 `bar`를 보냄(`EXTRA_FORBIDDEN`) | `fieldErrors` 표시 |
+
+#### 3.11.8 업주 신청 거절
+
+```http
+POST /api/owner-applications/{applicationId}/reject
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "reason": "사업자등록번호를 확인할 수 없습니다."
+}
+```
+
+operator만 호출할 수 있다. `reason`은 필수이며 앞뒤 공백을 지운 뒤 1~500자다. 신청자에게 그대로 보여 준다. `200 OK`, 본문은 `OwnerApplication`(`status = rejected`)이다. 오류는 3.11.7의 `403`, `404`, `409 INVALID_APPLICATION_STATE`, `422`와 같다.
+
+#### 3.11.9 내가 관리하는 업장 목록
+
+```http
+GET /api/me/bars
+Authorization: Bearer <access-token>
+```
+
+로그인한 사용자 누구나 호출할 수 있다. 호출자가 현재 업주인 업장을 이름순으로 반환한다. 업주가 아니면 `items = []`이며, operator도 본인이 업주인 업장만 나온다(전체 업장은 3.4). 프론트엔드는 목록이 비어 있지 않으면 업주 메뉴를 보여 준다. 업장마다 3.6과 같은 형식이다.
+
+```json
+{
+  "items": [
+    {
+      "barId": "22222222-2222-4222-8222-222222222222",
+      "name": "관악 위스키 바",
+      "address": "서울특별시 관악구 관악로 1 2층",
+      "latitude": 37.478321,
+      "longitude": 126.951234,
+      "phone": "02-000-0000",
+      "status": "active",
+      "activeMenuImport": null,
+      "currentMenu": {
+        "menuBoardId": "66666666-6666-4666-8666-666666666666",
+        "publishedAt": "2026-10-04T09:15:00Z"
+      },
+      "owner": {
+        "userId": "11111111-1111-4111-8111-111111111111",
+        "email": "owner@example.com",
+        "displayName": "김사장",
+        "ownerSince": "2026-10-14T05:00:00Z"
+      },
+      "createdAt": "2026-10-01T03:00:00Z",
+      "updatedAt": "2026-10-04T09:15:00Z"
+    }
+  ]
+}
+```
+
+#### 3.11.10 업주 해제
+
+```http
+DELETE /api/bars/{barId}/owner
+Authorization: Bearer <access-token>
+```
+
+operator만 호출할 수 있다. 업장의 현재 업주 관계를 해제하고 `204 No Content`를 반환한다. 기록은 지우지 않고 해제 시각을 남긴다. 해제된 사용자는 다음 요청부터 그 업장의 업주 권한이 없다. 업장에 진행 중인 메뉴 등록 작업은 그대로 남으며 operator나 새 업주가 이어서 처리할 수 있다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
+| `404` | `BAR_OWNER_NOT_FOUND` | 업장에 현재 업주가 없음 | 업장 상세(3.6) 재조회 |
 
 ## 4. 메뉴 등록 요청
 
@@ -1576,12 +1955,17 @@ HTTP/1.1 200 OK
 |---|---|---|---|
 | `400` | `INVALID_REQUEST` | JSON 또는 multipart 형식 오류 | 요청 구성 확인 |
 | `401` | `UNAUTHENTICATED` | 토큰 없음, 만료, 서명·claim 오류 (3.1.5) | 세션 갱신 후 한 번 재시도. 실패하면 로그인 이동 |
-| `403` | `FORBIDDEN` | operator가 아닌 사용자의 operator 전용 API 호출, 또는 업장·작업 접근 권한 없음 | 접근 차단 |
-| `404` | `BAR_NOT_FOUND` | 업장이 없음, `barId` 형식 오류, operator가 아닌 호출자의 비활성 업장 조회 (3.6, 3.9) | 안내 후 이전 화면 이동 |
+| `403` | `FORBIDDEN` | 권한이 없는 API 호출: operator 전용 API, 업주가 아닌 업장·작업의 관리 API, 업주의 `status` 변경 (2.2) | 접근 차단 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없음, `barId` 형식 오류, operator나 업주가 아닌 호출자의 비활성 업장 조회 (3.6, 3.9) | 안내 후 이전 화면 이동 |
+| `404` | `OWNER_APPLICATION_NOT_FOUND` | 업주 신청이 없거나 조회 권한이 없음 (3.11) | 신청 목록 재조회 |
+| `404` | `BAR_OWNER_NOT_FOUND` | 업주 해제 대상 업장에 현재 업주가 없음 (3.11.10) | 업장 상세 재조회 |
 | `404` | `MENU_IMPORT_NOT_FOUND` | 등록 작업이 없음 | 작업 목록 이동 |
-| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me` 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
+| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me` 또는 `POST /api/owner-applications` 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
 | `405` | `METHOD_NOT_ALLOWED` | 경로는 있지만 허용하지 않는 HTTP 메서드 | 요청 메서드 확인 |
+| `409` | `BAR_OWNER_EXISTS` | 이미 현재 업주가 있는 업장에 신청 또는 승인 (3.11) | 안내. operator는 해당 신청을 거절 |
+| `409` | `OWNER_APPLICATION_EXISTS` | 같은 업장에 본인의 대기 중 신청이 있음 (3.11.2) | `details.applicationId`의 신청으로 이동 |
+| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소 (3.11) | 신청 상세 재조회 |
 | `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 키에 다른 요청 내용 | 새 키로 명시적 재요청 |
 | `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있음 | 기존 작업으로 이동 |
 | `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가 | 상태 재조회 |
@@ -1620,7 +2004,7 @@ HTTP/1.1 200 OK
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
 - **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `EXTRA_FORBIDDEN`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`.
 
 ### 9.4 검수 버전 충돌
 

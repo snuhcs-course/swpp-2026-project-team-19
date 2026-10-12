@@ -4,6 +4,8 @@ Instructions for AI coding agents working in this repository, shared by the Andr
 
 BottleMap is an Android app that finds bars serving a specific whisky. Bar owners or operators upload a menu photo, AI extracts the menu, items are matched to a whisky catalogue, a person reviews and publishes the result, and customers search the published menus.
 
+Bar owners onboard themselves: they log in with Google, apply to own an existing bar or to register a new one, and an operator approves the application. Operators can still create bars directly, but as the service grows, bars are expected to come in through owner applications rather than one by one from operators.
+
 ## Repository layout
 
 | Path | What it is | Owner |
@@ -60,8 +62,9 @@ Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) i
 
 - JSON field names are `camelCase`. IDs are UUID strings, times are UTC RFC 3339 strings, prices are integer KRW, and a missing value is `null`, not an empty string.
 - Errors use one shape: `{"error": {"code", "message", ...}}`. Clients branch on `error.code`, not on the message text.
-- Auth is `Authorization: Bearer <token>`. Until real login lands, tokens come from `POST /api/auth/temp-login`, and the user type is set by the server environment, never by the client.
-- Customer search (`GET /api/search/bars`) and bar menu (`GET /api/bars/{barId}/menu`) are public; menu import, review, and catalogue APIs are operator-only.
+- Auth is `Authorization: Bearer <token>` with a Supabase access token from Google login (spec 3.1). `POST /api/auth/temp-login` stays for local development, and for the demo server only until Google login works in the app. Until the backend verifies Supabase tokens, temp-login tokens are the only ones it accepts.
+- Permissions come from the database, never from the client. `users.user_type` is `customer` or `operator`; being a bar owner is not a user type but a `bar_owners` row linking a user to one bar, created when an operator approves an owner application (spec 3.11).
+- Customer search (`GET /api/search/bars`) and bar menu (`GET /api/bars/{barId}/menu`) are public. Bar management, menu import, and review APIs are for operators and the bar's approved owner; the catalogue search APIs are for operators and owners. Approving owner applications is operator-only. The full table is in spec 2.2.
 
 ## Android notes
 

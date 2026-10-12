@@ -10,6 +10,7 @@ Project BottleMap {
   - Human review before publication
   - Product-centered search for bars, price, pour size, distance, and menu update date
   - Pilot-bar and menu registration by authenticated project operators
+  - Bar-owner applications approved by operators; an approved owner manages only their own bars
   - Anonymous customer search, with optional customer accounts for additional features
   - A menu upload may contain multiple images
   - Each upload explicitly selects full replacement or partial update mode
@@ -23,7 +24,6 @@ Project BottleMap {
   This draft intentionally keeps unresolved decisions visible.
   PostgreSQL is the selected database engine. Supabase Auth with the Google provider is the selected
   authentication provider. ID strategy is not final.
-  Bar-owner login, ownership claims, and owner-managed menu upload are post-MVP extensions.
   Accessory features such as reviews, recommendations, feeds, alerts, stale-menu reports,
   natural-language search, and non-whisky categories are outside the current MVP schema.
   '''
@@ -103,6 +103,18 @@ Enum menu_change_decision {
   ignore
 }
 
+Enum owner_application_type {
+  existing_bar
+  new_bar
+}
+
+Enum owner_application_status {
+  pending
+  approved
+  rejected
+  canceled
+}
+
 Table users {
   id uuid [pk]
   auth_subject varchar(255) [not null, unique, note: 'Supabase Auth user ID (the access token sub, a UUID string)']
@@ -116,8 +128,8 @@ Table users {
   Anonymous customers do not create a row. Customer accounts are optional and support additional
   logged-in features, while every operator must authenticate before managing bars or menus. Each
   account has one global user type; operators may still use public customer-facing features.
-  Bar-owner accounts and bar-specific ownership or management roles are outside the MVP and will
-  be modeled as user-to-bar relationships in a later schema revision.
+  Bar ownership is not a user type. It is a user-to-bar relationship in bar_owners, granted when an
+  operator approves a bar_owner_applications row, so an owner usually keeps user_type customer.
   '''
 }
 
@@ -133,10 +145,70 @@ Table bars {
   updated_at timestamptz [not null]
 
   Note: '''
-  During the MVP, bars are created and maintained by project operators with the bar's permission.
+  Bars are created by project operators, or by an operator approving a new_bar owner application.
   The schema does not retain which operator originally created a bar.
-  Owner-managed access and ownership claims are deferred until after the MVP.
+  The bar's approved owner, if any, is the bar_owners row whose revoked_at is null.
   Coordinate storage may later change to a PostGIS geography or geometry type if spatial search requires it.
+  '''
+}
+
+Table bar_owner_applications {
+  id uuid [pk]
+  applicant_user_id uuid [not null, ref: > users.id]
+  application_type owner_application_type [not null]
+  bar_id uuid [ref: > bars.id, note: 'existing_bar: the claimed bar. new_bar: null until approval, then the created bar']
+  proposed_bar_name varchar(150) [note: 'new_bar only']
+  proposed_address varchar(500) [note: 'new_bar only']
+  proposed_phone varchar(30) [note: 'new_bar only; optional']
+  business_registration_number char(10) [not null, note: 'Ten digits without hyphens']
+  contact_phone varchar(30) [not null]
+  applicant_note varchar(500)
+  status owner_application_status [not null, default: 'pending']
+  reviewed_by_user_id uuid [ref: > users.id, note: 'The operator who approved or rejected it']
+  reviewed_at timestamptz
+  rejection_reason varchar(500) [note: 'Required when rejected; shown to the applicant']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    (status, created_at)
+    (applicant_user_id, created_at)
+    (bar_id)
+  }
+
+  Note: '''
+  A user's request to become the owner of a bar. existing_bar claims a bar already in bars;
+  new_bar asks to register a bar that is not in bars yet. The applicant gives a business registration
+  number and a contact phone, and an operator checks them outside the app before deciding.
+  Approving an existing_bar application creates the bar_owners row. Approving a new_bar application
+  creates the bars row from the operator's confirmed bar details (including coordinates) and the
+  bar_owners row in the same transaction, and stores the new bar's id in bar_id.
+  Only pending applications can be approved, rejected or canceled; the other statuses are final.
+  An applicant may have only one pending application per existing bar. A rejected or canceled
+  applicant may apply again with a new row. Business registration numbers and contact phones are
+  visible only to the applicant and operators.
+  '''
+}
+
+Table bar_owners {
+  id uuid [pk]
+  bar_id uuid [not null, ref: > bars.id]
+  user_id uuid [not null, ref: > users.id]
+  application_id uuid [not null, unique, ref: - bar_owner_applications.id]
+  created_at timestamptz [not null, note: 'When the application was approved']
+  revoked_at timestamptz
+  revoked_by_user_id uuid [ref: > users.id, note: 'The operator who revoked the ownership']
+
+  indexes {
+    bar_id [note: 'Unique where revoked_at is null: at most one current owner per bar']
+    user_id
+  }
+
+  Note: '''
+  The approved owner of a bar. A row with revoked_at null is the current owner, who may manage that
+  bar's information and menu imports; a user may own several bars, but a bar has at most one current
+  owner. Revoking keeps the row and sets revoked_at so the history remains. Ownership does not change
+  users.user_type.
   '''
 }
 
@@ -246,7 +318,7 @@ Table menu_imports {
   }
 
   Note: '''
-  One import represents one operator submission and may contain multiple menu images.
+  One import represents one submission by an operator or the bar's approved owner and may contain multiple menu images.
   idempotency_key prevents duplicate imports and duplicate AI costs when the same client request is retried.
   When an existing idempotency_key is received, the backend returns the existing import only if the newly
   calculated request_fingerprint is equal; otherwise it rejects the request as a conflict. The fingerprint
@@ -256,13 +328,13 @@ Table menu_imports {
   submission locks the import row and runs at SERIALIZABLE isolation.
   full_replace rebuilds the current menu-board grouping from the confirmed results.
   partial_update adds or updates only confirmed results and leaves unrelated entries unchanged.
-  Neither mode changes the published menu until the operator completes the consolidated review of
+  Neither mode changes the published menu until the reviewer completes the consolidated review of
   extracted items and options, entity-resolution decisions, proposed catalog additions, and the generated diff.
   The entire final approval and menu-application transaction runs at SERIALIZABLE isolation. On a
   serialization failure, the backend rolls it back and retries the full transaction up to three times.
   Because confirmation and application share one transaction, status moves directly from
   ready_for_review to applied; there is no intermediate approved status.
-  Owner submissions will use the same structure after owner accounts are introduced.
+  Owner submissions use the same structure and rules as operator submissions.
   Import records and their related images and AI results are retained through the project period,
   even after a newer menu replaces the current published menu.
   '''
@@ -593,6 +665,8 @@ Table eval_ground_truth_options {
 TableGroup "Accounts and Bars" {
   users
   bars
+  bar_owner_applications
+  bar_owners
 }
 
 TableGroup "Product Catalog" {
