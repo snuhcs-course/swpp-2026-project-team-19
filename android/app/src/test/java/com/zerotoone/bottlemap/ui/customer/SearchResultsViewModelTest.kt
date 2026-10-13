@@ -71,6 +71,19 @@ class SearchResultsViewModelTest {
     }
 
     @Test
+    fun koreanQueryIsSentWithoutClientSideAliasMatching() = runTest(dispatcher) {
+        val fake = FakeSource { query -> response(query, withBar = false) }
+        val vm = SearchResultsViewModel(fake)
+        vm.search("  딘스톤 12  ")
+        advanceUntilIdle()
+        assertEquals(listOf("딘스톤 12"), fake.requests)
+        assertEquals(
+            CustomerSearchUiState.Empty(EmptySearchReason.NO_BARS),
+            vm.state.value,
+        )
+    }
+
+    @Test
     fun networkErrorThenRetryKeepsQueryAndSucceeds() = runTest(dispatcher) {
         var shouldFail = true
         val fake = FakeSource { query ->
