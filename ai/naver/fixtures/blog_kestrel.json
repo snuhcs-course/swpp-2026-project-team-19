@@ -1,0 +1,11 @@
+{
+ "lastBuildDate": "Tue, 13 Oct 2026 10:00:00 +0900",
+ "total": 3,
+ "start": 1,
+ "display": 3,
+ "items": [
+  {"title": "케스트럴 보틀러스(Kestrel Bottlers) 아드벡 9년", "link": "https://blog.example/k1", "description": "독립병입사 케스트럴 보틀러스 아드벡 9년 캐스크 스트렝스", "bloggername": "b", "bloggerlink": "https://blog.example", "postdate": "20261001"},
+  {"title": "아드벡 9년 vs 아드벡 10년", "link": "https://blog.example/k2", "description": "정규품 아드벡 10년과 비교", "bloggername": "b", "bloggerlink": "https://blog.example", "postdate": "20261002"},
+  {"title": "Kestrel Bottlers Ardbeg 9", "link": "https://blog.example/k3", "description": "no hangul here", "bloggername": "b", "bloggerlink": "https://blog.example", "postdate": "20261003"}
+ ]
+}
