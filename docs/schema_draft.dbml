@@ -45,6 +45,7 @@ Enum import_status {
   ready_for_review
   applied
   failed
+  canceled
 }
 
 Enum import_mode {
@@ -334,6 +335,9 @@ Table menu_imports {
   serialization failure, the backend rolls it back and retries the full transaction up to three times.
   Because confirmation and application share one transaction, status moves directly from
   ready_for_review to applied; there is no intermediate approved status.
+  An unfinished import can be canceled by an operator or the bar's owner. It then becomes canceled
+  without changing the menu board or the catalog, its images and AI records are kept, and the bar can
+  take a new upload. completed_at records when an import became applied, failed or canceled.
   Owner submissions use the same structure and rules as operator submissions.
   Import records and their related images and AI results are retained through the project period,
   even after a newer menu replaces the current published menu.

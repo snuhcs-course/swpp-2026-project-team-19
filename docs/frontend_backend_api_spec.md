@@ -71,7 +71,7 @@ GET 상품 검색 (검색어 + 선택적 위치)
 
 | API | 비로그인 | customer | 해당 업장의 업주 | operator |
 |---|---|---|---|---|
-| `GET /api/search/bars` | O | O | O | O |
+| `GET /api/search/bars`, `GET /api/search/bar-names` | O | O | O | O |
 | `GET /api/bars/{barId}/menu` | 활성 업장만 | 활성 업장만 | O | O |
 | `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
 | `POST /api/owner-applications`, `GET /api/me/owner-applications` | | O | O | O |
@@ -83,7 +83,7 @@ GET 상품 검색 (검색어 + 선택적 위치)
 | `GET /api/bars/{barId}` | | | O | O |
 | `PATCH /api/bars/{barId}` | | | O (`status` 제외) | O |
 | `GET /api/bars/{barId}/menu-imports`, `POST /api/bars/{barId}/menu-imports` | | | O | O |
-| `GET /api/menu-imports/{menuImportId}`, `POST .../review-and-apply` | | | 해당 업장의 작업만 | O |
+| `GET /api/menu-imports/{menuImportId}`, `POST .../review-and-apply`, `POST .../cancel` | | | 해당 업장의 작업만 | O |
 | `GET /api/catalog/brands`, `GET /api/catalog/products` | | | 업장이 하나 이상이면 O | O |
 
 인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다.
@@ -104,7 +104,10 @@ processing
 ready_for_review
 applied
 failed
+canceled
 ```
+
+`uploaded`, `processing`, `ready_for_review`는 미완료 상태이고, `applied`, `failed`, `canceled`는 최종 상태다.
 
 `ImportMode`
 
@@ -173,6 +176,8 @@ ignore
 | `GET` | `/api/catalog/brands` | 검수 중 기존 브랜드 검색 |
 | `GET` | `/api/catalog/products` | 검수 중 기존 상품 검색 |
 | `POST` | `/api/menu-imports/{menuImportId}/review-and-apply` | 전체 검수 결정 제출과 원자적 반영 |
+| `POST` | `/api/menu-imports/{menuImportId}/cancel` | 미완료 메뉴 등록 작업 취소 |
+| `GET` | `/api/search/bar-names` | 업주 신청용 업장 이름·주소 검색 (공개) |
 | `POST` | `/api/owner-applications` | 업주 신청 |
 | `GET` | `/api/me/owner-applications` | 내 업주 신청 목록 |
 | `GET` | `/api/owner-applications/{applicationId}` | 업주 신청 상세 |
@@ -418,7 +423,7 @@ Authorization: Bearer <access-token>
 {
   "items": [
     {
-      "barId": "bar-001",
+      "barId": "22222222-2222-4222-8222-222222222222",
       "name": "관악 위스키 바",
       "address": "서울특별시 관악구 관악로 1, 2층",
       "latitude": 37.123456,
@@ -426,7 +431,7 @@ Authorization: Bearer <access-token>
       "phone": "02-000-0000",
       "status": "active",
       "activeMenuImport": {
-        "menuImportId": "import-001",
+        "menuImportId": "77777777-7777-4777-8777-777777777777",
         "status": "ready_for_review"
       }
     }
@@ -439,6 +444,8 @@ Authorization: Bearer <access-token>
 
 ### 3.5 업장 생성
 
+operator가 업장을 직접 만드는 API다. 업주가 있는 업장은 업주의 `new_bar` 신청과 승인(3.11)으로 만드는 것을 기본으로 한다.
+
 ```http
 POST /api/bars
 Authorization: Bearer <access-token>
@@ -448,35 +455,39 @@ Content-Type: application/json
 ```json
 {
   "name": "관악 위스키 바",
-  "address": "서울특별시 관악구 관악로 1, 2층",
-  "latitude": 37.123456,
-  "longitude": 126.123456,
+  "address": "서울특별시 관악구 관악로 1 2층",
+  "latitude": 37.478321,
+  "longitude": 126.951234,
   "phone": "02-000-0000"
 }
 ```
 
+업장 필드 규칙(3.5, 3.7, 3.11.7 공통):
+
+| 필드 | 생성 시 필수 | 규칙 |
+|---|---|---|
+| `name` | 예 | 앞뒤 공백을 지운 뒤 1~150자 |
+| `address` | 예 | 앞뒤 공백을 지운 뒤 1~500자. 층·호수를 포함한 표시용 주소 |
+| `latitude` | 예 | -90~90. 소수점 아래 6자리까지 저장한다 |
+| `longitude` | 예 | -180~180. 소수점 아래 6자리까지 저장한다 |
+| `phone` | 아니오 | 30자 이하. 없거나 공백뿐이면 `null` |
+
+좌표는 서버가 주소로 계산하지 않는다. 프론트엔드는 지도에서 업장 위치를 고르는 화면을 제공하고, 고른 좌표를 주소와 함께 보낸다. operator의 업장 생성, 신청 승인(3.11.7)과 업장 수정(3.7)이 같은 화면을 쓴다.
+
 ```http
 HTTP/1.1 201 Created
-Location: /api/bars/bar-001
+Location: /api/bars/22222222-2222-4222-8222-222222222222
 ```
 
-```json
-{
-  "barId": "bar-001",
-  "name": "관악 위스키 바",
-  "address": "서울특별시 관악구 관악로 1, 2층",
-  "latitude": 37.123456,
-  "longitude": 126.123456,
-  "phone": "02-000-0000",
-  "status": "active",
-  "createdAt": "2026-10-04T09:00:00Z",
-  "updatedAt": "2026-10-04T09:00:00Z"
-}
-```
+응답 본문은 3.6과 같은 형식이다. 새 업장이므로 `status = active`, `activeMenuImport = null`, `currentMenu = null`, `owner = null`이다.
 
-백엔드는 이름·주소가 비슷한 기존 업장을 조회해 중복 가능성을 경고할 수 있지만 이름 유사성만으로 생성을 자동 차단하지 않는다.
+이름·주소가 비슷한 업장이 있어도 생성을 막지 않으며, 응답에 경고도 담지 않는다. 프론트엔드는 생성 전에 3.4로 같은 업장이 있는지 확인하게 한다.
 
-operator가 업장을 직접 만드는 API다. 업주가 있는 업장은 업주의 `new_bar` 신청과 승인(3.11)으로 만드는 것을 기본으로 한다.
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `422` | `VALIDATION_FAILED` | 위 규칙 위반 | `fieldErrors` 표시 |
 
 ### 3.6 업장 상세 조회
 
@@ -555,7 +566,7 @@ Authorization: Bearer <access-token>
 Content-Type: application/json
 ```
 
-변경할 필드만 전송한다.
+operator와 해당 업장의 현재 업주가 호출할 수 있다. 바꿀 필드만 보낸다. 필드 규칙은 3.5와 같다.
 
 ```json
 {
@@ -564,22 +575,25 @@ Content-Type: application/json
 }
 ```
 
-```json
-{
-  "barId": "bar-001",
-  "name": "관악 위스키 바",
-  "address": "서울특별시 관악구 관악로 1, 2층",
-  "latitude": 37.123456,
-  "longitude": 126.123456,
-  "phone": "02-111-2222",
-  "status": "inactive",
-  "updatedAt": "2026-10-04T10:10:00Z"
-}
-```
+| 필드 | 보낼 수 있는 사람 | 규칙 |
+|---|---|---|
+| `name`, `address` | operator, 업주 | `null`을 보낼 수 없다 |
+| `latitude`, `longitude` | operator, 업주 | 둘을 함께 보낸다. 하나만 보내면 `LAT_LNG_REQUIRED_TOGETHER` |
+| `phone` | operator, 업주 | `null`을 보내면 연락처를 지운다 |
+| `status` | operator만 | `active` 또는 `inactive`. 업주가 보내면 `403 FORBIDDEN` |
 
-업장을 물리 삭제하는 API는 두지 않는다. 운영 중단은 `status = inactive`로 처리해 메뉴 등록과 이미지 이력을 유지한다.
+- `address`를 바꿀 때는 `latitude`와 `longitude`도 함께 보낸다. 주소만 보내면 `422`이고 `fieldErrors[].code = COORDINATES_REQUIRED`다. 주소 없이 좌표만 바꿔 위치를 보정할 수는 있다.
+- 빈 본문 `{}`이면 아무것도 바꾸지 않고 현재 값을 반환한다.
+- 응답은 `200 OK`이며 본문은 3.6과 같은 형식이다.
 
-해당 업장의 업주도 이 API를 호출할 수 있지만 `status`는 바꿀 수 없다. 업주가 `status`를 보내면 `403 FORBIDDEN`이다. 업장의 비활성화와 재활성화는 operator가 한다.
+업장을 물리 삭제하는 API는 두지 않는다. 운영 중단은 operator가 `status = inactive`로 처리해 메뉴 등록과 이미지 이력을 유지한다. 비활성 업장은 고객 검색과 고객용 업장 상세에서 빠지고, 새 메뉴 등록을 받지 않는다(4.4).
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님, 또는 업주가 `status`를 보냄 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `LAT_LNG_REQUIRED_TOGETHER`, `COORDINATES_REQUIRED` | `fieldErrors` 표시 |
 
 ### 3.8 업장별 메뉴 등록 작업 목록
 
@@ -592,7 +606,7 @@ Authorization: Bearer <access-token>
 
 | Query | 필수 | 기본값 | 설명 |
 |---|---|---|---|
-| `status` | 아니오 | `all` | `active`, `uploaded`, `processing`, `ready_for_review`, `applied`, `failed`, `all` |
+| `status` | 아니오 | `all` | `active`, `uploaded`, `processing`, `ready_for_review`, `applied`, `failed`, `canceled`, `all` |
 | `limit` | 아니오 | `20` | 최대 `100` |
 | `cursor` | 아니오 | 없음 | 다음 페이지 cursor |
 
@@ -602,7 +616,7 @@ Authorization: Bearer <access-token>
 {
   "items": [
     {
-      "menuImportId": "import-001",
+      "menuImportId": "77777777-7777-4777-8777-777777777777",
       "mode": "full_replace",
       "status": "ready_for_review",
       "imageCount": 2,
@@ -998,6 +1012,7 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 ```text
 [신청자]
 GET /api/me                                  (users 행이 없으면 먼저 생성)
+GET /api/search/bar-names?query=...          (기존 업장 신청이면 업장 선택, 3.11.11)
 POST /api/owner-applications                 → pending
 GET /api/me/owner-applications               → 상태 확인
 POST /api/owner-applications/{id}/cancel     → canceled (pending일 때만)
@@ -1115,7 +1130,7 @@ Content-Type: application/json
 | 필드 | 필수 | 규칙 |
 |---|---|---|
 | `applicationType` | 예 | `existing_bar` 또는 `new_bar` |
-| `barId` | `existing_bar`만 필수 | 활성 업장의 UUID. `new_bar`에서 보내면 `EXTRA_FORBIDDEN` |
+| `barId` | `existing_bar`만 필수 | 활성 업장의 UUID. 3.11.11로 찾는다. `new_bar`에서 보내면 `EXTRA_FORBIDDEN` |
 | `proposedBar` | `new_bar`만 필수 | `existing_bar`에서 보내면 `EXTRA_FORBIDDEN` |
 | `proposedBar.name` | 예 | 앞뒤 공백을 지운 뒤 1~150자 |
 | `proposedBar.address` | 예 | 앞뒤 공백을 지운 뒤 1~500자 |
@@ -1313,6 +1328,50 @@ operator만 호출할 수 있다. 업장의 현재 업주 관계를 해제하고
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
 | `404` | `BAR_OWNER_NOT_FOUND` | 업장에 현재 업주가 없음 | 업장 상세(3.6) 재조회 |
 
+#### 3.11.11 신청할 업장 검색
+
+`existing_bar` 신청에서 신청자가 자기 업장을 고를 때 사용한다. 업장 이름이나 주소의 일부로 활성 업장을 찾는다. 상품으로 업장을 찾는 고객 검색(3.10)과는 다른 API다.
+
+```http
+GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
+```
+
+로그인 없이 호출할 수 있는 공개 API이며 `Authorization` 헤더를 사용하지 않는다. 반환하는 값은 활성 업장의 공개 정보(3.9에서도 볼 수 있는 이름과 주소)와 업주 등록 여부뿐이다.
+
+| Query | 필수 | 기본값 | 설명 |
+|---|---|---|---|
+| `query` | 예 | 없음 | 업장 이름 또는 주소의 일부. 앞뒤 공백을 지운 뒤 1~100자. 대소문자를 구분하지 않는다 |
+| `limit` | 아니오 | `20` | 1~50 |
+
+`200 OK`. 이름순으로 반환하고 페이지네이션은 두지 않는다. 결과가 없으면 `items = []`다.
+
+```json
+{
+  "items": [
+    {
+      "barId": "22222222-2222-4222-8222-222222222222",
+      "name": "관악 위스키 바",
+      "address": "서울특별시 관악구 관악로 1 2층",
+      "hasOwner": true
+    }
+  ],
+  "truncated": false
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `items[].barId` | UUID 문자열 | 아니오 | |
+| `items[].name`, `items[].address` | 문자열 | 아니오 | |
+| `items[].hasOwner` | 불리언 | 아니오 | 현재 업주가 있으면 `true`. 이 업장에 신청하면 `409 BAR_OWNER_EXISTS`다 |
+| `truncated` | 불리언 | 아니오 | `limit`보다 많이 일치했으면 `true` |
+
+비활성 업장은 결과에 없다. 신청자의 업장이 목록에 없으면 프론트엔드는 `new_bar` 신청을 안내한다. `hasOwner = true`인 업장은 선택할 수 없게 하고 operator 문의를 안내한다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `422` | `VALIDATION_FAILED` | `query` 없음(`MISSING`), 공백뿐(`BLANK`), 100자 초과(`STRING_TOO_LONG`), `limit` 범위 밖 | 검색창 아래에 안내 |
+
 ## 4. 메뉴 등록 요청
 
 ### 4.1 요청
@@ -1329,8 +1388,12 @@ multipart 필드:
 | 필드 | 타입 | 필수 | 설명 |
 |---|---|---|---|
 | `mode` | `ImportMode` | 예 | 전체 교체 또는 일부 수정 |
-| `ownerNote` | 문자열 | 아니오 | 촬영 출처나 작업 메모 |
+| `ownerNote` | 문자열 | 아니오 | 촬영 출처나 작업 메모. 1000자 이하. 공백뿐이면 `null`로 저장 |
 | `images` | 이미지 파일 배열 | 예 | 표시 순서대로 전송한 메뉴 사진 |
+
+`Idempotency-Key` 헤더는 필수이며 1~255자다. 프론트엔드는 업로드를 시작할 때마다 새 UUID를 만들고, 같은 업로드를 재시도할 때만 같은 값을 다시 보낸다.
+
+operator와 해당 업장의 현재 업주가 호출할 수 있다.
 
 예시:
 
@@ -1359,16 +1422,16 @@ AI 결과를 기다리지 않고 작업 생성 직후 반환한다.
 
 ```http
 HTTP/1.1 202 Accepted
-Location: /api/menu-imports/import-001
+Location: /api/menu-imports/77777777-7777-4777-8777-777777777777
 Retry-After: 3
 ```
 
 ```json
 {
-  "menuImportId": "import-001",
+  "menuImportId": "77777777-7777-4777-8777-777777777777",
   "status": "processing",
   "imageCount": 2,
-  "statusUrl": "/api/menu-imports/import-001",
+  "statusUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777777",
   "pollAfterMs": 3000
 }
 ```
@@ -1400,7 +1463,22 @@ ownerNote
 → 별개의 명시적 등록 요청으로 허용
 ```
 
-한 업장에는 `uploaded`, `processing`, `ready_for_review` 상태의 미완료 작업을 하나만 허용한다.
+한 업장에는 `uploaded`, `processing`, `ready_for_review` 상태의 미완료 작업을 하나만 허용한다. 미완료 작업을 끝내지 않고 새로 올리려면 먼저 그 작업을 취소한다(5.7).
+
+### 4.4 오류와 프론트엔드 처리
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없음, `barId`가 UUID 형식이 아님, 비활성 업장 | 업장 목록으로 이동 |
+| `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 `Idempotency-Key`로 다른 내용을 보냄. `details.menuImportId`에 그 키로 만든 작업 ID | 새 키로 다시 요청 |
+| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 있음. `details.menuImportId`와 `details.status`에 그 작업의 ID와 상태 | 기존 작업으로 이동(`GET /api/menu-imports/{details.menuImportId}`). 새로 올리려면 기존 작업을 취소(5.7)한 뒤 다시 업로드 |
+| `413` | `UPLOAD_TOO_LARGE` | 사진 개수, 한 장 크기 또는 전체 크기 초과. `details.maxImages`, `details.maxImageBytes`, `details.maxTotalBytes`에 제한값 | 사진 수를 줄이거나 다시 압축 |
+| `415` | `UNSUPPORTED_IMAGE_TYPE` | JPEG·PNG가 아니거나 선언한 형식과 내용이 다름. `details.imageOrder`에 해당 사진 순서 | 해당 사진을 JPEG로 바꿔 다시 업로드 |
+| `422` | `VALIDATION_FAILED` | `Idempotency-Key`, `mode`, `images` 누락(`MISSING`), 허용하지 않는 `mode`, `ownerNote` 1000자 초과 | `fieldErrors` 표시 |
+
+같은 키와 같은 내용의 재요청은 오류가 아니라 기존 작업의 `202` 응답을 다시 받는다(4.3).
 
 ## 5. 메뉴 등록 상태와 통합 검수 조회
 
@@ -1411,13 +1489,27 @@ GET /api/menu-imports/{menuImportId}
 Authorization: Bearer <access-token>
 ```
 
-이 API는 상태에 따라 응답 본문이 달라진다.
+operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 이 API는 상태에 따라 응답 본문이 달라진다.
+
+| `status` | 응답 | 프론트엔드 처리 |
+|---|---|---|
+| `uploaded`, `processing` | 5.2 | `pollAfterMs` 뒤 다시 조회 |
+| `failed` | 5.3 | polling 중단, 새 업로드 안내 |
+| `ready_for_review` | 5.4 | polling 중단, 통합 검수 화면 |
+| `applied` | 5.5 | polling 중단, 반영 완료 화면 |
+| `canceled` | 5.6 | polling 중단, 취소됨 안내 |
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 작업 대상 업장의 업주도 아님 | 3.1.5 |
+| `404` | `MENU_IMPORT_NOT_FOUND` | 작업이 없거나 `menuImportId`가 UUID 형식이 아님 | 작업 목록(3.8)으로 이동 |
 
 ### 5.2 처리 중 응답
 
 ```json
 {
-  "menuImportId": "import-001",
+  "menuImportId": "77777777-7777-4777-8777-777777777777",
   "status": "processing",
   "progress": {
     "totalImages": 2,
@@ -1428,6 +1520,8 @@ Authorization: Bearer <access-token>
 }
 ```
 
+`uploaded`와 `processing`은 같은 형식이다. `status`만 다르다.
+
 `completedImages`는 AI 호출, 응답 검증과 추출 저장까지 성공한 이미지 수다. 후보 생성과 임시 diff는 모든 이미지의 추출이 끝난 뒤 한 번에 만들므로, 모든 이미지가 완료돼도 잠시 `processing` 상태일 수 있다. 프론트엔드는 이 숫자를 정확한 전체 처리율로 간주하지 않고 진행 안내에만 사용한다.
 
 ### 5.3 실패 응답
@@ -1436,7 +1530,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 
 ```json
 {
-  "menuImportId": "import-001",
+  "menuImportId": "77777777-7777-4777-8777-777777777777",
   "status": "failed",
   "progress": {
     "totalImages": 2,
@@ -1467,20 +1561,20 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 
 ```json
 {
-  "menuImportId": "import-001",
-  "barId": "bar-001",
+  "menuImportId": "77777777-7777-4777-8777-777777777777",
+  "barId": "22222222-2222-4222-8222-222222222222",
   "mode": "full_replace",
   "status": "ready_for_review",
   "reviewVersion": 3,
   "images": [
     {
-      "imageId": "image-001",
+      "imageId": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1",
       "imageOrder": 1,
       "imageUrl": "https://cdn.example.com/signed/menu-image-001",
       "imageUrlExpiresAt": "2026-10-04T09:30:00Z",
       "items": [
         {
-          "extractedItemId": "item-007",
+          "extractedItemId": "10000000-0000-4000-8000-000000000007",
           "itemOrder": 7,
           "rawText": "딘스톤 12년 15ml 8.0 / 30ml 15.0",
           "extractedLineType": "product",
@@ -1493,17 +1587,17 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
           "extractedEditionName": null,
           "extractedAbv": null,
           "extractionConfidence": 0.92,
-          "proposedProductId": "product-deanston-12",
+          "proposedProductId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
           "options": [
             {
-              "extractedOptionId": "option-001",
+              "extractedOptionId": "20000000-0000-4000-8000-000000000001",
               "optionOrder": 1,
               "extractedOptionLabel": null,
               "extractedPourMl": 15,
               "extractedPriceKrw": 8000
             },
             {
-              "extractedOptionId": "option-002",
+              "extractedOptionId": "20000000-0000-4000-8000-000000000002",
               "optionOrder": 2,
               "extractedOptionLabel": null,
               "extractedPourMl": 30,
@@ -1512,10 +1606,10 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
           ],
           "candidates": [
             {
-              "productId": "product-deanston-12",
+              "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
               "candidateRank": 1,
               "displayName": "Deanston 12",
-              "brandId": "brand-deanston",
+              "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
               "brandName": "Deanston",
               "category": "whisky",
               "ageYears": 12,
@@ -1544,23 +1638,23 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
   ],
   "proposedChanges": [
     {
-      "changeId": "change-001",
+      "changeId": "30000000-0000-4000-8000-000000000001",
       "changeType": "add",
       "barMenuItemId": null,
-      "extractedItemId": "item-007",
+      "extractedItemId": "10000000-0000-4000-8000-000000000007",
       "before": null,
       "after": {
-        "productId": "product-deanston-12",
+        "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
         "displayName": "Deanston 12",
         "options": [
           {
-            "extractedOptionId": "option-001",
+            "extractedOptionId": "20000000-0000-4000-8000-000000000001",
             "optionLabel": null,
             "pourMl": 15,
             "priceKrw": 8000
           },
           {
-            "extractedOptionId": "option-002",
+            "extractedOptionId": "20000000-0000-4000-8000-000000000002",
             "optionLabel": null,
             "pourMl": 30,
             "priceKrw": 15000
@@ -1577,7 +1671,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 응답 규칙:
 
 - `rawText`는 해당 항목의 OCR 원문 블록이다.
-- `imageUrl`은 짧은 만료 시간을 가진 서명 URL이다.
+- `imageUrl`은 짧은 만료 시간을 가진 서명 URL이다. `imageUrlExpiresAt`이 만료 시각이며, 만료되지 않는 URL(로컬 저장소)이면 `null`이다. 만료되었거나 이미지 로딩이 `403`으로 실패하면 프론트엔드는 같은 `GET /api/menu-imports/{menuImportId}`를 다시 호출해 새 URL을 받는다. 다시 호출해도 `reviewVersion`이 같으면 검수 데이터는 바뀌지 않으므로 사용자가 입력 중인 결정을 유지한다.
 - `extractedLineType`은 AI의 최초 분류이며 검수 후에도 변경되지 않는다.
 - `correctedLineType`은 운영자가 최초 분류를 바꾼 경우에만 값이 있고, 그대로 승인한 경우 `null`이다.
 - `effectiveLineType`은 `correctedLineType ?? extractedLineType`으로 계산한 현재 검수 기준 역할이다.
@@ -1601,14 +1695,53 @@ remove: before = 현재 게시 값, after = null
 
 ```json
 {
-  "menuImportId": "import-001",
-  "barId": "bar-001",
+  "menuImportId": "77777777-7777-4777-8777-777777777777",
+  "barId": "22222222-2222-4222-8222-222222222222",
   "status": "applied",
   "reviewVersion": 3,
   "appliedAt": "2026-10-04T09:15:00Z",
-  "menuBoardId": "menu-board-001"
+  "menuBoardId": "66666666-6666-4666-8666-666666666666"
 }
 ```
+
+### 5.6 취소된 작업 응답
+
+```json
+{
+  "menuImportId": "77777777-7777-4777-8777-777777777777",
+  "barId": "22222222-2222-4222-8222-222222222222",
+  "status": "canceled",
+  "canceledAt": "2026-10-04T09:20:00Z"
+}
+```
+
+### 5.7 메뉴 등록 작업 취소
+
+미완료 작업을 반영하지 않고 끝낸다. 업주가 검수를 포기하거나, 처리 중인 작업이 진행되지 않을 때 사용한다. 취소하면 업장에 미완료 작업이 없어지므로 새로 업로드할 수 있다.
+
+```http
+POST /api/menu-imports/{menuImportId}/cancel
+Authorization: Bearer <access-token>
+```
+
+operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요청 본문은 없다.
+
+- `uploaded`, `processing`, `ready_for_review`인 작업만 취소할 수 있다. 상태를 `canceled`로 바꾸고 `completedAt`에 취소 시각을 기록한다.
+- 현재 메뉴판과 카탈로그는 바뀌지 않는다. 업로드한 사진과 AI 처리 기록은 다른 작업처럼 보존한다.
+- 처리 중에 취소하면 백그라운드 처리는 결과를 저장하지 않고 끝난다. 처리가 끝나도 상태는 `canceled`로 남는다.
+- 취소와 `review-and-apply`가 동시에 오면 작업 행 잠금으로 먼저 처리된 쪽만 성공하고, 나중 요청은 `409 INVALID_IMPORT_STATE`다.
+- 이미 `canceled`인 작업을 다시 취소하면 오류 없이 같은 응답을 반환한다. 네트워크 재시도에 안전하다.
+
+`200 OK`, 본문은 5.6과 같다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 작업 대상 업장의 업주도 아님 | 3.1.5 |
+| `404` | `MENU_IMPORT_NOT_FOUND` | 작업이 없거나 `menuImportId`가 UUID 형식이 아님 | 작업 목록으로 이동 |
+| `409` | `INVALID_IMPORT_STATE` | `applied` 또는 `failed`인 작업. `details.status`에 현재 상태 | 작업 상세 재조회 |
+
+프론트엔드는 취소 전에 확인을 받는다. `ready_for_review`에서 취소하면 검수 중 입력한 결정은 모두 사라진다.
 
 ## 6. 검수 보조 브랜드 검색
 
@@ -1632,7 +1765,7 @@ Authorization: Bearer <access-token>
 {
   "items": [
     {
-      "brandId": "brand-deanston",
+      "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
       "canonicalName": "Deanston",
       "matchedAlias": "딘스톤"
     }
@@ -1649,7 +1782,7 @@ Authorization: Bearer <access-token>
 ### 7.1 요청
 
 ```http
-GET /api/catalog/products?query=%EB%94%98%EC%8A%A4%ED%86%A4%2012&brandId=brand-deanston&includeInactive=true&limit=20
+GET /api/catalog/products?query=%EB%94%98%EC%8A%A4%ED%86%A4%2012&brandId=dddddddd-dddd-4ddd-8ddd-ddddddddddd1&includeInactive=true&limit=20
 Authorization: Bearer <access-token>
 ```
 
@@ -1666,9 +1799,9 @@ Authorization: Bearer <access-token>
 {
   "items": [
     {
-      "productId": "product-deanston-12",
+      "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
       "displayName": "Deanston 12",
-      "brandId": "brand-deanston",
+      "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
       "brandName": "Deanston",
       "category": "whisky",
       "ageYears": 12,
@@ -1681,7 +1814,9 @@ Authorization: Bearer <access-token>
 }
 ```
 
-비활성 상품은 중복 확인을 위해 보여줄 수 있지만, 그대로 메뉴에 연결하려면 백엔드 정책에 따라 활성화 절차가 추가로 필요할 수 있다.
+비활성 상품(`isActive = false`)은 같은 상품을 새로 만드는 일을 막기 위해 검색 결과에 보여 준다. 하지만 메뉴에 연결할 수는 없다. `select_existing_product`로 비활성 상품을 제출하면 `422 VALIDATION_FAILED`(`fieldErrors[].code = PRODUCT_INACTIVE`)다. 상품을 다시 활성화하는 API는 이 문서의 범위가 아니다(1장 제외 범위의 카탈로그 CRUD).
+
+프론트엔드 처리: 비활성 상품은 "비활성 상품" 표시와 함께 보여 주되 선택할 수 없게 한다. 같은 상품을 새로 만들려고 하면 백엔드가 `409 DUPLICATE_PRODUCT_FOUND`로 막으므로(9.5), 이 경우 사용자에게 operator 문의를 안내한다.
 
 ## 8. 통합 검수 제출과 메뉴 반영
 
@@ -1701,7 +1836,59 @@ Content-Type: application/json
 | `itemDecisions` | 배열 | 예 | 모든 추출 항목의 최종 결정 |
 | `changeDecisions` | 배열 | 예 | 모든 임시 diff의 적용 또는 무시 결정 |
 
-한 화면의 결정을 한 번에 제출하며 중간 항목 저장 API는 사용하지 않는다.
+한 화면의 결정을 한 번에 제출하며 중간 항목 저장 API는 사용하지 않는다. operator와 작업 대상 업장의 현재 업주가 호출할 수 있다.
+
+모든 객체는 정의하지 않은 필드를 받지 않는다(`EXTRA_FORBIDDEN`). 예를 들어 `confirm_non_product`에 `optionDecisions`를 보내면 거부한다. 문자열 필드는 앞뒤 공백을 지운 뒤 길이를 검사한다.
+
+`itemDecisions[]`는 `action`에 따라 네 형식 중 하나다.
+
+| `action` | 용도 | `finalLineType` | 필드 |
+|---|---|---|---|
+| `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId` 필수. `correctedProductName`, `optionDecisions`, `aliasesToAdd` 선택 |
+| `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product` 필수. `correctedProductName`, `optionDecisions`, `aliases` 선택 |
+| `confirm_non_product` | 비상품 줄로 확정 | `section_header`, `description`, `unknown` | `extractedItemId`만 |
+| `reject` | 잡음·중복 등으로 제외 | 어떤 값이든 | `extractedItemId`만 |
+
+상품 결정(`select_existing_product`, `create_product`)의 공통 필드:
+
+| 필드 | 필수 | 규칙 |
+|---|---|---|
+| `extractedItemId` | 예 | 검수 응답의 항목 ID |
+| `correctedProductName` | 아니오 | 메뉴판에 보일 이름. 1~200자. 없거나 `null`이면 추출한 이름을 쓴다 |
+| `optionDecisions` | 아니오 | 고칠 옵션만 보낸다. 보내지 않은 옵션은 추출값 그대로 반영한다. 기본 `[]` |
+| `optionDecisions[].extractedOptionId` | 예 | 그 항목의 옵션 ID |
+| `optionDecisions[].correctedOptionLabel` | 아니오 | 1~100자. 없거나 `null`이면 추출값 유지 |
+| `optionDecisions[].correctedPriceKrw` | 아니오 | 1 이상 정수. 없거나 `null`이면 추출값 유지 |
+| `optionDecisions[].correctedPourMl` | 아니오 | 1~32767 정수. 없거나 `null`이면 추출값 유지 |
+
+`optionDecisions`의 필드는 "없음 또는 `null` = 고치지 않음"이다. 따라서 추출된 값을 지워 `null`로 만들 수는 없다. 가격이 없는 옵션은 게시하지 않으며, 게시할 상품에는 가격 있는 옵션이 최소 하나 있어야 한다(`NO_PRICED_OPTION`).
+
+`select_existing_product`의 추가 필드:
+
+| 필드 | 필수 | 규칙 |
+|---|---|---|
+| `productId` | 예 | 활성 상품의 ID. 비활성이면 `PRODUCT_INACTIVE`(7.2) |
+| `aliasesToAdd` | 아니오 | 이 상품에 추가할 별칭. 기본 `[]` |
+| `aliasesToAdd[].aliasText` | 예 | 1~200자 |
+| `aliasesToAdd[].languageCode` | 아니오 | 10자 이하. 예: `ko`, `en` |
+| `aliasesToAdd[].isSearchable` | 아니오 | 고객 검색에 쓸지 여부. 기본 `true` |
+
+`create_product`의 추가 필드:
+
+| 필드 | 필수 | 규칙 |
+|---|---|---|
+| `brand.type` | 예 | `existing` 또는 `new` |
+| `brand.brandId` | `existing`만 필수 | 기존 브랜드 ID |
+| `brand.canonicalName` | `new`만 필수 | 1~120자. 별칭으로도 함께 저장한다 |
+| `brand.aliases` | 아니오 | `new`만. `aliasText` 1~120자, `languageCode` 10자 이하. 기본 `[]` |
+| `product.category` | 아니오 | 1~30자. 기본 `whisky` |
+| `product.displayName` | 예 | 대표 상품명. 1~200자. 별칭으로도 함께 저장한다 |
+| `product.ageYears` | 아니오 | 0~200 정수 |
+| `product.editionName` | 아니오 | 1~150자 |
+| `product.abv` | 아니오 | 0 초과 100 이하 |
+| `aliases` | 아니오 | `aliasesToAdd`와 같은 형식. 기본 `[]` |
+
+`changeDecisions[]`는 `changeId`(필수)와 `decision`(`apply` 또는 `ignore`, 필수)이다. `reviewVersion`은 1 이상 정수다.
 
 ### 8.2 기존 상품 선택 예시
 
@@ -1710,10 +1897,10 @@ Content-Type: application/json
   "reviewVersion": 3,
   "itemDecisions": [
     {
-      "extractedItemId": "item-007",
+      "extractedItemId": "10000000-0000-4000-8000-000000000007",
       "finalLineType": "product",
       "action": "select_existing_product",
-      "productId": "product-deanston-12",
+      "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
       "correctedProductName": "딘스톤 12년",
       "aliasesToAdd": [
         {
@@ -1724,13 +1911,13 @@ Content-Type: application/json
       ],
       "optionDecisions": [
         {
-          "extractedOptionId": "option-001",
+          "extractedOptionId": "20000000-0000-4000-8000-000000000001",
           "correctedOptionLabel": null,
           "correctedPriceKrw": 8000,
           "correctedPourMl": 15
         },
         {
-          "extractedOptionId": "option-002",
+          "extractedOptionId": "20000000-0000-4000-8000-000000000002",
           "correctedOptionLabel": null,
           "correctedPriceKrw": 15000,
           "correctedPourMl": 30
@@ -1740,7 +1927,7 @@ Content-Type: application/json
   ],
   "changeDecisions": [
     {
-      "changeId": "change-001",
+      "changeId": "30000000-0000-4000-8000-000000000001",
       "decision": "apply"
     }
   ]
@@ -1771,7 +1958,7 @@ productId == proposedProductId
 
 ```json
 {
-  "extractedItemId": "item-003",
+  "extractedItemId": "10000000-0000-4000-8000-000000000003",
   "finalLineType": "section_header",
   "action": "confirm_non_product"
 }
@@ -1783,7 +1970,7 @@ productId == proposedProductId
 
 ```json
 {
-  "extractedItemId": "item-004",
+  "extractedItemId": "10000000-0000-4000-8000-000000000004",
   "finalLineType": "unknown",
   "action": "reject"
 }
@@ -1795,13 +1982,13 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 
 ```json
 {
-  "extractedItemId": "item-007",
+  "extractedItemId": "10000000-0000-4000-8000-000000000007",
   "finalLineType": "product",
   "action": "create_product",
   "correctedProductName": "딘스톤 버진 오크",
   "brand": {
     "type": "existing",
-    "brandId": "brand-deanston"
+    "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1"
   },
   "product": {
     "category": "whisky",
@@ -1824,7 +2011,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
   ],
   "optionDecisions": [
     {
-      "extractedOptionId": "option-001",
+      "extractedOptionId": "20000000-0000-4000-8000-000000000001",
       "correctedPriceKrw": 12000,
       "correctedPourMl": 15
     }
@@ -1836,7 +2023,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 
 ```json
 {
-  "extractedItemId": "item-009",
+  "extractedItemId": "10000000-0000-4000-8000-000000000009",
   "finalLineType": "product",
   "action": "create_product",
   "brand": {
@@ -1874,7 +2061,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
   ],
   "optionDecisions": [
     {
-      "extractedOptionId": "option-003",
+      "extractedOptionId": "20000000-0000-4000-8000-000000000003",
       "correctedPriceKrw": 14000,
       "correctedPourMl": 15
     }
@@ -1907,11 +2094,11 @@ HTTP/1.1 200 OK
 
 ```json
 {
-  "menuImportId": "import-001",
+  "menuImportId": "77777777-7777-4777-8777-777777777777",
   "status": "applied",
   "reviewVersion": 3,
   "appliedAt": "2026-10-04T09:15:00Z",
-  "menuBoardId": "menu-board-001",
+  "menuBoardId": "66666666-6666-4666-8666-666666666666",
   "result": {
     "added": 3,
     "updated": 2,
@@ -1937,10 +2124,10 @@ HTTP/1.1 200 OK
     "code": "REVIEW_OUTDATED",
     "message": "검수 데이터가 변경되었습니다. 최신 내용을 다시 확인해 주세요.",
     "details": {
-      "menuImportId": "import-001",
+      "menuImportId": "77777777-7777-4777-8777-777777777777",
       "submittedReviewVersion": 2,
       "currentReviewVersion": 3,
-      "reviewUrl": "/api/menu-imports/import-001"
+      "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777777"
     },
     "fieldErrors": []
   }
@@ -1967,8 +2154,8 @@ HTTP/1.1 200 OK
 | `409` | `OWNER_APPLICATION_EXISTS` | 같은 업장에 본인의 대기 중 신청이 있음 (3.11.2) | `details.applicationId`의 신청으로 이동 |
 | `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소 (3.11) | 신청 상세 재조회 |
 | `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 키에 다른 요청 내용 | 새 키로 명시적 재요청 |
-| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있음 | 기존 작업으로 이동 |
-| `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가 | 상태 재조회 |
+| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있음. `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 재업로드 |
+| `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가. 예: `ready_for_review`가 아닌 작업의 검수 제출, `applied`·`failed` 작업의 취소. `details.status`에 현재 상태 | 상태 재조회 |
 | `409` | `REVIEW_OUTDATED` | `reviewVersion` 불일치, 또는 검수 데이터를 만든 뒤 현재 메뉴판이 바뀜 | `details.reviewUrl`로 최신 검수 데이터 재조회 |
 | `409` | `DUPLICATE_BRAND_FOUND` | 신규 브랜드와 동일할 수 있는 브랜드 발견 | 기존 브랜드 선택 화면 표시 |
 | `409` | `DUPLICATE_PRODUCT_FOUND` | 신규 상품과 동일한 상품 발견, 또는 제출한 이름·별칭이 기존 상품의 별칭과 일치 | 기존 상품 선택 화면 표시. 다른 상품이면 겹치는 별칭을 빼고 다시 제출 |
@@ -2004,7 +2191,7 @@ HTTP/1.1 200 OK
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
 - **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `EXTRA_FORBIDDEN`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `COORDINATES_REQUIRED`.
 
 ### 9.4 검수 버전 충돌
 
@@ -2018,17 +2205,17 @@ HTTP/1.1 200 OK
     "code": "DUPLICATE_PRODUCT_FOUND",
     "message": "동일한 상품이 먼저 등록되었습니다.",
     "details": {
-      "extractedItemId": "item-007",
+      "extractedItemId": "10000000-0000-4000-8000-000000000007",
       "existingProduct": {
-        "productId": "product-existing",
+        "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2",
         "displayName": "Deanston Virgin Oak",
-        "brandId": "brand-deanston",
+        "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
         "brandName": "Deanston",
         "category": "whisky",
         "ageYears": null,
         "editionName": "Virgin Oak"
       },
-      "reviewUrl": "/api/menu-imports/import-001"
+      "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777777"
     },
     "fieldErrors": []
   }
@@ -2043,6 +2230,7 @@ HTTP/1.1 200 OK
 uploaded 또는 processing
 → 로딩 화면
 → pollAfterMs 후 GET 재호출
+→ 오래 진행되지 않으면 취소(5.7) 후 새 업로드를 고를 수 있게 함
 
 ready_for_review
 → images, items, candidates, proposedChanges로 통합 검수 화면 구성
@@ -2054,6 +2242,10 @@ failed
 applied
 → 반영 완료 화면
 → 현재 메뉴판으로 이동 가능
+
+canceled
+→ 취소된 작업임을 표시
+→ 새 업로드 작업을 시작할 수 있음
 ```
 
 프론트엔드는 `proposedProductId`나 `proposedChanges`를 확정값으로 취급하지 않는다. 실제 반영 기준은 `review-and-apply`에 제출한 결정과 백엔드의 최종 재검증 결과다.

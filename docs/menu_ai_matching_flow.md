@@ -176,7 +176,7 @@ canonical request는 필드 순서와 null 표현 등을 백엔드의 한 함수
 
 `request_fingerprint` 자체에는 UNIQUE 제약을 두지 않는다.
 
-MVP에서는 업장마다 `uploaded`, `processing`, `ready_for_review` 상태의 작업을 하나만 허용한다. 새 작업 생성 시 `bars` 또는 현재 `menu_boards` 행을 잠그고 진행 중인 작업을 다시 조회하며, 이미 있으면 새 작업 대신 기존 작업을 계속하도록 응답한다.
+MVP에서는 업장마다 `uploaded`, `processing`, `ready_for_review` 상태의 작업을 하나만 허용한다. 새 작업 생성 시 `bars` 또는 현재 `menu_boards` 행을 잠그고 진행 중인 작업을 다시 조회하며, 이미 있으면 새 작업 대신 기존 작업을 계속하도록 응답한다. 기존 작업을 끝내지 않고 새로 올리려면 그 작업을 취소한다(`canceled`, API 명세 5.7). 취소는 메뉴판과 카탈로그를 바꾸지 않으며, 처리 중에 취소된 작업의 AI 처리 결과는 저장하지 않는다.
 
 ### 3.3 객체 저장소 업로드
 

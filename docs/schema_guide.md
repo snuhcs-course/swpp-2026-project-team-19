@@ -98,8 +98,11 @@
 | `ready_for_review` | 자동 추출·후보 매칭·임시 diff 생성이 끝나 통합 검수를 할 수 있는 상태 |
 | `applied` | 운영자가 확정한 변경이 현재 메뉴판에 반영된 상태 |
 | `failed` | 업로드 또는 AI 처리에 실패한 상태 |
+| `canceled` | 운영자나 업주가 미완료 작업을 반영하지 않고 취소한 상태. 메뉴판과 카탈로그는 바뀌지 않는다 |
 
 이 상태값은 비동기 AI 처리와 사람 검수가 어디까지 진행됐는지 추적하고 중복 적용을 방지한다. 검수 확정과 메뉴판 반영은 같은 트랜잭션에서 일어나므로 성공하면 `ready_for_review`에서 `applied`로 바로 바뀌고, 실패하면 전체가 롤백되어 `ready_for_review`를 유지한다.
+
+`uploaded`, `processing`, `ready_for_review`는 미완료 상태이고 `applied`, `failed`, `canceled`는 최종 상태다. 미완료 작업은 취소할 수 있으며, 취소하면 업장에 미완료 작업이 없어져 새로 업로드할 수 있다. 처리 중에 취소된 작업의 백그라운드 처리 결과는 저장하지 않는다.
 
 ### 4.4 import_mode
 
@@ -442,7 +445,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `owner_note` | `text`, nullable | `업장 허가 후 9월 메뉴 촬영` | 업장 허가 출처 특이사항 등의 운영 메모다. 현재 이름은 향후 업주 흐름을 고려한 표현이다. |
 | `review_confirmed_at` | `timestamptz`, nullable | `2026-09-28T04:30:00Z` | 항목·옵션·상품 매칭·신규 등록 제안·메뉴 diff를 한 번에 최종 승인한 시점이다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:40:00Z` | 등록 작업 시작 시점이다. |
-| `completed_at` | `timestamptz`, nullable | `2026-09-28T04:31:00Z` | 모든 변경 적용이 끝난 시점이다. 진행 중이면 null이다. |
+| `completed_at` | `timestamptz`, nullable | `2026-09-28T04:31:00Z` | 작업이 최종 상태(`applied`, `failed`, `canceled`)가 된 시점이다. 진행 중이면 null이다. |
 
 **필요한 이유:** 이미지 한 장이나 추출 항목 하나만으로는 전체 교체 일부 수정 최종 승인 상태를 표현할 수 없으므로 작업 단위가 필요하다.
 
