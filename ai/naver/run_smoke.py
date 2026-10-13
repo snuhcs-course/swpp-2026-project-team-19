@@ -24,7 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from candidates import (brand_age_query, build_queries, edition_brand_aliases, extract_candidates,  # noqa: E402
+from candidates import (bottler_missing, brand_age_query, build_queries, edition_brand_aliases, extract_candidates,  # noqa: E402
                         ko_brand_aliases, learn_brand_aliases, clean_text)
 from client import ENDPOINTS, NaverSearchClient, NaverSearchError  # noqa: E402
 from sample import REPO_ROOT, is_independent, strata  # noqa: E402
@@ -77,12 +77,6 @@ def collect(client: NaverSearchClient, product: dict, ko_brands: list[str],
             run(q)
     return results, errors, {"queries": done,
                              "learned_brand_for_query": learned[0] if learned and product.get("age_years") else None}
-
-
-def bottler_missing(product: dict, cand: dict) -> bool:
-    """Rule flag (P18 c): an independent bottling's candidate that starts at the distillery,
-    i.e. without the bottler's name. Recorded next to the LLM verdict, never overriding it."""
-    return is_independent(product) and cand["anchor_kind"] == "edition_brand"
 
 
 def judge_input(product: dict, cand: dict, tag: dict) -> dict:
@@ -140,7 +134,7 @@ def main() -> None:
         for cand in extracted["candidates"]:
             tag = tagger.tag(cand["alias"], key)
             verdict = judge(judge_input(product, cand, tag)) if judge else None
-            cands.append({**cand, "bottler_missing": bottler_missing(product, cand), "matcher": tag, "llm": verdict})
+            cands.append({**cand, "bottler_missing": bottler_missing(is_independent(product), cand["alias"], extracted["anchors"]), "matcher": tag, "llm": verdict})
             v = verdict["verdict"] if verdict else "-"
             print(f"  {key[:34]:34} {cand['alias'][:28]:28} tag={tag['tag']:13} llm={v}", flush=True)
         records.append({

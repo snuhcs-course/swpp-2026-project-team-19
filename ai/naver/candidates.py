@@ -21,7 +21,7 @@ from __future__ import annotations
 import html
 import re
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -45,17 +45,21 @@ PROMO_WORDS = (
     "최저가", "할인", "특가", "판매", "구매", "구입", "가격", "배송", "이벤트", "쿠폰", "후기", "리뷰",
     "추천", "시음", "테이스팅", "정품", "공식", "쇼핑", "마트", "면세", "데일리샷", "바틀샵", "입고",
     "품절", "예약", "증정", "선물", "세트", "한정판매", "주문", "택배", "픽업", "가성비", "맛집",
-    "노트", "후기", "소개", "정보", "리스트", "모음", "총정리", "비교", "차이", "종류", "입문",
+    "노트", "소개", "정보", "리스트", "모음", "총정리", "비교", "차이", "종류", "입문", "전국", "포함",
 )
 # Words dropped from the ends of a candidate (they describe the category, not the product).
 EDGE_WORDS = frozenset({
     "위스키", "싱글몰트", "싱글", "몰트", "스카치", "버번", "블렌디드", "라이", "증류소", "제품", "신제품",
     "출시", "병", "잔", "한잔", "마셔본", "마신", "오늘", "드디어", "그리고", "및", "등", "의",
+    "병입사", "독립병입", "독립", "브랜드",
 })
 # Particles that end a noun phrase: a token ending in one ends the candidate (the particle is
 # dropped). Kept to particles that rarely end a transliterated name ("이", "가", "로", "와" do:
 # 글렌모레이, 하뉴가 ...), so those stay in the token.
-_PARTICLE = re.compile(r"(?<=[가-힣0-9]{2})(?:에서|으로|이에요|예요|입니다|이고|하고|까지|부터|을|를|은|는|의|과|에)$")
+_PARTICLE = re.compile(r"(?<=[가-힣0-9]{2})(?:에서|으로|이에요|예요|입니다|이고|하고|까지|부터|을|를|은|는|의|과|에)$"
+                       r"|(?<=\d년)(?:도|이|가|로|와)$")
+# Tokens that end a run: quantities ("1병", "2잔") and particles written apart ("12년 과").
+_BOUNDARY_TOKEN = re.compile(r"\d+(?:병|잔|개|종|박스|ml|cl)|과|와|도|은|는|을|를|의|에|이|가|및|등", re.IGNORECASE)
 _SEPARATORS = re.compile(r"[|/\\\[\]{}<>«»\"“”‘’!?~:;,·•■◆▶★☆♥♡#=+*()\-–—_…]")
 
 
@@ -114,18 +118,57 @@ def build_queries(product: dict, ko_brands: list[str], edition_brands: list[str]
 
 
 def learn_brand_aliases(brand: str, texts: list[str]) -> list[str]:
-    """Hangul runs written right next to the English brand: "한글(English" or "English(한글)"."""
-    english = re.escape(brand.replace("-", " ").replace("_", " "))
-    before = re.compile(r"([가-힣][가-힣 ]{1,24}?)\s*\(\s*" + english, re.IGNORECASE)
-    after = re.compile(english + r"\s*\(\s*([가-힣][가-힣 ]{1,24}?)\s*\)", re.IGNORECASE)
-    found = set()
+    """Korean brand spellings written in parentheses next to the English brand.
+
+    "고든 앤 맥페일(Gordon & MacPhail)" / "Tomatin(토마틴)": the last 1..n Hangul words
+    before the parenthesis (or the words inside it), n = words in the English brand.
+    "킬호만 피노 셰리 캐스크(Kilchoman Fino ...)": the first 1..n words of the Hangul name.
+    Text before a particle ("원액은 토마틴") and category words ("병입사") are cut off.
+    Each spelling gets one vote per occurrence; spellings with 2+ votes are kept
+    (or the most voted ones).
+    """
+    english = brand.replace("-", " ").replace("_", " ").strip()
+    n = len(english.split())
+    esc = re.escape(english)
+    votes: Counter = Counter()
+
+    def vote(words: list[str], from_end: bool) -> None:
+        words = _after_particle(words)
+        while words and words[0] in EDGE_WORDS:
+            words = words[1:]
+        while words and words[-1] in EDGE_WORDS:
+            words = words[:-1]
+        for k in range(1, min(n, len(words)) + 1):
+            part = words[-k:] if from_end else words[:k]
+            if all(has_hangul(w) and not re.search(r"\d", w) for w in part):
+                votes[" ".join(part)] += 1
+
     for text in texts:
-        for m in list(before.finditer(text)) + list(after.finditer(text)):
-            words = m.group(1).split()[-3:]
-            alias = " ".join(w for w in words if w not in EDGE_WORDS)
-            if len(alias.replace(" ", "")) >= 2:
-                found.add(alias)
-    return sorted(found)
+        for m in re.finditer(r"\(\s*" + esc + r"(?P<more>[^()]*)\)", text, re.IGNORECASE):
+            head = text[:m.start()].rstrip()
+            runs = _runs(head[-80:])
+            more = m.group("more")
+            if not runs or not head.endswith(runs[-1][-1]):
+                continue
+            if not more.strip():
+                vote(runs[-1], from_end=True)  # "한글(Brand)"
+            elif re.match(r"\s+\w", more):
+                vote(runs[-1], from_end=False)  # "한글 전체명(Brand Rest of Name)"
+        for m in re.finditer(esc + r"\s*\(\s*([가-힣][가-힣 ]{0,30}?)\s*\)", text, re.IGNORECASE):
+            words = m.group(1).split()
+            if len(words) <= n + 1:
+                vote(words, from_end=True)
+    top = max(votes.values(), default=0)
+    kept = [a for a, c in votes.items() if c >= min(2, top)]
+    return sorted(a for a in kept if len(a.replace(" ", "")) >= 2)
+
+
+def _after_particle(words: list[str]) -> list[str]:
+    """Words after the last one that ends in a particle ("위스키의 원액은 토마틴" -> ["토마틴"])."""
+    for i in range(len(words) - 1, -1, -1):
+        if _PARTICLE.search(words[i]):
+            return words[i + 1:]
+    return list(words)
 
 
 def _runs(text: str) -> list[list[str]]:
@@ -134,7 +177,8 @@ def _runs(text: str) -> list[list[str]]:
     for segment in _SEPARATORS.split(text):
         run: list[str] = []
         for token in segment.split():
-            if _NAME_TOKEN.fullmatch(token) and not any(w in token for w in PROMO_WORDS):
+            if (_NAME_TOKEN.fullmatch(token) and not _BOUNDARY_TOKEN.fullmatch(token)
+                    and not any(w in token for w in PROMO_WORDS)):
                 run.append(token)
             else:
                 if run:
@@ -160,16 +204,28 @@ def _trim(tokens: list[str]) -> list[str]:
 
 def _from_run(run: list[str], anchors: list[tuple[str, str]]) -> tuple[list[str], str, str] | None:
     """First anchor that a suffix of the run starts with -> (candidate tokens, anchor, kind)."""
+    names = {normalize(a) for a, _ in anchors}
     for i in range(len(run)):
         joined = normalize("".join(run[i:]))
-        for anchor, kind in anchors:
+        for anchor, kind in anchors:  # longest first
             a = normalize(anchor)
             if a and joined.startswith(a):
                 tokens = _trim(run[i:i + MAX_TOKENS])
-                # More than the anchor itself: a bare brand is not a product name.
-                if len(normalize("".join(tokens))) > len(a):
+                key = normalize("".join(tokens))
+                # More than an anchor: a bare brand is not a product name.
+                if len(key) > len(a) and key not in names:
                     return tokens, anchor, kind
+                break
     return None
+
+
+def bottler_missing(product_is_independent: bool, alias: str, anchors: list[dict]) -> bool:
+    """Rule flag (P18 c): an independent bottling's candidate without the bottler's name
+    (no brand / learned anchor in it, e.g. only the distillery)."""
+    if not product_is_independent:
+        return False
+    key = normalize(alias)
+    return not any(normalize(a["text"]) in key for a in anchors if a["kind"] in ("brand", "learned"))
 
 
 def split_attributes(alias: str, anchor: str) -> tuple[int | None, list[str]]:
@@ -190,8 +246,8 @@ def extract_candidates(product: dict, results: list[dict], ko_brands: list[str],
     """Return {"anchors": [...], "candidates": [...]} (candidates ranked, at most MAX_CANDIDATES)."""
     items = [(r, it) for r in results for it in r["items"]]
     texts = [clean_text(it.get("title", "")) + " | " + clean_text(it.get("description", "")) for _, it in items]
-    learned = [a for a in learn_brand_aliases(product["brand"], texts) if normalize(a) not in
-               {normalize(b) for b in ko_brands}]
+    # Learned only when the catalog has no Korean spelling of the brand.
+    learned = [] if ko_brands else learn_brand_aliases(product["brand"], texts)
     anchors = ([(a, "brand") for a in ko_brands] + [(a, "learned") for a in learned]
                + [(a, "edition_brand") for a in edition_brands])
     # Longer anchors first so "하이랜드 파크" wins over "하이랜드".

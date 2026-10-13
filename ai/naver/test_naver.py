@@ -137,6 +137,32 @@ def test_candidates_learn_brand_and_keep_distillery_only_names():
     assert kinds.get("아드벡 9년") == "edition_brand"
 
 
+def test_learned_brand_skips_comma_lists_and_text_before_particles():
+    texts = ["고든 앤 맥페일, 디스커버리 부나하벤 10년(Gordon & MacPhail, Discovery Bunnahabhain 10)",
+             "독립병입사 고든 앤 맥페일(Gordon & MacPhail) 소개", "고든 앤 맥페일(Gordon & MacPhail)"]
+    learned = cand_mod.learn_brand_aliases("Gordon & MacPhail", texts)
+    assert "고든 앤 맥페일" in learned and not any("디스커버리" in a for a in learned)
+    texts = ["위스키의 원액은 토마틴 12년 (Tomatin 12)", "토마틴 레거시 (Tomatin Legacy)"]
+    assert cand_mod.learn_brand_aliases("Tomatin", texts) == ["토마틴"]
+
+
+def test_quantities_and_detached_particles_end_a_candidate():
+    results = [record("blog", "q", {"total": 2, "items": [
+        {"title": "토마틴 12년 1병 토마틴 전용잔 1개", "link": "l1", "description": ""},
+        {"title": "토마틴12년 과 모듬회", "link": "l2", "description": ""}]})]
+    out = extract_candidates({**ARRAN_10, "brand": "Tomatin", "age_years": 12}, results, ["토마틴"])
+    aliases = [c["alias"] for c in out["candidates"]]
+    assert aliases[0] == "토마틴 12년" and out["candidates"][0]["result_count"] == 2
+    assert not any("1병" in a or "모듬회" in a for a in aliases)
+
+
+def test_bottler_missing_flag():
+    anchors = [{"text": "케스트럴 보틀러스", "kind": "learned"}, {"text": "아드벡", "kind": "edition_brand"}]
+    assert cand_mod.bottler_missing(True, "아드벡 9년", anchors)
+    assert not cand_mod.bottler_missing(True, "케스트럴 보틀러스 아드벡 9년", anchors)
+    assert not cand_mod.bottler_missing(False, "아드벡 9년", anchors)
+
+
 def test_particle_cut_keeps_names_ending_in_i():
     assert cand_mod._trim(["글렌모레이", "12년은", "부드럽다"]) == ["글렌모레이", "12년"]
     assert cand_mod._trim(["글렌모레이"]) == ["글렌모레이"]
