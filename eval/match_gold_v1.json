@@ -196,7 +196,7 @@
   }
  },
  "review": {
-  "Buffalo Trace / Makrt's Mark": "한 줄에 두 상품, 가격 하나. 둘 중 하나면 정답으로 볼지",
+  "Buffalo Trace / Makrt's Mark": "한 줄에 두 상품, 가격 하나. 두 상품 모두를 뜻함: 둘 다 내야 정답, 하나만 확정하면 partial",
   "Wildturkey 101": "카탈로그 Wild Turkey 101 8 Year와 같은 상품으로 봄 (국내 101은 8년 표기)",
   "Taylor Small Batch": "Colonel E.H. Taylor Small Batch로 추정 (Old Taylor일 수도)",
   "Arran Sherry cask": "캐스크 스트렝스 섹션. 카탈로그 Arran Bodega Sherry Cask(CS 제품)와 같은 상품으로 봄",
@@ -1593,13 +1593,13 @@
      "raw_name": "Buffalo Trace / Makrt's Mark",
      "unit": "glass",
      "pour_ml": 30,
-     "gold": "multi:new:buffalo-trace|makers-mark"
+     "gold": "both:new:buffalo-trace|makers-mark"
     },
     {
      "raw_name": "Buffalo Trace / Makrt's Mark",
      "unit": "bottle",
      "pour_ml": null,
-     "gold": "multi:new:buffalo-trace|makers-mark"
+     "gold": "both:new:buffalo-trace|makers-mark"
     },
     {
      "raw_name": "Wildturkey 101",

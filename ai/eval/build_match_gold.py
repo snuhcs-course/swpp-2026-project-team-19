@@ -9,7 +9,8 @@ labels_v1_1.json (val) and labels_heldout_v1.json (Beck only for now) gets
   - an existing catalog product key            e.g. "talisker-10"
   - "new:<key>" for a product missing from the catalog; NEW_PRODUCTS gives its
     standard English name, age and edition (no menu spelling is used as alias)
-  - "multi:<key>|<key>" when one line names two products ("A / B" with one price)
+  - "both:<key>|<key>" when one line names two products ("A / B" with one price);
+    the line means both products, so a matcher has to return both
   - "unknown" when the line is too short to tell which product it is
   - "non_whisky" for cognac etc. (expected: unmatched)
 REVIEW lists links a human should confirm. Matching split (eval_plan.md): dev =
@@ -64,7 +65,7 @@ NEW_PRODUCTS = {
 
 # Beck: raw_name -> gold (same for every unit / pour of that line)
 BECK = {
-    "Buffalo Trace / Makrt's Mark": "multi:new:buffalo-trace|makers-mark",
+    "Buffalo Trace / Makrt's Mark": "both:new:buffalo-trace|makers-mark",
     "Wildturkey 101": "wild-turkey-101-8",
     "Four Roses Small Batch": "new:four-roses-small-batch",
     "James E Pepper 1776 Rye Whiskey": "new:james-e-pepper-1776-rye",
@@ -132,7 +133,7 @@ BECK = {
 
 # Links a human should confirm before the gold file is final.
 REVIEW = {
-    "Buffalo Trace / Makrt's Mark": "한 줄에 두 상품, 가격 하나. 둘 중 하나면 정답으로 볼지",
+    "Buffalo Trace / Makrt's Mark": "한 줄에 두 상품, 가격 하나. 두 상품 모두를 뜻함: 둘 다 내야 정답, 하나만 확정하면 partial",
     "Wildturkey 101": "카탈로그 Wild Turkey 101 8 Year와 같은 상품으로 봄 (국내 101은 8년 표기)",
     "Taylor Small Batch": "Colonel E.H. Taylor Small Batch로 추정 (Old Taylor일 수도)",
     "Arran Sherry cask": "캐스크 스트렝스 섹션. 카탈로그 Arran Bodega Sherry Cask(CS 제품)와 같은 상품으로 봄",
@@ -173,7 +174,7 @@ def main() -> None:
     # every referenced key must exist
     for p in photos:
         for i in p["items"]:
-            for ref in i["gold"].removeprefix("multi:").split("|"):
+            for ref in i["gold"].removeprefix("both:").split("|"):
                 if ref.startswith("new:"):
                     assert ref[4:] in NEW_PRODUCTS, ref
                 elif ref not in ("unknown", "non_whisky"):
@@ -191,7 +192,7 @@ def main() -> None:
         "review": REVIEW,
         "photos": photos,
     }
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
     n = sum(len(p["items"]) for p in photos)
     print(f"wrote {OUT.relative_to(REPO_ROOT)}: {len(photos)} photos, {n} items, {len(NEW_PRODUCTS)} new products")
 

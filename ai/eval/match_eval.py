@@ -14,14 +14,17 @@ Catalog conditions
       ("product is in the DB, this menu's spelling is not").
 
 Outcome per line (glass/bottle rows of one line count once)
-  correct        exact_match to the gold product (any of them for multi:)
+  correct        exact_match to the gold product; for both: (one line, two products)
+                 a multi result with exactly the two gold products
+  partial        both: line, exact_match to only one of its two products
   ambiguous_ok   ambiguous, gold among the candidates -> owner picks
   ambiguous_bad  ambiguous, gold not among the candidates
   unmatched      no candidate (correct outcome when gold is absent from the catalog)
-  false_merge    exact_match to a different product, or to anything when the gold
-                 is absent / non_whisky
-  overconfident  exact_match for an "unknown" line (menu too short to tell)
-Owner burden = lines per photo that are not exact_match (owner has to choose or create).
+  false_merge    exact_match (or a multi result) naming a product that is not gold,
+                 or naming anything when the gold is absent / non_whisky
+  overconfident  exact_match or multi for an "unknown" line (menu too short to tell)
+Owner burden = lines per photo that are not confirmed (exact_match or multi): the
+owner has to choose or create.
 """
 
 from __future__ import annotations
@@ -44,7 +47,8 @@ GOLD = REPO_ROOT / "eval" / "match_gold_v1.json"
 SEED = REPO_ROOT / "ai" / "catalog" / "catalog_v1_draft.json"
 NEW_NS = uuid.UUID("6f1d3f0e-6c8a-4d5e-9b1a-2b7c3d4e5f60")
 BURDEN_LIMIT = 5  # 진우 기준: 메뉴판 1장당 업주가 골라야 하는 항목 5개 미만
-OUTCOMES = ("correct", "ambiguous_ok", "ambiguous_bad", "unmatched", "false_merge", "overconfident")
+OUTCOMES = ("correct", "partial", "ambiguous_ok", "ambiguous_bad", "unmatched", "false_merge", "overconfident")
+CONFIRMED = ("exact_match", "multi")
 
 MATCHERS = {
     "M0": resolve_product,  # I1: normalize + exact alias, " / " bilingual split
@@ -69,16 +73,29 @@ def load_catalog(bar: str, condition: str, new_products: dict) -> tuple[InMemory
     return InMemoryCatalog(products, aliases), key_to_id
 
 
-def judge(gold: str, status: str, proposed, candidates, key_to_id: dict, in_catalog) -> str:
+def gold_refs(gold: str) -> list[str]:
+    return gold.removeprefix("both:").split("|")
+
+
+def judge(gold: str, r, key_to_id: dict, in_catalog) -> str:
+    """`r` is a ResolutionResult; a "multi" result lists its products in `r.parts`."""
+    status = r.status
     if gold == "unknown":
-        return "overconfident" if status == "exact_match" else ("unmatched" if status == "unmatched" else "ambiguous_ok")
-    golds = gold.removeprefix("multi:").split("|")
-    ids = {key_to_id[g] for g in golds if g in key_to_id and in_catalog(g)}
+        return "overconfident" if status in CONFIRMED else ("unmatched" if status == "unmatched" else "ambiguous_ok")
+    both = gold.startswith("both:")
+    ids = {key_to_id[g] for g in gold_refs(gold) if g in key_to_id and in_catalog(g)}
     if status == "unmatched":
         return "unmatched"
+    if status == "multi":
+        named = {p.proposed_product_id for p in r.parts}
+        if not named <= ids:
+            return "false_merge"
+        return "correct" if both and len(ids) == 2 and named == ids else "partial"
     if status == "exact_match":
-        return "correct" if proposed in ids else "false_merge"
-    return "ambiguous_ok" if ids & {c.product_id for c in candidates} else "ambiguous_bad"
+        if r.proposed_product_id not in ids:
+            return "false_merge"
+        return "partial" if both else "correct"
+    return "ambiguous_ok" if ids & {c.product_id for c in r.candidates} else "ambiguous_bad"
 
 
 def evaluate(matcher: str, condition: str, split: str) -> dict:
@@ -106,12 +123,12 @@ def evaluate(matcher: str, condition: str, split: str) -> dict:
         burden[photo["photo_id"]] = 0
         for name, g in seen.items():
             r = resolve(ExtractedProduct(product_name=name), catalog)
-            outcome = judge(g, r.status, r.proposed_product_id, r.candidates, key_to_id, in_catalog)
+            outcome = judge(g, r, key_to_id, in_catalog)
             kind = ("non_whisky" if g == "non_whisky" else "unknown" if g == "unknown"
-                    else "known" if all(in_catalog(x) for x in g.removeprefix("multi:").split("|")) else "absent")
+                    else "known" if all(in_catalog(x) for x in gold_refs(g)) else "absent")
             by_bar[bar][outcome] += 1
             by_kind[kind][outcome] += 1
-            if r.status != "exact_match":
+            if r.status not in CONFIRMED:
                 burden[photo["photo_id"]] += 1
             if outcome not in ("correct",) and not (kind in ("absent", "non_whisky") and outcome == "unmatched"):
                 errors.append({"photo_id": photo["photo_id"], "name": name, "gold": g, "kind": kind,
