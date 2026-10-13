@@ -130,3 +130,17 @@ S2가 새로 exact로 맞힌 줄은 C0 10줄, C1 15줄이고 새 exact는 전부
   5. 편집거리로 찾은 결과는 exact 금지, 항상 ambiguous("확인 권장"). 단 후보가 1개이고 편집거리 1 이하이고 이름에 숫자 부분이 있으면 exact 허용.
   6. 같은 거리의 후보가 여러 개면 ambiguous.
 - 측정 지표에 "확인 권장" 건수(후보 1개 ambiguous 중 `confirmRecommended`)를 추가한다. 채택 조건은 그대로(dev false merge 0.02 이하).
+
+**S2b·S3 결과 (dev, 2026-10-13).** 위 사전 등록 규칙·임계값 그대로 한 번 측정. 결과 `ai/runs/2026-10-13_match_dev.json`.
+
+| 단계 | 조건 | 알려진 Top-1 | false merge | partial | 확인 권장 | 업주 부담 5 미만 사진 | 중단 규칙 |
+|---|---|---|---|---|---|---|---|
+| S1+S2 | C0 | 0.937 | 0 | 0 | 0 | 0.69 | 통과 |
+| S1+S2b | C0 | 0.916 | 0 | 0 | 3 | 0.69 | 통과 |
+| S1+S2b+S3 | C0 | 0.916 | 0 | 0 | 6 | 0.69 | 통과 |
+| S1+S2 | C1 | 0.884 | 0 | 1 | 0 | 0.92 | 통과 |
+| S1+S2b | C1 | 0.867 | 0 | 1 | 3 | 0.92 | 통과 |
+| S1+S2b+S3 | C1 | 0.867 | 0 | 1 | 7 | 0.92 | 통과 |
+
+- S2b: exact → 확인 권장 3줄(발베니 14Y, Macallan 15yo, Balvenie 12yo, 셋 다 정답 상품이 유일 후보). Top-1 하락은 이 3줄 때문이고 false merge 위험을 업주 확인 1번으로 바꾼 것이다. 기본 제품 규칙(1번)이 결과를 바꾼 줄은 dev에 없다.
+- S3: unmatched → 확인 권장 C0 3줄(Makrt's Mark → Maker's Mark, Abelour A`bunadh, Dalwhinny 15yo), C1 4줄(Abelour, Dalwhinny, Ballentine 30yo, Bushmil 10yo). 정답 상품이 전부 유일 후보다. 새 exact 0, 새 오답 0. 편집거리 1·숫자 있음·후보 1개인 exact 경로는 dev에서 발동 0회.

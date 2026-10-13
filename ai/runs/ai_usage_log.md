@@ -281,3 +281,32 @@
 - `build_match_gold.py`가 Windows에서 CRLF로 써서 gold 파일 전체가 diff로 잡힘 → 출력 줄바꿈을 LF로 고정.
 - gold의 새 상품 브랜드 `makers-mark`와 카탈로그 브랜드 key `makers_mark`가 달라 평가 카탈로그에서 다른 브랜드로 잡힘 → 평가 스크립트에서 하이픈을 밑줄로 바꿔 연결.
 - 샌드박스가 시스템 Temp를 막아 `tmp_path` 테스트 에러 → `--basetemp`를 scratchpad로 지정.
+
+## 2026-10-13 · P22 (I2) 매칭기 S2b(기본 제품) + S3(편집거리) (dev)
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 없음
+- **브랜치:** `i2-p22-matching-eval`
+- **시간(대략):** 약 45분 (사전 등록 5분, 구현 20분, 측정·줄 비교 10분, 테스트·마무리 10분)
+- **토큰(대략):** Claude Code 세션 컨텍스트 약 23만 → 약 29만 토큰(이 작업 약 6만)
+
+### 진행 순서
+1. 담당자가 S2b 규칙 3개, S3 규칙 6개와 임계값, 측정 명령, 중단 규칙, 금지 사항(정답·카탈로그·normalize·resolve_product 변경, dev를 보고 S3 임계값 조정)을 지정.
+2. eval_plan.md에 S2b·S3 규칙을 측정 전에 사전 등록하고 먼저 커밋·push(`7ba8592`). S3 5번 "편집거리 1"은 숫자는 같고 어순만 다른 거리 0도 포함하도록 "1 이하"로 적음.
+3. 구현: `CatalogLookup`에 전체 별칭 목록 2개 추가(메모리·DB), `staged.py`에 S2b(`_narrow_brand`의 기본 제품·확인 권장)와 S3(상품 별칭·브랜드 별칭 편집거리, 숫자 일치 필수).
+4. 측정 1회, 줄 단위 비교(S1+S2 → S2b, S2b → S3).
+
+### 결과 (dev)
+- false merge 전 단계 0 → 중단 규칙 통과.
+- 알려진 상품 Top-1: C0 0.937 → 0.916 → 0.916, C1 0.884 → 0.867 → 0.867. 확인 권장: C0 0 → 3 → 6, C1 0 → 3 → 7.
+- S2b exact → 확인 권장 3줄(정답 상품 유일 후보). S3 unmatched → 확인 권장 C0 3줄, C1 4줄(정답 상품 유일 후보). 새 오답 0.
+
+### 사람 결정
+- S2b·S3 규칙과 임계값(담당자 지정). 임계값은 dev 결과로 조정하지 않음.
+
+### AI가 만든 것
+- `staged.py` S2b·S3, `CatalogLookup.list_normalized_aliases` / `list_normalized_brand_aliases`(메모리·DB), `match_eval.py` 매처 2개와 확인 권장 건수
+- 테스트 13개(기본 제품 우선, 에디션 상품 확인 권장, 숫자 다르면 후보 제외, 편집거리 exact 조건, 동점 ambiguous, 한글 음절 거리 등)와 카탈로그 목록 테스트, eval_plan.md 사전 등록·결과, 이 로그 항목
+
+### 검증
+- 단계별 줄 단위 비교로 바뀐 줄 전부 확인(위 결과). S1+S2 숫자가 이전 측정과 같음을 확인.
+- 백엔드 pytest 전체: 288 passed, 194 skipped(DB), 실패 0.

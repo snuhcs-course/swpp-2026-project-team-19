@@ -93,6 +93,12 @@ class InMemoryCatalog:
     def get_brand_product_ids(self, brand_id: UUID) -> list[UUID]:
         return list(self._products_by_brand.get(brand_id, []))
 
+    def list_normalized_aliases(self) -> list[tuple[str, UUID]]:
+        return [(alias, pid) for pid, aliases in self._aliases_by_product.items() for alias in aliases]
+
+    def list_normalized_brand_aliases(self) -> list[tuple[str, UUID]]:
+        return [(alias, bid) for alias, brand_ids in self._brands_by_alias.items() for bid in brand_ids]
+
     def shared_aliases(self) -> dict[str, list[UUID]]:
         """Normalized aliases that point to more than one product."""
         return {

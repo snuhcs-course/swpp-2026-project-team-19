@@ -96,3 +96,15 @@ def test_from_seed_loads_brands():
     products = [catalog.get_product(pid) for pid in catalog.get_brand_product_ids(macallan)]
     assert {p.display_name for p in products} >= {"The Macallan 12 Double Cask", "The Macallan 15 Double Cask"}
     assert all(p.brand_id == macallan for p in products)
+
+
+def test_list_aliases_for_edit_distance():
+    brand, product = UUID(int=100), UUID(int=1)
+    catalog = InMemoryCatalog(
+        [ProductInfo(product, "Dalwhinnie 15", 15, brand_id=brand)],
+        [(product, "Dalwhinnie 15"), (product, "달위니 15년")],
+        [(brand, "Dalwhinnie"), (brand, "달위니")],
+    )
+
+    assert catalog.list_normalized_aliases() == [("dalwhinnie15", product), ("달위니15", product)]
+    assert catalog.list_normalized_brand_aliases() == [("dalwhinnie", brand), ("달위니", brand)]

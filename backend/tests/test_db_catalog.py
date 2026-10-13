@@ -57,6 +57,14 @@ def test_brand_lookup_returns_active_products(db_session):
     assert catalog.get_brand_product_ids(brand.id) == [twelve.id, fifteen.id]
     assert catalog.get_brand_product_ids(other.id) == []
 
+    assert sorted(catalog.list_normalized_brand_aliases()) == sorted(
+        [("themacallan", brand.id), ("맥캘란", brand.id), ("kavalan", other.id)]
+    )
+    # Aliases of the inactive product are left out.
+    assert sorted(catalog.list_normalized_aliases()) == sorted(
+        [("themacallan12doublecask", twelve.id), ("themacallan15doublecask", fifteen.id)]
+    )
+
 
 @pytest.mark.skipif(not all(path.exists() for path in SEED_FILES), reason="ai/catalog seed is not checked out")
 def test_matches_the_in_memory_catalog_on_the_labeled_menu_items(db_session):
@@ -83,9 +91,10 @@ def test_staged_matching_is_the_same_on_both_catalogs(db_session):
     in_memory = InMemoryCatalog.from_seed(SEED_FILES[0])
     from_db = DbCatalog(db_session)
     names = [item["raw_name"] for photo in labels_json["photos"] for item in photo["items"]]
-    names += ["맥캘란 더블캐스크 12Y", "Macallan 12yo", "Kavalan Solist", "아벨라워(Aberlour) 12년", "Talisker 10 / Ardbeg 10"]
+    names += ["맥캘란 더블캐스크 12Y", "Macallan 12yo", "Kavalan Solist", "아벨라워(Aberlour) 12년", "Talisker 10 / Ardbeg 10", "Dalwhinny 15yo", "Abelour A`bunadh"]
 
     for name in names:
         extracted = ExtractedProduct(product_name=name)
-        expected = resolve_product_staged(extracted, in_memory, {"S1", "S2"})
-        assert resolve_product_staged(extracted, from_db, {"S1", "S2"}) == expected, name
+        stages = {"S1", "S2", "S2b", "S3"}
+        expected = resolve_product_staged(extracted, in_memory, stages)
+        assert resolve_product_staged(extracted, from_db, stages) == expected, name

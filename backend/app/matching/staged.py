@@ -1,7 +1,7 @@
 # AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13, P22). Reviewed by Jinwoo Park.
 """Product resolution with optional stages on top of `resolve_product` (eval_plan.md, 매칭 평가).
 
-    resolve_product_staged(item, catalog, stages={"S1", "S2"})
+    resolve_product_staged(item, catalog, stages={"S1", "S2", "S2b", "S3"})
 
 With no stages this is exactly `resolve_product`, which menu import still uses.
 Stages only add lookups; `normalize` and the alias rules stay the same.
@@ -18,6 +18,16 @@ S2  brand + attributes (needs S1), tried only when no alias matched
       Exact only for a single product that every edition token fits; with no
       age, only when edition tokens pick out one product. Anything else is
       ambiguous (owner picks) or unmatched.
+S2b default product (needs S2), applied to the products S2 narrowed by brand + age
+    - no edition token and exactly one product of that age without an edition -> exact
+    - one candidate that has an edition but no edition token in the name -> ambiguous
+      with evidence confirmRecommended ("확인 권장")
+S3  edit distance (needs S2b), tried only when S2 found nothing either
+    - menu name vs product aliases, and the start of the name vs brand aliases (then S2b)
+    - the digits must be identical and in the same order; the rest may differ by an
+      edit distance of 1 (6 characters or fewer) or 2 (longer), counting Hangul syllables
+    - never exact, except one candidate at distance <= 1 for a name with digits;
+      otherwise ambiguous, with confirmRecommended when there is one candidate
 """
 
 import re
@@ -30,8 +40,11 @@ from app.core.normalize import normalize
 from app.matching.resolve import BILINGUAL_SEPARATOR, resolve_product
 from app.matching.types import Candidate, CatalogLookup, ExtractedProduct, ProductInfo, ResolutionResult
 
-STAGES = frozenset({"S1", "S2"})
+STAGES = frozenset({"S1", "S2", "S2b", "S3"})
+# Each stage runs on top of the one named here.
+_NEEDS = {"S2": "S1", "S2b": "S2", "S3": "S2b"}
 BRAND_ATTRIBUTE_SCORE = 0.8
+EDIT_DISTANCE_SCORE = 0.6
 
 UNMATCHED = ResolutionResult(status="unmatched")
 
@@ -61,8 +74,9 @@ def resolve_product_staged(
     stages = frozenset(stages)
     if not stages <= STAGES:
         raise ValueError(f"Unknown matching stages: {sorted(stages - STAGES)}")
-    if "S2" in stages and "S1" not in stages:
-        raise ValueError("Stage S2 runs on top of S1")
+    for stage, needed in _NEEDS.items():
+        if stage in stages and needed not in stages:
+            raise ValueError(f"Stage {stage} runs on top of {needed}")
     if item.product_name is None:
         return UNMATCHED
     if "S1" in stages:
@@ -89,7 +103,17 @@ def _resolve_one(item: ExtractedProduct, catalog: CatalogLookup, stages: frozens
     names = [item.product_name, *variants]
     if BILINGUAL_SEPARATOR in item.product_name:
         names += [side.strip() for side in item.product_name.split(BILINGUAL_SEPARATOR) if side.strip()]
-    return _merge(((name, _resolve_by_brand(name, item, catalog)) for name in names), "brandName")
+    default_product = "S2b" in stages
+    result = _merge(((name, _resolve_by_brand(name, item, catalog, default_product)) for name in names), "brandName")
+    if result.status != "unmatched" or "S3" not in stages:
+        return result
+
+    # S3: edit distance to product aliases and to brand aliases (then S2b).
+    lookups = []
+    for name in names:
+        lookups.append((name, _resolve_by_alias_distance(name, catalog)))
+        lookups.append((name, _resolve_by_brand_distance(name, item, catalog)))
+    return _merge(lookups, "fuzzyName")
 
 
 def _parenthesis_variants(name: str) -> list[str]:
@@ -181,23 +205,30 @@ def _resolve_two_products(
     return ResolutionResult(status="multi", candidates=candidates, parts=tuple(parts))
 
 
-# --- S2: brand + attributes ---------------------------------------------------------
+# --- S2 / S2b: brand + attributes ---------------------------------------------------
+
+
+def _brand_prefixes(name: str) -> list[tuple[str, str]]:
+    """(start of the name, rest) splits to try as a brand, longest first.
+
+    Word prefixes, then the part before the first digit for Korean menus
+    without spaces ("라프로익25년").
+    """
+    words = name.split()
+    splits = [(" ".join(words[:count]), " ".join(words[count:])) for count in range(len(words), 0, -1)]
+    match = _HEAD_BEFORE_DIGIT.match(name)
+    if match is not None:
+        splits.append((match["head"], match["rest"]))
+    return splits
 
 
 def _find_brand(name: str, catalog: CatalogLookup) -> tuple[list[UUID], str, str] | None:
     """Return (brand ids, matched brand alias, rest of the name) for the longest leading brand alias."""
-    words = name.split()
-    for count in range(len(words), 0, -1):
-        alias = normalize(" ".join(words[:count]))
+    for head, rest in _brand_prefixes(name):
+        alias = normalize(head)
         brand_ids = catalog.find_brand_ids_by_alias(alias) if alias else []
         if brand_ids:
-            return brand_ids, alias, " ".join(words[count:])
-    match = _HEAD_BEFORE_DIGIT.match(name)
-    if match is not None:
-        alias = normalize(match["head"])
-        brand_ids = catalog.find_brand_ids_by_alias(alias) if alias else []
-        if brand_ids:
-            return brand_ids, alias, match["rest"]
+            return brand_ids, alias, rest
     return None
 
 
@@ -224,11 +255,25 @@ def _token_fits(token: str, targets: list[str]) -> bool:
     return len(token) >= min_length and any(token in target for target in targets)
 
 
-def _resolve_by_brand(name: str, item: ExtractedProduct, catalog: CatalogLookup) -> ResolutionResult:
+def _resolve_by_brand(
+    name: str, item: ExtractedProduct, catalog: CatalogLookup, default_product: bool
+) -> ResolutionResult:
     found = _find_brand(name, catalog)
     if found is None:
         return UNMATCHED
     brand_ids, brand_alias, rest = found
+    return _narrow_brand(brand_ids, {"brandMatch": brand_alias}, rest, item, catalog, default_product)
+
+
+def _narrow_brand(
+    brand_ids: list[UUID],
+    brand_evidence: dict[str, Any],
+    rest: str,
+    item: ExtractedProduct,
+    catalog: CatalogLookup,
+    default_product: bool,
+) -> ResolutionResult:
+    """Narrow the brands' products by the age and edition tokens in `rest` (S2, and S2b if asked)."""
     age, tokens = _split_age(rest)
     if age is None:
         age = item.age_years
@@ -253,7 +298,12 @@ def _resolve_by_brand(name: str, item: ExtractedProduct, catalog: CatalogLookup)
         fits.append((product, [token for token in tokens if _token_fits(token, targets)]))
 
     full = [product for product, fitted in fits if len(fitted) == len(tokens)]
-    if age is not None:
+    if age is not None and default_product and not tokens:
+        # S2b: the plain product of that age is the default; an edition is never assumed.
+        plain = [product for product in products if product.edition_name is None]
+        exact = len(plain) == 1
+        chosen = plain if exact else products
+    elif age is not None:
         exact = len(full) == 1 and (len(products) == 1 or bool(tokens))
         chosen = full if exact else [product for product, _ in fits]
     else:
@@ -262,13 +312,16 @@ def _resolve_by_brand(name: str, item: ExtractedProduct, catalog: CatalogLookup)
         chosen = full if exact else [product for product, fitted in fits if fitted or not tokens]
     if not chosen:
         return UNMATCHED
+    confirm = (
+        default_product and not exact and not tokens and len(chosen) == 1 and chosen[0].edition_name is not None
+    )
 
     by_fit = {product.product_id: fitted for product, fitted in fits}
     ranked = sorted(chosen, key=lambda p: (-len(by_fit[p.product_id]), p.display_name, str(p.product_id)))
     candidates = []
     for rank, product in enumerate(ranked, start=1):
         fitted = by_fit[product.product_id]
-        evidence: dict[str, Any] = {"brandMatch": brand_alias}
+        evidence: dict[str, Any] = dict(brand_evidence)
         if age is not None:
             evidence["ageMatch"] = age
         if fitted:
@@ -276,6 +329,10 @@ def _resolve_by_brand(name: str, item: ExtractedProduct, catalog: CatalogLookup)
         unfitted = [token for token in tokens if token not in fitted]
         if unfitted:
             evidence["editionUnmatched"] = unfitted
+        if default_product and exact and not tokens:
+            evidence["defaultProduct"] = True
+        if confirm:
+            evidence["confirmRecommended"] = True
         candidates.append(
             Candidate(
                 product_id=product.product_id,
@@ -290,3 +347,118 @@ def _resolve_by_brand(name: str, item: ExtractedProduct, catalog: CatalogLookup)
         candidates=tuple(candidates),
         proposed_product_id=candidates[0].product_id,
     )
+
+
+# --- S3: edit distance --------------------------------------------------------------
+
+_DIGITS = re.compile(r"\d+(?:\.\d+)?")
+_SHORT_TEXT = 6
+
+
+def _digits_and_text(normalized: str) -> tuple[list[str], str]:
+    """"macallan12sherryoak" -> (["12"], "macallansherryoak")."""
+    return _DIGITS.findall(normalized), _DIGITS.sub("", normalized)
+
+
+def _distance_limit(text: str) -> int:
+    return 1 if len(text) <= _SHORT_TEXT else 2
+
+
+def edit_distance(a: str, b: str, limit: int) -> int:
+    """Levenshtein distance over characters (one Hangul syllable = one character).
+
+    Returns `limit + 1` as soon as the distance is known to exceed `limit`.
+    """
+    if abs(len(a) - len(b)) > limit:
+        return limit + 1
+    previous = list(range(len(b) + 1))
+    for i, char_a in enumerate(a, start=1):
+        current = [i]
+        for j, char_b in enumerate(b, start=1):
+            current.append(min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + (char_a != char_b)))
+        if min(current) > limit:
+            return limit + 1
+        previous = current
+    return min(previous[-1], limit + 1)
+
+
+def _closest(digits: list[str], text: str, aliases: Iterable[tuple[str, UUID]]) -> dict[UUID, tuple[int, str]]:
+    """Map each owner id to (distance, alias) of its closest alias within the limit; digits must be equal."""
+    if not text:
+        return {}
+    limit = _distance_limit(text)
+    best: dict[UUID, tuple[int, str]] = {}
+    for alias, owner_id in aliases:
+        alias_digits, alias_text = _digits_and_text(alias)
+        if alias_digits != digits:
+            continue
+        distance = edit_distance(text, alias_text, limit)
+        if distance <= limit and (owner_id not in best or distance < best[owner_id][0]):
+            best[owner_id] = (distance, alias)
+    return best
+
+
+def _exact_allowed(candidate_count: int, distance: int, has_digits: bool) -> bool:
+    return candidate_count == 1 and distance <= 1 and has_digits
+
+
+def _resolve_by_alias_distance(name: str, catalog: CatalogLookup) -> ResolutionResult:
+    digits, text = _digits_and_text(normalize(name))
+    found = []
+    for product_id, (distance, alias) in _closest(digits, text, catalog.list_normalized_aliases()).items():
+        product = catalog.get_product(product_id)
+        if product is not None:
+            found.append((distance, product, alias))
+    if not found:
+        return UNMATCHED
+    found.sort(key=lambda entry: (entry[0], entry[1].display_name, str(entry[1].product_id)))
+    exact = _exact_allowed(len(found), found[0][0], bool(digits))
+    candidates = []
+    for rank, (distance, product, alias) in enumerate(found, start=1):
+        evidence: dict[str, Any] = {"fuzzyAlias": alias, "editDistance": distance}
+        if not exact and len(found) == 1:
+            evidence["confirmRecommended"] = True
+        candidates.append(
+            Candidate(product_id=product.product_id, rank=rank, score=EDIT_DISTANCE_SCORE, method="alias", evidence=evidence)
+        )
+    return ResolutionResult(
+        status="exact_match" if exact else "ambiguous",
+        candidates=tuple(candidates),
+        proposed_product_id=candidates[0].product_id,
+    )
+
+
+def _resolve_by_brand_distance(name: str, item: ExtractedProduct, catalog: CatalogLookup) -> ResolutionResult:
+    """Brand found by edit distance (Dalwhinny -> Dalwhinnie), then narrowed by S2b."""
+    brand_aliases = catalog.list_normalized_brand_aliases()
+    chosen: tuple[int, list[UUID], str, str] | None = None  # distance, brand ids, alias, rest
+    for head, rest in _brand_prefixes(name):
+        best = _closest(*_digits_and_text(normalize(head)), brand_aliases)
+        if not best:
+            continue
+        distance = min(found[0] for found in best.values())
+        # Longer prefixes come first, so a shorter one replaces them only when strictly closer.
+        if chosen is None or distance < chosen[0]:
+            nearest = [brand_id for brand_id, found in best.items() if found[0] == distance]
+            chosen = (distance, nearest, best[nearest[0]][1], rest)
+    if chosen is None:
+        return UNMATCHED
+    distance, brand_ids, alias, rest = chosen
+    result = _narrow_brand(
+        brand_ids, {"fuzzyBrand": alias, "editDistance": distance}, rest, item, catalog, default_product=True
+    )
+    if result.status == "unmatched":
+        return result
+    has_digits = bool(_DIGITS.search(normalize(name)))
+    if result.status == "exact_match" and _exact_allowed(len(brand_ids), distance, has_digits):
+        return result
+    single = len(result.candidates) == 1
+    candidates = tuple(
+        replace(
+            candidate,
+            score=EDIT_DISTANCE_SCORE,
+            evidence={**candidate.evidence, "confirmRecommended": True} if single else candidate.evidence,
+        )
+        for candidate in result.candidates
+    )
+    return ResolutionResult(status="ambiguous", candidates=candidates, proposed_product_id=candidates[0].product_id)

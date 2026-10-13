@@ -25,6 +25,8 @@ Outcome per line (glass/bottle rows of one line count once)
   overconfident  exact_match or multi for an "unknown" line (menu too short to tell)
 Owner burden = lines per photo that are not confirmed (exact_match or multi): the
 owner has to choose or create.
+Confirm recommended = ambiguous lines with one candidate marked "confirmRecommended"
+(S2b/S3: the owner only confirms it); they still count toward owner burden.
 """
 
 from __future__ import annotations
@@ -55,6 +57,8 @@ MATCHERS = {
     "M0": resolve_product,  # I1: normalize + exact alias, " / " bilingual split
     "S1": lambda item, catalog: resolve_product_staged(item, catalog, {"S1"}),  # + parentheses, two products
     "S1+S2": lambda item, catalog: resolve_product_staged(item, catalog, {"S1", "S2"}),  # + brand, age, edition
+    "S1+S2b": lambda item, catalog: resolve_product_staged(item, catalog, {"S1", "S2", "S2b"}),  # + default product
+    "S1+S2b+S3": lambda item, catalog: resolve_product_staged(item, catalog, {"S1", "S2", "S2b", "S3"}),  # + edit distance
 }
 
 
@@ -118,6 +122,7 @@ def evaluate(matcher: str, condition: str, split: str) -> dict:
     by_kind: dict[str, Counter] = defaultdict(Counter)
     burden: dict[str, int] = {}
     errors = []
+    confirm = 0
     catalogs = {}
     for photo in gold["photos"]:
         if photo["split"] != split:
@@ -143,9 +148,13 @@ def evaluate(matcher: str, condition: str, split: str) -> dict:
             by_kind[kind][outcome] += 1
             if r.status not in CONFIRMED:
                 burden[photo["photo_id"]] += 1
+            # "확인 권장": one candidate the owner only has to confirm (S2b, S3)
+            confirm_recommended = r.status == "ambiguous" and len(r.candidates) == 1 and bool(
+                r.candidates[0].evidence.get("confirmRecommended"))
+            confirm += confirm_recommended
             if outcome not in ("correct",) and not (kind in ("absent", "non_whisky") and outcome == "unmatched"):
                 errors.append({"photo_id": photo["photo_id"], "name": name, "gold": g, "kind": kind,
-                               "outcome": outcome, "status": r.status})
+                               "outcome": outcome, "status": r.status, "confirm_recommended": confirm_recommended})
     lines = sum(sum(c.values()) for c in by_bar.values())
     fm = sum(c["false_merge"] + c["overconfident"] for c in by_bar.values())
     known = by_kind["known"]
@@ -153,6 +162,7 @@ def evaluate(matcher: str, condition: str, split: str) -> dict:
         "matcher": matcher, "condition": condition, "split": split, "lines": lines,
         "known_top1": known["correct"] / sum(known.values()) if known else None,
         "false_merge_rate": fm / lines if lines else None,
+        "confirm_recommended": confirm,
         "by_kind": {k: dict(v) for k, v in by_kind.items()},
         "by_bar": {k: dict(v) for k, v in by_bar.items()},
         "owner_burden": burden,
@@ -165,7 +175,8 @@ def print_result(r: dict) -> None:
     print(f"\n== {r['matcher']} / {r['condition']} / {r['split']}  ({r['lines']} lines)")
     kt = f"{r['known_top1']:.3f}" if r["known_top1"] is not None else "-"
     print(f"  known top-1 {kt}   false merge rate {r['false_merge_rate']:.3f}   "
-          f"photos with owner burden < {BURDEN_LIMIT}: {r['photos_under_limit']:.2f}")
+          f"photos with owner burden < {BURDEN_LIMIT}: {r['photos_under_limit']:.2f}   "
+          f"confirm recommended {r['confirm_recommended']}")
     print("  " + "kind".ljust(12) + "".join(o.rjust(15) for o in OUTCOMES))
     for k, c in sorted(r["by_kind"].items()):
         print("  " + k.ljust(12) + "".join(str(c.get(o, 0)).rjust(15) for o in OUTCOMES))

@@ -230,3 +230,128 @@ def test_two_products_found_by_brand_and_age(catalog):
 
     assert result.status == "multi"
     assert [part.proposed_product_id for part in result.parts] == [MACALLAN_15_DOUBLE, ABERLOUR_12]
+
+
+# --- S2b: default product, S3: edit distance -----------------------------------------
+
+FIDDICH = _id(200)
+FIDDICH_12, FIDDICH_12_SHERRY, FIDDICH_15_SOLERA = (_id(n) for n in range(201, 204))
+
+
+@pytest.fixture
+def glenfiddich():
+    products = [
+        ProductInfo(FIDDICH_12, "Glenfiddich 12", age_years=12, brand_id=FIDDICH),
+        ProductInfo(FIDDICH_12_SHERRY, "Glenfiddich 12 Sherry Cask Finish", 12, "Sherry Cask Finish", brand_id=FIDDICH),
+        ProductInfo(FIDDICH_15_SOLERA, "Glenfiddich 15 Solera", 15, "Solera", brand_id=FIDDICH),
+    ]
+    aliases = [(product.product_id, product.display_name) for product in products]
+    return InMemoryCatalog(products, aliases, [(FIDDICH, "Glenfiddich"), (FIDDICH, "글렌피딕")])
+
+
+def staged(name: str, catalog, *stages: str):
+    return resolve_product_staged(ExtractedProduct(product_name=name), catalog, {"S1", "S2", *stages})
+
+
+def test_s2b_and_s3_need_the_stage_below(glenfiddich):
+    with pytest.raises(ValueError):
+        resolve_product_staged(ExtractedProduct(product_name="x"), glenfiddich, {"S1", "S2b"})
+    with pytest.raises(ValueError):
+        resolve_product_staged(ExtractedProduct(product_name="x"), glenfiddich, {"S1", "S2", "S3"})
+
+
+def test_default_product_without_edition_wins_when_no_edition_token(glenfiddich):
+    assert staged("글렌피딕 12년", glenfiddich).status == "ambiguous"  # S2 alone
+
+    result = staged("글렌피딕 12년", glenfiddich, "S2b")
+
+    assert result.status == "exact_match"
+    assert result.proposed_product_id == FIDDICH_12
+    assert result.candidates[0].evidence["defaultProduct"] is True
+
+
+def test_edition_token_still_picks_the_edition_product(glenfiddich):
+    result = staged("Glenfiddich 12yo Sherry", glenfiddich, "S2b")
+
+    assert result.status == "exact_match"
+    assert result.proposed_product_id == FIDDICH_12_SHERRY
+
+
+def test_only_product_of_that_age_with_an_edition_is_confirm_recommended(glenfiddich):
+    assert staged("글렌피딕 15년", glenfiddich).status == "exact_match"  # S2 alone
+
+    result = staged("글렌피딕 15년", glenfiddich, "S2b")
+
+    assert result.status == "ambiguous"
+    [candidate] = result.candidates
+    assert candidate.product_id == FIDDICH_15_SOLERA
+    assert candidate.evidence["confirmRecommended"] is True
+
+
+def test_s2b_leaves_the_s2_cases_with_several_editions_ambiguous(catalog):
+    result = staged("Macallan 12yo", catalog, "S2b")
+
+    assert result.status == "ambiguous"
+    assert {c.product_id for c in result.candidates} == {MACALLAN_12_SHERRY, MACALLAN_12_DOUBLE}
+    assert all("confirmRecommended" not in c.evidence for c in result.candidates)
+
+
+def test_edit_distance_counts_hangul_syllables():
+    from app.matching.staged import edit_distance
+
+    assert edit_distance("납크릭", "놉크릭", 1) == 1
+    assert edit_distance("dalwhinny", "dalwhinnie", 2) == 2
+    assert edit_distance("dalwhinny", "dalwhinnie", 1) == 2  # over the limit -> limit + 1
+
+
+def test_edit_distance_needs_the_same_digits(glenfiddich):
+    s3 = ("S2b", "S3")
+    # 16 and 18 are not in the catalog; "glenfiddich15..." is never a candidate.
+    assert staged("Glenfiddich 16yo", glenfiddich, *s3).status == "unmatched"
+    assert staged("Glenfidich 18yo", glenfiddich, *s3).status == "unmatched"
+
+
+def test_edit_distance_one_with_digits_and_one_candidate_is_exact(glenfiddich):
+    result = staged("Glenfidich 12yo", glenfiddich, "S2b", "S3")
+
+    assert staged("Glenfidich 12yo", glenfiddich, "S2b").status == "unmatched"
+    assert result.status == "exact_match"
+    assert result.proposed_product_id == FIDDICH_12
+    assert result.candidates[0].evidence["editDistance"] == 1
+
+
+def test_edit_distance_two_is_confirm_recommended(glenfiddich):
+    result = staged("Glanfidich 15yo", glenfiddich, "S2b", "S3")
+
+    assert result.status == "ambiguous"
+    [candidate] = result.candidates
+    assert candidate.product_id == FIDDICH_15_SOLERA
+    assert candidate.evidence["editDistance"] == 2
+    assert candidate.evidence["confirmRecommended"] is True
+
+
+def test_edit_distance_without_digits_is_never_exact(catalog):
+    result = staged("Makers Mork", catalog, "S2b", "S3")
+
+    assert result.status == "ambiguous"
+    assert result.proposed_product_id == MAKERS_MARK
+    assert result.candidates[0].evidence["confirmRecommended"] is True
+
+
+def test_edit_distance_ties_are_ambiguous():
+    first, second = _id(301), _id(302)
+    catalog = InMemoryCatalog(
+        [ProductInfo(first, "Abcd 10", 10), ProductInfo(second, "Abce 10", 10)],
+        [(first, "Abcd 10"), (second, "Abce 10")],
+    )
+
+    result = staged("Abcf 10", catalog, "S2b", "S3")
+
+    assert result.status == "ambiguous"
+    assert {c.product_id for c in result.candidates} == {first, second}
+    assert all("confirmRecommended" not in c.evidence for c in result.candidates)
+
+
+def test_s3_runs_only_when_s2_found_nothing(catalog):
+    # S2 already offers the Kavalan Solist products; S3 does not add anything.
+    assert staged("Kavalan Solist", catalog, "S2b", "S3") == staged("Kavalan Solist", catalog, "S2b")

@@ -22,6 +22,8 @@ class DbCatalog:
         self._products: dict[UUID, ProductInfo | None] = {}
         self._aliases: dict[UUID, list[str]] = {}
         self._brand_products: dict[UUID, list[UUID]] = {}
+        self._all_aliases: list[tuple[str, UUID]] | None = None
+        self._all_brand_aliases: list[tuple[str, UUID]] | None = None
 
     def find_product_ids_by_alias(self, normalized_alias: str) -> list[UUID]:
         query = (
@@ -77,3 +79,22 @@ class DbCatalog:
             )
             self._brand_products[brand_id] = list(self._session.scalars(query))
         return self._brand_products[brand_id]
+
+    def list_normalized_aliases(self) -> list[tuple[str, UUID]]:
+        if self._all_aliases is None:
+            query = (
+                select(ProductAlias.normalized_alias, ProductAlias.product_id)
+                .join(Product, Product.id == ProductAlias.product_id)
+                .where(Product.is_active)
+                .order_by(ProductAlias.product_id, ProductAlias.normalized_alias)
+            )
+            self._all_aliases = [(alias, product_id) for alias, product_id in self._session.execute(query)]
+        return self._all_aliases
+
+    def list_normalized_brand_aliases(self) -> list[tuple[str, UUID]]:
+        if self._all_brand_aliases is None:
+            query = select(BrandAlias.normalized_alias, BrandAlias.brand_id).order_by(
+                BrandAlias.brand_id, BrandAlias.normalized_alias
+            )
+            self._all_brand_aliases = [(alias, brand_id) for alias, brand_id in self._session.execute(query)]
+        return self._all_brand_aliases
