@@ -18,6 +18,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -36,13 +37,17 @@ fun SearchScreen(
     onOpenResults: (String) -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
+    var navigating by rememberSaveable { mutableStateOf(false) }
+    // Reset the one-shot navigation guard when returning from Search Results.
+    LaunchedEffect(Unit) { navigating = false }
     val normalizedInput = query.trim()
     val tooLong = normalizedInput.length > MAX_QUERY_LENGTH
-    val canSearch = normalizedInput.isNotEmpty() && !tooLong
+    val canSearch = normalizedInput.isNotEmpty() && !tooLong && !navigating
     val keyboard = LocalSoftwareKeyboardController.current
 
     val submit = {
         if (canSearch) {
+            navigating = true
             keyboard?.hide()
             onOpenResults(normalizedInput)
         }
@@ -53,6 +58,7 @@ fun SearchScreen(
             query = query,
             tooLong = tooLong,
             canSearch = canSearch,
+            isNavigating = navigating,
             onQueryChange = { query = it },
             onClear = { query = "" },
             onSearch = submit,
@@ -65,6 +71,7 @@ private fun SearchContent(
     query: String,
     tooLong: Boolean,
     canSearch: Boolean,
+    isNavigating: Boolean,
     onQueryChange: (String) -> Unit,
     onClear: () -> Unit,
     onSearch: () -> Unit,
@@ -122,6 +129,7 @@ private fun SearchContent(
                 onValueChange = onQueryChange,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                enabled = !isNavigating,
                 placeholder = { Text("위스키 이름 입력") },
                 leadingIcon = { Text("⌕") },
                 trailingIcon = {
@@ -155,7 +163,7 @@ private fun SearchContent(
 @Composable
 private fun I2SearchInitialPreview() {
     I2CustomerSearchTheme {
-        SearchContent("", false, false, {}, {}, {})
+        SearchContent("", false, false, false, {}, {}, {})
     }
 }
 
@@ -163,6 +171,6 @@ private fun I2SearchInitialPreview() {
 @Composable
 private fun I2SearchEnteredPreview() {
     I2CustomerSearchTheme {
-        SearchContent("Deanston 12", false, true, {}, {}, {})
+        SearchContent("Deanston 12", false, true, false, {}, {}, {})
     }
 }
