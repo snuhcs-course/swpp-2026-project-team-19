@@ -33,8 +33,8 @@ class SearchResultsViewModel(
             _state.value = CustomerSearchUiState.Error("검색어를 1~100자로 입력해 주세요.")
             return
         }
-        // LaunchedEffect(query) can run again after recomposition/navigation.
-        if (currentQuery == trimmed && _state.value !is CustomerSearchUiState.Error) return
+        // A recomposed or recreated destination must not auto-retry an existing error.
+        if (currentQuery == trimmed) return
         currentQuery = trimmed
         load()
     }
