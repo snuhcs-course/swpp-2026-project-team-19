@@ -238,3 +238,46 @@
 - 이 셸에서 `python`이 Microsoft Store 스텁으로 잡히고 전역 Python에 PIL이 없어, 레포 `.venv/Scripts/python.exe`로 실행.
 - 샌드박스가 시스템 Temp 접근을 막아 `tmp_path` 테스트 1개가 에러 → `--basetemp` 지정으로 해결.
 - `extract.py`는 429도 최대 5회 재시도하므로, 코드를 바꾸지 않고 실행 감시 래퍼로 429 재시도 시 즉시 중단하도록 함(실제 발생 0회).
+
+## 2026-10-13 · P22 (I2) 매칭 평가 하네스 + 매칭기 S1·S2 (dev)
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 없음 (Gemini 0회)
+- **브랜치:** `i2-p22-matching-eval` (base `i2-p11-heldout-benchmark`, P22 패치 `git am`)
+- **시간(대략):** 약 1시간 30분 (0단계 준비·정답 수정 20분, S1 25분, S2 35분, 마무리 10분)
+- **토큰(대략):** Claude Code 세션 컨텍스트 약 23만 토큰(마무리 시점), Max 플랜 5시간 한도의 6%
+
+### 진행 순서
+1. 담당자가 단계(0 준비 → S1 → S2 → 마무리), 단계마다 멈춤, 금지 사항(test 분할 평가·열람, 정답을 결과에 맞춰 수정, 카탈로그 JSON·`resolve_product`·`normalize.py`·메뉴 등록/게시 코드 수정)과 중단 규칙(dev false merge 0.02 초과 시 미채택)을 지정.
+2. 0단계: P22 패치 적용·push. 정답 1건 수정("Buffalo Trace / Makrt's Mark"를 `both:`로, 하나만 exact면 `partial`). M0 C1 Top-1이 0.803 → 0.798로 바뀌어 담당자에게 보고, 담당자 결정으로 eval_plan.md 기준선을 옛 값과 사유를 남기고 수정.
+3. S1(괄호 병기, 두 상품 묶음 → status `multi`) 구현·측정: dev 변화 없음(괄호 표기 0줄, 묶음 줄은 오타로 미발동). 합성 이름으로 동작 확인.
+4. S2(브랜드 + 연수 + 에디션 토큰) 구현·측정: false merge 0, C0 Top-1 0.937, C1 0.884.
+5. 마무리: eval_plan.md에 결과 표·주의 두 줄, 이 로그, 커밋·push.
+
+### 결과 (dev, 사전 등록 지표)
+- M0 → S1 → S1+S2, C0 Top-1 0.867 → 0.867 → 0.937, C1 0.798 → 0.798 → 0.884. false merge 전부 0, partial C1 1(Buffalo 줄).
+- 업주 부담 5 미만 사진: C0 0.62 → 0.69, C1 0.85 → 0.92.
+- 새 exact는 전부 정답(C0 10줄, C1 15줄). ambiguous_bad 2줄(C0, 카탈로그에 없는 상품에 같은 브랜드 후보).
+
+### 사람 결정
+- push, uv 설치·`uv sync` 승인.
+- Buffalo 정답 정의 변경과 M0 기준선 수정(옛 값 0.803 유지 기록).
+- S2 위험("해당 연수 상품이 카탈로그에 하나뿐이면 exact")은 test 평가 전에 정책을 정하기로 함. test는 평가·열람하지 않음.
+
+### AI가 만든 것
+- `backend/app/matching/staged.py` (`resolve_product_staged`, S1·S2), `types.py`(`ProductInfo.brand_id`, `ResolutionResult.parts`, status `multi`, `CatalogLookup` 브랜드 조회 2개), 메모리·DB 카탈로그 구현
+- `ai/eval/match_eval.py`: `both:`·`partial` 판정, 매처 `S1`·`S1+S2`, 평가 카탈로그 브랜드(C1 새 브랜드는 영문명 하나), `build_match_gold.py` 정답 수정·LF 출력
+- 테스트 `tests/test_resolve_staged.py`(23개), 메모리·DB 카탈로그 브랜드 조회 테스트, `ai/runs/2026-10-13_match_dev.json`, eval_plan.md 결과 절, 커밋 메시지, 이 로그 항목
+
+### AI가 제안해 반영된 것 (사람 확인)
+- M0 기준선 처리 방식 (a) 수정 + 사유 기록.
+
+### 검증
+- 0단계 후 M0 C0 숫자가 기준선과 같음을 확인. 단계마다 줄 단위로 status·후보를 비교(S1: 변화 0줄, S2: 바뀐 줄 전부 확인, 새 오답 0).
+- 단계 없이 부르면 `resolve_product`와 결과가 같은지 테스트로 확인. DB 카탈로그와 메모리 카탈로그의 staged 결과 일치 테스트 추가(DB 미설정이라 skip).
+- 백엔드 pytest 전체: 275 passed, 194 skipped(DB), 실패 0.
+
+### 사용 중 있었던 문제
+- backend `.venv`에 boto3가 없어 conftest(autouse fixture) import가 실패, 거의 모든 테스트가 수집 오류 → 승인 후 `uv sync`로 해결.
+- `build_match_gold.py`가 Windows에서 CRLF로 써서 gold 파일 전체가 diff로 잡힘 → 출력 줄바꿈을 LF로 고정.
+- gold의 새 상품 브랜드 `makers-mark`와 카탈로그 브랜드 key `makers_mark`가 달라 평가 카탈로그에서 다른 브랜드로 잡힘 → 평가 스크립트에서 하이픈을 밑줄로 바꿔 연결.
+- 샌드박스가 시스템 Temp를 막아 `tmp_path` 테스트 에러 → `--basetemp`를 scratchpad로 지정.

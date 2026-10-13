@@ -101,3 +101,18 @@
 - S4: LLM 판정 (P28·P29와 함께, 호출 비용 기록)
 
 **M0 기준선 (dev, 2026-10-13).** C0: 알려진 상품 Top-1 0.867, false merge 0, 업주 부담 5 미만 사진 0.62. C1: Top-1 0.798 (partial 1), false merge 0, 0.85. 2026-10-13 S1 착수 전 정답 정의 변경: 'Buffalo Trace / Makrt's Mark'를 '둘 중 하나'에서 '두 상품 모두'로. 변경 전 0.803. 매칭기 동작은 같음. 실패는 전부 unmatched이고 원인은 철자(Dalwhinny, 납크릭 등), 어순·생략(맥캘란 더블캐스크 12Y, Macallan 15yo), 한글 단독 이름(라프로익 25년)이다.
+
+**S1·S2 결과 (dev, 2026-10-13).** `resolve_product_staged`(`backend/app/matching/staged.py`), 결과 `ai/runs/2026-10-13_match_dev.json`. 운영 매칭(`resolve_product`)은 그대로다.
+
+| 단계 | 조건 | 알려진 Top-1 | false merge | partial | 업주 부담 5 미만 사진 | 채택 |
+|---|---|---|---|---|---|---|
+| M0 | C0 | 0.867 | 0 | 0 | 0.62 | 기준선 |
+| S1 | C0 | 0.867 | 0 | 0 | 0.62 | 채택 (false merge ≤ 0.02) |
+| S1+S2 | C0 | 0.937 | 0 | 0 | 0.69 | 채택 (false merge ≤ 0.02) |
+| M0 | C1 | 0.798 | 0 | 1 | 0.85 | 기준선 |
+| S1 | C1 | 0.798 | 0 | 1 | 0.85 | |
+| S1+S2 | C1 | 0.884 | 0 | 1 | 0.92 | |
+
+S2가 새로 exact로 맞힌 줄은 C0 10줄, C1 15줄이고 새 exact는 전부 정답이다. unmatched → ambiguous는 C0 10줄(그중 ambiguous_bad 2줄: 카탈로그에 없는 Arran Quarter Cask, Laphroaig 10 Cask Strength에 같은 브랜드 다른 상품을 후보로 냄)이다.
+- S1은 dev에 괄호 병기 형식이 없어 dev 숫자 변화 없음. 단위 테스트로만 확인했고 test(미라보)에서 처음 검증된다. 두 상품 묶음 규칙도 dev에서 발동 0회(오타 때문).
+- 알려진 위험: S2는 브랜드의 해당 연수 상품이 카탈로그에 하나뿐이면 exact. 카탈로그에 없는 같은 연수의 다른 에디션이면 false merge가 된다. test 평가 전에 정책을 정한다.
