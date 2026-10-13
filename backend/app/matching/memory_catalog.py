@@ -11,9 +11,24 @@ from app.matching.types import ProductInfo
 
 
 class InMemoryCatalog:
-    def __init__(self, products: Iterable[ProductInfo], aliases: Iterable[tuple[UUID, str]]) -> None:
-        """`aliases` holds (product_id, alias_text) pairs; normalized aliases are computed here."""
+    def __init__(
+        self,
+        products: Iterable[ProductInfo],
+        aliases: Iterable[tuple[UUID, str]],
+        brand_aliases: Iterable[tuple[UUID, str]] = (),
+    ) -> None:
+        """`aliases` holds (product_id, alias_text) pairs and `brand_aliases` (brand_id, alias_text)
+        pairs; normalized aliases are computed here. A product's brand is `ProductInfo.brand_id`."""
         self._products = {product.product_id: product for product in products}
+        self._products_by_brand: dict[UUID, list[UUID]] = {}
+        for product in self._products.values():
+            if product.brand_id is not None:
+                self._products_by_brand.setdefault(product.brand_id, []).append(product.product_id)
+        self._brands_by_alias: dict[str, dict[UUID, None]] = {}
+        for brand_id, alias_text in brand_aliases:
+            normalized = normalize(alias_text)
+            if normalized:
+                self._brands_by_alias.setdefault(normalized, {})[brand_id] = None
         # dict keys keep insertion order and drop aliases that normalize to the same value
         # within one product, like the (product_id, normalized_alias) unique constraint.
         self._aliases_by_product: dict[UUID, dict[str, None]] = {pid: {} for pid in self._products}
@@ -37,6 +52,12 @@ class InMemoryCatalog:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         products = []
         aliases = []
+        brand_aliases = [
+            (UUID(brand["id"]), alias["alias_text"])
+            for brand in data.get("brands", [])
+            for alias in brand["aliases"]
+            if not exclude_sources or not set(alias.get("sources", [])) <= set(exclude_sources)
+        ]
         for row in data["products"]:
             if not row.get("is_active", True):
                 continue
@@ -55,7 +76,7 @@ class InMemoryCatalog:
                 for alias in row["aliases"]
                 if not exclude_sources or not set(alias.get("sources", [])) <= set(exclude_sources)
             )
-        return cls(products, aliases)
+        return cls(products, aliases, brand_aliases)
 
     def find_product_ids_by_alias(self, normalized_alias: str) -> list[UUID]:
         return list(self._products_by_alias.get(normalized_alias, {}))
@@ -65,6 +86,12 @@ class InMemoryCatalog:
 
     def get_normalized_aliases(self, product_id: UUID) -> list[str]:
         return list(self._aliases_by_product.get(product_id, {}))
+
+    def find_brand_ids_by_alias(self, normalized_alias: str) -> list[UUID]:
+        return list(self._brands_by_alias.get(normalized_alias, {}))
+
+    def get_brand_product_ids(self, brand_id: UUID) -> list[UUID]:
+        return list(self._products_by_brand.get(brand_id, []))
 
     def shared_aliases(self) -> dict[str, list[UUID]]:
         """Normalized aliases that point to more than one product."""

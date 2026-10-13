@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.matching.types import ProductInfo
-from app.models import Product, ProductAlias
+from app.models import BrandAlias, Product, ProductAlias
 
 
 class DbCatalog:
@@ -21,6 +21,7 @@ class DbCatalog:
         self._session = session
         self._products: dict[UUID, ProductInfo | None] = {}
         self._aliases: dict[UUID, list[str]] = {}
+        self._brand_products: dict[UUID, list[UUID]] = {}
 
     def find_product_ids_by_alias(self, normalized_alias: str) -> list[UUID]:
         query = (
@@ -57,3 +58,22 @@ class DbCatalog:
             )
             self._aliases[product_id] = list(self._session.scalars(query))
         return self._aliases[product_id]
+
+    def find_brand_ids_by_alias(self, normalized_alias: str) -> list[UUID]:
+        query = (
+            select(BrandAlias.brand_id)
+            .where(BrandAlias.normalized_alias == normalized_alias)
+            .distinct()
+            .order_by(BrandAlias.brand_id)
+        )
+        return list(self._session.scalars(query))
+
+    def get_brand_product_ids(self, brand_id: UUID) -> list[UUID]:
+        if brand_id not in self._brand_products:
+            query = (
+                select(Product.id)
+                .where(Product.brand_id == brand_id, Product.is_active)
+                .order_by(Product.display_name, Product.id)
+            )
+            self._brand_products[brand_id] = list(self._session.scalars(query))
+        return self._brand_products[brand_id]

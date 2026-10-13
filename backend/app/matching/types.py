@@ -73,3 +73,11 @@ class CatalogLookup(Protocol):
     def get_normalized_aliases(self, product_id: UUID) -> list[str]:
         """Return every normalized alias of the product."""
         ...
+
+    def find_brand_ids_by_alias(self, normalized_alias: str) -> list[UUID]:
+        """Return distinct brand ids whose normalized brand alias equals the argument."""
+        ...
+
+    def get_brand_product_ids(self, brand_id: UUID) -> list[UUID]:
+        """Return the ids of the brand's active products."""
+        ...

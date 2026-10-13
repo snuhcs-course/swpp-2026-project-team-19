@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #17). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #17); Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13, P22). Reviewed by Haeul Yang.
 import json
 from pathlib import Path
 
@@ -7,6 +7,7 @@ import pytest
 from app.matching import ExtractedProduct, resolve_product
 from app.matching.db_catalog import DbCatalog
 from app.matching.memory_catalog import InMemoryCatalog
+from app.matching.staged import resolve_product_staged
 from scripts.seed_catalog import seed
 from tests.factories import make_brand, make_product
 
@@ -39,6 +40,22 @@ def test_get_product_returns_none_for_inactive_or_missing(db_session):
     assert (info.product_id, info.display_name, info.age_years, info.edition_name) == (active.id, "Ardbeg 10", 10, None)
     assert catalog.get_product(retired.id) is None
     assert catalog.get_product(brand.id) is None
+    assert info.brand_id == brand.id
+
+
+def test_brand_lookup_returns_active_products(db_session):
+    brand = make_brand(db_session, "The Macallan", aliases=("맥캘란",))
+    other = make_brand(db_session, "Kavalan")
+    twelve = make_product(db_session, brand, "The Macallan 12 Double Cask", age_years=12)
+    fifteen = make_product(db_session, brand, "The Macallan 15 Double Cask", age_years=15)
+    make_product(db_session, brand, "The Macallan Old", is_active=False)
+    catalog = DbCatalog(db_session)
+
+    assert catalog.find_brand_ids_by_alias("맥캘란") == [brand.id]
+    assert catalog.find_brand_ids_by_alias("themacallan") == [brand.id]
+    assert catalog.find_brand_ids_by_alias("macallan") == []
+    assert catalog.get_brand_product_ids(brand.id) == [twelve.id, fifteen.id]
+    assert catalog.get_brand_product_ids(other.id) == []
 
 
 @pytest.mark.skipif(not all(path.exists() for path in SEED_FILES), reason="ai/catalog seed is not checked out")
@@ -57,3 +74,18 @@ def test_matches_the_in_memory_catalog_on_the_labeled_menu_items(db_session):
         statuses.append(actual.status)
 
     assert (statuses.count("exact_match"), statuses.count("unmatched"), len(statuses)) == (215, 4, 219)
+
+
+@pytest.mark.skipif(not all(path.exists() for path in SEED_FILES), reason="ai/catalog seed is not checked out")
+def test_staged_matching_is_the_same_on_both_catalogs(db_session):
+    catalog_json, bars_json, labels_json = (json.loads(path.read_text(encoding="utf-8")) for path in SEED_FILES)
+    seed(db_session.connection(), catalog_json, bars_json)
+    in_memory = InMemoryCatalog.from_seed(SEED_FILES[0])
+    from_db = DbCatalog(db_session)
+    names = [item["raw_name"] for photo in labels_json["photos"] for item in photo["items"]]
+    names += ["맥캘란 더블캐스크 12Y", "Macallan 12yo", "Kavalan Solist", "아벨라워(Aberlour) 12년", "Talisker 10 / Ardbeg 10"]
+
+    for name in names:
+        extracted = ExtractedProduct(product_name=name)
+        expected = resolve_product_staged(extracted, in_memory, {"S1", "S2"})
+        assert resolve_product_staged(extracted, from_db, {"S1", "S2"}) == expected, name

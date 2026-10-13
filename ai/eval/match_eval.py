@@ -54,6 +54,7 @@ CONFIRMED = ("exact_match", "multi")
 MATCHERS = {
     "M0": resolve_product,  # I1: normalize + exact alias, " / " bilingual split
     "S1": lambda item, catalog: resolve_product_staged(item, catalog, {"S1"}),  # + parentheses, two products
+    "S1+S2": lambda item, catalog: resolve_product_staged(item, catalog, {"S1", "S2"}),  # + brand, age, edition
 }
 
 
@@ -63,6 +64,8 @@ def load_catalog(bar: str, condition: str, new_products: dict) -> tuple[InMemory
     brand_ids = {b["key"]: uuid.UUID(b["id"]) for b in seed["brands"]}
     own = {f"menu:{bar}"}
     products, aliases = [], []
+    brand_aliases = [(uuid.UUID(b["id"]), a["alias_text"]) for b in seed["brands"] for a in b["aliases"]
+                     if not set(a.get("sources", [])) <= own]
     for row in seed["products"]:
         pid = uuid.UUID(row["id"])
         products.append(ProductInfo(pid, row["display_name"], row.get("age_years"), row.get("edition_name"),
@@ -72,11 +75,15 @@ def load_catalog(bar: str, condition: str, new_products: dict) -> tuple[InMemory
         pid = uuid.uuid5(NEW_NS, key)
         key_to_id[f"new:{key}"] = pid
         if condition == "C1":
-            # brand: an existing brand key, or a new brand's English name
-            brand_id = brand_ids.get(p["brand"]) or uuid.uuid5(NEW_NS, f"brand:{p['brand']}")
+            # brand: an existing brand key (gold writes "makers-mark" for "makers_mark"), or a new
+            # brand's English name, which then is that brand's only alias
+            brand_id = brand_ids.get(p["brand"].replace("-", "_"))
+            if brand_id is None:
+                brand_id = uuid.uuid5(NEW_NS, f"brand:{p['brand']}")
+                brand_aliases.append((brand_id, p["brand"]))
             products.append(ProductInfo(pid, p["display_name"], p["age_years"], p["edition_name"], brand_id))
             aliases.append((pid, p["display_name"]))
-    return InMemoryCatalog(products, aliases), key_to_id
+    return InMemoryCatalog(products, aliases, brand_aliases), key_to_id
 
 
 def gold_refs(gold: str) -> list[str]:
