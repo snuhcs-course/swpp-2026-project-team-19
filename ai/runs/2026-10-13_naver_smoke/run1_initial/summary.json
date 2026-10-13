@@ -1,0 +1,120 @@
+{
+ "run": {
+  "started_at": "2026-10-13T11:20:15+00:00",
+  "wall_s": 161.6,
+  "products": 10,
+  "smoke_seed": 20261014,
+  "display": 10,
+  "endpoints": [
+   "blog",
+   "webkr",
+   "encyc",
+   "cafearticle"
+  ],
+  "matcher": "S1+S2b+S3",
+  "judge": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "59117565949bf0ff2d28da7bb9d01141453bce753283776bd14632051a087cd9"
+  }
+ },
+ "endpoint_results": {
+  "blog": 198,
+  "webkr": 240,
+  "encyc": 69,
+  "cafearticle": 137
+ },
+ "endpoint_results_with_candidate": {
+  "blog": 36,
+  "webkr": 39,
+  "cafearticle": 25
+ },
+ "korean_candidates_per_product": {
+  "gm-bunnahabhain-10": {
+   "found": 37,
+   "kept": 5
+  },
+  "gm-bunnahabhain-heavily-peated-11": {
+   "found": 0,
+   "kept": 0
+  },
+  "signatory-caol-ila-10-100-proof": {
+   "found": 37,
+   "kept": 5
+  },
+  "signatory-linkwood-12-100-proof": {
+   "found": 43,
+   "kept": 5
+  },
+  "wm-dailuaine-15": {
+   "found": 0,
+   "kept": 0
+  },
+  "kilchoman-fino-sherry": {
+   "found": 1,
+   "kept": 1
+  },
+  "kilchoman-px-sherry": {
+   "found": 10,
+   "kept": 5
+  },
+  "kiwon-signature": {
+   "found": 11,
+   "kept": 5
+  },
+  "tomatin-12": {
+   "found": 37,
+   "kept": 5
+  },
+  "wild-turkey-rye": {
+   "found": 9,
+   "kept": 5
+  }
+ },
+ "matcher_tags": {
+  "new": 25,
+  "ambiguous": 9,
+  "other_product": 2
+ },
+ "llm_verdicts": {
+  "same": 7,
+  "different": 29
+ },
+ "tag_x_verdict": {
+  "new / same": 6,
+  "new / different": 19,
+  "ambiguous / different": 8,
+  "ambiguous / same": 1,
+  "other_product / different": 2
+ },
+ "disagreements": [],
+ "naver": {
+  "api_calls": 84,
+  "cache_hits": 12,
+  "retries": 0,
+  "errors": 0,
+  "latency": {
+   "n": 84,
+   "mean_ms": 140,
+   "p50_ms": 133,
+   "p95_ms": 225,
+   "max_ms": 293
+  }
+ },
+ "llm": {
+  "llm_calls": 36,
+  "retries": 0,
+  "parse_errors": 0,
+  "input_tokens": 65627,
+  "output_tokens": 2727,
+  "thought_tokens": 0,
+  "latency": {
+   "n": 36,
+   "mean_ms": 1327,
+   "p50_ms": 1342,
+   "p95_ms": 1496,
+   "max_ms": 1621
+  }
+ }
+}
