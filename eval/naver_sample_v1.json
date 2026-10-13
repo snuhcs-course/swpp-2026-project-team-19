@@ -1,0 +1,59 @@
+{
+ "version": "naver_sample_v1",
+ "created": "2026-10-13",
+ "purpose": "P28 evaluation of Naver candidates + LLM judge. Not run or opened during P17.",
+ "source": "eval/match_gold_v1.json new_products",
+ "source_sha256": "9b1b0794ecd05e866ace44b80e32c0452a59ed4d45f349909c69096c6da2bbdf",
+ "seed": 20261013,
+ "rule": "independent = brand in ai/naver/sample.py IB_BOTTLERS; official = the rest",
+ "population": {
+  "independent": 42,
+  "official": 295
+ },
+ "sample": {
+  "independent": [
+   "big-peat",
+   "elements-of-islay-bourbon",
+   "elements-of-islay-sherry",
+   "gauldrons",
+   "gauldrons-cs",
+   "gm-miltonduff-10",
+   "hl-deanston-12",
+   "hl-knockdhu-13",
+   "hunter-laing-cragganmore-26",
+   "hunter-laing-royal-brackla-14",
+   "lmdw-ben-nevis-7-artist-collective",
+   "port-askaig-8",
+   "samaroli-royal-brackla-14",
+   "scarabus",
+   "signatory-ben-nevis-9-100-proof",
+   "signatory-benriach-10-100-proof",
+   "signatory-glen-ord-12-100-proof",
+   "timorous-beastie",
+   "wm-ardmore-12",
+   "wm-caol-ila-2014"
+  ],
+  "official": [
+   "ardbeg-wee-beastie",
+   "bowmore-15-sherry-oak",
+   "bruichladdich-18",
+   "bunnahabhain-18",
+   "compass-box-orchard-house",
+   "edradour-caledonia-12",
+   "glen-scotia-double-cask",
+   "glendronach-ode-to-the-embers",
+   "kavalan-oloroso-sherry-oak",
+   "kilchoman-korea-small-batch",
+   "laphroaig-18",
+   "laphroaig-25",
+   "macallan-classic-cut-2025",
+   "mh-bourbon-single-cask",
+   "nagahama-second-batch",
+   "nikka-taketsuru-pure-malt",
+   "octomore-14-3",
+   "octomore-15-3",
+   "paul-john-px",
+   "wild-turkey-81"
+  ]
+ }
+}
