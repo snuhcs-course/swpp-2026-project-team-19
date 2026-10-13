@@ -205,7 +205,7 @@ Deployments run one at a time, and a running one is never cancelled. Each deploy
 - **Logs:** `journalctl -u bottlemap-api -f` (API), `journalctl -u caddy -f` (HTTPS, proxy).
 - **Settings:** edit `backend/.env`, then `sudo systemctl restart bottlemap-api`.
 - **Real extraction:** set `MENU_EXTRACTOR=gemini` and `GEMINI_API_KEY` (a paid-tier key, so uploaded menu photos are not used for training) and restart. The settings are checked at start-up.
-- **Temporary login** is on for the demo, so anyone who reaches the server can get an operator token. Keep the server running only when needed, and set `TEMP_AUTH_ENABLED=false` when the demo period ends.
+- **Temporary login** is on for the demo, so anyone who reaches the server can get an operator token. Keep the server running only when needed, and set `TEMP_AUTH_ENABLED=false` once Google login works in the app.
 - **Known limitation:** an import that is `processing` when the service restarts stays there; delete it with `reset_menu_imports.py` and upload again.
 - **Cost:** stop the EC2 and RDS instances when idle. A stopped RDS instance starts again by itself after 7 days, and the Elastic IP is billed while the instance is stopped.
 

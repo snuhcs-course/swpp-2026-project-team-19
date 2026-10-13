@@ -1,0 +1,705 @@
+Project BottleMap {
+  database_type: 'PostgreSQL'
+
+  Note: '''
+  Team review draft based on Team19 Proposal.
+
+  MVP scope:
+  - Whisky catalog curated by the project operator
+  - Menu-photo upload and AI extraction
+  - Human review before publication
+  - Product-centered search for bars, price, pour size, distance, and menu update date
+  - Pilot-bar and menu registration by authenticated project operators
+  - Bar-owner applications approved by operators; an approved owner manages only their own bars
+  - Anonymous customer search, with optional customer accounts for additional features
+  - A menu upload may contain multiple images
+  - Each upload explicitly selects full replacement or partial update mode
+  - One current menu board per bar; previous menu-board groupings are not retained
+  - Persistent bar menu items survive menu-board replacement; current-board membership determines visibility
+  - A menu-board entry may have multiple pour-size and price options
+  - Operators can create unmatched products during menu review and manage them in an operator dashboard
+  - Evaluation tables share the application database but use an eval_ prefix and a separate ERD group
+  - Original menu images and all AI processing records retained through the project period
+
+  This draft intentionally keeps unresolved decisions visible.
+  PostgreSQL is the selected database engine. Supabase Auth with the Google provider is the selected
+  authentication provider. ID strategy is not final.
+  Accessory features such as reviews, recommendations, feeds, alerts, stale-menu reports,
+  natural-language search, and non-whisky categories are outside the current MVP schema.
+  '''
+}
+
+Enum user_type {
+  customer
+  operator
+}
+
+Enum bar_status {
+  active
+  inactive
+}
+
+Enum import_status {
+  uploaded
+  processing
+  ready_for_review
+  applied
+  failed
+  canceled
+}
+
+Enum import_mode {
+  full_replace
+  partial_update
+}
+
+Enum pipeline_status {
+  queued
+  running
+  succeeded
+  failed
+}
+
+Enum extraction_approach {
+  ocr_llm
+  vision_llm
+}
+
+Enum extracted_line_type {
+  product
+  section_header
+  description
+  unknown
+}
+
+Enum resolution_status {
+  exact_match
+  ambiguous
+  unmatched
+}
+
+Enum review_status {
+  pending
+  confirmed
+  corrected
+  rejected
+}
+
+Enum match_method {
+  alias
+  embedding
+  llm
+  manual
+}
+
+Enum menu_change_type {
+  add
+  update
+  remove
+}
+
+Enum menu_change_decision {
+  pending
+  apply 
+  ignore
+}
+
+Enum owner_application_type {
+  existing_bar
+  new_bar
+}
+
+Enum owner_application_status {
+  pending
+  approved
+  rejected
+  canceled
+}
+
+Table users {
+  id uuid [pk]
+  auth_subject varchar(255) [not null, unique, note: 'Supabase Auth user ID (the access token sub, a UUID string)']
+  email varchar(255) [unique]
+  display_name varchar(100) [note: 'The API limits it to 20 characters']
+  user_type user_type [not null, default: 'customer']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Note: '''
+  Anonymous customers do not create a row. Customer accounts are optional and support additional
+  logged-in features, while every operator must authenticate before managing bars or menus. Each
+  account has one global user type; operators may still use public customer-facing features.
+  Bar ownership is not a user type. It is a user-to-bar relationship in bar_owners, granted when an
+  operator approves a bar_owner_applications row, so an owner usually keeps user_type customer.
+  '''
+}
+
+Table bars {
+  id uuid [pk]
+  name varchar(150) [not null]
+  address varchar(500) [not null]
+  latitude decimal(9,6) [not null]
+  longitude decimal(9,6) [not null]
+  phone varchar(30)
+  status bar_status [not null, default: 'active']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Note: '''
+  Bars are created by project operators, or by an operator approving a new_bar owner application.
+  The schema does not retain which operator originally created a bar.
+  The bar's approved owner, if any, is the bar_owners row whose revoked_at is null.
+  Coordinate storage may later change to a PostGIS geography or geometry type if spatial search requires it.
+  '''
+}
+
+Table bar_owner_applications {
+  id uuid [pk]
+  applicant_user_id uuid [not null, ref: > users.id]
+  application_type owner_application_type [not null]
+  bar_id uuid [ref: > bars.id, note: 'existing_bar: the claimed bar. new_bar: null until approval, then the created bar']
+  proposed_bar_name varchar(150) [note: 'new_bar only']
+  proposed_address varchar(500) [note: 'new_bar only']
+  proposed_phone varchar(30) [note: 'new_bar only; optional']
+  business_registration_number char(10) [not null, note: 'Ten digits without hyphens']
+  contact_phone varchar(30) [not null]
+  applicant_note varchar(500)
+  status owner_application_status [not null, default: 'pending']
+  reviewed_by_user_id uuid [ref: > users.id, note: 'The operator who approved or rejected it']
+  reviewed_at timestamptz
+  rejection_reason varchar(500) [note: 'Required when rejected; shown to the applicant']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    (status, created_at)
+    (applicant_user_id, created_at)
+    (bar_id)
+  }
+
+  Note: '''
+  A user's request to become the owner of a bar. existing_bar claims a bar already in bars;
+  new_bar asks to register a bar that is not in bars yet. The applicant gives a business registration
+  number and a contact phone, and an operator checks them outside the app before deciding.
+  Approving an existing_bar application creates the bar_owners row. Approving a new_bar application
+  creates the bars row from the operator's confirmed bar details (including coordinates) and the
+  bar_owners row in the same transaction, and stores the new bar's id in bar_id.
+  Only pending applications can be approved, rejected or canceled; the other statuses are final.
+  An applicant may have only one pending application per existing bar. A rejected or canceled
+  applicant may apply again with a new row. Business registration numbers and contact phones are
+  visible only to the applicant and operators.
+  '''
+}
+
+Table bar_owners {
+  id uuid [pk]
+  bar_id uuid [not null, ref: > bars.id]
+  user_id uuid [not null, ref: > users.id]
+  application_id uuid [not null, unique, ref: - bar_owner_applications.id]
+  created_at timestamptz [not null, note: 'When the application was approved']
+  revoked_at timestamptz
+  revoked_by_user_id uuid [ref: > users.id, note: 'The operator who revoked the ownership']
+
+  indexes {
+    bar_id [note: 'Unique where revoked_at is null: at most one current owner per bar']
+    user_id
+  }
+
+  Note: '''
+  The approved owner of a bar. A row with revoked_at null is the current owner, who may manage that
+  bar's information and menu imports; a user may own several bars, but a bar has at most one current
+  owner. Revoking keeps the row and sets revoked_at so the history remains. Ownership does not change
+  users.user_type.
+  '''
+}
+
+Table brands {
+  id uuid [pk]
+  canonical_name varchar(120) [not null, unique]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Note: 'Canonical brand record shared by all products from the same brand. The schema does not retain which operator originally created a brand.'
+}
+
+Table brand_aliases {
+  id uuid [pk]
+  brand_id uuid [not null, ref: > brands.id]
+  alias_text varchar(120) [not null]
+  normalized_alias varchar(120) [not null]
+  language_code varchar(10)
+  created_at timestamptz [not null]
+
+  indexes {
+    normalized_alias
+    (brand_id, normalized_alias) [unique]
+  }
+
+  Note: '''
+  Examples include Deanston and 딘스톤 for the same canonical brand. The brand's canonical_name is
+  also stored as a default alias so every brand-name lookup uses normalized_alias.
+  No normalization-version column is stored. When the deterministic backend normalization rule changes,
+  every brand_aliases and product_aliases normalized_alias value is regenerated with
+  backend/scripts/renormalize_aliases.py (dry run first, then --apply, then seed_catalog.py again)
+  before the backend using the new rule is activated.
+  '''
+}
+
+Table products {
+  id uuid [pk]
+  category varchar(30) [not null, default: 'whisky']
+  display_name varchar(200) [not null]
+  brand_id uuid [not null, ref: > brands.id]
+  age_years smallint
+  edition_name varchar(150)
+  abv decimal(5,2)
+  is_active boolean [not null, default: true]
+  created_from_extracted_item_id uuid [ref: > extracted_items.id]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    display_name
+    (brand_id, age_years)
+    (brand_id, edition_name)
+  }
+
+  Note: '''
+  The product catalog is curated manually from pilot menus.
+  display_name is the preferred customer-facing name, not the sole merge key. Entity resolution compares
+  brand, age, edition, and full-product aliases. A conflicting age or edition must not be auto-merged.
+  age_years is nullable for no-age-statement products, and edition_name distinguishes releases that
+  share the same brand and age. ABV is optional metadata and is not an identity key in the MVP.
+  When no existing product matches, an operator may create a product during menu review and link its
+  originating extracted item. This optional link records only the item that triggered initial product
+  creation, not every later occurrence of the product. Manually pre-registered products have no source
+  item. The schema does not separately retain which operator originally created a product.
+  '''
+}
+
+Table product_aliases {
+  id uuid [pk]
+  product_id uuid [not null, ref: > products.id]
+  alias_text varchar(200) [not null]
+  normalized_alias varchar(200) [not null]
+  language_code varchar(10)
+  is_searchable boolean [not null, default: true]
+  created_at timestamptz [not null]
+
+  indexes {
+    normalized_alias
+    (product_id, normalized_alias) [unique]
+  }
+
+  Note: '''
+  The product's display_name is also stored as a default alias so every product-name lookup uses
+  normalized_alias.
+  normalized_alias is intentionally not globally unique because an ambiguous spelling may refer
+  to more than one product. Ambiguity must produce candidates rather than an automatic merge.
+  Normalization-rule changes use the same full alias regeneration script described for brand_aliases.
+  '''
+}
+
+Table menu_imports {
+  id uuid [pk]
+  idempotency_key varchar(255) [not null, unique, note: 'Client-generated key used to return the same menu import when an upload request is retried']
+  request_fingerprint varchar(64) [not null, note: 'SHA-256 hex digest of the canonical request content, used to reject reuse of an idempotency key with different content']
+  bar_id uuid [not null, ref: > bars.id]
+  mode import_mode [not null]
+  status import_status [not null, default: 'uploaded']
+  review_version integer [not null, default: 0, note: 'Incremented whenever the consolidated review payload is regenerated']
+  owner_note text
+  review_confirmed_at timestamptz
+  created_at timestamptz [not null]
+  completed_at timestamptz
+
+  indexes {
+    (bar_id, created_at)
+    (bar_id, status)
+  }
+
+  Note: '''
+  One import represents one submission by an operator or the bar's approved owner and may contain multiple menu images.
+  idempotency_key prevents duplicate imports and duplicate AI costs when the same client request is retried.
+  When an existing idempotency_key is received, the backend returns the existing import only if the newly
+  calculated request_fingerprint is equal; otherwise it rejects the request as a conflict. The fingerprint
+  is not unique because separate requests with different idempotency keys may intentionally have identical content.
+  During the MVP, a bar may have only one unfinished import whose status is uploaded, processing,
+  or ready_for_review. The backend checks this rule while locking the bar row when it creates an import. The final review
+  submission locks the import row and runs at SERIALIZABLE isolation.
+  full_replace rebuilds the current menu-board grouping from the confirmed results.
+  partial_update adds or updates only confirmed results and leaves unrelated entries unchanged.
+  Neither mode changes the published menu until the reviewer completes the consolidated review of
+  extracted items and options, entity-resolution decisions, proposed catalog additions, and the generated diff.
+  The entire final approval and menu-application transaction runs at SERIALIZABLE isolation. On a
+  serialization failure, the backend rolls it back and retries the full transaction up to three times.
+  Because confirmation and application share one transaction, status moves directly from
+  ready_for_review to applied; there is no intermediate approved status.
+  An unfinished import can be canceled by an operator or the bar's owner. It then becomes canceled
+  without changing the menu board or the catalog, its images and AI records are kept, and the bar can
+  take a new upload. completed_at records when an import became applied, failed or canceled.
+  Owner submissions use the same structure and rules as operator submissions.
+  Import records and their related images and AI results are retained through the project period,
+  even after a newer menu replaces the current published menu.
+  '''
+}
+
+Table menu_images {
+  id uuid [pk]
+  menu_import_id uuid [not null, ref: > menu_imports.id]
+  storage_key varchar(500) [not null]
+  original_filename varchar(255)
+  image_order smallint [not null]
+  uploaded_at timestamptz [not null]
+
+  indexes {
+    (menu_import_id, image_order) [unique]
+  }
+
+  Note: '''
+  The database stores an object-storage key rather than image bytes or a public URL.
+  Original menu images are retained through the project period for evaluation and reprocessing.
+  '''
+}
+
+Table extraction_runs {
+  id uuid [pk]
+  menu_image_id uuid [not null, ref: > menu_images.id]
+  approach extraction_approach [not null]
+  provider varchar(100) [not null]
+  model_name varchar(150) [not null]
+  pipeline_version varchar(100) [not null]
+  status pipeline_status [not null, default: 'queued']
+  raw_output json
+  started_at timestamptz
+  completed_at timestamptz
+  created_at timestamptz [not null]
+
+  indexes {
+    menu_image_id [unique]
+    (pipeline_version, status)
+  }
+
+  Note: '''
+  The MVP chooses one extraction approach before deployment and creates exactly one operational run
+  for each menu image. Model calls are retried inside one extraction call (connection errors and HTTP 429/5xx, up to EXTRACTION_MAX_ATTEMPTS, 6 by default). A run that still fails stays failed, and the import becomes failed; the operator starts a new upload. Retrying a failed import may be considered after Iteration 2.
+  Run metadata, raw output, extracted items and options, match candidates, and reviewer corrections
+  are retained through the project period for metric calculation and error analysis.
+  '''
+}
+
+Table extracted_items {
+  id uuid [pk]
+  extraction_run_id uuid [not null, ref: > extraction_runs.id]
+  item_order smallint [not null]
+  raw_text text [not null]
+  extracted_line_type extracted_line_type [not null, default: 'unknown']
+  corrected_line_type extracted_line_type
+  extracted_product_name varchar(200)
+  extracted_brand_name varchar(120)
+  extracted_age_years smallint
+  extracted_edition_name varchar(150)
+  extracted_abv decimal(5,2)
+  extraction_confidence decimal(5,4)
+  initial_resolution_status resolution_status
+  selected_product_id uuid [ref: > products.id]
+  selected_match_method match_method
+  match_confidence decimal(5,4)
+  review_status review_status [not null, default: 'pending']
+  corrected_product_name varchar(200)
+  reviewed_at timestamptz
+
+  indexes {
+    (extraction_run_id, item_order) [unique]
+    (extraction_run_id, extracted_line_type)
+    (review_status, extraction_confidence)
+    selected_product_id
+  }
+
+  Note: '''
+  Every recognized menu item or non-product text block is stored once, including product items,
+  section headers, descriptions, and blocks whose role is still unknown. Only product items enter
+  entity resolution. Structured brand, age, edition, and ABV values are stored in queryable columns
+  while the complete original model response remains available in extraction_runs.raw_output.
+  extracted_line_type permanently preserves the AI's initial classification. corrected_line_type remains null
+  when the reviewer accepts it and stores only a changed classification; the effective type is
+  COALESCE(corrected_line_type, extracted_line_type).
+  initial_resolution_status permanently preserves the first entity-resolution outcome for items initially
+  classified as product: exact_match for one conflict-free exact alias match, ambiguous when non-exact
+  candidates remain, and unmatched when no valid candidate remains. It stays null when matching was not run,
+  including items initially classified as non-products, and is not changed by review.
+  selected_product_id remains nullable until entity resolution is confirmed.
+  When the reviewer accepts proposedProductId, selected_match_method copies that candidate's method.
+  Choosing another candidate, searching for a different product, or creating a product uses manual.
+  If the selected product exists in resolution_candidates, match_confidence copies that candidate's score
+  even when the reviewer chooses a non-Top-1 candidate. Direct search and new products leave it null.
+  An operator can create a missing product during review and immediately assign the new product ID.
+  Low-confidence and ambiguous results must be reviewed; false merges are treated as worse than misses.
+  '''
+}
+
+Table extracted_options {
+  id uuid [pk]
+  extracted_item_id uuid [not null, ref: > extracted_items.id]
+  option_order smallint [not null]
+  extracted_option_label varchar(100)
+  extracted_price_krw integer
+  extracted_pour_ml smallint
+  corrected_option_label varchar(100)
+  corrected_price_krw integer
+  corrected_pour_ml smallint
+
+  indexes {
+    (extracted_item_id, option_order) [unique]
+  }
+
+  Note: '''
+  One row stores one price and serving-size option extracted for a product item. A product item may
+  have multiple options, while section headers, descriptions, and unknown items normally have none.
+  The parent extracted_items row owns product matching and review state so shared product information
+  is not duplicated for every option.
+  '''
+}
+
+Table resolution_candidates {
+  id uuid [pk]
+  extracted_item_id uuid [not null, ref: > extracted_items.id]
+  product_id uuid [not null, ref: > products.id]
+  candidate_rank smallint [not null]
+  score decimal(7,6)
+  method match_method [not null]
+  evidence json
+  created_at timestamptz [not null]
+
+  indexes {
+    (extracted_item_id, candidate_rank) [unique]
+    (extracted_item_id, product_id) [unique]
+  }
+
+  Note: '''
+  Stores candidates shown to the reviewer and supports Top-1 entity-resolution evaluation.
+  Each product appears at most once for an extracted item. Signals from alias, attribute, string,
+  embedding, and LLM paths are merged into evidence rather than stored as duplicate candidate rows.
+  method records the representative method that determined the candidate's final rank.
+  evidence stores the latest structured matching signals for the candidate, such as exact alias,
+  brand/age agreement, edition conflict, string/embedding similarity, and an optional LLM reason code.
+  Reranking model and prompt configuration are managed in backend code rather than copied into each candidate row.
+  Historical candidate evidence versions are not retained.
+  '''
+}
+
+Table menu_import_changes {
+  id uuid [pk]
+  menu_import_id uuid [not null, ref: > menu_imports.id]
+  change_type menu_change_type [not null]
+  bar_menu_item_id uuid [ref: > bar_menu_items.id]
+  extracted_item_id uuid [ref: > extracted_items.id]
+  decision menu_change_decision [not null, default: 'pending']
+  reviewed_at timestamptz
+
+  indexes {
+    (menu_import_id, change_type)
+    (menu_import_id, decision)
+  }
+
+  Note: '''
+  Stores the provisional add, update, and remove diff between the current menu board and the automated
+  import result, together with the operator's decisions from the consolidated final review.
+  Only the latest provisional diff is retained. Before final confirmation, regenerating the review
+  payload replaces all existing change rows for the import and increments menu_imports.review_version
+  in the same transaction.
+  A full replacement can create remove rows for current items missing from the new import.
+  A partial update creates add and update rows only. Nothing is applied until every change has a
+  decision and the import receives final consolidated confirmation. The backend recalculates the diff
+  from the submitted item, option, and product decisions before applying it. An add may lack bar_menu_item_id until
+  publication; a remove may lack extracted_item_id because no new item produced it.
+  When the import is applied, the rows are rewritten to record what actually happened: ignored rows keep
+  their decision; an applied row whose final change differs takes the final type and targets (for example,
+  an add that became an update); an applied row that ended up changing nothing is deleted; and a change
+  the draft did not have is inserted as apply. After that the rows are no longer replaced. The original
+  AI judgment stays in extracted_items and resolution_candidates.
+  '''
+}
+
+Table bar_menu_items {
+  id uuid [pk]
+  bar_id uuid [not null, ref: > bars.id]
+  product_id uuid [not null, ref: > products.id]
+  created_at timestamptz [not null]
+
+  indexes {
+    (bar_id, product_id) [unique]
+    product_id
+  }
+
+  Note: '''
+  A row is one bar-specific menu item backed by a shared canonical product. It is not deleted merely
+  because a later menu board omits it, and it can be reused if the product returns later.
+  Membership in the bar's current menu board is the single visibility rule: linked means visible;
+  unlinked means retained but not visible. No separate visibility status is stored.
+  '''
+}
+
+Table menu_boards {
+  id uuid [pk]
+  bar_id uuid [not null, unique, ref: > bars.id]
+  last_import_id uuid [ref: > menu_imports.id]
+  published_at timestamptz [not null]
+
+  Note: '''
+  A menu board is the current grouping of bar menu items shown by a bar. Each bar has at most one current
+  menu board. A full replacement rebuilds its entries, while a partial update changes only selected
+  entries. last_import_id identifies the latest change; each sales option can trace its own source
+  through source_extracted_option_id. The underlying bar_menu_items rows remain, and original images
+  and AI processing records remain under the import workflow.
+  '''
+}
+
+Table menu_board_entries {
+  id uuid [pk]
+  menu_board_id uuid [not null, ref: > menu_boards.id]
+  bar_menu_item_id uuid [not null, ref: > bar_menu_items.id]
+  display_name varchar(200) [not null]
+  sort_order integer [not null]
+  created_at timestamptz [not null]
+
+  indexes {
+    (menu_board_id, sort_order) [unique]
+    (menu_board_id, bar_menu_item_id) [unique]
+  }
+
+  Note: '''
+  One row represents one bar menu item displayed on the current menu board. Display name and order
+  may change whenever the board is replaced. Price and pour-size choices are stored separately in
+  menu_entry_options so the same drink can have multiple sales options.
+  '''
+}
+
+Table menu_entry_options {
+  id uuid [pk]
+  menu_board_entry_id uuid [not null, ref: > menu_board_entries.id]
+  source_extracted_option_id uuid [ref: > extracted_options.id]
+  option_label varchar(100)
+  pour_ml smallint
+  price_krw integer [not null]
+  sort_order smallint [not null]
+  created_at timestamptz [not null]
+
+  indexes {
+    (menu_board_entry_id, sort_order) [unique]
+    price_krw
+  }
+
+  Note: '''
+  One row is one sales option, such as 15 ml at KRW 8,000 or 30 ml at KRW 15,000.
+  Each visible menu-board entry must have at least one option. option_label supports non-volume
+  labels found on a real menu while pour_ml remains nullable when the size is not stated.
+  '''
+}
+
+Enum eval_sample_kind {
+  real
+  synthetic
+}
+
+Table eval_sets {
+  id uuid [pk]
+  name varchar(150) [not null, unique]
+  iteration_number smallint
+  description text
+  frozen_at timestamptz
+  created_at timestamptz [not null]
+
+  Note: '''
+  Defines a named evaluation dataset such as Iteration 1 Held-out Set.
+  frozen_at records when membership and labels were locked before pipeline evaluation.
+  '''
+}
+
+Table eval_samples {
+  id uuid [pk]
+  eval_set_id uuid [not null, ref: > eval_sets.id]
+  menu_image_id uuid [not null, ref: > menu_images.id]
+  sample_kind eval_sample_kind [not null, default: 'real']
+  added_at timestamptz [not null]
+
+  indexes {
+    (eval_set_id, menu_image_id) [unique]
+    menu_image_id
+  }
+
+  Note: 'Associates retained menu images with a named evaluation set.'
+}
+
+Table eval_ground_truth_items {
+  id uuid [pk]
+  menu_image_id uuid [not null, ref: > menu_images.id]
+  item_order smallint [not null]
+  product_name_text varchar(200) [not null]
+  product_id uuid [ref: > products.id]
+  annotated_at timestamptz [not null]
+
+  indexes {
+    (menu_image_id, item_order) [unique]
+  }
+
+  Note: '''
+  Hand-labeled product-item ground truth is attached to the image, not a pipeline run, so the labels
+  remain reusable across evaluation sets for the extraction approach selected before implementation.
+  Price and serving-size labels are stored in eval_ground_truth_options.
+  The eval_ prefix keeps evaluation-only tables distinct inside the same application database.
+  '''
+}
+
+Table eval_ground_truth_options {
+  id uuid [pk]
+  ground_truth_item_id uuid [not null, ref: > eval_ground_truth_items.id]
+  option_order smallint [not null]
+  option_label varchar(100)
+  price_krw integer
+  pour_ml smallint
+
+  indexes {
+    (ground_truth_item_id, option_order) [unique]
+  }
+
+  Note: 'Stores one human-labeled price and serving-size option for an evaluation ground-truth item.'
+}
+
+TableGroup "Accounts and Bars" {
+  users
+  bars
+  bar_owner_applications
+  bar_owners
+}
+
+TableGroup "Product Catalog" {
+  brands
+  brand_aliases
+  products
+  product_aliases
+}
+
+TableGroup "Published Menus" {
+  bar_menu_items
+  menu_boards
+  menu_board_entries
+  menu_entry_options
+}
+
+TableGroup "AI Menu Import" {
+  menu_imports
+  menu_images
+  extraction_runs
+  extracted_items
+  extracted_options
+  resolution_candidates
+  menu_import_changes
+}
+
+TableGroup "Evaluation Data" {
+  eval_sets
+  eval_samples
+  eval_ground_truth_items
+  eval_ground_truth_options
+}
