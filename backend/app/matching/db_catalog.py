@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11); Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13, P22). Reviewed by Haeul Yang.
 """`CatalogLookup` backed by the catalog tables, used when processing a menu import."""
 
 from uuid import UUID
@@ -41,6 +41,7 @@ class DbCatalog:
                     display_name=product.display_name,
                     age_years=product.age_years,
                     edition_name=product.edition_name,
+                    brand_id=product.brand_id,
                 )
                 if product is not None and product.is_active
                 else None

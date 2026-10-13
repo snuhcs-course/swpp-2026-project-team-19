@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5). Reviewed by Jinwoo Park.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5; 2026-10-13, P22). Reviewed by Jinwoo Park.
 """In-memory `CatalogLookup` loaded from the seed JSON, for tests and offline evaluation."""
 
 import json
@@ -47,6 +47,7 @@ class InMemoryCatalog:
                     display_name=row["display_name"],
                     age_years=row.get("age_years"),
                     edition_name=row.get("edition_name"),
+                    brand_id=UUID(row["brand_id"]) if row.get("brand_id") else None,
                 )
             )
             aliases.extend(
