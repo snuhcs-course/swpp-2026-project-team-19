@@ -1,10 +1,13 @@
 // AI-assisted implementation draft (2026-10-13, I2-P13/P14). Human build/review pending.
 package com.zerotoone.bottlemap.ui.customer
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
 
 // Scoped to I2 Customer search so P19 Owner and application-wide theme stay unchanged.
 private val i2CustomerSearchColors = darkColorScheme(
@@ -25,5 +28,16 @@ private val i2CustomerSearchColors = darkColorScheme(
 
 @Composable
 internal fun I2CustomerSearchTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = i2CustomerSearchColors, content = content)
+    MaterialTheme(colorScheme = i2CustomerSearchColors) {
+        // MainActivity hosts the NavHost inside a light Surface. Re-establish
+        // LocalContentColor when nesting the I2 dark scheme so Text defaults
+        // do not inherit the light screen's dark text color.
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground,
+        ) {
+            content()
+        }
+    }
 }
