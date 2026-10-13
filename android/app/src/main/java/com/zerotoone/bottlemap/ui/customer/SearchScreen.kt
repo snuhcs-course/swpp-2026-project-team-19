@@ -1,4 +1,4 @@
-// AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #7, #15). Reviewed by Hojin Nam.
+// AI-assisted implementation draft (2026-10-13, I2-P13). Human build/review pending.
 package com.zerotoone.bottlemap.ui.customer
 
 import androidx.compose.foundation.background
@@ -7,18 +7,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -29,25 +36,37 @@ fun SearchScreen(
     onOpenResults: (String) -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
-    val trimmedQuery = query.trim()
-    val queryTooLong = trimmedQuery.length > MAX_QUERY_LENGTH
-    val canSearch = trimmedQuery.isNotEmpty() && !queryTooLong
+    val normalizedInput = query.trim()
+    val tooLong = normalizedInput.length > MAX_QUERY_LENGTH
+    val canSearch = normalizedInput.isNotEmpty() && !tooLong
+    val keyboard = LocalSoftwareKeyboardController.current
 
-    SearchContent(
-        query = query,
-        queryTooLong = queryTooLong,
-        canSearch = canSearch,
-        onQueryChange = { query = it },
-        onSearch = { onOpenResults(trimmedQuery) },
-    )
+    val submit = {
+        if (canSearch) {
+            keyboard?.hide()
+            onOpenResults(normalizedInput)
+        }
+    }
+
+    I2CustomerSearchTheme {
+        SearchContent(
+            query = query,
+            tooLong = tooLong,
+            canSearch = canSearch,
+            onQueryChange = { query = it },
+            onClear = { query = "" },
+            onSearch = submit,
+        )
+    }
 }
 
 @Composable
 private fun SearchContent(
     query: String,
-    queryTooLong: Boolean,
+    tooLong: Boolean,
     canSearch: Boolean,
     onQueryChange: (String) -> Unit,
+    onClear: () -> Unit,
     onSearch: () -> Unit,
 ) {
     Column(
@@ -56,53 +75,77 @@ private fun SearchContent(
             .background(MaterialTheme.colorScheme.background),
     ) {
         Surface(
-            tonalElevation = 1.dp,
+            color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = "BottleMap",
+                text = "◉ BottleMap",
+                color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 22.dp),
             )
         }
 
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 22.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = "What whisky are you looking for?",
-                style = MaterialTheme.typography.headlineSmall,
+                text = "DISCOVER YOUR POUR",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Type a whisky name to find current published menu entries.",
+                text = "찾는 위스키, 어디에서 마실까요?",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "위스키 이름으로 취급하는 바를 찾아보세요.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "위스키 검색",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 12.dp),
             )
 
             OutlinedTextField(
                 value = query,
                 onValueChange = onQueryChange,
-                singleLine = true,
-                label = { Text("Whisky name") },
-                placeholder = { Text("e.g. Deanston 12") },
-                isError = queryTooLong,
-                supportingText = if (queryTooLong) {
-                    { Text("Search terms must be 100 characters or fewer.") }
-                } else {
-                    null
-                },
                 modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text("위스키 이름 입력") },
+                leadingIcon = { Text("⌕") },
+                trailingIcon = {
+                    if (query.isNotEmpty()) {
+                        TextButton(onClick = onClear) { Text("지우기") }
+                    }
+                },
+                isError = tooLong,
+                supportingText = {
+                    Text(
+                        if (tooLong) "검색어는 공백 제외 100자 이하여야 합니다."
+                        else "한글 · English 주류명 검색",
+                    )
+                },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { if (canSearch) onSearch() }),
             )
 
             Button(
                 onClick = onSearch,
                 enabled = canSearch,
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Search")
+                Text("판매하는 바 찾기")
             }
         }
     }
@@ -110,12 +153,16 @@ private fun SearchContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun SearchIdlePreview() {
-    SearchContent(
-        query = "",
-        queryTooLong = false,
-        canSearch = false,
-        onQueryChange = {},
-        onSearch = {},
-    )
+private fun I2SearchInitialPreview() {
+    I2CustomerSearchTheme {
+        SearchContent("", false, false, {}, {}, {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun I2SearchEnteredPreview() {
+    I2CustomerSearchTheme {
+        SearchContent("Deanston 12", false, true, {}, {}, {})
+    }
 }
