@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -109,6 +110,7 @@ private fun SearchContent(
             )
             Text(
                 text = "찾는 위스키, 어디에서 마실까요?",
+                color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
@@ -119,6 +121,7 @@ private fun SearchContent(
             )
             Text(
                 text = "위스키 검색",
+                color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(top = 12.dp),
@@ -144,7 +147,10 @@ private fun SearchContent(
                         else "한글 · English 주류명 검색",
                     )
                 },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Search,
+                ),
                 keyboardActions = KeyboardActions(onSearch = { if (canSearch) onSearch() }),
             )
 
