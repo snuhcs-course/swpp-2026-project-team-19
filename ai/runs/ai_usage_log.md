@@ -310,3 +310,25 @@
 ### 검증
 - 단계별 줄 단위 비교로 바뀐 줄 전부 확인(위 결과). S1+S2 숫자가 이전 측정과 같음을 확인.
 - 백엔드 pytest 전체: 288 passed, 194 skipped(DB), 실패 0.
+
+## 2026-10-13 · P22 (I2) test 2층 정답 병합 + C1 정의 수정
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 없음
+- **브랜치:** `i2-p22-matching-eval`
+- **시간(대략):** 약 20분
+- **토큰(대략):** Claude Code 세션 컨텍스트 약 28만 → 약 31만 토큰
+
+### 진행 순서
+1. 담당자가 test 정답 패치 3개(초안 → 검수 반영 → Woodford Double XO Blend) 적용, C1 정의 변경, test 초안 병합, `POST_TEST_ALIASES` 미반영, test split 미실행을 지정.
+2. 패치 3개 `git am` (충돌 없음, 정답 초안 파일만 변경).
+3. `build_match_gold.py`가 `eval/match_gold_test_draft.json`의 test 사진·새 상품·review를 그대로 복사해 `match_gold_v1.json`에 split "test"로 합침(새 상품 key·review 중복 시 오류).
+4. C1 변경 전 dev 측정: test 새 상품 307개가 dev 카탈로그에 섞여 S1+S2 C1 0.884 → 0.867로 바뀜을 확인 → C1을 "평가하는 split의 정답이 참조하는 new 상품만"으로 변경.
+
+### 결과
+- 병합: dev 13장 316항목(이전과 동일), test 10장 478항목(초안과 동일), 새 상품 30 + 307 = 337.
+- dev 재측정(M0, S1+S2, S1+S2b, S1+S2b+S3): `2026-10-13_match_dev.json`이 병합 전과 완전히 같음. S1+S2 C0 0.937, C1 0.884.
+- test split은 실행하지 않음. test 정답 내용은 구조(키·개수)만 확인.
+
+### 검증
+- dev 사진·기존 새 상품이 병합 전과 같음, test 사진이 초안과 같음을 스크립트로 비교.
+- 백엔드 pytest 전체: 288 passed, 194 skipped(DB).

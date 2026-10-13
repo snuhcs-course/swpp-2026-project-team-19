@@ -10,8 +10,10 @@ For each bar the catalog drops aliases whose sources are only that bar's own men
 
 Catalog conditions
   C0  catalog_v1_draft as is. Products marked new:* are absent -> expected unmatched.
-  C1  C0 + every new:* product, with its standard English name as the only alias
-      ("product is in the DB, this menu's spelling is not").
+  C1  C0 + the new:* products that the evaluated split's gold refers to, each with its
+      standard English name as the only alias ("product is in the DB, this menu's
+      spelling is not"). New products of the other split are left out, so adding
+      test gold does not change the dev catalog.
 
 Outcome per line (glass/bottle rows of one line count once)
   correct        exact_match to the gold product; for both: (one line, two products)
@@ -62,7 +64,9 @@ MATCHERS = {
 }
 
 
-def load_catalog(bar: str, condition: str, new_products: dict) -> tuple[InMemoryCatalog, dict[str, uuid.UUID]]:
+def load_catalog(bar: str, condition: str, new_products: dict,
+                 in_split: set[str]) -> tuple[InMemoryCatalog, dict[str, uuid.UUID]]:
+    """`in_split`: keys of the new products referenced by the evaluated split (added in C1)."""
     seed = json.loads(SEED.read_text(encoding="utf-8"))
     key_to_id = {p["key"]: uuid.UUID(p["id"]) for p in seed["products"]}
     brand_ids = {b["key"]: uuid.UUID(b["id"]) for b in seed["brands"]}
@@ -78,7 +82,7 @@ def load_catalog(bar: str, condition: str, new_products: dict) -> tuple[InMemory
     for key, p in new_products.items():
         pid = uuid.uuid5(NEW_NS, key)
         key_to_id[f"new:{key}"] = pid
-        if condition == "C1":
+        if condition == "C1" and key in in_split:
             # brand: an existing brand key (gold writes "makers-mark" for "makers_mark"), or a new
             # brand's English name, which then is that brand's only alias
             brand_id = brand_ids.get(p["brand"].replace("-", "_"))
@@ -92,6 +96,11 @@ def load_catalog(bar: str, condition: str, new_products: dict) -> tuple[InMemory
 
 def gold_refs(gold: str) -> list[str]:
     return gold.removeprefix("both:").split("|")
+
+
+def split_new_products(gold: dict, split: str) -> set[str]:
+    return {ref.removeprefix("new:") for photo in gold["photos"] if photo["split"] == split
+            for item in photo["items"] for ref in gold_refs(item["gold"]) if ref.startswith("new:")}
 
 
 def judge(gold: str, r, key_to_id: dict, in_catalog) -> str:
@@ -124,12 +133,13 @@ def evaluate(matcher: str, condition: str, split: str) -> dict:
     errors = []
     confirm = 0
     catalogs = {}
+    in_split = split_new_products(gold, split)
     for photo in gold["photos"]:
         if photo["split"] != split:
             continue
         bar = photo["bar"]
         if bar not in catalogs:
-            catalogs[bar] = load_catalog(bar, condition, gold["new_products"])
+            catalogs[bar] = load_catalog(bar, condition, gold["new_products"], in_split)
         catalog, key_to_id = catalogs[bar]
 
         def in_catalog(g: str) -> bool:

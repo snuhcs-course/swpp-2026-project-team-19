@@ -14,7 +14,9 @@ labels_v1_1.json (val) and labels_heldout_v1.json (Beck only for now) gets
   - "unknown" when the line is too short to tell which product it is
   - "non_whisky" for cognac etc. (expected: unmatched)
 REVIEW lists links a human should confirm. Matching split (eval_plan.md): dev =
-위스키복춘, 서로상, Beck; test = 미라보, 포레스트 (added later).
+위스키복춘, 서로상, Beck; test = 미라보, 포레스트. The test photos, their new products
+and review notes are copied from eval/match_gold_test_draft.json (built by
+match_gold_test_draft.py, reviewed by Jinwoo); its POST_TEST_ALIASES are not used.
 """
 
 from __future__ import annotations
@@ -26,6 +28,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 VAL = REPO_ROOT / "ai" / "catalog" / "labels_v1_1.json"
 TEST = REPO_ROOT / "eval" / "labels_heldout_v1.json"
 CATALOG = REPO_ROOT / "ai" / "catalog" / "catalog_v1_draft.json"
+TEST_DRAFT = REPO_ROOT / "eval" / "match_gold_test_draft.json"
 OUT = REPO_ROOT / "eval" / "match_gold_v1.json"
 
 # Products not in catalog_v1_draft. brand: an existing brand key or a new brand's English name.
@@ -171,30 +174,44 @@ def main() -> None:
     if missing:
         raise SystemExit(f"BECK names not in labels: {sorted(missing)}")
 
+    # test split: copied as is from the reviewed draft
+    draft = json.loads(TEST_DRAFT.read_text(encoding="utf-8"))
+    new_products = {k: {"display_name": d, "brand": b, "age_years": a, "edition_name": e}
+                    for k, (d, b, a, e) in NEW_PRODUCTS.items()}
+    assert not set(draft["new_products"]) & set(new_products), "new product key defined twice"
+    assert not set(draft["review"]) & set(REVIEW), "review note defined twice"
+    new_products.update(draft["new_products"])
+    for p in draft["photos"]:
+        assert p["split"] == "test" and p["bar"] in ("미라보", "포레스트"), p["photo_id"]
+        photos.append(p)
+
     # every referenced key must exist
     for p in photos:
         for i in p["items"]:
             for ref in i["gold"].removeprefix("both:").split("|"):
                 if ref.startswith("new:"):
-                    assert ref[4:] in NEW_PRODUCTS, ref
+                    assert ref[4:] in new_products, ref
                 elif ref not in ("unknown", "non_whisky"):
                     assert ref in keys, ref
-    for key, (_, brand, _, _) in NEW_PRODUCTS.items():
+    for key in new_products:
         assert key not in keys, f"{key} already in catalog"
 
     out = {
         "version": "match_gold_v1",
         "created": "2026-10-13",
         "split": {"dev": ["위스키복춘", "서로상", "Beck"], "test": ["미라보", "포레스트"]},
-        "labeling": "val: labels_v1_1 product_key (I1). Beck: Claude draft, review pending",
-        "new_products": {k: {"display_name": d, "brand": b, "age_years": a, "edition_name": e}
-                         for k, (d, b, a, e) in NEW_PRODUCTS.items()},
-        "review": REVIEW,
+        "labeling": "val: labels_v1_1 product_key (I1). Beck: Claude draft, review pending. "
+                    "test: match_gold_test_draft (Claude draft, Jinwoo's review applied)",
+        "new_products": new_products,
+        "review": {**REVIEW, **draft["review"]},
         "photos": photos,
     }
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
-    n = sum(len(p["items"]) for p in photos)
-    print(f"wrote {OUT.relative_to(REPO_ROOT)}: {len(photos)} photos, {n} items, {len(NEW_PRODUCTS)} new products")
+    for split in ("dev", "test"):
+        chosen = [p for p in photos if p["split"] == split]
+        n = sum(len(p["items"]) for p in chosen)
+        print(f"{split}: {len(chosen)} photos, {n} items")
+    print(f"wrote {OUT.relative_to(REPO_ROOT)}: {len(photos)} photos, {len(new_products)} new products")
 
 
 if __name__ == "__main__":
