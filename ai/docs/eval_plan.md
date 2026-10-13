@@ -157,3 +157,23 @@ S2가 새로 exact로 맞힌 줄은 C0 10줄, C1 15줄이고 새 exact는 전부
 4. **최종 매처 판정 규칙.** S1+S2b+S3의 test false merge rate가 S1+S2의 test false merge rate보다 낮거나 같고 0.02 이하이면 S1+S2b+S3를 채택한다. 조건 C0와 C1 각각에서 둘 다 만족해야 한다. 만족하지 못하면 S1+S2b+S3는 채택하지 않고 원인만 보고한다. 판정은 이 규칙으로만 한다.
 5. **동결.** 이 등록을 마지막으로 매처 코드(`backend/app/matching/`, `ai/eval/match_eval.py`)와 정답(`eval/match_gold_v1.json`, `ai/eval/build_match_gold.py`, `eval/match_gold_test_draft.json`)을 동결한다. 카탈로그 시드(`ai/catalog/*`)도 바꾸지 않는다(`POST_TEST_ALIASES`는 test 평가 후). test는 동결 커밋, 또는 동결 대상 파일을 바꾸지 않은 이후 커밋에서 실행하고 실행한 커밋 해시를 결과와 함께 적는다.
    - 동결 커밋: `69879fdf478b76a39aa6a5b791c37f59850b7195` (브랜치 `i2-p22-matching-eval`). 이 해시를 적는 커밋과 이후 문서·로그 커밋은 동결 대상 파일을 바꾸지 않는다.
+
+**test 결과 (2026-10-13, 1회 실행).** 동결 커밋 `69879fdf478b76a39aa6a5b791c37f59850b7195`을 체크아웃해 사전 등록 명령(`--split test --matcher M0 S1+S2 S1+S2b+S3 --condition C0 C1`)을 한 번 실행했다. 결과 `ai/runs/2026-10-13_match_test.json`. 실행 후 매처 코드·정답·임계값은 바꾸지 않았다. test 478줄(미라보 410, 포레스트 68), 정답 `unknown` 3줄(미라보), 알려진 상품 줄 C0 135 / C1 475.
+
+| 매처 | 조건 | 알려진 Top-1 | false merge rate | overconfident | partial | 확인 권장 | (a) 확인 | (b) 선택 | (c) 직접 등록 | (d) 오답 후보 | 부담 5 미만 사진 | (b)+(c)+(d) 5 미만 사진 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| M0 | C0 | 0.252 | 0.000 | 0 | 0 | 0 | 0 | 0 | 444 | 0 | 0.00 | 0.00 |
+| S1+S2 | C0 | 0.770 | 0.000 | 0 | 0 | 0 | 10 | 4 | 324 | 36 | 0.00 | 0.00 |
+| S1+S2b+S3 | C0 | 0.778 | 0.000 | 0 | 0 | 12 | 17 | 4 | 311 | 41 | 0.00 | 0.00 |
+| M0 | C1 | 0.072 | 0.000 | 0 | 0 | 0 | 0 | 0 | 444 | 0 | 0.00 | 0.00 |
+| S1+S2 | C1 | 0.371 | 0.000 | 0 | 0 | 0 | 48 | 44 | 193 | 17 | 0.00 | 0.00 |
+| S1+S2b+S3 | C1 | 0.379 | 0.000 | 0 | 0 | 18 | 62 | 44 | 171 | 21 | 0.00 | 0.00 |
+
+바별 알려진 Top-1 (미라보 / 포레스트): C0 M0 0.000 / 0.872, S1+S2 0.719 / 0.897, S1+S2b+S3 0.719 / 0.923. C1 M0 0.000 / 0.500, S1+S2 0.332 / 0.603, S1+S2b+S3 0.339 / 0.618. 업주 부담(사진 1장당 확정 아닌 줄)은 S1+S2b+S3 기준 미라보 22–38, 포레스트 26–32.
+
+- **판정 (사전 등록 4번).** S1+S2b+S3의 false merge rate는 C0 0.000, C1 0.000이고 S1+S2(C0 0.000, C1 0.000)보다 낮거나 같으며 0.02 이하다. C0·C1 둘 다 만족 → **S1+S2b+S3 채택.**
+- **false merge가 난 줄:** 없음(모든 매처·조건에서 false_merge 0, overconfident 0).
+- **나머지 오답 유형별 개수 (S1+S2b+S3).** C0: 알려진 상품 ambiguous_ok 21, unmatched 9 / 카탈로그에 없는 상품 ambiguous_bad 41 / `unknown` unmatched 3. C1: ambiguous_ok 106, ambiguous_bad 21, unmatched 168 / `unknown` unmatched 3.
+- **S1+S2 → S1+S2b+S3에서 바뀐 줄 (결과 JSON 비교).** C0: unmatched → 정답 1, unmatched → ambiguous_ok 7, 카탈로그에 없는 상품 unmatched → ambiguous_bad 5. C1: unmatched → 정답 7, unmatched → ambiguous_ok 11, unmatched → ambiguous_bad 4, 정답 → ambiguous_ok(확인 권장) 3.
+- **판정과 무관한 보고 항목.** 정답이 `unknown`인 줄 중 `confirmRecommended`가 붙은 건수: 모든 매처·조건 0(`unknown` 3줄은 전부 unmatched).
+- **그대로 보고하는 관찰 (수정하지 않음).** (1) M0는 미라보 410줄을 하나도 매칭하지 못했다(자기 메뉴판 별칭을 빼면 미라보 표기는 카탈로그 별칭과 정확히 같은 것이 없음). (2) "부담 5 미만 사진"은 모든 매처에서 0.00이다. 미라보 사진은 한 장에 31–60줄이라 dev(1장 0–16줄)와 달리 이 지표로 매처 차이가 드러나지 않는다. (3) C1 Top-1이 C0보다 크게 낮다. C1은 카탈로그에 없던 340줄의 상품을 영문 표준명 별칭 하나만으로 넣는데, 이 줄들의 메뉴 표기와 맞는 별칭이 없어 대부분 unmatched·ambiguous가 된다. (4) test에는 `both:` 줄이 없어 partial은 0이다.
