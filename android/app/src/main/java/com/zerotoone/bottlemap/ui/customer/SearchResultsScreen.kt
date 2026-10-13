@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -117,6 +118,7 @@ private fun SearchResultsContent(
             is CustomerSearchUiState.Success -> ResultsSuccess(
                 state = state,
                 onOpenBarDetail = onOpenBarDetail,
+                modifier = Modifier.weight(1f),
             )
             is CustomerSearchUiState.Empty -> {
                 val unknown = state.reason == EmptySearchReason.UNKNOWN_PRODUCT
@@ -146,40 +148,41 @@ private fun SearchResultsContent(
 private fun ResultsSuccess(
     state: CustomerSearchUiState.Success,
     onOpenBarDetail: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
+    // The results are allocated the remaining height by the parent Column.
+    // Keep the count/notice inside the same LazyColumn, allowing every card
+    // to scroll on small phones without adding a visible scrollbar.
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            text = "검색 결과 (" + state.results.size + ")",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-        )
-        if (state.truncated) {
+        item {
             Text(
-                text = "검색 결과 일부만 표시 중입니다. 검색어를 구체적으로 입력해 주세요.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = "검색 결과 (" + state.results.size + ")",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
             )
         }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(
-                items = state.results,
-                key = { it.barId + ":" + it.productId },
-            ) { result ->
-                SearchResultCard(
-                    result = result,
-                    onClick = { onOpenBarDetail(result.barId) },
+        if (state.truncated) {
+            item {
+                Text(
+                    text = "검색 결과 일부만 표시 중입니다. 검색어를 구체적으로 입력해 주세요.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+        items(
+            items = state.results,
+            key = { it.barId + ":" + it.productId },
+        ) { result ->
+            SearchResultCard(
+                result = result,
+                onClick = { onOpenBarDetail(result.barId) },
+            )
         }
     }
 }
