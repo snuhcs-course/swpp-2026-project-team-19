@@ -1,0 +1,284 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v2",
+  "prompt_sha256": "87314f7784a57513cea270fef34d2c7d9a1147f2d1b337b1bfd73841ce5cab96",
+  "source_image": "011_mirabeau_01.jpeg",
+  "prepared_image": "011_mirabeau_01.jpg",
+  "prepared_sha256": "e78a85b3942477251cb18e20e088366015604c4cd3e503df4298381d1f855638",
+  "started_at": "2026-10-13T02:27:34.641598+00:00",
+  "latency_ms": 21376,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2811,
+  "output_tokens": 2047,
+  "thought_tokens": 5370,
+  "total_tokens": 10228,
+  "output": {
+    "items": [
+      {
+        "raw_name": "벤네비스 7년 아티스트 콜렉티브",
+        "price_krw": 34000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "쿨일라 9년 아티스트 콜렉티브",
+        "price_krw": 38000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 솔리스트 올로로소 7년",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 솔리스트 포트 8년",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "로얄 브라클라 14년",
+        "price_krw": 62000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "쿨일라 13년",
+        "price_krw": 63000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "SR 22 탈리스커 11년",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "SR 23 오반 11년",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "SR 23 탈리스커",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "SR 23 클라이넬리쉬",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "쿨일라 2014",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아드모어 12년",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달유인 15년",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "딘스톤 12년",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "쿨일라 12년",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "녹두 13년",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌토커스 16년",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발블레어 14년",
+        "price_krw": 34000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "벤네비스 9년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "쿨일라 10년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "벤리악 10년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌오드 12년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "링크우드 12년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "스페이사이드 14년",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "에드라두어 2014",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발렌타인(Ballantine) 17년",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발렌타인(Ballantine) 21년",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 블랙",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 블랙 세리",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 그린",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 18년",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 블루",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트렝스",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "커디샤(Cutty Shark) 프로히비션",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"벤네비스 7년 아티스트 콜렉티브\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 9년 아티스트 콜렉티브\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 올로로소 7년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 포트 8년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"로얄 브라클라 14년\",\n      \"price_krw\": 62000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 13년\",\n      \"price_krw\": 63000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 22 탈리스커 11년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 23 오반 11년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 23 탈리스커\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 23 클라이넬리쉬\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 2014\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드모어 12년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달유인 15년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"딘스톤 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"녹두 13년\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌토커스 16년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발블레어 14년\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"벤네비스 9년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"벤리악 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌오드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"링크우드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"스페이사이드 14년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에드라두어 2014\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 17년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 21년\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙 세리\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 그린\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 18년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블루\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트렝스\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"커디샤(Cutty Shark) 프로히비션\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-13T02:27:55Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"벤네비스 7년 아티스트 콜렉티브\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 9년 아티스트 콜렉티브\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 올로로소 7년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 포트 8년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"로얄 브라클라 14년\",\n      \"price_krw\": 62000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 13년\",\n      \"price_krw\": 63000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 22 탈리스커 11년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 23 오반 11년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 23 탈리스커\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 23 클라이넬리쉬\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 2014\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드모어 12년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달유인 15년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"딘스톤 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"녹두 13년\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌토커스 16년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발블레어 14년\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"벤네비스 9년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"벤리악 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌오드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"링크우드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"스페이사이드 14년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에드라두어 2014\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 17년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 21년\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙 세리\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 그린\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 18년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블루\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트렝스\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"커디샤(Cutty Shark) 프로히비션\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EvZ4CvN4AWkUfRMYkr5E6k4N09IqNb4mLO4EfvQH8IZHQcms92xOgQ3BtXuJ9qKbQPbWiWxDczHpv9TaJRWb3ynRc0k3mxI0b/OMvDLyjevVxMhwk12/Wzruo+fc650ZGMcipgx+5eD4XTM+UbRXbRXn/ISJCSFfrI7z6fritq03Zd6gw8920B+HYHszQzI0S+lYsskUOpoElfrFzEW8h8qdGoDB3IWO6QO95vEeHTlj7dfPYZMDl29UgxqIEmtGaadTAWMoaL0jjWy85C6ITim3AGvQp937GAbmUkbxCtmgMrvO2pqQAk9regdAW2Rv4t59BHllDM9l3pdd+iByVzbt3GAJyjiTfbHLO4pI2b5OpjIaDwoPrD7p01w47Kz7WmZBQMhikHqN4n2Cy6b09cMUAZpPhcjQa5MHJT82LzxiN+Jy3LXrv/nByEZ+rdvFFyBDhSyEREx/ZDIfOPxiOAOL0PO4HHcJbta0UlM6JFmWepnbu13CJaye+y7W20i8qqCTzmyzM9Jh2+eqkXzdVHiE4Kx340i7moAWoQqxy9re5Gz6Vetf+CAP7alTIKFhnQ4iC+I6tsl9k9zHDtb4DLQg1NveZWCY/gwoE4ptVb4VNqgmQKwOC5LIQ+TppAOLeDYkyXcvB2Dmhh6pWA5NuQ8//RXipjxafUKX2j3JjMtXqanNdFpTGKMZrCCDYybSOuoUZm7W7mxxBPAa0va8xsP1AevHIhLIL9GBXCoK2zJFrtHaPG/IHQtTZIepUei7KjOylVB1bLRPkW+e4Tb2F7D1FoYocrHn0uQPXxbNdcVp5hbmHWQIxtAwIdfv5ZOuGHfIrdnjsBtIdfjgx0FZ0S3IcfVw3+/6MrsaJVPECiakDkKYD7ubWvEOlNuaF8hF95rJGdcs0Fj8R+dpzRfpqEYTor4PO0vw5IqoFqwszRKw1UJ3Mnx4TVxwHoU/0EZPbBeXCsVDmyA0LRNMQ5sMVu/cCFGQFbCKh45B6s2zZ7IPY/Yssr60AmuhRbuzo/3Lm8TO9bBq6xReScjwouts7BysbGo3Td/pc7QphTepIzhf7Q5e5zr4ABwT8ITCSZBhSFY5kmc6q9jzOVtgppEBoc3L3mP2UWMRKIJF718OmqO/RTCWJkzyVDoj4IvrmjnVV96W7gKg+rIj3eSJuW54lWiZ735l0v39LehzvDvAmCSPvi/yyGGIy5R35A69SYR+7ltIDO623MhHO7eatYiRjqLhuyyibVFEjZN3c2RCYLA/X4OdgXNS6UcV8y/IPO6MWrlYm2k6/sSP2PQRDoaQrNDlAcfusxAiU+zZ7h71m/g37EQxXlD5NUCWTTbhYkpzrhVmZjvCQEYc348tR6z7fnf+0iqMp/tQ6i09yl38qCUMhIPWpgIjcj/INe2uPWQGXMpWirsuF3gQoTXVW4DPl2Q12+NDvNjK7vhWuHMc83e9up3pua22KCx98NHYYZxg2ixv+jEIgoa79kQQj80+VoEN0D4xx1qDHN65c/6JmKr0U6Ms9bc9Gg3G+UVO5ssoksjSD2cySG2gb30KWikK+jbnGAwZRD/oSILR6lQaXIz7UAlZ4DpQu0Xgn9F+tC2D6LoP3bPvHGoDTF59YuLFymftghP8uSvV9fwIU9we+Nn7vQHRi/Xhe16Bsjxz10aCoAEhfvYxdJoQDiqeNkZfegOOGWKRGYVPpYTgdxTXhG/Amk6J3VhYixQn9VB9eiM0G42qV6JDNThFWtMBSuaPLuwRaAVLVzwk+HfUqd+VK0craoa++VCkTRpFsM9sYJmlZcpNPSZrRiu7zQmmokTnDTur2tyeROurziXyD3QYiPRlmK7IqsvWIGTGt7GuNX00fFUZIZUUpG0eyz5BHAUsB1wQm+dVdGhKPvsNVebWtsCfMkref11iA650dyKuQ69/HBV1sKIhigCz2P4W0U9Z/O2aswiYn6zHiK8UA/wBUX7bOL4h59JHT8GIw6rhzOh2KsjZw0ZWQSQKziUsVYKMvTm+RIucEdGkGoLEOCR1fKHutz6Q9ylLCCLbMbjQV0qIJYiWVdtVeIdcfkq5dlMuJXnSpgBHkhl89TZZdKQR/Yyg0ZGZ4rDGBDcYrd5arEyQS2YzFzvdrKvLfIlWlXv5fwHp+Y/WP1zMXPjJLfchtKExpD8cw/K75l31y1fXNB6fNWZoLvxTtyyCRTMTj2QDayLGr2m/527qRJAFBg40klvyplh/xp0naULKWQnUAQjnHPrTwhjips/pB2Lq71R26v5tDOwljIb11ksidSicKIyfDLO3FaWlv4UzDgrxyetXzLTK8Ez0XG7dHqgxFXaFOqNJ0O7kE+Qz1s3/94HcJEYm8WQDGGx0wcIRw/TaRYPC+ghKZk1Pd+EN29v0gzRYEAQocqrmytRTAmUU3YCuDX5R0XGDpZApAbJCOO4VsSilbmO5uJm+Pax6YHP1RgKTkQbS7CPaJkm8KPH4qMgAe70AGj3uvN8faE3k6yo2PYgGYrQd/AnFOBHjdjhaZ27RXgngEnhW5QpzlbkGgmFMPEJGfptuRL7ujoNNodCmCer7YJNbLJ74VhvDCvWCdkkk6yTFyIiTK2/jjC5r12qn6n4ydvgr2NaVoolmhKo5L8kze5vmjQUiCtjrvzQbAFUdfI/33xWLIpedhUv7XLgjmg4185nWBuxcYKiGlxHfULf/++iLu2VkSuHeb/kAETMj6OTjiplHmjBYWUMkAwcxmLewMrVC25sQM1KiaZ5/lQC/CfDAkB088DukDKo3hR7Kms0rZUW2/TM8lMWetmZ4DiMDExM2BYmVsrCdL2HJDDxQa76stUxe7W0aLJSQjwFv+05QLwv68cAFWILSTYWA7LxHYlBct9s9apPt5Owv0iEScVwcyzGyEUBbdMkbaPNgBCzMJVQ3nx7daaD7nG1K0AyDv7XCBVvLRAJQ3X2iGM29jz87AnQs5lnkeaV/bcHB58dNRoTvfP2CUkxjOUIBC56tEFhCoU1nXvVfaa/Lv4LrjtyJ/1YsKRAjScMzK3Jf3WwazAFA1sRbcwtWyE6muvOR7nvCJniSEFFNGix8k87oF/JE8gwP4Acw8HzhgGrV7gdeUerOdL82NZnaeOSSkFloa2qMD82ff2jSH9MZpGgZdJ27bC1qqiU/nqCoN0HQlcTQ0TUr7IY0n/eKHm8to354q1YCzj8IoFEnGLfsZuhQbWj6ysTXXVLRbHe2AbRl4IZRCoAwUwTCBYrF97bd2h2O2JSu/KF4FG5ekh/W4VFOjvlJdl8bHQVuKXjtLu6Ohv/77075/Uc+ecasa54XcAZOCMR4ZHQog6cCciymPnyTJl6k+/IqOrlwAYk482k5aSEXf6/NQSk3Jo3ggGfHLEn88z95/HtmHvO80qkqR56FVPqN3PyA4k5KDZRLoIzBldzyOYxyxu2HbIOGsQmcPjL7Zq7hTjha1kH+iERghi2SNPK207pYOcguF0Gbu0S5kNhkiawW8e5opvZtJdkRqoBMOqPoCWTZdX/gmc7nISjM8N6jUAp1z8Ya3uZQAmfJnENBVd3WZIuEt7dILBOxVzygMXbZhXRH/nyxqYFAqYQA8XvkcCLDP56iIana/Wh3fAzAgL1weD+j2Ju68IFGAmbL+jwZSW9mpXLzVlghZPM4iwNw1caTG6nIjldNnyRlVfynSjQ9KMRUXFQqA1VxzFIJCmaXC8xdDq+122imFz9prEs1Woye7QMC1hypwj/PEo+esdI+4iLND5uW0jdbBfT2V61tBMLzeCuuqF61CiFff18/OhmB2fOuhPEwc4V3UG8T9PFY3jRws3DALvtApdgrL+bD3an7zPCnuEyYlWl5+m5XoYuA5O1oGQQkS/AxBvWHWf7hnOscSZxnFXt6FCFAH1RyegmLv7+Dbqty+g2lBvfJleTFmvkFWXSDT/MNwwLb6jyawPmpCGhx28czOl4KaAtn3uxe2o/5kwfueiNKtTKgYfBAmQVMzeqdyUhm45Nzd7eEUpKzaDWA1+FtS3fCwKhNT3FVAogU69xpawAOCNFUYsea+6XTQmmwpTbKbjb+wPS372H5aHoNtBBDnYnqW6Y1LNvf1tKaPoog73tokTLmfHQHJ1e+0VD/0uD3z4BEky2yS5Alwd/2tUjyE9V7GA/8D3UXcACgWVtDeEXCpKIJ/sn9YN2WtwCydKdafaem7BpF3sq8bYOWoSbBads8yg8S9gBTXcaYxr5cW9XEy0qoTqXX+c4FAUxWr4ap74Dbzxtf5mxmpj3T96DUB/msM3BdAkGR5FUzvOiQLAcaFZWkjUACZbyzAiOqq8H0Wkk9jwl+MMzoJNuuYIBVDsPcCa6ZdIQPi2cmC6wAJSwTzmrMvolRmhsuocSkXXbJPZsyPug28uBH4m7M1dfyIrRI2++myY2+xbo7NCvVGe2nTnm682j6QTRlPc8fqs/IzN5k9HrhfnwJAYW96AC7ebEModpkVO41vswCEQEDT82MVtro+J8aso/1qvsa01ZL30Cgb5cMKT001ZVxsPICE5pZTgUoo0hVz0cN/Bfiv2Hne/1itU7AEWcBHeT74QZmt81I2N0DxuolDiIFgcXix9pnU7+AZcj+/rbABzbyxynWDuAnAvvT07mTq0m3+LSUJAHBRSTv+WUlNGa2UsvBYdziy8+FWkmPDjMDCBADpOf5fJMlqGMS7iWecM38IpxW2FwgJ/4+y3tafGUAvZ0AXmnQafj8WawKYkdjYnYJ4+UWKvh9cIxSmAnE+IQLrJCcdHS14pQwqxCTYphvN/RX1Fj5UX3WqlfVRDKucTzd2Ps24RHaT8vmlGxDF22ex9O0iI40Bj2vS3l7/rzKqgO99Hgc3HHBJWeYwEaBFcyl9HxwFf+u+Ni0JFuFXmdHsgo305JVJWaYVFTzj/M3MkDrioSCtIlZi+pQv8qNshVczFiTmdXj9cVoi6LXW436uSqsJoOxtJRcnR878NOHXUSt0sTZwkVuBHISkyU5aCmxLVAb+O6L20eaHHbQF3MPjDS1FCuRWzp/3eDFbmXVTJndjq1XYZX/FmDfSTME5Er+/uCQyf3FRQO5VX4piOzGojBUv0upFzNV1XN3pGgmqJE9dFqj04BsxVL9eYm2VAmqMGJDik0TDv9fHjB4dxelIG2z0vH3eoH9kJr8lHzZfeoctn0TLHQhs3zdYSRl5BizmcR/sisnV+/I63v8U0Q7b1S7gKrKbt+dmQ7alWvx5vA4xi54/wNkw3jNvrW96vq4LXUg/JtwkNztlKICFRFt0NLiKTv0o2+1V9N2HE6e6w6o3feiPe9BH8utXHT2I+XA9ZNp9n697hfsJklvkzp3m9dCN4S76lNIJ16CWIodWw7SBFAPRzyzvj85Inl88HvqNjNzq7q5K5W+9rTIJe2ORizVrYgl6hNRkWEZ2QpWC5oyBS1hC0Z/8AkxHaKFQ+joPzKdDK7q47kvJt8UETX8UMfdIjzarSxpx31zhCNcLjVzBI410XjvJNiCgWS5pQh6EBGR0SfEpbJ8bpUrpm9VJ8fiTDQ6I46oEsmHFkc4wTvasvVnhliDNxQHKtmRIetURY1dUNzJG/23gCPQft6XfOLhZ+XKaXgDib+orug5HfS8sDsr8Ri83mpf6B8TUwyVXhZwdS6jQR+i7rAyDYT/R0jICwc3uHnlPANgBGy7FZJqf/7WvpnZ8PJKMY+0MA8zwTLOQa8Hn1AepQh+GoaEmTxAqQHhtGy+R3hip/f1w0/vWyEMFs6HP4P5S4WG9aJCPlFKoiIZ66OSDnNwNcDc4Wq26VMn7LSAVkz0QFsmy1qf0gO5AsE1F6Yr83IxmOaMKTrcIbZY5S6Y7H9/GcHeAMlgz4LGh4iM366xsKPrxJ6NiIZOOYHcOaW+nJyc46AirXLUgcxezyDHoy41HFmtJygGOpVeiBOKiWGck/1R/p1ebWFtEGhqiSy8rUGt5n8tJjTC83T2wT3Ul3XSnVd0Xqj1imjpwdX5qA8HxV/PvrbdD4RoPLRbsF6LbkPwt3mN407Z+084SiyRQTHsLCVxYbp8w3jqEkTDG4Jr9RMoXOYw0yO4rDeIMWbLG3gwaEDwr88VCKYwCbSHm4irQO5Mktvt9kMNgc9YZtZ4A+rdxiyoUKWrX7sYuYJ+I/R54PSUCjNAxnKeqblHPTLsAsEeWZAi7yllfpvjJHkJCtoTAg+pja2IKH2VntiPU1Y6yCYyPrcbBAer8HgIGRj/NAVDT2nr+AUut1AUHMiNFLKVY6iwtAy4rULN5/WpeXdblGZ+vwuCkadWad0h+S/AC1h9xvAhj5UTeHe007HXIIq5etbtO3zLkzSlm1gFCz9uklYJ2A2XSwIDtiEY9ivRF1QvShOO6CM3Ygv6TeFUjmxiX/uLIg1cVeccnF7ss6hFduih4dyhSTLW1cnj5wHYbQPm121acFYMw8cGRD+6kF4eVTsGsTUJ1/0hTZFyFhz74/UoQ/HnnZhxClby9KCCm2pydfiuGkIdfZs5X4SPZJ8PjypAavErtVcs1eJ49rBjVNrU22iDXEjrONfRAg0sDA+tLqZ1vE7k4xY602Q7BMkbhV9GNS5yYbBvNoaWvs4nWObKvsAXVjqgx+rVswtNdi5YMFKUXaOjVXI36dizuIn82TjYm3GHZ+vYXZ1Cire0XtKUoNAWD4P73TWdkrRr0f3c+KXOVvMySWSO1rcY9iiTC8nMlY7+Ql6I/7bkMwCerSOX2iy2t4lOpwU2b53yfd20w0yCtmgSolmNbK6CTE37TKAAmA2IzNWcxkTgOPgP92QZKwpjwvultI3ec8BCWdBBER2edPbQhik16u+p99ZhUIJcVejTdQW19vsGMHaO8Pv2CTI4VxgIOfCn9NlzavW9pyWzWv14v5g/BCcJPWGgwiTvbdxIGYqLrOh5sYfclDL1Gk+9Q9dXg1nqcoILeGXOn3ZZZ8BxmuBmZm98dxCJnw4LlOfLQELwdc7QmJILKOHPp/qrltiSn6bwGYy+zx7B1NWMYRluFWTDwzLMNFiwDtPl4CeU+VG8/sEh2OwhiIbEfZvqKHACSHuaJIg6cj6fIPkq3qYHf50iC1bn3wyECDtZVBU9XYHoYIs9CW8lmlHSs5QZ7m/b6VdLk3rbQlnmmMsmWrQ8p11gN47DHeHNp9mL+vMX0lDxfWvqmxKw4Y9Kh2UKsHM3uaYCaCYJfRYxDkPARUfXxc3Fya0NS8ools78GB7sD1YLzBRR9EX11qK8tVP+qO8Ha1FisDqfbXILjw0rt8ct1hMNm/eAQRD52fsfZUd3lNQpfU3CDxUXVQSwEJVooa78dh8BEwnODx1WX7LyddSepygjWNLba3qG/eF5E0nEAIuvY+05EZ0FtwELCAwPnqdtPQrXbPcfsaQVV+Cr5fyIVzNsb7nDG+PXzcZrF0irf3hebzmjtLa0baxgbMBTEboIhxUqAI51A8J+3uVsj68sLJxCaRIHisTdl2BudDPFleWIcmoLxuFtgNu/1EdzJ4aG1fYGGdJ1A70503FCQkyfWqFgCsWYXEWkNxzL1vx2OyEELunlbnwzbR9Upj4Qop2VufoeGiqncP1i1SCZpTWhW81sEoAfeBOKPFe0wWGOKu9A5L7Zk/nAwY9A54KbzRCGq3OUnzBFutxdFFfDkLgcDcFdnwsJYyo5Rr2yJ0Uig5moggaW5S21GeIrxNMgH/LOmrjPeTD0Rka9dp/pt+XG19hA3ZHPA2TracAOVC3amye+KuQIxWuiXdclxEJAaPpNL9PVrl9XpS1UHcuTF/1KpZga19ThXOir/zu61z6NytUNItWmf6BPUCGRcWflyv21cebaiNudG2yMKPFoXvbF+D6OC7QkcHCzJsYSxM/kJLpmYngW84HqRAqrl8HUWt3KN5euIXZgLc1pjziZ3MhF0uP+M4HKVcsmIuFvZ8ArS0ul0LBT+EnAcRFRh137Q5dq4VXPa1fO1yLl3Vcb68m9h62RLXflzauQElvpAzmXGtwt1CoExk/1yT7gZVBaDOQhs9DOWNG5USUYex+E73+FYUCsA+lB8OgJ4Kvz+QKesrqsVqdk5tmRA4hyR1deVFf+K99c/F00CR31z5+LhnuBGMcg++Z/DSxHEGishNGB1GM6hcxZEORJZB+ALfAfUQTnIXh+zVUqvoPPoZBmmrdiSo88rdqRQvU3sXqiTgyaKTJQtH2o+PvjtT+6udPjzmGLU/iihyb7TDth1AiewpiOohHFoZ9BB5a1++y+2iUoJPu/j1BYyDuQXcFZAoAjgCMrsQOs8JP4EEOGV2CgX0fEMO79ro+fKP38eZw6KNFWQSa7jl6ZA0owgqDOwbmzilCr+U6N3O+WriBXeMG0EXM9UrLVDMSxpz8jqScuknNDrTO6Opj0l9NN7xfGGEZ/trvlJAuEmV1u6Lc0qwyebWJzbkBh6NyNyGnQ6Rw5IShi/l652CZIOUrjIQ30d9ye8WCoLsKYL/j/FwBpcEBwcL6PM940ZuvpfLkrEqBcFGuCpTiPa3A9unu3Vrjdfwe3FMOB0WmgFtdIl3n05FORHbZdmSdTaL90Ygz2s/x9jh6ksVeBeFlVOiTtelIVoZsj+4N+Xsv64zwkCsMqVpaWANJ1kyfxKSI9nUcPkANjpUmKG7HYi2aSATwSx9wJ8Zr5LlGIV98qd0oBCTg6Jf3OCLU0tC2UKbWphWzvGYKCsO8WRE2TrNXgxUNdu8nxf6G4inDSW5MhN/0OICdj6+ar17Sn6fldoMLE3wJwJh9srVrcuvSpfKIsUnAkaG1/xW94vJvnUFFwvuvHYAVc32CnmPCpXHXrXwBBu+UYiFil3C8ViqwpXFt2QbXWly6IREv3P7zIyow6Ua7gNF6xvdRYfxw5tAYgFoPwBMBt/QUe2070C4zn/0YBw8bkQ225ZG5QM/cFlhSFPi5VsLA5Xfq3SGR+6scFHNx8g2IIVOy6QiTEkG1ZiF3Nzy7LU47NHQmjFspiRIP5ojD6M7+8s68jT1JWsOVTsafVqAFE0RC7SizgQFyuIFBj5TaWcBWiQsslQDHVm3V+vY3jYLhJIq9S4MzDjpteC7LFvutvuFl7dvhyhMbYuOUGYB1U9/zIsZBaAgPaCPTiahS0CLW0KiiOaYFONsv4+w13zyoLzmIxuiobEgM/31fx4ioCJ2XjNJofDMDV+XY+aQLifn52RkfyGMaGPtyks/kPdaWGiqIyP6ac/SVRIT01NCt6Fuh1VXBViuWGsjA5y0JlIn2OFtsLCc0+GDe8LIVkcfxWps5qUpP5U7Zvta6pkyyXXI/6r6mFrmcMD01pnJYteR3m4Ix9GP3cehdGcIu1cqLA+A2OSQ9dX09vdvDkWoLsa4TKTa9Ek1k5tofRswj6xm3BjG6SiKPwfrY6+gl1PxsGlfpS0a4KRbCgdAqJ2WGou4H6TLnW1cSvLnIB2Y/CCE8lSB0EYRw1YPRFuVR7NOjxvJrtxzS2I2vKbtgMI3MyoG71fbTs3GHMdvZRxfs1ZHDsbgHaynsCy0opdx8f+/JQ9vQxEWm8aNz4zqM7argujruNX/VD0IhmaZLZu7LssWkQX4FkTt3ytibvltxLUTBT+T8tO6OzzKbm7z29h7P1wXrjPpaHC3MOLVN77Z2O9AfTMz5H9KA3YhoUDFkNycO2hCGssYMC/ULYvROQCHjelTVYpOGSzHdrC2CI4dpDyJn9ihWoA6CLscYyxp+bGLivcQ97KU/LYzjgU4PwiqNUnLjnrqvXoZ3fOdMLUkHb18JQP/IAabeMM6DuIsPuUrUPSMtyHpgWpTRl2JHlFhX0U8tXV0zzQk+P9q7OfycX+7fm0TVkAEl7Zh4ZpCKhbsx/Q88LCsLENYgJcyxw+PostmtJBJfbUUIj2gBjV+rxh2zN63a0K+U4OvjdNvPeAKyZOOCONbAThTps9ZvP7icv50x9YIYAH2yq0q5QI3gry/klfVp5f+OhrkNTC7zdqqxO5HG1UkiyivBrcWLluomm4J8tSNIqOlARdlD6b2J14AADbH0IPdGDlCHpnIHGnQ8tzSd2/6DNpA2ttgQGgIXwV9A0qHZHrtUlYMbk1gBEfuR0syWh+wYvtWFhJTZPr6vs5kKGPxXhCDCbpV6Lv+42VF/86fwYs1MRFunaTQV93utBp+s/f7rkLZpJQ9Aexz83FxTmc1w5fSvyZb1STOH/zqn0i5DnvvYX8ty1PSgwFfaJ1YZzgIifG6pRHde/1iXyziVjn8iQ6+XkVmh8VGfrTTAS6A6Ym4pw7cnYEuidBia9/HBXXi+BVVEL0xcegxD2m/76mCoOjkGbi+TxfdjuBvt0T6ICr3S18IEgZe8UFCxJqAjsOHC+3rY/sLi9mW0TG7i5OF+LwP1qr18Vc/JsgO13Zpf5osczn2QWFuZr8qQj8rzML5NIGfCCHqg0PFHQ9L+IpZ519MNT6Wtbfd9oJqyFvsxwNFnE4a3wghC9B3G9/OQb3KHHSRqzj0RFn+BH55JvP6DhPZlFBZMyNJv1j9f5uyKZdg0YoKr2RpJSzg92hQB6iHeHT7okGUuqorpWAfD19mOEYcPZxsu07wJYnwenq7vcc00C9Tez9ncdB4kMXPYdED8PCjNKqSgBZTbPF/sAYBlyU+QR5LJm2KaTaRArxG4AxwtSlVILDM+htHVGRM78Vf77TLfRhSUtBT+9cdmjC3BNg5oo8b/a3qZEHvsxBlYa+og/T/12NaveWJ7XuzPNQteCUnAeUe6yKpbT0d5de52zzvTiti4a/QpcR43jmgU2TDeRJ4wsyUYHOT7HoqpiljbEJpJ+T++UPjiNsrb2lFFRdwSiu0w8a98z71wfcA2H0f8C7sP5i1ise8SpzjIH46jrf9sAuOMdrbMHvTOjPQ0Z6B6ygGXqWD4ienyJG1xiYYx32coecbUiy+G0ek0Q8BRD6G5XAVHvhpsS8LhTkHgb8qavksrDXyaf8Njhw4B18/My/VJ7iGTriTweTpx+Fjuh0lr81Iulx6+fYOgY1t7jUget2CDHFsvt1XkPTYgLx9OId7A7NXuJfD8og1rs9jELZcfhRCvCUohMK4LFNRXzlon6PlAyEmPn1GJYjLnBmotkbqTT9o+b2NHhQFivIkl35EoXzB92It5e4ZysCMJ/sn9SmKOTzR3zszdCQT4n2mgAyKm3458byYKgWWsZCDrbvTW8PZpbyy6GK3ak+P8NARnNseDVM2zCkh1hQkZMaLF0eRBpsbArtuxkIUW5IMT02kRMhJLLduHpSGCU7NZ8FalJuxmFCqbmkKIb7EOciOf9Es66X935o3fGBmS/Z2U948u89q7HC0X/asIV3sJmGQljT8x2/sOkNhqDTX7jnGNZvoave5kn5eSG3i6TX5WSWOCV4sDiZh1qiizw9tv0qLN5Jf+EaLgzj5rMT6UuX9hHaZmxT4Iuz/ZFsqzy5ry5L6Tm+sHTvemDXmBeAGIRgHPfXEB3dCp50eO5BXkgkCuQcjuFtiDooa9gXvTL51JwhwOUxgBMkZ96p03MBM5RkslgxsIXoIwqG9h+WxD8kaDg/BhLftIAwHVLIj5CkwMUJcUiJKNXXVgSiekSDVI/4jUIjC9aGrDzzB1u5Qgw0azriks5UAVEhdLX7qQ5quyWvlx0+7s/xRIZZv9YFOPsPe2B8uTxaaOd/Y1U746u/+9dQqD07gIQ/60fR4FNRUsCQ5ugsUhmqAgrVuPlXtzF22i5jYXfuzrfLXHnZhqDGR3RqSbwGnTMHfJRqk5EQ33YXNjSf8vyZ69LgZqoTlWXJDVxwgx2Yovct3O/lx5p4WrLnIfLku/SBv7RyQ0Fu1xfaHozWahq5bwTjUcN4FJnJOZN+GNJtsrnj0ngyZ8DPKc9LORtyFjwxaDi9485NX+mtpG66D2J+AnkD9Viehg8efToKC1hFsRhpotqNMMTyKLhrpz3OXnlLLudVYdjrPJGi7SX8ufIVYi6yGGpjhN+MQduvSDYMdBmz6wHmL04lgCTffwtc5D0uemtYh5Wx0j5vt2oPLFB29/JWPFWfI9iicQuoeTabaYetSKtPIjDc9HrBqSWDaeo6hpfJuvX21O6s1HN2pf7DOujBqMneKn9IEQdne4yVHigvjBa9RhCWPsCn3JYut2aUAXdFlKlKWaZUc13XfclqJ+mA6c6kMFH0V00Utow+8zuH9FsU1+I3+A2K/tRQTQWuRQlpFJrLxEtyYRubtTWwzZTygUjwtnWAF1jpFvOteV4xB5hxRMKQTEQg1CUg/C12tmeBan35jymaxsfCNF2Yw6AbL8yg1/FnPoUJ5VcNkck6VP9TKtk1As/8zsNKKMsZ5Fxoh6YUyl4QpfLSOX3wYfTF5rCrOgQP+LiRv4QviurI7OiAa+pXEFDKTRd4d5V7duXmnR9RXzhHFhlQpMYVuzLsWVnlkDSbMpPnALeFygMwmaorEqUj20o6EnuPEOQ8pfwMRhX6CP5rxWCX90oVsGQRMKoCPEV5vqUgMk3aIF0Iqba3150ir/ZtsPrl0JwZ6duYeTDBVWpv3TWFbLUE5xvYP/GVZ7QyxRbJT3L6hO4QFKElgdfloBb0JxDqhc+ak2JH3mKwPGn73NWYrkHZPzBDKw+Vf0aim8GP7jsh9C9LEBQw8X2yL/6zmW1NSWe2FHoOTXI6RhhFwXibHZNml0PxruZWAwq+bUiHfqZQVkPc+Aj5irjjI00h6Hid1CqDUW7Z1wcak9T+4bnZY4Exiexq6mFskliTFC3b5eu1RH0kt0JwyaboXOVgBernvufc9qEcxnYZnWnY9+RUNp3+5TxsmovZ9zQ/BdG4104QQ0jQ6Nxc1fgK6UOhURU5LmNU6CEzuXBmbSO/3NRuNR6XdwVFPmtFddPk6W+/ALPjm8Nckw0ofWD3b9wBq0yS+HGFgPpaKgV2i4ZrVKU+sLFR9xOeGer/nUvlRYLQZBqv4d/7BzrMzrLg2x884Zam0Ljb0+Yve9yVKgKjQv8B7RBAfO50NKvLTIRT5i8sFlgnSZxsJrr4L6DREls5SEIy1EAsNsibczVao5kQ/cnNZ626O6OjbODx+G1lIdCl/o6GNKrsE/4wAzfuahamm4bbo+v3AL1iM1V0AoKR/MCRGXHPcAC6z7y/7ro4eRqPM3hcbx7yNSKfgtNcetqD1sHLm/6pHVMjb6xyrInZJCJ6/2nAE6/IeScPS2gz3WOmIU++eED30Eq4lT9xsUMIPXbt7ggw0Y1nj/BLcawBixxnbwKw6mk16aNl3xrOfwc01byuDznO9fwrPLerxYbS5Pu1zwaredaZuXBfIpiJkP+K6VJhEBy+u2ivVnCridK06iA5cO3sgnl5HfltvYQXfxD6feKCxQdzq456GbDAv2dKwu9ui01YTPGdR/ItCnvUQnNjUAAOw6+7NN4Nj8DOElCjeFsKzWt+geppm83O6AdKBIzdatHYc6LmDbI/VU6QCBKIavVjnQZxIv0eW3raOIcai5IHfE0VJU+70tJAfSUV4AFBO5NGd6TmnXCz86WazrILPoNwpSt9IAuOFk/nbq4atjDRxNbLdTquVe9vZgNC1LRBMYpa8VeilGJ39PYUbOA3we9S+ZcY+w/6+iawR8wVX8Ro4dkAQrqoZ6v1TqbwwsBiG2PgDLXeO4x/s4qD/THZO728i4tYhFRWRlehi/leKiFWnG/EOBjyFuFFYmy0d638WD4yj59hZXC7uddq0N7km6K8C1mfX77MefQRulggopKuxjmkTJRiWohdRoY/dFOqkQ6ZFgRAZ4ca5JG7zJ2Nb+661ZepHgYYOZ7JQoTeUSPOYHUoDsJ43my7DAoGT1U7vXCDfxiI9ocnadqsCd57rs3YWh/Q7f3H87FzK3KDsZMMzYdb7+9vj5aJcXCwjMz3u/cct6cMKEUZ7JCl4UZ3zPHTJFwztTX55CnTnh1lOjwsBVGkDfxKdZ9QHp1iLJExuheEVoCfQpjM7kRkjGNKPsFy82qLVNxkSM86Yw10CF6Olz9twX60qVdVINkHWVjYkYtNrVB8jKOsh7hG4t6ZBedX0qANBJQWoU1rqxaEgy8EX31zdfDy4j+XGC00u85zSEcCguzrJ/bXVJGb+Tifvupt1YkJq4w9lH8byUQzADKtIKwdbmOoUZeubTLbY+tunxz/ZMlZgQF0P6otoGxZa6XQQiwlXf0vdB/e3EKB68KsuVPetl+UIlBbCFhGtHnxMfiFh1nYwp2Mirnvbu137ruTZld/Eir9vfp7Oh2p+ItG9BblNX/MH6fGaMnJ7cIMQn7NmdcybtsoIgarXkkzlVwOlHw+yeBJpVO/FwcFGzeYZVA/ER42FZTKnxYyXCkcaLm6ATfEx5BJG196Yf1+d21+ALI/PH9rnLQOL5Sy2dQHznE7ZVnfTiVdJ86J+j8toC+QryPhe3E7Lfv2j0DNiIIEBwCZDb7CyXQJGAuLCeMoM8JFDd3UNGFQyTwfz9cee+g5taVIGDHbirimKJQhd2tz70Esh1mvuooDdXaPrjmsiDIBpxmRss512ApUNuuPw98NQFDky7ZEnfR2cLp1s/y6yXc2hmRl0KAW77IrKg0RTI6zwt4mLVdx8JIkIYMUpuMEwNRbZDOGbc/NFCeDEnYYKUcZj2QEgD8xYMsbF2hT/JW3n4vCdbOVAslskk2YYpQ9RgXERz85/fKQhwJEAc7a7fuRtZqXVBE/3lfOhhhYX3fIV6KbvGxIWgCEG0Jx4oVNDn2ORivZ48Hp6wqH+TeIXiSal/PmCpa395+A5c+FXTa+/kFPk9Ndugvpld/TKKt1e4l8fWpeKw8JEb+b8RVpTKb4auY6gdaZWkmQVtYyXKyP4mKYLNx8CisJdseFi86rELOKMrVYRQRa7+ptykaLVPs/62X9edl+DB/qv3zLdq/4MRfmK1Bo9J9RFiNLCt3CDuZWThNJjHdvJG/Q0LCuW0DoX49cz2MBCloMBn4P2QNdLGSSfQCw6yjYuw0KahYLe1JsjWxg/PvAgDMZV5R/S8BcphKsmjxKAh0W/NdTtRz11KvpUvERmgPoDtvIsOBC6MzANJaWQvPPep02jbmcg4jZJzDkFKRH+F1GL5pww5g4VYo3/q+LukTmoYRzKQG7G02S2/4Fn35iddkpjKgsApdgYUnCKn8/dtjVJTO8ShieIL6tz1Y1TJqFIHTRO9glyJN9wdK0pPNvCy/p5vrmJHZ16bi4y9El2+oJ1812keb2wvBWc51pmQI9i89y5/Ta5azcq/KoqioDd8jtTN95ELt0ff8p9lFsbiA7dTgfqZMffGrhVjwGZyqdnOoF39F/+s2twNpEC+QN0B5AFhzTCUB3RYeRSoCgmsHp+ZAkwK1NZe70sW4sfWUCGUwWQZ4SZ0XPM6fP/vIqy26yYymx5vpsPX0x04R6lvkpXN/SCJ+mFhd8D2gzG/3uSqrT3UNZKlus0Htia+F0ioPlYDUk86rjAGPh7ixP1g6EVlNeVA4h4glR+AlmWLir8MqsaZb261L5nY0lhXg/dEkb4n1U3TYl/bxhioviZKvTGy7AvS1ft1VGFhT+EVurtULV2bjsSEBTUFIPQRtPfQe8+6Y9Y2JGOtL7f0VYsqD/6YE1+Xggkipe9T2TD0O/jUQrG/CuEDtt+/68OCTujMLCRxy2smN2gUr2NVnJeqlFfYC9sOAF7sd8MCCOAr0WgcQEAwLBIo/xzwy+RhWF/eQ+Y74SobO3x4sSXXP3+On+ttl3GXbIwG6jXmnmaOE3Gr6EJjVKArryB+sGlXrXGmrxtlbyOZA2aMjSLm4bYgJP0uQAy6pWA2ST7iHT9sstiFvQimd6bxnYeS9VjmoNpsuY0/hH9dtNkUg/dxkpZriR8XlpI+N/J9yGBPeHulxJLNfZzOOIuzNbLDqn2ZaNa9bVCqYcDf4WkrKZb/+S8yEDJJ1NLFhjYvjLg7iw4isG9xS/T2t6esCHJP5BnxneX/VQxpd+HDrkXnp+z6wPIndIfqTXntG31yG4fj6qHjrCTcFPZY4d1XgeGWRjC56afkthwYOj0VzFIrxHj7UEXmw9CXAYTWPFQ4P4MGSBBgLDFIQqgED4jTueKu62+Q/Czm8siILhHZ8kPnnSW2ZhuH9Ek/yYuPar7VOuF1Ri14sK6DQCmAHq/2eDGy9TypCdyswumQL3R7EXFMFErMIp4dUJpkr/8+VgRgfhYx7QI0xTGdljKACLFvAr98M1YbvinVWmY88OtgXPKxqhoiSl0GwwxvhTvkTpURmQCGu5pjDadsjXlz4htMiQDlM/Yei4Sd2vvkfDtQ9KIgu6+qMC84T5N+9AXhwBN28f7xmQhViAaPq4XB6IDMUbGESLnRvacotbIfTCL37NkVGyQT8Vc+MxYSAPknMRY8WOW8rSugWXhzYjvu/H3Cl9v/eHgflUj6mv8kGgz8RLXg4uhmSI7xKewwv5F6FPz1TWcFUIcYY+Q8vdmgoEiLag0j8xJs738BFAKiSg+IkSikptsuKuCPi+GIdkbfZmczadXj7VTnhK8bCrX/a929J5C3RxeXOzhGEcbIL/uFELpw4lQB1CsI//6NuIsCu0WgpgdzTMKppNSRXwemH9qnZDa/kg0jjb50luaZbWh+kQu2yJa+oxEx35ncmQE0ZgPZocZjZqpxQcTu5MuKgtSaQKvaLIBs6b2Hb8SjrZe/HS4bYf2N7dJDu3jYlnc+cu3EYtutmPBRzTJYpcP0zMnYeZ4iXdgZf9j+A+AIUjLSGpsNsUuDx/MGfvi4KvRq/umnPsmGWQ81Lt5Is+IyYEp7nbuEXSFOKMKhgxZD5GQMuvLxHwvvYlX6VO0IWvl5sPTaz2egMmxoK4Rn1t0WzKPQKXaZZ5/FR+1UHVnDdZ+z8KfsVnnsDD6UHUq7Mgqm1YPZeguDsdPUWURJTJdw6HghmnjswWi5A+qPW6C6Q66dmN2cucfDV8o26mRwncuBgNYIhC+CiJ/qZ8bHd0XKZd4iVBwK9jTtGdnOmLrL67JzfHczm5biXQD2gC+P6YJaHeOc0lS09wVbvXj8CHzYpzB3I930xIwqKIEzA3YP9edG8eEGlMCwDWF3+pbn6TDauRFT9MqCgn7/UAz/X70/l1TO8ziv4RlT4EQlgEIQagRClu3GmJ625hcEQtUPHa18xA/QO8GR71qrs7xwLV1V6ED+Y4obB1K1HIQPYwWOa50yTdLby2p5BQDmXUYeY52LKpN8Wgkr1KGXjLXYkAfYA82EB9iSJhjlbIaxhD+tEUjE2Qoc/yJdNrG+gNmCITkV/DK2udlaPmRuGjsgFf9azksRFDPeHPSJyGu4qW+/OlXmr434zeTM/jqmkyTcBwX4S4cFdznuRfDdqmq/1BDjgJJJ6MRTJKrfdiiFTno1Eo/0WGfIzrqsyZa//8AqjKjc3B3aPfR0No5z2cWIm1tDqQpQCsyXE83dbVffA9BkAzVcIkHd3eqv59DSxmMYNpaNunXCiOZf5wnWqDVWzaeFLETUGH4xd39Qh35+3Pk0O3qUbjFK0Zv7vGbrBLMKRvF28PRD45d6Fp45/e4fBoYwYWvoch5L6PrJUlojO3WT5mWw5/33arHNCWFMb6c93S9rlz9WDn9XXf1h7CaVRHildUrfFZJ5r/FR/4Jly8zQ0xVJg79wdEV0q+DgMjI232jggK8Q11gSqZdflHaE1B08oWKQKdP9msZd7pwD9PhEdBu8t/b6L+20h9++knKnAx1V2oBm/WjBynT5mC1Ykot4+Bd2m1wjrMuR7+0wvMyTgpnAvhE7ja4ghUYaEibAnFTe3hXai13uMquzSjq0wWgaXfsRdekDUiOlgDFWRhMj0VeFpOs0V0Nbfv9fzE9H9f1/IdayACaWvSR5w46Ehhe2d6ba4TYRI7Wl6Z87ccmSRneCAtUqaV2a/EtX5kSZKBnqT9WFsWB8XjsYQuIrJuLN65W0NQDLxxMJGQHoN4jwvbagXUDzZO9JJ+yIWVL5zN7JBFmGamyI28qy+zjPZTXKp7lxJOb/yf39uQ9lJK0r+wMYzHZc0JewgwGsqhGDdrbDr8KQ5zX0bwyRQOcGoPTy88sgtgaTuncqmASauJA6kkmASKZACJ03XpmA6D3afp9sbSSMe/xOD80U41aB5KMIrY6++l+fEnekfFnL5ZPd8tFqFZiau7FlNDPvgsq1IrjDtW5b5w3nTtml7g8yeqBmkLapXeLGeEVJsBGIiA3Pf6trrU+SuCiG9z3J71KrtSVC+QyuDIyvYuW6PO/j3G3/C4GF0/ZnOZi8uVM18tZ7vcPHaksavdfXReQ+ggmbqNaMO3JDNi/b2QHerhmwf/U/+at6Bkj20/UVWC3g5yIaT56SYF7PgFHXv2swvrvAa4xlw6qIVBV70NpORlmGSmlidfPl1BHO3Q3tvFROwIW3WHFaLX2kRqtq9jaq411tBGZFr/gS1k99uIa+zZgu7AYB1bO8Y7XY/q9CuEq72nJArazGjcXd9ssrHxkwX8pqP/ZARNZQ8Fi6ce+wgSBsMZipxLPe73NzryoYxng0C5Qn0Lir4hI6Vhgq1PK5mv3cOyn9M6yHpVuUfudSOZw7BC9WysAnXBoxWILiy+c6B61l8x1kWwnmsZh1v0f7wwGnrT3N5DBgStPhFw2Y1QiByBKK3bcf0Vkqst53BgSb+QvpGC8KDvNfAqina8JYz6MOa3YdqxwIU8DB4sobFhnEa3iLpLYF91omfLEb67wIdYxjI1/fJueTCVpOhSZXzDqsHXX40tJMyaiklB6V+FXPMwV2dkEQj9JINci6sqfw5Hn2ui564dkOsjBKOMN7OdUJ/JgH/2GuezE3ixbLOVi87427457gWB8IxR03Btqjqid7nueNceVT+vII9K598KAszYGa4Le1LPKqkbIYokvS5lgC9XOoRdxXHRDU9fUj4RLVMkJFJxrgl9TaPmN0f3Yna4MIDpluh0xXBFyjOqErWxRvqw1PEPLLwrH6yfmG7keAjqCNCNaYD6zdMjd6Pg7yhtZ+y38onzqTSkxWGPO921dshaJ1octpXnzJ74PQCczC/p8dj02poUgT6/za6QIp+INd8VKZf4zpb0Ovm7VTmKbUSwFJKtUeWqZPRKHQmJeW9XFKg50bFHw68KBQpnL5p++9LZ6sJdgSDpvHi7Mbl5BSmCNdeQXROpgjG1LkG4Vj9oQntmohFAcN4KULQYt9+DdvDap4GTn5atKNtRfgYG44FNfJMbWzLsuHXsb17QoiWWxV0HYJIUcPjRPsUxeXSqBBaszj0Doq9H3FOiohxPFkN3IuDX+cQRkf7blA3zINiWkxbM8RBP6sVSsxbTrMuqdu8mbVDykZF+X/7BM/hMb/ldP4saYvZ5Ev2wR16md56r6FbUYZMvM6KeDnN8lLVB9supuriQLFIDZqDslSPih85l+76D0qsfC23rkF7/wCuPRfaR5aCLTZv9wUNSJG7X/Wj0wBthXoiaLW74PDrO3WhIrQl8dO+GeIkIX2nOawLLpLB6w9yM4yAHUZ9OOaTTXDRjUOqoIfgjZ7ZacOZ70+eZ/8FB5b6ZG+Ibdgrdgw3M6XhM/EQ3MuF7no2x8BuA09jJWDBoOOS6HWVDm52VTDzl+tq4o8ZecCZW8AxQGWIf0ZVELatrosarZ+u5n2lc6j8xFVWhHHoKLlxc+sScnXZ21jH9IRhmXcKzZGx79DnMFRs/ZNdNumatxLGSQKCYQINohjdL33r6x0R5oTinBZCYAFTPBRpNh1TqaP4LPz5/8LMtXdCjMGYhP5igHa8vCQPpJ4THfNN9pQRbwigDWxsNOjzmpKw4w8AvZ0udUmSpTqnXq3DqQQdY/CH436hajURzUlPC0tlNKLasGZgJRPaXpBBddrrGHkBfmkxMg3DK4V8bbds2wnGpgvrYQN3Jiq95x2AmlE/Q2r3Vuf1IKdyTU971sKhfV67ehDazhBQJv/kVwAWRj4H6+jhSae5Ucm/vvOCXYISXK0ZzkopXleaVr/DYC/K/olY5ie83hSTlOBAvt7KIYCrbS6hG5tCKDNOWQfbrqNXIhU6bfM/uxXWlXh0N5g2c+5Ay3HQ85Xuz7DwQixjzBCALtOSBVIPghCf7QW92c1S1o/b0V1uyOGd6DJvf35mr7d9id3Gr2JdB4yVLNkl53xQ28aliLFbeZgOA9uNG4GOKF/H0YGQMfbrP8XS2WBIPvUOAG9H7pptiH490dts+I556vyXM1b5BGhPLje28m80QilI3IB941Jlv0x/62nscu3h7m6Ly6YcSELprRswNu3X7DikDbrrtSQEyOkWw7i9vUqZNOWBv4LQPzPwjPwuW00EdTeMIU2rRt8oqtxIOgJPa9lQbwyx+Dst43hLvldbEvE/fOK8vMccnWLrekydzgHu0K389fFv7pbkG5xyBSJxi+xIb2Yda+JbE4C4FQCO093W67EwPC4NqafIoL2lhXQhH3aF4BWI+xJZmGASiIOgDd4HkZUZ2tl8QTkmiFzptJp8dro8/J4hn4fExPMNdqOimoQaiSUhDjg2tLGjWk9qlsn7fU4teZNZEgZoWRNBMsl/1fU/3ZurBRDy2KdO1cEK5Ewwj03St3PstKeQkn8NNoYXTjfRQyBuOCMKtle303MYjK9vHLKnUo71gdnxDC1UQ5TKijGsmg2sV08Zlqs8oZeN7gD7MjdRAS+hHFeUu/5/ZWKitg==",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"벤네비스 7년 아티스트 콜렉티브\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 9년 아티스트 콜렉티브\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 올로로소 7년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란 솔리스트 포트 8년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"로얄 브라클라 14년\",\n      \"price_krw\": 62000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 13년\",\n      \"price_krw\": 63000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 22 탈리스커 11년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 23 오반 11년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 23 탈리스커\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"SR 23 클라이넬리쉬\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 2014\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드모어 12년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달유인 15년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"딘스톤 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"녹두 13년\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌토커스 16년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발블레어 14년\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"벤네비스 9년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"쿨일라 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"벤리악 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌오드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"링크우드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"스페이사이드 14년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에드라두어 2014\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 17년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 21년\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙 세리\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 그린\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 18년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블루\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트렝스\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"커디샤(Cutty Shark) 프로히비션\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-13T02:27:55Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 1747
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2811,
+      "total_output_tokens": 2047,
+      "total_thought_tokens": 5370,
+      "total_tokens": 10228,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3
+}

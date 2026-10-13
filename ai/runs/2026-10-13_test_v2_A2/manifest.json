@@ -1,0 +1,75 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "media_resolution": "default",
+  "prompt_version": "v2",
+  "prompt_sha256": "87314f7784a57513cea270fef34d2c7d9a1147f2d1b337b1bfd73841ce5cab96",
+  "label_set": "test",
+  "labels_sha256": "07bc5e07e84b43d445520b4e4488ecbf7f928d1ecf5ae6b7b0d94c0908ac98d7",
+  "runs": 3,
+  "photos": {
+    "011_mirabeau_01.jpeg": {
+      "prepared": "011_mirabeau_01.jpg",
+      "prepared_sha256": "e78a85b3942477251cb18e20e088366015604c4cd3e503df4298381d1f855638"
+    },
+    "011_mirabeau_02.jpeg": {
+      "prepared": "011_mirabeau_02.jpg",
+      "prepared_sha256": "bbcd831d276edbe18e6cf7de1c1cfdbb8b43b55027ea2b6fef8343eec90d2dbd"
+    },
+    "011_mirabeau_03.jpeg": {
+      "prepared": "011_mirabeau_03.jpg",
+      "prepared_sha256": "91a377bd66e7baecc589bcc1f71d91f96d5ffe2cc5753bb8c73620261e90655e"
+    },
+    "011_mirabeau_04.jpeg": {
+      "prepared": "011_mirabeau_04.jpg",
+      "prepared_sha256": "081b5ea55cf0384cdefbb46d846589f1be7442e16ede74f1a9c7617ee3a52ee6"
+    },
+    "011_mirabeau_05.jpeg": {
+      "prepared": "011_mirabeau_05.jpg",
+      "prepared_sha256": "f80b1dc354db947cb938c85cb397e32f65e1bb35da3e844b181410b03727bf29"
+    },
+    "011_mirabeau_06.jpeg": {
+      "prepared": "011_mirabeau_06.jpg",
+      "prepared_sha256": "cf4f0c8367042a8dded94e738ba1e795d692e3a97fb71f261b7904b38e3e6bc3"
+    },
+    "011_mirabeau_07.jpeg": {
+      "prepared": "011_mirabeau_07.jpg",
+      "prepared_sha256": "972a22e86ab3cef1f333ce05f0367e8608ea8b6a7d5adc32678a0003a6224716"
+    },
+    "011_mirabeau_08.jpeg": {
+      "prepared": "011_mirabeau_08.jpg",
+      "prepared_sha256": "e8e6151f251591b1f77c577fd1668506d9be6d1fd1063fdd2b176718201009a2"
+    },
+    "011_mirabeau_09.jpeg": {
+      "prepared": "011_mirabeau_09.jpg",
+      "prepared_sha256": "0a2bbafb436aad6760b4e4905dbd93b6c7c846acb88c61e418f8e8d263057034"
+    },
+    "012_beck_01.jpeg": {
+      "prepared": "012_beck_01.jpg",
+      "prepared_sha256": "a28a7a2cd49dcaad883a55e00d311104b0db35cab2de4d1fdaad510dd11334e6"
+    },
+    "012_beck_02.jpeg": {
+      "prepared": "012_beck_02.jpg",
+      "prepared_sha256": "7ac0445476b77da086069a3dcdc1919122c6adb8a6fdcf9fb108707a5cf2244d"
+    },
+    "012_beck_03.jpeg": {
+      "prepared": "012_beck_03.jpg",
+      "prepared_sha256": "f2de6f5bc360231da04d9696ace0b83c6d067c9da71fad48055df3d31dda7417"
+    },
+    "012_beck_04.jpeg": {
+      "prepared": "012_beck_04.jpg",
+      "prepared_sha256": "46371d02d46b7ee5187dda13e29c06bc15c0ddff5fd0f2dc7b9aac43009c950c"
+    },
+    "013_forest_01.png": {
+      "prepared": "013_forest_01.png",
+      "prepared_sha256": "0f540c816377d36c1602b7b615dd9512957732da1e63e7002574725d49026855"
+    }
+  },
+  "api_tier": "free (inputs may be used to improve Google products)",
+  "written_at": "2026-10-13T02:20:44.597482+00:00"
+}

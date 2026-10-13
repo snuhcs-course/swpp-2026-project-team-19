@@ -38,7 +38,9 @@ def fmt(v, digits=3):
 
 def decide(acc: dict[str, float]) -> str:
     a, a2, b = acc.get("A"), acc.get("A2"), acc.get("B")
-    if a is not None and a >= THRESHOLD:
+    if a is None:
+        return "판정 생략: I1 판정 규칙은 A/A2/B 3조건 비교용"
+    if a >= THRESHOLD:
         return f"A {a:.3f} ≥ 0.85 → Flash-Lite 기본값으로 계속, 프롬프트 개선"
     if a2 is not None and a2 >= THRESHOLD:
         return f"A {a:.3f} < 0.85, A2 {a2:.3f} ≥ 0.85 → Flash-Lite + thinking medium 채택"
