@@ -17,6 +17,17 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 THRESHOLD = 0.85
+# Standard (paid) price per 1M tokens, USD — same basis as the 2026-10-04 summary
+PRICE_PER_M = {"gemini-3.5-flash-lite": (0.30, 2.50), "gemini-3.6-flash": None}
+
+
+def pct(vals, q):
+    vals = sorted(vals)
+    if not vals:
+        return 0
+    k = (len(vals) - 1) * q
+    lo, hi = int(k), min(int(k) + 1, len(vals) - 1)
+    return vals[lo] + (vals[hi] - vals[lo]) * (k - lo)
 
 
 def fmt(v, digits=3):
@@ -47,7 +58,10 @@ def main() -> None:
         cond = json.loads((d / "manifest.json").read_text(encoding="utf-8"))["condition"]
         scores[cond] = (d, s)
 
-    print("## 조건별 지표 (5회 평균, 괄호는 최소–최대)\n")
+    n_runs = len(next(iter(scores.values()))[1]["runs"])
+    label_set = next(iter(scores.values()))[1].get("label_set", "val")
+    print(f"라벨 셋: {label_set}\n")
+    print(f"## 조건별 지표 ({n_runs}회 평균, 괄호는 최소–최대)\n")
     print("| 조건 | 항목 정답률 | F1 엄격 | F1 관대 | 가격 정확도 | 잔·병 혼동 | 오탐 | 누락 | 실패 호출 |")
     print("| --- | --- | --- | --- | --- | --- | --- | --- | --- |")
     for c, (_, s) in scores.items():
@@ -56,7 +70,15 @@ def main() -> None:
               f"{fmt(m['price_accuracy'])} | {fmt(m['unit_confusion'], 1)} | {fmt(m['fp'], 1)} | "
               f"{fmt(m['fn'], 1)} | {len(s['failed_calls'])} |")
 
-    print("\n## 사진별 항목 정답률 (5회 평균, 최소–최대)\n")
+    if any(s.get("per_bar_accuracy") for _, s in scores.values()):
+        print(f"\n## 바별 항목 정답률 ({n_runs}회 평균, 최소–최대)\n")
+        bars = list(next(iter(scores.values()))[1]["per_bar_accuracy"])
+        print("| 바 | " + " | ".join(scores) + " |")
+        print("| --- | " + " | ".join("---" for _ in scores) + " |")
+        for b in bars:
+            print(f"| {b} | " + " | ".join(fmt(s["per_bar_accuracy"].get(b)) for _, s in scores.values()) + " |")
+
+    print(f"\n## 사진별 항목 정답률 ({n_runs}회 평균, 최소–최대)\n")
     pids = list(next(iter(scores.values()))[1]["per_photo_accuracy"])
     n_gt = {p["photo_id"]: p["n_gt"] for p in next(iter(scores.values()))[1]["runs"]["1"]["photos"]}
     print("| 사진 | 정답 항목 | " + " | ".join(scores) + " |")
@@ -65,7 +87,7 @@ def main() -> None:
         cells = [fmt(s["per_photo_accuracy"][pid]) for _, s in scores.values()]
         print(f"| {pid} | {n_gt[pid]} | " + " | ".join(cells) + " |")
 
-    print("\n## 오류 유형 (5회 합계)\n")
+    print(f"\n## 오류 유형 ({n_runs}회 합계)\n")
     types = defaultdict(Counter)
     for c, (_, s) in scores.items():
         for run in s["runs"].values():
@@ -78,8 +100,8 @@ def main() -> None:
         print(f"| {t} | " + " | ".join(str(cnt[c]) for c in scores) + " |")
 
     print("\n## 1장당 비용 (호출 평균)\n")
-    print("| 조건 | 입력 토큰 | 출력 토큰 | thought 토큰 | 응답 시간(초) | 재시도 포함 호출 |")
-    print("| --- | --- | --- | --- | --- | --- |")
+    print("| 조건 | 입력 토큰 | 출력 토큰 | thought 토큰 | 응답 시간 평균(초) | p50 | p95 | 유료 환산 | 재시도 포함 호출 |")
+    print("| --- | --- | --- | --- | --- | --- | --- | --- | --- |")
     for c, (d, _) in scores.items():
         recs = [json.loads(f.read_text(encoding="utf-8")) for f in sorted(d.glob("*_r*.json"))
                 if not f.name.endswith(".error.json")]
@@ -87,12 +109,19 @@ def main() -> None:
             vals = [r[k] for r in recs if r.get(k) is not None]
             return statistics.mean(vals) if vals else 0
         retried = sum(1 for r in recs if r.get("attempts", 1) > 1)
+        lat = [r["latency_ms"] / 1000 for r in recs if r.get("latency_ms") is not None]
+        model = json.loads((d / "manifest.json").read_text(encoding="utf-8"))["model"]
+        price = PRICE_PER_M.get(model)
+        cost = (f"${(avg('input_tokens') * price[0] + (avg('output_tokens') + avg('thought_tokens')) * price[1]) / 1e6:.4f}"
+                if price else "-")
         print(f"| {c} | {avg('input_tokens'):,.0f} | {avg('output_tokens'):,.0f} | "
-              f"{avg('thought_tokens'):,.0f} | {avg('latency_ms') / 1000:.1f} | {retried} |")
+              f"{avg('thought_tokens'):,.0f} | {avg('latency_ms') / 1000:.1f} | {pct(lat, .5):.1f} | "
+              f"{pct(lat, .95):.1f} | {cost} | {retried} |")
 
-    acc = {c: s["summary"]["item_accuracy"]["mean"] for c, (_, s) in scores.items()
-           if s["summary"]["item_accuracy"]}
-    print(f"\n## 판정\n\n{decide(acc)}")
+    if label_set == "val":  # the decision rule in eval_plan.md was fixed for the I1 val run
+        acc = {c: s["summary"]["item_accuracy"]["mean"] for c, (_, s) in scores.items()
+               if s["summary"]["item_accuracy"]}
+        print(f"\n## 판정\n\n{decide(acc)}")
 
 
 if __name__ == "__main__":

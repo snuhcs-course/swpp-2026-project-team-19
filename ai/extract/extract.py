@@ -31,7 +31,8 @@ from PIL import Image, ImageOps
 from pydantic import BaseModel, ValidationError
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PROMPT_VERSION = "v1"
+# Override with BOTTLEMAP_PROMPT_VERSION=v2 for experiments; the backend adapter keeps v1.
+PROMPT_VERSION = os.environ.get("BOTTLEMAP_PROMPT_VERSION", "v1")
 PROMPT_PATH = Path(__file__).with_name(f"prompt_{PROMPT_VERSION}.md")
 USER_TEXT = "이 메뉴판 사진에서 규칙에 따라 항목을 추출해."
 
