@@ -207,12 +207,6 @@
    "age_years": null,
    "edition_name": "Cask Strength Release No.4"
   },
-  "highland-park-cs-heather": {
-   "display_name": "Highland Park Cask Strength Heather",
-   "brand": "highland_park",
-   "age_years": null,
-   "edition_name": "Cask Strength Heather"
-  },
   "highland-park-15": {
    "display_name": "Highland Park 15",
    "brand": "highland_park",
@@ -1833,6 +1827,12 @@
    "age_years": null,
    "edition_name": "81"
   },
+  "wild-turkey-rye": {
+   "display_name": "Wild Turkey Rye",
+   "brand": "wild_turkey",
+   "age_years": null,
+   "edition_name": "Rye"
+  },
   "sagamore-rye-cs": {
    "display_name": "Sagamore Spirit Cask Strength Rye",
    "brand": "Sagamore Spirit",
@@ -1841,22 +1841,22 @@
   }
  },
  "review": {
-  "시그나토리 빈티지(Signatory Vintage) 스페이사이드 14년": "카탈로그 Signatory Speyside GL(연수 없음)과 다른 상품으로 봄",
-  "하이랜드 파크(Highland Park) 캐스크 스트렝스 헤더": "제품명 불확실 (Cask Strength 계열로 추정)",
+  "시그나토리 빈티지(Signatory Vintage) 스페이사이드 14년": "새 상품. 실재 후보: Signatory Speyside 'M' 14 Small Batch. 카탈로그의 Speyside GL(GL = 다른 증류소 코드)과 별개 (진우 검수)",
+  "하이랜드 파크(Highland Park) 캐스크 스트렝스 헤더": "Cask Strength는 Release 번호별로 다른 상품 → unknown (진우 검수)",
   "글렌모렌지(Glenmorangie) 12년 오리지널": "카탈로그 The Original(10년). 2024년 리뉴얼로 12년이 됨 → 같은 상품으로 봄. 연수 불일치로 매칭기는 확정 못 할 것",
-  "글렌모렌지(Glenmorangie) 15년 라산타": "카탈로그 Lasanta(연수 없음)에 연결. 메뉴의 15년 표기가 맞는지 불확실",
-  "글렌모렌지(Glenmorangie) 16년 더 넥타": "The Nectar 16 = 카탈로그 Nectar D'Or의 리뉴얼명으로 봄",
-  "글렌모렌지(Glenmorangie) 18년 인피니트": "18 Infinita = 카탈로그 Glenmorangie 18로 봄",
+  "글렌모렌지(Glenmorangie) 15년 라산타": "카탈로그 Lasanta에 연결. 15년 별칭은 test 평가 후 추가 (POST_TEST_ALIASES, 진우 검수)",
+  "글렌모렌지(Glenmorangie) 16년 더 넥타": "The Nectar 16 = Nectar D'Or 리뉴얼 (진우 검수)",
+  "글렌모렌지(Glenmorangie) 18년 인피니트": "18 Infinita = 18의 리뉴얼명, 같은 상품. 별칭은 test 평가 후 추가 (진우 검수)",
   "글렌리벳(Glenrivet) 12년 더블 오크": "현재 글렌리벳 12 = 12 Double Oak → 카탈로그 The Glenlivet 12",
   "글렌리벳(Glenrivet) 15년 프렌치 오크": "글렌리벳 15 = 15 French Oak Reserve → 카탈로그 The Glenlivet 15",
   "글렌피딕(Glenfiddich) 12년 아몬티야도 셰리 피니시": "카탈로그 12 Sherry Cask Finish와 같은 상품으로 봄 (불확실)",
   "글렌피딕(Glenfiddich) 21년 그란 르제르바": "21 Gran Reserva = 카탈로그 Glenfiddich 21",
-  "카발란(Kavalan) 비노 바리끄": "메뉴에 '솔리스트' 없음. 카탈로그 Solist Vinho Barrique에 연결",
+  "카발란(Kavalan) 비노 바리끄": "Vinho Barrique 정규 출시는 Solist 라인. 잔 가격 44,000원이 같은 메뉴의 Solist(41,000원)와 같은 급 → Solist Vinho Barrique 유지",
   "와일드 터키(Wild Turkey) 8년 버번": "Beck 판단과 같이 Wild Turkey 101 8 Year로 봄",
-  "벤로막(Benromach) 싱글 캐스크": "캐스크 정보 없음 → unknown",
-  "아란(Arran) 시그니쳐 시리즈": "시리즈명만 있음 → unknown",
-  "우드포드 리저브(Woodford Reserve) 더블 X.O": "제품 불명(가격 42.0/420 불확실 줄) → unknown",
-  "와일드터키 라이": "101 Rye / 81 Rye 구분 없음 → unknown",
+  "벤로막(Benromach) 싱글 캐스크": "싱글 캐스크는 캐스크마다 다른 상품, 메뉴에 번호·연도 없음 → unknown (재검색 후 유지)",
+  "아란(Arran) 시그니쳐 시리즈": "Signature Series는 Edition 1 Remnant Renegade, Edition 2 등 여러 개 → unknown (재검색 후 유지)",
+  "우드포드 리저브(Woodford Reserve) 더블 X.O": "가격 42,000원으로 같은 메뉴 Double Oaked(19,000원)의 2배 이상. 후보 Double Double Oaked('더블 D.O' 오독?). 사진 확인 전까지 unknown",
+  "와일드터키 라이": "81 proof 라이는 상품명이 Wild Turkey Rye → 그 상품 (진우 검수). 101 Rye와 별개",
   "발베니 12년": "Beck과 같이 12 DoubleWood에 연결",
   "글렌드로낙 피티드": "미라보의 Traditionally Peated와 같은 상품으로 봄",
   "글렌드로낙(Glendronach) 18년": "카탈로그 유일한 18년(Allardice)에 연결",
@@ -2101,7 +2101,7 @@
      "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트렝스 헤더",
      "unit": "glass",
      "pour_ml": null,
-     "gold": "new:highland-park-cs-heather"
+     "gold": "unknown"
     },
     {
      "raw_name": "하이랜드 파크(Highland Park) 15년",
@@ -4785,7 +4785,7 @@
      "raw_name": "와일드터키 라이",
      "unit": "glass",
      "pour_ml": 30,
-     "gold": "unknown"
+     "gold": "new:wild-turkey-rye"
     },
     {
      "raw_name": "와일드터키 레어브리드",
