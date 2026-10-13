@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.zerotoone.bottlemap.ui.customer.BarDetailPendingScreen
 import com.zerotoone.bottlemap.ui.customer.SearchResultsScreen
 import com.zerotoone.bottlemap.ui.customer.SearchScreen
 import com.zerotoone.bottlemap.ui.mode.ModeSelectionScreen
@@ -23,6 +24,8 @@ private object Routes {
     const val CUSTOMER_SEARCH = "customer/search"
     const val CUSTOMER_SEARCH_RESULTS = "customer/search-results"
     const val CUSTOMER_QUERY_ARGUMENT = "query"
+    const val BAR_ID_ARGUMENT = "barId"
+    const val CUSTOMER_BAR_DETAIL_ROUTE = "customer/bar-detail/{" + BAR_ID_ARGUMENT + "}"
     const val CUSTOMER_SEARCH_RESULTS_ROUTE =
         CUSTOMER_SEARCH_RESULTS + "?" + CUSTOMER_QUERY_ARGUMENT + "={" + CUSTOMER_QUERY_ARGUMENT + "}"
 
@@ -58,6 +61,9 @@ fun BottleMapNavHost() {
                 )
             },
             onBack = { navController.popBackStack() },
+            onOpenBarDetail = { barId ->
+                navController.navigate("customer/bar-detail/" + Uri.encode(barId))
+            },
         )
 
         ownerGraph(
@@ -74,6 +80,7 @@ fun BottleMapNavHost() {
 private fun NavGraphBuilder.customerGraph(
     onOpenResults: (String) -> Unit,
     onBack: () -> Unit,
+    onOpenBarDetail: (String) -> Unit,
 ) {
     navigation(
         route = Routes.CUSTOMER_GRAPH,
@@ -95,6 +102,18 @@ private fun NavGraphBuilder.customerGraph(
                 query = backStackEntry.arguments
                     ?.getString(Routes.CUSTOMER_QUERY_ARGUMENT)
                     .orEmpty(),
+                onBack = onBack,
+                onOpenBarDetail = onOpenBarDetail,
+            )
+        }
+        composable(
+            route = Routes.CUSTOMER_BAR_DETAIL_ROUTE,
+            arguments = listOf(navArgument(Routes.BAR_ID_ARGUMENT) {
+                type = NavType.StringType
+            }),
+        ) { backStackEntry ->
+            BarDetailPendingScreen(
+                barId = backStackEntry.arguments?.getString(Routes.BAR_ID_ARGUMENT).orEmpty(),
                 onBack = onBack,
             )
         }
