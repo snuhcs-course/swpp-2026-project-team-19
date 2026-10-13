@@ -29,6 +29,12 @@ Owner burden = lines per photo that are not confirmed (exact_match or multi): th
 owner has to choose or create.
 Confirm recommended = ambiguous lines with one candidate marked "confirmRecommended"
 (S2b/S3: the owner only confirms it); they still count toward owner burden.
+Owner burden by kind, per photo (lines that are not confirmed):
+  confirm   one candidate and it is the gold product (owner confirms)
+  choose    several candidates, gold among them (or an "unknown" line)
+  register  unmatched (owner creates or links the product)
+  wrong     ambiguous_bad: the gold product is not among the candidates
+Secondary: photos where choose + register + wrong < 5.
 """
 
 from __future__ import annotations
@@ -52,6 +58,7 @@ GOLD = REPO_ROOT / "eval" / "match_gold_v1.json"
 SEED = REPO_ROOT / "ai" / "catalog" / "catalog_v1_draft.json"
 NEW_NS = uuid.UUID("6f1d3f0e-6c8a-4d5e-9b1a-2b7c3d4e5f60")
 BURDEN_LIMIT = 5  # 진우 기준: 메뉴판 1장당 업주가 골라야 하는 항목 5개 미만
+BURDEN_KINDS = ("confirm", "choose", "register", "wrong")
 OUTCOMES = ("correct", "partial", "ambiguous_ok", "ambiguous_bad", "unmatched", "false_merge", "overconfident")
 CONFIRMED = ("exact_match", "multi")
 
@@ -124,12 +131,24 @@ def judge(gold: str, r, key_to_id: dict, in_catalog) -> str:
     return "ambiguous_ok" if ids & {c.product_id for c in r.candidates} else "ambiguous_bad"
 
 
+def burden_kind(gold: str, r, outcome: str) -> str:
+    """Kind of owner work for a line that is not confirmed (see the module docstring)."""
+    if r.status == "unmatched":
+        return "register"
+    if outcome == "ambiguous_bad":
+        return "wrong"
+    if len(r.candidates) == 1 and gold != "unknown":
+        return "confirm"
+    return "choose"
+
+
 def evaluate(matcher: str, condition: str, split: str) -> dict:
     gold = json.loads(GOLD.read_text(encoding="utf-8"))
     resolve = MATCHERS[matcher]
     by_bar: dict[str, Counter] = defaultdict(Counter)
     by_kind: dict[str, Counter] = defaultdict(Counter)
     burden: dict[str, int] = {}
+    burden_by_kind: dict[str, Counter] = {}
     errors = []
     confirm = 0
     catalogs = {}
@@ -149,6 +168,7 @@ def evaluate(matcher: str, condition: str, split: str) -> dict:
         for item in photo["items"]:
             seen.setdefault(item["raw_name"], item["gold"])
         burden[photo["photo_id"]] = 0
+        burden_by_kind[photo["photo_id"]] = Counter({k: 0 for k in BURDEN_KINDS})
         for name, g in seen.items():
             r = resolve(ExtractedProduct(product_name=name), catalog)
             outcome = judge(g, r, key_to_id, in_catalog)
@@ -158,6 +178,7 @@ def evaluate(matcher: str, condition: str, split: str) -> dict:
             by_kind[kind][outcome] += 1
             if r.status not in CONFIRMED:
                 burden[photo["photo_id"]] += 1
+                burden_by_kind[photo["photo_id"]][burden_kind(g, r, outcome)] += 1
             # "확인 권장": one candidate the owner only has to confirm (S2b, S3)
             confirm_recommended = r.status == "ambiguous" and len(r.candidates) == 1 and bool(
                 r.candidates[0].evidence.get("confirmRecommended"))
@@ -168,6 +189,7 @@ def evaluate(matcher: str, condition: str, split: str) -> dict:
     lines = sum(sum(c.values()) for c in by_bar.values())
     fm = sum(c["false_merge"] + c["overconfident"] for c in by_bar.values())
     known = by_kind["known"]
+    hard = {pid: c["choose"] + c["register"] + c["wrong"] for pid, c in burden_by_kind.items()}
     return {
         "matcher": matcher, "condition": condition, "split": split, "lines": lines,
         "known_top1": known["correct"] / sum(known.values()) if known else None,
@@ -177,6 +199,10 @@ def evaluate(matcher: str, condition: str, split: str) -> dict:
         "by_bar": {k: dict(v) for k, v in by_bar.items()},
         "owner_burden": burden,
         "photos_under_limit": sum(b < BURDEN_LIMIT for b in burden.values()) / len(burden) if burden else None,
+        "owner_burden_by_kind": {pid: dict(c) for pid, c in burden_by_kind.items()},
+        "owner_burden_totals": {k: sum(c[k] for c in burden_by_kind.values()) for k in BURDEN_KINDS},
+        "photos_under_limit_without_confirm": (sum(h < BURDEN_LIMIT for h in hard.values()) / len(hard)
+                                               if hard else None),
         "errors": errors,
     }
 
@@ -193,6 +219,9 @@ def print_result(r: dict) -> None:
     for bar, c in sorted(r["by_bar"].items()):
         print("  [bar] " + bar.ljust(6) + "".join(str(c.get(o, 0)).rjust(15) for o in OUTCOMES))
     print("  owner burden per photo: " + ", ".join(f"{k} {v}" for k, v in r["owner_burden"].items()))
+    totals = ", ".join(f"{k} {v}" for k, v in r["owner_burden_totals"].items())
+    print(f"  owner burden by kind (all photos): {totals}   "
+          f"photos with choose+register+wrong < {BURDEN_LIMIT}: {r['photos_under_limit_without_confirm']:.2f}")
 
 
 def main() -> None:

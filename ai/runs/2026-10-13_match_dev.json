@@ -52,6 +52,93 @@
    "012_Beck_04": 6
   },
   "photos_under_limit": 0.6153846153846154,
+  "owner_burden_by_kind": {
+   "007_위스키복춘_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 8,
+    "wrong": 0
+   },
+   "007_위스키복춘_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 3,
+    "wrong": 0
+   },
+   "007_위스키복춘_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 1,
+    "wrong": 0
+   },
+   "007_위스키복춘_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 2,
+    "wrong": 0
+   },
+   "008_서로상_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_05": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "012_Beck_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 10,
+    "wrong": 0
+   },
+   "012_Beck_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 7,
+    "wrong": 0
+   },
+   "012_Beck_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 16,
+    "wrong": 0
+   },
+   "012_Beck_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 6,
+    "wrong": 0
+   }
+  },
+  "owner_burden_totals": {
+   "confirm": 0,
+   "choose": 0,
+   "register": 53,
+   "wrong": 0
+  },
+  "photos_under_limit_without_confirm": 0.6153846153846154,
   "errors": [
    {
     "photo_id": "007_위스키복춘_01",
@@ -296,6 +383,93 @@
    "012_Beck_04": 4
   },
   "photos_under_limit": 0.8461538461538461,
+  "owner_burden_by_kind": {
+   "007_위스키복춘_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 8,
+    "wrong": 0
+   },
+   "007_위스키복춘_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 3,
+    "wrong": 0
+   },
+   "007_위스키복춘_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 1,
+    "wrong": 0
+   },
+   "007_위스키복춘_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 2,
+    "wrong": 0
+   },
+   "008_서로상_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_05": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "012_Beck_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 4,
+    "wrong": 0
+   },
+   "012_Beck_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 4,
+    "wrong": 0
+   },
+   "012_Beck_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 12,
+    "wrong": 0
+   },
+   "012_Beck_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 4,
+    "wrong": 0
+   }
+  },
+  "owner_burden_totals": {
+   "confirm": 0,
+   "choose": 0,
+   "register": 38,
+   "wrong": 0
+  },
+  "photos_under_limit_without_confirm": 0.8461538461538461,
   "errors": [
    {
     "photo_id": "007_위스키복춘_01",
@@ -690,6 +864,93 @@
    "012_Beck_04": 5
   },
   "photos_under_limit": 0.6923076923076923,
+  "owner_burden_by_kind": {
+   "007_위스키복춘_01": {
+    "confirm": 1,
+    "choose": 2,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_02": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_03": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 2,
+    "wrong": 0
+   },
+   "008_서로상_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_05": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "012_Beck_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 9,
+    "wrong": 0
+   },
+   "012_Beck_02": {
+    "confirm": 0,
+    "choose": 1,
+    "register": 4,
+    "wrong": 2
+   },
+   "012_Beck_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 15,
+    "wrong": 0
+   },
+   "012_Beck_04": {
+    "confirm": 1,
+    "choose": 1,
+    "register": 3,
+    "wrong": 0
+   }
+  },
+  "owner_burden_totals": {
+   "confirm": 4,
+   "choose": 4,
+   "register": 33,
+   "wrong": 2
+  },
+  "photos_under_limit_without_confirm": 0.7692307692307693,
   "errors": [
    {
     "photo_id": "007_위스키복춘_01",
@@ -865,6 +1126,93 @@
    "012_Beck_04": 3
   },
   "photos_under_limit": 0.9230769230769231,
+  "owner_burden_by_kind": {
+   "007_위스키복춘_01": {
+    "confirm": 1,
+    "choose": 2,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_02": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_03": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 2,
+    "wrong": 0
+   },
+   "008_서로상_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_05": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "012_Beck_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 1,
+    "wrong": 0
+   },
+   "012_Beck_02": {
+    "confirm": 0,
+    "choose": 1,
+    "register": 1,
+    "wrong": 0
+   },
+   "012_Beck_03": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 9,
+    "wrong": 0
+   },
+   "012_Beck_04": {
+    "confirm": 0,
+    "choose": 2,
+    "register": 1,
+    "wrong": 0
+   }
+  },
+  "owner_burden_totals": {
+   "confirm": 4,
+   "choose": 5,
+   "register": 14,
+   "wrong": 0
+  },
+  "photos_under_limit_without_confirm": 0.9230769230769231,
   "errors": [
    {
     "photo_id": "007_위스키복춘_01",
@@ -1124,6 +1472,93 @@
    "012_Beck_04": 6
   },
   "photos_under_limit": 0.6923076923076923,
+  "owner_burden_by_kind": {
+   "007_위스키복춘_01": {
+    "confirm": 2,
+    "choose": 2,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_02": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_03": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 2,
+    "wrong": 0
+   },
+   "008_서로상_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_05": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "012_Beck_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 9,
+    "wrong": 0
+   },
+   "012_Beck_02": {
+    "confirm": 0,
+    "choose": 1,
+    "register": 4,
+    "wrong": 2
+   },
+   "012_Beck_03": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 15,
+    "wrong": 0
+   },
+   "012_Beck_04": {
+    "confirm": 2,
+    "choose": 1,
+    "register": 3,
+    "wrong": 0
+   }
+  },
+  "owner_burden_totals": {
+   "confirm": 7,
+   "choose": 4,
+   "register": 33,
+   "wrong": 2
+  },
+  "photos_under_limit_without_confirm": 0.7692307692307693,
   "errors": [
    {
     "photo_id": "007_위스키복춘_01",
@@ -1326,6 +1761,93 @@
    "012_Beck_04": 4
   },
   "photos_under_limit": 0.9230769230769231,
+  "owner_burden_by_kind": {
+   "007_위스키복춘_01": {
+    "confirm": 2,
+    "choose": 2,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_02": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_03": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 2,
+    "wrong": 0
+   },
+   "008_서로상_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_05": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "012_Beck_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 1,
+    "wrong": 0
+   },
+   "012_Beck_02": {
+    "confirm": 0,
+    "choose": 1,
+    "register": 1,
+    "wrong": 0
+   },
+   "012_Beck_03": {
+    "confirm": 2,
+    "choose": 0,
+    "register": 9,
+    "wrong": 0
+   },
+   "012_Beck_04": {
+    "confirm": 1,
+    "choose": 2,
+    "register": 1,
+    "wrong": 0
+   }
+  },
+  "owner_burden_totals": {
+   "confirm": 7,
+   "choose": 5,
+   "register": 14,
+   "wrong": 0
+  },
+  "photos_under_limit_without_confirm": 0.9230769230769231,
   "errors": [
    {
     "photo_id": "007_위스키복춘_01",
@@ -1612,6 +2134,93 @@
    "012_Beck_04": 6
   },
   "photos_under_limit": 0.6923076923076923,
+  "owner_burden_by_kind": {
+   "007_위스키복춘_01": {
+    "confirm": 2,
+    "choose": 2,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_02": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_03": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 2,
+    "wrong": 0
+   },
+   "008_서로상_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_05": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "012_Beck_01": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 8,
+    "wrong": 0
+   },
+   "012_Beck_02": {
+    "confirm": 1,
+    "choose": 1,
+    "register": 3,
+    "wrong": 2
+   },
+   "012_Beck_03": {
+    "confirm": 2,
+    "choose": 0,
+    "register": 14,
+    "wrong": 0
+   },
+   "012_Beck_04": {
+    "confirm": 2,
+    "choose": 1,
+    "register": 3,
+    "wrong": 0
+   }
+  },
+  "owner_burden_totals": {
+   "confirm": 10,
+   "choose": 4,
+   "register": 30,
+   "wrong": 2
+  },
+  "photos_under_limit_without_confirm": 0.7692307692307693,
   "errors": [
    {
     "photo_id": "007_위스키복춘_01",
@@ -1823,6 +2432,93 @@
    "012_Beck_04": 4
   },
   "photos_under_limit": 0.9230769230769231,
+  "owner_burden_by_kind": {
+   "007_위스키복춘_01": {
+    "confirm": 2,
+    "choose": 2,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_02": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_03": {
+    "confirm": 1,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "007_위스키복춘_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 2,
+    "wrong": 0
+   },
+   "008_서로상_02": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_03": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_04": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "008_서로상_05": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 0,
+    "wrong": 0
+   },
+   "012_Beck_01": {
+    "confirm": 0,
+    "choose": 0,
+    "register": 1,
+    "wrong": 0
+   },
+   "012_Beck_02": {
+    "confirm": 1,
+    "choose": 1,
+    "register": 0,
+    "wrong": 0
+   },
+   "012_Beck_03": {
+    "confirm": 4,
+    "choose": 0,
+    "register": 7,
+    "wrong": 0
+   },
+   "012_Beck_04": {
+    "confirm": 2,
+    "choose": 2,
+    "register": 0,
+    "wrong": 0
+   }
+  },
+  "owner_burden_totals": {
+   "confirm": 11,
+   "choose": 5,
+   "register": 10,
+   "wrong": 0
+  },
+  "photos_under_limit_without_confirm": 0.9230769230769231,
   "errors": [
    {
     "photo_id": "007_위스키복춘_01",
