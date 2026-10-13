@@ -1365,6 +1365,12 @@
    "age_years": null,
    "edition_name": "Full Proof"
   },
+  "woodford-reserve-double-xo-blend": {
+   "display_name": "Woodford Reserve Double XO Blend",
+   "brand": "woodford",
+   "age_years": null,
+   "edition_name": "Double XO Blend"
+  },
   "willett-pot-still-reserve": {
    "display_name": "Willett Pot Still Reserve",
    "brand": "Willett",
@@ -1855,7 +1861,7 @@
   "와일드 터키(Wild Turkey) 8년 버번": "Beck 판단과 같이 Wild Turkey 101 8 Year로 봄",
   "벤로막(Benromach) 싱글 캐스크": "싱글 캐스크는 캐스크마다 다른 상품, 메뉴에 번호·연도 없음 → unknown (재검색 후 유지)",
   "아란(Arran) 시그니쳐 시리즈": "Signature Series는 Edition 1 Remnant Renegade, Edition 2 등 여러 개 → unknown (재검색 후 유지)",
-  "우드포드 리저브(Woodford Reserve) 더블 X.O": "가격 42,000원으로 같은 메뉴 Double Oaked(19,000원)의 2배 이상. 후보 Double Double Oaked('더블 D.O' 오독?). 사진 확인 전까지 unknown",
+  "우드포드 리저브(Woodford Reserve) 더블 X.O": "Double XO Blend (코냑 XO 캐스크 피니시, 면세 전용 Rare Release). Double Oaked와 별개 (진우 검수)",
   "와일드터키 라이": "81 proof 라이는 상품명이 Wild Turkey Rye → 그 상품 (진우 검수). 101 Rye와 별개",
   "발베니 12년": "Beck과 같이 12 DoubleWood에 연결",
   "글렌드로낙 피티드": "미라보의 Traditionally Peated와 같은 상품으로 봄",
@@ -3858,7 +3864,7 @@
      "raw_name": "우드포드 리저브(Woodford Reserve) 더블 X.O",
      "unit": "glass",
      "pour_ml": null,
-     "gold": "unknown"
+     "gold": "new:woodford-reserve-double-xo-blend"
     },
     {
      "raw_name": "윌렛(Willet) 로완스크릭",
