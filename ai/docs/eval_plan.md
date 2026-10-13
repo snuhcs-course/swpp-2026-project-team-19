@@ -156,4 +156,4 @@ S2가 새로 exact로 맞힌 줄은 C0 10줄, C1 15줄이고 새 exact는 전부
 3. **업주 부담 세분화 (보조).** 확정(exact·multi)이 아닌 줄을 (a) 확인 권장(후보 1개이고 정답이 그 후보), (b) 선택(후보 여러 개, 또는 정답 `unknown`), (c) 직접 등록(unmatched), (d) 오답 후보(ambiguous_bad)로 나눠 사진당 집계한다. 기존 "업주 부담 5 미만 사진"은 그대로 두고 "(b)+(c)+(d) 5 미만 사진"을 보조 지표로 추가한다.
 4. **최종 매처 판정 규칙.** S1+S2b+S3의 test false merge rate가 S1+S2의 test false merge rate보다 낮거나 같고 0.02 이하이면 S1+S2b+S3를 채택한다. 조건 C0와 C1 각각에서 둘 다 만족해야 한다. 만족하지 못하면 S1+S2b+S3는 채택하지 않고 원인만 보고한다. 판정은 이 규칙으로만 한다.
 5. **동결.** 이 등록을 마지막으로 매처 코드(`backend/app/matching/`, `ai/eval/match_eval.py`)와 정답(`eval/match_gold_v1.json`, `ai/eval/build_match_gold.py`, `eval/match_gold_test_draft.json`)을 동결한다. 카탈로그 시드(`ai/catalog/*`)도 바꾸지 않는다(`POST_TEST_ALIASES`는 test 평가 후). test는 동결 커밋, 또는 동결 대상 파일을 바꾸지 않은 이후 커밋에서 실행하고 실행한 커밋 해시를 결과와 함께 적는다.
-   - 동결 커밋: (다음 커밋에서 기록)
+   - 동결 커밋: `69879fdf478b76a39aa6a5b791c37f59850b7195` (브랜치 `i2-p22-matching-eval`). 이 해시를 적는 커밋과 이후 문서·로그 커밋은 동결 대상 파일을 바꾸지 않는다.
