@@ -116,3 +116,17 @@
 S2가 새로 exact로 맞힌 줄은 C0 10줄, C1 15줄이고 새 exact는 전부 정답이다. unmatched → ambiguous는 C0 10줄(그중 ambiguous_bad 2줄: 카탈로그에 없는 Arran Quarter Cask, Laphroaig 10 Cask Strength에 같은 브랜드 다른 상품을 후보로 냄)이다.
 - S1은 dev에 괄호 병기 형식이 없어 dev 숫자 변화 없음. 단위 테스트로만 확인했고 test(미라보)에서 처음 검증된다. 두 상품 묶음 규칙도 dev에서 발동 0회(오타 때문).
 - 알려진 위험: S2는 브랜드의 해당 연수 상품이 카탈로그에 하나뿐이면 exact. 카탈로그에 없는 같은 연수의 다른 에디션이면 false merge가 된다. test 평가 전에 정책을 정한다.
+
+**S2b·S3 사전 등록 (2026-10-13, dev 측정 전).** 위 S2 위험에 대한 정책과 다음 단계. 규칙과 임계값은 dev 결과를 보고 바꾸지 않는다(바꾸고 싶으면 제안만 하고 새로 등록).
+- S2b 기본 제품 규칙 (S2 위에, 브랜드+연수로 좁힌 결과에 적용):
+  1. 같은 연수 상품 중 에디션 없는 상품(`edition_name` null)이 정확히 1개이고 이름에 남은 에디션 토큰이 없으면 그 상품으로 exact (예: Glenfiddich 12와 12 Sherry Cask Finish가 있을 때 "글렌피딕 12년" → Glenfiddich 12).
+  2. 남은 후보가 1개라도 그 상품에 에디션이 있고 이름에 에디션 토큰이 없으면 exact 금지, 후보 1개짜리 ambiguous("확인 권장", evidence `confirmRecommended: true`) (예: "Macallan 15yo" → 15 Double Cask 후보).
+  3. 이름에 에디션 토큰이 있고 그 상품 에디션과 맞으면 S2대로 exact.
+- S3 편집거리 (S2b 위에, 이름 전체 별칭 매칭과 S2가 모두 아무것도 못 찾았을 때만):
+  1. 비교 대상은 normalize된 상품 별칭과 브랜드 별칭.
+  2. 숫자 부분(연수, 배치 번호 등)은 순서까지 완전히 같아야 한다. 다르면 후보가 아니다.
+  3. 숫자를 뺀 나머지의 편집거리: 길이 6자 이하면 1, 더 길면 2까지 허용(한글은 음절 단위). 길이는 메뉴 쪽 문자열 기준.
+  4. 브랜드 별칭에 편집거리를 적용해 브랜드를 찾은 경우(예: 납크릭→놉크릭, Dalwhinny→Dalwhinnie)는 그 뒤 S2b 규칙으로 상품을 좁힌다.
+  5. 편집거리로 찾은 결과는 exact 금지, 항상 ambiguous("확인 권장"). 단 후보가 1개이고 편집거리 1 이하이고 이름에 숫자 부분이 있으면 exact 허용.
+  6. 같은 거리의 후보가 여러 개면 ambiguous.
+- 측정 지표에 "확인 권장" 건수(후보 1개 ambiguous 중 `confirmRecommended`)를 추가한다. 채택 조건은 그대로(dev false merge 0.02 이하).
