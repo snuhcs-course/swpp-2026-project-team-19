@@ -25,15 +25,34 @@ uv run --env-file .env uvicorn app.main:app --reload
 The API is available at `http://127.0.0.1:8000`; interactive docs are at `/docs`.
 `GET /health` returns `{"status":"ok","version":"<commit>"}` and does not require a database connection. `version` is the short hash of the commit the server started from (`null` outside a git checkout), so a deployment can be checked from outside.
 
-For local frontend integration before Supabase Auth is connected, a temporary login endpoint can issue a three-hour development JWT:
+## Authentication
+
+Protected APIs take `Authorization: Bearer <token>` (API spec, section 3.1). Two kinds of token are accepted.
+
+**Supabase access tokens (Google login).** The app signs in with Google through Supabase and sends the Supabase access token. The backend verifies it locally with the project's public signing keys (JWKS): signature (ES256), issuer, audience, expiry with 30 seconds of leeway, the required claims, and that it is not an anonymous session. No Supabase secret or `service_role` key is needed.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `SUPABASE_URL` | — | Project URL, e.g. `https://<project-ref>.supabase.co`. The issuer is `<url>/auth/v1` and the keys come from `<url>/auth/v1/.well-known/jwks.json`. Without it, Supabase tokens get `503` and temporary login still works. |
+| `SUPABASE_JWT_AUDIENCE` | `authenticated` | Accepted `aud`. |
+| `SUPABASE_JWT_ALGORITHMS` | `ES256` | Accepted signing algorithms, comma-separated. Asymmetric only: `HS256` and `none` are rejected. |
+
+The server checks these at start-up and refuses to start if a value is invalid. The public keys are cached for ten minutes; a token with an unknown `kid` refetches them, at most once every 30 seconds, which picks up a rotated key.
+
+**Temporary tokens (local development).** `POST /api/auth/temp-login` issues a three-hour token for the fixed subject `local-dev-user` (display name `Local dev user`). It is off by default:
 
 ```sh
 TEMP_AUTH_ENABLED=true \
 TEMP_AUTH_JWT_SECRET="replace-with-a-local-secret-at-least-32-characters" \
+TEMP_AUTH_USER_TYPE=operator \
 uv run uvicorn app.main:app --reload
 ```
 
-Set `TEMP_AUTH_USER_TYPE=operator` in the server environment when launching Uvicorn to exercise operator flows, or `customer` for the default customer identity. The role is configured on the backend rather than supplied by the client. Call `POST /api/auth/temp-login` to receive a bearer token, then pass it as `Authorization: Bearer <accessToken>` to `GET /api/me` and protected APIs. Operator routes can use the `require_operator` dependency. Temporary auth is disabled by default; keep it disabled outside local development. The fixed subject is `local-dev-user`.
+The role of a temporary token is `TEMP_AUTH_USER_TYPE` (`customer` or `operator`) at request time, so changing it applies to tokens already issued; the `user_type` claim in the token is ignored. The deployed server keeps temporary login on only until Google login works in the app.
+
+**Users and roles.** `GET /api/me` is the only API that creates users: the first call stores the token's subject as `users.auth_subject` with user type `customer` (a temporary user takes `TEMP_AUTH_USER_TYPE`), and later calls keep the email in step with the token. Operator routes (`require_operator`) read a Supabase user's role from `users.user_type` on every request; a user without a row is a customer. Token claims never grant a role.
+
+**Errors.** A missing, invalid or expired token is `401 UNAUTHENTICATED` with `WWW-Authenticate: Bearer`. When the server cannot check tokens (no `SUPABASE_URL`, signing keys out of reach or empty, invalid temporary-login settings) it answers `503 SERVICE_UNAVAILABLE`, so the app keeps the session and retries instead of sending the user back to login.
 
 ## Database configuration
 
@@ -86,7 +105,7 @@ Check that the server is running with `pg_isready -h localhost -p 5432`.
 uv run --env-file .env pytest
 ```
 
-Tests that need PostgreSQL use the database named by `POSTGRES_TEST_DATABASE` (same host and credentials as `POSTGRES_*`). Each test run drops and rebuilds that database's schema from the migrations, and each test is rolled back afterwards, so the name must end with `_test`; any other name stops the run. If the variable is not set, the database tests are skipped and the other tests still run. Shared fixtures (`db_session`, `client`) are in `tests/conftest.py`. Tests always use the mock extractor, whatever `MENU_EXTRACTOR` says, so they never call the Gemini API.
+Tests that need PostgreSQL use the database named by `POSTGRES_TEST_DATABASE` (same host and credentials as `POSTGRES_*`). Each test run drops and rebuilds that database's schema from the migrations, and each test is rolled back afterwards, so the name must end with `_test`; any other name stops the run. If the variable is not set, the database tests are skipped and the other tests still run. Shared fixtures (`db_session`, `client`) are in `tests/conftest.py`. Tests always use the mock extractor, whatever `MENU_EXTRACTOR` says, so they never call the Gemini API. Auth tests never call Supabase either: they sign tokens with an ES256 key made in the test and serve the public keys from memory (the `supabase` fixture and `tests/auth_support.py`).
 
 To measure coverage of `app/` (line and branch):
 

@@ -18,7 +18,7 @@ How the backend runs for the demo: one EC2 instance serving the API over HTTPS, 
 
 Files used on the server are in [`deploy/`](deploy/): the systemd service, the Caddyfile, `env.production.example`, and `deploy.sh`.
 
-Never commit or paste secrets (the RDS password, `TEMP_AUTH_JWT_SECRET`, `GEMINI_API_KEY`); they live only in `backend/.env` on the server. The deploy key for automatic deployment lives only in GitHub secrets.
+Never commit or paste secrets (the RDS password, `TEMP_AUTH_JWT_SECRET`, `GEMINI_API_KEY`); they live only in `backend/.env` on the server. Supabase secrets (the secret or `service_role` key, the Google client secret) are not needed and do not go on the server at all: the backend only reads the public `SUPABASE_URL`. The deploy key for automatic deployment lives only in GitHub secrets.
 
 ## 1. AWS resources (console)
 
@@ -74,7 +74,7 @@ git clone https://github.com/snuhcs-course/swpp-2026-project-team-19.git
 cd ~/swpp-2026-project-team-19/backend
 cp deploy/env.production.example .env && chmod 600 .env
 openssl rand -hex 32      # paste as TEMP_AUTH_JWT_SECRET
-nano .env                 # POSTGRES_HOST (RDS endpoint), POSTGRES_PASSWORD, TEMP_AUTH_JWT_SECRET
+nano .env                 # POSTGRES_HOST (RDS endpoint), POSTGRES_PASSWORD, TEMP_AUTH_JWT_SECRET, SUPABASE_URL
 ```
 
 `.env` must stay plain `KEY=VALUE` lines: systemd reads it too and takes everything after `=` literally, comments included.
@@ -114,6 +114,8 @@ journalctl -u caddy -f                     # wait for "certificate obtained succ
 From your PC, with `BASE=https://bottlemap.o-r.kr`:
 
 - `curl $BASE/health` returns `{"status":"ok","version":"<commit>"}`, and `$BASE/docs` opens Swagger UI.
+- `curl -i $BASE/api/me -H "Authorization: Bearer not-a-jwt"` returns `401 UNAUTHENTICATED` with `WWW-Authenticate: Bearer`.
+- On the server, `curl -sS <SUPABASE_URL>/auth/v1/.well-known/jwks.json` lists at least one key with `"alg": "ES256"`. An empty list means the Supabase project still signs with the legacy HS256 secret.
 - The full flow, as in the [README](README.md#menu-import-upload-review-publish):
   1. `POST $BASE/api/auth/temp-login` for an operator token; `GET $BASE/api/bars` for a bar id.
   2. Upload a photo named `sample.jpg` to that bar, then poll `GET $BASE/api/menu-imports/<id>` until `ready_for_review`.
@@ -205,6 +207,7 @@ Deployments run one at a time, and a running one is never cancelled. Each deploy
 - **Logs:** `journalctl -u bottlemap-api -f` (API), `journalctl -u caddy -f` (HTTPS, proxy).
 - **Settings:** edit `backend/.env`, then `sudo systemctl restart bottlemap-api`.
 - **Real extraction:** set `MENU_EXTRACTOR=gemini` and `GEMINI_API_KEY` (a paid-tier key, so uploaded menu photos are not used for training) and restart. The settings are checked at start-up.
+- **Google login (Supabase):** `SUPABASE_URL` in `.env`, then restart. If a real Google token gets `503`, check that `SUPABASE_URL` is set and look for `signing keys are unavailable` in `journalctl -u bottlemap-api`. A Free-plan Supabase project is paused after about a week without activity, and then every signed-in request gets `503`; check the project in the Supabase dashboard before a demo.
 - **Temporary login** is on for the demo, so anyone who reaches the server can get an operator token. Keep the server running only when needed, and set `TEMP_AUTH_ENABLED=false` once Google login works in the app.
 - **Known limitation:** an import that is `processing` when the service restarts stays there; delete it with `reset_menu_imports.py` and upload again.
 - **Cost:** stop the EC2 and RDS instances when idle. A stopped RDS instance starts again by itself after 7 days, and the Elastic IP is billed while the instance is stopped.

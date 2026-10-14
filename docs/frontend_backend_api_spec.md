@@ -231,9 +231,10 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 | `iss` | `{SUPABASE_URL}/auth/v1` | 예: `https://<project-ref>.supabase.co/auth/v1` |
 | `aud` | `authenticated` | |
 | 필수 claim | `exp`, `iat`, `sub`, `iss`, `aud` | 하나라도 없으면 `401` |
+| `exp`, `iat` 여유 | 30초 | Supabase와 서버의 시계 차이로 막 발급된 token(`iat`가 조금 미래)이나 막 만료된 token을 거부하지 않도록 둔다 |
 | `is_anonymous` | `true`면 거부 | Supabase 익명 로그인 token |
 
-- JWKS 응답은 20분보다 오래 캐시하지 않는다. 캐시에 없는 `kid`가 오면 JWKS를 한 번 다시 조회한다. 키 교체 직후에도 정상 token을 거부하지 않기 위해서다.
+- JWKS 응답은 20분보다 오래 캐시하지 않는다(현재 10분). 캐시에 없는 `kid`가 오면 JWKS를 한 번 다시 조회한다. 키 교체 직후에도 정상 token을 거부하지 않기 위해서다. 다시 조회는 30초에 한 번까지만 하므로, 지어낸 `kid`를 반복해 보내도 Supabase를 계속 호출하지 않는다.
 - token의 `role`(`authenticated`)은 Supabase의 Postgres 역할이며 BottleMap의 `userType`이 아니다. 백엔드는 권한 판단에 사용하지 않는다.
 - `user_metadata`는 사용자가 직접 바꿀 수 있는 값이다. 표시 이름의 초기값으로만 쓰고 권한 판단에는 사용하지 않는다.
 - access token 수명은 Supabase 프로젝트 설정을 따르며 기본값은 1시간이다. 로그아웃하면 Supabase 세션은 삭제되지만 이미 발급된 access token은 `exp`까지 서명 검증을 통과한다. 백엔드는 세션 삭제 여부를 따로 확인하지 않으므로 프론트엔드는 로그아웃할 때 저장된 token을 함께 버린다.
@@ -260,7 +261,7 @@ POST /api/auth/temp-login
 
 - 백엔드는 `iss = bottlemap-local`인 token을 임시 token으로 보고 `TEMP_AUTH_JWT_SECRET`으로 HS256 검증한다. 그 밖의 token은 3.1.2 규칙으로 검증한다. `TEMP_AUTH_ENABLED`가 `true`가 아니면 임시 token은 `401`이다.
 - 임시 사용자도 `auth_subject = local-dev-user`인 `users` 행을 가지며, 다른 사용자처럼 최초 `GET /api/me` 호출 때 생성된다.
-- 임시 사용자의 `user_type`은 `TEMP_AUTH_USER_TYPE=customer|operator` 서버 환경 변수를 따른다. 값을 바꾸면 다음 요청부터 반영된다. 요청에서 역할을 선택할 수는 없다.
+- 임시 사용자의 `user_type`은 `TEMP_AUTH_USER_TYPE=customer|operator` 서버 환경 변수를 따른다. 값을 바꾸면 이미 발급된 token에도 다음 요청부터 반영된다. 발급한 token에 남아 있는 `user_type` claim은 검증과 권한 판단에 쓰지 않는다. 요청에서 역할을 선택할 수는 없다.
 
 | 상황 | 응답 |
 |---|---|
@@ -286,7 +287,7 @@ POST /api/auth/temp-login
 | `401` | `UNAUTHENTICATED` | access token 만료 | 아래 재시도 흐름 |
 | `401` | `UNAUTHENTICATED` | 서명 오류, 알 수 없는 `kid`, `iss`·`aud` 불일치, 필수 claim 누락, `is_anonymous = true`, 임시 로그인이 꺼진 서버에 보낸 임시 token | 아래 재시도 흐름 |
 | `403` | `FORBIDDEN` | 로그인했지만 권한이 없는 API 호출 (2.2). 예: operator 전용 API, 업주가 아닌 업장의 관리 API | 접근 차단 안내. 재시도하거나 로그인 화면으로 보내지 않는다. `GET /api/me`를 다시 불러 화면 권한을 갱신할 수 있다 |
-| `503` | `SERVICE_UNAVAILABLE` | 서버 인증 설정 누락(`SUPABASE_URL` 등), Supabase JWKS 조회 실패, 임시 인증 설정 오류 | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않고 저장된 세션을 유지한다 |
+| `503` | `SERVICE_UNAVAILABLE` | 서버 인증 설정 누락(`SUPABASE_URL` 등), Supabase JWKS 조회 실패 또는 공개된 키가 없음(프로젝트가 레거시 HS256 secret만 사용), 임시 인증 설정 오류 | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않고 저장된 세션을 유지한다 |
 
 `401` 재시도 흐름:
 
@@ -316,6 +317,8 @@ API 응답 401 UNAUTHENTICATED
 | `TEMP_AUTH_ENABLED` | `false` | 임시 로그인 사용 여부. 로컬 개발에서만 `true` |
 | `TEMP_AUTH_USER_TYPE` | `customer` | 임시 사용자의 역할 (`customer`, `operator`) |
 | `TEMP_AUTH_JWT_SECRET` | (비밀값) | 임시 token 서명 키. `.env`에만 둔다 |
+
+서버는 시작할 때 Supabase 설정을 검사한다. 값이 잘못되면(예: `SUPABASE_JWT_ALGORITHMS`에 HS256 포함, `SUPABASE_URL`에 경로가 붙음) 시작하지 않는다. `SUPABASE_URL`이 없는 것만으로는 시작을 막지 않으며, 이때 Supabase token은 `503`이고 임시 로그인은 그대로 동작한다.
 
 Supabase와 Google Cloud 쪽에서 설정할 항목은 다음과 같다. 값은 이 문서에 적지 않는다.
 
