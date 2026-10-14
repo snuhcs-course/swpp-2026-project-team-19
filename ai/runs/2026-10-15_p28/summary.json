@@ -1,0 +1,134 @@
+{
+ "run": {
+  "started_at": "2026-10-14T15:36:07+00:00",
+  "wall_s": 688.6,
+  "products": 40,
+  "display": 10,
+  "endpoints": [
+   "blog",
+   "webkr",
+   "encyc",
+   "cafearticle"
+  ],
+  "matcher": "S1+S2b+S3",
+  "matcher_stages": [
+   "S1",
+   "S2",
+   "S2b",
+   "S3"
+  ],
+  "tag_v1_catalog": "catalog_v1_draft + match_gold_v1 new products (C1)",
+  "tag_v2_catalog": "catalog_v2_draft (origin/i2-catalog-v2 415e78f), reference only",
+  "judge": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f"
+  },
+  "quota_stop": null
+ },
+ "candidates": 142,
+ "judged": 142,
+ "pending_judge": 0,
+ "by_stratum": {
+  "independent": {
+   "products": 20,
+   "products_with_candidates": 10,
+   "candidates": 47,
+   "llm_verdicts": {
+    "different": 30,
+    "same": 8,
+    "unsure": 9
+   }
+  },
+  "official": {
+   "products": 20,
+   "products_with_candidates": 19,
+   "candidates": 95,
+   "llm_verdicts": {
+    "same": 43,
+    "different": 45,
+    "unsure": 7
+   }
+  }
+ },
+ "tags_v1": {
+  "new": 93,
+  "other_product": 12,
+  "ambiguous": 32,
+  "same": 5
+ },
+ "tags_v2": {
+  "new": 77,
+  "other_product": 14,
+  "ambiguous": 38,
+  "same": 13
+ },
+ "llm_verdicts": {
+  "different": 75,
+  "same": 51,
+  "unsure": 16
+ },
+ "tag_v1_x_verdict": {
+  "new / different": 52,
+  "new / same": 27,
+  "new / unsure": 14,
+  "other_product / different": 11,
+  "ambiguous / different": 12,
+  "ambiguous / same": 19,
+  "ambiguous / unsure": 1,
+  "other_product / unsure": 1,
+  "same / same": 5
+ },
+ "tag_v2_x_verdict": {
+  "new / different": 44,
+  "new / same": 19,
+  "new / unsure": 14,
+  "other_product / different": 12,
+  "ambiguous / different": 18,
+  "ambiguous / same": 19,
+  "same / same": 12,
+  "ambiguous / unsure": 1,
+  "other_product / unsure": 1,
+  "other_product / same": 1,
+  "same / different": 1
+ },
+ "bottler_missing_x_verdict": {
+  "different": 1
+ },
+ "endpoint_results_with_candidate": {
+  "cafearticle": 84,
+  "webkr": 121,
+  "blog": 190,
+  "encyc": 1
+ },
+ "naver": {
+  "api_calls": 360,
+  "cache_hits": 12,
+  "retries": 0,
+  "errors": 0,
+  "latency": {
+   "n": 360,
+   "mean_ms": 137,
+   "p50_ms": 133,
+   "p95_ms": 198,
+   "max_ms": 403
+  }
+ },
+ "llm": {
+  "llm_calls": 137,
+  "retries": 0,
+  "parse_errors": 0,
+  "input_tokens": 260720,
+  "output_tokens": 10150,
+  "thought_tokens": 0,
+  "latency": {
+   "n": 137,
+   "mean_ms": 1824,
+   "p50_ms": 1223,
+   "p95_ms": 3573,
+   "max_ms": 24550
+  },
+  "cached_verdicts_reused": 5
+ }
+}

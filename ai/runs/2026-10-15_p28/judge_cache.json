@@ -1,0 +1,2416 @@
+{
+ "big-peat\t더글라스 랭 앤 코": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '더글라스 랭 앤 코'는 위스키 상품명이 아니라 독립병입사 회사 이름을 가리킵니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1498,
+   "attempts": 1,
+   "input_tokens": 1986,
+   "output_tokens": 66,
+   "thought_tokens": 0
+  }
+ },
+ "big-peat\t더글라스 랭 리마커블 몰츠 캐스크 스트": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 빅 피트(Big Peat)이나, alias는 리마커블 몰츠 캐스크 스트렝스 시리즈 중 다른 상품을 가리키므로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1037,
+   "attempts": 1,
+   "input_tokens": 1722,
+   "output_tokens": 79,
+   "thought_tokens": 0
+  }
+ },
+ "big-peat\t더글라스랭 리저너블몰트": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 빅피트(Big Peat)이나 alias는 리저너블몰트(Remarkable Regional Malts)로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1207,
+   "attempts": 1,
+   "input_tokens": 1699,
+   "output_tokens": 70,
+   "thought_tokens": 0
+  }
+ },
+ "big-peat\t더글라스 랭 빅 피트": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 독립병입사 및 브랜드명(Douglas Laing)과 에디션명(Big Peat)이 alias와 근거 자료에 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1464,
+   "attempts": 1,
+   "input_tokens": 1707,
+   "output_tokens": 76,
+   "thought_tokens": 0
+  }
+ },
+ "big-peat\t더글라스랭 올드파티큘러 아드벡 2006 15년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 빅 피트(Big Peat)이지만 alias는 올드 파티큘러 아드벡 15년(Old Particular Ardbeg 15yo)으로 에디션과 상품명이 다름.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1141,
+   "attempts": 1,
+   "input_tokens": 1714,
+   "output_tokens": 86,
+   "thought_tokens": 0
+  }
+ },
+ "elements-of-islay-bourbon\t아일라 블렌디드 스카치 위스키 엘리먼츠 오브": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "alias에 필수 에디션 정보인 버번 캐스크(Bourbon Cask)가 누락되어 있어 같은 상품으로 특정할 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1763,
+   "attempts": 1,
+   "input_tokens": 1834,
+   "output_tokens": 68,
+   "thought_tokens": 0
+  }
+ },
+ "elements-of-islay-bourbon\t아일라 섬에": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '아일라 섬에'는 상품명이 아닌 문장의 일부이며 브랜드와 상품 정보를 전혀 포함하지 않습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1370,
+   "attempts": 1,
+   "input_tokens": 1724,
+   "output_tokens": 64,
+   "thought_tokens": 0
+  }
+ },
+ "elements-of-islay-bourbon\t아일라 섬에서 열리": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 상품명이 아닌 문장 조각(지역명/여행기 제목)이 섞여 있어 메뉴 표기로 쓸 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1042,
+   "attempts": 1,
+   "input_tokens": 1715,
+   "output_tokens": 68,
+   "thought_tokens": 0
+  }
+ },
+ "elements-of-islay-bourbon\t오브 아일라 버번 캐스크": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 독립병입사 브랜드 '엘리먼츠 오브 아일라'(Elements of Islay)의 한글 표기와 '버번 캐스크' 에디션이 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1877,
+   "attempts": 1,
+   "input_tokens": 1826,
+   "output_tokens": 81,
+   "thought_tokens": 0
+  }
+ },
+ "elements-of-islay-sherry\t아일라 섬에": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '아일라 섬에'는 문장 속 단어 조각으로 메뉴 표기로 쓸 수 없고 상품을 특정할 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1113,
+   "attempts": 1,
+   "input_tokens": 1724,
+   "output_tokens": 69,
+   "thought_tokens": 0
+  }
+ },
+ "elements-of-islay-sherry\t아일라 싱글 몰트 위스키 베스트 10": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 상품명이 아닌 일반 문장('아일라 싱글 몰트 위스키 베스트 10')이 섞여 있어 메뉴 표기로 쓸 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1163,
+   "attempts": 1,
+   "input_tokens": 1709,
+   "output_tokens": 74,
+   "thought_tokens": 0
+  }
+ },
+ "elements-of-islay-sherry\t아일라 페스티벌": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '아일라 페스티벌'은 축제 이벤트명을 지칭하며 기준 상품인 Elements of Islay Sherry Cask와 일치하지 않음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1400,
+   "attempts": 1,
+   "input_tokens": 1713,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "gm-miltonduff-10\t고든앤맥패일": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 독립병입사 고든앤맥패일의 밀튼더프 10년이나, alias '고든앤맥패일'에는 연수와 증류소/상품명이 누락되어 해당 상품으로 특정할 수 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 2213,
+   "attempts": 1,
+   "input_tokens": 2128,
+   "output_tokens": 92,
+   "thought_tokens": 0
+  }
+ },
+ "gm-miltonduff-10\t고든 램지": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 독립병입사 위스키인 고든앤맥페일 밀토더프 10년이나, alias인 '고든 램지'는 인물 및 햄버거 관련 내용으로 위스키 상품과 무관합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1226,
+   "attempts": 1,
+   "input_tokens": 1877,
+   "output_tokens": 92,
+   "thought_tokens": 0
+  }
+ },
+ "gm-miltonduff-10\t고든 앤 맥페일 디스커버리 밀튼더프 10": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 병입사, 브랜드, 연수가 alias와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1492,
+   "attempts": 1,
+   "input_tokens": 2008,
+   "output_tokens": 57,
+   "thought_tokens": 0
+  }
+ },
+ "gm-miltonduff-10\t고든 감독": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "근거가 영화 '스튜어트 고든 감독'에 대한 내용으로 위스키 상품과 무관합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1144,
+   "attempts": 1,
+   "input_tokens": 1725,
+   "output_tokens": 64,
+   "thought_tokens": 0
+  }
+ },
+ "gm-miltonduff-10\t고든 램지 버거 팝업": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "위스키 상품이 아닌 햄버거 팝업 스토어에 대한 내용으로 기준 상품과 전혀 관련이 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1316,
+   "attempts": 1,
+   "input_tokens": 1739,
+   "output_tokens": 65,
+   "thought_tokens": 0
+  }
+ },
+ "port-askaig-8\t포트 애스케이그 8": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "포트 애스케이그 8년은 기준 상품의 브랜드와 연수, 독립병입 성격을 정확히 일치시킵니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1656,
+   "attempts": 1,
+   "input_tokens": 2126,
+   "output_tokens": 68,
+   "thought_tokens": 0
+  }
+ },
+ "port-askaig-8\t포트 에스케이그": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "기준 상품은 8년산이나, alias '포트 에스케이그'에 연수(8년) 정보가 누락되어 있어 다른 연수 제품으로도 읽힐 수 있으므로 different 또는 unsure에 해당합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1573,
+   "attempts": 1,
+   "input_tokens": 1836,
+   "output_tokens": 87,
+   "thought_tokens": 0
+  }
+ },
+ "port-askaig-8\t라인업 2026년 8월 방영": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "alias에 상품명이 아닌 드라마 방영 관련 문장 조각이 포함되어 있으며 위스키와 무관합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 12900,
+   "attempts": 1,
+   "input_tokens": 1718,
+   "output_tokens": 63,
+   "thought_tokens": 0
+  }
+ },
+ "port-askaig-8\t라인업 6편": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 1.0,
+  "reason": "alias에 위스키 브랜드나 상품명이 전혀 없고 드라마 관련 문장 조각이므로 위스키 상품으로 볼 수 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1470,
+   "attempts": 1,
+   "input_tokens": 1710,
+   "output_tokens": 63,
+   "thought_tokens": 0
+  }
+ },
+ "port-askaig-8\t라인업 8": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "alias에 브랜드(Port Askaig)나 병입사 이름이 없고, 근거도 대학축제 관련 내용으로 위스키와 무관함",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1064,
+   "attempts": 1,
+   "input_tokens": 1739,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "samaroli-royal-brackla-14\t사마롤리 2008 로얄 브라클라 14년 달달에디션": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 독립병입사(Samaroli)의 로얄 브라클라 14년이나, alias에 '달달에디션 No.1'이라는 특정 한정판 에디션 이름이 포함되어 있어 에디션이 일치하지 않습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1255,
+   "attempts": 1,
+   "input_tokens": 2201,
+   "output_tokens": 97,
+   "thought_tokens": 0
+  }
+ },
+ "samaroli-royal-brackla-14\t사마롤리 2008 로얄 브라클라 14 년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 에디션명이 Royal Brackla이나 alias와 근거에는 '달달에디션 No.1'이라는 추가 에디션/싱글캐스크 정보가 있어 다른 상품이다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1282,
+   "attempts": 1,
+   "input_tokens": 2024,
+   "output_tokens": 81,
+   "thought_tokens": 0
+  }
+ },
+ "samaroli-royal-brackla-14\t사마롤리 아데니슬 209": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 사마롤리 로얄 브라클라 14년이지만, alias는 사마롤리 아데니슬 209로 증류소와 에디션 정보가 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 976,
+   "attempts": 1,
+   "input_tokens": 1919,
+   "output_tokens": 85,
+   "thought_tokens": 0
+  }
+ },
+ "samaroli-royal-brackla-14\t로얄브라클라 18년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 사마롤리 독립병입 14년 제품인데, alias는 로얄브라클라 18년 정규품으로 연수가 다르므로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1778,
+   "attempts": 1,
+   "input_tokens": 1886,
+   "output_tokens": 79,
+   "thought_tokens": 0
+  }
+ },
+ "samaroli-royal-brackla-14\t사마롤리 1986 글렌로티스 36년 마그니피코": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 사마롤리 로열 브라클라 14년이나, alias는 '사마롤리 1986 글렌로티스 36년 마그니피코'로 증류소, 연수, 에디션이 모두 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1061,
+   "attempts": 1,
+   "input_tokens": 1744,
+   "output_tokens": 102,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-ben-nevis-9-100-proof\t시그나토리 글렌오드 9년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 벤네비스(Ben Nevis)인데 alias는 글렌오드(Glen Ord)로 증류소가 다름",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1220,
+   "attempts": 1,
+   "input_tokens": 2052,
+   "output_tokens": 67,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-ben-nevis-9-100-proof\t시그나토리 빈티지": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '시그나토리 빈티지'는 브랜드 및 독립병입사 이름만 포함하고 있으며 구체적인 증류소명(벤 네비스)과 연수, 에디션 정보가 누락되어 있어 기준 상품을 특정할 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1384,
+   "attempts": 1,
+   "input_tokens": 2054,
+   "output_tokens": 93,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-ben-nevis-9-100-proof\t시그나토리 2015 벤 네비스 9년 100": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "시그나토리 병입사와 벤 네비스 증류소, 9년 연수, 100 프루프 에디션 정보가 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 947,
+   "attempts": 1,
+   "input_tokens": 1917,
+   "output_tokens": 75,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-ben-nevis-9-100-proof\t시그나토리 스페이사이드": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 벤네비스 9년(Ben Nevis 9)이지만 alias는 시그나토리 스페이사이드로 증류소와 연수가 일치하지 않습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1082,
+   "attempts": 1,
+   "input_tokens": 1905,
+   "output_tokens": 77,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-ben-nevis-9-100-proof\t시그나토리 100프루프가 다 마셔가서": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.8,
+  "reason": "알리아스에 벤네비스 증류소 이름이 누락되어 있고 근거의 글도 툴리바딘 9년에 관한 내용이라 동일 상품으로 확정할 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1105,
+   "attempts": 1,
+   "input_tokens": 1705,
+   "output_tokens": 80,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-benriach-10-100-proof\t시그나토리 2014 벤리악 10년 100프루프": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "병입사(시그나토리), 브랜드(벤리악), 연수(10년), 에디션(100 프루프) 및 빈티지 표기가 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1348,
+   "attempts": 1,
+   "input_tokens": 2247,
+   "output_tokens": 81,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-benriach-10-100-proof\t시그나토리 100 프루프 벤리악 10년": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "시그나토리 병입사 이름, 벤리악 증류소, 10년 연수, 100 프루프 에디션이 모두 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1157,
+   "attempts": 1,
+   "input_tokens": 2061,
+   "output_tokens": 78,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-benriach-10-100-proof\t시그나토리 벤리악 10년 100 프루프 에디션": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "시그나토리 병입사 이름, 벤리악 증류소, 10년 연수, 100 프루프 에디션 정보가 기준 상품과 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1331,
+   "attempts": 1,
+   "input_tokens": 2336,
+   "output_tokens": 83,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-benriach-10-100-proof\t시그나토리 100프루프": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 독립병입사(시그나토리)나 증류소(벤리악), 연수 정보가 빠져있고 100프루프 시리즈 중 다른 배치일 수 있어 기준 상품으로 특정되지 않음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1435,
+   "attempts": 1,
+   "input_tokens": 1905,
+   "output_tokens": 89,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-benriach-10-100-proof\t시그나토리 벤리악 2014": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 연수가 10년이나, alias에 명시된 빈티지 2014와 기준 상품의 연수·에디션 정보가 일치하지 않거나 다른 상품을 가리킴",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1177,
+   "attempts": 1,
+   "input_tokens": 1927,
+   "output_tokens": 86,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-glen-ord-12-100-proof\t시그나토리 빈티지": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 독립병입사 이름만 있고 글렌 오드 12년 100 프루프 에디션 정보가 없어 다른 상품임",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1093,
+   "attempts": 1,
+   "input_tokens": 2209,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-glen-ord-12-100-proof\t시그나토리 2011 글렌 기어리 12년 스몰": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.98,
+  "reason": "기준 상품은 글렌 오드(Glen Ord) 12년이지만, alias는 글렌 기어리(Glen Garioch) 12년으로 증류소가 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1147,
+   "attempts": 1,
+   "input_tokens": 1929,
+   "output_tokens": 80,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-glen-ord-12-100-proof\t시그나토리 100": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.8,
+  "reason": "alias에 증류소 이름(글렌오드)과 정확한 연수가 누락되어 있어 특정 상품으로 판정할 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1223,
+   "attempts": 1,
+   "input_tokens": 1764,
+   "output_tokens": 68,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-glen-ord-12-100-proof\t시그나토리 100프루프": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 글렌 오드 12년이나, 알리아스와 근거 글은 마녹모어 등 다른 증류소 원액을 가리켜 서로 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1534,
+   "attempts": 1,
+   "input_tokens": 1765,
+   "output_tokens": 78,
+   "thought_tokens": 0
+  }
+ },
+ "signatory-glen-ord-12-100-proof\t시그나토리 100 프루프 2012 링크우드 12년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 글렌 오드(Glen Ord) 12년이지만 alias는 링크우드(Linkwood) 12년으로 증류소가 다름.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1032,
+   "attempts": 1,
+   "input_tokens": 1783,
+   "output_tokens": 74,
+   "thought_tokens": 0
+  }
+ },
+ "timorous-beastie\t더글라스 랭 앤 코": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '더글라스 랭 앤 코'는 특정 위스키 제품이 아니라 독립병입사 회사명을 가리키므로 기준 상품과 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 979,
+   "attempts": 1,
+   "input_tokens": 1816,
+   "output_tokens": 73,
+   "thought_tokens": 0
+  }
+ },
+ "timorous-beastie\t더글라스 랭 티머러스 비스티 10년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 연수가 없는 NAS 제품이나 alias는 10년 숙성 한정판을 가리키므로 연수와 에디션이 달라 다른 상품이다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1228,
+   "attempts": 1,
+   "input_tokens": 1815,
+   "output_tokens": 75,
+   "thought_tokens": 0
+  }
+ },
+ "timorous-beastie\t더글라스 랭 리마커블 리저널": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 티모러스 비스티이지만, alias는 더글라스 랭의 리마커블 리저널 몰트 전체 시리즈를 가리키므로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1379,
+   "attempts": 1,
+   "input_tokens": 1678,
+   "output_tokens": 76,
+   "thought_tokens": 0
+  }
+ },
+ "timorous-beastie\t더글라스 랭 리마커블 몰츠 캐스": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 Timorous Beastie가 없고 Remarkable Malts Cask Strength 시리즈 중 다른 제품(12년 CS 등)을 가리키거나 불충분함",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 24550,
+   "attempts": 1,
+   "input_tokens": 1704,
+   "output_tokens": 74,
+   "thought_tokens": 0
+  }
+ },
+ "timorous-beastie\t더글라스 랭 리마커블 몰츠 캐스크 스트": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 Timorous Beastie이지만, alias는 Remarkable Malts Cask Strength 시리즈의 다른 제품을 가리킵니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1019,
+   "attempts": 1,
+   "input_tokens": 1724,
+   "output_tokens": 66,
+   "thought_tokens": 0
+  }
+ },
+ "ardbeg-wee-beastie\t아드벡 위 비스티 5년": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.98,
+  "reason": "브랜드(아드벡), 연수(5년), 에디션명(위 비스티)이 모두 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1918,
+   "attempts": 1,
+   "input_tokens": 2176,
+   "output_tokens": 66,
+   "thought_tokens": 0
+  }
+ },
+ "ardbeg-wee-beastie\t아드벡 위비스티": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "아드벡 브랜드와 위비스티 에디션, 5년 숙성 정보가 근거와 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1345,
+   "attempts": 1,
+   "input_tokens": 2144,
+   "output_tokens": 64,
+   "thought_tokens": 0
+  }
+ },
+ "ardbeg-wee-beastie\t아드벡 5년 위 비스티": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드, 연수, 에디션이 alias '아드벡 5년 위 비스티'와 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1112,
+   "attempts": 1,
+   "input_tokens": 2176,
+   "output_tokens": 67,
+   "thought_tokens": 0
+  }
+ },
+ "ardbeg-wee-beastie\t아드벡 10년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 5년 숙성 위 비스티이나 alias는 10년으로 연수가 다름",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1244,
+   "attempts": 1,
+   "input_tokens": 1970,
+   "output_tokens": 62,
+   "thought_tokens": 0
+  }
+ },
+ "ardbeg-wee-beastie\t아드벡5년": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '아드벡5년'은 브랜드(아드벡)와 연수(5년), 그리고 증거 자료를 통해 'Ardbeg Wee Beastie 5'와 정확히 일치함",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1376,
+   "attempts": 1,
+   "input_tokens": 2052,
+   "output_tokens": 83,
+   "thought_tokens": 0
+  }
+ },
+ "bowmore-15-sherry-oak\t보모어 15 년": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.85,
+  "reason": "기준 상품은 'Sherry Oak' 에디션이나, alias 및 근거에는 에디션 명시 없이 '보모어 15년'으로만 표기되어 있어 동일 상품으로 단정하기 어렵습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1883,
+   "attempts": 1,
+   "input_tokens": 2189,
+   "output_tokens": 87,
+   "thought_tokens": 0
+  }
+ },
+ "bowmore-15-sherry-oak\t보모어 15 년 다키스트": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "보모어 15년 다키스트는 보모어 15년 셰리 오크(Sherry Oak)의 구형 명칭(리뉴얼 전 이름)으로 동일한 상품임이 근거를 통해 확인됨.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1283,
+   "attempts": 1,
+   "input_tokens": 2154,
+   "output_tokens": 91,
+   "thought_tokens": 0
+  }
+ },
+ "bowmore-15-sherry-oak\t보모어 12년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 보모어 15년 셰리 오크인데 alias는 연수가 다른 보모어 12년을 가리킴",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1176,
+   "attempts": 1,
+   "input_tokens": 1841,
+   "output_tokens": 70,
+   "thought_tokens": 0
+  }
+ },
+ "bowmore-15-sherry-oak\t보모어 15년 셰리 오크 캐스크": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 브랜드(보모어), 연수(15년), 에디션(셰리 오크 캐스크)이 기준 상품과 모두 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1187,
+   "attempts": 1,
+   "input_tokens": 1971,
+   "output_tokens": 73,
+   "thought_tokens": 0
+  }
+ },
+ "bowmore-15-sherry-oak\t보모어 15년 셰리 캐스크": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "보모어 브랜드, 15년 숙성, 셰리 캐스크 에디션 정보가 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 976,
+   "attempts": 1,
+   "input_tokens": 1863,
+   "output_tokens": 64,
+   "thought_tokens": 0
+  }
+ },
+ "bruichladdich-18\t브룩라디 18 년": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "브랜드 Bruichladdich와 18년 숙성 정보가 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 973,
+   "attempts": 1,
+   "input_tokens": 2131,
+   "output_tokens": 58,
+   "thought_tokens": 0
+  }
+ },
+ "bruichladdich-18\t브룩라디 18년 와인": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.8,
+  "reason": "alias에 '와인'이라는 단어가 섞여 있어 위스키 상품명으로 특정하기 어렵고, 와인 카테고리 상품일 가능성이 있어 불확실함.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1133,
+   "attempts": 1,
+   "input_tokens": 1878,
+   "output_tokens": 77,
+   "thought_tokens": 0
+  }
+ },
+ "bruichladdich-18\t브룩라디 18년 셰리 캐스크": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 브룩라디 정규품(18년)이나, alias는 독립병입사(산시바 파이니스트) 제품을 가리키므로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1021,
+   "attempts": 1,
+   "input_tokens": 1839,
+   "output_tokens": 79,
+   "thought_tokens": 0
+  }
+ },
+ "bruichladdich-18\t브룩라디 21년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 브룩라디 18년이지만, alias는 연수가 다른 브룩라디 21년을 가리키므로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1415,
+   "attempts": 1,
+   "input_tokens": 1899,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "bruichladdich-18\t브룩라디 클래식 래디": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 브룩라디 18년이지만, alias는 브룩라디 클래식 나인티(클래식 래디)로 서로 다른 에디션/제품이다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1201,
+   "attempts": 1,
+   "input_tokens": 1858,
+   "output_tokens": 80,
+   "thought_tokens": 0
+  }
+ },
+ "bunnahabhain-18\t부나하벤 18 년": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드, 연수, 정규품(official) 여부가 alias '부나하벤 18 년' 및 근거 자료와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1210,
+   "attempts": 1,
+   "input_tokens": 2232,
+   "output_tokens": 76,
+   "thought_tokens": 0
+  }
+ },
+ "bunnahabhain-18\t부나하벤 12년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 부나하벤 18년이나 alias는 12년으로 연수가 다름",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1323,
+   "attempts": 1,
+   "input_tokens": 2214,
+   "output_tokens": 62,
+   "thought_tokens": 0
+  }
+ },
+ "bunnahabhain-18\t부나하벤 스튜라더": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 부나하벤 18년이지만, alias인 '부나하벤 스튜라더'는 다른 에디션(Stiuireadair)을 가리키므로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1322,
+   "attempts": 1,
+   "input_tokens": 2008,
+   "output_tokens": 84,
+   "thought_tokens": 0
+  }
+ },
+ "bunnahabhain-18\t부나하벤 15년 안 쿠안 가르브": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 18년 정규품이나, alias는 15년 안 쿠안 가르브 한정판으로 연수와 에디션이 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 975,
+   "attempts": 1,
+   "input_tokens": 1840,
+   "output_tokens": 77,
+   "thought_tokens": 0
+  }
+ },
+ "bunnahabhain-18\t부나하벤 18년 바이알": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드와 18년 연수가 일치하며, 바이알 형태는 용량 표기일 뿐 같은 상품을 가리킵니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1508,
+   "attempts": 1,
+   "input_tokens": 1867,
+   "output_tokens": 71,
+   "thought_tokens": 0
+  }
+ },
+ "compass-box-orchard-house\t박스 오차드 하우스": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '박스 오차드 하우스'는 브랜드명인 '컴파스 박스'에서 '컴파스'가 누락되어 브랜드 전체를 특정할 수 없으므로 다른 상품으로 판정합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1414,
+   "attempts": 1,
+   "input_tokens": 2070,
+   "output_tokens": 85,
+   "thought_tokens": 0
+  }
+ },
+ "compass-box-orchard-house\t컴파스 박스 오챠드 하우스": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드와 에디션명(Compass Box Orchard House)이 알리아스 '컴파스 박스 오챠드 하우스' 및 근거 자료와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1321,
+   "attempts": 1,
+   "input_tokens": 1818,
+   "output_tokens": 80,
+   "thought_tokens": 0
+  }
+ },
+ "compass-box-orchard-house\t박스 헤도니즘": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 컴패스 박스 오차드 하우스이나, alias는 '박스 헤도니즘'으로 전혀 다른 에디션/제품을 가리킵니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1012,
+   "attempts": 1,
+   "input_tokens": 1675,
+   "output_tokens": 78,
+   "thought_tokens": 0
+  }
+ },
+ "compass-box-orchard-house\t컴파스박스 오차드 하우스 입니다": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.8,
+  "reason": "alias에 상품명이 아닌 문장 조각('입니다')과 조사 등이 섞여 있어 메뉴 표기로 사용하기 부적절합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 999,
+   "attempts": 1,
+   "input_tokens": 1686,
+   "output_tokens": 67,
+   "thought_tokens": 0
+  }
+ },
+ "compass-box-orchard-house\t컴파스 박스 오차드 하우스 하이볼 캔": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 병 위스키(Orchard House)이지만, alias는 일본 한정판 '하이볼 캔' 제품으로 서로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 946,
+   "attempts": 1,
+   "input_tokens": 1702,
+   "output_tokens": 70,
+   "thought_tokens": 0
+  }
+ },
+ "edradour-caledonia-12\t에드라두어 12 년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "기준 상품은 'Caledonia' 에디션이나, alias인 '에드라두어 12 년'에는 에디션 정보가 누락되어 캐스크 스트렝스 등 다른 12년 제품과 혼동될 수 있음.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1072,
+   "attempts": 1,
+   "input_tokens": 2256,
+   "output_tokens": 93,
+   "thought_tokens": 0
+  }
+ },
+ "edradour-caledonia-12\t에드라두어 12 년 칼레도니아": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.98,
+  "reason": "기준 상품의 브랜드(에드라두어), 연수(12년), 에디션(칼레도니아)이 alias와 근거 자료에서 모두 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1229,
+   "attempts": 1,
+   "input_tokens": 2175,
+   "output_tokens": 77,
+   "thought_tokens": 0
+  }
+ },
+ "edradour-caledonia-12\t에드라두어 칼레도니아 12 년": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드, 연수, 에디션(칼레도니아 12년)이 alias와 근거 자료에서 모두 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1106,
+   "attempts": 1,
+   "input_tokens": 2194,
+   "output_tokens": 73,
+   "thought_tokens": 0
+  }
+ },
+ "edradour-caledonia-12\t에드라두어 2013 12": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 'Caledonia' 에디션이나, alias 및 근거의 상품은 2013 빈티지 이비스코 버번 캐스크 CS로 에디션이 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1248,
+   "attempts": 1,
+   "input_tokens": 1959,
+   "output_tokens": 83,
+   "thought_tokens": 0
+  }
+ },
+ "edradour-caledonia-12\t에드라두어 1": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias의 '에드라두어 1'은 텍스트가 잘려 있으며, 기준 상품인 에드라두어 칼레도니아 12년과 연수 및 에디션 정보가 일치하지 않습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1295,
+   "attempts": 1,
+   "input_tokens": 1736,
+   "output_tokens": 88,
+   "thought_tokens": 0
+  }
+ },
+ "glen-scotia-double-cask\t글렌스코시아더블캐스크": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 브랜드(글렌스코시아)와 에디션(더블캐스크)이 모두 정확히 포함되어 있으며, 근거 자료에서도 동일 상품임을 확인했습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1252,
+   "attempts": 1,
+   "input_tokens": 2038,
+   "output_tokens": 75,
+   "thought_tokens": 0
+  }
+ },
+ "glen-scotia-double-cask\t글렌 스코샤 더블 캐스크": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "근거에 브랜드(글렌 스코샤)와 에디션(더블 캐스크)이 기준 상품과 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1932,
+   "attempts": 1,
+   "input_tokens": 1683,
+   "output_tokens": 69,
+   "thought_tokens": 0
+  }
+ },
+ "glen-scotia-double-cask\t글렌 스코샤 더블 캐스크 럼 마감": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 글렌 스코샤 더블 캐스크(오리지널)이지만, 별칭은 럼 마감(Rum Finish) 에디션이므로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1531,
+   "attempts": 1,
+   "input_tokens": 1712,
+   "output_tokens": 77,
+   "thought_tokens": 0
+  }
+ },
+ "glen-scotia-double-cask\t글렌스코시아 10년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 논스탠더드 연수의 더블 캐스크(Double Cask)이나, alias와 근거는 '10년(10 Year Old)' 연수 표기 제품을 가리키므로 서로 다른 상품이다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1420,
+   "attempts": 1,
+   "input_tokens": 1706,
+   "output_tokens": 89,
+   "thought_tokens": 0
+  }
+ },
+ "glen-scotia-double-cask\t글렌스코시아 빅토리아나": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 글렌스코시아 더블 C스크이나, alias는 캐스크 스트렝스 에디션인 빅토리아나라서 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1026,
+   "attempts": 1,
+   "input_tokens": 1691,
+   "output_tokens": 73,
+   "thought_tokens": 0
+  }
+ },
+ "glendronach-ode-to-the-embers\t글랜드로낙 오드 투 더 앰버스": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "브랜드와 에디션 이름이 수입식품조회 근거의 영문명 및 한글명과 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1057,
+   "attempts": 1,
+   "input_tokens": 1825,
+   "output_tokens": 69,
+   "thought_tokens": 0
+  }
+ },
+ "glendronach-ode-to-the-embers\t글렌드로낙 오드 투 더 앰버스": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "근거에 브랜드와 에디션명(글렌드로낙 오드 투 더 앰버스)이 기준 상품과 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1040,
+   "attempts": 1,
+   "input_tokens": 1853,
+   "output_tokens": 70,
+   "thought_tokens": 0
+  }
+ },
+ "glendronach-ode-to-the-embers\t글렌드로낙 오드 투 더 엠버스": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드와 에디션명(글렌드로낙 오드 투 더 엠버스)이 alias 및 근거와 완벽히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1202,
+   "attempts": 1,
+   "input_tokens": 1859,
+   "output_tokens": 73,
+   "thought_tokens": 0
+  }
+ },
+ "glendronach-ode-to-the-embers\t글렌드로낙 오드 투 엠버스": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "브랜드 글렌드로낙과 에디션 오드 투 엠버스(Ode to the Embers)가 근거 및 alias와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1091,
+   "attempts": 1,
+   "input_tokens": 1867,
+   "output_tokens": 74,
+   "thought_tokens": 0
+  }
+ },
+ "glendronach-ode-to-the-embers\t글랜드로낙 오드 투 더 다크": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 에디션은 'Ode to the Embers'이나 alias와 근거는 'Ode to the Dark'로 에디션이 서로 다름",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1088,
+   "attempts": 1,
+   "input_tokens": 1724,
+   "output_tokens": 75,
+   "thought_tokens": 0
+  }
+ },
+ "kavalan-oloroso-sherry-oak\t카발란 올로로소 셰리 오크": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "근거에 브랜드(카발란)와 에디션(올로로소 셰리 오크)이 기준 상품과 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1280,
+   "attempts": 1,
+   "input_tokens": 2246,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "kavalan-oloroso-sherry-oak\t카발란 올로로소 쉐리 오크": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드와 에디션명(Kavalan Oloroso Sherry Oak)이 alias와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1244,
+   "attempts": 1,
+   "input_tokens": 2203,
+   "output_tokens": 66,
+   "thought_tokens": 0
+  }
+ },
+ "kavalan-oloroso-sherry-oak\t카발란 미즈나라": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 올로로소 셰리 오크인데 alias는 미즈나라 에디션이므로 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1143,
+   "attempts": 1,
+   "input_tokens": 1700,
+   "output_tokens": 65,
+   "thought_tokens": 0
+  }
+ },
+ "kavalan-oloroso-sherry-oak\t카발란 미즈나라 한눈": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 카발란 올로로소 셰리 오크이나, alias는 카발란 미즈나라로 에디션(캐스크)이 다름",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1273,
+   "attempts": 1,
+   "input_tokens": 1702,
+   "output_tokens": 75,
+   "thought_tokens": 0
+  }
+ },
+ "kavalan-oloroso-sherry-oak\t카발란 올로로소": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "근거에서 브랜드(카발란)와 에디션(올로로소)이 일치하여 동일 상품으로 판정함.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1320,
+   "attempts": 1,
+   "input_tokens": 1763,
+   "output_tokens": 67,
+   "thought_tokens": 0
+  }
+ },
+ "kilchoman-korea-small-batch\t킬호만 코리아 스몰배치": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드(킬호만)와 에디션(코리아 스몰배치)이 alias와 근거 자료에 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1422,
+   "attempts": 1,
+   "input_tokens": 2132,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "kilchoman-korea-small-batch\t킬호만 스몰배치 릴리즈 코리아 에디션 배치": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "브랜드와 에디션(코리아 스몰배치)이 기준 상품과 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1446,
+   "attempts": 1,
+   "input_tokens": 1790,
+   "output_tokens": 60,
+   "thought_tokens": 0
+  }
+ },
+ "kilchoman-korea-small-batch\t킬호만 로크곰": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 킬호만 코리아 스몰 배치이나, 별칭은 킬호만 로크곰으로 다른 에디션에 해당함",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 924,
+   "attempts": 1,
+   "input_tokens": 1680,
+   "output_tokens": 71,
+   "thought_tokens": 0
+  }
+ },
+ "kilchoman-korea-small-batch\t킬호만 스몰배치 릴리즈 코리아 에디션 배치1": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "브랜드 킬호만과 에디션 Korea Small Batch(코리아 에디션 배치1)가 근거와 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 954,
+   "attempts": 1,
+   "input_tokens": 1728,
+   "output_tokens": 68,
+   "thought_tokens": 0
+  }
+ },
+ "kilchoman-korea-small-batch\t킬호만에서도": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "alias '킬호만에서도'는 브랜드명 일부와 조사일 뿐이며, 상품명을 특정할 수 없어 메뉴 표기로 적합하지 않음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1184,
+   "attempts": 1,
+   "input_tokens": 1713,
+   "output_tokens": 70,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-18\t라프로익 18 년": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "근거에서 라프로익 증류소와 18년 연수가 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1212,
+   "attempts": 1,
+   "input_tokens": 2105,
+   "output_tokens": 60,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-18\t라프로익 15년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 라프로익 18년이지만 alias는 라프로익 15년으로 연수가 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1119,
+   "attempts": 1,
+   "input_tokens": 2152,
+   "output_tokens": 65,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-18\t라프로익 10년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 라프로익 18년이지만 alias는 라프로익 10년으로 연수가 다름",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1193,
+   "attempts": 1,
+   "input_tokens": 2201,
+   "output_tokens": 64,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-18\t라프로익 쿼터캐스크": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 라프로익 18년이지만, alias는 쿼터캐스크 에디션으로 에디션 및 연수가 다름.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1095,
+   "attempts": 1,
+   "input_tokens": 1886,
+   "output_tokens": 70,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-18\t라프로익 10년 69": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 라프로익 18년이지만, alias는 라프로익 10년으로 연수가 다르므로 다른 상품이다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 920,
+   "attempts": 1,
+   "input_tokens": 1778,
+   "output_tokens": 68,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-25\t라프로익 25": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "기준 상품의 브랜드(라프로익)와 25년 숙성 정보가 alias 및 백과사전/블로그 근거와 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1286,
+   "attempts": 1,
+   "input_tokens": 2133,
+   "output_tokens": 71,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-25\t라프로익 10년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 25년산인데 alias는 10년산으로 연수가 다름",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 9814,
+   "attempts": 1,
+   "input_tokens": 2038,
+   "output_tokens": 60,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-25\t라프로익 25 년 베시 윌리엄슨 스토리": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 일반 25년 정규품이나, alias에는 '베시 윌리엄슨 스토리'라는 별도의 에디션명이 포함되어 있어 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1232,
+   "attempts": 1,
+   "input_tokens": 1860,
+   "output_tokens": 77,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-25\t라프로익 10년 69": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 라프로익 25년이지만, alias는 라프로익 10년으로 연수가 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 10773,
+   "attempts": 1,
+   "input_tokens": 1767,
+   "output_tokens": 66,
+   "thought_tokens": 0
+  }
+ },
+ "laphroaig-25\t라프로익 10년 80년대 보틀": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 25년산이지만 alias는 10년산으로 연수가 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 944,
+   "attempts": 1,
+   "input_tokens": 1751,
+   "output_tokens": 61,
+   "thought_tokens": 0
+  }
+ },
+ "macallan-classic-cut-2025\t맥캘란 클래식 컷 2025": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "브랜드와 에디션(클래식 컷 2025)이 기준 상품과 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1330,
+   "attempts": 1,
+   "input_tokens": 2190,
+   "output_tokens": 64,
+   "thought_tokens": 0
+  }
+ },
+ "macallan-classic-cut-2025\t맥캘란 클래식컷": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 2025년 에디션이나 alias인 '맥캘란 클래식컷'에는 특정 연도가 없어 다른 에디션(연도별 릴리즈)과 혼동될 수 있음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 10598,
+   "attempts": 1,
+   "input_tokens": 2011,
+   "output_tokens": 85,
+   "thought_tokens": 0
+  }
+ },
+ "macallan-classic-cut-2025\t맥캘란 클래식컷 2025 에디션": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "근거에 브랜드(맥캘란)와 에디션(클래식컷 2025 에디션)이 모두 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1691,
+   "attempts": 1,
+   "input_tokens": 1886,
+   "output_tokens": 71,
+   "thought_tokens": 0
+  }
+ },
+ "macallan-classic-cut-2025\t맥캘란 110프루프": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 '맥캘란 110프루프'라는 별도의 에디션명이 명시되어 있어 'Classic Cut 2025' 기준 상품과 다름",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 4305,
+   "attempts": 1,
+   "input_tokens": 1736,
+   "output_tokens": 78,
+   "thought_tokens": 0
+  }
+ },
+ "macallan-classic-cut-2025\t맥캘란 12년 110프루프": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 맥캘란 클래식 컷 2025이나, alias는 맥캘란 12년 110프루프로 연수와 에디션이 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1002,
+   "attempts": 1,
+   "input_tokens": 1763,
+   "output_tokens": 82,
+   "thought_tokens": 0
+  }
+ },
+ "nagahama-second-batch\t나가하마 더 세컨드 배치": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드(Nagahama)와 에디션(The Second Batch)이 alias '나가하마 더 세컨드 배치'와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 926,
+   "attempts": 1,
+   "input_tokens": 2054,
+   "output_tokens": 75,
+   "thought_tokens": 0
+  }
+ },
+ "nagahama-second-batch\t나가하마 붐을": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "alias에 포함된 '나가하마 붐을'은 상품명이 아닌 문맥상의 단어로, 기준 상품인 나가하마 세컨드 배치와 동일한 상품인지 특정할 수 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1250,
+   "attempts": 1,
+   "input_tokens": 1688,
+   "output_tokens": 80,
+   "thought_tokens": 0
+  }
+ },
+ "nagahama-second-batch\t나가하마 붐을 만들어 버린 그 전설": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 상품명이 아닌 문장 조각('나가하마 붐을 만들어 버린 그 전설')이 섞여 있어 메뉴 표기로 쓸 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 3573,
+   "attempts": 1,
+   "input_tokens": 1694,
+   "output_tokens": 74,
+   "thought_tokens": 0
+  }
+ },
+ "nagahama-second-batch\t나가하마 세컨드배치": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "근거 블로그에서 '나가하마 세컨드배치'라는 명칭과 브랜드, 에디션이 기준 상품과 일치함을 확인했습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1097,
+   "attempts": 1,
+   "input_tokens": 1690,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "nagahama-second-batch\t나가하마 싱글몰트 세컨드 배치": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드(Nagahama)와 에디션(The Second Batch)이 alias '나가하마 싱글몰트 세컨드 배치'와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1174,
+   "attempts": 1,
+   "input_tokens": 1673,
+   "output_tokens": 78,
+   "thought_tokens": 0
+  }
+ },
+ "nikka-taketsuru-pure-malt\t닛카 타케츠루 퓨어": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "alias '닛카 타케츠루 퓨어'는 브랜드와 에디션 이름이 기준 상품(Nikka Taketsuru Pure Malt)과 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 12083,
+   "attempts": 1,
+   "input_tokens": 2163,
+   "output_tokens": 73,
+   "thought_tokens": 0
+  }
+ },
+ "nikka-taketsuru-pure-malt\t닛카 타케츠루 퓨어몰트": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드와 에디션명(타케츠루 퓨어몰트)이 alias 및 근거 자료와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1452,
+   "attempts": 1,
+   "input_tokens": 2133,
+   "output_tokens": 71,
+   "thought_tokens": 0
+  }
+ },
+ "nikka-taketsuru-pure-malt\t니카 다케츠루 퓨어": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "근거에서 '니카 다케츠루 퓨어 몰트' 상품이 확인되므로 기준 상품과 같은 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1120,
+   "attempts": 1,
+   "input_tokens": 1847,
+   "output_tokens": 66,
+   "thought_tokens": 0
+  }
+ },
+ "nikka-taketsuru-pure-malt\t닛카 타케츠루": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias와 근거에서 브랜드(닛카)와 상품명(타케츠루 퓨어 몰트)이 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1292,
+   "attempts": 1,
+   "input_tokens": 1836,
+   "output_tokens": 67,
+   "thought_tokens": 0
+  }
+ },
+ "nikka-taketsuru-pure-malt\t니카 다케츠루 21년 퓨어몰트": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 연수 표기가 없는 다케츠루 퓨어몰트이나, alias는 21년 숙성 제품을 가리키므로 연수가 달라 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1739,
+   "attempts": 1,
+   "input_tokens": 1718,
+   "output_tokens": 78,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-14-3\t옥토모어 14.3": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품의 브랜드와 에디션(14.3)이 alias 및 근거 자료의 '옥토모어 14.3'과 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1029,
+   "attempts": 1,
+   "input_tokens": 2218,
+   "output_tokens": 77,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-14-3\t옥토모어 농장": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '옥토모어 농장'은 위스키 상품명이 아니라 농장의 지명이나 설명 단어에 가까워 메뉴판 표기로 쓸 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1627,
+   "attempts": 1,
+   "input_tokens": 2188,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-14-3\t옥토모어 13.2": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 옥토모어 14.3인데, alias는 에디션이 다른 옥토모어 13.2임.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1282,
+   "attempts": 1,
+   "input_tokens": 1850,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-14-3\t옥토모어 13.3": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 옥토모어 14.3이지만 alias는 옥토모어 13.3으로 에디션 번호가 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1073,
+   "attempts": 1,
+   "input_tokens": 1856,
+   "output_tokens": 75,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-14-3\t옥토모어 14.3 에디션": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "브랜드와 에디션(옥토모어 14.3)이 기준 상품과 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 938,
+   "attempts": 1,
+   "input_tokens": 1867,
+   "output_tokens": 63,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-15-3\t옥토모어 15.3": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias '옥토모어 15.3'은 기준 상품 'Octomore 15.3'의 브랜드와 에디션 정보와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1165,
+   "attempts": 1,
+   "input_tokens": 2175,
+   "output_tokens": 76,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-15-3\t옥토모어 15.3 에디션": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "alias에 옥토모어 15.3이 정확히 포함되어 있으며 증류소 정규품 Octomore 15.3과 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1654,
+   "attempts": 1,
+   "input_tokens": 1820,
+   "output_tokens": 74,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-15-3\t옥토모어 폴리포닉": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "옥토모어 폴리포닉은 Feis Ile 2025 출품작으로 기준 상품인 옥토모어 15.3과 에디션이 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1317,
+   "attempts": 1,
+   "input_tokens": 1863,
+   "output_tokens": 81,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-15-3\t옥토모어 14.1": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.99,
+  "reason": "기준 상품은 옥토모어 15.3이지만 alias는 옥토모어 14.1로 에디션(시리즈)이 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1130,
+   "attempts": 1,
+   "input_tokens": 1764,
+   "output_tokens": 77,
+   "thought_tokens": 0
+  }
+ },
+ "octomore-15-3\t옥토모어 14.3": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 옥토모어 15.3이지만 alias는 옥토모어 14.3으로 에디션 번호가 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 900,
+   "attempts": 1,
+   "input_tokens": 1721,
+   "output_tokens": 75,
+   "thought_tokens": 0
+  }
+ },
+ "paul-john-px\t폴 존 페드로 히메네즈": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "근거 블로그에서 '폴 존 페드로 히메네즈' 표기가 기준 상품인 Paul John Pedro Ximenez Select Cask를 지칭하고 있음을 직접 확인함.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1215,
+   "attempts": 1,
+   "input_tokens": 1831,
+   "output_tokens": 76,
+   "thought_tokens": 0
+  }
+ },
+ "paul-john-px\t폴존 피티드 셀렉트 캐스크 배치 03": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 페드로 히메네즈(PX) 캐스크 제품이나, alias는 피티드 셀렉트 캐스크 배치 03으로 에디션 종류가 다름",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1123,
+   "attempts": 1,
+   "input_tokens": 1837,
+   "output_tokens": 78,
+   "thought_tokens": 0
+  }
+ },
+ "paul-john-px\t폴 존 니르바나": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 페드로 히메네즈 셀렉트 캐스크이지만, 알리아스는 '폴 존 니르바나'로 서로 다른 에디션(제품)입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1142,
+   "attempts": 1,
+   "input_tokens": 1692,
+   "output_tokens": 76,
+   "thought_tokens": 0
+  }
+ },
+ "paul-john-px\t폴 존 볼드": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 페드로 히메네즈 셀렉트 캐스크이지만, 알리아스는 폴 존 볼드로 에디션이 다릅니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1037,
+   "attempts": 1,
+   "input_tokens": 1690,
+   "output_tokens": 69,
+   "thought_tokens": 0
+  }
+ },
+ "paul-john-px\t폴 존 브릴리언스": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 페드로 히메네즈 셀렉트 캐스크이나, 별칭은 브릴리언스로 서로 다른 에디션/제품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1121,
+   "attempts": 1,
+   "input_tokens": 1693,
+   "output_tokens": 71,
+   "thought_tokens": 0
+  }
+ },
+ "wild-turkey-81\t와일드 터키 81": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "와일드 터키 81은 기준 상품의 브랜드와 에디션(81)을 정확히 일치하며 근거를 통해 확인됩니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1542,
+   "attempts": 1,
+   "input_tokens": 2121,
+   "output_tokens": 72,
+   "thought_tokens": 0
+  }
+ },
+ "wild-turkey-81\t와일드터키 101 8년": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 와일드터키 81이지만 alias는 와일드터키 101 8년으로 연수와 에디션 정보가 달라 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1328,
+   "attempts": 1,
+   "input_tokens": 2199,
+   "output_tokens": 78,
+   "thought_tokens": 0
+  }
+ },
+ "wild-turkey-81\t와일드 터키 101": {
+  "verdict": "different",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "기준 상품은 와일드 터키 81이지만 alias는 와일드 터키 101로 프루프(도수)가 다른 다른 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1173,
+   "attempts": 1,
+   "input_tokens": 1860,
+   "output_tokens": 75,
+   "thought_tokens": 0
+  }
+ },
+ "wild-turkey-81\t와일드 터키 81 프루프": {
+  "verdict": "same",
+  "product_id": null,
+  "confidence": 0.95,
+  "reason": "근거에 '와일드 터키 81 프루프'의 브랜드, 에디션(81)이 기준 상품과 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1125,
+   "attempts": 1,
+   "input_tokens": 1882,
+   "output_tokens": 74,
+   "thought_tokens": 0
+  }
+ },
+ "wild-turkey-81\t와일드터키 81 마시고 나서 산 게": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.9,
+  "reason": "alias에 상품명이 아닌 일상 문장 조각('마시고 나서 산 게')이 섞여 있어 메뉴 표기로 쓸 수 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1206,
+   "attempts": 1,
+   "input_tokens": 1731,
+   "output_tokens": 68,
+   "thought_tokens": 0
+  }
+ }
+}
