@@ -19,6 +19,11 @@ def to_flow_items(v1_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     stays a separate item: the same name in two places on a menu is not merged.
     (In the P14 A2 runs all 530 glass/bottle pairs were adjacent.)
     """
+    return [_flow_item(order, group) for order, group in enumerate(group_items(v1_items), start=1)]
+
+
+def group_items(v1_items: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    """The v1 items of each 4.3 item, in order (see to_flow_items)."""
     groups: list[list[dict[str, Any]]] = []
     for item in v1_items:
         previous = groups[-1] if groups else None
@@ -31,8 +36,7 @@ def to_flow_items(v1_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
             previous.append(item)
         else:
             groups.append([item])
-
-    return [_flow_item(order, group) for order, group in enumerate(groups, start=1)]
+    return groups
 
 
 def _flow_item(order: int, group: list[dict[str, Any]]) -> dict[str, Any]:

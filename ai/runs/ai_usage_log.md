@@ -592,3 +592,21 @@
 - Claude 지식에 2025~26년 출시 상품이 없어 Dalmore 17 등을 "확인 안 됨"으로 적음 → 웹 검색으로 7줄 재확인
 - **박진우 결정 (2026-10-14):** Knob Creek 연수 null(v1 규칙: 연수 표기 변경 이력) 은 P47까지 그대로 두고 알려진 한계로 보고. `p47_plan.md` 5장(알려진 한계)·6장(P47 이후 할 일)에 기록. 같은 문서의 바 이름 "오드바"를 "오드비"로 정정
 - **웹 검색 확인 (2026-10-14, 박진우 질문):** SANSIBAR 21y 2줄과 Eld Vatten 8y는 싱글 캐스크 독립병입사(증류소 없음)라 unknown 유지. "Eld Vatten"의 정식 이름이 Svenska Eldvatten이라 새 상품 2개의 브랜드·표준명을 정정(브랜드 key `eld_vatten` → `svenska_eldvatten`, 상품 key 유지). 카탈로그 수치 변화 없음, 검증 그대로(충돌 0). PR #24의 service 스냅샷도 갱신
+
+## 2026-10-15 · P35 (I2) 하이브리드 추출 백엔드 옵션 (야간 무인 작업, API 호출 없음)
+
+- **도구:** Claude Code (Claude Opus 5.5). 실제 CLOVA·Gemini 호출 0회(테스트는 mock·fixture만)
+- **브랜치:** `i2-p35-hybrid-backend` (base `origin/i2-catalog-v2` `415e78f`). PR은 만들지 않음, 초안은 `ai/docs/p35_backend_notes.md`
+- **시간(대략):** 약 1시간
+
+### AI가 정한 것 (사람 확인 필요)
+- 선택 방식: 기존 `MENU_EXTRACTOR=gemini` 아래에 `EXTRACTION_MODE=gemini|hybrid`(기본 gemini). 하이브리드 설정 누락은 서버 시작 시 오류(기존 Gemini 검사와 같은 방식).
+- fallback 범위: CLOVA 단계 실패만 Gemini 단독으로 넘김. OCR 성공 뒤 Gemini 실패는 기존과 같이 실패 처리.
+- bbox는 스키마 변경 없이 `extraction_runs.raw_output`에 저장(`ocr.lines`, `itemSources`). DB 컬럼은 제안만.
+- `approach = ocr_llm`(기존 enum 값), provider `naver-clova+google`.
+- `convert.to_flow_items`의 묶기를 `group_items`로 분리(동작 같음).
+
+### 검증
+- 기존 288개 + 새 30개 = 318 passed. DB 테스트 194개는 로컬에 PostgreSQL이 없어 skip(바꾸기 전과 같음) → CI 확인 필요.
+- 새·수정 파일 커버리지 100%(로컬). 로그에 CLOVA 비밀값이 없는지 테스트.
+- 백엔드 프롬프트 사본이 `ai/ocr/hybrid_prompt_v1.md`와 같은지 테스트.

@@ -56,8 +56,17 @@ def get_menu_extractor() -> MenuExtractor:
         from app.adapters.gemini_extraction import GeminiMenuExtractor
         from app.extraction import ExtractionConfigError
 
+        # P35: EXTRACTION_MODE=hybrid adds CLOVA OCR lines to the Gemini call; gemini (default) is unchanged.
+        mode = os.getenv("EXTRACTION_MODE", "gemini")
+        if mode not in ("gemini", "hybrid"):
+            raise RuntimeError(f"Unsupported EXTRACTION_MODE: {mode!r} (supported: gemini, hybrid)")
+        setting = "MENU_EXTRACTOR=gemini" + (" with EXTRACTION_MODE=hybrid" if mode == "hybrid" else "")
         try:
+            if mode == "hybrid":
+                from app.adapters.hybrid_extraction import HybridMenuExtractor
+
+                return HybridMenuExtractor()
             return GeminiMenuExtractor()
         except ExtractionConfigError as error:
-            raise RuntimeError(f"MENU_EXTRACTOR=gemini is not configured: {error}") from error
+            raise RuntimeError(f"{setting} is not configured: {error}") from error
     raise RuntimeError(f"Unsupported MENU_EXTRACTOR: {kind!r} (supported: mock, gemini)")
