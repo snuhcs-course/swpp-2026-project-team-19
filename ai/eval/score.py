@@ -6,7 +6,8 @@
 
 --set val (default) scores against eval/labels_v1.json with photos in
 <data_dir>/eval_photos; --set test uses eval/labels_heldout_v1.json with photos in
-<data_dir>/eval_photos_test. Labels are pinned by SHA-256.
+<data_dir>/eval_photos_test. Labels are pinned by SHA-256. val_v1_1 / test_v1_1 are
+the same sets with raw_name as printed on the menu (eval/labels_changelog.md).
 
 Each run directory holds one record per call: <photo_stem>_r<k>.json (from
 run_experiment.py). A failed or unparseable call counts as an empty output.
@@ -38,6 +39,13 @@ LABEL_SETS = {
     "test": {"labels": REPO_ROOT / "eval" / "labels_heldout_v1.json",
              "sha256": "07bc5e07e84b43d445520b4e4488ecbf7f928d1ecf5ae6b7b0d94c0908ac98d7",
              "photo_dir": "eval_photos_test"},
+    # v1.1: raw_name as printed on the menu (eval/labels_changelog.md); everything else as v1
+    "val_v1_1": {"labels": REPO_ROOT / "eval" / "labels_v1_1.json",
+                 "sha256": "a34249ebb0528371d23b5c18d3f9ca306a31646fe2a7a447cf4807a389b193cf",
+                 "photo_dir": "eval_photos"},
+    "test_v1_1": {"labels": REPO_ROOT / "eval" / "labels_heldout_v1_1.json",
+                  "sha256": "047bf7d6f7274552f0dce0a4922ce7a72fa4282459d6cf1f6bbfb5271082c986",
+                  "photo_dir": "eval_photos_test"},
 }
 LABELS_PATH = LABEL_SETS["val"]["labels"]
 LABELS_SHA256 = LABEL_SETS["val"]["sha256"]

@@ -1,0 +1,101 @@
+{
+  "_note": "L1 labels v1.1 proposals (approved by Jinwoo Park, 2026-10-14). Keys are label_ocr_check.py patterns: normalized label token → normalized OCR token. Categories: A = CLOVA misread (label kept), B = label differs from print (fix), C = punctuation (fix), D = uncertain reading (Jinwoo reads). Source: P12 report (ai/runs/2026-10-14_p12_clova/report.md) A–D lists, rechecked on the crops by Claude.",
+  "patterns": {
+    "스트렝스→스트랭스": {
+      "category": "B",
+      "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다."
+    },
+    "맥캘란→맥켈란": {
+      "category": "B",
+      "note": "제목 줄 '맥켈란(Maccallan)' 아래 6개 항목 모두에 붙는 브랜드 제목."
+    },
+    "에리너→에리네": {
+      "category": "B"
+    },
+    "아몬티야도→아몬티야또": {
+      "category": "B"
+    },
+    "언익스팩티드→언익스펙티드": {
+      "category": "B"
+    },
+    "커티샥→커디샥": {
+      "category": "B",
+      "note": "영문 '(Cutty Shark)'는 라벨이 이미 인쇄대로다."
+    },
+    "퓨전→퓨젼": {
+      "category": "B",
+      "note": "P12 리포트에서 인쇄 '퓨젼' 확인. 진우 검토에서 이의 없음."
+    },
+    "캐리비안→캐리비언": {
+      "category": "B"
+    },
+    "퀸타→킨타": {
+      "category": "A",
+      "note": "진우 판독: 인쇄는 '퀸타'. CLOVA 오독 (P12 리포트의 B 분류를 정정)."
+    },
+    "엡버스→엠버스": {
+      "category": "B",
+      "note": "인쇄 '엠버스' (진우 확인). P12 리포트의 A 분류를 정정."
+    },
+    "rowan`s→rowans": {
+      "category": "A",
+      "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음."
+    },
+    "maker`s→makers": {
+      "category": "A",
+      "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음."
+    },
+    "noah`s→noahs": {
+      "category": "A",
+      "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음."
+    },
+    "booker`s→bookers": {
+      "category": "A",
+      "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음."
+    },
+    "a`bunadh→abunadh": {
+      "category": "A",
+      "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음."
+    },
+    "클라이넬리쉬→클라이녤리쉬": {
+      "category": "A",
+      "note": "제목 줄 오독이 아래 2개 항목에 번짐."
+    },
+    "헤빌리→혜빌리": {
+      "category": "A"
+    },
+    "ila→lla": {
+      "category": "A",
+      "note": "산세리프 대문자 I와 소문자 l은 글꼴상 같은 모양."
+    },
+    "샌드엔드→샌드앤드": {
+      "category": "A"
+    },
+    "스펙타큘러→스펙타클러": {
+      "category": "A"
+    },
+    "미야기쿄→미아기쿄": {
+      "category": "B",
+      "note": "진우 판독: 인쇄 '미아기쿄 싱글몰트'."
+    },
+    "시그니쳐→시그니처": {
+      "category": "B",
+      "note": "진우 판독: 인쇄 '시그니처 시리즈'."
+    },
+    "세리캐스크→셰리캐스크": {
+      "category": "B",
+      "note": "진우 판독: 인쇄 '12년 셰리캐스크 셀렉트'."
+    },
+    "퀸타루반→퀀타루반": {
+      "category": "B",
+      "note": "val. 진우 판독: 인쇄 '퀀타루반'."
+    }
+  },
+  "items": {},
+  "questions": [],
+  "decisions_log": [
+    "2026-10-14 박진우: 포레스트 '퀸타'가 인쇄대로(라벨 유지). Beck 백틱은 인쇄대로(C 수정 안 함).",
+    "2026-10-14 박진우: D 판독 — 미아기쿄 싱글몰트 / 12년 셰리캐스크 셀렉트 / 시그니처 시리즈 / 퀀타루반(val).",
+    "2026-10-14 박진우: 엠버스 맞음(B). 버전 문자열은 labels_v1.1 그대로 (ai/catalog/labels_v1_1.json과 별개 파일)."
+  ]
+}
