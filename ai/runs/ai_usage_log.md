@@ -642,3 +642,19 @@
 - Claude 지식에 2025~26년 출시 상품이 없어 Dalmore 17 등을 "확인 안 됨"으로 적음 → 웹 검색으로 7줄 재확인
 - **박진우 결정 (2026-10-14):** Knob Creek 연수 null(v1 규칙: 연수 표기 변경 이력) 은 P47까지 그대로 두고 알려진 한계로 보고. `p47_plan.md` 5장(알려진 한계)·6장(P47 이후 할 일)에 기록. 같은 문서의 바 이름 "오드바"를 "오드비"로 정정
 - **웹 검색 확인 (2026-10-14, 박진우 질문):** SANSIBAR 21y 2줄과 Eld Vatten 8y는 싱글 캐스크 독립병입사(증류소 없음)라 unknown 유지. "Eld Vatten"의 정식 이름이 Svenska Eldvatten이라 새 상품 2개의 브랜드·표준명을 정정(브랜드 key `eld_vatten` → `svenska_eldvatten`, 상품 key 유지). 카탈로그 수치 변화 없음, 검증 그대로(충돌 0). PR #24의 service 스냅샷도 갱신
+
+## 2026-10-15 · P36 준비 (I2) Naver 별칭 후보 대기열 (야간 무인 작업)
+
+- **도구:** Claude Code (Claude Opus 5.5). 외부 API: NAVER API HUB 4,542회(확인 실행 28 포함), Gemini `gemini-3.5-flash-lite` 269회(재시도 10 포함)
+- **브랜치:** `i2-p36-naver-queue` (`i2-p28-naver-precision` + `origin/i2-catalog-v2` 머지; 충돌 `.env.example`, `ai_usage_log.md`는 양쪽 추가분 유지)
+- **시간(대략):** 약 1시간 40분 (1단계 19분, 2단계 1회차 약 45분 + 2회차 응답 없음)
+
+### AI가 정한 것 (사람 확인 필요)
+- 제외 규칙 해석: `age_mismatch`에 "상품은 무연수인데 후보에 연수"도 포함. `existing_alias`는 그 상품 자신의 별칭만 대조.
+- 독립병입 판정을 M3 병입사 목록으로 브랜드 key·이름 대조. 한글 브랜드 별칭은 `catalog_v2_service`에서 찾음(P17은 v1).
+- `p47_only` 표시 추가(지시에는 없음): P47 평가 전 승인하면 P47 메뉴 표기가 카탈로그로 새는 위험.
+- 2단계: Gemini가 330초 응답 없음을 연속으로 내서 1회 이어서 시도 후 중단(429는 아님). 남은 1,123개 `pending_judge`.
+
+### 검증
+- 1단계 3개 상품 확인 실행 후 전체 실행. 규칙 제외 결과를 몇 상품에서 직접 확인(예: `아드벡 우거다일` → other_product, `아벨라워 13년` → age_mismatch).
+- 스테이징 diff 키 검사.

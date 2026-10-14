@@ -24,23 +24,23 @@
   ],
   "stage2": {
    "judge": {
-    "llm_calls": 264,
-    "retries": 6,
+    "llm_calls": 5,
+    "retries": 4,
     "parse_errors": 0,
-    "input_tokens": 474491,
-    "output_tokens": 18645,
+    "input_tokens": 0,
+    "output_tokens": 0,
     "thought_tokens": 0,
     "latency": {
-     "n": 257,
-     "mean_ms": 1280,
-     "p50_ms": 1194,
-     "p95_ms": 1642,
-     "max_ms": 6369
+     "n": 0,
+     "mean_ms": null,
+     "p50_ms": null,
+     "p95_ms": null,
+     "max_ms": null
     }
    },
    "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
    "stopped": "HardTimeout: no response within 330s",
-   "finished_at": "2026-10-14T17:24:03+00:00"
+   "finished_at": "2026-10-14T17:53:06+00:00"
   }
  },
  "records": [
