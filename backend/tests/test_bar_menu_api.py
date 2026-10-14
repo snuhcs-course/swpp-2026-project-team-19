@@ -1,10 +1,11 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 import pytest
 
-from app.models import BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption
+from app.models import BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption, User, UserType
+from tests.auth_support import connection_error
 from tests.factories import make_bar, make_brand, make_product, publish_menu
 
 def test_returns_bar_and_menu_in_display_order(client, db_session):
@@ -120,3 +121,64 @@ def test_invalid_token_is_rejected_even_on_public_route(client, db_session, toke
 
     assert response.status_code == 401
     assert response.json()["error"]["code"] == "UNAUTHENTICATED"
+
+
+# ---- a token the server cannot check counts as no token here (API spec, section 3.1.5) ----
+
+
+def supabase_url_missing(supabase, token_for, monkeypatch):
+    token = supabase.token()
+    monkeypatch.delenv("SUPABASE_URL")
+    return token
+
+
+def signing_keys_out_of_reach(supabase, token_for, monkeypatch):
+    supabase.jwks.error = connection_error()
+    return supabase.token()
+
+
+def temporary_login_misconfigured(supabase, token_for, monkeypatch):
+    token = token_for("customer")
+    monkeypatch.setenv("TEMP_AUTH_USER_TYPE", "admin")
+    return token
+
+
+@pytest.mark.parametrize(
+    "uncheckable",
+    [supabase_url_missing, signing_keys_out_of_reach, temporary_login_misconfigured],
+    ids=lambda case: case.__name__,
+)
+def test_uncheckable_token_reads_the_menu_as_a_guest(
+    client, db_session, supabase, token_for, monkeypatch, uncheckable
+):
+    bar = make_bar(db_session)
+    as_guest = client.get(f"/api/bars/{bar.id}/menu")
+
+    token = uncheckable(supabase, token_for, monkeypatch)
+    response = client.get(f"/api/bars/{bar.id}/menu", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 200
+    assert response.json() == as_guest.json()
+
+
+def test_operator_with_an_uncheckable_token_sees_only_what_a_guest_sees(client, db_session, supabase):
+    bar = make_bar(db_session, status=BarStatus.INACTIVE)
+    db_session.add(User(auth_subject="operator-subject", user_type=UserType.OPERATOR))
+    db_session.flush()
+    supabase.jwks.error = connection_error()
+
+    response = client.get(
+        f"/api/bars/{bar.id}/menu", headers={"Authorization": f"Bearer {supabase.token(sub='operator-subject')}"}
+    )
+
+    assert (response.status_code, response.json()["error"]["code"]) == (404, "BAR_NOT_FOUND")
+
+
+def test_protected_routes_still_answer_503_when_tokens_cannot_be_checked(client, supabase):
+    supabase.jwks.error = connection_error()
+
+    response = client.get(
+        "/api/catalog/brands", params={"query": "x"}, headers={"Authorization": f"Bearer {supabase.token()}"}
+    )
+
+    assert (response.status_code, response.json()["error"]["code"]) == (503, "SERVICE_UNAVAILABLE")

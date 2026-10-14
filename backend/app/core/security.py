@@ -167,10 +167,21 @@ def get_optional_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     key_provider_for: Callable[[str], SigningKeyProvider] = Depends(get_signing_key_provider_factory),
 ) -> Principal | None:
-    """For public routes: None without an Authorization header; a token that is sent must be valid."""
+    """For public routes: None without an Authorization header; a token that is sent must be valid.
+
+    A token the server cannot check right now (no SUPABASE_URL, signing keys out of reach, invalid
+    temporary-login settings) counts as no token instead of `503`: public data stays readable for
+    signed-in users during a Supabase outage, and they only lose what a guest cannot see either
+    (API spec, section 3.1.5). An invalid or expired token is still `401`.
+    """
     if credentials is None:
         return None
-    return authenticate(credentials.credentials, key_provider_for)
+    try:
+        return authenticate(credentials.credentials, key_provider_for)
+    except HTTPException as exc:
+        if exc.status_code == status.HTTP_503_SERVICE_UNAVAILABLE:
+            return None
+        raise
 
 
 def user_type_of(principal: Principal, session: Session) -> UserType:

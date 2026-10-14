@@ -97,7 +97,9 @@ def read_bar_menu_imports(
     summary="Bar info and its current published menu",
     description=(
         "Used by the customer bar detail screen and by operators.\n\n"
-        "- Public for active bars; no token is needed.\n"
+        "- Public for active bars; no token is needed. A token that is sent must be valid (`401` "
+        "otherwise), but one the server cannot check right now (Supabase outage, missing settings) "
+        "is treated as no token rather than failing with `503`.\n"
         "- Inactive bars are returned only to operators. Anonymous callers and customers get "
         "`404 BAR_NOT_FOUND`, the same as for a missing bar.\n"
         "- A bar without a published menu returns `200` with `menuBoardId: null` and `items: []`.\n"
