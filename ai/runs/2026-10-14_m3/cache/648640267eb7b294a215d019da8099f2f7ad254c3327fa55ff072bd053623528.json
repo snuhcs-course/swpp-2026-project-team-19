@@ -1,0 +1,70 @@
+{
+ "key": "648640267eb7b294a215d019da8099f2f7ad254c3327fa55ff072bd053623528",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "로얄살루트 21Y",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "몽키숄더",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "조니워커 블랙",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "조니워커 블루",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "폴존 올로로소 셀렉트 캐스크",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "폴존 피티드 셀렉트 캐스크",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "시그나토리 벤리악 12Y",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "시그나토리 맥더프 13Y",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "올트모어 디스틸러리 12Y",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "시그나토리 스페이사이드 GL",
+    "target": false
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Aultmore\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "9bb9934ed0fdb954651f29a50fec891f931469a26017fd14d6b1bfcb5f81e8ca",
+  "started_at": "2026-10-14T07:43:08.864941+00:00",
+  "latency_ms": 2134,
+  "attempts": 1,
+  "input_tokens": 1239,
+  "output_tokens": 86,
+  "thought_tokens": 127
+ }
+}

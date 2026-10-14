@@ -1,0 +1,70 @@
+{
+ "key": "f0a79c63968384065c0766476042de7316478b99a8dceb40948eabcdbd9332a8",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "Arran Quarter Cask",
+    "target": true
+   },
+   {
+    "line": 2,
+    "name": "Arran Sherry cask",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "Ardbeg Uigeadail",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "Glenfarclas 105",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "Abelour A`bunadh",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "Lagavulin 12yo 2018",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "Laphroaig 10yo Cask Strength",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "Kavalan Solist",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "Octomore 13.1",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "Macallan Classic Cut 2020",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 1,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Quarter\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Aberlour\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"A'bunadh\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 6,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Lagavulin\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\n        \"2018\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Laphroaig\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\n        \"Cask\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kavalan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Solist\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"13.1\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Macallan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Classic\",\n        \"Cut\",\n        \"2020\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "2e7d91f4573a017a2f3f515dd8aacdaae5666005a8c7fdc727442b8e5b6c8e2a",
+  "started_at": "2026-10-14T07:51:46.236914+00:00",
+  "latency_ms": 2964,
+  "attempts": 1,
+  "input_tokens": 1426,
+  "output_tokens": 667,
+  "thought_tokens": 106
+ }
+}
