@@ -14,8 +14,14 @@ sealed interface CustomerSearchUiState {
         val reason: EmptySearchReason,
     ) : CustomerSearchUiState
 
+    /** Input validation must be fixed by editing the query, not by retrying. */
+    data class InvalidQuery(
+        val fieldErrorCode: String,
+    ) : CustomerSearchUiState
+
     data class Error(
         val message: String,
+        val canRetry: Boolean = true,
     ) : CustomerSearchUiState
 }
 
