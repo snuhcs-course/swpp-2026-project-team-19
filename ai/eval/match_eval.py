@@ -84,6 +84,9 @@ M3_BASE = "S1+S2b+S3"
 # M3 matcher -> (mode, use M3b). Needs an M3 engine (make_m3).
 M3_MATCHERS = {"M3a": ("merge", False), "M3a+M3b": ("merge", True),
                "M3a/replace": ("replace", False), "M3a+M3b/replace": ("replace", True)}
+# M4 (ai/docs/m4_plan.md): Naver evidence + judge.py match mode on lines still open; value = M3a first.
+# Needs an M3 engine (translations, vetoes) and an M4 engine (ai/match_llm/m4.py).
+M4_MATCHERS = {"M3a+M4": True, "M4": False}
 LABELS_V1_1 = (REPO_ROOT / "eval" / "labels_v1_1.json", REPO_ROOT / "eval" / "labels_heldout_v1_1.json")
 
 
@@ -221,8 +224,45 @@ def make_m3(llm, gold_path: Path, split: str, photos: set[str] | None = None):
     return engine
 
 
+def make_m4(m3, cache_dir: Path | None, prompt_path: Path | None, budget: int, dry: bool = False):
+    """M4 engine: NAVER client (cached) and judge.py match mode with the quota stop (ai/naver/quota.py)."""
+    import hashlib
+    sys.path.insert(0, str(REPO_ROOT / "ai" / "naver"))
+    from client import NaverSearchClient
+    from m4 import M4
+    from quota import GuardedJudge
+    judge = GuardedJudge(budget=budget, task="M4")
+    if dry:  # Naver and options only; every judge call answers unsure without an API call
+        judge = _DryJudge(judge.prompt_sha256)
+    if prompt_path is not None:
+        judge.prompt = prompt_path.read_text(encoding="utf-8")
+        judge.prompt_sha256 = hashlib.sha256(judge.prompt.encode("utf-8")).hexdigest()
+    judge.prompt_name = (prompt_path or Path("ai/naver/judge_prompt_v1.md")).name
+    return M4(m3, NaverSearchClient(), judge, None if dry else cache_dir)
+
+
+class _DryJudge:
+    """--m4-dry: no API call, always unsure (target lines, Naver results and options only)."""
+
+    def __init__(self, prompt_sha256: str):
+        self.prompt_sha256 = prompt_sha256
+        self.prompt_name = "dry"
+        self.stats = {"llm_calls": 0}
+
+    def __call__(self, candidate: dict) -> dict:
+        return {"verdict": "unsure", "product_id": None, "confidence": 0.0, "reason": "dry run", "meta": {}}
+
+
+def m4_summary(m4) -> dict:
+    j = m4.judge
+    naver = {k: v for k, v in m4.naver.stats.items() if k != "latency_ms"}
+    return {"prompt": j.prompt_name, "prompt_sha256": j.prompt_sha256, "model": "gemini-3.5-flash-lite",
+            "engine": m4.summary(), "judge_calls": {k: v for k, v in j.stats.items() if k != "latency_ms"},
+            "naver": naver}
+
+
 def evaluate(matcher: str, condition: str, split: str, gold_path: Path = GOLD, m3=None,
-             photos: set[str] | None = None) -> dict:
+             photos: set[str] | None = None, m4=None) -> dict:
     gold = json.loads(gold_path.read_text(encoding="utf-8"))
     current = {}  # photo being evaluated, for the M3 resolver
     if matcher in M3_MATCHERS:
@@ -237,6 +277,21 @@ def evaluate(matcher: str, condition: str, split: str, gold_path: Path = GOLD, m
                 return base, base, None
             r, info = m3.resolve(current["photo_id"], item.product_name, catalog, base, mode, use_m3b)
             return r, base, info
+    elif matcher in M4_MATCHERS:
+        if m3 is None or m4 is None:
+            raise ValueError(f"{matcher} needs M3 and M4 engines")
+        use_m3a = M4_MATCHERS[matcher]
+        base_resolve = MATCHERS[M3_BASE]
+
+        def resolve(item, catalog):
+            base = base_resolve(item, catalog)
+            if base.status in CONFIRMED:
+                return base, base, None
+            r, info = base, {}
+            if use_m3a:
+                r, info = m3.resolve(current["photo_id"], item.product_name, catalog, base, "merge", False)
+            r, info4 = m4.resolve(current["photo_id"], item.product_name, catalog, r)
+            return r, base, {**info, "m4": info4}
     else:
         plain = MATCHERS[matcher]
 
@@ -360,7 +415,7 @@ def print_result(r: dict) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--matcher", nargs="+", default=list(MATCHERS), choices=[*MATCHERS, *M3_MATCHERS])
+    parser.add_argument("--matcher", nargs="+", default=list(MATCHERS), choices=[*MATCHERS, *M3_MATCHERS, *M4_MATCHERS])
     parser.add_argument("--condition", nargs="+", default=["C0", "C1"], choices=["C0", "C1"])
     parser.add_argument("--split", default="dev", choices=["dev", "test"])
     parser.add_argument("--json", type=Path, help="write all results (with error lists) here")
@@ -368,23 +423,35 @@ def main() -> None:
     parser.add_argument("--m3-cache", type=Path, help="M3 LLM response cache directory (needed for M3 matchers)")
     parser.add_argument("--cache-only", action="store_true", help="M3: never call the API (rescore from the cache)")
     parser.add_argument("--photos", nargs="+", help="only these photo ids (smoke runs)")
+    parser.add_argument("--m4-cache", type=Path, help="M4 judge verdict cache directory (needed for M4 matchers)")
+    parser.add_argument("--m4-prompt", type=Path, help="M4 judge prompt (default ai/naver/judge_prompt_v1.md)")
+    parser.add_argument("--m4-budget", type=int, default=200, help="M4 Gemini calls in this run (m4_plan.md 7절)")
+    parser.add_argument("--m4-dry", action="store_true", help="M4 without Gemini (judge answers unsure)")
     args = parser.parse_args()
     photos = set(args.photos) if args.photos else None
-    m3 = llm = None
-    if any(m in M3_MATCHERS for m in args.matcher):
+    m3 = llm = m4 = None
+    if any(m in M3_MATCHERS or m in M4_MATCHERS for m in args.matcher):
         from llm import CachedLLM
         if args.m3_cache is None:
             parser.error("M3 matchers need --m3-cache")
         llm = CachedLLM(args.m3_cache, cache_only=args.cache_only)
         m3 = make_m3(llm, args.gold, args.split, photos)
-    results = [evaluate(m, c, args.split, args.gold, m3, photos) for m in args.matcher for c in args.condition]
+    if any(m in M4_MATCHERS for m in args.matcher):
+        if args.m4_cache is None and not args.m4_dry:
+            parser.error("M4 matchers need --m4-cache")
+        m4 = make_m4(m3, args.m4_cache, args.m4_prompt, args.m4_budget, args.m4_dry)
+    results = [evaluate(m, c, args.split, args.gold, m3, photos, m4) for m in args.matcher for c in args.condition]
     for r in results:
         print_result(r)
     if llm is not None:
         print(f"\nLLM: {json.dumps(llm.summary(), ensure_ascii=False)}")
+    if m4 is not None:
+        print(f"M4: {json.dumps(m4_summary(m4), ensure_ascii=False)}")
     if args.json:
         out = results if m3 is None else {"gold": args.gold.as_posix(), "results": results, "llm": llm.summary(),
                                           "m3_photos": m3.photo_records}
+        if m4 is not None:
+            out["m4"] = m4_summary(m4)
         args.json.write_text(json.dumps(out, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
 
 
