@@ -592,3 +592,18 @@
 - Claude 지식에 2025~26년 출시 상품이 없어 Dalmore 17 등을 "확인 안 됨"으로 적음 → 웹 검색으로 7줄 재확인
 - **박진우 결정 (2026-10-14):** Knob Creek 연수 null(v1 규칙: 연수 표기 변경 이력) 은 P47까지 그대로 두고 알려진 한계로 보고. `p47_plan.md` 5장(알려진 한계)·6장(P47 이후 할 일)에 기록. 같은 문서의 바 이름 "오드바"를 "오드비"로 정정
 - **웹 검색 확인 (2026-10-14, 박진우 질문):** SANSIBAR 21y 2줄과 Eld Vatten 8y는 싱글 캐스크 독립병입사(증류소 없음)라 unknown 유지. "Eld Vatten"의 정식 이름이 Svenska Eldvatten이라 새 상품 2개의 브랜드·표준명을 정정(브랜드 key `eld_vatten` → `svenska_eldvatten`, 상품 key 유지). 카탈로그 수치 변화 없음, 검증 그대로(충돌 0). PR #24의 service 스냅샷도 갱신
+
+## 2026-10-15 · 문서 초안 (I2) 실험 원장, Testing documentation AI 영역 (야간 무인 작업, API 호출 없음)
+
+- **도구:** Claude Code (Claude Opus 5.5). API 호출 0회
+- **브랜치:** `i2-docs-ai-results` (base `origin/i2-catalog-v2` `415e78f`)
+- **시간(대략):** 약 40분
+
+### AI가 한 것
+- `ai/docs/results_ledger.md`: P14/I1, P11, P22, P12, L1(라벨 v1.1 재채점), M3, E2E, P28, M4를 한 표로. 숫자는 각 run README·리포트·`eval_plan.md` 표에서 그대로 옮김(새 계산·반올림 변경 없음). 커밋은 원본 파일의 마지막 커밋.
+- `ai/docs/testing_doc_ai_draft.md`: 분할, 사전 등록, 지표 정의, 단위 테스트 목록(`pytest --collect-only` 개수), 실행 명령, CI 범위. 맨 위에 "가이드라인 대조 필요".
+
+### 사람 확인 필요
+- 원장에 L1(라벨 v1.1 재채점)을 실험 행으로 넣음(지시 목록에는 없었음).
+- CI에서 `ai/` 테스트가 돌지 않는다는 점을 문서에 적음. CI에 넣을지는 결정 필요.
+- 과목 Testing documentation 가이드라인과 형식 대조.
