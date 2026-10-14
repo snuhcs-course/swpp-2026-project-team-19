@@ -1,0 +1,401 @@
+[
+  {
+    "set": "val",
+    "source_image": "007_bokchun_03.jpg",
+    "prepared_image": "007_bokchun_03.jpg",
+    "sent_image": "007_bokchun_03.jpg",
+    "sent_sha256": "427f3c129446e60e6f7f37f47b02580873807af3b1e8ad22a600700b05ae16d6",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:49:05.872348+00:00",
+    "latency_ms": 2711,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 65,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "007_bokchun_03.jpg",
+    "prepared_image": "007_bokchun_03.jpg",
+    "sent_image": "007_bokchun_03.jpg",
+    "sent_sha256": "427f3c129446e60e6f7f37f47b02580873807af3b1e8ad22a600700b05ae16d6",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:49:08.625818+00:00",
+    "latency_ms": 2558,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 65,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "007_bokchun_01.jpg",
+    "prepared_image": "007_bokchun_01.jpg",
+    "sent_image": "007_bokchun_01.jpg",
+    "sent_sha256": "d15fad48bc5b84ca42834a5640a00bcac0e96dc8b0a6af03e86e022a79178f3d",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:28.287588+00:00",
+    "latency_ms": 2648,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 173,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "007_bokchun_01.jpg",
+    "prepared_image": "007_bokchun_01.jpg",
+    "sent_image": "007_bokchun_01.jpg",
+    "sent_sha256": "d15fad48bc5b84ca42834a5640a00bcac0e96dc8b0a6af03e86e022a79178f3d",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:30.955572+00:00",
+    "latency_ms": 2832,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 173,
+    "n_tables": 2
+  },
+  {
+    "set": "val",
+    "source_image": "007_bokchun_02.jpg",
+    "prepared_image": "007_bokchun_02.jpg",
+    "sent_image": "007_bokchun_02.jpg",
+    "sent_sha256": "3eeaa05936f34bf17b16bf7ba4a3f87c6e935f1ffdb5868e453da423a6b9e470",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:33.806543+00:00",
+    "latency_ms": 2454,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 115,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "007_bokchun_02.jpg",
+    "prepared_image": "007_bokchun_02.jpg",
+    "sent_image": "007_bokchun_02.jpg",
+    "sent_sha256": "3eeaa05936f34bf17b16bf7ba4a3f87c6e935f1ffdb5868e453da423a6b9e470",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:36.272380+00:00",
+    "latency_ms": 2556,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 115,
+    "n_tables": 1
+  },
+  {
+    "set": "val",
+    "source_image": "007_bokchun_03.jpg",
+    "prepared_image": "007_bokchun_03.jpg",
+    "sent_image": "007_bokchun_03.jpg",
+    "sent_sha256": "427f3c129446e60e6f7f37f47b02580873807af3b1e8ad22a600700b05ae16d6",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:38.844757+00:00",
+    "latency_ms": 2636,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 65,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "007_bokchun_04.jpg",
+    "prepared_image": "007_bokchun_04.jpg",
+    "sent_image": "007_bokchun_04.jpg",
+    "sent_sha256": "5228aac6adeece3c026c1365f6f15d8f3e1798464796396dc4b0053cfecf9498",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:41.490282+00:00",
+    "latency_ms": 3883,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 71,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "007_bokchun_04.jpg",
+    "prepared_image": "007_bokchun_04.jpg",
+    "sent_image": "007_bokchun_04.jpg",
+    "sent_sha256": "5228aac6adeece3c026c1365f6f15d8f3e1798464796396dc4b0053cfecf9498",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:45.385545+00:00",
+    "latency_ms": 2476,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 71,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_01.png",
+    "prepared_image": "008_seorosang_01.png",
+    "sent_image": "008_seorosang_01.png",
+    "sent_sha256": "c1c304b23f92853ef046d2e3862410110533806fedb1a8dce3685b106f0bfffa",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:47.875758+00:00",
+    "latency_ms": 1752,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 65,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_01.png",
+    "prepared_image": "008_seorosang_01.png",
+    "sent_image": "008_seorosang_01.png",
+    "sent_sha256": "c1c304b23f92853ef046d2e3862410110533806fedb1a8dce3685b106f0bfffa",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:49.641923+00:00",
+    "latency_ms": 2370,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 65,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_02.png",
+    "prepared_image": "008_seorosang_02.png",
+    "sent_image": "008_seorosang_02.png",
+    "sent_sha256": "0951efa0152bc4d37d6f335ed08769321555efa515ab431070ebbd1a0c9c8fd6",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:52.038056+00:00",
+    "latency_ms": 1752,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 56,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_02.png",
+    "prepared_image": "008_seorosang_02.png",
+    "sent_image": "008_seorosang_02.png",
+    "sent_sha256": "0951efa0152bc4d37d6f335ed08769321555efa515ab431070ebbd1a0c9c8fd6",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:53.804457+00:00",
+    "latency_ms": 2091,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 56,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_03.png",
+    "prepared_image": "008_seorosang_03.png",
+    "sent_image": "008_seorosang_03.png",
+    "sent_sha256": "707b0034dfeb178db9087e8adec17f1dc69e05225fbe9211920e450c150f5241",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:55.918747+00:00",
+    "latency_ms": 2100,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 65,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_03.png",
+    "prepared_image": "008_seorosang_03.png",
+    "sent_image": "008_seorosang_03.png",
+    "sent_sha256": "707b0034dfeb178db9087e8adec17f1dc69e05225fbe9211920e450c150f5241",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:53:58.029124+00:00",
+    "latency_ms": 2169,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 65,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_04.png",
+    "prepared_image": "008_seorosang_04.png",
+    "sent_image": "008_seorosang_04.png",
+    "sent_sha256": "4c3886715fed44180129ef76dfc40a64b766593ba2388841f32c92d95c5d93ca",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:54:00.217723+00:00",
+    "latency_ms": 1974,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 53,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_04.png",
+    "prepared_image": "008_seorosang_04.png",
+    "sent_image": "008_seorosang_04.png",
+    "sent_sha256": "4c3886715fed44180129ef76dfc40a64b766593ba2388841f32c92d95c5d93ca",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:54:02.216585+00:00",
+    "latency_ms": 1943,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 53,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_05.png",
+    "prepared_image": "008_seorosang_05.png",
+    "sent_image": "008_seorosang_05.png",
+    "sent_sha256": "0267b1102ead2147cc49471ec8b3bacd2610d2e01988f550874936a7e6d26f63",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:54:04.184138+00:00",
+    "latency_ms": 1985,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 44,
+    "n_tables": 0
+  },
+  {
+    "set": "val",
+    "source_image": "008_seorosang_05.png",
+    "prepared_image": "008_seorosang_05.png",
+    "sent_image": "008_seorosang_05.png",
+    "sent_sha256": "0267b1102ead2147cc49471ec8b3bacd2610d2e01988f550874936a7e6d26f63",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": true,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T04:54:06.187557+00:00",
+    "latency_ms": 2056,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 44,
+    "n_tables": 0
+  }
+]
