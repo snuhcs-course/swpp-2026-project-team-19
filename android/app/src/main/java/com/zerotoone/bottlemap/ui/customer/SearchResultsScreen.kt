@@ -41,11 +41,17 @@ fun SearchResultsScreen(
     query: String,
     onBack: () -> Unit,
     onOpenBarDetail: (String) -> Unit,
+    onInvalidQuery: (String) -> Unit,
     viewModel: SearchResultsViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(query) { viewModel.search(query) }
+    LaunchedEffect(state) {
+        if (state is CustomerSearchUiState.InvalidQuery) {
+            onInvalidQuery((state as CustomerSearchUiState.InvalidQuery).fieldErrorCode)
+        }
+    }
 
     I2CustomerSearchTheme {
         SearchResultsContent(
@@ -133,12 +139,18 @@ private fun SearchResultsContent(
                     onAction = onBack,
                 )
             }
+            is CustomerSearchUiState.InvalidQuery -> SearchStatusPanel(
+                title = "검색어를 확인해 주세요",
+                description = searchValidationMessage(state.fieldErrorCode),
+                actionLabel = "검색어 변경",
+                onAction = onBack,
+            )
             is CustomerSearchUiState.Error -> SearchStatusPanel(
                 title = "결과를 불러오지 못했어요",
                 description = state.message,
-                actionLabel = "다시 시도",
-                onAction = onRetry,
-                secondaryAction = onBack,
+                actionLabel = if (state.canRetry) "다시 시도" else "검색어 변경",
+                onAction = if (state.canRetry) onRetry else onBack,
+                secondaryAction = if (state.canRetry) onBack else null,
             )
         }
     }
