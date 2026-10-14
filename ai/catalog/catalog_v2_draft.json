@@ -1,14 +1,15 @@
 {
   "version": "catalog_v2_draft",
   "created": "2026-10-14",
-  "based_on": "catalog_v1_draft + eval/match_gold_v1_1.json new_products + menu names of the held-out bars (labels v1.1: 미라보, Beck, 포레스트) + POST_TEST_ALIASES (match_gold_test_draft.py)",
+  "based_on": "catalog_v1_draft + eval/match_gold_v1_1.json new_products + menu names of the held-out bars (labels v1.1: 미라보, Beck, 포레스트) + POST_TEST_ALIASES (match_gold_test_draft.py) + eval/match_gold_final_v1.json new_products and menu names (수이, 오드비)",
   "notes": [
     "ids are UUIDv5(namespace 6b1a1f4e-19b0-4c7a-9a7e-b0771e3a0019, '<kind>:<key>'): stable across rebuilds.",
     "normalized_alias is intentionally omitted: backend normalization function generates it.",
     "'sources' on aliases is metadata for evaluation scripts only; the loader can ignore it.",
     "abv is null for all products in v1 (not on menus; not filled from memory).",
     "products[].sources / first_seen are evaluation-only fields: the bars whose menu lists the product, and the first of them. The loader ignores them.",
-    "Menu aliases are the printed line names (labels v1.1); a 'Korean / English' line gives one alias per part."
+    "Menu aliases are the printed line names (labels v1.1, labels_final_v1); a 'Korean / English' line gives one alias per part; the Odbi event note ' / 행사' is not part of the alias.",
+    "menu:수이 / menu:오드비 aliases are the final (P47) bars' own spellings: catalog_v2_eval_5bars.json drops aliases whose only sources are these two."
   ],
   "excluded_non_whisky": {
     "레미마틴vsop / Remy Martin vsop": "cognac",
@@ -2718,6 +2719,276 @@
           ]
         }
       ]
+    },
+    {
+      "id": "61ed7966-1a14-51aa-a360-061bbbbf9b4b",
+      "key": "the_ileach",
+      "canonical_name": "The Ileach",
+      "aliases": [
+        {
+          "id": "71d03f8d-ebff-5e3b-b10e-03538a4787ef",
+          "alias_text": "The Ileach",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c654cced-b501-5920-856c-1dc35c8e321a",
+      "key": "jura",
+      "canonical_name": "Jura",
+      "aliases": [
+        {
+          "id": "9f5aea53-3827-5712-850b-e51881584137",
+          "alias_text": "Jura",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2a40f180-f578-5d8f-b7ca-e05b0d1e92e3",
+      "key": "angels_envy",
+      "canonical_name": "Angel's Envy",
+      "aliases": [
+        {
+          "id": "9a15596a-060d-5771-9ad4-8dfab96a8784",
+          "alias_text": "Angel's Envy",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4941751a-cb05-50a1-add2-fe78fdb9acad",
+      "key": "widow_jane",
+      "canonical_name": "Widow Jane",
+      "aliases": [
+        {
+          "id": "2eb52e1c-79de-5cbd-8a66-3045be91a546",
+          "alias_text": "Widow Jane",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "033e7a76-46af-588c-b1b3-4dcb07391e09",
+      "key": "eld_vatten",
+      "canonical_name": "Eld Vatten",
+      "aliases": [
+        {
+          "id": "7bead32a-3a22-50b6-8adc-2e583d58234c",
+          "alias_text": "Eld Vatten",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1590c156-7b50-51e2-8f5b-888390b98066",
+      "key": "kim_gwajang",
+      "canonical_name": "Kim Gwajang",
+      "aliases": [
+        {
+          "id": "b04f1556-dcd5-5923-8e5d-924c99d6a848",
+          "alias_text": "Kim Gwajang",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ce4574f0-60c5-54e2-9dc5-7238d2cc045a",
+      "key": "the_nectar",
+      "canonical_name": "The Nectar",
+      "aliases": [
+        {
+          "id": "5732dc23-73b8-5ae1-b8b6-5e7f8ee4030e",
+          "alias_text": "The Nectar",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b68faf1f-5133-55a3-9c9f-cb319f54e6d9",
+      "key": "the_maltman",
+      "canonical_name": "The Maltman",
+      "aliases": [
+        {
+          "id": "4185b5fc-ded2-5ff9-922a-932786542e17",
+          "alias_text": "The Maltman",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bcf93329-55c2-5a4f-baf8-22deb0d2cf81",
+      "key": "jack_wiebers",
+      "canonical_name": "Jack Wiebers",
+      "aliases": [
+        {
+          "id": "5ae754f9-4e28-5638-bb5c-dc672798d010",
+          "alias_text": "Jack Wiebers",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3dd9f03e-e17f-5c65-b7a9-65c970b7e70b",
+      "key": "aqua_vitae",
+      "canonical_name": "Aqua Vitae",
+      "aliases": [
+        {
+          "id": "8e534f28-0010-5884-83ad-4950edccc197",
+          "alias_text": "Aqua Vitae",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "8e1c249b-1364-5f3d-b4f3-ad8144f8cf6d",
+      "key": "craft_bros",
+      "canonical_name": "Craft Bros",
+      "aliases": [
+        {
+          "id": "56f4f6cd-efc4-5cd0-b5c3-77ef0c04f427",
+          "alias_text": "Craft Bros",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fbe2ff1b-a4f3-5224-8435-71d6aeee47a5",
+      "key": "saburomaru",
+      "canonical_name": "Saburomaru",
+      "aliases": [
+        {
+          "id": "c1155556-8891-5cca-93c7-b248511e69b6",
+          "alias_text": "Saburomaru",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "226c4b35-7626-5320-bc77-c87bfac64b14",
+      "key": "basil_haydens",
+      "canonical_name": "Basil Hayden's",
+      "aliases": [
+        {
+          "id": "0a482b0f-aa90-5295-9db4-c2794d4d14c3",
+          "alias_text": "Basil Hayden's",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "7127b22f-1a97-590d-92d6-8136c214d4eb",
+      "key": "bulleit",
+      "canonical_name": "Bulleit",
+      "aliases": [
+        {
+          "id": "b08a85e8-1786-5a7a-b459-c46c31996a87",
+          "alias_text": "Bulleit",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "53d84970-4c9b-534d-9e55-efd8b16277e6",
+      "key": "evan_williams",
+      "canonical_name": "Evan Williams",
+      "aliases": [
+        {
+          "id": "cc878437-6e36-508a-ab47-d5cd1ec0e5bc",
+          "alias_text": "Evan Williams",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "313225bb-3c54-51cc-ba3f-88c2980809d2",
+      "key": "old_parr",
+      "canonical_name": "Old Parr",
+      "aliases": [
+        {
+          "id": "3bc90fed-3baf-51a2-b987-ce5269da0280",
+          "alias_text": "Old Parr",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "135558da-3fbf-590e-a9f5-fde266a1d089",
+      "key": "north_star",
+      "canonical_name": "North Star",
+      "aliases": [
+        {
+          "id": "a7898b63-d652-57b8-acc1-754b4727fedd",
+          "alias_text": "North Star",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "66df1185-676b-5d19-b116-994224b4d1a5",
+      "key": "shindo",
+      "canonical_name": "Shindo",
+      "aliases": [
+        {
+          "id": "abd1c3ce-1b61-50db-93ed-6177ce6ce414",
+          "alias_text": "Shindo",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ]
+        }
+      ]
     }
   ],
   "products": [
@@ -2774,7 +3045,9 @@
         "menu:위스키복춘",
         "menu:P5온라인",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -2824,6 +3097,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "c3db317a-fcd9-5d7a-8ec8-4d77318e814f",
+          "alias_text": "아벨라워 아부나흐 셰리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "da688bf2-fbef-559f-b20c-820361329150",
+          "alias_text": "Aberlour A'Bunadh (아부나흐)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -2843,7 +3134,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -2929,6 +3222,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "0bf5275d-caf2-50e7-8438-1e29b03d6859",
+          "alias_text": "아드벡10",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "c30ec443-2a92-5b7d-b411-8c55ee8945e1",
+          "alias_text": "Ardbeg 10y (아드벡)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -2947,7 +3258,9 @@
         "menu:서로상",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -2968,6 +3281,7 @@
           "language_code": "ko",
           "sources": [
             "menu:서로상",
+            "menu:오드비",
             "menu:위스키복춘",
             "menu:포레스트",
             "standard"
@@ -2980,6 +3294,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "dd25149e-0d85-5662-8edf-b1b5995e59e6",
+          "alias_text": "Ardbeg Uiggeadail (우거다일)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -2999,7 +3322,9 @@
         "menu:위스키복춘",
         "menu:서로상",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3019,6 +3344,7 @@
           "language_code": "ko",
           "sources": [
             "menu:서로상",
+            "menu:오드비",
             "menu:위스키복춘",
             "menu:포레스트",
             "standard"
@@ -3031,6 +3357,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "7e83c42c-f93f-5bce-af82-90e73732b6de",
+          "alias_text": "Ardbeg Corryvreckan (코리브레칸)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -3050,7 +3385,9 @@
         "menu:위스키복춘",
         "menu:서로상",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3126,6 +3463,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "39c54b4f-f730-5ee7-9fc5-9a9aaae7d15b",
+          "alias_text": "아란10",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "27370fb9-de06-5601-a332-c1585cbf8aed",
+          "alias_text": "Arran 10y (아란)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -3142,7 +3497,8 @@
       "sources": [
         "menu:위스키복춘",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3189,6 +3545,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "b6278dec-0997-583a-9a10-6de41a0c1ffc",
+          "alias_text": "아란 셰리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -3282,7 +3647,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3400,7 +3767,26 @@
           "alias_text": "발베니 12년",
           "language_code": "ko",
           "sources": [
+            "menu:수이",
             "menu:포레스트"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2c2979bc-73e1-58ad-9d24-186fd0336beb",
+          "alias_text": "발베니12 더블우드",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "3f9d1c52-99aa-5c29-ad61-282b6c088f2c",
+          "alias_text": "Balvenie 12y (발베니)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -3419,7 +3805,9 @@
       "sources": [
         "menu:위스키복춘",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3503,6 +3891,24 @@
             "menu:포레스트"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "c168a1bc-fe67-5c0a-a110-fa30e5827349",
+          "alias_text": "발베니14 캐리비안 캐스크",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "b62c74b3-3fab-54ff-be14-c0f6c4789385",
+          "alias_text": "Balvenie 14y (럼 캐스크)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -3519,7 +3925,8 @@
       "sources": [
         "menu:위스키복춘",
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3583,6 +3990,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "76fa038d-fe30-5526-9fe4-d7b6471b03f6",
+          "alias_text": "벤로막10",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -3673,7 +4089,9 @@
       "sources": [
         "menu:위스키복춘",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3691,6 +4109,7 @@
           "alias_text": "부커스",
           "language_code": "ko",
           "sources": [
+            "menu:오드비",
             "menu:위스키복춘",
             "standard"
           ],
@@ -3713,6 +4132,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "11464a09-d868-5e72-8d96-bf11a6cdca41",
+          "alias_text": "Booker's (부커스)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -3731,7 +4159,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3807,6 +4237,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "3f48c087-4d66-52b0-a77a-a9df87ce07a5",
+          "alias_text": "보모어12",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "5784ac11-cca1-5c94-b087-76a2555c4658",
+          "alias_text": "Bowmore 12y (보모어)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -3823,7 +4271,8 @@
       "sources": [
         "menu:위스키복춘",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3889,6 +4338,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "ea6bef3d-267b-51da-afd7-f65821db2ea1",
+          "alias_text": "Bowmore 15y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -3904,7 +4362,8 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -3959,6 +4418,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "bafc7fe4-1b98-57dd-8ea2-2a08c7f678ec",
+          "alias_text": "Bunnahabhain 12y (부나하벤)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -4059,7 +4527,8 @@
       "sources": [
         "menu:서로상",
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "서로상",
       "aliases": [
@@ -4134,6 +4603,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "fbb3179c-cc43-5469-8702-b30d33d7b16e",
+          "alias_text": "Cragganmore 12y (크라겐모어)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -4151,7 +4629,8 @@
         "menu:위스키복춘",
         "menu:서로상",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -4169,6 +4648,7 @@
           "alias_text": "달모어 12년",
           "language_code": "ko",
           "sources": [
+            "menu:수이",
             "menu:포레스트",
             "standard"
           ],
@@ -4245,6 +4725,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "1a60c47a-70d4-515a-a25b-bcee42f3ef50",
+          "alias_text": "Dalmore 12y (달모어)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -4260,7 +4749,8 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -4335,6 +4825,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "32e88f03-0858-553a-83bb-4a2297b887bd",
+          "alias_text": "달모어12셰리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -4351,7 +4850,9 @@
       "sources": [
         "menu:위스키복춘",
         "menu:서로상",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -4451,6 +4952,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "986def51-a9aa-5a4d-8778-69fb8d84a8e7",
+          "alias_text": "달모어15",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "56e5b37c-b71d-5034-8e3d-94963201ce28",
+          "alias_text": "Dalmore 15y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -4589,7 +5108,8 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:수이"
       ],
       "first_seen": "서로상",
       "aliases": [
@@ -4672,6 +5192,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "0f6957ee-4939-5a86-bea4-4a45c69f767e",
+          "alias_text": "Dalwhinnie 15y (달위니)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -4761,7 +5290,8 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -4818,6 +5348,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "abf8bb39-6fb2-5b68-8d57-7998556ab20d",
+          "alias_text": "에드라두어10",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -4835,7 +5374,9 @@
         "menu:위스키복춘",
         "menu:P5온라인",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -4854,6 +5395,7 @@
           "language_code": "ko",
           "sources": [
             "menu:P5온라인",
+            "menu:수이",
             "menu:포레스트",
             "standard"
           ],
@@ -4864,7 +5406,8 @@
           "alias_text": "글렌알라키12",
           "language_code": "ko",
           "sources": [
-            "menu:P5온라인"
+            "menu:P5온라인",
+            "menu:오드비"
           ],
           "is_searchable": true
         },
@@ -4921,6 +5464,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "e2090f04-8bac-5daa-a329-2a5a32d7c2a8",
+          "alias_text": "Glenallachie 12y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -4938,7 +5490,9 @@
         "menu:위스키복춘",
         "menu:P5온라인",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -4967,7 +5521,8 @@
           "alias_text": "글렌알라키15",
           "language_code": "ko",
           "sources": [
-            "menu:P5온라인"
+            "menu:P5온라인",
+            "menu:오드비"
           ],
           "is_searchable": true
         },
@@ -5024,6 +5579,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "40a0773b-a838-5b1b-9e35-d414d25b38d1",
+          "alias_text": "Glenallachie 15y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5043,7 +5607,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -5061,6 +5627,7 @@
           "alias_text": "글렌드로낙 12년",
           "language_code": "ko",
           "sources": [
+            "menu:수이",
             "menu:포레스트",
             "standard"
           ],
@@ -5071,7 +5638,8 @@
           "alias_text": "글렌드로낙12",
           "language_code": "ko",
           "sources": [
-            "menu:P5온라인"
+            "menu:P5온라인",
+            "menu:오드비"
           ],
           "is_searchable": true
         },
@@ -5147,6 +5715,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "536aa62a-c6ed-5d22-89f4-6938e2f32410",
+          "alias_text": "Glendronach 12y (글렌드로낙)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5163,7 +5740,8 @@
       "sources": [
         "menu:위스키복춘",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -5239,6 +5817,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "feeff105-80c3-5573-aca2-a34071ce7817",
+          "alias_text": "글렌드로낙15",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5257,7 +5844,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -5299,6 +5888,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "b1eee1c3-72b9-503d-9bd4-b5458399c301",
+          "alias_text": "글렌파클라스105",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "358a81cf-8732-5918-9794-df2c47230ab0",
+          "alias_text": "Glenfarclas 105 (글렌파클라스)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5318,7 +5925,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -5347,7 +5956,8 @@
           "alias_text": "글렌피딕12",
           "language_code": "ko",
           "sources": [
-            "menu:P5온라인"
+            "menu:P5온라인",
+            "menu:오드비"
           ],
           "is_searchable": true
         },
@@ -5414,6 +6024,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "31460d8f-d7a7-5ba6-b238-ebd9efdefd7c",
+          "alias_text": "Glenfiddich 12y (글렌피딕)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "74d0ff72-3c2a-5846-9139-794af7d354f1",
+          "alias_text": "글렌피딕12년",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5433,7 +6061,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -5471,7 +6101,8 @@
           "alias_text": "글렌피딕15",
           "language_code": "ko",
           "sources": [
-            "menu:P5온라인"
+            "menu:P5온라인",
+            "menu:오드비"
           ],
           "is_searchable": true
         },
@@ -5538,6 +6169,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "326c19bb-62ca-598e-b31f-e017a81526d6",
+          "alias_text": "Glenfiddich 15y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5553,7 +6193,8 @@
       "abv": null,
       "sources": [
         "menu:서로상",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "서로상",
       "aliases": [
@@ -5619,6 +6260,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "177e282b-645d-5ed9-bbe4-28850c3de6f8",
+          "alias_text": "Glengoyne 12y (글렌고인)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5636,7 +6286,9 @@
         "menu:위스키복춘",
         "menu:P5온라인",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -5712,6 +6364,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "832f8c68-c33a-5e25-b7a5-b47b8bc6b1c2",
+          "alias_text": "글렌그란트15",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2aa408b9-7b81-550a-9ccf-0ca2158a3678",
+          "alias_text": "Glengrant 15y (글렌그란트)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5728,7 +6398,8 @@
       "sources": [
         "menu:서로상",
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "서로상",
       "aliases": [
@@ -5795,6 +6466,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "81ec109d-12f2-5fff-b3c7-7b9fff33df89",
+          "alias_text": "Glenkinchie 12y (글렌킨치)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5813,7 +6493,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -5851,7 +6533,8 @@
           "alias_text": "글렌리벳12",
           "language_code": "ko",
           "sources": [
-            "menu:P5온라인"
+            "menu:P5온라인",
+            "menu:오드비"
           ],
           "is_searchable": true
         },
@@ -5917,6 +6600,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "26cb6ce0-7479-5bad-b06b-6aa197e1c006",
+          "alias_text": "The Glenlivet 12y (더 글렌리벳)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5935,7 +6627,9 @@
         "menu:서로상",
         "menu:P5온라인",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -5953,6 +6647,8 @@
           "alias_text": "글렌모렌지 오리지널",
           "language_code": "ko",
           "sources": [
+            "menu:수이",
+            "menu:오드비",
             "menu:위스키복춘",
             "menu:포레스트",
             "standard"
@@ -6050,6 +6746,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "d15ae40d-d676-5e99-a815-ac54908e2939",
+          "alias_text": "Glenmorangie Org (글렌모렌지)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -6067,7 +6772,9 @@
         "menu:위스키복춘",
         "menu:서로상",
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -6153,6 +6860,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "b325227e-f3ae-5c16-a2a0-6f7f89c350f2",
+          "alias_text": "글렌모렌지 더 넥타",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "4e8ca290-6eda-54ad-8b1b-c093de563ff6",
+          "alias_text": "Glenmorangie The Nectar (더 넥타)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -6171,7 +6896,9 @@
         "menu:서로상",
         "menu:P5온라인",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -6191,6 +6918,7 @@
           "language_code": "ko",
           "sources": [
             "menu:P5온라인",
+            "menu:오드비",
             "menu:위스키복춘",
             "standard"
           ],
@@ -6249,6 +6977,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "13c846ba-2c40-5158-8069-6e0b1214c768",
+          "alias_text": "Glenmorangie Lasanta (라산타)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -6267,7 +7004,9 @@
         "menu:서로상",
         "menu:P5온라인",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -6335,6 +7074,24 @@
             "menu:포레스트"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "0b220b23-dffe-51fa-98fb-9084af3402bd",
+          "alias_text": "글렌모렌지 컨타루반",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "89050221-17c3-5910-82bf-1ae6861108e5",
+          "alias_text": "Glenmorangie Quinta Ruban (퀸타루반)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -6353,7 +7110,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -6373,6 +7132,7 @@
           "language_code": "ko",
           "sources": [
             "menu:P5온라인",
+            "menu:수이",
             "menu:위스키복춘",
             "menu:포레스트",
             "standard"
@@ -6385,6 +7145,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "24ff63cf-e16a-5383-8620-667ca63434c5",
+          "alias_text": "글렌모렌지 시그넷 리저브",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "190d728a-1dc6-5c1e-a00e-0e002b15d628",
+          "alias_text": "Glenmorangie Signet (시그넷)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -6404,7 +7182,8 @@
         "menu:위스키복춘",
         "menu:서로상",
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -6506,6 +7285,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "b816f084-b509-5204-8297-5bfbc7a8235b",
+          "alias_text": "Glenmorangie 18y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -6522,7 +7310,8 @@
       "sources": [
         "menu:서로상",
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "서로상",
       "aliases": [
@@ -6617,6 +7406,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "1c6333a4-a165-5830-b8df-3a255b098547",
+          "alias_text": "Glenrothes 12y (글렌로시스)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -6633,7 +7431,8 @@
       "sources": [
         "menu:위스키복춘",
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -6708,6 +7507,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "b7a7101b-7da1-5cb5-878a-e6bcf1f6eb3f",
+          "alias_text": "Highland Park 12y (하이랜드파크)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -6723,7 +7531,8 @@
       "abv": null,
       "sources": [
         "menu:서로상",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "서로상",
       "aliases": [
@@ -6772,6 +7581,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "2efef07e-ab9b-574c-917f-0b32434cd80b",
+          "alias_text": "잭다니엘",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -6786,7 +7604,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:서로상"
+        "menu:서로상",
+        "menu:오드비"
       ],
       "first_seen": "서로상",
       "aliases": [
@@ -6806,6 +7625,7 @@
           "language_code": "ko",
           "sources": [
             "menu:서로상",
+            "menu:오드비",
             "standard"
           ],
           "is_searchable": true
@@ -6835,7 +7655,8 @@
         "menu:위스키복춘",
         "menu:서로상",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -6912,6 +7733,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "97a512c9-2ef9-51b4-a1ce-101fa7a6452a",
+          "alias_text": "조니워커블랙",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -6929,7 +7759,9 @@
         "menu:위스키복춘",
         "menu:서로상",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -6988,6 +7820,33 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "28b23acb-ba71-5a38-8471-59824ddadaa4",
+          "alias_text": "조니워커블루",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d3f79878-3a74-5cc8-894e-ac6cd764118f",
+          "alias_text": "JohnnieWalker Blue (블루)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a9928ceb-d171-548f-aebc-44663f5e89f1",
+          "alias_text": "조니블루",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -7003,7 +7862,8 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7032,6 +7892,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "20e4d0ff-3c89-522f-a819-7e57f02366f0",
+          "alias_text": "Kavalan Vinho Barrique",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -7112,7 +7981,8 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7121,6 +7991,7 @@
           "alias_text": "Kavalan Triple Sherry Cask",
           "language_code": "en",
           "sources": [
+            "menu:수이",
             "standard"
           ],
           "is_searchable": true
@@ -7166,7 +8037,9 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7214,6 +8087,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "d6d66e12-8c6a-5eee-bd0d-9adab6d74e01",
+          "alias_text": "놉크릭 버번",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "485020ae-7769-572d-885c-df8cb540a107",
+          "alias_text": "Knob Creek 9y (납 크릭)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -7232,7 +8123,9 @@
         "menu:서로상",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7317,6 +8210,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "9c45d1b0-5bd3-5a8d-a437-ae4c81e86e87",
+          "alias_text": "라가불린16",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "003f0167-4710-5458-a6f4-4f32fc4e0043",
+          "alias_text": "Lagavulin 16y (라가불린)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -7336,7 +8247,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7422,6 +8335,33 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "f2809bdb-31ed-501f-a28f-c049b512cfaa",
+          "alias_text": "라프로익10",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "acca89fd-5055-5f81-b0b0-19028f3815d7",
+          "alias_text": "Laphroaig 10y (라프로익)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "c59eb140-3517-5a2b-b4c9-ff0498ba74a4",
+          "alias_text": "라프로윅 10년",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -7439,7 +8379,9 @@
         "menu:위스키복춘",
         "menu:서로상",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7468,6 +8410,7 @@
           "language_code": "ko",
           "sources": [
             "menu:서로상",
+            "menu:오드비",
             "menu:위스키복춘"
           ],
           "is_searchable": true
@@ -7489,6 +8432,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "fb8a8247-61e9-5c86-b732-c1487cf6c496",
+          "alias_text": "Laphroaig Quarter Cask (쿼터캐스크)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -7507,7 +8459,9 @@
         "menu:서로상",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7611,6 +8565,33 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "64413915-57e6-59be-8d74-851dac8bd5c9",
+          "alias_text": "맥켈란12 더블",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "336196db-1b38-5d81-853a-4b5764f755ef",
+          "alias_text": "Macallan 12y Double Cask (맥캘란 더블)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "6678cd0b-4d68-5b48-96d0-f90f5f558e1f",
+          "alias_text": "맥캘란 12년 더블",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -7628,7 +8609,8 @@
         "menu:위스키복춘",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7713,6 +8695,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "4005129b-d829-5208-9f55-ea52e23c078b",
+          "alias_text": "Macallan 15y Double cask",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -7729,7 +8720,9 @@
       "sources": [
         "menu:서로상",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "서로상",
       "aliases": [
@@ -7823,6 +8816,33 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "00ccd969-e5a4-5e54-a899-0310ddcea7e7",
+          "alias_text": "맥켈란12 셰리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "57668033-08eb-5376-8239-a60acef69f2a",
+          "alias_text": "Macallan 12y Sherry Cask (쉐리)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "aed8cce6-6d8b-532b-b598-ed641526cbb3",
+          "alias_text": "맥캘란 12년 쉐리",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -7840,7 +8860,9 @@
         "menu:위스키복춘",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7872,6 +8894,25 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "973d599b-6d74-5530-8dc7-d57ab0e69745",
+          "alias_text": "메이커스마크",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이",
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "1e229216-a3d1-5223-a755-32cb04eaf2dd",
+          "alias_text": "Maker's Mark (메이커스 마크)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -7888,7 +8929,9 @@
       "sources": [
         "menu:위스키복춘",
         "menu:서로상",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7908,6 +8951,8 @@
           "language_code": "ko",
           "sources": [
             "menu:서로상",
+            "menu:수이",
+            "menu:오드비",
             "menu:위스키복춘",
             "standard"
           ],
@@ -7919,6 +8964,15 @@
           "language_code": "ko",
           "sources": [
             "menu:포레스트"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "5cdfb2ed-3a8c-5f92-8fb6-75990857eb9d",
+          "alias_text": "Monkey Shoulder (몽키 숄더)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -7938,7 +8992,8 @@
         "menu:위스키복춘",
         "menu:서로상",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -7995,6 +9050,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "ff7b2b5e-787a-5e38-b43a-13b38e19ab8b",
+          "alias_text": "Noah's Mill (노아스밀)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -8068,7 +9132,9 @@
         "menu:서로상",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -8153,6 +9219,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "7e034d7f-2053-5d3a-beff-09517e4f051d",
+          "alias_text": "오반14",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2f307276-3dd6-50ea-8138-631af2b2b368",
+          "alias_text": "Oban 14y (오반)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -8167,7 +9251,8 @@
       "edition_name": "16.1",
       "abv": null,
       "sources": [
-        "menu:위스키복춘"
+        "menu:위스키복춘",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -8187,6 +9272,15 @@
           "sources": [
             "menu:위스키복춘",
             "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2c171042-ee90-5ac7-8485-52800a86709e",
+          "alias_text": "Octomore 16.1 (옥토모어)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -8322,7 +9416,8 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -8377,6 +9472,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "7e303d7c-2445-54a0-9332-5c62b5adf721",
+          "alias_text": "브룩라디 포트샬롯10",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -8450,7 +9554,9 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -8505,6 +9611,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "da57f732-43c9-5301-9969-bb75975da234",
+          "alias_text": "로얄브라클라12",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "1a7711cb-cbd3-51b1-9364-3575c91251e1",
+          "alias_text": "Royal Brackla",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -8594,7 +9718,8 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -8652,6 +9777,15 @@
             "menu:위스키복춘"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "39e1de81-54c3-5903-a484-61a5e9bc9c79",
+          "alias_text": "Royal Salute (로얄살루트 21년)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -8667,7 +9801,8 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -8704,6 +9839,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "87d5f721-868d-5b0b-8a9e-87ddd5030cb6",
+          "alias_text": "러셀 싱글베럴",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -8921,7 +10065,9 @@
         "menu:P5온라인",
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -8939,6 +10085,7 @@
           "alias_text": "탈리스커 10년",
           "language_code": "ko",
           "sources": [
+            "menu:수이",
             "menu:포레스트",
             "standard"
           ],
@@ -9005,6 +10152,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "64c9abd3-4be6-5f3e-a60b-737926030e76",
+          "alias_text": "탈리스커10",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "0a3b2212-dd92-5ad7-a092-70bf27413606",
+          "alias_text": "Talisker 10y (탈리스커)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -9086,7 +10251,9 @@
       "sources": [
         "menu:위스키복춘",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -9161,6 +10328,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "e7d60c79-50f0-554c-9dfc-b36825e94691",
+          "alias_text": "와일드터키8 101",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "da7fbd4d-b8d1-5804-bac3-89a9e6984e58",
+          "alias_text": "Wild Turkey 8y (와일드터키)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -9177,7 +10362,9 @@
       "sources": [
         "menu:위스키복춘",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -9204,6 +10391,7 @@
           "alias_text": "와일드터키 레어브리드",
           "language_code": "ko",
           "sources": [
+            "menu:오드비",
             "menu:위스키복춘",
             "menu:포레스트"
           ],
@@ -9215,6 +10403,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2b9125f3-b64b-56a1-80b8-fb97da6cf726",
+          "alias_text": "Wild Turkey Rarebreed (레어브리드)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -9233,7 +10430,9 @@
       "sources": [
         "menu:위스키복춘",
         "menu:서로상",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -9283,6 +10482,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "5c1e4038-5fc7-56f0-bd55-75b6dd843ba9",
+          "alias_text": "우드포드리저브",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a2328d16-a646-503f-a295-836fabda5028",
+          "alias_text": "Woodford Reserve (우드포드리저브)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -9298,7 +10515,9 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -9335,6 +10554,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a53a3926-5cc1-5fa2-818d-c8a800fe9274",
+          "alias_text": "우드포드리저브 더블오크",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "034f3114-cba9-5b22-a7b5-030e05bb1813",
+          "alias_text": "Woodford Reserve Double Oak (더블 오크)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -9396,7 +10633,8 @@
       "abv": null,
       "sources": [
         "menu:위스키복춘",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "위스키복춘",
       "aliases": [
@@ -9432,6 +10670,7 @@
           "alias_text": "요이치 싱글몰트",
           "language_code": "ko",
           "sources": [
+            "menu:오드비",
             "menu:위스키복춘"
           ],
           "is_searchable": true
@@ -9808,7 +11047,8 @@
       "sources": [
         "menu:P5온라인",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -9902,6 +11142,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "029acb9d-411c-5f58-ad84-594c84b61164",
+          "alias_text": "The Glenlivet 15y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -9917,7 +11166,9 @@
       "abv": null,
       "sources": [
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -9954,7 +11205,8 @@
           "alias_text": "글렌리벳18",
           "language_code": "ko",
           "sources": [
-            "menu:P5온라인"
+            "menu:P5온라인",
+            "menu:오드비"
           ],
           "is_searchable": true
         },
@@ -10002,6 +11254,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "d1104a8e-5468-5345-994c-9868e5cf2c68",
+          "alias_text": "The Glenlivet 18y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -10017,7 +11278,9 @@
       "abv": null,
       "sources": [
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -10082,6 +11345,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "bae197f3-aa89-5f39-8eeb-b814d9e7a948",
+          "alias_text": "글렌알라키8",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2d659f52-a689-575d-aa3c-743c5a54e2eb",
+          "alias_text": "Glenallachie 8y (글렌알라키)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -10274,7 +11555,8 @@
       "sources": [
         "menu:P5온라인",
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -10348,6 +11630,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "822d8657-3cbe-5993-a0a6-292bd8ce26b8",
+          "alias_text": "Glenfiddich 18y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -10447,7 +11738,8 @@
       "abv": null,
       "sources": [
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -10511,6 +11803,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "f323235c-4498-5069-a89e-c2687949ec68",
+          "alias_text": "Glenfiddich 12y Sherry",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -10619,7 +11920,8 @@
       "sources": [
         "menu:P5온라인",
         "menu:미라보",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -10646,7 +11948,8 @@
           "alias_text": "글렌드로낙18",
           "language_code": "ko",
           "sources": [
-            "menu:P5온라인"
+            "menu:P5온라인",
+            "menu:오드비"
           ],
           "is_searchable": true
         },
@@ -10790,7 +12093,8 @@
       "abv": null,
       "sources": [
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -10845,6 +12149,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "6d7ad1b8-ef77-5e24-a37b-14479e309e71",
+          "alias_text": "Glenfarclas 10y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -10934,7 +12247,8 @@
       "abv": null,
       "sources": [
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -10989,6 +12303,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e3f4f88b-415a-5bec-a06d-169bf74dbd9a",
+          "alias_text": "Glenfarclas 15y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -11068,7 +12391,8 @@
       "abv": null,
       "sources": [
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -11141,6 +12465,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "0bc86e42-8997-5e35-b524-3a5e7db7974e",
+          "alias_text": "Benriach 12y (벤리악)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -11219,7 +12552,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:P5온라인"
+        "menu:P5온라인",
+        "menu:오드비"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -11267,6 +12601,15 @@
             "template"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "e3783efa-2852-51be-b894-3de5dc2e546c",
+          "alias_text": "올트풀티니15",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -11282,7 +12625,9 @@
       "abv": null,
       "sources": [
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -11337,6 +12682,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "4a408088-129b-5ba8-8e83-c033b566a495",
+          "alias_text": "아벨라워12",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "231f34ce-9fe5-55de-9c12-8d96a4078e84",
+          "alias_text": "Aberlour 12y (아벨라워)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -11510,7 +12873,8 @@
       "abv": null,
       "sources": [
         "menu:P5온라인",
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "P5온라인",
       "aliases": [
@@ -11539,6 +12903,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d4b2cc11-c29e-5f78-82ff-e01a0554ada9",
+          "alias_text": "Ardbeg An Oa (언오)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -11591,7 +12964,8 @@
       "edition_name": "Small Batch",
       "abv": null,
       "sources": [
-        "menu:Beck"
+        "menu:Beck",
+        "menu:수이"
       ],
       "first_seen": "Beck",
       "aliases": [
@@ -11602,6 +12976,15 @@
           "sources": [
             "menu:Beck",
             "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "f10fee77-a85d-5614-acf4-6bcdf783a43b",
+          "alias_text": "Four Roses Small Batch (스몰 배치)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -11798,7 +13181,8 @@
       "abv": null,
       "sources": [
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -11826,6 +13210,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "5a4ece4b-a702-54c9-865c-c6667255980b",
+          "alias_text": "Maker's Mark C.S",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -11942,7 +13335,8 @@
       "abv": null,
       "sources": [
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -11970,6 +13364,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "ae64c02a-1bdc-5e6c-aaa8-2dd69f83b564",
+          "alias_text": "라프로익10cs",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -12094,7 +13497,9 @@
       "abv": null,
       "sources": [
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -12124,6 +13529,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "627c3eda-894e-5740-bdee-233c4275778c",
+          "alias_text": "하쿠슈DR",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "866d6bb2-3e31-53ff-9bb8-856fdc271bb6",
+          "alias_text": "Hakushu Dr (하쿠슈 Dr)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -12140,7 +13563,9 @@
       "sources": [
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -12179,6 +13604,24 @@
             "menu:포레스트"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "640ef52a-b34c-5060-97ad-b9808b06edcb",
+          "alias_text": "산토리 히비키 하모니",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "19cdfffb-8d25-5636-85db-4e0bd029d9cf",
+          "alias_text": "Hibiki (히비키)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -12194,7 +13637,9 @@
       "abv": null,
       "sources": [
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -12224,6 +13669,24 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "910e248f-268c-585d-aa97-0591f623c355",
+          "alias_text": "보모어18",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "b1e1dbc1-8632-50ea-bec1-2695b0dc401b",
+          "alias_text": "Bowmore 18y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -12240,7 +13703,8 @@
       "sources": [
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -12277,6 +13741,15 @@
           "language_code": "ko",
           "sources": [
             "menu:포레스트"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "33c1cdef-9f23-549a-a3c8-83c93e25df96",
+          "alias_text": "Yamazaki 12y (야마자키 12년)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -12409,7 +13882,8 @@
       "abv": null,
       "sources": [
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -12437,6 +13911,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "581ac49c-7464-5d5a-a5ff-0ddc2a19a099",
+          "alias_text": "Laphroaig 25y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -12649,7 +14132,8 @@
       "abv": null,
       "sources": [
         "menu:미라보",
-        "menu:Beck"
+        "menu:Beck",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -12679,6 +14163,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "7cac3949-95de-5626-ad9f-af7fe228c118",
+          "alias_text": "Caol Ila 12y (쿨 일라)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -12695,7 +14188,8 @@
       "sources": [
         "menu:미라보",
         "menu:Beck",
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -12724,6 +14218,15 @@
           "language_code": "ko",
           "sources": [
             "menu:포레스트"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e59bdcc2-1b1f-5191-a303-d4eb5a8e5101",
+          "alias_text": "Kilchoman Saniaig (킬호만 사닉)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -13545,7 +15048,8 @@
       "edition_name": "Speyside",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -13564,6 +15068,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "0ddd76e7-37ce-5b1b-83d8-85ae655c068c",
+          "alias_text": "시그나토리 스페이사이드14M",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -13730,7 +15243,9 @@
       "edition_name": "Green Label",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -13749,6 +15264,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "cd85338b-fa18-5e4d-93c7-511351235850",
+          "alias_text": "조니워커그린",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "8489bc43-cd0d-5a3c-92ed-9be11787444b",
+          "alias_text": "JohnnieWalker Green (그린)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -13835,7 +15368,8 @@
       "edition_name": "Lum Reek Cask Strength",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -13854,6 +15388,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "c62018fb-e4d1-54a8-8d9e-67a53d86e75d",
+          "alias_text": "Macnair’s Lum Reek 10y (맥네어스 럼 릭)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -13905,7 +15448,8 @@
       "edition_name": "Cask Strength Release No.4",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -13926,6 +15470,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "88c28111-dd57-5522-a734-683c33e437dd",
+          "alias_text": "하이랜드파크CS R.4",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -13940,7 +15493,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -13961,6 +15515,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "d850d6db-cae9-5f7e-8714-a4411565d906",
+          "alias_text": "Highland Park 15y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -13975,7 +15538,8 @@
       "edition_name": "Viking Pride",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -13994,6 +15558,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "196b7bde-c7f2-57d3-a6ff-404eb33dc308",
+          "alias_text": "Highland Park 18y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -14150,7 +15723,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -14169,6 +15743,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "02cf85c1-0f1b-5a4a-a734-e51b56befb7a",
+          "alias_text": "Auchentoshan 18y (오켄토션)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -14495,7 +16078,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -14514,6 +16098,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "9b9b74a1-c4fb-5a67-99d2-f0af75385078",
+          "alias_text": "캠벨타운 글렌스코샤15",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -15405,7 +16998,8 @@
       "edition_name": "Machir Bay",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -15424,6 +17018,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "1711197c-a1ad-5c05-9200-2cddb9974f84",
+          "alias_text": "Kilchoman Machir bay (마키어 베이)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -15905,7 +17508,8 @@
       "edition_name": "The Classic Laddie",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -15924,6 +17528,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "cac1428e-03ab-539f-b881-14f079432dc2",
+          "alias_text": "브룩라디 클래식 스토티시 발리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -15975,7 +17588,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -15994,6 +17608,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "239c1b81-25e4-54a0-b54a-5285bf237b63",
+          "alias_text": "브룩라디18",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -16580,7 +18203,8 @@
       "edition_name": "Port Cask Finish",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -16601,6 +18225,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "eba292e8-d4d7-534b-843c-839605b021ca",
+          "alias_text": "아란 포트",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -16615,7 +18248,8 @@
       "edition_name": "Amarone Cask Finish",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -16634,6 +18268,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "24b6963d-a448-5c3c-8453-d12ab3da26f1",
+          "alias_text": "아란 아마로네",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -16800,7 +18443,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -16819,6 +18463,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "ea651b8c-5914-56b0-b984-2542a9e2402c",
+          "alias_text": "아란18",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -17080,7 +18733,8 @@
       "edition_name": "Calvados Cask Finish",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -17099,6 +18753,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "4b02e45f-c88d-57e5-aae7-8c6762cd73e8",
+          "alias_text": "Glenmorangie Calvados Cask (깔바도스 캐스크)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -17345,7 +19008,8 @@
       "edition_name": "Ode to the Valley",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -17366,6 +19030,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "22d7747f-b4e9-5b1e-bb87-be5163a4021e",
+          "alias_text": "글렌드로낙 오드 투 더 벨리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -17380,7 +19053,8 @@
       "edition_name": "Ode to the Embers",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -17401,6 +19075,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "d8c09267-91be-54e6-81cd-81a9cdc53fa6",
+          "alias_text": "글렌드로낙 오드 투 더 엠버스",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -17415,7 +19098,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -17434,6 +19118,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "55196f92-9e41-5bd5-9de9-0d3eb4d552e6",
+          "alias_text": "로크로몬드12",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -17485,7 +19178,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -17506,6 +19200,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "554a6180-7eb3-5acf-a973-184a4b9d0f41",
+          "alias_text": "로크로몬드18",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -17520,7 +19223,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -17539,6 +19243,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "5bc51de6-8f5d-531b-bcf4-29c285933d6d",
+          "alias_text": "Tomatin 12y (토마틴)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -17835,7 +19548,9 @@
       "edition_name": "Wee Beastie",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -17854,6 +19569,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "104dc86b-ad8e-5cc6-ba60-3198c1f30112",
+          "alias_text": "아드벡 위 비스티",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2b6d942b-c9e6-5795-b516-3ba9faff3f8e",
+          "alias_text": "Ardbeg Wee Beastie 5y (위 비스티)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -18135,7 +19868,9 @@
       "edition_name": "Sherry Oak Finish",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -18154,6 +19889,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d21f0344-603a-560e-a0aa-84e64fb8a394",
+          "alias_text": "라프로익10 쉐리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "5097bc89-f2e7-53c2-8392-b1262feffdb2",
+          "alias_text": "Laphroaig 10y sherry (라프로익쉐리)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -18670,7 +20423,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -18689,6 +20443,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a7551702-1bd7-50cc-9302-f234f4175b55",
+          "alias_text": "Glengoyne 15y (글렌고인)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -18775,7 +20538,8 @@
       "edition_name": "Distillers Edition",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -18794,6 +20558,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "c26248e6-4f73-5ef0-aea9-cd732093b1e8",
+          "alias_text": "클라이넬리쉬DE",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -18880,7 +20653,9 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -18899,6 +20674,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "56e143cd-748d-542e-b34e-ab227cb599ac",
+          "alias_text": "아벨라워14",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "8a3ff7b1-9ed2-58ba-b81e-b9da392d5238",
+          "alias_text": "Aberlour 14y (아벨라워)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -19405,7 +21198,8 @@
       "edition_name": "American Oak",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -19426,6 +21220,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "f9682272-78d5-5cad-bd63-281d40642a81",
+          "alias_text": "Balvenie American Oak (아메리칸 오크)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -19440,7 +21243,8 @@
       "edition_name": "Single Barrel",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -19459,6 +21263,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "dce778a7-3fbc-5e49-902e-1ad1ac21ef68",
+          "alias_text": "Balvenie Single Barrel (싱글배럴)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -19545,7 +21358,8 @@
       "edition_name": "French Oak",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -19566,6 +21380,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "339f9274-1c11-578b-a9a7-4fa5d918d484",
+          "alias_text": "Balvenie 16y French Oak (프렌치 오크)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -19580,7 +21403,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -19599,6 +21423,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "c57308ef-f547-57a1-b1bb-14341cb1f031",
+          "alias_text": "Mortlach 16y (몰트락)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -19825,7 +21658,8 @@
       "edition_name": "Double Cask",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -19846,6 +21680,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "a2495c0f-a796-5f44-9e1e-c52b4aa91154",
+          "alias_text": "Macallan 18y Double cask",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -19860,7 +21703,9 @@
       "edition_name": "Sherry Oak",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -19879,6 +21724,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "3a80de83-1dfa-5e7d-9b23-55582ce1744c",
+          "alias_text": "맥켈란18 쉐리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "fa71e297-a1c0-59d0-ab22-5cff9480b4bf",
+          "alias_text": "Macallan 18y Sherry cask",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -20245,7 +22108,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -20264,6 +22128,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "262cc1bc-5f51-5f8b-838f-b2c793873e85",
+          "alias_text": "Tamdhu 12y (탐듀)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "05199ffa-f6e7-55e6-b7ad-b980c3d8b03f",
+          "alias_text": "탐듀 12년",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -20315,7 +22197,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -20334,6 +22217,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "169f1b48-7b42-5082-811e-a4999353a0fb",
+          "alias_text": "Tamdhu 15y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -20455,7 +22347,8 @@
       "edition_name": "Rye",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -20476,6 +22369,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "fe542892-62b0-5075-8fc9-5676879715bf",
+          "alias_text": "Knob Creek Rye (라이)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -20490,7 +22392,9 @@
       "edition_name": "Single Barrel",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -20509,6 +22413,24 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "23e7623a-e677-5799-a7fe-e5a2e048f70c",
+          "alias_text": "포로지스 싱글베럴",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "b6c1be4e-071a-582d-bf4d-1884c15eec34",
+          "alias_text": "Four Roses Single Barrel (포 로지스 싱글배럴)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -20560,7 +22482,8 @@
       "edition_name": "Single Barrel Rye",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -20579,6 +22502,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "61465cd7-e44d-5ab5-bd20-bcf0f34edf87",
+          "alias_text": "러셀 싱글베럴 라이",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -21190,7 +23122,8 @@
       "edition_name": "Classic",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -21209,6 +23142,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "78339306-7acb-5266-9409-409afabd1190",
+          "alias_text": "Kavalan Original (카발란)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -21890,7 +23832,8 @@
       "edition_name": "101 Rye",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -21911,6 +23854,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "f647722f-5add-5ed8-bf0e-37a6517ee869",
+          "alias_text": "Wild Turkey Rye 101 (라이 101)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -21925,7 +23877,8 @@
       "edition_name": "Rare Breed Rye",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -21944,6 +23897,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "ac309aa2-a236-5991-8f8c-ee606fbb6bd2",
+          "alias_text": "Wild Turkey Rarebreed Rye (라이)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -22030,7 +23992,8 @@
       "edition_name": null,
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -22051,6 +24014,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "21b5cb31-018f-5a18-b73d-c7c365a0ff78",
+          "alias_text": "Hakushu 12y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -22065,7 +24037,8 @@
       "edition_name": "Distiller's Reserve",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:수이"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -22084,6 +24057,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "6f3c9773-1e2b-5ab6-b1dc-8c8dfeef59d0",
+          "alias_text": "Yamazaki Dr (야마자키 Dr)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -22135,7 +24117,8 @@
       "edition_name": "Taketsuru Pure Malt",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -22156,6 +24139,15 @@
             "menu:미라보"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "310e045e-8b07-578b-ae69-708d47592b27",
+          "alias_text": "다케츠루 싱글몰트",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -22170,7 +24162,8 @@
       "edition_name": "Single Malt",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -22189,6 +24182,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a6b75418-c3c0-5a02-a490-ae3d27d11753",
+          "alias_text": "미야기코 싱글몰트",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -22590,7 +24592,8 @@
       "edition_name": "Black Bush",
       "abv": null,
       "sources": [
-        "menu:미라보"
+        "menu:미라보",
+        "menu:오드비"
       ],
       "first_seen": "미라보",
       "aliases": [
@@ -22609,6 +24612,15 @@
           "language_code": "ko",
           "sources": [
             "menu:미라보"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "6fb9392b-a369-5e8e-a0ca-90d259aaa7df",
+          "alias_text": "부시밀 블랙 부쉬",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
@@ -23335,7 +25347,8 @@
       "edition_name": "16.3",
       "abv": null,
       "sources": [
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:수이"
       ],
       "first_seen": "포레스트",
       "aliases": [
@@ -23354,6 +25367,15 @@
           "language_code": "ko",
           "sources": [
             "menu:포레스트"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "c1ae4380-2f50-530a-b93a-06eeb66948c1",
+          "alias_text": "Octomore 16.3 (옥토모어)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -23475,7 +25497,8 @@
       "edition_name": "81",
       "abv": null,
       "sources": [
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비"
       ],
       "first_seen": "포레스트",
       "aliases": [
@@ -23496,6 +25519,15 @@
             "menu:포레스트"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "f11c4f33-1b82-5e81-8241-49998321a412",
+          "alias_text": "와일드터키81",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -23510,7 +25542,9 @@
       "edition_name": "Rye",
       "abv": null,
       "sources": [
-        "menu:포레스트"
+        "menu:포레스트",
+        "menu:오드비",
+        "menu:수이"
       ],
       "first_seen": "포레스트",
       "aliases": [
@@ -23529,6 +25563,24 @@
           "language_code": "ko",
           "sources": [
             "menu:포레스트"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "4f50494e-7b86-5780-b002-fa4e241c7dac",
+          "alias_text": "와일드터키라이",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e432e134-1bff-5bb6-b295-7d49183c7c00",
+          "alias_text": "Wild Turkey Rye (라이)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
           ],
           "is_searchable": true
         }
@@ -23564,6 +25616,2862 @@
           "language_code": "ko",
           "sources": [
             "menu:포레스트"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "3ec14804-8b94-5af8-87ac-45bb0461120c",
+      "key": "bowmore-25",
+      "brand_id": "d725bc16-56d5-5823-aedf-2d918ded749e",
+      "brand_key": "bowmore",
+      "category": "whisky",
+      "display_name": "Bowmore 25",
+      "age_years": 25,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "4824defc-6946-5bad-af67-c46eb4112d5c",
+          "alias_text": "Bowmore 25",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e6a2e679-1766-5c0c-aca9-5e9fef4647bd",
+          "alias_text": "Bowmore 25y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "5e87db8a-3db4-5251-8227-126fd28e043f",
+      "key": "octomore-16-2",
+      "brand_id": "09b01467-919f-5ef9-9e7f-a350f728705c",
+      "brand_key": "octomore",
+      "category": "whisky",
+      "display_name": "Octomore 16.2",
+      "age_years": null,
+      "edition_name": "16.2",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "14041425-e0fd-5081-8619-f95720fbc64d",
+          "alias_text": "Octomore 16.2",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "89f02877-a2f1-5013-90f4-2c43213f4133",
+          "alias_text": "Octomore 16.2 (옥토모어)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "1522d2e3-f5c5-5cda-94eb-2a700322109a",
+      "key": "ileach-cs",
+      "brand_id": "61ed7966-1a14-51aa-a360-061bbbbf9b4b",
+      "brand_key": "the_ileach",
+      "category": "whisky",
+      "display_name": "The Ileach Cask Strength",
+      "age_years": null,
+      "edition_name": "Cask Strength",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "a667ad60-9cd6-58ec-9549-51d429353f33",
+          "alias_text": "The Ileach Cask Strength",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "8122735e-d6aa-5271-afe3-770e18a822be",
+          "alias_text": "Ileach CS (일리악)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "71f59885-64b8-5929-a75a-b045557575a6",
+      "key": "auchentoshan-21",
+      "brand_id": "ac181b62-911b-5bb5-80d8-209ed0b9e439",
+      "brand_key": "auchentoshan",
+      "category": "whisky",
+      "display_name": "Auchentoshan 21",
+      "age_years": 21,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "6cb90448-7a01-5b6c-af99-fecfa342bec6",
+          "alias_text": "Auchentoshan 21",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "45d52818-e90e-5052-923e-a21faf44345d",
+          "alias_text": "Auchentoshan 21y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "706a35d7-0a40-5d58-88a6-017113f64cc7",
+      "key": "jura-10",
+      "brand_id": "c654cced-b501-5920-856c-1dc35c8e321a",
+      "brand_key": "jura",
+      "category": "whisky",
+      "display_name": "Jura 10",
+      "age_years": 10,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "82a25ece-7ebc-513e-af75-1743ff9c3c87",
+          "alias_text": "Jura 10",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2ef357b1-8779-54e8-b562-f39a334d37b5",
+          "alias_text": "Jura 10y (주라)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "c660e19d-3955-5519-8169-73930b4c2d60",
+      "key": "jura-12",
+      "brand_id": "c654cced-b501-5920-856c-1dc35c8e321a",
+      "brand_key": "jura",
+      "category": "whisky",
+      "display_name": "Jura 12",
+      "age_years": 12,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "93cab8f7-77fd-5ce3-9723-48c5efc21d96",
+          "alias_text": "Jura 12",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "57edda14-8496-52d4-9a31-170e7483642b",
+          "alias_text": "Jura 12y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "d47a30aa-c01d-5077-a58b-45d547bd7298",
+      "key": "jura-french-oak",
+      "brand_id": "c654cced-b501-5920-856c-1dc35c8e321a",
+      "brand_key": "jura",
+      "category": "whisky",
+      "display_name": "Jura French Oak",
+      "age_years": null,
+      "edition_name": "French Oak",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "fb25ebd8-759e-5342-8ef4-b53690d7e7a4",
+          "alias_text": "Jura French Oak",
+          "language_code": "en",
+          "sources": [
+            "menu:수이",
+            "standard"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "66d9226d-e6ad-5ae1-a01e-ccd93900ad58",
+      "key": "jura-18",
+      "brand_id": "c654cced-b501-5920-856c-1dc35c8e321a",
+      "brand_key": "jura",
+      "category": "whisky",
+      "display_name": "Jura 18",
+      "age_years": 18,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "a92ce579-bb23-5c69-b596-52bec03a13d1",
+          "alias_text": "Jura 18",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "474155a3-04c4-55e4-baa5-bb497641464b",
+          "alias_text": "Jura 18y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "d687c450-4559-5c5c-b926-e0801a8cba42",
+      "key": "dalmore-17",
+      "brand_id": "7f5fb407-1a5e-5244-83f2-c26102b7a31d",
+      "brand_key": "dalmore",
+      "category": "whisky",
+      "display_name": "The Dalmore 17",
+      "age_years": 17,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "26d45dad-35e8-5d0a-b8da-d9568e226a5f",
+          "alias_text": "The Dalmore 17",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "ce49b1cc-94ac-5ad7-8632-73a94d170d12",
+          "alias_text": "Dalmore 17y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "ba9788fc-bbd8-56c3-b927-4c747cd00283",
+      "key": "dl-blair-athol-13-sangiovese",
+      "brand_id": "e6e66eca-dbcc-570a-a891-f53cd907352c",
+      "brand_key": "douglas_laing",
+      "category": "whisky",
+      "display_name": "Douglas Laing Old Particular Blair Athol 13 Sangiovese Cask",
+      "age_years": 13,
+      "edition_name": "Old Particular Blair Athol Sangiovese Cask",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "f51ba5b3-b44a-5a45-b154-59abd625dfc9",
+          "alias_text": "Douglas Laing Old Particular Blair Athol 13 Sangiovese Cask",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "26dc18c2-8703-55ef-aba5-6b7379f70497",
+          "alias_text": "Blair Athol Sangiovese Cask (블레어 아쏠)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "87bfe3f1-1d3d-58e1-b7b4-e7ec60ec780c",
+      "key": "dl-tormore-13-tempranillo",
+      "brand_id": "e6e66eca-dbcc-570a-a891-f53cd907352c",
+      "brand_key": "douglas_laing",
+      "category": "whisky",
+      "display_name": "Douglas Laing Old Particular Tormore 13 Tempranillo Cask",
+      "age_years": 13,
+      "edition_name": "Old Particular Tormore Tempranillo Cask",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "ad446d42-eeae-5631-bd57-8d53fb2a456e",
+          "alias_text": "Douglas Laing Old Particular Tormore 13 Tempranillo Cask",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "1e21ebb8-8591-5c0d-bf64-ee2d5aca78d6",
+          "alias_text": "Tormore Tempranillo Cask (토모어)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "9e10fbe2-c666-53d8-a052-bbd4fc9cfe9f",
+      "key": "glenallachie-2014-sinteis",
+      "brand_id": "025f3552-23e3-5afb-a850-1cf7d286094f",
+      "brand_key": "glenallachie",
+      "category": "whisky",
+      "display_name": "GlenAllachie 2014 Sìnteis",
+      "age_years": null,
+      "edition_name": "2014 Sinteis",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "9fa15367-b953-5867-8579-8bd78a013297",
+          "alias_text": "GlenAllachie 2014 Sìnteis",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "193380bc-df0e-5736-9fb6-ad43074732ed",
+          "alias_text": "Glenallachie 2014 Sinteis",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "d9b464be-36c3-5850-8b05-5eacb3602c91",
+      "key": "glenmorangie-cadboll",
+      "brand_id": "851919cc-675b-513d-8541-3cb2d1acfab5",
+      "brand_key": "glenmorangie",
+      "category": "whisky",
+      "display_name": "Glenmorangie Cadboll Estate",
+      "age_years": null,
+      "edition_name": "Cadboll Estate",
+      "abv": null,
+      "sources": [
+        "menu:오드비",
+        "menu:수이"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "e52762af-e57d-5863-836b-fa4df8604d2a",
+          "alias_text": "Glenmorangie Cadboll Estate",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e5cfc262-5b06-522a-a8e3-1baf4cd31e90",
+          "alias_text": "글렌모렌지 캐드볼",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "7e712d33-4cb1-5ce4-9c2b-f7e1a287243d",
+          "alias_text": "Glenmorangie Cadball (캐드볼)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "8c0844c8-a712-543f-8f77-5a2a08fb912f",
+      "key": "johnnie-walker-double-black",
+      "brand_id": "5a43bba5-fc3b-55bd-9546-4aaa148e8b35",
+      "brand_key": "johnnie_walker",
+      "category": "whisky",
+      "display_name": "Johnnie Walker Double Black",
+      "age_years": null,
+      "edition_name": "Double Black",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "179887eb-4658-5418-9a8f-b23e6e14de05",
+          "alias_text": "Johnnie Walker Double Black",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "ec364dea-46b1-57a4-9589-bdde23339ab2",
+          "alias_text": "JohnnieWalker Double Black (더블블랙)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "9eee4278-2d25-592f-a1ac-5fb04467e756",
+      "key": "woodford-reserve-rye",
+      "brand_id": "6304295c-fbe0-5560-80dd-e00f806feeaf",
+      "brand_key": "woodford",
+      "category": "whisky",
+      "display_name": "Woodford Reserve Rye",
+      "age_years": null,
+      "edition_name": "Rye",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "40697b50-a5b8-5d80-b4c0-c8b32b7078af",
+          "alias_text": "Woodford Reserve Rye",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d807effd-e3a0-558a-bb1f-c7cbad0a9501",
+          "alias_text": "Woodford Reserve Rye (라이)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "867b8eed-281f-5c71-bf2e-051cf1a277a7",
+      "key": "angels-envy",
+      "brand_id": "2a40f180-f578-5d8f-b7ca-e05b0d1e92e3",
+      "brand_key": "angels_envy",
+      "category": "whisky",
+      "display_name": "Angel's Envy Bourbon Port Wine Barrel Finish",
+      "age_years": null,
+      "edition_name": "Port Wine Barrel Finish",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "f865423c-8ad2-5366-9410-56d486e93fc1",
+          "alias_text": "Angel's Envy Bourbon Port Wine Barrel Finish",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "4fa4abef-2a4b-51b5-ab65-2fdd8e0bf021",
+          "alias_text": "Angel’s Envy (엔젤스엔비)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "ad784380-0f7a-50af-8080-c8e1e4a4f353",
+      "key": "widow-jane-10",
+      "brand_id": "4941751a-cb05-50a1-add2-fe78fdb9acad",
+      "brand_key": "widow_jane",
+      "category": "whisky",
+      "display_name": "Widow Jane 10",
+      "age_years": 10,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "04b9caa3-9bf1-5b96-8417-32e979eabe05",
+          "alias_text": "Widow Jane 10",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a3285ef5-b668-5603-a1b4-dc385407cf78",
+          "alias_text": "Widow Jane 10y (위도우 제인)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "bd2b6d79-0859-5b8d-990f-c6a78dcfbcde",
+      "key": "high-coast-sherry",
+      "brand_id": "6e669850-2f07-553b-a5e0-45f35e7d256e",
+      "brand_key": "high_coast",
+      "category": "whisky",
+      "display_name": "High Coast Sherry Cask",
+      "age_years": null,
+      "edition_name": "Sherry Cask",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "a0169b32-b2f1-5b92-8459-5583e3b00730",
+          "alias_text": "High Coast Sherry Cask",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2e1c6b4b-f016-5302-80cf-216d796b0762",
+          "alias_text": "High Coast Sherry",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "7a7edfce-d51c-5cd2-bd95-f3c49b159a3b",
+      "key": "high-coast-maria",
+      "brand_id": "6e669850-2f07-553b-a5e0-45f35e7d256e",
+      "brand_key": "high_coast",
+      "category": "whisky",
+      "display_name": "High Coast Maria PX Sherry",
+      "age_years": null,
+      "edition_name": "Maria PX Sherry",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "d5cbc364-fded-5979-a180-9d66d58d5130",
+          "alias_text": "High Coast Maria PX Sherry",
+          "language_code": "en",
+          "sources": [
+            "menu:수이",
+            "standard"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "cf644bc8-95e0-5f1b-9755-d0822efb2b18",
+      "key": "high-coast-eva",
+      "brand_id": "6e669850-2f07-553b-a5e0-45f35e7d256e",
+      "brand_key": "high_coast",
+      "category": "whisky",
+      "display_name": "High Coast Eva Beer Cask",
+      "age_years": null,
+      "edition_name": "Eva Beer Cask",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "28e6adb9-48d2-5f27-9aa6-9e542263922a",
+          "alias_text": "High Coast Eva Beer Cask",
+          "language_code": "en",
+          "sources": [
+            "menu:수이",
+            "standard"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "c3887554-4805-5ced-a9cb-89943590e116",
+      "key": "eld-vatten-bruichladdich-11",
+      "brand_id": "033e7a76-46af-588c-b1b3-4dcb07391e09",
+      "brand_key": "eld_vatten",
+      "category": "whisky",
+      "display_name": "Eld Vatten Bruichladdich 11",
+      "age_years": 11,
+      "edition_name": "Bruichladdich",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "d3e29414-80a0-54d9-b1b4-3e2a3f7c9602",
+          "alias_text": "Eld Vatten Bruichladdich 11",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "1fbdb1ce-768b-5992-a93d-97efde6c8529",
+          "alias_text": "Eld Vatten 11y (브룩라디)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "60d6dc01-123c-59e2-9485-3e2510f53087",
+      "key": "eld-vatten-ben-nevis-14",
+      "brand_id": "033e7a76-46af-588c-b1b3-4dcb07391e09",
+      "brand_key": "eld_vatten",
+      "category": "whisky",
+      "display_name": "Eld Vatten Ben Nevis 14",
+      "age_years": 14,
+      "edition_name": "Ben Nevis",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "061a8bb2-94cb-56a8-a053-a35684ea34a4",
+          "alias_text": "Eld Vatten Ben Nevis 14",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d841910c-4e73-55f6-bfc7-92f4a9c2ab04",
+          "alias_text": "Eld Vatten 14y (벤네비스)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "17992bdc-f74f-536b-acbf-dd62449697c8",
+      "key": "kimgwajang-3-highland-park",
+      "brand_id": "1590c156-7b50-51e2-8f5b-888390b98066",
+      "brand_key": "kim_gwajang",
+      "category": "whisky",
+      "display_name": "Kim Gwajang #3 Highland Park",
+      "age_years": null,
+      "edition_name": "#3 Highland Park",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "da48f959-8e7b-5898-ba32-a86ea3d092a3",
+          "alias_text": "Kim Gwajang #3 Highland Park",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "4bb996f0-a610-578f-8ddf-c1da796d03cc",
+          "alias_text": "김과장 #3 (하이랜드 파크)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "18aeac68-f673-5459-8f19-4cb0c5ed6093",
+      "key": "kimgwajang-4-clynelish",
+      "brand_id": "1590c156-7b50-51e2-8f5b-888390b98066",
+      "brand_key": "kim_gwajang",
+      "category": "whisky",
+      "display_name": "Kim Gwajang #4 Clynelish",
+      "age_years": null,
+      "edition_name": "#4 Clynelish",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "75826333-d92f-5ced-b52d-b92463dd2895",
+          "alias_text": "Kim Gwajang #4 Clynelish",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "34623427-d008-53f1-904c-50b7a539fa1b",
+          "alias_text": "김과장 #4 (클라이넬리쉬)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "708630ad-efdd-50c4-892b-b5bbf17af51e",
+      "key": "nectar-glen-ord-11",
+      "brand_id": "ce4574f0-60c5-54e2-9dc5-7238d2cc045a",
+      "brand_key": "the_nectar",
+      "category": "whisky",
+      "display_name": "The Nectar Glen Ord 11",
+      "age_years": 11,
+      "edition_name": "Glen Ord",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "bc50d639-007f-5051-b19e-c706faa1066f",
+          "alias_text": "The Nectar Glen Ord 11",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e1486a33-b632-5a36-8a73-8e0dbfca635f",
+          "alias_text": "The Nectar 11y (글렌 오드)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "da0c712e-0a0c-545a-94e1-2a34e9b3e1d4",
+      "key": "nectar-miltonduff-12",
+      "brand_id": "ce4574f0-60c5-54e2-9dc5-7238d2cc045a",
+      "brand_key": "the_nectar",
+      "category": "whisky",
+      "display_name": "The Nectar Miltonduff 12",
+      "age_years": 12,
+      "edition_name": "Miltonduff",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "f59b8195-efde-5d65-a188-bc57eac34b65",
+          "alias_text": "The Nectar Miltonduff 12",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "fa51bccc-476d-563d-9ba0-88e0a4e4b4c3",
+          "alias_text": "The Nectar 12y (밀튼 더프)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "b8f0805f-f8c3-50ba-94c3-1cef8f85a229",
+      "key": "maltman-dailuaine-14",
+      "brand_id": "b68faf1f-5133-55a3-9c9f-cb319f54e6d9",
+      "brand_key": "the_maltman",
+      "category": "whisky",
+      "display_name": "The Maltman Dailuaine 14",
+      "age_years": 14,
+      "edition_name": "Dailuaine",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "f6a5c5ac-493d-512f-8e3d-478904139500",
+          "alias_text": "The Maltman Dailuaine 14",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "ba4438ce-60e1-5078-8c55-064dfa086807",
+          "alias_text": "The Maltman Dailuaine 14y (달루인)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "0360478e-29f1-5d5d-ba93-9918a180751f",
+      "key": "maltman-deanston-14",
+      "brand_id": "b68faf1f-5133-55a3-9c9f-cb319f54e6d9",
+      "brand_key": "the_maltman",
+      "category": "whisky",
+      "display_name": "The Maltman Deanston 14",
+      "age_years": 14,
+      "edition_name": "Deanston",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "f3982602-76d9-525b-b410-ca73de8baf53",
+          "alias_text": "The Maltman Deanston 14",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "fcf73fd7-42a9-512c-932c-44c6d96e3a92",
+          "alias_text": "The Maltman DeanSton 14y (딘스톤)",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "5906b621-3995-5e16-8ff8-da7f546714fb",
+      "key": "maltman-campbeltown-10",
+      "brand_id": "b68faf1f-5133-55a3-9c9f-cb319f54e6d9",
+      "brand_key": "the_maltman",
+      "category": "whisky",
+      "display_name": "The Maltman Campbeltown 10",
+      "age_years": 10,
+      "edition_name": "Campbeltown",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "db0d8fbf-c9c4-5522-8716-5903dc59adf4",
+          "alias_text": "The Maltman Campbeltown 10",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d38190c8-95f5-5347-b766-13f7e7c8f220",
+          "alias_text": "The Maltman Campbeltown 10y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "5746023e-a724-5f21-a14f-c8ce5af60028",
+      "key": "maltman-masters-blend-34",
+      "brand_id": "b68faf1f-5133-55a3-9c9f-cb319f54e6d9",
+      "brand_key": "the_maltman",
+      "category": "whisky",
+      "display_name": "The Maltman Master's Blend 34",
+      "age_years": 34,
+      "edition_name": "Master's Blend",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "6deb7015-64f4-5419-9a12-175151f9f296",
+          "alias_text": "The Maltman Master's Blend 34",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "00e9c51b-8a41-5393-b8bf-be425fb70c53",
+          "alias_text": "The Maltman Master's Blend 34y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "c64723fe-a036-5933-ae75-479c49ae5c6c",
+      "key": "twa-bruichladdich-12",
+      "brand_id": "7af2eaed-3e2d-5ca1-8657-b1d20d627e0c",
+      "brand_key": "the_whisky_agency",
+      "category": "whisky",
+      "display_name": "The Whisky Agency Bruichladdich 12",
+      "age_years": 12,
+      "edition_name": "Bruichladdich",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "53ef5c8a-b55c-5ab5-8541-809998788d47",
+          "alias_text": "The Whisky Agency Bruichladdich 12",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d000a767-7174-5b62-9ec5-86b73278d94a",
+          "alias_text": "Whisky Agency Bruichladdich 12y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "8146327f-6460-5e74-baf3-d708f5208aa5",
+      "key": "twa-secret-islay-6",
+      "brand_id": "7af2eaed-3e2d-5ca1-8657-b1d20d627e0c",
+      "brand_key": "the_whisky_agency",
+      "category": "whisky",
+      "display_name": "The Whisky Agency Secret Islay 6",
+      "age_years": 6,
+      "edition_name": "Secret Islay",
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "58918904-69e6-532d-bde8-d2a95c491ce0",
+          "alias_text": "The Whisky Agency Secret Islay 6",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e39f9548-5cdd-523c-91c2-51d9b13c8ba7",
+          "alias_text": "Whisky Agency Secret Islay 6y",
+          "language_code": "en",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "b287da38-18e8-50dd-b3a6-8fd8aa4db094",
+      "key": "dewars-12",
+      "brand_id": "103a3035-bda7-5cb2-a08f-4de86e234644",
+      "brand_key": "dewars",
+      "category": "whisky",
+      "display_name": "Dewar's 12",
+      "age_years": 12,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:수이"
+      ],
+      "first_seen": "수이",
+      "aliases": [
+        {
+          "id": "2b13ee3e-bc23-500b-8b00-694a123127b2",
+          "alias_text": "Dewar's 12",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a6ea4cec-c475-52c2-8c21-87df98153df8",
+          "alias_text": "듀어스12년",
+          "language_code": "ko",
+          "sources": [
+            "menu:수이"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "42a009bc-0ce6-50b4-864b-ebb8c719512c",
+      "key": "jack-wiebers-knockdhu-16",
+      "brand_id": "bcf93329-55c2-5a4f-baf8-22deb0d2cf81",
+      "brand_key": "jack_wiebers",
+      "category": "whisky",
+      "display_name": "Jack Wiebers Knockdhu 16",
+      "age_years": 16,
+      "edition_name": "Knockdhu",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "35814c5b-c493-582b-9323-52ae49c1a247",
+          "alias_text": "Jack Wiebers Knockdhu 16",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "207d27da-2ba6-5806-b1b7-a9079cd0b728",
+          "alias_text": "잭비버스 녹듀16",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "ac894f9c-2ab0-56e4-8a35-1229cafe62fb",
+      "key": "aqua-vitae-cooley-22-port",
+      "brand_id": "3dd9f03e-e17f-5c65-b7a9-65c970b7e70b",
+      "brand_key": "aqua_vitae",
+      "category": "whisky",
+      "display_name": "Aqua Vitae Cooley 22 Port Cask",
+      "age_years": 22,
+      "edition_name": "Cooley Port Cask",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "10b68691-b252-5948-9024-dbff850bc8c9",
+          "alias_text": "Aqua Vitae Cooley 22 Port Cask",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e4467f30-1656-5626-82d3-8e30d12b259a",
+          "alias_text": "아쿠아비타 쿨리22 포트",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "85277124-7da3-5a19-af02-33cd063ebc35",
+      "key": "aqua-vitae-cooley-23-amarone",
+      "brand_id": "3dd9f03e-e17f-5c65-b7a9-65c970b7e70b",
+      "brand_key": "aqua_vitae",
+      "category": "whisky",
+      "display_name": "Aqua Vitae Cooley 23 Amarone Cask",
+      "age_years": 23,
+      "edition_name": "Cooley Amarone Cask",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "3f6658b8-8b5f-55d1-8c04-302ae46628dd",
+          "alias_text": "Aqua Vitae Cooley 23 Amarone Cask",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "6f7079ae-6cea-5523-9d4d-9b01a8b9db5b",
+          "alias_text": "아쿠아비타 쿨리23 아마로네",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "effa5cba-7fa2-5c31-ba4a-5f99b24a09af",
+      "key": "aqua-vitae-cooley-24-bourbon",
+      "brand_id": "3dd9f03e-e17f-5c65-b7a9-65c970b7e70b",
+      "brand_key": "aqua_vitae",
+      "category": "whisky",
+      "display_name": "Aqua Vitae Cooley 24 Bourbon Cask",
+      "age_years": 24,
+      "edition_name": "Cooley Bourbon Cask",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "8758b49b-4a10-5c55-abf9-c1446401b0f5",
+          "alias_text": "Aqua Vitae Cooley 24 Bourbon Cask",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "125bde15-5dfa-5e5f-9309-160215f4bb0a",
+          "alias_text": "아쿠아비타 쿨리24 버번",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "a9f18029-2ab6-56bb-8f40-a9d22b16600a",
+      "key": "signatory-royal-brackla-11",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage Royal Brackla 11",
+      "age_years": 11,
+      "edition_name": "Royal Brackla",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "55ab42eb-cabc-5df5-85eb-312aa2be87b0",
+          "alias_text": "Signatory Vintage Royal Brackla 11",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "28ba8862-1df2-5112-a3ad-a398ef378d5f",
+          "alias_text": "시그나토리 로얄브라클라11",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "fd1500b6-c6d9-5243-80e5-a242bef9553e",
+      "key": "signatory-ben-nevis-7-heavily-peated",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage Ben Nevis 7 Heavily Peated",
+      "age_years": 7,
+      "edition_name": "Ben Nevis Heavily Peated",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "b2844e5a-417c-583c-a04a-01f0b3b8a904",
+          "alias_text": "Signatory Vintage Ben Nevis 7 Heavily Peated",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d16d85b4-6b38-5b00-9b12-4b541c0a2239",
+          "alias_text": "시그나토리 벤네비스7 헤빌리 피티드",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "61c51737-6cf7-5196-81f0-c11472b38bba",
+      "key": "signatory-caol-ila-13",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage Caol Ila 13",
+      "age_years": 13,
+      "edition_name": "Caol Ila",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "2b428b28-d932-5352-a0e9-5546fc869941",
+          "alias_text": "Signatory Vintage Caol Ila 13",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "5dc0688f-edbf-53eb-8749-3f2029e25e6f",
+          "alias_text": "시그나토리 쿨일라13",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "dc5b6186-727f-50ea-880f-4f5ed9d7282c",
+      "key": "signatory-benriach-11",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage BenRiach 11",
+      "age_years": 11,
+      "edition_name": "BenRiach",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "6409dcf8-5e91-5054-887d-a556f9d0a385",
+          "alias_text": "Signatory Vintage BenRiach 11",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "600422dc-00c1-5260-b886-f90fe5da2cc9",
+          "alias_text": "시그나토리 벤리악11",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "b76a0848-6db2-57b6-bbe0-c2cc4a769133",
+      "key": "signatory-aultmore-14",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage Aultmore 14",
+      "age_years": 14,
+      "edition_name": "Aultmore",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "157def46-e5e6-5846-a2ec-f2babebb1c31",
+          "alias_text": "Signatory Vintage Aultmore 14",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "550faf33-28e3-5821-a1b6-68e5586946ab",
+          "alias_text": "시그나토리 올트모어14",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "87471557-0f99-572b-8f8f-bad2b711eeac",
+      "key": "signatory-aberlour-13",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage Aberlour 13",
+      "age_years": 13,
+      "edition_name": "Aberlour",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "158e02bb-2392-577a-8d04-07cff50e3041",
+          "alias_text": "Signatory Vintage Aberlour 13",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "1efd8069-d73f-5b9d-bce1-ab133148e88d",
+          "alias_text": "시그나토리 아벨라워13",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "36b7a18a-7585-55e5-884d-edfde288455f",
+      "key": "craft-bros-eagle-1",
+      "brand_id": "8e1c249b-1364-5f3d-b4f3-ad8144f8cf6d",
+      "brand_key": "craft_bros",
+      "category": "whisky",
+      "display_name": "Craft Bros Eagle Five Brothers No.1",
+      "age_years": null,
+      "edition_name": "Eagle Five Brothers No.1",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "746cb78b-8930-51bf-b410-8808cbcfe379",
+          "alias_text": "Craft Bros Eagle Five Brothers No.1",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d299d96d-d457-5168-afcd-64a7ac13b1e1",
+          "alias_text": "크래프트브로스 독수리 오형제 1호",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "cbece13c-686c-5807-b467-654653eba150",
+      "key": "craft-bros-eagle-3",
+      "brand_id": "8e1c249b-1364-5f3d-b4f3-ad8144f8cf6d",
+      "brand_key": "craft_bros",
+      "category": "whisky",
+      "display_name": "Craft Bros Eagle Five Brothers No.3",
+      "age_years": null,
+      "edition_name": "Eagle Five Brothers No.3",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "087bfde9-74e8-5429-945b-d0c4885d1795",
+          "alias_text": "Craft Bros Eagle Five Brothers No.3",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "37bed1b6-befd-56d8-9dec-fb37e6fb583d",
+          "alias_text": "크래프트브로스 독수리 오형제 3호",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "8b689311-83c1-58c5-a34b-5fbccdf10c37",
+      "key": "signatory-cameronbridge-16",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage Cameronbridge 16",
+      "age_years": 16,
+      "edition_name": "Cameronbridge",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "cbb5796a-7f00-5842-8aa0-a6e7d1ae30d3",
+          "alias_text": "Signatory Vintage Cameronbridge 16",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "17abaf34-2a0b-5693-ad4c-4e27c1cfdd15",
+          "alias_text": "시그나토리 카메론브릿지16",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "0b1c51db-41e8-5746-ab4e-4af74a31d016",
+      "key": "signatory-cameronbridge-12",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage Cameronbridge 12",
+      "age_years": 12,
+      "edition_name": "Cameronbridge",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "35d0275f-3b59-5171-a18c-a5b3ea3d7fdc",
+          "alias_text": "Signatory Vintage Cameronbridge 12",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "8fbe1d1b-825b-520a-abdc-9247b076770b",
+          "alias_text": "시그나토리 카메론브릿지12",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "fbc5e905-abfe-594e-991e-0fe66a3c83b6",
+      "key": "signatory-north-british-15",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage North British 15",
+      "age_years": 15,
+      "edition_name": "North British",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "96264fe4-9020-5d3b-a1fd-732a57625b17",
+          "alias_text": "Signatory Vintage North British 15",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "3fff91e9-4855-5988-9d24-f66fe63d6f66",
+          "alias_text": "시그나토리 노스 브리티쉬15",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "33ee33c6-6536-5886-9dda-4b08dd6d42ac",
+      "key": "saburomaru-3-empress",
+      "brand_id": "fbe2ff1b-a4f3-5224-8435-71d6aeee47a5",
+      "brand_key": "saburomaru",
+      "category": "whisky",
+      "display_name": "Saburomaru III The Empress",
+      "age_years": null,
+      "edition_name": "III The Empress",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "61fcfc3a-c15a-5d97-aaf3-372de438769c",
+          "alias_text": "Saburomaru III The Empress",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "444769be-13d8-550c-b384-15af218a651c",
+          "alias_text": "사부로마루3 여황제",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "f44de90b-dc17-550f-9aa1-6b487c87c383",
+      "key": "saburomaru-4-emperor",
+      "brand_id": "fbe2ff1b-a4f3-5224-8435-71d6aeee47a5",
+      "brand_key": "saburomaru",
+      "category": "whisky",
+      "display_name": "Saburomaru IV The Emperor",
+      "age_years": null,
+      "edition_name": "IV The Emperor",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "3f67d6a5-1ec9-5581-9920-b0b030da6449",
+          "alias_text": "Saburomaru IV The Emperor",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "49524390-09d0-5de8-937a-b9f4a0681e7d",
+          "alias_text": "사부로마루4 황제",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "086bf70c-ba8e-5b86-99d4-657b92fc327d",
+      "key": "saburomaru-5-hierophant",
+      "brand_id": "fbe2ff1b-a4f3-5224-8435-71d6aeee47a5",
+      "brand_key": "saburomaru",
+      "category": "whisky",
+      "display_name": "Saburomaru V The Hierophant",
+      "age_years": null,
+      "edition_name": "V The Hierophant",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "0bdc520d-e3b1-51ca-b3b1-020e8167c558",
+          "alias_text": "Saburomaru V The Hierophant",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2b75cc71-509f-5fd6-a558-973ee4792c3b",
+          "alias_text": "사부로마루5 교황",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "1f365dee-e225-5a61-ad39-0397291a338d",
+      "key": "saburomaru-6-lovers",
+      "brand_id": "fbe2ff1b-a4f3-5224-8435-71d6aeee47a5",
+      "brand_key": "saburomaru",
+      "category": "whisky",
+      "display_name": "Saburomaru VI The Lovers",
+      "age_years": null,
+      "edition_name": "VI The Lovers",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "03f0f722-9415-5cb6-9c4a-feab4f714212",
+          "alias_text": "Saburomaru VI The Lovers",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "738a16ed-ff85-56b6-be20-6e525f41b1b4",
+          "alias_text": "사부로마루6 연인",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "5f5d3b62-f98f-56de-96a0-16c97258c286",
+      "key": "saburomaru-7-chariot",
+      "brand_id": "fbe2ff1b-a4f3-5224-8435-71d6aeee47a5",
+      "brand_key": "saburomaru",
+      "category": "whisky",
+      "display_name": "Saburomaru VII The Chariot",
+      "age_years": null,
+      "edition_name": "VII The Chariot",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "99583870-49d1-5da4-918a-bd0b6425405b",
+          "alias_text": "Saburomaru VII The Chariot",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "ef7229bc-c8f5-534f-942d-6d346a6e40e4",
+          "alias_text": "사부로마루7 전차",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "29d8cb48-ad50-5648-8b73-edcdf5304bfa",
+      "key": "twa-macduff-13",
+      "brand_id": "7af2eaed-3e2d-5ca1-8657-b1d20d627e0c",
+      "brand_key": "the_whisky_agency",
+      "category": "whisky",
+      "display_name": "The Whisky Agency Macduff 13",
+      "age_years": 13,
+      "edition_name": "Macduff",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "0db5c16d-b693-5f46-b0a7-f76b7fb39d99",
+          "alias_text": "The Whisky Agency Macduff 13",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "aeda5762-540b-5dec-b397-37d6a9f00abd",
+          "alias_text": "TWA 맥더프13 잔혹동화",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "0ad02070-c0b5-5b94-84c9-7766db1948f0",
+      "key": "twa-balmenach-11",
+      "brand_id": "7af2eaed-3e2d-5ca1-8657-b1d20d627e0c",
+      "brand_key": "the_whisky_agency",
+      "category": "whisky",
+      "display_name": "The Whisky Agency Balmenach 11",
+      "age_years": 11,
+      "edition_name": "Balmenach",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "635fd9f4-3402-5492-a278-a86e482bc2e5",
+          "alias_text": "The Whisky Agency Balmenach 11",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "2060df75-6d23-5a9e-b6ad-9bee152ad42c",
+          "alias_text": "TWA 발메낙11 전갈자리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "729dfb2c-eeb0-5bfc-9968-46ebee56b7f2",
+      "key": "twa-ardmore-9",
+      "brand_id": "7af2eaed-3e2d-5ca1-8657-b1d20d627e0c",
+      "brand_key": "the_whisky_agency",
+      "category": "whisky",
+      "display_name": "The Whisky Agency Ardmore 9",
+      "age_years": 9,
+      "edition_name": "Ardmore",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "35b67c92-3851-5dee-b7a4-d059d8150d10",
+          "alias_text": "The Whisky Agency Ardmore 9",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "06ff224a-401d-5154-b31e-ef85978f6582",
+          "alias_text": "TWA 아드모어9 천칭자리",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "adc219bd-6563-55b0-823e-bfe40b2106cf",
+      "key": "glenallachie-11-palo-cortado",
+      "brand_id": "025f3552-23e3-5afb-a850-1cf7d286094f",
+      "brand_key": "glenallachie",
+      "category": "whisky",
+      "display_name": "GlenAllachie 11 Palo Cortado Finish",
+      "age_years": 11,
+      "edition_name": "Palo Cortado Finish",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "449a93e5-0acc-5d0a-9ae5-890a4e642b96",
+          "alias_text": "GlenAllachie 11 Palo Cortado Finish",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "94c6c0b6-fe69-5564-b8d1-86e3304fbc5a",
+          "alias_text": "글렌알라키11 팔로 코르타도",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "2c6b9ee0-2206-5dc4-8fd0-e2fd7772e78e",
+      "key": "signatory-linkwood-14",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage Linkwood 14",
+      "age_years": 14,
+      "edition_name": "Linkwood",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "2e64a460-4a91-5fb1-a7c4-d8377750d69e",
+          "alias_text": "Signatory Vintage Linkwood 14",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "6b0a86e5-6be3-5827-805b-3efe71173eca",
+          "alias_text": "시그나토리 싱글몰트 링크우드14",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "0fb3a7dc-ed69-5e17-bae9-edf0eefc03f1",
+      "key": "signatory-ben-nevis-13",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage Ben Nevis 13",
+      "age_years": 13,
+      "edition_name": "Ben Nevis",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "cde3808f-1e9b-553f-a384-ef13ce963ac1",
+          "alias_text": "Signatory Vintage Ben Nevis 13",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "db88786f-1d7c-50d5-b793-9c16ebef571a",
+          "alias_text": "시그나토리 싱글몰트 벤네비스13",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "b9fa469e-7984-5ce8-a2e0-779cb89e2a20",
+      "key": "glen-scotia-12",
+      "brand_id": "f43aedd8-6340-5755-a1fe-cff9aa6fede8",
+      "brand_key": "glen_scotia",
+      "category": "whisky",
+      "display_name": "Glen Scotia 12",
+      "age_years": 12,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "5424774d-c64e-540e-9e28-16d3500671ad",
+          "alias_text": "Glen Scotia 12",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e1a5e50e-c040-50ae-afa0-41223222d7cd",
+          "alias_text": "캠벨타운 싱글몰트 글렌스코샤12",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "2490e686-9f7d-52a4-ad6d-2691b0bced81",
+      "key": "glen-scotia-victoriana",
+      "brand_id": "f43aedd8-6340-5755-a1fe-cff9aa6fede8",
+      "brand_key": "glen_scotia",
+      "category": "whisky",
+      "display_name": "Glen Scotia Victoriana",
+      "age_years": null,
+      "edition_name": "Victoriana",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "d3b0af1b-e6b8-5612-a105-7789586b5b19",
+          "alias_text": "Glen Scotia Victoriana",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "81768c00-40e6-5080-8b50-4f0448b9f6f6",
+          "alias_text": "캠벨타운 글렌스코샤 빅토리아나",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "6af57867-35f8-54ea-8f77-4de179f5368f",
+      "key": "basil-haydens",
+      "brand_id": "226c4b35-7626-5320-bc77-c87bfac64b14",
+      "brand_key": "basil_haydens",
+      "category": "whisky",
+      "display_name": "Basil Hayden's",
+      "age_years": null,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "a460bd8e-8791-5c8f-aabc-7c073de26585",
+          "alias_text": "Basil Hayden's",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "84a0dab9-def9-5ce8-b990-5c440de1a464",
+          "alias_text": "바질헤이든",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "2ea11f0c-4e80-52e8-b559-5f0eb6d58649",
+      "key": "bulleit-bourbon",
+      "brand_id": "7127b22f-1a97-590d-92d6-8136c214d4eb",
+      "brand_key": "bulleit",
+      "category": "whisky",
+      "display_name": "Bulleit Bourbon",
+      "age_years": null,
+      "edition_name": "Bourbon",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "b1593b68-9c0c-50a6-9ada-402351702994",
+          "alias_text": "Bulleit Bourbon",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "315e9144-cad1-5703-a920-5e27149d9311",
+          "alias_text": "불렛버번",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "abb8408e-f24d-563e-a24f-6ea0bc304e55",
+      "key": "bulleit-rye",
+      "brand_id": "7127b22f-1a97-590d-92d6-8136c214d4eb",
+      "brand_key": "bulleit",
+      "category": "whisky",
+      "display_name": "Bulleit Rye",
+      "age_years": null,
+      "edition_name": "Rye",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "172631b9-aaf8-54d0-b568-b5a65c5ed4ed",
+          "alias_text": "Bulleit Rye",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "3ba0877e-2a54-5723-b359-87cfe2c201a9",
+          "alias_text": "불렛라이",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "c4ec237a-631d-5cc8-b853-c02d613fe0fa",
+      "key": "four-roses-bourbon",
+      "brand_id": "a4c421c1-c7a2-53da-9dfc-e435cc204819",
+      "brand_key": "four_roses",
+      "category": "whisky",
+      "display_name": "Four Roses Bourbon",
+      "age_years": null,
+      "edition_name": "Bourbon",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "48da3825-7340-5394-98d2-489b012481ee",
+          "alias_text": "Four Roses Bourbon",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "0546c95a-c06f-594d-bf3a-1275354d27f1",
+          "alias_text": "포로지스",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "e86eb386-b45a-51cf-81e5-c1d6853ecbd4",
+      "key": "evan-williams",
+      "brand_id": "53d84970-4c9b-534d-9e55-efd8b16277e6",
+      "brand_key": "evan_williams",
+      "category": "whisky",
+      "display_name": "Evan Williams Black Label",
+      "age_years": null,
+      "edition_name": "Black Label",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "81b22292-c6ee-534b-b49b-cd49c65cd960",
+          "alias_text": "Evan Williams Black Label",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "89438843-d958-55d9-9fcb-d74b28238731",
+          "alias_text": "에반윌리암스",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "a2635bc6-7fc9-582a-8edf-83f11eebdb09",
+      "key": "old-parr-12",
+      "brand_id": "313225bb-3c54-51cc-ba3f-88c2980809d2",
+      "brand_key": "old_parr",
+      "category": "whisky",
+      "display_name": "Old Parr 12",
+      "age_years": 12,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "a16947b7-173e-5a35-a5b5-fcfd17a6ce68",
+          "alias_text": "Old Parr 12",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a1335ef7-3875-5e0a-87a8-bf52b87e41e4",
+          "alias_text": "올드파12",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "6185c57e-03d7-5e36-9f92-2b2b4ac9ca2a",
+      "key": "kirin-fuji-single-grain",
+      "brand_id": "13016ba0-bf1c-5af8-bd40-e12e4d5c7eb2",
+      "brand_key": "kirin",
+      "category": "whisky",
+      "display_name": "Kirin Fuji Single Grain",
+      "age_years": null,
+      "edition_name": "Fuji Single Grain",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "94d94703-73c8-5f01-8ac3-f500158e0b17",
+          "alias_text": "Kirin Fuji Single Grain",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a78069d4-5c63-522e-9eb7-b9f266d8987d",
+          "alias_text": "기린 싱글그레인 후지",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "4b7ee45f-a854-59f3-9f5f-b81932a1afec",
+      "key": "kirin-fuji-single-blended",
+      "brand_id": "13016ba0-bf1c-5af8-bd40-e12e4d5c7eb2",
+      "brand_key": "kirin",
+      "category": "whisky",
+      "display_name": "Kirin Fuji Single Blended",
+      "age_years": null,
+      "edition_name": "Fuji Single Blended",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "4a2295cc-20dc-5c46-86b1-06c750e7d634",
+          "alias_text": "Kirin Fuji Single Blended",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "7c1a6ded-871a-5e24-8eb0-d783e8a60af8",
+          "alias_text": "기린 싱글브렌디드 후지",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "2769713b-a6d3-5999-9211-15a97eb2823f",
+      "key": "old-pulteney-huddart",
+      "brand_id": "2c618935-dd3b-54e2-8824-c9b3a1ab9c3b",
+      "brand_key": "old_pulteney",
+      "category": "whisky",
+      "display_name": "Old Pulteney Huddart",
+      "age_years": null,
+      "edition_name": "Huddart",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "f595c0db-2f6c-532f-bbae-e92ef92408d5",
+          "alias_text": "Old Pulteney Huddart",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "3e23286b-af99-580d-88d8-4de5ab61b13f",
+          "alias_text": "올드풀티니 허다트",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "3cb806f5-e16c-5278-a111-a20f92f0e060",
+      "key": "old-pulteney-18",
+      "brand_id": "2c618935-dd3b-54e2-8824-c9b3a1ab9c3b",
+      "brand_key": "old_pulteney",
+      "category": "whisky",
+      "display_name": "Old Pulteney 18",
+      "age_years": 18,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "bf3e5835-6406-5b73-b174-fc79f33fc976",
+          "alias_text": "Old Pulteney 18",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "06ff862c-0977-559d-8430-d07a38699308",
+          "alias_text": "올드풀티니18",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "73fc5478-48b1-54cd-bf61-09e62dd58944",
+      "key": "glendronach-ode-to-the-dark",
+      "brand_id": "8d4c19b1-a2f3-50bb-85a4-463169e3ef07",
+      "brand_key": "glendronach",
+      "category": "whisky",
+      "display_name": "GlenDronach Ode to the Dark",
+      "age_years": null,
+      "edition_name": "Ode to the Dark",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "21880d45-1e7d-583c-9287-3eefa95ea717",
+          "alias_text": "GlenDronach Ode to the Dark",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "5c8d6828-d43a-548f-9e87-f17d461c22ed",
+          "alias_text": "글렌드로낙 오드 투 더 다크",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "96c6c2d4-b151-5f69-8736-dbfe78d4f1a4",
+      "key": "benromach-12",
+      "brand_id": "3dd8ba2d-2cfd-5979-a81b-cd238e7259d8",
+      "brand_key": "benromach",
+      "category": "whisky",
+      "display_name": "Benromach 12",
+      "age_years": 12,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "ac69a062-bb1b-5ea3-8bec-a70a749f104a",
+          "alias_text": "Benromach 12",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "1f4ba091-497e-5dc5-a2fa-862badfdcddb",
+          "alias_text": "벤로막12",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "7fd603f0-3c89-5a63-afb5-6a778364ae99",
+      "key": "glenallachie-10-cs-batch-13",
+      "brand_id": "025f3552-23e3-5afb-a850-1cf7d286094f",
+      "brand_key": "glenallachie",
+      "category": "whisky",
+      "display_name": "GlenAllachie 10 Cask Strength Batch 13",
+      "age_years": 10,
+      "edition_name": "Cask Strength Batch 13",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "8e788dd1-b4d6-5ffe-8523-32922eb3e3ba",
+          "alias_text": "GlenAllachie 10 Cask Strength Batch 13",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "f7fe5d07-75ab-5eae-ac3d-e4a32ef7fae5",
+          "alias_text": "글렌알라키10cs 배치13",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "747d387d-e995-5b2a-90ed-748881a60a50",
+      "key": "maltman-fettercairn-37",
+      "brand_id": "b68faf1f-5133-55a3-9c9f-cb319f54e6d9",
+      "brand_key": "the_maltman",
+      "category": "whisky",
+      "display_name": "The Maltman Fettercairn 37",
+      "age_years": 37,
+      "edition_name": "Fettercairn",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "a81f8f83-8159-5f46-82fc-5b29f50ea3f4",
+          "alias_text": "The Maltman Fettercairn 37",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "bc065f28-e25a-5f67-ae14-f71b6373249d",
+          "alias_text": "몰트맨 싱글몰트 페터캐른37",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "acc36064-233c-5d7f-a3f7-4542a4ab1471",
+      "key": "glenallachie-19-ex-solera",
+      "brand_id": "025f3552-23e3-5afb-a850-1cf7d286094f",
+      "brand_key": "glenallachie",
+      "category": "whisky",
+      "display_name": "GlenAllachie 19 Ex-Solera Sherry Cask",
+      "age_years": 19,
+      "edition_name": "Masters of Wood Ex-Solera Sherry Cask",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "d1728570-1024-559f-a7f7-c803a2a15b80",
+          "alias_text": "GlenAllachie 19 Ex-Solera Sherry Cask",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "4e930201-7aeb-505d-8c04-70768f9dc18f",
+          "alias_text": "글렌알라키19 엑스 솔레라",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "8ab908ab-d01f-5a4f-9843-57279eaea646",
+      "key": "signatory-north-british-34",
+      "brand_id": "5e34423d-8cfd-5750-9bb9-6c87101151a0",
+      "brand_key": "signatory",
+      "category": "whisky",
+      "display_name": "Signatory Vintage North British 34",
+      "age_years": 34,
+      "edition_name": "North British",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "66b8ccd3-2dd0-5ef1-9865-b27adc3ba324",
+          "alias_text": "Signatory Vintage North British 34",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "cce82133-4725-597d-84cc-383a3df3bb0b",
+          "alias_text": "시그나토리 노스 브리티쉬 싱글그레인34",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "89c22dde-b367-5289-b4bc-7ed2a62d10c9",
+      "key": "north-star-ardmore-26",
+      "brand_id": "135558da-3fbf-590e-a9f5-fde266a1d089",
+      "brand_key": "north_star",
+      "category": "whisky",
+      "display_name": "North Star Ardmore 26",
+      "age_years": 26,
+      "edition_name": "Ardmore",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "13fe379a-0212-5924-b310-eda152c44d5f",
+          "alias_text": "North Star Ardmore 26",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "7d465500-5554-5b1e-a79f-520846927358",
+          "alias_text": "더 노스스타 아드모어26",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "b8a440d2-d11b-5bc7-8467-7c47f1cf09c8",
+      "key": "balvenie-12-golden-cask",
+      "brand_id": "e7d43505-a7ed-54cf-b1f4-e7f403d448ca",
+      "brand_key": "balvenie",
+      "category": "whisky",
+      "display_name": "The Balvenie 12 Golden Cask",
+      "age_years": 12,
+      "edition_name": "Golden Cask",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "8b1f4de1-2709-5375-b564-4661efddac09",
+          "alias_text": "The Balvenie 12 Golden Cask",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "e67f3615-462c-5fbe-b99d-baf634437129",
+          "alias_text": "발베니12 골드캐스크",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "624f044f-2ddf-5dc1-8bae-66bb6615381b",
+      "key": "benriach-quarter-cask",
+      "brand_id": "dc17406c-b658-542d-b990-0647c6cbda32",
+      "brand_key": "benriach",
+      "category": "whisky",
+      "display_name": "BenRiach Quarter Cask",
+      "age_years": null,
+      "edition_name": "Quarter Cask",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "205a82e9-96fa-52e5-b2eb-2c28f4f3ac29",
+          "alias_text": "BenRiach Quarter Cask",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a369eaca-4bc6-58f3-b799-afb0ca30ebc8",
+          "alias_text": "벤리악 쿼터캐스크",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "7a0d0ed3-2d39-5306-bab0-2564d2c02ed7",
+      "key": "shindo-the-blended",
+      "brand_id": "66df1185-676b-5d19-b116-994224b4d1a5",
+      "brand_key": "shindo",
+      "category": "whisky",
+      "display_name": "Shindo The Blended",
+      "age_years": null,
+      "edition_name": "The Blended",
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "786ba1dc-88d3-55d2-8c44-146e3d2a0ef8",
+          "alias_text": "Shindo The Blended",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "4ce4a22d-802d-53f0-9ac5-c0393af48ea0",
+          "alias_text": "신도 더 블렌디드",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
+          ],
+          "is_searchable": true
+        }
+      ]
+    },
+    {
+      "id": "a1affae2-c364-598a-b4f9-d5e227d35e96",
+      "key": "laphroaig-15",
+      "brand_id": "fe15ab95-fe21-5ed3-b36f-fde25222c363",
+      "brand_key": "laphroaig",
+      "category": "whisky",
+      "display_name": "Laphroaig 15",
+      "age_years": 15,
+      "edition_name": null,
+      "abv": null,
+      "sources": [
+        "menu:오드비"
+      ],
+      "first_seen": "오드비",
+      "aliases": [
+        {
+          "id": "287f1a33-d3e2-5afd-9d90-13b255c9984f",
+          "alias_text": "Laphroaig 15",
+          "language_code": "en",
+          "sources": [
+            "standard"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a742ee6c-d98e-5dbe-939e-dbea178ac2a2",
+          "alias_text": "라프로익15",
+          "language_code": "ko",
+          "sources": [
+            "menu:오드비"
           ],
           "is_searchable": true
         }
