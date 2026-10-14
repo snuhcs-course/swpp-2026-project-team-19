@@ -52,7 +52,7 @@ from app.matching.types import Candidate, CatalogLookup, ExtractedProduct, Resol
 
 PROMPT_DIR = Path(__file__).parent
 # BOTTLEMAP_M3_TRANSLATE=v1 rescores the r0 translations (cache) with the current rules.
-TRANSLATE_VERSION = os.environ.get("BOTTLEMAP_M3_TRANSLATE", "v2")
+TRANSLATE_VERSION = os.environ.get("BOTTLEMAP_M3_TRANSLATE", "v3")  # frozen: v3
 TRANSLATE_PROMPT = PROMPT_DIR / f"translate_prompt_{TRANSLATE_VERSION}.md"
 PICK_PROMPT = PROMPT_DIR / "pick_prompt_v1.md"
 BASE_STAGES = frozenset({"S1", "S2", "S2b", "S3"})

@@ -1,0 +1,50 @@
+{
+ "key": "4b932e973dcdf30b377f55865d2da7988e829fe2bee8876966d460bfc3810f32",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Lagavulin 12yo 2018",
+  "context_lines": [
+   "Arran Quarter Cask",
+   "Arran Sherry cask",
+   "Ardbeg Uigeadail",
+   "Glenfarclas 105",
+   "Abelour A`bunadh"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Lagavulin",
+   "age": 12,
+   "edition_tokens_en": [
+    "2018"
+   ],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Lagavulin 16",
+    "age": 16,
+    "edition": null
+   },
+   {
+    "no": "2",
+    "name": "Lagavulin 8",
+    "age": 8,
+    "edition": null
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"메뉴의 12년 2018년 빈티지 제품은 목록에 있는 8년, 16년 정규 제품과 연수가 모두 다릅니다.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:08.719333+00:00",
+  "latency_ms": 1690,
+  "attempts": 1,
+  "input_tokens": 951,
+  "output_tokens": 57,
+  "thought_tokens": 117
+ }
+}

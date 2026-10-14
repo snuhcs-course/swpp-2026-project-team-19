@@ -1,0 +1,58 @@
+{
+ "key": "f3cfb02dd34d87ad95cec8ed430b72c25231b6e841ec9ee9a83ab36c6c16ac9e",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Macallan Classic Cut 2020",
+  "context_lines": [
+   "Abelour A`bunadh",
+   "Lagavulin 12yo 2018",
+   "Laphroaig 10yo Cask Strength",
+   "Kavalan Solist",
+   "Octomore 13.1"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Macallan",
+   "age": null,
+   "edition_tokens_en": [
+    "Classic",
+    "Cut",
+    "2020"
+   ],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "The Macallan 12 Double Cask",
+    "age": 12,
+    "edition": "Double Cask"
+   },
+   {
+    "no": "2",
+    "name": "The Macallan 12 Sherry Oak",
+    "age": 12,
+    "edition": "Sherry Oak"
+   },
+   {
+    "no": "3",
+    "name": "The Macallan 15 Double Cask",
+    "age": 15,
+    "edition": "Double Cask"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"제시된 옵션에는 'Macallan Classic Cut 2020'에 해당하는 에디션이 존재하지 않음.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:22.220757+00:00",
+  "latency_ms": 1589,
+  "attempts": 1,
+  "input_tokens": 1017,
+  "output_tokens": 46,
+  "thought_tokens": 124
+ }
+}

@@ -1,0 +1,60 @@
+{
+ "key": "4201eacfb977ec5d7fc111cdd958323462e8be4aefb9825ae751ce500c625b1a",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Macallan 18yo",
+  "context_lines": [
+   "Macallan 15yo",
+   "Glenmorangie Signet",
+   "Yamazaki 12yo",
+   "Ballentine 30yo",
+   "Glenfiddich 21yo"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Macallan",
+   "age": 18,
+   "edition_tokens_en": [],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "The Macallan 12 Double Cask",
+    "age": 12,
+    "edition": "Double Cask"
+   },
+   {
+    "no": "2",
+    "name": "The Macallan 12 Sherry Oak",
+    "age": 12,
+    "edition": "Sherry Oak"
+   },
+   {
+    "no": "3",
+    "name": "The Macallan 15 Double Cask",
+    "age": 15,
+    "edition": "Double Cask"
+   },
+   {
+    "no": "4",
+    "name": "The Macallan Classic Cut 2020",
+    "age": null,
+    "edition": "Classic Cut 2020"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"목록에 있는 맥캘란 제품들은 12년, 15년, 또는 클래식 컷이며, 메뉴에 기재된 18년 숙성 제품은 목록에 없습니다.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:57:07.225057+00:00",
+  "latency_ms": 1598,
+  "attempts": 1,
+  "input_tokens": 1035,
+  "output_tokens": 60,
+  "thought_tokens": 121
+ }
+}

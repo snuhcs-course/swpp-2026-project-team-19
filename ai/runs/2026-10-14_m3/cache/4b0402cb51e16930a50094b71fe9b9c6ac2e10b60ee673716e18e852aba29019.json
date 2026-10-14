@@ -1,0 +1,70 @@
+{
+ "key": "4b0402cb51e16930a50094b71fe9b9c6ac2e10b60ee673716e18e852aba29019",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "헤네시vsop / Hennessy vsop",
+    "target": true
+   },
+   {
+    "line": 2,
+    "name": "레미마틴vsop / Remy Martin vsop",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "조니워커 블랙 / Jonnie walker black",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "조니워커 블루 / Jonnie walker blue",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "몽키숄더 / Monkey Shoulder",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "제임슨 / Jameson",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "잭 다니엘스 / Jack Daniel's",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "1792 스몰배치 / 1792 Small Batch",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "우드포트리저브 / Woodford Reserve",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "노아스밀 / Noahsmill",
+    "target": false
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 1,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hennessy\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"VSOP\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"VSOP\",\n          \"expansion\": \"Very Superior Old Pale\"\n        }\n      ]\n    },\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Rémy Martin\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"VSOP\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"VSOP\",\n          \"expansion\": \"Very Superior Old Pale\"\n        }\n      ]\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-14T07:55:36.968003+00:00",
+  "latency_ms": 1708,
+  "attempts": 1,
+  "input_tokens": 1583,
+  "output_tokens": 252,
+  "thought_tokens": 96
+ }
+}

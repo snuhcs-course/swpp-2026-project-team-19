@@ -1,0 +1,51 @@
+{
+ "key": "0012a46da513882330e9ed952030cd53309337a9e872d44e438fa2229d455dc1",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Machrie Moor",
+  "context_lines": [
+   "Oban 14yo",
+   "Glengrant 15yo",
+   "Dalwhinny 15yo",
+   "Glenlivet 15yo",
+   "Bowmore 15yo"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Arran",
+   "age": null,
+   "edition_tokens_en": [
+    "Machrie",
+    "Moor"
+   ],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Arran 10",
+    "age": 10,
+    "edition": null
+   },
+   {
+    "no": "2",
+    "name": "Arran Bodega Sherry Cask",
+    "age": null,
+    "edition": "Bodega Sherry Cask"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"메뉴의 'Machrie Moor'는 아란(Arran) 증류소의 피트 위스키 라인업이나, 제공된 목록(Arran 10, Arran Bodega Sherry Cask)에는 해당 상품이 포함되어 있지 않음.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:26.721220+00:00",
+  "latency_ms": 2036,
+  "attempts": 1,
+  "input_tokens": 951,
+  "output_tokens": 72,
+  "thought_tokens": 124
+ }
+}

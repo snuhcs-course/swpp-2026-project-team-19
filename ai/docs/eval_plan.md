@@ -242,3 +242,9 @@ S1+S2b+S3(P22 채택) 위에 LLM 층을 더한다. 운영 매칭(`resolve_produc
 - **보고.** C0의 LLM 확인 권장 정답 비율은 판정 기준이 아니지만 보고서 맨 위에 C1과 함께 표시한다.
 
 **M3 되돌림 규칙 (2026-10-14, r2 실행 전 등록).** dev 수정은 최대 2회(r1: 규칙 + 프롬프트 v2, r2: 프롬프트 v3 + M3b). r2(M3a 또는 M3a+M3b, 합치기, C0 또는 C1)에서 LLM 확인 권장 오답이 1줄이라도 나오거나 C0·C1 수락 시 오답률이 0을 넘으면, 프롬프트를 v2(r1)로 되돌리고 v2 + M3b를 최종 후보로 한다. Machrie Moor(라인업 이름)가 r2에서도 고쳐지지 않으면 더 손대지 않고 한계로 기록한다. 동결 전에 거부권 4개(bottler_missing 양방향, age_mismatch, alias_of_other, edition_mismatch)의 단위 테스트를 eval에 없는 가짜 예시로 작성해 통과시킨다.
+
+**M3 dev 판정과 동결 (2026-10-14).** 최종 dev 결과는 r2(번역 프롬프트 v3, M3b 프롬프트 v1, 거부권 4개). 되돌림 규칙은 발동하지 않았다(r2 LLM 확인 권장 오답 0, 수락 시 오답률 C0·C1 0). 숫자와 회차별 표는 `ai/runs/2026-10-14_m3/README.md`.
+- **M3a 채택 (dev):** C1 (c) 10 → 4, C1 LLM 확인 권장 13/13, 수락 시 오답률 C0 0.000·C1 0.000.
+- **M3b 채택 안 함 (dev):** M3a 대비 C1 (c) 4 → 4로 줄지 않음(기준 1 불만족). 호출 16회에서 고른 상품 0(C0는 전부 "none", 정답이 카탈로그에 없는 줄).
+- **동결 대상:** `ai/match_llm/`(코드, `translate_prompt_v3.md`, `pick_prompt_v1.md`), `ai/eval/match_eval.py`, `eval/match_gold_v1_1.json`, 카탈로그 시드. test(미라보·포레스트)는 M3a만 1회:
+  `python ai/eval/match_eval.py --split test --gold eval/match_gold_v1_1.json --matcher S1+S2b+S3 M3a M3a/replace --m3-cache ai/runs/2026-10-14_m3/cache --json ai/runs/2026-10-14_m3/test_m3a.json`

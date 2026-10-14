@@ -1,0 +1,63 @@
+{
+ "key": "63b6abd19806a77fe44ef43bbe5f138e6a7c01cde75ae312eb413933f5d7e02e",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "카발란 DR 마데라캐스크",
+  "context_lines": [
+   "Caol ila 25yo",
+   "라프로익 25년",
+   "히비키 21년",
+   "히비키 블랜더스 쵸이스",
+   "발베니 18년 PX"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Kavalan",
+   "age": null,
+   "edition_tokens_en": [
+    "DR",
+    "Madeira",
+    "Cask"
+   ],
+   "expansions": [
+    {
+     "token": "DR",
+     "expansion": "Distiller's Reserve"
+    }
+   ]
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Kavalan Solist Oloroso Sherry",
+    "age": null,
+    "edition": "Solist Oloroso Sherry"
+   },
+   {
+    "no": "2",
+    "name": "Kavalan Solist Vinho Barrique",
+    "age": null,
+    "edition": "Solist Vinho Barrique"
+   },
+   {
+    "no": "3",
+    "name": "Kavalan Triple Sherry Cask",
+    "age": null,
+    "edition": "Triple Sherry Cask"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"메뉴의 'DR 마데라캐스크(Distiller's Reserve Madeira Cask)'는 목록에 있는 셰리 캐스크 및 비뇨 바리끄 제품들과 에디션이 일치하지 않습니다.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:58.223867+00:00",
+  "latency_ms": 3908,
+  "attempts": 1,
+  "input_tokens": 1024,
+  "output_tokens": 63,
+  "thought_tokens": 118
+ }
+}

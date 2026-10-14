@@ -1,0 +1,48 @@
+{
+ "key": "bed7a3e1d9a677ad433f61bb98443f0c97854b9a14ea8fbf376e2e3869516400",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "라프로익 25년",
+  "context_lines": [
+   "Ballentine 30yo",
+   "Glenfiddich 21yo",
+   "Macallan 18yo",
+   "Glenfarclas 25yo",
+   "Caol ila 25yo"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Laphroaig",
+   "age": 25,
+   "edition_tokens_en": [],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Laphroaig 10",
+    "age": 10,
+    "edition": null
+   },
+   {
+    "no": "2",
+    "name": "Laphroaig Quarter Cask",
+    "age": null,
+    "edition": "Quarter Cask"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"목록에 있는 라프로익 제품들은 10년과 쿼터 캐스크뿐이며, 메뉴의 25년 제품과 일치하는 항목이 없습니다.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:49.223331+00:00",
+  "latency_ms": 3426,
+  "attempts": 1,
+  "input_tokens": 953,
+  "output_tokens": 54,
+  "thought_tokens": 147
+ }
+}
