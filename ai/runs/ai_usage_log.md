@@ -579,3 +579,14 @@
 - **웹 검색 확인 (2026-10-14, 박진우 요청):** Claude 지식에 없던 최근 출시를 확인. Dalmore 17(2026년 1월 정규 추가) 새 상품 유지. Blair Athol Sangiovese·Tormore Tempranillo는 Douglas Laing Old Particular 13년(독립병입)으로 정정. unknown → 새 상품 4줄: Glen Scotia 12(2025 정규), Benromach 12(2026 플래그십), GlenAllachie 19 Ex-Solera, BenRiach Quarter Cask. 에드라두어12cs 비스코(Ibisco 디캔터, 캐스크별 상이)는 unknown 유지. 2층: new 83줄(82종), unknown 16
 - **가격 근거 연결 (2026-10-14, 박진우 승인):** 정답 기준은 "메뉴판 정보로 상품을 정할 수 있나"이고 가격도 메뉴 정보로 봄(test의 카발란 비노 바리끄 선례). unknown → 카탈로그 상품 3줄: Balvenie Single Barrel → 12 Single Barrel(같은 메뉴 형제 상품 가격, 강), Royal Brackla → 12(같은 페이지 연수별 가격대, 중), Hibiki → Japanese Harmony(같은 섹션 일본 위스키 가격, 중). 나머지 unknown 13줄은 가격으로 못 정함. 2층: 카탈로그 202, new 83, unknown 13, non_whisky 15
 - **P47 이후 할 일 (매처 아이디어, 동결 중이라 미적용):** 후보가 여럿일 때 같은 메뉴 형제 상품 가격으로 연수를 좁히는 규칙. dev에서 먼저 측정
+
+### 3~5단계 (2026-10-14, 검수 반영 후)
+- **3단계:** `build_catalog_v2.py`에 수이·오드비 단계 추가. 새 상품 82, 새 브랜드 18, 메뉴 별칭 254(기존 별칭 31개는 출처만 추가). 오드비 행사 줄의 ` / 행사` 꼬리표는 별칭에서 뺌(그대로 나누면 "행사"가 별칭이 됨). 1단계 결과는 바뀌지 않음(기존 별칭 손실 0, 출처 추가 25)
+- **4단계:** `check_catalog_v2.py`로 service·eval_5bars·drop_products 검사. 상품 간 정규화 별칭 충돌 0, 상품 내 중복 210/159/159, 브랜드 내 14, FK·id 재생성 OK. 결과는 `ai/catalog/README.md` 10장
+- **5단계:** `export_snapshot.py`. eval_5bars는 수이·오드비 전용 별칭 254개 제거(상품 529 유지), `--drop-products`는 1단계 결과와 같음(상품 447, 별칭 1431)
+- **시간(대략, 누적):** Claude 작업 약 4시간 30분. **토큰(대략, 누적):** Claude Code 세션 약 70만 토큰. 외부 호출: CLOVA 14, Gemini 0, 웹 검색 9
+
+### 사용 중 있었던 문제
+- Bash heredoc 안의 `'''`가 셸 파싱을 깨서 패치 스크립트를 파일로 써서 실행(기존 메모와 같은 문제)
+- 처음 만든 검수 페이지가 검수 키와 라벨 이름이 다른 항목(예: `Balvenie 12y (발베니)`)의 줄을 놓쳐 매칭 규칙을 고침. 크롭 4장을 열어 맞는 줄인지 확인
+- Claude 지식에 2025~26년 출시 상품이 없어 Dalmore 17 등을 "확인 안 됨"으로 적음 → 웹 검색으로 7줄 재확인
