@@ -162,3 +162,21 @@ def test_temporary_operator_needs_no_user_row(client, token_for):
     )
 
     assert response.status_code == 200
+
+
+# ---- start-up warning (the deployed server keeps temporary login on until Google login works) ----
+
+
+@pytest.mark.parametrize(("enabled", "warned"), [("true", True), ("false", False)])
+def test_start_up_warns_while_temporary_login_is_on(monkeypatch, caplog, enabled, warned):
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    monkeypatch.setenv("TEMP_AUTH_ENABLED", enabled)
+    monkeypatch.setenv("TEMP_AUTH_USER_TYPE", "operator")
+
+    with caplog.at_level("WARNING", logger="app.core.security"), TestClient(app):
+        pass
+
+    assert ("can get a token with user type operator" in caplog.text) is warned
