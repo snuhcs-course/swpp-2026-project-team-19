@@ -15,10 +15,10 @@
    8,
    8
   ],
-  "category": "D",
+  "category": "A",
   "print_text": null,
   "new_name": null,
-  "note": "저해상도 스크린샷이라 ㅔ/ㅖ 구분 불가. 라벨은 Claude 판독 '셰리' 유지, 사람 판독 필요",
+  "note": "박진우 판독(2026-10-14): 인쇄는 '셰리'. CLOVA 오독, 라벨 유지",
   "pattern": "셰리→세리",
   "split": "labels_final_v1"
  },
@@ -38,10 +38,10 @@
    18,
    18
   ],
-  "category": "D",
+  "category": "A",
   "print_text": null,
   "new_name": null,
-  "note": "저해상도 스크린샷이라 ㅔ/ㅖ 구분 불가. 라벨은 Claude 판독 '셰리' 유지, 사람 판독 필요",
+  "note": "박진우 판독(2026-10-14): 인쇄는 '셰리'. CLOVA 오독, 라벨 유지",
   "pattern": "셰리→세리",
   "split": "labels_final_v1"
  },
@@ -61,10 +61,10 @@
    9,
    9
   ],
-  "category": "D",
+  "category": "A",
   "print_text": null,
   "new_name": null,
-  "note": "저해상도 스크린샷이라 ㅔ/ㅖ 구분 불가. 라벨은 Claude 판독 '셰리' 유지, 사람 판독 필요",
+  "note": "박진우 판독(2026-10-14): 인쇄는 '셰리'. CLOVA 오독, 라벨 유지",
   "pattern": "셰리→세리",
   "split": "labels_final_v1"
  },
@@ -84,10 +84,10 @@
    22,
    22
   ],
-  "category": "D",
+  "category": "A",
   "print_text": null,
   "new_name": null,
-  "note": "위와 같음",
+  "note": "박진우 판독(2026-10-14): 인쇄는 '셰리'. CLOVA 오독, 라벨 유지",
   "pattern": "달모어12셰리→달모어12세리",
   "split": "labels_final_v1"
  },

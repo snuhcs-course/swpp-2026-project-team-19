@@ -2,7 +2,7 @@
 
 2026-10-14 · Claude 초벌, 박진우 검수 전. 1층 `eval/labels_final_v1.json`, 2층 `eval/match_gold_final_v1.json`. OCR 대조 결과는 `review/final_ocr_check.html`(사진 포함, 커밋 안 함).
 
-표시: ⚠ = 2층 REVIEW 목록에 있음, OCR-D = OCR 대조 판독 불확실.
+표시: ⚠ = 2층 REVIEW 목록에 있음, OCR 대조 불일치 5건은 모두 CLOVA 오독으로 판정(셰리 4건은 박진우 판독).
 
 ## 009_오드비_01 (34항목)
 
@@ -128,13 +128,13 @@
 | # | raw_name | 가격 | unit | ml | 2층 정답 | |
 |---|---|---|---|---|---|---|
 | 1 | 아란10 | 16,000 | glass | 30 | arran-10 (Arran 10) |  |
-| 2 | 아란 셰리 | 20,000 | glass | 30 | arran-sherry-cask (Arran Bodega Sherry Cask) | ⚠ OCR-D |
+| 2 | 아란 셰리 | 20,000 | glass | 30 | arran-sherry-cask (Arran Bodega Sherry Cask) | ⚠ |
 | 3 | 아란 포트 | 20,000 | glass | 30 | arran-port-cask (Arran Port Cask Finish) |  |
 | 4 | 아란 아마로네 | 20,000 | glass | 30 | arran-amarone-cask (Arran Amarone Cask Finish) |  |
 | 5 | 아란18 | 56,000 | glass | 30 | arran-18 (Arran 18) |  |
 | 6 | 아벨라워12 | 17,000 | glass | 30 | aberlour-12 (Aberlour 12) |  |
 | 7 | 아벨라워14 | 27,000 | glass | 30 | aberlour-14 (Aberlour 14) |  |
-| 8 | 아벨라워 아부나흐 셰리 | 36,000 | glass | 30 | aberlour-abunadh (Aberlour A'bunadh) | OCR-D |
+| 8 | 아벨라워 아부나흐 셰리 | 36,000 | glass | 30 | aberlour-abunadh (Aberlour A'bunadh) | |
 | 9 | 올드풀티니 허다트 | 18,000 | glass | 30 | new: Old Pulteney Huddart |  |
 | 10 | 올트풀티니15 | 28,000 | glass | 30 | old-pulteney-15 (Old Pulteney 15) |  |
 | 11 | 올드풀티니18 | 35,000 | glass | 30 | new: Old Pulteney 18 |  |
@@ -145,7 +145,7 @@
 |---|---|---|---|---|---|---|
 | 1 | 글렌피딕12 | 14,000 | glass | 30 | glenfiddich-12 (Glenfiddich 12) |  |
 | 2 | 글렌피딕15 | 18,000 | glass | 30 | glenfiddich-15 (Glenfiddich 15) |  |
-| 3 | 맥켈란12 셰리 | 18,000 | glass | 30 | macallan-12-sherry-oak (The Macallan 12 Sherry Oak) | OCR-D |
+| 3 | 맥켈란12 셰리 | 18,000 | glass | 30 | macallan-12-sherry-oak (The Macallan 12 Sherry Oak) | |
 | 4 | 맥켈란12 더블 | 16,000 | glass | 30 | macallan-12-double-cask (The Macallan 12 Double Cask) |  |
 | 5 | 맥켈란18 쉐리 | 60,000 | glass | 30 | macallan-18-sherry-oak (The Macallan 18 Sherry Oak) |  |
 | 6 | 글렌파클라스105 | 17,000 | glass | 30 | glenfarclas-105 (Glenfarclas 105) |  |
@@ -153,7 +153,7 @@
 | 8 | 발베니14 캐리비안 캐스크 | 22,000 | glass | 30 | balvenie-14-caribbean (The Balvenie 14 Caribbean Cask) |  |
 | 9 | 글렌리벳12 | 13,000 | glass | 30 | glenlivet-12 (The Glenlivet 12) |  |
 | 10 | 글렌리벳18 | 35,000 | glass | 30 | glenlivet-18 (The Glenlivet 18) |  |
-| 11 | 달모어12셰리 | 23,000 | glass | 30 | dalmore-12-sherry-cask-select (The Dalmore 12 Sherry Cask Select) | ⚠ OCR-D |
+| 11 | 달모어12셰리 | 23,000 | glass | 30 | dalmore-12-sherry-cask-select (The Dalmore 12 Sherry Cask Select) | ⚠ |
 | 12 | 달모어15 | 32,000 | glass | 30 | dalmore-15 (The Dalmore 15) |  |
 | 13 | 로얄브라클라12 | 16,000 | glass | 30 | royal-brackla-12 (Royal Brackla 12) |  |
 | 14 | 글렌그란트15 | 20,000 | glass | 30 | glen-grant-15 (Glen Grant 15) |  |
