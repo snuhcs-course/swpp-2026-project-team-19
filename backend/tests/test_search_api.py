@@ -1,10 +1,12 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
+import time
 from datetime import datetime, timedelta, timezone
 
 import pytest
 
 from app.models import BarMenuItem, BarStatus
 from app.services.search import distance_meters
+from tests.auth_support import connection_error, new_signing_key
 from tests.factories import make_bar, make_brand, make_product, publish_menu
 
 T0 = datetime(2026, 10, 4, 9, 15, tzinfo=timezone.utc)
@@ -175,3 +177,75 @@ def test_distance_meters():
     assert distance_meters(37.478, 126.951, 37.478, 126.951) == 0
     # Seoul City Hall to Gangnam Station is about 8.8 km.
     assert 8_700 < distance_meters(37.5663, 126.9779, 37.4979, 127.0276) < 8_900
+
+
+# ---- guest search and tokens (API spec, sections 3.1.5 and 3.10) ----
+
+
+def expired_supabase_token(supabase, token_for, monkeypatch):
+    now = int(time.time())
+    return f"Bearer {supabase.token(iat=now - 3600, exp=now - 60)}"
+
+
+def supabase_token_signed_by_another_key(supabase, token_for, monkeypatch):
+    return f"Bearer {supabase.token(key=new_signing_key(supabase.key.kid))}"
+
+
+def malformed_token(supabase, token_for, monkeypatch):
+    return "Bearer not-a-jwt"
+
+
+def temporary_token_after_temporary_login_is_off(supabase, token_for, monkeypatch):
+    token = token_for("customer")
+    monkeypatch.setenv("TEMP_AUTH_ENABLED", "false")
+    return f"Bearer {token}"
+
+
+def supabase_token_without_supabase_url(supabase, token_for, monkeypatch):
+    token = supabase.token()
+    monkeypatch.delenv("SUPABASE_URL")
+    return f"Bearer {token}"
+
+
+def supabase_token_while_signing_keys_are_out_of_reach(supabase, token_for, monkeypatch):
+    supabase.jwks.error = connection_error()
+    return f"Bearer {supabase.token()}"
+
+
+def valid_supabase_token(supabase, token_for, monkeypatch):
+    return f"Bearer {supabase.token()}"
+
+
+def another_scheme(supabase, token_for, monkeypatch):
+    return "Basic dXNlcjpwYXNz"
+
+
+@pytest.mark.parametrize(
+    "authorization",
+    [
+        expired_supabase_token,
+        supabase_token_signed_by_another_key,
+        malformed_token,
+        temporary_token_after_temporary_login_is_off,
+        supabase_token_without_supabase_url,
+        supabase_token_while_signing_keys_are_out_of_reach,
+        valid_supabase_token,
+        another_scheme,
+    ],
+    ids=lambda case: case.__name__,
+)
+def test_guest_search_ignores_any_token(
+    client, db_session, glenfiddich, supabase, token_for, monkeypatch, authorization
+):
+    bar = make_bar(db_session, "Seorosang")
+    publish_menu(db_session, bar, [(glenfiddich[12], "글렌피딕 12Y", [("잔", None, 12000)])], published_at=T0)
+    as_guest = client.get("/api/search/bars", params={"query": "글렌피딕"})
+
+    header = authorization(supabase, token_for, monkeypatch)
+    with_token = client.get("/api/search/bars", params={"query": "글렌피딕"}, headers={"Authorization": header})
+
+    assert as_guest.status_code == with_token.status_code == 200
+    assert with_token.json() == as_guest.json()
+    assert with_token.json()["items"]
+    # The header is not even read: no signing keys were looked up.
+    assert supabase.jwks.fetches == 0
