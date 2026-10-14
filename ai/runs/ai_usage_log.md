@@ -425,3 +425,40 @@
 - 완전 일치 실패 56개 이름: CLOVA 실제 오독 7, 라벨이 메뉴판 인쇄와 다름 41(캐스크 스트랭스 28, 맥켈란 6 등), 문장부호(백틱) 5, 판독 불확실 3
 - 라벨 표기 불일치는 P11의 "외래어 표기 변형" 분류에도 영향(일부는 E1이 맞게 읽음). 라벨은 수정하지 않음, 담당자 결정 사항으로 보고
 - test 14장에 손글씨 메뉴 없음(썸네일로 확인)
+
+## 2026-10-14 · L1 (I2) 라벨 v1.1 (메뉴판 인쇄 표기) + 재채점
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 없음 (Gemini 0, CLOVA 0. CLOVA 캐시와 기존 실행 기록만 사용)
+- **브랜치:** `i2-labels-v1-1` (`i2-p12-clova` c3ccf6a + `i2-p22-matching-eval` merge, `ai_usage_log.md` 충돌은 양쪽 섹션 모두 유지). PR 없음, push 안 함
+- **시간(대략):** Claude 작업 약 1시간 30분 (도구·검토 페이지 40분, v1.1 빌드·검증 20분, 재채점 15분, 리포트·가이드라인 15분). 담당자 검토 시간 별도
+- **토큰(대략):** Claude Code 세션 컨텍스트 약 9만 토큰
+
+### 진행 순서
+1. 담당자가 원칙(v1 파일 수정 금지, 인쇄 그대로, raw_name만 수정, API 0회)과 2단계 진행(검토 페이지에서 멈춤 → 승인 후 반영)을 지정.
+2. Claude가 `ai/eval/label_ocr_check.py`를 작성(라벨 토큰과 CLOVA OCR 대조, 패턴별 묶음, 사진 크롭). test에서 P12 리포트의 완전 일치 실패 56개 이름을 그대로 재현했고, val에서는 1개를 찾았다.
+3. Claude가 크롭을 보고 P12 분류(A–D)를 다시 확인. 리포트와 다른 점 2가지를 질문으로 올림: 엡버스(인쇄 "엠버스"), Beck 백틱(인쇄 자체가 백틱). 검토 페이지 `review/labels_v1_1.html`(커밋 안 함)을 전달하고 멈춤.
+4. 담당자 결정을 반영해 `build_labels_v1_1.py`로 v1.1 생성(test 44, val 2항목). `build_match_gold_v1_1.py`로 매칭 정답의 이름만 교체. `rescore_labels_v1_1.py`로 재채점.
+
+### 사람 결정
+- 포레스트 "퀸타"가 인쇄대로라 라벨 유지(P12 B → A). Beck 백틱은 인쇄대로라 유지(C 수정 안 함). 엠버스는 B
+- D 판독: 미아기쿄 / 셰리캐스크 / 시그니처 / (val) 퀀타루반. Claude 판독 중 세리캐스크(라벨 유지 쪽)는 틀렸음
+- 버전 문자열은 `labels_v1.1` 그대로 (`ai/catalog/labels_v1_1.json`과 별개 파일이라고 changelog에 기록)
+
+### AI가 정한 것 (사람 확인 필요)
+- 항목 id = `<photo_id>#<index>` (라벨에 id 필드가 없어 위치로 정함)
+- `match_gold_v1.json`과 그 빌더는 P22 동결 대상이라 다시 빌드하지 않음. 위치로 맞춰 이름만 바꾼 `eval/match_gold_v1_1.json`을 새로 만듦. `match_eval.py`는 고치지 않고 GOLD 경로만 바꿔 호출
+- `score.py`에 `val_v1_1`, `test_v1_1` 라벨 세트를 추가(SHA 고정). 채점 규칙은 그대로
+- 가이드라인은 v2.2를 남기고 `labeling_guideline_v2.3.md`를 새로 만듦(규칙 변경 없음, "검수 전 OCR 대조" 절차만 추가)
+
+### 검증
+- v1 파일 SHA 그대로(c8a2…1dac, 07bc…98d7). v1.1은 raw_name 외 필드·순서·개수가 같은지 빌드 스크립트가 검사. v1.1을 다시 대조하면 남는 차이는 승인된 A 12개뿐
+- 매칭 정답 상품 연결이 v1과 794/794 같음. 동결 파일 `git diff 69879fd HEAD` 빈 결과
+- 재채점의 v1 숫자가 저장된 `scores.json` 3개, `2026-10-13_match_test.json`과 완전히 같음
+- pytest `ai/eval/test_label_ocr_check.py` + `test_score.py` 31 passed (`--basetemp` scratchpad)
+
+### 사용 중 있었던 문제
+- `ai/ocr/test_ocr.py`를 같이 돌렸을 때 실제 API 테스트(`test_live_clova_call`)가 수집됐다. pytest 임시 폴더 권한 오류로 setup에서 멈춰 호출은 일어나지 않았다(CLOVA 0회 유지). 이후 그 파일은 실행하지 않음
+- 기본 브라우저 패널이 로컬 HTML을 열지 못해, 검토 페이지는 텍스트 추출로 확인하고 파일로 전달
+
+### 결과
+- `ai/runs/2026-10-14_labels_v1_1_rescore.md`: 판정 불변(P12 Δ +0.040 → +0.041, P22 false merge 0). CLOVA+LLM 엄격 F1 +0.071, E1 test 항목 정답률 −0.001(맥켈란 편집 2), 매칭 Top-1 −0.003~−0.008(별칭이 표준 표기)
