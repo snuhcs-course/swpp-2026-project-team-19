@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,6 +17,8 @@ import com.zerotoone.bottlemap.ui.customer.SearchScreen
 import com.zerotoone.bottlemap.ui.mode.ModeSelectionScreen
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
+
+private const val SEARCH_VALIDATION_ERROR_KEY = "searchValidationErrorCode"
 
 private object Routes {
     const val MODE_SELECTION = "mode-selection"
@@ -61,6 +64,11 @@ fun BottleMapNavHost() {
                 )
             },
             onBack = { navController.popBackStack() },
+            onInvalidQuery = { fieldCode ->
+                navController.getBackStackEntry(Routes.CUSTOMER_SEARCH)
+                    .savedStateHandle[SEARCH_VALIDATION_ERROR_KEY] = fieldCode
+                navController.popBackStack()
+            },
             onOpenBarDetail = { barId ->
                 navController.navigate("customer/bar-detail/" + Uri.encode(barId))
             },
@@ -80,14 +88,24 @@ fun BottleMapNavHost() {
 private fun NavGraphBuilder.customerGraph(
     onOpenResults: (String) -> Unit,
     onBack: () -> Unit,
+    onInvalidQuery: (String) -> Unit,
     onOpenBarDetail: (String) -> Unit,
 ) {
     navigation(
         route = Routes.CUSTOMER_GRAPH,
         startDestination = Routes.CUSTOMER_SEARCH,
     ) {
-        composable(Routes.CUSTOMER_SEARCH) {
-            SearchScreen(onOpenResults = onOpenResults)
+        composable(Routes.CUSTOMER_SEARCH) { backStackEntry ->
+            val validationErrorCode = backStackEntry.savedStateHandle
+                .getStateFlow<String?>(SEARCH_VALIDATION_ERROR_KEY, null)
+                .collectAsStateWithLifecycle().value
+            SearchScreen(
+                onOpenResults = onOpenResults,
+                serverValidationErrorCode = validationErrorCode,
+                onClearServerValidation = {
+                    backStackEntry.savedStateHandle[SEARCH_VALIDATION_ERROR_KEY] = null
+                },
+            )
         }
         composable(
             route = Routes.CUSTOMER_SEARCH_RESULTS_ROUTE,
@@ -103,6 +121,7 @@ private fun NavGraphBuilder.customerGraph(
                     ?.getString(Routes.CUSTOMER_QUERY_ARGUMENT)
                     .orEmpty(),
                 onBack = onBack,
+                onInvalidQuery = onInvalidQuery,
                 onOpenBarDetail = onOpenBarDetail,
             )
         }
