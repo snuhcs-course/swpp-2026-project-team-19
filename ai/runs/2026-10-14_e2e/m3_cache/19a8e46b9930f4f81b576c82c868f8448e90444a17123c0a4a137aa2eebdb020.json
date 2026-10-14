@@ -1,0 +1,320 @@
+{
+ "key": "19a8e46b9930f4f81b576c82c868f8448e90444a17123c0a4a137aa2eebdb020",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "라가불린(Lagavulin) 8년",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "라가불린(Lagavulin) 11년 스위트 피트",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "라가불린(Lagavulin) 디스틸러리 에디션 2023",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "라가불린(Lagavulin) 16년",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "킬호만(Kilchoman) 마키어 베이",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "킬호만(Kilchoman) 사닉",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "킬호만(Kilchoman) 마키어베이 캐스크 스트렝스",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "킬호만(Kilchoman) 코리아 스몰배치",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "킬호만(Kilchoman) 배치 스트렝스",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "킬호만(Kilchoman) 사닉 캐스크 스트렝스",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "킬호만(Kilchoman) 피노 셰리 캐스크",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "킬호만(Kilchoman) 꼬냑 캐스크",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "킬호만(Kilchoman) PX 셰리 캐스크",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "킬호만(Kilchoman) 로크곰",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "킬호만(Kilchoman) 100% 아일라",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "킬호만(Kilchoman) 포트 싱글 캐스크 피니시",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "킬호만(Kilchoman) 소테른 캐스크",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "킬호만(Kilchoman) 포트 캐스크",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "킬호만(Kilchoman) 16년",
+    "target": true
+   },
+   {
+    "line": 20,
+    "name": "브룩라디(Bruichladdich) 스코티시 발리",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "브룩라디(Bruichladdich) 아일라 발리",
+    "target": true
+   },
+   {
+    "line": 22,
+    "name": "브룩라디(Bruichladdich) 18년",
+    "target": true
+   },
+   {
+    "line": 23,
+    "name": "브룩라디(Bruichladdich) 블랙아트 에디션 11",
+    "target": true
+   },
+   {
+    "line": 24,
+    "name": "포트샬롯(Port Charlotte) 10년",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "포트샬롯(Port Charlotte) 아일라 발리 2014",
+    "target": true
+   },
+   {
+    "line": 26,
+    "name": "포트샬롯(Port Charlotte) PMC:01",
+    "target": true
+   },
+   {
+    "line": 27,
+    "name": "옥토모어(Octomore) 14.1",
+    "target": true
+   },
+   {
+    "line": 28,
+    "name": "옥토모어(Octomore) 14.2",
+    "target": true
+   },
+   {
+    "line": 29,
+    "name": "옥토모어(Octomore) 15.1",
+    "target": true
+   },
+   {
+    "line": 30,
+    "name": "옥토모어(Octomore) 15.2",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "옥토모어(Octomore) 15.3",
+    "target": true
+   },
+   {
+    "line": 32,
+    "name": "쿨일라(Caol Ila) 12년",
+    "target": true
+   },
+   {
+    "line": 33,
+    "name": "쿨일라(Caol Ila) 18년",
+    "target": true
+   },
+   {
+    "line": 34,
+    "name": "부나하벤(Bunnahabhain) 12년",
+    "target": false
+   },
+   {
+    "line": 35,
+    "name": "부나하벤(Bunnahabhain) 크루아 모나",
+    "target": true
+   },
+   {
+    "line": 36,
+    "name": "부나하벤(Bunnahabhain) 안클라닥",
+    "target": true
+   },
+   {
+    "line": 37,
+    "name": "부나하벤(Bunnahabhain) 토호카흐",
+    "target": true
+   },
+   {
+    "line": 38,
+    "name": "부나하벤(Bunnahabhain) 에리네 그레이뉴",
+    "target": true
+   },
+   {
+    "line": 39,
+    "name": "부나하벤(Bunnahabhain) 12년 캐스크 스트렝스",
+    "target": true
+   },
+   {
+    "line": 40,
+    "name": "부나하벤(Bunnahabhain) 14년 루비포트 캐스크 피니시",
+    "target": true
+   },
+   {
+    "line": 41,
+    "name": "부나하벤(Bunnahabhain) 18년",
+    "target": true
+   },
+   {
+    "line": 42,
+    "name": "아란(Arran) 10년",
+    "target": false
+   },
+   {
+    "line": 43,
+    "name": "아란(Arran) 쿼터 캐스크",
+    "target": true
+   },
+   {
+    "line": 44,
+    "name": "아란(Arran) 포트 캐스크",
+    "target": true
+   },
+   {
+    "line": 45,
+    "name": "아란(Arran) 아마로네 캐스크",
+    "target": true
+   },
+   {
+    "line": 46,
+    "name": "아란(Arran) 소테른 캐스크",
+    "target": true
+   },
+   {
+    "line": 47,
+    "name": "아란(Arran) 셰리 캐스크 캐스크 스트렝스",
+    "target": true
+   },
+   {
+    "line": 48,
+    "name": "아란(Arran) 마크리무어 캐스크 스트렝스",
+    "target": true
+   },
+   {
+    "line": 49,
+    "name": "아란(Arran) 마크리무어 10년",
+    "target": true
+   },
+   {
+    "line": 50,
+    "name": "아란(Arran) 시그니처 시리즈",
+    "target": true
+   },
+   {
+    "line": 51,
+    "name": "아란(Arran) 프라이빗 캐스크 No.2",
+    "target": true
+   },
+   {
+    "line": 52,
+    "name": "아란(Arran) 18년",
+    "target": true
+   },
+   {
+    "line": 53,
+    "name": "아란(Arran) 21년",
+    "target": true
+   },
+   {
+    "line": 54,
+    "name": "아란(Arran) 25년",
+    "target": true
+   },
+   {
+    "line": 55,
+    "name": "탈리스커(Talisker) 스카이",
+    "target": true
+   },
+   {
+    "line": 56,
+    "name": "탈리스커(Talisker) 10년",
+    "target": false
+   },
+   {
+    "line": 57,
+    "name": "탈리스커(Talisker) 더 와일드 블루",
+    "target": true
+   },
+   {
+    "line": 58,
+    "name": "탈리스커(Talisker) 스톰",
+    "target": true
+   },
+   {
+    "line": 59,
+    "name": "탈리스커(Talisker) 18년",
+    "target": true
+   },
+   {
+    "line": 60,
+    "name": "탈리스커(Talisker) 25년",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Lagavulin\",\n      \"age\": 11,\n      \"edition_tokens_en\": [\n        \"Sweet\",\n        \"Peat\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Lagavulin\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Distillers\",\n        \"Edition\",\n        \"2023\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Machir\",\n        \"Bay\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 6,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Sanaig\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Machir\",\n        \"Bay\",\n        \"Cask\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Korea\",\n        \"Small\",\n        \"Batch\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Batch\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Sanaig\",\n        \"Cask\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 11,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Fino\",\n        \"Sherry\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Cognac\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"PX\",\n        \"Sherry\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"PX\",\n          \"expansion\": \"Pedro Ximénez\"\n        }\n      ]\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Loch\",\n        \"Gorm\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"100%\",\n        \"Islay\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Port\",\n        \"Single\",\n        \"Cask\",\n        \"Finish\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Sauternes\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Port\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilchoman\",\n      \"age\": 16,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bruichladdich\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"The\",\n        \"Classic\",\n        \"Laddie\",\n        \"Scottish\",\n        \"Barley\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 21,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bruichladdich\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Islay\",\n        \"Barley\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 22,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bruichladdich\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 23,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bruichladdich\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Black\",\n        \"Art\",\n        \"Edition\",\n        \"11\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Port Charlotte\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Islay\",\n        \"Barley\",\n        \"2014\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 26,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Port Charlotte\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"PMC:01\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 27,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"14.1\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 28,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"14.2\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 29,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"15.1\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"15.2\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 31,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"15.3\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 32,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Caol Ila\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 33,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Caol Ila\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 35,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bunnahabhain\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Cruach\",\n        \"Mhona\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 36,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bunnahabhain\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"An\",\n        \"Cladach\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 37,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bunnahabhain\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Toiteach\",\n        \"A\",\n        \"Dha\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 38,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bunnahabhain\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Eirigh\",\n        \"Na\",\n        \"Greine\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 39,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bunnahabhain\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\n        \"Cask\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 40,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bunnahabhain\",\n      \"age\": 14,\n      \"edition_tokens_en\": [\n        \"Ruby\",\n        \"Port\",\n        \"Cask\",\n        \"Finish\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 41,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bunnahabhain\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 43,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Quarter\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 44,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Port\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 45,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Amarone\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 46,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Sauternes\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 47,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Sherry\",\n        \"Cask\",\n        \"Cask\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 48,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Machrie\",\n        \"Moor\",\n        \"Cask\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 49,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\n        \"Machrie\",\n        \"Moor\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 50,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Signature\",\n        \"Series\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 51,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Private\",\n        \"Cask\",\n        \"No.2\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 52,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 53,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": 21,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 54,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": 25,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 55,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Talisker\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Skye\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 57,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Talisker\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"The\",\n        \"Wild\",\n        \"Explorer\",\n        \"Series\",\n        \"Wild\",\n        \"Blue\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 58,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Talisker\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Storm\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 59,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Talisker\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 60,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Talisker\",\n      \"age\": 25,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-14T08:46:40.458895+00:00",
+  "latency_ms": 10496,
+  "attempts": 1,
+  "input_tokens": 3173,
+  "output_tokens": 5188,
+  "thought_tokens": 105
+ }
+}

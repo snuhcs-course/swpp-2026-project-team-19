@@ -1,0 +1,240 @@
+{
+ "key": "3c8a13ea801a81922b613b4c399863589d2c20379f58b62edbfbc80c46fc3594",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "하이랜드 파크(Highland Park) 12년",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 배치 4",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 헤더",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "하이랜드 파크(Highland Park) 15년",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "하이랜드 파크(Highland Park) 18년",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "하이랜드 파크(Highland Park) 16년",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "밀튼더프 10년",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "부나하벤 10년",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "부나하벤 혜빌리 피티드 11년",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "글렌로티스 11년",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "글렌킨치(Glenkinchie) 12년",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "헌터랭 (Hunterlaing) 스카라버스",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "로얄 브라클라 14년",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "크라겐모어 26년",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "오큰토션(Auchentoshan) 아메리칸 오크",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "오큰토션(Auchentoshan) 12년",
+    "target": false
+   },
+   {
+    "line": 17,
+    "name": "오큰토션(Auchentoshan) 쇼비뇽 블랑",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "오큰토션(Auchentoshan) 쓰리 우드",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "오큰토션(Auchentoshan) 18년",
+    "target": true
+   },
+   {
+    "line": 20,
+    "name": "더글라스랭(Douglaslaing) 락 아일랜드",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "더글라스랭(Douglaslaing) 에피큐리안",
+    "target": true
+   },
+   {
+    "line": 22,
+    "name": "더글라스랭(Douglaslaing) 티모러스 비스티",
+    "target": true
+   },
+   {
+    "line": 23,
+    "name": "더글라스랭(Douglaslaing) 골드론",
+    "target": true
+   },
+   {
+    "line": 24,
+    "name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 25,
+    "name": "더글라스랭(Douglaslaing) 골드론 셰리 캐스크",
+    "target": true
+   },
+   {
+    "line": 26,
+    "name": "더글라스랭(Douglaslaing) 스칼리웩 윈터 에디션 2025",
+    "target": true
+   },
+   {
+    "line": 27,
+    "name": "더글라스랭(Douglaslaing) 빅피트 윈터 에디션 2025",
+    "target": true
+   },
+   {
+    "line": 28,
+    "name": "스프링뱅크(Springbank) 롱로우 피티드",
+    "target": true
+   },
+   {
+    "line": 29,
+    "name": "스프링뱅크(Springbank) 10년",
+    "target": true
+   },
+   {
+    "line": 30,
+    "name": "스프링뱅크(Springbank) 12년 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "스프링뱅크(Springbank) 15년",
+    "target": true
+   },
+   {
+    "line": 32,
+    "name": "블랙애더(Blackadder) 셰리 스네이크",
+    "target": true
+   },
+   {
+    "line": 33,
+    "name": "콤파스 박스(Compass Box) 오차드 하우스",
+    "target": true
+   },
+   {
+    "line": 34,
+    "name": "킬커란 12년",
+    "target": true
+   },
+   {
+    "line": 35,
+    "name": "글렌가일(Glengyle) 해빌리 피티드",
+    "target": true
+   },
+   {
+    "line": 36,
+    "name": "킬커란 16년",
+    "target": true
+   },
+   {
+    "line": 37,
+    "name": "포트에스케이그(Port Askaig) 8년",
+    "target": true
+   },
+   {
+    "line": 38,
+    "name": "포트에스케이그(Port Askaig) 17년",
+    "target": true
+   },
+   {
+    "line": 39,
+    "name": "글렌스코시아(Glenscotia) 더블 캐스크",
+    "target": true
+   },
+   {
+    "line": 40,
+    "name": "글렌스코시아(Glenscotia) 15년",
+    "target": true
+   },
+   {
+    "line": 41,
+    "name": "글렌스코시아(Glenscotia) 18년",
+    "target": true
+   },
+   {
+    "line": 42,
+    "name": "글렌스코시아(Glenscotia) 12년 머메이드",
+    "target": true
+   },
+   {
+    "line": 43,
+    "name": "엘리먼츠 오브 아일라(Elements of Islay) 버번",
+    "target": true
+   },
+   {
+    "line": 44,
+    "name": "엘리먼츠 오브 아일라(Elements of Islay) 셰리",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Highland Park\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Cask\", \"Strength\", \"Batch\", \"4\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Highland Park\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Cask\", \"Strength\", \"Hearth\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Highland Park\",\n      \"age\": 15,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Highland Park\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 6,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Highland Park\",\n      \"age\": 16,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Miltonduff\",\n      \"age\": 10,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bunnahabhain\",\n      \"age\": 10,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bunnahabhain\",\n      \"age\": 11,\n      \"edition_tokens_en\": [\"Heavily\", \"Peated\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenrothes\",\n      \"age\": 11,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": \"Hunter Laing\",\n      \"distillery_en\": \"Scarabus\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Royal Brackla\",\n      \"age\": 14,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Cragganmore\",\n      \"age\": 26,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Auchentoshan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"American\", \"Oak\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Auchentoshan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Sauvignon\", \"Blanc\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Auchentoshan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Three\", \"Wood\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Auchentoshan\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": \"Douglas Laing\",\n      \"distillery_en\": \"Rock Island\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 21,\n      \"bottler_en\": \"Douglas Laing\",\n      \"distillery_en\": \"The Epicurean\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 22,\n      \"bottler_en\": \"Douglas Laing\",\n      \"distillery_en\": \"Timorous Beastie\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 23,\n      \"bottler_en\": \"Douglas Laing\",\n      \"distillery_en\": \"Gaudron\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 24,\n      \"bottler_en\": \"Douglas Laing\",\n      \"distillery_en\": \"Gaudron\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [\"Cask\", \"Strength\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": \"Douglas Laing\",\n      \"distillery_en\": \"Gaudron\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [\"Sherry\", \"Cask\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 26,\n      \"bottler_en\": \"Douglas Laing\",\n      \"distillery_en\": \"Scallywag\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [\"Winter\", \"Edition\", \"2025\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 27,\n      \"bottler_en\": \"Douglas Laing\",\n      \"distillery_en\": \"Big Peat\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [\"Winter\", \"Edition\", \"2025\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 28,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Springbank\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Longrow\", \"Peated\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 29,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Springbank\",\n      \"age\": 10,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Springbank\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Cask\", \"Strength\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 31,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Springbank\",\n      \"age\": 15,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 32,\n      \"bottler_en\": \"Blackadder\",\n      \"distillery_en\": \"Sherry Snake\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 33,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Compass Box\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Orchard\", \"House\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 34,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilkerran\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 35,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glengyle\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Heavily\", \"Peated\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 36,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilkerran\",\n      \"age\": 16,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 37,\n      \"bottler_en\": \"Port Askaig\",\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": 8,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 38,\n      \"bottler_en\": \"Port Askaig\",\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": 17,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 39,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glen Scotia\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Double\", \"Cask\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 40,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glen Scotia\",\n      \"age\": 15,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 41,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glen Scotia\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 42,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glen Scotia\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Mermaid\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 43,\n      \"bottler_en\": \"Elements of Islay\",\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 44,\n      \"bottler_en\": \"Elements of Islay\",\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [\"Sherry\"],\n      \"kind\": \"whisky\"\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-14T08:48:28.081712+00:00",
+  "latency_ms": 7236,
+  "attempts": 1,
+  "input_tokens": 2681,
+  "output_tokens": 3195,
+  "thought_tokens": 126
+ }
+}

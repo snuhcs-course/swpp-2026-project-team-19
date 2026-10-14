@@ -1,0 +1,88 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "label_set": "test",
+  "runs": [
+    1
+  ],
+  "prompt_version": "v1",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "call_limit": 80,
+  "photos": {
+    "011_mirabeau_01.jpeg": {
+      "n_lines": 82,
+      "prepared": "011_mirabeau_01.jpg",
+      "ocr_latency_ms": 4077
+    },
+    "011_mirabeau_02.jpeg": {
+      "n_lines": 105,
+      "prepared": "011_mirabeau_02.jpg",
+      "ocr_latency_ms": 3481
+    },
+    "011_mirabeau_03.jpeg": {
+      "n_lines": 146,
+      "prepared": "011_mirabeau_03.jpg",
+      "ocr_latency_ms": 4652
+    },
+    "011_mirabeau_04.jpeg": {
+      "n_lines": 133,
+      "prepared": "011_mirabeau_04.jpg",
+      "ocr_latency_ms": 3749
+    },
+    "011_mirabeau_05.jpeg": {
+      "n_lines": 127,
+      "prepared": "011_mirabeau_05.jpg",
+      "ocr_latency_ms": 2899
+    },
+    "011_mirabeau_06.jpeg": {
+      "n_lines": 121,
+      "prepared": "011_mirabeau_06.jpg",
+      "ocr_latency_ms": 4253
+    },
+    "011_mirabeau_07.jpeg": {
+      "n_lines": 87,
+      "prepared": "011_mirabeau_07.jpg",
+      "ocr_latency_ms": 3474
+    },
+    "011_mirabeau_08.jpeg": {
+      "n_lines": 101,
+      "prepared": "011_mirabeau_08.jpg",
+      "ocr_latency_ms": 5196
+    },
+    "011_mirabeau_09.jpeg": {
+      "n_lines": 98,
+      "prepared": "011_mirabeau_09.jpg",
+      "ocr_latency_ms": 3255
+    },
+    "012_beck_01.jpeg": {
+      "n_lines": 54,
+      "prepared": "012_beck_01.jpg",
+      "ocr_latency_ms": 2211
+    },
+    "012_beck_02.jpeg": {
+      "n_lines": 23,
+      "prepared": "012_beck_02.jpg",
+      "ocr_latency_ms": 2062
+    },
+    "012_beck_03.jpeg": {
+      "n_lines": 61,
+      "prepared": "012_beck_03.jpg",
+      "ocr_latency_ms": 2316
+    },
+    "012_beck_04.jpeg": {
+      "n_lines": 70,
+      "prepared": "012_beck_04.jpg",
+      "ocr_latency_ms": 2192
+    },
+    "013_forest_01.png": {
+      "n_lines": 155,
+      "prepared": "013_forest_01.png",
+      "ocr_latency_ms": 3990
+    }
+  },
+  "api_tier": "free (inputs may be used to improve Google products)",
+  "written_at": "2026-10-14T08:29:46.938385+00:00"
+}

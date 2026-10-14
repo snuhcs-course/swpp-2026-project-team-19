@@ -1,0 +1,556 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "011_mirabeau_07.jpeg",
+  "prepared_image": "011_mirabeau_07.jpg",
+  "prepared_sha256": "972a22e86ab3cef1f333ce05f0367e8608ea8b6a7d5adc32678a0003a6224716",
+  "started_at": "2026-10-14T08:36:58.008460+00:00",
+  "latency_ms": 11342,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6452,
+  "output_tokens": 3104,
+  "thought_tokens": 0,
+  "total_tokens": 9556,
+  "output": {
+    "items": [
+      {
+        "raw_name": "메이커스 마크(Maker's Mark) 버번",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L002",
+            "L003"
+          ],
+          "price": [
+            "L006"
+          ]
+        }
+      },
+      {
+        "raw_name": "메이커스 마크(Maker's Mark) 46",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L002",
+            "L004"
+          ],
+          "price": [
+            "L007"
+          ]
+        }
+      },
+      {
+        "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트랭스",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L002",
+            "L005"
+          ],
+          "price": [
+            "L008"
+          ]
+        }
+      },
+      {
+        "raw_name": "리뎀션(Redemption) 라이",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022",
+            "L023"
+          ],
+          "price": [
+            "L024"
+          ]
+        }
+      },
+      {
+        "raw_name": "놉 크릭(Knob Creek) 버번",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L020",
+            "L021",
+            "L029"
+          ],
+          "price": [
+            "L031"
+          ]
+        }
+      },
+      {
+        "raw_name": "놉 크릭(Knob Creek) 라이",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L020",
+            "L021",
+            "L030"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "이글레어(Eagle Rare) 10년",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L039",
+            "L040"
+          ],
+          "price": [
+            "L041"
+          ]
+        }
+      },
+      {
+        "raw_name": "포로지스(Four Roses) 싱글 배럴",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L043",
+            "L044"
+          ],
+          "price": [
+            "L045"
+          ]
+        }
+      },
+      {
+        "raw_name": "러셀(Russel's) 10년 버번",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L055"
+          ],
+          "price": [
+            "L059"
+          ]
+        }
+      },
+      {
+        "raw_name": "러셀(Russel's) 버번 싱글 배럴",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L056"
+          ],
+          "price": [
+            "L060"
+          ]
+        }
+      },
+      {
+        "raw_name": "러셀(Russel's) 라이 싱글 배럴",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L057"
+          ],
+          "price": [
+            "L061"
+          ]
+        }
+      },
+      {
+        "raw_name": "1776제임스 E.페퍼(1776 James E. Pepper) 버번",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L058",
+            "L072"
+          ],
+          "price": [
+            "L066"
+          ]
+        }
+      },
+      {
+        "raw_name": "1776제임스 E.페퍼(1776 James E. Pepper) 라이",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L058",
+            "L073"
+          ],
+          "price": [
+            "L067"
+          ]
+        }
+      },
+      {
+        "raw_name": "믹터스(Michter's) 버번",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L075",
+            "L084"
+          ],
+          "price": [
+            "L076"
+          ]
+        }
+      },
+      {
+        "raw_name": "믹터스(Michter's) 라이",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L075",
+            "L085"
+          ],
+          "price": [
+            "L077"
+          ]
+        }
+      },
+      {
+        "raw_name": "사제락(Sazerac) 라이",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L074",
+            "L086"
+          ],
+          "price": [
+            "L087"
+          ]
+        }
+      },
+      {
+        "raw_name": "브로큰 배럴(Broken Barrel) 버번 포트 캐스크",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L011",
+            "L012"
+          ],
+          "price": [
+            "L013"
+          ]
+        }
+      },
+      {
+        "raw_name": "베이커스(Baker's) 버번",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009",
+            "L010"
+          ],
+          "price": [
+            "L014"
+          ]
+        }
+      },
+      {
+        "raw_name": "바톤 1792(Barton 1792) 1792 풀 프루프",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025",
+            "L026"
+          ],
+          "price": [
+            "L028"
+          ]
+        }
+      },
+      {
+        "raw_name": "우드포드 리저브(Woodford Reserve) 버번",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027",
+            "L033"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      },
+      {
+        "raw_name": "우드포드 리저브(Woodford Reserve) 더블오크",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027",
+            "L034"
+          ],
+          "price": [
+            "L037"
+          ]
+        }
+      },
+      {
+        "raw_name": "우드포드 리저브(Woodford Reserve) 더블 X.O",
+        "price_krw": 420000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L027",
+            "L035"
+          ],
+          "price": [
+            "L038"
+          ]
+        }
+      },
+      {
+        "raw_name": "윌렛(Willet) 로완스크릭",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L046",
+            "L047"
+          ],
+          "price": [
+            "L051"
+          ]
+        }
+      },
+      {
+        "raw_name": "윌렛(Willet) 팟 스틸 리저브",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L046",
+            "L048"
+          ],
+          "price": [
+            "L052"
+          ]
+        }
+      },
+      {
+        "raw_name": "윌렛(Willet) 노아스밀",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L046",
+            "L049"
+          ],
+          "price": [
+            "L053"
+          ]
+        }
+      },
+      {
+        "raw_name": "윌렛(Willet) 위티드 버번 8년",
+        "price_krw": 70000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L046",
+            "L050"
+          ],
+          "price": [
+            "L054"
+          ]
+        }
+      },
+      {
+        "raw_name": "배럴(Barrel) 라이 씨그라스",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L062",
+            "L063"
+          ],
+          "price": [
+            "L065"
+          ]
+        }
+      },
+      {
+        "raw_name": "블랑톤(Blanton) 버번 싱글배럴",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L064",
+            "L068"
+          ],
+          "price": [
+            "L070"
+          ]
+        }
+      },
+      {
+        "raw_name": "블랑톤(Blanton) SFTB",
+        "price_krw": 62000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L064",
+            "L069"
+          ],
+          "price": [
+            "L071"
+          ]
+        }
+      },
+      {
+        "raw_name": "부커스(Booker's) 버번",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L078",
+            "L079"
+          ],
+          "price": [
+            "L082"
+          ]
+        }
+      },
+      {
+        "raw_name": "일라이저크레이그(Elijah Craig) 버번 배럴 프루프",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L080",
+            "L081"
+          ],
+          "price": [
+            "L083"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": [\n  {\n    \"raw_name\": \"메이커스 마크(Maker's Mark) 버번\",\n    \"price_krw\": 12000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L002\", \"L003\"],\n      \"price\": [\"L006\"]\n    }\n  },\n  {\n    \"raw_name\": \"메이커스 마크(Maker's Mark) 46\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L002\", \"L004\"],\n      \"price\": [\"L007\"]\n    }\n  },\n  {\n    \"raw_name\": \"메이커스 마크(Maker's Mark) 캐스크 스트랭스\",\n    \"price_krw\": 16000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L002\", \"L005\"],\n      \"price\": [\"L008\"]\n    }\n  },\n  {\n    \"raw_name\": \"리뎀션(Redemption) 라이\",\n    \"price_krw\": 12000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L022\", \"L023\"],\n      \"price\": [\"L024\"]\n    }\n  },\n  {\n    \"raw_name\": \"놉 크릭(Knob Creek) 버번\",\n    \"price_krw\": 12000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L020\", \"L021\", \"L029\"],\n      \"price\": [\"L031\"]\n    }\n  },\n  {\n    \"raw_name\": \"놉 크릭(Knob Creek) 라이\",\n    \"price_krw\": 13000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L020\", \"L021\", \"L030\"],\n      \"price\": [\"L032\"]\n    }\n  },\n  {\n    \"raw_name\": \"이글레어(Eagle Rare) 10년\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L039\", \"L040\"],\n      \"price\": [\"L041\"]\n    }\n  },\n  {\n    \"raw_name\": \"포로지스(Four Roses) 싱글 배럴\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L043\", \"L044\"],\n      \"price\": [\"L045\"]\n    }\n  },\n  {\n    \"raw_name\": \"러셀(Russel's) 10년 버번\",\n    \"price_krw\": 13000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L042\", \"L055\"],\n      \"price\": [\"L059\"]\n    }\n  },\n  {\n    \"raw_name\": \"러셀(Russel's) 버번 싱글 배럴\",\n    \"price_krw\": 16000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L042\", \"L056\"],\n      \"price\": [\"L060\"]\n    }\n  },\n  {\n    \"raw_name\": \"러셀(Russel's) 라이 싱글 배럴\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L042\", \"L057\"],\n      \"price\": [\"L061\"]\n    }\n  },\n  {\n    \"raw_name\": \"1776제임스 E.페퍼(1776 James E. Pepper) 버번\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L058\", \"L072\"],\n      \"price\": [\"L066\"]\n    }\n  },\n  {\n    \"raw_name\": \"1776제임스 E.페퍼(1776 James E. Pepper) 라이\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L058\", \"L073\"],\n      \"price\": [\"L067\"]\n    }\n  },\n  {\n    \"raw_name\": \"믹터스(Michter's) 버번\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L075\", \"L084\"],\n      \"price\": [\"L076\"]\n    }\n  },\n  {\n    \"raw_name\": \"믹터스(Michter's) 라이\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L075\", \"L085\"],\n      \"price\": [\"L077\"]\n    }\n  },\n  {\n    \"raw_name\": \"사제락(Sazerac) 라이\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L074\", \"L086\"],\n      \"price\": [\"L087\"]\n    }\n  },\n  {\n    \"raw_name\": \"브로큰 배럴(Broken Barrel) 버번 포트 캐스크\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L011\", \"L012\"],\n      \"price\": [\"L013\"]\n    }\n  },\n  {\n    \"raw_name\": \"베이커스(Baker's) 버번\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L009\", \"L010\"],\n      \"price\": [\"L014\"]\n    }\n  },\n  {\n    \"raw_name\": \"바톤 1792(Barton 1792) 1792 풀 프루프\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L025\", \"L026\"],\n      \"price\": [\"L028\"]\n    }\n  },\n  {\n    \"raw_name\": \"우드포드 리저브(Woodford Reserve) 버번\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L027\", \"L033\"],\n      \"price\": [\"L036\"]\n    }\n  },\n  {\n    \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블오크\",\n    \"price_krw\": 19000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L027\", \"L034\"],\n      \"price\": [\"L037\"]\n    }\n  },\n  {\n    \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블 X.O\",\n    \"price_krw\": 420000,\n    \"pour_ml\": null,\n    \"unit\": \"bottle\",\n    \"source_lines\": {\n      \"name\": [\"L027\", \"L035\"],\n      \"price\": [\"L038\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 로완스크릭\",\n    \"price_krw\": 18000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L047\"],\n      \"price\": [\"L051\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 팟 스틸 리저브\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L048\"],\n      \"price\": [\"L052\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 노아스밀\",\n    \"price_krw\": 21000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L049\"],\n      \"price\": [\"L053\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 위티드 버번 8년\",\n    \"price_krw\": 70000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L050\"],\n      \"price\": [\"L054\"]\n    }\n  },\n  {\n    \"raw_name\": \"배럴(Barrel) 라이 씨그라스\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L062\", \"L063\"],\n      \"price\": [\"L065\"]\n    }\n  },\n  {\n    \"raw_name\": \"블랑톤(Blanton) 버번 싱글배럴\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L064\", \"L068\"],\n      \"price\": [\"L070\"]\n    }\n  },\n  {\n    \"raw_name\": \"블랑톤(Blanton) SFTB\",\n    \"price_krw\": 62000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L064\", \"L069\"],\n      \"price\": [\"L071\"]\n    }\n  },\n  {\n    \"raw_name\": \"부커스(Booker's) 버번\",\n    \"price_krw\": 35000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L078\", \"L079\"],\n      \"price\": [\"L082\"]\n    }\n  },\n  {\n    \"raw_name\": \"일라이저크레이그(Elijah Craig) 버번 배럴 프루프\",\n    \"price_krw\": 37000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L080\", \"L081\"],\n      \"price\": [\"L083\"]\n    }\n  }\n]}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T08:37:08Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": [\n  {\n    \"raw_name\": \"메이커스 마크(Maker's Mark) 버번\",\n    \"price_krw\": 12000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L002\", \"L003\"],\n      \"price\": [\"L006\"]\n    }\n  },\n  {\n    \"raw_name\": \"메이커스 마크(Maker's Mark) 46\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L002\", \"L004\"],\n      \"price\": [\"L007\"]\n    }\n  },\n  {\n    \"raw_name\": \"메이커스 마크(Maker's Mark) 캐스크 스트랭스\",\n    \"price_krw\": 16000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L002\", \"L005\"],\n      \"price\": [\"L008\"]\n    }\n  },\n  {\n    \"raw_name\": \"리뎀션(Redemption) 라이\",\n    \"price_krw\": 12000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L022\", \"L023\"],\n      \"price\": [\"L024\"]\n    }\n  },\n  {\n    \"raw_name\": \"놉 크릭(Knob Creek) 버번\",\n    \"price_krw\": 12000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L020\", \"L021\", \"L029\"],\n      \"price\": [\"L031\"]\n    }\n  },\n  {\n    \"raw_name\": \"놉 크릭(Knob Creek) 라이\",\n    \"price_krw\": 13000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L020\", \"L021\", \"L030\"],\n      \"price\": [\"L032\"]\n    }\n  },\n  {\n    \"raw_name\": \"이글레어(Eagle Rare) 10년\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L039\", \"L040\"],\n      \"price\": [\"L041\"]\n    }\n  },\n  {\n    \"raw_name\": \"포로지스(Four Roses) 싱글 배럴\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L043\", \"L044\"],\n      \"price\": [\"L045\"]\n    }\n  },\n  {\n    \"raw_name\": \"러셀(Russel's) 10년 버번\",\n    \"price_krw\": 13000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L042\", \"L055\"],\n      \"price\": [\"L059\"]\n    }\n  },\n  {\n    \"raw_name\": \"러셀(Russel's) 버번 싱글 배럴\",\n    \"price_krw\": 16000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L042\", \"L056\"],\n      \"price\": [\"L060\"]\n    }\n  },\n  {\n    \"raw_name\": \"러셀(Russel's) 라이 싱글 배럴\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L042\", \"L057\"],\n      \"price\": [\"L061\"]\n    }\n  },\n  {\n    \"raw_name\": \"1776제임스 E.페퍼(1776 James E. Pepper) 버번\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L058\", \"L072\"],\n      \"price\": [\"L066\"]\n    }\n  },\n  {\n    \"raw_name\": \"1776제임스 E.페퍼(1776 James E. Pepper) 라이\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L058\", \"L073\"],\n      \"price\": [\"L067\"]\n    }\n  },\n  {\n    \"raw_name\": \"믹터스(Michter's) 버번\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L075\", \"L084\"],\n      \"price\": [\"L076\"]\n    }\n  },\n  {\n    \"raw_name\": \"믹터스(Michter's) 라이\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L075\", \"L085\"],\n      \"price\": [\"L077\"]\n    }\n  },\n  {\n    \"raw_name\": \"사제락(Sazerac) 라이\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L074\", \"L086\"],\n      \"price\": [\"L087\"]\n    }\n  },\n  {\n    \"raw_name\": \"브로큰 배럴(Broken Barrel) 버번 포트 캐스크\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L011\", \"L012\"],\n      \"price\": [\"L013\"]\n    }\n  },\n  {\n    \"raw_name\": \"베이커스(Baker's) 버번\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L009\", \"L010\"],\n      \"price\": [\"L014\"]\n    }\n  },\n  {\n    \"raw_name\": \"바톤 1792(Barton 1792) 1792 풀 프루프\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L025\", \"L026\"],\n      \"price\": [\"L028\"]\n    }\n  },\n  {\n    \"raw_name\": \"우드포드 리저브(Woodford Reserve) 버번\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L027\", \"L033\"],\n      \"price\": [\"L036\"]\n    }\n  },\n  {\n    \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블오크\",\n    \"price_krw\": 19000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L027\", \"L034\"],\n      \"price\": [\"L037\"]\n    }\n  },\n  {\n    \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블 X.O\",\n    \"price_krw\": 420000,\n    \"pour_ml\": null,\n    \"unit\": \"bottle\",\n    \"source_lines\": {\n      \"name\": [\"L027\", \"L035\"],\n      \"price\": [\"L038\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 로완스크릭\",\n    \"price_krw\": 18000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L047\"],\n      \"price\": [\"L051\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 팟 스틸 리저브\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L048\"],\n      \"price\": [\"L052\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 노아스밀\",\n    \"price_krw\": 21000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L049\"],\n      \"price\": [\"L053\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 위티드 버번 8년\",\n    \"price_krw\": 70000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L050\"],\n      \"price\": [\"L054\"]\n    }\n  },\n  {\n    \"raw_name\": \"배럴(Barrel) 라이 씨그라스\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L062\", \"L063\"],\n      \"price\": [\"L065\"]\n    }\n  },\n  {\n    \"raw_name\": \"블랑톤(Blanton) 버번 싱글배럴\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L064\", \"L068\"],\n      \"price\": [\"L070\"]\n    }\n  },\n  {\n    \"raw_name\": \"블랑톤(Blanton) SFTB\",\n    \"price_krw\": 62000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L064\", \"L069\"],\n      \"price\": [\"L071\"]\n    }\n  },\n  {\n    \"raw_name\": \"부커스(Booker's) 버번\",\n    \"price_krw\": 35000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L078\", \"L079\"],\n      \"price\": [\"L082\"]\n    }\n  },\n  {\n    \"raw_name\": \"일라이저크레이그(Elijah Craig) 버번 배럴 프루프\",\n    \"price_krw\": 37000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L080\", \"L081\"],\n      \"price\": [\"L083\"]\n    }\n  }\n]}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0T0gLeeJtlV+Mfw+Llf3oZ8JWYntOxLfCnh2RXrXDS0dS0+eHiJsA/FcmPZYTD7m8upwARgd+j+0HojAjG1hVOHF5Eo+ihjPx2/xvVHizMOD75Lhv0RhzssWg=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": [\n  {\n    \"raw_name\": \"메이커스 마크(Maker's Mark) 버번\",\n    \"price_krw\": 12000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L002\", \"L003\"],\n      \"price\": [\"L006\"]\n    }\n  },\n  {\n    \"raw_name\": \"메이커스 마크(Maker's Mark) 46\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L002\", \"L004\"],\n      \"price\": [\"L007\"]\n    }\n  },\n  {\n    \"raw_name\": \"메이커스 마크(Maker's Mark) 캐스크 스트랭스\",\n    \"price_krw\": 16000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L002\", \"L005\"],\n      \"price\": [\"L008\"]\n    }\n  },\n  {\n    \"raw_name\": \"리뎀션(Redemption) 라이\",\n    \"price_krw\": 12000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L022\", \"L023\"],\n      \"price\": [\"L024\"]\n    }\n  },\n  {\n    \"raw_name\": \"놉 크릭(Knob Creek) 버번\",\n    \"price_krw\": 12000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L020\", \"L021\", \"L029\"],\n      \"price\": [\"L031\"]\n    }\n  },\n  {\n    \"raw_name\": \"놉 크릭(Knob Creek) 라이\",\n    \"price_krw\": 13000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L020\", \"L021\", \"L030\"],\n      \"price\": [\"L032\"]\n    }\n  },\n  {\n    \"raw_name\": \"이글레어(Eagle Rare) 10년\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L039\", \"L040\"],\n      \"price\": [\"L041\"]\n    }\n  },\n  {\n    \"raw_name\": \"포로지스(Four Roses) 싱글 배럴\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L043\", \"L044\"],\n      \"price\": [\"L045\"]\n    }\n  },\n  {\n    \"raw_name\": \"러셀(Russel's) 10년 버번\",\n    \"price_krw\": 13000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L042\", \"L055\"],\n      \"price\": [\"L059\"]\n    }\n  },\n  {\n    \"raw_name\": \"러셀(Russel's) 버번 싱글 배럴\",\n    \"price_krw\": 16000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L042\", \"L056\"],\n      \"price\": [\"L060\"]\n    }\n  },\n  {\n    \"raw_name\": \"러셀(Russel's) 라이 싱글 배럴\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L042\", \"L057\"],\n      \"price\": [\"L061\"]\n    }\n  },\n  {\n    \"raw_name\": \"1776제임스 E.페퍼(1776 James E. Pepper) 버번\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L058\", \"L072\"],\n      \"price\": [\"L066\"]\n    }\n  },\n  {\n    \"raw_name\": \"1776제임스 E.페퍼(1776 James E. Pepper) 라이\",\n    \"price_krw\": 14000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L058\", \"L073\"],\n      \"price\": [\"L067\"]\n    }\n  },\n  {\n    \"raw_name\": \"믹터스(Michter's) 버번\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L075\", \"L084\"],\n      \"price\": [\"L076\"]\n    }\n  },\n  {\n    \"raw_name\": \"믹터스(Michter's) 라이\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L075\", \"L085\"],\n      \"price\": [\"L077\"]\n    }\n  },\n  {\n    \"raw_name\": \"사제락(Sazerac) 라이\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L074\", \"L086\"],\n      \"price\": [\"L087\"]\n    }\n  },\n  {\n    \"raw_name\": \"브로큰 배럴(Broken Barrel) 버번 포트 캐스크\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L011\", \"L012\"],\n      \"price\": [\"L013\"]\n    }\n  },\n  {\n    \"raw_name\": \"베이커스(Baker's) 버번\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L009\", \"L010\"],\n      \"price\": [\"L014\"]\n    }\n  },\n  {\n    \"raw_name\": \"바톤 1792(Barton 1792) 1792 풀 프루프\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L025\", \"L026\"],\n      \"price\": [\"L028\"]\n    }\n  },\n  {\n    \"raw_name\": \"우드포드 리저브(Woodford Reserve) 버번\",\n    \"price_krw\": 17000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L027\", \"L033\"],\n      \"price\": [\"L036\"]\n    }\n  },\n  {\n    \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블오크\",\n    \"price_krw\": 19000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L027\", \"L034\"],\n      \"price\": [\"L037\"]\n    }\n  },\n  {\n    \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블 X.O\",\n    \"price_krw\": 420000,\n    \"pour_ml\": null,\n    \"unit\": \"bottle\",\n    \"source_lines\": {\n      \"name\": [\"L027\", \"L035\"],\n      \"price\": [\"L038\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 로완스크릭\",\n    \"price_krw\": 18000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L047\"],\n      \"price\": [\"L051\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 팟 스틸 리저브\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L048\"],\n      \"price\": [\"L052\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 노아스밀\",\n    \"price_krw\": 21000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L049\"],\n      \"price\": [\"L053\"]\n    }\n  },\n  {\n    \"raw_name\": \"윌렛(Willet) 위티드 버번 8년\",\n    \"price_krw\": 70000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L046\", \"L050\"],\n      \"price\": [\"L054\"]\n    }\n  },\n  {\n    \"raw_name\": \"배럴(Barrel) 라이 씨그라스\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L062\", \"L063\"],\n      \"price\": [\"L065\"]\n    }\n  },\n  {\n    \"raw_name\": \"블랑톤(Blanton) 버번 싱글배럴\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L064\", \"L068\"],\n      \"price\": [\"L070\"]\n    }\n  },\n  {\n    \"raw_name\": \"블랑톤(Blanton) SFTB\",\n    \"price_krw\": 62000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L064\", \"L069\"],\n      \"price\": [\"L071\"]\n    }\n  },\n  {\n    \"raw_name\": \"부커스(Booker's) 버번\",\n    \"price_krw\": 35000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L078\", \"L079\"],\n      \"price\": [\"L082\"]\n    }\n  },\n  {\n    \"raw_name\": \"일라이저크레이그(Elijah Craig) 버번 배럴 프루프\",\n    \"price_krw\": 37000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\"L080\", \"L081\"],\n      \"price\": [\"L083\"]\n    }\n  }\n]}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T08:37:08Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 5388
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 6452,
+      "total_output_tokens": 3104,
+      "total_thought_tokens": 0,
+      "total_tokens": 9556,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 87,
+    "price_like_lines": 34,
+    "uncited_price_lines": 2,
+    "uncited": [
+      "L018",
+      "L019"
+    ],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 2,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [189,108,639,133] 스코틀랜드 위스키 (SCOTCH WHISKY)\nL002 [161,186,384,202] 메이커스 마크(Maker's Mark)\nL003 [160,207,196,221] 버번\nL004 [156,222,181,234] 46\nL005 [154,237,288,254] 캐스크 스트랭스\nL006 [434,206,470,217] 12.0\nL007 [434,220,470,233] 14.0\nL008 [434,237,470,249] 16.0\nL009 [508,228,649,244] 베이커스(Baker's)\nL010 [512,252,549,268] 버번\nL011 [507,178,715,194] 브로큰 배럴(Broken Barrel)\nL012 [508,199,642,216] 버번 포트 캐스크\nL013 [786,198,823,210] 15.0\nL014 [795,247,833,259] 17.0\nL015 [0,295,9,307] 0\nL016 [0,277,14,289] 0\nL017 [0,260,17,273] .0\nL018 [0,245,22,256] 2.0\nL019 [0,228,26,240] 2.0\nL020 [140,319,152,335] 놉\nL021 [155,320,314,339] 크릭(Knob Creek)\nL022 [149,267,313,285] 리뎀션(Redemption)\nL023 [147,289,186,306] 라이\nL024 [431,290,469,303] 12.0\nL025 [508,278,696,298] 바톤 1792(Barton 1792)\nL026 [510,303,639,320] 1792 풀 프루프\nL027 [510,331,811,353] 우드포드 리저브(Woodford Reserve)\nL028 [807,301,845,312] 17.0\nL029 [139,345,179,362] 버번\nL030 [137,362,177,379] 라이\nL031 [432,345,470,358] 12.0\nL032 [432,363,470,376] 13.0\nL033 [514,362,552,378] 버번\nL034 [515,378,592,396] 더블오크\nL035 [515,397,592,414] 더블 X.O\nL036 [819,355,857,368] 17.0\nL037 [823,374,861,387] 19.0\nL038 [826,392,861,404] 420\nL039 [130,394,314,414] 이글레어(Eagle Rare)\nL040 [125,420,170,438] 10년\nL041 [433,419,473,435] 14.0\nL042 [111,518,245,538] 러셀(Russel's)\nL043 [120,456,314,474] 포로지스(Four Roses)\nL044 [118,483,208,501] 싱글 배럴\nL045 [434,480,474,495] 15.0\nL046 [514,430,620,451] 윌렛(Willet)\nL047 [515,457,617,477] 로완스크릭\nL048 [517,475,649,496] 팟 스틸 리저브\nL049 [517,496,599,516] 노아스밀\nL050 [519,515,661,535] 위티드 버번 8년\nL051 [837,454,877,467] 18.0\nL052 [840,472,882,487] 20.0\nL053 [844,493,885,506] 21.0\nL054 [847,513,889,527] 70.0\nL055 [107,548,203,568] 10년 버번\nL056 [106,569,246,589] 버번 싱글 배럴\nL057 [102,591,245,611] 라이 싱글 배럴\nL058 [92,626,484,652] 1776제임스 E.페퍼(1776 James E. Pepper)\nL059 [434,545,476,560] 13.0\nL060 [434,566,477,582] 16.0\nL061 [434,587,477,604] 17.0\nL062 [521,552,635,572] 배럴(Barrel)\nL063 [524,580,658,601] 라이 씨그라스\nL064 [522,620,675,642] 블랑톤(Blanton)\nL065 [861,579,904,594] 25.0\nL066 [434,665,477,682] 14.0\nL067 [434,689,479,706] 14.0\nL068 [524,651,661,674] 버번 싱글배럴\nL069 [528,678,587,695] SFTB\nL070 [875,651,918,667] 25.0\nL071 [878,673,924,690] 62.0\nL072 [88,664,135,686] 버번\nL073 [85,688,134,710] 라이\nL074 [64,841,238,866] 사제락(Sazerac)\nL075 [80,734,257,758] 믹터스(Michter's)\nL076 [436,769,482,788] 15.0\nL077 [436,795,482,812] 15.0\nL078 [526,716,696,740] 부커스(Booker's)\nL079 [529,751,578,775] 버번\nL080 [529,790,844,817] 일라이저크레이그(Elijah Craig)\nL081 [530,827,708,853] 버번 배럴 프루프\nL082 [892,747,939,766] 35.0\nL083 [903,824,954,845] 37.0\nL084 [76,769,127,792] 버번\nL085 [74,793,125,816] 라이\nL086 [62,875,114,900] 라이\nL087 [438,877,486,896] 15.0\n</ocr_lines>",
+  "n_lines": 87,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 3474
+}

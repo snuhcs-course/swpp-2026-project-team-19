@@ -1,0 +1,1042 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "013_forest_01.png",
+  "prepared_image": "013_forest_01.png",
+  "prepared_sha256": "0f540c816377d36c1602b7b615dd9512957732da1e63e7002574725d49026855",
+  "started_at": "2026-10-14T08:45:07.574173+00:00",
+  "latency_ms": 56528,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 8652,
+  "output_tokens": 5995,
+  "thought_tokens": 2724,
+  "total_tokens": 17371,
+  "output": {
+    "items": [
+      {
+        "raw_name": "글렌그란트 10년",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013"
+          ],
+          "price": [
+            "L026"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌리벳 12년",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L014"
+          ],
+          "price": [
+            "L027"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌피딕 12년",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L015"
+          ],
+          "price": [
+            "L028"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌피딕 15년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L016"
+          ],
+          "price": [
+            "L029"
+          ]
+        }
+      },
+      {
+        "raw_name": "발베니 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L017"
+          ],
+          "price": [
+            "L030"
+          ]
+        }
+      },
+      {
+        "raw_name": "발베니 14년 캐리비언 캐스크",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L018"
+          ],
+          "price": [
+            "L031"
+          ]
+        }
+      },
+      {
+        "raw_name": "맥캘란 12년 더블 캐스크",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L019"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "맥캘란 15년 더블 캐스크",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L020"
+          ],
+          "price": [
+            "L033"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌알라키 10년 CS",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L021"
+          ],
+          "price": [
+            "L034"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌알라키 12년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022"
+          ],
+          "price": [
+            "L035"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌알라키 15년",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      },
+      {
+        "raw_name": "로즈아일 12년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L037"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌글라사 샌드앤드",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L038"
+          ]
+        }
+      },
+      {
+        "raw_name": "라프로익 10년",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L039"
+          ],
+          "price": [
+            "L057"
+          ]
+        }
+      },
+      {
+        "raw_name": "라프로익 PX 캐스크",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L040"
+          ],
+          "price": [
+            "L058"
+          ]
+        }
+      },
+      {
+        "raw_name": "보모어 12년",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L041"
+          ],
+          "price": [
+            "L059"
+          ]
+        }
+      },
+      {
+        "raw_name": "아드벡 10년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042"
+          ],
+          "price": [
+            "L060"
+          ]
+        }
+      },
+      {
+        "raw_name": "아드벡 우거다일",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L043"
+          ],
+          "price": [
+            "L061"
+          ]
+        }
+      },
+      {
+        "raw_name": "아드벡 코리브레칸",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L044"
+          ],
+          "price": [
+            "L062"
+          ]
+        }
+      },
+      {
+        "raw_name": "아드벡 스펙타클러",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L045"
+          ],
+          "price": [
+            "L063"
+          ]
+        }
+      },
+      {
+        "raw_name": "아드벡 25년",
+        "price_krw": 190000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L046"
+          ],
+          "price": [
+            "L064"
+          ]
+        }
+      },
+      {
+        "raw_name": "라가볼린 8년",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L047"
+          ],
+          "price": [
+            "L065"
+          ]
+        }
+      },
+      {
+        "raw_name": "라가불린 16년",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L048"
+          ],
+          "price": [
+            "L066"
+          ]
+        }
+      },
+      {
+        "raw_name": "킬호만 사닉",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L049"
+          ],
+          "price": [
+            "L067"
+          ]
+        }
+      },
+      {
+        "raw_name": "킬호만 배치 스트렝스",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L050"
+          ],
+          "price": [
+            "L068"
+          ]
+        }
+      },
+      {
+        "raw_name": "롱로우 피티드",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L051"
+          ],
+          "price": [
+            "L069"
+          ]
+        }
+      },
+      {
+        "raw_name": "빅 피트",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L052"
+          ],
+          "price": [
+            "L070"
+          ]
+        }
+      },
+      {
+        "raw_name": "옥토모어 13.1",
+        "price_krw": 55000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L053"
+          ],
+          "price": [
+            "L071"
+          ]
+        }
+      },
+      {
+        "raw_name": "옥토모어 14.3",
+        "price_krw": 65000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L054"
+          ],
+          "price": [
+            "L072"
+          ]
+        }
+      },
+      {
+        "raw_name": "옥토모어 15.3",
+        "price_krw": 69000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L055"
+          ],
+          "price": [
+            "L073"
+          ]
+        }
+      },
+      {
+        "raw_name": "옥토모어 16.3",
+        "price_krw": 69000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L056"
+          ],
+          "price": [
+            "L074"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니워커 블랙",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L075"
+          ],
+          "price": [
+            "L088"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니워커 블루",
+        "price_krw": 39000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L076"
+          ],
+          "price": [
+            "L089"
+          ]
+        }
+      },
+      {
+        "raw_name": "발렌타인 21년",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L077"
+          ],
+          "price": [
+            "L090"
+          ]
+        }
+      },
+      {
+        "raw_name": "로얄 살루트 21년",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L078"
+          ],
+          "price": [
+            "L091"
+          ]
+        }
+      },
+      {
+        "raw_name": "듀어스 18년",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L079"
+          ],
+          "price": [
+            "L092"
+          ]
+        }
+      },
+      {
+        "raw_name": "몽키 숄더",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L080"
+          ],
+          "price": [
+            "L093"
+          ]
+        }
+      },
+      {
+        "raw_name": "메이커스 마크",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L082"
+          ],
+          "price": [
+            "L094"
+          ]
+        }
+      },
+      {
+        "raw_name": "와일드터키 81",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L083"
+          ],
+          "price": [
+            "L095"
+          ]
+        }
+      },
+      {
+        "raw_name": "와일드터키 라이",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L084"
+          ],
+          "price": [
+            "L096"
+          ]
+        }
+      },
+      {
+        "raw_name": "와일드터키 레어브리드",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L085"
+          ],
+          "price": [
+            "L097"
+          ]
+        }
+      },
+      {
+        "raw_name": "사가모어 라이 CS",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L086"
+          ],
+          "price": [
+            "L098"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 오리지널",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L099"
+          ],
+          "price": [
+            "L100"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 라산타 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L101"
+          ],
+          "price": [
+            "L102"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 킨타 루반 14년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L103"
+          ],
+          "price": [
+            "L104"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 시그넷",
+        "price_krw": 34000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L105"
+          ],
+          "price": [
+            "L106"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L107"
+          ],
+          "price": [
+            "L108"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 15년",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L109"
+          ],
+          "price": [
+            "L110"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 18년",
+        "price_krw": 48000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L111"
+          ],
+          "price": [
+            "L112"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 포트우드",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L113"
+          ],
+          "price": [
+            "L114"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 피티드",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L115"
+          ],
+          "price": [
+            "L116"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 29년 1993 빈티지 캐스크보틀링",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L117"
+          ],
+          "price": [
+            "L118"
+          ]
+        }
+      },
+      {
+        "raw_name": "탈리스커 10년",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L119"
+          ],
+          "price": [
+            "L120"
+          ]
+        }
+      },
+      {
+        "raw_name": "달모어 12년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L121"
+          ],
+          "price": [
+            "L122"
+          ]
+        }
+      },
+      {
+        "raw_name": "오반 14년",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L123"
+          ],
+          "price": [
+            "L124"
+          ]
+        }
+      },
+      {
+        "raw_name": "달위니 15년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L125"
+          ],
+          "price": [
+            "L126"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌파클라스 105",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L127"
+          ],
+          "price": [
+            "L128"
+          ]
+        }
+      },
+      {
+        "raw_name": "크라이넬리시 14년",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L129"
+          ],
+          "price": [
+            "L130"
+          ]
+        }
+      },
+      {
+        "raw_name": "아란 10년",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L131"
+          ],
+          "price": [
+            "L142"
+          ]
+        }
+      },
+      {
+        "raw_name": "마크리무어 CS",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L132"
+          ],
+          "price": [
+            "L143"
+          ]
+        }
+      },
+      {
+        "raw_name": "킬커란 12년",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L133"
+          ],
+          "price": [
+            "L144"
+          ]
+        }
+      },
+      {
+        "raw_name": "스프링뱅크 10년",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L134"
+          ],
+          "price": [
+            "L145"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌스코시아 10년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L135"
+          ],
+          "price": [
+            "L146"
+          ]
+        }
+      },
+      {
+        "raw_name": "레드브레스트 12년",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L136"
+          ],
+          "price": [
+            "L147"
+          ]
+        }
+      },
+      {
+        "raw_name": "폴 존 피티드",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L137"
+          ],
+          "price": [
+            "L148"
+          ]
+        }
+      },
+      {
+        "raw_name": "히비키 하모니",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L138"
+          ],
+          "price": [
+            "L149"
+          ]
+        }
+      },
+      {
+        "raw_name": "야마자키 12년",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L139"
+          ],
+          "price": [
+            "L150"
+          ]
+        }
+      },
+      {
+        "raw_name": "기원 호랑이",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L140"
+          ],
+          "price": [
+            "L151"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌그란트 10년\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌리벳 12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕 12년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕 15년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니 14년 캐리비언 캐스크\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 12년 더블 캐스크\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 15년 더블 캐스크\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 10년 CS\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 15년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"로즈아일 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L037\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌글라사 샌드앤드\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L038\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익 10년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L039\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익 PX 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L040\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"보모어 12년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 10년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\"],\n        \"price\": [\"L060\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\"],\n        \"price\": [\"L061\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L044\"],\n        \"price\": [\"L062\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 스펙타클러\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L045\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 25년\",\n      \"price_krw\": 190000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L046\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"라가볼린 8년\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"라가불린 16년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L048\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"킬호만 사닉\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L049\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"킬호만 배치 스트렝스\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L050\"],\n        \"price\": [\"L068\"]\n      }\n    },\n    {\n      \"raw_name\": \"롱로우 피티드\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L051\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"빅 피트\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L052\"],\n        \"price\": [\"L070\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 13.1\",\n      \"price_krw\": 55000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L053\"],\n        \"price\": [\"L071\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 14.3\",\n      \"price_krw\": 65000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L054\"],\n        \"price\": [\"L072\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 15.3\",\n      \"price_krw\": 69000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L055\"],\n        \"price\": [\"L073\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 16.3\",\n      \"price_krw\": 69000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L056\"],\n        \"price\": [\"L074\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L075\"],\n        \"price\": [\"L088\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 39000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L076\"],\n        \"price\": [\"L089\"]\n      }\n    },\n    {\n      \"raw_name\": \"발렌타인 21년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L077\"],\n        \"price\": [\"L090\"]\n      }\n    },\n    {\n      \"raw_name\": \"로얄 살루트 21년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L078\"],\n        \"price\": [\"L091\"]\n      }\n    },\n    {\n      \"raw_name\": \"듀어스 18년\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\"],\n        \"price\": [\"L092\"]\n      }\n    },\n    {\n      \"raw_name\": \"몽키 숄더\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L080\"],\n        \"price\": [\"L093\"]\n      }\n    },\n    {\n      \"raw_name\": \"메이커스 마크\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L082\"],\n        \"price\": [\"L094\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 81\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L083\"],\n        \"price\": [\"L095\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 라이\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L084\"],\n        \"price\": [\"L096\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 레어브리드\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L085\"],\n        \"price\": [\"L097\"]\n      }\n    },\n    {\n      \"raw_name\": \"사가모어 라이 CS\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L086\"],\n        \"price\": [\"L098\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L099\"],\n        \"price\": [\"L100\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L101\"],\n        \"price\": [\"L102\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 킨타 루반 14년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L103\"],\n        \"price\": [\"L104\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L105\"],\n        \"price\": [\"L106\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L107\"],\n        \"price\": [\"L108\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 15년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L109\"],\n        \"price\": [\"L110\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 18년\",\n      \"price_krw\": 48000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L111\"],\n        \"price\": [\"L112\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 포트우드\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L113\"],\n        \"price\": [\"L114\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 피티드\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L115\"],\n        \"price\": [\"L116\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 29년 1993 빈티지 캐스크보틀링\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L117\"],\n        \"price\": [\"L118\"]\n      }\n    },\n    {\n      \"raw_name\": \"탈리스커 10년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L119\"],\n        \"price\": [\"L120\"]\n      }\n    },\n    {\n      \"raw_name\": \"달모어 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L121\"],\n        \"price\": [\"L122\"]\n      }\n    },\n    {\n      \"raw_name\": \"오반 14년\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L123\"],\n        \"price\": [\"L124\"]\n      }\n    },\n    {\n      \"raw_name\": \"달위니 15년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L125\"],\n        \"price\": [\"L126\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌파클라스 105\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L127\"],\n        \"price\": [\"L128\"]\n      }\n    },\n    {\n      \"raw_name\": \"크라이넬리시 14년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L129\"],\n        \"price\": [\"L130\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 10년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L131\"],\n        \"price\": [\"L142\"]\n      }\n    },\n    {\n      \"raw_name\": \"마크리무어 CS\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L132\"],\n        \"price\": [\"L143\"]\n      }\n    },\n    {\n      \"raw_name\": \"킬커란 12년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L133\"],\n        \"price\": [\"L144\"]\n      }\n    },\n    {\n      \"raw_name\": \"스프링뱅크 10년\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L134\"],\n        \"price\": [\"L145\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌스코시아 10년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L135\"],\n        \"price\": [\"L146\"]\n      }\n    },\n    {\n      \"raw_name\": \"레드브레스트 12년\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L136\"],\n        \"price\": [\"L147\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴 존 피티드\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L137\"],\n        \"price\": [\"L148\"]\n      }\n    },\n    {\n      \"raw_name\": \"히비키 하모니\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L138\"],\n        \"price\": [\"L149\"]\n      }\n    },\n    {\n      \"raw_name\": \"야마자키 12년\",\n      \"price_krw\": 43000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L139\"],\n        \"price\": [\"L150\"]\n      }\n    },\n    {\n      \"raw_name\": \"기원 호랑이\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L140\"],\n        \"price\": [\"L151\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T08:46:03Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌그란트 10년\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌리벳 12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕 12년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕 15년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니 14년 캐리비언 캐스크\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 12년 더블 캐스크\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 15년 더블 캐스크\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 10년 CS\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 15년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"로즈아일 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L037\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌글라사 샌드앤드\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L038\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익 10년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L039\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익 PX 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L040\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"보모어 12년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 10년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\"],\n        \"price\": [\"L060\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\"],\n        \"price\": [\"L061\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L044\"],\n        \"price\": [\"L062\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 스펙타클러\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L045\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 25년\",\n      \"price_krw\": 190000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L046\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"라가볼린 8년\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"라가불린 16년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L048\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"킬호만 사닉\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L049\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"킬호만 배치 스트렝스\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L050\"],\n        \"price\": [\"L068\"]\n      }\n    },\n    {\n      \"raw_name\": \"롱로우 피티드\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L051\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"빅 피트\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L052\"],\n        \"price\": [\"L070\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 13.1\",\n      \"price_krw\": 55000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L053\"],\n        \"price\": [\"L071\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 14.3\",\n      \"price_krw\": 65000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L054\"],\n        \"price\": [\"L072\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 15.3\",\n      \"price_krw\": 69000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L055\"],\n        \"price\": [\"L073\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 16.3\",\n      \"price_krw\": 69000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L056\"],\n        \"price\": [\"L074\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L075\"],\n        \"price\": [\"L088\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 39000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L076\"],\n        \"price\": [\"L089\"]\n      }\n    },\n    {\n      \"raw_name\": \"발렌타인 21년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L077\"],\n        \"price\": [\"L090\"]\n      }\n    },\n    {\n      \"raw_name\": \"로얄 살루트 21년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L078\"],\n        \"price\": [\"L091\"]\n      }\n    },\n    {\n      \"raw_name\": \"듀어스 18년\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\"],\n        \"price\": [\"L092\"]\n      }\n    },\n    {\n      \"raw_name\": \"몽키 숄더\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L080\"],\n        \"price\": [\"L093\"]\n      }\n    },\n    {\n      \"raw_name\": \"메이커스 마크\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L082\"],\n        \"price\": [\"L094\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 81\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L083\"],\n        \"price\": [\"L095\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 라이\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L084\"],\n        \"price\": [\"L096\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 레어브리드\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L085\"],\n        \"price\": [\"L097\"]\n      }\n    },\n    {\n      \"raw_name\": \"사가모어 라이 CS\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L086\"],\n        \"price\": [\"L098\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L099\"],\n        \"price\": [\"L100\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L101\"],\n        \"price\": [\"L102\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 킨타 루반 14년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L103\"],\n        \"price\": [\"L104\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L105\"],\n        \"price\": [\"L106\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L107\"],\n        \"price\": [\"L108\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 15년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L109\"],\n        \"price\": [\"L110\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 18년\",\n      \"price_krw\": 48000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L111\"],\n        \"price\": [\"L112\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 포트우드\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L113\"],\n        \"price\": [\"L114\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 피티드\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L115\"],\n        \"price\": [\"L116\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 29년 1993 빈티지 캐스크보틀링\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L117\"],\n        \"price\": [\"L118\"]\n      }\n    },\n    {\n      \"raw_name\": \"탈리스커 10년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L119\"],\n        \"price\": [\"L120\"]\n      }\n    },\n    {\n      \"raw_name\": \"달모어 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L121\"],\n        \"price\": [\"L122\"]\n      }\n    },\n    {\n      \"raw_name\": \"오반 14년\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L123\"],\n        \"price\": [\"L124\"]\n      }\n    },\n    {\n      \"raw_name\": \"달위니 15년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L125\"],\n        \"price\": [\"L126\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌파클라스 105\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L127\"],\n        \"price\": [\"L128\"]\n      }\n    },\n    {\n      \"raw_name\": \"크라이넬리시 14년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L129\"],\n        \"price\": [\"L130\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 10년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L131\"],\n        \"price\": [\"L142\"]\n      }\n    },\n    {\n      \"raw_name\": \"마크리무어 CS\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L132\"],\n        \"price\": [\"L143\"]\n      }\n    },\n    {\n      \"raw_name\": \"킬커란 12년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L133\"],\n        \"price\": [\"L144\"]\n      }\n    },\n    {\n      \"raw_name\": \"스프링뱅크 10년\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L134\"],\n        \"price\": [\"L145\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌스코시아 10년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L135\"],\n        \"price\": [\"L146\"]\n      }\n    },\n    {\n      \"raw_name\": \"레드브레스트 12년\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L136\"],\n        \"price\": [\"L147\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴 존 피티드\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L137\"],\n        \"price\": [\"L148\"]\n      }\n    },\n    {\n      \"raw_name\": \"히비키 하모니\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L138\"],\n        \"price\": [\"L149\"]\n      }\n    },\n    {\n      \"raw_name\": \"야마자키 12년\",\n      \"price_krw\": 43000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L139\"],\n        \"price\": [\"L150\"]\n      }\n    },\n    {\n      \"raw_name\": \"기원 호랑이\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L140\"],\n        \"price\": [\"L151\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌그란트 10년\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌리벳 12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕 12년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕 15년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니 14년 캐리비언 캐스크\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 12년 더블 캐스크\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 15년 더블 캐스크\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 10년 CS\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 15년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"로즈아일 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L037\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌글라사 샌드앤드\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L038\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익 10년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L039\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익 PX 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L040\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"보모어 12년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 10년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\"],\n        \"price\": [\"L060\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\"],\n        \"price\": [\"L061\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L044\"],\n        \"price\": [\"L062\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 스펙타클러\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L045\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 25년\",\n      \"price_krw\": 190000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L046\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"라가볼린 8년\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"라가불린 16년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L048\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"킬호만 사닉\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L049\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"킬호만 배치 스트렝스\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L050\"],\n        \"price\": [\"L068\"]\n      }\n    },\n    {\n      \"raw_name\": \"롱로우 피티드\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L051\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"빅 피트\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L052\"],\n        \"price\": [\"L070\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 13.1\",\n      \"price_krw\": 55000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L053\"],\n        \"price\": [\"L071\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 14.3\",\n      \"price_krw\": 65000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L054\"],\n        \"price\": [\"L072\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 15.3\",\n      \"price_krw\": 69000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L055\"],\n        \"price\": [\"L073\"]\n      }\n    },\n    {\n      \"raw_name\": \"옥토모어 16.3\",\n      \"price_krw\": 69000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L056\"],\n        \"price\": [\"L074\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커 블랙\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L075\"],\n        \"price\": [\"L088\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커 블루\",\n      \"price_krw\": 39000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L076\"],\n        \"price\": [\"L089\"]\n      }\n    },\n    {\n      \"raw_name\": \"발렌타인 21년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L077\"],\n        \"price\": [\"L090\"]\n      }\n    },\n    {\n      \"raw_name\": \"로얄 살루트 21년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L078\"],\n        \"price\": [\"L091\"]\n      }\n    },\n    {\n      \"raw_name\": \"듀어스 18년\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\"],\n        \"price\": [\"L092\"]\n      }\n    },\n    {\n      \"raw_name\": \"몽키 숄더\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L080\"],\n        \"price\": [\"L093\"]\n      }\n    },\n    {\n      \"raw_name\": \"메이커스 마크\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L082\"],\n        \"price\": [\"L094\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 81\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L083\"],\n        \"price\": [\"L095\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 라이\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L084\"],\n        \"price\": [\"L096\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 레어브리드\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L085\"],\n        \"price\": [\"L097\"]\n      }\n    },\n    {\n      \"raw_name\": \"사가모어 라이 CS\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L086\"],\n        \"price\": [\"L098\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L099\"],\n        \"price\": [\"L100\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L101\"],\n        \"price\": [\"L102\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 킨타 루반 14년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L103\"],\n        \"price\": [\"L104\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L105\"],\n        \"price\": [\"L106\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L107\"],\n        \"price\": [\"L108\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 15년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L109\"],\n        \"price\": [\"L110\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 18년\",\n      \"price_krw\": 48000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L111\"],\n        \"price\": [\"L112\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 포트우드\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L113\"],\n        \"price\": [\"L114\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 피티드\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L115\"],\n        \"price\": [\"L116\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 29년 1993 빈티지 캐스크보틀링\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L117\"],\n        \"price\": [\"L118\"]\n      }\n    },\n    {\n      \"raw_name\": \"탈리스커 10년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L119\"],\n        \"price\": [\"L120\"]\n      }\n    },\n    {\n      \"raw_name\": \"달모어 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L121\"],\n        \"price\": [\"L122\"]\n      }\n    },\n    {\n      \"raw_name\": \"오반 14년\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L123\"],\n        \"price\": [\"L124\"]\n      }\n    },\n    {\n      \"raw_name\": \"달위니 15년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L125\"],\n        \"price\": [\"L126\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌파클라스 105\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L127\"],\n        \"price\": [\"L128\"]\n      }\n    },\n    {\n      \"raw_name\": \"크라이넬리시 14년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L129\"],\n        \"price\": [\"L130\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 10년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L131\"],\n        \"price\": [\"L142\"]\n      }\n    },\n    {\n      \"raw_name\": \"마크리무어 CS\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L132\"],\n        \"price\": [\"L143\"]\n      }\n    },\n    {\n      \"raw_name\": \"킬커란 12년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L133\"],\n        \"price\": [\"L144\"]\n      }\n    },\n    {\n      \"raw_name\": \"스프링뱅크 10년\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L134\"],\n        \"price\": [\"L145\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌스코시아 10년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L135\"],\n        \"price\": [\"L146\"]\n      }\n    },\n    {\n      \"raw_name\": \"레드브레스트 12년\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L136\"],\n        \"price\": [\"L147\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴 존 피티드\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L137\"],\n        \"price\": [\"L148\"]\n      }\n    },\n    {\n      \"raw_name\": \"히비키 하모니\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L138\"],\n        \"price\": [\"L149\"]\n      }\n    },\n    {\n      \"raw_name\": \"야마자키 12년\",\n      \"price_krw\": 43000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L139\"],\n        \"price\": [\"L150\"]\n      }\n    },\n    {\n      \"raw_name\": \"기원 호랑이\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L140\"],\n        \"price\": [\"L151\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T08:46:03Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 7574
+        },
+        {
+          "modality": "image",
+          "tokens": 1078
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 8652,
+      "total_output_tokens": 5995,
+      "total_thought_tokens": 2724,
+      "total_tokens": 17371,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 155,
+    "price_like_lines": 71,
+    "uncited_price_lines": 3,
+    "uncited": [
+      "L001",
+      "L154",
+      "L155"
+    ],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 3,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [855,27,897,40] 92\nL002 [92,25,220,44] 20:50\nL003 [880,101,928,124] X\nL004 [181,194,818,252] For. esT\nL005 [98,273,175,281] @for.rest\nL006 [361,272,638,282] 포레스트에 오신 것을 환영합니다.\nL007 [790,275,908,282] whisky/brandy\nL008 [651,293,968,300] *위스키는 30ml 제공됩니다. 바들 주문 시 문의 부탁드립니다.\nL009 [33,314,188,331] Speyside\nL010 [353,314,440,331] Islay\nL011 [672,312,802,327] Blended\nL012 [36,521,183,539] Highland\nL013 [36,336,126,344] 글렌그란트 10년\nL014 [36,347,115,356] 글렌리벳 12년\nL015 [36,360,115,368] 글렌피딕 12년\nL016 [36,374,115,381] 글렌피딕 15년\nL017 [36,385,104,394] 발베니 12년\nL018 [36,398,188,406] 발베니 14년 캐리비언 캐스크\nL019 [36,411,166,419] 맥캘란 12년 더블 캐스크\nL020 [36,423,166,432] 맥캘란 15년 더블 캐스크\nL021 [36,436,147,444] 글렌알라키 10년 CS\nL022 [36,449,126,457] 글렌알라키 12년\nL023 [36,462,126,470] 글렌알라키 15년\nL024 [36,474,115,482] 로즈아일 12년\nL025 [36,487,147,495] 글렌글라사 샌드앤드\nL026 [262,336,327,344] ₩12,000\nL027 [262,347,330,355] ₩15,000\nL028 [262,360,330,368] ₩14,000\nL029 [262,374,330,381] ₩18,000\nL030 [262,387,330,393] ₩16,000\nL031 [262,398,330,406] ₩24,000\nL032 [262,411,330,419] ₩17,000\nL033 [262,424,330,432] ₩28,000\nL034 [262,436,330,444] ₩24,000\nL035 [262,449,330,457] ₩18,000\nL036 [262,462,330,470] ₩25,000\nL037 [262,474,330,482] ₩18,000\nL038 [262,487,330,495] ₩17,000\nL039 [355,336,434,344] 라프로익 10년\nL040 [355,347,460,355] 라프로익 PX 캐스크\nL041 [355,360,423,368] 보모어 12년\nL042 [355,374,423,381] 아드벡 10년\nL043 [355,385,443,394] 아드벡 우거다일\nL044 [355,398,454,406] 아드벡 코리브레칸\nL045 [355,411,454,419] 아드벡 스펙타클러\nL046 [355,423,423,432] 아드벡 25년\nL047 [355,436,428,444] 라가볼린 8년\nL048 [355,449,434,457] 라가불린 16년\nL049 [355,462,420,470] 킬호만 사닉\nL050 [355,474,468,483] 킬호만 배치 스트렝스\nL051 [355,487,432,495] 롱로우 피티드\nL052 [355,500,398,507] 빅 피트\nL053 [355,511,432,521] 옥토모어 13.1\nL054 [355,525,434,532] 옥토모어 14.3\nL055 [355,538,434,545] 옥토모어 15.3\nL056 [355,549,434,557] 옥토모어 16.3\nL057 [581,336,646,344] ₩14,000\nL058 [581,347,646,355] ₩18,000\nL059 [581,360,646,368] ₩14,000\nL060 [581,374,646,381] ₩18,000\nL061 [581,387,646,394] ₩21,000\nL062 [581,398,646,406] ₩24,000\nL063 [581,411,646,419] ₩24,000\nL064 [573,424,646,432] ₩190,000\nL065 [581,436,646,444] ₩19,000\nL066 [581,449,646,457] ₩25,000\nL067 [581,462,646,470] ₩16,000\nL068 [581,474,646,482] ₩19,000\nL069 [581,487,646,495] ₩19,000\nL070 [581,500,646,507] ₩16,000\nL071 [581,511,646,519] ₩55,000\nL072 [581,525,646,532] ₩65,000\nL073 [581,538,646,545] ₩69,000\nL074 [581,550,646,557] ₩69,000\nL075 [674,336,747,344] 조니워커 블랙\nL076 [672,347,747,356] 조니워커 블루\nL077 [672,360,751,368] 발렌타인 21년\nL078 [674,374,764,381] 로얄 살루트 21년\nL079 [674,385,739,393] 듀어스 18년\nL080 [674,398,725,406] 몽키 숄더\nL081 [672,540,790,557] Brandy\nL082 [672,455,747,463] 메이커스 마크\nL083 [672,467,751,477] 와일드터키 81\nL084 [672,480,759,488] 와일드터키 라이\nL085 [672,493,793,501] 와일드터키 레어브리드\nL086 [674,506,770,514] 사가모어 라이 CS\nL087 [672,433,827,448] American\nL088 [917,336,965,344] 10,000\nL089 [900,349,965,355] ₩39,000\nL090 [900,360,965,368] ₩25,000\nL091 [900,374,965,381] ₩29,000\nL092 [900,387,965,393] ₩24,000\nL093 [900,398,965,406] ₩12,000\nL094 [900,455,965,463] ₩12,000\nL095 [900,469,965,475] ₩14,000\nL096 [917,480,965,488] 14,000\nL097 [900,493,965,501] ₩17,000\nL098 [900,506,965,514] ₩21,000\nL099 [36,543,147,550] 글렌모렌지 오리지널\nL100 [262,544,330,550] ₩12,000\nL101 [36,556,164,564] 글렌모렌지 라산타 12년\nL102 [262,556,327,564] ₩16,000\nL103 [36,569,177,577] 글렌모렌지 킨타 루반 14년\nL104 [262,569,327,577] ₩18,000\nL105 [36,581,135,590] 글렌모렌지 시그넷\nL106 [262,582,330,590] ₩34,000\nL107 [36,594,126,601] 글렌드로낙 12년\nL108 [262,594,330,601] ₩16,000\nL109 [36,606,126,614] 글렌드로낙 15년\nL110 [262,606,330,614] ₩21,000\nL111 [36,620,126,628] 글렌드로낙 18년\nL112 [262,620,330,628] ₩48,000\nL113 [36,631,147,639] 글렌드로낙 포트우드\nL114 [262,631,330,639] ₩19,000\nL115 [36,644,135,652] 글렌드로낙 피티드\nL116 [262,644,330,652] ₩22,000\nL117 [36,657,243,665] 글렌드로낙 29년 1993 빈티지 캐스크보틀링\nL118 [256,657,330,665] ₩150,000\nL119 [36,669,115,678] 탈리스커 10년\nL120 [262,670,330,678] ₩15,000\nL121 [36,682,104,691] 달모어 12년\nL122 [262,682,330,690] ₩18,000\nL123 [36,695,92,703] 오반 14년\nL124 [282,695,330,703] 19,000\nL125 [36,708,104,716] 달위니 15년\nL126 [262,708,330,716] ₩18,000\nL127 [36,720,135,729] 글렌파클라스 105\nL128 [262,720,330,728] ₩18,000\nL129 [36,733,138,741] 크라이넬리시 14년\nL130 [265,733,327,741] ₩21,000\nL131 [355,606,411,614] 아란 10년\nL132 [355,620,437,628] 마크리무어 CS\nL133 [355,631,423,639] 킬커란 12년\nL134 [355,644,445,652] 스프링뱅크 10년\nL135 [355,657,457,665] 글렌스코시아 10년\nL136 [355,669,454,678] 레드브레스트 12년\nL137 [355,682,423,691] 폴 존 피티드\nL138 [355,695,432,703] 히비키 하모니\nL139 [355,708,434,716] 야마자키 12년\nL140 [355,720,420,729] 기원 호랑이\nL141 [353,585,471,600] Others\nL142 [581,606,646,614] ₩15,000\nL143 [581,620,646,628] ₩25,000\nL144 [581,631,646,639] ₩27,000\nL145 [581,644,646,652] ₩33,000\nL146 [581,657,646,665] ₩18,000\nL147 [581,670,646,677] ₩17,000\nL148 [581,682,646,690] ₩23,000\nL149 [581,695,646,703] ₩23,000\nL150 [581,708,646,715] ₩43,000\nL151 [581,720,646,728] ₩17,000\nL152 [672,562,747,570] 헤네시 VSOP\nL153 [674,576,737,584] 헤네시 X.O\nL154 [900,564,965,570] ₩16,000\nL155 [900,576,965,583] ₩44,000\n</ocr_lines>",
+  "n_lines": 155,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 3990
+}
