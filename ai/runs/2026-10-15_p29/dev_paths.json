@@ -1,0 +1,8546 @@
+{
+ "full/C0": {
+  "lines": 177,
+  "paths": {
+   "alias_exact": {
+    "lines": 123,
+    "correct": 123,
+    "precision": 1.0,
+    "gold_in_candidates": 123
+   },
+   "s2_exact": {
+    "lines": 7,
+    "correct": 7,
+    "precision": 1.0,
+    "gold_in_candidates": 7
+   },
+   "s2b_confirm": {
+    "lines": 3,
+    "correct": 3,
+    "precision": 1.0,
+    "gold_in_candidates": 3
+   },
+   "s3_confirm": {
+    "lines": 4,
+    "correct": 4,
+    "precision": 1.0,
+    "gold_in_candidates": 4
+   },
+   "m3a_confirm": {
+    "lines": 7,
+    "correct": 7,
+    "precision": 1.0,
+    "gold_in_candidates": 7
+   },
+   "llm_top": {
+    "lines": 1,
+    "correct": 0,
+    "precision": 0.0,
+    "gold_in_candidates": 0
+   },
+   "single": {
+    "lines": 2,
+    "correct": 0,
+    "precision": 0.0,
+    "gold_in_candidates": 0
+   },
+   "register": {
+    "lines": 30,
+    "correct": 30,
+    "precision": 1.0,
+    "gold_in_candidates": 0
+   }
+  },
+  "policies": {
+   "P1 LLM 확인 = B": {
+    "grades": {
+     "A": 130,
+     "B": 14,
+     "C": 3,
+     "D": 30
+    },
+    "choose_register_per_photo_mean": 2.54,
+    "choose_register_max": 14,
+    "photos_choose_register_under_5": "10/13",
+    "with_confirm_per_photo_mean": 3.62,
+    "photos_with_confirm_under_5": "8/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   },
+   "P2 LLM 확인 자동 수락": {
+    "grades": {
+     "A": 137,
+     "B": 7,
+     "C": 3,
+     "D": 30
+    },
+    "choose_register_per_photo_mean": 2.54,
+    "choose_register_max": 14,
+    "photos_choose_register_under_5": "10/13",
+    "with_confirm_per_photo_mean": 3.08,
+    "photos_with_confirm_under_5": "10/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   },
+   "P3 별칭만 자동": {
+    "grades": {
+     "A": 123,
+     "B": 14,
+     "C": 10,
+     "D": 30
+    },
+    "choose_register_per_photo_mean": 3.08,
+    "choose_register_max": 14,
+    "photos_choose_register_under_5": "9/13",
+    "with_confirm_per_photo_mean": 4.15,
+    "photos_with_confirm_under_5": "8/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   }
+  },
+  "m4_confidence": [
+   {
+    "bin": "[0.0, 0.8)",
+    "verdicts": 0,
+    "correct": 0,
+    "accuracy": null
+   },
+   {
+    "bin": "[0.8, 0.9)",
+    "verdicts": 1,
+    "correct": 1,
+    "accuracy": 1.0
+   },
+   {
+    "bin": "[0.9, 0.95)",
+    "verdicts": 2,
+    "correct": 2,
+    "accuracy": 1.0
+   },
+   {
+    "bin": "[0.95, 1.0]",
+    "verdicts": 17,
+    "correct": 17,
+    "accuracy": 1.0
+   }
+  ],
+  "rows": [
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌그란트 15Y",
+    "gold": "glen-grant-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌드로낙 12Y",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌드로낙 15Y",
+    "gold": "glendronach-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌리벳 12Y",
+    "gold": "glenlivet-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 오리지널",
+    "gold": "glenmorangie-original",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 넥타도르",
+    "gold": "glenmorangie-nectar-dor",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 라산타",
+    "gold": "glenmorangie-lasanta",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 퀀타루반",
+    "gold": "glenmorangie-quinta-ruban",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 시그넷",
+    "gold": "glenmorangie-signet",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 18Y",
+    "gold": "glenmorangie-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌알라키 12Y",
+    "gold": "glenallachie-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌알라키 15Y",
+    "gold": "glenallachie-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌파클라스 105",
+    "gold": "glenfarclas-105",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌피딕 12Y",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌피딕 15Y",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y",
+    "gold": "dalmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y 쉐리",
+    "gold": "dalmore-12-sherry-cask-select",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 15Y",
+    "gold": "dalmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 포트우드 리저브",
+    "gold": "dalmore-port-wood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 시가몰트 리저브",
+    "gold": "dalmore-cigar-malt",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "로얄브라클라 12Y",
+    "gold": "royal-brackla-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "로얄브라클라 18Y",
+    "gold": "royal-brackla-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "맥캘란 더블캐스크 12Y",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "맥캘란 더블캐스크 15Y",
+    "gold": "macallan-15-double-cask",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "부나하벤 12Y",
+    "gold": "bunnahabhain-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아란 10Y",
+    "gold": "arran-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아란 보데가 셰리 캐스크",
+    "gold": "arran-sherry-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아벨라워 아부나흐",
+    "gold": "aberlour-abunadh",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "오반 14Y",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 셰리 오크",
+    "gold": "kavalan-solist-sherry",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 비노 바리끄",
+    "gold": "kavalan-solist-vinho-barrique",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 트리플 셰리",
+    "gold": "kavalan-triple-sherry",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "클라이넬리쉬 14Y",
+    "gold": "clynelish-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "발베니 12Y",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "발베니 14Y",
+    "gold": "balvenie-14-caribbean",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "츠누키 에디션 2025",
+    "gold": "tsunuki-the-edition-2025",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "요이치 싱글몰트",
+    "gold": "yoichi-single-malt",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "에드라두어 10Y",
+    "gold": "edradour-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "노마드",
+    "gold": "nomad-outland",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "1792 스몰배치",
+    "gold": "1792-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "노아스 밀",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "러셀 리저브 싱글배럴",
+    "gold": "russells-reserve-single-barrel",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "로완스 크릭",
+    "gold": "rowans-creek",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "메이커스 마크",
+    "gold": "makers-mark",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "우드포드 리저브",
+    "gold": "woodford-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "우드포드 리저브 더블오크",
+    "gold": "woodford-reserve-double-oaked",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "와일드터키 101 8Y",
+    "gold": "wild-turkey-101-8",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "와일드터키 레어브리드",
+    "gold": "wild-turkey-rare-breed",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "이글 레어 10Y",
+    "gold": "eagle-rare-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "납크릭",
+    "gold": "knob-creek",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "부커스",
+    "gold": "bookers",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라가불린 16Y",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라프로익 10Y",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라프로익 쿼터캐스크",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 10Y",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 우거다일",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 코리브레칸",
+    "gold": "ardbeg-corryvreckan",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "옥토모어 16.1",
+    "gold": "octomore-16-1",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "포트샬롯 10Y",
+    "gold": "port-charlotte-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "하이랜드 파크 12Y",
+    "gold": "highland-park-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "탈리스커 10Y",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "벤로막 10Y",
+    "gold": "benromach-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "벤로막 15Y",
+    "gold": "benromach-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "보모어 12Y",
+    "gold": "bowmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "보모어 15Y",
+    "gold": "bowmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "야마자키 스모키",
+    "gold": "yamazaki-smoky",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "로얄살루트 21Y",
+    "gold": "royal-salute-21",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "몽키숄더",
+    "gold": "monkey-shoulder",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "조니워커 블랙",
+    "gold": "johnnie-walker-black",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "조니워커 블루",
+    "gold": "johnnie-walker-blue",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "폴존 올로로소 셀렉트 캐스크",
+    "gold": "paul-john-oloroso",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "폴존 피티드 셀렉트 캐스크",
+    "gold": "paul-john-peated",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 벤리악 12Y",
+    "gold": "signatory-benriach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 맥더프 13Y",
+    "gold": "signatory-macduff-13",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "올트모어 디스틸러리 12Y",
+    "gold": "aultmore-12",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 스페이사이드 GL",
+    "gold": "signatory-speyside-gl",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "헤네시vsop / Hennessy vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "레미마틴vsop / Remy Martin vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "조니워커 블랙 / Jonnie walker black",
+    "gold": "johnnie-walker-black",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "조니워커 블루 / Jonnie walker blue",
+    "gold": "johnnie-walker-blue",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "몽키숄더 / Monkey Shoulder",
+    "gold": "monkey-shoulder",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "제임슨 / Jameson",
+    "gold": "jameson",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "잭 다니엘스 / Jack Daniel's",
+    "gold": "jack-daniels-old-no7",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "1792 스몰배치 / 1792 Small Batch",
+    "gold": "1792-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "우드포트리저브 / Woodford Reserve",
+    "gold": "woodford-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "노아스밀 / Noahsmill",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡10년 / Ardbeg 10Y",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡 우거다일 / Ardbeg Uigeadail",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+    "gold": "ardbeg-corryvreckan",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라프로익10년 / Laphroaig 10Y",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라가불린16년 / Lagavulin 16Y",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "탈리스커10년 / Talisker 10Y",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아란10년 / Arran 10Y",
+    "gold": "arran-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "글랜킨치12년 / Glenkinchie 12Y",
+    "gold": "glenkinchie-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달위니15년 / Dalwhinnie 15Y",
+    "gold": "dalwhinnie-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달모어12년 / Dalmore 12Y",
+    "gold": "dalmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달모어15년 / Dalmore 15Y",
+    "gold": "dalmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 오리지날 / Glenmorangie OG",
+    "gold": "glenmorangie-original",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+    "gold": "glenmorangie-lasanta",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+    "gold": "glenmorangie-nectar-dor",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+    "gold": "glenmorangie-quinta-ruban",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지18년 / Glenmorangie 18Y",
+    "gold": "glenmorangie-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜드로낙12년 / Glendronach 12Y",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜고인12년 / Glengoyne 12Y",
+    "gold": "glengoyne-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "오반14년 / Oban 14Y",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜피딕12년 / Glenfiddich 12Y",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜피딕15년 / Glenfiddich 15Y",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "발베니12년 더블우드 / Balvenie 12yDW",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜로시스12년 / Glenrothes 12Y",
+    "gold": "glenrothes-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "맥켈란12년 쉐리 / Macallan 12ySC",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "맥켈란12년 더블 / Macallan 12yDC",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "크라겐모어12년 / Cragganmore 12Y",
+    "gold": "cragganmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Buffalo Trace / Makrt's Mark",
+    "gold": "both:new:buffalo-trace|makers-mark",
+    "kind": "absent",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Wildturkey 101",
+    "gold": "wild-turkey-101-8",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Four Roses Small Batch",
+    "gold": "new:four-roses-small-batch",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Rye Whiskey",
+    "gold": "new:james-e-pepper-1776-rye",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Bourbon Whiskey",
+    "gold": "new:james-e-pepper-1776-bourbon",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Cleveland Black Reserve Bourbon",
+    "gold": "new:cleveland-black-reserve",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Rowan`s Creek",
+    "gold": "rowans-creek",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Taylor Small Batch",
+    "gold": "new:eh-taylor-small-batch",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Templeton Rye Barrel Strength",
+    "gold": "new:templeton-rye-barrel-strength",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Maker`s Mark Cask Strength",
+    "gold": "new:makers-mark-cask-strength",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Old Pepper Rye Single Barrel",
+    "gold": "new:old-pepper-rye-single-barrel",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Noah`s Mill",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Booker`s",
+    "gold": "bookers",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Arran Quarter Cask",
+    "gold": "new:arran-quarter-cask",
+    "kind": "absent",
+    "path": "single",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "ambiguous_bad",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Arran Sherry cask",
+    "gold": "arran-sherry-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Ardbeg Uigeadail",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Glenfarclas 105",
+    "gold": "glenfarclas-105",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Abelour A`bunadh",
+    "gold": "aberlour-abunadh",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Lagavulin 12yo 2018",
+    "gold": "new:lagavulin-12-2018",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Laphroaig 10yo Cask Strength",
+    "gold": "new:laphroaig-10-cask-strength",
+    "kind": "absent",
+    "path": "single",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "ambiguous_bad",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Kavalan Solist",
+    "gold": "unknown",
+    "kind": "unknown",
+    "path": "llm_top",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "unsure",
+     "confidence": 0.8,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Octomore 13.1",
+    "gold": "new:octomore-13-1",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Macallan Classic Cut 2020",
+    "gold": "new:macallan-classic-cut-2020",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 15yo",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Oban 14yo",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glengrant 15yo",
+    "gold": "glen-grant-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Dalwhinny 15yo",
+    "gold": "dalwhinnie-15",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenlivet 15yo",
+    "gold": "glenlivet-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 15yo",
+    "gold": "bowmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Machrie Moor",
+    "gold": "new:arran-machrie-moor",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hakushu DR",
+    "gold": "new:hakushu-distillers-reserve",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hibiki DR",
+    "gold": "new:hibiki-japanese-harmony",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Lagavulin 16yo",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 18yo",
+    "gold": "glenfiddich-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 18yo",
+    "gold": "new:bowmore-18",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 15yo",
+    "gold": "macallan-15-double-cask",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenmorangie Signet",
+    "gold": "glenmorangie-signet",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Yamazaki 12yo",
+    "gold": "new:yamazaki-12",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Ballentine 30yo",
+    "gold": "new:ballantines-30",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 21yo",
+    "gold": "glenfiddich-21",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 18yo",
+    "gold": "unknown",
+    "kind": "unknown",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.9,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfarclas 25yo",
+    "gold": "new:glenfarclas-25",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.9,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Caol ila 25yo",
+    "gold": "new:caol-ila-25",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "라프로익 25년",
+    "gold": "new:laphroaig-25",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 21년",
+    "gold": "new:hibiki-21",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 블랜더스 쵸이스",
+    "gold": "new:hibiki-blenders-choice",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "발베니 18년 PX",
+    "gold": "new:balvenie-18-px",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "카발란 DR 마데라캐스크",
+    "gold": "new:kavalan-distillery-reserve-madeira",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.85,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Talisker 10yo",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bushmil 10yo",
+    "gold": "new:bushmills-10",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glengrant 10yo",
+    "gold": "glen-grant-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Auchentoshan 12yo",
+    "gold": "auchentoshan-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glenfiddich 12yo",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bowmore 12yo",
+    "gold": "bowmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Laphroaig 10yo",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glenlivet 12yo",
+    "gold": "glenlivet-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Caol Ila 12yo",
+    "gold": "new:caol-ila-12",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Ardbeg 10yo",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Balvenie 12yo",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glendronach 12yo",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Kilchoman Sanaig",
+    "gold": "new:kilchoman-sanaig",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Laphroaig Quater Cask",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Double Cask",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Sheryy Cask",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   }
+  ]
+ },
+ "full/C1": {
+  "lines": 177,
+  "paths": {
+   "alias_exact": {
+    "lines": 138,
+    "correct": 138,
+    "precision": 1.0,
+    "gold_in_candidates": 138
+   },
+   "s2_exact": {
+    "lines": 12,
+    "correct": 12,
+    "precision": 1.0,
+    "gold_in_candidates": 12
+   },
+   "s2b_confirm": {
+    "lines": 3,
+    "correct": 3,
+    "precision": 1.0,
+    "gold_in_candidates": 3
+   },
+   "s3_confirm": {
+    "lines": 5,
+    "correct": 5,
+    "precision": 1.0,
+    "gold_in_candidates": 5
+   },
+   "m3a_confirm": {
+    "lines": 13,
+    "correct": 13,
+    "precision": 1.0,
+    "gold_in_candidates": 13
+   },
+   "llm_top": {
+    "lines": 2,
+    "correct": 1,
+    "precision": 0.5,
+    "gold_in_candidates": 1
+   },
+   "register": {
+    "lines": 4,
+    "correct": 3,
+    "precision": 0.75,
+    "gold_in_candidates": 0
+   }
+  },
+  "policies": {
+   "P1 LLM 확인 = B": {
+    "grades": {
+     "A": 150,
+     "B": 21,
+     "C": 2,
+     "D": 4
+    },
+    "choose_register_per_photo_mean": 0.46,
+    "choose_register_max": 3,
+    "photos_choose_register_under_5": "13/13",
+    "with_confirm_per_photo_mean": 2.08,
+    "photos_with_confirm_under_5": "11/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   },
+   "P2 LLM 확인 자동 수락": {
+    "grades": {
+     "A": 163,
+     "B": 8,
+     "C": 2,
+     "D": 4
+    },
+    "choose_register_per_photo_mean": 0.46,
+    "choose_register_max": 3,
+    "photos_choose_register_under_5": "13/13",
+    "with_confirm_per_photo_mean": 1.08,
+    "photos_with_confirm_under_5": "12/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   },
+   "P3 별칭만 자동": {
+    "grades": {
+     "A": 138,
+     "B": 20,
+     "C": 15,
+     "D": 4
+    },
+    "choose_register_per_photo_mean": 1.46,
+    "choose_register_max": 8,
+    "photos_choose_register_under_5": "12/13",
+    "with_confirm_per_photo_mean": 3,
+    "photos_with_confirm_under_5": "11/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   }
+  },
+  "m4_confidence": [
+   {
+    "bin": "[0.0, 0.8)",
+    "verdicts": 0,
+    "correct": 0,
+    "accuracy": null
+   },
+   {
+    "bin": "[0.8, 0.9)",
+    "verdicts": 0,
+    "correct": 0,
+    "accuracy": null
+   },
+   {
+    "bin": "[0.9, 0.95)",
+    "verdicts": 0,
+    "correct": 0,
+    "accuracy": null
+   },
+   {
+    "bin": "[0.95, 1.0]",
+    "verdicts": 2,
+    "correct": 1,
+    "accuracy": 0.5
+   }
+  ],
+  "rows": [
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌그란트 15Y",
+    "gold": "glen-grant-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌드로낙 12Y",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌드로낙 15Y",
+    "gold": "glendronach-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌리벳 12Y",
+    "gold": "glenlivet-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 오리지널",
+    "gold": "glenmorangie-original",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 넥타도르",
+    "gold": "glenmorangie-nectar-dor",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 라산타",
+    "gold": "glenmorangie-lasanta",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 퀀타루반",
+    "gold": "glenmorangie-quinta-ruban",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 시그넷",
+    "gold": "glenmorangie-signet",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 18Y",
+    "gold": "glenmorangie-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌알라키 12Y",
+    "gold": "glenallachie-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌알라키 15Y",
+    "gold": "glenallachie-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌파클라스 105",
+    "gold": "glenfarclas-105",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌피딕 12Y",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌피딕 15Y",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y",
+    "gold": "dalmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y 쉐리",
+    "gold": "dalmore-12-sherry-cask-select",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 15Y",
+    "gold": "dalmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 포트우드 리저브",
+    "gold": "dalmore-port-wood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 시가몰트 리저브",
+    "gold": "dalmore-cigar-malt",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "로얄브라클라 12Y",
+    "gold": "royal-brackla-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "로얄브라클라 18Y",
+    "gold": "royal-brackla-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "맥캘란 더블캐스크 12Y",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "맥캘란 더블캐스크 15Y",
+    "gold": "macallan-15-double-cask",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "부나하벤 12Y",
+    "gold": "bunnahabhain-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아란 10Y",
+    "gold": "arran-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아란 보데가 셰리 캐스크",
+    "gold": "arran-sherry-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아벨라워 아부나흐",
+    "gold": "aberlour-abunadh",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "오반 14Y",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 셰리 오크",
+    "gold": "kavalan-solist-sherry",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 비노 바리끄",
+    "gold": "kavalan-solist-vinho-barrique",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 트리플 셰리",
+    "gold": "kavalan-triple-sherry",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "클라이넬리쉬 14Y",
+    "gold": "clynelish-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "발베니 12Y",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "발베니 14Y",
+    "gold": "balvenie-14-caribbean",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "츠누키 에디션 2025",
+    "gold": "tsunuki-the-edition-2025",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "요이치 싱글몰트",
+    "gold": "yoichi-single-malt",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "에드라두어 10Y",
+    "gold": "edradour-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "노마드",
+    "gold": "nomad-outland",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "1792 스몰배치",
+    "gold": "1792-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "노아스 밀",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "러셀 리저브 싱글배럴",
+    "gold": "russells-reserve-single-barrel",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "로완스 크릭",
+    "gold": "rowans-creek",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "메이커스 마크",
+    "gold": "makers-mark",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "우드포드 리저브",
+    "gold": "woodford-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "우드포드 리저브 더블오크",
+    "gold": "woodford-reserve-double-oaked",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "와일드터키 101 8Y",
+    "gold": "wild-turkey-101-8",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "와일드터키 레어브리드",
+    "gold": "wild-turkey-rare-breed",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "이글 레어 10Y",
+    "gold": "eagle-rare-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "납크릭",
+    "gold": "knob-creek",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "부커스",
+    "gold": "bookers",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라가불린 16Y",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라프로익 10Y",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라프로익 쿼터캐스크",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 10Y",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 우거다일",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 코리브레칸",
+    "gold": "ardbeg-corryvreckan",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "옥토모어 16.1",
+    "gold": "octomore-16-1",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "포트샬롯 10Y",
+    "gold": "port-charlotte-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "하이랜드 파크 12Y",
+    "gold": "highland-park-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "탈리스커 10Y",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "벤로막 10Y",
+    "gold": "benromach-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "벤로막 15Y",
+    "gold": "benromach-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "보모어 12Y",
+    "gold": "bowmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "보모어 15Y",
+    "gold": "bowmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "야마자키 스모키",
+    "gold": "yamazaki-smoky",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "로얄살루트 21Y",
+    "gold": "royal-salute-21",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "몽키숄더",
+    "gold": "monkey-shoulder",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "조니워커 블랙",
+    "gold": "johnnie-walker-black",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "조니워커 블루",
+    "gold": "johnnie-walker-blue",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "폴존 올로로소 셀렉트 캐스크",
+    "gold": "paul-john-oloroso",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "폴존 피티드 셀렉트 캐스크",
+    "gold": "paul-john-peated",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 벤리악 12Y",
+    "gold": "signatory-benriach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 맥더프 13Y",
+    "gold": "signatory-macduff-13",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "올트모어 디스틸러리 12Y",
+    "gold": "aultmore-12",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 스페이사이드 GL",
+    "gold": "signatory-speyside-gl",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "헤네시vsop / Hennessy vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "레미마틴vsop / Remy Martin vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "조니워커 블랙 / Jonnie walker black",
+    "gold": "johnnie-walker-black",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "조니워커 블루 / Jonnie walker blue",
+    "gold": "johnnie-walker-blue",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "몽키숄더 / Monkey Shoulder",
+    "gold": "monkey-shoulder",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "제임슨 / Jameson",
+    "gold": "jameson",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "잭 다니엘스 / Jack Daniel's",
+    "gold": "jack-daniels-old-no7",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "1792 스몰배치 / 1792 Small Batch",
+    "gold": "1792-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "우드포트리저브 / Woodford Reserve",
+    "gold": "woodford-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "노아스밀 / Noahsmill",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡10년 / Ardbeg 10Y",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡 우거다일 / Ardbeg Uigeadail",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+    "gold": "ardbeg-corryvreckan",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라프로익10년 / Laphroaig 10Y",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라가불린16년 / Lagavulin 16Y",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "탈리스커10년 / Talisker 10Y",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아란10년 / Arran 10Y",
+    "gold": "arran-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "글랜킨치12년 / Glenkinchie 12Y",
+    "gold": "glenkinchie-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달위니15년 / Dalwhinnie 15Y",
+    "gold": "dalwhinnie-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달모어12년 / Dalmore 12Y",
+    "gold": "dalmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달모어15년 / Dalmore 15Y",
+    "gold": "dalmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 오리지날 / Glenmorangie OG",
+    "gold": "glenmorangie-original",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+    "gold": "glenmorangie-lasanta",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+    "gold": "glenmorangie-nectar-dor",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+    "gold": "glenmorangie-quinta-ruban",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지18년 / Glenmorangie 18Y",
+    "gold": "glenmorangie-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜드로낙12년 / Glendronach 12Y",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜고인12년 / Glengoyne 12Y",
+    "gold": "glengoyne-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "오반14년 / Oban 14Y",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜피딕12년 / Glenfiddich 12Y",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜피딕15년 / Glenfiddich 15Y",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "발베니12년 더블우드 / Balvenie 12yDW",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜로시스12년 / Glenrothes 12Y",
+    "gold": "glenrothes-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "맥켈란12년 쉐리 / Macallan 12ySC",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "맥켈란12년 더블 / Macallan 12yDC",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "크라겐모어12년 / Cragganmore 12Y",
+    "gold": "cragganmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Buffalo Trace / Makrt's Mark",
+    "gold": "both:new:buffalo-trace|makers-mark",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "partial",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Wildturkey 101",
+    "gold": "wild-turkey-101-8",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Four Roses Small Batch",
+    "gold": "new:four-roses-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Rye Whiskey",
+    "gold": "new:james-e-pepper-1776-rye",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Bourbon Whiskey",
+    "gold": "new:james-e-pepper-1776-bourbon",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Cleveland Black Reserve Bourbon",
+    "gold": "new:cleveland-black-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Rowan`s Creek",
+    "gold": "rowans-creek",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Taylor Small Batch",
+    "gold": "new:eh-taylor-small-batch",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Templeton Rye Barrel Strength",
+    "gold": "new:templeton-rye-barrel-strength",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Maker`s Mark Cask Strength",
+    "gold": "new:makers-mark-cask-strength",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Old Pepper Rye Single Barrel",
+    "gold": "new:old-pepper-rye-single-barrel",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Noah`s Mill",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Booker`s",
+    "gold": "bookers",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Arran Quarter Cask",
+    "gold": "new:arran-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Arran Sherry cask",
+    "gold": "arran-sherry-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Ardbeg Uigeadail",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Glenfarclas 105",
+    "gold": "glenfarclas-105",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Abelour A`bunadh",
+    "gold": "aberlour-abunadh",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Lagavulin 12yo 2018",
+    "gold": "new:lagavulin-12-2018",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Laphroaig 10yo Cask Strength",
+    "gold": "new:laphroaig-10-cask-strength",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Kavalan Solist",
+    "gold": "unknown",
+    "kind": "unknown",
+    "path": "llm_top",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "unsure",
+     "confidence": 0.8,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Octomore 13.1",
+    "gold": "new:octomore-13-1",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Macallan Classic Cut 2020",
+    "gold": "new:macallan-classic-cut-2020",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 15yo",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Oban 14yo",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glengrant 15yo",
+    "gold": "glen-grant-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Dalwhinny 15yo",
+    "gold": "dalwhinnie-15",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenlivet 15yo",
+    "gold": "glenlivet-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 15yo",
+    "gold": "bowmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Machrie Moor",
+    "gold": "new:arran-machrie-moor",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hakushu DR",
+    "gold": "new:hakushu-distillers-reserve",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hibiki DR",
+    "gold": "new:hibiki-japanese-harmony",
+    "kind": "known",
+    "path": "register",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Lagavulin 16yo",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 18yo",
+    "gold": "glenfiddich-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 18yo",
+    "gold": "new:bowmore-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 15yo",
+    "gold": "macallan-15-double-cask",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenmorangie Signet",
+    "gold": "glenmorangie-signet",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Yamazaki 12yo",
+    "gold": "new:yamazaki-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Ballentine 30yo",
+    "gold": "new:ballantines-30",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 21yo",
+    "gold": "glenfiddich-21",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 18yo",
+    "gold": "unknown",
+    "kind": "unknown",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfarclas 25yo",
+    "gold": "new:glenfarclas-25",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Caol ila 25yo",
+    "gold": "new:caol-ila-25",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "라프로익 25년",
+    "gold": "new:laphroaig-25",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 21년",
+    "gold": "new:hibiki-21",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 블랜더스 쵸이스",
+    "gold": "new:hibiki-blenders-choice",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "발베니 18년 PX",
+    "gold": "new:balvenie-18-px",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "카발란 DR 마데라캐스크",
+    "gold": "new:kavalan-distillery-reserve-madeira",
+    "kind": "known",
+    "path": "llm_top",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Talisker 10yo",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bushmil 10yo",
+    "gold": "new:bushmills-10",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glengrant 10yo",
+    "gold": "glen-grant-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Auchentoshan 12yo",
+    "gold": "auchentoshan-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glenfiddich 12yo",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bowmore 12yo",
+    "gold": "bowmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Laphroaig 10yo",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glenlivet 12yo",
+    "gold": "glenlivet-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Caol Ila 12yo",
+    "gold": "new:caol-ila-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Ardbeg 10yo",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Balvenie 12yo",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glendronach 12yo",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Kilchoman Sanaig",
+    "gold": "new:kilchoman-sanaig",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Laphroaig Quater Cask",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Double Cask",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Sheryy Cask",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "path": "m3a_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   }
+  ]
+ },
+ "m4/C0": {
+  "lines": 177,
+  "paths": {
+   "alias_exact": {
+    "lines": 123,
+    "correct": 123,
+    "precision": 1.0,
+    "gold_in_candidates": 123
+   },
+   "s2_exact": {
+    "lines": 7,
+    "correct": 7,
+    "precision": 1.0,
+    "gold_in_candidates": 7
+   },
+   "s2b_confirm": {
+    "lines": 3,
+    "correct": 3,
+    "precision": 1.0,
+    "gold_in_candidates": 3
+   },
+   "s3_confirm": {
+    "lines": 4,
+    "correct": 4,
+    "precision": 1.0,
+    "gold_in_candidates": 4
+   },
+   "m4_confirm": {
+    "lines": 3,
+    "correct": 3,
+    "precision": 1.0,
+    "gold_in_candidates": 3
+   },
+   "single": {
+    "lines": 6,
+    "correct": 4,
+    "precision": 0.667,
+    "gold_in_candidates": 4
+   },
+   "choose": {
+    "lines": 1,
+    "correct": 0,
+    "precision": 0.0,
+    "gold_in_candidates": 0
+   },
+   "register": {
+    "lines": 30,
+    "correct": 30,
+    "precision": 1.0,
+    "gold_in_candidates": 0
+   }
+  },
+  "policies": {
+   "P1 LLM 확인 = B": {
+    "grades": {
+     "A": 130,
+     "B": 10,
+     "C": 7,
+     "D": 30
+    },
+    "choose_register_per_photo_mean": 2.85,
+    "choose_register_max": 14,
+    "photos_choose_register_under_5": "10/13",
+    "with_confirm_per_photo_mean": 3.62,
+    "photos_with_confirm_under_5": "8/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   },
+   "P2 LLM 확인 자동 수락": {
+    "grades": {
+     "A": 133,
+     "B": 7,
+     "C": 7,
+     "D": 30
+    },
+    "choose_register_per_photo_mean": 2.85,
+    "choose_register_max": 14,
+    "photos_choose_register_under_5": "10/13",
+    "with_confirm_per_photo_mean": 3.38,
+    "photos_with_confirm_under_5": "9/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   },
+   "P3 별칭만 자동": {
+    "grades": {
+     "A": 123,
+     "B": 14,
+     "C": 10,
+     "D": 30
+    },
+    "choose_register_per_photo_mean": 3.08,
+    "choose_register_max": 14,
+    "photos_choose_register_under_5": "9/13",
+    "with_confirm_per_photo_mean": 4.15,
+    "photos_with_confirm_under_5": "8/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   }
+  },
+  "m4_confidence": [
+   {
+    "bin": "[0.0, 0.8)",
+    "verdicts": 0,
+    "correct": 0,
+    "accuracy": null
+   },
+   {
+    "bin": "[0.8, 0.9)",
+    "verdicts": 1,
+    "correct": 1,
+    "accuracy": 1.0
+   },
+   {
+    "bin": "[0.9, 0.95)",
+    "verdicts": 2,
+    "correct": 2,
+    "accuracy": 1.0
+   },
+   {
+    "bin": "[0.95, 1.0]",
+    "verdicts": 20,
+    "correct": 20,
+    "accuracy": 1.0
+   }
+  ],
+  "rows": [
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌그란트 15Y",
+    "gold": "glen-grant-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌드로낙 12Y",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌드로낙 15Y",
+    "gold": "glendronach-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌리벳 12Y",
+    "gold": "glenlivet-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 오리지널",
+    "gold": "glenmorangie-original",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 넥타도르",
+    "gold": "glenmorangie-nectar-dor",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 라산타",
+    "gold": "glenmorangie-lasanta",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 퀀타루반",
+    "gold": "glenmorangie-quinta-ruban",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 시그넷",
+    "gold": "glenmorangie-signet",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 18Y",
+    "gold": "glenmorangie-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌알라키 12Y",
+    "gold": "glenallachie-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌알라키 15Y",
+    "gold": "glenallachie-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌파클라스 105",
+    "gold": "glenfarclas-105",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌피딕 12Y",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌피딕 15Y",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y",
+    "gold": "dalmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y 쉐리",
+    "gold": "dalmore-12-sherry-cask-select",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.95,
+     "picked": "The Dalmore 12 Sherry Cask Select"
+    }
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 15Y",
+    "gold": "dalmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 포트우드 리저브",
+    "gold": "dalmore-port-wood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 시가몰트 리저브",
+    "gold": "dalmore-cigar-malt",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "로얄브라클라 12Y",
+    "gold": "royal-brackla-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "로얄브라클라 18Y",
+    "gold": "royal-brackla-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "맥캘란 더블캐스크 12Y",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "맥캘란 더블캐스크 15Y",
+    "gold": "macallan-15-double-cask",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "부나하벤 12Y",
+    "gold": "bunnahabhain-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아란 10Y",
+    "gold": "arran-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아란 보데가 셰리 캐스크",
+    "gold": "arran-sherry-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아벨라워 아부나흐",
+    "gold": "aberlour-abunadh",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "오반 14Y",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 셰리 오크",
+    "gold": "kavalan-solist-sherry",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.95,
+     "picked": "Kavalan Solist Oloroso Sherry"
+    }
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 비노 바리끄",
+    "gold": "kavalan-solist-vinho-barrique",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 트리플 셰리",
+    "gold": "kavalan-triple-sherry",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "클라이넬리쉬 14Y",
+    "gold": "clynelish-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "발베니 12Y",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "발베니 14Y",
+    "gold": "balvenie-14-caribbean",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "츠누키 에디션 2025",
+    "gold": "tsunuki-the-edition-2025",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "요이치 싱글몰트",
+    "gold": "yoichi-single-malt",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "에드라두어 10Y",
+    "gold": "edradour-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "노마드",
+    "gold": "nomad-outland",
+    "kind": "known",
+    "path": "single",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "1792 스몰배치",
+    "gold": "1792-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "노아스 밀",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "러셀 리저브 싱글배럴",
+    "gold": "russells-reserve-single-barrel",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "로완스 크릭",
+    "gold": "rowans-creek",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "메이커스 마크",
+    "gold": "makers-mark",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "우드포드 리저브",
+    "gold": "woodford-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "우드포드 리저브 더블오크",
+    "gold": "woodford-reserve-double-oaked",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "와일드터키 101 8Y",
+    "gold": "wild-turkey-101-8",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "와일드터키 레어브리드",
+    "gold": "wild-turkey-rare-breed",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "이글 레어 10Y",
+    "gold": "eagle-rare-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "납크릭",
+    "gold": "knob-creek",
+    "kind": "known",
+    "path": "single",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "부커스",
+    "gold": "bookers",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라가불린 16Y",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라프로익 10Y",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라프로익 쿼터캐스크",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 10Y",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 우거다일",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 코리브레칸",
+    "gold": "ardbeg-corryvreckan",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "옥토모어 16.1",
+    "gold": "octomore-16-1",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "포트샬롯 10Y",
+    "gold": "port-charlotte-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "하이랜드 파크 12Y",
+    "gold": "highland-park-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "탈리스커 10Y",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "벤로막 10Y",
+    "gold": "benromach-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "벤로막 15Y",
+    "gold": "benromach-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "보모어 12Y",
+    "gold": "bowmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "보모어 15Y",
+    "gold": "bowmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "야마자키 스모키",
+    "gold": "yamazaki-smoky",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "로얄살루트 21Y",
+    "gold": "royal-salute-21",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "몽키숄더",
+    "gold": "monkey-shoulder",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "조니워커 블랙",
+    "gold": "johnnie-walker-black",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "조니워커 블루",
+    "gold": "johnnie-walker-blue",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "폴존 올로로소 셀렉트 캐스크",
+    "gold": "paul-john-oloroso",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "폴존 피티드 셀렉트 캐스크",
+    "gold": "paul-john-peated",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 벤리악 12Y",
+    "gold": "signatory-benriach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 맥더프 13Y",
+    "gold": "signatory-macduff-13",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "올트모어 디스틸러리 12Y",
+    "gold": "aultmore-12",
+    "kind": "known",
+    "path": "single",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 스페이사이드 GL",
+    "gold": "signatory-speyside-gl",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "헤네시vsop / Hennessy vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "레미마틴vsop / Remy Martin vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "조니워커 블랙 / Jonnie walker black",
+    "gold": "johnnie-walker-black",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "조니워커 블루 / Jonnie walker blue",
+    "gold": "johnnie-walker-blue",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "몽키숄더 / Monkey Shoulder",
+    "gold": "monkey-shoulder",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "제임슨 / Jameson",
+    "gold": "jameson",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "잭 다니엘스 / Jack Daniel's",
+    "gold": "jack-daniels-old-no7",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "1792 스몰배치 / 1792 Small Batch",
+    "gold": "1792-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "우드포트리저브 / Woodford Reserve",
+    "gold": "woodford-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "노아스밀 / Noahsmill",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡10년 / Ardbeg 10Y",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡 우거다일 / Ardbeg Uigeadail",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+    "gold": "ardbeg-corryvreckan",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라프로익10년 / Laphroaig 10Y",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라가불린16년 / Lagavulin 16Y",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "탈리스커10년 / Talisker 10Y",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아란10년 / Arran 10Y",
+    "gold": "arran-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "글랜킨치12년 / Glenkinchie 12Y",
+    "gold": "glenkinchie-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달위니15년 / Dalwhinnie 15Y",
+    "gold": "dalwhinnie-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달모어12년 / Dalmore 12Y",
+    "gold": "dalmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달모어15년 / Dalmore 15Y",
+    "gold": "dalmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 오리지날 / Glenmorangie OG",
+    "gold": "glenmorangie-original",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+    "gold": "glenmorangie-lasanta",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+    "gold": "glenmorangie-nectar-dor",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+    "gold": "glenmorangie-quinta-ruban",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지18년 / Glenmorangie 18Y",
+    "gold": "glenmorangie-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜드로낙12년 / Glendronach 12Y",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜고인12년 / Glengoyne 12Y",
+    "gold": "glengoyne-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "오반14년 / Oban 14Y",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜피딕12년 / Glenfiddich 12Y",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜피딕15년 / Glenfiddich 15Y",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "발베니12년 더블우드 / Balvenie 12yDW",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜로시스12년 / Glenrothes 12Y",
+    "gold": "glenrothes-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "맥켈란12년 쉐리 / Macallan 12ySC",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "맥켈란12년 더블 / Macallan 12yDC",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "크라겐모어12년 / Cragganmore 12Y",
+    "gold": "cragganmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Buffalo Trace / Makrt's Mark",
+    "gold": "both:new:buffalo-trace|makers-mark",
+    "kind": "absent",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Wildturkey 101",
+    "gold": "wild-turkey-101-8",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Four Roses Small Batch",
+    "gold": "new:four-roses-small-batch",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Rye Whiskey",
+    "gold": "new:james-e-pepper-1776-rye",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Bourbon Whiskey",
+    "gold": "new:james-e-pepper-1776-bourbon",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Cleveland Black Reserve Bourbon",
+    "gold": "new:cleveland-black-reserve",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Rowan`s Creek",
+    "gold": "rowans-creek",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Taylor Small Batch",
+    "gold": "new:eh-taylor-small-batch",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Templeton Rye Barrel Strength",
+    "gold": "new:templeton-rye-barrel-strength",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Maker`s Mark Cask Strength",
+    "gold": "new:makers-mark-cask-strength",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Old Pepper Rye Single Barrel",
+    "gold": "new:old-pepper-rye-single-barrel",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Noah`s Mill",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Booker`s",
+    "gold": "bookers",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Arran Quarter Cask",
+    "gold": "new:arran-quarter-cask",
+    "kind": "absent",
+    "path": "single",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "ambiguous_bad",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Arran Sherry cask",
+    "gold": "arran-sherry-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Ardbeg Uigeadail",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Glenfarclas 105",
+    "gold": "glenfarclas-105",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Abelour A`bunadh",
+    "gold": "aberlour-abunadh",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Lagavulin 12yo 2018",
+    "gold": "new:lagavulin-12-2018",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Laphroaig 10yo Cask Strength",
+    "gold": "new:laphroaig-10-cask-strength",
+    "kind": "absent",
+    "path": "single",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "ambiguous_bad",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Kavalan Solist",
+    "gold": "unknown",
+    "kind": "unknown",
+    "path": "choose",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "unsure",
+     "confidence": 0.8,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Octomore 13.1",
+    "gold": "new:octomore-13-1",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Macallan Classic Cut 2020",
+    "gold": "new:macallan-classic-cut-2020",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 15yo",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Oban 14yo",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glengrant 15yo",
+    "gold": "glen-grant-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Dalwhinny 15yo",
+    "gold": "dalwhinnie-15",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenlivet 15yo",
+    "gold": "glenlivet-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 15yo",
+    "gold": "bowmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Machrie Moor",
+    "gold": "new:arran-machrie-moor",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hakushu DR",
+    "gold": "new:hakushu-distillers-reserve",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hibiki DR",
+    "gold": "new:hibiki-japanese-harmony",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Lagavulin 16yo",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 18yo",
+    "gold": "glenfiddich-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 18yo",
+    "gold": "new:bowmore-18",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 15yo",
+    "gold": "macallan-15-double-cask",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenmorangie Signet",
+    "gold": "glenmorangie-signet",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Yamazaki 12yo",
+    "gold": "new:yamazaki-12",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Ballentine 30yo",
+    "gold": "new:ballantines-30",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 21yo",
+    "gold": "glenfiddich-21",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 18yo",
+    "gold": "unknown",
+    "kind": "unknown",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.9,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfarclas 25yo",
+    "gold": "new:glenfarclas-25",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.9,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Caol ila 25yo",
+    "gold": "new:caol-ila-25",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "라프로익 25년",
+    "gold": "new:laphroaig-25",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 21년",
+    "gold": "new:hibiki-21",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 블랜더스 쵸이스",
+    "gold": "new:hibiki-blenders-choice",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "발베니 18년 PX",
+    "gold": "new:balvenie-18-px",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "카발란 DR 마데라캐스크",
+    "gold": "new:kavalan-distillery-reserve-madeira",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.85,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Talisker 10yo",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bushmil 10yo",
+    "gold": "new:bushmills-10",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glengrant 10yo",
+    "gold": "glen-grant-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Auchentoshan 12yo",
+    "gold": "auchentoshan-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glenfiddich 12yo",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bowmore 12yo",
+    "gold": "bowmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Laphroaig 10yo",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glenlivet 12yo",
+    "gold": "glenlivet-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Caol Ila 12yo",
+    "gold": "new:caol-ila-12",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Ardbeg 10yo",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Balvenie 12yo",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glendronach 12yo",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Kilchoman Sanaig",
+    "gold": "new:kilchoman-sanaig",
+    "kind": "absent",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Laphroaig Quater Cask",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "single",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Double Cask",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Sheryy Cask",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.95,
+     "picked": "The Macallan 12 Sherry Oak"
+    }
+   }
+  ]
+ },
+ "m4/C1": {
+  "lines": 177,
+  "paths": {
+   "alias_exact": {
+    "lines": 138,
+    "correct": 138,
+    "precision": 1.0,
+    "gold_in_candidates": 138
+   },
+   "s2_exact": {
+    "lines": 12,
+    "correct": 12,
+    "precision": 1.0,
+    "gold_in_candidates": 12
+   },
+   "s2b_confirm": {
+    "lines": 3,
+    "correct": 3,
+    "precision": 1.0,
+    "gold_in_candidates": 3
+   },
+   "s3_confirm": {
+    "lines": 5,
+    "correct": 5,
+    "precision": 1.0,
+    "gold_in_candidates": 5
+   },
+   "m4_confirm": {
+    "lines": 9,
+    "correct": 9,
+    "precision": 1.0,
+    "gold_in_candidates": 9
+   },
+   "llm_top": {
+    "lines": 1,
+    "correct": 1,
+    "precision": 1.0,
+    "gold_in_candidates": 1
+   },
+   "single": {
+    "lines": 4,
+    "correct": 4,
+    "precision": 1.0,
+    "gold_in_candidates": 4
+   },
+   "choose": {
+    "lines": 1,
+    "correct": 0,
+    "precision": 0.0,
+    "gold_in_candidates": 0
+   },
+   "register": {
+    "lines": 4,
+    "correct": 3,
+    "precision": 0.75,
+    "gold_in_candidates": 0
+   }
+  },
+  "policies": {
+   "P1 LLM 확인 = B": {
+    "grades": {
+     "A": 150,
+     "B": 17,
+     "C": 6,
+     "D": 4
+    },
+    "choose_register_per_photo_mean": 0.77,
+    "choose_register_max": 4,
+    "photos_choose_register_under_5": "13/13",
+    "with_confirm_per_photo_mean": 2.08,
+    "photos_with_confirm_under_5": "11/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   },
+   "P2 LLM 확인 자동 수락": {
+    "grades": {
+     "A": 159,
+     "B": 8,
+     "C": 6,
+     "D": 4
+    },
+    "choose_register_per_photo_mean": 0.77,
+    "choose_register_max": 4,
+    "photos_choose_register_under_5": "13/13",
+    "with_confirm_per_photo_mean": 1.38,
+    "photos_with_confirm_under_5": "12/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   },
+   "P3 별칭만 자동": {
+    "grades": {
+     "A": 138,
+     "B": 20,
+     "C": 15,
+     "D": 4
+    },
+    "choose_register_per_photo_mean": 1.46,
+    "choose_register_max": 8,
+    "photos_choose_register_under_5": "12/13",
+    "with_confirm_per_photo_mean": 3,
+    "photos_with_confirm_under_5": "11/13",
+    "wrong_auto_A": 0,
+    "wrong_suggested_B": 0
+   }
+  },
+  "m4_confidence": [
+   {
+    "bin": "[0.0, 0.8)",
+    "verdicts": 0,
+    "correct": 0,
+    "accuracy": null
+   },
+   {
+    "bin": "[0.8, 0.9)",
+    "verdicts": 0,
+    "correct": 0,
+    "accuracy": null
+   },
+   {
+    "bin": "[0.9, 0.95)",
+    "verdicts": 2,
+    "correct": 2,
+    "accuracy": 1.0
+   },
+   {
+    "bin": "[0.95, 1.0]",
+    "verdicts": 10,
+    "correct": 9,
+    "accuracy": 0.9
+   }
+  ],
+  "rows": [
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌그란트 15Y",
+    "gold": "glen-grant-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌드로낙 12Y",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌드로낙 15Y",
+    "gold": "glendronach-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌리벳 12Y",
+    "gold": "glenlivet-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 오리지널",
+    "gold": "glenmorangie-original",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 넥타도르",
+    "gold": "glenmorangie-nectar-dor",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 라산타",
+    "gold": "glenmorangie-lasanta",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 퀀타루반",
+    "gold": "glenmorangie-quinta-ruban",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 시그넷",
+    "gold": "glenmorangie-signet",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌모렌지 18Y",
+    "gold": "glenmorangie-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌알라키 12Y",
+    "gold": "glenallachie-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌알라키 15Y",
+    "gold": "glenallachie-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌파클라스 105",
+    "gold": "glenfarclas-105",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌피딕 12Y",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "글렌피딕 15Y",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y",
+    "gold": "dalmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y 쉐리",
+    "gold": "dalmore-12-sherry-cask-select",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.95,
+     "picked": "The Dalmore 12 Sherry Cask Select"
+    }
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 15Y",
+    "gold": "dalmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 포트우드 리저브",
+    "gold": "dalmore-port-wood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 시가몰트 리저브",
+    "gold": "dalmore-cigar-malt",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "로얄브라클라 12Y",
+    "gold": "royal-brackla-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "로얄브라클라 18Y",
+    "gold": "royal-brackla-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "맥캘란 더블캐스크 12Y",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "맥캘란 더블캐스크 15Y",
+    "gold": "macallan-15-double-cask",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "부나하벤 12Y",
+    "gold": "bunnahabhain-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아란 10Y",
+    "gold": "arran-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아란 보데가 셰리 캐스크",
+    "gold": "arran-sherry-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "아벨라워 아부나흐",
+    "gold": "aberlour-abunadh",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "오반 14Y",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 셰리 오크",
+    "gold": "kavalan-solist-sherry",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.95,
+     "picked": "Kavalan Solist Oloroso Sherry"
+    }
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 비노 바리끄",
+    "gold": "kavalan-solist-vinho-barrique",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 트리플 셰리",
+    "gold": "kavalan-triple-sherry",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "클라이넬리쉬 14Y",
+    "gold": "clynelish-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "발베니 12Y",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "발베니 14Y",
+    "gold": "balvenie-14-caribbean",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "츠누키 에디션 2025",
+    "gold": "tsunuki-the-edition-2025",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "요이치 싱글몰트",
+    "gold": "yoichi-single-malt",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "에드라두어 10Y",
+    "gold": "edradour-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "노마드",
+    "gold": "nomad-outland",
+    "kind": "known",
+    "path": "single",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "1792 스몰배치",
+    "gold": "1792-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "노아스 밀",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "러셀 리저브 싱글배럴",
+    "gold": "russells-reserve-single-barrel",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "로완스 크릭",
+    "gold": "rowans-creek",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "메이커스 마크",
+    "gold": "makers-mark",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "우드포드 리저브",
+    "gold": "woodford-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "우드포드 리저브 더블오크",
+    "gold": "woodford-reserve-double-oaked",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "와일드터키 101 8Y",
+    "gold": "wild-turkey-101-8",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "와일드터키 레어브리드",
+    "gold": "wild-turkey-rare-breed",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "이글 레어 10Y",
+    "gold": "eagle-rare-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "납크릭",
+    "gold": "knob-creek",
+    "kind": "known",
+    "path": "single",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "부커스",
+    "gold": "bookers",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라가불린 16Y",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라프로익 10Y",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "라프로익 쿼터캐스크",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 10Y",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 우거다일",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "아드벡 코리브레칸",
+    "gold": "ardbeg-corryvreckan",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "옥토모어 16.1",
+    "gold": "octomore-16-1",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "포트샬롯 10Y",
+    "gold": "port-charlotte-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "하이랜드 파크 12Y",
+    "gold": "highland-park-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "탈리스커 10Y",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "벤로막 10Y",
+    "gold": "benromach-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "벤로막 15Y",
+    "gold": "benromach-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "보모어 12Y",
+    "gold": "bowmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "보모어 15Y",
+    "gold": "bowmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_02",
+    "name": "야마자키 스모키",
+    "gold": "yamazaki-smoky",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "로얄살루트 21Y",
+    "gold": "royal-salute-21",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "몽키숄더",
+    "gold": "monkey-shoulder",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "조니워커 블랙",
+    "gold": "johnnie-walker-black",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "조니워커 블루",
+    "gold": "johnnie-walker-blue",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "폴존 올로로소 셀렉트 캐스크",
+    "gold": "paul-john-oloroso",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "폴존 피티드 셀렉트 캐스크",
+    "gold": "paul-john-peated",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 벤리악 12Y",
+    "gold": "signatory-benriach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 맥더프 13Y",
+    "gold": "signatory-macduff-13",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "올트모어 디스틸러리 12Y",
+    "gold": "aultmore-12",
+    "kind": "known",
+    "path": "single",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "007_위스키복춘_03",
+    "name": "시그나토리 스페이사이드 GL",
+    "gold": "signatory-speyside-gl",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "헤네시vsop / Hennessy vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "레미마틴vsop / Remy Martin vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "조니워커 블랙 / Jonnie walker black",
+    "gold": "johnnie-walker-black",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "조니워커 블루 / Jonnie walker blue",
+    "gold": "johnnie-walker-blue",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "몽키숄더 / Monkey Shoulder",
+    "gold": "monkey-shoulder",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "제임슨 / Jameson",
+    "gold": "jameson",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "잭 다니엘스 / Jack Daniel's",
+    "gold": "jack-daniels-old-no7",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "1792 스몰배치 / 1792 Small Batch",
+    "gold": "1792-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "우드포트리저브 / Woodford Reserve",
+    "gold": "woodford-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "노아스밀 / Noahsmill",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡10년 / Ardbeg 10Y",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡 우거다일 / Ardbeg Uigeadail",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+    "gold": "ardbeg-corryvreckan",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라프로익10년 / Laphroaig 10Y",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "라가불린16년 / Lagavulin 16Y",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "탈리스커10년 / Talisker 10Y",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "아란10년 / Arran 10Y",
+    "gold": "arran-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_02",
+    "name": "글랜킨치12년 / Glenkinchie 12Y",
+    "gold": "glenkinchie-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달위니15년 / Dalwhinnie 15Y",
+    "gold": "dalwhinnie-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달모어12년 / Dalmore 12Y",
+    "gold": "dalmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "달모어15년 / Dalmore 15Y",
+    "gold": "dalmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 오리지날 / Glenmorangie OG",
+    "gold": "glenmorangie-original",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+    "gold": "glenmorangie-lasanta",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+    "gold": "glenmorangie-nectar-dor",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+    "gold": "glenmorangie-quinta-ruban",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜모렌지18년 / Glenmorangie 18Y",
+    "gold": "glenmorangie-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜드로낙12년 / Glendronach 12Y",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "글랜고인12년 / Glengoyne 12Y",
+    "gold": "glengoyne-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_03",
+    "name": "오반14년 / Oban 14Y",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜피딕12년 / Glenfiddich 12Y",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜피딕15년 / Glenfiddich 15Y",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "발베니12년 더블우드 / Balvenie 12yDW",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "글랜로시스12년 / Glenrothes 12Y",
+    "gold": "glenrothes-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "맥켈란12년 쉐리 / Macallan 12ySC",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "맥켈란12년 더블 / Macallan 12yDC",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "008_서로상_05",
+    "name": "크라겐모어12년 / Cragganmore 12Y",
+    "gold": "cragganmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Buffalo Trace / Makrt's Mark",
+    "gold": "both:new:buffalo-trace|makers-mark",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "partial",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Wildturkey 101",
+    "gold": "wild-turkey-101-8",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Four Roses Small Batch",
+    "gold": "new:four-roses-small-batch",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Rye Whiskey",
+    "gold": "new:james-e-pepper-1776-rye",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Bourbon Whiskey",
+    "gold": "new:james-e-pepper-1776-bourbon",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Cleveland Black Reserve Bourbon",
+    "gold": "new:cleveland-black-reserve",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Rowan`s Creek",
+    "gold": "rowans-creek",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Taylor Small Batch",
+    "gold": "new:eh-taylor-small-batch",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.95,
+     "picked": "Colonel E.H. Taylor Small Batch"
+    }
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Templeton Rye Barrel Strength",
+    "gold": "new:templeton-rye-barrel-strength",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Maker`s Mark Cask Strength",
+    "gold": "new:makers-mark-cask-strength",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Old Pepper Rye Single Barrel",
+    "gold": "new:old-pepper-rye-single-barrel",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Noah`s Mill",
+    "gold": "noahs-mill",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Booker`s",
+    "gold": "bookers",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Arran Quarter Cask",
+    "gold": "new:arran-quarter-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Arran Sherry cask",
+    "gold": "arran-sherry-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Ardbeg Uigeadail",
+    "gold": "ardbeg-uigeadail",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Glenfarclas 105",
+    "gold": "glenfarclas-105",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Abelour A`bunadh",
+    "gold": "aberlour-abunadh",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Lagavulin 12yo 2018",
+    "gold": "new:lagavulin-12-2018",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Laphroaig 10yo Cask Strength",
+    "gold": "new:laphroaig-10-cask-strength",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Kavalan Solist",
+    "gold": "unknown",
+    "kind": "unknown",
+    "path": "choose",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "unsure",
+     "confidence": 0.8,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Octomore 13.1",
+    "gold": "new:octomore-13-1",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Macallan Classic Cut 2020",
+    "gold": "new:macallan-classic-cut-2020",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 15yo",
+    "gold": "glenfiddich-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Oban 14yo",
+    "gold": "oban-14",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glengrant 15yo",
+    "gold": "glen-grant-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Dalwhinny 15yo",
+    "gold": "dalwhinnie-15",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenlivet 15yo",
+    "gold": "glenlivet-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 15yo",
+    "gold": "bowmore-15",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Machrie Moor",
+    "gold": "new:arran-machrie-moor",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.9,
+     "picked": "Arran Machrie Moor"
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hakushu DR",
+    "gold": "new:hakushu-distillers-reserve",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.98,
+     "picked": "Hakushu Distiller's Reserve"
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hibiki DR",
+    "gold": "new:hibiki-japanese-harmony",
+    "kind": "known",
+    "path": "register",
+    "correct": false,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Lagavulin 16yo",
+    "gold": "lagavulin-16",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 18yo",
+    "gold": "glenfiddich-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 18yo",
+    "gold": "new:bowmore-18",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 15yo",
+    "gold": "macallan-15-double-cask",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenmorangie Signet",
+    "gold": "glenmorangie-signet",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Yamazaki 12yo",
+    "gold": "new:yamazaki-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Ballentine 30yo",
+    "gold": "new:ballantines-30",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfiddich 21yo",
+    "gold": "glenfiddich-21",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 18yo",
+    "gold": "unknown",
+    "kind": "unknown",
+    "path": "register",
+    "correct": true,
+    "gold_in_candidates": false,
+    "outcome": "unmatched",
+    "m4": {
+     "m4": "different",
+     "confidence": 0.95,
+     "picked": null
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfarclas 25yo",
+    "gold": "new:glenfarclas-25",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Caol ila 25yo",
+    "gold": "new:caol-ila-25",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "라프로익 25년",
+    "gold": "new:laphroaig-25",
+    "kind": "known",
+    "path": "s2_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 21년",
+    "gold": "new:hibiki-21",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.99,
+     "picked": "Hibiki 21"
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 블랜더스 쵸이스",
+    "gold": "new:hibiki-blenders-choice",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.98,
+     "picked": "Hibiki Blender's Choice"
+    }
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "발베니 18년 PX",
+    "gold": "new:balvenie-18-px",
+    "kind": "known",
+    "path": "single",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "카발란 DR 마데라캐스크",
+    "gold": "new:kavalan-distillery-reserve-madeira",
+    "kind": "known",
+    "path": "llm_top",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.9,
+     "picked": "Kavalan Distillery Reserve Madeira Cask"
+    }
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Talisker 10yo",
+    "gold": "talisker-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bushmil 10yo",
+    "gold": "new:bushmills-10",
+    "kind": "known",
+    "path": "s3_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glengrant 10yo",
+    "gold": "glen-grant-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Auchentoshan 12yo",
+    "gold": "auchentoshan-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glenfiddich 12yo",
+    "gold": "glenfiddich-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bowmore 12yo",
+    "gold": "bowmore-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Laphroaig 10yo",
+    "gold": "laphroaig-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glenlivet 12yo",
+    "gold": "glenlivet-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Caol Ila 12yo",
+    "gold": "new:caol-ila-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Ardbeg 10yo",
+    "gold": "ardbeg-10",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Balvenie 12yo",
+    "gold": "balvenie-12-doublewood",
+    "kind": "known",
+    "path": "s2b_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Glendronach 12yo",
+    "gold": "glendronach-12",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Kilchoman Sanaig",
+    "gold": "new:kilchoman-sanaig",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Laphroaig Quater Cask",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.99,
+     "picked": "Laphroaig Quarter Cask"
+    }
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Double Cask",
+    "gold": "macallan-12-double-cask",
+    "kind": "known",
+    "path": "alias_exact",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "correct",
+    "m4": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Sheryy Cask",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "path": "m4_confirm",
+    "correct": true,
+    "gold_in_candidates": true,
+    "outcome": "ambiguous_ok",
+    "m4": {
+     "m4": "same",
+     "confidence": 0.95,
+     "picked": "The Macallan 12 Sherry Oak"
+    }
+   }
+  ]
+ }
+}
