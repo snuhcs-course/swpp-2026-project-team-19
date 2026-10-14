@@ -47,7 +47,7 @@ def temporary_login() -> TemporaryLoginResponse:
         {
             "sub": "local-dev-user",
             "email": "local-dev@example.invalid",
-            "name": "Local development user",
+            "name": "Local dev user",
             "user_type": user_type,
             "iss": TOKEN_ISSUER,
             "aud": TOKEN_AUDIENCE,

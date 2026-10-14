@@ -2,26 +2,26 @@
 """Temporary login and temporary-token checks (API spec, section 3.1.3).
 
 The role of a temporary token comes from TEMP_AUTH_USER_TYPE at request time, not from the token.
+GET /api/me stores the user, so these tests use the test database.
 """
 
 from datetime import datetime, timedelta, timezone
+from uuid import UUID
 
 import jwt
 import pytest
-from fastapi.testclient import TestClient
 
 from app.core.tokens import TOKEN_ALGORITHM, TOKEN_AUDIENCE, TOKEN_ISSUER
-from app.main import app
 
 SECRET = "test-secret-for-temporary-auth-0123456789"
 
 
 @pytest.fixture
-def api(monkeypatch):
+def api(client, monkeypatch):
     monkeypatch.setenv("TEMP_AUTH_ENABLED", "true")
     monkeypatch.setenv("TEMP_AUTH_JWT_SECRET", SECRET)
     monkeypatch.setenv("TEMP_AUTH_USER_TYPE", "operator")
-    return TestClient(app)
+    return client
 
 
 def token(secret=SECRET, **changes):
@@ -56,12 +56,13 @@ def test_temp_login_token_identifies_the_configured_user_type(api):
     assert login.status_code == 200
     body = login.json()
     assert (body["tokenType"], body["expiresIn"]) == ("bearer", 3 * 60 * 60)
-    assert me(api, body["accessToken"]).json() == {
-        "userId": "local-dev-user",
-        "email": "local-dev@example.invalid",
-        "displayName": "Local development user",
-        "userType": "operator",
-    }
+    user = me(api, body["accessToken"]).json()
+    assert UUID(user["userId"])
+    assert (user["email"], user["displayName"], user["userType"]) == (
+        "local-dev@example.invalid",
+        "Local dev user",
+        "operator",
+    )
 
 
 def test_temp_login_is_hidden_when_disabled(api, monkeypatch):

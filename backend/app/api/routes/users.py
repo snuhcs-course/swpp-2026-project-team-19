@@ -1,30 +1,40 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3). Reviewed by Haeul Yang.
-from typing import Literal
-
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
-from app.core.security import Principal, get_current_user, user_type_of
+from app.core.security import Principal, get_current_user
+from app.db.session import get_session
+from app.schemas.errors import error_responses
+from app.schemas.user import CurrentUserResponse
+from app.services.users import sync_current_user
 
 router = APIRouter(prefix="/api", tags=["users"])
 
 
-class CurrentUserResponse(BaseModel):
-    userId: str
-    email: str | None = None
-    displayName: str | None = None
-    userType: Literal["customer", "operator"] = "customer"
-
-
-@router.get("/me", response_model=CurrentUserResponse)
-def read_current_user(principal: Principal = Depends(get_current_user)) -> CurrentUserResponse:
-    """Return the signed-in identity from the verified access token."""
-    claims = principal.claims
-    metadata = claims.get("user_metadata")
-    name = metadata.get("name") if isinstance(metadata, dict) else claims.get("name")
+@router.get(
+    "/me",
+    response_model=CurrentUserResponse,
+    summary="The signed-in user",
+    description=(
+        "Call after login and when the app starts. The first call creates the user as a customer; "
+        "later calls return the same user and update the email from the token. The display name "
+        "starts as the Google account name (at most 20 characters) and is not overwritten later."
+    ),
+    responses=error_responses(
+        (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+        (503, "`SERVICE_UNAVAILABLE`: the server cannot check tokens now (settings or signing keys)."),
+    ),
+)
+def read_current_user(
+    # Declared before the session so a request without a valid token never opens a database session.
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> CurrentUserResponse:
+    user = sync_current_user(session, principal)
     return CurrentUserResponse(
-        userId=principal.subject,
-        email=claims.get("email") or None,
-        displayName=name if isinstance(name, str) else None,
-        userType=user_type_of(principal),
+        userId=user.id,
+        email=user.email,
+        displayName=user.display_name,
+        userType=user.user_type.value,
+        updatedAt=user.updated_at,
     )
