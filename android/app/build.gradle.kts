@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.moshi.kotlin)
 
     testImplementation(libs.junit4)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

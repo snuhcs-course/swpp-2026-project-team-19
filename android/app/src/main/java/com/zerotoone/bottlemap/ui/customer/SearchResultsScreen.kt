@@ -1,10 +1,12 @@
-// AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #7, #15). Reviewed by Hojin Nam.
+// AI-assisted implementation draft (2026-10-13, I2-P13/P14). Human build/review pending.
 package com.zerotoone.bottlemap.ui.customer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -37,20 +40,28 @@ import java.util.Locale
 fun SearchResultsScreen(
     query: String,
     onBack: () -> Unit,
+    onOpenBarDetail: (String) -> Unit,
+    onInvalidQuery: (String) -> Unit,
     viewModel: SearchResultsViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(query) {
-        viewModel.search(query)
+    LaunchedEffect(query) { viewModel.search(query) }
+    LaunchedEffect(state) {
+        if (state is CustomerSearchUiState.InvalidQuery) {
+            onInvalidQuery((state as CustomerSearchUiState.InvalidQuery).fieldErrorCode)
+        }
     }
 
-    SearchResultsContent(
-        query = query,
-        state = state,
-        onBack = onBack,
-        onRetry = viewModel::retry,
-    )
+    I2CustomerSearchTheme {
+        SearchResultsContent(
+            query = query,
+            state = state,
+            onBack = onBack,
+            onOpenBarDetail = onOpenBarDetail,
+            onRetry = viewModel::retry,
+        )
+    }
 }
 
 @Composable
@@ -58,6 +69,7 @@ private fun SearchResultsContent(
     query: String,
     state: CustomerSearchUiState,
     onBack: () -> Unit,
+    onOpenBarDetail: (String) -> Unit,
     onRetry: () -> Unit,
 ) {
     Column(
@@ -65,150 +77,207 @@ private fun SearchResultsContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        Surface(
-            tonalElevation = 1.dp,
-            modifier = Modifier.fillMaxWidth(),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextButton(onClick = onBack) { Text("Back") }
-                Text(
-                    text = "Search Results",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 8.dp),
-                )
-            }
-        }
-
-        when (state) {
-            CustomerSearchUiState.Loading -> ResultsLoadingState(query)
-            is CustomerSearchUiState.Success -> ResultsSuccessState(query, state)
-            is CustomerSearchUiState.Empty -> ResultsEmptyState(query, state.reason, onBack)
-            is CustomerSearchUiState.Error -> ResultsErrorState(query, state.message, onRetry, onBack)
-        }
-    }
-}
-
-@Composable
-private fun ResultsLoadingState(query: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = "Search: " + query,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        CircularProgressIndicator()
-        Text("Searching bars…", style = MaterialTheme.typography.titleMedium)
-    }
-}
-
-@Composable
-private fun ResultsSuccessState(
-    query: String,
-    state: CustomerSearchUiState.Success,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = "Search: " + query,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        val countLabel = if (state.results.size == 1) "1 menu result" else state.results.size.toString() + " menu results"
-        Text(
-            text = countLabel,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Medium,
-        )
-        if (state.truncated) {
+            TextButton(onClick = onBack) { Text("←") }
             Text(
-                text = "More matching menu rows exist. Refine the search to narrow the result.",
-                style = MaterialTheme.typography.bodySmall,
+                text = "검색 결과",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            Text(
+                text = "PRODUCT SEARCH",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = query,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "검색한 위스키를 제공하는 바",
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(
-                items = state.results,
-                key = { it.barId + ":" + it.productDisplayName },
-            ) { result ->
-                SearchResultCard(result)
+        when (state) {
+            CustomerSearchUiState.Loading -> SearchStatusPanel(
+                title = "검색 중입니다",
+                description = "등록된 메뉴를 확인하고 있어요.",
+                isLoading = true,
+            )
+            is CustomerSearchUiState.Success -> ResultsSuccess(
+                state = state,
+                onOpenBarDetail = onOpenBarDetail,
+                modifier = Modifier.weight(1f),
+            )
+            is CustomerSearchUiState.Empty -> {
+                val unknown = state.reason == EmptySearchReason.UNKNOWN_PRODUCT
+                SearchStatusPanel(
+                    title = if (unknown) "일치하는 주류가 없어요" else "등록된 판매 바가 없어요",
+                    description = if (unknown) {
+                        "다른 철자나 제품명을 입력해 보세요."
+                    } else {
+                        "다른 위스키를 검색해 보세요."
+                    },
+                    actionLabel = "검색어 변경",
+                    onAction = onBack,
+                )
             }
+            is CustomerSearchUiState.InvalidQuery -> SearchStatusPanel(
+                title = "검색어를 확인해 주세요",
+                description = searchValidationMessage(state.fieldErrorCode),
+                actionLabel = "검색어 변경",
+                onAction = onBack,
+            )
+            is CustomerSearchUiState.Error -> SearchStatusPanel(
+                title = "결과를 불러오지 못했어요",
+                description = state.message,
+                actionLabel = if (state.canRetry) "다시 시도" else "검색어 변경",
+                onAction = if (state.canRetry) onRetry else onBack,
+                secondaryAction = if (state.canRetry) onBack else null,
+            )
         }
     }
 }
 
 @Composable
-private fun SearchResultCard(result: SearchResultUiModel) {
-    val priceFormatter = NumberFormat.getIntegerInstance(Locale.KOREA)
+private fun ResultsSuccess(
+    state: CustomerSearchUiState.Success,
+    onOpenBarDetail: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // The results are allocated the remaining height by the parent Column.
+    // Keep the count/notice inside the same LazyColumn, allowing every card
+    // to scroll on small phones without adding a visible scrollbar.
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Text(
+                text = "검색 결과 (" + state.results.size + ")",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+        if (state.truncated) {
+            item {
+                Text(
+                    text = "검색 결과 일부만 표시 중입니다. 검색어를 구체적으로 입력해 주세요.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        items(
+            items = state.results,
+            key = { it.barId + ":" + it.productId },
+        ) { result ->
+            SearchResultCard(
+                result = result,
+                onClick = { onOpenBarDetail(result.barId) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchResultCard(
+    result: SearchResultUiModel,
+    onClick: () -> Unit,
+) {
+    val formatter = NumberFormat.getIntegerInstance(Locale.KOREA)
+
     Surface(
-        shape = RoundedCornerShape(12.dp),
-        tonalElevation = 1.dp,
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.outlineVariant,
+                RoundedCornerShape(16.dp),
+            )
+            .clickable(onClick = onClick),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(7.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
+                text = "MATCHING WHISKY",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
                 text = result.barName,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
+            if (result.address.isNotBlank()) {
+                Text(
+                    text = result.address,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Text(
                 text = result.productDisplayName,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (result.menuDisplayName != result.productDisplayName) {
+            if (result.menuDisplayName.isNotBlank() &&
+                result.menuDisplayName != result.productDisplayName
+            ) {
                 Text(
-                    text = "Menu: " + result.menuDisplayName,
+                    text = "메뉴 표기: " + result.menuDisplayName,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            result.options.forEach { option ->
-                val detail = listOfNotNull(
-                    option.optionLabel,
-                    option.pourMl?.let { it.toString() + " ml" },
-                ).joinToString(" · ")
-                val optionText = buildString {
-                    append("₩")
-                    append(priceFormatter.format(option.priceKrw))
-                    if (detail.isNotBlank()) {
-                        append(" · ")
-                        append(detail)
-                    }
-                }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            if (result.options.isEmpty()) {
                 Text(
-                    text = optionText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
+                    text = "가격·용량 정보 없음",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            } else {
+                result.options.forEach { option ->
+                    val optionInfo = listOfNotNull(
+                        option.optionLabel?.takeIf { it.isNotBlank() },
+                        option.pourMl?.let { it.toString() + " ml" },
+                    ).joinToString(" · ")
+                    Text(
+                        text = (if (optionInfo.isBlank()) "" else optionInfo + "  ") +
+                            "₩" + formatter.format(option.priceKrw),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
             }
             Text(
                 text = result.menuUpdatedText,
@@ -220,72 +289,90 @@ private fun SearchResultCard(result: SearchResultUiModel) {
 }
 
 @Composable
-private fun ResultsEmptyState(
-    query: String,
-    reason: EmptySearchReason,
-    onBack: () -> Unit,
+private fun SearchStatusPanel(
+    title: String,
+    description: String,
+    isLoading: Boolean = false,
+    actionLabel: String? = null,
+    onAction: () -> Unit = {},
+    secondaryAction: (() -> Unit)? = null,
 ) {
-    val title = when (reason) {
-        EmptySearchReason.UNKNOWN_PRODUCT -> "We couldn't find that whisky"
-        EmptySearchReason.NO_BARS -> "No current menu lists this whisky"
-    }
-    val message = when (reason) {
-        EmptySearchReason.UNKNOWN_PRODUCT -> "Try another spelling or a different whisky name."
-        EmptySearchReason.NO_BARS -> "BottleMap recognizes the product, but no published bar menu currently sells it."
-    }
-
-    Column(
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+            .padding(16.dp),
     ) {
-        Text("Search: " + query, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(message, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        OutlinedButton(onClick = onBack) { Text("Back to Search") }
-    }
-}
-
-@Composable
-private fun ResultsErrorState(
-    query: String,
-    message: String,
-    onRetry: () -> Unit,
-    onBack: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Text("Search: " + query, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Surface(
-            color = MaterialTheme.colorScheme.errorContainer,
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth(),
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 34.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(15.dp),
         ) {
+            if (isLoading) CircularProgressIndicator()
             Text(
-                text = message,
-                color = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.padding(16.dp),
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
             )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(onClick = onRetry) { Text("Retry") }
-            OutlinedButton(onClick = onBack) { Text("Back") }
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (actionLabel != null) {
+                Button(onClick = onAction) { Text(actionLabel) }
+            }
+            if (secondaryAction != null) {
+                OutlinedButton(onClick = secondaryAction) { Text("검색어 변경") }
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SearchResultsUnknownPreview() {
-    SearchResultsContent(
-        query = "Unknown whisky",
-        state = CustomerSearchUiState.Empty(EmptySearchReason.UNKNOWN_PRODUCT),
-        onBack = {},
-        onRetry = {},
-    )
+private fun ResultsSuccessPreview() {
+    I2CustomerSearchTheme {
+        SearchResultsContent(
+            query = "Deanston 12",
+            state = CustomerSearchUiState.Success(
+                results = listOf(
+                    SearchResultUiModel(
+                        barId = "bar-preview",
+                        barName = "관악 위스키 바",
+                        address = "서울특별시 관악구",
+                        productId = "product-preview",
+                        productDisplayName = "Deanston 12",
+                        menuDisplayName = "딘스톤 12년",
+                        options = listOf(
+                            SearchOptionUiModel(8000, null, 15),
+                            SearchOptionUiModel(15000, null, 30),
+                        ),
+                        menuUpdatedText = "갱신 2026.10.04",
+                    ),
+                ),
+                truncated = false,
+            ),
+            onBack = {},
+            onOpenBarDetail = {},
+            onRetry = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ResultsErrorPreview() {
+    I2CustomerSearchTheme {
+        SearchResultsContent(
+            query = "Deanston 12",
+            state = CustomerSearchUiState.Error("네트워크 연결을 확인해 주세요."),
+            onBack = {},
+            onOpenBarDetail = {},
+            onRetry = {},
+        )
+    }
 }

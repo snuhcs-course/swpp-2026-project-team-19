@@ -1,6 +1,7 @@
-// AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #7, #15). Reviewed by Hojin Nam.
+// AI-assisted implementation draft (2026-10-13, I2-P14). Human build/review pending.
 package com.zerotoone.bottlemap.ui.customer
 
+/** Search request state is owned by SearchResultsViewModel. */
 sealed interface CustomerSearchUiState {
     data object Loading : CustomerSearchUiState
 
@@ -13,8 +14,14 @@ sealed interface CustomerSearchUiState {
         val reason: EmptySearchReason,
     ) : CustomerSearchUiState
 
+    /** Input validation must be fixed by editing the query, not by retrying. */
+    data class InvalidQuery(
+        val fieldErrorCode: String,
+    ) : CustomerSearchUiState
+
     data class Error(
         val message: String,
+        val canRetry: Boolean = true,
     ) : CustomerSearchUiState
 }
 
@@ -32,6 +39,8 @@ data class SearchOptionUiModel(
 data class SearchResultUiModel(
     val barId: String,
     val barName: String,
+    val address: String,
+    val productId: String,
     val productDisplayName: String,
     val menuDisplayName: String,
     val options: List<SearchOptionUiModel>,

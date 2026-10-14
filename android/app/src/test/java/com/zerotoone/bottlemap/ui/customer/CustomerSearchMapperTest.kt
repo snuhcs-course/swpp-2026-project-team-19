@@ -81,10 +81,18 @@ class CustomerSearchMapperTest {
 
         assertEquals(1, state.results.size)
         assertTrue(state.truncated)
+        assertEquals("bar-1", state.results.single().barId)
+        assertEquals("Gwanak-gu", state.results.single().address)
+        assertEquals("product-1", state.results.single().productId)
         assertNull(state.results.single().options.single().pourMl)
         assertEquals("병", state.results.single().options.single().optionLabel)
-        assertTrue(state.results.single().menuUpdatedText.startsWith("Updated "))
+        assertTrue(state.results.single().menuUpdatedText.startsWith("갱신 "))
         assertTrue(state.results.single().menuUpdatedText.contains("2026"))
+    }
+
+    @Test
+    fun invalidTimestamp_doesNotCrashOrInventFreshness() {
+        assertEquals("갱신일 확인 불가", formatMenuTimestamp("not-an-ISO-date"))
     }
 
     private fun matchedProduct(resultCount: Int) = MatchedProductDto(
