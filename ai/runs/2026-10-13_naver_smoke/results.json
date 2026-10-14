@@ -1,0 +1,3416 @@
+[
+ {
+  "key": "gm-bunnahabhain-10",
+  "stratum": "independent",
+  "product": {
+   "display_name": "Gordon & MacPhail Bunnahabhain 10",
+   "brand": "Gordon & MacPhail",
+   "age_years": 10,
+   "edition_name": "Bunnahabhain"
+  },
+  "ko_brand_aliases": [],
+  "edition_brand_aliases": [
+   "부나하벤"
+  ],
+  "queries": [
+   "Gordon & MacPhail Bunnahabhain 10",
+   "Gordon & MacPhail Bunnahabhain 10 위스키",
+   "고든 앤 맥페일 부나하벤 10년"
+  ],
+  "learned_brand_for_query": "고든 앤 맥페일",
+  "endpoint_results": {
+   "blog": 30,
+   "webkr": 30,
+   "encyc": 11,
+   "cafearticle": 26
+  },
+  "endpoint_total_hits": {
+   "blog": 139,
+   "webkr": 108303,
+   "encyc": 11,
+   "cafearticle": 146
+  },
+  "naver_errors": [],
+  "anchors": [
+   {
+    "text": "고든 앤 맥페일",
+    "kind": "learned"
+   },
+   {
+    "text": "앤 맥페일",
+    "kind": "learned"
+   },
+   {
+    "text": "부나하벤",
+    "kind": "edition_brand"
+   },
+   {
+    "text": "맥페일",
+    "kind": "learned"
+   }
+  ],
+  "candidate_total": 31,
+  "candidates": [
+   {
+    "alias": "고든앤맥페일 디스커버리 부나하벤 10 년",
+    "normalized": "고든앤맥페일디스커버리부나하벤10",
+    "anchor": "고든 앤 맥페일",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Gordon & MacPhail Bunnahabhain 10",
+      "url": "https://blog.naver.com/kirirrring/223234681453",
+      "fetched_at": "2026-10-13T11:17:40+00:00",
+      "title_raw": "신사 | 어슬렁· 커버차지 없는 가로수길 바",
+      "title": "신사 | 어슬렁· 커버차지 없는 가로수길 바",
+      "snippet": "고든앤맥페일 디스커버리 부나하벤 10 년 GORDON&MACPHAIL Discovery Bunnahabhain 10 yo 43% 마지막은 독립 병입 회사 고든앤맥페일의 부나하벤 10 년. 이렇게 전에 먹어 본 적 없는 라인업으로 위스키 4종 맛보기 좋아!..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://dailyshot.co/m/item/4441",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든 앤 맥페일</b> 디스커버리 <b>부나하벤 10년</b> 전국 가격비교하고 구매 | 데일리샷....",
+      "title": "고든 앤 맥페일 디스커버리 부나하벤 10년 전국 가격비교하고 구매 | 데일리샷....",
+      "snippet": "고든 앤 맥페일 디스커버리 부나하벤 10년 내 주변에서 편하게 배송 받는 방법, 데일리샷 전국 주류 스마트오더 서비스 | 싱글몰트 위스키, 700ml, 43%, 스코틀랜드, 아일라섬, 있음,"
+     },
+     {
+      "endpoint": "webkr",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://dailyshot.co/m/item/21823",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든 앤 맥페일</b> 디스커버리 <b>부나하벤 10년</b> 바이알 전국 가격비교하고 구매 | 데....",
+      "title": "고든 앤 맥페일 디스커버리 부나하벤 10년 바이알 전국 가격비교하고 구매 | 데....",
+      "snippet": "고든 앤 맥페일 디스커버리 부나하벤 10년 바이알 내 주변에서 편하게 배송 받는 방법, 데일리샷 전국 주류 스마트오더 서비스 | 싱글몰트 위스키, 매장별 상이, 43%, 스코틀랜드, 아일라섬, 없음,"
+     },
+     {
+      "endpoint": "webkr",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://bottle-note.com/search/Single%20Malt/5667",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든 앤 맥페일</b> 디스커버리 <b>부나하벤 10년</b> - 위스키 상세",
+      "title": "고든 앤 맥페일 디스커버리 부나하벤 10년 - 위스키 상세",
+      "snippet": "위스키 소개 ; Gordon & MacPhail Discovery의 Bunnahabhain 10년 Smoky 릴리즈. Islay 싱글 몰트로 43%, 700ml 병입이며, G&M Discovery의 스모키 프로파일에 해당한다. 레몬 제스트와 신선한 풀내음, 가벼운 피트와 스모크, 바닷바람과 솔티함, ...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://m.enuri.com/m/vip.jsp?modelno=105897859",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "매장픽업 - 에누리",
+      "title": "매장픽업 - 에누리",
+      "snippet": "주류/전통주/와인 > 양주, 고든 앤 맥페일 디스커버리 부나하벤 10년 [매장픽업] | 인기 쇼핑몰별 최저가 한 눈에 비교하고 최저가로 구매하세요! 최저가 알림 신청하면 원하는 가격에 알려드려요."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://dailyshot.co/m/items/206925/sellers?seller=17121",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든 앤 맥페일</b> 디스커버리 <b>부나하벤 10년</b> 바이알 가격비교 | 데일리샷에서 비....",
+      "title": "고든 앤 맥페일 디스커버리 부나하벤 10년 바이알 가격비교 | 데일리샷에서 비....",
+      "snippet": "고든 앤 맥페일 디스커버리 부나하벤 10년 바이알 와인·위스키·칵테일·수제맥주·보드카 구하기 힘들었다면, 데일리샷으로 편리하게 구매하고 집 근처로 배송 받으세요!"
+     },
+     {
+      "endpoint": "webkr",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://dailyshot.co/m/items/258006/sellers?seller=34",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든 앤 맥페일</b> 디스커버리 <b>부나하벤 10년</b> 가격비교 | 데일리샷에서 비교하고 ....",
+      "title": "고든 앤 맥페일 디스커버리 부나하벤 10년 가격비교 | 데일리샷에서 비교하고 ....",
+      "snippet": "고든 앤 맥페일 디스커버리 부나하벤 10년 와인·위스키·칵테일·수제맥주·보드카 구하기 힘들었다면, 데일리샷으로 편리하게 구매하고 집 근처로 배송 받으세요!"
+     }
+    ],
+    "result_count": 7,
+    "age_years": 10,
+    "edition_tokens": [
+     "고든앤맥페일",
+     "디스커버리",
+     "부나하벤"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "same",
+     "product_id": null,
+     "confidence": 0.98,
+     "reason": "병입사, 증류소, 연수, 에디션(디스커버리)이 모두 기준 상품과 일치합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1723,
+      "attempts": 1,
+      "input_tokens": 2157,
+      "output_tokens": 68,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "부나하벤 10 년",
+    "normalized": "부나하벤10",
+    "anchor": "부나하벤",
+    "anchor_kind": "edition_brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Gordon & MacPhail Bunnahabhain 10",
+      "url": "https://blog.naver.com/kirirrring/223234681453",
+      "fetched_at": "2026-10-13T11:17:40+00:00",
+      "title_raw": "신사 | 어슬렁· 커버차지 없는 가로수길 바",
+      "title": "신사 | 어슬렁· 커버차지 없는 가로수길 바",
+      "snippet": "고든앤맥페일 디스커버리 부나하벤 10 년 GORDON&MACPHAIL Discovery Bunnahabhain 10 yo 43% 마지막은 독립 병입 회사 고든앤맥페일의 부나하벤 10 년. 이렇게 전에 먹어 본 적 없는 라인업으로 위스키 4종 맛보기 좋아!..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Gordon & MacPhail Bunnahabhain 10",
+      "url": "https://www.wadossi.com/subWine/subDetail_N2.php?wineNumber=15412",
+      "fetched_at": "2026-10-13T11:17:41+00:00",
+      "title_raw": "고든 앤 맥페일, 디스커버리 부나하벤 <b>10</b>년(<b>Gordon &amp; MacPhail</b>, Discovery <b>Bunnahabhain 10</b> Yea....",
+      "title": "고든 앤 맥페일, 디스커버리 부나하벤 10 년( Gordon & MacPhail , Discovery Bunnahabhain 10 Yea....",
+      "snippet": "영국(United Kingdom) > 스코틀랜드(Scotland) > 기타 섬지역(Islands) - 고든 앤 맥페일, 디스커버리 부나하벤 10 년( Gordon & MacPhail , Discovery Bunnahabhain 10 Year Old) 가격 및 시음후기, 판매샵 정보제공"
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Gordon & MacPhail Bunnahabhain 10",
+      "url": "https://sakeherb.jp/product/bunnahabhain-%EB%B6%80%EB%82%98%ED%95%98%EB%B2%A4-10%EB%85%84-discovery-gordonmacphail-43-700ml-25102/6126/category/57/display/1/",
+      "fetched_at": "2026-10-13T11:17:41+00:00",
+      "title_raw": "<b>BUNNAHABHAIN</b> 부나하벤 <b>10</b>년 DISCOVERY <b>GORDON&amp;MACPHAIL</b> 43% 700ML [25102]",
+      "title": "BUNNAHABHAIN 부나하벤 10 년 DISCOVERY GORDON&MACPHAIL 43% 700ML [25102]",
+      "snippet": "🍯테이스팅 노트 ; 바 나라 , 토피, 건과일, 꿀, 은은한 해풍 . Palate (맛) 꿀, 사과, 배, 바닐라, 약간 너트류, 오크 스파이스. Finish (여운) 부드럽고 미디엄 길이의 여운. 달콤한 과일 향과 은은한 스파이스"
+     },
+     {
+      "endpoint": "webkr",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://awine.kr/wine/%EA%B3%A0%EB%93%A0%EC%95%A4%EB%A7%A5%ED%8C%A8%EC%9D%BC-%EB%94%94%EC%8A%A4%EC%BB%A4%EB%B2%84%EB%A6%AC-%EB%B6%80%EB%82%98%ED%95%98%EB%B2%A4-10%EB%85%84-gm-bunnahabhain-10yo/",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든앤</b>맥패일 디스커버리 <b>부나하벤 10년</b> | G&amp;M BUNNAHABHAIN <b>10</b>YO",
+      "title": "고든앤 맥패일 디스커버리 부나하벤 10년 | G&M BUNNAHABHAIN 10 YO",
+      "snippet": "180,000원 | Scotland | 부나하벤 증류소의 아일라 싱글 몰트다. 고든 앤 맥페일 디스커버리의 2019년 병입이다. 셰리 캐스크에서 10년 숙성해 43도로 병입했다. 바닐라 커스터드와 레몬 커드, 바닷소금, 라이트 피트 스모크가 어...."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://cafe.naver.com/whiskycognac/374230",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든앤맥페일</b> 디스커버리 4종",
+      "title": "고든앤맥페일 디스커버리 4종",
+      "snippet": "고든 앤 맥페일 밀튼더프 10 과 부나하벤 11은 셰리, 부나하벤 10 과 쿨일라 13 YO는 피트 스모키입니다. 앗, 부나하벤 10 YO가 Heavily Peated라고 써있네요, 미처 보지 못하고 주문했습니다 @@ 독립병입자 위스키는 시그나토리..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://cafe.naver.com/whiskycognac/501964",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "클럽 코라빈 <b>고든앤맥페일</b> 시음회",
+      "title": "클럽 코라빈 고든앤맥페일 시음회",
+      "snippet": "함께 고든앤맥페일 4종을 시음했습니다 디스커버리 부나하벤 10년 , 디스틸러리 라벨 몰트락 25년, 코노세우스... 43도고 10 -15년 정도 숙성이라고 합니다 레몬 시트러스 피트 약한 정로환 스모키 몰티한 노트가 느껴졌습니다..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://cafe.naver.com/whiskycognac/345069",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든 앤 맥페일</b> 디스커버리 어린이들^^",
+      "title": "고든 앤 맥페일 디스커버리 어린이들^^",
+      "snippet": "고든 앤 맥페일 디스커버리 밀든터포 10 , 부나하벤10 , 부나하벤 11 이렇게 구매를 하였습니다. 아일라 위스키의... 10년 11년 숙성된 제품이라 큰 기대는 없지만 그래도 한번 경험해 보고 싶은 생각에..."
+     }
+    ],
+    "result_count": 7,
+    "age_years": 10,
+    "edition_tokens": [],
+    "bottler_missing": true,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 독립병입사 고든앤맥페일의 부나하벤 10년이지만, alias '부나하벤 10 년'에는 병입사 이름이 누락되어 정규품으로 오인될 수 있음",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1529,
+      "attempts": 1,
+      "input_tokens": 2409,
+      "output_tokens": 92,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "고든 앤 맥페일 디스커버리",
+    "normalized": "고든앤맥페일디스커버리",
+    "anchor": "고든 앤 맥페일",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://awine.kr/wine/%EA%B3%A0%EB%93%A0%EC%95%A4%EB%A7%A5%ED%8C%A8%EC%9D%BC-%EB%94%94%EC%8A%A4%EC%BB%A4%EB%B2%84%EB%A6%AC-%EB%B6%80%EB%82%98%ED%95%98%EB%B2%A4-10%EB%85%84-gm-bunnahabhain-10yo/",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든앤</b>맥패일 디스커버리 <b>부나하벤 10년</b> | G&amp;M BUNNAHABHAIN <b>10</b>YO",
+      "title": "고든앤 맥패일 디스커버리 부나하벤 10년 | G&M BUNNAHABHAIN 10 YO",
+      "snippet": "180,000원 | Scotland | 부나하벤 증류소의 아일라 싱글 몰트다. 고든 앤 맥페일 디스커버리의 2019년 병입이다. 셰리 캐스크에서 10년 숙성해 43도로 병입했다. 바닐라 커스터드와 레몬 커드, 바닷소금, 라이트 피트 스모크가 어...."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://cafe.naver.com/whiskycognac/374230",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든앤맥페일</b> 디스커버리 4종",
+      "title": "고든앤맥페일 디스커버리 4종",
+      "snippet": "고든 앤 맥페일 밀튼더프 10 과 부나하벤 11은 셰리, 부나하벤 10 과 쿨일라 13 YO는 피트 스모키입니다. 앗, 부나하벤 10 YO가 Heavily Peated라고 써있네요, 미처 보지 못하고 주문했습니다 @@ 독립병입자 위스키는 시그나토리..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://cafe.naver.com/whiskycognac/345069",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든 앤 맥페일</b> 디스커버리 어린이들^^",
+      "title": "고든 앤 맥페일 디스커버리 어린이들^^",
+      "snippet": "고든 앤 맥페일 디스커버리 밀든터포 10 , 부나하벤10 , 부나하벤 11 이렇게 구매를 하였습니다. 아일라 위스키의... 10년 11년 숙성된 제품이라 큰 기대는 없지만 그래도 한번 경험해 보고 싶은 생각에..."
+     }
+    ],
+    "result_count": 3,
+    "age_years": null,
+    "edition_tokens": [
+     "디스커버리"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "alias '고든 앤 맥페일 디스커버리'는 시리즈명만 있고 연수와 증류소/캐스크 정보가 누락되어 기준 상품인 부나하벤 10년과 특정되지 않음",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1640,
+      "attempts": 1,
+      "input_tokens": 2149,
+      "output_tokens": 89,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "부나하벤 11",
+    "normalized": "부나하벤11",
+    "anchor": "부나하벤",
+    "anchor_kind": "edition_brand",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://cafe.naver.com/whiskycognac/374230",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "<b>고든앤맥페일</b> 디스커버리 4종",
+      "title": "고든앤맥페일 디스커버리 4종",
+      "snippet": "고든 앤 맥페일 밀튼더프 10 과 부나하벤 11은 셰리, 부나하벤 10 과 쿨일라 13 YO는 피트 스모키입니다. 앗, 부나하벤 10 YO가 Heavily Peated라고 써있네요, 미처 보지 못하고 주문했습니다 @@ 독립병입자 위스키는 시그나토리..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://cafe.naver.com/whiskycognac/767182",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "G&amp;M 디스커버리 <b>부나하벤</b> 11년",
+      "title": "G&M 디스커버리 부나하벤 11년",
+      "snippet": "시바스리갈 18년, 글렌모렌지 10년 , 발베니 클레식 그래서 한 잔 더 하고 싶은 욕구가 치밀어 올랐지만... ' 고든 앤 맥페일 디스커버리 부나하벤 11년'입니다. 셰리캐스크에서 11년을 숙성기킨 위스키입니다. 원액은..."
+     }
+    ],
+    "result_count": 2,
+    "age_years": null,
+    "edition_tokens": [],
+    "bottler_missing": true,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 10년 숙성인데 alias는 부나하벤 11년으로 연수가 다름",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1238,
+      "attempts": 1,
+      "input_tokens": 1858,
+      "output_tokens": 64,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "고든앤맥페일 10",
+    "normalized": "고든앤맥페일10",
+    "anchor": "고든 앤 맥페일",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "고든 앤 맥페일 부나하벤 10년",
+      "url": "https://blog.naver.com/sonms915/223520685258",
+      "fetched_at": "2026-10-13T11:18:48+00:00",
+      "title_raw": "서울 바 <b>앤</b> 스피릿쇼(Bar &amp; Spirit Show) 2024 방문기 1 (24.05.03)",
+      "title": "서울 바 앤 스피릿쇼(Bar & Spirit Show) 2024 방문기 1 (24.05.03)",
+      "snippet": "다양한 라인업 고든앤맥페일 10 Y 부나하벤 디스커버리 “ 고든 앤 맥페일 ”은 가장 큰 독립병입 회사 중 하나이다. “아영FBC”에서 국내 독점공급을 하고 있어 이번 부스에서도 만나 볼 수 있었다. 독립병입이란?..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "고든앤맥페일"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.9,
+     "reason": "기준 상품은 부나하벤 10년 독립병입 제품이지만, alias인 '고든앤맥페일 10'에는 증류소(부나하벤) 이름이 누락되어 있어 같은 상품으로 특정할 수 없음",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1173,
+      "attempts": 1,
+      "input_tokens": 1723,
+      "output_tokens": 91,
+      "thought_tokens": 0
+     }
+    }
+   }
+  ]
+ },
+ {
+  "key": "gm-bunnahabhain-heavily-peated-11",
+  "stratum": "independent",
+  "product": {
+   "display_name": "Gordon & MacPhail Bunnahabhain Heavily Peated 11",
+   "brand": "Gordon & MacPhail",
+   "age_years": 11,
+   "edition_name": "Bunnahabhain Heavily Peated"
+  },
+  "ko_brand_aliases": [],
+  "edition_brand_aliases": [
+   "부나하벤"
+  ],
+  "queries": [
+   "Gordon & MacPhail Bunnahabhain Heavily Peated 11",
+   "Gordon & MacPhail Bunnahabhain Heavily Peated 11 위스키"
+  ],
+  "learned_brand_for_query": null,
+  "endpoint_results": {
+   "blog": 4,
+   "webkr": 20,
+   "encyc": 0,
+   "cafearticle": 2
+  },
+  "endpoint_total_hits": {
+   "blog": 4,
+   "webkr": 722,
+   "encyc": 0,
+   "cafearticle": 2
+  },
+  "naver_errors": [],
+  "anchors": [
+   {
+    "text": "부나하벤",
+    "kind": "edition_brand"
+   }
+  ],
+  "candidate_total": 0,
+  "candidates": []
+ },
+ {
+  "key": "signatory-caol-ila-10-100-proof",
+  "stratum": "independent",
+  "product": {
+   "display_name": "Signatory Vintage 100 Proof Caol Ila 10",
+   "brand": "signatory",
+   "age_years": 10,
+   "edition_name": "100 Proof Caol Ila"
+  },
+  "ko_brand_aliases": [
+   "시그나토리"
+  ],
+  "edition_brand_aliases": [],
+  "queries": [
+   "Signatory Vintage 100 Proof Caol Ila 10",
+   "시그나토리 10년",
+   "Signatory Vintage 100 Proof Caol Ila 10 위스키"
+  ],
+  "learned_brand_for_query": null,
+  "endpoint_results": {
+   "blog": 22,
+   "webkr": 30,
+   "encyc": 0,
+   "cafearticle": 12
+  },
+  "endpoint_total_hits": {
+   "blog": 1034,
+   "webkr": 14073,
+   "encyc": 0,
+   "cafearticle": 1135
+  },
+  "naver_errors": [],
+  "anchors": [
+   {
+    "text": "시그나토리",
+    "kind": "brand"
+   }
+  ],
+  "candidate_total": 35,
+  "candidates": [
+   {
+    "alias": "시그나토리 빈티지",
+    "normalized": "시그나토리빈티지",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Signatory Vintage 100 Proof Caol Ila 10",
+      "url": "https://blog.naver.com/reserve_storage/224394114910",
+      "fetched_at": "2026-10-13T11:20:37+00:00",
+      "title_raw": "중랑구 상봉 위스키바 다운템포 : 조카 위스키 입문시키기 (+4)",
+      "title": "중랑구 상봉 위스키바 다운템포 : 조카 위스키 입문시키기 (+4)",
+      "snippet": "2012', '라프로익 10 년'. 사실 쿨일라는 제가 마신건데 조카가... 바 다운템포 [1] Signatory Vintage , Caol Ila 13 Years 2012 시그나토리 빈티지, 쿨일라 13년 2012 57.1% / 700ml / 100 Proof Edition No. 70 퍼스트필 및..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "시그나토리 10년",
+      "url": "https://labas24.tistory.com/188",
+      "fetched_at": "2026-10-13T11:20:38+00:00",
+      "title_raw": "싱글몰트 리뷰#71) 글렌버기 13년 싱글 캐스크 위스키내비 / Glenburgie 1....",
+      "title": "싱글몰트 리뷰#71) 글렌버기 13년 싱글 캐스크 위스키내비 / Glenburgie 1....",
+      "snippet": "com 위스키내비(WhiskyNavi), 한국 최초의 독립 병입자 WhiskyNavi 불과 10년 도 채 되지 않은... 25년 시그나토리 빈티지 / Glenburgie 25y Signatory Vintage Glenburgie Distillery Glenburgie-Glenlivet 또는 Glen Burgie..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "시그나토리 10년",
+      "url": "https://labas24.tistory.com/1619",
+      "fetched_at": "2026-10-13T11:20:38+00:00",
+      "title_raw": "그레인 리뷰#6) 노스 브리티쉬 1962 베리 브로스 &amp; 러드 익셉셔널 캐스....",
+      "title": "그레인 리뷰#6) 노스 브리티쉬 1962 베리 브로스 & 러드 익셉셔널 캐스....",
+      "snippet": "캐스크 시그나토리 빈티지 / North British 28y Single Cask Signato Signatory Vintage 시그나토리 빈티지... com 그레인 리뷰# 10 ) 노스 브리티쉬 33년 싱글 캐스크 마스터 오브 몰트 / North British 33y Single..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 10년",
+      "url": "https://m.kihya.com/goods/goods_view.php?goodsNo=1000016225",
+      "fetched_at": "2026-10-13T11:20:38+00:00",
+      "title_raw": "[세금포함] <b>시그나토리</b> 2014 에드라두어 <b>10년</b> 700ml",
+      "title": "[세금포함] 시그나토리 2014 에드라두어 10년 700ml",
+      "snippet": "독립 병입사 시그나토리 빈티지(Signatory Vintage)가 소유한 하이랜드의 보석, 에드라두어(Edradour) 증류소의 '2014 에드라두어 10년 '을 소개합니다. 퍼스트 필 셰리 캐스크에서 10년 간 숙성되어 호두, 건포도, 벌집꿀, 라즈베리...."
+     }
+    ],
+    "result_count": 4,
+    "age_years": null,
+    "edition_tokens": [
+     "빈티지"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "alias에 증류소 이름(쿨일라)과 연수(10년)가 빠져있어 기준 상품과 일치하지 않습니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1351,
+      "attempts": 1,
+      "input_tokens": 2185,
+      "output_tokens": 70,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "시그나토리 2014 에드라두어 10년",
+    "normalized": "시그나토리2014에드라두어10",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 10년",
+      "url": "https://dailyshot.co/m/item/23452",
+      "fetched_at": "2026-10-13T11:20:38+00:00",
+      "title_raw": "<b>시그나토리</b> 2014 에드라두어 <b>10년</b> 전국 가격비교하고 구매 | 데일리샷에서 모든 ....",
+      "title": "시그나토리 2014 에드라두어 10년 전국 가격비교하고 구매 | 데일리샷에서 모든 ....",
+      "snippet": "시그나토리 2014 에드라두어 10년 내 주변에서 편하게 배송 받는 방법, 데일리샷 전국 주류 스마트오더 서비스 | 싱글몰트 위스키, 700ml, 46%, 스코틀랜드, 하이랜드, 있음,"
+     },
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 10년",
+      "url": "https://m.kihya.com/goods/goods_view.php?goodsNo=1000016225",
+      "fetched_at": "2026-10-13T11:20:38+00:00",
+      "title_raw": "[세금포함] <b>시그나토리</b> 2014 에드라두어 <b>10년</b> 700ml",
+      "title": "[세금포함] 시그나토리 2014 에드라두어 10년 700ml",
+      "snippet": "독립 병입사 시그나토리 빈티지(Signatory Vintage)가 소유한 하이랜드의 보석, 에드라두어(Edradour) 증류소의 '2014 에드라두어 10년 '을 소개합니다. 퍼스트 필 셰리 캐스크에서 10년 간 숙성되어 호두, 건포도, 벌집꿀, 라즈베리...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 10년",
+      "url": "https://thebottleskorea.com/singlemalt/?idx=1073",
+      "fetched_at": "2026-10-13T11:20:38+00:00",
+      "title_raw": "<b>시그나토리</b> 2014 에드라두어 <b>10년</b>",
+      "title": "시그나토리 2014 에드라두어 10년",
+      "snippet": "시그나토리 2014 에드라두어 10년 187,000원 상품 원산지스코틀랜드 수량 187,000원 총 상품금액(1개) 187,000원 보틀즈 논현 전화 문의 보틀즈 논현 카톡 문의 매장 재고 문의 필요 Information..."
+     }
+    ],
+    "result_count": 3,
+    "age_years": 10,
+    "edition_tokens": [
+     "2014",
+     "에드라두어"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "ambiguous",
+     "matcher": "S1+S2b+S3",
+     "status": "ambiguous",
+     "input_among_candidates": true,
+     "products": [
+      {
+       "key": "new:signatory-benriach-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof BenRiach 10",
+       "age_years": 10,
+       "edition_name": "100 Proof BenRiach",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 10,
+        "editionUnmatched": [
+         "2014",
+         "에드라두어"
+        ],
+        "brandName": "시그나토리 2014 에드라두어 10년"
+       }
+      },
+      {
+       "key": "new:signatory-caol-ila-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Caol Ila 10",
+       "age_years": 10,
+       "edition_name": "100 Proof Caol Ila",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 10,
+        "editionUnmatched": [
+         "2014",
+         "에드라두어"
+        ],
+        "brandName": "시그나토리 2014 에드라두어 10년"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.99,
+     "reason": "기준 상품은 콜라일라(Caol Ila)인데 alias는 에드라두어(Edradour)로 증류소가 다름.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1251,
+      "attempts": 1,
+      "input_tokens": 2067,
+      "output_tokens": 70,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "시그나토리 벤리악 10년 100 프루프 에디션",
+    "normalized": "시그나토리벤리악10100프루프에디션",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 10년",
+      "url": "https://xwine.club/products/%ED%95%9C%EC%A0%95%EC%8B%9C%EA%B7%B8%EB%82%98%ED%86%A0%EB%A6%AC-%EB%B2%A4%EB%A6%AC%EC%95%85-10%EB%85%84-100-%ED%94%84%EB%A3%A8%ED%94%84-%EC%97%90%EB%94%94%EC%85%98-40",
+      "fetched_at": "2026-10-13T11:20:38+00:00",
+      "title_raw": "<b>시그나토리</b> 벤리악 <b>10년</b> 100 프루프 에디션 #47",
+      "title": "시그나토리 벤리악 10년 100 프루프 에디션 #47",
+      "snippet": "시그나토리 벤리악 10년 100 프루프 에디션 #47 ✨ 스페이사이드의 다채로운 영혼, 10년 숙성 버번 캐스크가 빚어낸 시그나토리 의 강력한 벤리아크! ✨ 벤리아크(Benriach) 증류소는 스코틀랜드 스페이사이드(Speyside) 지역에 ...."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "시그나토리 10년",
+      "url": "https://cafe.naver.com/whiskycognac/731600",
+      "fetched_at": "2026-10-13T11:20:39+00:00",
+      "title_raw": "<b>시그나토리</b> 벤리악<b>10년</b> 100프루프에디션#40 결혼기념일에디션",
+      "title": "시그나토리 벤리악 10년 100프루프에디션#40 결혼기념일에디션",
+      "snippet": "구입기 필수 정보 ============= ■구입처 엑스와인 ■구입가격 88유로(2유로포인트사용) 한화 135,189원 구매 정보가 없는 글은 회원 술자랑 게시판에 올려주세요 심심해서 아들 생빈(2015)이나 찾아볼가 엑스와인을..."
+     }
+    ],
+    "result_count": 2,
+    "age_years": 10,
+    "edition_tokens": [
+     "벤리악",
+     "100",
+     "프루프",
+     "에디션"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "ambiguous",
+     "matcher": "S1+S2b+S3",
+     "status": "ambiguous",
+     "input_among_candidates": true,
+     "products": [
+      {
+       "key": "new:signatory-benriach-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof BenRiach 10",
+       "age_years": 10,
+       "edition_name": "100 Proof BenRiach",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 10,
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "벤리악",
+         "프루프",
+         "에디션"
+        ],
+        "brandName": "시그나토리 벤리악 10년 100 프루프 에디션"
+       }
+      },
+      {
+       "key": "new:signatory-caol-ila-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Caol Ila 10",
+       "age_years": 10,
+       "edition_name": "100 Proof Caol Ila",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 10,
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "벤리악",
+         "프루프",
+         "에디션"
+        ],
+        "brandName": "시그나토리 벤리악 10년 100 프루프 에디션"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.99,
+     "reason": "기준 상품은 콜라일라(Caol Ila)이지만, alias는 벤리악(Benriach)을 가리켜 브랜드가 다릅니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1258,
+      "attempts": 1,
+      "input_tokens": 2061,
+      "output_tokens": 73,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "시그나토리 100 프루프 시리즈",
+    "normalized": "시그나토리100프루프시리즈",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "Signatory Vintage 100 Proof Caol Ila 10",
+      "url": "https://suljang.com/products/%EC%BF%A0%EC%9D%BC%EB%9D%BC-2015-2023-8%EB%85%84%EC%88%99%EC%84%B1-%EC%8B%9C%EA%B7%B8%EB%82%98%ED%86%A0%EB%A6%AC-100%ED%94%84%EB%A3%A8%ED%94%84-%EC%8B%9C%EB%A6%AC%EC%A6%88-10-57-1-70cl-%ED%94%84%EB%A6%AC%EC%98%A4%EB%8D%94",
+      "fetched_at": "2026-10-13T11:20:37+00:00",
+      "title_raw": "쿠일라 2015/2023, 8년숙성 시그나토리 <b>100</b>프루프 시리즈 #<b>10</b>, 57.1%, 700ml",
+      "title": "쿠일라 2015/2023, 8년숙성 시그나토리 100 프루프 시리즈 # 10 , 57.1%, 700ml",
+      "snippet": "Caol Ila 8 Years 2015/2023 Signatory Vintage 100 Proof Edition # 10 57.1% 1st Fill Oloroso Sherry Butts & Hogsheads 증류소 : 쿠일라 브랜드 : 시그나토리 카테고리 : 싱글몰트 원산지 : 스코틀랜드 지역 : 아일라 숙성년수 : 8년 숙성 캐스크 : 퍼스트...."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "100",
+     "프루프",
+     "시리즈"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "ambiguous",
+     "matcher": "S1+S2b+S3",
+     "status": "ambiguous",
+     "input_among_candidates": true,
+     "products": [
+      {
+       "key": "new:signatory-ben-nevis-9-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Ben Nevis 9",
+       "age_years": 9,
+       "edition_name": "100 Proof Ben Nevis",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "시리즈"
+        ],
+        "brandName": "시그나토리 100 프루프 시리즈"
+       }
+      },
+      {
+       "key": "new:signatory-benriach-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof BenRiach 10",
+       "age_years": 10,
+       "edition_name": "100 Proof BenRiach",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "시리즈"
+        ],
+        "brandName": "시그나토리 100 프루프 시리즈"
+       }
+      },
+      {
+       "key": "new:signatory-caol-ila-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Caol Ila 10",
+       "age_years": 10,
+       "edition_name": "100 Proof Caol Ila",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "시리즈"
+        ],
+        "brandName": "시그나토리 100 프루프 시리즈"
+       }
+      },
+      {
+       "key": "new:signatory-glen-ord-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Glen Ord 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Glen Ord",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "시리즈"
+        ],
+        "brandName": "시그나토리 100 프루프 시리즈"
+       }
+      },
+      {
+       "key": "new:signatory-linkwood-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Linkwood 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Linkwood",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "시리즈"
+        ],
+        "brandName": "시그나토리 100 프루프 시리즈"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 10년 숙성 쿠일라인데, alias 및 근거의 상품은 8년 숙성(2015/2023)으로 연수가 다릅니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1190,
+      "attempts": 1,
+      "input_tokens": 2018,
+      "output_tokens": 82,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "시그나토리 100 프루프 에디션",
+    "normalized": "시그나토리100프루프에디션",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "시그나토리 10년",
+      "url": "https://cafe.naver.com/whiskycognac/911377",
+      "fetched_at": "2026-10-13T11:20:39+00:00",
+      "title_raw": "<b>시그나토리</b> 글렌로티스 2015 <b>10</b>y 100p #50",
+      "title": "시그나토리 글렌로티스 2015 10 y 100p #50",
+      "snippet": "구입기 필수 정보 ============= ■구입처 gs25 ■구입가격 136,000 구매 정보가 없는 글은 회원 술자랑 게시판에 올려주세요 주요 정보 이름: 글렌로티스 10년 시그나토리 100 프루프 에디션 #50 (Glenrothes 2015-2025) 지역..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "100",
+     "프루프",
+     "에디션"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "ambiguous",
+     "matcher": "S1+S2b+S3",
+     "status": "ambiguous",
+     "input_among_candidates": true,
+     "products": [
+      {
+       "key": "new:signatory-ben-nevis-9-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Ben Nevis 9",
+       "age_years": 9,
+       "edition_name": "100 Proof Ben Nevis",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "에디션"
+        ],
+        "brandName": "시그나토리 100 프루프 에디션"
+       }
+      },
+      {
+       "key": "new:signatory-benriach-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof BenRiach 10",
+       "age_years": 10,
+       "edition_name": "100 Proof BenRiach",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "에디션"
+        ],
+        "brandName": "시그나토리 100 프루프 에디션"
+       }
+      },
+      {
+       "key": "new:signatory-caol-ila-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Caol Ila 10",
+       "age_years": 10,
+       "edition_name": "100 Proof Caol Ila",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "에디션"
+        ],
+        "brandName": "시그나토리 100 프루프 에디션"
+       }
+      },
+      {
+       "key": "new:signatory-glen-ord-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Glen Ord 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Glen Ord",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "에디션"
+        ],
+        "brandName": "시그나토리 100 프루프 에디션"
+       }
+      },
+      {
+       "key": "new:signatory-linkwood-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Linkwood 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Linkwood",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "프루프",
+         "에디션"
+        ],
+        "brandName": "시그나토리 100 프루프 에디션"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 독립병입사 쿨일라 10년이지만, alias에는 병입사(시그나토리)와 에디션만 있고 증류소 이름(쿨일라)이 누락되어 있어 같은 상품으로 특정할 수 없음.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1167,
+      "attempts": 1,
+      "input_tokens": 1809,
+      "output_tokens": 94,
+      "thought_tokens": 0
+     }
+    }
+   }
+  ]
+ },
+ {
+  "key": "signatory-linkwood-12-100-proof",
+  "stratum": "independent",
+  "product": {
+   "display_name": "Signatory Vintage 100 Proof Linkwood 12",
+   "brand": "signatory",
+   "age_years": 12,
+   "edition_name": "100 Proof Linkwood"
+  },
+  "ko_brand_aliases": [
+   "시그나토리"
+  ],
+  "edition_brand_aliases": [],
+  "queries": [
+   "Signatory Vintage 100 Proof Linkwood 12",
+   "시그나토리 12년",
+   "Signatory Vintage 100 Proof Linkwood 12 위스키"
+  ],
+  "learned_brand_for_query": null,
+  "endpoint_results": {
+   "blog": 24,
+   "webkr": 30,
+   "encyc": 0,
+   "cafearticle": 16
+  },
+  "endpoint_total_hits": {
+   "blog": 1005,
+   "webkr": 8216,
+   "encyc": 0,
+   "cafearticle": 1118
+  },
+  "naver_errors": [],
+  "anchors": [
+   {
+    "text": "시그나토리",
+    "kind": "brand"
+   }
+  ],
+  "candidate_total": 42,
+  "candidates": [
+   {
+    "alias": "시그나토리 빈티지",
+    "normalized": "시그나토리빈티지",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Signatory Vintage 100 Proof Linkwood 12",
+      "url": "https://blog.naver.com/gipi7894/224044925510",
+      "fetched_at": "2026-10-13T11:20:59+00:00",
+      "title_raw": "고든 앤 맥페일 - 링크우드 15년 디스틸러리 라벨 &lt;Gorden &amp; MacPhail -Linkw....",
+      "title": "고든 앤 맥페일 - 링크우드 15년 디스틸러리 라벨 <Gorden & MacPhail -Linkw....",
+      "snippet": "Bottled : 12 .05.2021 Stated Age : 15 years Strength : 46.0% Conditon 바이알 25ml Price 파는 곳... 에디션 #19 Signatory Vintage - Linkwood 2013 100 Proof - Edition #19) 시그나토리 빈티지 - 링크우드 2012..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "시그나토리 12년",
+      "url": "https://blog.naver.com/one_bjj/224021077843",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "<b>시그나토리</b> 빈티지 포트던 다스 16년(Signatory Vintage Port Dundas 16)",
+      "title": "시그나토리 빈티지 포트던 다스 16년(Signatory Vintage Port Dundas 16)",
+      "snippet": "하던 시그나토리 빈티지를 데일리 샷에서 구매했습니다 출처 : 데일리 샷 종류: 싱글 그레인위스키 용량: 700ml 도수: 46% 가격 : 12 ~14만 원대 Tasting Notes Aroma (향) : 말린 과일, 향신료, 캐러멜 Taste (맛) : 구운..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "시그나토리 12년",
+      "url": "https://labas24.tistory.com/690",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "싱글몰트 리뷰#312) 라프로익 1815 레거시 에디션 / Laphroaig 1815 Legacy Edi....",
+      "title": "싱글몰트 리뷰#312) 라프로익 1815 레거시 에디션 / Laphroaig 1815 Legacy Edi....",
+      "snippet": "증류소를 운영한 Johnston labas24.tistory.com 싱글몰트 리뷰#313) 라프로익 10년 CS 배치 # 12 ... com 싱글몰트 리뷰#349) 언네임드(라프로익) 1990 시그나토리 빈티지 / Unnamed Islay 1990 SV..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "시그나토리 12년",
+      "url": "https://labas24.tistory.com/965",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "싱글몰트 리뷰#425) 라프로익 10년 1980's 이태리 임포트 / Laphroaig 10y 198....",
+      "title": "싱글몰트 리뷰#425) 라프로익 10년 1980's 이태리 임포트 / Laphroaig 10y 198....",
+      "snippet": "증류소를 운영한 Johnston labas24.tistory.com 싱글몰트 리뷰#313) 라프로익 10년 CS 배치 # 12 ... com 싱글몰트 리뷰#349) 언네임드(라프로익) 1990 시그나토리 빈티지 / Unnamed Islay 1990 SV..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 12년",
+      "url": "https://m.kihya.com/goods/goods_view.php?goodsNo=1000016221",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "[세금포함] <b>시그나토리</b> 2011 글렌 기어리 <b>12년</b> 스몰 배치 700ml",
+      "title": "[세금포함] 시그나토리 2011 글렌 기어리 12년 스몰 배치 700ml",
+      "snippet": "스코틀랜드의 명망 높은 독립 병입사 시그나토리 빈티지(Signatory Vintage)가 선보이는 '2011 글렌 기어리 12년 '을 만나보세요. 하이랜드의 유서 깊은 글렌 기어리(Glen Garioch) 증류소의 원액을 퍼스트 필 버번 캐스크에서 12년 간...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 12년",
+      "url": "https://winemoa.de/collections/%EC%8B%9C%EA%B7%B8%EB%82%98%ED%86%A0%EB%A6%AC-%EB%B9%88%ED%8B%B0%EC%A7%80",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "<b>시그나토리</b> 빈티지",
+      "title": "시그나토리 빈티지",
+      "snippet": "스페이사이드(M) 18년 시그나토리 빈티지 100 프루프 익셉셔널 에디션 #17 57.1%vol. 700ml 기프트 박스없음 관세 부가세 교육세 주세 전체 포함 ; 시그나토리 빈티지 하이랜드 파크 18년 2006/2024 혹스헤드 이비스코 52.0%vol. 700ml ...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 12년",
+      "url": "https://m.kihya.com/goods/goods_view.php?goodsNo=1000016222",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "[세금포함] <b>시그나토리</b> 2012 글렌로시 <b>12년</b> 100 프루프 700ml",
+      "title": "[세금포함] 시그나토리 2012 글렌로시 12년 100 프루프 700ml",
+      "snippet": "스코틀랜드의 독립 병입사 시그나토리 빈티지(Signatory Vintage)가 발굴한 스페이사이드의 숨겨진 보석, '2012 글렌로시 12년 '을 만나보세요. 공식 병입이 드물어 더욱 특별한 글렌로시 증류소의 원액을 퍼스트 필 올로로소 셰...."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "시그나토리 12년",
+      "url": "https://cafe.naver.com/whiskycognac/940611",
+      "fetched_at": "2026-10-13T11:21:01+00:00",
+      "title_raw": "<b>시그나토리</b> 빈티지 탐두 <b>12</b> 구매",
+      "title": "시그나토리 빈티지 탐두 12 구매",
+      "snippet": "이번 구매 바틀은 시그나토리 빈티지 탐두 12년 입니다. 이번 와인모아 추석 할인코드 이용해서 19.2유로 정도 더 저렴하게 적절한 가격에 잘 구매한거 같습니다. 시그나토리 빈티지에서 탐두 찾아보기가 쉽지 않은거..."
+     }
+    ],
+    "result_count": 8,
+    "age_years": null,
+    "edition_tokens": [
+     "빈티지"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "unsure",
+     "product_id": null,
+     "confidence": 0.9,
+     "reason": "alias '시그나토리 빈티지'에는 독립병입사 이름만 있고 증류소 이름(링크우드)과 연수, 에디션 정보가 없어 기준 상품과 일치하는지 특정할 수 없습니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1453,
+      "attempts": 1,
+      "input_tokens": 2209,
+      "output_tokens": 87,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "시그나토리 100프루프 에디션",
+    "normalized": "시그나토리100프루프에디션",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "시그나토리 12년",
+      "url": "https://blog.naver.com/aronax_9s/224283026311",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "비하인드 - <b>시그나토리</b> 100프루프 에디션 : 마녹모어 2014 11년 57.1도",
+      "title": "비하인드 - 시그나토리 100프루프 에디션 : 마녹모어 2014 11년 57.1도",
+      "snippet": "시그나토리 마녹모어 2014 11년 100 Proof 2026.03.26 시그나토리 마녹모어 2014 (11년) 100 Proof Edition #51 57.1... 시그나토리 100프루프(캐스크 스트렝스) 에디션 51번 보틀. 주로 독병 위주로 원액을 판매하는..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Signatory Vintage 100 Proof Linkwood 12 위스키",
+      "url": "https://www.thewhiskybarrel.com/ko/products/linkwood-12-year-old-2012-signatory-100-proof-edition-68",
+      "fetched_at": "2026-10-13T11:21:01+00:00",
+      "title_raw": "링크우드 <b>12</b>년산 2012 시그나토리 <b>100</b>프루프 에디션 #68 | 더 <b>위스키</b> 배럴",
+      "title": "링크우드 12 년산 2012 시그나토리 100 프루프 에디션 #68 | 더 위스키 배럴",
+      "snippet": "The Linkwood 12 Year Old 2012 is a richly sherried Speyside single malt Scotch whisky, bottled by Signatory Vintage for their acclaimed 100 - Proof Edition series."
+     }
+    ],
+    "result_count": 2,
+    "age_years": null,
+    "edition_tokens": [
+     "100프루프",
+     "에디션"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "alias에 '링크우드' 증류소 이름이 누락되어 있고, '100프루프 에디션'은 마녹모어 등 다른 증류소의 동 시리즈 제품도 가리킬 수 있어 기준 상품과 일치하지 않음",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1283,
+      "attempts": 1,
+      "input_tokens": 1910,
+      "output_tokens": 95,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "시그나토리 2011 글렌 기어리 12년 스몰",
+    "normalized": "시그나토리2011글렌기어리12스몰",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 12년",
+      "url": "https://m.kihya.com/goods/goods_view.php?goodsNo=1000016221",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "[세금포함] <b>시그나토리</b> 2011 글렌 기어리 <b>12년</b> 스몰 배치 700ml",
+      "title": "[세금포함] 시그나토리 2011 글렌 기어리 12년 스몰 배치 700ml",
+      "snippet": "스코틀랜드의 명망 높은 독립 병입사 시그나토리 빈티지(Signatory Vintage)가 선보이는 '2011 글렌 기어리 12년 '을 만나보세요. 하이랜드의 유서 깊은 글렌 기어리(Glen Garioch) 증류소의 원액을 퍼스트 필 버번 캐스크에서 12년 간...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "시그나토리 12년",
+      "url": "https://dailyshot.co/m/item/23772",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "<b>시그나토리</b> 2011 글렌 기어리 <b>12년</b> 스몰 배치 전국 가격비교하고 구매 | 데일리샷....",
+      "title": "시그나토리 2011 글렌 기어리 12년 스몰 배치 전국 가격비교하고 구매 | 데일리샷....",
+      "snippet": "시그나토리 2011 글렌 기어리 12년 스몰 배치 내 주변에서 편하게 배송 받는 방법, 데일리샷 전국 주류 스마트오더 서비스 | 싱글몰트 위스키, 700ml, 48.2%, 스코틀랜드, 있음,"
+     }
+    ],
+    "result_count": 2,
+    "age_years": 12,
+    "edition_tokens": [
+     "2011",
+     "글렌",
+     "기어리",
+     "스몰"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "ambiguous",
+     "matcher": "S1+S2b+S3",
+     "status": "ambiguous",
+     "input_among_candidates": true,
+     "products": [
+      {
+       "key": "new:signatory-glen-ord-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Glen Ord 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Glen Ord",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 12,
+        "editionUnmatched": [
+         "2011",
+         "글렌",
+         "기어리",
+         "스몰"
+        ],
+        "brandName": "시그나토리 2011 글렌 기어리 12년 스몰"
+       }
+      },
+      {
+       "key": "new:signatory-linkwood-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Linkwood 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Linkwood",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 12,
+        "editionUnmatched": [
+         "2011",
+         "글렌",
+         "기어리",
+         "스몰"
+        ],
+        "brandName": "시그나토리 2011 글렌 기어리 12년 스몰"
+       }
+      },
+      {
+       "key": "signatory-benriach-12",
+       "display_name": "Signatory Vintage BenRiach 12",
+       "age_years": 12,
+       "edition_name": "BenRiach",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 12,
+        "editionUnmatched": [
+         "2011",
+         "글렌",
+         "기어리",
+         "스몰"
+        ],
+        "brandName": "시그나토리 2011 글렌 기어리 12년 스몰"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.99,
+     "reason": "기준 상품은 링크우드 증류소 원액이지만, alias는 글렌 기어리 증류소의 상품을 가리키므로 다른 상품입니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1254,
+      "attempts": 1,
+      "input_tokens": 1929,
+      "output_tokens": 72,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "시그나토리 2012 링크우드 12 년 100",
+    "normalized": "시그나토리2012링크우드12100",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Signatory Vintage 100 Proof Linkwood 12",
+      "url": "https://blog.naver.com/wanjeong0531/224307658667",
+      "fetched_at": "2026-10-13T11:20:59+00:00",
+      "title_raw": "시그나토리 2012 링크우드 <b>12</b>년 <b>100</b>프루프 배치68",
+      "title": "시그나토리 2012 링크우드 12 년 100 프루프 배치68",
+      "snippet": "오늘의 위스키 시그나토리 2012 링크우드 12 년 100 프루프 에디션 배치68 ( Signatory Vintage Linkwood 2012 12 YO 100 Proof Edition #68) 한줄 평 올로로소 셰리의 진한 풍미와 링크우드 특유의 우아한 과실향이..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Signatory Vintage 100 Proof Linkwood 12 위스키",
+      "url": "https://www.daangn.com/kr/business-post/%EC%8B%9C%EA%B7%B8%EB%82%98%ED%86%A0%EB%A6%AC-%EB%A7%81%ED%81%AC%EC%9A%B0%EB%93%9C-12%EB%85%84-100%ED%94%84%EB%A3%A8%ED%94%84-%EC%97%90%EB%94%94%EC%85%98-%EB%B0%B0%EC%B9%9868-k6moo4sk3u1g/",
+      "fetched_at": "2026-10-13T11:21:01+00:00",
+      "title_raw": "시그나토리 링크우드 <b>12</b>년 <b>100</b>프루프 에디션 배치68 | 인천광역시 검단구 당하동 ....",
+      "title": "시그나토리 링크우드 12 년 100 프루프 에디션 배치68 | 인천광역시 검단구 당하동 ....",
+      "snippet": "🥃 시그나토리 2012 링크우드 12 년 100 프루프 에디션 배치68 ( Signatory Vintage Linkwood 2012 12 YO 100 Proof Edition #68) 👉 한줄 평 올로로소 셰리의 진한 풍미와 링크우드 특유의 우아한 과실향이 균형 있게 어우러진..."
+     }
+    ],
+    "result_count": 2,
+    "age_years": 12,
+    "edition_tokens": [
+     "2012",
+     "링크우드",
+     "100"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "ambiguous",
+     "matcher": "S1+S2b+S3",
+     "status": "ambiguous",
+     "input_among_candidates": true,
+     "products": [
+      {
+       "key": "new:signatory-glen-ord-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Glen Ord 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Glen Ord",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 12,
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "2012",
+         "링크우드"
+        ],
+        "brandName": "시그나토리 2012 링크우드 12 년 100"
+       }
+      },
+      {
+       "key": "new:signatory-linkwood-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Linkwood 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Linkwood",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 12,
+        "editionMatch": [
+         "100"
+        ],
+        "editionUnmatched": [
+         "2012",
+         "링크우드"
+        ],
+        "brandName": "시그나토리 2012 링크우드 12 년 100"
+       }
+      },
+      {
+       "key": "signatory-benriach-12",
+       "display_name": "Signatory Vintage BenRiach 12",
+       "age_years": 12,
+       "edition_name": "BenRiach",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "ageMatch": 12,
+        "editionUnmatched": [
+         "2012",
+         "링크우드",
+         "100"
+        ],
+        "brandName": "시그나토리 2012 링크우드 12 년 100"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "same",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "시그나토리 독립병입사와 링크우드 증류소, 12년 연수, 100 프루프 에디션 정보가 일치합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1291,
+      "attempts": 1,
+      "input_tokens": 2107,
+      "output_tokens": 76,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "시그나토리 100",
+    "normalized": "시그나토리100",
+    "anchor": "시그나토리",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "시그나토리 12년",
+      "url": "https://irenne.tistory.com/409",
+      "fetched_at": "2026-10-13T11:21:00+00:00",
+      "title_raw": "올데이위스키 7월 byob 모임",
+      "title": "올데이위스키 7월 byob 모임",
+      "snippet": "글렌피딕 12 (2009년형) | 43% || Glenfiddich 12 yo || 헌터랭 올드 몰트 캐스크... 6% || Longmorn 18yo Cask Strength single batch | cask - barrels and hogsheads || 시그나토리 100 Proof..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "100"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "ambiguous",
+     "matcher": "S1+S2b+S3",
+     "status": "ambiguous",
+     "input_among_candidates": true,
+     "products": [
+      {
+       "key": "new:signatory-ben-nevis-9-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Ben Nevis 9",
+       "age_years": 9,
+       "edition_name": "100 Proof Ben Nevis",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "brandName": "시그나토리 100"
+       }
+      },
+      {
+       "key": "new:signatory-benriach-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof BenRiach 10",
+       "age_years": 10,
+       "edition_name": "100 Proof BenRiach",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "brandName": "시그나토리 100"
+       }
+      },
+      {
+       "key": "new:signatory-caol-ila-10-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Caol Ila 10",
+       "age_years": 10,
+       "edition_name": "100 Proof Caol Ila",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "brandName": "시그나토리 100"
+       }
+      },
+      {
+       "key": "new:signatory-glen-ord-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Glen Ord 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Glen Ord",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "brandName": "시그나토리 100"
+       }
+      },
+      {
+       "key": "new:signatory-linkwood-12-100-proof",
+       "display_name": "Signatory Vintage 100 Proof Linkwood 12",
+       "age_years": 12,
+       "edition_name": "100 Proof Linkwood",
+       "evidence": {
+        "brandMatch": "시그나토리",
+        "editionMatch": [
+         "100"
+        ],
+        "brandName": "시그나토리 100"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.9,
+     "reason": "alias에 링크우드 증류소 이름이 없고 '시그나토리 100'으로만 표기되어 있어 어떤 증류소의 100 Proof 제품인지 특정할 수 없음",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1237,
+      "attempts": 1,
+      "input_tokens": 1764,
+      "output_tokens": 81,
+      "thought_tokens": 0
+     }
+    }
+   }
+  ]
+ },
+ {
+  "key": "wm-dailuaine-15",
+  "stratum": "independent",
+  "product": {
+   "display_name": "Wilson & Morgan Dailuaine 15",
+   "brand": "Wilson & Morgan",
+   "age_years": 15,
+   "edition_name": "Dailuaine"
+  },
+  "ko_brand_aliases": [],
+  "edition_brand_aliases": [],
+  "queries": [
+   "Wilson & Morgan Dailuaine 15",
+   "Wilson & Morgan Dailuaine 15 위스키"
+  ],
+  "learned_brand_for_query": null,
+  "endpoint_results": {
+   "blog": 8,
+   "webkr": 20,
+   "encyc": 12,
+   "cafearticle": 0
+  },
+  "endpoint_total_hits": {
+   "blog": 8,
+   "webkr": 402,
+   "encyc": 12,
+   "cafearticle": 0
+  },
+  "naver_errors": [],
+  "anchors": [],
+  "candidate_total": 0,
+  "candidates": []
+ },
+ {
+  "key": "kilchoman-fino-sherry",
+  "stratum": "official",
+  "product": {
+   "display_name": "Kilchoman Fino Sherry Cask Matured",
+   "brand": "Kilchoman",
+   "age_years": null,
+   "edition_name": "Fino Sherry Cask"
+  },
+  "ko_brand_aliases": [],
+  "edition_brand_aliases": [],
+  "queries": [
+   "Kilchoman Fino Sherry Cask Matured",
+   "Kilchoman Fino Sherry Cask Matured 위스키"
+  ],
+  "learned_brand_for_query": null,
+  "endpoint_results": {
+   "blog": 20,
+   "webkr": 20,
+   "encyc": 0,
+   "cafearticle": 6
+  },
+  "endpoint_total_hits": {
+   "blog": 39,
+   "webkr": 264,
+   "encyc": 0,
+   "cafearticle": 6
+  },
+  "naver_errors": [],
+  "anchors": [
+   {
+    "text": "킬호만",
+    "kind": "learned"
+   }
+  ],
+  "candidate_total": 6,
+  "candidates": [
+   {
+    "alias": "킬호만 머추어드 시리즈",
+    "normalized": "킬호만머추어드시리즈",
+    "anchor": "킬호만",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "Kilchoman Fino Sherry Cask Matured",
+      "url": "https://cafe.naver.com/whiskycognac/868046",
+      "fetched_at": "2026-10-13T11:21:24+00:00",
+      "title_raw": "위린이 관점에서의 킬호만 머추어드 시리즈 시음기",
+      "title": "위린이 관점에서의 킬호만 머추어드 시리즈 시음기",
+      "snippet": "1. Kilchoman PX Sherry Cask Matured 2023 - 지역 : Islay (아일라) - 피트 : 약 50ppm - 캐스크 : PX(Pedro Ximénez) 혹스헤드... Kilchoman Fino Cask Matured 2023 - 지역 : Islay (아일라) - 피트 : 약 50ppm - 캐스크 : Fino sherry - 도수 : 50% - 가격..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "머추어드",
+     "시리즈"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "alias에 특정 에디션(피노 셰리) 정보가 없고 '머추어드 시리즈'로만 되어 있어 PX 등 다른 캐스크 상품도 포괄하므로 기준 상품과 일치하지 않습니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1397,
+      "attempts": 1,
+      "input_tokens": 1724,
+      "output_tokens": 84,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "킬호만 피노셰리 머추어드",
+    "normalized": "킬호만피노셰리머추어드",
+    "anchor": "킬호만",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman Fino Sherry Cask Matured",
+      "url": "https://blog.naver.com/zenzensky/223173197641",
+      "fetched_at": "2026-10-13T11:21:24+00:00",
+      "title_raw": "킬호만 피노셰리 머추어드",
+      "title": "킬호만 피노셰리 머추어드",
+      "snippet": "킬호만 피노셰리 머추어드 Kilchoman Fino Sherry Cask Matured (50%,700ml) 요즘 매물이 보이고 있는 킬호만 피노셰리 머추어드. 뚜따의 영광을 독차지 하고자 주문하게 되었다.(잔은 오래 굴려야 하지만..) Nose..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "피노셰리",
+     "머추어드"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "same",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "alias에 킬호만 브랜드와 피노셰리 머추어드 에디션 정보가 기준 상품과 정확히 일치합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1296,
+      "attempts": 1,
+      "input_tokens": 1698,
+      "output_tokens": 68,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "킬호만 피노 셰리 캐스크",
+    "normalized": "킬호만피노셰리캐스크",
+    "anchor": "킬호만",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "Kilchoman Fino Sherry Cask Matured",
+      "url": "https://soolhanjan.com/alcohol/4009/%ED%82%AC%ED%98%B8%EB%A7%8C-%ED%94%BC%EB%85%B8-%EC%85%B0%EB%A6%AC-%EC%BA%90%EC%8A%A4%ED%81%AC?sub_id=6501",
+      "fetched_at": "2026-10-13T11:21:24+00:00",
+      "title_raw": "킬호만 피노 셰리 캐스크 700ml 최저가 비교 및 정보 - <b>Kilchoman Fino sherry cask matured</b> ....",
+      "title": "킬호만 피노 셰리 캐스크 700ml 최저가 비교 및 정보 - Kilchoman Fino sherry cask matured ....",
+      "snippet": "킬호만 피노 셰리 캐스크( Kilchoman Fino sherry cask matured ) 700ml 최저가 얼마일까요? KILCHOMAN DISTILLERY CO LTD 아일라 싱글 몰트 스카치 위스키 킬호만 피노 셰리 캐스크의 현재 술한잔에 등록된 1곳의 판매처 정보를 바탕으로 최저...."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "피노",
+     "셰리",
+     "캐스크"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "same",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품의 브랜드(킬호만)와 에디션명(피노 셰리 캐스크)이 별칭 및 근거 자료와 정확히 일치합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1205,
+      "attempts": 1,
+      "input_tokens": 1803,
+      "output_tokens": 75,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "킬호만 피노 셰리 캐스크 머추어드",
+    "normalized": "킬호만피노셰리캐스크머추어드",
+    "anchor": "킬호만",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "Kilchoman Fino Sherry Cask Matured",
+      "url": "https://theliquor.net/liquor/10002066",
+      "fetched_at": "2026-10-13T11:21:24+00:00",
+      "title_raw": "킬호만 피노 셰리 캐스크 머추어드 정보",
+      "title": "킬호만 피노 셰리 캐스크 머추어드 정보",
+      "snippet": "주종 : 위스키>스카치 위스키>싱글 몰트 위스키, 도수 : 50.0%, 생산국 : 영국, 지역 : 아일라, 증류소 : Kilchoman Distillery, 생산자 : Kilchoman Distillery Company, 숙성기간 : NAS"
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "피노",
+     "셰리",
+     "캐스크",
+     "머추어드"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "same",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품의 브랜드, 에디션명, 병입 방식이 alias 및 근거와 일치합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1209,
+      "attempts": 1,
+      "input_tokens": 1688,
+      "output_tokens": 61,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "킬호만 피노 쉐리 캐스크",
+    "normalized": "킬호만피노쉐리캐스크",
+    "anchor": "킬호만",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman Fino Sherry Cask Matured",
+      "url": "https://blog.naver.com/virusman401/223124056944",
+      "fetched_at": "2026-10-13T11:21:24+00:00",
+      "title_raw": "[위스키 리뷰] 킬호만 피노 쉐리 캐스크 (추천&lt;4/5&gt; / 스카치 위스키 / ....",
+      "title": "[위스키 리뷰] 킬호만 피노 쉐리 캐스크 (추천 / 스카치 위스키 / ....",
+      "snippet": "이름: Kilchoman Fino Sherry Matured 제조사: The Kilchoman Distillery 주도(ABV): 50.0% 지역: Islay 용량: 700 ml 숙성연수: NAS 캐스크타입: Fino Sherry Cask 구입: The Whisky Exchange - CoventGarden Shop 종류: 싱글몰트 위스키..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "피노",
+     "쉐리",
+     "캐스크"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "same",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "킬호만 브랜드와 피노 쉐리 캐스크 에디션 정보가 일치합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1217,
+      "attempts": 1,
+      "input_tokens": 1715,
+      "output_tokens": 59,
+      "thought_tokens": 0
+     }
+    }
+   }
+  ]
+ },
+ {
+  "key": "kilchoman-px-sherry",
+  "stratum": "official",
+  "product": {
+   "display_name": "Kilchoman PX Sherry Cask Matured",
+   "brand": "Kilchoman",
+   "age_years": null,
+   "edition_name": "PX Sherry Cask"
+  },
+  "ko_brand_aliases": [],
+  "edition_brand_aliases": [],
+  "queries": [
+   "Kilchoman PX Sherry Cask Matured",
+   "Kilchoman PX Sherry Cask Matured 위스키"
+  ],
+  "learned_brand_for_query": null,
+  "endpoint_results": {
+   "blog": 20,
+   "webkr": 20,
+   "encyc": 0,
+   "cafearticle": 10
+  },
+  "endpoint_total_hits": {
+   "blog": 79,
+   "webkr": 430,
+   "encyc": 0,
+   "cafearticle": 10
+  },
+  "naver_errors": [],
+  "anchors": [
+   {
+    "text": "킬호만",
+    "kind": "learned"
+   },
+   {
+    "text": "셰리",
+    "kind": "learned"
+   }
+  ],
+  "candidate_total": 10,
+  "candidates": [
+   {
+    "alias": "셰리 캐스크",
+    "normalized": "셰리캐스크",
+    "anchor": "셰리",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://blog.naver.com/tgroupvn/223424311417",
+      "fetched_at": "2026-10-13T11:21:27+00:00",
+      "title_raw": "Winecellar에서 가장 좋은 가격대의 글렌알라키 Glen Alaki 베트남위스키 ....",
+      "title": "Winecellar에서 가장 좋은 가격대의 글렌알라키 Glen Alaki 베트남위스키 ....",
+      "snippet": "Kilchoman Whisky Line + 킬호만 로크곰 2022 - Kilchoman Loch Gorm 2022 + 킬호만 마키베이 - Kilchoman Machir Bay + 킬호만 PX 셰리 캐스크 - Kilchomna PX Sherry Cask Matured + 킬호만 마키어 베이 CS 2021 - Kilchoman ..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://blog.naver.com/bar_day1/223340573856",
+      "fetched_at": "2026-10-13T11:21:27+00:00",
+      "title_raw": "[공지] 24년 2월 1차_Day1 싱글몰트 위스키 판매 리스트",
+      "title": "[공지] 24년 2월 1차_Day1 싱글몰트 위스키 판매 리스트",
+      "snippet": "글렌알라키 11Y 페드로 히메네스 (Glenallachie 11Y PX ) 15. 글렌알라키 11Y 타우니... 글렌기리 15Y 셰리 캐스크 (Glen Garioch 15Y Sherry Cask Matured ) 73. 글렌드로낙 12Y..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://blog.naver.com/bar_day1/223935028305",
+      "fetched_at": "2026-10-13T11:21:27+00:00",
+      "title_raw": "[공지] 25년 7월 2차 몰트 바 Day 1 싱글몰트 위스키 리스트",
+      "title": "[공지] 25년 7월 2차 몰트 바 Day 1 싱글몰트 위스키 리스트",
+      "snippet": "맥캘란 12Y 셰리 캐스크 (The Macallan 12Y Sherry Cask ) (Bottle 판매) 29. 맥캘란 12Y 더블... 글렌드로낙 오드 투 더 다크(GlenDronach Ode To the Dark) * PX , 50.8% 86. 글렌드로낙 오드..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://blog.naver.com/bar_day1/223223789050",
+      "fetched_at": "2026-10-13T11:21:27+00:00",
+      "title_raw": "[공지] 23년 10월 1차_Day1 싱글몰트 위스키 리스트",
+      "title": "[공지] 23년 10월 1차_Day1 싱글몰트 위스키 리스트",
+      "snippet": "글렌알라키 11Y PX (Glenallachie 11Y PX ) 17. 글렌알라키 11Y 타우니 포트 CS (Glenallachie... 글렌기리 15Y 셰리 캐스크 (Glen Garioch 15Y Sherry Cask Matured ) 72. 글렌드로낙 12Y..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://blog.naver.com/bar_day1/223638873045",
+      "fetched_at": "2026-10-13T11:21:27+00:00",
+      "title_raw": "[공지] 24년 11월 몰트 바 Day 1 싱글몰트 위스키 리스트",
+      "title": "[공지] 24년 11월 몰트 바 Day 1 싱글몰트 위스키 리스트",
+      "snippet": "글렌기리 15Y 셰리 캐스크 (Glen Garioch 15Y Sherry Cask Matured ) Sold Out ☆ 글렌드로낙 83.... 글렌드로낙 캐스크 바틀링 1992 (GlenDronach Cask Bottling, PX Puncheon) * NEW, 30Y, 51.8% 90...."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://blog.naver.com/bar_day1/223403521936",
+      "fetched_at": "2026-10-13T11:21:27+00:00",
+      "title_raw": "[공지] 24년 4월 Day1 싱글몰트 위스키 리스트",
+      "title": "[공지] 24년 4월 Day1 싱글몰트 위스키 리스트",
+      "snippet": "글렌기리 15Y 셰리 캐스크 (Glen Garioch 15Y Sherry Cask Matured ) 74. 글렌드로낙 12Y (GlenDronach 12Y) * 레이첼 베리 Ver. (Bottle 판매) 75. 글렌드로낙 15Y (GlenDronach 15Y) * 레이첼..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://www.wadossi.com/subWine/subDetail.php?wineNumber=14798",
+      "fetched_at": "2026-10-13T11:21:27+00:00",
+      "title_raw": "킬호만, <b>PX</b> 셰리 캐스크 (NAS)(<b>Kilchoman</b>, <b>PX Sherry Cask Matured</b>) - 영국(United Kingdom) &gt; 스코....",
+      "title": "킬호만, PX 셰리 캐스크 (NAS)( Kilchoman , PX Sherry Cask Matured ) - 영국(United Kingdom) > 스코....",
+      "snippet": "영국(United Kingdom) > 스코틀랜드(Scotland) > 아일라(Islay) - 킬호만, PX 셰리 캐스크 (NAS)( Kilchoman , PX Sherry Cask Matured ) 가격 및 시음후기, 판매 와인샵 정보제공"
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://cafe.naver.com/whiskycognac/281587",
+      "fetched_at": "2026-10-13T11:21:28+00:00",
+      "title_raw": "맛있다!! 킬호만 <b>PX</b>셰리(<b>KILCHOMAN PX Sherry Cask Matured</b>)",
+      "title": "맛있다!! 킬호만 PX 셰리( KILCHOMAN PX Sherry Cask Matured )",
+      "snippet": "• 킬호만 PX 셰리 _ KILCHOMAN PX Sherry Cask Matured ° Making: 킬호만 증류소 (아일라) ° Type: 스카치위스키 (싱글몰트위스키 ) ° Age: NAS ° Strength: 47.3도 ° Cask : PX 셰리 캐스크 ° Edition: 2021 (12,000병) • [Nose: 흑설탕, 포도잼..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman PX Sherry Cask Matured 위스키",
+      "url": "https://blog.naver.com/bar_day1/223602989442",
+      "fetched_at": "2026-10-13T11:21:28+00:00",
+      "title_raw": "[공지] 24년 10월 몰트 바 Day 1 싱글몰트 <b>위스키</b> 리스트",
+      "title": "[공지] 24년 10월 몰트 바 Day 1 싱글몰트 위스키 리스트",
+      "snippet": "신촌 위스키 바/몰트 바 Day 1 입니다. 2024년 10월 싱글몰트 위스키 판매 라인업... 글렌기리 15Y 셰리 캐스크 (Glen Garioch 15Y Sherry Cask Matured ) ☆ 글렌드로낙 81...."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Kilchoman PX Sherry Cask Matured 위스키",
+      "url": "https://blog.naver.com/bar_day1/223369225596",
+      "fetched_at": "2026-10-13T11:21:28+00:00",
+      "title_raw": "[공지] 24년 3월 1차_Day1 싱글몰트 <b>위스키</b> 판매 리스트",
+      "title": "[공지] 24년 3월 1차_Day1 싱글몰트 위스키 판매 리스트",
+      "snippet": "2024년 3월 싱글몰트 위스키 판매 라인업... 글렌알라키 11Y 페드로 히메네스 (Glenallachie 11Y PX ) 15.... 글렌기리 15Y 셰리 캐스크 (Glen Garioch 15Y Sherry Cask Matured ) 72...."
+     }
+    ],
+    "result_count": 11,
+    "age_years": null,
+    "edition_tokens": [
+     "캐스크"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "alias인 '셰리 캐스크'에 브랜드 이름인 킬호만과 PX 에디션 정보가 누락되어 다른 셰리 캐스크 위스키와 혼동될 수 있습니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1213,
+      "attempts": 1,
+      "input_tokens": 2180,
+      "output_tokens": 79,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "셰리 캐스크 머추어드",
+    "normalized": "셰리캐스크머추어드",
+    "anchor": "셰리",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://soolhanjan.com/alcohol/4010/%ED%82%AC%ED%98%B8%EB%A7%8C-px-%EC%85%B0%EB%A6%AC-%EC%BA%90%EC%8A%A4%ED%81%AC-%EB%A8%B8%EC%B6%94%EC%96%B4%EB%93%9C?sub_id=6502",
+      "fetched_at": "2026-10-13T11:21:27+00:00",
+      "title_raw": "킬호만 <b>PX</b> 셰리 캐스크 머추어드 700ml 최저가 비교 및 정보 - <b>Kilchoman PX sherry cask</b> m....",
+      "title": "킬호만 PX 셰리 캐스크 머추어드 700ml 최저가 비교 및 정보 - Kilchoman PX sherry cask m....",
+      "snippet": "킬호만 PX 셰리 캐스크 머추어드( Kilchoman PX sherry cask matured ) 700ml 최저가 얼마일까요? KILCHOMAN DISTILLERY CO LTD 아일라 싱글 몰트 스카치 위스키 킬호만 PX 셰리 캐스크 머추어드의 현재 술한잔에 등록된 1곳의 판매처 정보를 바...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Kilchoman PX Sherry Cask Matured 위스키",
+      "url": "https://theliquor.net/liquor/10002067",
+      "fetched_at": "2026-10-13T11:21:28+00:00",
+      "title_raw": "킬호만 <b>PX</b> 셰리 캐스크 머추어드 정보",
+      "title": "킬호만 PX 셰리 캐스크 머추어드 정보",
+      "snippet": "주종 : 위스키 >스카치 위스키 >싱글 몰트 위스키 , 도수 : 50.0%, 생산국 : 영국, 지역 : 아일라, 증류소 : Kilchoman Distillery, 생산자 : Kilchoman Distillery Company, 숙성기간 : NAS"
+     }
+    ],
+    "result_count": 2,
+    "age_years": null,
+    "edition_tokens": [
+     "캐스크",
+     "머추어드"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "unsure",
+     "product_id": null,
+     "confidence": 0.8,
+     "reason": "alias에 브랜드(킬호만)와 에디션 세부 정보가 빠져 있어 '셰리 캐스크 머추어드'라는 표기만으로는 해당 상품을 특정할 수 없음",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1322,
+      "attempts": 1,
+      "input_tokens": 1938,
+      "output_tokens": 80,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "셰리 오크",
+    "normalized": "셰리오크",
+    "anchor": "셰리",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://cafe.naver.com/whiskycognac/873239",
+      "fetched_at": "2026-10-13T11:21:28+00:00",
+      "title_raw": "1년 사이 몰라보게 불어난 술장, 대공사를 마쳤습니다.",
+      "title": "1년 사이 몰라보게 불어난 술장, 대공사를 마쳤습니다.",
+      "snippet": "Old Sherry Oak Cask X 스페인 헤레스 셰리 오크통에서만 숙성 44 스페이사이드 싱글 몰트 The Macallan 15 Years Old Double Cask X 아메리칸 & 유러피안 셰리 오크의 조화 45 스페이사이드 싱글 몰트 The..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "오크"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "unsure",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "alias에 브랜드(킬호만)와 특정 에디션 정보가 없고 일반적인 '셰리 오크'로만 표기되어 있어 기준 상품과 일치하는지 확인할 수 없습니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1126,
+      "attempts": 1,
+      "input_tokens": 1692,
+      "output_tokens": 80,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "셰리 오크통에서만 숙성 44 스페이사이드",
+    "normalized": "셰리오크통에서만숙성44스페이사이드",
+    "anchor": "셰리",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "Kilchoman PX Sherry Cask Matured",
+      "url": "https://cafe.naver.com/whiskycognac/873239",
+      "fetched_at": "2026-10-13T11:21:28+00:00",
+      "title_raw": "1년 사이 몰라보게 불어난 술장, 대공사를 마쳤습니다.",
+      "title": "1년 사이 몰라보게 불어난 술장, 대공사를 마쳤습니다.",
+      "snippet": "Old Sherry Oak Cask X 스페인 헤레스 셰리 오크통에서만 숙성 44 스페이사이드 싱글 몰트 The Macallan 15 Years Old Double Cask X 아메리칸 & 유러피안 셰리 오크의 조화 45 스페이사이드 싱글 몰트 The..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "오크통에서만",
+     "숙성",
+     "스페이사이드"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "unsure",
+     "product_id": null,
+     "confidence": 0.9,
+     "reason": "alias에 브랜드(킬호만) 이름이 없고, 스페이사이드 지역명과 타 브랜드(맥캘란) 관련 문구가 섞여 있어 기준 상품으로 특정할 수 없음",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1226,
+      "attempts": 1,
+      "input_tokens": 1704,
+      "output_tokens": 79,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "셰리 캐스크 숙성",
+    "normalized": "셰리캐스크숙성",
+    "anchor": "셰리",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "Kilchoman PX Sherry Cask Matured 위스키",
+      "url": "https://www.thewhiskybarrel.com/ko/products/kilchoman-px-sherry-cask-matured-2023?collection=find_similar&position=6&sbclid=productCard&returnedcollection=find_similar&source=edradour25yearoldsmallbatch2&page_type=productdetails",
+      "fetched_at": "2026-10-13T11:21:28+00:00",
+      "title_raw": "킬코만 <b>PX</b> 셰리 캐스크 숙성 (2023) | 더 <b>위스키</b> 배럴",
+      "title": "킬코만 PX 셰리 캐스크 숙성 (2023) | 더 위스키 배럴",
+      "snippet": "Kilchoman PX Sherry Cask Matured 2023 Release is a rich and characterful Islay single malt Scotch whisky from Kilchoman Distillery."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "캐스크",
+     "숙성"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "unsure",
+     "product_id": null,
+     "confidence": 0.9,
+     "reason": "alias에 브랜드(킬코만) 이름이 없어 기준 상품을 특정할 수 없음",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1239,
+      "attempts": 1,
+      "input_tokens": 1714,
+      "output_tokens": 57,
+      "thought_tokens": 0
+     }
+    }
+   }
+  ]
+ },
+ {
+  "key": "kiwon-signature",
+  "stratum": "official",
+  "product": {
+   "display_name": "Ki One Signature",
+   "brand": "Ki One",
+   "age_years": null,
+   "edition_name": "Signature"
+  },
+  "ko_brand_aliases": [],
+  "edition_brand_aliases": [],
+  "queries": [
+   "Ki One Signature",
+   "Ki One Signature 위스키"
+  ],
+  "learned_brand_for_query": null,
+  "endpoint_results": {
+   "blog": 20,
+   "webkr": 20,
+   "encyc": 13,
+   "cafearticle": 15
+  },
+  "endpoint_total_hits": {
+   "blog": 491,
+   "webkr": 201509,
+   "encyc": 156,
+   "cafearticle": 5095
+  },
+  "naver_errors": [],
+  "anchors": [
+   {
+    "text": "시그니처",
+    "kind": "learned"
+   },
+   {
+    "text": "기원",
+    "kind": "learned"
+   }
+  ],
+  "candidate_total": 9,
+  "candidates": [
+   {
+    "alias": "기원 시그니처",
+    "normalized": "기원시그니처",
+    "anchor": "기원",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "Ki One Signature",
+      "url": "https://dailyshot.co/m/item/33163",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "기원 시그니처 전국 가격비교하고 구매 | 데일리샷에서 모든 위스키 가격 비교....",
+      "title": "기원 시그니처 전국 가격비교하고 구매 | 데일리샷에서 모든 위스키 가격 비교....",
+      "snippet": "논란과 별개로 기원 증류소 투어하면서 시음 경험이 굉장히 만족스러웠어서 구매했습니다. 동양의 다른 위스키들과 차별점이 분명한 위스키라고 생각하고요. 에어링을 해줄 수록 느껴지는 다양한 향, 특유의 한약재 느...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Ki One Signature",
+      "url": "https://kaja2002.co.kr/shop/shop/item.php?it_id=1773582047",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "기원 시그니처 CS 700ml 몰트위스키 가격 및 재고 안내 | 가나주류백화점",
+      "title": "기원 시그니처 CS 700ml 몰트위스키 가격 및 재고 안내 | 가나주류백화점",
+      "snippet": "*기원 시그니쳐 CS (현금가) \"한국 최초의 싱글몰트, 독특한 기후가 빚어낸 진하고 강렬한 스파이스\" -술에 대한 설명 기원 시그니처 CS는 한국 최초의 싱글몰트 위스키 증류소인 쓰리소사이어티스에서 선보이는 제품으로,...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Ki One Signature",
+      "url": "https://www.bottlebunker.co.kr/product?item_cd=1003007955",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "한국쓰리소사이어티 기원 시그니처 - 싱글몰트위스키",
+      "title": "한국쓰리소사이어티 기원 시그니처 - 싱글몰트위스키",
+      "snippet": "※ 양주 이미지는 이해를 돕기 위한 참고 이미지 입니다. 빈티지, 라벨은 실제 판매중인 상품과 다를 수 있습니다. ※ 지나친 음주는 뇌졸중, 기억력 손상이나 치매를 유발합니다. 임신 중 음주는 기형아 출생 위험을 높...."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "Ki One Signature",
+      "url": "https://cafe.naver.com/drinki/296",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "기원 시그니처",
+      "title": "기원 시그니처",
+      "snippet": "이름 : Ki one Signature 가격 : 188,000 종류 : 싱글몰트 위스키 용량 : 700ml 도수 : 53.3% 지역 : 대한민국 Tasting Note 향 : 허브, 후추, 꿀 맛 : 흑설탕, 후추, 허브, 풀, 꽃, 셰리 Finish : 부드러운, 중간 묵직 Note 전에..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Ki One Signature 위스키",
+      "url": "https://blog.naver.com/jupiter0311/224244360013",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "&quot;카발란을 이긴 한국 <b>위스키</b>?&quot; 기원 시그니처 포함 호랑이 독수리 유....",
+      "title": "\"카발란을 이긴 한국 위스키 ?\" 기원 시그니처 포함 호랑이 독수리 유....",
+      "snippet": "한국 최초의 싱글몰트 위스키 증류소 기원( Ki One )이에요. 카발란 솔리스트 라인을 비롯해 세계적인... 【 기원 시그니처 ( Signature ) — 수상작의 풍미를 그대로 】 도수 53.3%. 유러피안 셰리 & 와인 캐스크...."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Ki One Signature 위스키",
+      "url": "https://labas24.tistory.com/2330",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "싱글몰트 리뷰#880) 기원 시그니처 / <b>Ki One Signature</b>",
+      "title": "싱글몰트 리뷰#880) 기원 시그니처 / Ki One Signature",
+      "snippet": "Ki One Distillery 기원( Ki One ), 한국 최초의 싱글 몰트 위스키 증류소 Ki One Distillery 2010년대, 전직... com Ki One Signature 주종: Korean Single Malt Whisky 원료: Malted Barley 증류기: (Copper) Pot Still 원액: Ki One ..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Ki One Signature 위스키",
+      "url": "https://blog.naver.com/xile_88/224314105952",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "기원 시그니처",
+      "title": "기원 시그니처",
+      "snippet": "본인은 어떠한 위스키 를 점수로 평가할만큼의 전문가가 절대 아니기에 그저 마셔본 느낌을... Ki One Signature 후기 * 구매정보 : 바에서 샷으로 2만원이었나.. 데일리샷 가격은 바틀 18만원 근처 https://www.whiskybase...."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Ki One Signature 위스키",
+      "url": "https://blog.naver.com/about_hyundai/224270228325",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "[2026 <b>위스키</b> 트렌드] 팩트로 따져본 가성비 &amp; 입문용 <b>위스키</b> 추천 3선",
+      "title": "[2026 위스키 트렌드] 팩트로 따져본 가성비 & 입문용 위스키 추천 3선",
+      "snippet": "[요즘 위스키 트렌드] K- 위스키 / 기원 시그니처 ( Ki One Signature ) 스코틀랜드의 위스키 가 수십 년을 느긋하게 통 속에서 잘 수 있는 이유는 그곳의 날씨가 평온하기 때문입니다. 하지만 대한민국 최초의 싱글..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Ki One Signature 위스키",
+      "url": "https://kaja2002.co.kr/shop/bbs/board.php?bo_table=qa&wr_id=2411",
+      "fetched_at": "2026-10-13T11:21:51+00:00",
+      "title_raw": "기원 시그니처 CS — 한국에서 만든 프리미엄 싱글몰트 <b>위스키</b> &gt; 주류정보",
+      "title": "기원 시그니처 CS — 한국에서 만든 프리미엄 싱글몰트 위스키 > 주류정보",
+      "snippet": "기원 시그니처 CS - 한국을 대표하는 국산 싱글몰트 위스키 기원( KI ONE ) 위스키 는 이제 한국 위스키 를 이야기할 때 빼놓을 수 없는 이름입니다. 국내에서 만들어지는 국산 싱글몰트 위스키 , 한국 싱글몰트, 코리안 싱글몰...."
+     }
+    ],
+    "result_count": 9,
+    "age_years": null,
+    "edition_tokens": [
+     "시그니처"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "same",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품인 Ki One Signature와 alias '기원 시그니처'의 브랜드 및 에디션명이 일치합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1343,
+      "attempts": 1,
+      "input_tokens": 2114,
+      "output_tokens": 65,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "기원 시그니쳐",
+    "normalized": "기원시그니쳐",
+    "anchor": "기원",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "Ki One Signature",
+      "url": "https://kaja2002.co.kr/shop/shop/item.php?it_id=1773582047",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "기원 시그니처 CS 700ml 몰트위스키 가격 및 재고 안내 | 가나주류백화점",
+      "title": "기원 시그니처 CS 700ml 몰트위스키 가격 및 재고 안내 | 가나주류백화점",
+      "snippet": "*기원 시그니쳐 CS (현금가) \"한국 최초의 싱글몰트, 독특한 기후가 빚어낸 진하고 강렬한 스파이스\" -술에 대한 설명 기원 시그니처 CS는 한국 최초의 싱글몰트 위스키 증류소인 쓰리소사이어티스에서 선보이는 제품으로,...."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Ki One Signature 위스키",
+      "url": "https://blog.naver.com/bar_dancheong/224090498170",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "丹靑 아일랜드 / 일본 / 한국 <b>위스키</b> Irish / Japanese / Korean Whisky",
+      "title": "丹靑 아일랜드 / 일본 / 한국 위스키 Irish / Japanese / Korean Whisky",
+      "snippet": "0 기원 시그니쳐 Ki - one Signature ABV 53.3% 전세계가 인정한 국산 위스키 의 저력 15ml : 12.0 일본 Japan 산토리 AO Suntory AO ABV 43% 일본+미국+스코틀랜드+캐나다+아일랜드 15ml : 7.0..."
+     }
+    ],
+    "result_count": 2,
+    "age_years": null,
+    "edition_tokens": [
+     "시그니쳐"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "same",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품의 브랜드 'Ki One'과 에디션 'Signature'가 한글 표기 '기원 시그니쳐'와 정확히 일치합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1147,
+      "attempts": 1,
+      "input_tokens": 1858,
+      "output_tokens": 73,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "기원 한국",
+    "normalized": "기원한국",
+    "anchor": "기원",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "Ki One Signature",
+      "url": "https://kione.co.kr/collection-core-ko.php",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "코어 레인지 — 기원 한국 싱글몰트 위스키",
+      "title": "코어 레인지 — 기원 한국 싱글몰트 위스키",
+      "snippet": "KOREA · 호랑이 · SWEET & FRUITY · Sherry & Wine Casks 46% ABV · 700ml Non-chill Filtered Non-colored · DISCOVER TIGER ; AMERICA · 독수리 · BOLD & CLASSIC · New Oak & Bourbon Casks 43% ABV · 700ml Non-chill Filtered Non-colored · DISCOVER EAGLE ; SCOTLAND · 유니콘 · SMO...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Ki One Signature 위스키",
+      "url": "https://kione.co.kr/signature-ko.php",
+      "fetched_at": "2026-10-13T11:21:51+00:00",
+      "title_raw": "코어 레인지 — 기원 한국 싱글몰트 <b>위스키</b>",
+      "title": "코어 레인지 — 기원 한국 싱글몰트 위스키",
+      "snippet": "KI ONE 시그니처 Rich & Complex Cask Strength ABV 700ml VOLUME European Casks CASK TYPE DISCOVER THE FLAVOR"
+     }
+    ],
+    "result_count": 2,
+    "age_years": null,
+    "edition_tokens": [
+     "한국"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "alias '기원 한국'은 기준 상품 'Ki One Signature'의 에디션명이나 정식 명칭과 일치하지 않는 다른 상품(기원 호랑이/코어 레인지)을 가리킵니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1359,
+      "attempts": 1,
+      "input_tokens": 1778,
+      "output_tokens": 87,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "기원 위 스키",
+    "normalized": "기원위스키",
+    "anchor": "기원",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "Ki One Signature 위스키",
+      "url": "https://cafe.naver.com/whiskycognac/837593",
+      "fetched_at": "2026-10-13T11:21:51+00:00",
+      "title_raw": "전 세계 <b>위스키</b> 거장 한국에 온다&quot;... 기원 <b>위 스키</b> '2027 세계 <b>위스 키</b> 포럼' ....",
+      "title": "전 세계 위스키 거장 한국에 온다\"... 기원 위 스키 '2027 세계 위스 키 포럼' ....",
+      "snippet": "여기에 '기원 유니콘( KI ONE UNICORN)'이 IWSC 에서 최고상인 '베스트 월드와이드 위스키 '를 수상하 며 '기원 시그니처( KI ONE SIGNATURE )'가 SFWS C에서 최고상인 '베스트 오브 클래스(Best of Clas s)'를 수상하며 품질을..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "위",
+     "스키"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "unsure",
+     "product_id": null,
+     "confidence": 0.9,
+     "reason": "alias '기원 위 스키'는 브랜드명과 일반명사 조합일 뿐 구체적인 시그니처 에디션을 특정하지 못합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1065,
+      "attempts": 1,
+      "input_tokens": 1696,
+      "output_tokens": 71,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "기원 위스키 기사",
+    "normalized": "기원위스키기사",
+    "anchor": "기원",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "Ki One Signature",
+      "url": "https://cafe.naver.com/whiskycognac/692819",
+      "fetched_at": "2026-10-13T11:21:50+00:00",
+      "title_raw": "Whisky Magazine에 실린 기원 위스키 기사",
+      "title": "Whisky Magazine에 실린 기원 위스키 기사",
+      "snippet": "(번역기로 한 것임을 참고해서 봐주세요) Ki One Distillery를 만나보세요: 한국의 선구적 몰트 개척자 극한의 미기후, 특수 몰트, 스코틀랜드, 미국 및 본국의 증류 전통을 활용하여 Ki One Distillery는 이미 감정가들의..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": null,
+    "edition_tokens": [
+     "기사"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "unsure",
+     "product_id": null,
+     "confidence": 0.9,
+     "reason": "alias에 '기원 위스키 기사'라는 문장 조각이 포함되어 있어 상품명이 아닌 일반 기사 제목으로 읽히므로 메뉴 표기로 적합하지 않습니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1359,
+      "attempts": 1,
+      "input_tokens": 1668,
+      "output_tokens": 76,
+      "thought_tokens": 0
+     }
+    }
+   }
+  ]
+ },
+ {
+  "key": "tomatin-12",
+  "stratum": "official",
+  "product": {
+   "display_name": "Tomatin 12",
+   "brand": "Tomatin",
+   "age_years": 12,
+   "edition_name": null
+  },
+  "ko_brand_aliases": [],
+  "edition_brand_aliases": [],
+  "queries": [
+   "Tomatin 12",
+   "Tomatin 12 위스키",
+   "토마틴 12년"
+  ],
+  "learned_brand_for_query": "토마틴",
+  "endpoint_results": {
+   "blog": 30,
+   "webkr": 30,
+   "encyc": 12,
+   "cafearticle": 30
+  },
+  "endpoint_total_hits": {
+   "blog": 2004,
+   "webkr": 56528,
+   "encyc": 249,
+   "cafearticle": 754
+  },
+  "naver_errors": [],
+  "anchors": [
+   {
+    "text": "토마틴",
+    "kind": "learned"
+   }
+  ],
+  "candidate_total": 31,
+  "candidates": [
+   {
+    "alias": "토마틴 12 년",
+    "normalized": "토마틴12",
+    "anchor": "토마틴",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "Tomatin 12",
+      "url": "https://cafe.naver.com/wisewhisky/163367",
+      "fetched_at": "2026-10-13T11:22:13+00:00",
+      "title_raw": "대형마트) 토마틴 <b>12</b>년(정품 캐런 세트)",
+      "title": "대형마트) 토마틴 12 년(정품 캐런 세트)",
+      "snippet": "■ 제품명 : 토마틴 12 년( TOMATIN 12 YO) ■ 구매처 : 홈플러스 연수점 ■ 구입 시기 : 24.06.20 ■ 구입 가격 : 84000 ■ 제품 설명 : 몇달간 눈여겨본 캐런세트 세일하길래 충동적으로 집어왔습니다 토마틴 레거시, CS모두..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "Tomatin 12",
+      "url": "https://cafe.naver.com/whiskycognac/945836",
+      "fetched_at": "2026-10-13T11:22:13+00:00",
+      "title_raw": "더 탈리스만 포르투기스 리저브 9년 (The Talisman Portuguese Reserva 9 Years Old Limited....",
+      "title": "더 탈리스만 포르투기스 리저브 9년 (The Talisman Portuguese Reserva 9 Years Old Limited....",
+      "snippet": "싱글 몰트 라인업 Tomatin 토마틴 12 년 ( Tomatin 12 Y) 버번 캐스크와 셰리 캐스크 원액을 블렌딩하여 과실향, 꿀, 부드러운 스파이스가 균형을 이루는 입문용 대표작. 토마틴 15년 ( Tomatin 15Y) 아메리칸 오크 캐스크 위주로..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "Tomatin 12 위스키",
+      "url": "https://cafe.naver.com/whiskylove9999/93730",
+      "fetched_at": "2026-10-13T11:22:14+00:00",
+      "title_raw": "2023년 처음 마셔본 <b>위스키</b> 10종 정리",
+      "title": "2023년 처음 마셔본 위스키 10종 정리",
+      "snippet": "로 앤 코 (✩✩ Roe & Co, 45도, 700ml 3881엔) 아일랜드의 블렌디드 위스키 . 나쁘지 않으나 역시 블렌디드 보다는 싱글몰트가 내 취향임. 6. 토마틴 12 년 (✩✩ Tomatin 12 Bourbon & Sherry Casks, 43도, 700ml, 3962엔)..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "토마틴 12년",
+      "url": "https://dailyshot.co/m/item/4320",
+      "fetched_at": "2026-10-13T11:27:47+00:00",
+      "title_raw": "<b>토마틴 12년</b> 전국 가격비교하고 구매 | 데일리샷에서 모든 위스키 가격 비교하....",
+      "title": "토마틴 12년 전국 가격비교하고 구매 | 데일리샷에서 모든 위스키 가격 비교하....",
+      "snippet": "토마틴 12년 내 주변에서 편하게 배송 받는 방법, 데일리샷 전국 주류 스마트오더 서비스 | 싱글몰트 위스키, 700ml, 43%, 스코틀랜드, 하이랜드, 있음,"
+     },
+     {
+      "endpoint": "webkr",
+      "query": "토마틴 12년",
+      "url": "https://www.theraremalt.com/ko/products/tomatin-12-year-old-bourbon-sherry-casks",
+      "fetched_at": "2026-10-13T11:27:47+00:00",
+      "title_raw": "<b>토마틴 12년</b> 버번 &amp; 셰리 캐스크 위스키 | The Rare Malt",
+      "title": "토마틴 12년 버번 & 셰리 캐스크 위스키 | The Rare Malt",
+      "snippet": "HK$430 · 재고 있음 · 스코틀랜드 하이랜드의 토마틴 12년 위스키, 700ml."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "토마틴 12년",
+      "url": "https://luvwhisky.netlify.app/tomatin-12-years",
+      "fetched_at": "2026-10-13T11:27:47+00:00",
+      "title_raw": "<b>토마틴 12년</b> | Luv Whisky",
+      "title": "토마틴 12년 | Luv Whisky",
+      "snippet": "버번과 쉐리 캐스크에서 전통적인 방식으로 숙성한 토마틴 12년 은 클래식하게 부드러운 위스키이다. 야생 헤더, 소나무, 삼나무의 향은 곧 달콤해지며 사과, 배, 망고와 함께 크림 캐러멜의 향을 드러낸다."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "토마틴 12년",
+      "url": "http://www.kajawine.kr/shop/item.php?it_id=1772726260",
+      "fetched_at": "2026-10-13T11:27:47+00:00",
+      "title_raw": "<b>토마틴 12년</b> &gt; 싱글몰트위스키 | 와인쇼핑몰, 양주쇼핑몰 및 추천정보",
+      "title": "토마틴 12년 > 싱글몰트위스키 | 와인쇼핑몰, 양주쇼핑몰 및 추천정보",
+      "snippet": "토마틴 12년 부드럽고 실키한 맛의 싱글몰트 위스키. 토마틴12년 은 버번, 스페인쉐리 캐스트에서 숙성되어 잘 익은 사과의 향과 달콤한 배의 풍미와 견과류의 피니시를 자극하는 부드럽고 실키한 맛을 느낄 수 있습니다."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "토마틴 12년",
+      "url": "https://dailyshot.co/m/item/13903",
+      "fetched_at": "2026-10-13T11:27:47+00:00",
+      "title_raw": "<b>토마틴 12년</b> 전용잔 패키지 전국 가격비교하고 구매 | 데일리샷에서 모든 위스....",
+      "title": "토마틴 12년 전용잔 패키지 전국 가격비교하고 구매 | 데일리샷에서 모든 위스....",
+      "snippet": "토마틴 12년 전용잔 패키지 내 주변에서 편하게 배송 받는 방법, 데일리샷 전국 주류 스마트오더 서비스 | 싱글몰트 위스키, 700ml, 43%, 스코틀랜드, 하이랜드, 있음, 토마틴 12년 1병 토마틴 전용잔 1개(독일산) 종이 코스...."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "토마틴 12년",
+      "url": "https://thecentralwhisky.com/ko/products/tomatin-12-year-old-single-malt-scotch-whisky",
+      "fetched_at": "2026-10-13T11:27:47+00:00",
+      "title_raw": "<b>토마틴 12년</b> 싱글 몰트 스카치 위스키",
+      "title": "토마틴 12년 싱글 몰트 스카치 위스키",
+      "snippet": "위치 : 센트럴 웰링턴 스트리트 98번지 제이드 센터 13층 [ 구글 지도 ] 웰링턴 스트리트와 코크란 스트리트의 교차로, 영업시간 : 월-토: 11:00 - 20:00 일/공휴일: 11:00-18:00, 문의하기 : 연락처: 852-6826-4806 [ 왓츠앱 ] 이메일: **@...."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "토마틴 12년",
+      "url": "https://cafe.naver.com/wisewhisky/180469",
+      "fetched_at": "2026-10-13T11:27:48+00:00",
+      "title_raw": "육퇴후 혼술(<b>토마틴 12년</b> 과 숙성회)",
+      "title": "육퇴후 혼술( 토마틴 12년 과 숙성회)",
+      "snippet": "오늘은 육퇴 후 혼술 합니다. 토마틴12년 과 모듬숙성회 모두 즐거운 토요일밤 보내시길 바랍니다"
+     }
+    ],
+    "result_count": 11,
+    "age_years": 12,
+    "edition_tokens": [],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "same",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "토마틴 12년은 기준 상품 Tomatin 12와 브랜드, 연수, 정규품 여부가 모두 일치합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1361,
+      "attempts": 1,
+      "input_tokens": 2145,
+      "output_tokens": 69,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "토마틴 18년",
+    "normalized": "토마틴18",
+    "anchor": "토마틴",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Tomatin 12",
+      "url": "https://blog.naver.com/three_oz/223121615803",
+      "fetched_at": "2026-10-13T11:22:12+00:00",
+      "title_raw": "[싱글몰트 리뷰] 위스키 테이스팅 in 타이베이 더몰트 part.2",
+      "title": "[싱글몰트 리뷰] 위스키 테이스팅 in 타이베이 더몰트 part.2",
+      "snippet": "체리) - 12 년 엔트리 체급이라 생각되지 않는 밸런스와 깊이감 토마틴 18년 / Tomatin 18y ABV : 43% Cask Type : First Fill Sherry Cask Finish - 항 : 달콤, 버터리함, 화사함(꽃), 고소함(견과류) - 달콤한 향..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Tomatin 12",
+      "url": "https://blog.naver.com/officewalker/223474846560",
+      "fetched_at": "2026-10-13T11:22:12+00:00",
+      "title_raw": "[신촌] Day 1, 글렌모렌지 18년, 토마틴 18년 간단시음기",
+      "title": "[신촌] Day 1, 글렌모렌지 18년, 토마틴 18년 간단시음기",
+      "snippet": "토마틴( Tomatin ), 이걸 어떻게 하지? 토마틴 지난 번에도 똑같이 12 년과 18년을 여기서 마셔봤습니다. 그 때 정말 맛있게 먹어서 12 년을 한 병 구입해서 집에서 조금씩 마셔보고 있는데 집에서 마시면서 좀..."
+     }
+    ],
+    "result_count": 2,
+    "age_years": 18,
+    "edition_tokens": [],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.99,
+     "reason": "기준 상품은 토마틴 12년인데 별칭이 '토마틴 18년'으로 연수가 다름",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1378,
+      "attempts": 1,
+      "input_tokens": 1841,
+      "output_tokens": 67,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "토마틴 레거시",
+    "normalized": "토마틴레거시",
+    "anchor": "토마틴",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "Tomatin 12",
+      "url": "https://cafe.naver.com/wisewhisky/163367",
+      "fetched_at": "2026-10-13T11:22:13+00:00",
+      "title_raw": "대형마트) 토마틴 <b>12</b>년(정품 캐런 세트)",
+      "title": "대형마트) 토마틴 12 년(정품 캐런 세트)",
+      "snippet": "■ 제품명 : 토마틴 12 년( TOMATIN 12 YO) ■ 구매처 : 홈플러스 연수점 ■ 구입 시기 : 24.06.20 ■ 구입 가격 : 84000 ■ 제품 설명 : 몇달간 눈여겨본 캐런세트 세일하길래 충동적으로 집어왔습니다 토마틴 레거시, CS모두..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Tomatin 12 위스키",
+      "url": "https://ckdals331.tistory.com/176",
+      "fetched_at": "2026-10-13T11:22:13+00:00",
+      "title_raw": "whisky <b>Tomatin</b> (<b>위스키</b> 토마틴) 역사,종류,테이스팅 이야기.",
+      "title": "whisky Tomatin ( 위스키 토마틴) 역사,종류,테이스팅 이야기.",
+      "snippet": "whisky Tomatin ( 위스키 토마틴) 역사,종류,테이스팅 이야기. 토마틴 토마틴이란 게일어로 ' 노간주나무... 합하여 12 기의 포트 스틸로 몰트 위스키 를 생산하는 스코틀랜드 최대의 증류소이다. 1. 토마틴 레거시..."
+     }
+    ],
+    "result_count": 2,
+    "age_years": null,
+    "edition_tokens": [
+     "레거시"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 토마틴 12년이지만, alias는 토마틴 레거시로 에디션(제품)이 다르다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1236,
+      "attempts": 1,
+      "input_tokens": 1837,
+      "output_tokens": 69,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "토마틴 12년 내 주변",
+    "normalized": "토마틴12내주변",
+    "anchor": "토마틴",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "토마틴 12년",
+      "url": "https://dailyshot.co/m/item/4320",
+      "fetched_at": "2026-10-13T11:27:47+00:00",
+      "title_raw": "<b>토마틴 12년</b> 전국 가격비교하고 구매 | 데일리샷에서 모든 위스키 가격 비교하....",
+      "title": "토마틴 12년 전국 가격비교하고 구매 | 데일리샷에서 모든 위스키 가격 비교하....",
+      "snippet": "토마틴 12년 내 주변에서 편하게 배송 받는 방법, 데일리샷 전국 주류 스마트오더 서비스 | 싱글몰트 위스키, 700ml, 43%, 스코틀랜드, 하이랜드, 있음,"
+     }
+    ],
+    "result_count": 1,
+    "age_years": 12,
+    "edition_tokens": [
+     "내",
+     "주변"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "unsure",
+     "product_id": null,
+     "confidence": 0.8,
+     "reason": "alias에 '내 주변'이라는 상품명 외의 단어가 포함되어 있어 메뉴 표기로 사용하기 부적절합니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1389,
+      "attempts": 1,
+      "input_tokens": 1674,
+      "output_tokens": 64,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "토마틴 12년 부드럽고 실키한 맛의",
+    "normalized": "토마틴12부드럽고실키한맛의",
+    "anchor": "토마틴",
+    "anchor_kind": "learned",
+    "evidence": [
+     {
+      "endpoint": "webkr",
+      "query": "토마틴 12년",
+      "url": "http://www.kajawine.kr/shop/item.php?it_id=1772726260",
+      "fetched_at": "2026-10-13T11:27:47+00:00",
+      "title_raw": "<b>토마틴 12년</b> &gt; 싱글몰트위스키 | 와인쇼핑몰, 양주쇼핑몰 및 추천정보",
+      "title": "토마틴 12년 > 싱글몰트위스키 | 와인쇼핑몰, 양주쇼핑몰 및 추천정보",
+      "snippet": "토마틴 12년 부드럽고 실키한 맛의 싱글몰트 위스키. 토마틴12년 은 버번, 스페인쉐리 캐스트에서 숙성되어 잘 익은 사과의 향과 달콤한 배의 풍미와 견과류의 피니시를 자극하는 부드럽고 실키한 맛을 느낄 수 있습니다."
+     }
+    ],
+    "result_count": 1,
+    "age_years": 12,
+    "edition_tokens": [
+     "부드럽고",
+     "실키한",
+     "맛의"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "unsure",
+     "product_id": null,
+     "confidence": 0.8,
+     "reason": "alias에 '부드럽고 실키한 맛의'라는 상품명이 아닌 수식어와 문장 조각이 섞여 있어 메뉴 표기로 적합하지 않습니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1299,
+      "attempts": 1,
+      "input_tokens": 1727,
+      "output_tokens": 76,
+      "thought_tokens": 0
+     }
+    }
+   }
+  ]
+ },
+ {
+  "key": "wild-turkey-rye",
+  "stratum": "official",
+  "product": {
+   "display_name": "Wild Turkey Rye",
+   "brand": "wild_turkey",
+   "age_years": null,
+   "edition_name": "Rye"
+  },
+  "ko_brand_aliases": [
+   "와일드 터키",
+   "와일드터키"
+  ],
+  "edition_brand_aliases": [],
+  "queries": [
+   "Wild Turkey Rye",
+   "Wild Turkey Rye 위스키"
+  ],
+  "learned_brand_for_query": null,
+  "endpoint_results": {
+   "blog": 20,
+   "webkr": 20,
+   "encyc": 12,
+   "cafearticle": 20
+  },
+  "endpoint_total_hits": {
+   "blog": 1418,
+   "webkr": 25988,
+   "encyc": 22,
+   "cafearticle": 341
+  },
+  "naver_errors": [],
+  "anchors": [
+   {
+    "text": "와일드 터키",
+    "kind": "brand"
+   },
+   {
+    "text": "와일드터키",
+    "kind": "brand"
+   }
+  ],
+  "candidate_total": 9,
+  "candidates": [
+   {
+    "alias": "와일드터키 101",
+    "normalized": "와일드터키101",
+    "anchor": "와일드 터키",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Wild Turkey Rye",
+      "url": "https://blog.naver.com/youarejazz/222231570831",
+      "fetched_at": "2026-10-13T11:22:34+00:00",
+      "title_raw": "You're Jazz.(유어재즈) 메뉴판",
+      "title": "You're Jazz.(유어재즈) 메뉴판",
+      "snippet": "버번 & 라이위스키 Bourbon & Rye Whisky 잭다니엘 (Jack Daniel) 샷(30ml) 9.0 더블샷(60ml) 17.... 0 와일드터키 101 ( Wild Turkey 101) 샷(30ml) 9.0 더블샷(60ml) 17.0 바틀 180.0 잭다니엘..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "Wild Turkey Rye",
+      "url": "https://cafe.naver.com/whiskycognac/747319",
+      "fetched_at": "2026-10-13T11:22:35+00:00",
+      "title_raw": "[위린백과] 와일드 터키(<b>Wild Turkey</b>), 칠면조 사냥을 나간다!!",
+      "title": "[위린백과] 와일드 터키( Wild Turkey ), 칠면조 사냥을 나간다!!",
+      "snippet": "와일드 터키 101 라이 ( Wild Turkey 101 Rye ) 호밀( Rye )을 주원료로 하여 만들어진 위스키로, 특유의 스파이시함과 깔끔함이 특징입니다. 주로 칵테일 제조에 활용됩니다. Nosing: 호밀 특유의 스파이시함과 함께 깔끔한..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "Wild Turkey Rye",
+      "url": "https://cafe.naver.com/whisamo/44",
+      "fetched_at": "2026-10-13T11:22:35+00:00",
+      "title_raw": "라이 위스키에 대해",
+      "title": "라이 위스키에 대해",
+      "snippet": "- 와일드 터키 101 라이 ( Wild Turkey 101 Rye ): 입문용 라이의 정석. 높은 도수(50.5도)에서 오는 강렬한 타격감과 풍부한 호밀 향이 일품입니다. - 불렛 라이 (Bulleit Rye ): 호밀 함량이 95%로 매우 높아, 라이 특유의 풀 향과..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "Wild Turkey Rye",
+      "url": "https://cafe.naver.com/whiskycognac/73146",
+      "fetched_at": "2026-10-13T11:22:35+00:00",
+      "title_raw": "와일드 터키 101 <b>Wild Turkey</b> 101 Bourbon &amp; 와일드 터키 라이 <b>Wild Turkey</b> 101 <b>Rye</b>",
+      "title": "와일드 터키 101 Wild Turkey 101 Bourbon & 와일드 터키 라이 Wild Turkey 101 Rye",
+      "snippet": "이름 : 와일드 터키 라이 Wild Turkey 101 Rye 생산자 또는 병입자 : 와일드 터키 증류소 (캄파리 그룹) 타입 : 스트레이트 라이 위스키 숙성 년수 : non-age statement 용량 : 700ml 알콜 도수 : 40.5% 매쉬빌 : 51% Rye , 37..."
+     },
+     {
+      "endpoint": "webkr",
+      "query": "Wild Turkey Rye 위스키",
+      "url": "https://soolhanjan.com/alcohol/6069/%EC%99%80%EC%9D%BC%EB%93%9C-%ED%84%B0%ED%82%A4-101-%EB%9D%BC%EC%9D%B4",
+      "fetched_at": "2026-10-13T11:22:36+00:00",
+      "title_raw": "와일드 터키 101 라이 700ml 최저가 비교 및 정보 - <b>Wild turkey</b> 101 <b>rye</b> 가격 정보 | 술....",
+      "title": "와일드 터키 101 라이 700ml 최저가 비교 및 정보 - Wild turkey 101 rye 가격 정보 | 술....",
+      "snippet": "와일드 터키 101 라이( Wild turkey 101 rye ) 700ml 최저가 얼마일까요? WILD TURKEY DISTILLING COMPANY 라이 아메리칸 위스키 와일드 터키 101 라이의 현재 술한잔에 등록된 3곳의 판매처 정보를 바탕으로 최저가 59,000원부터 최고가 63,000원...."
+     }
+    ],
+    "result_count": 5,
+    "age_years": null,
+    "edition_tokens": [
+     "와일드터키",
+     "101"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "ambiguous",
+     "matcher": "S1+S2b+S3",
+     "status": "ambiguous",
+     "input_among_candidates": false,
+     "products": [
+      {
+       "key": "wild-turkey-101-8",
+       "display_name": "Wild Turkey 101 8 Year",
+       "age_years": 8,
+       "edition_name": "101",
+       "evidence": {
+        "brandMatch": "와일드터키",
+        "editionMatch": [
+         "101"
+        ],
+        "brandName": "와일드터키 101"
+       }
+      },
+      {
+       "key": "new:wild-turkey-101-rye",
+       "display_name": "Wild Turkey 101 Rye",
+       "age_years": null,
+       "edition_name": "101 Rye",
+       "evidence": {
+        "brandMatch": "와일드터키",
+        "editionMatch": [
+         "101"
+        ],
+        "brandName": "와일드터키 101"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 와일드 터키 라이(Wild Turkey Rye)이나, alias '와일드터키 101'은 버번 제품인 와일드 터키 101을 가리키므로 서로 다른 상품이다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1604,
+      "attempts": 1,
+      "input_tokens": 2158,
+      "output_tokens": 90,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "와일드 터키 레어브리드",
+    "normalized": "와일드터키레어브리드",
+    "anchor": "와일드 터키",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Wild Turkey Rye",
+      "url": "https://irenne.tistory.com/457",
+      "fetched_at": "2026-10-13T11:22:34+00:00",
+      "title_raw": "와일드 터키 레어브리드( <b>Wild Turkey</b> Rare Breed)",
+      "title": "와일드 터키 레어브리드( Wild Turkey Rare Breed)",
+      "snippet": "|| 와일드 터키 레어브리드 | 58.4% | 750ml || Wild Turkey Rare Breed | 116.8 Proof || Mashbill: 75% Corn, 13% Rye , 12% Malted Barley | Tasting Notes(공식 홈페이지) ⬆️Aroma : 봄꽃이 가득하고 검은 후추와..."
+     },
+     {
+      "endpoint": "cafearticle",
+      "query": "Wild Turkey Rye",
+      "url": "https://cafe.naver.com/whiskylove9999/67428",
+      "fetched_at": "2026-10-13T11:22:35+00:00",
+      "title_raw": "[위사평점]<b>Wild Turkey</b> Rare Breed / 와일드터키 레어브리드",
+      "title": "[위사평점] Wild Turkey Rare Breed / 와일드터키 레어브리드",
+      "snippet": "Wild Turkey Rare Breed Distillery Wild Turkey Bottler Wild Turkey Bottiling Type Official Vintage... 13% Rye , 12% Malted Barley Strength 58.4% Size 700 ml , 750ml MSRP $ 50 Nose Scents of caramel and..."
+     },
+     {
+      "endpoint": "blog",
+      "query": "Wild Turkey Rye 위스키",
+      "url": "https://blog.naver.com/wnwldnd1234/224249674409",
+      "fetched_at": "2026-10-13T11:22:35+00:00",
+      "title_raw": "와일드터키 레어브리드 라이 가격 도수 맛, 진짜 강한 라이 <b>위스키</b> ....",
+      "title": "와일드터키 레어브리드 라이 가격 도수 맛, 진짜 강한 라이 위스키 ....",
+      "snippet": "생산지 미국 켄터키주 로렌스 버그 ( Wild Turkey Distillery) 종류 켄터키 스트레이트 라이 위스키 (Kentucky Straight Rye ) 무엇으로 만들었나 (원료 / 매시빌) 이 위스키 는 3가지 곡물을 섞어서 만듭니다. ▶ 호밀(라이)..."
+     }
+    ],
+    "result_count": 3,
+    "age_years": null,
+    "edition_tokens": [
+     "레어브리드"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "other_product",
+     "matcher": "S1+S2b+S3",
+     "status": "exact_match",
+     "input_among_candidates": false,
+     "products": [
+      {
+       "key": "wild-turkey-rare-breed",
+       "display_name": "Wild Turkey Rare Breed",
+       "age_years": null,
+       "edition_name": "Rare Breed",
+       "evidence": {
+        "aliasExact": true,
+        "matchedAlias": "와일드터키레어브리드"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 와일드 터키 라이(Wild Turkey Rye)이나, alias는 와일드 터키 레어브리드로 에디션/제품명이 다름.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1402,
+      "attempts": 1,
+      "input_tokens": 1965,
+      "output_tokens": 75,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "와일드 터키 101 8년",
+    "normalized": "와일드터키1018",
+    "anchor": "와일드 터키",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Wild Turkey Rye 위스키",
+      "url": "https://blog.naver.com/alt_salt_sobi/223360786115",
+      "fetched_at": "2026-10-13T11:22:35+00:00",
+      "title_raw": "[위라읽] 와일드 터키 101 8년, <b>위스키</b> 라벨 읽어드립니다",
+      "title": "[위라읽] 와일드 터키 101 8년, 위스키 라벨 읽어드립니다",
+      "snippet": "and rye available, this bourbon has been aged for 8 years in classic no.4 char... 다음 시간에 또 다른 위스키 와 함께 찾아오겠습니다. 위라읽. We Like Whisky - 참고문헌 Bethany Whymark. “ Wild Turkey 101..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": 8,
+    "edition_tokens": [
+     "101"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "other_product",
+     "matcher": "S1+S2b+S3",
+     "status": "exact_match",
+     "input_among_candidates": false,
+     "products": [
+      {
+       "key": "wild-turkey-101-8",
+       "display_name": "Wild Turkey 101 8 Year",
+       "age_years": 8,
+       "edition_name": "101",
+       "evidence": {
+        "aliasExact": true,
+        "matchedAlias": "와일드터키1018"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 와일드 터키 라이(Wild Turkey Rye)이나, alias는 와일드 터키 101 8년으로 연수와 에디션 정보가 일치하지 않습니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1305,
+      "attempts": 1,
+      "input_tokens": 1699,
+      "output_tokens": 82,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "와일드 터키 13년 디스틸러스 리저브",
+    "normalized": "와일드터키13디스틸러스리저브",
+    "anchor": "와일드 터키",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "blog",
+      "query": "Wild Turkey Rye",
+      "url": "https://labas24.tistory.com/220",
+      "fetched_at": "2026-10-13T11:22:34+00:00",
+      "title_raw": "버번 리뷰#18) 와일드 터키 13년 디스틸러스 리저브 / <b>Wild Turkey</b> 13y Disti....",
+      "title": "버번 리뷰#18) 와일드 터키 13년 디스틸러스 리저브 / Wild Turkey 13y Disti....",
+      "snippet": "증류소는 켄터키주 로렌스버그 labas24.tistory.com 라이 리뷰#7) 러셀 리저브 싱글 배럴 라이 / Russell's Reserve Single Barrel Rye Wild Turkey Distillery 와일드 터키 증류소( Wild Turkey Distillery)..."
+     }
+    ],
+    "result_count": 1,
+    "age_years": 13,
+    "edition_tokens": [
+     "디스틸러스",
+     "리저브"
+    ],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "new",
+     "matcher": "S1+S2b+S3",
+     "status": "unmatched",
+     "input_among_candidates": false,
+     "products": []
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 논에이지 라이(Rye) 제품이나, 알리아스는 13년 숙성 제품이므로 연수가 달라 다른 상품입니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1531,
+      "attempts": 1,
+      "input_tokens": 1694,
+      "output_tokens": 71,
+      "thought_tokens": 0
+     }
+    }
+   },
+   {
+    "alias": "와일드 터키 8년",
+    "normalized": "와일드터키8",
+    "anchor": "와일드 터키",
+    "anchor_kind": "brand",
+    "evidence": [
+     {
+      "endpoint": "cafearticle",
+      "query": "Wild Turkey Rye 위스키",
+      "url": "https://cafe.naver.com/whisamo/13",
+      "fetched_at": "2026-10-13T11:22:36+00:00",
+      "title_raw": "지역별 <b>위스키</b> 입문 추천 리스트",
+      "title": "지역별 위스키 입문 추천 리스트",
+      "snippet": "스카치 위스키 (Scotch Whisky) 스카치 위스키 는 싱글 몰트와 블렌디드로 나뉘는데, 부드럽고 접근성이... 와일드 터키 8년 ( Wild Turkey 8 Year Old) 높은 라이( Rye ) 함량으로 스파이시함과 캐러멜 단맛의 밸런스가 좋음...."
+     }
+    ],
+    "result_count": 1,
+    "age_years": 8,
+    "edition_tokens": [],
+    "bottler_missing": false,
+    "matcher": {
+     "tag": "ambiguous",
+     "matcher": "S1+S2b+S3",
+     "status": "ambiguous",
+     "input_among_candidates": false,
+     "products": [
+      {
+       "key": "wild-turkey-101-8",
+       "display_name": "Wild Turkey 101 8 Year",
+       "age_years": 8,
+       "edition_name": "101",
+       "evidence": {
+        "brandMatch": "와일드터키",
+        "ageMatch": 8,
+        "confirmRecommended": true,
+        "brandName": "와일드 터키 8년"
+       }
+      }
+     ]
+    },
+    "llm": {
+     "verdict": "different",
+     "product_id": null,
+     "confidence": 0.95,
+     "reason": "기준 상품은 와일드 터키 라이(연수 없음)이나, alias는 와일드 터키 8년으로 연수가 달라 다른 상품입니다.",
+     "meta": {
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "low",
+      "prompt_version": "v1",
+      "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+      "latency_ms": 1215,
+      "attempts": 1,
+      "input_tokens": 1689,
+      "output_tokens": 72,
+      "thought_tokens": 0
+     }
+    }
+   }
+  ]
+ }
+]

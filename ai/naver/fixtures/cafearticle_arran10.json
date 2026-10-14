@@ -1,0 +1,12 @@
+{
+ "lastBuildDate": "Tue, 13 Oct 2026 10:00:00 +0900",
+ "total": 4,
+ "start": 1,
+ "display": 4,
+ "items": [
+  {"title": "아란<b>10</b>년 시음 후기", "link": "https://cafe.example/a1", "description": "오늘 마신 <b>아란 10년</b>은 버번 캐스크 위주. <b>Arran 10</b> Year Old", "cafename": "c", "cafeurl": "https://cafe.example"},
+  {"title": "[특가] 아란 10년 최저가 판매 &amp; 무료배송", "link": "https://cafe.example/a2", "description": "아란 10년 할인 이벤트", "cafename": "c", "cafeurl": "https://cafe.example"},
+  {"title": "아란 <b>10</b>주년 기념 에디션", "link": "https://cafe.example/a3", "description": "아란 10주년 기념 에디션을 소개합니다", "cafename": "c", "cafeurl": "https://cafe.example"},
+  {"title": "&lt;펌&gt; 위스키 이야기", "link": "https://cafe.example/a4", "description": "<b>Arran</b> 섬 여행기", "cafename": "c", "cafeurl": "https://cafe.example"}
+ ]
+}

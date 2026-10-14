@@ -1,0 +1,122 @@
+{
+ "run": {
+  "started_at": "2026-10-13T11:29:32+00:00",
+  "wall_s": 176.8,
+  "products": 10,
+  "smoke_seed": 20261014,
+  "display": 10,
+  "endpoints": [
+   "blog",
+   "webkr",
+   "encyc",
+   "cafearticle"
+  ],
+  "matcher": "S1+S2b+S3",
+  "judge": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f"
+  }
+ },
+ "endpoint_results": {
+  "blog": 198,
+  "webkr": 240,
+  "encyc": 60,
+  "cafearticle": 137
+ },
+ "endpoint_results_with_candidate": {
+  "blog": 36,
+  "webkr": 45,
+  "cafearticle": 27
+ },
+ "korean_candidates_per_product": {
+  "gm-bunnahabhain-10": {
+   "found": 31,
+   "kept": 5
+  },
+  "gm-bunnahabhain-heavily-peated-11": {
+   "found": 0,
+   "kept": 0
+  },
+  "signatory-caol-ila-10-100-proof": {
+   "found": 35,
+   "kept": 5
+  },
+  "signatory-linkwood-12-100-proof": {
+   "found": 42,
+   "kept": 5
+  },
+  "wm-dailuaine-15": {
+   "found": 0,
+   "kept": 0
+  },
+  "kilchoman-fino-sherry": {
+   "found": 6,
+   "kept": 5
+  },
+  "kilchoman-px-sherry": {
+   "found": 10,
+   "kept": 5
+  },
+  "kiwon-signature": {
+   "found": 9,
+   "kept": 5
+  },
+  "tomatin-12": {
+   "found": 31,
+   "kept": 5
+  },
+  "wild-turkey-rye": {
+   "found": 9,
+   "kept": 5
+  }
+ },
+ "matcher_tags": {
+  "new": 29,
+  "ambiguous": 9,
+  "other_product": 2
+ },
+ "llm_verdicts": {
+  "same": 9,
+  "different": 22,
+  "unsure": 9
+ },
+ "tag_x_verdict": {
+  "new / same": 8,
+  "new / different": 12,
+  "ambiguous / different": 8,
+  "new / unsure": 9,
+  "ambiguous / same": 1,
+  "other_product / different": 2
+ },
+ "disagreements": [],
+ "naver": {
+  "api_calls": 0,
+  "cache_hits": 96,
+  "retries": 0,
+  "errors": 0,
+  "latency": {
+   "n": 0,
+   "mean_ms": null,
+   "p50_ms": null,
+   "p95_ms": null,
+   "max_ms": null
+  }
+ },
+ "llm": {
+  "llm_calls": 40,
+  "retries": 0,
+  "parse_errors": 0,
+  "input_tokens": 75754,
+  "output_tokens": 3033,
+  "thought_tokens": 0,
+  "latency": {
+   "n": 40,
+   "mean_ms": 1312,
+   "p50_ms": 1291,
+   "p95_ms": 1604,
+   "max_ms": 1723
+  }
+ }
+}
