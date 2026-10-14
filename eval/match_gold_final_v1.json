@@ -53,10 +53,10 @@
   "아일라 싱글몰트 보모어21 셰리 / 행사": "독립병입인지 정규품인지 없음 → unknown",
   "믹터스 토스티드 배럴 피니쉬 / 행사": "Toasted Barrel Finish는 버번·라이·사워매시 등 여러 개 → unknown",
   "카발란 증류소 킹 카 위스키 올드보틀": "King Car Whisky(카발란 증류소 블렌드) 올드 보틀, 상품 특정 불가 → unknown",
-  "SANSIBAR 21y Batch4 (산시바) / SANSIBAR 21y": "Sansibar는 증류소명을 붙여 내는 독립병입사. 메뉴에 증류소 없음 → unknown",
-  "Eld Vatten 8y (엘드바튼)": "독립병입사, 증류소 없음 → unknown. 11y·14y는 괄호의 증류소로 새 상품",
+  "SANSIBAR 21y Batch4 (산시바) / SANSIBAR 21y": "Sansibar = 독일 독립병입사, 싱글 캐스크를 증류소(또는 Secret Orkney 같은 지역명)·빈티지로 냄(예: Secret Orkney 1999 21). 'Batch 4' 상품은 검색에 없음. 메뉴에 증류소 없음 → unknown (웹 검색 확인)",
+  "Eld Vatten 8y (엘드바튼)": "Eld Vatten = 스웨덴 독립병입사 Svenska Eldvatten(싱글 캐스크 위주). 8년만 최소 2개(Islay Kildalton 8 SE060, Invergordon 8), 괄호는 브랜드 한글명이라 증류소 없음 → unknown (웹 검색 확인). 11y·14y는 괄호의 증류소로 새 상품(Bruichladdich 2003 11 YO 실재 확인)",
   "시그나토리 블렌디드10": "증류소·상품명 없음 → unknown",
-  "독립병입 브랜드": "새 병입사 브랜드: The Nectar, The Maltman, Eld Vatten, 김과장(Kim Gwajang), Jack Wiebers, Aqua Vitae(아쿠아비타), Craft Bros, North Star, Sansibar. P17 IB_BOTTLERS 목록(12곳)에 없음 → M3 거부권 bottler_missing에 영향. 목록은 바꾸지 않음(보고만)",
+  "독립병입 브랜드": "새 병입사 브랜드: The Nectar, The Maltman, Svenska Eldvatten(메뉴 표기 Eld Vatten), 김과장(Kim Gwajang), Jack Wiebers, Aqua Vitae(아쿠아비타), Craft Bros, North Star, Sansibar. P17 IB_BOTTLERS 목록(12곳)에 없음 → M3 거부권 bottler_missing에 영향. 목록은 바꾸지 않음(보고만)",
   "아쿠아비타 쿨리22/23/24": "아쿠아비타를 쿨리(Cooley) 원액의 병입사로 봄",
   "김과장 #3 / #4": "김과장을 병입사로, 괄호를 증류소로 봄",
   "크래프트브로스 독수리 오형제 1호 / 3호": "크래프트브로스 시리즈로 봄. 원액 불명",
@@ -189,14 +189,14 @@
    "edition_name": "Eva Beer Cask"
   },
   "eld-vatten-bruichladdich-11": {
-   "display_name": "Eld Vatten Bruichladdich 11",
-   "brand": "Eld Vatten",
+   "display_name": "Svenska Eldvatten Bruichladdich 11",
+   "brand": "Svenska Eldvatten",
    "age_years": 11,
    "edition_name": "Bruichladdich"
   },
   "eld-vatten-ben-nevis-14": {
-   "display_name": "Eld Vatten Ben Nevis 14",
-   "brand": "Eld Vatten",
+   "display_name": "Svenska Eldvatten Ben Nevis 14",
+   "brand": "Svenska Eldvatten",
    "age_years": 14,
    "edition_name": "Ben Nevis"
   },

@@ -44,7 +44,7 @@
 
 - **카탈로그 연수 null: Knob Creek.** v1 규칙("공식 연수가 있고 바뀐 이력이 없으면 `age_years`")에 따라 `knob-creek`의 연수가 null이다(9년 표기가 2016년에 빠졌다가 2020년 무렵 복귀). 수이 `Knob Creek 9y (납 크릭)`은 S2(브랜드+연수)로 좁혀지지 않고, M3 `age_mismatch`(후보 연수 null도 불일치)가 LLM 후보를 버린다. `eval_5bars`에서는 이 줄의 `menu:수이` 별칭이 빠지므로 놓칠 가능성이 높다. 결과에서 "카탈로그 연수 null 때문"으로 따로 표시한다.
 - **같은 규칙의 불일치: Glenmorangie The Original.** 2024년에 12년으로 리뉴얼(바뀐 이력)됐는데 v1에 `age_years` 10이다.
-- **새 독립병입사가 병입사 목록에 없음.** The Nectar, The Maltman, Eld Vatten, 김과장, Jack Wiebers, Aqua Vitae, Craft Bros, North Star, Sansibar는 P17 `IB_BOTTLERS`(12곳)에 없어 `bottler_missing` 거부권이 적용되지 않는다. 메뉴에 병입사가 빠진 Douglas Laing 병입(Blair Athol Sangiovese, Tormore Tempranillo)은 반대로 이 거부권에 막힐 수 있다.
+- **새 독립병입사가 병입사 목록에 없음.** The Nectar, The Maltman, Svenska Eldvatten(메뉴 표기 Eld Vatten), 김과장, Jack Wiebers, Aqua Vitae, Craft Bros, North Star, Sansibar는 P17 `IB_BOTTLERS`(12곳)에 없어 `bottler_missing` 거부권이 적용되지 않는다. 메뉴에 병입사가 빠진 Douglas Laing 병입(Blair Athol Sangiovese, Tormore Tempranillo)은 반대로 이 거부권에 막힐 수 있다.
 
 ## 6. P47 이후 할 일
 

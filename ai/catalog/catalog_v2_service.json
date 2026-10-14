@@ -2782,13 +2782,13 @@
       ]
     },
     {
-      "id": "033e7a76-46af-588c-b1b3-4dcb07391e09",
-      "key": "eld_vatten",
-      "canonical_name": "Eld Vatten",
+      "id": "fc816798-559a-5578-b288-4e155767a473",
+      "key": "svenska_eldvatten",
+      "canonical_name": "Svenska Eldvatten",
       "aliases": [
         {
-          "id": "7bead32a-3a22-50b6-8adc-2e583d58234c",
-          "alias_text": "Eld Vatten",
+          "id": "de3aa839-77d6-5bd1-917f-fb718f9a29a0",
+          "alias_text": "Svenska Eldvatten",
           "language_code": "en",
           "sources": [
             "standard"
@@ -26311,10 +26311,10 @@
     {
       "id": "c3887554-4805-5ced-a9cb-89943590e116",
       "key": "eld-vatten-bruichladdich-11",
-      "brand_id": "033e7a76-46af-588c-b1b3-4dcb07391e09",
-      "brand_key": "eld_vatten",
+      "brand_id": "fc816798-559a-5578-b288-4e155767a473",
+      "brand_key": "svenska_eldvatten",
       "category": "whisky",
-      "display_name": "Eld Vatten Bruichladdich 11",
+      "display_name": "Svenska Eldvatten Bruichladdich 11",
       "age_years": 11,
       "edition_name": "Bruichladdich",
       "abv": null,
@@ -26324,8 +26324,8 @@
       "first_seen": "수이",
       "aliases": [
         {
-          "id": "d3e29414-80a0-54d9-b1b4-3e2a3f7c9602",
-          "alias_text": "Eld Vatten Bruichladdich 11",
+          "id": "d32f921c-692a-5319-a994-b58d02bd9c5f",
+          "alias_text": "Svenska Eldvatten Bruichladdich 11",
           "language_code": "en",
           "sources": [
             "standard"
@@ -26346,10 +26346,10 @@
     {
       "id": "60d6dc01-123c-59e2-9485-3e2510f53087",
       "key": "eld-vatten-ben-nevis-14",
-      "brand_id": "033e7a76-46af-588c-b1b3-4dcb07391e09",
-      "brand_key": "eld_vatten",
+      "brand_id": "fc816798-559a-5578-b288-4e155767a473",
+      "brand_key": "svenska_eldvatten",
       "category": "whisky",
-      "display_name": "Eld Vatten Ben Nevis 14",
+      "display_name": "Svenska Eldvatten Ben Nevis 14",
       "age_years": 14,
       "edition_name": "Ben Nevis",
       "abv": null,
@@ -26359,8 +26359,8 @@
       "first_seen": "수이",
       "aliases": [
         {
-          "id": "061a8bb2-94cb-56a8-a053-a35684ea34a4",
-          "alias_text": "Eld Vatten Ben Nevis 14",
+          "id": "e2d9be5a-6a35-588c-9424-0f8362f29228",
+          "alias_text": "Svenska Eldvatten Ben Nevis 14",
           "language_code": "en",
           "sources": [
             "standard"

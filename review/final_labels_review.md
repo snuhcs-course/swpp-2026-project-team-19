@@ -348,8 +348,8 @@
 | 11 | High Coast Maria PX Sherry | 30,000 | glass |  | new: High Coast Maria PX Sherry |  |
 | 12 | High Coast Eva Beer Cask | 26,000 | glass |  | new: High Coast Eva Beer Cask |  |
 | 13 | Eld Vatten 8y (엘드바튼) | 23,000 | glass |  | unknown | ⚠ |
-| 14 | Eld Vatten 11y (브룩라디) | 48,000 | glass |  | new: Eld Vatten Bruichladdich 11 |  |
-| 15 | Eld Vatten 14y (벤네비스) | 50,000 | glass |  | new: Eld Vatten Ben Nevis 14 |  |
+| 14 | Eld Vatten 11y (브룩라디) | 48,000 | glass |  | new: Svenska Eldvatten Bruichladdich 11 |  |
+| 15 | Eld Vatten 14y (벤네비스) | 50,000 | glass |  | new: Svenska Eldvatten Ben Nevis 14 |  |
 | 16 | 김과장 #2 (바베이도스 럼) | 40,000 | glass |  | non_whisky | ⚠ |
 | 17 | 김과장 #3 (하이랜드 파크) | 25,000 | glass |  | new: Kim Gwajang #3 Highland Park |  |
 | 18 | 김과장 #4 (클라이넬리쉬) | 29,000 | glass |  | new: Kim Gwajang #4 Clynelish |  |
@@ -414,8 +414,8 @@
 - **Signatory Speyside M Sherry**: 카탈로그 Signatory Speyside 14('M' 14 Small Batch 추정)와 같은지 못 정함(연수 없음) → unknown
 - **시그나토리 스페이사이드14M**: 카탈로그 Signatory Vintage Speyside 14('M' 14)로 연결
 - **다케츠루 싱글몰트**: 다케츠루는 퓨어 몰트(블렌디드 몰트). Nikka Taketsuru Pure Malt로 연결
-- **포로지스**: Four Roses Bourbon(옐로 라벨) 새 상품
-- **에반윌리암스**: Evan Williams Black Label 새 상품
+- **포로지스**: 에디션 없이 브랜드명만 있음. 브랜드명 그대로인 기본 상품 Four Roses Bourbon(옐로 라벨)이 있고, 같은 메뉴에 싱글베럴(12,000원)이 따로 있으며, 30ml 8,000원이 섹션 최저가급(와일드터키81·메이커스마크) → 기본 상품. Small Batch 가능성은 남음(같은 메뉴에 비교 상품 없음). 박진우 검수: 유지
+- **에반윌리암스**: 브랜드명만 있음. 기본 상품 Evan Williams Black Label(국내 유통 대부분), 30ml 8,000원이 섹션 최저가급 → 기본 상품. 같은 메뉴에 형제 상품이 없어 White Label(BIB)·1783 등은 메뉴로 배제 못 함. 박진우 검수: 유지
 - **1776 제임스 E.페퍼**: 카탈로그에 1776 Straight Rye와 1776 Straight Bourbon 둘 → unknown
 - **아란 셰리**: 이전 정답과 같이 Arran Bodega Sherry Cask (Sherry Cask = The Bodega)
 - **글렌드로낙18**: 이전 정답과 같이 카탈로그 유일한 18년(Allardice)
@@ -431,10 +431,10 @@
 - **아일라 싱글몰트 보모어21 셰리 / 행사**: 독립병입인지 정규품인지 없음 → unknown
 - **믹터스 토스티드 배럴 피니쉬 / 행사**: Toasted Barrel Finish는 버번·라이·사워매시 등 여러 개 → unknown
 - **카발란 증류소 킹 카 위스키 올드보틀**: King Car Whisky(카발란 증류소 블렌드) 올드 보틀, 상품 특정 불가 → unknown
-- **SANSIBAR 21y Batch4 (산시바) / SANSIBAR 21y**: Sansibar는 증류소명을 붙여 내는 독립병입사. 메뉴에 증류소 없음 → unknown
-- **Eld Vatten 8y (엘드바튼)**: 독립병입사, 증류소 없음 → unknown. 11y·14y는 괄호의 증류소로 새 상품
+- **SANSIBAR 21y Batch4 (산시바) / SANSIBAR 21y**: Sansibar = 독일 독립병입사, 싱글 캐스크를 증류소(또는 Secret Orkney 같은 지역명)·빈티지로 냄(예: Secret Orkney 1999 21). 'Batch 4' 상품은 검색에 없음. 메뉴에 증류소 없음 → unknown (웹 검색 확인)
+- **Eld Vatten 8y (엘드바튼)**: Eld Vatten = 스웨덴 독립병입사 Svenska Eldvatten(싱글 캐스크 위주). 8년만 최소 2개(Islay Kildalton 8 SE060, Invergordon 8), 괄호는 브랜드 한글명이라 증류소 없음 → unknown (웹 검색 확인). 11y·14y는 괄호의 증류소로 새 상품(Bruichladdich 2003 11 YO 실재 확인)
 - **시그나토리 블렌디드10**: 증류소·상품명 없음 → unknown
-- **독립병입 브랜드**: 새 병입사 브랜드: The Nectar, The Maltman, Eld Vatten, 김과장(Kim Gwajang), Jack Wiebers, Aqua Vitae(아쿠아비타), Craft Bros, North Star, Sansibar. P17 IB_BOTTLERS 목록(12곳)에 없음 → M3 거부권 bottler_missing에 영향. 목록은 바꾸지 않음(보고만)
+- **독립병입 브랜드**: 새 병입사 브랜드: The Nectar, The Maltman, Svenska Eldvatten(메뉴 표기 Eld Vatten), 김과장(Kim Gwajang), Jack Wiebers, Aqua Vitae(아쿠아비타), Craft Bros, North Star, Sansibar. P17 IB_BOTTLERS 목록(12곳)에 없음 → M3 거부권 bottler_missing에 영향. 목록은 바꾸지 않음(보고만)
 - **아쿠아비타 쿨리22/23/24**: 아쿠아비타를 쿨리(Cooley) 원액의 병입사로 봄
 - **김과장 #3 / #4**: 김과장을 병입사로, 괄호를 증류소로 봄
 - **크래프트브로스 독수리 오형제 1호 / 3호**: 크래프트브로스 시리즈로 봄. 원액 불명
