@@ -31,14 +31,14 @@ def temporary_login() -> TemporaryLoginResponse:
     if len(secret) < 32:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Temporary auth requires TEMP_AUTH_JWT_SECRET with at least 32 characters",
+            detail="임시 로그인 설정이 올바르지 않습니다. TEMP_AUTH_JWT_SECRET은 32자 이상이어야 합니다.",
         )
 
     user_type = os.getenv("TEMP_AUTH_USER_TYPE", "customer").lower()
     if user_type not in {"customer", "operator"}:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="TEMP_AUTH_USER_TYPE must be customer or operator",
+            detail="임시 로그인 설정이 올바르지 않습니다. TEMP_AUTH_USER_TYPE은 customer 또는 operator여야 합니다.",
         )
 
     now = datetime.now(timezone.utc)

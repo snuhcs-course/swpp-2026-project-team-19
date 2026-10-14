@@ -1,10 +1,10 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #13). Reviewed by Haeul Yang.
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
 
-from app.core.security import get_optional_user, require_operator
+from app.core.security import Principal, get_optional_user, require_operator, user_type_of
 from app.db.session import get_session
 from app.schemas.bar import BarListResponse
 from app.schemas.errors import error_responses
@@ -51,7 +51,7 @@ def read_bars(
     limit: Limit = 20,
     cursor: Cursor = None,
     session: Session = Depends(get_session),
-    _operator: dict[str, Any] = Depends(require_operator),
+    _operator: Principal = Depends(require_operator),
 ) -> BarListResponse:
     return list_bars(session, query=query, status=status, limit=limit, cursor=cursor)
 
@@ -85,7 +85,7 @@ def read_bar_menu_imports(
     limit: Limit = 20,
     cursor: Cursor = None,
     session: Session = Depends(get_session),
-    _operator: dict[str, Any] = Depends(require_operator),
+    _operator: Principal = Depends(require_operator),
 ) -> MenuImportListResponse:
     return list_menu_imports(session, bar_id, status=status, limit=limit, cursor=cursor)
 
@@ -110,7 +110,7 @@ def read_bar_menu_imports(
 def read_bar_menu(
     bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
     session: Session = Depends(get_session),
-    user: dict[str, Any] | None = Depends(get_optional_user),
+    user: Principal | None = Depends(get_optional_user),
 ) -> BarMenuResponse:
-    is_operator = user is not None and user.get("user_type") == "operator"
+    is_operator = user is not None and user_type_of(user) == "operator"
     return get_bar_menu(session, bar_id, include_inactive=is_operator)

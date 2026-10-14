@@ -1,5 +1,5 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #12). Reviewed by Haeul Yang.
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, Path, Request, Response, UploadFile
 from pydantic import WithJsonSchema
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.api.deps import get_image_storage, get_menu_extractor
-from app.core.security import require_operator
+from app.core.security import Principal, require_operator
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
 from app.models import ImportMode
 from app.schemas.errors import error_responses
@@ -74,7 +74,7 @@ def upload_menu_import(
     storage: ImageStorage = Depends(get_image_storage),
     extractor: MenuExtractor = Depends(get_menu_extractor),
     session_factory: SessionFactory = Depends(get_session_factory),
-    _operator: dict[str, Any] = Depends(require_operator),
+    _operator: Principal = Depends(require_operator),
 ) -> MenuImportAcceptedResponse:
     menu_import, created = create_menu_import(
         session,
@@ -133,7 +133,7 @@ def read_menu_import(
     menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
     session: Session = Depends(get_session),
     storage: ImageStorage = Depends(get_image_storage),
-    _operator: dict[str, Any] = Depends(require_operator),
+    _operator: Principal = Depends(require_operator),
 ) -> MenuImportStatusResponse:
     return get_menu_import_status(session, menu_import_id, storage, str(request.base_url))
 
@@ -192,6 +192,6 @@ def submit_menu_review(
     body: ReviewAndApplyRequest,
     menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
     session_factory: SessionFactory = Depends(get_serializable_session_factory),
-    _operator: dict[str, Any] = Depends(require_operator),
+    _operator: Principal = Depends(require_operator),
 ) -> ReviewAppliedResponse:
     return review_and_apply(session_factory, menu_import_id, body)
