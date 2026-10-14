@@ -11,7 +11,7 @@ from app.api.deps import get_image_storage, get_menu_extractor
 from app.core.security import Principal, require_operator
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
 from app.models import ImportMode
-from app.schemas.errors import error_responses
+from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.menu_import import MenuImportAcceptedResponse, MenuImportStatusResponse
 from app.schemas.menu_review import ReviewAndApplyRequest, ReviewAppliedResponse
 from app.services import menu_import_upload as upload
@@ -48,6 +48,7 @@ UploadedImage = Annotated[UploadFile, WithJsonSchema({"type": "string", "format"
     responses=error_responses(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
         (403, "`FORBIDDEN`: the caller is not an operator."),
+        AUTH_UNAVAILABLE,
         (404, "`BAR_NOT_FOUND`: no such bar, a malformed id, or an inactive bar."),
         (
             409,
@@ -125,6 +126,7 @@ def upload_menu_import(
     responses=error_responses(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
         (403, "`FORBIDDEN`: the caller is not an operator."),
+        AUTH_UNAVAILABLE,
         (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
     ),
 )
@@ -185,7 +187,11 @@ def read_menu_import(
             "`PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `NOT_NORMALIZABLE`, "
             "`CHANGE_WITHOUT_PRODUCT`.",
         ),
-        (503, "`TEMPORARY_WRITE_CONFLICT`: conflicted with concurrent writes three times; submit again."),
+        (
+            503,
+            "`TEMPORARY_WRITE_CONFLICT`: conflicted with concurrent writes three times; submit again. "
+            + AUTH_UNAVAILABLE_DESCRIPTION,
+        ),
     ),
 )
 def submit_menu_review(

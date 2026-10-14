@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.security import Principal, get_optional_user, require_operator, user_type_of
 from app.db.session import get_session
 from app.schemas.bar import BarListResponse
-from app.schemas.errors import error_responses
+from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
 from app.schemas.menu import BarMenuResponse
 from app.schemas.menu_import import MenuImportListResponse
 from app.services.bar_admin import BarStatusFilter, ImportStatusFilter, list_bars, list_menu_imports
@@ -18,6 +18,7 @@ router = APIRouter(prefix="/api/bars", tags=["bars"])
 _OPERATOR_ERRORS = (
     (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
     (403, "`FORBIDDEN`: the caller is not an operator."),
+    AUTH_UNAVAILABLE,
 )
 _PAGING = (
     "Pages use a cursor: pass the response's `nextCursor` as `cursor` to get the next page; "

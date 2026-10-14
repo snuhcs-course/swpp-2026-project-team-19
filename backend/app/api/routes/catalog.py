@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.security import Principal, require_operator
 from app.db.session import get_session
 from app.schemas.catalog import CatalogBrandsResponse, CatalogProductsResponse
-from app.schemas.errors import error_responses
+from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
 from app.services.catalog_search import search_brands, search_products
 
 router = APIRouter(prefix="/api/catalog", tags=["catalog"])
@@ -21,6 +21,7 @@ _MATCHING = (
 _COMMON_ERRORS = (
     (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
     (403, "`FORBIDDEN`: the caller is not an operator."),
+    AUTH_UNAVAILABLE,
     (
         422,
         "`VALIDATION_FAILED`: `query` `MISSING`, `BLANK`, `STRING_TOO_LONG` (over 100 characters) or "
