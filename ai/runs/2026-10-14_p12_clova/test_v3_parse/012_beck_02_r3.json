@@ -1,0 +1,132 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "e62c33be4b7fb80769b5f8e71628a480f31f5f0382b66ab8267a63aab0242127",
+  "started_at": "2026-10-14T05:35:37.414715+00:00",
+  "latency_ms": 8907,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 3150,
+  "output_tokens": 577,
+  "thought_tokens": 1714,
+  "total_tokens": 5441,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Arran Quarter Cask",
+        "price_krw": 24000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Arran Sherry cask",
+        "price_krw": 26000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Ardbeg Uigeadail",
+        "price_krw": 28000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfarclas 105",
+        "price_krw": 28000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Abelour A'bunadh",
+        "price_krw": 30000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Lagavulin 12yo 2018",
+        "price_krw": 40000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Laphroaig 10yo Cask Strength",
+        "price_krw": 55000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Kavalan Solist",
+        "price_krw": 55000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Octomore 13.1",
+        "price_krw": 70000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan Classic Cut 2020",
+        "price_krw": 70000,
+        "pour_ml": 30,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Arran Quarter Cask\",\n      \"price_krw\": 24000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Arran Sherry cask\",\n      \"price_krw\": 26000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Uigeadail\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenfarclas 105\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Abelour A'bunadh\",\n      \"price_krw\": 30000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Lagavulin 12yo 2018\",\n      \"price_krw\": 40000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo Cask Strength\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Kavalan Solist\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Octomore 13.1\",\n      \"price_krw\": 70000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Macallan Classic Cut 2020\",\n      \"price_krw\": 70000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:35:46Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Arran Quarter Cask\",\n      \"price_krw\": 24000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Arran Sherry cask\",\n      \"price_krw\": 26000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Uigeadail\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenfarclas 105\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Abelour A'bunadh\",\n      \"price_krw\": 30000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Lagavulin 12yo 2018\",\n      \"price_krw\": 40000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo Cask Strength\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Kavalan Solist\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Octomore 13.1\",\n      \"price_krw\": 70000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Macallan Classic Cut 2020\",\n      \"price_krw\": 70000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Arran Quarter Cask\",\n      \"price_krw\": 24000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Arran Sherry cask\",\n      \"price_krw\": 26000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Uigeadail\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenfarclas 105\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Abelour A'bunadh\",\n      \"price_krw\": 30000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Lagavulin 12yo 2018\",\n      \"price_krw\": 40000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo Cask Strength\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Kavalan Solist\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Octomore 13.1\",\n      \"price_krw\": 70000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Macallan Classic Cut 2020\",\n      \"price_krw\": 70000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:35:46Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 3150
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 3150,
+      "total_output_tokens": 577,
+      "total_thought_tokens": 1714,
+      "total_tokens": 5441,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3,
+  "source_image": "012_beck_02.jpeg",
+  "prompt_version": "v3",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [76,292,366,319] Arran Quarter Cask\nL002 [78,324,342,351] Arran Sherry cask\nL003 [78,353,339,382] Ardbeg Uigeadail\nL004 [77,383,306,408] Glenfarclas 105\nL005 [80,412,349,438] Abelour A'bunadh\nL006 [81,444,387,472] Lagavulin 12yo 2018\nL007 [81,471,524,502] Laphroaig 10yo Cask Strength\nL008 [83,503,288,528] Kavalan Solist\nL009 [87,534,303,558] Octomore 13.1\nL010 [86,558,469,587] Macallan Classic Cut 2020\nL011 [74,240,632,281] 싱글몰트 캐스크 스트렝스(급)\nL012 [828,239,897,259] Glass\nL013 [830,268,897,288] 30ml\nL014 [816,295,906,319] 24,000\nL015 [816,324,908,348] 26,000\nL016 [814,354,906,376] 28,000\nL017 [814,381,904,405] 28,000\nL018 [814,410,904,434] 30,000\nL019 [812,438,904,462] 40,000\nL020 [814,467,904,491] 55,000\nL021 [814,495,904,518] 55,000\nL022 [814,523,904,547] 70,000\nL023 [814,551,905,575] 70,000\n</ocr_lines>",
+  "ocr_variant": "off",
+  "n_lines": 23,
+  "gap_factor": 2.5,
+  "layout": "lines",
+  "ocr_latency_ms": 2062
+}

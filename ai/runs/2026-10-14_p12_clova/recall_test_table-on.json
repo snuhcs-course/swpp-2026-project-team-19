@@ -1,0 +1,203 @@
+{
+  "label_set": "test",
+  "clova": {
+    "source": "clova table-on",
+    "missing_cache": [],
+    "total": {
+      "n_items": 575,
+      "name_exact": 517,
+      "name_approx": 573,
+      "name_one_line": 152,
+      "n_priced": 575,
+      "price_found": 571,
+      "name_exact_recall": 0.8991304347826087,
+      "name_approx_recall": 0.9965217391304347,
+      "name_one_line_recall": 0.2643478260869565,
+      "price_recall": 0.9930434782608696
+    },
+    "per_bar": {
+      "Beck": {
+        "n_items": 97,
+        "name_exact": 89,
+        "name_approx": 97,
+        "name_one_line": 89,
+        "n_priced": 97,
+        "price_found": 97,
+        "name_exact_recall": 0.9175257731958762,
+        "name_approx_recall": 1.0,
+        "name_one_line_recall": 0.9175257731958762,
+        "price_recall": 1.0
+      },
+      "미라보": {
+        "n_items": 410,
+        "name_exact": 364,
+        "name_approx": 409,
+        "name_one_line": 0,
+        "n_priced": 410,
+        "price_found": 406,
+        "name_exact_recall": 0.8878048780487805,
+        "name_approx_recall": 0.9975609756097561,
+        "name_one_line_recall": 0.0,
+        "price_recall": 0.9902439024390244
+      },
+      "포레스트": {
+        "n_items": 68,
+        "name_exact": 64,
+        "name_approx": 67,
+        "name_one_line": 63,
+        "n_priced": 68,
+        "price_found": 68,
+        "name_exact_recall": 0.9411764705882353,
+        "name_approx_recall": 0.9852941176470589,
+        "name_one_line_recall": 0.9264705882352942,
+        "price_recall": 1.0
+      }
+    },
+    "photos": [
+      {
+        "photo_id": "011_미라보_01",
+        "n_items": 35,
+        "name_exact": 33,
+        "name_approx": 35,
+        "name_one_line": 0,
+        "n_priced": 35,
+        "price_found": 35,
+        "missed_names": []
+      },
+      {
+        "photo_id": "011_미라보_02",
+        "n_items": 44,
+        "name_exact": 39,
+        "name_approx": 44,
+        "name_one_line": 0,
+        "n_priced": 44,
+        "price_found": 44,
+        "missed_names": []
+      },
+      {
+        "photo_id": "011_미라보_03",
+        "n_items": 60,
+        "name_exact": 52,
+        "name_approx": 60,
+        "name_one_line": 0,
+        "n_priced": 60,
+        "price_found": 60,
+        "missed_names": []
+      },
+      {
+        "photo_id": "011_미라보_04",
+        "n_items": 58,
+        "name_exact": 53,
+        "name_approx": 58,
+        "name_one_line": 0,
+        "n_priced": 58,
+        "price_found": 58,
+        "missed_names": []
+      },
+      {
+        "photo_id": "011_미라보_05",
+        "n_items": 52,
+        "name_exact": 43,
+        "name_approx": 52,
+        "name_one_line": 0,
+        "n_priced": 52,
+        "price_found": 50,
+        "missed_names": []
+      },
+      {
+        "photo_id": "011_미라보_06",
+        "n_items": 54,
+        "name_exact": 46,
+        "name_approx": 54,
+        "name_one_line": 0,
+        "n_priced": 54,
+        "price_found": 54,
+        "missed_names": []
+      },
+      {
+        "photo_id": "011_미라보_07",
+        "n_items": 31,
+        "name_exact": 30,
+        "name_approx": 31,
+        "name_one_line": 0,
+        "n_priced": 31,
+        "price_found": 30,
+        "missed_names": []
+      },
+      {
+        "photo_id": "011_미라보_08",
+        "n_items": 35,
+        "name_exact": 32,
+        "name_approx": 35,
+        "name_one_line": 0,
+        "n_priced": 35,
+        "price_found": 35,
+        "missed_names": []
+      },
+      {
+        "photo_id": "011_미라보_09",
+        "n_items": 41,
+        "name_exact": 36,
+        "name_approx": 40,
+        "name_one_line": 0,
+        "n_priced": 41,
+        "price_found": 40,
+        "missed_names": [
+          "암룻(Amrut) 퓨전"
+        ]
+      },
+      {
+        "photo_id": "012_Beck_01",
+        "n_items": 14,
+        "name_exact": 10,
+        "name_approx": 14,
+        "name_one_line": 10,
+        "n_priced": 14,
+        "price_found": 14,
+        "missed_names": []
+      },
+      {
+        "photo_id": "012_Beck_02",
+        "n_items": 10,
+        "name_exact": 9,
+        "name_approx": 10,
+        "name_one_line": 9,
+        "n_priced": 10,
+        "price_found": 10,
+        "missed_names": []
+      },
+      {
+        "photo_id": "012_Beck_03",
+        "n_items": 25,
+        "name_exact": 25,
+        "name_approx": 25,
+        "name_one_line": 25,
+        "n_priced": 25,
+        "price_found": 25,
+        "missed_names": []
+      },
+      {
+        "photo_id": "012_Beck_04",
+        "n_items": 48,
+        "name_exact": 45,
+        "name_approx": 48,
+        "name_one_line": 45,
+        "n_priced": 48,
+        "price_found": 48,
+        "missed_names": []
+      },
+      {
+        "photo_id": "013_포레스트_01",
+        "n_items": 68,
+        "name_exact": 64,
+        "name_approx": 67,
+        "name_one_line": 63,
+        "n_priced": 68,
+        "price_found": 68,
+        "missed_names": [
+          "글렌모렌지 퀸타 루반 14년"
+        ]
+      }
+    ]
+  }
+}
