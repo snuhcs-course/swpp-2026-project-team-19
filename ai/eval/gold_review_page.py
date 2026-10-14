@@ -22,7 +22,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).parent))
-from label_ocr_check import OcrText, crop_b64, load_set, normalize  # noqa: E402
+from label_ocr_check import (OcrText, best_substrings, crop_b64, jamo_distance, load_set,  # noqa: E402
+                             max_distance, normalize)
 
 PAREN = re.compile(r"\s*\([^)]*\)")
 # Entries that describe a group of lines: raw_name prefixes (or exact names) of their lines.
@@ -48,16 +49,38 @@ def entry_lines(key: str, items: list[tuple[str, int, dict]]) -> list[tuple[str,
             or PAREN.sub("", t[2]["raw_name"]).strip() in parts]
 
 
-def locate(ocr: OcrText, raw_name: str) -> tuple[int, int] | None:
-    """Field span of the line in the OCR text: the whole name, else its longest token found."""
+def line_extra(ocr: OcrText, span: tuple[int, int], name: str) -> int:
+    """Letters (not digits) on the span's whole OCR line beyond the name; prices do not count."""
+    fs, (a, b) = ocr.fields, span
+    while a > 0 and not fs[a - 1].get("lineBreak"):
+        a -= 1
+    while b < len(fs) - 1 and not fs[b].get("lineBreak"):
+        b += 1
+    text = normalize(" ".join(f.get("inferText", "") for f in fs[a:b + 1])).replace(name, "", 1)
+    return sum(not c.isdigit() for c in text)
+
+
+def locate(ocr: OcrText, raw_name: str) -> tuple[tuple[int, int] | None, str]:
+    """Field span of the line in the OCR text and how it was found: the whole name exactly, else the
+    whole name within edit distance max(1, len // 3) (OCR misreads such as 셰리 -> 세리; ties broken
+    by jamo distance), else its longest token (may hit another line; flagged on the page)."""
     whole = normalize(raw_name)
-    pieces = [whole] + sorted((normalize(t) for t in raw_name.replace("(", " ").replace(")", " ").split()),
-                              key=len, reverse=True)
-    pieces += [whole[:k] for k in range(len(whole) - 1, 3, -1)]  # prefixes (e.g. "달모어12" of "달모어12셰리")
-    for p in pieces:
+    starts = [k for k in range(len(ocr.s)) if ocr.s.startswith(whole, k)]
+    if starts:
+        # a short name also occurs inside a longer line ("SANSIBAR 21y" in "SANSIBAR 21y Batch4"):
+        # take the occurrence whose OCR line has the fewest other letters
+        k = min(starts, key=lambda k: line_extra(ocr, ocr.field_span(k, k + len(whole)), whole))
+        return ocr.field_span(k, k + len(whole)), "exact"
+    d, spans = best_substrings(whole, ocr.s)
+    if spans and d <= max_distance(whole):
+        a, b = min(spans, key=lambda s: jamo_distance(whole, ocr.s[s[0]:s[1]]))
+        return ocr.field_span(a, b), f"approx (distance {d})"
+    tokens = sorted((normalize(t) for t in raw_name.replace("(", " ").replace(")", " ").split()),
+                    key=len, reverse=True)
+    for p in tokens:
         if len(p) >= 2 and (k := ocr.s.find(p)) >= 0:
-            return ocr.field_span(k, k + len(p))
-    return None
+            return ocr.field_span(k, k + len(p)), f"token '{p}' only (check the crop)"
+    return None, "not found"
 
 
 def main() -> None:
@@ -101,22 +124,24 @@ def main() -> None:
             with Image.open(img) as im:
                 ocr_cache[stem] = (im.copy(), rec["response"], OcrText(image_result(rec["response"]).get("fields") or []))
         im, resp, ocr = ocr_cache[stem]
-        span = locate(ocr, raw_name)
-        return crop_b64(im, resp, span) if span else None
+        span, how = locate(ocr, raw_name)
+        return (crop_b64(im, resp, span) if span else None), how
 
-    cards, missing = [], []
+    cards, missing, located = [], [], []
     keys = [k for k in gold["review"] if k not in args.skip]
     for n, key in enumerate(keys, 1):
         lines = entry_lines(key, items)
         rows = []
         for photo_id, idx, it in lines:
-            b64 = crop(photo_id, it["raw_name"])
+            b64, how = crop(photo_id, it["raw_name"])
+            located.append((photo_id, it["raw_name"], how))
             if b64 is None:
                 missing.append(it["raw_name"])
             img = f"<img src='data:image/jpeg;base64,{b64}'>" if b64 else "<div class='mut'>OCR에서 줄을 못 찾음</div>"
+            warn = "" if how == "exact" else f" · <span class='mut'>크롭 위치: {html.escape(how)}</span>"
             rows.append(f"<div class='line'><div class='meta'><b>{html.escape(it['raw_name'])}</b> "
                         f"<span class='mut'>{photo_id} #{idx + 1} · {it['unit']} · "
-                        f"{price[(photo_id, idx)] or 0:,}원</span><br>"
+                        f"{price[(photo_id, idx)] or 0:,}원</span>{warn}<br>"
                         f"현재 정답: <code>{html.escape(gold_text(it['gold']))}</code></div>{img}</div>")
         if not rows:
             rows.append("<div class='mut'>연결된 줄 없음 (일반 메모)</div>")
@@ -164,6 +189,9 @@ document.getElementById('copy').onclick = async () => {{
     args.out.write_bytes(page.encode("utf-8"))
     n_lines = sum(c.count("class='line'") for c in cards)
     print(f"wrote {args.out}: {len(keys)} entries, {n_lines} lines; not found in OCR: {missing}")
+    for photo_id, name, how in located:
+        if how != "exact":
+            print(f"  {photo_id} {name}: {how}")
 
 
 if __name__ == "__main__":
