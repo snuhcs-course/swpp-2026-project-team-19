@@ -576,3 +576,4 @@
 - 카카오맵: 미라보는 후보 둘 중 위스키 바 블로그가 있는 봉천로 541, 수이는 카카오 메뉴가 사진 Dish Menu와 같은 "수이바". 포레스트는 찾지 못해 null + TODO
 - **박진우 결정 (2026-10-14):** held-out 메뉴 별칭을 v1 상품에도 넣는 현재 방식 유지(v1 상품 175건 포함). 목표는 확인된 표기를 모두 별칭으로 넣어 별칭 단계에서 최대한 걸러내는 것. OCR 대조의 `셰리` 4건은 박진우 판독으로 인쇄 표기 확인(라벨 유지)
 - **박진우 결정 (2026-10-14):** 오드비_09 맥주 4줄(섹션 제목 없음)과 오드비_01 한정판 섹션의 알마냑 8줄은 가이드라인 v2.3대로 1층 항목 유지(이름으로 술 종류를 판단하지 않음), 2층 `non_whisky`
+- **웹 검색 확인 (2026-10-14, 박진우 요청):** Claude 지식에 없던 최근 출시를 확인. Dalmore 17(2026년 1월 정규 추가) 새 상품 유지. Blair Athol Sangiovese·Tormore Tempranillo는 Douglas Laing Old Particular 13년(독립병입)으로 정정. unknown → 새 상품 4줄: Glen Scotia 12(2025 정규), Benromach 12(2026 플래그십), GlenAllachie 19 Ex-Solera, BenRiach Quarter Cask. 에드라두어12cs 비스코(Ibisco 디캔터, 캐스크별 상이)는 unknown 유지. 2층: new 83줄(82종), unknown 16

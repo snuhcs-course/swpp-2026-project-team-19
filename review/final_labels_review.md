@@ -1,8 +1,8 @@
 # 수이·오드비 검수표 (1층 라벨 + 2층 정답 초벌)
 
-2026-10-14 · Claude 초벌, 박진우 검수 전. 1층 `eval/labels_final_v1.json`, 2층 `eval/match_gold_final_v1.json`. OCR 대조 결과는 `review/final_ocr_check.html`(사진 포함, 커밋 안 함).
+2026-10-14 · Claude 초벌, 박진우 검수 중. 1층 `eval/labels_final_v1.json`, 2층 `eval/match_gold_final_v1.json`. 사진 크롭이 있는 검수 페이지는 `review/final_gold_review.html`(`ai/eval/gold_review_page.py`로 생성, 커밋 안 함).
 
-표시: ⚠ = 2층 REVIEW 목록에 있음, OCR 대조 불일치 5건은 모두 CLOVA 오독으로 판정(셰리 4건은 박진우 판독).
+표시: ⚠ = 2층 REVIEW 목록에 있음. OCR 대조 불일치 5건은 모두 CLOVA 오독으로 판정(셰리 4건은 박진우 판독).
 
 ## 009_오드비_01 (34항목)
 
@@ -55,7 +55,7 @@
 | 2 | 싱글몰트 에드라두어12cs 비스코 | 40,000 | glass |  | unknown | ⚠ |
 | 3 | 시그나토리 싱글몰트 링크우드14 | 20,000 | glass |  | new: Signatory Vintage Linkwood 14 |  |
 | 4 | 시그나토리 싱글몰트 벤네비스13 | 20,000 | glass |  | new: Signatory Vintage Ben Nevis 13 |  |
-| 5 | 캠벨타운 싱글몰트 글렌스코샤12 | 15,000 | glass |  | unknown | ⚠ |
+| 5 | 캠벨타운 싱글몰트 글렌스코샤12 | 15,000 | glass |  | new: Glen Scotia 12 | ⚠ |
 | 6 | 캠벨타운 글렌스코샤15 | 18,000 | glass |  | glen-scotia-15 (Glen Scotia 15) |  |
 | 7 | 캠벨타운 글렌스코샤 빅토리아나 | 29,000 | glass |  | new: Glen Scotia Victoriana |  |
 
@@ -134,7 +134,7 @@
 | 5 | 아란18 | 56,000 | glass | 30 | arran-18 (Arran 18) |  |
 | 6 | 아벨라워12 | 17,000 | glass | 30 | aberlour-12 (Aberlour 12) |  |
 | 7 | 아벨라워14 | 27,000 | glass | 30 | aberlour-14 (Aberlour 14) |  |
-| 8 | 아벨라워 아부나흐 셰리 | 36,000 | glass | 30 | aberlour-abunadh (Aberlour A'bunadh) | |
+| 8 | 아벨라워 아부나흐 셰리 | 36,000 | glass | 30 | aberlour-abunadh (Aberlour A'bunadh) |  |
 | 9 | 올드풀티니 허다트 | 18,000 | glass | 30 | new: Old Pulteney Huddart |  |
 | 10 | 올트풀티니15 | 28,000 | glass | 30 | old-pulteney-15 (Old Pulteney 15) |  |
 | 11 | 올드풀티니18 | 35,000 | glass | 30 | new: Old Pulteney 18 |  |
@@ -145,7 +145,7 @@
 |---|---|---|---|---|---|---|
 | 1 | 글렌피딕12 | 14,000 | glass | 30 | glenfiddich-12 (Glenfiddich 12) |  |
 | 2 | 글렌피딕15 | 18,000 | glass | 30 | glenfiddich-15 (Glenfiddich 15) |  |
-| 3 | 맥켈란12 셰리 | 18,000 | glass | 30 | macallan-12-sherry-oak (The Macallan 12 Sherry Oak) | |
+| 3 | 맥켈란12 셰리 | 18,000 | glass | 30 | macallan-12-sherry-oak (The Macallan 12 Sherry Oak) |  |
 | 4 | 맥켈란12 더블 | 16,000 | glass | 30 | macallan-12-double-cask (The Macallan 12 Double Cask) |  |
 | 5 | 맥켈란18 쉐리 | 60,000 | glass | 30 | macallan-18-sherry-oak (The Macallan 18 Sherry Oak) |  |
 | 6 | 글렌파클라스105 | 17,000 | glass | 30 | glenfarclas-105 (Glenfarclas 105) |  |
@@ -171,7 +171,7 @@
 | 26 | 오반14 | 19,000 | glass | 30 | oban-14 (Oban 14) |  |
 | 27 | 에드라두어10 | 14,000 | glass | 30 | edradour-10 (Edradour 10) |  |
 | 28 | 벤로막10 | 12,000 | glass | 30 | benromach-10 (Benromach 10) |  |
-| 29 | 벤로막12 | 18,000 | glass | 30 | unknown | ⚠ |
+| 29 | 벤로막12 | 18,000 | glass | 30 | new: Benromach 12 | ⚠ |
 | 30 | 클라이넬리쉬DE | 21,000 | glass | 30 | clynelish-de (Clynelish Distillers Edition) |  |
 | 31 | 글렌알라키8 | 16,000 | glass | 30 | glenallachie-8 (GlenAllachie 8) |  |
 | 32 | 글렌알라키10cs 배치13 | 28,000 | glass | 30 | new: GlenAllachie 10 Cask Strength Batch 13 | ⚠ |
@@ -184,7 +184,7 @@
 |---|---|---|---|---|---|---|
 | 1 | 몰트맨 싱글몰트 페터캐른37 / 행사 | 70,000 | glass |  | new: The Maltman Fettercairn 37 |  |
 | 2 | 와일드터키 아카이브 골드포일16 / 행사 | 50,000 | glass |  | unknown | ⚠ |
-| 3 | 글렌알라키19 엑스 솔레라 / 한정파 행사 | 60,000 | glass |  | unknown | ⚠ |
+| 3 | 글렌알라키19 엑스 솔레라 / 한정파 행사 | 60,000 | glass |  | new: GlenAllachie 19 Ex-Solera Sherry Cask | ⚠ |
 | 4 | 시그나토리 노스 브리티쉬 싱글그레인34 / 행사 | 50,000 | glass |  | new: Signatory Vintage North British 34 |  |
 | 5 | 아일라 싱글몰트 보모어21 셰리 / 행사 | 40,000 | glass |  | unknown | ⚠ |
 | 6 | 믹터스 토스티드 배럴 피니쉬 / 행사 | 60,000 | glass |  | unknown | ⚠ |
@@ -192,7 +192,7 @@
 | 8 | 카발란 증류소 킹 카 위스키 올드보틀 | 28,000 | glass |  | unknown | ⚠ |
 | 9 | 하이랜드파크CS R.4 | 25,000 | glass |  | highland-park-cs-batch-4 (Highland Park Cask Strength Release No.4) | ⚠ |
 | 10 | 발베니12 골드캐스크 | 18,000 | glass |  | new: The Balvenie 12 Golden Cask |  |
-| 11 | 벤리악 쿼터캐스크 | 15,000 | glass |  | unknown | ⚠ |
+| 11 | 벤리악 쿼터캐스크 | 15,000 | glass |  | new: BenRiach Quarter Cask | ⚠ |
 | 12 | 로크로몬드12 | 14,000 | glass |  | loch-lomond-12 (Loch Lomond 12) |  |
 | 13 | 로크로몬드18 | 31,000 | glass |  | loch-lomond-18 (Loch Lomond 18) |  |
 | 14 | 신도 더 블렌디드 | 17,000 | glass |  | new: Shindo The Blended |  |
@@ -247,7 +247,7 @@
 | 39 | Dalmore 15y | 32,000 | glass |  | dalmore-15 (The Dalmore 15) |  |
 | 40 | Dalmore 17y | 63,000 | glass |  | new: The Dalmore 17 | ⚠ |
 | 41 | Dalwhinnie 15y (달위니) | 18,000 | glass |  | dalwhinnie-15 (Dalwhinnie 15) |  |
-| 42 | Blair Athol Sangiovese Cask (블레어 아쏠) | 33,000 | glass |  | new: Blair Athol Sangiovese Cask Finish | ⚠ |
+| 42 | Blair Athol Sangiovese Cask (블레어 아쏠) | 33,000 | glass |  | new: Douglas Laing Old Particular Blair Athol 13 Sangiovese Cask | ⚠ |
 | 43 | Oban 14y (오반) | 20,000 | glass |  | oban-14 (Oban 14) |  |
 | 44 | Glendronach 12y (글렌드로낙) | 15,000 | glass |  | glendronach-12 (GlenDronach 12) |  |
 
@@ -273,7 +273,7 @@
 | 16 | Macallan 18y Double cask | 49,000 | glass |  | macallan-18-double-cask (The Macallan 18 Double Cask) |  |
 | 17 | Macallan 18y Sherry cask | 55,000 | glass |  | macallan-18-sherry-oak (The Macallan 18 Sherry Oak) |  |
 | 18 | Cragganmore 12y (크라겐모어) | 15,000 | glass |  | cragganmore-12 (Cragganmore 12) |  |
-| 19 | Tormore Tempranillo Cask (토모어) | 28,000 | glass |  | new: Tormore Tempranillo Cask Finish | ⚠ |
+| 19 | Tormore Tempranillo Cask (토모어) | 28,000 | glass |  | new: Douglas Laing Old Particular Tormore 13 Tempranillo Cask | ⚠ |
 | 20 | Glenrothes 12y (글렌로시스) | 15,000 | glass |  | glenrothes-12 (The Glenrothes 12) |  |
 | 21 | Glenallachie 8y (글렌알라키) | 15,000 | glass |  | glenallachie-8 (GlenAllachie 8) |  |
 | 22 | Glenallachie 12y | 18,000 | glass |  | glenallachie-12 (GlenAllachie 12) |  |
@@ -391,9 +391,9 @@
 - **Laphroaig 10y sherry (라프로익쉐리) / 라프로익10 쉐리**: 카탈로그 Laphroaig 10 Sherry Oak Finish로 봄
 - **anCnoc Sherry (아녹)**: Peated Sherry Cask(카탈로그)인지 비피트 셰리 캐스크인지 메뉴로 못 정함 → unknown
 - **Bowmore 18y / 보모어18**: 카탈로그에 18(표준), 18 Deep & Complex, 18 Sherry Oak 셋. 이전 정답처럼 Bowmore 18(표준)로 연결
-- **Dalmore 17y**: 정규 17년이 확인되지 않음(면세·한정 가능). 새 상품 The Dalmore 17로 둠 (unknown 후보)
-- **Blair Athol Sangiovese Cask (블레어 아쏠)**: 실재 상품명 미확인. 새 상품으로 둠 (병입사·연수 없음, unknown 후보)
-- **Tormore Tempranillo Cask (토모어)**: 실재 상품명 미확인. 새 상품으로 둠 (unknown 후보)
+- **Dalmore 17y**: The Dalmore 17 (2026년 1월 정규 라인업 추가, 셰리 3종 피니시, 42%). 웹 검색으로 확인 → 새 상품 유지
+- **Blair Athol Sangiovese Cask (블레어 아쏠)**: 웹 검색: Douglas Laing Old Particular Red Wine Cask Collection의 Blair Athol 13 (2011, Sangiovese, 48.4%)뿐 → 독립병입 새 상품. 메뉴에 병입사·연수 없음(bottler_missing 대상)
+- **Tormore Tempranillo Cask (토모어)**: 웹 검색: Douglas Laing Old Particular Red Wine Cask Collection의 Tormore 13 (2010, Tempranillo, 48.4%)뿐 → 독립병입 새 상품. 메뉴에 병입사·연수 없음
 - **Glenallachie 2014 Sinteis**: Sìnteis 시리즈의 2014 빈티지로 봄. 새 상품
 - **Balvenie 12y / 발베니 12년**: 이전 정답과 같이 12 DoubleWood
 - **Balvenie American Oak (아메리칸 오크)**: 연수 없음. 아메리칸 오크는 12년뿐이라 12 American Oak로 연결
@@ -420,14 +420,14 @@
 - **아란 셰리**: 이전 정답과 같이 Arran Bodega Sherry Cask (Sherry Cask = The Bodega)
 - **글렌드로낙18**: 이전 정답과 같이 카탈로그 유일한 18년(Allardice)
 - **달모어12셰리**: The Dalmore 12 Sherry Cask Select로 연결
-- **벤로막12**: 카탈로그에 12 Cask Strength만 있음. 표준 12년인지 CS인지 못 정함 → unknown
+- **벤로막12**: 웹 검색: 2026년 새 플래그십 Benromach 12 (퍼스트필 셰리, 46%) 정규품 → 새 상품. 카탈로그 12 CS(대만 한정 57.8%)와 별개
 - **글렌알라키10cs 배치13**: 카탈로그 GlenAllachie 10 Cask Strength(배치 없음)와 별개로 배치 13 새 상품 (Highland Park CS 릴리스 판단과 같은 기준)
 - **하이랜드파크CS R.4**: 카탈로그 Highland Park Cask Strength Release No.4로 연결
-- **싱글몰트 에드라두어12cs 비스코**: '비스코'가 무엇인지 확인 못 함(캐스크명?). 12 CS 계열 중 못 정함 → unknown
-- **캠벨타운 싱글몰트 글렌스코샤12**: Glen Scotia 12는 시즌 한정 등 여러 개, 카탈로그 12 Mermaid와 같은지 못 정함 → unknown
-- **벤리악 쿼터캐스크**: 실재 상품명 확인 못 함 → unknown
+- **싱글몰트 에드라두어12cs 비스코**: 웹 검색: '비스코' = Ibisco 디캔터 시리즈(예: 2006 cask 414). 캐스크·빈티지별로 다른 상품이고 메뉴에 번호 없음 → unknown 유지
+- **캠벨타운 싱글몰트 글렌스코샤12**: 웹 검색: Glen Scotia 12가 2025년 정규 라인업 추가(퍼스트필 버번, 46%) → 새 상품. 카탈로그 12 Mermaid와 별개
+- **벤리악 쿼터캐스크**: 웹 검색: BenRiach Quarter Cask(비피트, 46%)와 Peated Quarter Cask 둘. 메뉴에 피티드 표기 없어 Quarter Cask로 → 새 상품
 - **와일드터키 아카이브 골드포일16 / 행사**: 올드 보틀(아카이브) 16년, 상품 특정 불가 → unknown
-- **글렌알라키19 엑스 솔레라 / 한정파 행사**: '엑스 솔레라'가 캐스크명인지 확인 못 함 → unknown
+- **글렌알라키19 엑스 솔레라 / 한정파 행사**: 웹 검색: GlenAllachie 19 Ex-Solera (Masters of Wood, 50%) 단일 상품 → 새 상품
 - **아일라 싱글몰트 보모어21 셰리 / 행사**: 독립병입인지 정규품인지 없음 → unknown
 - **믹터스 토스티드 배럴 피니쉬 / 행사**: Toasted Barrel Finish는 버번·라이·사워매시 등 여러 개 → unknown
 - **카발란 증류소 킹 카 위스키 올드보틀**: King Car Whisky(카발란 증류소 블렌드) 올드 보틀, 상품 특정 불가 → unknown

@@ -14,8 +14,8 @@
   "anCnoc Sherry (아녹)": "Peated Sherry Cask(카탈로그)인지 비피트 셰리 캐스크인지 메뉴로 못 정함 → unknown",
   "Bowmore 18y / 보모어18": "카탈로그에 18(표준), 18 Deep & Complex, 18 Sherry Oak 셋. 이전 정답처럼 Bowmore 18(표준)로 연결",
   "Dalmore 17y": "The Dalmore 17 (2026년 1월 정규 라인업 추가, 셰리 3종 피니시, 42%). 웹 검색으로 확인 → 새 상품 유지",
-  "Blair Athol Sangiovese Cask (블레어 아쏠)": "실재 상품명 미확인. 새 상품으로 둠 (병입사·연수 없음, unknown 후보)",
-  "Tormore Tempranillo Cask (토모어)": "실재 상품명 미확인. 새 상품으로 둠 (unknown 후보)",
+  "Blair Athol Sangiovese Cask (블레어 아쏠)": "웹 검색: Douglas Laing Old Particular Red Wine Cask Collection의 Blair Athol 13 (2011, Sangiovese, 48.4%)뿐 → 독립병입 새 상품. 메뉴에 병입사·연수 없음(bottler_missing 대상)",
+  "Tormore Tempranillo Cask (토모어)": "웹 검색: Douglas Laing Old Particular Red Wine Cask Collection의 Tormore 13 (2010, Tempranillo, 48.4%)뿐 → 독립병입 새 상품. 메뉴에 병입사·연수 없음",
   "Glenallachie 2014 Sinteis": "Sìnteis 시리즈의 2014 빈티지로 봄. 새 상품",
   "Balvenie 12y / 발베니 12년": "이전 정답과 같이 12 DoubleWood",
   "Balvenie American Oak (아메리칸 오크)": "연수 없음. 아메리칸 오크는 12년뿐이라 12 American Oak로 연결",
@@ -42,14 +42,14 @@
   "아란 셰리": "이전 정답과 같이 Arran Bodega Sherry Cask (Sherry Cask = The Bodega)",
   "글렌드로낙18": "이전 정답과 같이 카탈로그 유일한 18년(Allardice)",
   "달모어12셰리": "The Dalmore 12 Sherry Cask Select로 연결",
-  "벤로막12": "카탈로그에 12 Cask Strength만 있음. 표준 12년인지 CS인지 못 정함 → unknown",
+  "벤로막12": "웹 검색: 2026년 새 플래그십 Benromach 12 (퍼스트필 셰리, 46%) 정규품 → 새 상품. 카탈로그 12 CS(대만 한정 57.8%)와 별개",
   "글렌알라키10cs 배치13": "카탈로그 GlenAllachie 10 Cask Strength(배치 없음)와 별개로 배치 13 새 상품 (Highland Park CS 릴리스 판단과 같은 기준)",
   "하이랜드파크CS R.4": "카탈로그 Highland Park Cask Strength Release No.4로 연결",
-  "싱글몰트 에드라두어12cs 비스코": "'비스코'가 무엇인지 확인 못 함(캐스크명?). 12 CS 계열 중 못 정함 → unknown",
-  "캠벨타운 싱글몰트 글렌스코샤12": "Glen Scotia 12는 시즌 한정 등 여러 개, 카탈로그 12 Mermaid와 같은지 못 정함 → unknown",
-  "벤리악 쿼터캐스크": "실재 상품명 확인 못 함 → unknown",
+  "싱글몰트 에드라두어12cs 비스코": "웹 검색: '비스코' = Ibisco 디캔터 시리즈(예: 2006 cask 414). 캐스크·빈티지별로 다른 상품이고 메뉴에 번호 없음 → unknown 유지",
+  "캠벨타운 싱글몰트 글렌스코샤12": "웹 검색: Glen Scotia 12가 2025년 정규 라인업 추가(퍼스트필 버번, 46%) → 새 상품. 카탈로그 12 Mermaid와 별개",
+  "벤리악 쿼터캐스크": "웹 검색: BenRiach Quarter Cask(비피트, 46%)와 Peated Quarter Cask 둘. 메뉴에 피티드 표기 없어 Quarter Cask로 → 새 상품",
   "와일드터키 아카이브 골드포일16 / 행사": "올드 보틀(아카이브) 16년, 상품 특정 불가 → unknown",
-  "글렌알라키19 엑스 솔레라 / 한정파 행사": "'엑스 솔레라'가 캐스크명인지 확인 못 함 → unknown",
+  "글렌알라키19 엑스 솔레라 / 한정파 행사": "웹 검색: GlenAllachie 19 Ex-Solera (Masters of Wood, 50%) 단일 상품 → 새 상품",
   "아일라 싱글몰트 보모어21 셰리 / 행사": "독립병입인지 정규품인지 없음 → unknown",
   "믹터스 토스티드 배럴 피니쉬 / 행사": "Toasted Barrel Finish는 버번·라이·사워매시 등 여러 개 → unknown",
   "카발란 증류소 킹 카 위스키 올드보틀": "King Car Whisky(카발란 증류소 블렌드) 올드 보틀, 상품 특정 불가 → unknown",
@@ -122,17 +122,17 @@
    "age_years": 17,
    "edition_name": null
   },
-  "blair-athol-sangiovese": {
-   "display_name": "Blair Athol Sangiovese Cask Finish",
-   "brand": "Blair Athol",
-   "age_years": null,
-   "edition_name": "Sangiovese Cask Finish"
+  "dl-blair-athol-13-sangiovese": {
+   "display_name": "Douglas Laing Old Particular Blair Athol 13 Sangiovese Cask",
+   "brand": "Douglas Laing",
+   "age_years": 13,
+   "edition_name": "Old Particular Blair Athol Sangiovese Cask"
   },
-  "tormore-tempranillo": {
-   "display_name": "Tormore Tempranillo Cask Finish",
-   "brand": "Tormore",
-   "age_years": null,
-   "edition_name": "Tempranillo Cask Finish"
+  "dl-tormore-13-tempranillo": {
+   "display_name": "Douglas Laing Old Particular Tormore 13 Tempranillo Cask",
+   "brand": "Douglas Laing",
+   "age_years": 13,
+   "edition_name": "Old Particular Tormore Tempranillo Cask"
   },
   "glenallachie-2014-sinteis": {
    "display_name": "GlenAllachie 2014 Sìnteis",
@@ -422,6 +422,12 @@
    "age_years": 13,
    "edition_name": "Ben Nevis"
   },
+  "glen-scotia-12": {
+   "display_name": "Glen Scotia 12",
+   "brand": "Glen Scotia",
+   "age_years": 12,
+   "edition_name": null
+  },
   "glen-scotia-victoriana": {
    "display_name": "Glen Scotia Victoriana",
    "brand": "Glen Scotia",
@@ -494,6 +500,12 @@
    "age_years": null,
    "edition_name": "Ode to the Dark"
   },
+  "benromach-12": {
+   "display_name": "Benromach 12",
+   "brand": "benromach",
+   "age_years": 12,
+   "edition_name": null
+  },
   "glenallachie-10-cs-batch-13": {
    "display_name": "GlenAllachie 10 Cask Strength Batch 13",
    "brand": "glenallachie",
@@ -505,6 +517,12 @@
    "brand": "The Maltman",
    "age_years": 37,
    "edition_name": "Fettercairn"
+  },
+  "glenallachie-19-ex-solera": {
+   "display_name": "GlenAllachie 19 Ex-Solera Sherry Cask",
+   "brand": "glenallachie",
+   "age_years": 19,
+   "edition_name": "Masters of Wood Ex-Solera Sherry Cask"
   },
   "signatory-north-british-34": {
    "display_name": "Signatory Vintage North British 34",
@@ -523,6 +541,12 @@
    "brand": "balvenie",
    "age_years": 12,
    "edition_name": "Golden Cask"
+  },
+  "benriach-quarter-cask": {
+   "display_name": "BenRiach Quarter Cask",
+   "brand": "benriach",
+   "age_years": null,
+   "edition_name": "Quarter Cask"
   },
   "shindo-the-blended": {
    "display_name": "Shindo The Blended",
@@ -788,7 +812,7 @@
      "raw_name": "캠벨타운 싱글몰트 글렌스코샤12",
      "unit": "glass",
      "pour_ml": null,
-     "gold": "unknown"
+     "gold": "new:glen-scotia-12"
     },
     {
      "raw_name": "캠벨타운 글렌스코샤15",
@@ -1369,7 +1393,7 @@
      "raw_name": "벤로막12",
      "unit": "glass",
      "pour_ml": 30,
-     "gold": "unknown"
+     "gold": "new:benromach-12"
     },
     {
      "raw_name": "클라이넬리쉬DE",
@@ -1424,7 +1448,7 @@
      "raw_name": "글렌알라키19 엑스 솔레라 / 한정파 행사",
      "unit": "glass",
      "pour_ml": null,
-     "gold": "unknown"
+     "gold": "new:glenallachie-19-ex-solera"
     },
     {
      "raw_name": "시그나토리 노스 브리티쉬 싱글그레인34 / 행사",
@@ -1472,7 +1496,7 @@
      "raw_name": "벤리악 쿼터캐스크",
      "unit": "glass",
      "pour_ml": null,
-     "gold": "unknown"
+     "gold": "new:benriach-quarter-cask"
     },
     {
      "raw_name": "로크로몬드12",
@@ -1779,7 +1803,7 @@
      "raw_name": "Blair Athol Sangiovese Cask (블레어 아쏠)",
      "unit": "glass",
      "pour_ml": null,
-     "gold": "new:blair-athol-sangiovese"
+     "gold": "new:dl-blair-athol-13-sangiovese"
     },
     {
      "raw_name": "Oban 14y (오반)",
@@ -1912,7 +1936,7 @@
      "raw_name": "Tormore Tempranillo Cask (토모어)",
      "unit": "glass",
      "pour_ml": null,
-     "gold": "new:tormore-tempranillo"
+     "gold": "new:dl-tormore-13-tempranillo"
     },
     {
      "raw_name": "Glenrothes 12y (글렌로시스)",
