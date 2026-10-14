@@ -258,7 +258,7 @@
 | 1 | Balvenie 12y (발베니) | 18,000 | glass |  | balvenie-12-doublewood (The Balvenie 12 DoubleWood) |  |
 | 2 | Balvenie American Oak (아메리칸 오크) | 18,000 | glass |  | balvenie-12-american-oak (The Balvenie 12 American Oak) | ⚠ |
 | 3 | Balvenie 14y (럼 캐스크) | 24,000 | glass |  | balvenie-14-caribbean (The Balvenie 14 Caribbean Cask) |  |
-| 4 | Balvenie Single Barrel (싱글배럴) | 18,000 | glass |  | unknown | ⚠ |
+| 4 | Balvenie Single Barrel (싱글배럴) | 18,000 | glass |  | balvenie-12-single-barrel (The Balvenie 12 Single Barrel) | ⚠ |
 | 5 | Balvenie 16y French Oak (프렌치 오크) | 39,000 | glass |  | balvenie-16-french-oak (The Balvenie 16 French Oak) |  |
 | 6 | Glenfiddich 12y (글렌피딕) | 16,000 | glass |  | glenfiddich-12 (Glenfiddich 12) |  |
 | 7 | Glenfiddich 12y Sherry | 17,000 | glass |  | glenfiddich-12-sherry-cask-finish (Glenfiddich 12 Sherry Cask Finish) |  |
@@ -288,7 +288,7 @@
 | 31 | Aberlour 12y (아벨라워) | 16,000 | glass |  | aberlour-12 (Aberlour 12) |  |
 | 32 | Aberlour 14y (아벨라워) | 23,000 | glass |  | aberlour-14 (Aberlour 14) |  |
 | 33 | Aberlour A'Bunadh (아부나흐) | 26,000 | glass |  | aberlour-abunadh (Aberlour A'bunadh) |  |
-| 34 | Royal Brackla | 15,000 | glass |  | unknown | ⚠ |
+| 34 | Royal Brackla | 15,000 | glass |  | royal-brackla-12 (Royal Brackla 12) | ⚠ |
 
 ## 010_수이_03 (36항목)
 
@@ -338,7 +338,7 @@
 | 1 | Yamazaki 12y (야마자키 12년) | 46,000 | glass |  | yamazaki-12 (Yamazaki 12) |  |
 | 2 | Yamazaki Dr (야마자키 Dr) | 30,000 | glass |  | yamazaki-distillers-reserve (Yamazaki Distiller's Reserve) |  |
 | 3 | Hakushu Dr (하쿠슈 Dr) | 30,000 | glass |  | hakushu-distillers-reserve (Hakushu Distiller's Reserve) |  |
-| 4 | Hibiki (히비키) | 23,000 | glass |  | unknown | ⚠ |
+| 4 | Hibiki (히비키) | 23,000 | glass |  | hibiki-japanese-harmony (Hibiki Japanese Harmony) | ⚠ |
 | 5 | Kavalan Original (카발란) | 23,000 | glass |  | kavalan-classic (Kavalan Classic) | ⚠ |
 | 6 | Kavalan Triple Sherry Cask | 24,000 | glass |  | kavalan-triple-sherry (Kavalan Triple Sherry Cask) |  |
 | 7 | Kavalan Vinho Barrique | 43,000 | glass |  | kavalan-solist-vinho-barrique (Kavalan Solist Vinho Barrique) | ⚠ |
@@ -397,9 +397,9 @@
 - **Glenallachie 2014 Sinteis**: Sìnteis 시리즈의 2014 빈티지로 봄. 새 상품
 - **Balvenie 12y / 발베니 12년**: 이전 정답과 같이 12 DoubleWood
 - **Balvenie American Oak (아메리칸 오크)**: 연수 없음. 아메리칸 오크는 12년뿐이라 12 American Oak로 연결
-- **Balvenie Single Barrel (싱글배럴)**: 12 First Fill / 15 Sherry / 25 중 어느 것인지 없음 → unknown
+- **Balvenie Single Barrel (싱글배럴)**: 연수 없음(12 First Fill / 15 Sherry / 25). 가격 근거: 잔 18,000원 = 같은 메뉴 12y·American Oak(12년) 18,000원, 14y 24,000원, 16y 39,000원 → 12 Single Barrel (박진우 승인, 카발란 비노 바리끄 선례와 같은 기준)
 - **Benriach 12y (벤리악)**: The Twelve와 The Smoky Twelve 중 기본(비피트) The Twelve로 연결
-- **Royal Brackla**: 연수 없음(12·18·21) → unknown
+- **Royal Brackla**: 연수 없음(12·18·21). 가격 근거(중간): 잔 15,000원 = 같은 페이지 12년급(Cragganmore·Glenrothes·Glenlivet 12) 15,000원, 18년급 25,000원. 오드비 로얄브라클라12 16,000원 → Royal Brackla 12 (박진우 승인)
 - **Glenmorangie The Nectar / 글렌모렌지 더 넥타**: 이전 정답과 같이 Nectar D'Or(리뉴얼 The Nectar)
 - **Glenmorangie Org (글렌모렌지)**: Org = Original로 봄
 - **Glenmorangie Calvados Cask (깔바도스 캐스크)**: 12 Calvados Cask Finish로 연결 (연수 없음)
@@ -408,7 +408,7 @@
 - **Compass Box (컴파스 박스)**: 브랜드만 있음 → unknown
 - **Wild Turkey 8y / 와일드터키8 101**: 이전 정답과 같이 Wild Turkey 101 8 Year
 - **Knob Creek 9y / 놉크릭 버번**: Knob Creek(9년 표기 스몰 배치)으로 연결
-- **Hibiki (히비키)**: Japanese Harmony / Blender's Choice / 연수 상품 중 못 정함 → unknown
+- **Hibiki (히비키)**: 연수·에디션 없음. 가격 근거(중간): 잔 23,000원 < 같은 섹션 Yamazaki·Hakushu DR 30,000원, Yamazaki 12 46,000원. 이보다 싼 히비키는 기본 NAS인 Japanese Harmony뿐 → Japanese Harmony (박진우 승인)
 - **Kavalan Original (카발란)**: Kavalan Classic(오리지널 싱글몰트)으로 연결
 - **Kavalan Vinho Barrique**: 이전 정답과 같이 Solist Vinho Barrique
 - **Signatory Speyside M Sherry**: 카탈로그 Signatory Speyside 14('M' 14 Small Batch 추정)와 같은지 못 정함(연수 없음) → unknown

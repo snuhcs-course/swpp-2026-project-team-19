@@ -577,3 +577,5 @@
 - **박진우 결정 (2026-10-14):** held-out 메뉴 별칭을 v1 상품에도 넣는 현재 방식 유지(v1 상품 175건 포함). 목표는 확인된 표기를 모두 별칭으로 넣어 별칭 단계에서 최대한 걸러내는 것. OCR 대조의 `셰리` 4건은 박진우 판독으로 인쇄 표기 확인(라벨 유지)
 - **박진우 결정 (2026-10-14):** 오드비_09 맥주 4줄(섹션 제목 없음)과 오드비_01 한정판 섹션의 알마냑 8줄은 가이드라인 v2.3대로 1층 항목 유지(이름으로 술 종류를 판단하지 않음), 2층 `non_whisky`
 - **웹 검색 확인 (2026-10-14, 박진우 요청):** Claude 지식에 없던 최근 출시를 확인. Dalmore 17(2026년 1월 정규 추가) 새 상품 유지. Blair Athol Sangiovese·Tormore Tempranillo는 Douglas Laing Old Particular 13년(독립병입)으로 정정. unknown → 새 상품 4줄: Glen Scotia 12(2025 정규), Benromach 12(2026 플래그십), GlenAllachie 19 Ex-Solera, BenRiach Quarter Cask. 에드라두어12cs 비스코(Ibisco 디캔터, 캐스크별 상이)는 unknown 유지. 2층: new 83줄(82종), unknown 16
+- **가격 근거 연결 (2026-10-14, 박진우 승인):** 정답 기준은 "메뉴판 정보로 상품을 정할 수 있나"이고 가격도 메뉴 정보로 봄(test의 카발란 비노 바리끄 선례). unknown → 카탈로그 상품 3줄: Balvenie Single Barrel → 12 Single Barrel(같은 메뉴 형제 상품 가격, 강), Royal Brackla → 12(같은 페이지 연수별 가격대, 중), Hibiki → Japanese Harmony(같은 섹션 일본 위스키 가격, 중). 나머지 unknown 13줄은 가격으로 못 정함. 2층: 카탈로그 202, new 83, unknown 13, non_whisky 15
+- **P47 이후 할 일 (매처 아이디어, 동결 중이라 미적용):** 후보가 여럿일 때 같은 메뉴 형제 상품 가격으로 연수를 좁히는 규칙. dev에서 먼저 측정
