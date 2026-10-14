@@ -27,3 +27,5 @@ __pycache__/
 .pytest_cache/
 # CLOVA OCR raw responses (kept outside the repo in <data_dir>/ocr_cache)
 ocr_cache/
+# Label review pages embed menu photo crops (owner consent scope; repo is public)
+review/*.html
