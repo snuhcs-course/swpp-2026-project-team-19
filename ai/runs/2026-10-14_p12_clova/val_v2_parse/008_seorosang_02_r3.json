@@ -1,0 +1,180 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "372bede8674eac276b9b68fd33ccc98e1950d6c6a3b46cb46d9e28642acf8875",
+  "started_at": "2026-10-14T05:06:35.571568+00:00",
+  "latency_ms": 2857,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 3226,
+  "output_tokens": 1133,
+  "thought_tokens": 0,
+  "total_tokens": 4359,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Ardbeg 10Y / 아드벡10년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Ardbeg 10Y / 아드벡10년",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Ardbeg Uigeadail / 아드벡 우거다일",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Ardbeg Uigeadail / 아드벡 우거다일",
+        "price_krw": 390000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Ardbeg Corryvreckan / 아드벡 코리브레칸",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Ardbeg Corryvreckan / 아드벡 코리브레칸",
+        "price_krw": 470000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Laphroaig 10Y / 라프로익10년",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Laphroaig 10Y / 라프로익10년",
+        "price_krw": 200000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Laphroaig Quarter Cask / 라프로익 쿼터캐스크",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Laphroaig Quarter Cask / 라프로익 쿼터캐스크",
+        "price_krw": 230000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Lagavulin 16Y / 라가불린16년",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Lagavulin 16Y / 라가불린16년",
+        "price_krw": 450000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Talisker 10Y / 탈리스커10년",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Talisker 10Y / 탈리스커10년",
+        "price_krw": 200000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Arran 10Y / 아란10년",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Arran 10Y / 아란10년",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Glenkinchie 12Y / 글랜킨치12년",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenkinchie 12Y / 글랜킨치12년",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Ardbeg 10Y / 아드벡10년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg 10Y / 아드벡10년\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Uigeadail / 아드벡 우거다일\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Uigeadail / 아드벡 우거다일\",\n      \"price_krw\": 390000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Corryvreckan / 아드벡 코리브레칸\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Corryvreckan / 아드벡 코리브레칸\",\n      \"price_krw\": 470000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Laphroaig 10Y / 라프로익10년\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Laphroaig 10Y / 라프로익10년\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Laphroaig Quarter Cask / 라프로익 쿼터캐스크\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Laphroaig Quarter Cask / 라프로익 쿼터캐스크\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Lagavulin 16Y / 라가불린16년\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Lagavulin 16Y / 라가불린16년\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Talisker 10Y / 탈리스커10년\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Talisker 10Y / 탈리스커10년\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Arran 10Y / 아란10년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Arran 10Y / 아란10년\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenkinchie 12Y / 글랜킨치12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenkinchie 12Y / 글랜킨치12년\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:06:38Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Ardbeg 10Y / 아드벡10년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg 10Y / 아드벡10년\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Uigeadail / 아드벡 우거다일\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Uigeadail / 아드벡 우거다일\",\n      \"price_krw\": 390000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Corryvreckan / 아드벡 코리브레칸\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Corryvreckan / 아드벡 코리브레칸\",\n      \"price_krw\": 470000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Laphroaig 10Y / 라프로익10년\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Laphroaig 10Y / 라프로익10년\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Laphroaig Quarter Cask / 라프로익 쿼터캐스크\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Laphroaig Quarter Cask / 라프로익 쿼터캐스크\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Lagavulin 16Y / 라가불린16년\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Lagavulin 16Y / 라가불린16년\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Talisker 10Y / 탈리스커10년\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Talisker 10Y / 탈리스커10년\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Arran 10Y / 아란10년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Arran 10Y / 아란10년\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenkinchie 12Y / 글랜킨치12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenkinchie 12Y / 글랜킨치12년\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0Tt7ec+N5+RPtJVqekHTTq/Z8Fw/uQh/atXgCTiONNCLd2L80BiIpRJwpcdCN1yaaLf6oBK7CLwSz70CpHshx9rdX9jd7uZ9GxO1VTKezDWX5w2fRNBTkiOds=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Ardbeg 10Y / 아드벡10년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg 10Y / 아드벡10년\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Uigeadail / 아드벡 우거다일\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Uigeadail / 아드벡 우거다일\",\n      \"price_krw\": 390000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Corryvreckan / 아드벡 코리브레칸\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Ardbeg Corryvreckan / 아드벡 코리브레칸\",\n      \"price_krw\": 470000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Laphroaig 10Y / 라프로익10년\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Laphroaig 10Y / 라프로익10년\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Laphroaig Quarter Cask / 라프로익 쿼터캐스크\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Laphroaig Quarter Cask / 라프로익 쿼터캐스크\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Lagavulin 16Y / 라가불린16년\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Lagavulin 16Y / 라가불린16년\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Talisker 10Y / 탈리스커10년\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Talisker 10Y / 탈리스커10년\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Arran 10Y / 아란10년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Arran 10Y / 아란10년\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenkinchie 12Y / 글랜킨치12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenkinchie 12Y / 글랜킨치12년\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:06:38Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 3226
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 3226,
+      "total_output_tokens": 1133,
+      "total_thought_tokens": 0,
+      "total_tokens": 4359,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3,
+  "source_image": "008_seorosang_02.png",
+  "prompt_version": "v2",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_rows>\nR001 y=25 | [96-220] 22:00 | [855-897] 26\nR002 y=100 | [880-928] X\nR003 y=201 | [67-197] ISLAY\nR004 y=256 | [70-192] Ardbeg 10Y | [578-606] 16 | [689-725] 250\nR005 y=269 | [73-158] 아드벡10년\nR006 y=290 | [70-245] Ardbeg Uigeadail | [578-606] 24 | [685-725] 390\nR007 y=303 | [73-188] 아드벡 우거다일\nR008 y=323 | [70-288] Ardbeg Corryvreckan | [578-606] 29 | [689-725] 470\nR009 y=336 | [73-205] 아드벡 코리브레칸\nR010 y=355 | [70-217] Laphroaig 10Y | [578-606] 13 | [685-725] 200\nR011 y=367 | [70-172] 라프로익10년\nR012 y=389 | [70-310] Laphroaig Quarter Cask | [578-606] 15 | [685-725] 230\nR013 y=402 | [73-220] 라프로익 쿼터캐스크\nR014 y=423 | [70-215] Lagavulin 16Y | [578-606] 28 | [689-725] 450\nR015 y=433 | [70-175] 라가불린16년\nR016 y=492 | [67-542] ISLANDS / LOWLAND\nR017 y=547 | [73-194] Talisker 10Y | [578-606] 13 | [683-725] 200\nR018 y=561 | [73-175] 탈리스커10년\nR019 y=581 | [73-172] Arran 10Y | [578-606] 15 | [683-725] 240\nR020 y=594 | [73-143] 아란10년\nR021 y=613 | [73-234] Glenkinchie 12Y | [578-606] 15 | [683-725] 240\nR022 y=626 | [73-175] 글랜킨치12년\n</ocr_rows>",
+  "ocr_variant": "off",
+  "n_lines": 41,
+  "gap_factor": 2.5,
+  "layout": "rows",
+  "ocr_latency_ms": 1752
+}

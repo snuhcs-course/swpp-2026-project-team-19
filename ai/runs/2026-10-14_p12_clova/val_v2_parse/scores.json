@@ -1,0 +1,1485 @@
+{
+  "run_dir": "val_v2_parse",
+  "failed_calls": [],
+  "summary": {
+    "item_accuracy": {
+      "mean": 0.9116929429429429,
+      "min": 0.90625,
+      "max": 0.9144144144144144,
+      "n": 3
+    },
+    "f1_strict": {
+      "mean": 0.9780181371460253,
+      "min": 0.9750566893424036,
+      "max": 0.979498861047836,
+      "n": 3
+    },
+    "f1_lenient": {
+      "mean": 0.9871159802822673,
+      "min": 0.9841269841269841,
+      "max": 0.9886104783599089,
+      "n": 3
+    },
+    "price_accuracy": {
+      "mean": 0.9354838709677419,
+      "min": 0.9354838709677419,
+      "max": 0.9354838709677419,
+      "n": 3
+    },
+    "unit_confusion": {
+      "mean": 1,
+      "min": 1,
+      "max": 1,
+      "n": 3
+    },
+    "fp": {
+      "mean": 3.6666666666666665,
+      "min": 3,
+      "max": 5,
+      "n": 3
+    },
+    "fn": {
+      "mean": 2,
+      "min": 2,
+      "max": 2,
+      "n": 3
+    }
+  },
+  "per_photo_accuracy": {
+    "007_위스키복춘_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "007_위스키복춘_02": {
+      "mean": 0.6792452830188679,
+      "min": 0.6792452830188679,
+      "max": 0.6792452830188679
+    },
+    "007_위스키복춘_03": {
+      "mean": 0.9259259259259259,
+      "min": 0.8888888888888888,
+      "max": 1.0
+    },
+    "007_위스키복춘_04": {
+      "mean": 0.3333333333333333,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "008_서로상_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_02": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_05": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    }
+  },
+  "per_bar_accuracy": {
+    "서로상": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "위스키복춘": {
+      "mean": 0.8677477477477478,
+      "min": 0.86,
+      "max": 0.8716216216216216
+    }
+  },
+  "runs": {
+    "1": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 220,
+        "matched_strict": 215,
+        "matched": 217,
+        "correct": 203,
+        "fp": 3,
+        "fn": 2,
+        "priced": 217,
+        "price_correct": 203,
+        "unit_confusion": 1,
+        "item_accuracy": 0.9144144144144144,
+        "f1_strict": 0.979498861047836,
+        "f1_lenient": 0.9886104783599089,
+        "price_accuracy": 0.9354838709677419
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 75,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 51,
+          "matched_strict": 50,
+          "matched": 50,
+          "correct": 36,
+          "fp": 1,
+          "fn": 2,
+          "priced": 50,
+          "price_correct": 36,
+          "unit_confusion": 1,
+          "errors": [
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 9000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 460000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 180000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 9000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 180000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 510000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 52000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 510000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 1040000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 52000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 1040000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "잔·병 혼동",
+              "gt": {
+                "raw_name": "포트샬롯 10Y",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "포트샬롯 10Y",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "포트샬롯 10Y",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 18,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 2,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "헤네시 VSOP",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "다니엘 부쥬 로얄",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    },
+    "2": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 220,
+        "matched_strict": 215,
+        "matched": 217,
+        "correct": 203,
+        "fp": 3,
+        "fn": 2,
+        "priced": 217,
+        "price_correct": 203,
+        "unit_confusion": 1,
+        "item_accuracy": 0.9144144144144144,
+        "f1_strict": 0.979498861047836,
+        "f1_lenient": 0.9886104783599089,
+        "price_accuracy": 0.9354838709677419
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 75,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 51,
+          "matched_strict": 50,
+          "matched": 50,
+          "correct": 36,
+          "fp": 1,
+          "fn": 2,
+          "priced": 50,
+          "price_correct": 36,
+          "unit_confusion": 1,
+          "errors": [
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 9000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 460000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 180000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 9000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 180000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 510000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 52000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 510000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 1040000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 52000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 1040000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "잔·병 혼동",
+              "gt": {
+                "raw_name": "포트샬롯 10Y",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "포트샬롯 10Y",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "포트샬롯 10Y",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 2,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 2,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "복춘",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "입춘",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    },
+    "3": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 222,
+        "matched_strict": 215,
+        "matched": 217,
+        "correct": 203,
+        "fp": 5,
+        "fn": 2,
+        "priced": 217,
+        "price_correct": 203,
+        "unit_confusion": 1,
+        "item_accuracy": 0.90625,
+        "f1_strict": 0.9750566893424036,
+        "f1_lenient": 0.9841269841269841,
+        "price_accuracy": 0.9354838709677419
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 75,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 51,
+          "matched_strict": 50,
+          "matched": 50,
+          "correct": 36,
+          "fp": 1,
+          "fn": 2,
+          "priced": 50,
+          "price_correct": 36,
+          "unit_confusion": 1,
+          "errors": [
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 9000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 460000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라가불린 16Y",
+                "price_krw": 180000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 9000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 180000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 10Y",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 250000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익 쿼터캐스크",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 14000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 280000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 10Y",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 우거다일",
+                "price_krw": 510000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 52000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 510000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 코리브레칸",
+                "price_krw": 1040000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 52000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 1040000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "옥토모어 16.1",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "잔·병 혼동",
+              "gt": {
+                "raw_name": "포트샬롯 10Y",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "포트샬롯 10Y",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "포트샬롯 10Y",
+                "price_krw": 420000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 18,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 2,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "헤네시 VSOP",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "다니엘 부쥬 로얄",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 2,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 2,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "복춘",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "입춘",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    }
+  },
+  "label_set": "val"
+}

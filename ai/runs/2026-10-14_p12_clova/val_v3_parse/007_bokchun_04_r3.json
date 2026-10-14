@@ -1,0 +1,150 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "e62c33be4b7fb80769b5f8e71628a480f31f5f0382b66ab8267a63aab0242127",
+  "started_at": "2026-10-14T05:11:18.805874+00:00",
+  "latency_ms": 14227,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 4258,
+  "output_tokens": 625,
+  "thought_tokens": 5027,
+  "total_tokens": 9910,
+  "output": {
+    "items": [
+      {
+        "raw_name": "프랭크시나트라",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "슬로진피즈",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "찰리채플린",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "앤하탄",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카카오피즈",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "엘더플라워 사워",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "롱아일랜드티",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "프렌치커넥션",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카타르시스",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올드파",
+        "price_krw": null,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "복춘",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "입춘",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"프랭크시나트라\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"슬로진피즈\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"찰리채플린\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"앤하탄\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카카오피즈\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"엘더플라워 사워\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"롱아일랜드티\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"프렌치커넥션\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카타르시스\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올드파\",\n      \"price_krw\": null,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"복춘\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"입춘\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:11:32Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"프랭크시나트라\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"슬로진피즈\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"찰리채플린\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"앤하탄\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카카오피즈\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"엘더플라워 사워\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"롱아일랜드티\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"프렌치커넥션\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카타르시스\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올드파\",\n      \"price_krw\": null,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"복춘\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"입춘\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"프랭크시나트라\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"슬로진피즈\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"찰리채플린\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"앤하탄\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카카오피즈\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"엘더플라워 사워\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"롱아일랜드티\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"프렌치커넥션\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카타르시스\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올드파\",\n      \"price_krw\": null,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"복춘\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"입춘\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:11:32Z",
+    "usage": {
+      "cached_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1904
+        }
+      ],
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 4258
+        }
+      ],
+      "total_cached_tokens": 1904,
+      "total_input_tokens": 4258,
+      "total_output_tokens": 625,
+      "total_thought_tokens": 5027,
+      "total_tokens": 9910,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3,
+  "source_image": "007_bokchun_04.jpg",
+  "prompt_version": "v3",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [375,41,627,83] Cocktail\nL002 [817,87,845,101] 1.8\nL003 [819,115,852,131] 1.6\nL004 [826,146,854,159] 1.6\nL005 [830,176,859,189] 1.8\nL006 [833,207,863,220] 1.6\nL007 [838,238,868,251] 1.6\nL008 [841,270,873,286] 1.8\nL009 [847,305,877,318] 1,8\nL010 [851,339,882,353] 1.6\nL011 [856,374,887,388] 1.8\nL012 [877,531,911,548] 1.5\nL013 [882,573,917,590] 1.8\nL014 [356,641,385,656] 1.6\nL015 [359,601,387,617] 1.6\nL016 [361,564,389,577] 1.6\nL017 [363,525,391,539] 1.6\nL018 [366,488,394,502] 1.8\nL019 [368,453,396,467] 1.8\nL020 [370,419,397,432] 1.8\nL021 [373,385,399,398] 1.8\nL022 [375,353,401,366] 1.6\nL023 [377,320,403,333] 1.8\nL024 [378,290,404,302] 1.6\nL025 [382,259,406,272] 1.8\nL026 [384,229,408,242] 1.6\nL027 [385,200,410,214] 1.7\nL028 [387,172,411,185] 1.5\nL029 [389,144,413,157] 1.5\nL030 [391,118,415,130] 1.2\nL031 [352,682,384,698] 1.8\nL032 [161,121,208,134] 진토닉\nL033 [156,147,191,163] 김렛\nL034 [151,174,219,190] 다이퀴리\nL035 [147,201,250,219] 드라이 마티니\nL036 [140,230,226,248] 보스턴쿨러\nL037 [137,260,238,278] 하이랜드쿨러\nL038 [132,289,234,308] 코스모폴리탄\nL039 [126,320,198,339] 올드패션\nL040 [121,352,193,370] 파우스트\nL041 [116,383,205,403] 위스키사워\nL042 [109,417,165,437] 갓파더\nL043 [104,451,177,470] 사이드카\nL044 [97,486,154,504] 잭로즈\nL045 [92,523,149,542] 진피즈\nL046 [85,559,198,580] 에메랄드쿨러\nL047 [77,597,176,618] 그래스호퍼\nL048 [72,636,151,657] 네그로니\nL049 [65,677,145,698] 불바디에\nL050 [58,718,158,740] 라스트워드\nL051 [48,759,196,785] 헤밍웨이 스페셜\nL052 [41,802,108,826] 롭로이\nL053 [344,812,375,829] 1.8\nL054 [347,767,378,785] 1.6\nL055 [347,724,384,741] 2.0\nL056 [573,569,614,589] 입춘\nL057 [571,530,614,549] 복춘\nL058 [562,490,691,513] Signature\nL059 [564,107,687,129] 프랭크시나트라\nL060 [566,137,654,156] 슬로진피즈\nL061 [565,164,657,186] 찰리채플린\nL062 [567,195,622,215] 앤하탄\nL063 [566,223,660,245] 카카오피즈\nL064 [566,250,702,275] 엘더플라워 사워\nL065 [568,284,681,307] 롱아일랜드티\nL066 [568,315,683,339] 프렌치커넥션\nL067 [568,349,666,372] 카타르시스\nL068 [569,385,629,406] 올드파\n</ocr_lines>",
+  "ocr_variant": "off",
+  "n_lines": 68,
+  "gap_factor": 2.5,
+  "layout": "lines",
+  "ocr_latency_ms": 3883
+}

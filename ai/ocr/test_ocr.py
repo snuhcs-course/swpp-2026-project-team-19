@@ -263,7 +263,7 @@ def test_call_parse_with_fake_client():
     assert rec["output"]["items"][0]["price_krw"] == 19000 and rec["parse_error"] is None
 
 
-@pytest.mark.parametrize("version", ["v1", "v2"])
+@pytest.mark.parametrize("version", ["v1", "v2", "v3", "v4"])
 def test_prompt_has_no_eval_photo_content(version):
     from score import load_labels, normalize
     prompt = parse.prompt_path(version).read_text(encoding="utf-8")
