@@ -539,3 +539,26 @@
 
 ### 결과
 - `ai/runs/2026-10-14_e2e/README.md`: 하이브리드 test 0.995(3회, r1 1.000), E1 0.842, CLOVA+LLM 0.883. 종단 Top-1 하이브리드 C0 0.770 / C1 0.377(라벨과 같음, 놓친 줄 0), E1 0.733 / 0.366, CLOVA+LLM 0.726 / 0.331. 가격 근거 줄 인용 오류(r2 미라보_05 15건)와 누락 감지 오탐(비위스키 섹션)은 한계로 기록
+
+## 2026-10-14 · A3 (I2) 카탈로그 v2와 수이·오드바 정답 라벨 (진행 중)
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 0회(Gemini·CLOVA 모두)
+- **브랜치:** `i2-e2e-hybrid`(d3163c0)에서 `i2-catalog-v2`. 시작 전 `git merge-base --is-ancestor`로 `i2-m3-llm-match`, `i2-labels-v1-1`(로컬·origin 모두)이 포함된 것을 확인. 단계별 커밋 후 브랜치로만 push
+- **시간(대략, 여기까지):** Claude 작업 약 40분 (기존 카탈로그·정답 구조 파악 15분, 동결 기록 10분, 빌드·검증 스크립트 15분)
+- **토큰(대략, 여기까지):** Claude Code 세션 약 15만 토큰
+
+### 진행 순서
+1. 0단계: 동결 대상(매처 `backend/app/matching/`, `ai/match_llm/`·`match_eval.py`, 하이브리드 `hybrid.py`·`hybrid_prompt_v1.md`·`lines.py`)이 각 동결 커밋 이후 d3163c0까지 바뀌지 않았음을 `git diff --stat`으로 확인하고 `ai/docs/p47_plan.md` 커밋(69ff7aa)
+2. 1단계: v1 생성 스크립트가 레포에 없어 id 규칙을 역산(`brand:`, `balias:<brand>:<text>`, `product:`, `palias:<product>:<text>`, `bar:`; v1 전체 id가 일치). `build_catalog_v2.py`, `check_catalog_v2.py`, `catalog_v2_draft.json` 커밋(b10b31b)
+3. 2단계: `BOTTLEMAP_DATA_DIR`(미설정, 기본 `../bottlemap-p14/data`) 아래에 수이·오드바 사진이 없어 지시대로 멈춤
+
+### AI가 정한 것 (사람 확인 필요)
+- `jack-daniels-apple`(Tennessee Apple, 위스키 리큐어)를 비위스키로 보고 카탈로그에서 제외(정답 `new_products` 337 → 상품 336). 그 미라보 줄은 별칭을 만들지 않음
+- held-out 바(미라보·Beck·포레스트)의 메뉴 표기 별칭을 새 상품뿐 아니라 v1 상품에도 추가(v1 상품 175건). 검수에서 "추정"으로 연결한 줄(예: Macallan 15yo → 15 Double Cask)도 별칭이 되므로 서비스에서 exact가 될 수 있음
+- 메뉴 표기 `한글 / 영문`은 v1처럼 부분마다 별칭 하나. 괄호 병기(`글렌모렌지(Glenmorangie) 12년 오리지널`)는 인쇄 그대로 한 별칭
+- 새 브랜드 key는 v1 형식(소문자, 영숫자 외 `_`)으로 만들고 별칭은 영문 표준명 하나(`standard`). 한글 브랜드 별칭은 만들지 않음
+- 정답의 연수·에디션 값은 그대로 씀(예: Octomore는 v1처럼 `age_years` null)
+
+### 검증
+- `check_catalog_v2.py`를 v1에 돌려 README의 수치(상품 내 정규화 중복 127, 브랜드 14, 상품 간 충돌 0)가 재현되는지 확인
+- v2 핵심: 상품 간·브랜드 간 정규화 별칭 충돌 0, FK·id 유일성 OK, key로 재생성한 id 동일. 정답이 참조하는 상품은 제외한 1개 외 모두 카탈로그에 있음
