@@ -31,7 +31,7 @@ from extract import (CONDITIONS, MAX_ATTEMPTS, REQUEST_TIMEOUT_S, WALL_TIMEOUT_S
                      _create_with_deadline, _is_transient, _raw_response, data_dir, genai, make_client)
 
 from clova import load_cached, set_photos  # noqa: E402
-from lines import GAP_FACTOR, build_lines, format_lines, format_tables, image_size  # noqa: E402
+from lines import GAP_FACTOR, build_lines, format_lines, format_rows, format_tables, image_size  # noqa: E402
 
 CONDITION = "A2"  # E1 setting: gemini-3.5-flash-lite, thinking medium
 USER_HEADER = "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해."
@@ -41,7 +41,8 @@ def prompt_path(version: str) -> Path:
     return Path(__file__).with_name(f"ocr_parse_prompt_{version}.md")
 
 
-def ocr_user_text(stem: str, gap: float = GAP_FACTOR, tables: bool = False) -> tuple[str, dict]:
+def ocr_user_text(stem: str, gap: float = GAP_FACTOR, tables: bool = False,
+                  layout: str = "lines") -> tuple[str, dict]:
     """User message for one photo from the OCR cache, and the input meta."""
     rec = load_cached(stem, "on" if tables else "off")
     if rec is None:
@@ -53,12 +54,15 @@ def ocr_user_text(stem: str, gap: float = GAP_FACTOR, tables: bool = False) -> t
             sent_size = im.size
     size = image_size(resp, tuple(sent_size))
     lines = build_lines(resp, gap)
-    text = f"{USER_HEADER}\n\n<ocr_lines>\n{format_lines(lines, size)}\n</ocr_lines>"
+    if layout == "rows":  # visual rows by y, segments left to right
+        text = f"{USER_HEADER}\n\n<ocr_rows>\n{format_rows(lines, size)}\n</ocr_rows>"
+    else:  # CLOVA reading order
+        text = f"{USER_HEADER}\n\n<ocr_lines>\n{format_lines(lines, size)}\n</ocr_lines>"
     table_text = format_tables(resp) if tables else ""
     if table_text:
         text += f"\n\nOCR 표 인식 결과 (행·열 번호):\n<ocr_tables>\n{table_text}\n</ocr_tables>"
     return text, {"ocr_variant": "on" if tables else "off", "ocr_meta": rec["meta"],
-                  "n_lines": len(lines), "gap_factor": gap}
+                  "n_lines": len(lines), "gap_factor": gap, "layout": layout}
 
 
 def call_parse(user_text: str, prompt: str, client=None) -> dict:
@@ -136,13 +140,15 @@ def main() -> None:
     parser.add_argument("--prompt", default="v1", help="ocr_parse_prompt_<version>.md")
     parser.add_argument("--gap", type=float, default=GAP_FACTOR, help="column split gap (x line height)")
     parser.add_argument("--tables", action="store_true", help="use the table-on OCR response + cell list")
+    parser.add_argument("--layout", choices=["lines", "rows"], default="lines",
+                        help="lines: CLOVA order (prompt v1); rows: grouped by y, left to right (v2)")
     parser.add_argument("--tag", required=True, help="run dir name part, e.g. val_v1, test")
     parser.add_argument("--date", default=date.today().isoformat())
     args = parser.parse_args()
 
     prompt = prompt_path(args.prompt).read_text(encoding="utf-8")
     photos = set_photos(args.label_set, args.photos)
-    inputs = {p.stem: ocr_user_text(p.stem, args.gap, args.tables) for p in photos}  # fail early on missing cache
+    inputs = {p.stem: ocr_user_text(p.stem, args.gap, args.tables, args.layout) for p in photos}  # fail early on missing cache
 
     run_dir = REPO_ROOT / "ai" / "runs" / f"{args.date}_p12_clova" / f"{args.tag}_parse"
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -152,7 +158,7 @@ def main() -> None:
         "label_set": args.label_set, "runs": args.runs,
         "prompt_version": args.prompt,
         "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
-        "gap_factor": args.gap, "ocr_variant": "on" if args.tables else "off",
+        "gap_factor": args.gap, "layout": args.layout, "ocr_variant": "on" if args.tables else "off",
         "photos": {p.name: {"n_lines": inputs[p.stem][1]["n_lines"],
                             "ocr_latency_ms": inputs[p.stem][1]["ocr_meta"]["latency_ms"]} for p in photos},
         "api_tier": "free (inputs may be used to improve Google products)",

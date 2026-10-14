@@ -1,0 +1,76 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "695a74d1aa387aff0358197c412dffcc01354f7e79be6bb36417ce14504b68df",
+  "started_at": "2026-10-14T04:57:56.075926+00:00",
+  "latency_ms": 2503,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 4026,
+  "output_tokens": 5,
+  "thought_tokens": 556,
+  "total_tokens": 4587,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T04:57:58Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T04:57:58Z",
+    "usage": {
+      "cached_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1897
+        }
+      ],
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 4026
+        }
+      ],
+      "total_cached_tokens": 1897,
+      "total_input_tokens": 4026,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 556,
+      "total_tokens": 4587,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 2,
+  "source_image": "007_bokchun_04.jpg",
+  "prompt_version": "v1",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [375,41,627,83] Cocktail\nL002 [817,87,845,101] 1.8\nL003 [819,115,852,131] 1.6\nL004 [826,146,854,159] 1.6\nL005 [830,176,859,189] 1.8\nL006 [833,207,863,220] 1.6\nL007 [838,238,868,251] 1.6\nL008 [841,270,873,286] 1.8\nL009 [847,305,877,318] 1,8\nL010 [851,339,882,353] 1.6\nL011 [856,374,887,388] 1.8\nL012 [877,531,911,548] 1.5\nL013 [882,573,917,590] 1.8\nL014 [356,641,385,656] 1.6\nL015 [359,601,387,617] 1.6\nL016 [361,564,389,577] 1.6\nL017 [363,525,391,539] 1.6\nL018 [366,488,394,502] 1.8\nL019 [368,453,396,467] 1.8\nL020 [370,419,397,432] 1.8\nL021 [373,385,399,398] 1.8\nL022 [375,353,401,366] 1.6\nL023 [377,320,403,333] 1.8\nL024 [378,290,404,302] 1.6\nL025 [382,259,406,272] 1.8\nL026 [384,229,408,242] 1.6\nL027 [385,200,410,214] 1.7\nL028 [387,172,411,185] 1.5\nL029 [389,144,413,157] 1.5\nL030 [391,118,415,130] 1.2\nL031 [352,682,384,698] 1.8\nL032 [161,121,208,134] 진토닉\nL033 [156,147,191,163] 김렛\nL034 [151,174,219,190] 다이퀴리\nL035 [147,201,250,219] 드라이 마티니\nL036 [140,230,226,248] 보스턴쿨러\nL037 [137,260,238,278] 하이랜드쿨러\nL038 [132,289,234,308] 코스모폴리탄\nL039 [126,320,198,339] 올드패션\nL040 [121,352,193,370] 파우스트\nL041 [116,383,205,403] 위스키사워\nL042 [109,417,165,437] 갓파더\nL043 [104,451,177,470] 사이드카\nL044 [97,486,154,504] 잭로즈\nL045 [92,523,149,542] 진피즈\nL046 [85,559,198,580] 에메랄드쿨러\nL047 [77,597,176,618] 그래스호퍼\nL048 [72,636,151,657] 네그로니\nL049 [65,677,145,698] 불바디에\nL050 [58,718,158,740] 라스트워드\nL051 [48,759,196,785] 헤밍웨이 스페셜\nL052 [41,802,108,826] 롭로이\nL053 [344,812,375,829] 1.8\nL054 [347,767,378,785] 1.6\nL055 [347,724,384,741] 2.0\nL056 [573,569,614,589] 입춘\nL057 [571,530,614,549] 복춘\nL058 [562,490,691,513] Signature\nL059 [564,107,687,129] 프랭크시나트라\nL060 [566,137,654,156] 슬로진피즈\nL061 [565,164,657,186] 찰리채플린\nL062 [567,195,622,215] 앤하탄\nL063 [566,223,660,245] 카카오피즈\nL064 [566,250,702,275] 엘더플라워 사워\nL065 [568,284,681,307] 롱아일랜드티\nL066 [568,315,683,339] 프렌치커넥션\nL067 [568,349,666,372] 카타르시스\nL068 [569,385,629,406] 올드파\n</ocr_lines>",
+  "ocr_variant": "off",
+  "n_lines": 68,
+  "gap_factor": 2.5,
+  "ocr_latency_ms": 3883
+}

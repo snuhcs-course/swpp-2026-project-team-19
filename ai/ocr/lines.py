@@ -16,6 +16,7 @@ import statistics
 from dataclasses import dataclass, field
 
 GAP_FACTOR = 2.5  # tuned on val only (ai/docs/p12_plan.md)
+ROW_TOL = 0.75  # row grouping: max center step, x median segment height (val only)
 
 
 @dataclass
@@ -109,6 +110,39 @@ def format_lines(lines: list[Line], size: tuple[float, float]) -> str:
         x0, y0, x1, y1 = line.box
         box = ",".join(str(round(v)) for v in (x0 / w * 1000, y0 / h * 1000, x1 / w * 1000, y1 / h * 1000))
         out.append(f"L{i:03d} [{box}] {line.text}")
+    return "\n".join(out)
+
+
+def group_rows(lines: list[Line]) -> list[list[Line]]:
+    """Group segments into visual rows by vertical center, top to bottom; each row is
+    sorted left to right. Segments are taken in order of center; one joins the current
+    row when its center is within ROW_TOL x the median segment height of the previous
+    segment's center (chained, so a slightly tilted row stays together)."""
+    if not lines:
+        return []
+    tol = statistics.median(ln.box[3] - ln.box[1] for ln in lines) * ROW_TOL or 1.0
+
+    def center(ln):
+        return (ln.box[1] + ln.box[3]) / 2
+
+    rows, cur = [], []
+    for ln in sorted(lines, key=center):
+        if cur and center(ln) - center(cur[-1]) > tol:
+            rows.append(cur)
+            cur = []
+        cur.append(ln)
+    rows.append(cur)
+    return [sorted(r, key=lambda ln: ln.box[0]) for r in rows]
+
+
+def format_rows(lines: list[Line], size: tuple[float, float]) -> str:
+    """One visual row per line: `R001 y=229 | [x0-x1] text | [x0-x1] text`, 0-1000 scale."""
+    w, h = size
+    out = []
+    for i, row in enumerate(group_rows(lines), 1):
+        y = round(min(ln.box[1] for ln in row) / h * 1000)
+        cells = " | ".join(f"[{round(ln.box[0] / w * 1000)}-{round(ln.box[2] / w * 1000)}] {ln.text}" for ln in row)
+        out.append(f"R{i:03d} y={y} | {cells}")
     return "\n".join(out)
 
 

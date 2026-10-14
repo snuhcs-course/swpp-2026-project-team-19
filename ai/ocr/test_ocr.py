@@ -65,6 +65,18 @@ def test_image_size_prefers_converted_info_then_fallback():
     assert lines.image_size(resp, (1000, 400)) == (50, 70)
 
 
+def test_rows_group_by_y_and_sort_by_x():
+    w = lambda t, x0, y0, x1, y1: lines.Line([lines.Word(t, x0, y0, x1, y1)])  # noqa: E731
+    segs = [w("Bottle", 600, 0, 680, 20),
+            w("57", 700, 100, 730, 120), w("글렌그란트", 40, 104, 160, 124),     # same row
+            w("2.8", 610, 118, 650, 138),                                        # tilted: chains on
+            w("노스랜드", 40, 200, 140, 220)]
+    rows = lines.group_rows(segs)
+    assert [[s.text for s in r] for r in rows] == [["Bottle"], ["글렌그란트", "2.8", "57"], ["노스랜드"]]
+    out = lines.format_rows(segs, (1000, 1000)).splitlines()
+    assert out[1] == "R002 y=100 | [40-160] 글렌그란트 | [610-650] 2.8 | [700-730] 57"
+
+
 def test_format_tables():
     out = lines.format_tables(FIXTURE).splitlines()
     assert out == ["T1 r0 c0: 글렌그란트 18년", "T1 r0 c1 (span 1x2): 2.8"]
@@ -251,10 +263,19 @@ def test_call_parse_with_fake_client():
     assert rec["output"]["items"][0]["price_krw"] == 19000 and rec["parse_error"] is None
 
 
-def test_prompt_has_no_eval_photo_content():
-    prompt = parse.prompt_path("v1").read_text(encoding="utf-8")
+@pytest.mark.parametrize("version", ["v1", "v2"])
+def test_prompt_has_no_eval_photo_content(version):
+    from score import load_labels, normalize
+    prompt = parse.prompt_path(version).read_text(encoding="utf-8")
     for word in ("미라보", "Beck", "포레스트", "복춘", "서로상", "크라이넬리시", "Balvenie", "Macallan"):
         assert word not in prompt
+    # no val/test label name (normalized, 4+ chars) anywhere in the normalized prompt,
+    # except guideline text examples shared with E1's prompt v2 (e.g. 글렌파클라스105 CS)
+    flat = normalize(prompt)
+    e1 = normalize((clova.REPO_ROOT / "ai" / "extract" / "prompt_v2.md").read_text(encoding="utf-8"))
+    names = {normalize(i["raw_name"]) for s in ("val", "test") for items in load_labels(s).values() for i in items}
+    leaked = sorted(n for n in names if len(n) >= 4 and n in flat and n not in e1)
+    assert leaked == []
 
 
 # ---------- live (only with keys) ----------
