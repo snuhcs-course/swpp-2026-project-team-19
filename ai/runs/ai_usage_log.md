@@ -239,6 +239,139 @@
 - 샌드박스가 시스템 Temp 접근을 막아 `tmp_path` 테스트 1개가 에러 → `--basetemp` 지정으로 해결.
 - `extract.py`는 429도 최대 5회 재시도하므로, 코드를 바꾸지 않고 실행 감시 래퍼로 429 재시도 시 즉시 중단하도록 함(실제 발생 0회).
 
+## 2026-10-13 · P22 (I2) 매칭 평가 하네스 + 매칭기 S1·S2 (dev)
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 없음 (Gemini 0회)
+- **브랜치:** `i2-p22-matching-eval` (base `i2-p11-heldout-benchmark`, P22 패치 `git am`)
+- **시간(대략):** 약 1시간 30분 (0단계 준비·정답 수정 20분, S1 25분, S2 35분, 마무리 10분)
+- **토큰(대략):** Claude Code 세션 컨텍스트 약 23만 토큰(마무리 시점), Max 플랜 5시간 한도의 6%
+
+### 진행 순서
+1. 담당자가 단계(0 준비 → S1 → S2 → 마무리), 단계마다 멈춤, 금지 사항(test 분할 평가·열람, 정답을 결과에 맞춰 수정, 카탈로그 JSON·`resolve_product`·`normalize.py`·메뉴 등록/게시 코드 수정)과 중단 규칙(dev false merge 0.02 초과 시 미채택)을 지정.
+2. 0단계: P22 패치 적용·push. 정답 1건 수정("Buffalo Trace / Makrt's Mark"를 `both:`로, 하나만 exact면 `partial`). M0 C1 Top-1이 0.803 → 0.798로 바뀌어 담당자에게 보고, 담당자 결정으로 eval_plan.md 기준선을 옛 값과 사유를 남기고 수정.
+3. S1(괄호 병기, 두 상품 묶음 → status `multi`) 구현·측정: dev 변화 없음(괄호 표기 0줄, 묶음 줄은 오타로 미발동). 합성 이름으로 동작 확인.
+4. S2(브랜드 + 연수 + 에디션 토큰) 구현·측정: false merge 0, C0 Top-1 0.937, C1 0.884.
+5. 마무리: eval_plan.md에 결과 표·주의 두 줄, 이 로그, 커밋·push.
+
+### 결과 (dev, 사전 등록 지표)
+- M0 → S1 → S1+S2, C0 Top-1 0.867 → 0.867 → 0.937, C1 0.798 → 0.798 → 0.884. false merge 전부 0, partial C1 1(Buffalo 줄).
+- 업주 부담 5 미만 사진: C0 0.62 → 0.69, C1 0.85 → 0.92.
+- 새 exact는 전부 정답(C0 10줄, C1 15줄). ambiguous_bad 2줄(C0, 카탈로그에 없는 상품에 같은 브랜드 후보).
+
+### 사람 결정
+- push, uv 설치·`uv sync` 승인.
+- Buffalo 정답 정의 변경과 M0 기준선 수정(옛 값 0.803 유지 기록).
+- S2 위험("해당 연수 상품이 카탈로그에 하나뿐이면 exact")은 test 평가 전에 정책을 정하기로 함. test는 평가·열람하지 않음.
+
+### AI가 만든 것
+- `backend/app/matching/staged.py` (`resolve_product_staged`, S1·S2), `types.py`(`ProductInfo.brand_id`, `ResolutionResult.parts`, status `multi`, `CatalogLookup` 브랜드 조회 2개), 메모리·DB 카탈로그 구현
+- `ai/eval/match_eval.py`: `both:`·`partial` 판정, 매처 `S1`·`S1+S2`, 평가 카탈로그 브랜드(C1 새 브랜드는 영문명 하나), `build_match_gold.py` 정답 수정·LF 출력
+- 테스트 `tests/test_resolve_staged.py`(23개), 메모리·DB 카탈로그 브랜드 조회 테스트, `ai/runs/2026-10-13_match_dev.json`, eval_plan.md 결과 절, 커밋 메시지, 이 로그 항목
+
+### AI가 제안해 반영된 것 (사람 확인)
+- M0 기준선 처리 방식 (a) 수정 + 사유 기록.
+
+### 검증
+- 0단계 후 M0 C0 숫자가 기준선과 같음을 확인. 단계마다 줄 단위로 status·후보를 비교(S1: 변화 0줄, S2: 바뀐 줄 전부 확인, 새 오답 0).
+- 단계 없이 부르면 `resolve_product`와 결과가 같은지 테스트로 확인. DB 카탈로그와 메모리 카탈로그의 staged 결과 일치 테스트 추가(DB 미설정이라 skip).
+- 백엔드 pytest 전체: 275 passed, 194 skipped(DB), 실패 0.
+
+### 사용 중 있었던 문제
+- backend `.venv`에 boto3가 없어 conftest(autouse fixture) import가 실패, 거의 모든 테스트가 수집 오류 → 승인 후 `uv sync`로 해결.
+- `build_match_gold.py`가 Windows에서 CRLF로 써서 gold 파일 전체가 diff로 잡힘 → 출력 줄바꿈을 LF로 고정.
+- gold의 새 상품 브랜드 `makers-mark`와 카탈로그 브랜드 key `makers_mark`가 달라 평가 카탈로그에서 다른 브랜드로 잡힘 → 평가 스크립트에서 하이픈을 밑줄로 바꿔 연결.
+- 샌드박스가 시스템 Temp를 막아 `tmp_path` 테스트 에러 → `--basetemp`를 scratchpad로 지정.
+
+## 2026-10-13 · P22 (I2) 매칭기 S2b(기본 제품) + S3(편집거리) (dev)
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 없음
+- **브랜치:** `i2-p22-matching-eval`
+- **시간(대략):** 약 45분 (사전 등록 5분, 구현 20분, 측정·줄 비교 10분, 테스트·마무리 10분)
+- **토큰(대략):** Claude Code 세션 컨텍스트 약 23만 → 약 29만 토큰(이 작업 약 6만)
+
+### 진행 순서
+1. 담당자가 S2b 규칙 3개, S3 규칙 6개와 임계값, 측정 명령, 중단 규칙, 금지 사항(정답·카탈로그·normalize·resolve_product 변경, dev를 보고 S3 임계값 조정)을 지정.
+2. eval_plan.md에 S2b·S3 규칙을 측정 전에 사전 등록하고 먼저 커밋·push(`7ba8592`). S3 5번 "편집거리 1"은 숫자는 같고 어순만 다른 거리 0도 포함하도록 "1 이하"로 적음.
+3. 구현: `CatalogLookup`에 전체 별칭 목록 2개 추가(메모리·DB), `staged.py`에 S2b(`_narrow_brand`의 기본 제품·확인 권장)와 S3(상품 별칭·브랜드 별칭 편집거리, 숫자 일치 필수).
+4. 측정 1회, 줄 단위 비교(S1+S2 → S2b, S2b → S3).
+
+### 결과 (dev)
+- false merge 전 단계 0 → 중단 규칙 통과.
+- 알려진 상품 Top-1: C0 0.937 → 0.916 → 0.916, C1 0.884 → 0.867 → 0.867. 확인 권장: C0 0 → 3 → 6, C1 0 → 3 → 7.
+- S2b exact → 확인 권장 3줄(정답 상품 유일 후보). S3 unmatched → 확인 권장 C0 3줄, C1 4줄(정답 상품 유일 후보). 새 오답 0.
+
+### 사람 결정
+- S2b·S3 규칙과 임계값(담당자 지정). 임계값은 dev 결과로 조정하지 않음.
+
+### AI가 만든 것
+- `staged.py` S2b·S3, `CatalogLookup.list_normalized_aliases` / `list_normalized_brand_aliases`(메모리·DB), `match_eval.py` 매처 2개와 확인 권장 건수
+- 테스트 13개(기본 제품 우선, 에디션 상품 확인 권장, 숫자 다르면 후보 제외, 편집거리 exact 조건, 동점 ambiguous, 한글 음절 거리 등)와 카탈로그 목록 테스트, eval_plan.md 사전 등록·결과, 이 로그 항목
+
+### 검증
+- 단계별 줄 단위 비교로 바뀐 줄 전부 확인(위 결과). S1+S2 숫자가 이전 측정과 같음을 확인.
+- 백엔드 pytest 전체: 288 passed, 194 skipped(DB), 실패 0.
+
+## 2026-10-13 · P22 (I2) test 2층 정답 병합 + C1 정의 수정
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 없음
+- **브랜치:** `i2-p22-matching-eval`
+- **시간(대략):** 약 20분
+- **토큰(대략):** Claude Code 세션 컨텍스트 약 28만 → 약 31만 토큰
+
+### 진행 순서
+1. 담당자가 test 정답 패치 3개(초안 → 검수 반영 → Woodford Double XO Blend) 적용, C1 정의 변경, test 초안 병합, `POST_TEST_ALIASES` 미반영, test split 미실행을 지정.
+2. 패치 3개 `git am` (충돌 없음, 정답 초안 파일만 변경).
+3. `build_match_gold.py`가 `eval/match_gold_test_draft.json`의 test 사진·새 상품·review를 그대로 복사해 `match_gold_v1.json`에 split "test"로 합침(새 상품 key·review 중복 시 오류).
+4. C1 변경 전 dev 측정: test 새 상품 307개가 dev 카탈로그에 섞여 S1+S2 C1 0.884 → 0.867로 바뀜을 확인 → C1을 "평가하는 split의 정답이 참조하는 new 상품만"으로 변경.
+
+### 결과
+- 병합: dev 13장 316항목(이전과 동일), test 10장 478항목(초안과 동일), 새 상품 30 + 307 = 337.
+- dev 재측정(M0, S1+S2, S1+S2b, S1+S2b+S3): `2026-10-13_match_dev.json`이 병합 전과 완전히 같음. S1+S2 C0 0.937, C1 0.884.
+- test split은 실행하지 않음. test 정답 내용은 구조(키·개수)만 확인.
+
+### 검증
+- dev 사진·기존 새 상품이 병합 전과 같음, test 사진이 초안과 같음을 스크립트로 비교.
+- 백엔드 pytest 전체: 288 passed, 194 skipped(DB).
+
+## 2026-10-13 · P22 (I2) test 매칭 평가 최종 사전 등록 + 동결
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 없음
+- **브랜치:** `i2-p22-matching-eval`, 동결 커밋 `69879fd`
+- **시간(대략):** 약 20분
+- **토큰(대략):** Claude Code 세션 컨텍스트 약 31만 → 약 34만 토큰
+
+### 진행 순서
+1. 담당자가 사전 등록 5개 항목(대상 매처·횟수, 주 지표, 업주 부담 세분화, 판정 규칙, 동결)과 "dev 숫자는 다시 재지 않음"을 지정.
+2. `match_eval.py`에 업주 부담 세분화(확인 / 선택 / 직접 등록 / 오답 후보, 사진당)와 "(b)+(c)+(d) 5 미만 사진" 추가. dev로 동작만 확인: 기존 필드는 저장된 결과와 완전히 같고, 사진별 세분화 합 = 기존 업주 부담.
+3. eval_plan.md: dev 결과 표에 M0 행과 세분화 열 추가, 최종 사전 등록 절 작성, 커밋(`69879fd`) 후 해시 기록.
+
+### AI가 정한 것 (사람 확인 필요)
+- 판정 규칙 4번은 조건을 명시하지 않아 "C0와 C1 각각에서 둘 다 만족"으로 적음.
+- (b) 선택에 정답이 `unknown`인 후보 1개 줄을 포함(정답 상품이 없어 "확인"이 아님).
+
+### 검증
+- test split 실행 없음. 백엔드 코드 변경 없음.
+
+## 2026-10-13 · P22 (I2) test 매칭 평가 1회 실행
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API 호출 없음
+- **브랜치:** `i2-p22-matching-eval`. 실행 커밋 = 동결 커밋 `69879fd` (detached checkout 후 실행, 브랜치로 복귀)
+- **시간(대략):** 약 15분
+- **토큰(대략):** Claude Code 세션 컨텍스트 약 34만 → 약 37만 토큰
+
+### 진행 순서
+1. 담당자가 두 결정(C0·C1 둘 다 만족, `unknown` 후보 1개는 (b))을 확정하고 실행·보고 규칙(6–9번)과 판정 무관 보고 항목(`unknown` 줄 중 confirmRecommended 건수)을 지정.
+2. eval_plan.md의 동결 해시 기록과 동결 이후 동결 대상 파일 무변경(`git diff 69879fd HEAD`)을 확인.
+3. 동결 커밋에서 사전 등록 명령 1회 실행. 이후 보고 숫자는 결과 JSON과 정답 파일에서만 집계(매처 재실행 없음).
+
+### 결과
+- false merge·overconfident 모든 매처·조건 0 → 판정 규칙 4번에 따라 S1+S2b+S3 채택.
+- 알려진 상품 Top-1: C0 M0 0.252 / S1+S2 0.770 / S1+S2b+S3 0.778, C1 0.072 / 0.371 / 0.379.
+- 이상해 보이는 결과(M0 미라보 0줄, 부담 5 미만 0.00, C1 Top-1 낮음)는 고치지 않고 eval_plan.md에 그대로 기록.
+
+### 검증
+- 실행 전후 `git status`로 결과 JSON 외 변경 없음 확인. 매처 코드·정답·임계값 변경 없음.
+
 ## 2026-10-14 · P12 (I2) CLOVA OCR 능력 확인
 
 - **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. OCR은 CLOVA General OCR V2, 2단계 파싱은 Gemini `gemini-3.5-flash-lite` (A2: thinking medium, E1과 같은 설정)
