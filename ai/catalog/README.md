@@ -106,7 +106,7 @@ v1 위에 평가 정답의 새 상품과 메뉴판 표기를 더한 판입니다
 | `catalog_v2_draft.json` | 위 스냅샷의 원본 | X |
 | `bars_v2.json` | 바 7곳 (v1 2곳 + 미라보, 벡(Beck), 포레스트, 오드비, 수이바) | O |
 
-만드는 순서: `python ai/catalog/build_catalog_v2.py` → `python ai/catalog/export_snapshot.py --drop-products` → `python ai/catalog/check_catalog_v2.py <파일...>`.
+main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있습니다. 적재하지 않는 파일(`catalog_v2_draft.json`, 평가 스냅샷 두 개)과 생성·검사 스크립트는 AI 브랜치 `i2-catalog-v2`에 있습니다. 만드는 순서: `python ai/catalog/build_catalog_v2.py` → `python ai/catalog/export_snapshot.py --drop-products` → `python ai/catalog/check_catalog_v2.py <파일...>`.
 
 ## 8. v2에서 추가된 것
 
