@@ -109,7 +109,7 @@ def test_budget_stops_at_limit(data_dir):
         hybrid.call_hybrid(src, "USER", "SYSTEM", budget, fake_client({}))
 
 
-@pytest.mark.parametrize("version", ["v1"])
+@pytest.mark.parametrize("version", ["v1", "v2"])
 def test_prompt_has_no_eval_photo_content(version):
     from score import load_labels, normalize
     prompt = hybrid.prompt_path(version).read_text(encoding="utf-8")
