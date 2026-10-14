@@ -30,7 +30,9 @@ class SearchResultsViewModel(
     fun search(query: String) {
         val trimmed = query.trim()
         if (trimmed.isEmpty() || trimmed.length > 100) {
-            _state.value = CustomerSearchUiState.Error("검색어를 1~100자로 입력해 주세요.")
+            _state.value = CustomerSearchUiState.InvalidQuery(
+                if (trimmed.isEmpty()) "BLANK" else "STRING_TOO_LONG",
+            )
             return
         }
         // A recomposed or recreated destination must not auto-retry an existing error.
@@ -40,7 +42,10 @@ class SearchResultsViewModel(
     }
 
     fun retry() {
-        if (currentQuery.isNotBlank() && _state.value !is CustomerSearchUiState.Loading) {
+        if (currentQuery.isNotBlank() &&
+            _state.value is CustomerSearchUiState.Error &&
+            (_state.value as CustomerSearchUiState.Error).canRetry
+        ) {
             load()
         }
     }
@@ -58,20 +63,41 @@ class SearchResultsViewModel(
                 throw cancelled
             } catch (error: Exception) {
                 if (version == requestVersion) {
-                    _state.value = CustomerSearchUiState.Error(searchErrorMessage(error))
+                    _state.value = classifySearchError(error)
                 }
             }
         }
     }
 }
 
+/**
+ * The backend contract uses error.code rather than HTTP status for client behavior.
+ * Only query validation errors are returned to the editable search field.
+ */
+internal fun classifySearchError(error: Exception): CustomerSearchUiState {
+    if (error is BottleMapApiException && error.code == "VALIDATION_FAILED") {
+        val queryFieldCode = error.fieldErrors.firstOrNull {
+            it.path == "query" && it.code in setOf(
+                "MISSING", "BLANK", "STRING_TOO_LONG", "NOT_SEARCHABLE",
+            )
+        }?.code
+        return if (queryFieldCode != null) {
+            CustomerSearchUiState.InvalidQuery(queryFieldCode)
+        } else {
+            // Validation failure on an unexpected field is still not retryable.
+            CustomerSearchUiState.Error(
+                message = "검색 요청의 입력값을 확인해 주세요.",
+                canRetry = false,
+            )
+        }
+    }
+    return CustomerSearchUiState.Error(searchErrorMessage(error))
+}
+
 internal fun searchErrorMessage(error: Exception): String = when (error) {
-    is BottleMapApiException -> when {
-        error.code == "NETWORK_ERROR" -> "네트워크 연결을 확인한 뒤 다시 시도해 주세요."
-        error.httpStatus == 401 || error.httpStatus == 403 ->
-            "게스트 검색에 접근할 수 없습니다. 잠시 후 다시 시도해 주세요."
-        error.httpStatus != null && error.httpStatus >= 500 ->
-            "검색 서버에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요."
+    is BottleMapApiException -> when (error.code) {
+        "NETWORK_ERROR" -> "네트워크 연결을 확인한 뒤 다시 시도해 주세요."
+        "SERVICE_UNAVAILABLE" -> "검색 서버를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요."
         else -> "검색 결과를 불러오지 못했습니다. 다시 시도해 주세요."
     }
     else -> "검색 응답을 처리하지 못했습니다. 다시 시도해 주세요."
