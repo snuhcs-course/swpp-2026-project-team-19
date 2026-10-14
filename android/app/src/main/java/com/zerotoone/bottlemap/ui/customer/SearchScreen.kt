@@ -36,14 +36,20 @@ private const val MAX_QUERY_LENGTH = 100
 @Composable
 fun SearchScreen(
     onOpenResults: (String) -> Unit,
+    serverValidationErrorCode: String? = null,
+    onClearServerValidation: () -> Unit = {},
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var navigating by rememberSaveable { mutableStateOf(false) }
     // Reset the one-shot navigation guard when returning from Search Results.
     LaunchedEffect(Unit) { navigating = false }
+    LaunchedEffect(serverValidationErrorCode) {
+        if (serverValidationErrorCode != null) navigating = false
+    }
     val normalizedInput = query.trim()
     val tooLong = normalizedInput.length > MAX_QUERY_LENGTH
-    val canSearch = normalizedInput.isNotEmpty() && !tooLong && !navigating
+    val canSearch = normalizedInput.isNotEmpty() && !tooLong &&
+        !navigating && serverValidationErrorCode == null
     val keyboard = LocalSoftwareKeyboardController.current
 
     val submit = {
@@ -60,8 +66,15 @@ fun SearchScreen(
             tooLong = tooLong,
             canSearch = canSearch,
             isNavigating = navigating,
-            onQueryChange = { query = it },
-            onClear = { query = "" },
+            serverValidationErrorCode = serverValidationErrorCode,
+            onQueryChange = {
+                query = it
+                onClearServerValidation()
+            },
+            onClear = {
+                query = ""
+                onClearServerValidation()
+            },
             onSearch = submit,
         )
     }
@@ -73,6 +86,7 @@ private fun SearchContent(
     tooLong: Boolean,
     canSearch: Boolean,
     isNavigating: Boolean,
+    serverValidationErrorCode: String?,
     onQueryChange: (String) -> Unit,
     onClear: () -> Unit,
     onSearch: () -> Unit,
@@ -140,11 +154,15 @@ private fun SearchContent(
                         TextButton(onClick = onClear) { Text("지우기") }
                     }
                 },
-                isError = tooLong,
+                isError = tooLong || serverValidationErrorCode != null,
                 supportingText = {
                     Text(
-                        if (tooLong) "검색어는 공백 제외 100자 이하여야 합니다."
-                        else "한글 · English 주류명 검색",
+                        when {
+                            tooLong -> "검색어는 공백 제외 100자 이하여야 합니다."
+                            serverValidationErrorCode != null ->
+                                searchValidationMessage(serverValidationErrorCode)
+                            else -> "한글 · English 주류명 검색"
+                        },
                     )
                 },
                 keyboardOptions = KeyboardOptions(
@@ -169,7 +187,7 @@ private fun SearchContent(
 @Composable
 private fun I2SearchInitialPreview() {
     I2CustomerSearchTheme {
-        SearchContent("", false, false, false, {}, {}, {})
+        SearchContent("", false, false, false, null, {}, {}, {})
     }
 }
 
@@ -177,6 +195,14 @@ private fun I2SearchInitialPreview() {
 @Composable
 private fun I2SearchEnteredPreview() {
     I2CustomerSearchTheme {
-        SearchContent("Deanston 12", false, true, false, {}, {}, {})
+        SearchContent("Deanston 12", false, true, false, null, {}, {}, {})
     }
+}
+
+/** This mapping is display-only. The backend remains the validation authority. */
+internal fun searchValidationMessage(fieldCode: String): String = when (fieldCode) {
+    "MISSING", "BLANK" -> "검색어를 입력해 주세요."
+    "STRING_TOO_LONG" -> "검색어는 100자 이하여야 합니다."
+    "NOT_SEARCHABLE" -> "검색할 수 있는 문자가 없습니다. 제품명을 입력해 주세요."
+    else -> "검색어를 확인해 주세요."
 }
