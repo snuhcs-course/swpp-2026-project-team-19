@@ -406,7 +406,7 @@ REVIEW = {
     "Laphroaig 10y sherry (라프로익쉐리) / 라프로익10 쉐리": "카탈로그 Laphroaig 10 Sherry Oak Finish로 봄",
     "anCnoc Sherry (아녹)": "Peated Sherry Cask(카탈로그)인지 비피트 셰리 캐스크인지 메뉴로 못 정함 → unknown",
     "Bowmore 18y / 보모어18": "카탈로그에 18(표준), 18 Deep & Complex, 18 Sherry Oak 셋. 이전 정답처럼 Bowmore 18(표준)로 연결",
-    "Dalmore 17y": "정규 17년이 확인되지 않음(면세·한정 가능). 새 상품 The Dalmore 17로 둠 (unknown 후보)",
+    "Dalmore 17y": "The Dalmore 17 (2026년 1월 정규 라인업 추가, 셰리 3종 피니시, 42%). 웹 검색으로 확인 → 새 상품 유지",
     "Blair Athol Sangiovese Cask (블레어 아쏠)": "실재 상품명 미확인. 새 상품으로 둠 (병입사·연수 없음, unknown 후보)",
     "Tormore Tempranillo Cask (토모어)": "실재 상품명 미확인. 새 상품으로 둠 (unknown 후보)",
     "Glenallachie 2014 Sinteis": "Sìnteis 시리즈의 2014 빈티지로 봄. 새 상품",
