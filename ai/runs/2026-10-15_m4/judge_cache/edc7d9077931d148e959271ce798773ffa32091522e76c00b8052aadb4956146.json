@@ -1,0 +1,58 @@
+{
+ "key": "edc7d9077931d148e959271ce798773ffa32091522e76c00b8052aadb4956146",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "James E Pepper 1776 Bourbon Whiskey",
+  "options": [
+   {
+    "product_id": "267e4a32-091f-5d9b-a19a-ec5098c1fb4e",
+    "display_name": "Booker's",
+    "age_years": null,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "[켄터키] 제임스 이 페퍼 1776 스트레이트 버번 위스키 James E . Pepper 177....",
+    "snippet": "미국 켄터키주에서 오랜 역사를 자랑하는 '제임스 이 페퍼 1776 스트레이트 버번 위스키( James E . Pepper 1776 Straight Bourbon Whiskey )'입니다. 앞서 드셨던 보모어, 맥캘란 같은 스코틀랜드 싱글몰트와는 완전히...",
+    "url": "https://kirinos.tistory.com/2532"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[ 1776 /버번] 1776 버번 VS 라이 100 Proof 위스키를 통해 버번과 라이의 차....",
+    "snippet": "마신 곳 : 필동 숙희 제품 이름 : 제임스 이 페퍼 1776 스트레이트 버번(라이) 위스키 James E Pepper 1776 Straight Bourbon (Rye) Whiskey 가격 : 30ML 기준 18,000원(필동 숙희) 도수 : 50% 버번과 라이의 차이점 버번과 라이...",
+    "url": "https://blog.naver.com/madlion_93/223695399156"
+   },
+   {
+    "endpoint": "blog",
+    "title": "미국을 대표하는 라이 위스키 브랜드, 제임스 E . 페퍼 \" 1776 \" 스트레이....",
+    "snippet": "제임스 E . 페퍼 \" 1776 \" 스트레이트 라이 위스키( James E . Pepper \" 1776 \" Straight Rye Whiskey ). 잘 모르는... James E . Pepper – Bourbon Whiskey Distillery Tours – Lexington, Kentucky In 2008 the brand was relaunched by whiskey ...",
+    "url": "https://wineys.tistory.com/1544"
+   },
+   {
+    "endpoint": "blog",
+    "title": "초보드링커를 위한 술 하나 338 제임스 이 페퍼 1776 버번 위스키",
+    "snippet": "제임스 이 페퍼 1776 스트레이트 버번 위스키 JAMES E PEPPER 1776 STRAIGHT BOURBON WHISKEY 종류:위스키-아메리칸위스키-스트레이트 위스키-버번위스키 제조:MGP 소유사:제임스 이 페퍼 알코올함량:50%(100 proof) 생산지...",
+    "url": "https://blog.naver.com/talewhale/222897982644"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "new",
+  "confidence": 0.95,
+  "reason": "메뉴의 James E Pepper 1776 Bourbon Whiskey는 후보에 없으며 카탈로그에 없는 새로운 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1216,
+   "attempts": 1,
+   "input_tokens": 2155,
+   "output_tokens": 66,
+   "thought_tokens": 0
+  }
+ }
+}

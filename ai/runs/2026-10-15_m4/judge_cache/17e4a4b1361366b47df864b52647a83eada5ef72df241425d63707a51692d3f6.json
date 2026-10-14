@@ -1,0 +1,76 @@
+{
+ "key": "17e4a4b1361366b47df864b52647a83eada5ef72df241425d63707a51692d3f6",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Yamazaki 12yo",
+  "options": [
+   {
+    "product_id": "47d1007c-3e9e-5471-b7ea-9b7caa1b49bb",
+    "display_name": "Yamazaki Smoky Batch",
+    "age_years": null,
+    "edition_name": "Smoky Batch"
+   },
+   {
+    "product_id": "89f1e724-1a62-5d0b-a78b-c7084b9f9bdd",
+    "display_name": "Auchentoshan 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+    "display_name": "The Dalmore 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "b7ac293e-fa4e-5cd6-a7c9-dc4beebd8c87",
+    "display_name": "Aultmore 12",
+    "age_years": 12,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "[일본여행 쇼핑] MY CELLAR by JOYLAB 아사쿠사점 한정! 재패니즈 위스키 ....",
+    "snippet": "위스키 명칭 (한글 / 日本語) 기존 판매가 ★ 할인가 ★ 면세 적용가 (Tax-Free) 야마자키 NV (山崎 NV / Yamazaki NV) ￥13,500 ￥12,100 ￥11,000 야마자키 12년 (山崎 12年 / Yamazaki 12yo ) ￥24,500 ￥23,100 ￥21,000...",
+    "url": "https://blog.naver.com/mycellar_joylab_sake/224436407677"
+   },
+   {
+    "endpoint": "blog",
+    "title": "야마자키 12년( Yamazaki 12yo )",
+    "snippet": "2026년 7월 15일 수요일 더 빈티지 스톡(도쿄) 야마자키 12년 220,000원 일본여행을 간 친구에게 야마자키 12년을 부탁해서 받았다! 포장을 확인해보니 아주 똘똘 잘 싸매왔다 ㅎㅎ 고맙다며 친구가...",
+    "url": "https://blog.naver.com/hanan_95/224371020092"
+   },
+   {
+    "endpoint": "blog",
+    "title": "\"정가에 구하면 로또? 12년 숙성인데 왜 30만 원이 훌쩍 넘을까?\"",
+    "snippet": "위스키 매대에서 보이면 무조건 집어야 한다는 전설의 술, 바로 산토리의 간판스타 야마자키 12년( Yamazaki 12yo ) 이야기입니다. 스코틀랜드 싱글몰트의 쟁쟁한 12년산들이 10만 원 안팎에 자리 잡고 있는 반면...",
+    "url": "https://blog.naver.com/b2bhjlee/224404034895"
+   },
+   {
+    "endpoint": "blog",
+    "title": "MY CELLAR by JOYLAB 아사쿠사점 영업일 확대! 화/수요일 매장 판매 오픈 ....",
+    "snippet": "12年 / Yamazaki 12yo ) ￥24,500 ￥23,100 ￥21,000 하쿠슈 NV (白州 NV / Hakushu NV) ￥13,800 ￥11,000 ￥10,000 히비키 재패니즈 하모니 (響 JAPANESE HARMONY) ￥14,000 ￥12,870 ￥11,700 4. 왜 MY CELLAR by JOYLAB에서...",
+    "url": "https://blog.naver.com/mycellar_joylab_sake/224440265728"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.95,
+  "reason": "메뉴판의 Yamazaki 12yo는 야마자키 12년산이지만, 제공된 후보 목록에는 야마자키 12년 상품이 없고 다른 증류소의 12년산(오헨토션, 달모어, 오트모어)과 야마자키 스모키 배치만 있어 일치하는 상품이 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1360,
+   "attempts": 1,
+   "input_tokens": 2443,
+   "output_tokens": 120,
+   "thought_tokens": 0
+  }
+ }
+}

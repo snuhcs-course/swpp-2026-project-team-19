@@ -1,0 +1,70 @@
+{
+ "key": "e33a9a9cf4797c939271d68b69bb84bc74ec6b64f65980e9f006bfac56b2c7eb",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Machrie Moor",
+  "options": [
+   {
+    "product_id": "4a898091-d81b-55ac-ab1f-9103e787b1d8",
+    "display_name": "Arran 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "58b6da39-cc5a-52ca-a299-d75bbee54ff8",
+    "display_name": "Arran Bodega Sherry Cask",
+    "age_years": null,
+    "edition_name": "Bodega Sherry Cask"
+   },
+   {
+    "product_id": "a342821c-15b8-5db7-bb72-6fbb058f6dd4",
+    "display_name": "Woodford Reserve",
+    "age_years": null,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "아란 마크리무어 10년｜과실의 달콤함 위에 피트 스모크를 더하다",
+    "snippet": "오늘 소개할 위스키는 아란 증류소의 개성 있는 피트 위스키, *아란 마크리무어 10년(Arran Machrie Moor 10 Year Old)*입니다. 아란 특유의 싱그러운 과실 풍미에 피트 스모크를 더해, 달콤함과 스모키함의...",
+    "url": "https://blog.naver.com/calor8899/224440236830"
+   },
+   {
+    "endpoint": "blog",
+    "title": "꿀피셜 화사한 아란이 피트를 만나면? 아란 마크리무어 10년의 진짜 ....",
+    "snippet": "아란 마크리무어 10년 (Arran Machrie Moor 10 Years Old) 아란 마크리무어 10년 캐스크 스트렝스(CS)와의 비교로 더 깊이 알아보는 아란섬의 싱글 몰트 스코틀랜드 아란 섬에서 탄생한 독특하고 매력적인 싱글...",
+    "url": "https://blog.naver.com/thesoool/224435710567"
+   },
+   {
+    "endpoint": "blog",
+    "title": "아란 마크리무어 CS(캐스크 스트렝스) 시음기, 화려하고 톡쏘는 피트....",
+    "snippet": "기본 정보 제품명: 아란 마크리무어 캐스크 스트렝스 (Arran Machrie Moor Cask Strength) 제조사: 아일 오브 아란 디스틸러스 (Isle of Arran Distillers Ltd) 증류소: 로크란자 증류소 (Lochranza Distillery), 아란섬 종류...",
+    "url": "https://blog.naver.com/dadagoclub/224418093724"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[위스키 리뷰] Arran Machrie Moor (아란 마크리무어 NAS)",
+    "snippet": "Machrie Moor Standing Stones 출처 : https://www.undiscoveredscotland.co.uk/arran/machriemoor/index.html 흥미진진한 전설은 여기까지 하고 접어두고 병을 살펴봅니다. 다른 아란 제품과 병모양 등이 똑같습니다. 케이스에서...",
+    "url": "https://blog.naver.com/afficionado9/223740339238"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.95,
+  "reason": "메뉴판의 Machrie Moor(마크리무어)는 아란의 피트 에디션 제품이나, 카탈로그 후보 목록(Arran 10, Arran Bodega Sherry Cask, Woodford Reserve)에는 해당 상품이 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1774,
+   "attempts": 1,
+   "input_tokens": 2274,
+   "output_tokens": 93,
+   "thought_tokens": 0
+  }
+ }
+}

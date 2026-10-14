@@ -1,0 +1,76 @@
+{
+ "key": "5bd5e1d4e35e9f8a4e73ed4cf6c5c478e03aa1600656683f2b9cc9a1f542e79d",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Hibiki DR",
+  "options": [
+   {
+    "product_id": "dc167751-6e79-5ae1-bcfd-9fc405b0a94e",
+    "display_name": "Hibiki 21",
+    "age_years": 21,
+    "edition_name": null
+   },
+   {
+    "product_id": "9a3e4134-990d-5685-9dd1-289e3afeac37",
+    "display_name": "Hibiki Blender's Choice",
+    "age_years": null,
+    "edition_name": "Blender's Choice"
+   },
+   {
+    "product_id": "eaa1578b-74c5-579d-a1bc-ee385cf221e9",
+    "display_name": "Hibiki Japanese Harmony",
+    "age_years": null,
+    "edition_name": "Japanese Harmony"
+   },
+   {
+    "product_id": "6b26bcdc-76d1-56df-bda7-cec06d74950e",
+    "display_name": "Yamazaki 12",
+    "age_years": 12,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "히비키 팝업 일정, 북촌서 열리는 위스키 행사 예약·가격 총정리",
+    "snippet": "8월 21일부터 북촌에서 ' HIBIKI , Taste of Harmony' 팝업이 열립니다. 그냥 위스키만 마시는 팝업은 아니고... 하모니·야마자키 DR ·하쿠슈 DR 모두 30ml 기준 각 7,000원이에요. 페어링 디너는 1인 180,000원입니다....",
+    "url": "https://blog.naver.com/5manjobs/224378616734"
+   },
+   {
+    "endpoint": "blog",
+    "title": "슈치쿠 X 히비키 가을 페어링 코스",
+    "snippet": "슈치쿠 X 히비키 가을 페어링 코스 SHUCHIKU × HIBIKI AUTUMN PAIRING COURSE 가을의 맛을 가장 섬세하게 담아낸... 하쿠슈 DR , 잘 익은 감과 복숭아, 바닐라의 향에 코코넛과 버터의 부드러운 풍미가 더해져 달콤하고...",
+    "url": "https://blog.naver.com/hanwhafoodtech/224432937982"
+   },
+   {
+    "endpoint": "blog",
+    "title": "히비키 보틀 사면 한정판 잔까지? 북촌 히비키 팝업스토어 총정리",
+    "snippet": "(30ml) HIBIKI HARMONY 7,000원 YAMAZAKI DR 7,000원 HAKUSHU DR 7,000원 #히비키 #히비키팝업 #하우스오브산토리 #TasteOfHarmony #북촌팝업스토어 #북촌핫플 #성수팝업스토어 #위스키팝업...",
+    "url": "https://blog.naver.com/sia_mom2025/224379695073"
+   },
+   {
+    "endpoint": "blog",
+    "title": "위스키(일본) 정리 ( 가격 조사 )",
+    "snippet": "라인업 2024 인상 후 정가 2026.04 예정 정가 현지 리커샵 시세 (예상) NV DR ¥7,000 ¥8,000~ ¥12,000... 리쿼샵 : 900,000엔 이상 響 ( Hibiki , 히비키 ) 야마자키와 하쿠슈의 원액을 섞어 만든 블렌디드...",
+    "url": "https://blog.naver.com/bkain/224141211950"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.95,
+  "reason": "메뉴의 'Hibiki DR'은 히비키 무연수(Distiller's Reserve / Japanese Harmony 등)를 의미하나, 주어진 후보 목록에는 Hibiki 21, Blender's Choice, Japanese Harmony 등이 있으며 메뉴와 정확히 일치하는 DR 전용 상품이나 후보가 없어 일치하는 상품이 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1323,
+   "attempts": 1,
+   "input_tokens": 2369,
+   "output_tokens": 110,
+   "thought_tokens": 0
+  }
+ }
+}

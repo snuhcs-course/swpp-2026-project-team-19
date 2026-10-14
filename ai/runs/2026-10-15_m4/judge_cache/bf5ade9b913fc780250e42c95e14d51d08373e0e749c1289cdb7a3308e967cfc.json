@@ -1,0 +1,58 @@
+{
+ "key": "bf5ade9b913fc780250e42c95e14d51d08373e0e749c1289cdb7a3308e967cfc",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Kilchoman Sanaig",
+  "options": [
+   {
+    "product_id": "b72f246e-aa1e-50ca-9011-e09df8af55c1",
+    "display_name": "Bunnahabhain 12",
+    "age_years": 12,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "킬호만 사닉 올로로소 셰리·버번 캐스크 / Kilchoman Sanaig (46%) 강피트 ....",
+    "snippet": "킬호만 사닉 올로로소 셰리·버번 캐스크 / Kilchoman Sanaig (46%) 강피트 50ppm 제품 정보 증류소: 킬호만 증류소 독립병입자·브랜드: Kilchoman Distillery 위스키 종류: 아일라 싱글 몰트 스카치위스키 생산 국가...",
+    "url": "https://blog.naver.com/samsara_jeonju/224373207232"
+   },
+   {
+    "endpoint": "blog",
+    "title": "부산 위스키바 모티에서 킬호만 사닉 시음기, 버번캐스크와 셰리 캐....",
+    "snippet": "기본 정보 제품명: 킬호만 사닉( Kilchoman Sanaig ) 종류: 아일라 싱글몰트 스카치위스키 숙성: 숙성 연수 미표기 캐스크: 버번 배럴 + 올로로소 셰리 혹스헤드 피트: 50ppm 도수: 46% 용량: 700ml 병과 라벨 어깨가...",
+    "url": "https://blog.naver.com/dadagoclub/224434946724"
+   },
+   {
+    "endpoint": "blog",
+    "title": "킬호만 사나익 위스키 리뷰｜아일라 피트와 진한 셰리의 조화",
+    "snippet": "이번에 마셔볼 위스키는 **킬호만 사나익( Kilchoman Sanaig )**입니다. 킬호만은 스코틀랜드 아일라 지역에 위치한 비교적 젊은 증류소로, 전통적인 아일라 위스키의 강한 피트와 개성적인 숙성 스타일을 보여주는...",
+    "url": "https://blog.naver.com/kimjam77/224415652670"
+   },
+   {
+    "endpoint": "blog",
+    "title": "킬호만 사닉( Kilchoman Sanaig ), 마키어 베이와 고민하고 있다면",
+    "snippet": "지난번 소개한 마키어 베이(Machir Bay)를 통해 킬호만의 신선하고 날카로운 피트를 경험했다면, 반드시 그 뒤를 이어 맛봐야 할 위스키가 바로 사닉( Sanaig )입니다. 사실 이 둘은 킬호만이라는 도화지 위에...",
+    "url": "https://blog.naver.com/soundgardenbar/224287457196"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "new",
+  "confidence": 0.95,
+  "reason": "메뉴의 Kilchoman Sanaig는 카탈로그 후보(Bunnahabhain 12)와 일치하지 않으며, 카탈로그에 없는 새 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1105,
+   "attempts": 1,
+   "input_tokens": 2152,
+   "output_tokens": 77,
+   "thought_tokens": 0
+  }
+ }
+}

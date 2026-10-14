@@ -1,0 +1,70 @@
+{
+ "key": "7e18ddab397eb96569aa419c794d0b84334e286375bd284e4fb92bea0697964c",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "히비키 21년",
+  "options": [
+   {
+    "product_id": "dc167751-6e79-5ae1-bcfd-9fc405b0a94e",
+    "display_name": "Hibiki 21",
+    "age_years": 21,
+    "edition_name": null
+   },
+   {
+    "product_id": "9a3e4134-990d-5685-9dd1-289e3afeac37",
+    "display_name": "Hibiki Blender's Choice",
+    "age_years": null,
+    "edition_name": "Blender's Choice"
+   },
+   {
+    "product_id": "eaa1578b-74c5-579d-a1bc-ee385cf221e9",
+    "display_name": "Hibiki Japanese Harmony",
+    "age_years": null,
+    "edition_name": "Japanese Harmony"
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "Whisky Journal #005 히비키 21년 내돈내산 후기 오사카 울트라마켓 구매",
+    "snippet": "히비키 21년 이번에 마신 제품은 SUNTORY HIBIKI 21 YEARS OLD입니다. 산토리 공식 설명에 따르면 히비키 21년 은 21년 이상 숙성된 몰트와 그레인위스키를 블렌딩해 만드는 제품입니다. 제품 정보 제품명 : Hibiki 21 ...",
+    "url": "https://blog.naver.com/kime9606_/224393431390"
+   },
+   {
+    "endpoint": "blog",
+    "title": "히비키 21년 화조풍월｜희귀 일본 위스키 한정판 실소장 리뷰",
+    "snippet": "오늘 리뷰할 위스키는 제가 실제 소장하고 있는 히비키 21년 화조풍월(Hibiki 21 Year Old Kacho Fugetsu)입니다. 후지산과 매화, 대나무 등 일본의 자연을 금빛으로 표현한 히비키 21년 한정판입니다. 히비키 21년 ...",
+    "url": "https://blog.naver.com/woon7737/224407208220"
+   },
+   {
+    "endpoint": "blog",
+    "title": "히비키 21년 , 하쿠슈 증료소 투어, 테이스팅 라운지에서, 시간에 쫓....",
+    "snippet": "기본 정보 제품명 : 산토리 위스키 히비키 21년 (HIBIKI 21 YEARS OLD) 분류 : 블렌디드 재패니즈 위스키 도수 : 43% 원재료 : 몰트, 그레인 숙성 : 주령 21년 이상 몰트 원주 및 21년 이상 그레인 원주 비고 : 수량 한정...",
+    "url": "https://blog.naver.com/dadagoclub/224399003262"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "히비키 21년 700ml 최저가 비교 및 정보 - Hibiki suntory whisky 21 years 가격 정보 | 술한....",
+    "snippet": "히비키 21년 (Hibiki suntory whisky 21 years) 700ml 최저가 얼마일까요? SUNTORY SPIRITS LIMITED YAMAZAKI DISTILLERY 산토리 일본 위스키 히비키 21년 의 전국 매장별 실시간 가격 정보를 비교하고 주류 정보를 확인해보세요. 술한잔에서 가장 ....",
+    "url": "https://soolhanjan.com/alcohol/1558/%ED%9E%88%EB%B9%84%ED%82%A4-21%EB%85%84"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "same",
+  "product_id": "dc167751-6e79-5ae1-bcfd-9fc405b0a94e",
+  "confidence": 0.99,
+  "reason": "메뉴판의 '히비키 21년'은 21년 숙성 카탈로그 상품인 Hibiki 21과 브랜드, 연수가 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 2587,
+   "attempts": 1,
+   "input_tokens": 2344,
+   "output_tokens": 111,
+   "thought_tokens": 0
+  }
+ }
+}

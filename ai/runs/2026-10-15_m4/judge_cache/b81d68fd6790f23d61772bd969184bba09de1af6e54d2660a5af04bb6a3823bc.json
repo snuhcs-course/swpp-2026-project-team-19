@@ -1,0 +1,76 @@
+{
+ "key": "b81d68fd6790f23d61772bd969184bba09de1af6e54d2660a5af04bb6a3823bc",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Bowmore 18yo",
+  "options": [
+   {
+    "product_id": "deabfe81-7c98-54c8-96d6-fd839a61b3e2",
+    "display_name": "Bowmore 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "66038b0f-4916-5d93-bf59-1a881862fcbb",
+    "display_name": "Bowmore 15",
+    "age_years": 15,
+    "edition_name": null
+   },
+   {
+    "product_id": "18df9675-a0df-5d70-b9db-bbc91203554a",
+    "display_name": "Royal Brackla 18",
+    "age_years": 18,
+    "edition_name": null
+   },
+   {
+    "product_id": "078bdd87-d120-52db-976d-23648ffeec99",
+    "display_name": "Glenmorangie 18",
+    "age_years": 18,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "[★★★☆☆] 보모어 18년 신형( Bowmore 18yo Renewal Bottle)",
+    "snippet": "오늘은!!!! 지난 포스팅에 이어서 이번에도 춘천에 있는 위스키바 \"바틀\"에서 마셨던 위스키 리뷰다. 하이랜드파크 12년 구구형을 한 잔 서비스로 마신 뒤에, 바로 너무나도 궁금했던 보모어 18년 신형을...",
+    "url": "https://blog.naver.com/1515687/223857918912"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[위스키] 보모어 18년 ( Bowmore 18YO , Deep & Complex) 완병~!!! ^^",
+    "snippet": "뚜따 후 오래된 후엔 그 매력이 조금 꺽인 것도 같았다. #위스키 #싱글몰트위스키 #보모어 #보모어18년 #보모어18년딥앤컴플렉스 # Bowmore # Bowmore18YO #BowmoreDeepnComplex",
+    "url": "https://blog.naver.com/homoludens/224146670057"
+   },
+   {
+    "endpoint": "blog",
+    "title": "착한가격",
+    "snippet": "BOWMORE 18yo BOWMORE 18yo DEEP & COMPLEX GLENDRONACH 18yo GLENMORANGIE 18yo THE INFINITA MACALLAN 18yo SHERRY OAK OLD PULTENEY 18yo ROYAL BRACKLA 18yo . 각 위스키마다 추구미가 다릅니다 글렌모렌지18년과...",
+    "url": "https://blog.naver.com/bar_remy/224149046528"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "보모어 18년 - SpiritsDB",
+    "snippet": "Bowmore 18YO (보우모어 18년) - 위스키, Bowmore Distillery, 영국. 수입이력 6건. SpiritsDB 수입주류 데이터베이스.",
+    "url": "https://spiritsdb.tera.co.kr/master/3584"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.95,
+  "reason": "메뉴의 Bowmore 18yo는 18년 숙성 제품이나, 카탈로그의 보모어 후보는 12년과 15년뿐이어서 일치하는 상품이 없음",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1578,
+   "attempts": 1,
+   "input_tokens": 2265,
+   "output_tokens": 86,
+   "thought_tokens": 0
+  }
+ }
+}

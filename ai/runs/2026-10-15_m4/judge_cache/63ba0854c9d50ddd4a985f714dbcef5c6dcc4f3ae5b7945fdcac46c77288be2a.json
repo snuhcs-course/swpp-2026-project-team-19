@@ -1,0 +1,82 @@
+{
+ "key": "63ba0854c9d50ddd4a985f714dbcef5c6dcc4f3ae5b7945fdcac46c77288be2a",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "발베니 18년 PX",
+  "options": [
+   {
+    "product_id": "ee5db3dd-cd58-5d2d-b70d-ae95964f96fc",
+    "display_name": "The Balvenie 12 DoubleWood",
+    "age_years": 12,
+    "edition_name": "DoubleWood"
+   },
+   {
+    "product_id": "9aacd9a4-764a-5087-ad74-9f6e27235b4d",
+    "display_name": "The Balvenie 14 Caribbean Cask",
+    "age_years": 14,
+    "edition_name": "Caribbean Cask"
+   },
+   {
+    "product_id": "9c5564f0-c824-5c65-b8d0-13189e788104",
+    "display_name": "The Balvenie 21 PortWood",
+    "age_years": 21,
+    "edition_name": "PortWood"
+   },
+   {
+    "product_id": "3b6f8a1c-c506-50f9-b383-fe5d0c6d5064",
+    "display_name": "The Glenlivet 18",
+    "age_years": 18,
+    "edition_name": null
+   },
+   {
+    "product_id": "078bdd87-d120-52db-976d-23648ffeec99",
+    "display_name": "Glenmorangie 18",
+    "age_years": 18,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "발베니 18년 PX 시음기",
+    "snippet": "지극히개인적인 평가 (4.5/5) https://m.blog.naver.com/mh2178 # 발베니 # 발베니18년 # 발베니 PX # 발베니 PX 18년 # 발베니18 PX # 발베니 위스키 #Balvenie #TheBalvenie # PX 캐스크 # PX 셰리 #셰리캐스크 #싱글몰트위스키 #싱글몰트...",
+    "url": "https://blog.naver.com/mh2178/224409676790"
+   },
+   {
+    "endpoint": "blog",
+    "title": "발베니 18년 PX , 면세점 추천 맛있는 싱글몰트 위스키",
+    "snippet": "제품 정보 항목 내용 제품명 발베니 18년 PX 캐스크 영문명 The Balvenie 18 Year Old Pedro Ximénez Cask 종류 스페이사이드 싱글몰트 스카치 위스키 숙성 방식 아메리칸 오크 숙성 후 PX 셰리 캐스크 피니시 도수 48.7...",
+    "url": "https://blog.naver.com/5manjobs/224372178641"
+   },
+   {
+    "endpoint": "blog",
+    "title": "발베니 18년 PX 셰리 캐스크 도수, 맛 후기! 가격만큼의 가치는 있을....",
+    "snippet": "발베니 18년 PX 의 정식 명칭은 The Balvenie 18 PX Sherry Cask입니다. 용량은 700ml, 알코올 도수는 48.7%로 일반적인 40~43%대 위스키보다 도수가 높은 편입니다. 이 제품의 가장 큰 특징은 바로 PX 셰리 캐스크입니다....",
+    "url": "https://blog.naver.com/matcumentary/224400737704"
+   },
+   {
+    "endpoint": "blog",
+    "title": "발베니 18년 PX 캐스크 – 페드로 히메네스 셰리 캐스크가 선사하는 ....",
+    "snippet": "발베니 18년 PX 캐스크(The Balvenie 18 Years Pedro Ximénez Cask) 스페이사이드를 대표하는 증류소 ** 발베니 (The Balvenie)**는 전통적인 제조 방식과 뛰어난 캐스크 관리로 세계적인 명성을 얻고 있습니다. 특히...",
+    "url": "https://blog.naver.com/drcarter/224359763569"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "new",
+  "confidence": 0.95,
+  "reason": "메뉴판의 '발베니 18년 PX'는 18년 숙성 및 PX 캐스크 에디션이나, 카탈로그 후보 목록에 일치하는 18년산 발베니 제품이 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1409,
+   "attempts": 1,
+   "input_tokens": 2452,
+   "output_tokens": 90,
+   "thought_tokens": 0
+  }
+ }
+}

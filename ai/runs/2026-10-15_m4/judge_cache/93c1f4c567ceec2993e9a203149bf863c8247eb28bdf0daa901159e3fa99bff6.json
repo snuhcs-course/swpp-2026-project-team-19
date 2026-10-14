@@ -1,0 +1,64 @@
+{
+ "key": "93c1f4c567ceec2993e9a203149bf863c8247eb28bdf0daa901159e3fa99bff6",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "라프로익 25년",
+  "options": [
+   {
+    "product_id": "dbc5af99-05b2-5538-a5ef-8aa53cdc660b",
+    "display_name": "Laphroaig 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "4658648a-d8cb-54da-ad58-f506a5cac3ef",
+    "display_name": "Laphroaig Quarter Cask",
+    "age_years": null,
+    "edition_name": "Quarter Cask"
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "현대면세점에서 구매했던, 라프로익 25년 베시 윌리엄슨 스토리 Laphr....",
+    "snippet": "whisky seoul korea 라프로익 25년 베시 윌리엄슨 스토리 Laphroaig 25 Bessie Williamson Story 라프로익 25년 베시 윌리엄슨 스토리 Laphroaig 25 years Bessie Williamson Story 拉弗格 25 年 貝西·威廉森故事...",
+    "url": "https://blog.naver.com/tobro_whisky/224356092667"
+   },
+   {
+    "endpoint": "blog",
+    "title": "Laphroaig ( 라프로익 ) Islay 위스키 종류",
+    "snippet": "라프로익 (Laphroaig)은 스코틀랜드 아일라(Islay)를 대표하는 싱글몰트 위스키다. 강렬한 피트... Laphroaig 25 Years Old 숙성: 25년 도수: 캐스크 스트렝스(배치별 상이) 특징 피트가 매우 우아하게...",
+    "url": "https://blog.naver.com/evolve486/224345552427"
+   },
+   {
+    "endpoint": "blog",
+    "title": "Laphroaig 25 년 Bessie Williamson Story (Global Travel Exclusive)",
+    "snippet": "*Laphroaig 25 년 Bessie Williamson Story (Global Travel Exclusive) 브랜드: Laphroaig ( 라프로익 ) 종류: 아일라 싱글몰트 숙성 연수: 25년 도수: 43% ABV 면세점(Travel Retail) 한정판 “Bessie Williamson Story” [Bessie...",
+    "url": "https://blog.naver.com/hachurryr/224328071505"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "라프로익 10년 - 가나세계주류",
+    "snippet": "라프로익 라프로익 25년 라프로익 25년 상품 정보 이 독특한 25년 산 Laphroaig는 Laphroaig Distillery에서 조심스럽게 보관된 재 병입된 유러피언 Oloroso 오크 배럴과 화이트 아메리칸 버번 오크 배럴의 조합입니다.이...",
+    "url": "https://kanawine3.cafe24.com/product/%EB%9D%BC%ED%94%84%EB%A1%9C%EC%9D%B5-10%EB%85%84/"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.95,
+  "reason": "메뉴판의 라프로익 25년은 25년 숙성 상품이지만, 카탈로그 후보에는 10년과 쿼터캐스크만 있어 일치하는 상품이 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1308,
+   "attempts": 1,
+   "input_tokens": 2217,
+   "output_tokens": 84,
+   "thought_tokens": 0
+  }
+ }
+}

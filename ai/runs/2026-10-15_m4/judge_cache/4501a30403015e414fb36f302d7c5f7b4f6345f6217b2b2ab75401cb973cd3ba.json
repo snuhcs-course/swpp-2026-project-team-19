@@ -1,0 +1,76 @@
+{
+ "key": "4501a30403015e414fb36f302d7c5f7b4f6345f6217b2b2ab75401cb973cd3ba",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Macallan 12yo Sheryy Cask",
+  "options": [
+   {
+    "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+    "display_name": "The Macallan 12 Double Cask",
+    "age_years": 12,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "854c6973-b222-5298-b1fe-4fa0ef6264f8",
+    "display_name": "The Macallan 12 Sherry Oak",
+    "age_years": 12,
+    "edition_name": "Sherry Oak"
+   },
+   {
+    "product_id": "30ac644f-a7ae-51a2-a3a8-cda1fe7d1d7f",
+    "display_name": "The Macallan 15 Double Cask",
+    "age_years": 15,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "c78d15b5-46b1-589d-b3ee-a8e308dbea1c",
+    "display_name": "Aberlour 12",
+    "age_years": 12,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "맥캘란 12 년 셰리 가격, 맛, 구형",
+    "snippet": "구형( The Macallan 12 Year Old Sherry Oak - Old Bottle) 을 소개드리겠습니다. 맥캘란 12 년 셰리 오크는 오랜... 제품 : 12 년 Double Cask 12 년 Sherry Oak 15년 Double Cask 15년 Sherry Oak 18년 Sherry Oak Rare Cask Classic Cut Harmony Collection...",
+    "url": "https://blog.naver.com/keg5645/224373938339"
+   },
+   {
+    "endpoint": "blog",
+    "title": "대전 동구 칵테일바 | 칵테일&위스키 바 ‘공강’",
+    "snippet": "풍부하고 묵직한 셰리 풍미 The Macallan 18 ( Sherry Seasoned) 5. The Macallan 12 년 (Double Cask ) • 대략 가격: 10~15만 원(바틀 기준) • 특징: 스페이사이드 싱글 몰트. 아메리칸·유러피안 셰리 오크 더블...",
+    "url": "https://blog.naver.com/bacotalbe/224413649998"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[북마크 추천] 싱글몰트의 신화, 맥캘란( The Macallan ) 위스키 시리즈 완....",
+    "snippet": "[북마크 추천] 싱글몰트의 신화, 맥캘란( The Macallan ) 위스키... (Double Cask 12 Years Old) - 완벽한 조화와 매일의 즐거움 등급 & 숙성... ② 맥캘란 12 년 셰리오크 ( Sherry Oak 12 Years Old) - 맥캘란의 클래식...",
+    "url": "https://blog.naver.com/whisky_tamgu/224407879681"
+   },
+   {
+    "endpoint": "blog",
+    "title": "맥캘란 12 년 셰리 오크 캐스크 ( Macallan 12 Sherry Oak Cask )",
+    "snippet": "아메리칸 셰리 오크와 유러피안 셰리 오크를 블렌딩한 더블 캐스크(Double Cask )를 더 좋아하는... 그중에서도 맥캘란 12 년 셰리 오크( The Macallan 12 Years Old Sherry Oak)는 브랜드의 정체성을 대표하는...",
+    "url": "https://blog.naver.com/nizilab/224433883304"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "same",
+  "product_id": "854c6973-b222-5298-b1fe-4fa0ef6264f8",
+  "confidence": 0.95,
+  "reason": "메뉴판의 'Macallan 12yo Sheryy Cask'는 12년 숙성 셰리 오크 에디션으로, 후보 중 The Macallan 12 Sherry Oak와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1308,
+   "attempts": 1,
+   "input_tokens": 2381,
+   "output_tokens": 123,
+   "thought_tokens": 0
+  }
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "key": "e07ed27009a4301f94d4124b50d6122a2d2fb7ec039aa034e63ebc0bfa3ff0c9",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Kavalan Solist",
+  "options": [
+   {
+    "product_id": "609f1199-f627-5ce1-bab9-b4dfd9acb9ec",
+    "display_name": "Kavalan Solist Oloroso Sherry",
+    "age_years": null,
+    "edition_name": "Solist Oloroso Sherry"
+   },
+   {
+    "product_id": "abe4e50e-f84d-5fc8-9d9e-d4cfc345754a",
+    "display_name": "Kavalan Solist Vinho Barrique",
+    "age_years": null,
+    "edition_name": "Solist Vinho Barrique"
+   },
+   {
+    "product_id": "cbe5c81b-5886-57c3-8e75-6b474eff02b0",
+    "display_name": "Kavalan Triple Sherry Cask",
+    "age_years": null,
+    "edition_name": "Triple Sherry Cask"
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "카발란 솔리스트 비노바리끄, 피노 쉐리( Kavalan Solist Single Cask Strength ....",
+    "snippet": "카발란 솔리스트 비노바리끄, 피노 쉐리 ( Kavalan Solist Single Cask Strength Vinho Barrique, Fino Sherry Cask) 종류: 싱글몰트 위스키 도수: 비노바리끄 54.8%, 피노 쉐리 57.1% 용량: 1000ml (카발란 솔리스트 라인은 캐스크...",
+    "url": "https://blog.naver.com/zozochic/224436296230"
+   },
+   {
+    "endpoint": "blog",
+    "title": "카발란 솔리스트 비노 바리끄( Kavalan Solist Vinho Barrique) Cask No.W170324084D....",
+    "snippet": "2% 캐스크 스트렝스 위스키 이번에 마셔본 위스키는 대만의 대표적인 싱글몰트 위스키 브랜드인 카발란( Kavalan )의 솔리스트 비노 바리끄( Solist Vinho Barrique). 비노 바리끄는 와인 숙성에 사용된 오크통을...",
+    "url": "https://blog.naver.com/d_sung__/224410132475"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[싱글몰트위스키] 카발란 솔리스트 올로로소 셰리캐스크( Kavalan Solist ....",
+    "snippet": "박찬욱 감독의 영화에 등장해서 보다 널리 대중적으로 알려진 대만의 위스키, 카발란. 카발란의 솔리스트 시리즈는 모두 싱글캐스크 스트렝쓰이다. 올로로소 캐스크를 썼다는 것은 스페인...",
+    "url": "https://blog.naver.com/mercyblu/224405682999"
+   },
+   {
+    "endpoint": "blog",
+    "title": "대만여행 기념품 쇼핑리스트 추천 카발란위스키 도수 종류 추천 면....",
+    "snippet": "스파이스 Kavalan Solist Bourbon 싱글 캐스크 46~59.9% 버번 캐스크 바닐라, 코코넛, 열대과일 Kavalan Solist Sherry 싱글 캐스크 46~59.9% 셰리 캐스크 건포도, 말린 과일, 초콜릿, 견과류 Kavalan Solist Vinho 싱글 캐스크...",
+    "url": "https://blog.naver.com/zinizio/224403002486"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "unsure",
+  "product_id": null,
+  "confidence": 0.8,
+  "reason": "메뉴판에 'Kavalan Solist'만 적혀있어 올로로소 셰리나 비노 바리끄 등 구체적인 캐스크 에디션을 특정할 수 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1411,
+   "attempts": 1,
+   "input_tokens": 2312,
+   "output_tokens": 81,
+   "thought_tokens": 0
+  }
+ }
+}

@@ -1,0 +1,82 @@
+{
+ "key": "c9e44254a6a039d304e4e851f353d3d1c39479389f04b6e8c5a303b623331a6c",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Four Roses Small Batch",
+  "options": [
+   {
+    "product_id": "cadd2c4a-0ac9-555b-a1be-33742d66d8c6",
+    "display_name": "Eagle Rare 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "ccf8c7b3-4b19-5ef2-8056-f714c4c2d468",
+    "display_name": "Knob Creek",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "f626dbc2-6a44-5e95-83b4-35af8023e497",
+    "display_name": "Wild Turkey 101 8 Year",
+    "age_years": 8,
+    "edition_name": "101"
+   },
+   {
+    "product_id": "f95e81a0-b8f5-5cb3-adb0-998b5956f588",
+    "display_name": "Maker's Mark",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "a342821c-15b8-5db7-bb72-6fbb058f6dd4",
+    "display_name": "Woodford Reserve",
+    "age_years": null,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "[위스키 리뷰] 포 로지스 스몰 배치 셀렉트, Four Roses Small Batch Select",
+    "snippet": "포 로지스 스몰 배치 셀렉트 리뷰 생산지 구분 아메리칸 위스키 재료 및 블렌딩 구분 버번 위스키 캐스크 - 생산 지역 켄터키 도수 52% 숙성연수 NAS 용량 750ml 색소 첨가 여부 X 주요 특징 비냉각여과, 스몰 배치...",
+    "url": "https://blog.naver.com/mashillae/224433458079"
+   },
+   {
+    "endpoint": "blog",
+    "title": "가격대별 버번 추천 ($30 / $50 / $80 / $100+) | 버번 위스키 입문 가이드 p....",
+    "snippet": "선물용으로도 추천 Four Roses Small Batch 90 proof (45% ABV) $35–40 스파이시하고 과일향. 네트 & 올드 패션드 모두 추천 Eagle Rare 10 Year 90 proof (45% ABV) $45–55 10년 숙성, 부드러운 시트러스....",
+    "url": "https://blog.naver.com/twism1/224408712569"
+   },
+   {
+    "endpoint": "blog",
+    "title": "포 로지스 2026 한정판 공개! 14~23년 초고숙성 블렌딩, 미국 가격 249달....",
+    "snippet": "Four Roses 2026 Limited Edition Small Batch 포 로지스의 2026년 한정판이 공개됐습니다. 이번에는 스펙부터 꽤 강합니다. 14년부터 무려 23년 숙성 원액까지 블렌딩했고 생산량 역시 약 16,800병에...",
+    "url": "https://blog.naver.com/kkyuni_dad/224409182491"
+   },
+   {
+    "endpoint": "blog",
+    "title": "포 로지스 스몰 배치 리뷰: 부드러움과 복합미를 모두 갖춘 프리미....",
+    "snippet": "버번 위스키를 좋아하는 사람이라면 한 번쯤은 **포 로지스 스몰 배치( Four Roses Small Batch )**라는 이름을 들어봤을 것입니다. 포 로지스 스몰 배치는 브랜드의 대표적인 프리미엄 버번으로, 서로 다른 숙성...",
+    "url": "https://blog.naver.com/kimjam77/224333504495"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.95,
+  "reason": "메뉴의 Four Roses Small Batch와 일치하는 상품이 카탈로그 옵션에 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1978,
+   "attempts": 1,
+   "input_tokens": 2405,
+   "output_tokens": 60,
+   "thought_tokens": 0
+  }
+ }
+}

@@ -1,0 +1,3219 @@
+{
+ "run": "ai/runs/2026-10-15_m4/dev_r0.json",
+ "rows": [
+  {
+   "matcher": "S1+S2b+S3",
+   "condition": "C0",
+   "lines": 177,
+   "known_top1": 0.9090909090909091,
+   "false_merge_rate": 0.0,
+   "accept_error_rate": 0.0,
+   "confirm": 11,
+   "choose": 4,
+   "register": 30,
+   "wrong": 2,
+   "confirm_per_photo": 0.85,
+   "choose_per_photo": 0.31,
+   "register_per_photo": 2.31,
+   "wrong_per_photo": 0.15,
+   "b_plus_c": 34,
+   "photos_bcd_under_5": 0.7692307692307693,
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 7,
+     "correct": 7,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 0,
+     "correct": 0,
+     "precision": null
+    }
+   }
+  },
+  {
+   "matcher": "S1+S2b+S3",
+   "condition": "C1",
+   "lines": 177,
+   "known_top1": 0.861271676300578,
+   "false_merge_rate": 0.0,
+   "accept_error_rate": 0.0,
+   "confirm": 12,
+   "choose": 5,
+   "register": 10,
+   "wrong": 0,
+   "confirm_per_photo": 0.92,
+   "choose_per_photo": 0.38,
+   "register_per_photo": 0.77,
+   "wrong_per_photo": 0.0,
+   "b_plus_c": 15,
+   "photos_bcd_under_5": 0.9230769230769231,
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 8,
+     "correct": 8,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 0,
+     "correct": 0,
+     "precision": null
+    }
+   }
+  },
+  {
+   "matcher": "M3a",
+   "condition": "C0",
+   "lines": 177,
+   "known_top1": 0.9090909090909091,
+   "false_merge_rate": 0.0,
+   "accept_error_rate": 0.0,
+   "confirm": 14,
+   "choose": 1,
+   "register": 30,
+   "wrong": 2,
+   "confirm_per_photo": 1.08,
+   "choose_per_photo": 0.08,
+   "register_per_photo": 2.31,
+   "wrong_per_photo": 0.15,
+   "b_plus_c": 31,
+   "photos_bcd_under_5": 0.7692307692307693,
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 7,
+     "correct": 7,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 7,
+     "correct": 7,
+     "precision": 1.0
+    }
+   }
+  },
+  {
+   "matcher": "M3a",
+   "condition": "C1",
+   "lines": 177,
+   "known_top1": 0.861271676300578,
+   "false_merge_rate": 0.0,
+   "accept_error_rate": 0.0,
+   "confirm": 22,
+   "choose": 1,
+   "register": 4,
+   "wrong": 0,
+   "confirm_per_photo": 1.69,
+   "choose_per_photo": 0.08,
+   "register_per_photo": 0.31,
+   "wrong_per_photo": 0.0,
+   "b_plus_c": 5,
+   "photos_bcd_under_5": 1.0,
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 8,
+     "correct": 8,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 13,
+     "correct": 13,
+     "precision": 1.0
+    }
+   }
+  },
+  {
+   "matcher": "M3a+M4",
+   "condition": "C0",
+   "lines": 177,
+   "known_top1": 0.9090909090909091,
+   "false_merge_rate": 0.0,
+   "accept_error_rate": 0.0,
+   "confirm": 14,
+   "choose": 1,
+   "register": 30,
+   "wrong": 2,
+   "confirm_per_photo": 1.08,
+   "choose_per_photo": 0.08,
+   "register_per_photo": 2.31,
+   "wrong_per_photo": 0.15,
+   "b_plus_c": 31,
+   "photos_bcd_under_5": 0.7692307692307693,
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 7,
+     "correct": 7,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 7,
+     "correct": 7,
+     "precision": 1.0
+    }
+   },
+   "m4": {
+    "target_lines": 29,
+    "skipped": 2,
+    "verdicts": {
+     "skipped": 2,
+     "different": 20,
+     "no_options": 8,
+     "unsure": 1
+    },
+    "raised_confirm": 0,
+    "raised_confirm_wrong": 0,
+    "raised_confirm_wrong_rate": null,
+    "picked_not_confirm": 0,
+    "new_verdicts": 10,
+    "new_verdicts_gold_absent": 9
+   }
+  },
+  {
+   "matcher": "M3a+M4",
+   "condition": "C1",
+   "lines": 177,
+   "known_top1": 0.861271676300578,
+   "false_merge_rate": 0.0,
+   "accept_error_rate": 0.0,
+   "confirm": 22,
+   "choose": 1,
+   "register": 4,
+   "wrong": 0,
+   "confirm_per_photo": 1.69,
+   "choose_per_photo": 0.08,
+   "register_per_photo": 0.31,
+   "wrong_per_photo": 0.0,
+   "b_plus_c": 5,
+   "photos_bcd_under_5": 1.0,
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 8,
+     "correct": 8,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 13,
+     "correct": 13,
+     "precision": 1.0
+    }
+   },
+   "m4": {
+    "target_lines": 3,
+    "skipped": 2,
+    "verdicts": {
+     "skipped": 2,
+     "unsure": 1,
+     "different": 2
+    },
+    "raised_confirm": 0,
+    "raised_confirm_wrong": 0,
+    "raised_confirm_wrong_rate": null,
+    "picked_not_confirm": 0,
+    "new_verdicts": 0,
+    "new_verdicts_gold_absent": 0
+   }
+  },
+  {
+   "matcher": "M4",
+   "condition": "C0",
+   "lines": 177,
+   "known_top1": 0.9090909090909091,
+   "false_merge_rate": 0.0,
+   "accept_error_rate": 0.0,
+   "confirm": 14,
+   "choose": 1,
+   "register": 30,
+   "wrong": 2,
+   "confirm_per_photo": 1.08,
+   "choose_per_photo": 0.08,
+   "register_per_photo": 2.31,
+   "wrong_per_photo": 0.15,
+   "b_plus_c": 31,
+   "photos_bcd_under_5": 0.7692307692307693,
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 7,
+     "correct": 7,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 3,
+     "correct": 3,
+     "precision": 1.0
+    }
+   },
+   "m4": {
+    "target_lines": 32,
+    "skipped": 2,
+    "verdicts": {
+     "same": 3,
+     "skipped": 2,
+     "different": 20,
+     "no_options": 8,
+     "unsure": 1
+    },
+    "raised_confirm": 3,
+    "raised_confirm_wrong": 0,
+    "raised_confirm_wrong_rate": 0.0,
+    "picked_not_confirm": 0,
+    "new_verdicts": 10,
+    "new_verdicts_gold_absent": 9
+   }
+  },
+  {
+   "matcher": "M4",
+   "condition": "C1",
+   "lines": 177,
+   "known_top1": 0.861271676300578,
+   "false_merge_rate": 0.0,
+   "accept_error_rate": 0.0,
+   "confirm": 22,
+   "choose": 1,
+   "register": 4,
+   "wrong": 0,
+   "confirm_per_photo": 1.69,
+   "choose_per_photo": 0.08,
+   "register_per_photo": 0.31,
+   "wrong_per_photo": 0.0,
+   "b_plus_c": 5,
+   "photos_bcd_under_5": 1.0,
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 8,
+     "correct": 8,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 9,
+     "correct": 9,
+     "precision": 1.0
+    }
+   },
+   "m4": {
+    "target_lines": 13,
+    "skipped": 2,
+    "verdicts": {
+     "same": 10,
+     "skipped": 2,
+     "unsure": 1,
+     "different": 2
+    },
+    "raised_confirm": 9,
+    "raised_confirm_wrong": 0,
+    "raised_confirm_wrong_rate": 0.0,
+    "picked_not_confirm": 1,
+    "new_verdicts": 0,
+    "new_verdicts_gold_absent": 0
+   }
+  }
+ ],
+ "go": {
+  "1_c1_bc_reduction": {
+   "M3a": 5,
+   "M3a+M4": 5,
+   "reduction": 0.0,
+   "pass": false
+  },
+  "2_wrong_rate_C0": {
+   "n": 0,
+   "wrong": 0,
+   "rate": null,
+   "pass": true
+  },
+  "3_false_merge_C0": {
+   "M3a": 0.0,
+   "M3a+M4": 0.0,
+   "pass": true
+  },
+  "2_wrong_rate_C1": {
+   "n": 0,
+   "wrong": 0,
+   "rate": null,
+   "pass": true
+  },
+  "3_false_merge_C1": {
+   "M3a": 0.0,
+   "M3a+M4": 0.0,
+   "pass": true
+  },
+  "provisional_go": false
+ },
+ "m4_calls": {
+  "prompt": "judge_prompt_v1.md",
+  "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+  "model": "gemini-3.5-flash-lite",
+  "engine": {
+   "target_lines": 77,
+   "skipped_translation": 8,
+   "no_options": 16,
+   "llm_requests": 61,
+   "llm_cache_hits": 25,
+   "naver_requests": 393,
+   "naver_errors": 0,
+   "naver_latency_per_line": {
+    "n": 77,
+    "mean_ms": 0,
+    "p95_ms": 0
+   },
+   "llm_latency_per_call": {
+    "n": 36,
+    "mean_ms": 1367,
+    "p95_ms": 1774
+   },
+   "line_latency": {
+    "n": 77,
+    "mean_ms": 2060,
+    "p95_ms": 4675
+   }
+  },
+  "judge_calls": {
+   "llm_calls": 36,
+   "retries": 0,
+   "parse_errors": 0,
+   "input_tokens": 89396,
+   "output_tokens": 3274,
+   "thought_tokens": 0
+  },
+  "naver": {
+   "api_calls": 0,
+   "cache_hits": 393,
+   "retries": 0,
+   "errors": 0
+  }
+ },
+ "m3_llm": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "api_calls_this_run": 0,
+  "by_kind": {
+   "m3a": {
+    "requests": 8,
+    "api_calls": 0,
+    "cache_hits": 8,
+    "parse_errors": 0,
+    "input_tokens": 14242,
+    "output_tokens": 4343,
+    "thought_tokens": 934,
+    "mean_latency_ms": 4128
+   }
+  }
+ },
+ "m4_lines": {
+  "M3a+M4/C0": [
+   {
+    "photo_id": "008_서로상_01",
+    "name": "헤네시vsop / Hennessy vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "skipped",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": null,
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "레미마틴vsop / Remy Martin vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "skipped",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": null,
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Four Roses Small Batch",
+    "gold": "new:four-roses-small-batch",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Four Roses Small Batch와 일치하는 상품이 카탈로그 옵션에 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Eagle Rare 10",
+      "via": "naver"
+     },
+     {
+      "product": "Knob Creek",
+      "via": "naver"
+     },
+     {
+      "product": "Wild Turkey 101 8 Year",
+      "via": "naver"
+     },
+     {
+      "product": "Maker's Mark",
+      "via": "naver"
+     },
+     {
+      "product": "Woodford Reserve",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Rye Whiskey",
+    "gold": "new:james-e-pepper-1776-rye",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 James E Pepper 1776 Rye Whiskey는 후보 목록에 존재하지 않는 새로운 상품입니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Knob Creek",
+      "via": "naver"
+     },
+     {
+      "product": "Booker's",
+      "via": "naver"
+     },
+     {
+      "product": "Wild Turkey 101 8 Year",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Bourbon Whiskey",
+    "gold": "new:james-e-pepper-1776-bourbon",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 James E Pepper 1776 Bourbon Whiskey는 후보에 없으며 카탈로그에 없는 새로운 상품입니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Booker's",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Cleveland Black Reserve Bourbon",
+    "gold": "new:cleveland-black-reserve",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Taylor Small Batch",
+    "gold": "new:eh-taylor-small-batch",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Taylor Small Batch'는 E.H. Taylor Small Batch 제품을 가리키나, 주어진 후보 목록(Eagle Rare 10, Booker's, Russell's Reserve Single Barrel) 중에는 일치하는 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Eagle Rare 10",
+      "via": "naver"
+     },
+     {
+      "product": "Booker's",
+      "via": "naver"
+     },
+     {
+      "product": "Russell's Reserve Single Barrel",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Templeton Rye Barrel Strength",
+    "gold": "new:templeton-rye-barrel-strength",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 템플턴 라이 배럴 스트랭스(Templeton Rye Barrel Strength)와 일치하는 상품이 후보 목록에 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Jameson",
+      "via": "naver"
+     },
+     {
+      "product": "The Dalmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Dalmore 15",
+      "via": "naver"
+     },
+     {
+      "product": "Ardbeg 10",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Maker`s Mark Cask Strength",
+    "gold": "new:makers-mark-cask-strength",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Maker's Mark Cask Strength'는 캐스크 스트렝스 에디션이나, 후보 목록에는 기본 'Maker's Mark'만 있고 캐스크 스트렝스 상품이 없어 새로운 상품에 해당합니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Maker's Mark",
+      "via": "family"
+     },
+     {
+      "product": "Woodford Reserve",
+      "via": "naver"
+     },
+     {
+      "product": "Monkey Shoulder",
+      "via": "naver"
+     },
+     {
+      "product": "Knob Creek",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Old Pepper Rye Single Barrel",
+    "gold": "new:old-pepper-rye-single-barrel",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Old Pepper Rye Single Barrel은 카탈로그 후보 목록에 일치하는 상품이 없으며 새로운 상품이다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Eagle Rare 10",
+      "via": "naver"
+     },
+     {
+      "product": "Russell's Reserve Single Barrel",
+      "via": "naver"
+     },
+     {
+      "product": "Woodford Reserve",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 8",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 18",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 15",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Lagavulin 12yo 2018",
+    "gold": "new:lagavulin-12-2018",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Lagavulin 12yo 2018(12년 연수 및 2018년 빈티지/에디션)과 일치하는 상품이 옵션 목록에 존재하지 않음.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Lagavulin 16",
+      "via": "family"
+     },
+     {
+      "product": "Lagavulin 8",
+      "via": "family"
+     },
+     {
+      "product": "Bowmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 12",
+      "via": "naver"
+     },
+     {
+      "product": "Highland Park 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenlivet 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Dalmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     },
+     {
+      "product": "Cragganmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "BenRiach The Twelve",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Kavalan Solist",
+    "gold": "unknown",
+    "kind": "unknown",
+    "burden": "choose",
+    "rank1_gold": false,
+    "m4": "unsure",
+    "picked": null,
+    "confidence": 0.8,
+    "reason": "메뉴판에 'Kavalan Solist'만 적혀있어 올로로소 셰리나 비노 바리끄 등 구체적인 캐스크 에디션을 특정할 수 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Kavalan Solist Oloroso Sherry",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Solist Vinho Barrique",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Triple Sherry Cask",
+      "via": "family"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Octomore 13.1",
+    "gold": "new:octomore-13-1",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Octomore 13.1은 후보 목록에 없으나 에디션이 다른 새 상품이므로 new로 판정함",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Octomore 16.1",
+      "via": "family"
+     },
+     {
+      "product": "Port Charlotte 10",
+      "via": "naver"
+     },
+     {
+      "product": "Laphroaig 10",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Macallan Classic Cut 2020",
+    "gold": "new:macallan-classic-cut-2020",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 Macallan Classic Cut 2020은 후보 목록에 없는 한정판 에디션 상품입니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "Glenmorangie 18",
+      "via": "naver"
+     },
+     {
+      "product": "Lagavulin 16",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenrothes 12",
+      "via": "naver"
+     },
+     {
+      "product": "Lagavulin 8",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenrothes Whisky Maker's Cut",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 12",
+      "via": "naver"
+     },
+     {
+      "product": "Jameson",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 15",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 15",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 10",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 12",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 17",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Machrie Moor",
+    "gold": "new:arran-machrie-moor",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 Machrie Moor(마크리무어)는 아란의 피트 에디션 제품이나, 카탈로그 후보 목록(Arran 10, Arran Bodega Sherry Cask, Woodford Reserve)에는 해당 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Arran 10",
+      "via": "family"
+     },
+     {
+      "product": "Arran Bodega Sherry Cask",
+      "via": "family"
+     },
+     {
+      "product": "Woodford Reserve",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hakushu DR",
+    "gold": "new:hakushu-distillers-reserve",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hibiki DR",
+    "gold": "new:hibiki-japanese-harmony",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 18yo",
+    "gold": "new:bowmore-18",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Bowmore 18yo는 18년 숙성 제품이나, 카탈로그의 보모어 후보는 12년과 15년뿐이어서 일치하는 상품이 없음",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Bowmore 12",
+      "via": "family"
+     },
+     {
+      "product": "Bowmore 15",
+      "via": "family"
+     },
+     {
+      "product": "Royal Brackla 18",
+      "via": "naver"
+     },
+     {
+      "product": "Glenmorangie 18",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Yamazaki 12yo",
+    "gold": "new:yamazaki-12",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 Yamazaki 12yo는 야마자키 12년산이지만, 제공된 후보 목록에는 야마자키 12년 상품이 없고 다른 증류소의 12년산(오헨토션, 달모어, 오트모어)과 야마자키 스모키 배치만 있어 일치하는 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Yamazaki Smoky Batch",
+      "via": "family"
+     },
+     {
+      "product": "Auchentoshan 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Dalmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aultmore 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Ballentine 30yo",
+    "gold": "new:ballantines-30",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 18yo",
+    "gold": "unknown",
+    "kind": "unknown",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.9,
+    "reason": "메뉴의 Macallan 18yo는 18년 숙성 제품이나, 제공된 옵션 목록에 맥캘란 18년 제품이 없어 새 상품(new)으로 판정합니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "Royal Brackla 18",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenlivet 18",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfiddich 18",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfarclas 25yo",
+    "gold": "new:glenfarclas-25",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.9,
+    "reason": "메뉴판의 Glenfarclas 25yo에 해당하는 25년 숙성 상품이 옵션 목록에 존재하지 않습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Glenfarclas 10",
+      "via": "family"
+     },
+     {
+      "product": "Glenfarclas 105",
+      "via": "family"
+     },
+     {
+      "product": "Glenfarclas 12",
+      "via": "family"
+     },
+     {
+      "product": "Glenfarclas 15",
+      "via": "family"
+     },
+     {
+      "product": "Glenfarclas 17",
+      "via": "family"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Caol ila 25yo",
+    "gold": "new:caol-ila-25",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "라프로익 25년",
+    "gold": "new:laphroaig-25",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 라프로익 25년은 25년 숙성 상품이지만, 카탈로그 후보에는 10년과 쿼터캐스크만 있어 일치하는 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Laphroaig 10",
+      "via": "family"
+     },
+     {
+      "product": "Laphroaig Quarter Cask",
+      "via": "family"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 21년",
+    "gold": "new:hibiki-21",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 블랜더스 쵸이스",
+    "gold": "new:hibiki-blenders-choice",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "발베니 18년 PX",
+    "gold": "new:balvenie-18-px",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 '발베니 18년 PX'는 18년 숙성 및 PX 캐스크 에디션이나, 카탈로그 후보 목록에 일치하는 18년산 발베니 제품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "The Balvenie 12 DoubleWood",
+      "via": "family"
+     },
+     {
+      "product": "The Balvenie 14 Caribbean Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Balvenie 21 PortWood",
+      "via": "family"
+     },
+     {
+      "product": "The Glenlivet 18",
+      "via": "naver"
+     },
+     {
+      "product": "Glenmorangie 18",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "카발란 DR 마데라캐스크",
+    "gold": "new:kavalan-distillery-reserve-madeira",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.85,
+    "reason": "메뉴의 '카발란 DR 마데라캐스크'는 카발란 마데이라 관련 제품이나, 주어진 후보 목록에 일치하는 카발란 마데라 캐스크 제품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Kavalan Solist Oloroso Sherry",
+      "via": "family"
+     },
+     {
+      "product": "Kavalan Solist Vinho Barrique",
+      "via": "family"
+     },
+     {
+      "product": "Kavalan Triple Sherry Cask",
+      "via": "family"
+     },
+     {
+      "product": "GlenDronach 15",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 21 Parliament",
+      "via": "naver"
+     },
+     {
+      "product": "The Balvenie 21 PortWood",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 12",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 15",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 10",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 18",
+      "via": "naver"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bushmil 10yo",
+    "gold": "new:bushmills-10",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Caol Ila 12yo",
+    "gold": "new:caol-ila-12",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Caol Ila 12yo'는 쿨일라 증류소의 12년산 정규품이지만, 후보 목록에 쿨일라(Caol Ila) 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Bunnahabhain 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aultmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "Bowmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "Highland Park 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Kilchoman Sanaig",
+    "gold": "new:kilchoman-sanaig",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Kilchoman Sanaig는 카탈로그 후보(Bunnahabhain 12)와 일치하지 않으며, 카탈로그에 없는 새 상품입니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Bunnahabhain 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   }
+  ],
+  "M3a+M4/C1": [
+   {
+    "photo_id": "008_서로상_01",
+    "name": "헤네시vsop / Hennessy vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "skipped",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": null,
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "레미마틴vsop / Remy Martin vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "skipped",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": null,
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Kavalan Solist",
+    "gold": "unknown",
+    "kind": "unknown",
+    "burden": "choose",
+    "rank1_gold": false,
+    "m4": "unsure",
+    "picked": null,
+    "confidence": 0.8,
+    "reason": "메뉴판의 'Kavalan Solist'는 브랜드와 시리즈명만 있고 구체적인 캐스크 종류(올로로소 셰리, 비노 바리끄 등)가 명시되어 있지 않아 특정 후보를 고를 수 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Kavalan Solist Oloroso Sherry",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Solist Vinho Barrique",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Distillery Reserve Madeira Cask",
+      "via": "family"
+     },
+     {
+      "product": "Kavalan Triple Sherry Cask",
+      "via": "family"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hibiki DR",
+    "gold": "new:hibiki-japanese-harmony",
+    "kind": "known",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 'Hibiki DR'은 히비키 무연수(Distiller's Reserve / Japanese Harmony 등)를 의미하나, 주어진 후보 목록에는 Hibiki 21, Blender's Choice, Japanese Harmony 등이 있으며 메뉴와 정확히 일치하는 DR 전용 상품이나 후보가 없어 일치하는 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Hibiki 21",
+      "via": "family"
+     },
+     {
+      "product": "Hibiki Blender's Choice",
+      "via": "family"
+     },
+     {
+      "product": "Hibiki Japanese Harmony",
+      "via": "family"
+     },
+     {
+      "product": "Yamazaki 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 18yo",
+    "gold": "unknown",
+    "kind": "unknown",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Macallan 18yo'는 18년 숙성 제품이나, 옵션 목록에 맥캘란 18년 제품이 존재하지 않습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan Classic Cut 2020",
+      "via": "family"
+     },
+     {
+      "product": "Royal Brackla 18",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenlivet 18",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfiddich 18",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   }
+  ],
+  "M4/C0": [
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y 쉐리",
+    "gold": "dalmore-12-sherry-cask-select",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "The Dalmore 12 Sherry Cask Select",
+    "confidence": 0.95,
+    "reason": "메뉴판의 '달모어 12Y 쉐리'는 12년 연수와 쉐리 캐스크 에디션을 명시하고 있어 후보 중 The Dalmore 12 Sherry Cask Select와 정확히 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "The Dalmore 12",
+      "via": "current"
+     },
+     {
+      "product": "The Dalmore 12 Sherry Cask Select",
+      "via": "current"
+     },
+     {
+      "product": "The Dalmore 15",
+      "via": "family"
+     },
+     {
+      "product": "The Dalmore Cigar Malt Reserve",
+      "via": "family"
+     },
+     {
+      "product": "The Dalmore Port Wood Reserve",
+      "via": "family"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 셰리 오크",
+    "gold": "kavalan-solist-sherry",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "Kavalan Solist Oloroso Sherry",
+    "confidence": 0.95,
+    "reason": "메뉴판의 '카발란 솔리스트 셰리 오크'는 옵션의 'Kavalan Solist Oloroso Sherry'와 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "Kavalan Solist Oloroso Sherry",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Solist Vinho Barrique",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Triple Sherry Cask",
+      "via": "current"
+     },
+     {
+      "product": "Edradour 10",
+      "via": "naver"
+     },
+     {
+      "product": "Clynelish 14",
+      "via": "naver"
+     },
+     {
+      "product": "Arran 10",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "naver"
+     },
+     {
+      "product": "Auchentoshan 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aultmore 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "헤네시vsop / Hennessy vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "skipped",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": null,
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "레미마틴vsop / Remy Martin vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "skipped",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": null,
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Four Roses Small Batch",
+    "gold": "new:four-roses-small-batch",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Four Roses Small Batch와 일치하는 상품이 카탈로그 옵션에 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Eagle Rare 10",
+      "via": "naver"
+     },
+     {
+      "product": "Knob Creek",
+      "via": "naver"
+     },
+     {
+      "product": "Wild Turkey 101 8 Year",
+      "via": "naver"
+     },
+     {
+      "product": "Maker's Mark",
+      "via": "naver"
+     },
+     {
+      "product": "Woodford Reserve",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Rye Whiskey",
+    "gold": "new:james-e-pepper-1776-rye",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 James E Pepper 1776 Rye Whiskey는 후보 목록에 존재하지 않는 새로운 상품입니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Knob Creek",
+      "via": "naver"
+     },
+     {
+      "product": "Booker's",
+      "via": "naver"
+     },
+     {
+      "product": "Wild Turkey 101 8 Year",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "James E Pepper 1776 Bourbon Whiskey",
+    "gold": "new:james-e-pepper-1776-bourbon",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 James E Pepper 1776 Bourbon Whiskey는 후보에 없으며 카탈로그에 없는 새로운 상품입니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Booker's",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Cleveland Black Reserve Bourbon",
+    "gold": "new:cleveland-black-reserve",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Taylor Small Batch",
+    "gold": "new:eh-taylor-small-batch",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Taylor Small Batch'는 E.H. Taylor Small Batch 제품을 가리키나, 주어진 후보 목록(Eagle Rare 10, Booker's, Russell's Reserve Single Barrel) 중에는 일치하는 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Eagle Rare 10",
+      "via": "naver"
+     },
+     {
+      "product": "Booker's",
+      "via": "naver"
+     },
+     {
+      "product": "Russell's Reserve Single Barrel",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Templeton Rye Barrel Strength",
+    "gold": "new:templeton-rye-barrel-strength",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 템플턴 라이 배럴 스트랭스(Templeton Rye Barrel Strength)와 일치하는 상품이 후보 목록에 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Jameson",
+      "via": "naver"
+     },
+     {
+      "product": "The Dalmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Dalmore 15",
+      "via": "naver"
+     },
+     {
+      "product": "Ardbeg 10",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Maker`s Mark Cask Strength",
+    "gold": "new:makers-mark-cask-strength",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Maker's Mark Cask Strength'는 캐스크 스트렝스 에디션이나, 후보 목록에는 기본 'Maker's Mark'만 있고 캐스크 스트렝스 상품이 없어 새로운 상품에 해당합니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Maker's Mark",
+      "via": "family"
+     },
+     {
+      "product": "Woodford Reserve",
+      "via": "naver"
+     },
+     {
+      "product": "Monkey Shoulder",
+      "via": "naver"
+     },
+     {
+      "product": "Knob Creek",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Old Pepper Rye Single Barrel",
+    "gold": "new:old-pepper-rye-single-barrel",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Old Pepper Rye Single Barrel은 카탈로그 후보 목록에 일치하는 상품이 없으며 새로운 상품이다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Eagle Rare 10",
+      "via": "naver"
+     },
+     {
+      "product": "Russell's Reserve Single Barrel",
+      "via": "naver"
+     },
+     {
+      "product": "Woodford Reserve",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 8",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 18",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 15",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Lagavulin 12yo 2018",
+    "gold": "new:lagavulin-12-2018",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Lagavulin 12yo 2018(12년 연수 및 2018년 빈티지/에디션)과 일치하는 상품이 옵션 목록에 존재하지 않음.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Lagavulin 16",
+      "via": "family"
+     },
+     {
+      "product": "Lagavulin 8",
+      "via": "family"
+     },
+     {
+      "product": "Bowmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 12",
+      "via": "naver"
+     },
+     {
+      "product": "Highland Park 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenAllachie 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenlivet 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Dalmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     },
+     {
+      "product": "Cragganmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "BenRiach The Twelve",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Kavalan Solist",
+    "gold": "unknown",
+    "kind": "unknown",
+    "burden": "choose",
+    "rank1_gold": false,
+    "m4": "unsure",
+    "picked": null,
+    "confidence": 0.8,
+    "reason": "메뉴판에 'Kavalan Solist'만 적혀있어 올로로소 셰리나 비노 바리끄 등 구체적인 캐스크 에디션을 특정할 수 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Kavalan Solist Oloroso Sherry",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Solist Vinho Barrique",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Triple Sherry Cask",
+      "via": "family"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Octomore 13.1",
+    "gold": "new:octomore-13-1",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Octomore 13.1은 후보 목록에 없으나 에디션이 다른 새 상품이므로 new로 판정함",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Octomore 16.1",
+      "via": "family"
+     },
+     {
+      "product": "Port Charlotte 10",
+      "via": "naver"
+     },
+     {
+      "product": "Laphroaig 10",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Macallan Classic Cut 2020",
+    "gold": "new:macallan-classic-cut-2020",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 Macallan Classic Cut 2020은 후보 목록에 없는 한정판 에디션 상품입니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "Glenmorangie 18",
+      "via": "naver"
+     },
+     {
+      "product": "Lagavulin 16",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenrothes 12",
+      "via": "naver"
+     },
+     {
+      "product": "Lagavulin 8",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenrothes Whisky Maker's Cut",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 12",
+      "via": "naver"
+     },
+     {
+      "product": "Jameson",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 15",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 15",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 10",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 12",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 17",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Machrie Moor",
+    "gold": "new:arran-machrie-moor",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 Machrie Moor(마크리무어)는 아란의 피트 에디션 제품이나, 카탈로그 후보 목록(Arran 10, Arran Bodega Sherry Cask, Woodford Reserve)에는 해당 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Arran 10",
+      "via": "family"
+     },
+     {
+      "product": "Arran Bodega Sherry Cask",
+      "via": "family"
+     },
+     {
+      "product": "Woodford Reserve",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hakushu DR",
+    "gold": "new:hakushu-distillers-reserve",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hibiki DR",
+    "gold": "new:hibiki-japanese-harmony",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Bowmore 18yo",
+    "gold": "new:bowmore-18",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Bowmore 18yo는 18년 숙성 제품이나, 카탈로그의 보모어 후보는 12년과 15년뿐이어서 일치하는 상품이 없음",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Bowmore 12",
+      "via": "family"
+     },
+     {
+      "product": "Bowmore 15",
+      "via": "family"
+     },
+     {
+      "product": "Royal Brackla 18",
+      "via": "naver"
+     },
+     {
+      "product": "Glenmorangie 18",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Yamazaki 12yo",
+    "gold": "new:yamazaki-12",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 Yamazaki 12yo는 야마자키 12년산이지만, 제공된 후보 목록에는 야마자키 12년 상품이 없고 다른 증류소의 12년산(오헨토션, 달모어, 오트모어)과 야마자키 스모키 배치만 있어 일치하는 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Yamazaki Smoky Batch",
+      "via": "family"
+     },
+     {
+      "product": "Auchentoshan 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Dalmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aultmore 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Ballentine 30yo",
+    "gold": "new:ballantines-30",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 18yo",
+    "gold": "unknown",
+    "kind": "unknown",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.9,
+    "reason": "메뉴의 Macallan 18yo는 18년 숙성 제품이나, 제공된 옵션 목록에 맥캘란 18년 제품이 없어 새 상품(new)으로 판정합니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "Royal Brackla 18",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenlivet 18",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfiddich 18",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Glenfarclas 25yo",
+    "gold": "new:glenfarclas-25",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.9,
+    "reason": "메뉴판의 Glenfarclas 25yo에 해당하는 25년 숙성 상품이 옵션 목록에 존재하지 않습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Glenfarclas 10",
+      "via": "family"
+     },
+     {
+      "product": "Glenfarclas 105",
+      "via": "family"
+     },
+     {
+      "product": "Glenfarclas 12",
+      "via": "family"
+     },
+     {
+      "product": "Glenfarclas 15",
+      "via": "family"
+     },
+     {
+      "product": "Glenfarclas 17",
+      "via": "family"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Caol ila 25yo",
+    "gold": "new:caol-ila-25",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "라프로익 25년",
+    "gold": "new:laphroaig-25",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 라프로익 25년은 25년 숙성 상품이지만, 카탈로그 후보에는 10년과 쿼터캐스크만 있어 일치하는 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Laphroaig 10",
+      "via": "family"
+     },
+     {
+      "product": "Laphroaig Quarter Cask",
+      "via": "family"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 21년",
+    "gold": "new:hibiki-21",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 블랜더스 쵸이스",
+    "gold": "new:hibiki-blenders-choice",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "발베니 18년 PX",
+    "gold": "new:balvenie-18-px",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 '발베니 18년 PX'는 18년 숙성 및 PX 캐스크 에디션이나, 카탈로그 후보 목록에 일치하는 18년산 발베니 제품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "The Balvenie 12 DoubleWood",
+      "via": "family"
+     },
+     {
+      "product": "The Balvenie 14 Caribbean Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Balvenie 21 PortWood",
+      "via": "family"
+     },
+     {
+      "product": "The Glenlivet 18",
+      "via": "naver"
+     },
+     {
+      "product": "Glenmorangie 18",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "카발란 DR 마데라캐스크",
+    "gold": "new:kavalan-distillery-reserve-madeira",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.85,
+    "reason": "메뉴의 '카발란 DR 마데라캐스크'는 카발란 마데이라 관련 제품이나, 주어진 후보 목록에 일치하는 카발란 마데라 캐스크 제품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Kavalan Solist Oloroso Sherry",
+      "via": "family"
+     },
+     {
+      "product": "Kavalan Solist Vinho Barrique",
+      "via": "family"
+     },
+     {
+      "product": "Kavalan Triple Sherry Cask",
+      "via": "family"
+     },
+     {
+      "product": "GlenDronach 15",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 21 Parliament",
+      "via": "naver"
+     },
+     {
+      "product": "The Balvenie 21 PortWood",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 12",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 15",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 10",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 18",
+      "via": "naver"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Bushmil 10yo",
+    "gold": "new:bushmills-10",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "no_options",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": [],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Caol Ila 12yo",
+    "gold": "new:caol-ila-12",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Caol Ila 12yo'는 쿨일라 증류소의 12년산 정규품이지만, 후보 목록에 쿨일라(Caol Ila) 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Bunnahabhain 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aultmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "Bowmore 12",
+      "via": "naver"
+     },
+     {
+      "product": "Highland Park 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfarclas 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Kilchoman Sanaig",
+    "gold": "new:kilchoman-sanaig",
+    "kind": "absent",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 Kilchoman Sanaig는 카탈로그 후보(Bunnahabhain 12)와 일치하지 않으며, 카탈로그에 없는 새 상품입니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Bunnahabhain 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Sheryy Cask",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "The Macallan 12 Sherry Oak",
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Macallan 12yo Sheryy Cask'는 12년 숙성 셰리 오크 에디션으로, 후보 중 The Macallan 12 Sherry Oak와 정확히 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "current"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "current"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   }
+  ],
+  "M4/C1": [
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "달모어 12Y 쉐리",
+    "gold": "dalmore-12-sherry-cask-select",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "The Dalmore 12 Sherry Cask Select",
+    "confidence": 0.95,
+    "reason": "메뉴판의 '달모어 12Y 쉐리'는 12년 연수와 쉐리 캐스크 에디션을 명시하고 있어 후보 중 The Dalmore 12 Sherry Cask Select와 정확히 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "The Dalmore 12",
+      "via": "current"
+     },
+     {
+      "product": "The Dalmore 12 Sherry Cask Select",
+      "via": "current"
+     },
+     {
+      "product": "The Dalmore 15",
+      "via": "family"
+     },
+     {
+      "product": "The Dalmore Cigar Malt Reserve",
+      "via": "family"
+     },
+     {
+      "product": "The Dalmore Port Wood Reserve",
+      "via": "family"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "007_위스키복춘_01",
+    "name": "카발란 솔리스트 셰리 오크",
+    "gold": "kavalan-solist-sherry",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "Kavalan Solist Oloroso Sherry",
+    "confidence": 0.95,
+    "reason": "메뉴판의 '카발란 솔리스트 셰리 오크'는 카탈로그의 'Kavalan Solist Oloroso Sherry'와 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "Kavalan Solist Oloroso Sherry",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Solist Vinho Barrique",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Triple Sherry Cask",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Distillery Reserve Madeira Cask",
+      "via": "family"
+     },
+     {
+      "product": "Edradour 10",
+      "via": "naver"
+     },
+     {
+      "product": "Clynelish 14",
+      "via": "naver"
+     },
+     {
+      "product": "Arran 10",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "naver"
+     },
+     {
+      "product": "Auchentoshan 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     },
+     {
+      "product": "Aultmore 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "헤네시vsop / Hennessy vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "skipped",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": null,
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "008_서로상_01",
+    "name": "레미마틴vsop / Remy Martin vsop",
+    "gold": "non_whisky",
+    "kind": "non_whisky",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "skipped",
+    "picked": null,
+    "confidence": null,
+    "reason": null,
+    "raised_confirm": null,
+    "options": null,
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_01",
+    "name": "Taylor Small Batch",
+    "gold": "new:eh-taylor-small-batch",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "Colonel E.H. Taylor Small Batch",
+    "confidence": 0.95,
+    "reason": "메뉴판의 Taylor Small Batch는 Colonel E.H. Taylor Small Batch 상품과 브랜드 및 에디션이 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "Colonel E.H. Taylor Small Batch",
+      "via": "naver"
+     },
+     {
+      "product": "Buffalo Trace",
+      "via": "naver"
+     },
+     {
+      "product": "Eagle Rare 10",
+      "via": "naver"
+     },
+     {
+      "product": "Booker's",
+      "via": "naver"
+     },
+     {
+      "product": "Russell's Reserve Single Barrel",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_02",
+    "name": "Kavalan Solist",
+    "gold": "unknown",
+    "kind": "unknown",
+    "burden": "choose",
+    "rank1_gold": false,
+    "m4": "unsure",
+    "picked": null,
+    "confidence": 0.8,
+    "reason": "메뉴판의 'Kavalan Solist'는 브랜드와 시리즈명만 있고 구체적인 캐스크 종류(올로로소 셰리, 비노 바리끄 등)가 명시되어 있지 않아 특정 후보를 고를 수 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Kavalan Solist Oloroso Sherry",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Solist Vinho Barrique",
+      "via": "current"
+     },
+     {
+      "product": "Kavalan Distillery Reserve Madeira Cask",
+      "via": "family"
+     },
+     {
+      "product": "Kavalan Triple Sherry Cask",
+      "via": "family"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Machrie Moor",
+    "gold": "new:arran-machrie-moor",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "Arran Machrie Moor",
+    "confidence": 0.9,
+    "reason": "메뉴판의 Machrie Moor는 아란 마크리무어 상품명과 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "Arran 10",
+      "via": "family"
+     },
+     {
+      "product": "Arran Bodega Sherry Cask",
+      "via": "family"
+     },
+     {
+      "product": "Arran Machrie Moor",
+      "via": "family"
+     },
+     {
+      "product": "Arran Quarter Cask",
+      "via": "family"
+     },
+     {
+      "product": "Woodford Reserve",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hakushu DR",
+    "gold": "new:hakushu-distillers-reserve",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "Hakushu Distiller's Reserve",
+    "confidence": 0.98,
+    "reason": "메뉴판의 'Hakushu DR'은 근거 자료에서 '하쿠슈 Distiller's Reserve'의 약어로 명확히 확인되므로 첫 번째 후보와 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "Hakushu Distiller's Reserve",
+      "via": "family"
+     },
+     {
+      "product": "Yamazaki 12",
+      "via": "naver"
+     },
+     {
+      "product": "Hibiki 21",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Hibiki DR",
+    "gold": "new:hibiki-japanese-harmony",
+    "kind": "known",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴의 'Hibiki DR'은 히비키 무연수(Distiller's Reserve / Japanese Harmony 등)를 의미하나, 주어진 후보 목록에는 Hibiki 21, Blender's Choice, Japanese Harmony 등이 있으며 메뉴와 정확히 일치하는 DR 전용 상품이나 후보가 없어 일치하는 상품이 없습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "Hibiki 21",
+      "via": "family"
+     },
+     {
+      "product": "Hibiki Blender's Choice",
+      "via": "family"
+     },
+     {
+      "product": "Hibiki Japanese Harmony",
+      "via": "family"
+     },
+     {
+      "product": "Yamazaki 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "Macallan 18yo",
+    "gold": "unknown",
+    "kind": "unknown",
+    "burden": "register",
+    "rank1_gold": false,
+    "m4": "different",
+    "picked": null,
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Macallan 18yo'는 18년 숙성 제품이나, 옵션 목록에 맥캘란 18년 제품이 존재하지 않습니다.",
+    "raised_confirm": null,
+    "options": [
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan Classic Cut 2020",
+      "via": "family"
+     },
+     {
+      "product": "Royal Brackla 18",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenlivet 18",
+      "via": "naver"
+     },
+     {
+      "product": "Glenfiddich 18",
+      "via": "naver"
+     }
+    ],
+    "vetoed": null,
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 21년",
+    "gold": "new:hibiki-21",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "Hibiki 21",
+    "confidence": 0.99,
+    "reason": "메뉴판의 '히비키 21년'은 21년 숙성 카탈로그 상품인 Hibiki 21과 브랜드, 연수가 정확히 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "Hibiki 21",
+      "via": "family"
+     },
+     {
+      "product": "Hibiki Blender's Choice",
+      "via": "family"
+     },
+     {
+      "product": "Hibiki Japanese Harmony",
+      "via": "family"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "히비키 블랜더스 쵸이스",
+    "gold": "new:hibiki-blenders-choice",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "Hibiki Blender's Choice",
+    "confidence": 0.98,
+    "reason": "메뉴판의 '히비키 블랜더스 쵸이스'는 후보 목록의 Hibiki Blender's Choice와 정확히 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "Hibiki 21",
+      "via": "family"
+     },
+     {
+      "product": "Hibiki Blender's Choice",
+      "via": "family"
+     },
+     {
+      "product": "Hibiki Japanese Harmony",
+      "via": "family"
+     },
+     {
+      "product": "Yamazaki 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_03",
+    "name": "카발란 DR 마데라캐스크",
+    "gold": "new:kavalan-distillery-reserve-madeira",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "Kavalan Distillery Reserve Madeira Cask",
+    "confidence": 0.9,
+    "reason": "메뉴판의 '카발란 DR 마데라캐스크'는 Kavalan Distillery Reserve Madeira Cask 제품을 의미합니다.",
+    "raised_confirm": false,
+    "options": [
+     {
+      "product": "Kavalan Distillery Reserve Madeira Cask",
+      "via": "family"
+     },
+     {
+      "product": "Kavalan Solist Oloroso Sherry",
+      "via": "family"
+     },
+     {
+      "product": "Kavalan Solist Vinho Barrique",
+      "via": "family"
+     },
+     {
+      "product": "Kavalan Triple Sherry Cask",
+      "via": "family"
+     },
+     {
+      "product": "Yamazaki 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 15",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 12",
+      "via": "naver"
+     },
+     {
+      "product": "GlenDronach 21 Parliament",
+      "via": "naver"
+     },
+     {
+      "product": "The Balvenie 18 Pedro Ximenez Cask",
+      "via": "naver"
+     },
+     {
+      "product": "The Balvenie 21 PortWood",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 12",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 15",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 10",
+      "via": "naver"
+     },
+     {
+      "product": "Glen Grant 18",
+      "via": "naver"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": {
+     "Kavalan Distillery Reserve Madeira Cask": [
+      "dr"
+     ]
+    }
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Laphroaig Quater Cask",
+    "gold": "laphroaig-quarter-cask",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "Laphroaig Quarter Cask",
+    "confidence": 0.99,
+    "reason": "메뉴판의 Laphroaig Quater Cask는 카탈로그의 Laphroaig Quarter Cask와 정확히 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "Laphroaig 10 Cask Strength",
+      "via": "current"
+     },
+     {
+      "product": "Laphroaig Quarter Cask",
+      "via": "current"
+     },
+     {
+      "product": "Laphroaig 10",
+      "via": "family"
+     },
+     {
+      "product": "Laphroaig 25",
+      "via": "family"
+     },
+     {
+      "product": "Wild Turkey Rare Breed",
+      "via": "naver"
+     },
+     {
+      "product": "Talisker 10",
+      "via": "naver"
+     },
+     {
+      "product": "Hibiki 21",
+      "via": "naver"
+     },
+     {
+      "product": "Maker's Mark",
+      "via": "naver"
+     },
+     {
+      "product": "Yamazaki 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenlivet 18",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenlivet 15",
+      "via": "naver"
+     },
+     {
+      "product": "The Glenlivet 12",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "naver"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   },
+   {
+    "photo_id": "012_Beck_04",
+    "name": "Macallan 12yo Sheryy Cask",
+    "gold": "macallan-12-sherry-oak",
+    "kind": "known",
+    "burden": "confirm",
+    "rank1_gold": true,
+    "m4": "same",
+    "picked": "The Macallan 12 Sherry Oak",
+    "confidence": 0.95,
+    "reason": "메뉴판의 'Macallan 12yo Sheryy Cask'는 12년 숙성과 셰리 캐스크(Sherry Oak) 에디션을 명시하고 있어 후보 중 맥캘란 12년 셰리 오크와 일치합니다.",
+    "raised_confirm": true,
+    "options": [
+     {
+      "product": "The Macallan 12 Double Cask",
+      "via": "current"
+     },
+     {
+      "product": "The Macallan 12 Sherry Oak",
+      "via": "current"
+     },
+     {
+      "product": "The Macallan 15 Double Cask",
+      "via": "family"
+     },
+     {
+      "product": "The Macallan Classic Cut 2020",
+      "via": "family"
+     },
+     {
+      "product": "Aberlour 12",
+      "via": "naver"
+     }
+    ],
+    "vetoed": [],
+    "short_unverified": null
+   }
+  ]
+ }
+}

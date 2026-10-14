@@ -1,0 +1,88 @@
+{
+ "key": "ebfe5fcb11475fdbbe54b2a08b0ba9bcab802338a2a1abaaa142e1b4064f7da9",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Caol Ila 12yo",
+  "options": [
+   {
+    "product_id": "b72f246e-aa1e-50ca-9011-e09df8af55c1",
+    "display_name": "Bunnahabhain 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "b7ac293e-fa4e-5cd6-a7c9-dc4beebd8c87",
+    "display_name": "Aultmore 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "deabfe81-7c98-54c8-96d6-fd839a61b3e2",
+    "display_name": "Bowmore 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "8ab09688-478e-5a77-ae5c-bb7f1d603d1e",
+    "display_name": "Highland Park 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "c78d15b5-46b1-589d-b3ee-a8e308dbea1c",
+    "display_name": "Aberlour 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "8486aaeb-3530-525c-9cd1-8cda77de5b16",
+    "display_name": "Glenfarclas 12",
+    "age_years": 12,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "\"쿨 일라 12년( Caol Ila 12yo )\"",
+    "snippet": "CAOL ILA 12yo 증류소 소개 쿨 일라는 1846년에 설립된 이후 여러 차례 주인이 바뀌고 현재에는 디아지오에 소속되어 있다.쿨 일라는 게일어로 뜻은 'The Sound of Islay' '아일라의 해협'이라는 뜻이다 간혹 Sound를...",
+    "url": "https://blog.naver.com/donsooy/222970994734"
+   },
+   {
+    "endpoint": "blog",
+    "title": "Smws 쿨일라 12년 53.491",
+    "snippet": "오늘의 위스키 Smws 쿨일라 12년 ( Gastronomic beachcombing 해변가에서 즐기는 미식) Smws Gastronomic beachcombing Caol ila 12Yo Cask number:53.491 증류년도:2012 .3.5 병입년도:2024 Cask type: Ex-Bourbon / 1st Fill European...",
+    "url": "https://blog.naver.com/starlord84/224258395830"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "Sansibar Caol Ila 12YO , 2008/2021, 53.7% HK",
+    "snippet": "產品資料 ; Type : Single Malt Whisky · Vintage : 2008 · Bottled : 2021 · Cask Type : Bourbon Cask · Age : 12 · Strength : 53.7% · Content : 700ml · Number of Bottles : 330 · Bottling Series : JD's Personal Choice No. 3",
+    "url": "https://alcoholpleasehk.com/products/consignment-sansibar-caol-ila-12yo"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "Caol Ila 12 Year Old - Small Bottle Scotch Whisky",
+    "snippet": "A quarter-bottle of Caol Ila 12yo , equally at home in golf bags, on winter walks or during wet weekends at the seaside.",
+    "url": "https://www.thewhiskyexchange.com/p/8353/caol-ila-12-year-old-small-bottle"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.95,
+  "reason": "메뉴판의 'Caol Ila 12yo'는 쿨일라 증류소의 12년산 정규품이지만, 후보 목록에 쿨일라(Caol Ila) 상품이 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1408,
+   "attempts": 1,
+   "input_tokens": 2438,
+   "output_tokens": 87,
+   "thought_tokens": 0
+  }
+ }
+}

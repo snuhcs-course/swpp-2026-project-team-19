@@ -1,0 +1,88 @@
+{
+ "key": "42fbe7c2860f76f6a7b17f8b0af745d6eac31612c55425e2bebb0866b8ea1818",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Macallan 18yo",
+  "options": [
+   {
+    "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+    "display_name": "The Macallan 12 Double Cask",
+    "age_years": 12,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "854c6973-b222-5298-b1fe-4fa0ef6264f8",
+    "display_name": "The Macallan 12 Sherry Oak",
+    "age_years": 12,
+    "edition_name": "Sherry Oak"
+   },
+   {
+    "product_id": "30ac644f-a7ae-51a2-a3a8-cda1fe7d1d7f",
+    "display_name": "The Macallan 15 Double Cask",
+    "age_years": 15,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "18df9675-a0df-5d70-b9db-bbc91203554a",
+    "display_name": "Royal Brackla 18",
+    "age_years": 18,
+    "edition_name": null
+   },
+   {
+    "product_id": "3b6f8a1c-c506-50f9-b383-fe5d0c6d5064",
+    "display_name": "The Glenlivet 18",
+    "age_years": 18,
+    "edition_name": null
+   },
+   {
+    "product_id": "5ab69eb9-ac14-5e1a-980b-012a09acc148",
+    "display_name": "Glenfiddich 18",
+    "age_years": 18,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "[★★★★☆] 맥캘란 18년 2025 릴리즈 (The Macallan 18yo 2025 Release)",
+    "snippet": "오늘은! 예에에에전에 주인장이 자주 가는 바 몰트앤뮤직에 방문했을 때 마셨던 맥캘란 18년 2025 릴리즈 리뷰다. 사실 맥캘란이 이번에 디자인이 전면적으로 바뀌면서 상당히 뭐랄까... 상당히 곤란한 느낌으로...",
+    "url": "https://blog.naver.com/1515687/224272679916"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[창원/마산 바틀샵] 골든보틀 섹션별 투어 3탄: 위스키 애호가들의 ....",
+    "snippet": "맥캘란 18년 셰리오크 (The Macallan 18yo ): 설명이 필요 없는 위스키입니다. 골든보틀에서는 귀한 맥캘란 18년을 비롯해 맥캘란 12년 셰리오크/더블캐스크 등 다양한 라인업을 만나보실 수 있습니다. 프리미엄...",
+    "url": "https://blog.naver.com/golden-bottle/224409334027"
+   },
+   {
+    "endpoint": "blog",
+    "title": "질문 받은 김에 위스키 추천",
+    "snippet": "둡니다 Macallan 18yo Double Cask 맥캘란 18년 더블 캐스크 Royal Brackla 18yo 로얄 브라클라 18년 무난무난 Hakushu Japanese Forest Bittersweet Edition 하쿠슈 비터스윗 작년에 히비키21년이랑 비교하면서...",
+    "url": "https://blog.naver.com/z_eun24/224268467490"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "맥캘란 18년 더블 캐스크 700ml 최저가 비교 및 정보 - Macallan 18yo double cask 가격 정....",
+    "snippet": "맥캘란 18년 더블 캐스크( Macallan 18yo double cask) 700ml 최저가 얼마일까요? THE MACALLAN DISTILLERS LTD 하이랜드 싱글 몰트 스카치 위스키 맥캘란 18년 더블 캐스크의 현재 술한잔에 등록된 7곳의 판매처 정보를 바탕으로 최저가 395,0....",
+    "url": "https://soolhanjan.com/alcohol/1723/%EB%A7%A5%EC%BA%98%EB%9E%80-18%EB%85%84-%EB%8D%94%EB%B8%94-%EC%BA%90%EC%8A%A4%ED%81%AC"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "new",
+  "confidence": 0.9,
+  "reason": "메뉴의 Macallan 18yo는 18년 숙성 제품이나, 제공된 옵션 목록에 맥캘란 18년 제품이 없어 새 상품(new)으로 판정합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1270,
+   "attempts": 1,
+   "input_tokens": 2583,
+   "output_tokens": 84,
+   "thought_tokens": 0
+  }
+ }
+}

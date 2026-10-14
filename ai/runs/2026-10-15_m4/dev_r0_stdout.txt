@@ -1,0 +1,114 @@
+
+== S1+S2b+S3 / C0 / dev  (177 lines)
+  known top-1 0.909   false merge rate 0.000   photos with owner burden < 5: 0.62   confirm recommended 7   accept error rate 0.000
+  confirm recommended by source: rule 7/7, llm 0/0
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  absent                    0              0              1              2             27              0              0
+  known                   130              0             13              0              0              0              0
+  non_whisky                0              0              0              0              2              0              0
+  unknown                   0              0              1              0              1              0              0
+  [bar] Beck               26              0              8              2             28              0              0
+  [bar] 서로상                35              0              0              0              2              0              0
+  [bar] 위스키복춘              69              0              7              0              0              0              0
+  owner burden per photo: 007_위스키복춘_01 5, 007_위스키복춘_02 1, 007_위스키복춘_03 1, 007_위스키복춘_04 0, 008_서로상_01 2, 008_서로상_02 0, 008_서로상_03 0, 008_서로상_04 0, 008_서로상_05 0, 012_Beck_01 9, 012_Beck_02 7, 012_Beck_03 16, 012_Beck_04 6
+  owner burden by kind (all photos): confirm 11, choose 4, register 30, wrong 2   photos with choose+register+wrong < 5: 0.77
+
+== S1+S2b+S3 / C1 / dev  (177 lines)
+  known top-1 0.861   false merge rate 0.000   photos with owner burden < 5: 0.85   confirm recommended 8   accept error rate 0.000
+  confirm recommended by source: rule 8/8, llm 0/0
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  known                   149              1             16              0              7              0              0
+  non_whisky                0              0              0              0              2              0              0
+  unknown                   0              0              1              0              1              0              0
+  [bar] Beck               45              1             10              0              8              0              0
+  [bar] 서로상                35              0              0              0              2              0              0
+  [bar] 위스키복춘              69              0              7              0              0              0              0
+  owner burden per photo: 007_위스키복춘_01 5, 007_위스키복춘_02 1, 007_위스키복춘_03 1, 007_위스키복춘_04 0, 008_서로상_01 2, 008_서로상_02 0, 008_서로상_03 0, 008_서로상_04 0, 008_서로상_05 0, 012_Beck_01 1, 012_Beck_02 2, 012_Beck_03 11, 012_Beck_04 4
+  owner burden by kind (all photos): confirm 12, choose 5, register 10, wrong 0   photos with choose+register+wrong < 5: 0.92
+
+== M3a / C0 / dev  (177 lines)
+  known top-1 0.909   false merge rate 0.000   photos with owner burden < 5: 0.62   confirm recommended 14   accept error rate 0.000
+  confirm recommended by source: rule 7/7, llm 7/7
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  absent                    0              0              1              2             27              0              0
+  known                   130              0             13              0              0              0              0
+  non_whisky                0              0              0              0              2              0              0
+  unknown                   0              0              1              0              1              0              0
+  [bar] Beck               26              0              8              2             28              0              0
+  [bar] 서로상                35              0              0              0              2              0              0
+  [bar] 위스키복춘              69              0              7              0              0              0              0
+  owner burden per photo: 007_위스키복춘_01 5, 007_위스키복춘_02 1, 007_위스키복춘_03 1, 007_위스키복춘_04 0, 008_서로상_01 2, 008_서로상_02 0, 008_서로상_03 0, 008_서로상_04 0, 008_서로상_05 0, 012_Beck_01 9, 012_Beck_02 7, 012_Beck_03 16, 012_Beck_04 6
+  owner burden by kind (all photos): confirm 14, choose 1, register 30, wrong 2   photos with choose+register+wrong < 5: 0.77
+
+== M3a / C1 / dev  (177 lines)
+  known top-1 0.861   false merge rate 0.000   photos with owner burden < 5: 0.85   confirm recommended 21   accept error rate 0.000
+  confirm recommended by source: rule 8/8, llm 13/13
+  from register (unmatched in S1+S2b+S3): {'confirm': 6, 'confirm_gold_in_candidates': 6}
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  known                   149              1             22              0              1              0              0
+  non_whisky                0              0              0              0              2              0              0
+  unknown                   0              0              1              0              1              0              0
+  [bar] Beck               45              1             16              0              2              0              0
+  [bar] 서로상                35              0              0              0              2              0              0
+  [bar] 위스키복춘              69              0              7              0              0              0              0
+  owner burden per photo: 007_위스키복춘_01 5, 007_위스키복춘_02 1, 007_위스키복춘_03 1, 007_위스키복춘_04 0, 008_서로상_01 2, 008_서로상_02 0, 008_서로상_03 0, 008_서로상_04 0, 008_서로상_05 0, 012_Beck_01 1, 012_Beck_02 2, 012_Beck_03 11, 012_Beck_04 4
+  owner burden by kind (all photos): confirm 22, choose 1, register 4, wrong 0   photos with choose+register+wrong < 5: 1.00
+
+== M3a+M4 / C0 / dev  (177 lines)
+  known top-1 0.909   false merge rate 0.000   photos with owner burden < 5: 0.62   confirm recommended 14   accept error rate 0.000
+  confirm recommended by source: rule 7/7, llm 7/7
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  absent                    0              0              1              2             27              0              0
+  known                   130              0             13              0              0              0              0
+  non_whisky                0              0              0              0              2              0              0
+  unknown                   0              0              1              0              1              0              0
+  [bar] Beck               26              0              8              2             28              0              0
+  [bar] 서로상                35              0              0              0              2              0              0
+  [bar] 위스키복춘              69              0              7              0              0              0              0
+  owner burden per photo: 007_위스키복춘_01 5, 007_위스키복춘_02 1, 007_위스키복춘_03 1, 007_위스키복춘_04 0, 008_서로상_01 2, 008_서로상_02 0, 008_서로상_03 0, 008_서로상_04 0, 008_서로상_05 0, 012_Beck_01 9, 012_Beck_02 7, 012_Beck_03 16, 012_Beck_04 6
+  owner burden by kind (all photos): confirm 14, choose 1, register 30, wrong 2   photos with choose+register+wrong < 5: 0.77
+
+== M3a+M4 / C1 / dev  (177 lines)
+  known top-1 0.861   false merge rate 0.000   photos with owner burden < 5: 0.85   confirm recommended 21   accept error rate 0.000
+  confirm recommended by source: rule 8/8, llm 13/13
+  from register (unmatched in S1+S2b+S3): {'confirm': 6, 'confirm_gold_in_candidates': 6}
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  known                   149              1             22              0              1              0              0
+  non_whisky                0              0              0              0              2              0              0
+  unknown                   0              0              1              0              1              0              0
+  [bar] Beck               45              1             16              0              2              0              0
+  [bar] 서로상                35              0              0              0              2              0              0
+  [bar] 위스키복춘              69              0              7              0              0              0              0
+  owner burden per photo: 007_위스키복춘_01 5, 007_위스키복춘_02 1, 007_위스키복춘_03 1, 007_위스키복춘_04 0, 008_서로상_01 2, 008_서로상_02 0, 008_서로상_03 0, 008_서로상_04 0, 008_서로상_05 0, 012_Beck_01 1, 012_Beck_02 2, 012_Beck_03 11, 012_Beck_04 4
+  owner burden by kind (all photos): confirm 22, choose 1, register 4, wrong 0   photos with choose+register+wrong < 5: 1.00
+
+== M4 / C0 / dev  (177 lines)
+  known top-1 0.909   false merge rate 0.000   photos with owner burden < 5: 0.62   confirm recommended 10   accept error rate 0.000
+  confirm recommended by source: rule 7/7, llm 3/3
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  absent                    0              0              1              2             27              0              0
+  known                   130              0             13              0              0              0              0
+  non_whisky                0              0              0              0              2              0              0
+  unknown                   0              0              1              0              1              0              0
+  [bar] Beck               26              0              8              2             28              0              0
+  [bar] 서로상                35              0              0              0              2              0              0
+  [bar] 위스키복춘              69              0              7              0              0              0              0
+  owner burden per photo: 007_위스키복춘_01 5, 007_위스키복춘_02 1, 007_위스키복춘_03 1, 007_위스키복춘_04 0, 008_서로상_01 2, 008_서로상_02 0, 008_서로상_03 0, 008_서로상_04 0, 008_서로상_05 0, 012_Beck_01 9, 012_Beck_02 7, 012_Beck_03 16, 012_Beck_04 6
+  owner burden by kind (all photos): confirm 14, choose 1, register 30, wrong 2   photos with choose+register+wrong < 5: 0.77
+
+== M4 / C1 / dev  (177 lines)
+  known top-1 0.861   false merge rate 0.000   photos with owner burden < 5: 0.85   confirm recommended 17   accept error rate 0.000
+  confirm recommended by source: rule 8/8, llm 9/9
+  from register (unmatched in S1+S2b+S3): {'confirm': 6, 'confirm_gold_in_candidates': 6}
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  known                   149              1             22              0              1              0              0
+  non_whisky                0              0              0              0              2              0              0
+  unknown                   0              0              1              0              1              0              0
+  [bar] Beck               45              1             16              0              2              0              0
+  [bar] 서로상                35              0              0              0              2              0              0
+  [bar] 위스키복춘              69              0              7              0              0              0              0
+  owner burden per photo: 007_위스키복춘_01 5, 007_위스키복춘_02 1, 007_위스키복춘_03 1, 007_위스키복춘_04 0, 008_서로상_01 2, 008_서로상_02 0, 008_서로상_03 0, 008_서로상_04 0, 008_서로상_05 0, 012_Beck_01 1, 012_Beck_02 2, 012_Beck_03 11, 012_Beck_04 4
+  owner burden by kind (all photos): confirm 22, choose 1, register 4, wrong 0   photos with choose+register+wrong < 5: 1.00
+
+LLM: {"model": "gemini-3.1-flash-lite", "thinking_level": "low", "api_calls_this_run": 0, "by_kind": {"m3a": {"requests": 8, "api_calls": 0, "cache_hits": 8, "parse_errors": 0, "input_tokens": 14242, "output_tokens": 4343, "thought_tokens": 934, "mean_latency_ms": 4128}}}
+M4: {"prompt": "judge_prompt_v1.md", "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f", "model": "gemini-3.5-flash-lite", "engine": {"target_lines": 77, "skipped_translation": 8, "no_options": 16, "llm_requests": 61, "llm_cache_hits": 25, "naver_requests": 393, "naver_errors": 0, "naver_latency_per_line": {"n": 77, "mean_ms": 0, "p95_ms": 0}, "llm_latency_per_call": {"n": 36, "mean_ms": 1367, "p95_ms": 1774}, "line_latency": {"n": 77, "mean_ms": 2060, "p95_ms": 4675}}, "judge_calls": {"llm_calls": 36, "retries": 0, "parse_errors": 0, "input_tokens": 89396, "output_tokens": 3274, "thought_tokens": 0}, "naver": {"api_calls": 0, "cache_hits": 393, "retries": 0, "errors": 0}}

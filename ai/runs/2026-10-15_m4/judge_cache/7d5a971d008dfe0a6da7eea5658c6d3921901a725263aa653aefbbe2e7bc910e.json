@@ -1,0 +1,88 @@
+{
+ "key": "7d5a971d008dfe0a6da7eea5658c6d3921901a725263aa653aefbbe2e7bc910e",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Maker`s Mark Cask Strength",
+  "options": [
+   {
+    "product_id": "f95e81a0-b8f5-5cb3-adb0-998b5956f588",
+    "display_name": "Maker's Mark",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "a342821c-15b8-5db7-bb72-6fbb058f6dd4",
+    "display_name": "Woodford Reserve",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "504c7a9c-f7d0-5902-9fd2-652fdd0e884f",
+    "display_name": "Monkey Shoulder",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "ccf8c7b3-4b19-5ef2-8056-f714c4c2d468",
+    "display_name": "Knob Creek",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "30ac644f-a7ae-51a2-a3a8-cda1fe7d1d7f",
+    "display_name": "The Macallan 15 Double Cask",
+    "age_years": 15,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+    "display_name": "The Macallan 12 Double Cask",
+    "age_years": 12,
+    "edition_name": "Double Cask"
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "webkr",
+    "title": "Maker ' s Mark ® 46 Cask Strength | Makers Mark",
+    "snippet": "This limited-edition bourbon is Maker ’ s Mark 46® turned up to Cask Strength . Not your typical barrel-proof bourbon, Maker ’ s Mark 46® Cask Strength Bourbon",
+    "url": "https://www.makersmark.com/en-us/bourbons/makers-mark-46-cask-strength"
+   },
+   {
+    "endpoint": "blog",
+    "title": "메이커스 마크 캐스크 스트렝스 ( Maker ’ s Mark Cask Strength )",
+    "snippet": "오늘 소개해 드릴 위스키는 버번 입문 3대장 중 하나인 **메이커스 마크 CS( Maker ’ s Mark Cask Strength )**입니다. 사실 메이커스 마크는 기존 제품에 대한 평가가 다소 아쉽다는 이야기도 있었는데요. 특히 이전 구형...",
+    "url": "https://blog.naver.com/noywhipt/224436470068"
+   },
+   {
+    "endpoint": "blog",
+    "title": "위스키 소개 #14 메이커스 마크 캐스크 스트렝스 배치 25-03 / Maker ' s Mar....",
+    "snippet": "제품 정보 제품명 : 메이커스 마크 캐스크 스트렝스 배치 25-03 / Maker ' s Mark Cask Strength Batch 25-03 증류소 : 메이커스 마크 증류소 / Maker ' s Mark Distillery 종류 : 미국 / 켄터키 스트레이트 버번 위스키(위티드...",
+    "url": "https://blog.naver.com/apseastar/224384904122"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[위스키] 메이커스 마크 CS ( Maker ' s Mark Cask Strength )",
+    "snippet": "이 제품은 캐스크 스트렝스( Cask Strength )이다. 보통 미국에서는 같은 의미인 배럴 프루프(Barrel Proof)로 많이 표현하는데 이 제품은 캐스크 스트렝스로 표현했다. 두 표현 모두 오크통에 있는 그대로 도수를...",
+    "url": "https://blog.naver.com/leonerd/224421177515"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "new",
+  "confidence": 0.95,
+  "reason": "메뉴판의 'Maker's Mark Cask Strength'는 캐스크 스트렝스 에디션이나, 후보 목록에는 기본 'Maker's Mark'만 있고 캐스크 스트렝스 상품이 없어 새로운 상품에 해당합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1357,
+   "attempts": 1,
+   "input_tokens": 2409,
+   "output_tokens": 93,
+   "thought_tokens": 0
+  }
+ }
+}

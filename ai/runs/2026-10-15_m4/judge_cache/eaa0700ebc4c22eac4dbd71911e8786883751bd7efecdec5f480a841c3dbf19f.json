@@ -1,0 +1,142 @@
+{
+ "key": "eaa0700ebc4c22eac4dbd71911e8786883751bd7efecdec5f480a841c3dbf19f",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Laphroaig Quater Cask",
+  "options": [
+   {
+    "product_id": "8d5d9b35-44c9-575b-9401-ebdebc55dc81",
+    "display_name": "Laphroaig 10 Cask Strength",
+    "age_years": 10,
+    "edition_name": "Cask Strength"
+   },
+   {
+    "product_id": "4658648a-d8cb-54da-ad58-f506a5cac3ef",
+    "display_name": "Laphroaig Quarter Cask",
+    "age_years": null,
+    "edition_name": "Quarter Cask"
+   },
+   {
+    "product_id": "dbc5af99-05b2-5538-a5ef-8aa53cdc660b",
+    "display_name": "Laphroaig 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "377db7e3-01a9-5f9a-ad2a-241d8646d791",
+    "display_name": "Laphroaig 25",
+    "age_years": 25,
+    "edition_name": null
+   },
+   {
+    "product_id": "e542add8-783a-53b6-9c5f-c0064e512334",
+    "display_name": "Wild Turkey Rare Breed",
+    "age_years": null,
+    "edition_name": "Rare Breed"
+   },
+   {
+    "product_id": "8886fde4-53a8-5a6b-a5c8-13d5ac1a55d9",
+    "display_name": "Talisker 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "dc167751-6e79-5ae1-bcfd-9fc405b0a94e",
+    "display_name": "Hibiki 21",
+    "age_years": 21,
+    "edition_name": null
+   },
+   {
+    "product_id": "f95e81a0-b8f5-5cb3-adb0-998b5956f588",
+    "display_name": "Maker's Mark",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "6b26bcdc-76d1-56df-bda7-cec06d74950e",
+    "display_name": "Yamazaki 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "3b6f8a1c-c506-50f9-b383-fe5d0c6d5064",
+    "display_name": "The Glenlivet 18",
+    "age_years": 18,
+    "edition_name": null
+   },
+   {
+    "product_id": "2be391ea-979a-54b6-a992-c753ba9966cc",
+    "display_name": "The Glenlivet 15",
+    "age_years": 15,
+    "edition_name": null
+   },
+   {
+    "product_id": "293b9d2b-8fdb-52c2-b6cd-eb0a77910eae",
+    "display_name": "The Glenlivet 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "30ac644f-a7ae-51a2-a3a8-cda1fe7d1d7f",
+    "display_name": "The Macallan 15 Double Cask",
+    "age_years": 15,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+    "display_name": "The Macallan 12 Double Cask",
+    "age_years": 12,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "854c6973-b222-5298-b1fe-4fa0ef6264f8",
+    "display_name": "The Macallan 12 Sherry Oak",
+    "age_years": 12,
+    "edition_name": "Sherry Oak"
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "Laphroaig Quater Cask (라프로익 쿼터캐스크)",
+    "snippet": "개요 위스키명: Laphroaig Quarter Cask (라프로익 쿼터 캐스크) 타입: 싱글 몰트 스카치 위스키 도수: 48% 생산지: 스코틀랜드, 아일라(Islay), 라프로익 증류소 시음 장소: A31 (범어동 바) / 글렌캐런 잔 2....",
+    "url": "https://blog.naver.com/772pumpkin/224127726483"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "Laphroaig Quarter Cask 70cl Whisky",
+    "snippet": "“I really love what the quater cask is doing here. Lots of sweet and pleasant woody flavours here. 48% is spot on for a whisky of this style in my view; a bit of bite and personality, but goes down just right. One of my favourite whiskys in this price range.Nova Lee",
+    "url": "https://www.masterofmalt.com/whiskies/laphroaig-quarter-cask-whisky/"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[보틀킬] 라프로익 PX 캐스크 48%",
+    "snippet": "3 만원 구매했습니다 보틀킬 Laphroaig PX Cask Triple Matured 48% 2025년 6월 8일 오픈 2026년 8월 31일 보틀킬... Ex-Bourbon → Quater Cask → PX Sherry ✔ 도수(ABV): 48% ✔ 색상 : Antique Gold ✔ 냉각여과 : 미공개 ✔ 피트...",
+    "url": "https://blog.naver.com/park1989kk/224421093514"
+   },
+   {
+    "endpoint": "blog",
+    "title": "맛있다... 이니스 & 건 오리지널(Innis & Gunn Original), 그리고 아일라 위....",
+    "snippet": "Innis & Gunn, Presents Islay Whisky Cask Laphroaig Quater Casks Scottish Red Beer Limited Edition 이니스 & 건, 아일라 위스키 캐스크 라프로익 쿼터 캐스크 스코티시 레드 비어 리미티드 에디션 검붉은 기운이 감도는 짙은...",
+    "url": "https://wineys.tistory.com/1560"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "same",
+  "product_id": "4658648a-d8cb-54da-ad58-f506a5cac3ef",
+  "confidence": 0.99,
+  "reason": "메뉴판의 Laphroaig Quater Cask는 카탈로그의 Laphroaig Quarter Cask와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1274,
+   "attempts": 1,
+   "input_tokens": 3094,
+   "output_tokens": 99,
+   "thought_tokens": 0
+  }
+ }
+}

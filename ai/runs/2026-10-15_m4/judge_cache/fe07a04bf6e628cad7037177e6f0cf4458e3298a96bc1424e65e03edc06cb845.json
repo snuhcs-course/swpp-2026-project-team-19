@@ -1,0 +1,76 @@
+{
+ "key": "fe07a04bf6e628cad7037177e6f0cf4458e3298a96bc1424e65e03edc06cb845",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "히비키 블랜더스 쵸이스",
+  "options": [
+   {
+    "product_id": "dc167751-6e79-5ae1-bcfd-9fc405b0a94e",
+    "display_name": "Hibiki 21",
+    "age_years": 21,
+    "edition_name": null
+   },
+   {
+    "product_id": "9a3e4134-990d-5685-9dd1-289e3afeac37",
+    "display_name": "Hibiki Blender's Choice",
+    "age_years": null,
+    "edition_name": "Blender's Choice"
+   },
+   {
+    "product_id": "eaa1578b-74c5-579d-a1bc-ee385cf221e9",
+    "display_name": "Hibiki Japanese Harmony",
+    "age_years": null,
+    "edition_name": "Japanese Harmony"
+   },
+   {
+    "product_id": "6b26bcdc-76d1-56df-bda7-cec06d74950e",
+    "display_name": "Yamazaki 12",
+    "age_years": 12,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "히비키 블랜더스 초이스 Hibiki Blender's Choice 리뷰 (일본 위스키 추천)",
+    "snippet": "https://blog.naver.com/jazz__free/224183848357 일본 여행 갈 때 야마자키,하쿠슈에 이어 많이들 구매하시는 히비키 위스키 중 하나인 히비키 블랜더스 초이스 (Hibiki lender's Choice) 입니다. 병이 참 예쁘다 히비키 에...",
+    "url": "https://blog.naver.com/jazz__free/224260221715"
+   },
+   {
+    "endpoint": "blog",
+    "title": "히비키 블랜더스 초이스(HIBIKI Blender's choice)",
+    "snippet": "그런데 어제, 드디어 히비키 를 마셔봤다. 회사 동료와 함께 우연히 위스키 바에 들어갔는데 메뉴판에 히비키 가 있었다. 그것도 히비키 블렌더스 초이스(Hibiki Blender's Choice). 메뉴에는 두 가지 히비키 가 있었는데...",
+    "url": "https://blog.naver.com/young2004/224343386418"
+   },
+   {
+    "endpoint": "blog",
+    "title": "히비키 블랜더스 초이스(HIBIKI BLENDER'S CHOICE) 시음기 (가격 정보 포함)",
+    "snippet": "교토에서 히비키 블랜더스 초이스를 병당 15,297엔 (당시 환율 약 144,000원)에 3병 사 오고 선 한 병은 4월에 마시긴 했습니다만, 발렌타인 30년을 마시고 히비키 블초를 마시니 진짜 맛이 없었습니다. 그러다 사촌...",
+    "url": "https://blog.naver.com/rudxo5455/224304186886"
+   },
+   {
+    "endpoint": "cafearticle",
+    "title": "히비키( Blender's Choice ) 하이볼",
+    "snippet": "히비키 블렌더스 초이스( Hibiki Blender's Choice , 响红酒桶)와 함께 했습니다. 캬 ∼ 히비키 라인업중 블랜더스 초이스는 재패니즈 하모니나 마스터즈 셀렉트보단 상위등급에 포지셔닝 되어 있습니다. 블랜더스 초이스가...",
+    "url": "https://cafe.naver.com/whiskylove9999/65966"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "same",
+  "product_id": "9a3e4134-990d-5685-9dd1-289e3afeac37",
+  "confidence": 0.98,
+  "reason": "메뉴판의 '히비키 블랜더스 쵸이스'는 후보 목록의 Hibiki Blender's Choice와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1329,
+   "attempts": 1,
+   "input_tokens": 2334,
+   "output_tokens": 103,
+   "thought_tokens": 0
+  }
+ }
+}

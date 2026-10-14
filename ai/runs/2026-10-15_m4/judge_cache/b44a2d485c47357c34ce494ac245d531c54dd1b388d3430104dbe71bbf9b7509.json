@@ -1,0 +1,70 @@
+{
+ "key": "b44a2d485c47357c34ce494ac245d531c54dd1b388d3430104dbe71bbf9b7509",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "James E Pepper 1776 Rye Whiskey",
+  "options": [
+   {
+    "product_id": "ccf8c7b3-4b19-5ef2-8056-f714c4c2d468",
+    "display_name": "Knob Creek",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "267e4a32-091f-5d9b-a19a-ec5098c1fb4e",
+    "display_name": "Booker's",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "f626dbc2-6a44-5e95-83b4-35af8023e497",
+    "display_name": "Wild Turkey 101 8 Year",
+    "age_years": 8,
+    "edition_name": "101"
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "미국을 대표하는 라이 위스키 브랜드, 제임스 E . 페퍼 \" 1776 \" 스트레이....",
+    "snippet": "페퍼 \" 1776 \" 스트레이트 라이 위스키( James E . Pepper \" 1776 \" Straight Rye Whiskey ). 잘 모르는 위스키였는데 구매한 이유는 솔직히 레이블과 보틀이 예뻐서였다. 마침 라이 위스키가 필요하기도...",
+    "url": "https://wineys.tistory.com/1544"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[켄터키] 제임스 이 페퍼 1776 스트레이트 버번 위스키 James E . Pepper 177....",
+    "snippet": "위스키( James E . Pepper 1776 Straight Bourbon Whiskey )'입니다. 앞서 드셨던 보모어, 맥캘란 같은 스코틀랜드... 호밀( Rye ) 함량이 높은 버번: 옥수수 51% 이상이라는 버번의 기준을 따르면서도, 매시빌(원료 배합...",
+    "url": "https://kirinos.tistory.com/2532"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[ 1776 /버번] 1776 버번 VS 라이 100 Proof 위스키를 통해 버번과 라이의 차....",
+    "snippet": "마신 곳 : 필동 숙희 제품 이름 : 제임스 이 페퍼 1776 스트레이트 버번(라이) 위스키 James E Pepper 1776 Straight Bourbon( Rye ) Whiskey 가격 : 30ML 기준 18,000원(필동 숙희) 도수 : 50% 버번과 라이의 차이점 버번과 라이...",
+    "url": "https://blog.naver.com/madlion_93/223695399156"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[위스키] 1776 제임스 E .페퍼 라이",
+    "snippet": "1776 제임스 E .페퍼 라이 James E . Pepper 1776 Barrel Proof Straight Rye Whiskey ⓒ 2022 Veluga. All Rights Reserved. - 주종:위스키 - 원산지:미국 - 도수:50.0% - 제조사: James E . Pepper Distillery 제임스 E . 페퍼 증류소( James E ....",
+    "url": "https://blog.naver.com/velugabrewery/222719950948"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "new",
+  "confidence": 0.95,
+  "reason": "메뉴판의 James E Pepper 1776 Rye Whiskey는 후보 목록에 존재하지 않는 새로운 상품입니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1310,
+   "attempts": 1,
+   "input_tokens": 2281,
+   "output_tokens": 64,
+   "thought_tokens": 0
+  }
+ }
+}

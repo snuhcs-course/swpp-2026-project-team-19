@@ -1,0 +1,82 @@
+{
+ "key": "bc6913736160152b44d51f838f86870bcd141f57d8cc15ede368a1c073e1120c",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Glenfarclas 25yo",
+  "options": [
+   {
+    "product_id": "8c88bf8b-304c-58bf-bcd4-27f574864ca1",
+    "display_name": "Glenfarclas 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "3eff6768-0c6e-58c1-8fd1-a0c0ce70fe69",
+    "display_name": "Glenfarclas 105",
+    "age_years": null,
+    "edition_name": "105"
+   },
+   {
+    "product_id": "8486aaeb-3530-525c-9cd1-8cda77de5b16",
+    "display_name": "Glenfarclas 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "a04404ca-fde0-5d97-b695-f743e78ec190",
+    "display_name": "Glenfarclas 15",
+    "age_years": 15,
+    "edition_name": null
+   },
+   {
+    "product_id": "8938ac84-2199-5e2a-a1cf-16659eeff813",
+    "display_name": "Glenfarclas 17",
+    "age_years": 17,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "[★★★★☆] 글렌파클라스 25년 CS 일본 한정판 Batch 2( Glenfarclas 25yo CS....",
+    "snippet": "오늘은, 작년에 주인장이 일본 위스키 여행을 하며 데려온 그 친구, 글렌파클라스 25년 CS 일본 한정판 Batch 2 리뷰다. 사실 딸까 말까 엄청 고민하던 위스키였는데, 개인적으로는 워낙 궁금했던 위스키이기도...",
+    "url": "https://blog.naver.com/1515687/223909619568"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[싱글몰트] 쉐리 위스키 명가 - 글렌파클라스 25년 캐스크 스트랭스 ....",
+    "snippet": "글렌파클라스 25년 CS 배치1 Glenfarclas 25yo Cask Strength Batch No.1 증류소 : Glenfarclas 캐스크 : Sherry cask 숙성년수 : 25 year old 캐스크 넘버 : Batch 1 Number of Bottles : 1200 병입일 : 2022. 03. 24 도 수 : 52.2% ABV Non...",
+    "url": "https://blog.naver.com/kky2112/223790321426"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[Whisky] 글렌파클라스 25년( Glenfarclas 25yo )",
+    "snippet": "글렌파클라스 25년 글렌파클라스는 6대를 거쳐 내려오는 유서 깊은 쉐리의 명가이죠 다양한 Oloroso 쉐리통만 사용하여 숙성합니다. 25년 동안 묵언거라서 맛이 많이 궁금합니다. 요즘 위스키 가격이 계속...",
+    "url": "https://blog.naver.com/sunprax/220654743677"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "Glenfarclas 25 Year Old Scotch Whisky",
+    "snippet": "An all-time classic, Glenfarclas 25yo is the epitome of long-aged sherried Speyside, gorgeously smooth and silkily-textured, with rich, generous flavours of fruitcake, hazelnuts, dried fruit and a ...",
+    "url": "https://www.thewhiskyexchange.com/p/2072/glenfarclas-25-year-old"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.9,
+  "reason": "메뉴판의 Glenfarclas 25yo에 해당하는 25년 숙성 상품이 옵션 목록에 존재하지 않습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1428,
+   "attempts": 1,
+   "input_tokens": 2387,
+   "output_tokens": 67,
+   "thought_tokens": 0
+  }
+ }
+}

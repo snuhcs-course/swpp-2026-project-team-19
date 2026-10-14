@@ -1,0 +1,94 @@
+{
+ "key": "d45d0e992c618cfb11d6ceb6167ab647a46e5a5646b31ad4c3ee72e0e82a82d4",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Old Pepper Rye Single Barrel",
+  "options": [
+   {
+    "product_id": "cadd2c4a-0ac9-555b-a1be-33742d66d8c6",
+    "display_name": "Eagle Rare 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "0c5e090d-5461-5e0a-b164-b33da68b96db",
+    "display_name": "Russell's Reserve Single Barrel",
+    "age_years": null,
+    "edition_name": "Single Barrel"
+   },
+   {
+    "product_id": "a342821c-15b8-5db7-bb72-6fbb058f6dd4",
+    "display_name": "Woodford Reserve",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "4749c956-7ad0-548c-ad94-a65c1dc3a2b9",
+    "display_name": "GlenAllachie 8",
+    "age_years": 8,
+    "edition_name": null
+   },
+   {
+    "product_id": "1e71c22c-2bba-5ae0-8798-d054d062da6d",
+    "display_name": "GlenAllachie 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "8584eb25-d591-584b-bece-63a2fd0eb300",
+    "display_name": "GlenAllachie 18",
+    "age_years": 18,
+    "edition_name": null
+   },
+   {
+    "product_id": "54abee4e-7e03-5d52-852a-2ca1b288df26",
+    "display_name": "GlenAllachie 15",
+    "age_years": 15,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "webkr",
+    "title": "Old Pepper Single Barrel Rye",
+    "snippet": "Old Pepper Single Barrel Rye 이 위스키의 강도는 52.6 % Vol.입니다. James E. Pepper Distilling Co.에서 나온 병",
+    "url": "https://www.whiskybase.com/ko/whiskies/whisky/226918/single-barrel-rye"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "Old Pepper Single Barrel Rye",
+    "snippet": "This expression is a blend of straight rye whiskeys that is partially produced at James E. Pepper Distillery in Lexington, KY as well as Lawrenceburg Distillery in Indiana and Bardstown Bourbon Company. The whiskeys are married together and given a second maturation in heavily toasted Kent....",
+    "url": "https://distiller.com/spirits/old-pepper-single-barrel-rye"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "Old Pepper Rye – James E. Pepper",
+    "snippet": "Old Pepper - Single Barrel & Small Batch Sensory Notes Unique to each barrel , small batch or... Best Rye Whiskey – New York World Spirits Competition 2018 - Double Gold Medal – New York...",
+    "url": "https://jamesepepper.com/old-pepper-rye/"
+   },
+   {
+    "endpoint": "blog",
+    "title": "Bourbon brands",
+    "snippet": "Harper James E. Pepper Jesse James J.P. Van Winkle J.T.S.... Weller 19 Year- old Sazerac Rye 18 Year- old Eagle Rare 17 Year... Year- old Eagle Rare Single Barrel Elmer T. Lee George T....",
+    "url": "https://blog.naver.com/nebula21/100022354026"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "new",
+  "confidence": 0.95,
+  "reason": "메뉴의 Old Pepper Rye Single Barrel은 카탈로그 후보 목록에 일치하는 상품이 없으며 새로운 상품이다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1169,
+   "attempts": 1,
+   "input_tokens": 2347,
+   "output_tokens": 65,
+   "thought_tokens": 0
+  }
+ }
+}

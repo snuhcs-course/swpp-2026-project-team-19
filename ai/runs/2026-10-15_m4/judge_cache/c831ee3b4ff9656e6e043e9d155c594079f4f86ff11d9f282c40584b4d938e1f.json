@@ -1,0 +1,70 @@
+{
+ "key": "c831ee3b4ff9656e6e043e9d155c594079f4f86ff11d9f282c40584b4d938e1f",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Hakushu DR",
+  "options": [
+   {
+    "product_id": "dbfd2294-1c39-5d0e-a412-78e75d9e0168",
+    "display_name": "Hakushu Distiller's Reserve",
+    "age_years": null,
+    "edition_name": "Distiller's Reserve"
+   },
+   {
+    "product_id": "6b26bcdc-76d1-56df-bda7-cec06d74950e",
+    "display_name": "Yamazaki 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "dc167751-6e79-5ae1-bcfd-9fc405b0a94e",
+    "display_name": "Hibiki 21",
+    "age_years": 21,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "테이스팅 노트-하쿠슈 DR",
+    "snippet": "하쿠슈 Distiller's Reserve The Hakushu Distiller's Reserve 오늘 마셔본 위스키는 산토리의 싱글몰트 위스키 하쿠슈 Distiller's Reserve,*흔히 하쿠슈 DR 이라고 부르는 제품이다. 하쿠슈 증류소는 일본 야마나시현의...",
+    "url": "https://blog.naver.com/ydm06038/224382798969"
+   },
+   {
+    "endpoint": "blog",
+    "title": "일본 위스키 하쿠슈 DR 솔직 후기 면세점 쇼핑 성공일까 실패일까",
+    "snippet": "일본 위스키, 하쿠슈 DR 제품명 하쿠슈 DR Hakushu DR 종류 싱글몰트 재패니스 위스키 증류소 (블렌딩 원액) 일본 야마나시현 산토리 하쿠슈 증류소 도수 43% 하수큐 DR 은 은은한 스모크 원액과 화이트 오크통...",
+    "url": "https://blog.naver.com/pinet713/224396836359"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[위스키 리뷰] '야마자키 DR 'vs'하쿠슈 DR ' 완벽비교｜ 일본 여행에서 ....",
+    "snippet": "아래에 야마자키 12년과 다른 야마자키 위스키들을 비교한 포스팅이 있으니 참고해 보길 바란다 https://m.blog.naver.com/sophia_universe/224347841562 하쿠슈 DR ( Hakushu Distiller's Reserve) * 증류소 : 하쿠슈 증류소 * 회사...",
+    "url": "https://blog.naver.com/sophia_universe/224358805066"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[시음기] 숲의 정기를 마시다, 하쿠슈 DR ( Hakushu Distiller’s Reserve)",
+    "snippet": "리저브 ( Hakushu Distiller’s Reserve) 종류: 싱글 몰트 재패니즈 위스키 도수: 43% 특징: 고도가 높은 숲속 증류소에서 생산되어, 맑은 물과 시원한 공기가 느껴지는 상쾌한 풍미가 특징. 하쿠슈 DR 가격 15...",
+    "url": "https://blog.naver.com/peatmusae/224251919470"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "same",
+  "product_id": "dbfd2294-1c39-5d0e-a412-78e75d9e0168",
+  "confidence": 0.98,
+  "reason": "메뉴판의 'Hakushu DR'은 근거 자료에서 '하쿠슈 Distiller's Reserve'의 약어로 명확히 확인되므로 첫 번째 후보와 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1260,
+   "attempts": 1,
+   "input_tokens": 2266,
+   "output_tokens": 113,
+   "thought_tokens": 0
+  }
+ }
+}

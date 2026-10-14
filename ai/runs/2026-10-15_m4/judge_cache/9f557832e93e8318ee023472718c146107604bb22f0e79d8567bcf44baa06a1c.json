@@ -1,0 +1,70 @@
+{
+ "key": "9f557832e93e8318ee023472718c146107604bb22f0e79d8567bcf44baa06a1c",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Octomore 13.1",
+  "options": [
+   {
+    "product_id": "cb4325eb-e221-5870-9768-295b67a1a465",
+    "display_name": "Octomore 16.1",
+    "age_years": null,
+    "edition_name": "16.1"
+   },
+   {
+    "product_id": "e3b37fa7-db17-5fb3-a0f0-03c59c6b29f8",
+    "display_name": "Port Charlotte 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "dbc5af99-05b2-5538-a5ef-8aa53cdc660b",
+    "display_name": "Laphroaig 10",
+    "age_years": 10,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "옥토모어 13.1 ( Octomore ) | 강렬한 피트의 정점",
+    "snippet": "브룩라디 증류소 공식 홈페이지 https://www.bruichladdich.com/ 옥토모어 13.1 의 의미와 독보적인 수치 옥토모어( Octomore )라는 이름은 증류소 인근에 위치한 '옥토모어 농장'에서 따온 것입니다. 이 시리즈는 2008년...",
+    "url": "https://blog.naver.com/soundgardenbar/224190918835"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[아일라] OCTOMORE 옥토모어 15.2, 15.3 by Bruickladdich 브룩라디",
+    "snippet": "https://kirinos.tistory.com/1862 [아일라] OCTOMORE 옥토모어 12.1, 13.1 , 13.2 by Bruickladdich 브룩라디 구하기 어렵고 가격이 비싼 위스키 중 하나이며, 높은 페놀함량으로 Super Heavily Peated 위스키의 대명사다....",
+    "url": "https://kirinos.tistory.com/2182"
+   },
+   {
+    "endpoint": "blog",
+    "title": "(위스키 리뷰) 옥토모어 5년 13.1 PPM",
+    "snippet": "옥토모어 5년 13.1 PPM ( OCTOMORE AGED 5 YEARS 13.1 PPM ) 700ml 59.2% ★★★★☆ ( 내입안의 피트파티 ) ★☆☆☆☆: 만나서 ㅈ 같았고 다신 보지말자 ★★☆☆☆: 그냥 참고 마실수있음...",
+    "url": "https://jabdajisick.tistory.com/369"
+   },
+   {
+    "endpoint": "blog",
+    "title": "옥토모어 13.1 / 카발란 포트 캐스크, 위린이 맛있는 위스키 추천",
+    "snippet": "Octomore 13.1 **브룩라디 증류소(Bruichladdich)**에서 생산하는 슈퍼 피티드(Super-Heavily Peated) 싱글몰트. PPM (Phenol Parts per Million) 수치 약 137.3 PPM – 매우 높은 수치. 스코틀랜드 본토 스코틀쉬 보리...",
+    "url": "https://blog.naver.com/youngandone4ever/223807711653"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "new",
+  "confidence": 0.95,
+  "reason": "메뉴의 Octomore 13.1은 후보 목록에 없으나 에디션이 다른 새 상품이므로 new로 판정함",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1547,
+   "attempts": 1,
+   "input_tokens": 2289,
+   "output_tokens": 70,
+   "thought_tokens": 0
+  }
+ }
+}

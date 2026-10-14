@@ -1,0 +1,76 @@
+{
+ "key": "ce3a1c05c996dc43112548f017b744586d968a1e76e804347c5c328902b09011",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Templeton Rye Barrel Strength",
+  "options": [
+   {
+    "product_id": "dc0e99bd-2f2e-5bef-b1e2-5e65ab443e7f",
+    "display_name": "Jameson",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+    "display_name": "The Dalmore 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "ee00403f-4ece-56ff-bbc6-7dfa4737ed62",
+    "display_name": "The Dalmore 15",
+    "age_years": 15,
+    "edition_name": null
+   },
+   {
+    "product_id": "583b633a-c820-574d-8f77-521d6ac268b2",
+    "display_name": "Ardbeg 10",
+    "age_years": 10,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "미드웨스트 그레인 프로덕츠(Midwest Grain Products), 인디애나의 대형 증....",
+    "snippet": "템플턴( Templeton )을 시작으로 벌크 스피릿 수요가 크게 늘면서 증류소 생산량 또한... Toasted Barrel Strength 주종: Straight Bourbon Whiskey 원료: Rye 21% Bourbon Mash + Corn 99% Bourbon Mash + Wheat 45...",
+    "url": "https://labas24.tistory.com/1256"
+   },
+   {
+    "endpoint": "blog",
+    "title": "TEMPLETON RYE BARREL STRENGTH / 템플턴 라이 베럴 스트랭스",
+    "snippet": "바틀로 구입한 첫번째 라이 위스키 였음 인생 첫번째 위스키는 제임슨(제머슨?) 20년도 겨울에 샀던거로 기억함 가끔 이용하는 가격 좀 눈탱이 때리던 곳에서 할인가로 12만원인가 주고 샀음 당시 극위린이던...",
+    "url": "https://blog.naver.com/laopo77/223300940507"
+   },
+   {
+    "endpoint": "blog",
+    "title": "템플턴 라이 베럴 스트렝스 ( Templeton Rye Barrel Strength 2018) bar adonis",
+    "snippet": "bar adonis 템플턴 라이 베럴 스트렝스 ( Templeton Rye Barrel Strength 2018) 라이 위스키가 유행을 타고 있는 중입니다 미국의 여러종류 위스키중에 한 종류인데 호밀( Rye )가 주로 많이 (51%이상)들어간...",
+    "url": "https://blog.naver.com/alsol97/221528022468"
+   },
+   {
+    "endpoint": "blog",
+    "title": "젠틀한 패피! 중후한 패피! 인생위스키!!!",
+    "snippet": "Templeton Rye Barrel Strength 115.8proof 강한 개성 탓에 아주 가끔씩 접하는 종류이다. 그런데, 이 녀석은 좀 맛있다..ㅎㅎ 호밀의 부드러우면서도 톡 쏘는 맛! 쪼임! 피니쉬까지 이어지는 파워! 이 녀석은...",
+    "url": "https://blog.naver.com/ddadac80/221736995980"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.95,
+  "reason": "메뉴판의 템플턴 라이 배럴 스트랭스(Templeton Rye Barrel Strength)와 일치하는 상품이 후보 목록에 없습니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1222,
+   "attempts": 1,
+   "input_tokens": 2289,
+   "output_tokens": 71,
+   "thought_tokens": 0
+  }
+ }
+}

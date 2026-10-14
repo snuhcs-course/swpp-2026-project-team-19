@@ -1,0 +1,124 @@
+{
+ "key": "b622331df2996d28864bfd523eb87d935ff8a2980661168221ea8e9ce85e6cf7",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Lagavulin 12yo 2018",
+  "options": [
+   {
+    "product_id": "08cd7921-e646-5b8e-96dc-9b6a25c03bb6",
+    "display_name": "Lagavulin 16",
+    "age_years": 16,
+    "edition_name": null
+   },
+   {
+    "product_id": "22fb35cf-50eb-52b3-8f11-3be058ee321f",
+    "display_name": "Lagavulin 8",
+    "age_years": 8,
+    "edition_name": null
+   },
+   {
+    "product_id": "deabfe81-7c98-54c8-96d6-fd839a61b3e2",
+    "display_name": "Bowmore 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "e5de7281-878c-59d1-9504-6f057c69e860",
+    "display_name": "GlenDronach 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "8ab09688-478e-5a77-ae5c-bb7f1d603d1e",
+    "display_name": "Highland Park 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "1e71c22c-2bba-5ae0-8798-d054d062da6d",
+    "display_name": "GlenAllachie 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "293b9d2b-8fdb-52c2-b6cd-eb0a77910eae",
+    "display_name": "The Glenlivet 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+    "display_name": "The Dalmore 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "c78d15b5-46b1-589d-b3ee-a8e308dbea1c",
+    "display_name": "Aberlour 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "68dbee4d-dc5b-5bf7-84f7-a3faf4c24571",
+    "display_name": "Cragganmore 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+    "display_name": "The Macallan 12 Double Cask",
+    "age_years": 12,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "1c99d4a3-54c6-50ff-932e-25496b2222a0",
+    "display_name": "BenRiach The Twelve",
+    "age_years": 12,
+    "edition_name": "The Twelve"
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "Lagavulin 12yo Diageo SR 2021 700ml 56.5%(라가블린12년 디아지오 SR 2021)",
+    "snippet": "Lagavulin 12 years Old Diageo Special Release 2021 Refill American Oak 700ml 56.5% CS 라가블린 12년 CS 디아지오 SR_2021 56.5% 개인적으로 좋아하는 보틀입니다. SR_ 2018 이전 보틀은 마셔본 기억이 없지만...",
+    "url": "https://blog.naver.com/masterdiver/223831835126"
+   },
+   {
+    "endpoint": "blog",
+    "title": "Lagavulin 12yo CS 2018",
+    "snippet": "라가불린 12년 CS 2018 릴리즈 (ABV 57.8%) 비가 오는 날이다. 비오는 날엔 왠지 아일라(Islay) 위스키가 땡긴다. 캠벨타운과는 다른 아일라만의 묵직하면서도 축축한 피트가 빗소리와 잘 어울리는 듯 하다. 아래 영상...",
+    "url": "https://blog.naver.com/scienslee/222016855905"
+   },
+   {
+    "endpoint": "blog",
+    "title": "[Whisky] 라가불린 12년 / Lagavulin 12yo CS(2019)",
+    "snippet": "(출처 : whiskybase.com) Lagavulin 12 yo cask strength // Lagavulin Distillery ('방앗간이 있는 분지 Hollow in the Mill... 라가불린 16년을 마시고 맛있다고 감동받고 얼마 후 라가불린12년( 2018 SR)을 마셔보고 이건 보틀로...",
+    "url": "https://blog.naver.com/kdhcrew/222179065866"
+   },
+   {
+    "endpoint": "blog",
+    "title": "Lagavulin 12yo Diageo 2018 SR 라가블린 12년 CS 2018 SR",
+    "snippet": "# LAGAVULIN #LimitedRelease # 2018 #라가블린 # 12yo #CS #57.8% #CaskStrength #Singlemaltwhisky #Whiskycollector #위스키수집가 #산타는남자⛰ #산행길에만난사람 #바다사랑 #Scuba #Scubadiving #Balvenie #위스키사랑...",
+    "url": "https://blog.naver.com/masterdiver/222635089892"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "different",
+  "product_id": "none",
+  "confidence": 0.95,
+  "reason": "메뉴의 Lagavulin 12yo 2018(12년 연수 및 2018년 빈티지/에디션)과 일치하는 상품이 옵션 목록에 존재하지 않음.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1221,
+   "attempts": 1,
+   "input_tokens": 2945,
+   "output_tokens": 90,
+   "thought_tokens": 0
+  }
+ }
+}

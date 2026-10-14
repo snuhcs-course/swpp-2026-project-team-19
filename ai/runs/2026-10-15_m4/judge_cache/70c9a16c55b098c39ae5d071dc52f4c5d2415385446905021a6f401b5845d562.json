@@ -1,0 +1,88 @@
+{
+ "key": "70c9a16c55b098c39ae5d071dc52f4c5d2415385446905021a6f401b5845d562",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "달모어 12Y 쉐리",
+  "options": [
+   {
+    "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+    "display_name": "The Dalmore 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "461acdf2-1256-5a0f-b9ed-e18b44baf4e1",
+    "display_name": "The Dalmore 12 Sherry Cask Select",
+    "age_years": 12,
+    "edition_name": "Sherry Cask Select"
+   },
+   {
+    "product_id": "ee00403f-4ece-56ff-bbc6-7dfa4737ed62",
+    "display_name": "The Dalmore 15",
+    "age_years": 15,
+    "edition_name": null
+   },
+   {
+    "product_id": "2f557cc3-4552-50c8-a10a-a838c806546c",
+    "display_name": "The Dalmore Cigar Malt Reserve",
+    "age_years": null,
+    "edition_name": "Cigar Malt Reserve"
+   },
+   {
+    "product_id": "81bd91d9-2949-516c-9a25-b0aed5507eb3",
+    "display_name": "The Dalmore Port Wood Reserve",
+    "age_years": null,
+    "edition_name": "Port Wood Reserve"
+   },
+   {
+    "product_id": "c78d15b5-46b1-589d-b3ee-a8e308dbea1c",
+    "display_name": "Aberlour 12",
+    "age_years": 12,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "주류상회Be 달모어",
+    "snippet": "Dalmore 12 캐스크 - American White Oak and Oloroso Sherry Casks 숙성년도 - 최저 12년 알코올(ABV) - 40% Dalmore 15 캐스크 - American White Oak & 3 Styles of Sherry 숙성년도 - 최저 15년 알코올(ABV) - 40% 달모어12Y , 12Y쉐리 캐스크,15Y 을...",
+    "url": "https://blog.naver.com/liquormarketbe/222513256485"
+   },
+   {
+    "endpoint": "blog",
+    "title": "위스키 노트 :: 더 달모어 12년(The Dalmore 12y )",
+    "snippet": "2.8.) 제품명 : 더 달모어 12년 종류 : 싱글몰트 스카치 위스키(논피트) 도수 : 40% vol. 용량 : 700ml 입맛 : ●●◐○○ 달모어 는 쿨톤인데 쉐리 셀렉트는 웜톤 코트였던 것으로... 달모어 12년 40도 700ml, 1개 102,900",
+    "url": "https://blog.naver.com/allachie/224176875567"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "달모어 12 년 쉐리 캐스크",
+    "snippet": "Dalmore 12 YO Sherry Cask (달모어 12 년 쉐리 캐스크) - 위스키, Whyte And Mackay LTD, 영국. 수입이력 2건. SpiritsDB 수입주류 데이터베이스.",
+    "url": "https://spiritsdb.tera.co.kr/master/8836"
+   },
+   {
+    "endpoint": "cafearticle",
+    "title": "달모어 12 년 쉐리 캐스크",
+    "snippet": "영화 #킹스맨 위스키 #달모어 12 년 쉐리 캐스크 달모어 12 년 쉐리 캐스크 The Dalmore 12 yaers Sherry Cask 스코틀랜드 - ⚜️싱글몰트 위스키 Taste: 진한 초컬릿을 베이스로 바닐라와 열대과일향이 맡아지고 입은...",
+    "url": "https://cafe.naver.com/choigoyawine1/220"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "same",
+  "product_id": "461acdf2-1256-5a0f-b9ed-e18b44baf4e1",
+  "confidence": 0.95,
+  "reason": "메뉴판의 '달모어 12Y 쉐리'는 12년 연수와 쉐리 캐스크 에디션을 명시하고 있어 후보 중 The Dalmore 12 Sherry Cask Select와 정확히 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1343,
+   "attempts": 1,
+   "input_tokens": 2481,
+   "output_tokens": 125,
+   "thought_tokens": 0
+  }
+ }
+}

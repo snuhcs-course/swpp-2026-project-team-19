@@ -1,0 +1,142 @@
+{
+ "key": "794b53f3d3d770114175c772acea90a45f11c233f570abd7b82806cedaffd070",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "카발란 DR 마데라캐스크",
+  "options": [
+   {
+    "product_id": "594548b5-7593-5f8d-9049-662f8ae682fc",
+    "display_name": "Kavalan Distillery Reserve Madeira Cask",
+    "age_years": null,
+    "edition_name": "Distillery Reserve Madeira Cask"
+   },
+   {
+    "product_id": "609f1199-f627-5ce1-bab9-b4dfd9acb9ec",
+    "display_name": "Kavalan Solist Oloroso Sherry",
+    "age_years": null,
+    "edition_name": "Solist Oloroso Sherry"
+   },
+   {
+    "product_id": "abe4e50e-f84d-5fc8-9d9e-d4cfc345754a",
+    "display_name": "Kavalan Solist Vinho Barrique",
+    "age_years": null,
+    "edition_name": "Solist Vinho Barrique"
+   },
+   {
+    "product_id": "cbe5c81b-5886-57c3-8e75-6b474eff02b0",
+    "display_name": "Kavalan Triple Sherry Cask",
+    "age_years": null,
+    "edition_name": "Triple Sherry Cask"
+   },
+   {
+    "product_id": "6b26bcdc-76d1-56df-bda7-cec06d74950e",
+    "display_name": "Yamazaki 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "65a7ff41-1a34-5fab-ae14-399c9080f542",
+    "display_name": "GlenDronach 15",
+    "age_years": 15,
+    "edition_name": null
+   },
+   {
+    "product_id": "e5de7281-878c-59d1-9504-6f057c69e860",
+    "display_name": "GlenDronach 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "8e2044fe-cc03-50f4-9837-824b5da7f5f8",
+    "display_name": "GlenDronach 21 Parliament",
+    "age_years": 21,
+    "edition_name": "Parliament"
+   },
+   {
+    "product_id": "490c0c07-f393-5ea4-8726-2cb303879390",
+    "display_name": "The Balvenie 18 Pedro Ximenez Cask",
+    "age_years": 18,
+    "edition_name": "Pedro Ximenez Cask"
+   },
+   {
+    "product_id": "9c5564f0-c824-5c65-b8d0-13189e788104",
+    "display_name": "The Balvenie 21 PortWood",
+    "age_years": 21,
+    "edition_name": "PortWood"
+   },
+   {
+    "product_id": "2e5afd95-81f4-5085-a394-14f0905bd20c",
+    "display_name": "Glen Grant 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "3f4d6495-d607-5334-b11d-7801deacfd32",
+    "display_name": "Glen Grant 15",
+    "age_years": 15,
+    "edition_name": null
+   },
+   {
+    "product_id": "c78cc437-c328-57bc-9d75-aade485e2312",
+    "display_name": "Glen Grant 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "f5a1b955-c4de-5eaa-86d7-a21299a303e9",
+    "display_name": "Glen Grant 18",
+    "age_years": 18,
+    "edition_name": null
+   },
+   {
+    "product_id": "c78d15b5-46b1-589d-b3ee-a8e308dbea1c",
+    "display_name": "Aberlour 12",
+    "age_years": 12,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "[면세점 위스키 가격비교] 야마자키 ㅣ 하쿠슈 ㅣ 발베니ㅣ카발란 | ....",
+    "snippet": "발베니 마데이라 15(The Balvenie 15 Madeira Cask ) 개별가격 TWD 2700$ (118,125원)_한국가 249,000 나라... ( DR ) #하쿠슈Distiller'sReserve( DR ) #TheBalvenie15 MadeiraCas # KAVALAN RHYTHMofTAIWAN COLLECTION #발베니마데이라15...",
+    "url": "https://blog.naver.com/august171/224373620101"
+   },
+   {
+    "endpoint": "blog",
+    "title": "26년 1월 현재 77병/위린이의 소장 위스키, 시음후기, 위스키추천. 계....",
+    "snippet": "BALVENIE MADEIRA CASK AGED 15YEARS 구매: 2023년 1월 15일 제주 중문면세점 $156 (할인 전) 미개봉 48. 카발란 피노 KAVALAN FINO SHERRY CASK ... 하쿠슈 DR 구매: 2022년 9월. 개봉: 2023년 4월 26일. 이마트 어플....",
+    "url": "https://blog.naver.com/wonderlist222/222974159726"
+   },
+   {
+    "endpoint": "blog",
+    "title": "Kavalan 디스틸러리: 아시아 위스키의 혁신과 성공",
+    "snippet": "성공의 핵심은 마스터 블렌더 Ian Chang과 위스키 컨설턴트 Dr . Jim Swan의 노하우에 있습니다.... CS Kavalan Solist Madeira Cask Strength 카발란 솔리스트 마데이라캐스크 카발란 디스틸러리 셀렉트...",
+    "url": "https://blog.naver.com/leeee96/223304137988"
+   },
+   {
+    "endpoint": "blog",
+    "title": "카발란 솔리스트 마데이라 캐스크",
+    "snippet": "카발란 솔리스트 마데이라 캐스크 위스키 ( Kavalan Solist Madeira Cask Strength) 종류 : 싱글 몰트 대만 위스키 (Taiwanese Single Malt Whisky) 생산지 : 대만 (Yilan, Taiwan) 증류소 : 카발란 증류소 ( Kavalan ...",
+    "url": "https://blog.naver.com/mh2178/224256185148"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "same",
+  "product_id": "594548b5-7593-5f8d-9049-662f8ae682fc",
+  "confidence": 0.9,
+  "reason": "메뉴판의 '카발란 DR 마데라캐스크'는 Kavalan Distillery Reserve Madeira Cask 제품을 의미합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1167,
+   "attempts": 1,
+   "input_tokens": 3175,
+   "output_tokens": 99,
+   "thought_tokens": 0
+  }
+ }
+}

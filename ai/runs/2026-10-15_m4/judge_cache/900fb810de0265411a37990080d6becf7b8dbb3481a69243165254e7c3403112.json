@@ -1,0 +1,130 @@
+{
+ "key": "900fb810de0265411a37990080d6becf7b8dbb3481a69243165254e7c3403112",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "카발란 솔리스트 셰리 오크",
+  "options": [
+   {
+    "product_id": "609f1199-f627-5ce1-bab9-b4dfd9acb9ec",
+    "display_name": "Kavalan Solist Oloroso Sherry",
+    "age_years": null,
+    "edition_name": "Solist Oloroso Sherry"
+   },
+   {
+    "product_id": "abe4e50e-f84d-5fc8-9d9e-d4cfc345754a",
+    "display_name": "Kavalan Solist Vinho Barrique",
+    "age_years": null,
+    "edition_name": "Solist Vinho Barrique"
+   },
+   {
+    "product_id": "cbe5c81b-5886-57c3-8e75-6b474eff02b0",
+    "display_name": "Kavalan Triple Sherry Cask",
+    "age_years": null,
+    "edition_name": "Triple Sherry Cask"
+   },
+   {
+    "product_id": "594548b5-7593-5f8d-9049-662f8ae682fc",
+    "display_name": "Kavalan Distillery Reserve Madeira Cask",
+    "age_years": null,
+    "edition_name": "Distillery Reserve Madeira Cask"
+   },
+   {
+    "product_id": "b9055c7f-cab5-5145-b2d1-d900c0924d09",
+    "display_name": "Edradour 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "e575169b-7f33-585c-9238-1d02b475ea18",
+    "display_name": "Clynelish 14",
+    "age_years": 14,
+    "edition_name": null
+   },
+   {
+    "product_id": "4a898091-d81b-55ac-ab1f-9103e787b1d8",
+    "display_name": "Arran 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "30ac644f-a7ae-51a2-a3a8-cda1fe7d1d7f",
+    "display_name": "The Macallan 15 Double Cask",
+    "age_years": 15,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+    "display_name": "The Macallan 12 Double Cask",
+    "age_years": 12,
+    "edition_name": "Double Cask"
+   },
+   {
+    "product_id": "854c6973-b222-5298-b1fe-4fa0ef6264f8",
+    "display_name": "The Macallan 12 Sherry Oak",
+    "age_years": 12,
+    "edition_name": "Sherry Oak"
+   },
+   {
+    "product_id": "89f1e724-1a62-5d0b-a78b-c7084b9f9bdd",
+    "display_name": "Auchentoshan 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "c78d15b5-46b1-589d-b3ee-a8e308dbea1c",
+    "display_name": "Aberlour 12",
+    "age_years": 12,
+    "edition_name": null
+   },
+   {
+    "product_id": "b7ac293e-fa4e-5cd6-a7c9-dc4beebd8c87",
+    "display_name": "Aultmore 12",
+    "age_years": 12,
+    "edition_name": null
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "blog",
+    "title": "KAVALAN Port Oak Single Malt",
+    "snippet": "카발란 포트 오크( Kavalan Port Oak Single Malt Whisky)는, 대만의 대표적인 위스키 증류소인 카발란... 특히 카발란 솔리스트 셰리( Solist Sherry )나 포트(Port) 라인업은 셰리와 포트와인 특유의 짙은 붉은...",
+    "url": "https://blog.naver.com/vague_planet/224356944383"
+   },
+   {
+    "endpoint": "cafearticle",
+    "title": "카발란 올로로소 셰리 오크",
+    "snippet": "카발란 올로로소 셰리 오크 Kavalan oloroso sherry oak 는 솔리스트 셰리 solist sherry 를 Kavalan 샘물로 46%까지 희석해 조금 더 가볍게 마실수 있도록 만든 제품입니다. 완벽하게 요리 한 스테이크는 Kavalan Oloroso Sherry ...",
+    "url": "https://cafe.naver.com/jehao/1086"
+   },
+   {
+    "endpoint": "blog",
+    "title": "카발란 올로로소 셰리 오크",
+    "snippet": "올로로소 셰리 오크 (Kavalan Oloroso Sherry Oak)**입니다. 세계적으로 큰 인기를 얻은 ' 카발란 솔리스트 셰리 캐스크' 원액에 카발란 증류소 고유의 청정 천연 암반수를 더해 46% 도수로 부드럽게 재해석한...",
+    "url": "https://blog.naver.com/eodwnd25/224398716983"
+   },
+   {
+    "endpoint": "blog",
+    "title": "KAVALAN OLOROSO SHERRY OAK / EDRADOUR 12 OLOROSO SHERRY BUTTS BATCH:#7",
+    "snippet": "항목 상세 정보 제품명 카발란 올로로소 셰리 오크 생산지 / 종류 대만 이란 / 싱글 몰트 위스키 숙성... • 솔리스트 의 대중화 버전: 카발란 의 유명한 고도수 제품인 ' 솔리스트 셰리 '를 음용하기 편한 46...",
+    "url": "https://blog.naver.com/wellegg11/224390181319"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "same",
+  "product_id": "609f1199-f627-5ce1-bab9-b4dfd9acb9ec",
+  "confidence": 0.95,
+  "reason": "메뉴판의 '카발란 솔리스트 셰리 오크'는 카탈로그의 'Kavalan Solist Oloroso Sherry'와 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1210,
+   "attempts": 1,
+   "input_tokens": 2963,
+   "output_tokens": 106,
+   "thought_tokens": 0
+  }
+ }
+}

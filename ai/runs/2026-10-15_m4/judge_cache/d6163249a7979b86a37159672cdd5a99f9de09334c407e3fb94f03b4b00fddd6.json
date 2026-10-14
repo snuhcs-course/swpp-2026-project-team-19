@@ -1,0 +1,82 @@
+{
+ "key": "d6163249a7979b86a37159672cdd5a99f9de09334c407e3fb94f03b4b00fddd6",
+ "candidate": {
+  "mode": "match",
+  "menu_line": "Taylor Small Batch",
+  "options": [
+   {
+    "product_id": "ba04c4c7-3efa-5b97-ad6c-ec87fbfc0060",
+    "display_name": "Colonel E.H. Taylor Small Batch",
+    "age_years": null,
+    "edition_name": "Small Batch"
+   },
+   {
+    "product_id": "de13c12d-fb43-5b60-82b8-a08ddce214ae",
+    "display_name": "Buffalo Trace",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "cadd2c4a-0ac9-555b-a1be-33742d66d8c6",
+    "display_name": "Eagle Rare 10",
+    "age_years": 10,
+    "edition_name": null
+   },
+   {
+    "product_id": "267e4a32-091f-5d9b-a19a-ec5098c1fb4e",
+    "display_name": "Booker's",
+    "age_years": null,
+    "edition_name": null
+   },
+   {
+    "product_id": "0c5e090d-5461-5e0a-b164-b33da68b96db",
+    "display_name": "Russell's Reserve Single Barrel",
+    "age_years": null,
+    "edition_name": "Single Barrel"
+   }
+  ],
+  "evidence": [
+   {
+    "endpoint": "webkr",
+    "title": "E.H. Taylor , Jr. Small Batch Bourbon",
+    "snippet": "Produced at Buffalo Trace Distillery in Frankfort, Kentucky, E.H. Taylor Small Batch is a Bottled-in-Bond bourbon named for Colonel Edmund Haynes...",
+    "url": "https://distiller.com/spirits/colonel-e-h-taylor-small-batch"
+   },
+   {
+    "endpoint": "webkr",
+    "title": "E. H. Taylor , Jr. Small Batch | Buffalo Trace Distillery",
+    "snippet": "Discover E.H. Taylor , Jr. Small Batch , a Bottled-in-Bond bourbon honoring historic craftsmanship and the legacy of Colonel E.H. Taylor at Buffalo Trace.",
+    "url": "https://www.buffalotracedistillery.com/our-brands/e-h-taylor-jr/e-h-taylor-jr-small-batch/"
+   },
+   {
+    "endpoint": "cafearticle",
+    "title": "[시음기] Colonel E.H. Taylor Jr. Small Batch",
+    "snippet": "H. Taylor , Jr. Small Batch (콜로넬 에드먼드 헤인즈 테일러 주니어 스몰배치) 입니다. 초콜릿이랑 먹으면서 찍었습니다. 제조 : 미국, 버팔로 트레이스사 분류 : 버번(Bourbon whisky) 도수 : 50% 색깔 : 호박색 가격 : 13만원...",
+    "url": "https://cafe.naver.com/whiskylove9999/30649"
+   },
+   {
+    "endpoint": "cafearticle",
+    "title": "버팔로 트레이스 증류소, 'Colonel E.H. Taylor , Jr. Distiller’s Council' 출시",
+    "snippet": "스몰 배치( Small Batch ), 싱글 배럴(Single Barrel), 배럴 프루프(Barrel Proof) 버번과 스몰 배치 라이( Small Batch Rye), 배럴 프루프 라이(Barrel Proof Rye) 버번이 꾸준히 출시되고 있습니다. EH 테일러 주니어 컬렉션(EH Taylor ...",
+    "url": "https://cafe.naver.com/whiskycognac/743632"
+   }
+  ]
+ },
+ "verdict": {
+  "verdict": "same",
+  "product_id": "ba04c4c7-3efa-5b97-ad6c-ec87fbfc0060",
+  "confidence": 0.95,
+  "reason": "메뉴판의 Taylor Small Batch는 Colonel E.H. Taylor Small Batch 상품과 브랜드 및 에디션이 일치합니다.",
+  "meta": {
+   "model": "gemini-3.5-flash-lite",
+   "thinking_level": "low",
+   "prompt_version": "v1",
+   "prompt_sha256": "4665608cccf2d2d44d957389b3579fabf21fcc57269cfbb8268824574487fb8f",
+   "latency_ms": 1207,
+   "attempts": 1,
+   "input_tokens": 2292,
+   "output_tokens": 95,
+   "thought_tokens": 0
+  }
+ }
+}
