@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.customer
 
 import com.zerotoone.bottlemap.data.CustomerSearchSource
 import com.zerotoone.bottlemap.network.BottleMapApiException
+import com.zerotoone.bottlemap.network.FieldErrorDto
 import com.zerotoone.bottlemap.network.MatchedProductDto
 import com.zerotoone.bottlemap.network.SearchBarsResponseDto
 import com.zerotoone.bottlemap.network.SearchOptionDto
@@ -132,12 +133,86 @@ class SearchResultsViewModelTest {
     }
 
     @Test
-    fun serverErrorIsUserFriendly() {
+    fun serverErrorUsesApiCodeNotHttpStatus() {
         assertTrue(
             searchErrorMessage(
-                BottleMapApiException(httpStatus = 503, code = "HTTP_503", message = "internal"),
+                BottleMapApiException(
+                    httpStatus = 400,
+                    code = "SERVICE_UNAVAILABLE",
+                    message = "internal",
+                ),
             ).contains("서버"),
         )
+        assertTrue(
+            searchErrorMessage(
+                BottleMapApiException(
+                    httpStatus = 503,
+                    code = "UNEXPECTED_CODE",
+                    message = "internal",
+                ),
+            ).contains("다시 시도"),
+        )
+    }
+
+    @Test
+    fun backendQueryValidationCodesReturnToInputWithoutRetry() = runTest(dispatcher) {
+        for (fieldCode in listOf("MISSING", "BLANK", "STRING_TOO_LONG", "NOT_SEARCHABLE")) {
+            val fake = FakeSource {
+                throw BottleMapApiException(
+                    httpStatus = 422,
+                    code = "VALIDATION_FAILED",
+                    message = "input error",
+                    fieldErrors = listOf(
+                        FieldErrorDto(
+                            path = "query",
+                            code = fieldCode,
+                            message = "validation error",
+                        ),
+                    ),
+                )
+            }
+            val vm = SearchResultsViewModel(fake)
+            vm.search("!!!")
+            advanceUntilIdle()
+            assertEquals(CustomerSearchUiState.InvalidQuery(fieldCode), vm.state.value)
+            vm.retry()
+            advanceUntilIdle()
+            assertEquals(listOf("!!!"), fake.requests)
+            assertTrue(searchValidationMessage(fieldCode).isNotBlank())
+        }
+    }
+
+    @Test
+    fun unknownValidationFieldIsNotRetryable() = runTest(dispatcher) {
+        val fake = FakeSource {
+            throw BottleMapApiException(
+                httpStatus = 422,
+                code = "VALIDATION_FAILED",
+                message = "input error",
+                fieldErrors = listOf(
+                    FieldErrorDto(path = "limit", code = "LESS_THAN_EQUAL", message = "invalid"),
+                ),
+            )
+        }
+        val vm = SearchResultsViewModel(fake)
+        vm.search("Deanston 12")
+        advanceUntilIdle()
+        assertEquals(
+            CustomerSearchUiState.Error("검색 요청의 입력값을 확인해 주세요.", canRetry = false),
+            vm.state.value,
+        )
+        vm.retry()
+        advanceUntilIdle()
+        assertEquals(listOf("Deanston 12"), fake.requests)
+    }
+
+    @Test
+    fun inputValidationStillRunsLocally() {
+        val vm = SearchResultsViewModel(FakeSource { response(it) })
+        vm.search("   ")
+        assertEquals(CustomerSearchUiState.InvalidQuery("BLANK"), vm.state.value)
+        vm.search("a".repeat(101))
+        assertEquals(CustomerSearchUiState.InvalidQuery("STRING_TOO_LONG"), vm.state.value)
     }
 
     private class FakeSource(
