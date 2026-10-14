@@ -47,9 +47,11 @@ def ocr_user_text(stem: str, gap: float = GAP_FACTOR, tables: bool = False) -> t
     if rec is None:
         raise FileNotFoundError(f"no OCR cache for {stem} (table-{'on' if tables else 'off'})")
     resp = rec["response"]
-    prepared = data_dir() / "prepared" / rec["meta"]["prepared_image"]
-    with Image.open(prepared) as im:
-        size = image_size(resp, im.size)
+    sent_size = rec["meta"].get("sent_size")  # boxes are in the pixels of the image sent
+    if sent_size is None:
+        with Image.open(data_dir() / "prepared" / rec["meta"]["prepared_image"]) as im:
+            sent_size = im.size
+    size = image_size(resp, tuple(sent_size))
     lines = build_lines(resp, gap)
     text = f"{USER_HEADER}\n\n<ocr_lines>\n{format_lines(lines, size)}\n</ocr_lines>"
     table_text = format_tables(resp) if tables else ""

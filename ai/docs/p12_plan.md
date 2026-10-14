@@ -22,6 +22,8 @@
 ## OCR 호출
 
 - CLOVA General OCR V2, JSON 본문, 이미지 base64, `lang: "ko"`. 헤더 `X-OCR-SECRET`
+- **사진은 순차로 1장씩 호출한다** (CLOVA 동시 호출 제한). 병렬 호출 없음
+- 장축이 8,000px 이상이면 장축 7,999px로 줄인 JPEG(q95, `<data_dir>/prepared_ocr/`)를 보낸다. 현재 val·test 23장은 장축 최대 4,032px라 해당 없음. 좌표는 보낸 이미지 기준
 - 사진마다 `enableTableDetection` **false / true 두 버전**을 호출해 응답 원본을 `<data_dir>/ocr_cache/`에 저장. 콘솔에서 표 추출이 꺼져 있어(오류 0028) true 버전을 못 받으면 false만 쓰고 보고서에 적는다
 - 캐시가 있으면 다시 호출하지 않는다. OCR은 사진당 버전별 1회
 - 사진별·버전별 지연 시간(ms)과 호출 수를 `ai/runs/<날짜>_p12_clova/ocr_calls.json`에 기록 (키·URL은 기록하지 않음)
@@ -93,3 +95,4 @@ OCR 결과에 정답 정보가 **글자로 존재하는지**만 본다 (위치·
 ## 변경 이력
 
 - 2026-10-14: 최초 작성 (OCR·LLM 호출 전)
+- 2026-10-14: 순차 호출, 장축 8,000px 이상 축소 추가 (담당자 지시, OCR 호출 전)

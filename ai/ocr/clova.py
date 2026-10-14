@@ -8,7 +8,9 @@ The invoke URL and secret are read only from CLOVA_OCR_INVOKE_URL and
 CLOVA_OCR_SECRET in the repo .env; neither is printed or written anywhere.
 Raw responses go to <data_dir>/ocr_cache/<stem>__table-<off|on>.json (outside the
 repo). Per-call latency is appended to ai/runs/<date>_p12_clova/ocr_calls.json.
-The photo sent is extract.prepare_image's output, the same bytes E1 used.
+The photo sent is extract.prepare_image's output, the same bytes E1 used, unless
+its long side is >= 8,000 px; then a downscaled copy (<data_dir>/prepared_ocr/) is
+sent. CLOVA limits concurrent calls, so photos are sent strictly one at a time.
 """
 
 from __future__ import annotations
@@ -26,12 +28,15 @@ from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
+from PIL import Image
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "ai" / "extract"))
 from extract import data_dir, prepare_image  # noqa: E402
 
 VARIANTS = {"off": False, "on": True}  # variant -> enableTableDetection
+MAX_LONG_SIDE = 8000  # long side >= this is downscaled to MAX_LONG_SIDE - 1 before sending
+JPEG_QUALITY = 95
 FORMATS = {".jpg": "jpg", ".jpeg": "jpg", ".png": "png"}
 LANG = "ko"
 RETRY_STATUS = {429, 500, 502, 503, 504}
@@ -64,6 +69,26 @@ def cache_path(stem: str, variant: str) -> Path:
     return data_dir() / "ocr_cache" / f"{stem}__table-{variant}.json"
 
 
+def ocr_image(prepared: Path) -> tuple[Path, tuple[int, int], bool]:
+    """Image actually sent to CLOVA: the prepared photo, or a downscaled copy in
+    <data_dir>/prepared_ocr/ when its long side is >= MAX_LONG_SIDE.
+    Returns (path, (width, height), resized). OCR boxes are in this image's pixels."""
+    with Image.open(prepared) as im:
+        size = im.size
+        if max(size) < MAX_LONG_SIDE:
+            return prepared, size, False
+        scale = (MAX_LONG_SIDE - 1) / max(size)
+        new_size = (max(1, round(size[0] * scale)), max(1, round(size[1] * scale)))
+        dst = data_dir() / "prepared_ocr" / (prepared.stem + ".jpg")
+        if not dst.exists():
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            tmp = dst.with_name(dst.name + ".tmp")
+            im.convert("RGB").resize(new_size, Image.LANCZOS).save(tmp, format="JPEG", quality=JPEG_QUALITY)
+            tmp.replace(dst)
+    with Image.open(dst) as im:
+        return dst, im.size, True
+
+
 def build_request(image_bytes: bytes, fmt: str, name: str, table: bool) -> dict:
     return {
         "version": "V2",
@@ -90,8 +115,9 @@ def call_ocr(image_path: Path, table: bool, client: httpx.Client | None = None) 
     """One OCR call. Returns (raw response, call meta). Retries transient errors only."""
     url, secret = credentials()
     prepared = prepare_image(Path(image_path))
-    image_bytes = prepared.read_bytes()
-    body = build_request(image_bytes, FORMATS[prepared.suffix.lower()], prepared.stem, table)
+    sent, sent_size, resized = ocr_image(prepared)
+    image_bytes = sent.read_bytes()
+    body = build_request(image_bytes, FORMATS[sent.suffix.lower()], prepared.stem, table)
     headers = {"X-OCR-SECRET": secret, "Content-Type": "application/json"}
     own = client is None
     client = client or httpx.Client(timeout=TIMEOUT_S)
@@ -127,7 +153,10 @@ def call_ocr(image_path: Path, table: bool, client: httpx.Client | None = None) 
     meta = {
         "source_image": Path(image_path).name,
         "prepared_image": prepared.name,
-        "prepared_sha256": hashlib.sha256(image_bytes).hexdigest(),
+        "sent_image": sent.name,
+        "sent_sha256": hashlib.sha256(image_bytes).hexdigest(),
+        "sent_size": list(sent_size),
+        "resized": resized,
         "table_detection": table,
         "version": "V2",
         "lang": LANG,
@@ -187,6 +216,7 @@ def main() -> None:
     log = json.loads(log_path.read_text(encoding="utf-8")) if log_path.exists() else []
 
     skip_on = False
+    # Sequential on purpose: one request in flight at a time (CLOVA concurrency limit).
     with httpx.Client(timeout=TIMEOUT_S) as client:
         for photo in photos:
             for variant in args.variants:

@@ -174,6 +174,24 @@ def test_ocr_photo_sends_secret_header_caches_and_never_stores_secret(data_dir):
     assert cached2 and len(seen) == 1 and record2["response"] == FIXTURE
 
 
+def test_long_side_8000_is_downscaled_before_sending(data_dir):
+    src = data_dir / "eval_photos" / "big.png"
+    src.parent.mkdir(parents=True, exist_ok=True)
+    Image.new("RGB", (8000, 2000), "white").save(src)
+    sent = []
+
+    def handler(request):
+        sent.append(json.loads(request.content)["images"][0])
+        return httpx.Response(200, json=FIXTURE)
+
+    _, meta = clova.call_ocr(src, False, httpx.Client(transport=httpx.MockTransport(handler)))
+    assert meta["resized"] and meta["sent_size"] == [7999, 2000]
+    assert meta["sent_image"] == "big.jpg" and sent[0]["format"] == "jpg"
+    small = photo(data_dir / "eval_photos" / "small.png")  # 1000 px: sent as is
+    _, meta2 = clova.call_ocr(small, False, httpx.Client(transport=httpx.MockTransport(handler)))
+    assert not meta2["resized"] and meta2["sent_size"] == [1000, 400] and sent[1]["format"] == "png"
+
+
 def test_retry_on_500_then_success(data_dir, monkeypatch):
     monkeypatch.setattr(clova.time, "sleep", lambda s: None)
     src = photo(data_dir / "eval_photos" / "m2.png")
