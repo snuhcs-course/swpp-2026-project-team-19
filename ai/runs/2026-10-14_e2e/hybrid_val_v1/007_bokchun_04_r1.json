@@ -1,0 +1,145 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "007_bokchun_04.jpg",
+  "prepared_image": "007_bokchun_04.jpg",
+  "prepared_sha256": "5228aac6adeece3c026c1365f6f15d8f3e1798464796396dc4b0053cfecf9498",
+  "started_at": "2026-10-14T08:26:00.569895+00:00",
+  "latency_ms": 7753,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5847,
+  "output_tokens": 200,
+  "thought_tokens": 1571,
+  "total_tokens": 7618,
+  "output": {
+    "items": [
+      {
+        "raw_name": "복춘",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L057"
+          ],
+          "price": [
+            "L012"
+          ]
+        }
+      },
+      {
+        "raw_name": "입춘",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L056"
+          ],
+          "price": [
+            "L013"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"복춘\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\n          \"L057\"\n        ],\n        \"price\": [\n          \"L012\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"입춘\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\n          \"L056\"\n        ],\n        \"price\": [\n          \"L013\"\n        ]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T08:26:07Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"복춘\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\n          \"L057\"\n        ],\n        \"price\": [\n          \"L012\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"입춘\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\n          \"L056\"\n        ],\n        \"price\": [\n          \"L013\"\n        ]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"복춘\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\n          \"L057\"\n        ],\n        \"price\": [\n          \"L012\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"입춘\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\n          \"L056\"\n        ],\n        \"price\": [\n          \"L013\"\n        ]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T08:26:07Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 4783
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 5847,
+      "total_output_tokens": 200,
+      "total_thought_tokens": 1571,
+      "total_tokens": 7618,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 68,
+    "price_like_lines": 32,
+    "uncited_price_lines": 30,
+    "uncited": [
+      "L002",
+      "L003",
+      "L004",
+      "L005",
+      "L006",
+      "L007",
+      "L008",
+      "L010",
+      "L011",
+      "L014",
+      "L015",
+      "L016",
+      "L017",
+      "L018",
+      "L019",
+      "L020",
+      "L021",
+      "L022",
+      "L023",
+      "L024",
+      "L025",
+      "L026",
+      "L027",
+      "L028",
+      "L029",
+      "L030",
+      "L031",
+      "L053",
+      "L054",
+      "L055"
+    ],
+    "flag_missing": true,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [375,41,627,83] Cocktail\nL002 [817,87,845,101] 1.8\nL003 [819,115,852,131] 1.6\nL004 [826,146,854,159] 1.6\nL005 [830,176,859,189] 1.8\nL006 [833,207,863,220] 1.6\nL007 [838,238,868,251] 1.6\nL008 [841,270,873,286] 1.8\nL009 [847,305,877,318] 1,8\nL010 [851,339,882,353] 1.6\nL011 [856,374,887,388] 1.8\nL012 [877,531,911,548] 1.5\nL013 [882,573,917,590] 1.8\nL014 [356,641,385,656] 1.6\nL015 [359,601,387,617] 1.6\nL016 [361,564,389,577] 1.6\nL017 [363,525,391,539] 1.6\nL018 [366,488,394,502] 1.8\nL019 [368,453,396,467] 1.8\nL020 [370,419,397,432] 1.8\nL021 [373,385,399,398] 1.8\nL022 [375,353,401,366] 1.6\nL023 [377,320,403,333] 1.8\nL024 [378,290,404,302] 1.6\nL025 [382,259,406,272] 1.8\nL026 [384,229,408,242] 1.6\nL027 [385,200,410,214] 1.7\nL028 [387,172,411,185] 1.5\nL029 [389,144,413,157] 1.5\nL030 [391,118,415,130] 1.2\nL031 [352,682,384,698] 1.8\nL032 [161,121,208,134] 진토닉\nL033 [156,147,191,163] 김렛\nL034 [151,174,219,190] 다이퀴리\nL035 [147,201,250,219] 드라이 마티니\nL036 [140,230,226,248] 보스턴쿨러\nL037 [137,260,238,278] 하이랜드쿨러\nL038 [132,289,234,308] 코스모폴리탄\nL039 [126,320,198,339] 올드패션\nL040 [121,352,193,370] 파우스트\nL041 [116,383,205,403] 위스키사워\nL042 [109,417,165,437] 갓파더\nL043 [104,451,177,470] 사이드카\nL044 [97,486,154,504] 잭로즈\nL045 [92,523,149,542] 진피즈\nL046 [85,559,198,580] 에메랄드쿨러\nL047 [77,597,176,618] 그래스호퍼\nL048 [72,636,151,657] 네그로니\nL049 [65,677,145,698] 불바디에\nL050 [58,718,158,740] 라스트워드\nL051 [48,759,196,785] 헤밍웨이 스페셜\nL052 [41,802,108,826] 롭로이\nL053 [344,812,375,829] 1.8\nL054 [347,767,378,785] 1.6\nL055 [347,724,384,741] 2.0\nL056 [573,569,614,589] 입춘\nL057 [571,530,614,549] 복춘\nL058 [562,490,691,513] Signature\nL059 [564,107,687,129] 프랭크시나트라\nL060 [566,137,654,156] 슬로진피즈\nL061 [565,164,657,186] 찰리채플린\nL062 [567,195,622,215] 앤하탄\nL063 [566,223,660,245] 카카오피즈\nL064 [566,250,702,275] 엘더플라워 사워\nL065 [568,284,681,307] 롱아일랜드티\nL066 [568,315,683,339] 프렌치커넥션\nL067 [568,349,666,372] 카타르시스\nL068 [569,385,629,406] 올드파\n</ocr_lines>",
+  "n_lines": 68,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 3883
+}

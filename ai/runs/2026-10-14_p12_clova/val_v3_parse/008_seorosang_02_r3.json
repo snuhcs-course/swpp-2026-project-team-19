@@ -1,0 +1,180 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "e62c33be4b7fb80769b5f8e71628a480f31f5f0382b66ab8267a63aab0242127",
+  "started_at": "2026-10-14T05:11:39.099553+00:00",
+  "latency_ms": 7510,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 3575,
+  "output_tokens": 1131,
+  "thought_tokens": 2173,
+  "total_tokens": 6879,
+  "output": {
+    "items": [
+      {
+        "raw_name": "아드벡10년 / Ardbeg 10Y",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아드벡10년 / Ardbeg 10Y",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+        "price_krw": 390000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+        "price_krw": 470000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "라프로익10년 / Laphroaig 10Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라프로익10년 / Laphroaig 10Y",
+        "price_krw": 200000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라프로익 쿼터캐스크 / Laphroaig Quarter Cask",
+        "price_krw": 230000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "라가불린16년 / Lagavulin 16Y",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라가불린16년 / Lagavulin 16Y",
+        "price_krw": 450000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "탈리스커10년 / Talisker 10Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커10년 / Talisker 10Y",
+        "price_krw": 200000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "아란10년 / Arran 10Y",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란10년 / Arran 10Y",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글랜킨치12년 / Glenkinchie 12Y",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"아드벡10년 / Ardbeg 10Y\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드벡10년 / Ardbeg 10Y\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일 / Ardbeg Uigeadail\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일 / Ardbeg Uigeadail\",\n      \"price_krw\": 390000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸 / Ardbeg Corryvreckan\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸 / Ardbeg Corryvreckan\",\n      \"price_krw\": 470000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"라프로익10년 / Laphroaig 10Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"라프로익10년 / Laphroaig 10Y\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"라프로익 쿼터캐스크 / Laphroaig Quarter Cask\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"라프로익 쿼터캐스크 / Laphroaig Quarter Cask\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"라가불린16년 / Lagavulin 16Y\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"라가불린16년 / Lagavulin 16Y\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"탈리스커10년 / Talisker 10Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탈리스커10년 / Talisker 10Y\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아란10년 / Arran 10Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아란10년 / Arran 10Y\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜킨치12년 / Glenkinchie 12Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜킨치12년 / Glenkinchie 12Y\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:11:46Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"아드벡10년 / Ardbeg 10Y\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드벡10년 / Ardbeg 10Y\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일 / Ardbeg Uigeadail\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일 / Ardbeg Uigeadail\",\n      \"price_krw\": 390000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸 / Ardbeg Corryvreckan\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸 / Ardbeg Corryvreckan\",\n      \"price_krw\": 470000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"라프로익10년 / Laphroaig 10Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"라프로익10년 / Laphroaig 10Y\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"라프로익 쿼터캐스크 / Laphroaig Quarter Cask\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"라프로익 쿼터캐스크 / Laphroaig Quarter Cask\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"라가불린16년 / Lagavulin 16Y\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"라가불린16년 / Lagavulin 16Y\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"탈리스커10년 / Talisker 10Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탈리스커10년 / Talisker 10Y\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아란10년 / Arran 10Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아란10년 / Arran 10Y\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜킨치12년 / Glenkinchie 12Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜킨치12년 / Glenkinchie 12Y\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"아드벡10년 / Ardbeg 10Y\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드벡10년 / Ardbeg 10Y\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일 / Ardbeg Uigeadail\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일 / Ardbeg Uigeadail\",\n      \"price_krw\": 390000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸 / Ardbeg Corryvreckan\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸 / Ardbeg Corryvreckan\",\n      \"price_krw\": 470000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"라프로익10년 / Laphroaig 10Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"라프로익10년 / Laphroaig 10Y\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"라프로익 쿼터캐스크 / Laphroaig Quarter Cask\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"라프로익 쿼터캐스크 / Laphroaig Quarter Cask\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"라가불린16년 / Lagavulin 16Y\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"라가불린16년 / Lagavulin 16Y\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"탈리스커10년 / Talisker 10Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탈리스커10년 / Talisker 10Y\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"아란10년 / Arran 10Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"아란10년 / Arran 10Y\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜킨치12년 / Glenkinchie 12Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜킨치12년 / Glenkinchie 12Y\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:11:46Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 3575
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 3575,
+      "total_output_tokens": 1131,
+      "total_thought_tokens": 2173,
+      "total_tokens": 6879,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3,
+  "source_image": "008_seorosang_02.png",
+  "prompt_version": "v3",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [855,27,897,40] 26\nL002 [96,25,220,44] 22:00\nL003 [880,100,928,124] X\nL004 [67,201,197,220] ISLAY\nL005 [578,257,606,267] 16\nL006 [689,257,725,267] 250\nL007 [70,256,192,268] Ardbeg 10Y\nL008 [73,269,158,279] 아드벡10년\nL009 [578,291,606,300] 24\nL010 [70,290,245,302] Ardbeg Uigeadail\nL011 [73,303,188,312] 아드벡 우거다일\nL012 [685,290,725,300] 390\nL013 [578,324,606,333] 29\nL014 [689,324,725,333] 470\nL015 [70,323,288,335] Ardbeg Corryvreckan\nL016 [73,336,205,345] 아드벡 코리브레칸\nL017 [685,355,725,366] 200\nL018 [578,356,606,366] 13\nL019 [70,356,217,369] Laphroaig 10Y\nL020 [70,367,172,379] 라프로익10년\nL021 [578,392,606,399] 15\nL022 [70,389,310,401] Laphroaig Quarter Cask\nL023 [73,402,220,411] 라프로익 쿼터캐스크\nL024 [685,390,725,399] 230\nL025 [578,424,606,432] 28\nL026 [70,423,215,434] Lagavulin 16Y\nL027 [70,433,175,445] 라가불린16년\nL028 [689,424,725,432] 450\nL029 [67,492,542,510] ISLANDS / LOWLAND\nL030 [578,548,606,557] 13\nL031 [683,547,725,557] 200\nL032 [73,548,194,557] Talisker 10Y\nL033 [73,561,175,570] 탈리스커10년\nL034 [578,582,606,590] 15\nL035 [683,581,725,590] 240\nL036 [73,582,172,590] Arran 10Y\nL037 [73,594,143,603] 아란10년\nL038 [578,616,606,624] 15\nL039 [73,614,234,624] Glenkinchie 12Y\nL040 [73,626,175,635] 글랜킨치12년\nL041 [683,613,725,624] 240\n</ocr_lines>",
+  "ocr_variant": "off",
+  "n_lines": 41,
+  "gap_factor": 2.5,
+  "layout": "lines",
+  "ocr_latency_ms": 1752
+}

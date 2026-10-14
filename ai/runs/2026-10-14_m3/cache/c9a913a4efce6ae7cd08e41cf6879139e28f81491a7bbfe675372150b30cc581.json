@@ -1,0 +1,66 @@
+{
+ "key": "c9a913a4efce6ae7cd08e41cf6879139e28f81491a7bbfe675372150b30cc581",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Glenfarclas 25yo",
+  "context_lines": [
+   "Glenmorangie Signet",
+   "Yamazaki 12yo",
+   "Ballentine 30yo",
+   "Glenfiddich 21yo",
+   "Macallan 18yo"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Glenfarclas",
+   "age": 25,
+   "edition_tokens_en": [],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Glenfarclas 10",
+    "age": 10,
+    "edition": null
+   },
+   {
+    "no": "2",
+    "name": "Glenfarclas 105",
+    "age": null,
+    "edition": "105"
+   },
+   {
+    "no": "3",
+    "name": "Glenfarclas 12",
+    "age": 12,
+    "edition": null
+   },
+   {
+    "no": "4",
+    "name": "Glenfarclas 15",
+    "age": 15,
+    "edition": null
+   },
+   {
+    "no": "5",
+    "name": "Glenfarclas 17",
+    "age": 17,
+    "edition": null
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"목록에는 25년 숙성 제품이 없으며, 메뉴상의 25년과 일치하는 상품이 없습니다.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:44.723015+00:00",
+  "latency_ms": 2960,
+  "attempts": 1,
+  "input_tokens": 1035,
+  "output_tokens": 45,
+  "thought_tokens": 126
+ }
+}

@@ -1,0 +1,821 @@
+{
+  "run_dir": "val_v3_parse",
+  "failed_calls": [],
+  "summary": {
+    "item_accuracy": {
+      "mean": 0.9741007358654418,
+      "min": 0.9358974358974359,
+      "max": 0.9954545454545455,
+      "n": 3
+    },
+    "f1_strict": {
+      "mean": 0.9776771699556778,
+      "min": 0.958057395143488,
+      "max": 0.9886104783599089,
+      "n": 3
+    },
+    "f1_lenient": {
+      "mean": 0.9866880194483568,
+      "min": 0.9668874172185431,
+      "max": 0.9977220956719818,
+      "n": 3
+    },
+    "price_accuracy": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 3
+    },
+    "unit_confusion": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 3
+    },
+    "fp": {
+      "mean": 6,
+      "min": 1,
+      "max": 15,
+      "n": 3
+    },
+    "fn": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 3
+    }
+  },
+  "per_photo_accuracy": {
+    "007_위스키복춘_01": {
+      "mean": 0.9914529914529915,
+      "min": 0.9871794871794872,
+      "max": 1.0
+    },
+    "007_위스키복춘_02": {
+      "mean": 0.9753086419753086,
+      "min": 0.9629629629629629,
+      "max": 1.0
+    },
+    "007_위스키복춘_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "007_위스키복춘_04": {
+      "mean": 0.6666666666666666,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "008_서로상_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_02": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_05": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    }
+  },
+  "per_bar_accuracy": {
+    "서로상": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "위스키복춘": {
+      "mean": 0.9619317475848786,
+      "min": 0.90625,
+      "max": 0.9931506849315068
+    }
+  },
+  "runs": {
+    "1": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 220,
+        "matched_strict": 217,
+        "matched": 219,
+        "correct": 219,
+        "fp": 1,
+        "fn": 0,
+        "priced": 219,
+        "price_correct": 219,
+        "unit_confusion": 0,
+        "item_accuracy": 0.9954545454545455,
+        "f1_strict": 0.9886104783599089,
+        "f1_lenient": 0.9977220956719818,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 78,
+          "matched_strict": 75,
+          "matched": 77,
+          "correct": 77,
+          "fp": 1,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "에드라두어 10Y",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 52,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    },
+    "2": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 221,
+        "matched_strict": 217,
+        "matched": 219,
+        "correct": 219,
+        "fp": 2,
+        "fn": 0,
+        "priced": 219,
+        "price_correct": 219,
+        "unit_confusion": 0,
+        "item_accuracy": 0.9909502262443439,
+        "f1_strict": 0.9863636363636363,
+        "f1_lenient": 0.9954545454545455,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 75,
+          "matched": 77,
+          "correct": 77,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 54,
+          "matched_strict": 52,
+          "matched": 52,
+          "correct": 52,
+          "fp": 2,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "부커스",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "야마자키 스모키",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    },
+    "3": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 234,
+        "matched_strict": 217,
+        "matched": 219,
+        "correct": 219,
+        "fp": 15,
+        "fn": 0,
+        "priced": 219,
+        "price_correct": 219,
+        "unit_confusion": 0,
+        "item_accuracy": 0.9358974358974359,
+        "f1_strict": 0.958057395143488,
+        "f1_lenient": 0.9668874172185431,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 78,
+          "matched_strict": 75,
+          "matched": 77,
+          "correct": 77,
+          "fp": 1,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 77,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 퀀타루반",
+                "price_krw": 310000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "에드라두어 10Y",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 54,
+          "matched_strict": 52,
+          "matched": 52,
+          "correct": 52,
+          "fp": 2,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "부커스",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "야마자키 스모키",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 12,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 12,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "프랭크시나트라",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "슬로진피즈",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "찰리채플린",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "앤하탄",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "카카오피즈",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "엘더플라워 사워",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "롱아일랜드티",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "프렌치커넥션",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "카타르시스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "올드파",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "복춘",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "비위스키 포함",
+              "out": {
+                "raw_name": "입춘",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    }
+  },
+  "label_set": "val"
+}

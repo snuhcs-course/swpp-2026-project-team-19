@@ -1,0 +1,282 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "e62c33be4b7fb80769b5f8e71628a480f31f5f0382b66ab8267a63aab0242127",
+  "started_at": "2026-10-14T05:25:57.212338+00:00",
+  "latency_ms": 20469,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5242,
+  "output_tokens": 2154,
+  "thought_tokens": 7501,
+  "total_tokens": 14897,
+  "output": {
+    "items": [
+      {
+        "raw_name": "하이 코스트(High Coast) 신코 배치 2",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "스타워드(Starward) 솔레라",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "오마르(Omar) 버번",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "오마르(Omar) 셰리",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 클래식",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 엑스 버번 오크",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 포트캐스크 피니시",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 트리플 셰리",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 올로로소 셰리",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 솔리스트 올로로소 셰리",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 솔리스트 포트",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 비노 바리끄",
+        "price_krw": 44000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS",
+        "price_krw": 31000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "미셸쿠브어(Michel Couveur) 오버에이지드",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "미셸쿠브어(Michel Couveur) 오버에이지드 코리아 에디션",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 3 캐스크 스트랭스",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 4 스모크",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 4 피티드",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트랭스",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 7",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 시그니처",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 레드페퍼 캐스크",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "밀크 앤 허니(M&H) 버번 싱글 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "밀크 앤 허니(M&H) PX 셰리 싱글 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭다니엘(Jack Daniel) 넘버 7",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭다니엘(Jack Daniel) 애플",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭다니엘(Jack Daniel) 싱글 배럴 100 프루프",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "버팔로 트레이스(Buffalo Trace) 버번",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "버팔로 트레이스(Buffalo Trace) 웰러 12년",
+        "price_krw": 38000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 101 라이",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 8년 버번",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 레어브리드 버번",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 레어브리드 라이",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 12년 버번",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"하이 코스트(High Coast) 신코 배치 2\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"스타워드(Starward) 솔레라\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오마르(Omar) 버번\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오마르(Omar) 셰리\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 클래식\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 엑스 버번 오크\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 포트캐스크 피니시\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 트리플 셰리\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 올로로소 셰리\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 솔리스트 올로로소 셰리\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 솔리스트 포트\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 비노 바리끄\",\n      \"price_krw\": 44000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS\",\n      \"price_krw\": 31000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드 코리아 에디션\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 3 캐스크 스트랭스\",\n      \"price_krw\": 32000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 4 스모크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 4 피티드\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 5 포트 캐스크 스트랭스\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 7\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 시그니처\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 레드페퍼 캐스크\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"밀크 앤 허니(M&H) 버번 싱글 캐스크\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"밀크 앤 허니(M&H) PX 셰리 싱글 캐스크\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭다니엘(Jack Daniel) 넘버 7\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭다니엘(Jack Daniel) 애플\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭다니엘(Jack Daniel) 싱글 배럴 100 프루프\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"버팔로 트레이스(Buffalo Trace) 버번\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 12년\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 101 라이\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 8년 버번\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 버번\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 라이\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 12년 버번\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:26:17Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"하이 코스트(High Coast) 신코 배치 2\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"스타워드(Starward) 솔레라\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오마르(Omar) 버번\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오마르(Omar) 셰리\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 클래식\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 엑스 버번 오크\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 포트캐스크 피니시\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 트리플 셰리\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 올로로소 셰리\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 솔리스트 올로로소 셰리\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 솔리스트 포트\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 비노 바리끄\",\n      \"price_krw\": 44000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS\",\n      \"price_krw\": 31000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드 코리아 에디션\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 3 캐스크 스트랭스\",\n      \"price_krw\": 32000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 4 스모크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 4 피티드\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 5 포트 캐스크 스트랭스\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 7\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 시그니처\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 레드페퍼 캐스크\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"밀크 앤 허니(M&H) 버번 싱글 캐스크\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"밀크 앤 허니(M&H) PX 셰리 싱글 캐스크\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭다니엘(Jack Daniel) 넘버 7\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭다니엘(Jack Daniel) 애플\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭다니엘(Jack Daniel) 싱글 배럴 100 프루프\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"버팔로 트레이스(Buffalo Trace) 버번\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 12년\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 101 라이\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 8년 버번\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 버번\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 라이\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 12년 버번\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"하이 코스트(High Coast) 신코 배치 2\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"스타워드(Starward) 솔레라\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오마르(Omar) 버번\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오마르(Omar) 셰리\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 클래식\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 엑스 버번 오크\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 포트캐스크 피니시\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 트리플 셰리\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 올로로소 셰리\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 솔리스트 올로로소 셰리\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 솔리스트 포트\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"카발란(Kavalan) 비노 바리끄\",\n      \"price_krw\": 44000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS\",\n      \"price_krw\": 31000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드\",\n      \"price_krw\": 33000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드 코리아 에디션\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 3 캐스크 스트랭스\",\n      \"price_krw\": 32000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 4 스모크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 4 피티드\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 5 포트 캐스크 스트랭스\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 배치 7\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 시그니처\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"기원(Ki-Won) 레드페퍼 캐스크\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"밀크 앤 허니(M&H) 버번 싱글 캐스크\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"밀크 앤 허니(M&H) PX 셰리 싱글 캐스크\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭다니엘(Jack Daniel) 넘버 7\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭다니엘(Jack Daniel) 애플\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"잭다니엘(Jack Daniel) 싱글 배럴 100 프루프\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"버팔로 트레이스(Buffalo Trace) 버번\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 12년\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 101 라이\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 8년 버번\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 버번\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 라이\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"와일드 터키(Wild Turkey) 12년 버번\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:26:17Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 5242
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 5242,
+      "total_output_tokens": 2154,
+      "total_thought_tokens": 7501,
+      "total_tokens": 14897,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 1,
+  "source_image": "011_mirabeau_08.jpeg",
+  "prompt_version": "v3",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [904,52,1000,76] 스코틀랜\nL002 [114,107,280,128] 스웨덴(SWEDEN)\nL003 [492,94,631,118] 한국(KOREA)\nL004 [110,136,306,155] 하이 코스트(High Coast)\nL005 [107,160,203,179] 신코 배치 2\nL006 [396,157,434,169] 25.0\nL007 [494,128,613,149] 기원(Ki-Won)\nL008 [913,124,999,145] 메이커스 마\nL009 [922,147,955,161] 버번\nL010 [927,163,948,174] 46\nL011 [929,176,999,196] 캐스크 스\nL012 [90,226,259,246] 스타워드(Starward)\nL013 [88,252,149,271] 솔레라\nL014 [97,191,294,214] 호주(AUSTRAILIA)\nL015 [392,251,431,264] 21.0\nL016 [495,153,700,175] 배치 3 캐스크 스트랭스\nL017 [496,171,616,189] 배치 4 스모크\nL018 [498,188,617,209] 배치 4 피티드\nL019 [498,202,752,226] 배치 5 포트 캐스크 스트랭스\nL020 [498,226,556,244] 배치 7\nL021 [497,243,577,262] 시그니처\nL022 [497,259,646,281] 레드페퍼 캐스크\nL023 [800,155,838,168] 32.0\nL024 [802,172,842,185] 22.0\nL025 [804,189,844,202] 23.0\nL026 [807,207,847,220] 29.0\nL027 [811,224,851,237] 22.0\nL028 [814,242,854,255] 24.0\nL029 [816,260,856,273] 25.0\nL030 [936,206,1000,227] 리뎀션(R\nL031 [946,230,981,247] 라이\nL032 [74,294,236,314] 대만(TAIWAN)\nL033 [495,290,693,317] 이스라엘(ISRAEL)\nL034 [951,262,972,277] 놉\nL035 [972,264,998,277] 크릭\nL036 [960,286,995,303] 버번\nL037 [963,305,998,320] 라이\nL038 [73,331,199,349] 오마르(Omar)\nL039 [495,325,671,350] 밀크 앤 허니(M&H)\nL040 [977,363,998,376] 10\nL041 [970,337,998,354] 이글\nL042 [71,358,113,376] 버번\nL043 [67,377,109,396] 셰리\nL044 [391,359,431,374] 16.0\nL045 [391,380,431,393] 17.0\nL046 [496,356,654,377] 버번 싱글 캐스크\nL047 [494,376,691,396] PX 셰리 싱글 캐스크\nL048 [828,359,871,372] 27.0\nL049 [831,379,873,393] 27.0\nL050 [988,398,998,411] 포\nL051 [54,414,210,434] 카발란(Kavalan)\nL052 [498,420,632,443] 미국(U.S.A)\nL053 [50,446,114,465] 클래식\nL054 [47,467,191,486] 엑스 버번 오크\nL055 [43,490,222,508] 포트캐스크 피니시\nL056 [38,510,154,530] 트리플 셰리\nL057 [36,534,175,552] 올로로소 셰리\nL058 [31,555,267,575] 솔리스트 올로로소 셰리\nL059 [28,579,170,599] 솔리스트 포트\nL060 [24,603,144,622] 비노 바리끄\nL061 [391,449,434,465] 23.0\nL062 [389,470,434,487] 24.0\nL063 [389,492,432,508] 25.0\nL064 [387,513,432,530] 27.0\nL065 [387,535,432,552] 28.0\nL066 [387,557,432,574] 41.0\nL067 [385,581,431,597] 41.0\nL068 [385,604,431,621] 44.0\nL069 [498,464,706,486] 잭다니엘(Jack Daniel)\nL070 [502,496,566,517] 넘버 7\nL071 [500,517,549,539] 애플\nL072 [500,539,715,561] 싱글 배럴 100 프루프\nL073 [847,495,892,512] 10.0\nL074 [851,518,896,534] 10.0\nL075 [854,540,899,557] 16.0\nL076 [14,646,222,670] 프랑스(FRANCE)\nL077 [498,581,816,603] 버팔로 트레이스(Buffalo Trace)\nL078 [502,615,549,637] 버번\nL079 [502,638,701,661] 웰러 스페셜 리저브\nL080 [502,664,604,686] 웰러 12년\nL081 [864,616,910,633] 11.0\nL082 [868,641,913,657] 21.0\nL083 [870,665,917,684] 38.0\nL084 [7,690,300,714] 미셸쿠브어(Michel Couveur)\nL085 [500,708,771,733] 와일드 터키(Wild Turkey)\nL086 [2,725,245,750] 언익스펙티드 넘버3 CS\nL087 [0,751,142,776] 오버에이지드\nL088 [0,779,290,803] 오버에이지드 코리아 에디션\nL089 [380,729,429,747] 31.0\nL090 [378,755,429,773] 33.0\nL091 [378,782,427,801] 36.0\nL092 [502,746,597,769] 101 라이\nL093 [500,773,595,797] 8년 버번\nL094 [502,799,681,824] 레어브리드 버번\nL095 [503,828,682,853] 레어브리드 라이\nL096 [502,855,613,880] 12년 버번\nL097 [880,747,929,766] 12.0\nL098 [884,773,932,792] 12.0\nL099 [887,801,936,819] 16.0\nL100 [891,828,939,846] 16.0\nL101 [894,855,942,874] 19.0\n</ocr_lines>",
+  "ocr_variant": "off",
+  "n_lines": 101,
+  "gap_factor": 2.5,
+  "layout": "lines",
+  "ocr_latency_ms": 5196
+}

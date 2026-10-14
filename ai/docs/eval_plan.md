@@ -177,3 +177,76 @@ S2가 새로 exact로 맞힌 줄은 C0 10줄, C1 15줄이고 새 exact는 전부
 - **S1+S2 → S1+S2b+S3에서 바뀐 줄 (결과 JSON 비교).** C0: unmatched → 정답 1, unmatched → ambiguous_ok 7, 카탈로그에 없는 상품 unmatched → ambiguous_bad 5. C1: unmatched → 정답 7, unmatched → ambiguous_ok 11, unmatched → ambiguous_bad 4, 정답 → ambiguous_ok(확인 권장) 3.
 - **판정과 무관한 보고 항목.** 정답이 `unknown`인 줄 중 `confirmRecommended`가 붙은 건수: 모든 매처·조건 0(`unknown` 3줄은 전부 unmatched).
 - **그대로 보고하는 관찰 (수정하지 않음).** (1) M0는 미라보 410줄을 하나도 매칭하지 못했다(자기 메뉴판 별칭을 빼면 미라보 표기는 카탈로그 별칭과 정확히 같은 것이 없음). (2) "부담 5 미만 사진"은 모든 매처에서 0.00이다. 미라보 사진은 한 장에 31–60줄이라 dev(1장 0–16줄)와 달리 이 지표로 매처 차이가 드러나지 않는다. (3) C1 Top-1이 C0보다 크게 낮다. C1은 카탈로그에 없던 340줄의 상품을 영문 표준명 별칭 하나만으로 넣는데, 이 줄들의 메뉴 표기와 맞는 별칭이 없어 대부분 unmatched·ambiguous가 된다. (4) test에는 `both:` 줄이 없어 partial은 0이다.
+
+## M3 사전 등록: 매칭 LLM 층 (I2, 2026-10-14, dev 측정 전)
+
+S1+S2b+S3(P22 채택) 위에 LLM 층을 더한다. 운영 매칭(`resolve_product`), `backend/app/matching/`, 메뉴 등록·게시 코드, 카탈로그 시드(`ai/catalog/*`)는 바꾸지 않는다. 코드는 `ai/match_llm/`, 하네스는 `ai/eval/match_eval.py`에 매처만 추가한다(기존 매처 결과·기본값 불변, `--gold` 인자 추가).
+
+**입력과 정답.** 줄 이름은 라벨 v1.1(`eval/labels_v1_1.json`, `eval/labels_heldout_v1_1.json`), 정답은 `eval/match_gold_v1_1.json`(v1.1 이름, 연결은 `match_gold_v1`과 같음). dev = 위스키복춘·서로상·Beck(조정 가능), test = 미라보·포레스트(동결 후 1회). test는 P22에서 한 번 썼지만 LLM 층에는 처음 쓰는 것으로 기록한다.
+
+**원칙.**
+1. LLM은 S1+S2b+S3가 확정(exact·multi)하지 못한 줄에만 쓴다.
+2. LLM이 관여한 결과는 exact가 아니다. 항상 ambiguous이고 LLM 후보는 `method: "llm"`. 자동 확정 기준은 P29에서 정한다.
+   - **합치기 (채택 대상 방식).** S1+S2b+S3 후보를 버리지 않는다. LLM 후보(거부권 통과)를 앞 순위에, S1+S2b+S3 후보를 그 뒤에 둔다(중복은 LLM 쪽으로 한 번).
+   - **확인 권장.** LLM 후보가 정확히 1개이고, S1+S2b+S3 후보가 없었거나 그 LLM 후보가 S1+S2b+S3 후보 안에 있을 때만 1순위에 evidence `confirmRecommended`. 이때 줄은 "확인 권장"(후보 1개 확인)으로 센다. 그 밖(LLM 후보 여러 개, 또는 S1+S2b+S3 후보 밖의 LLM 후보)은 확인 권장 없이 선택.
+   - **대체 (비교용).** LLM 후보가 남으면 S1+S2b+S3 후보를 버리고 LLM 후보만 쓰는 방식(후보 1개면 확인 권장). 같은 표에 숫자만 보고하고 채택 판정에는 쓰지 않는다.
+   - 업주 부담 (a) 확인은 "후보 1개이고 정답", 또는 "확인 권장 줄이고 1순위가 정답". 확인 권장 1순위가 정답이 아니면 (d) 오답 후보로 센다(S2b·S3의 확인 권장은 후보 1개라 기존 분류와 같다).
+3. 거부권. LLM이 낸 후보마다 아래를 검사해 걸리면 그 후보를 버리고 evidence(기록)에 규칙 이름을 남긴다. LLM 후보가 모두 버려지면 그 줄은 S1+S2b+S3 결과 그대로다.
+   - `bottler_missing`: 후보가 독립병입 상품인데(브랜드가 아래 병입사 목록), M3a 번역의 `bottler_en`이 그 병입사가 아니거나 null. 반대로 번역에 병입사가 있는데 후보가 그 병입사 상품이 아니면 같은 규칙 이름에 `(reverse)`로 남긴다
+   - `age_mismatch`: 줄의 연수(인쇄 이름에서 S2 규칙으로 읽은 값, 없으면 번역 `age`)가 있고 후보 연수와 다름(후보 연수가 null인 경우 포함)
+   - `alias_of_other`: 줄 이름(또는 괄호 풀이 변형)을 normalize한 값이 카탈로그에서 다른 상품의 별칭으로 등록돼 있음(그 표기는 이미 다른 상품으로 확정된 표기)
+   - **독립병입 판정 (P17과 같은 기준).** 상품의 브랜드(new 상품은 `brand`, 카탈로그 상품은 브랜드 key·`canonical_name`)가 P17 `ai/naver/sample.py` `IB_BOTTLERS`에 있으면 독립병입, 나머지는 정규품. 기준: "병입사가 다른 증류소 원액을 자기 이름으로 낸 상품"(`naver_plan.md` 2절).
+   - **최종 병입사 목록 (P17 목록 그대로, 12곳):** Signatory, Gordon & MacPhail, Douglas Laing, Hunter Laing, La Maison du Whisky, The Whisky Agency, Samaroli, Wilson & Morgan, Highland Laird, Elements of Islay, Port Askaig, Blackadder.
+   - **근거 (2026-10-14 확인).** `match_gold_v1_1.json`이 참조하는 상품(카탈로그 111 + new)의 브랜드를 전부 나열해 대조했다. 다른 증류소 이름을 자기 병입사 이름으로 낸 상품은 Signatory(카탈로그 3, new 7), Gordon & MacPhail 4, Douglas Laing 9, Hunter Laing 3, LMDW 2, TWA 2, Samaroli 2, Wilson & Morgan 3, Highland Laird 5, Elements of Islay 2, Port Askaig 2, Blackadder 1로 모두 목록 안이다. **목록에 없는 독립병입 병입사는 없어서 추가하지 않았다.** 정규품으로 둔 경계 사례: P17과 같이 Compass Box·Michel Couvreur(블렌더·숙성사), Macnair's(GlenAllachie 소유), Ki One. 추가로 원액 증류소 이름을 내걸지 않는 미국 비증류 병입 브랜드(Noah's Mill, Rowan's Creek, Willett, Barrell, Redemption, Templeton, Cleveland, James E. Pepper, Old Pepper, Broken Barrel)와 소유 증류소 단일 상품(Ballantine's Glenburgie)도 정규품이다. 메뉴에 증류소 이름만 적혀 병입사가 빠질 위험이 없는 경우이기 때문이다.
+   - 번역 `bottler_en`과 병입사의 대조는 normalize 후 이름 또는 약칭(Signatory Vintage, G&M, LMDW, TWA, W&M)으로 한다.
+4. 모델 `gemini-3.1-flash-lite`, thinking `low` 고정. 추출용 3.5 한도는 쓰지 않는다.
+5. 실행 1회당 LLM 호출 200회 상한(넘으면 멈추고 보고). 응답은 (모델, 프롬프트 SHA-256, 입력 JSON) 키로 `ai/runs/<날짜>_m3/cache/`에 캐시. 재채점은 캐시로만(`--cache-only`, 캐시에 없으면 실패).
+
+**M3a 번역 후 규칙.**
+- 사진 1장당 1회 호출. 사진의 줄 이름을 순서대로 모두 주고 대상 줄만 표시한다. 대상 줄 = C0 또는 C1에서 확정되지 않은 줄(합집합). 그래서 번역 1회를 C0·C1에 같이 쓴다. 대상 줄이 없는 사진은 호출하지 않는다.
+- 대상 줄마다 출력 `{line, bottler_en|null, distillery_en|null, brand_en|null, age|null, edition_tokens_en[], kind: whisky|non_whisky|unclear}`. 위쪽 병입사·브랜드 제목을 문맥으로 써도 된다. 프롬프트에 카탈로그·정답은 넣지 않는다.
+- `kind`가 `whisky`가 아니면 그 줄은 LLM 후보를 만들지 않는다.
+- (1) 재조회: 번역으로 영문 이름을 만들어(병입사 있으면 `병입사 증류소 연수 에디션`, 없으면 `브랜드(없으면 증류소) 연수 에디션`) S1+S2b+S3를 다시 돌린다. 나온 후보는 원칙 2·3 적용.
+- (2) 토큰 일치: 상품 영문 표준명(`display_name`)의 핵심 토큰이 번역 토큰(병입사·증류소·브랜드·에디션)에 모두 있고 연수가 같으면(둘 다 null 포함) 후보. 토큰화: 소문자, `'`·`.`(숫자 사이 제외) 제거, 영숫자 단위로 분리. 일반 단어 제외: the, whisky, whiskey, scotch, single, malt, year, years, old, yo, edition, release, no. 연수 숫자는 토큰에서 빼고 연수로 비교.
+- (1)·(2) 후보를 합친다(합집합, 거부권 적용 후).
+
+**M3b 후보 중 고르기 (M3a 후 LLM 후보가 남지 않은 대상 줄, `kind` whisky만).**
+- M3a 번역의 병입사·증류소·브랜드를 브랜드 별칭으로 찾아 그 브랜드들의 상품 목록(상품당 영문 표준명, 연수, 에디션; 해당 조건의 카탈로그)을 준다. 목록이 비면 호출하지 않고 `no_family`로 기록.
+- 출력 `{choice: <목록 번호>|"none"|"unsure", reason}`. 고르면 후보 1개(원칙 2·3), `none`·`unsure`면 S1+S2b+S3 결과 유지.
+- 줄 단위 호출이라 dev에서만 돌리고 호출 수를 따로 보고한다. 조건별 목록이 다르므로 C0·C1 각각 호출(같은 입력은 캐시 공유).
+
+**지표 (C0·C1 각각, 기존 열 + 추가 열).**
+- 알려진 상품 Top-1(exact 기준. LLM은 exact를 만들지 않으므로 S1+S2b+S3와 같아야 정상), false merge rate(기존 정의)
+- 업주 부담 (a) 확인 (b) 선택 (c) 직접 등록 (d) 오답 후보, 사진당 (b)+(c)+(d) 5 미만 비율
+- LLM 확인 권장 수, 그중 정답 수와 비율
+- **확인 권장 수락 시 오답률** = (false_merge + overconfident + 확인 권장(규칙·LLM 모두) 중 유일 후보가 정답이 아닌 줄) / 전체 줄. 정답이 카탈로그에 없거나 `non_whisky`·`unknown`인 줄의 확인 권장은 오답
+- (c) → (a)·(b)로 올라온 줄 수와 그중 정답(정답이 후보에 있음) 수, (c) → (d) 줄 수
+- 거부권이 막은 후보 전체(줄, 번역, 후보, 규칙, 정답)
+- 확인 권장을 **규칙이 낸 것**(S2b·S3, `method: "alias"`)과 **LLM이 낸 것**(`method: "llm"`)으로 나눠 건수·정답 수·정답 비율을 따로 보고한다
+- 호출 수(M3a·M3b 따로), 평균 지연, 입력·출력·thought 토큰
+
+**채택 기준 (합치기 방식으로 판정).**
+- M3a 채택: 아래 셋을 모두 만족해야 한다.
+  1. dev C1에서 (c)가 S1+S2b+S3보다 줄 것
+  2. dev C1에서 LLM 확인 권장 정답 비율 ≥ 0.95
+  3. 확인 권장 수락 시 오답률 ≤ 0.02를 **dev C0와 C1 둘 다**에서 (C0는 카탈로그에 없는 상품이 많아 false merge 시험이므로 안전 기준은 C0에서도 본다)
+- M3b: M3a 위에 더해 같은 세 기준(1번의 비교 대상은 M3a)으로 판정.
+- 이 기준과 거부권 규칙은 dev 결과를 보고 바꾸지 않는다. 프롬프트 문구·번역→이름 조립은 dev에서 조정할 수 있고, 수정 이력은 `ai/runs/ai_usage_log.md`에 남긴다.
+
+**순서와 동결.** dev 조정 → 프롬프트·규칙 동결 커밋 → 동결 커밋에서 test(미라보·포레스트) M3a 1회(M3b 없음) → 커밋 해시와 함께 `ai/runs/<날짜>_m3/README.md`에 보고. test 결과로 규칙을 바꾸지 않는다.
+
+**M3 사전 등록 추가 (2026-10-14, dev r0 결과를 보고 엄격 방향으로 추가, 박진우 승인).** r0(프롬프트 v1)에서 C0 LLM 확인 권장 4/7. 틀린 3줄(Maker's Mark Cask Strength, Laphroaig 10 Cask Strength, Arran Quarter Cask)은 모두 메뉴에 적힌 에디션이 카탈로그에 없어서 에디션 없는(또는 다른) 형제 상품에 붙은 false merge 전형이다. 아래는 LLM 후보를 버리거나 확인 권장을 막는 방향만 더하므로 기준을 유리하게 바꾸지 않는다. 채택 기준·임계값은 그대로다.
+- **거부권 4 `edition_mismatch`.** LLM 경로의 모든 후보(재조회, 토큰 규칙, M3b 선택; 합치기에서 확인 권장이 붙는 후보는 이 중 하나)에 적용. 번역의 에디션 토큰(중립 단어 제외) 중 하나라도 후보의 에디션명·영문 표준명·별칭에 없으면 그 후보를 버린다. 3자 이상 라틴 토큰과 2자 이상 한글 토큰은 normalize한 문자열 포함으로, 숫자 토큰은 단어 단위 완전 일치로 검사한다.
+- **중립 단어.** 기존 일반 단어 + cask, casks, oak, barrel, wood, finish, finished, matured. 일치 근거(토큰 규칙의 핵심 토큰)로도, 불일치 근거(`edition_mismatch`)로도 쓰지 않는다.
+- **짧은 토큰(라틴 3자 미만, 예: PX, DR).** 검사에서 빼지 않고 단어 단위 완전 일치(대소문자 무시, 부분 문자열 금지)로 검사한다. 후보에 없으면 버리지는 않지만 그 후보는 확인 권장을 받을 수 없다(목록에 남겨 업주가 고름). 번역의 `expansions`(약어 풀이)가 있으면 풀이의 토큰이 모두 후보에 단어로 있을 때도 맞은 것으로 본다.
+- **보고.** C0의 LLM 확인 권장 정답 비율은 판정 기준이 아니지만 보고서 맨 위에 C1과 함께 표시한다.
+
+**M3 되돌림 규칙 (2026-10-14, r2 실행 전 등록).** dev 수정은 최대 2회(r1: 규칙 + 프롬프트 v2, r2: 프롬프트 v3 + M3b). r2(M3a 또는 M3a+M3b, 합치기, C0 또는 C1)에서 LLM 확인 권장 오답이 1줄이라도 나오거나 C0·C1 수락 시 오답률이 0을 넘으면, 프롬프트를 v2(r1)로 되돌리고 v2 + M3b를 최종 후보로 한다. Machrie Moor(라인업 이름)가 r2에서도 고쳐지지 않으면 더 손대지 않고 한계로 기록한다. 동결 전에 거부권 4개(bottler_missing 양방향, age_mismatch, alias_of_other, edition_mismatch)의 단위 테스트를 eval에 없는 가짜 예시로 작성해 통과시킨다.
+
+**M3 dev 판정과 동결 (2026-10-14).** 최종 dev 결과는 r2(번역 프롬프트 v3, M3b 프롬프트 v1, 거부권 4개). 되돌림 규칙은 발동하지 않았다(r2 LLM 확인 권장 오답 0, 수락 시 오답률 C0·C1 0). 숫자와 회차별 표는 `ai/runs/2026-10-14_m3/README.md`.
+- **M3a 채택 (dev):** C1 (c) 10 → 4, C1 LLM 확인 권장 13/13, 수락 시 오답률 C0 0.000·C1 0.000.
+- **M3b 채택 안 함 (dev):** M3a 대비 C1 (c) 4 → 4로 줄지 않음(기준 1 불만족). 호출 16회에서 고른 상품 0(C0는 전부 "none", 정답이 카탈로그에 없는 줄).
+- **동결 대상:** `ai/match_llm/`(코드, `translate_prompt_v3.md`, `pick_prompt_v1.md`), `ai/eval/match_eval.py`, `eval/match_gold_v1_1.json`, 카탈로그 시드. test(미라보·포레스트)는 M3a만 1회:
+  `python ai/eval/match_eval.py --split test --gold eval/match_gold_v1_1.json --matcher S1+S2b+S3 M3a M3a/replace --m3-cache ai/runs/2026-10-14_m3/cache --json ai/runs/2026-10-14_m3/test_m3a.json`
+
+**M3 test 결과 (2026-10-14, 1회 실행).** 동결 커밋 `1ace9275718ddb55e00827c1db49461204fb445f`에서 등록 명령으로 M3a만 실행(호출 10회). C1: (c) 171 → 41, LLM 확인 권장 193/194, 수락 시 오답률 0.002. C0: LLM 확인 권장 7/9, 수락 시 오답률 0.015(기준선 0.010은 S2b·S3 확인 권장 오답). Top-1·false merge rate는 S1+S2b+S3와 같음. 상세와 한계는 `ai/runs/2026-10-14_m3/README.md`. 실행 후 규칙·프롬프트는 바꾸지 않았다.

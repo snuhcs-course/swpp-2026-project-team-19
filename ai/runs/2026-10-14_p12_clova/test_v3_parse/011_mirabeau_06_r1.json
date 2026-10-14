@@ -1,0 +1,408 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "e62c33be4b7fb80769b5f8e71628a480f31f5f0382b66ab8267a63aab0242127",
+  "started_at": "2026-10-14T05:25:26.431537+00:00",
+  "latency_ms": 16845,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5879,
+  "output_tokens": 3548,
+  "thought_tokens": 4837,
+  "total_tokens": 14264,
+  "output": {
+    "items": [
+      {
+        "raw_name": "발베니(Balvenie) 12년 더블 우드",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 12년 아메리칸 오크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 12년 싱글 배럴",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 14년 캐리비안 캐스크",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 14년 위크 오브 피트",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 15년 마데이라 캐스크",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 16년 프렌치 오크",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 18년 페드로 히메네즈 캐스크",
+        "price_krw": 47000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 21년 포트 우드",
+        "price_krw": 70000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 12년 더블 캐스크",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 12년 셰리 캐스크",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 15년 더블 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 클래식컷 2025",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 18년 더블캐스크",
+        "price_krw": 48000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 18년 셰리 캐스크",
+        "price_krw": 55000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 14년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 15년",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 18년",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 21년 그란 르제르바",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 23년 그랑 크루",
+        "price_krw": 64000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌리벳(Glenrivet) 12년 더블 오크",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌리벳(Glenrivet) 15년 프렌치 오크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌리벳(Glenrivet) 18년",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌그란트(Glengrant) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌그란트(Glengrant) 15년",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌그란트(Glengrant) 18년",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "모틀락(Mortlach) 16년",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "모틀락(Mortlach) 12년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "모틀락(Mortlach) 18년",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "모틀락(Mortlach) 21년",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올트모어(Aultmore) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올트모어(Aultmore) 16년",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "에버펠디(Aberfeldy) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "에버펠디(Aberfeldy) 16년",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌로티스(Glenrothes) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌로티스(Glenrothes) WMC",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌로티스(Glenrothes) 18년",
+        "price_krw": 31000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 8년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 12년",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트랭스",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 9년 퀴베 캐스크 피니시",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 8년 스코티시 오크 피니시",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 10년 루비포트 캐스크 피니시",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 12년 모스카텔 캐스크 피니시",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 10년 스페니시 오크 피니시",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 15년",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 18년",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 18년 PX 펀천",
+        "price_krw": 68000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발렌타인 글렌버기(Glenburgie) 12년",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발렌타인 글렌버기(Glenburgie) 15년",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탐두(Tamdhu) 12년",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탐두(Tamdhu) 배치스트랭스 8",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탐두(Tamdhu) 15년",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탐두(Tamdhu) 18년",
+        "price_krw": 48000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"발베니(Balvenie) 12년 더블 우드\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 12년 아메리칸 오크\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 12년 싱글 배럴\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 14년 캐리비안 캐스크\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 14년 위크 오브 피트\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 15년 마데이라 캐스크\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 16년 프렌치 오크\",\n      \"price_krw\": 37000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 18년 페드로 히메네즈 캐스크\",\n      \"price_krw\": 47000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 21년 포트 우드\",\n      \"price_krw\": 70000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 12년 더블 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 12년 셰리 캐스크\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 15년 더블 캐스크\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 클래식컷 2025\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 18년 더블캐스크\",\n      \"price_krw\": 48000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 18년 셰리 캐스크\",\n      \"price_krw\": 55000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 14년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 15년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 18년\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 21년 그란 르제르바\",\n      \"price_krw\": 43000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 23년 그랑 크루\",\n      \"price_krw\": 64000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳(Glenrivet) 12년 더블 오크\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳(Glenrivet) 15년 프렌치 오크\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳(Glenrivet) 18년\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌그란트(Glengrant) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌그란트(Glengrant) 15년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌그란트(Glengrant) 18년\",\n      \"price_krw\": 32000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 16년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 18년\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 21년\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어(Aultmore) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어(Aultmore) 16년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에버펠디(Aberfeldy) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에버펠디(Aberfeldy) 16년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로티스(Glenrothes) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로티스(Glenrothes) WMC\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로티스(Glenrothes) 18년\",\n      \"price_krw\": 31000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 8년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 12년\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 10년 캐스크 스트랭스\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 9년 퀴베 캐스크 피니시\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 8년 스코티시 오크 피니시\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 10년 루비포트 캐스크 피니시\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 12년 모스카텔 캐스크 피니시\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 10년 스페니시 오크 피니시\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 15년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 18년\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 18년 PX 펀천\",\n      \"price_krw\": 68000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인 글렌버기(Glenburgie) 12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인 글렌버기(Glenburgie) 15년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 12년\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 배치스트랭스 8\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 15년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 18년\",\n      \"price_krw\": 48000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:25:43Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"발베니(Balvenie) 12년 더블 우드\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 12년 아메리칸 오크\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 12년 싱글 배럴\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 14년 캐리비안 캐스크\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 14년 위크 오브 피트\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 15년 마데이라 캐스크\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 16년 프렌치 오크\",\n      \"price_krw\": 37000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 18년 페드로 히메네즈 캐스크\",\n      \"price_krw\": 47000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 21년 포트 우드\",\n      \"price_krw\": 70000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 12년 더블 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 12년 셰리 캐스크\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 15년 더블 캐스크\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 클래식컷 2025\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 18년 더블캐스크\",\n      \"price_krw\": 48000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 18년 셰리 캐스크\",\n      \"price_krw\": 55000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 14년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 15년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 18년\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 21년 그란 르제르바\",\n      \"price_krw\": 43000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 23년 그랑 크루\",\n      \"price_krw\": 64000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳(Glenrivet) 12년 더블 오크\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳(Glenrivet) 15년 프렌치 오크\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳(Glenrivet) 18년\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌그란트(Glengrant) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌그란트(Glengrant) 15년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌그란트(Glengrant) 18년\",\n      \"price_krw\": 32000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 16년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 18년\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 21년\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어(Aultmore) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어(Aultmore) 16년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에버펠디(Aberfeldy) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에버펠디(Aberfeldy) 16년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로티스(Glenrothes) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로티스(Glenrothes) WMC\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로티스(Glenrothes) 18년\",\n      \"price_krw\": 31000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 8년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 12년\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 10년 캐스크 스트랭스\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 9년 퀴베 캐스크 피니시\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 8년 스코티시 오크 피니시\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 10년 루비포트 캐스크 피니시\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 12년 모스카텔 캐스크 피니시\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 10년 스페니시 오크 피니시\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 15년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 18년\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 18년 PX 펀천\",\n      \"price_krw\": 68000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인 글렌버기(Glenburgie) 12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인 글렌버기(Glenburgie) 15년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 12년\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 배치스트랭스 8\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 15년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 18년\",\n      \"price_krw\": 48000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"발베니(Balvenie) 12년 더블 우드\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 12년 아메리칸 오크\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 12년 싱글 배럴\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 14년 캐리비안 캐스크\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 14년 위크 오브 피트\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 15년 마데이라 캐스크\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 16년 프렌치 오크\",\n      \"price_krw\": 37000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 18년 페드로 히메네즈 캐스크\",\n      \"price_krw\": 47000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니(Balvenie) 21년 포트 우드\",\n      \"price_krw\": 70000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 12년 더블 캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 12년 셰리 캐스크\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 15년 더블 캐스크\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 클래식컷 2025\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 18년 더블캐스크\",\n      \"price_krw\": 48000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥켈란(Maccallan) 18년 셰리 캐스크\",\n      \"price_krw\": 55000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 14년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 15년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 18년\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 21년 그란 르제르바\",\n      \"price_krw\": 43000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕(Glenfiddich) 23년 그랑 크루\",\n      \"price_krw\": 64000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳(Glenrivet) 12년 더블 오크\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳(Glenrivet) 15년 프렌치 오크\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌리벳(Glenrivet) 18년\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌그란트(Glengrant) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌그란트(Glengrant) 15년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌그란트(Glengrant) 18년\",\n      \"price_krw\": 32000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 16년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 18년\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"모틀락(Mortlach) 21년\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어(Aultmore) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"올트모어(Aultmore) 16년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에버펠디(Aberfeldy) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"에버펠디(Aberfeldy) 16년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로티스(Glenrothes) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로티스(Glenrothes) WMC\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로티스(Glenrothes) 18년\",\n      \"price_krw\": 31000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 8년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 12년\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 10년 캐스크 스트랭스\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 9년 퀴베 캐스크 피니시\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 8년 스코티시 오크 피니시\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 10년 루비포트 캐스크 피니시\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 12년 모스카텔 캐스크 피니시\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 10년 스페니시 오크 피니시\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 15년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 18년\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌알라키(Glenallachie) 18년 PX 펀천\",\n      \"price_krw\": 68000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인 글렌버기(Glenburgie) 12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발렌타인 글렌버기(Glenburgie) 15년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 12년\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 배치스트랭스 8\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 15년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"탐두(Tamdhu) 18년\",\n      \"price_krw\": 48000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:25:43Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 5879
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 5879,
+      "total_output_tokens": 3548,
+      "total_thought_tokens": 4837,
+      "total_tokens": 14264,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 1,
+  "source_image": "011_mirabeau_06.jpeg",
+  "prompt_version": "v3",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [135,39,367,60] 스페이사이드(Speyside)\nL002 [131,70,273,92] 발베니(Balvenie)\nL003 [126,93,253,111] 12년 더블 우드\nL004 [124,109,290,127] 12년 아메리칸 오크\nL005 [123,126,252,145] 12년 싱글 배럴\nL006 [119,141,306,162] 14년 캐리비안 캐스크\nL007 [117,158,292,176] 14년 위크 오브 피트\nL008 [114,175,304,195] 15년 마데이라 캐스크\nL009 [110,192,264,212] 16년 프렌치 오크\nL010 [108,209,366,230] 18년 페드로 히메네즈 캐스크\nL011 [105,227,243,247] 21년 포트 우드\nL012 [413,96,451,108] 18.0\nL013 [413,112,449,124] 20.0\nL014 [413,127,449,139] 23.0\nL015 [411,143,449,156] 23.0\nL016 [411,160,449,173] 25.0\nL017 [410,177,449,190] 35.0\nL018 [410,194,449,207] 37.0\nL019 [410,212,449,225] 47.0\nL020 [410,230,449,243] 70.0\nL021 [509,71,660,87] 맥켈란(Maccallan)\nL022 [512,94,654,109] 12년 더블 캐스크\nL023 [512,109,656,125] 12년 셰리 캐스크\nL024 [512,124,656,141] 15년 더블 캐스크\nL025 [514,142,637,159] 클래식컷 2025\nL026 [514,157,658,174] 18년 더블캐스크\nL027 [513,172,662,192] 18년 셰리 캐스크\nL028 [514,200,706,220] 글렌피딕(Glenfiddich)\nL029 [797,96,835,108] 18.0\nL030 [799,113,837,125] 21.0\nL031 [802,129,840,142] 27.0\nL032 [804,146,844,157] 28.0\nL033 [807,163,845,174] 48.0\nL034 [811,180,849,191] 55.0\nL035 [92,286,234,306] 12년 더블 오크\nL036 [90,306,252,326] 15년 프렌치 오크\nL037 [86,325,134,343] 18년\nL038 [95,257,276,281] 글렌리벳(Glenrivet)\nL039 [410,290,449,303] 16.0\nL040 [408,310,449,323] 20.0\nL041 [408,329,449,342] 26.0\nL042 [516,228,559,245] 12년\nL043 [515,245,771,264] 12년 아몬티야또 셰리 피니시\nL044 [516,264,561,282] 14년\nL045 [516,284,561,301] 15년\nL046 [517,303,561,320] 18년\nL047 [517,321,698,341] 21년 그란 르제르바\nL048 [517,341,660,361] 23년 그랑 크루\nL049 [816,229,856,242] 16.0\nL050 [817,247,859,260] 16.0\nL051 [821,266,863,279] 18.0\nL052 [824,284,866,297] 20.0\nL053 [828,303,868,316] 28.0\nL054 [831,321,871,336] 43.0\nL055 [833,341,877,355] 64.0\nL056 [79,354,298,382] 글렌그란트(Glengrant)\nL057 [517,372,750,395] 글렌알라키(Glenallachie)\nL058 [49,577,99,596] 12년\nL059 [42,599,97,621] 18년\nL060 [40,624,94,646] 21년\nL061 [59,500,109,519] 16년\nL062 [74,387,123,405] 12년\nL063 [71,407,121,426] 15년\nL064 [69,430,118,448] 18년\nL065 [62,466,241,489] 모틀락(Mortlach)\nL066 [50,539,259,564] 올트모어(Aultmore)\nL067 [403,577,448,594] 18.0\nL068 [401,600,448,617] 30.0\nL069 [401,625,448,643] 45.0\nL070 [404,504,451,519] 25.0\nL071 [408,391,451,406] 16.0\nL072 [406,411,449,426] 20.0\nL073 [406,432,449,445] 32.0\nL074 [521,405,556,423] 8년\nL075 [521,426,567,444] 12년\nL076 [522,445,732,465] 10년 캐스크 스트랭스\nL077 [522,466,746,487] 9년 퀴베 캐스크 피니시\nL078 [522,488,769,509] 8년 스코티시 오크 피니시\nL079 [523,509,806,531] 10년 루비포트 캐스크 피니시\nL080 [524,532,809,554] 12년 모스카텔 캐스크 피니시\nL081 [523,553,788,576] 10년 스페니시 오크 피니시\nL082 [526,579,573,600] 15년\nL083 [524,603,574,624] 18년\nL084 [524,625,665,648] 18년 PX 펀천\nL085 [844,404,887,418] 16.0\nL086 [847,424,891,439] 19.0\nL087 [851,445,894,460] 22.0\nL088 [854,467,899,483] 22.0\nL089 [857,488,903,505] 23.0\nL090 [859,510,906,527] 23.0\nL091 [863,534,910,549] 23.0\nL092 [866,556,913,573] 25.0\nL093 [870,579,917,596] 27.0\nL094 [875,603,920,620] 42.0\nL095 [877,627,924,644] 68.0\nL096 [35,663,253,686] 에버펠디(Aberfeldy)\nL097 [524,664,840,690] 발렌타인 글렌버기(Glenburgie)\nL098 [33,700,88,724] 12년\nL099 [29,726,85,750] 16년\nL100 [399,700,448,719] 16.0\nL101 [397,726,446,745] 23.0\nL102 [524,703,578,725] 12년\nL103 [526,729,580,752] 15년\nL104 [887,703,936,720] 15.0\nL105 [891,728,939,746] 20.0\nL106 [21,769,279,795] 글렌로티스(Glenrothes)\nL107 [529,772,688,798] 탐두(Tamdhu)\nL108 [19,810,76,835] 12년\nL109 [19,839,90,861] WMC\nL110 [14,866,71,891] 18년\nL111 [396,811,444,831] 16.0\nL112 [394,839,444,857] 22.0\nL113 [394,866,444,885] 31.0\nL114 [533,812,587,836] 12년\nL115 [534,838,705,864] 배치스트랭스 8\nL116 [533,867,588,891] 15년\nL117 [534,896,590,919] 18년\nL118 [903,809,949,827] 17.0\nL119 [904,836,953,854] 26.0\nL120 [908,863,958,881] 29.0\nL121 [911,891,962,910] 48.0\n</ocr_lines>",
+  "ocr_variant": "off",
+  "n_lines": 121,
+  "gap_factor": 2.5,
+  "layout": "lines",
+  "ocr_latency_ms": 4253
+}

@@ -1,0 +1,758 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "012_beck_04.jpeg",
+  "prepared_image": "012_beck_04.jpg",
+  "prepared_sha256": "46371d02d46b7ee5187dda13e29c06bc15c0ddff5fd0f2dc7b9aac43009c950c",
+  "started_at": "2026-10-14T08:38:25.722714+00:00",
+  "latency_ms": 16724,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6097,
+  "output_tokens": 4292,
+  "thought_tokens": 2856,
+  "total_tokens": 13245,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Talisker 10yo",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022"
+          ],
+          "price": [
+            "L006"
+          ]
+        }
+      },
+      {
+        "raw_name": "Talisker 10yo",
+        "price_krw": 19900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022"
+          ],
+          "price": [
+            "L039"
+          ]
+        }
+      },
+      {
+        "raw_name": "Talisker 10yo",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L022"
+          ],
+          "price": [
+            "L055"
+          ]
+        }
+      },
+      {
+        "raw_name": "Bushmil 10yo",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L007"
+          ]
+        }
+      },
+      {
+        "raw_name": "Bushmil 10yo",
+        "price_krw": 19900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L040"
+          ]
+        }
+      },
+      {
+        "raw_name": "Bushmil 10yo",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L056"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glengrant 10yo",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L008"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glengrant 10yo",
+        "price_krw": 19900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L041"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glengrant 10yo",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L057"
+          ]
+        }
+      },
+      {
+        "raw_name": "Auchentoshan 12yo",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L009"
+          ]
+        }
+      },
+      {
+        "raw_name": "Auchentoshan 12yo",
+        "price_krw": 19900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L042"
+          ]
+        }
+      },
+      {
+        "raw_name": "Auchentoshan 12yo",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L058"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenfiddich 12yo",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L026"
+          ],
+          "price": [
+            "L010"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenfiddich 12yo",
+        "price_krw": 22900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L026"
+          ],
+          "price": [
+            "L043"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenfiddich 12yo",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L026"
+          ],
+          "price": [
+            "L059"
+          ]
+        }
+      },
+      {
+        "raw_name": "Bowmore 12yo",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L011"
+          ]
+        }
+      },
+      {
+        "raw_name": "Bowmore 12yo",
+        "price_krw": 22900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L044"
+          ]
+        }
+      },
+      {
+        "raw_name": "Bowmore 12yo",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L060"
+          ]
+        }
+      },
+      {
+        "raw_name": "Laphroaig 10yo",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028"
+          ],
+          "price": [
+            "L012"
+          ]
+        }
+      },
+      {
+        "raw_name": "Laphroaig 10yo",
+        "price_krw": 23900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028"
+          ],
+          "price": [
+            "L045"
+          ]
+        }
+      },
+      {
+        "raw_name": "Laphroaig 10yo",
+        "price_krw": 290000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L028"
+          ],
+          "price": [
+            "L061"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenlivet 12yo",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L029"
+          ],
+          "price": [
+            "L013"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenlivet 12yo",
+        "price_krw": 23900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L029"
+          ],
+          "price": [
+            "L046"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenlivet 12yo",
+        "price_krw": 290000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L029"
+          ],
+          "price": [
+            "L062"
+          ]
+        }
+      },
+      {
+        "raw_name": "Caol lla 12yo",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L030"
+          ],
+          "price": [
+            "L014"
+          ]
+        }
+      },
+      {
+        "raw_name": "Caol lla 12yo",
+        "price_krw": 23900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L030"
+          ],
+          "price": [
+            "L047"
+          ]
+        }
+      },
+      {
+        "raw_name": "Caol lla 12yo",
+        "price_krw": 290000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L030"
+          ],
+          "price": [
+            "L063"
+          ]
+        }
+      },
+      {
+        "raw_name": "Ardbeg 10yo",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L031"
+          ],
+          "price": [
+            "L015"
+          ]
+        }
+      },
+      {
+        "raw_name": "Ardbeg 10yo",
+        "price_krw": 23900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L031"
+          ],
+          "price": [
+            "L048"
+          ]
+        }
+      },
+      {
+        "raw_name": "Ardbeg 10yo",
+        "price_krw": 290000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L031"
+          ],
+          "price": [
+            "L064"
+          ]
+        }
+      },
+      {
+        "raw_name": "Balvenie 12yo",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L032"
+          ],
+          "price": [
+            "L016"
+          ]
+        }
+      },
+      {
+        "raw_name": "Balvenie 12yo",
+        "price_krw": 23900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L032"
+          ],
+          "price": [
+            "L049"
+          ]
+        }
+      },
+      {
+        "raw_name": "Balvenie 12yo",
+        "price_krw": 290000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L032"
+          ],
+          "price": [
+            "L065"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glendronach 12yo",
+        "price_krw": 18000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033"
+          ],
+          "price": [
+            "L017"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glendronach 12yo",
+        "price_krw": 24900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033"
+          ],
+          "price": [
+            "L050"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glendronach 12yo",
+        "price_krw": 300000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L033"
+          ],
+          "price": [
+            "L066"
+          ]
+        }
+      },
+      {
+        "raw_name": "Kilchoman Sanaig",
+        "price_krw": 18000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L034"
+          ],
+          "price": [
+            "L018"
+          ]
+        }
+      },
+      {
+        "raw_name": "Kilchoman Sanaig",
+        "price_krw": 24900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L034"
+          ],
+          "price": [
+            "L051"
+          ]
+        }
+      },
+      {
+        "raw_name": "Kilchoman Sanaig",
+        "price_krw": 300000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L034"
+          ],
+          "price": [
+            "L067"
+          ]
+        }
+      },
+      {
+        "raw_name": "Laphroaig Quater Cask",
+        "price_krw": 18000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L035"
+          ],
+          "price": [
+            "L019"
+          ]
+        }
+      },
+      {
+        "raw_name": "Laphroaig Quater Cask",
+        "price_krw": 24900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L035"
+          ],
+          "price": [
+            "L052"
+          ]
+        }
+      },
+      {
+        "raw_name": "Laphroaig Quater Cask",
+        "price_krw": 300000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L035"
+          ],
+          "price": [
+            "L068"
+          ]
+        }
+      },
+      {
+        "raw_name": "Macallan 12yo Double Cask",
+        "price_krw": 19000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L036"
+          ],
+          "price": [
+            "L020"
+          ]
+        }
+      },
+      {
+        "raw_name": "Macallan 12yo Double Cask",
+        "price_krw": 25900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L036"
+          ],
+          "price": [
+            "L053"
+          ]
+        }
+      },
+      {
+        "raw_name": "Macallan 12yo Double Cask",
+        "price_krw": 320000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L036"
+          ],
+          "price": [
+            "L069"
+          ]
+        }
+      },
+      {
+        "raw_name": "Macallan 12yo Sheryy Cask",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L037"
+          ],
+          "price": [
+            "L021"
+          ]
+        }
+      },
+      {
+        "raw_name": "Macallan 12yo Sheryy Cask",
+        "price_krw": 32900,
+        "pour_ml": 45,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L037"
+          ],
+          "price": [
+            "L054"
+          ]
+        }
+      },
+      {
+        "raw_name": "Macallan 12yo Sheryy Cask",
+        "price_krw": 430000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L037"
+          ],
+          "price": [
+            "L070"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Talisker 10yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L006\"]\n      }\n    },\n    {\n      \"raw_name\": \"Talisker 10yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L039\"]\n      }\n    },\n    {\n      \"raw_name\": \"Talisker 10yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bushmil 10yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L007\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bushmil 10yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bushmil 10yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glengrant 10yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L008\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glengrant 10yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glengrant 10yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"Auchentoshan 12yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L009\"]\n      }\n    },\n    {\n      \"raw_name\": \"Auchentoshan 12yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L042\"]\n      }\n    },\n    {\n      \"raw_name\": \"Auchentoshan 12yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenfiddich 12yo\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L010\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenfiddich 12yo\",\n      \"price_krw\": 22900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L043\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenfiddich 12yo\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bowmore 12yo\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L011\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bowmore 12yo\",\n      \"price_krw\": 22900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L044\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bowmore 12yo\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L060\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L061\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenlivet 12yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenlivet 12yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L046\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenlivet 12yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L062\"]\n      }\n    },\n    {\n      \"raw_name\": \"Caol lla 12yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"Caol lla 12yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L047\"]\n      }\n    },\n    {\n      \"raw_name\": \"Caol lla 12yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"Ardbeg 10yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"Ardbeg 10yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L048\"]\n      }\n    },\n    {\n      \"raw_name\": \"Ardbeg 10yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"Balvenie 12yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"Balvenie 12yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L049\"]\n      }\n    },\n    {\n      \"raw_name\": \"Balvenie 12yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glendronach 12yo\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L017\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glendronach 12yo\",\n      \"price_krw\": 24900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L050\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glendronach 12yo\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"Kilchoman Sanaig\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"Kilchoman Sanaig\",\n      \"price_krw\": 24900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L051\"]\n      }\n    },\n    {\n      \"raw_name\": \"Kilchoman Sanaig\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig Quater Cask\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L019\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig Quater Cask\",\n      \"price_krw\": 24900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L052\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig Quater Cask\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L068\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Double Cask\",\n      \"price_krw\": 19000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L020\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Double Cask\",\n      \"price_krw\": 25900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L053\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Double Cask\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Sheryy Cask\",\n      \"price_krw\": 23000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Sheryy Cask\",\n      \"price_krw\": 32900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Sheryy Cask\",\n      \"price_krw\": 430000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L070\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T08:38:42Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Talisker 10yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L006\"]\n      }\n    },\n    {\n      \"raw_name\": \"Talisker 10yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L039\"]\n      }\n    },\n    {\n      \"raw_name\": \"Talisker 10yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bushmil 10yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L007\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bushmil 10yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bushmil 10yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glengrant 10yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L008\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glengrant 10yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glengrant 10yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"Auchentoshan 12yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L009\"]\n      }\n    },\n    {\n      \"raw_name\": \"Auchentoshan 12yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L042\"]\n      }\n    },\n    {\n      \"raw_name\": \"Auchentoshan 12yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenfiddich 12yo\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L010\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenfiddich 12yo\",\n      \"price_krw\": 22900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L043\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenfiddich 12yo\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bowmore 12yo\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L011\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bowmore 12yo\",\n      \"price_krw\": 22900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L044\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bowmore 12yo\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L060\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L061\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenlivet 12yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenlivet 12yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L046\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenlivet 12yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L062\"]\n      }\n    },\n    {\n      \"raw_name\": \"Caol lla 12yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"Caol lla 12yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L047\"]\n      }\n    },\n    {\n      \"raw_name\": \"Caol lla 12yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"Ardbeg 10yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"Ardbeg 10yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L048\"]\n      }\n    },\n    {\n      \"raw_name\": \"Ardbeg 10yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"Balvenie 12yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"Balvenie 12yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L049\"]\n      }\n    },\n    {\n      \"raw_name\": \"Balvenie 12yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glendronach 12yo\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L017\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glendronach 12yo\",\n      \"price_krw\": 24900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L050\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glendronach 12yo\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"Kilchoman Sanaig\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"Kilchoman Sanaig\",\n      \"price_krw\": 24900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L051\"]\n      }\n    },\n    {\n      \"raw_name\": \"Kilchoman Sanaig\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig Quater Cask\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L019\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig Quater Cask\",\n      \"price_krw\": 24900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L052\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig Quater Cask\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L068\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Double Cask\",\n      \"price_krw\": 19000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L020\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Double Cask\",\n      \"price_krw\": 25900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L053\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Double Cask\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Sheryy Cask\",\n      \"price_krw\": 23000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Sheryy Cask\",\n      \"price_krw\": 32900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Sheryy Cask\",\n      \"price_krw\": 430000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L070\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Talisker 10yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L006\"]\n      }\n    },\n    {\n      \"raw_name\": \"Talisker 10yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L039\"]\n      }\n    },\n    {\n      \"raw_name\": \"Talisker 10yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bushmil 10yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L007\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bushmil 10yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bushmil 10yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glengrant 10yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L008\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glengrant 10yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glengrant 10yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"Auchentoshan 12yo\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L009\"]\n      }\n    },\n    {\n      \"raw_name\": \"Auchentoshan 12yo\",\n      \"price_krw\": 19900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L042\"]\n      }\n    },\n    {\n      \"raw_name\": \"Auchentoshan 12yo\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenfiddich 12yo\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L010\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenfiddich 12yo\",\n      \"price_krw\": 22900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L043\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenfiddich 12yo\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bowmore 12yo\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L011\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bowmore 12yo\",\n      \"price_krw\": 22900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L044\"]\n      }\n    },\n    {\n      \"raw_name\": \"Bowmore 12yo\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L060\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig 10yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L061\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenlivet 12yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenlivet 12yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L046\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glenlivet 12yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L062\"]\n      }\n    },\n    {\n      \"raw_name\": \"Caol lla 12yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"Caol lla 12yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L047\"]\n      }\n    },\n    {\n      \"raw_name\": \"Caol lla 12yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"Ardbeg 10yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"Ardbeg 10yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L048\"]\n      }\n    },\n    {\n      \"raw_name\": \"Ardbeg 10yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"Balvenie 12yo\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"Balvenie 12yo\",\n      \"price_krw\": 23900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L049\"]\n      }\n    },\n    {\n      \"raw_name\": \"Balvenie 12yo\",\n      \"price_krw\": 290000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glendronach 12yo\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L017\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glendronach 12yo\",\n      \"price_krw\": 24900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L050\"]\n      }\n    },\n    {\n      \"raw_name\": \"Glendronach 12yo\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"Kilchoman Sanaig\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"Kilchoman Sanaig\",\n      \"price_krw\": 24900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L051\"]\n      }\n    },\n    {\n      \"raw_name\": \"Kilchoman Sanaig\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig Quater Cask\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L019\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig Quater Cask\",\n      \"price_krw\": 24900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L052\"]\n      }\n    },\n    {\n      \"raw_name\": \"Laphroaig Quater Cask\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L068\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Double Cask\",\n      \"price_krw\": 19000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L020\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Double Cask\",\n      \"price_krw\": 25900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L053\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Double Cask\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Sheryy Cask\",\n      \"price_krw\": 23000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Sheryy Cask\",\n      \"price_krw\": 32900,\n      \"pour_ml\": 45,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"Macallan 12yo Sheryy Cask\",\n      \"price_krw\": 430000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L070\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T08:38:42Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 5033
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 6097,
+      "total_output_tokens": 4292,
+      "total_thought_tokens": 2856,
+      "total_tokens": 13245,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 70,
+    "price_like_lines": 48,
+    "uncited_price_lines": 0,
+    "uncited": [],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 2,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [366,149,596,198] 위스키\nL002 [62,245,311,280] 싱글몰트 위스키\nL003 [851,230,918,247] Bottle\nL004 [635,233,696,251] Glass\nL005 [639,256,696,275] 30ml\nL006 [630,281,706,299] 14,000\nL007 [630,305,706,324] 14,000\nL008 [632,328,708,348] 14,000\nL009 [632,351,708,371] 14,000\nL010 [634,375,708,395] 16,000\nL011 [634,400,708,418] 16,000\nL012 [635,423,710,443] 17,000\nL013 [635,446,712,466] 17,000\nL014 [637,470,712,490] 17,000\nL015 [635,492,713,512] 17,000\nL016 [639,515,713,535] 17,000\nL017 [639,539,715,559] 18,000\nL018 [641,562,717,582] 18,000\nL019 [642,586,717,605] 18,000\nL020 [644,609,719,629] 19,000\nL021 [643,632,721,653] 23,000\nL022 [62,288,224,313] Talisker 10yo\nL023 [67,313,229,337] Bushmil 10yo\nL024 [65,338,254,363] Glengrant 10yo\nL025 [69,360,306,384] Auchentoshan 12yo\nL026 [70,387,272,408] Glenfiddich 12yo\nL027 [74,412,254,433] Bowmore 12yo\nL028 [74,435,261,460] Laphroaig 10yo\nL029 [77,458,248,481] Glenlivet 12yo\nL030 [79,484,239,504] Caol lla 12yo\nL031 [79,507,236,531] Ardbeg 10yo\nL032 [83,531,247,552] Balvenie 12yo\nL033 [83,553,299,575] Glendronach 12yo\nL034 [85,577,294,599] Kilchoman Sanaig\nL035 [84,597,358,627] Laphroaig Quater Cask\nL036 [90,619,419,647] Macallan 12yo Double Cask\nL037 [90,643,411,671] Macallan 12yo Sheryy Cask\nL038 [748,253,807,272] 45ml\nL039 [741,278,816,298] 19,900\nL040 [741,302,816,322] 19,900\nL041 [741,326,816,345] 19,900\nL042 [743,348,818,369] 19,900\nL043 [741,373,818,392] 22,900\nL044 [743,397,818,415] 22,900\nL045 [743,420,818,439] 23,900\nL046 [744,444,819,462] 23,900\nL047 [746,466,821,486] 23,900\nL048 [746,489,821,509] 23,900\nL049 [748,512,823,532] 23,900\nL050 [748,536,823,556] 24,900\nL051 [750,558,825,578] 24,900\nL052 [749,582,827,602] 24,900\nL053 [751,605,829,626] 25,900\nL054 [753,628,830,649] 32,900\nL055 [842,277,931,296] 250,000\nL056 [843,300,931,319] 250,000\nL057 [843,324,931,344] 250,000\nL058 [843,346,932,366] 250,000\nL059 [843,371,932,390] 280,000\nL060 [843,394,932,413] 280,000\nL061 [845,416,932,435] 290.000\nL062 [847,439,933,459] 290.000\nL063 [847,463,934,482] 290.000\nL064 [847,485,936,505] 290.000\nL065 [848,509,936,528] 290.000\nL066 [850,532,938,551] 300.000\nL067 [850,555,939,574] 300.000\nL068 [852,578,939,597] 300.000\nL069 [854,600,941,620] 320.000\nL070 [854,624,943,644] 430.000\n</ocr_lines>",
+  "n_lines": 70,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 2192
+}

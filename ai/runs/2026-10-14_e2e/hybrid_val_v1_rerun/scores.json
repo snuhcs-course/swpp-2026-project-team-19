@@ -1,0 +1,282 @@
+{
+  "run_dir": "hybrid_val_v2",
+  "failed_calls": [],
+  "summary": {
+    "item_accuracy": {
+      "mean": 0.9954337899543378,
+      "min": 0.9954337899543378,
+      "max": 0.9954337899543378,
+      "n": 1
+    },
+    "f1_strict": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 1
+    },
+    "f1_lenient": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 1
+    },
+    "price_accuracy": {
+      "mean": 0.9954337899543378,
+      "min": 0.9954337899543378,
+      "max": 0.9954337899543378,
+      "n": 1
+    },
+    "unit_confusion": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+    },
+    "fp": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+    },
+    "fn": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+    }
+  },
+  "per_photo_accuracy": {
+    "007_위스키복춘_01": {
+      "mean": 0.987012987012987,
+      "min": 0.987012987012987,
+      "max": 0.987012987012987
+    },
+    "007_위스키복춘_02": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "007_위스키복춘_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "007_위스키복춘_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_02": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "008_서로상_05": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    }
+  },
+  "per_bar_accuracy": {
+    "서로상": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "위스키복춘": {
+      "mean": 0.993103448275862,
+      "min": 0.993103448275862,
+      "max": 0.993103448275862
+    }
+  },
+  "runs": {
+    "1": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 219,
+        "n_out": 219,
+        "matched_strict": 219,
+        "matched": 219,
+        "correct": 218,
+        "fp": 0,
+        "fn": 0,
+        "priced": 219,
+        "price_correct": 218,
+        "unit_confusion": 0,
+        "item_accuracy": 0.9954337899543378,
+        "f1_strict": 1.0,
+        "f1_lenient": 1.0,
+        "price_accuracy": 0.9954337899543378
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "n_out": 77,
+          "matched_strict": 77,
+          "matched": 77,
+          "correct": 76,
+          "fp": 0,
+          "fn": 0,
+          "priced": 77,
+          "price_correct": 76,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "가격 단위 환산 오류",
+              "gt": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "카발란 솔리스트 셰리 오크",
+                "price_krw": 330000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L084"
+                  ],
+                  "price": [
+                    "L085"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 52,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 16,
+          "fp": 0,
+          "fn": 0,
+          "priced": 16,
+          "price_correct": 16,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "n_out": 18,
+          "matched_strict": 18,
+          "matched": 18,
+          "correct": 18,
+          "fp": 0,
+          "fn": 0,
+          "priced": 18,
+          "price_correct": 18,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "n_out": 22,
+          "matched_strict": 22,
+          "matched": 22,
+          "correct": 22,
+          "fp": 0,
+          "fn": 0,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    }
+  },
+  "label_set": "val_v1_1"
+}

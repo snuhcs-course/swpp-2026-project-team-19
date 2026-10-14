@@ -1,0 +1,61 @@
+{
+ "key": "031857aa89f06ee673a6ad8e936bda71f94e23a2e355e9821c232aa3ad6ad1a4",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Hibiki DR",
+  "context_lines": [
+   "Dalwhinny 15yo",
+   "Glenlivet 15yo",
+   "Bowmore 15yo",
+   "Machrie Moor",
+   "Hakushu DR"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Hibiki",
+   "age": null,
+   "edition_tokens_en": [
+    "DR"
+   ],
+   "expansions": [
+    {
+     "token": "DR",
+     "expansion": "Distiller's Reserve"
+    }
+   ]
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Hibiki 21",
+    "age": 21,
+    "edition": null
+   },
+   {
+    "no": "2",
+    "name": "Hibiki Blender's Choice",
+    "age": null,
+    "edition": "Blender's Choice"
+   },
+   {
+    "no": "3",
+    "name": "Hibiki Japanese Harmony",
+    "age": null,
+    "edition": "Japanese Harmony"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"Hibiki DR은 일본 위스키에서 'Hibiki Japanese Harmony'와 같은 것으로 통용되기도 하지만, 공식 명칭이 아니며 리스트의 상품들과 명확히 일치하지 않음.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:57:02.724417+00:00",
+  "latency_ms": 1679,
+  "attempts": 1,
+  "input_tokens": 980,
+  "output_tokens": 60,
+  "thought_tokens": 122
+ }
+}

@@ -1,0 +1,611 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "011_mirabeau_01.jpeg",
+  "prepared_image": "011_mirabeau_01.jpg",
+  "prepared_sha256": "e78a85b3942477251cb18e20e088366015604c4cd3e503df4298381d1f855638",
+  "started_at": "2026-10-14T08:34:45.961114+00:00",
+  "latency_ms": 15713,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6440,
+  "output_tokens": 3689,
+  "thought_tokens": 1578,
+  "total_tokens": 11707,
+  "output": {
+    "items": [
+      {
+        "raw_name": "라 메종드 위스키(LMDW) 벤네비스 7년 아티스트 콜렉티브",
+        "price_krw": 34000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L001",
+            "L002"
+          ],
+          "price": [
+            "L004"
+          ]
+        }
+      },
+      {
+        "raw_name": "라 메종드 위스키(LMDW) 쿨일라 9년 아티스트 콜렉티브",
+        "price_krw": 38000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L001",
+            "L003"
+          ],
+          "price": [
+            "L005"
+          ]
+        }
+      },
+      {
+        "raw_name": "더 위스키 에이전시(TWA) 카발란 솔리스트 올로로소 7년",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008",
+            "L016"
+          ],
+          "price": [
+            "L018"
+          ]
+        }
+      },
+      {
+        "raw_name": "더 위스키 에이전시(TWA) 카발란 솔리스트 포트 8년",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008",
+            "L017"
+          ],
+          "price": [
+            "L019"
+          ]
+        }
+      },
+      {
+        "raw_name": "사마롤리(Smaroli) 로얄 브라클라 14년",
+        "price_krw": 62000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013",
+            "L014"
+          ],
+          "price": [
+            "L020"
+          ]
+        }
+      },
+      {
+        "raw_name": "사마롤리(Smaroli) 쿨일라 13년",
+        "price_krw": 63000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013",
+            "L015"
+          ],
+          "price": [
+            "L021"
+          ]
+        }
+      },
+      {
+        "raw_name": "디아지오 SR(Diagio SR) SR 22 탈리스커 11년",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033",
+            "L034"
+          ],
+          "price": [
+            "L038"
+          ]
+        }
+      },
+      {
+        "raw_name": "디아지오 SR(Diagio SR) SR 23 오반 11년",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033",
+            "L035"
+          ],
+          "price": [
+            "L039"
+          ]
+        }
+      },
+      {
+        "raw_name": "디아지오 SR(Diagio SR) SR 23 탈리스커",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033",
+            "L036"
+          ],
+          "price": [
+            "L040"
+          ]
+        }
+      },
+      {
+        "raw_name": "디아지오 SR(Diagio SR) SR 23 클라이넬리쉬",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033",
+            "L037"
+          ],
+          "price": [
+            "L041"
+          ]
+        }
+      },
+      {
+        "raw_name": "윌슨 앤 모건(Wilson & Morgan) 쿨일라 2014",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L047",
+            "L051"
+          ],
+          "price": [
+            "L054"
+          ]
+        }
+      },
+      {
+        "raw_name": "윌슨 앤 모건(Wilson & Morgan) 아드모어 12년",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L047",
+            "L052"
+          ],
+          "price": [
+            "L055"
+          ]
+        }
+      },
+      {
+        "raw_name": "윌슨 앤 모건(Wilson & Morgan) 달유인 15년",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L047",
+            "L053"
+          ],
+          "price": [
+            "L056"
+          ]
+        }
+      },
+      {
+        "raw_name": "하이랜드 레어드(Highland Laird) 딘스톤 12년",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L057",
+            "L058"
+          ],
+          "price": [
+            "L063"
+          ]
+        }
+      },
+      {
+        "raw_name": "하이랜드 레어드(Highland Laird) 쿨일라 12년",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L057",
+            "L059"
+          ],
+          "price": [
+            "L064"
+          ]
+        }
+      },
+      {
+        "raw_name": "하이랜드 레어드(Highland Laird) 녹두 13년",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L057",
+            "L060"
+          ],
+          "price": [
+            "L065"
+          ]
+        }
+      },
+      {
+        "raw_name": "하이랜드 레어드(Highland Laird) 글렌토커스 16년",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L057",
+            "L061"
+          ],
+          "price": [
+            "L066"
+          ]
+        }
+      },
+      {
+        "raw_name": "하이랜드 레어드(Highland Laird) 발블레어 14년",
+        "price_krw": 34000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L057",
+            "L062"
+          ],
+          "price": [
+            "L067"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리빈티지(Signatory Vintage) 벤네비스 9년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L068",
+            "L069"
+          ],
+          "price": [
+            "L076"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리빈티지(Signatory Vintage) 쿨일라 10년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L068",
+            "L070"
+          ],
+          "price": [
+            "L077"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리빈티지(Signatory Vintage) 벤리악 10년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L068",
+            "L071"
+          ],
+          "price": [
+            "L078"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리빈티지(Signatory Vintage) 글렌오드 12년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L068",
+            "L072"
+          ],
+          "price": [
+            "L079"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리빈티지(Signatory Vintage) 링크우드 12년 100 프루프",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L068",
+            "L073"
+          ],
+          "price": [
+            "L080"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리빈티지(Signatory Vintage) 스페이사이드 14년",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L068",
+            "L074"
+          ],
+          "price": [
+            "L081"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리빈티지(Signatory Vintage) 에드라두어 2014",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L068",
+            "L075"
+          ],
+          "price": [
+            "L082"
+          ]
+        }
+      },
+      {
+        "raw_name": "발렌타인(Ballantine) 17년",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006",
+            "L009"
+          ],
+          "price": [
+            "L011"
+          ]
+        }
+      },
+      {
+        "raw_name": "발렌타인(Ballantine) 21년",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006",
+            "L010"
+          ],
+          "price": [
+            "L012"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 블랙",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022",
+            "L023"
+          ],
+          "price": [
+            "L028"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 블랙 셰리",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022",
+            "L024"
+          ],
+          "price": [
+            "L029"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 그린",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022",
+            "L025"
+          ],
+          "price": [
+            "L030"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 18년",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022",
+            "L026"
+          ],
+          "price": [
+            "L031"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니워커(Johnnie Walker) 블루",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022",
+            "L027"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L043"
+          ],
+          "price": [
+            "L045"
+          ]
+        }
+      },
+      {
+        "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트랭스",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L044"
+          ],
+          "price": [
+            "L046"
+          ]
+        }
+      },
+      {
+        "raw_name": "커디샥(Cutty Shark) 프로히비션",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L048",
+            "L049"
+          ],
+          "price": [
+            "L050"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"라 메종드 위스키(LMDW) 벤네비스 7년 아티스트 콜렉티브\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L001\", \"L002\"],\n        \"price\": [\"L004\"]\n      }\n    },\n    {\n      \"raw_name\": \"라 메종드 위스키(LMDW) 쿨일라 9년 아티스트 콜렉티브\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L001\", \"L003\"],\n        \"price\": [\"L005\"]\n      }\n    },\n    {\n      \"raw_name\": \"더 위스키 에이전시(TWA) 카발란 솔리스트 올로로소 7년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\", \"L016\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"더 위스키 에이전시(TWA) 카발란 솔리스트 포트 8년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\", \"L017\"],\n        \"price\": [\"L019\"]\n      }\n    },\n    {\n      \"raw_name\": \"사마롤리(Smaroli) 로얄 브라클라 14년\",\n      \"price_krw\": 62000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\", \"L014\"],\n        \"price\": [\"L020\"]\n      }\n    },\n    {\n      \"raw_name\": \"사마롤리(Smaroli) 쿨일라 13년\",\n      \"price_krw\": 63000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\", \"L015\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 22 탈리스커 11년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L034\"],\n        \"price\": [\"L038\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 23 오반 11년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L035\"],\n        \"price\": [\"L039\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 23 탈리스커\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L036\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 23 클라이넬리쉬\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L037\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"윌슨 앤 모건(Wilson & Morgan) 쿨일라 2014\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\", \"L051\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"윌슨 앤 모건(Wilson & Morgan) 아드모어 12년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\", \"L052\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"윌슨 앤 모건(Wilson & Morgan) 달유인 15년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\", \"L053\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 딘스톤 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L058\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 쿨일라 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L059\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 녹두 13년\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L060\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 글렌토커스 16년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L061\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 발블레어 14년\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L062\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 벤네비스 9년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L069\"],\n        \"price\": [\"L076\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 쿨일라 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L070\"],\n        \"price\": [\"L077\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 벤리악 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L071\"],\n        \"price\": [\"L078\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 글렌오드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L072\"],\n        \"price\": [\"L079\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 링크우드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L073\"],\n        \"price\": [\"L080\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 스페이사이드 14년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L074\"],\n        \"price\": [\"L081\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 에드라두어 2014\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L075\"],\n        \"price\": [\"L082\"]\n      }\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 17년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L009\"],\n        \"price\": [\"L011\"]\n      }\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 21년\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L010\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L023\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙 셰리\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L024\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 그린\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L025\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 18년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L026\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블루\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L027\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L043\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트랭스\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L044\"],\n        \"price\": [\"L046\"]\n      }\n    },\n    {\n      \"raw_name\": \"커디샥(Cutty Shark) 프로히비션\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L048\", \"L049\"],\n        \"price\": [\"L050\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T08:35:01Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"라 메종드 위스키(LMDW) 벤네비스 7년 아티스트 콜렉티브\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L001\", \"L002\"],\n        \"price\": [\"L004\"]\n      }\n    },\n    {\n      \"raw_name\": \"라 메종드 위스키(LMDW) 쿨일라 9년 아티스트 콜렉티브\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L001\", \"L003\"],\n        \"price\": [\"L005\"]\n      }\n    },\n    {\n      \"raw_name\": \"더 위스키 에이전시(TWA) 카발란 솔리스트 올로로소 7년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\", \"L016\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"더 위스키 에이전시(TWA) 카발란 솔리스트 포트 8년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\", \"L017\"],\n        \"price\": [\"L019\"]\n      }\n    },\n    {\n      \"raw_name\": \"사마롤리(Smaroli) 로얄 브라클라 14년\",\n      \"price_krw\": 62000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\", \"L014\"],\n        \"price\": [\"L020\"]\n      }\n    },\n    {\n      \"raw_name\": \"사마롤리(Smaroli) 쿨일라 13년\",\n      \"price_krw\": 63000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\", \"L015\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 22 탈리스커 11년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L034\"],\n        \"price\": [\"L038\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 23 오반 11년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L035\"],\n        \"price\": [\"L039\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 23 탈리스커\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L036\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 23 클라이넬리쉬\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L037\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"윌슨 앤 모건(Wilson & Morgan) 쿨일라 2014\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\", \"L051\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"윌슨 앤 모건(Wilson & Morgan) 아드모어 12년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\", \"L052\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"윌슨 앤 모건(Wilson & Morgan) 달유인 15년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\", \"L053\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 딘스톤 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L058\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 쿨일라 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L059\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 녹두 13년\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L060\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 글렌토커스 16년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L061\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 발블레어 14년\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L062\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 벤네비스 9년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L069\"],\n        \"price\": [\"L076\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 쿨일라 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L070\"],\n        \"price\": [\"L077\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 벤리악 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L071\"],\n        \"price\": [\"L078\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 글렌오드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L072\"],\n        \"price\": [\"L079\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 링크우드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L073\"],\n        \"price\": [\"L080\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 스페이사이드 14년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L074\"],\n        \"price\": [\"L081\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 에드라두어 2014\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L075\"],\n        \"price\": [\"L082\"]\n      }\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 17년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L009\"],\n        \"price\": [\"L011\"]\n      }\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 21년\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L010\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L023\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙 셰리\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L024\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 그린\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L025\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 18년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L026\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블루\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L027\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L043\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트랭스\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L044\"],\n        \"price\": [\"L046\"]\n      }\n    },\n    {\n      \"raw_name\": \"커디샥(Cutty Shark) 프로히비션\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L048\", \"L049\"],\n        \"price\": [\"L050\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"라 메종드 위스키(LMDW) 벤네비스 7년 아티스트 콜렉티브\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L001\", \"L002\"],\n        \"price\": [\"L004\"]\n      }\n    },\n    {\n      \"raw_name\": \"라 메종드 위스키(LMDW) 쿨일라 9년 아티스트 콜렉티브\",\n      \"price_krw\": 38000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L001\", \"L003\"],\n        \"price\": [\"L005\"]\n      }\n    },\n    {\n      \"raw_name\": \"더 위스키 에이전시(TWA) 카발란 솔리스트 올로로소 7년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\", \"L016\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"더 위스키 에이전시(TWA) 카발란 솔리스트 포트 8년\",\n      \"price_krw\": 41000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\", \"L017\"],\n        \"price\": [\"L019\"]\n      }\n    },\n    {\n      \"raw_name\": \"사마롤리(Smaroli) 로얄 브라클라 14년\",\n      \"price_krw\": 62000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\", \"L014\"],\n        \"price\": [\"L020\"]\n      }\n    },\n    {\n      \"raw_name\": \"사마롤리(Smaroli) 쿨일라 13년\",\n      \"price_krw\": 63000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\", \"L015\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 22 탈리스커 11년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L034\"],\n        \"price\": [\"L038\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 23 오반 11년\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L035\"],\n        \"price\": [\"L039\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 23 탈리스커\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L036\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"디아지오 SR(Diagio SR) SR 23 클라이넬리쉬\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\", \"L037\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"윌슨 앤 모건(Wilson & Morgan) 쿨일라 2014\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\", \"L051\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"윌슨 앤 모건(Wilson & Morgan) 아드모어 12년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\", \"L052\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"윌슨 앤 모건(Wilson & Morgan) 달유인 15년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L047\", \"L053\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 딘스톤 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L058\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 쿨일라 12년\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L059\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 녹두 13년\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L060\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 글렌토커스 16년\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L061\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드 레어드(Highland Laird) 발블레어 14년\",\n      \"price_krw\": 34000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L057\", \"L062\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 벤네비스 9년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L069\"],\n        \"price\": [\"L076\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 쿨일라 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L070\"],\n        \"price\": [\"L077\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 벤리악 10년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L071\"],\n        \"price\": [\"L078\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 글렌오드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L072\"],\n        \"price\": [\"L079\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 링크우드 12년 100 프루프\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L073\"],\n        \"price\": [\"L080\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 스페이사이드 14년\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L074\"],\n        \"price\": [\"L081\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리빈티지(Signatory Vintage) 에드라두어 2014\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L068\", \"L075\"],\n        \"price\": [\"L082\"]\n      }\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 17년\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L009\"],\n        \"price\": [\"L011\"]\n      }\n    },\n    {\n      \"raw_name\": \"발렌타인(Ballantine) 21년\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L010\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L023\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블랙 셰리\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L024\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 그린\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L025\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 18년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L026\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커(Johnnie Walker) 블루\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L027\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L043\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트랭스\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L044\"],\n        \"price\": [\"L046\"]\n      }\n    },\n    {\n      \"raw_name\": \"커디샥(Cutty Shark) 프로히비션\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L048\", \"L049\"],\n        \"price\": [\"L050\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T08:35:01Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 5376
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 6440,
+      "total_output_tokens": 3689,
+      "total_thought_tokens": 1578,
+      "total_tokens": 11707,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 82,
+    "price_like_lines": 35,
+    "uncited_price_lines": 0,
+    "uncited": [],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 2,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [115,35,332,61] 라 메종드 위스키(LMDW)\nL002 [110,58,393,83] 벤네비스 7년 아티스트 콜렉티브\nL003 [108,75,372,100] 쿨일라 9년 아티스트 콜렉티브\nL004 [424,59,463,71] 34.0\nL005 [424,77,463,91] 38.0\nL006 [548,59,735,84] 발렌타인(Ballantine)\nL007 [546,24,825,47] 블랜디드(Blended Whisky)\nL008 [103,109,329,133] 더 위스키 에이전시(TWA)\nL009 [552,90,597,107] 17년\nL010 [554,107,597,124] 21년\nL011 [864,89,904,101] 25.0\nL012 [868,107,892,118] 35\nL013 [91,190,261,213] 사마롤리(Smaroli)\nL014 [90,217,272,240] 로얄 브라클라 14년\nL015 [88,238,201,259] 쿨일라 13년\nL016 [99,136,373,158] 카발란 솔리스트 올로로소 7년\nL017 [97,155,331,176] 카발란 솔리스트 포트 8년\nL018 [427,133,469,149] 41.0\nL019 [426,152,469,167] 41.0\nL020 [427,216,470,230] 62.0\nL021 [429,236,470,250] 63.0\nL022 [552,136,790,159] 조니워커(Johnnie Walker)\nL023 [555,168,599,186] 블랙\nL024 [556,183,649,205] 블랙 셰리\nL025 [559,205,601,224] 그린\nL026 [559,225,604,244] 18년\nL027 [561,246,608,266] 블루\nL028 [880,165,922,179] 12.0\nL029 [883,185,925,198] 13.0\nL030 [889,203,929,218] 16.0\nL031 [892,222,934,237] 20.0\nL032 [897,242,938,257] 40.0\nL033 [83,276,307,297] 디아지오 SR(Diagio SR)\nL034 [79,308,283,329] SR 22 탈리스커 11년\nL035 [78,330,239,350] SR 23 오반 11년\nL036 [76,351,231,371] SR 23 탈리스커\nL037 [72,371,274,393] SR 23 클라이넬리쉬\nL038 [431,307,476,323] 23.0\nL039 [431,328,476,342] 27.0\nL040 [432,350,477,366] 23.0\nL041 [432,371,477,388] 30.0\nL042 [560,283,907,312] 맥네어스 럼릭(Macnair's Lum Reek)\nL043 [565,322,613,342] 12년\nL044 [565,336,789,364] 10년 캐스크 스트랭스\nL045 [913,316,955,332] 16.0\nL046 [917,337,960,353] 20.0\nL047 [67,415,384,438] 윌슨 앤 모건(Wilson & Morgan)\nL048 [568,381,776,409] 커디샥(Cutty Shark)\nL049 [570,414,687,439] 프로히비션\nL050 [932,414,974,430] 12.0\nL051 [62,447,193,470] 쿨일라 2014\nL052 [62,471,210,492] 아드모어 12년\nL053 [59,494,186,517] 달유인 15년\nL054 [432,444,480,463] 20.0\nL055 [434,467,481,485] 23.0\nL056 [434,490,481,508] 29.0\nL057 [52,536,394,563] 하이랜드 레어드(Highland Laird)\nL058 [52,574,181,599] 딘스톤 12년\nL059 [49,599,179,624] 쿨일라 12년\nL060 [47,625,154,648] 녹두 13년\nL061 [43,648,224,676] 글렌토커스 16년\nL062 [43,676,198,702] 발블레어 14년\nL063 [438,569,484,587] 21.0\nL064 [438,594,484,612] 21.0\nL065 [438,620,486,637] 22.0\nL066 [438,644,486,663] 29.0\nL067 [438,672,488,690] 34.0\nL068 [36,720,450,753] 시그나토리빈티지(Signatory Vintage)\nL069 [34,764,314,791] 벤네비스 9년 100 프루프\nL070 [33,791,302,819] 쿨일라 10년 100 프루프\nL071 [31,818,302,847] 벤리악 10년 100 프루프\nL072 [27,846,326,875] 글렌오드 12년 100 프루프\nL073 [27,875,326,905] 링크우드 12년 100 프루프\nL074 [23,904,241,933] 스페이사이드 14년\nL075 [21,935,221,963] 에드라두어 2014\nL076 [439,762,491,781] 20.0\nL077 [441,790,491,809] 20.0\nL078 [441,818,493,837] 20.0\nL079 [442,846,493,865] 20.0\nL080 [442,875,495,893] 20.0\nL081 [442,904,496,923] 23.0\nL082 [444,934,496,952] 24.0\n</ocr_lines>",
+  "n_lines": 82,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 4077
+}

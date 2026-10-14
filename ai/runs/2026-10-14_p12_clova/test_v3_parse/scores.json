@@ -1,0 +1,5750 @@
+{
+  "run_dir": "test_v3_parse",
+  "failed_calls": [],
+  "summary": {
+    "item_accuracy": {
+      "mean": 0.882785667520417,
+      "min": 0.8211920529801324,
+      "max": 0.95578231292517,
+      "n": 3
+    },
+    "f1_strict": {
+      "mean": 0.8408957739102491,
+      "min": 0.8162895927601809,
+      "max": 0.8747826086956523,
+      "n": 3
+    },
+    "f1_lenient": {
+      "mean": 0.9384833707759328,
+      "min": 0.9067873303167421,
+      "max": 0.9773913043478261,
+      "n": 3
+    },
+    "price_accuracy": {
+      "mean": 0.9966733200266135,
+      "min": 0.9900199600798403,
+      "max": 1.0,
+      "n": 3
+    },
+    "unit_confusion": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 3
+    },
+    "fp": {
+      "mean": 29.666666666666668,
+      "min": 13,
+      "max": 47,
+      "n": 3
+    },
+    "fn": {
+      "mean": 40,
+      "min": 13,
+      "max": 74,
+      "n": 3
+    }
+  },
+  "per_photo_accuracy": {
+    "011_미라보_01": {
+      "mean": 0.5416666666666666,
+      "min": 0.16666666666666666,
+      "max": 1.0
+    },
+    "011_미라보_02": {
+      "mean": 0.8974358974358975,
+      "min": 0.6923076923076923,
+      "max": 1.0
+    },
+    "011_미라보_03": {
+      "mean": 0.7071428571428572,
+      "min": 0.21666666666666667,
+      "max": 1.0
+    },
+    "011_미라보_04": {
+      "mean": 0.9333333333333333,
+      "min": 0.8666666666666667,
+      "max": 1.0
+    },
+    "011_미라보_05": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "011_미라보_06": {
+      "mean": 0.9597701149425287,
+      "min": 0.8793103448275862,
+      "max": 1.0
+    },
+    "011_미라보_07": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "011_미라보_08": {
+      "mean": 0.9285714285714286,
+      "min": 0.7857142857142857,
+      "max": 1.0
+    },
+    "011_미라보_09": {
+      "mean": 0.8214285714285714,
+      "min": 0.4642857142857143,
+      "max": 1.0
+    },
+    "012_Beck_01": {
+      "mean": 0.8472222222222222,
+      "min": 0.5416666666666666,
+      "max": 1.0
+    },
+    "012_Beck_02": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "012_Beck_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "012_Beck_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "013_포레스트_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    }
+  },
+  "per_bar_accuracy": {
+    "Beck": {
+      "mean": 0.9657320872274143,
+      "min": 0.897196261682243,
+      "max": 1.0
+    },
+    "미라보": {
+      "mean": 0.8460527318088201,
+      "min": 0.7539863325740319,
+      "max": 0.9385342789598109
+    },
+    "포레스트": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    }
+  },
+  "runs": {
+    "1": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 575,
+        "n_out": 530,
+        "matched_strict": 451,
+        "matched": 501,
+        "correct": 496,
+        "fp": 29,
+        "fn": 74,
+        "priced": 501,
+        "price_correct": 496,
+        "unit_confusion": 0,
+        "item_accuracy": 0.8211920529801324,
+        "f1_strict": 0.8162895927601809,
+        "f1_lenient": 0.9067873303167421,
+        "price_accuracy": 0.9900199600798403
+      },
+      "photos": [
+        {
+          "photo_id": "011_미라보_01",
+          "n_gt": 35,
+          "n_out": 35,
+          "matched_strict": 33,
+          "matched": 35,
+          "correct": 35,
+          "fp": 0,
+          "fn": 0,
+          "priced": 35,
+          "price_correct": 35,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트렝스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트랭스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "커티샥(Cutty Shark) 프로히비션",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "커디샥(Cutty Shark) 프로히비션",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_02",
+          "n_gt": 44,
+          "n_out": 44,
+          "matched_strict": 32,
+          "matched": 36,
+          "correct": 36,
+          "fp": 8,
+          "fn": 8,
+          "priced": 36,
+          "price_correct": 36,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트렝스 배치 4",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 배치 4",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트렝스 헤더",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 헤더",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "스프링뱅크(Springbank) 12년 캐스크 스트렝스",
+                "price_krw": 40000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "스프링뱅크(Springbank) 12년 캐스크 스트랭스",
+                "price_krw": 40000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트렝스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트랭스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "밀튼더프 10년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "부나하벤 10년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "부나하벤 혜빌리 피티드 11년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "글렌로티스 11년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "로얄 브라클라 14년",
+                "price_krw": 37000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "크라겐모어 26년",
+                "price_krw": 120000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "킬커란 12년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "킬커란 16년",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글렌가일(Glengyle) 킬커란 12년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글렌가일(Glengyle) 킬커란 16년",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "고든앤맥페일(Gordon&Macphail) 밀튼더프 10년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "고든앤맥페일(Gordon&Macphail) 부나하벤 10년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "고든앤맥페일(Gordon&Macphail) 부나하벤 헤빌리 피티드 11년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "고든앤맥페일(Gordon&Macphail) 글렌로티스 11년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "헌터랭(Hunterlaing) 로얄 브라클라 14년",
+                "price_krw": 37000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "헌터랭(Hunterlaing) 크라겐모어 26년",
+                "price_krw": 120000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_03",
+          "n_gt": 60,
+          "n_out": 16,
+          "matched_strict": 16,
+          "matched": 16,
+          "correct": 13,
+          "fp": 0,
+          "fn": 44,
+          "priced": 16,
+          "price_correct": 13,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 사닉",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "킬호만(Kilchoman) 사닉",
+                "price_krw": 42000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "쿨일라(Caol Ila) 12년",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "쿨일라 (Caol Ila) 12년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "쿨일라(Caol Ila) 18년",
+                "price_krw": 42000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "쿨일라 (Caol Ila) 18년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트렝스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 코리아 스몰배치",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 배치 스트렝스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 사닉 캐스크 스트렝스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 피노 셰리 캐스크",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 꼬냑 캐스크",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) PX 셰리 캐스크",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 로크곰",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 100% 아일라",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 포트 싱글 캐스크 피니시",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 소테른 캐스크",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 포트 캐스크",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 16년",
+                "price_krw": 54000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "브룩라디(Bruichladdich) 스코티시 발리",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "브룩라디(Bruichladdich) 아일라 발리",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "브룩라디(Bruichladdich) 18년",
+                "price_krw": 60000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "브룩라디(Bruichladdich) 블랙아트 에디션 11",
+                "price_krw": 140000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "포트샬롯(Port Charllotte) 10년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "포트샬롯(Port Charllotte) 아일라 발리 2014",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "포트샬롯(Port Charllotte) PMC:01",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "옥토모어(Octomore) 14.1",
+                "price_krw": 43000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "옥토모어(Octomore) 14.2",
+                "price_krw": 47000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "옥토모어(Octomore) 15.1",
+                "price_krw": 47000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "옥토모어(Octomore) 15.2",
+                "price_krw": 49000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "옥토모어(Octomore) 15.3",
+                "price_krw": 60000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 안클라닥",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 토흐카흐",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 에리너 그레이뉴",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트렝스",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 14년 루비포트 캐스크 피니시",
+                "price_krw": 37000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 18년",
+                "price_krw": 48000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 10년",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 쿼터 캐스크",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 포트 캐스크",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 아마로네 캐스크",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 소테른 캐스크",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 셰리 캐스크 캐스크 스트렝스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 마크리무어 캐스크 스트렝스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 마크리무어 10년",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 시그니쳐 시리즈",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 프라이빗 캐스크 No.2",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 18년",
+                "price_krw": 50000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 21년",
+                "price_krw": 68000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아란(Arran) 25년",
+                "price_krw": 140000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_04",
+          "n_gt": 58,
+          "n_out": 55,
+          "matched_strict": 48,
+          "matched": 53,
+          "correct": 52,
+          "fp": 2,
+          "fn": 5,
+          "priced": 53,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "로크로몬드(Loch Lomond) 18년",
+                "price_krw": 40000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "로크로몬드(Loch Lomond) 18년",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌드로낙(Glendronach) 오드 투더 엡버스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌드로낙(Glendronach) 오드 투더 엠버스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "토마틴(Tomatin) 캐스크 스트렝스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "토마틴(Tomatin) 캐스크 스트랭스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌기어리(Glengarioch) 1997 배치12 캐스크 스트렝스",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌기어리(Glengarioch) 1997 배치12 캐스크 스트랭스",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "라프로익(Laphroaig) 10년 캐스크 스트렝스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익(Laphroaig) 10년 캐스크 스트랭스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "라프로익(Laphroaig) 25년 캐스크 스트렝스",
+                "price_krw": 130000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익(Laphroaig) 25년 캐스크 스트랭스",
+                "price_krw": 130000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "로크로몬드(Loch Lomond) 15년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "로크로몬드(Loch Lomond) 21년",
+                "price_krw": 40000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글렌드로낙(Glendronach) 15년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글렌드로낙(Glendronach) 18년",
+                "price_krw": 53000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글렌드로낙(Glendronach) 21년",
+                "price_krw": 67000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "로크로몬드(Loch Lomond) 12년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "로크로몬드(Loch Lomond) 14년",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_05",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 42,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "벤로막(Benromach) 12년 캐스크 스트렝스",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "벤로막(Benromach) 12년 캐스크 스트랭스",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌파클라스(Glenfarclas) 105 캐스크 스트렝스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌파클라스(Glenfarclas) 105 캐스크 스트랭스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌고인(Glengoyne) 배치 10 캐스크 스트렝스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌고인(Glengoyne) 배치 10 캐스크 스트랭스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "클라이넬리쉬(Clynelish) 14년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "클라이녤리쉬(Clynelish) 14년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "클라이넬리쉬(Clynelish) 디스틸러리 에디션",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "클라이녤리쉬(Clynelish) 디스틸러리 에디션",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어(Dalmore) 12년 세리캐스크 셀렉트",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어(Dalmore) 12년 셰리캐스크 셀렉트",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 10년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "エ드라두어(Edradour) 10년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 12년 캐스크 스트렝스",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "에드라두어(Edradour) 12년 캐스크 스트랭스",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트렝스",
+                "price_krw": 35000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트랭스",
+                "price_krw": 35000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 21년 캐스크 스트렝스",
+                "price_krw": 100000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "에드라두어(Edradour) 21년 캐스크 스트랭스",
+                "price_krw": 100000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_06",
+          "n_gt": 54,
+          "n_out": 56,
+          "matched_strict": 44,
+          "matched": 52,
+          "correct": 51,
+          "fp": 4,
+          "fn": 2,
+          "priced": 52,
+          "price_correct": 51,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "가격 오류(기타)",
+              "gt": {
+                "raw_name": "올트모어(Aultmore) 12년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "올트모어(Aultmore) 12년",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 12년 더블 캐스크",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 12년 더블 캐스크",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 12년 셰리 캐스크",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 12년 셰리 캐스크",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 15년 더블 캐스크",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 15년 더블 캐스크",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 클래식컷 2025",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 클래식컷 2025",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 18년 더블캐스크",
+                "price_krw": 48000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 18년 더블캐스크",
+                "price_krw": 48000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 18년 셰리 캐스크",
+                "price_krw": 55000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 18년 셰리 캐스크",
+                "price_krw": 55000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야도 셰리 피니시",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트렝스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트랭스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "모틀락(Mortlach) 12년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "모틀락(Mortlach) 18년",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "모틀락(Mortlach) 21년",
+                "price_krw": 45000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "올트모어(Aultmore) 16년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "올트모어(Aultmore) 18년",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "올트모어(Aultmore) 21년",
+                "price_krw": 45000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_07",
+          "n_gt": 31,
+          "n_out": 31,
+          "matched_strict": 30,
+          "matched": 31,
+          "correct": 31,
+          "fp": 0,
+          "fn": 0,
+          "priced": 31,
+          "price_correct": 31,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트렝스",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트랭스",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_08",
+          "n_gt": 35,
+          "n_out": 35,
+          "matched_strict": 32,
+          "matched": 35,
+          "correct": 35,
+          "fp": 0,
+          "fn": 0,
+          "priced": 35,
+          "price_correct": 35,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "미셸쿠브어(Michel Couveur) 언익스팩티드 넘버3 CS",
+                "price_krw": 31000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS",
+                "price_krw": 31000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "기원(Ki-Won) 배치 3 캐스크 스트렝스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "기원(Ki-Won) 배치 3 캐스크 스트랭스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트렝스",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트랭스",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_09",
+          "n_gt": 41,
+          "n_out": 41,
+          "matched_strict": 22,
+          "matched": 26,
+          "correct": 26,
+          "fp": 15,
+          "fn": 15,
+          "priced": 26,
+          "price_correct": 26,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "네터잭(Natterjack) 캐스크 스트렝스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "네터잭(Natterjack) 캐스크 스트랭스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "암룻(Amrut) 퓨전",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "암룻(Amrut) 퓨젼",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "암룻(Amrut) 인디안 캐스크 스트렝스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "암룻(Amrut) 인디안 캐스크 스트랭스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "암룻(Amrut) 피티드 인디안 캐스크 스트렝스",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "암룻(Amrut) 피티드 인디안 캐스크 스트랭스",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "월드 위스키 아오",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "히비키 제페니즈 하모니",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "하쿠슈 DR",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "하쿠슈 12년",
+                "price_krw": 45000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "야마자키 DR",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "야마자키 12년",
+                "price_krw": 45000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "프롬 더 배럴",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "다케스루 퓨어몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "요이치 싱글몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "미아기쿄 싱글몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "더 럭키캣 메이 앤 하나",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "더 럭키캣 하나 앤 초코",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "고마가타케 2023 에디션",
+                "price_krw": 26000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "고마가타케 2024 에디션",
+                "price_krw": 26000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "츠누키 2025 에디션",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "산토리(Santory) 월드 위스키 아오",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "산토리(Santory) 히비키 제페니즈 하모니",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "산토리(Santory) 하쿠슈 DR",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "산토리(Santory) 하쿠슈 12년",
+                "price_krw": 45000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "산토리(Santory) 야마자키 DR",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "산토리(Santory) 야마자키 12년",
+                "price_krw": 45000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "닛카(Nikka) 프롬 더 배럴",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "닛카(Nikka) 다케스루 퓨어몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "닛카(Nikka) 요이치 싱글몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "닛카(Nikka) 미야기쿄 싱글몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "마르스(Mars) 더 럭키캣 메이 앤 하나",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "마르스(Mars) 더 럭키캣 하나 앤 초코",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "마르스(Mars) 고마가타케 2023 에디션",
+                "price_krw": 26000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "마르스(Mars) 고마가타케 2024 에디션",
+                "price_krw": 26000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "마르스(Mars) 츠누키 2025 에디션",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_01",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 10,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Rowan`s Creek",
+                "price_krw": 27000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Rowan's Creek",
+                "price_krw": 27000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Maker`s Mark Cask Strength",
+                "price_krw": 33000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Maker's Mark Cask Strength",
+                "price_krw": 33000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Noah`s Mill",
+                "price_krw": 42000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Noah's Mill",
+                "price_krw": 42000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Booker`s",
+                "price_krw": 48000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Booker's",
+                "price_krw": 48000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_02",
+          "n_gt": 10,
+          "n_out": 10,
+          "matched_strict": 9,
+          "matched": 10,
+          "correct": 10,
+          "fp": 0,
+          "fn": 0,
+          "priced": 10,
+          "price_correct": 10,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Abelour A`bunadh",
+                "price_krw": 30000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Abelour A'bunadh",
+                "price_krw": 30000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_03",
+          "n_gt": 25,
+          "n_out": 25,
+          "matched_strict": 25,
+          "matched": 25,
+          "correct": 25,
+          "fp": 0,
+          "fn": 0,
+          "priced": 25,
+          "price_correct": 25,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "012_Beck_04",
+          "n_gt": 48,
+          "n_out": 48,
+          "matched_strict": 45,
+          "matched": 48,
+          "correct": 48,
+          "fp": 0,
+          "fn": 0,
+          "priced": 48,
+          "price_correct": 48,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Caol Ila 12yo",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Caol lla 12yo",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Caol Ila 12yo",
+                "price_krw": 23900,
+                "pour_ml": 45,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Caol lla 12yo",
+                "price_krw": 23900,
+                "pour_ml": 45,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Caol Ila 12yo",
+                "price_krw": 290000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Caol lla 12yo",
+                "price_krw": 290000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "013_포레스트_01",
+          "n_gt": 68,
+          "n_out": 68,
+          "matched_strict": 63,
+          "matched": 68,
+          "correct": 68,
+          "fp": 0,
+          "fn": 0,
+          "priced": 68,
+          "price_correct": 68,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "발베니 14년 캐리비안 캐스크",
+                "price_krw": 24000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "발베니 14년 캐리비언 캐스크",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌글라사 샌드엔드",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌글라사 샌드앤드",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타 루반 14년",
+                "price_krw": 18000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 킨타 루반 14년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 스펙타큘러",
+                "price_krw": 24000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 스펙타클러",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "라가불린 8년",
+                "price_krw": 19000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라가볼린 8년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 575,
+        "n_out": 575,
+        "matched_strict": 503,
+        "matched": 562,
+        "correct": 562,
+        "fp": 13,
+        "fn": 13,
+        "priced": 562,
+        "price_correct": 562,
+        "unit_confusion": 0,
+        "item_accuracy": 0.95578231292517,
+        "f1_strict": 0.8747826086956523,
+        "f1_lenient": 0.9773913043478261,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "011_미라보_01",
+          "n_gt": 35,
+          "n_out": 35,
+          "matched_strict": 20,
+          "matched": 22,
+          "correct": 22,
+          "fp": 13,
+          "fn": 13,
+          "priced": 22,
+          "price_correct": 22,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트렝스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트랭스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "커티샥(Cutty Shark) 프로히비션",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "커디샥(Cutty Shark) 프로히비션",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "벤네비스 7년 아티스트 콜렉티브",
+                "price_krw": 34000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "쿨일라 9년 아티스트 콜렉티브",
+                "price_krw": 38000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "카발란 솔리스트 올로로소 7년",
+                "price_krw": 41000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "카발란 솔리스트 포트 8년",
+                "price_krw": 41000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "로얄 브라클라 14년",
+                "price_krw": 62000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "쿨일라 13년",
+                "price_krw": 63000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "SR 22 탈리스커 11년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "SR 23 오반 11년",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "SR 23 탈리스커",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "SR 23 클라이넬리쉬",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "쿨일라 2014",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "아드모어 12년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "달유인 15년",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라 메종드 위스키(LMDW) 벤네비스 7년 아티스트 콜렉티브",
+                "price_krw": 34000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라 메종드 위스키(LMDW) 쿨일라 9년 아티스트 콜렉티브",
+                "price_krw": 38000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "더 위스키 에이전시(TWA) 카발란 솔리스트 올로로소 7년",
+                "price_krw": 41000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "더 위스키 에이전시(TWA) 카발란 솔리스트 포트 8년",
+                "price_krw": 41000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "사마롤리(Smaroli) 로얄 브라클라 14년",
+                "price_krw": 62000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "사마롤리(Smaroli) 쿨일라 13년",
+                "price_krw": 63000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "디아지오 SR(Diagio SR) SR 22 탈리스커 11년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "디아지오 SR(Diagio SR) SR 23 오반 11년",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "디아지오 SR(Diagio SR) SR 23 탈리스커",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "디아지오 SR(Diagio SR) SR 23 클라이넬리쉬",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "윌슨 앤 모건(Wilson & Morgan) 쿨일라 2014",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "윌슨 앤 모건(Wilson & Morgan) 아드모어 12년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "윌슨 앤 모건(Wilson & Morgan) 달유인 15년",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_02",
+          "n_gt": 44,
+          "n_out": 44,
+          "matched_strict": 39,
+          "matched": 44,
+          "correct": 44,
+          "fp": 0,
+          "fn": 0,
+          "priced": 44,
+          "price_correct": 44,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트렝스 배치 4",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 배치 4",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트렝스 헤더",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 헤더",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "스프링뱅크(Springbank) 12년 캐스크 스트렝스",
+                "price_krw": 40000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "스프링뱅크(Springbank) 12년 캐스크 스트랭스",
+                "price_krw": 40000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "고든앤맥페일(Gordon&Macphail) 부나하벤 헤빌리 피티드 11년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "고든앤맥페일(Gordon&Macphail) 부나하벤 혜빌리 피티드 11년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트렝스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트랭스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_03",
+          "n_gt": 60,
+          "n_out": 60,
+          "matched_strict": 52,
+          "matched": 60,
+          "correct": 60,
+          "fp": 0,
+          "fn": 0,
+          "priced": 60,
+          "price_correct": 60,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트렝스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트랭스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 배치 스트렝스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "킬호만(Kilchoman) 배치 스트랭스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 사닉 캐스크 스트렝스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "킬호만(Kilchoman) 사닉 캐스크 스트랭스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 에리너 그레이뉴",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "부나하벤(Bunnahabhain) 에리네 그레이뉴",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트렝스",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트랭스",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란(Arran) 셰리 캐스크 캐스크 스트렝스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란(Arran) 셰리 캐스크 캐스크 스트랭스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란(Arran) 마크리무어 캐스크 스트렝스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란(Arran) 마크리무어 캐스크 스트랭스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란(Arran) 시그니쳐 시리즈",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란(Arran) 시그니처 시리즈",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_04",
+          "n_gt": 58,
+          "n_out": 58,
+          "matched_strict": 53,
+          "matched": 58,
+          "correct": 58,
+          "fp": 0,
+          "fn": 0,
+          "priced": 58,
+          "price_correct": 58,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌드로낙(Glendronach) 오드 투더 엡버스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌드로낙(Glendronach) 오드 투더 엠버스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "토마틴(Tomatin) 캐스크 스트렝스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "토마틴(Tomatin) 캐스크 스트랭스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌기어리(Glengarioch) 1997 배치12 캐스크 스트렝스",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌기어리(Glengarioch) 1997 배치12 캐스크 스트랭스",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "라프로익(Laphroaig) 10년 캐스크 스트렝스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익(Laphroaig) 10년 캐스크 스트랭스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "라프로익(Laphroaig) 25년 캐스크 스트렝스",
+                "price_krw": 130000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익(Laphroaig) 25년 캐스크 스트랭스",
+                "price_krw": 130000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_05",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 43,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "벤로막(Benromach) 12년 캐스크 스트렝스",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "벤로막(Benromach) 12년 캐스크 스트랭스",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌파클라스(Glenfarclas) 105 캐스크 스트렝스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌파클라스(Glenfarclas) 105 캐스크 스트랭스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌고인(Glengoyne) 배치 10 캐스크 스트렝스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌고인(Glengoyne) 배치 10 캐스크 스트랭스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "클라이넬리쉬(Clynelish) 14년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "클라이녤리쉬(Clynelish) 14년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "클라이넬리쉬(Clynelish) 디스틸러리 에디션",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "클라이녤리쉬(Clynelish) 디스틸러리 에디션",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어(Dalmore) 12년 세리캐스크 셀렉트",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어(Dalmore) 12년 셰리캐스크 셀렉트",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 12년 캐스크 스트렝스",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "에드라두어(Edradour) 12년 캐스크 스트랭스",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트렝스",
+                "price_krw": 35000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트랭스",
+                "price_krw": 35000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 21년 캐스크 스트렝스",
+                "price_krw": 100000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "에드라두어(Edradour) 21년 캐스크 스트랭스",
+                "price_krw": 100000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_06",
+          "n_gt": 54,
+          "n_out": 54,
+          "matched_strict": 46,
+          "matched": 54,
+          "correct": 54,
+          "fp": 0,
+          "fn": 0,
+          "priced": 54,
+          "price_correct": 54,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 12년 더블 캐스크",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 12년 더블 캐스크",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 12년 셰리 캐스크",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 12년 셰리 캐스크",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 15년 더블 캐스크",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 15년 더블 캐스크",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 클래식컷 2025",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 클래식컷 2025",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 18년 더블캐스크",
+                "price_krw": 48000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 18년 더블캐스크",
+                "price_krw": 48000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 18년 셰리 캐스크",
+                "price_krw": 55000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 18년 셰리 캐스크",
+                "price_krw": 55000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야도 셰리 피니시",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트렝스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트랭스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_07",
+          "n_gt": 31,
+          "n_out": 31,
+          "matched_strict": 30,
+          "matched": 31,
+          "correct": 31,
+          "fp": 0,
+          "fn": 0,
+          "priced": 31,
+          "price_correct": 31,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트렝스",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트랭스",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_08",
+          "n_gt": 35,
+          "n_out": 35,
+          "matched_strict": 32,
+          "matched": 35,
+          "correct": 35,
+          "fp": 0,
+          "fn": 0,
+          "priced": 35,
+          "price_correct": 35,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "미셸쿠브어(Michel Couveur) 언익스팩티드 넘버3 CS",
+                "price_krw": 31000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS",
+                "price_krw": 31000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "기원(Ki-Won) 배치 3 캐스크 스트렝스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "기원(Ki-Won) 배치 3 캐스크 스트랭스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트렝스",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트랭스",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_09",
+          "n_gt": 41,
+          "n_out": 41,
+          "matched_strict": 36,
+          "matched": 41,
+          "correct": 41,
+          "fp": 0,
+          "fn": 0,
+          "priced": 41,
+          "price_correct": 41,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "닛카(Nikka) 미야기쿄 싱글몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "닛카(Nikka) 미아기쿄 싱글몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "네터잭(Natterjack) 캐스크 스트렝스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "네터잭(Natterjack) 캐스크 스트랭스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "암룻(Amrut) 퓨전",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "암룻(Amrut) 퓨젼",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "암룻(Amrut) 인디안 캐스크 스트렝스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "암룻(Amrut) 인디안 캐스크 스트랭스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "암룻(Amrut) 피티드 인디안 캐스크 스트렝스",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "암룻(Amrut) 피티드 인디안 캐스크 스트랭스",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_01",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 10,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Rowan`s Creek",
+                "price_krw": 27000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Rowan's Creek",
+                "price_krw": 27000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Maker`s Mark Cask Strength",
+                "price_krw": 33000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Maker's Mark Cask Strength",
+                "price_krw": 33000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Noah`s Mill",
+                "price_krw": 42000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Noah's Mill",
+                "price_krw": 42000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Booker`s",
+                "price_krw": 48000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Booker's",
+                "price_krw": 48000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_02",
+          "n_gt": 10,
+          "n_out": 10,
+          "matched_strict": 9,
+          "matched": 10,
+          "correct": 10,
+          "fp": 0,
+          "fn": 0,
+          "priced": 10,
+          "price_correct": 10,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Abelour A`bunadh",
+                "price_krw": 30000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Abelour A'bunadh",
+                "price_krw": 30000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_03",
+          "n_gt": 25,
+          "n_out": 25,
+          "matched_strict": 25,
+          "matched": 25,
+          "correct": 25,
+          "fp": 0,
+          "fn": 0,
+          "priced": 25,
+          "price_correct": 25,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "012_Beck_04",
+          "n_gt": 48,
+          "n_out": 48,
+          "matched_strict": 45,
+          "matched": 48,
+          "correct": 48,
+          "fp": 0,
+          "fn": 0,
+          "priced": 48,
+          "price_correct": 48,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Caol Ila 12yo",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Caol lla 12yo",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Caol Ila 12yo",
+                "price_krw": 23900,
+                "pour_ml": 45,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Caol lla 12yo",
+                "price_krw": 23900,
+                "pour_ml": 45,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Caol Ila 12yo",
+                "price_krw": 290000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Caol lla 12yo",
+                "price_krw": 290000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "013_포레스트_01",
+          "n_gt": 68,
+          "n_out": 68,
+          "matched_strict": 63,
+          "matched": 68,
+          "correct": 68,
+          "fp": 0,
+          "fn": 0,
+          "priced": 68,
+          "price_correct": 68,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "발베니 14년 캐리비안 캐스크",
+                "price_krw": 24000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "발베니 14년 캐리비언 캐스크",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌글라사 샌드엔드",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌글라사 샌드앤드",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타 루반 14년",
+                "price_krw": 18000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 킨타 루반 14년",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 스펙타큘러",
+                "price_krw": 24000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 스펙타클러",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "라가불린 8년",
+                "price_krw": 19000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라가볼린 8년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        }
+      ]
+    },
+    "3": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 575,
+        "n_out": 589,
+        "matched_strict": 484,
+        "matched": 542,
+        "correct": 542,
+        "fp": 47,
+        "fn": 33,
+        "priced": 542,
+        "price_correct": 542,
+        "unit_confusion": 0,
+        "item_accuracy": 0.8713826366559485,
+        "f1_strict": 0.8316151202749141,
+        "f1_lenient": 0.9312714776632302,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "011_미라보_01",
+          "n_gt": 35,
+          "n_out": 35,
+          "matched_strict": 8,
+          "matched": 10,
+          "correct": 10,
+          "fp": 25,
+          "fn": 25,
+          "priced": 10,
+          "price_correct": 10,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트렝스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트랭스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "커티샥(Cutty Shark) 프로히비션",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "커디샥(Cutty Shark) 프로히비션",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "벤네비스 7년 아티스트 콜렉티브",
+                "price_krw": 34000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "쿨일라 9년 아티스트 콜렉티브",
+                "price_krw": 38000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "카발란 솔리스트 올로로소 7년",
+                "price_krw": 41000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "카발란 솔리스트 포트 8년",
+                "price_krw": 41000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "로얄 브라클라 14년",
+                "price_krw": 62000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "쿨일라 13년",
+                "price_krw": 63000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "SR 22 탈리스커 11년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "SR 23 오반 11년",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "SR 23 탈리스커",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "SR 23 클라이넬리쉬",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "쿨일라 2014",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "아드모어 12년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "달유인 15년",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "딘스톤 12년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "쿨일라 12년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "녹두 13년",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "글렌토커스 16년",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "발블레어 14년",
+                "price_krw": 34000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "벤네비스 9년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "쿨일라 10년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "벤리악 10년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "글렌오드 12년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "링크우드 12년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "스페이사이드 14년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "에드라두어 2014",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라 메종드 위스키(LMDW) 벤네비스 7년 아티스트 콜렉티브",
+                "price_krw": 34000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "라 메종드 위스키(LMDW) 쿨일라 9년 아티스트 콜렉티브",
+                "price_krw": 38000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "더 위스키 에이전시(TWA) 카발란 솔리스트 올로로소 7년",
+                "price_krw": 41000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "더 위스키 에이전시(TWA) 카발란 솔리스트 포트 8년",
+                "price_krw": 41000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "사마롤리(Smaroli) 로얄 브라클라 14년",
+                "price_krw": 62000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "사마롤리(Smaroli) 쿨일라 13년",
+                "price_krw": 63000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "디아지오 SR(Diagio SR) SR 22 탈리스커 11년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "디아지오 SR(Diagio SR) SR 23 오반 11년",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "디아지오 SR(Diagio SR) SR 23 탈리스커",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "디아지오 SR(Diagio SR) SR 23 클라이넬리쉬",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "윌슨 앤 모건(Wilson & Morgan) 쿨일라 2014",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "윌슨 앤 모건(Wilson & Morgan) 아드모어 12년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "윌슨 앤 모건(Wilson & Morgan) 달유인 15년",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "하이랜드 레어드(Highland Laird) 딘스톤 12년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "하이랜드 레어드(Highland Laird) 쿨일라 12년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "하이랜드 레어드(Highland Laird) 녹두 13년",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "하이랜드 레어드(Highland Laird) 글렌토커스 16년",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "하이랜드 레어드(Highland Laird) 발블레어 14년",
+                "price_krw": 34000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "시그나토리 빈티지(Signatory Vintage) 벤네비스 9년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "시그나토리 빈티지(Signatory Vintage) 쿨일라 10년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "시그나토리 빈티지(Signatory Vintage) 벤리악 10년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "시그나토리 빈티지(Signatory Vintage) 글렌오드 12년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "시그나토리 빈티지(Signatory Vintage) 링크우드 12년 100 프루프",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "시그나토리 빈티지(Signatory Vintage) 스페이사이드 14년",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "시그나토리 빈티지(Signatory Vintage) 에드라두어 2014",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_02",
+          "n_gt": 44,
+          "n_out": 44,
+          "matched_strict": 39,
+          "matched": 44,
+          "correct": 44,
+          "fp": 0,
+          "fn": 0,
+          "priced": 44,
+          "price_correct": 44,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트렝스 배치 4",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 배치 4",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트렝스 헤더",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 헤더",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "스프링뱅크(Springbank) 12년 캐스크 스트렝스",
+                "price_krw": 40000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "스프링뱅크(Springbank) 12년 캐스크 스트랭스",
+                "price_krw": 40000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "고든앤맥페일(Gordon&Macphail) 부나하벤 헤빌리 피티드 11년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "고든앤맥페일(Gordon&Macphail) 부나하벤 혜빌리 피티드 11년",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트렝스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트랭스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_03",
+          "n_gt": 60,
+          "n_out": 60,
+          "matched_strict": 49,
+          "matched": 57,
+          "correct": 57,
+          "fp": 3,
+          "fn": 3,
+          "priced": 57,
+          "price_correct": 57,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트렝스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트랭스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 배치 스트렝스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "킬호만(Kilchoman) 배치 스트랭스",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "킬호만(Kilchoman) 사닉 캐스크 스트렝스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "킬호만(Kilchoman) 사닉 캐스크 스트랭스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 에리너 그레이뉴",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "부나하벤(Bunnahabhain) 에리네 그레이뉴",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트렝스",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트랭스",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란(Arran) 셰리 캐스크 캐스크 스트렝스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란(Arran) 셰리 캐스크 캐스크 스트랭스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란(Arran) 마크리무어 캐스크 스트렝스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란(Arran) 마크리무어 캐스크 스트랭스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란(Arran) 시그니쳐 시리즈",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란(Arran) 시그니처 시리즈",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "브룩라디(Bruichladdich) 10년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "브룩라디(Bruichladdich) 아일라 발리 2014",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "브룩라디(Bruichladdich) PMC:01",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "포트샬롯(Port Charllotte) 10년",
+                "price_krw": 19000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "포트샬롯(Port Charllotte) 아일라 발리 2014",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "포트샬롯(Port Charllotte) PMC:01",
+                "price_krw": 33000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_04",
+          "n_gt": 58,
+          "n_out": 58,
+          "matched_strict": 52,
+          "matched": 56,
+          "correct": 56,
+          "fp": 2,
+          "fn": 2,
+          "priced": 56,
+          "price_correct": 56,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌드로낙(Glendronach) 오드 투더 엡버스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌드로낙(Glendronach) 오드 투더 엠버스",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "토마틴(Tomatin) 캐스크 스트렝스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "토마틴(Tomatin) 캐스크 스트랭스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "라프로익(Laphroaig) 10년 캐스크 스트렝스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익(Laphroaig) 10년 캐스크 스트랭스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "라프로익(Laphroaig) 25년 캐스크 스트렝스",
+                "price_krw": 130000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라프로익(Laphroaig) 25년 캐스크 스트랭스",
+                "price_krw": 130000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "15년",
+                "price_krw": 26000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "1997 배치12 캐스크 스트랭스",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글렌기어리(Glengarioch) 15년",
+                "price_krw": 26000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "글렌기어리(Glengarioch) 1997 배치12 캐스크 스트렝스",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_05",
+          "n_gt": 52,
+          "n_out": 52,
+          "matched_strict": 43,
+          "matched": 52,
+          "correct": 52,
+          "fp": 0,
+          "fn": 0,
+          "priced": 52,
+          "price_correct": 52,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "벤로막(Benromach) 12년 캐스크 스트렝스",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "벤로막(Benromach) 12년 캐스크 스트랭스",
+                "price_krw": 17000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌파클라스(Glenfarclas) 105 캐스크 스트렝스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌파클라스(Glenfarclas) 105 캐스크 스트랭스",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌고인(Glengoyne) 배치 10 캐스크 스트렝스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌고인(Glengoyne) 배치 10 캐스크 스트랭스",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "클라이넬리쉬(Clynelish) 14년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "클라이녤리쉬(Clynelish) 14년",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "클라이넬리쉬(Clynelish) 디스틸러리 에디션",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "클라이녤리쉬(Clynelish) 디스틸러리 에디션",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어(Dalmore) 12년 세리캐스크 셀렉트",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어(Dalmore) 12년 셰리캐스크 셀렉트",
+                "price_krw": 23000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 12년 캐스크 스트렝스",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "에드라두어(Edradour) 12년 캐스크 스트랭스",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트렝스",
+                "price_krw": 35000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트랭스",
+                "price_krw": 35000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "에드라두어(Edradour) 21년 캐스크 스트렝스",
+                "price_krw": 100000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "에드라두어(Edradour) 21년 캐스크 스트랭스",
+                "price_krw": 100000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_06",
+          "n_gt": 54,
+          "n_out": 54,
+          "matched_strict": 46,
+          "matched": 54,
+          "correct": 54,
+          "fp": 0,
+          "fn": 0,
+          "priced": 54,
+          "price_correct": 54,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 12년 더블 캐스크",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 12년 더블 캐스크",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 12년 셰리 캐스크",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 12년 셰리 캐스크",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 15년 더블 캐스크",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 15년 더블 캐스크",
+                "price_krw": 27000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 클래식컷 2025",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 클래식컷 2025",
+                "price_krw": 28000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 18년 더블캐스크",
+                "price_krw": 48000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 18년 더블캐스크",
+                "price_krw": 48000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥캘란(Maccallan) 18년 셰리 캐스크",
+                "price_krw": 55000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란(Maccallan) 18년 셰리 캐스크",
+                "price_krw": 55000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야도 셰리 피니시",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트렝스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트랭스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_07",
+          "n_gt": 31,
+          "n_out": 31,
+          "matched_strict": 30,
+          "matched": 31,
+          "correct": 31,
+          "fp": 0,
+          "fn": 0,
+          "priced": 31,
+          "price_correct": 31,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트렝스",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트랭스",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_08",
+          "n_gt": 35,
+          "n_out": 40,
+          "matched_strict": 30,
+          "matched": 33,
+          "correct": 33,
+          "fp": 7,
+          "fn": 2,
+          "priced": 33,
+          "price_correct": 33,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "미셸쿠브어(Michel Couveur) 언익스팩티드 넘버3 CS",
+                "price_krw": 31000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS",
+                "price_krw": 31000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "기원(Ki-Won) 배치 3 캐스크 스트렝스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "기원(Ki-Won) 배치 3 캐스크 스트랭스",
+                "price_krw": 32000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트렝스",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트랭스",
+                "price_krw": 29000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "웰러 스페셜 리저브",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "웰러 12년",
+                "price_krw": 38000,
+                "pour_ml": null,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "메이커스 마 버번 46 캐스크 스",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": null
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "리뎀션 라이",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": null
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "놉 크릭 버번",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": null
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "놉 크릭 라이",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": null
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "이글 10 포",
+                "price_krw": null,
+                "pour_ml": null,
+                "unit": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브",
+                "price_krw": 21000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "버팔로 트레이스(Buffalo Trace) 웰러 12년",
+                "price_krw": 38000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_09",
+          "n_gt": 41,
+          "n_out": 41,
+          "matched_strict": 36,
+          "matched": 41,
+          "correct": 41,
+          "fp": 0,
+          "fn": 0,
+          "priced": 41,
+          "price_correct": 41,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "닛카(Nikka) 미야기쿄 싱글몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "닛카(Nikka) 미아기쿄 싱글몰트",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "네터잭(Natterjack) 캐스크 스트렝스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "네터잭(Natterjack) 캐스크 스트랭스",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "암룻(Amrut) 퓨전",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "암룻(Amrut) 퓨젼",
+                "price_krw": 18000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "암룻(Amrut) 인디안 캐스크 스트렝스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "암룻(Amrut) 인디안 캐스크 스트랭스",
+                "price_krw": 22000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "암룻(Amrut) 피티드 인디안 캐스크 스트렝스",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "암룻(Amrut) 피티드 인디안 캐스크 스트랭스",
+                "price_krw": 24000,
+                "pour_ml": null,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_01",
+          "n_gt": 14,
+          "n_out": 23,
+          "matched_strict": 9,
+          "matched": 13,
+          "correct": 13,
+          "fp": 10,
+          "fn": 1,
+          "priced": 13,
+          "price_correct": 13,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Rowan`s Creek",
+                "price_krw": 27000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Rowan's Creek",
+                "price_krw": 27000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Maker`s Mark Cask Strength",
+                "price_krw": 33000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Maker's Mark Cask Strength",
+                "price_krw": 33000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Noah`s Mill",
+                "price_krw": 42000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Noah's Mill",
+                "price_krw": 42000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Booker`s",
+                "price_krw": 48000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Booker's",
+                "price_krw": 48000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Remy Martin V.S.O.P",
+                "price_krw": 20000,
+                "pour_ml": 30,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Remy Martin V.S.O.P",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Hennessy V.S.O.P",
+                "price_krw": 20000,
+                "pour_ml": 30,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Hennessy V.S.O.P",
+                "price_krw": 320000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Boulard X.O",
+                "price_krw": 40000,
+                "pour_ml": 30,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Boulard X.O",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Camus X.O",
+                "price_krw": 50000,
+                "pour_ml": 30,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Remy Martin X.O",
+                "price_krw": 55000,
+                "pour_ml": 30,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Hennessy X.O",
+                "price_krw": 65000,
+                "pour_ml": 30,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Camus X.O Borderies",
+                "price_krw": 55000,
+                "pour_ml": 30,
+                "unit": "glass"
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "Buffalo Trace / Makrt's Mark",
+                "price_krw": 200000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_02",
+          "n_gt": 10,
+          "n_out": 10,
+          "matched_strict": 9,
+          "matched": 10,
+          "correct": 10,
+          "fp": 0,
+          "fn": 0,
+          "priced": 10,
+          "price_correct": 10,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Abelour A`bunadh",
+                "price_krw": 30000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Abelour A'bunadh",
+                "price_krw": 30000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_03",
+          "n_gt": 25,
+          "n_out": 25,
+          "matched_strict": 25,
+          "matched": 25,
+          "correct": 25,
+          "fp": 0,
+          "fn": 0,
+          "priced": 25,
+          "price_correct": 25,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "012_Beck_04",
+          "n_gt": 48,
+          "n_out": 48,
+          "matched_strict": 45,
+          "matched": 48,
+          "correct": 48,
+          "fp": 0,
+          "fn": 0,
+          "priced": 48,
+          "price_correct": 48,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Caol Ila 12yo",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Caol lla 12yo",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Caol Ila 12yo",
+                "price_krw": 23900,
+                "pour_ml": 45,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Caol lla 12yo",
+                "price_krw": 23900,
+                "pour_ml": 45,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "Caol Ila 12yo",
+                "price_krw": 290000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              },
+              "out": {
+                "raw_name": "Caol lla 12yo",
+                "price_krw": 290000,
+                "pour_ml": null,
+                "unit": "bottle"
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "013_포레스트_01",
+          "n_gt": 68,
+          "n_out": 68,
+          "matched_strict": 63,
+          "matched": 68,
+          "correct": 68,
+          "fp": 0,
+          "fn": 0,
+          "priced": 68,
+          "price_correct": 68,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "발베니 14년 캐리비안 캐스크",
+                "price_krw": 24000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "발베니 14년 캐리비언 캐스크",
+                "price_krw": 24000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌글라사 샌드엔드",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌글라사 샌드앤드",
+                "price_krw": 17000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌모렌지 퀸타 루반 14년",
+                "price_krw": 18000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌모렌지 킨타 루반 14년",
+                "price_krw": 18000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아드벡 스펙타큘러",
+                "price_krw": 24000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아드벡 스펙타클러",
+                "price_krw": 24000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "라가불린 8년",
+                "price_krw": 19000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "라가볼린 8년",
+                "price_krw": 19000,
+                "pour_ml": 30,
+                "unit": "glass"
+              },
+              "counted_correct": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "label_set": "test"
+}

@@ -1,0 +1,204 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "372bede8674eac276b9b68fd33ccc98e1950d6c6a3b46cb46d9e28642acf8875",
+  "started_at": "2026-10-14T05:05:29.603840+00:00",
+  "latency_ms": 3478,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 3366,
+  "output_tokens": 1391,
+  "thought_tokens": 0,
+  "total_tokens": 4757,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Dalwhinnie 15Y / 달위니15년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Dalwhinnie 15Y / 달위니15년",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Dalmore 12Y / 달모어12년",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Dalmore 12Y / 달모어12년",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Dalmore 15Y / 달모어15년",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Dalmore 15Y / 달모어15년",
+        "price_krw": 380000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Glenmorangie OG / 글랜모렌지 오리지날",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenmorangie OG / 글랜모렌지 오리지날",
+        "price_krw": 200000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Glenmorangie Lasanta / 글랜모렌지 라산타",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenmorangie Lasanta / 글랜모렌지 라산타",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Glenmorangie Nectar D'or / 글랜모렌지 넥타도르",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenmorangie Nectar D'or / 글랜모렌지 넥타도르",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Glenmorangie Quinta Ruban / 글랜모렌지 퀸타루반",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenmorangie Quinta Ruban / 글랜모렌지 퀸타루반",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Glenmorangie 18Y / 글랜모렌지18년",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenmorangie 18Y / 글랜모렌지18년",
+        "price_krw": 450000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Glendronach 12Y / 글랜드로낙12년",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glendronach 12Y / 글랜드로낙12년",
+        "price_krw": 230000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Glengoyne 12Y / 글랜고인12년",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glengoyne 12Y / 글랜고인12년",
+        "price_krw": 220000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Oban 14Y / 오반14년",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Oban 14Y / 오반14년",
+        "price_krw": 320000,
+        "pour_ml": null,
+        "unit": "bottle"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Dalwhinnie 15Y / 달위니15년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Dalwhinnie 15Y / 달위니15년\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Dalmore 12Y / 달모어12년\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Dalmore 12Y / 달모어12년\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Dalmore 15Y / 달모어15년\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Dalmore 15Y / 달모어15년\",\n      \"price_krw\": 380000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie OG / 글랜모렌지 오리지날\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie OG / 글랜모렌지 오리지날\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Lasanta / 글랜모렌지 라산타\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Lasanta / 글랜모렌지 라산타\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Nectar D'or / 글랜모렌지 넥타도르\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Nectar D'or / 글랜모렌지 넥타도르\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Quinta Ruban / 글랜모렌지 퀸타루반\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Quinta Ruban / 글랜모렌지 퀸타루반\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie 18Y / 글랜모렌지18년\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie 18Y / 글랜모렌지18년\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glendronach 12Y / 글랜드로낙12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glendronach 12Y / 글랜드로낙12년\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glengoyne 12Y / 글랜고인12년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glengoyne 12Y / 글랜고인12년\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Oban 14Y / 오반14년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Oban 14Y / 오반14년\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:05:32Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Dalwhinnie 15Y / 달위니15년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Dalwhinnie 15Y / 달위니15년\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Dalmore 12Y / 달모어12년\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Dalmore 12Y / 달모어12년\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Dalmore 15Y / 달모어15년\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Dalmore 15Y / 달모어15년\",\n      \"price_krw\": 380000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie OG / 글랜모렌지 오리지날\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie OG / 글랜모렌지 오리지날\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Lasanta / 글랜모렌지 라산타\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Lasanta / 글랜모렌지 라산타\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Nectar D'or / 글랜모렌지 넥타도르\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Nectar D'or / 글랜모렌지 넥타도르\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Quinta Ruban / 글랜모렌지 퀸타루반\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Quinta Ruban / 글랜모렌지 퀸타루반\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie 18Y / 글랜모렌지18년\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie 18Y / 글랜모렌지18년\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glendronach 12Y / 글랜드로낙12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glendronach 12Y / 글랜드로낙12년\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glengoyne 12Y / 글랜고인12년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glengoyne 12Y / 글랜고인12년\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Oban 14Y / 오반14년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Oban 14Y / 오반14년\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0TRoviQRm6MpuDs1aKy6bqahBh7ZGCAGMGZ2VlE+JxG4cffNt6x+Kowtx0uWQHbyW/o0YXbv/UFSrDwapc3xfJ8/GxcQl9BkQ7qHUxoT+EQAH4ksivEN6ukTE=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Dalwhinnie 15Y / 달위니15년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Dalwhinnie 15Y / 달위니15년\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Dalmore 12Y / 달모어12년\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Dalmore 12Y / 달모어12년\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Dalmore 15Y / 달모어15년\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Dalmore 15Y / 달모어15년\",\n      \"price_krw\": 380000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie OG / 글랜모렌지 오리지날\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie OG / 글랜모렌지 오리지날\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Lasanta / 글랜모렌지 라산타\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Lasanta / 글랜모렌지 라산타\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Nectar D'or / 글랜모렌지 넥타도르\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Nectar D'or / 글랜모렌지 넥타도르\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Quinta Ruban / 글랜모렌지 퀸타루반\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie Quinta Ruban / 글랜모렌지 퀸타루반\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie 18Y / 글랜모렌지18년\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glenmorangie 18Y / 글랜모렌지18년\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glendronach 12Y / 글랜드로낙12년\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glendronach 12Y / 글랜드로낙12년\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Glengoyne 12Y / 글랜고인12년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Glengoyne 12Y / 글랜고인12년\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Oban 14Y / 오반14년\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Oban 14Y / 오반14년\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:05:32Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 3366
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 3366,
+      "total_output_tokens": 1391,
+      "total_thought_tokens": 0,
+      "total_tokens": 4757,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 2,
+  "source_image": "008_seorosang_03.png",
+  "prompt_version": "v2",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_rows>\nR001 y=25 | [96-220] 22:00 | [855-897] 26\nR002 y=100 | [880-928] X\nR003 y=137 | [42-324] HIGHLAND\nR004 y=205 | [45-234] Dalwhinnie 15Y | [751-781] 18 | [880-928] 280\nR005 y=220 | [45-152] 달위니15년\nR006 y=246 | [45-200] Dalmore 12Y | [751-781] 17 | [880-928] 270\nR007 y=260 | [45-152] 달모어12년\nR008 y=286 | [45-200] Dalmore 15Y | [751-785] 24 | [880-928] 380\nR009 y=300 | [45-149] 달모어15년\nR010 y=326 | [44-265] Glenmorangie OG | [753-785] 12 | [880-928] 200\nR011 y=341 | [45-226] 글랜모렌지 오리지날\nR012 y=367 | [45-321] Glenmorangie Lasanta | [751-785] 15 | [880-928] 240\nR013 y=381 | [45-209] 글랜모렌지 라산타\nR014 y=407 | [45-364] Glenmorangie Nectar D'or | [751-781] 17 | [880-928] 270\nR015 y=423 | [45-226] 글랜모렌지 넥타도르\nR016 y=449 | [45-392] Glenmorangie Quinta Ruban | [751-781] 18 | [880-928] 280\nR017 y=463 | [45-226] 글랜모렌지 퀸타루반\nR018 y=489 | [45-271] Glenmorangie 18Y | [751-785] 28 | [880-928] 450\nR019 y=504 | [45-188] 글랜모렌지18년\nR020 y=530 | [45-256] Glendronach 12Y | [751-781] 15 | [880-928] 230\nR021 y=544 | [45-188] 글랜드로낙12년\nR022 y=569 | [45-231] Glengoyne 12Y | [753-785] 14 | [880-928] 220\nR023 y=585 | [45-172] 글랜고인12년\nR024 y=609 | [44-164] Oban 14Y | [751-781] 20 | [880-928] 320\nR025 y=623 | [44-131] 오반14년\n</ocr_rows>",
+  "ocr_variant": "off",
+  "n_lines": 48,
+  "gap_factor": 2.5,
+  "layout": "rows",
+  "ocr_latency_ms": 2100
+}

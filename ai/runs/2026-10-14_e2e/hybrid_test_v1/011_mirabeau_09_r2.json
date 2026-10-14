@@ -1,0 +1,701 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "011_mirabeau_09.jpeg",
+  "prepared_image": "011_mirabeau_09.jpg",
+  "prepared_sha256": "0a2bbafb436aad6760b4e4905dbd93b6c7c846acb88c61e418f8e8d263057034",
+  "started_at": "2026-10-14T08:37:33.665581+00:00",
+  "latency_ms": 19936,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6778,
+  "output_tokens": 4068,
+  "thought_tokens": 3867,
+  "total_tokens": 14713,
+  "output": {
+    "items": [
+      {
+        "raw_name": "산토리(Santory) 월드 위스키 아오",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L005",
+            "L007"
+          ],
+          "price": [
+            "L013"
+          ]
+        }
+      },
+      {
+        "raw_name": "산토리(Santory) 히비키 제페니즈 하모니",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L005",
+            "L008"
+          ],
+          "price": [
+            "L014"
+          ]
+        }
+      },
+      {
+        "raw_name": "산토리(Santory) 하쿠슈 DR",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L005",
+            "L009"
+          ],
+          "price": [
+            "L015"
+          ]
+        }
+      },
+      {
+        "raw_name": "산토리(Santory) 하쿠슈 12년",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L005",
+            "L010"
+          ],
+          "price": [
+            "L016"
+          ]
+        }
+      },
+      {
+        "raw_name": "산토리(Santory) 야마자키 DR",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L005",
+            "L011"
+          ],
+          "price": [
+            "L017"
+          ]
+        }
+      },
+      {
+        "raw_name": "산토리(Santory) 야마자키 12년",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L005",
+            "L012"
+          ],
+          "price": [
+            "L018"
+          ]
+        }
+      },
+      {
+        "raw_name": "닛카(Nikka) 프롬 더 배럴",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028",
+            "L029"
+          ],
+          "price": [
+            "L033"
+          ]
+        }
+      },
+      {
+        "raw_name": "닛카(Nikka) 다케스루 퓨어몰트",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028",
+            "L030"
+          ],
+          "price": [
+            "L034"
+          ]
+        }
+      },
+      {
+        "raw_name": "닛카(Nikka) 요이치 싱글몰트",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028",
+            "L031"
+          ],
+          "price": [
+            "L035"
+          ]
+        }
+      },
+      {
+        "raw_name": "닛카(Nikka) 미아기쿄 싱글몰트",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028",
+            "L032"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      },
+      {
+        "raw_name": "나가하마(Nagahama) 더 세컨드 배치",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L041",
+            "L044"
+          ],
+          "price": [
+            "L052"
+          ]
+        }
+      },
+      {
+        "raw_name": "나가하마(Nagahama) PX 셰리",
+        "price_krw": 58000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L041",
+            "L045"
+          ],
+          "price": [
+            "L053"
+          ]
+        }
+      },
+      {
+        "raw_name": "나가하마(Nagahama) 피티드 PX 셰리",
+        "price_krw": 58000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L041",
+            "L046"
+          ],
+          "price": [
+            "L054"
+          ]
+        }
+      },
+      {
+        "raw_name": "마르스(Mars) 더 럭키캣 메이 앤 하나",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L043",
+            "L047"
+          ],
+          "price": [
+            "L055"
+          ]
+        }
+      },
+      {
+        "raw_name": "마르스(Mars) 더 럭키캣 하나 앤 초코",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L043",
+            "L048"
+          ],
+          "price": [
+            "L056"
+          ]
+        }
+      },
+      {
+        "raw_name": "마르스(Mars) 고마가타케 2023 에디션",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L043",
+            "L049"
+          ],
+          "price": [
+            "L057"
+          ]
+        }
+      },
+      {
+        "raw_name": "마르스(Mars) 고마가타케 2024 에디션",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L043",
+            "L050"
+          ],
+          "price": [
+            "L058"
+          ]
+        }
+      },
+      {
+        "raw_name": "마르스(Mars) 츠누키 2025 에디션",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L043",
+            "L051"
+          ],
+          "price": [
+            "L059"
+          ]
+        }
+      },
+      {
+        "raw_name": "기린(Kirin) 후지산 로크 시그니처 블랜드",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L077",
+            "L078"
+          ],
+          "price": [
+            "L080"
+          ]
+        }
+      },
+      {
+        "raw_name": "카노스케(Kanosuke) 싱글몰트",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L079",
+            "L093"
+          ],
+          "price": [
+            "L096"
+          ]
+        }
+      },
+      {
+        "raw_name": "카노스케(Kanosuke) 히오키 팟스틸",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L079",
+            "L094"
+          ],
+          "price": [
+            "L097"
+          ]
+        }
+      },
+      {
+        "raw_name": "카노스케(Kanosuke) 더블 디스틸러리",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L079",
+            "L095"
+          ],
+          "price": [
+            "L098"
+          ]
+        }
+      },
+      {
+        "raw_name": "부쉬밀(Bushmill) 블랙 부쉬",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006",
+            "L019"
+          ],
+          "price": [
+            "L024"
+          ]
+        }
+      },
+      {
+        "raw_name": "부쉬밀(Bushmill) 10년",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006",
+            "L020"
+          ],
+          "price": [
+            "L025"
+          ]
+        }
+      },
+      {
+        "raw_name": "부쉬밀(Bushmill) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006",
+            "L021"
+          ],
+          "price": [
+            "L026"
+          ]
+        }
+      },
+      {
+        "raw_name": "레드 브레스트 (Red Breast) 12년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022",
+            "L023"
+          ],
+          "price": [
+            "L027"
+          ]
+        }
+      },
+      {
+        "raw_name": "네터잭(Natterjack) 캐스크 스트랭스",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L037",
+            "L038"
+          ],
+          "price": [
+            "L040"
+          ]
+        }
+      },
+      {
+        "raw_name": "암룻(Amrut) 인디안",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L061"
+          ],
+          "price": [
+            "L069"
+          ]
+        }
+      },
+      {
+        "raw_name": "암룻(Amrut) 피티드 인디안",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L062"
+          ],
+          "price": [
+            "L070"
+          ]
+        }
+      },
+      {
+        "raw_name": "암룻(Amrut) 퓨젼",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L063"
+          ],
+          "price": [
+            "L071"
+          ]
+        }
+      },
+      {
+        "raw_name": "암룻(Amrut) 인디안 캐스크 스트랭스",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L064"
+          ],
+          "price": [
+            "L072"
+          ]
+        }
+      },
+      {
+        "raw_name": "암룻(Amrut) 피티드 인디안 캐스크 스트랭스",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L065"
+          ],
+          "price": [
+            "L073"
+          ]
+        }
+      },
+      {
+        "raw_name": "암룻(Amrut) 나랑기",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L066"
+          ],
+          "price": [
+            "L074"
+          ]
+        }
+      },
+      {
+        "raw_name": "암룻(Amrut) 인터미디에이트 셰리",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L067"
+          ],
+          "price": [
+            "L075"
+          ]
+        }
+      },
+      {
+        "raw_name": "암룻(Amrut) 포토노바",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042",
+            "L068"
+          ],
+          "price": [
+            "L076"
+          ]
+        }
+      },
+      {
+        "raw_name": "폴존(Paul John) 클래식",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L060",
+            "L081"
+          ],
+          "price": [
+            "L087"
+          ]
+        }
+      },
+      {
+        "raw_name": "폴존(Paul John) 피티드",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L060",
+            "L082"
+          ],
+          "price": [
+            "L088"
+          ]
+        }
+      },
+      {
+        "raw_name": "폴존(Paul John) 올로로소 셰리",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L060",
+            "L083"
+          ],
+          "price": [
+            "L089"
+          ]
+        }
+      },
+      {
+        "raw_name": "폴존(Paul John) PX 셰리",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L060",
+            "L084"
+          ],
+          "price": [
+            "L090"
+          ]
+        }
+      },
+      {
+        "raw_name": "폴존(Paul John) 라크리마",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L060",
+            "L085"
+          ],
+          "price": [
+            "L091"
+          ]
+        }
+      },
+      {
+        "raw_name": "폴존(Paul John) 리데레",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L060",
+            "L086"
+          ],
+          "price": [
+            "L092"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"산토리(Santory) 월드 위스키 아오\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L007\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 히비키 제페니즈 하모니\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L008\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 하쿠슈 DR\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L009\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 하쿠슈 12년\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L010\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 야마자키 DR\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L011\"],\n        \"price\": [\"L017\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 야마자키 12년\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L012\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 프롬 더 배럴\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L029\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 다케스루 퓨어몰트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L030\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 요이치 싱글몰트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L031\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 미아기쿄 싱글몰트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L032\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"나가하마(Nagahama) 더 세컨드 배치\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\", \"L044\"],\n        \"price\": [\"L052\"]\n      }\n    },\n    {\n      \"raw_name\": \"나가하마(Nagahama) PX 셰리\",\n      \"price_krw\": 58000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\", \"L045\"],\n        \"price\": [\"L053\"]\n      }\n    },\n    {\n      \"raw_name\": \"나가하마(Nagahama) 피티드 PX 셰리\",\n      \"price_krw\": 58000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\", \"L046\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 더 럭키캣 메이 앤 하나\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L047\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 더 럭키캣 하나 앤 초코\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L048\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 고마가타케 2023 에디션\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L049\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 고마가타케 2024 에디션\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L050\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 츠누키 2025 에디션\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L051\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"기린(Kirin) 후지산 로크 시그니처 블랜드\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L077\", \"L078\"],\n        \"price\": [\"L080\"]\n      }\n    },\n    {\n      \"raw_name\": \"카노스케(Kanosuke) 싱글몰트\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\", \"L093\"],\n        \"price\": [\"L096\"]\n      }\n    },\n    {\n      \"raw_name\": \"카노스케(Kanosuke) 히오키 팟스틸\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\", \"L094\"],\n        \"price\": [\"L097\"]\n      }\n    },\n    {\n      \"raw_name\": \"카노스케(Kanosuke) 더블 디스틸러리\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\", \"L095\"],\n        \"price\": [\"L098\"]\n      }\n    },\n    {\n      \"raw_name\": \"부쉬밀(Bushmill) 블랙 부쉬\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L019\"],\n        \"price\": [\"L024\"]\n      }\n    },\n    {\n      \"raw_name\": \"부쉬밀(Bushmill) 10년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L020\"],\n        \"price\": [\"L025\"]\n      }\n    },\n    {\n      \"raw_name\": \"부쉬밀(Bushmill) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L021\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"레드 브레스트 (Red Breast) 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L023\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"네터잭(Natterjack) 캐스크 스트랭스\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\", \"L038\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 인디안\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L061\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 피티드 인디안\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L062\"],\n        \"price\": [\"L070\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 퓨젼\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L063\"],\n        \"price\": [\"L071\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 인디안 캐스크 스트랭스\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L064\"],\n        \"price\": [\"L072\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 피티드 인디안 캐스크 스트랭스\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L065\"],\n        \"price\": [\"L073\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 나랑기\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L066\"],\n        \"price\": [\"L074\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 인터미디에이트 셰리\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L067\"],\n        \"price\": [\"L075\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 포토노바\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L068\"],\n        \"price\": [\"L076\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 클래식\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L081\"],\n        \"price\": [\"L087\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 피티드\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L082\"],\n        \"price\": [\"L088\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 올로로소 셰리\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L083\"],\n        \"price\": [\"L089\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) PX 셰리\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L084\"],\n        \"price\": [\"L090\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 라크리마\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L085\"],\n        \"price\": [\"L091\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 리데레\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L086\"],\n        \"price\": [\"L092\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T08:37:53Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"산토리(Santory) 월드 위스키 아오\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L007\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 히비키 제페니즈 하모니\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L008\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 하쿠슈 DR\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L009\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 하쿠슈 12년\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L010\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 야마자키 DR\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L011\"],\n        \"price\": [\"L017\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 야마자키 12년\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L012\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 프롬 더 배럴\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L029\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 다케스루 퓨어몰트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L030\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 요이치 싱글몰트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L031\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 미아기쿄 싱글몰트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L032\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"나가하마(Nagahama) 더 세컨드 배치\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\", \"L044\"],\n        \"price\": [\"L052\"]\n      }\n    },\n    {\n      \"raw_name\": \"나가하마(Nagahama) PX 셰리\",\n      \"price_krw\": 58000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\", \"L045\"],\n        \"price\": [\"L053\"]\n      }\n    },\n    {\n      \"raw_name\": \"나가하마(Nagahama) 피티드 PX 셰리\",\n      \"price_krw\": 58000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\", \"L046\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 더 럭키캣 메이 앤 하나\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L047\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 더 럭키캣 하나 앤 초코\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L048\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 고마가타케 2023 에디션\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L049\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 고마가타케 2024 에디션\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L050\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 츠누키 2025 에디션\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L051\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"기린(Kirin) 후지산 로크 시그니처 블랜드\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L077\", \"L078\"],\n        \"price\": [\"L080\"]\n      }\n    },\n    {\n      \"raw_name\": \"카노스케(Kanosuke) 싱글몰트\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\", \"L093\"],\n        \"price\": [\"L096\"]\n      }\n    },\n    {\n      \"raw_name\": \"카노스케(Kanosuke) 히오키 팟스틸\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\", \"L094\"],\n        \"price\": [\"L097\"]\n      }\n    },\n    {\n      \"raw_name\": \"카노스케(Kanosuke) 더블 디스틸러리\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\", \"L095\"],\n        \"price\": [\"L098\"]\n      }\n    },\n    {\n      \"raw_name\": \"부쉬밀(Bushmill) 블랙 부쉬\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L019\"],\n        \"price\": [\"L024\"]\n      }\n    },\n    {\n      \"raw_name\": \"부쉬밀(Bushmill) 10년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L020\"],\n        \"price\": [\"L025\"]\n      }\n    },\n    {\n      \"raw_name\": \"부쉬밀(Bushmill) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L021\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"레드 브레스트 (Red Breast) 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L023\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"네터잭(Natterjack) 캐스크 스트랭스\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\", \"L038\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 인디안\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L061\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 피티드 인디안\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L062\"],\n        \"price\": [\"L070\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 퓨젼\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L063\"],\n        \"price\": [\"L071\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 인디안 캐스크 스트랭스\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L064\"],\n        \"price\": [\"L072\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 피티드 인디안 캐스크 스트랭스\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L065\"],\n        \"price\": [\"L073\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 나랑기\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L066\"],\n        \"price\": [\"L074\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 인터미디에이트 셰리\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L067\"],\n        \"price\": [\"L075\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 포토노바\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L068\"],\n        \"price\": [\"L076\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 클래식\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L081\"],\n        \"price\": [\"L087\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 피티드\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L082\"],\n        \"price\": [\"L088\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 올로로소 셰리\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L083\"],\n        \"price\": [\"L089\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) PX 셰리\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L084\"],\n        \"price\": [\"L090\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 라크리마\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L085\"],\n        \"price\": [\"L091\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 리데레\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L086\"],\n        \"price\": [\"L092\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"산토리(Santory) 월드 위스키 아오\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L007\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 히비키 제페니즈 하모니\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L008\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 하쿠슈 DR\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L009\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 하쿠슈 12년\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L010\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 야마자키 DR\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L011\"],\n        \"price\": [\"L017\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리(Santory) 야마자키 12년\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\", \"L012\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 프롬 더 배럴\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L029\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 다케스루 퓨어몰트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L030\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 요이치 싱글몰트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L031\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"닛카(Nikka) 미아기쿄 싱글몰트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\", \"L032\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"나가하마(Nagahama) 더 세컨드 배치\",\n      \"price_krw\": 45000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\", \"L044\"],\n        \"price\": [\"L052\"]\n      }\n    },\n    {\n      \"raw_name\": \"나가하마(Nagahama) PX 셰리\",\n      \"price_krw\": 58000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\", \"L045\"],\n        \"price\": [\"L053\"]\n      }\n    },\n    {\n      \"raw_name\": \"나가하마(Nagahama) 피티드 PX 셰리\",\n      \"price_krw\": 58000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L041\", \"L046\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 더 럭키캣 메이 앤 하나\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L047\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 더 럭키캣 하나 앤 초코\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L048\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 고마가타케 2023 에디션\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L049\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 고마가타케 2024 에디션\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L050\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"마르스(Mars) 츠누키 2025 에디션\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L043\", \"L051\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"기린(Kirin) 후지산 로크 시그니처 블랜드\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L077\", \"L078\"],\n        \"price\": [\"L080\"]\n      }\n    },\n    {\n      \"raw_name\": \"카노스케(Kanosuke) 싱글몰트\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\", \"L093\"],\n        \"price\": [\"L096\"]\n      }\n    },\n    {\n      \"raw_name\": \"카노스케(Kanosuke) 히오키 팟스틸\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\", \"L094\"],\n        \"price\": [\"L097\"]\n      }\n    },\n    {\n      \"raw_name\": \"카노스케(Kanosuke) 더블 디스틸러리\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L079\", \"L095\"],\n        \"price\": [\"L098\"]\n      }\n    },\n    {\n      \"raw_name\": \"부쉬밀(Bushmill) 블랙 부쉬\",\n      \"price_krw\": 11000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L019\"],\n        \"price\": [\"L024\"]\n      }\n    },\n    {\n      \"raw_name\": \"부쉬밀(Bushmill) 10년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L020\"],\n        \"price\": [\"L025\"]\n      }\n    },\n    {\n      \"raw_name\": \"부쉬밀(Bushmill) 12년\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\", \"L021\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"레드 브레스트 (Red Breast) 12년\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\", \"L023\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"네터잭(Natterjack) 캐스크 스트랭스\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\", \"L038\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 인디안\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L061\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 피티드 인디안\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L062\"],\n        \"price\": [\"L070\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 퓨젼\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L063\"],\n        \"price\": [\"L071\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 인디안 캐스크 스트랭스\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L064\"],\n        \"price\": [\"L072\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 피티드 인디안 캐스크 스트랭스\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L065\"],\n        \"price\": [\"L073\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 나랑기\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L066\"],\n        \"price\": [\"L074\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 인터미디에이트 셰리\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L067\"],\n        \"price\": [\"L075\"]\n      }\n    },\n    {\n      \"raw_name\": \"암룻(Amrut) 포토노바\",\n      \"price_krw\": 36000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L042\", \"L068\"],\n        \"price\": [\"L076\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 클래식\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L081\"],\n        \"price\": [\"L087\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 피티드\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L082\"],\n        \"price\": [\"L088\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 올로로소 셰리\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L083\"],\n        \"price\": [\"L089\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) PX 셰리\",\n      \"price_krw\": 23000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L084\"],\n        \"price\": [\"L090\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 라크리마\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L085\"],\n        \"price\": [\"L091\"]\n      }\n    },\n    {\n      \"raw_name\": \"폴존(Paul John) 리데레\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L060\", \"L086\"],\n        \"price\": [\"L092\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T08:37:53Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 5714
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 6778,
+      "total_output_tokens": 4068,
+      "total_thought_tokens": 3867,
+      "total_tokens": 14713,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 98,
+    "price_like_lines": 40,
+    "uncited_price_lines": 0,
+    "uncited": [],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 2,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [272,0,526,20] VILEYEenteu m\nL002 [90,2,617,47] 그외 국가 위스키(WORLD WHISKY)\nL003 [81,69,223,100] 일본(IAPAN)\nL004 [498,88,703,113] 아일랜드(IRELAND)\nL005 [78,103,233,133] 산토리(Santory)\nL006 [500,125,649,145] 부쉬밀(Bushmill)\nL007 [76,130,242,160] 월드 위스키 아오\nL008 [75,150,299,182] 히비키 제페니즈 하모니\nL009 [74,170,181,193] 하쿠슈 DR\nL010 [73,189,193,216] 하쿠슈 12년\nL011 [71,210,202,235] 야마자키 DR\nL012 [69,229,213,258] 야마자키 12년\nL013 [397,147,441,163] 16.0\nL014 [397,167,439,180] 25.0\nL015 [397,185,441,200] 25.0\nL016 [397,204,441,219] 45,0\nL017 [399,224,442,240] 25.0\nL018 [399,243,442,258] 45.0\nL019 [503,151,590,169] 블랙 부쉬\nL020 [503,170,549,188] 10년\nL021 [507,189,549,207] 12년\nL022 [508,221,741,242] 레드 브레스트 (Red Breast)\nL023 [510,250,556,267] 12년\nL024 [807,159,847,172] 11.0\nL025 [811,177,851,191] 14.0\nL026 [812,196,852,210] 16.0\nL027 [823,255,863,268] 18.0\nL028 [65,264,187,290] 닛카(Nikka)\nL029 [65,296,191,319] 프롬 더 배럴\nL030 [63,316,252,343] 다케스루 퓨어몰트\nL031 [61,338,228,364] 요이치 싱글몰트\nL032 [60,360,249,387] 미아기쿄 싱글몰트\nL033 [403,306,448,321] 17.0\nL034 [404,327,448,342] 20.0\nL035 [404,347,449,363] 20.0\nL036 [404,368,451,385] 20.0\nL037 [514,288,684,307] 네터잭(Natterjack)\nL038 [516,317,670,336] 캐스크 스트랭스\nL039 [519,355,658,378] 인도(INDIA)\nL040 [831,321,873,336] 18.0\nL041 [53,395,273,424] 나가하마(Nagahama)\nL042 [524,397,644,417] 암룻(Amrut)\nL043 [47,517,194,540] 마르스(Mars)\nL044 [57,431,208,453] 더 세컨드 배치\nL045 [53,454,142,475] PX 셰리\nL046 [50,476,215,499] 피티드 PX 셰리\nL047 [48,552,292,576] 더 럭키캣 메이 앤 하나\nL048 [45,576,292,601] 더 럭키캣 하나 앤 초코\nL049 [41,601,302,627] 고마가타케 2023 에디션\nL050 [39,626,302,653] 고마가타케 2024 에디션\nL051 [36,652,254,680] 츠누키 2025 에디션\nL052 [410,435,455,452] 45.0\nL053 [410,458,456,474] 58.0\nL054 [411,480,458,497] 58.0\nL055 [415,552,462,570] 19.0\nL056 [415,577,463,594] 23.0\nL057 [417,601,463,618] 26.0\nL058 [417,626,465,643] 26.0\nL059 [418,651,467,669] 27.0\nL060 [538,639,699,664] 폴존(Paul John)\nL061 [526,428,590,448] 인디안\nL062 [527,450,661,470] 피티드 인디안\nL063 [529,474,573,493] 퓨젼\nL064 [531,496,759,516] 인디안 캐스크 스트랭스\nL065 [531,517,828,539] 피티드 인디안 캐스크 스트랭스\nL066 [531,541,601,564] 나랑기\nL067 [534,563,734,587] 인터미디에이트 셰리\nL068 [536,591,628,611] 포토노바\nL069 [851,431,894,448] 16.0\nL070 [854,453,897,469] 18.0\nL071 [857,475,901,491] 18.0\nL072 [861,497,904,513] 22.0\nL073 [864,519,910,536] 24.0\nL074 [868,543,913,559] 28.0\nL075 [871,565,917,582] 36.0\nL076 [875,589,922,605] 36.0\nL077 [30,698,159,728] 기린(Kirin)\nL078 [28,730,353,766] 후지산 로크 시그니처 블랜드\nL079 [23,787,262,821] 카노스케(Kanosuke)\nL080 [418,732,470,751] 20.0\nL081 [541,676,611,700] 클래식\nL082 [543,701,615,725] 피티드\nL083 [544,726,691,752] 올로로소 셰리\nL084 [548,753,634,778] PX 셰리\nL085 [548,780,646,806] 라크리마\nL086 [550,808,623,834] 리데레\nL087 [891,672,936,689] 21.0\nL088 [894,696,939,715] 21.0\nL089 [897,721,944,740] 23.0\nL090 [903,747,949,764] 23.0\nL091 [908,773,955,792] 42.0\nL092 [911,799,960,818] 42.0\nL093 [21,832,135,864] 싱글몰트\nL094 [19,857,191,893] 히오키 팟스틸\nL095 [17,885,215,924] 더블 디스틸러리\nL096 [424,823,474,841] 30.0\nL097 [424,850,474,870] 30.0\nL098 [425,879,476,898] 35.0\n</ocr_lines>",
+  "n_lines": 98,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 3255
+}

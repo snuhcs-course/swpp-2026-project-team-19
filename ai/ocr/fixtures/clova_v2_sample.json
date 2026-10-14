@@ -1,0 +1,520 @@
+{
+ "version": "V2",
+ "requestId": "fixture",
+ "timestamp": 0,
+ "images": [
+  {
+   "uid": "fixture",
+   "name": "fixture",
+   "inferResult": "SUCCESS",
+   "message": "SUCCESS",
+   "validationResult": {
+    "result": "NO_REQUESTED"
+   },
+   "fields": [
+    {
+     "valueType": "ALL",
+     "inferText": "WHISKY",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": true,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 100,
+        "y": 20
+       },
+       {
+        "x": 260,
+        "y": 20
+       },
+       {
+        "x": 260,
+        "y": 60
+       },
+       {
+        "x": 100,
+        "y": 60
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "Glass",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 600,
+        "y": 80
+       },
+       {
+        "x": 680,
+        "y": 80
+       },
+       {
+        "x": 680,
+        "y": 110
+       },
+       {
+        "x": 600,
+        "y": 110
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "Bottle",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": true,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 760,
+        "y": 80
+       },
+       {
+        "x": 860,
+        "y": 80
+       },
+       {
+        "x": 860,
+        "y": 110
+       },
+       {
+        "x": 760,
+        "y": 110
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "글렌그란트",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 40,
+        "y": 140
+       },
+       {
+        "x": 160,
+        "y": 140
+       },
+       {
+        "x": 160,
+        "y": 170
+       },
+       {
+        "x": 40,
+        "y": 170
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "18년",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 165,
+        "y": 140
+       },
+       {
+        "x": 210,
+        "y": 140
+       },
+       {
+        "x": 210,
+        "y": 170
+       },
+       {
+        "x": 165,
+        "y": 170
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "Glen",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 230,
+        "y": 140
+       },
+       {
+        "x": 280,
+        "y": 140
+       },
+       {
+        "x": 280,
+        "y": 170
+       },
+       {
+        "x": 230,
+        "y": 170
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "Grant",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 285,
+        "y": 140
+       },
+       {
+        "x": 345,
+        "y": 140
+       },
+       {
+        "x": 345,
+        "y": 170
+       },
+       {
+        "x": 285,
+        "y": 170
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "18Y",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 350,
+        "y": 140
+       },
+       {
+        "x": 390,
+        "y": 140
+       },
+       {
+        "x": 390,
+        "y": 170
+       },
+       {
+        "x": 350,
+        "y": 170
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "2.8",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 610,
+        "y": 141
+       },
+       {
+        "x": 650,
+        "y": 141
+       },
+       {
+        "x": 650,
+        "y": 171
+       },
+       {
+        "x": 610,
+        "y": 171
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "/",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 690,
+        "y": 141
+       },
+       {
+        "x": 700,
+        "y": 141
+       },
+       {
+        "x": 700,
+        "y": 171
+       },
+       {
+        "x": 690,
+        "y": 171
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "57",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": true,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 770,
+        "y": 141
+       },
+       {
+        "x": 800,
+        "y": 141
+       },
+       {
+        "x": 800,
+        "y": 171
+       },
+       {
+        "x": 770,
+        "y": 171
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "울프번(Wolfburn)",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": true,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 40,
+        "y": 200
+       },
+       {
+        "x": 220,
+        "y": 200
+       },
+       {
+        "x": 220,
+        "y": 230
+       },
+       {
+        "x": 40,
+        "y": 230
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "노스랜드",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 60,
+        "y": 240
+       },
+       {
+        "x": 160,
+        "y": 240
+       },
+       {
+        "x": 160,
+        "y": 270
+       },
+       {
+        "x": 60,
+        "y": 270
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "19.0",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": true,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 620,
+        "y": 240
+       },
+       {
+        "x": 670,
+        "y": 240
+       },
+       {
+        "x": 670,
+        "y": 270
+       },
+       {
+        "x": 620,
+        "y": 270
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "17,000",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 610,
+        "y": 280
+       },
+       {
+        "x": 690,
+        "y": 280
+       },
+       {
+        "x": 690,
+        "y": 310
+       },
+       {
+        "x": 610,
+        "y": 310
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "₩17,000",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": false,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 760,
+        "y": 280
+       },
+       {
+        "x": 860,
+        "y": 280
+       },
+       {
+        "x": 860,
+        "y": 310
+       },
+       {
+        "x": 760,
+        "y": 310
+       }
+      ]
+     }
+    },
+    {
+     "valueType": "ALL",
+     "inferText": "12년",
+     "inferConfidence": 0.99,
+     "type": "NORMAL",
+     "lineBreak": true,
+     "boundingPoly": {
+      "vertices": [
+       {
+        "x": 40,
+        "y": 280
+       },
+       {
+        "x": 90,
+        "y": 280
+       },
+       {
+        "x": 90,
+        "y": 310
+       },
+       {
+        "x": 40,
+        "y": 310
+       }
+      ]
+     }
+    }
+   ],
+   "tables": [
+    {
+     "inferText": "",
+     "inferConfidence": 0.9,
+     "cells": [
+      {
+       "rowIndex": 0,
+       "columnIndex": 0,
+       "rowSpan": 1,
+       "columnSpan": 1,
+       "inferConfidence": 0.9,
+       "cellTextLines": [
+        {
+         "cellWords": [
+          {
+           "inferText": "글렌그란트"
+          },
+          {
+           "inferText": "18년"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "rowIndex": 0,
+       "columnIndex": 1,
+       "rowSpan": 1,
+       "columnSpan": 2,
+       "inferConfidence": 0.9,
+       "cellTextLines": [
+        {
+         "cellWords": [
+          {
+           "inferText": "2.8"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

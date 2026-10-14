@@ -1,0 +1,19 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "label_set": "val",
+  "runs": 1,
+  "prompt_version": "v1",
+  "prompt_sha256": "695a74d1aa387aff0358197c412dffcc01354f7e79be6bb36417ce14504b68df",
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "photos": {
+    "007_bokchun_03.jpg": {
+      "n_lines": 44,
+      "ocr_latency_ms": 2711
+    }
+  },
+  "api_tier": "free (inputs may be used to improve Google products)",
+  "written_at": "2026-10-14T04:54:32.206343+00:00"
+}

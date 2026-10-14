@@ -1,0 +1,900 @@
+{
+  "run_dir": "test_v3_parse",
+  "note": "post-hoc diagnostic; not part of the eval_plan.md decision rule",
+  "summary": {
+    "official": {
+      "mean": 0.882785667520417,
+      "min": 0.8211920529801324,
+      "max": 0.95578231292517
+    },
+    "diag": {
+      "mean": 0.9487961374753827,
+      "min": 0.8867924528301887,
+      "max": 1.0
+    }
+  },
+  "per_bar": {
+    "Beck": {
+      "official": {
+        "mean": 0.9657320872274143,
+        "min": 0.897196261682243,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.9657320872274143,
+        "min": 0.897196261682243,
+        "max": 1.0
+      }
+    },
+    "미라보": {
+      "official": {
+        "mean": 0.8460527318088201,
+        "min": 0.7539863325740319,
+        "max": 0.9385342789598109
+      },
+      "diag": {
+        "mean": 0.937026336724867,
+        "min": 0.8421052631578947,
+        "max": 1.0
+      }
+    },
+    "포레스트": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    }
+  },
+  "per_photo": {
+    "011_미라보_01": {
+      "official": {
+        "mean": 0.5416666666666666,
+        "min": 0.16666666666666666,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "011_미라보_02": {
+      "official": {
+        "mean": 0.8974358974358975,
+        "min": 0.6923076923076923,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.9851851851851852,
+        "min": 0.9555555555555556,
+        "max": 1.0
+      }
+    },
+    "011_미라보_03": {
+      "official": {
+        "mean": 0.7071428571428572,
+        "min": 0.21666666666666667,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.7071428571428572,
+        "min": 0.21666666666666667,
+        "max": 1.0
+      }
+    },
+    "011_미라보_04": {
+      "official": {
+        "mean": 0.9333333333333333,
+        "min": 0.8666666666666667,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.944256120527307,
+        "min": 0.8666666666666667,
+        "max": 1.0
+      }
+    },
+    "011_미라보_05": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "011_미라보_06": {
+      "official": {
+        "mean": 0.9597701149425287,
+        "min": 0.8793103448275862,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.9597701149425287,
+        "min": 0.8793103448275862,
+        "max": 1.0
+      }
+    },
+    "011_미라보_07": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "011_미라보_08": {
+      "official": {
+        "mean": 0.9285714285714286,
+        "min": 0.7857142857142857,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.9583333333333334,
+        "min": 0.875,
+        "max": 1.0
+      }
+    },
+    "011_미라보_09": {
+      "official": {
+        "mean": 0.8214285714285714,
+        "min": 0.4642857142857143,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.9841269841269841,
+        "min": 0.9523809523809523,
+        "max": 1.0
+      }
+    },
+    "012_Beck_01": {
+      "official": {
+        "mean": 0.8472222222222222,
+        "min": 0.5416666666666666,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.8472222222222222,
+        "min": 0.5416666666666666,
+        "max": 1.0
+      }
+    },
+    "012_Beck_02": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "012_Beck_03": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "012_Beck_04": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "013_포레스트_01": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    }
+  },
+  "runs": {
+    "1": {
+      "official": 0.8211920529801324,
+      "diag": 0.8867924528301887,
+      "rescued": 21,
+      "bars": {
+        "미라보": {
+          "official": 0.7539863325740319,
+          "diag": 0.8421052631578947
+        },
+        "Beck": {
+          "official": 1.0,
+          "diag": 1.0
+        },
+        "포레스트": {
+          "official": 1.0,
+          "diag": 1.0
+        }
+      },
+      "photos": [
+        {
+          "photo_id": "011_미라보_01",
+          "n_gt": 35,
+          "fp": 0,
+          "correct": 35,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_02",
+          "n_gt": 44,
+          "fp": 8,
+          "correct": 36,
+          "rescued": [
+            {
+              "gt": "글렌가일(Glengyle) 킬커란 12년",
+              "out": "킬커란 12년",
+              "price_krw": 21000
+            },
+            {
+              "gt": "글렌가일(Glengyle) 킬커란 16년",
+              "out": "킬커란 16년",
+              "price_krw": 33000
+            },
+            {
+              "gt": "고든앤맥페일(Gordon&Macphail) 밀튼더프 10년",
+              "out": "밀튼더프 10년",
+              "price_krw": 20000
+            },
+            {
+              "gt": "고든앤맥페일(Gordon&Macphail) 부나하벤 10년",
+              "out": "부나하벤 10년",
+              "price_krw": 20000
+            },
+            {
+              "gt": "고든앤맥페일(Gordon&Macphail) 글렌로티스 11년",
+              "out": "글렌로티스 11년",
+              "price_krw": 20000
+            },
+            {
+              "gt": "헌터랭(Hunterlaing) 로얄 브라클라 14년",
+              "out": "로얄 브라클라 14년",
+              "price_krw": 37000
+            },
+            {
+              "gt": "헌터랭(Hunterlaing) 크라겐모어 26년",
+              "out": "크라겐모어 26년",
+              "price_krw": 120000
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_03",
+          "n_gt": 60,
+          "fp": 0,
+          "correct": 13,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_04",
+          "n_gt": 58,
+          "fp": 2,
+          "correct": 52,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_05",
+          "n_gt": 52,
+          "fp": 0,
+          "correct": 52,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_06",
+          "n_gt": 54,
+          "fp": 4,
+          "correct": 51,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_07",
+          "n_gt": 31,
+          "fp": 0,
+          "correct": 31,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_08",
+          "n_gt": 35,
+          "fp": 0,
+          "correct": 35,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_09",
+          "n_gt": 41,
+          "fp": 15,
+          "correct": 26,
+          "rescued": [
+            {
+              "gt": "산토리(Santory) 월드 위스키 아오",
+              "out": "월드 위스키 아오",
+              "price_krw": 16000
+            },
+            {
+              "gt": "산토리(Santory) 히비키 제페니즈 하모니",
+              "out": "히비키 제페니즈 하모니",
+              "price_krw": 25000
+            },
+            {
+              "gt": "산토리(Santory) 하쿠슈 DR",
+              "out": "하쿠슈 DR",
+              "price_krw": 25000
+            },
+            {
+              "gt": "산토리(Santory) 하쿠슈 12년",
+              "out": "하쿠슈 12년",
+              "price_krw": 45000
+            },
+            {
+              "gt": "산토리(Santory) 야마자키 DR",
+              "out": "야마자키 DR",
+              "price_krw": 25000
+            },
+            {
+              "gt": "산토리(Santory) 야마자키 12년",
+              "out": "야마자키 12년",
+              "price_krw": 45000
+            },
+            {
+              "gt": "닛카(Nikka) 프롬 더 배럴",
+              "out": "프롬 더 배럴",
+              "price_krw": 17000
+            },
+            {
+              "gt": "닛카(Nikka) 다케스루 퓨어몰트",
+              "out": "다케스루 퓨어몰트",
+              "price_krw": 20000
+            },
+            {
+              "gt": "닛카(Nikka) 요이치 싱글몰트",
+              "out": "요이치 싱글몰트",
+              "price_krw": 20000
+            },
+            {
+              "gt": "마르스(Mars) 더 럭키캣 메이 앤 하나",
+              "out": "더 럭키캣 메이 앤 하나",
+              "price_krw": 19000
+            },
+            {
+              "gt": "마르스(Mars) 더 럭키캣 하나 앤 초코",
+              "out": "더 럭키캣 하나 앤 초코",
+              "price_krw": 23000
+            },
+            {
+              "gt": "마르스(Mars) 고마가타케 2023 에디션",
+              "out": "고마가타케 2023 에디션",
+              "price_krw": 26000
+            },
+            {
+              "gt": "마르스(Mars) 고마가타케 2024 에디션",
+              "out": "고마가타케 2024 에디션",
+              "price_krw": 26000
+            },
+            {
+              "gt": "마르스(Mars) 츠누키 2025 에디션",
+              "out": "츠누키 2025 에디션",
+              "price_krw": 27000
+            }
+          ]
+        },
+        {
+          "photo_id": "012_Beck_01",
+          "n_gt": 14,
+          "fp": 0,
+          "correct": 14,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_02",
+          "n_gt": 10,
+          "fp": 0,
+          "correct": 10,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_03",
+          "n_gt": 25,
+          "fp": 0,
+          "correct": 25,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_04",
+          "n_gt": 48,
+          "fp": 0,
+          "correct": 48,
+          "rescued": []
+        },
+        {
+          "photo_id": "013_포레스트_01",
+          "n_gt": 68,
+          "fp": 0,
+          "correct": 68,
+          "rescued": []
+        }
+      ]
+    },
+    "2": {
+      "official": 0.95578231292517,
+      "diag": 1.0,
+      "rescued": 13,
+      "bars": {
+        "미라보": {
+          "official": 0.9385342789598109,
+          "diag": 1.0
+        },
+        "Beck": {
+          "official": 1.0,
+          "diag": 1.0
+        },
+        "포레스트": {
+          "official": 1.0,
+          "diag": 1.0
+        }
+      },
+      "photos": [
+        {
+          "photo_id": "011_미라보_01",
+          "n_gt": 35,
+          "fp": 13,
+          "correct": 22,
+          "rescued": [
+            {
+              "gt": "라 메종드 위스키(LMDW) 벤네비스 7년 아티스트 콜렉티브",
+              "out": "벤네비스 7년 아티스트 콜렉티브",
+              "price_krw": 34000
+            },
+            {
+              "gt": "라 메종드 위스키(LMDW) 쿨일라 9년 아티스트 콜렉티브",
+              "out": "쿨일라 9년 아티스트 콜렉티브",
+              "price_krw": 38000
+            },
+            {
+              "gt": "더 위스키 에이전시(TWA) 카발란 솔리스트 올로로소 7년",
+              "out": "카발란 솔리스트 올로로소 7년",
+              "price_krw": 41000
+            },
+            {
+              "gt": "더 위스키 에이전시(TWA) 카발란 솔리스트 포트 8년",
+              "out": "카발란 솔리스트 포트 8년",
+              "price_krw": 41000
+            },
+            {
+              "gt": "사마롤리(Smaroli) 로얄 브라클라 14년",
+              "out": "로얄 브라클라 14년",
+              "price_krw": 62000
+            },
+            {
+              "gt": "사마롤리(Smaroli) 쿨일라 13년",
+              "out": "쿨일라 13년",
+              "price_krw": 63000
+            },
+            {
+              "gt": "디아지오 SR(Diagio SR) SR 22 탈리스커 11년",
+              "out": "SR 22 탈리스커 11년",
+              "price_krw": 23000
+            },
+            {
+              "gt": "디아지오 SR(Diagio SR) SR 23 오반 11년",
+              "out": "SR 23 오반 11년",
+              "price_krw": 27000
+            },
+            {
+              "gt": "디아지오 SR(Diagio SR) SR 23 탈리스커",
+              "out": "SR 23 탈리스커",
+              "price_krw": 23000
+            },
+            {
+              "gt": "디아지오 SR(Diagio SR) SR 23 클라이넬리쉬",
+              "out": "SR 23 클라이넬리쉬",
+              "price_krw": 30000
+            },
+            {
+              "gt": "윌슨 앤 모건(Wilson & Morgan) 쿨일라 2014",
+              "out": "쿨일라 2014",
+              "price_krw": 20000
+            },
+            {
+              "gt": "윌슨 앤 모건(Wilson & Morgan) 아드모어 12년",
+              "out": "아드모어 12년",
+              "price_krw": 23000
+            },
+            {
+              "gt": "윌슨 앤 모건(Wilson & Morgan) 달유인 15년",
+              "out": "달유인 15년",
+              "price_krw": 29000
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_02",
+          "n_gt": 44,
+          "fp": 0,
+          "correct": 44,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_03",
+          "n_gt": 60,
+          "fp": 0,
+          "correct": 60,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_04",
+          "n_gt": 58,
+          "fp": 0,
+          "correct": 58,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_05",
+          "n_gt": 52,
+          "fp": 0,
+          "correct": 52,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_06",
+          "n_gt": 54,
+          "fp": 0,
+          "correct": 54,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_07",
+          "n_gt": 31,
+          "fp": 0,
+          "correct": 31,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_08",
+          "n_gt": 35,
+          "fp": 0,
+          "correct": 35,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_09",
+          "n_gt": 41,
+          "fp": 0,
+          "correct": 41,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_01",
+          "n_gt": 14,
+          "fp": 0,
+          "correct": 14,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_02",
+          "n_gt": 10,
+          "fp": 0,
+          "correct": 10,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_03",
+          "n_gt": 25,
+          "fp": 0,
+          "correct": 25,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_04",
+          "n_gt": 48,
+          "fp": 0,
+          "correct": 48,
+          "rescued": []
+        },
+        {
+          "photo_id": "013_포레스트_01",
+          "n_gt": 68,
+          "fp": 0,
+          "correct": 68,
+          "rescued": []
+        }
+      ]
+    },
+    "3": {
+      "official": 0.8713826366559485,
+      "diag": 0.9595959595959596,
+      "rescued": 28,
+      "bars": {
+        "미라보": {
+          "official": 0.8456375838926175,
+          "diag": 0.9689737470167065
+        },
+        "Beck": {
+          "official": 0.897196261682243,
+          "diag": 0.897196261682243
+        },
+        "포레스트": {
+          "official": 1.0,
+          "diag": 1.0
+        }
+      },
+      "photos": [
+        {
+          "photo_id": "011_미라보_01",
+          "n_gt": 35,
+          "fp": 25,
+          "correct": 10,
+          "rescued": [
+            {
+              "gt": "라 메종드 위스키(LMDW) 벤네비스 7년 아티스트 콜렉티브",
+              "out": "벤네비스 7년 아티스트 콜렉티브",
+              "price_krw": 34000
+            },
+            {
+              "gt": "라 메종드 위스키(LMDW) 쿨일라 9년 아티스트 콜렉티브",
+              "out": "쿨일라 9년 아티스트 콜렉티브",
+              "price_krw": 38000
+            },
+            {
+              "gt": "더 위스키 에이전시(TWA) 카발란 솔리스트 올로로소 7년",
+              "out": "카발란 솔리스트 올로로소 7년",
+              "price_krw": 41000
+            },
+            {
+              "gt": "더 위스키 에이전시(TWA) 카발란 솔리스트 포트 8년",
+              "out": "카발란 솔리스트 포트 8년",
+              "price_krw": 41000
+            },
+            {
+              "gt": "사마롤리(Smaroli) 로얄 브라클라 14년",
+              "out": "로얄 브라클라 14년",
+              "price_krw": 62000
+            },
+            {
+              "gt": "사마롤리(Smaroli) 쿨일라 13년",
+              "out": "쿨일라 13년",
+              "price_krw": 63000
+            },
+            {
+              "gt": "디아지오 SR(Diagio SR) SR 22 탈리스커 11년",
+              "out": "SR 22 탈리스커 11년",
+              "price_krw": 23000
+            },
+            {
+              "gt": "디아지오 SR(Diagio SR) SR 23 오반 11년",
+              "out": "SR 23 오반 11년",
+              "price_krw": 27000
+            },
+            {
+              "gt": "디아지오 SR(Diagio SR) SR 23 탈리스커",
+              "out": "SR 23 탈리스커",
+              "price_krw": 23000
+            },
+            {
+              "gt": "디아지오 SR(Diagio SR) SR 23 클라이넬리쉬",
+              "out": "SR 23 클라이넬리쉬",
+              "price_krw": 30000
+            },
+            {
+              "gt": "윌슨 앤 모건(Wilson & Morgan) 쿨일라 2014",
+              "out": "쿨일라 2014",
+              "price_krw": 20000
+            },
+            {
+              "gt": "윌슨 앤 모건(Wilson & Morgan) 아드모어 12년",
+              "out": "아드모어 12년",
+              "price_krw": 23000
+            },
+            {
+              "gt": "윌슨 앤 모건(Wilson & Morgan) 달유인 15년",
+              "out": "달유인 15년",
+              "price_krw": 29000
+            },
+            {
+              "gt": "하이랜드 레어드(Highland Laird) 딘스톤 12년",
+              "out": "딘스톤 12년",
+              "price_krw": 21000
+            },
+            {
+              "gt": "하이랜드 레어드(Highland Laird) 쿨일라 12년",
+              "out": "쿨일라 12년",
+              "price_krw": 21000
+            },
+            {
+              "gt": "하이랜드 레어드(Highland Laird) 녹두 13년",
+              "out": "녹두 13년",
+              "price_krw": 22000
+            },
+            {
+              "gt": "하이랜드 레어드(Highland Laird) 글렌토커스 16년",
+              "out": "글렌토커스 16년",
+              "price_krw": 29000
+            },
+            {
+              "gt": "하이랜드 레어드(Highland Laird) 발블레어 14년",
+              "out": "발블레어 14년",
+              "price_krw": 34000
+            },
+            {
+              "gt": "시그나토리 빈티지(Signatory Vintage) 벤네비스 9년 100 프루프",
+              "out": "벤네비스 9년 100 프루프",
+              "price_krw": 20000
+            },
+            {
+              "gt": "시그나토리 빈티지(Signatory Vintage) 쿨일라 10년 100 프루프",
+              "out": "쿨일라 10년 100 프루프",
+              "price_krw": 20000
+            },
+            {
+              "gt": "시그나토리 빈티지(Signatory Vintage) 벤리악 10년 100 프루프",
+              "out": "벤리악 10년 100 프루프",
+              "price_krw": 20000
+            },
+            {
+              "gt": "시그나토리 빈티지(Signatory Vintage) 글렌오드 12년 100 프루프",
+              "out": "글렌오드 12년 100 프루프",
+              "price_krw": 20000
+            },
+            {
+              "gt": "시그나토리 빈티지(Signatory Vintage) 링크우드 12년 100 프루프",
+              "out": "링크우드 12년 100 프루프",
+              "price_krw": 20000
+            },
+            {
+              "gt": "시그나토리 빈티지(Signatory Vintage) 스페이사이드 14년",
+              "out": "스페이사이드 14년",
+              "price_krw": 23000
+            },
+            {
+              "gt": "시그나토리 빈티지(Signatory Vintage) 에드라두어 2014",
+              "out": "에드라두어 2014",
+              "price_krw": 24000
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_02",
+          "n_gt": 44,
+          "fp": 0,
+          "correct": 44,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_03",
+          "n_gt": 60,
+          "fp": 3,
+          "correct": 57,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_04",
+          "n_gt": 58,
+          "fp": 2,
+          "correct": 56,
+          "rescued": [
+            {
+              "gt": "글렌기어리(Glengarioch) 15년",
+              "out": "15년",
+              "price_krw": 26000
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_05",
+          "n_gt": 52,
+          "fp": 0,
+          "correct": 52,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_06",
+          "n_gt": 54,
+          "fp": 0,
+          "correct": 54,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_07",
+          "n_gt": 31,
+          "fp": 0,
+          "correct": 31,
+          "rescued": []
+        },
+        {
+          "photo_id": "011_미라보_08",
+          "n_gt": 35,
+          "fp": 7,
+          "correct": 33,
+          "rescued": [
+            {
+              "gt": "버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브",
+              "out": "웰러 스페셜 리저브",
+              "price_krw": 21000
+            },
+            {
+              "gt": "버팔로 트레이스(Buffalo Trace) 웰러 12년",
+              "out": "웰러 12년",
+              "price_krw": 38000
+            }
+          ]
+        },
+        {
+          "photo_id": "011_미라보_09",
+          "n_gt": 41,
+          "fp": 0,
+          "correct": 41,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_01",
+          "n_gt": 14,
+          "fp": 10,
+          "correct": 13,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_02",
+          "n_gt": 10,
+          "fp": 0,
+          "correct": 10,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_03",
+          "n_gt": 25,
+          "fp": 0,
+          "correct": 25,
+          "rescued": []
+        },
+        {
+          "photo_id": "012_Beck_04",
+          "n_gt": 48,
+          "fp": 0,
+          "correct": 48,
+          "rescued": []
+        },
+        {
+          "photo_id": "013_포레스트_01",
+          "n_gt": 68,
+          "fp": 0,
+          "correct": 68,
+          "rescued": []
+        }
+      ]
+    }
+  },
+  "label_set": "test"
+}

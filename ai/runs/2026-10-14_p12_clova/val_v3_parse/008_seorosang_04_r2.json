@@ -1,0 +1,71 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "e62c33be4b7fb80769b5f8e71628a480f31f5f0382b66ab8267a63aab0242127",
+  "started_at": "2026-10-14T05:10:22.066245+00:00",
+  "latency_ms": 2215,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 3483,
+  "output_tokens": 5,
+  "thought_tokens": 598,
+  "total_tokens": 4086,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:10:24Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:10:24Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 3483
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 3483,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 598,
+      "total_tokens": 4086,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 2,
+  "source_image": "008_seorosang_04.png",
+  "prompt_version": "v3",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [855,27,897,40] 26\nL002 [96,25,220,44] 22:00\nL003 [880,100,928,124] X\nL004 [73,220,293,238] COCKTAIL\nL005 [449,277,474,286] 10\nL006 [900,279,925,286] 17\nL007 [75,277,192,286] Gin & Tonic\nL008 [75,288,126,298] 진 토닉\nL009 [525,277,592,286] Gimlet\nL010 [525,289,558,298] 김렛\nL011 [449,311,474,319] 16\nL012 [900,311,928,319] 16\nL013 [75,311,175,319] Godfather\nL014 [73,320,124,331] 갓파더\nL015 [525,311,663,320] Cosmopolitan\nL016 [525,322,621,331] 코스모폴리탄\nL017 [449,344,474,351] 15\nL018 [900,344,925,351] 18\nL019 [73,342,279,354] Long Island Iced Tea\nL020 [75,354,226,363] 롱 아일랜드 아이스 티\nL021 [522,342,589,353] Mojito\nL022 [525,354,575,363] 모히또\nL023 [449,376,477,384] 17\nL024 [900,376,925,384] 17\nL025 [73,374,149,385] Daquiri\nL026 [75,387,138,396] 다이퀴리\nL027 [525,375,595,384] Martini\nL028 [525,387,575,396] 마티니\nL029 [449,409,474,417] 16\nL030 [900,409,928,417] 20\nL031 [75,409,155,417] Gin Fizz\nL032 [75,419,130,428] 진 피즈\nL033 [528,409,668,417] Old Fashioned\nL034 [522,418,609,428] 올드 패션드\nL035 [449,440,477,449] 16\nL036 [900,441,925,449] 21\nL037 [73,440,155,450] Negroni\nL038 [73,450,138,461] 네그로니\nL039 [525,441,604,449] Sidecar\nL040 [522,450,589,461] 사이드카\n</ocr_lines>",
+  "ocr_variant": "off",
+  "n_lines": 40,
+  "gap_factor": 2.5,
+  "layout": "lines",
+  "ocr_latency_ms": 1974
+}
