@@ -462,3 +462,46 @@
 
 ### 결과
 - `ai/runs/2026-10-14_labels_v1_1_rescore.md`: 판정 불변(P12 Δ +0.040 → +0.041, P22 false merge 0). CLOVA+LLM 엄격 F1 +0.071, E1 test 항목 정답률 −0.001(맥켈란 편집 2), 매칭 Top-1 −0.003~−0.008(별칭이 표준 표기)
+
+## 2026-10-14 · M3 (I2) 매칭 LLM 층 (M3a 번역 후 규칙, M3b 후보 고르기)
+
+- **도구:** Claude Code (Claude Opus 5.5), 데스크톱 앱 Code 탭. 외부 API: Gemini `gemini-3.1-flash-lite`(thinking low) 50회(스모크 1, dev 39, test 10). 실행당 상한 200회 안
+- **브랜치:** `i2-labels-v1-1`에서 `i2-m3-llm-match`. PR 없음, push 안 함
+- **시간(대략):** Claude 작업 약 3시간 (설계·사전 등록 30분, 코드·테스트 1시간, dev 3회차 1시간, test·보고서 30분). 담당자 검토 시간 별도
+- **토큰(대략):** Claude Code 세션 약 25만 토큰. Gemini 입력 약 9.9만 / 출력 4.9만 / thought 0.8만
+
+### 진행 순서
+1. 담당자가 M3 스펙(원칙 5개, M3a/M3b, 채택 기준, 순서)을 줌. Claude가 해석이 필요한 7가지(거부권 정의, 병입사 목록, 오답률 분모, 번역 대상 줄, 결과 적용, 판정 조건, 캐시 위치)를 질문 → 담당자가 3가지 변경(합치기 방식, C0·C1 둘 다 안전 기준, P17 기준 병입사 목록)
+2. 사전 등록 커밋 `5e8dfce` → 코드 → 사진 1장 스모크(Beck_03) 결과 보고 후 dev 전체
+3. dev r0 → 문제 사례 유형별 보고 → 담당자 결정으로 수정 1회차(r1) → 2회차(r2) → 거부권 단위 테스트 → 동결 `1ace927` → test 1회
+
+### 프롬프트·규칙 수정 이력 (dev만 보고 수정, 최대 2회)
+| 회차 | 번역 프롬프트 | 규칙 | 이유 (dev 사례) | 결과 |
+|---|---|---|---|---|
+| r0 | v1 | 거부권 3 (bottler_missing 양방향, age_mismatch, alias_of_other) | – | C0 LLM 확인 권장 4/7, 수락 시 오답률 0.017 |
+| r1 | v2: `expansions`(약어 풀이) 칸, 라인업이면 소유 브랜드 | + `edition_mismatch`, 중립 단어(cask/oak/barrel/wood/finish 등), 짧은 토큰 단어 일치(없으면 확인 권장 불가) | 메뉴 에디션이 카탈로그에 없을 때 형제 상품에 붙음(Maker's Mark CS, Laphroaig 10 CS, Arran QC), "DR"/"PX" | C0 7/7, 오답률 0. 카발란 DR 마데라 1줄 퇴보(번역이 DR 생략, "Madera") |
+| r2 | v3: 에디션 단어 음차·철자 교정, 약어 빼지 않기, 라인업 예시(eval에 없는 단어) | 그대로. + M3b | Machrie Moor, 카발란 DR 마데라 | C1 (c) 4. 되돌림 규칙 미발동. M3b 효과 0 |
+- 규칙 추가(r1)는 엄격 방향만이고 사전 등록 절에 기록 후 실행(`0d90655`). 되돌림 규칙도 r2 전에 등록
+
+### 사람 결정
+- 결과 적용은 "대체"가 아니라 "합치기"(대체는 비교용 숫자만). 수락 시 오답률은 C0·C1 둘 다
+- 병입사 목록은 P17 `IB_BOTTLERS` 그대로(추가 없음; Claude가 처음 넣은 Cadenhead는 뺌)
+- `edition_mismatch`를 거부권으로 승격, 짧은 토큰은 빼지 않고 단어 일치, 중립 단어는 양쪽 근거 모두 아님
+- C0 LLM 정밀도는 판정 기준 아님, 보고서 맨 위에 계속 표시
+
+### AI가 정한 것 (사람 확인 필요)
+- 번역→영문 이름 조립 순서(병입사 증류소 연수 에디션 / 브랜드 연수 에디션), 토큰 규칙의 일반 단어 목록, 확인 권장의 "규칙/LLM" 출처 구분(S1~S3가 이미 확인 권장한 상품에 LLM이 동의하면 규칙)
+- 프롬프트 예시는 eval에 없는 상품(Glen Moray, Inchgower, Craigellachie, Tomintoul 등)으로 바꿈. 처음 초안에 eval과 겹치는 예시(Caol Ila 10 100 Proof, Balvenie DoubleWood, 납크릭/Dalwhinny)가 있었고 Claude가 발견해 호출 전에 교체
+- 하네스: `burden_kind`에 "후보 여러 개 + 1순위 확인 권장" 분기 추가. 기존 매처 결과는 정답 2종 × 매처 5 × C0·C1 × dev·test 40조합에서 수정 전과 완전히 같음을 확인
+
+### 검증
+- pytest `ai/match_llm/` 25개(가짜 상품 거부권 테스트 포함) + `ai/eval/test_score.py` 통과
+- r2 결과를 동결 코드로 캐시만 써서 재현(API 0회, 결과 동일)
+- 캐시·결과 파일에 API 키 없음 확인(`.env` 값으로 grep 0건)
+
+### 사용 중 있었던 문제
+- Windows에서 Python `write_text`가 `eval_plan.md`를 CRLF로 바꿔 첫 사전 등록 커밋 diff가 파일 전체로 잡힘 → LF로 되돌리고 같은 커밋을 amend(push 전, 측정 전)
+- Bash heredoc 안의 `'''`가 셸 파싱을 깨서 패치 스크립트 대신 Edit 도구로 수정
+
+### 결과
+- `ai/runs/2026-10-14_m3/README.md`: M3a 채택(dev), test 확인에서도 세 기준 만족(C1 (c) 171 → 41, LLM 확인 권장 193/194, 수락 시 오답률 C0 0.015·C1 0.002). C0 LLM 정밀도 7/9. M3b 채택 안 함

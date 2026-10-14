@@ -248,3 +248,5 @@ S1+S2b+S3(P22 채택) 위에 LLM 층을 더한다. 운영 매칭(`resolve_produc
 - **M3b 채택 안 함 (dev):** M3a 대비 C1 (c) 4 → 4로 줄지 않음(기준 1 불만족). 호출 16회에서 고른 상품 0(C0는 전부 "none", 정답이 카탈로그에 없는 줄).
 - **동결 대상:** `ai/match_llm/`(코드, `translate_prompt_v3.md`, `pick_prompt_v1.md`), `ai/eval/match_eval.py`, `eval/match_gold_v1_1.json`, 카탈로그 시드. test(미라보·포레스트)는 M3a만 1회:
   `python ai/eval/match_eval.py --split test --gold eval/match_gold_v1_1.json --matcher S1+S2b+S3 M3a M3a/replace --m3-cache ai/runs/2026-10-14_m3/cache --json ai/runs/2026-10-14_m3/test_m3a.json`
+
+**M3 test 결과 (2026-10-14, 1회 실행).** 동결 커밋 `1ace9275718ddb55e00827c1db49461204fb445f`에서 등록 명령으로 M3a만 실행(호출 10회). C1: (c) 171 → 41, LLM 확인 권장 193/194, 수락 시 오답률 0.002. C0: LLM 확인 권장 7/9, 수락 시 오답률 0.015(기준선 0.010은 S2b·S3 확인 권장 오답). Top-1·false merge rate는 S1+S2b+S3와 같음. 상세와 한계는 `ai/runs/2026-10-14_m3/README.md`. 실행 후 규칙·프롬프트는 바꾸지 않았다.
