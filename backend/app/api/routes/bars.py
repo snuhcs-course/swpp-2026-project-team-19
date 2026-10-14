@@ -112,5 +112,5 @@ def read_bar_menu(
     session: Session = Depends(get_session),
     user: Principal | None = Depends(get_optional_user),
 ) -> BarMenuResponse:
-    is_operator = user is not None and user_type_of(user) == "operator"
+    is_operator = user is not None and user_type_of(user, session) == "operator"
     return get_bar_menu(session, bar_id, include_inactive=is_operator)

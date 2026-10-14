@@ -20,6 +20,8 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import InvalidTokenError
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.adapters.auth_keys import (
     SigningKeyProvider,
@@ -29,6 +31,8 @@ from app.adapters.auth_keys import (
 )
 from app.core.auth_config import TOKEN_LEEWAY, AuthConfigError, load_supabase_auth_settings
 from app.core.tokens import TOKEN_ALGORITHM, TOKEN_AUDIENCE, TOKEN_ISSUER
+from app.db.session import get_session
+from app.models import User
 
 UserType = Literal["customer", "operator"]
 USER_TYPES = ("customer", "operator")
@@ -169,13 +173,25 @@ def get_optional_user(
     return authenticate(credentials.credentials, key_provider_for)
 
 
-def user_type_of(principal: Principal) -> UserType:
-    """The caller's user type. Supabase users count as customers until roles are read from the database."""
-    return principal.user_type or "customer"
+def user_type_of(principal: Principal, session: Session) -> UserType:
+    """The caller's user type (API spec, section 3.1.4).
+
+    A temporary token takes it from TEMP_AUTH_USER_TYPE. A Supabase user takes it from
+    `users.user_type`, read on every request so a role change applies to the next one; a user
+    without a row (GET /api/me not called yet) is a customer. Token claims never grant a role.
+    """
+    if principal.kind == "temporary":
+        return principal.user_type or "customer"
+    stored = session.scalar(select(User.user_type).where(User.auth_subject == principal.subject))
+    return stored.value if stored is not None else "customer"
 
 
-def require_operator(principal: Principal = Depends(get_current_user)) -> Principal:
+def require_operator(
+    # Declared before the session so a request without a valid token never opens a database session.
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> Principal:
     """Require an authenticated operator for operator-only API routes."""
-    if user_type_of(principal) != "operator":
+    if user_type_of(principal, session) != "operator":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="이 작업을 할 권한이 없습니다.")
     return principal
