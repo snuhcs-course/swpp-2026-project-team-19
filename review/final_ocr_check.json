@@ -1,0 +1,117 @@
+[
+ {
+  "item_ids": [
+   "009_오드비_07#1"
+  ],
+  "photo_id": "009_오드비_07",
+  "stem": "009_odbi_07",
+  "raw_name": "아란 셰리",
+  "label_piece": "셰리",
+  "label_token": "셰리",
+  "ocr_text": "세리",
+  "ocr_token": "세리",
+  "distance": 1,
+  "fields": [
+   8,
+   8
+  ],
+  "category": "D",
+  "print_text": null,
+  "new_name": null,
+  "note": "저해상도 스크린샷이라 ㅔ/ㅖ 구분 불가. 라벨은 Claude 판독 '셰리' 유지, 사람 판독 필요",
+  "pattern": "셰리→세리",
+  "split": "labels_final_v1"
+ },
+ {
+  "item_ids": [
+   "009_오드비_07#7"
+  ],
+  "photo_id": "009_오드비_07",
+  "stem": "009_odbi_07",
+  "raw_name": "아벨라워 아부나흐 셰리",
+  "label_piece": "셰리",
+  "label_token": "셰리",
+  "ocr_text": "세리",
+  "ocr_token": "세리",
+  "distance": 1,
+  "fields": [
+   18,
+   18
+  ],
+  "category": "D",
+  "print_text": null,
+  "new_name": null,
+  "note": "저해상도 스크린샷이라 ㅔ/ㅖ 구분 불가. 라벨은 Claude 판독 '셰리' 유지, 사람 판독 필요",
+  "pattern": "셰리→세리",
+  "split": "labels_final_v1"
+ },
+ {
+  "item_ids": [
+   "009_오드비_08#2"
+  ],
+  "photo_id": "009_오드비_08",
+  "stem": "009_odbi_08",
+  "raw_name": "맥켈란12 셰리",
+  "label_piece": "셰리",
+  "label_token": "셰리",
+  "ocr_text": "세리",
+  "ocr_token": "세리",
+  "distance": 1,
+  "fields": [
+   9,
+   9
+  ],
+  "category": "D",
+  "print_text": null,
+  "new_name": null,
+  "note": "저해상도 스크린샷이라 ㅔ/ㅖ 구분 불가. 라벨은 Claude 판독 '셰리' 유지, 사람 판독 필요",
+  "pattern": "셰리→세리",
+  "split": "labels_final_v1"
+ },
+ {
+  "item_ids": [
+   "009_오드비_08#10"
+  ],
+  "photo_id": "009_오드비_08",
+  "stem": "009_odbi_08",
+  "raw_name": "달모어12셰리",
+  "label_piece": "달모어12셰리",
+  "label_token": "달모어12셰리",
+  "ocr_text": "달모어12세리",
+  "ocr_token": "달모어12세리",
+  "distance": 1,
+  "fields": [
+   22,
+   22
+  ],
+  "category": "D",
+  "print_text": null,
+  "new_name": null,
+  "note": "위와 같음",
+  "pattern": "달모어12셰리→달모어12세리",
+  "split": "labels_final_v1"
+ },
+ {
+  "item_ids": [
+   "009_오드비_08#14"
+  ],
+  "photo_id": "009_오드비_08",
+  "stem": "009_odbi_08",
+  "raw_name": "글렌드로낙12",
+  "label_piece": "글렌드로낙12",
+  "label_token": "글렌드로낙12",
+  "ocr_text": "글렌드로냑12",
+  "ocr_token": "글렌드로냑12",
+  "distance": 1,
+  "fields": [
+   26,
+   26
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "확대 판독: 모음 ㅏ(낙). 같은 사진 '글렌드로낙15·18'과 같은 글자",
+  "pattern": "글렌드로낙12→글렌드로냑12",
+  "split": "labels_final_v1"
+ }
+]

@@ -1,0 +1,296 @@
+[
+  {
+    "set": "final",
+    "source_image": "009_odbi_01.png",
+    "prepared_image": "009_odbi_01.png",
+    "sent_image": "009_odbi_01.png",
+    "sent_sha256": "5a817a2991fe198f1183999e979c06a32b01a14617614e065cac5da6730ff262",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:05:52.973380+00:00",
+    "latency_ms": 2179,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 129,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "009_odbi_02.png",
+    "prepared_image": "009_odbi_02.png",
+    "sent_image": "009_odbi_02.png",
+    "sent_sha256": "176866205a687557bf7eae1d6cb512404ced860ac6df4aa2ed432e4dfbe7e04b",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:05:55.164820+00:00",
+    "latency_ms": 1768,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 55,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "009_odbi_03.png",
+    "prepared_image": "009_odbi_03.png",
+    "sent_image": "009_odbi_03.png",
+    "sent_sha256": "da0adfe47d12f5d004d26f09c4029e9d558c0ea39972d5f76b2e58fd02085440",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:05:56.945037+00:00",
+    "latency_ms": 1309,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 32,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "009_odbi_04.png",
+    "prepared_image": "009_odbi_04.png",
+    "sent_image": "009_odbi_04.png",
+    "sent_sha256": "13cb1ac55bca77e16439293a1852ffd121148502335b4206910c7bad4cfac1fc",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:05:58.264897+00:00",
+    "latency_ms": 1514,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 57,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "009_odbi_05.png",
+    "prepared_image": "009_odbi_05.png",
+    "sent_image": "009_odbi_05.png",
+    "sent_sha256": "1958135667d3b38d0825839a2098fc299badabe84165ac67afc6d1f03b2af57e",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:05:59.790243+00:00",
+    "latency_ms": 2399,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 51,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "009_odbi_06.png",
+    "prepared_image": "009_odbi_06.png",
+    "sent_image": "009_odbi_06.png",
+    "sent_sha256": "e6822f120ad3877245e412849a23b5cb04b3730a7f033c7143497a9a6d3c135e",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:06:02.199975+00:00",
+    "latency_ms": 1388,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 47,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "009_odbi_07.png",
+    "prepared_image": "009_odbi_07.png",
+    "sent_image": "009_odbi_07.png",
+    "sent_sha256": "c6d43085e019e7297b530f966e33042091829241ef4eaf5a910348fe8198f330",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:06:03.599319+00:00",
+    "latency_ms": 1364,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 35,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "009_odbi_08.png",
+    "prepared_image": "009_odbi_08.png",
+    "sent_image": "009_odbi_08.png",
+    "sent_sha256": "a1139688c0525ffe42db6b5397ac92d86cb70d285e1d109a22ec0bbaee6c7a2f",
+    "sent_size": [
+      1179,
+      2556
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:06:04.978806+00:00",
+    "latency_ms": 1845,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 102,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "009_odbi_09.jpeg",
+    "prepared_image": "009_odbi_09.jpg",
+    "sent_image": "009_odbi_09.jpg",
+    "sent_sha256": "b4f4dc9c31cd0003cb0d8abb7e2c676de9d9b99312e0b81b73c787005c427dc3",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:06:06.942618+00:00",
+    "latency_ms": 2450,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 113,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "010_sui_01.jpeg",
+    "prepared_image": "010_sui_01.jpg",
+    "sent_image": "010_sui_01.jpg",
+    "sent_sha256": "85a62cd1f9c150b46e98888ae69952d1f005bacf5e45367cb29dad231a0d52bd",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:06:09.512073+00:00",
+    "latency_ms": 2632,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 186,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "010_sui_02.jpeg",
+    "prepared_image": "010_sui_02.jpg",
+    "sent_image": "010_sui_02.jpg",
+    "sent_sha256": "43081b230fcb6c3e3ed35a9ab975d94ad234b07a7b2e5031e2af510ede773a41",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:06:12.252974+00:00",
+    "latency_ms": 2804,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 149,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "010_sui_03.jpeg",
+    "prepared_image": "010_sui_03.jpg",
+    "sent_image": "010_sui_03.jpg",
+    "sent_sha256": "c9c081394d4669d7f02927851804ac30055e942c1bdaf075629c33145007ca86",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:06:15.171877+00:00",
+    "latency_ms": 2598,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 186,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "010_sui_04.jpeg",
+    "prepared_image": "010_sui_04.jpg",
+    "sent_image": "010_sui_04.jpg",
+    "sent_sha256": "ce9268eea120585f175f27e5f79ab0665bd3dcb78bbb32afc5d821c32a9564fb",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:06:17.887261+00:00",
+    "latency_ms": 2826,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 200,
+    "n_tables": 0
+  },
+  {
+    "set": "final",
+    "source_image": "010_sui_05.jpeg",
+    "prepared_image": "010_sui_05.jpg",
+    "sent_image": "010_sui_05.jpg",
+    "sent_sha256": "ad1f69e73c6bbefffb428aaf47cdfd84ecd21d3e0c62429ff19b921c02576446",
+    "sent_size": [
+      3024,
+      4032
+    ],
+    "resized": false,
+    "table_detection": false,
+    "version": "V2",
+    "lang": "ko",
+    "started_at": "2026-10-14T12:06:20.831958+00:00",
+    "latency_ms": 2083,
+    "attempts": 1,
+    "infer_result": "SUCCESS",
+    "n_fields": 72,
+    "n_tables": 0
+  }
+]
