@@ -78,6 +78,7 @@ Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) i
 - Change the schema only through a new Alembic migration. Never edit a migration that is already on `main`.
 - Routes stay thin. Business logic goes in `app/services/`, external systems (Gemini, S3, local storage) sit behind the interfaces in `app/adapters/`, and matching lives in `app/matching/`.
 - Raise spec errors with `ApiError(status, code, message)` from `app/core/errors.py` so the response uses the common error shape.
+- Every `/api` route is listed with its permission in `backend/tests/test_route_permissions.py`; add a new route there when you create it.
 - `scripts/reset_demo.py` and `scripts/reset_menu_imports.py` delete data. Do not run them against the deployed database unless explicitly asked.
 
 ## Code file header (team rule)

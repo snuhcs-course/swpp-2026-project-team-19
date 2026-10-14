@@ -208,9 +208,20 @@ Deployments run one at a time, and a running one is never cancelled. Each deploy
 - **Settings:** edit `backend/.env`, then `sudo systemctl restart bottlemap-api`.
 - **Real extraction:** set `MENU_EXTRACTOR=gemini` and `GEMINI_API_KEY` (a paid-tier key, so uploaded menu photos are not used for training) and restart. The settings are checked at start-up.
 - **Google login (Supabase):** `SUPABASE_URL` in `.env`, then restart. If a real Google token gets `503`, check that `SUPABASE_URL` is set and look for `signing keys are unavailable` in `journalctl -u bottlemap-api`. A Free-plan Supabase project is paused after about a week without activity, and then every signed-in request gets `503`; check the project in the Supabase dashboard before a demo.
-- **Temporary login** is on for the demo, so anyone who reaches the server can get an operator token. Keep the server running only when needed, and set `TEMP_AUTH_ENABLED=false` once Google login works in the app.
+- **Temporary login** is on for the demo, so anyone who reaches the server can get an operator token. While it is on, the service logs a warning at every start (`journalctl -u bottlemap-api | grep "Temporary login is on"`). Keep the server running only when needed, and turn it off as described below once Google login works in the app.
 - **Known limitation:** an import that is `processing` when the service restarts stays there; delete it with `reset_menu_imports.py` and upload again.
 - **Cost:** stop the EC2 and RDS instances when idle. A stopped RDS instance starts again by itself after 7 days, and the Elastic IP is billed while the instance is stopped.
+
+### Turning off temporary login
+
+Do this once the app signs in with Google (P19) and `SUPABASE_URL` is set (section 3).
+
+1. Each team member who needs operator access signs in with Google in the app once, so `GET /api/me` creates their user.
+2. Give them the operator role. Until the API has a way to manage roles, this is done only by the backend owner changing `users.user_type` in the database by hand; the new role applies from the user's next request.
+3. Set `TEMP_AUTH_ENABLED=false` in `.env` and run `sudo systemctl restart bottlemap-api`.
+4. Check: `curl -i -X POST $BASE/api/auth/temp-login` returns `404`, the start log no longer shows the warning, and an operator signed in with Google can open `GET $BASE/api/bars`.
+
+Temporary tokens issued before stop working at once (`401`). The `local-dev-user` row stays in `users` and does no harm.
 
 ## 7. Teardown
 
