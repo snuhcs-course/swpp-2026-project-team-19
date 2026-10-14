@@ -95,8 +95,8 @@ When you create a code file, add this line with your tool and model, the member 
 
 ## Git and PRs
 
-- Branch from `main` as `feature/<task-id>-<short-name>`, for example `feature/p25-demo-reset`.
-- The PR title is `<task ID>: <task summary>`, for example `P23: Unit test the matching function and basic API behavior, run in CI with coverage`. PRs are squash-merged.
+- Branch from `main` as `feature/i<iteration>-<task-id>-<short-name>`, all lowercase, for example `feature/i2-p9-google-token-verification` for task P9 in Iteration 2.
+- The PR title is `I<iteration>-<task ID>: <task summary>`, for example `I2-P9: Implement server verification of Google login tokens; handle invalid and expired credentials`. A PR that covers several tasks lists them with `/`, as in `I2-P13/P14: ...`. PRs are squash-merged.
 - Commit or push only when the member you are working for asks.
 - Merging to `main` deploys the backend to production automatically after CI passes, so `main` must stay deployable.
 
