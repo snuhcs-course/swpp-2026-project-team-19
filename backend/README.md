@@ -193,6 +193,8 @@ Request and response details, error codes, and rules not covered by the API spec
 | `EXTRACTION_MODEL` | — | Required with `gemini`. Exact model ID; P14 adopted `gemini-3.5-flash-lite`. |
 | `EXTRACTION_THINKING_LEVEL` | — | Required with `gemini`: `minimal`, `low`, `medium` or `high`; P14 adopted `medium`. |
 | `EXTRACTION_MAX_ATTEMPTS`, `EXTRACTION_REQUEST_TIMEOUT_S`, `EXTRACTION_WALL_TIMEOUT_S` | `6`, `300`, `330` | Optional retry and timeout settings for `gemini` (P14 values). |
+| `EXTRACTION_MODE` | `gemini` | With `MENU_EXTRACTOR=gemini`: `gemini` (photo only) or `hybrid` (CLOVA OCR lines + photo, frozen hybrid prompt v1; OCR line boxes kept in `raw_output`). If OCR fails, the photo goes through `gemini` and the fallback is logged. |
+| `CLOVA_OCR_INVOKE_URL`, `CLOVA_OCR_SECRET` | — | Required with `EXTRACTION_MODE=hybrid` (CLOVA General OCR). Never commit the secret. |
 
 With `gemini`, the server checks these settings at start-up and refuses to start if one is missing or invalid. Each photo is one model call (a few seconds to a few minutes with retries) in the background job. A successful run stores the model's original output, model ID, tokens, latency and attempts in `extraction_runs.raw_output`; a failed run stores the error and, when the model answered, its text.
 
