@@ -1,0 +1,60 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
+name: Seed catalog
+
+# Manual only: Actions → Seed catalog → Run workflow on main. Run dry-run first, then apply.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run prints the counts and rolls back; apply commits"
+        type: choice
+        options: [dry-run, apply]
+        default: dry-run
+
+permissions: {}
+
+# Same group as the deploy job, so a seed never runs while a deployment is running.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: production
+
+    env:
+      DEPLOY_HOST: bottlemap.o-r.kr
+      DEPLOY_USER: ubuntu
+      MODE: ${{ inputs.mode }}
+
+    steps:
+      - name: Check that the server runs this commit
+        # The seed uses the code deployed on the server; refuse when it is not this run's main.
+        run: |
+          version="$(curl -fsS "https://$DEPLOY_HOST/health" | jq -r '.version // empty')" || version=""
+          if [ -z "$version" ] || [[ "$GITHUB_SHA" != "$version"* ]]; then
+            echo "::error::The server runs '${version:-unknown}', main is ${GITHUB_SHA::7}. Wait until the deployment of main has finished, then run again."
+            exit 1
+          fi
+          echo "Server runs $version"
+
+      - name: Set up SSH
+        env:
+          SEED_SSH_KEY: ${{ secrets.SEED_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SEED_SSH_KEY" > ~/.ssh/seed_key
+          chmod 600 ~/.ssh/seed_key
+          # The pinned host key: never connect to a server that answers with another one.
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Run the seed on the server
+        # The seed key is restricted on the server to deploy/seed.sh, which accepts only dry-run or apply.
+        run: >-
+          ssh -i ~/.ssh/seed_key
+          -o BatchMode=yes -o StrictHostKeyChecking=yes -o ServerAliveInterval=30
+          "$DEPLOY_USER@$DEPLOY_HOST" "$MODE"

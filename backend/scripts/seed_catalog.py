@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #8). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #8); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
 # Modified with Claude Code (Jinwoo Park, 2026-10-15): default seed files are now catalog v2 (PR #24).
 """Load the pilot bars and the product catalog seed (ai/catalog/) into the database.
 
@@ -8,8 +8,12 @@ are inserted with ON CONFLICT DO NOTHING: rows whose id already exists, or that
 normalize to a value the same brand or product already has, are skipped.
 Rows removed from the JSON are not deleted. Everything runs in one transaction.
 
+With --dry-run the whole load runs and prints its counts, then rolls back, so a load that
+would fail (e.g. a brand name another brand already has) fails the same way without changes.
+
     cd backend
     uv run --env-file .env alembic upgrade head
+    uv run --env-file .env python scripts/seed_catalog.py --dry-run
     uv run --env-file .env python scripts/seed_catalog.py
 """
 
@@ -129,10 +133,23 @@ def seed(conn: Connection, catalog: dict, bars: dict) -> None:
         print(f"{name:<16} {len(rows):>4} in seed, inserted {inserted}, skipped {len(rows) - inserted}")
 
 
+def load(conn: Connection, catalog: dict, bars: dict, *, dry_run: bool) -> None:
+    """Seed inside a savepoint; a dry run rolls it back after printing the counts.
+
+    An error also rolls the savepoint back, so a failed load leaves the connection usable.
+    """
+    with conn.begin_nested() as savepoint:
+        seed(conn, catalog, bars)
+        if dry_run:
+            savepoint.rollback()
+            print("dry run: rolled back, nothing changed. Run without --dry-run to apply.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--catalog", type=Path, default=CATALOG_DIR / "catalog_v2_service.json")
     parser.add_argument("--bars", type=Path, default=CATALOG_DIR / "bars_v2.json")
+    parser.add_argument("--dry-run", action="store_true", help="load and print the counts, then roll back")
     args = parser.parse_args()
 
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
@@ -140,7 +157,7 @@ def main() -> None:
     print(f"catalog: {args.catalog.name} ({catalog['version']})  bars: {args.bars.name} ({bars['version']})")
 
     with get_engine().begin() as conn:
-        seed(conn, catalog, bars)
+        load(conn, catalog, bars, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":

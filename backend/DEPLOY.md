@@ -192,9 +192,9 @@ Deployments run one at a time, and a running one is never cancelled. Each deploy
    | `DEPLOY_SSH_KEY` | The whole private key file `bottlemap-deploy`, including the `BEGIN` and `END` lines |
    | `DEPLOY_KNOWN_HOSTS` | The `bottlemap.o-r.kr ssh-ed25519 AAAA...` line from step 3 |
 
-   Only the `deploy` job, which declares the `production` environment, can read them. After saving, delete the local private key; GitHub is the only place that needs it.
+   Only jobs that declare the `production` environment can read them: the `deploy` job here and the `seed` job of the Seed catalog workflow ([Loading the catalog seed](#loading-the-catalog-seed)). After saving, delete the local private key; GitHub is the only place that needs it.
 
-5. **Security group.** GitHub-hosted runners connect from changing addresses, so `bottlemap-ec2` must allow SSH (22) from anywhere (`0.0.0.0/0`). Password login is off on Ubuntu EC2 images, so only the two keys in `authorized_keys` can log in, and the deploy key can only run `deploy.sh`.
+5. **Security group.** GitHub-hosted runners connect from changing addresses, so `bottlemap-ec2` must allow SSH (22) from anywhere (`0.0.0.0/0`). Password login is off on Ubuntu EC2 images, so only the keys in `authorized_keys` can log in: your own key, the deploy key, which can only run `deploy.sh`, and the seed key of the Seed catalog workflow, which can only run `deploy/seed.sh`.
 
 ### When a deployment fails
 
@@ -202,10 +202,24 @@ Deployments run one at a time, and a running one is never cancelled. Each deploy
 - To roll back, revert the commit on `main` (`git revert <commit>`) and push. The revert is tested and deployed like any other change.
 - To pause automatic deployment, remove the deploy key line from `authorized_keys`. Deploy jobs then fail at SSH; the tests still run.
 
+### Loading the catalog seed
+
+Deployment does not touch the database contents. After a catalog change (`ai/catalog/`) is merged and deployed, load it with the **Seed catalog** workflow (`.github/workflows/seed-catalog.yml`), so anyone with write access to the repository can do it without SSH:
+
+1. Check that the deployment of that `main` commit has finished (Actions → Backend CI/CD).
+2. Actions → **Seed catalog** → Run workflow on `main` with mode **dry-run**. The log shows, per table, how many rows would be inserted and updated, then rolls back. A brand name that another brand already has under a different id fails here, without changes.
+3. If the counts look right, run it again with mode **apply**.
+
+The workflow refuses to run when the server is not running the `main` commit it was started from, and waits while a deployment is running. On the server it runs `deploy/seed.sh`, which runs `scripts/seed_catalog.py` with the deployed code and `.env`; the seed is one transaction, so a failed apply changes nothing. To run it by hand on the server: `~/swpp-2026-project-team-19/backend/deploy/seed.sh dry-run` (or `apply`).
+
+The seed upserts by id: rows in the seed overwrite changes made to the same rows on the server, and rows removed from the seed are not deleted (see `scripts/seed_catalog.py`).
+
+
 ## 6. Operations
 
 - **Logs:** `journalctl -u bottlemap-api -f` (API), `journalctl -u caddy -f` (HTTPS, proxy).
 - **Settings:** edit `backend/.env`, then `sudo systemctl restart bottlemap-api`.
+- **Catalog changes:** load them with the Seed catalog workflow ([Loading the catalog seed](#loading-the-catalog-seed)).
 - **Real extraction:** set `MENU_EXTRACTOR=gemini` and `GEMINI_API_KEY` (a paid-tier key, so uploaded menu photos are not used for training) and restart. The settings are checked at start-up.
 - **Google login (Supabase):** `SUPABASE_URL` in `.env`, then restart. If a real Google token gets `503`, check that `SUPABASE_URL` is set and look for `signing keys are unavailable` in `journalctl -u bottlemap-api`. A Free-plan Supabase project is paused after about a week without activity, and then every signed-in request gets `503`; check the project in the Supabase dashboard before a demo.
 - **Temporary login** is on for the demo, so anyone who reaches the server can get an operator token. While it is on, the service logs a warning at every start (`journalctl -u bottlemap-api | grep "Temporary login is on"`). Keep the server running only when needed, and turn it off as described below once Google login works in the app.
