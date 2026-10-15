@@ -157,3 +157,9 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 | forest | 포레스트 | 관악구에서 해당 바를 찾지 못함 | 주소·좌표·전화·`kakao_place_id` 전부 null (TODO) |
 | odbi | 오드비 | 블로그 "샤로수길 위스키바 오드비" | 전화 null (TODO, 카카오맵 미등록) |
 | sui | 수이바 | 카카오 메뉴(하몽을 곁들인 감자튀김, 교자, 안키모와 바게트)가 사진 010_sui_05의 Dish Menu와 같음 | 전화 null (TODO, 카카오맵 미등록) |
+
+## 생성 별칭 (2026-10-15)
+
+`catalog_v2_service.json`에 출처 `generated:claude-2026-10-15`인 별칭을 더했다: 브랜드 한국어 표기 216개, 상품 한국어 별칭 940개(상품 472개). Claude가 웹 검색 없이 만들고, 자동 검사(다른 상품·브랜드 별칭과 정규화 충돌, 상품에 없는 숫자, 연수 누락, 독립병입 병입사 누락, 에디션 없이 브랜드+연수만 있는 표기)를 통과한 것을 박진우가 검토했다. `check_catalog_v2.py`: 상품 간·브랜드 간 충돌 0, integrity OK. 평가용 스냅샷(`catalog_v2_eval_5bars.json`, P47)에는 넣지 않았다. 되돌릴 별칭 id 목록은 이 PR 설명에 첨부.
+
+적재: `cd backend && uv run --no-sync --env-file .env python scripts/seed_catalog.py --catalog ../ai/catalog/catalog_v2_service.json --bars ../ai/catalog/bars_v2.json` (추가만 하고 기존 행은 지우지 않음).
