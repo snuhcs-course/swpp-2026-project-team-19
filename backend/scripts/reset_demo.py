@@ -1,4 +1,5 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-07, PR #20). Reviewed by Haeul Yang.
+# Modified with Claude Code (Jinwoo Park, 2026-10-15): default seed files are now catalog v2 (PR #24).
 """Reset the database to the state right after seeding, e.g. after rehearsing the demo.
 
 What a rehearsal leaves behind is removed:
@@ -147,8 +148,8 @@ def delete_photos(storage: ImageStorage, keys: list[str]) -> list[str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--catalog", type=Path, default=CATALOG_DIR / "catalog_v1_draft.json")
-    parser.add_argument("--bars", type=Path, default=CATALOG_DIR / "bars_v1.json")
+    parser.add_argument("--catalog", type=Path, default=CATALOG_DIR / "catalog_v2_service.json")
+    parser.add_argument("--bars", type=Path, default=CATALOG_DIR / "bars_v2.json")
     parser.add_argument(
         "--menu", type=Path, action="append", help="seed menu to restore (repeatable; default: the Seorosang menu)"
     )

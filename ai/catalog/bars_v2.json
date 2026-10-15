@@ -1,0 +1,101 @@
+{
+  "version": "bars_v2",
+  "source": "bars_v1 + Kakao Map (place search + place panel API), looked up 2026-10-14",
+  "notes": [
+    "kakao_place_id is seed metadata for later Kakao Map linking; not a DBML column yet.",
+    "name = Kakao Map place name; label_bar_name = bar name in the eval labels.",
+    "Coordinates rounded to 6 decimals like v1. address = Kakao road address (floor only when Kakao lists it).",
+    "forest: not in Gwanak-gu. Address from the team (2026-10-15); Kakao place 1200932955 (포레스트, cocktail bar) has the same road address, and its blog reviews call it a whisky bar. Coordinates and phone from that place, looked up 2026-10-15.",
+    "TODO sui: phone not listed on Kakao Map (null).",
+    "odbi: phone not on Kakao Map; 0507 virtual number from the team (2026-10-15).",
+    "mirabeau: two Kakao candidates (미라보 카페·바 봉천로 541 / 미라보바 대학길 42). Chose 307352260: blog reviews describe a whisky bar with a whisky tasting course.",
+    "sui: Kakao place 수이바 (cocktail bar). Its Kakao menu (하몽을 곁들인 감자튀김, 교자, 안키모와 바게트) matches the Dish Menu on photo 010_sui_05. Some blog reviews on that place are about a different 수이 in Bangbae-dong.",
+    "beck: Kakao place name 벡; blog titles on the place say 'Beck'."
+  ],
+  "bars": [
+    {
+      "id": "564384a5-b81e-5169-a09f-482da9310223",
+      "key": "whisky-bokchun",
+      "name": "위스키복춘",
+      "address": "서울 관악구 솔밭로 8 1층",
+      "latitude": 37.478225,
+      "longitude": 126.96294,
+      "phone": "0502-5553-7423",
+      "status": "active",
+      "kakao_place_id": "1848001977",
+      "label_bar_name": "위스키복춘"
+    },
+    {
+      "id": "0d079e49-4d71-5fac-8b04-9bc4ea6a343d",
+      "key": "seorosang",
+      "name": "서로상",
+      "address": "서울 관악구 남부순환로 1929-9 더게이트 지하 1층 01호",
+      "latitude": 37.477648,
+      "longitude": 126.963763,
+      "phone": "0507-1348-5841",
+      "status": "active",
+      "kakao_place_id": "730910489",
+      "label_bar_name": "서로상"
+    },
+    {
+      "id": "8b8f0202-e96d-59c4-b40a-0332a6b1755d",
+      "key": "mirabeau",
+      "name": "미라보",
+      "address": "서울 관악구 봉천로 541 1층",
+      "latitude": 37.478656,
+      "longitude": 126.958078,
+      "phone": "070-4251-9117",
+      "status": "active",
+      "kakao_place_id": "307352260",
+      "label_bar_name": "미라보"
+    },
+    {
+      "id": "e72ae4f3-69aa-5aac-b5a6-c4c4545da2a6",
+      "key": "beck",
+      "name": "벡",
+      "address": "서울 관악구 낙성대역길 27 1층",
+      "latitude": 37.476246,
+      "longitude": 126.961684,
+      "phone": "02-6015-1533",
+      "status": "active",
+      "kakao_place_id": "22892494",
+      "label_bar_name": "Beck"
+    },
+    {
+      "id": "62620ea7-241a-522d-8adf-bb540ce233f1",
+      "key": "forest",
+      "name": "포레스트",
+      "address": "경기 하남시 미사강변중앙로 193 에코브릿지 209호",
+      "latitude": 37.563584,
+      "longitude": 127.189536,
+      "phone": "010-3758-1325",
+      "status": "active",
+      "kakao_place_id": "1200932955",
+      "label_bar_name": "포레스트"
+    },
+    {
+      "id": "ba080c2f-e694-5949-b5ad-6926c086f735",
+      "key": "odbi",
+      "name": "오드비",
+      "address": "서울 관악구 관악로10길 36",
+      "latitude": 37.476658,
+      "longitude": 126.954697,
+      "phone": "0507-1369-1669",
+      "status": "active",
+      "kakao_place_id": "331206983",
+      "label_bar_name": "오드비"
+    },
+    {
+      "id": "ad1ba5a4-11a2-5c25-9962-c307edb8a15d",
+      "key": "sui",
+      "name": "수이바",
+      "address": "서울 관악구 남부순환로230길 25 1층 102호",
+      "latitude": 37.479044,
+      "longitude": 126.955591,
+      "phone": null,
+      "status": "active",
+      "kakao_place_id": "1544661179",
+      "label_bar_name": "수이"
+    }
+  ]
+}

@@ -26,7 +26,7 @@ from scripts.reset_demo import CATALOG_DIR, Seeds, delete_photos, plan, reset
 from tests.factories import make_bar
 
 JPEG = b"\xff\xd8\xff\xe0" + b"jpeg-body"
-SEED_FILES = [CATALOG_DIR / name for name in ("catalog_v1_draft.json", "bars_v1.json", "menu_seed_seorosang_v1.json")]
+SEED_FILES = [CATALOG_DIR / name for name in ("catalog_v2_service.json", "bars_v2.json", "menu_seed_seorosang_v1.json")]
 
 pytestmark = pytest.mark.skipif(
     not all(path.exists() for path in SEED_FILES), reason="ai/catalog seed is not checked out"

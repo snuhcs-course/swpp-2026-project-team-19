@@ -11,7 +11,7 @@ from scripts.seed_catalog import seed
 from tests.factories import make_brand, make_product
 
 CATALOG_DIR = Path(__file__).resolve().parents[2] / "ai" / "catalog"
-SEED_FILES = [CATALOG_DIR / name for name in ("catalog_v1_draft.json", "bars_v1.json", "labels_v1_1.json")]
+SEED_FILES = [CATALOG_DIR / name for name in ("catalog_v2_service.json", "bars_v2.json", "labels_v1_1.json")]
 
 
 def test_lookup_uses_active_products_and_every_alias(db_session):
