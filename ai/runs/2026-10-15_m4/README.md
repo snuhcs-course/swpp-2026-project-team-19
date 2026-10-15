@@ -2,7 +2,7 @@
 
 2026-10-15 야간 · 실행: Claude Code · 검토: 박진우 (아침) · 사전 등록 `ai/docs/m4_plan.md` (`07e556c`, 실행 전 커밋) · 브랜치 `i2-m4-naver-match`
 
-## 판정 (잠정, 진우 확인 전): **잠정 no-go**
+## 판정: **no-go (2026-10-15 확정)**
 
 | go 조건 (m4_plan.md 6절) | 결과 | 통과 |
 | --- | --- | --- |
@@ -84,3 +84,7 @@ python ai/eval/match_eval.py --split dev --gold eval/match_gold_v1_1.json --matc
 python ai/eval/m4_report.py ai/runs/2026-10-15_m4/dev_r0.json --out ai/runs/2026-10-15_m4/dev_r0_report.json
 ```
 캐시가 있으면 Gemini 0회(Naver 캐시는 `<data_dir>/naver_cache/`, 레포 밖).
+
+## 확정 (2026-10-15, 박진우)
+
+**no-go 확정.** M4는 I2 매칭 파이프라인에 넣지 않는다. "M3a 없이 M4만 써도 M3a 수준"이라는 참고 행 결과는 I3 백업안으로만 남긴다(새 사전 등록 필요). Naver는 실시간 매칭에 쓰지 않는다(P36 마감 기록 참고).
