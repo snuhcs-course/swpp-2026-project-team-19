@@ -163,3 +163,5 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 `catalog_v2_service.json`에 출처 `generated:claude-2026-10-15`인 별칭을 더했다: 브랜드 한국어 표기 216개, 상품 한국어 별칭 940개(상품 472개). Claude가 웹 검색 없이 만들고, 자동 검사(다른 상품·브랜드 별칭과 정규화 충돌, 상품에 없는 숫자, 연수 누락, 독립병입 병입사 누락, 에디션 없이 브랜드+연수만 있는 표기)를 통과한 것을 박진우가 검토했다. `check_catalog_v2.py`: 상품 간·브랜드 간 충돌 0, integrity OK. 평가용 스냅샷(`catalog_v2_eval_5bars.json`, P47)에는 넣지 않았다. 되돌릴 별칭 id 목록은 이 PR 설명에 첨부.
 
 적재: `cd backend && uv run --no-sync --env-file .env python scripts/seed_catalog.py --catalog ../ai/catalog/catalog_v2_service.json --bars ../ai/catalog/bars_v2.json` (추가만 하고 기존 행은 지우지 않음).
+
+괄호 제거 별칭(출처 `template:paren-strip`) 265개: 메뉴 별칭의 괄호 부분을 뺀 형태(예: '쿨일라(Caol Ila) 12년' → '쿨일라 12년'). 고객 검색은 메뉴 매칭 S1과 달리 괄호를 처리하지 않아서 넣음. 연수·에디션이 빠지거나 다른 상품과 겹치면 제외. 검사 규칙 오류로 빠졌던 생성 별칭 19개(숫자 에디션 등)도 복구. 오프라인 검색 측정(손님형 검색어 600개): 47% → 51%, 실제 Naver 표기 49개: 21 → 26.
