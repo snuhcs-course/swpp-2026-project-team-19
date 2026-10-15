@@ -1,0 +1,135 @@
+{
+ "input": {
+  "rows": 142,
+  "human_filled": 68,
+  "llm_pending": 0,
+  "human_empty": 74
+ },
+ "overall": {
+  "rows": 68,
+  "llm_same": 51,
+  "M1_precision": 0.9216,
+  "llm_same_correct": 47,
+  "llm_same_wrong": 4,
+  "llm_same_human_different": 3,
+  "llm_same_human_unsure": 1,
+  "M1b_precision_excl_unsure": 0.94,
+  "M2_false_merge_upper95": 0.1706,
+  "llm_vs_human_agreement": 0.8676,
+  "human_same_recall": 0.9592
+ },
+ "M3_confidence_bins": [
+  {
+   "bin": "[0.0, 0.5)",
+   "rows": 0,
+   "llm_vs_human_mismatch": null,
+   "llm_same": 0,
+   "llm_same_error_rate": null
+  },
+  {
+   "bin": "[0.5, 0.8)",
+   "rows": 0,
+   "llm_vs_human_mismatch": null,
+   "llm_same": 0,
+   "llm_same_error_rate": null
+  },
+  {
+   "bin": "[0.8, 0.9)",
+   "rows": 0,
+   "llm_vs_human_mismatch": null,
+   "llm_same": 0,
+   "llm_same_error_rate": null
+  },
+  {
+   "bin": "[0.9, 0.95)",
+   "rows": 6,
+   "llm_vs_human_mismatch": 0.3333,
+   "llm_same": 4,
+   "llm_same_error_rate": 0.25
+  },
+  {
+   "bin": "[0.95, 1.0]",
+   "rows": 62,
+   "llm_vs_human_mismatch": 0.1129,
+   "llm_same": 47,
+   "llm_same_error_rate": 0.0638
+  }
+ ],
+ "M4_by_stratum": {
+  "independent": {
+   "rows": 14,
+   "llm_same": 8,
+   "M1_precision": 0.875,
+   "llm_same_correct": 7,
+   "llm_same_wrong": 1,
+   "llm_same_human_different": 1,
+   "llm_same_human_unsure": 0,
+   "M1b_precision_excl_unsure": 0.875,
+   "M2_false_merge_upper95": 0.4707,
+   "llm_vs_human_agreement": 0.5714,
+   "human_same_recall": 0.7778
+  },
+  "official": {
+   "rows": 54,
+   "llm_same": 43,
+   "M1_precision": 0.9302,
+   "llm_same_correct": 40,
+   "llm_same_wrong": 3,
+   "llm_same_human_different": 2,
+   "llm_same_human_unsure": 1,
+   "M1b_precision_excl_unsure": 0.9524,
+   "M2_false_merge_upper95": 0.1706,
+   "llm_vs_human_agreement": 0.9444,
+   "human_same_recall": 1.0
+  }
+ },
+ "M5_product_recall": {
+  "products_reviewed": 26,
+  "products_with_human_same": 25,
+  "products_with_correct_llm_same": 24,
+  "M5_recall": 0.96
+ },
+ "M6_tag_v1_x_human": {
+  "ambiguous": {
+   "same": 17,
+   "different": 2,
+   "unsure": 1
+  },
+  "new": {
+   "same": 27,
+   "different": 10,
+   "unsure": 2
+  },
+  "other_product": {
+   "different": 4
+  },
+  "same": {
+   "same": 5
+  }
+ },
+ "M6_tag_v2_x_human": {
+  "ambiguous": {
+   "same": 16,
+   "different": 3,
+   "unsure": 1
+  },
+  "new": {
+   "same": 20,
+   "different": 8,
+   "unsure": 2
+  },
+  "other_product": {
+   "same": 1,
+   "different": 5
+  },
+  "same": {
+   "same": 12
+  }
+ },
+ "M7_bottler_missing": {
+  "rows": 0,
+  "human_same": 0,
+  "llm_same": 0
+ },
+ "decision": "보류"
+}
