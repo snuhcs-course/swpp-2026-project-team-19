@@ -11,6 +11,7 @@ verified. A bad or expired token is `401`; a server that cannot check tokens (mi
 signing keys out of reach) answers `503` so the app does not send the user back to login.
 """
 
+import logging
 import os
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -39,6 +40,7 @@ USER_TYPES = ("customer", "operator")
 REQUIRED_CLAIMS = ["exp", "iat", "sub", "iss", "aud"]
 
 bearer_scheme = HTTPBearer(auto_error=False)
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -84,8 +86,22 @@ def authenticate(token: str, key_provider_for: Callable[[str], SigningKeyProvide
     return _verify_supabase(token, header, key_provider_for)
 
 
+def temporary_login_enabled() -> bool:
+    return os.getenv("TEMP_AUTH_ENABLED", "false").lower() == "true"
+
+
+def warn_if_temporary_login_is_on() -> None:
+    """At start-up, say in the server log that anyone who reaches the server can get a token."""
+    if temporary_login_enabled():
+        logger.warning(
+            "Temporary login is on: anyone who can reach this server can get a token with user type %s "
+            "from POST /api/auth/temp-login. Turn it off (TEMP_AUTH_ENABLED=false) once Google login works.",
+            os.getenv("TEMP_AUTH_USER_TYPE", "customer"),
+        )
+
+
 def _verify_temporary(token: str) -> Principal:
-    if os.getenv("TEMP_AUTH_ENABLED", "false").lower() != "true":
+    if not temporary_login_enabled():
         raise _unauthenticated()
     secret = os.getenv("TEMP_AUTH_JWT_SECRET", "")
     user_type = os.getenv("TEMP_AUTH_USER_TYPE", "customer").lower()
@@ -167,10 +183,21 @@ def get_optional_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     key_provider_for: Callable[[str], SigningKeyProvider] = Depends(get_signing_key_provider_factory),
 ) -> Principal | None:
-    """For public routes: None without an Authorization header; a token that is sent must be valid."""
+    """For public routes: None without an Authorization header; a token that is sent must be valid.
+
+    A token the server cannot check right now (no SUPABASE_URL, signing keys out of reach, invalid
+    temporary-login settings) counts as no token instead of `503`: public data stays readable for
+    signed-in users during a Supabase outage, and they only lose what a guest cannot see either
+    (API spec, section 3.1.5). An invalid or expired token is still `401`.
+    """
     if credentials is None:
         return None
-    return authenticate(credentials.credentials, key_provider_for)
+    try:
+        return authenticate(credentials.credentials, key_provider_for)
+    except HTTPException as exc:
+        if exc.status_code == status.HTTP_503_SERVICE_UNAVAILABLE:
+            return None
+        raise
 
 
 def user_type_of(principal: Principal, session: Session) -> UserType:

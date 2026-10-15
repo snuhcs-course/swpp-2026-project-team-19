@@ -48,11 +48,11 @@ TEMP_AUTH_USER_TYPE=operator \
 uv run uvicorn app.main:app --reload
 ```
 
-The role of a temporary token is `TEMP_AUTH_USER_TYPE` (`customer` or `operator`) at request time, so changing it applies to tokens already issued; the `user_type` claim in the token is ignored. The deployed server keeps temporary login on only until Google login works in the app.
+The role of a temporary token is `TEMP_AUTH_USER_TYPE` (`customer` or `operator`) at request time, so changing it applies to tokens already issued; the `user_type` claim in the token is ignored. The deployed server keeps temporary login on only until Google login works in the app. While it is on, the server logs a warning at start-up; [DEPLOY.md](DEPLOY.md#turning-off-temporary-login) describes how to turn it off.
 
 **Users and roles.** `GET /api/me` is the only API that creates users: the first call stores the token's subject as `users.auth_subject` with user type `customer` (a temporary user takes `TEMP_AUTH_USER_TYPE`), and later calls keep the email in step with the token. Operator routes (`require_operator`) read a Supabase user's role from `users.user_type` on every request; a user without a row is a customer. Token claims never grant a role.
 
-**Errors.** A missing, invalid or expired token is `401 UNAUTHENTICATED` with `WWW-Authenticate: Bearer`. When the server cannot check tokens (no `SUPABASE_URL`, signing keys out of reach or empty, invalid temporary-login settings) it answers `503 SERVICE_UNAVAILABLE`, so the app keeps the session and retries instead of sending the user back to login.
+**Errors.** A missing, invalid or expired token is `401 UNAUTHENTICATED` with `WWW-Authenticate: Bearer`. When the server cannot check tokens (no `SUPABASE_URL`, signing keys out of reach or empty, invalid temporary-login settings) it answers `503 SERVICE_UNAVAILABLE`, so the app keeps the session and retries instead of sending the user back to login. Public routes are the exception: `GET /api/bars/{barId}/menu` treats a token it cannot check as no token, and `GET /api/search/bars` does not read the header at all, so guests and signed-in users can still search during a Supabase outage.
 
 ## Database configuration
 
@@ -105,7 +105,7 @@ Check that the server is running with `pg_isready -h localhost -p 5432`.
 uv run --env-file .env pytest
 ```
 
-Tests that need PostgreSQL use the database named by `POSTGRES_TEST_DATABASE` (same host and credentials as `POSTGRES_*`). Each test run drops and rebuilds that database's schema from the migrations, and each test is rolled back afterwards, so the name must end with `_test`; any other name stops the run. If the variable is not set, the database tests are skipped and the other tests still run. Shared fixtures (`db_session`, `client`) are in `tests/conftest.py`. Tests always use the mock extractor, whatever `MENU_EXTRACTOR` says, so they never call the Gemini API. Auth tests never call Supabase either: they sign tokens with an ES256 key made in the test and serve the public keys from memory (the `supabase` fixture and `tests/auth_support.py`).
+Tests that need PostgreSQL use the database named by `POSTGRES_TEST_DATABASE` (same host and credentials as `POSTGRES_*`). Each test run drops and rebuilds that database's schema from the migrations, and each test is rolled back afterwards, so the name must end with `_test`; any other name stops the run. If the variable is not set, the database tests are skipped and the other tests still run. Shared fixtures (`db_session`, `client`) are in `tests/conftest.py`. Tests always use the mock extractor, whatever `MENU_EXTRACTOR` says, so they never call the Gemini API. `tests/test_route_permissions.py` lists who may call each `/api` route (API spec 2.2) and checks it with both kinds of token; a new route fails that test until it is added to the list. Auth tests never call Supabase either: they sign tokens with an ES256 key made in the test and serve the public keys from memory (the `supabase` fixture and `tests/auth_support.py`).
 
 To measure coverage of `app/` (line and branch):
 

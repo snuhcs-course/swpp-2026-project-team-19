@@ -85,12 +85,18 @@ GET 상품 검색 (검색어 + 선택적 위치)
 | `GET /api/bars/{barId}/menu-imports`, `POST /api/bars/{barId}/menu-imports` | | | O | O |
 | `GET /api/menu-imports/{menuImportId}`, `POST .../review-and-apply`, `POST .../cancel` | | | 해당 업장의 작업만 | O |
 | `GET /api/catalog/brands`, `GET /api/catalog/products` | | | 업장이 하나 이상이면 O | O |
+| `POST /api/auth/temp-login` | 임시 로그인이 켜진 서버에서만 O (3.1.3) | 같음 | 같음 | 같음 |
+| `GET /health` | O | O | O | O |
+
+`/media/{key}`는 로컬 저장소를 쓰는 개발 환경에서만 있는 사진 파일 경로이며 API 계약이 아니다. 배포 서버(S3)에는 없다.
 
 인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다.
 
 1. token이 유효한가 (아니면 `401`, 3.1.5)
-2. 요청한 `barId`, `menuImportId`, `applicationId`가 존재하는가 (아니면 각 API의 `404`)
-3. 호출자가 operator이거나, 요청 대상 업장의 현재 업주인가 (아니면 `403 FORBIDDEN`)
+2. operator 전용 API는 호출자가 operator인가 (아니면 `403 FORBIDDEN`). 대상이 있는지는 그다음에 확인하므로, operator가 아닌 호출자는 없는 `barId`나 `menuImportId`를 보내도 `403`이다. 업장 정보는 공개 API로 이미 볼 수 있어 존재 여부를 숨길 필요가 없다.
+3. 요청한 `barId`, `menuImportId`, `applicationId`가 존재하는가 (아니면 각 API의 `404`)
+
+업주 권한(Iteration 3)이 들어오면 업장별 권한은 대상 업장을 알아야 판단할 수 있다. 그래서 업주도 호출할 수 있는 API는 3번을 먼저 확인한 뒤 "호출자가 operator이거나 대상 업장의 현재 업주인가"(아니면 `403`)를 확인한다.
 
 업주 여부는 매 요청 DB에서 확인하므로 승인과 해제가 다음 요청부터 반영된다. 업주 신청은 다른 사람의 신청이 있는지 알리지 않도록 권한이 없을 때도 `404 OWNER_APPLICATION_NOT_FOUND`를 반환한다(3.11.4).
 
@@ -243,7 +249,7 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 
 Supabase 연동 전과 로컬 개발을 위해 `POST /api/auth/temp-login`을 유지한다. 이 API는 명시적으로 활성화해야 하며, 고정된 `local-dev-user` subject로 짧은 만료 시간의 HS256 JWT를 발급한다. 이 token은 Supabase access token이 아니다.
 
-배포 서버에서는 앱에서 Google 로그인이 가능해질 때까지만 데모용으로 켜 둘 수 있고, Google 로그인이 가능해지면 끈다(`TEMP_AUTH_ENABLED=false`). 켜져 있는 동안에는 서버에 접근하는 누구나 같은 임시 계정을 공유하며, `TEMP_AUTH_USER_TYPE=operator`이면 operator 권한을 얻는다.
+배포 서버에서는 앱에서 Google 로그인이 가능해질 때까지만 데모용으로 켜 둘 수 있고, Google 로그인이 가능해지면 끈다(`TEMP_AUTH_ENABLED=false`). 켜져 있는 동안에는 서버에 접근하는 누구나 같은 임시 계정을 공유하며, `TEMP_AUTH_USER_TYPE=operator`이면 operator 권한을 얻는다. 켜져 있는 동안 서버는 시작할 때마다 경고 로그를 남긴다. 끄는 절차는 `backend/DEPLOY.md`를 따른다.
 
 개발 환경에서 `TEMP_AUTH_ENABLED=true`와 32자 이상의 로컬 `TEMP_AUTH_JWT_SECRET`을 설정한 뒤 호출한다. 요청 본문은 없으며, 응답은 세 시간 동안 유효한 bearer token이다.
 
@@ -273,7 +279,7 @@ POST /api/auth/temp-login
 
 - 최초 가입한 사용자는 항상 `customer`다. 신규 가입자를 자동으로 `operator`로 만들지 않는다.
 - 클라이언트 요청이나 token claim(`user_metadata` 포함)으로 `userType`을 바꿀 수 없다. 권한은 매 요청 BottleMap DB의 `users.user_type`에서 읽는다.
-- `operator` 전환은 이후 별도 기능으로 정의하며 이 문서의 범위가 아니다. 그전까지 로컬에서 operator API를 시험할 때는 임시 로그인과 `TEMP_AUTH_USER_TYPE=operator`를 사용한다.
+- `operator` 전환은 이후 별도 기능으로 정의하며 이 문서의 범위가 아니다. 그전까지 로컬에서 operator API를 시험할 때는 임시 로그인과 `TEMP_AUTH_USER_TYPE=operator`를 사용한다. 배포 서버에서는 백엔드 담당자가 DB의 `users.user_type`을 직접 고쳐야만 operator 역할이 부여되며, 바꾼 역할은 해당 사용자의 다음 요청부터 반영된다.
 - 업주는 `userType`이 아니라 업장별 관계다. 신청과 승인은 3.11, 권한은 2.2를 따른다.
 - `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`는 `404 USER_NOT_FOUND`다(3.3, 3.11.2).
 
@@ -302,8 +308,8 @@ API 응답 401 UNAUTHENTICATED
 - 프론트엔드는 access token을 따로 보관하지 않고 요청 직전에 SDK의 현재 세션에서 꺼낸다. SDK가 만료 전에 자동으로 갱신하므로 대부분의 요청은 `401` 없이 처리된다.
 - 여러 요청이 동시에 `401`을 받아도 세션 갱신은 한 번만 하고, 나머지 요청은 그 결과를 기다려 재시도한다.
 - 공개 API 처리:
-  - `GET /api/bars/{barId}/menu`는 `Authorization` 헤더가 있으면 token을 검증하고, 잘못된 token이면 `401`을 반환한다. 프론트엔드는 위 재시도 흐름을 똑같이 적용하되, 세션 갱신에 실패하면 로그인 화면으로 보내지 않고 로그아웃한 뒤 헤더 없이 비로그인 사용자로 다시 요청한다.
-  - `GET /api/search/bars`는 `Authorization` 헤더를 사용하지 않는다.
+  - `GET /api/bars/{barId}/menu`는 `Authorization` 헤더가 있으면 token을 검증하고, 잘못된 token이면 `401`을 반환한다. 프론트엔드는 위 재시도 흐름을 똑같이 적용하되, 세션 갱신에 실패하면 로그인 화면으로 보내지 않고 로그아웃한 뒤 헤더 없이 비로그인 사용자로 다시 요청한다. 단, 서버가 지금 token을 확인할 수 없으면(위 표의 `503` 조건) 이 API는 `503` 대신 token이 없는 것처럼 비로그인 사용자로 처리한다. 공개 정보라서 Supabase 장애 중에도 로그인 사용자가 업장 상세를 볼 수 있게 하려는 것이다. 이때는 operator도 비활성 업장을 볼 수 없다(`404`).
+  - `GET /api/search/bars`는 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
 
 #### 3.1.6 백엔드 설정 항목
 
@@ -643,7 +649,7 @@ Authorization: Bearer <access-token>
 GET /api/bars/{barId}/menu
 ```
 
-`Authorization` 헤더는 선택이다. 보내면 token을 검증하며, 잘못된 token은 `401`이다(3.1.5).
+`Authorization` 헤더는 선택이다. 보내면 token을 검증하며, 잘못된 token은 `401`이다(3.1.5). 서버가 token을 확인할 수 없으면 비로그인 사용자로 처리한다(3.1.5).
 
 | 호출자 | 활성 업장 | 비활성 업장 |
 |---|---|---|
