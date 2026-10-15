@@ -1,4 +1,5 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #8). Reviewed by Haeul Yang.
+# Modified with Claude Code (Jinwoo Park, 2026-10-15): default seed files are now catalog v2 (PR #24).
 """Load the pilot bars and the product catalog seed (ai/catalog/) into the database.
 
 Brands, products, and bars are upserted by id, so re-running after editing the JSON
@@ -130,8 +131,8 @@ def seed(conn: Connection, catalog: dict, bars: dict) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--catalog", type=Path, default=CATALOG_DIR / "catalog_v1_draft.json")
-    parser.add_argument("--bars", type=Path, default=CATALOG_DIR / "bars_v1.json")
+    parser.add_argument("--catalog", type=Path, default=CATALOG_DIR / "catalog_v2_service.json")
+    parser.add_argument("--bars", type=Path, default=CATALOG_DIR / "bars_v2.json")
     args = parser.parse_args()
 
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
