@@ -312,10 +312,10 @@ def test_processing_runs_only_for_imports_in_processing(db_session, image_storag
     assert db_session.scalars(select(ExtractedItem)).all() == []
 
 
-@pytest.mark.skipif(not (CATALOG_DIR / "catalog_v1_draft.json").exists(), reason="ai/catalog seed is not checked out")
+@pytest.mark.skipif(not (CATALOG_DIR / "catalog_v2_service.json").exists(), reason="ai/catalog seed is not checked out")
 def test_label_fixture_against_the_seed_catalog(client, db_session, image_storage, operator):
-    catalog = json.loads((CATALOG_DIR / "catalog_v1_draft.json").read_text(encoding="utf-8"))
-    bars = json.loads((CATALOG_DIR / "bars_v1.json").read_text(encoding="utf-8"))
+    catalog = json.loads((CATALOG_DIR / "catalog_v2_service.json").read_text(encoding="utf-8"))
+    bars = json.loads((CATALOG_DIR / "bars_v2.json").read_text(encoding="utf-8"))
     seed(db_session.connection(), catalog, bars)
     bar = make_bar(db_session)
 

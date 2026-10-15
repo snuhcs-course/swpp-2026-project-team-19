@@ -8,7 +8,7 @@ import pytest
 from app.matching import ProductInfo
 from app.matching.memory_catalog import InMemoryCatalog
 
-SEED_PATH = Path(__file__).resolve().parents[2] / "ai" / "catalog" / "catalog_v1_draft.json"
+SEED_PATH = Path(__file__).resolve().parents[2] / "ai" / "catalog" / "catalog_v2_service.json"
 
 
 def test_aliases_are_normalized_and_deduplicated_per_product():
