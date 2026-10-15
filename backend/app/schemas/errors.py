@@ -23,6 +23,13 @@ class ErrorResponse(BaseModel):
     error: ErrorBody
 
 
+AUTH_UNAVAILABLE_DESCRIPTION = (
+    "`SERVICE_UNAVAILABLE`: the server cannot check tokens now (Supabase settings missing, signing keys "
+    "out of reach, or invalid temporary-login settings). Not a login problem: keep the session and retry later."
+)
+AUTH_UNAVAILABLE = (503, AUTH_UNAVAILABLE_DESCRIPTION)
+
+
 def error_responses(*entries: tuple[int, str]) -> dict[int | str, dict[str, Any]]:
     """`responses=` for a route: (status, description listing the error codes) pairs.
 

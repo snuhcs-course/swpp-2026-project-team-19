@@ -1,14 +1,14 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
-from typing import Annotated, Any
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.core.security import require_operator
+from app.core.security import Principal, require_operator
 from app.db.session import get_session
 from app.schemas.catalog import CatalogBrandsResponse, CatalogProductsResponse
-from app.schemas.errors import error_responses
+from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
 from app.services.catalog_search import search_brands, search_products
 
 router = APIRouter(prefix="/api/catalog", tags=["catalog"])
@@ -21,6 +21,7 @@ _MATCHING = (
 _COMMON_ERRORS = (
     (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
     (403, "`FORBIDDEN`: the caller is not an operator."),
+    AUTH_UNAVAILABLE,
     (
         422,
         "`VALIDATION_FAILED`: `query` `MISSING`, `BLANK`, `STRING_TOO_LONG` (over 100 characters) or "
@@ -43,7 +44,7 @@ def read_catalog_brands(
     query: Annotated[str, Query(description="Brand name or alias; 1-100 characters after trimming")],
     limit: Annotated[int, Query(ge=1, le=50, description="Maximum number of brands")] = 20,
     session: Session = Depends(get_session),
-    _operator: dict[str, Any] = Depends(require_operator),
+    _operator: Principal = Depends(require_operator),
 ) -> CatalogBrandsResponse:
     return search_brands(session, query, limit=limit)
 
@@ -68,6 +69,6 @@ def read_catalog_products(
     ] = True,
     limit: Annotated[int, Query(ge=1, le=50, description="Maximum number of products")] = 20,
     session: Session = Depends(get_session),
-    _operator: dict[str, Any] = Depends(require_operator),
+    _operator: Principal = Depends(require_operator),
 ) -> CatalogProductsResponse:
     return search_products(session, query, brand_id=brand_id, include_inactive=include_inactive, limit=limit)

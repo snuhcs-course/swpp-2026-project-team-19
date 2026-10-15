@@ -1,13 +1,13 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #13). Reviewed by Haeul Yang.
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
 
-from app.core.security import get_optional_user, require_operator
+from app.core.security import Principal, get_optional_user, require_operator, user_type_of
 from app.db.session import get_session
 from app.schemas.bar import BarListResponse
-from app.schemas.errors import error_responses
+from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
 from app.schemas.menu import BarMenuResponse
 from app.schemas.menu_import import MenuImportListResponse
 from app.services.bar_admin import BarStatusFilter, ImportStatusFilter, list_bars, list_menu_imports
@@ -18,6 +18,7 @@ router = APIRouter(prefix="/api/bars", tags=["bars"])
 _OPERATOR_ERRORS = (
     (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
     (403, "`FORBIDDEN`: the caller is not an operator."),
+    AUTH_UNAVAILABLE,
 )
 _PAGING = (
     "Pages use a cursor: pass the response's `nextCursor` as `cursor` to get the next page; "
@@ -51,7 +52,7 @@ def read_bars(
     limit: Limit = 20,
     cursor: Cursor = None,
     session: Session = Depends(get_session),
-    _operator: dict[str, Any] = Depends(require_operator),
+    _operator: Principal = Depends(require_operator),
 ) -> BarListResponse:
     return list_bars(session, query=query, status=status, limit=limit, cursor=cursor)
 
@@ -85,7 +86,7 @@ def read_bar_menu_imports(
     limit: Limit = 20,
     cursor: Cursor = None,
     session: Session = Depends(get_session),
-    _operator: dict[str, Any] = Depends(require_operator),
+    _operator: Principal = Depends(require_operator),
 ) -> MenuImportListResponse:
     return list_menu_imports(session, bar_id, status=status, limit=limit, cursor=cursor)
 
@@ -110,7 +111,7 @@ def read_bar_menu_imports(
 def read_bar_menu(
     bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
     session: Session = Depends(get_session),
-    user: dict[str, Any] | None = Depends(get_optional_user),
+    user: Principal | None = Depends(get_optional_user),
 ) -> BarMenuResponse:
-    is_operator = user is not None and user.get("user_type") == "operator"
+    is_operator = user is not None and user_type_of(user, session) == "operator"
     return get_bar_menu(session, bar_id, include_inactive=is_operator)

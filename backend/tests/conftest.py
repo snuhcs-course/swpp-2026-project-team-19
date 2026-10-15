@@ -113,6 +113,31 @@ def token_for(client: TestClient, monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture
+def supabase(monkeypatch: pytest.MonkeyPatch) -> Iterator["SupabaseTokens"]:
+    """Supabase login served from memory: SUPABASE_URL is set and the API reads signing keys from a fake JWKS."""
+    from app.adapters.auth_keys import JwksSigningKeyProvider
+    from app.core.security import get_signing_key_provider_factory
+    from app.main import app
+    from tests.auth_support import SUPABASE_TEST_URL, SupabaseTokens
+
+    monkeypatch.setenv("SUPABASE_URL", SUPABASE_TEST_URL)
+    monkeypatch.delenv("SUPABASE_JWT_AUDIENCE", raising=False)
+    monkeypatch.delenv("SUPABASE_JWT_ALGORITHMS", raising=False)
+    tokens = SupabaseTokens()
+    provider = JwksSigningKeyProvider(tokens.jwks)
+
+    def provider_for(jwks_url: str) -> JwksSigningKeyProvider:
+        tokens.requested_jwks_urls.append(jwks_url)
+        return provider
+
+    app.dependency_overrides[get_signing_key_provider_factory] = lambda: provider_for
+    try:
+        yield tokens
+    finally:
+        app.dependency_overrides.pop(get_signing_key_provider_factory, None)
+
+
+@pytest.fixture
 def image_storage(tmp_path: Path) -> Iterator["LocalImageStorage"]:
     """Image storage in a temporary directory, used by the API instead of the configured one."""
     from app.adapters.storage import LocalImageStorage

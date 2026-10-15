@@ -56,14 +56,15 @@ uv run --env-file .env uvicorn app.main:app --reload
 uv run --env-file .env alembic upgrade head
 ```
 
-Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) is set in `backend/.env`; a run with skipped database tests also drops below the coverage threshold. Tests always use the mock menu extractor and must never call the Gemini API.
+Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) is set in `backend/.env`; a run with skipped database tests also drops below the coverage threshold. Tests always use the mock menu extractor and must never call the Gemini API or Supabase: auth tests sign their own tokens and serve the public keys from memory (the `supabase` fixture in `backend/tests/conftest.py`).
 
 ## API conventions (both sides)
 
 - JSON field names are `camelCase`. IDs are UUID strings, times are UTC RFC 3339 strings, prices are integer KRW, and a missing value is `null`, not an empty string.
 - Errors use one shape: `{"error": {"code", "message", ...}}`. Clients branch on `error.code`, not on the message text.
-- Auth is `Authorization: Bearer <token>` with a Supabase access token from Google login (spec 3.1). `POST /api/auth/temp-login` stays for local development, and for the demo server only until Google login works in the app. Until the backend verifies Supabase tokens, temp-login tokens are the only ones it accepts.
-- Permissions come from the database, never from the client. `users.user_type` is `customer` or `operator`; being a bar owner is not a user type but a `bar_owners` row linking a user to one bar, created when an operator approves an owner application (spec 3.11).
+- Auth is `Authorization: Bearer <token>` with a Supabase access token from Google login (spec 3.1). `POST /api/auth/temp-login` stays for local development, and for the demo server only until Google login works in the app. The backend accepts both kinds: Supabase tokens are verified with the project's public keys (`SUPABASE_URL`), and temp-login tokens only while `TEMP_AUTH_ENABLED=true`.
+- Permissions come from the server, never from the client or the token's claims. A Supabase user's `users.user_type` (`customer` or `operator`) is read from the database on every request, and a user without a row is a customer; a temporary token takes its role from `TEMP_AUTH_USER_TYPE` on the server.
+- Being a bar owner is not a user type but a `bar_owners` row linking a user to one bar, created when an operator approves an owner application (spec 3.11).
 - Customer search (`GET /api/search/bars`) and bar menu (`GET /api/bars/{barId}/menu`) are public. Bar management, menu import, and review APIs are for operators and the bar's approved owner; the catalogue search APIs are for operators and owners. Approving owner applications is operator-only. The full table is in spec 2.2.
 
 ## Android notes
@@ -95,8 +96,8 @@ When you create a code file, add this line with your tool and model, the member 
 
 ## Git and PRs
 
-- Branch from `main` as `feature/<task-id>-<short-name>`, for example `feature/p25-demo-reset`.
-- The PR title is `<task ID>: <task summary>`, for example `P23: Unit test the matching function and basic API behavior, run in CI with coverage`. PRs are squash-merged.
+- Branch from `main` as `feature/i<iteration>-<task-id>-<short-name>`, all lowercase, for example `feature/i2-p9-google-token-verification` for task P9 in Iteration 2.
+- The PR title is `I<iteration>-<task ID>: <task summary>`, for example `I2-P9: Implement server verification of Google login tokens; handle invalid and expired credentials`. A PR that covers several tasks lists them with `/`, as in `I2-P13/P14: ...`. PRs are squash-merged.
 - Commit or push only when the member you are working for asks.
 - Merging to `main` deploys the backend to production automatically after CI passes, so `main` must stay deployable.
 
