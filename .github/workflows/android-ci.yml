@@ -58,8 +58,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install compile SDK
-        run: sdkmanager --install 'platforms;android-37'
+      - name: Set up Android SDK 37
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-37'
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v5
       - name: Run Android lint
@@ -86,8 +88,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install compile SDK
-        run: sdkmanager --install 'platforms;android-37'
+      - name: Set up Android SDK 37
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-37'
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v5
       - name: Run JUnit 4 local tests
@@ -115,8 +119,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install compile SDK
-        run: sdkmanager --install 'platforms;android-37'
+      - name: Set up Android SDK 37
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-37'
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v5
       # Empty BuildConfig credentials are supported for compilation; this job never connects
