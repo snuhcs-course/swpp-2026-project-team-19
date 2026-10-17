@@ -379,6 +379,22 @@ private fun ResultsSuccessPreview() {
     }
 }
 
+@Preview(showBackground = true, widthDp = 320, heightDp = 568, fontScale = 1.3f)
+@Composable
+private fun CompactPortraitSearchErrorPreview() {
+    I2CustomerSearchTheme {
+        SearchResultsContent(
+            query = "아주 긴 위스키 이름을 검색했을 때에도 다시 시도 버튼이 보여야 합니다",
+            state = CustomerSearchUiState.Error(
+                "연결 상태를 확인하고 다시 시도해 주세요.",
+            ),
+            onBack = {},
+            onOpenBarDetail = {},
+            onRetry = {},
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun ResultsErrorPreview() {
