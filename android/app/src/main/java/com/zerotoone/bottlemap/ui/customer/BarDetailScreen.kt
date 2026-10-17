@@ -1,6 +1,7 @@
 // AI-assisted implementation draft (2026-10-17, I2-P24). Human verification pending.
 package com.zerotoone.bottlemap.ui.customer
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,14 @@ fun BarDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(barId) { viewModel.load(barId) }
+    // Hardware Back follows the same API contract as the visible Back button
+    // when the selected bar no longer exists.
+    BackHandler(
+        enabled = state is BarDetailUiState.Error &&
+            (state as BarDetailUiState.Error).refreshResultsOnBack,
+    ) {
+        onBackAndRefreshResults()
+    }
 
     I2CustomerSearchTheme {
         BarDetailContent(
