@@ -1,0 +1,299 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "009_odbi_06.png",
+  "prepared_image": "009_odbi_06.png",
+  "prepared_sha256": "e6822f120ad3877245e412849a23b5cb04b3730a7f033c7143497a9a6d3c135e",
+  "started_at": "2026-10-17T06:22:57.054280+00:00",
+  "latency_ms": 7052,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5110,
+  "output_tokens": 1320,
+  "thought_tokens": 1593,
+  "total_tokens": 8023,
+  "output": {
+    "items": [
+      {
+        "raw_name": "보모어12",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006"
+          ],
+          "price": [
+            "L022"
+          ]
+        }
+      },
+      {
+        "raw_name": "보모어18",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L023"
+          ]
+        }
+      },
+      {
+        "raw_name": "아드벡 위 비스티",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008"
+          ],
+          "price": [
+            "L024"
+          ]
+        }
+      },
+      {
+        "raw_name": "아드벡10",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L025"
+          ]
+        }
+      },
+      {
+        "raw_name": "아드벡 우거다일",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L010"
+          ],
+          "price": [
+            "L026"
+          ]
+        }
+      },
+      {
+        "raw_name": "아드벡 코리브레칸",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L011"
+          ],
+          "price": [
+            "L027"
+          ]
+        }
+      },
+      {
+        "raw_name": "라가불린16",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L012"
+          ],
+          "price": [
+            "L028"
+          ]
+        }
+      },
+      {
+        "raw_name": "라프로익 쿼터캐스크",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013"
+          ],
+          "price": [
+            "L029"
+          ]
+        }
+      },
+      {
+        "raw_name": "라프로익10",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L014"
+          ],
+          "price": [
+            "L030"
+          ]
+        }
+      },
+      {
+        "raw_name": "라프로익10 쉐리",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L015",
+            "L016"
+          ],
+          "price": [
+            "L031"
+          ]
+        }
+      },
+      {
+        "raw_name": "라프로익10cs",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L017"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "탈리스커10",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L018"
+          ],
+          "price": [
+            "L033"
+          ]
+        }
+      },
+      {
+        "raw_name": "브룩라디18",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L019"
+          ],
+          "price": [
+            "L034"
+          ]
+        }
+      },
+      {
+        "raw_name": "브룩라디 포트샬롯10",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L020"
+          ],
+          "price": [
+            "L035"
+          ]
+        }
+      },
+      {
+        "raw_name": "브룩라디 클래식 스토티시 발리",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L021"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"보모어12\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L022\"]\n      }\n    },\n    {\n      \"raw_name\": \"보모어18\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L023\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 위 비스티\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L024\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡10\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L025\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"라가불린16\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익 쿼터캐스크\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익10\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익10 쉐리\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\", \"L016\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익10cs\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"탈리스커10\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"브룩라디18\",\n      \"price_krw\": 60000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"브룩라디 포트샬롯10\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"브룩라디 클래식 스토티시 발리\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L036\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:23:03Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"보모어12\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L022\"]\n      }\n    },\n    {\n      \"raw_name\": \"보모어18\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L023\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 위 비스티\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L024\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡10\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L025\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"라가불린16\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익 쿼터캐스크\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익10\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익10 쉐리\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\", \"L016\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익10cs\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"탈리스커10\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"브룩라디18\",\n      \"price_krw\": 60000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"브룩라디 포트샬롯10\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"브룩라디 클래식 스토티시 발리\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L036\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"보모어12\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L022\"]\n      }\n    },\n    {\n      \"raw_name\": \"보모어18\",\n      \"price_krw\": 30000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L023\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 위 비스티\",\n      \"price_krw\": 10000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L024\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡10\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L025\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 우거다일\",\n      \"price_krw\": 22000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"아드벡 코리브레칸\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"라가불린16\",\n      \"price_krw\": 26000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익 쿼터캐스크\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익10\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익10 쉐리\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\", \"L016\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익10cs\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"탈리스커10\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"브룩라디18\",\n      \"price_krw\": 60000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"브룩라디 포트샬롯10\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"브룩라디 클래식 스토티시 발리\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L036\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:23:03Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 4032
+        },
+        {
+          "modality": "image",
+          "tokens": 1078
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 5110,
+      "total_output_tokens": 1320,
+      "total_thought_tokens": 1593,
+      "total_tokens": 8023,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 36,
+    "price_like_lines": 16,
+    "uncited_price_lines": 1,
+    "uncited": [
+      "L003"
+    ],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [98,25,217,44] 21:07\nL002 [776,27,838,43] LTE\nL003 [861,27,903,40] 42\nL004 [880,100,928,124] X\nL005 [152,211,364,223] -싱글몰트 피트 위스키\nL006 [152,228,239,239] 보모어12\nL007 [152,245,239,256] 보모어18\nL008 [152,260,313,272] 아드벡 위 비스티\nL009 [152,277,239,289] 아드벡10\nL010 [152,294,304,306] 아드벡 우거다일\nL011 [152,311,324,323] 아드벡 코리브레칸\nL012 [152,327,260,338] 라가불린16\nL013 [152,344,344,355] 라프로익 쿼터캐스크\nL014 [152,359,260,371] 라프로익10\nL015 [152,376,260,388] 라프로익10\nL016 [265,376,304,388] 쉐리\nL017 [152,393,282,405] 라프로익10cs\nL018 [152,410,260,422] 탈리스커10\nL019 [152,426,260,437] 브룩라디18\nL020 [152,442,347,454] 브룩라디 포트샬롯10\nL021 [152,459,440,471] 브룩라디 클래식 스토티시 발리\nL022 [776,228,846,238] 12,000\nL023 [779,246,846,255] 30,000\nL024 [779,263,846,272] 10,000\nL025 [775,277,847,289] 15,000\nL026 [779,295,846,304] 22,000\nL027 [779,312,846,322] 26,000\nL028 [776,327,846,337] 26,000\nL029 [776,344,846,354] 14,000\nL030 [779,362,846,371] 14,000\nL031 [779,379,846,388] 18,000\nL032 [779,394,846,403] 20,000\nL033 [779,411,846,421] 12,000\nL034 [776,427,846,437] 60,000\nL035 [776,442,846,453] 24,000\nL036 [779,460,846,470] 17,000\n</ocr_lines>",
+  "n_lines": 36,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 1388
+}

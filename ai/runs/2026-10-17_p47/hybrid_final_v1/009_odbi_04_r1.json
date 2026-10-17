@@ -1,0 +1,368 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "009_odbi_04.png",
+  "prepared_image": "009_odbi_04.png",
+  "prepared_sha256": "13cb1ac55bca77e16439293a1852ffd121148502335b4206910c7bad4cfac1fc",
+  "started_at": "2026-10-17T06:22:38.822989+00:00",
+  "latency_ms": 7897,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5385,
+  "output_tokens": 1770,
+  "thought_tokens": 892,
+  "total_tokens": 8047,
+  "output": {
+    "items": [
+      {
+        "raw_name": "와일드터키81",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006"
+          ],
+          "price": [
+            "L027"
+          ]
+        }
+      },
+      {
+        "raw_name": "와일드터키라이",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L028"
+          ]
+        }
+      },
+      {
+        "raw_name": "와일드터키8 101",
+        "price_krw": 9000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008"
+          ],
+          "price": [
+            "L029"
+          ]
+        }
+      },
+      {
+        "raw_name": "와일드터키 레어브리드",
+        "price_krw": 12000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L030"
+          ]
+        }
+      },
+      {
+        "raw_name": "바질헤이든",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L010"
+          ],
+          "price": [
+            "L031"
+          ]
+        }
+      },
+      {
+        "raw_name": "메이커스마크",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L011"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "불렛버번",
+        "price_krw": 10000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L012"
+          ],
+          "price": [
+            "L033"
+          ]
+        }
+      },
+      {
+        "raw_name": "불렛라이",
+        "price_krw": 10000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013"
+          ],
+          "price": [
+            "L034"
+          ]
+        }
+      },
+      {
+        "raw_name": "우드포드리저브",
+        "price_krw": 12000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L014"
+          ],
+          "price": [
+            "L035"
+          ]
+        }
+      },
+      {
+        "raw_name": "우드포드리저브 더블오크",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L015"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      },
+      {
+        "raw_name": "포로지스",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L016"
+          ],
+          "price": [
+            "L037"
+          ]
+        }
+      },
+      {
+        "raw_name": "포로지스 싱글베럴",
+        "price_krw": 12000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L017"
+          ],
+          "price": [
+            "L038"
+          ]
+        }
+      },
+      {
+        "raw_name": "러셀 싱글베럴",
+        "price_krw": 15000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L018"
+          ],
+          "price": [
+            "L039"
+          ]
+        }
+      },
+      {
+        "raw_name": "러셀 싱글베럴 라이",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L019"
+          ],
+          "price": [
+            "L040"
+          ]
+        }
+      },
+      {
+        "raw_name": "부커스",
+        "price_krw": 28000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L020"
+          ],
+          "price": [
+            "L041"
+          ]
+        }
+      },
+      {
+        "raw_name": "놉크릭 버번",
+        "price_krw": 10000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L021"
+          ],
+          "price": [
+            "L042"
+          ]
+        }
+      },
+      {
+        "raw_name": "에반윌리암스",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022"
+          ],
+          "price": [
+            "L043"
+          ]
+        }
+      },
+      {
+        "raw_name": "1776 제임스 E.페퍼",
+        "price_krw": 13000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L044"
+          ]
+        }
+      },
+      {
+        "raw_name": "잭다니엘",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L045"
+          ]
+        }
+      },
+      {
+        "raw_name": "잭다니엘 애플",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L046"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"와일드터키81\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키라이\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키8 101\",\n      \"price_krw\": 9000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 레어브리드\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"바질헤이든\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"메이커스마크\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"불렛버번\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"불렛라이\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"우드포드리저브\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"우드포드리저브 더블오크\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"포로지스\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L037\"]\n      }\n    },\n    {\n      \"raw_name\": \"포로지스 싱글베럴\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L038\"]\n      }\n    },\n    {\n      \"raw_name\": \"러셀 싱글베럴\",\n      \"price_krw\": 15000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L039\"]\n      }\n    },\n    {\n      \"raw_name\": \"러셀 싱글베럴 라이\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"부커스\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"놉크릭 버번\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L042\"]\n      }\n    },\n    {\n      \"raw_name\": \"에반윌리암스\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L043\"]\n      }\n    },\n    {\n      \"raw_name\": \"1776 제임스 E.페퍼\",\n      \"price_krw\": 13000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L044\"]\n      }\n    },\n    {\n      \"raw_name\": \"잭다니엘\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"잭다니엘 애플\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L046\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:22:46Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"와일드터키81\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키라이\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키8 101\",\n      \"price_krw\": 9000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 레어브리드\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"바질헤이든\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"메이커스마크\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"불렛버번\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"불렛라이\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"우드포드리저브\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"우드포드리저브 더블오크\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"포로지스\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L037\"]\n      }\n    },\n    {\n      \"raw_name\": \"포로지스 싱글베럴\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L038\"]\n      }\n    },\n    {\n      \"raw_name\": \"러셀 싱글베럴\",\n      \"price_krw\": 15000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L039\"]\n      }\n    },\n    {\n      \"raw_name\": \"러셀 싱글베럴 라이\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"부커스\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"놉크릭 버번\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L042\"]\n      }\n    },\n    {\n      \"raw_name\": \"에반윌리암스\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L043\"]\n      }\n    },\n    {\n      \"raw_name\": \"1776 제임스 E.페퍼\",\n      \"price_krw\": 13000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L044\"]\n      }\n    },\n    {\n      \"raw_name\": \"잭다니엘\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"잭다니엘 애플\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L046\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"와일드터키81\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키라이\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L028\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키8 101\",\n      \"price_krw\": 9000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L029\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 레어브리드\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L030\"]\n      }\n    },\n    {\n      \"raw_name\": \"바질헤이든\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"메이커스마크\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"불렛버번\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"불렛라이\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"우드포드리저브\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"우드포드리저브 더블오크\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"포로지스\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L037\"]\n      }\n    },\n    {\n      \"raw_name\": \"포로지스 싱글베럴\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L038\"]\n      }\n    },\n    {\n      \"raw_name\": \"러셀 싱글베럴\",\n      \"price_krw\": 15000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L039\"]\n      }\n    },\n    {\n      \"raw_name\": \"러셀 싱글베럴 라이\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L040\"]\n      }\n    },\n    {\n      \"raw_name\": \"부커스\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"놉크릭 버번\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L042\"]\n      }\n    },\n    {\n      \"raw_name\": \"에반윌리암스\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L043\"]\n      }\n    },\n    {\n      \"raw_name\": \"1776 제임스 E.페퍼\",\n      \"price_krw\": 13000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L044\"]\n      }\n    },\n    {\n      \"raw_name\": \"잭다니엘\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"잭다니엘 애플\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L046\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:22:46Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1078
+        },
+        {
+          "modality": "text",
+          "tokens": 4307
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 5385,
+      "total_output_tokens": 1770,
+      "total_thought_tokens": 892,
+      "total_tokens": 8047,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 46,
+    "price_like_lines": 21,
+    "uncited_price_lines": 1,
+    "uncited": [
+      "L003"
+    ],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [98,25,217,44] 21:07\nL002 [776,27,838,43] LTE\nL003 [861,27,903,40] 42\nL004 [880,101,928,124] X\nL005 [152,211,265,223] -버번위스키\nL006 [152,228,277,239] 와일드터키81\nL007 [152,245,293,256] 와일드터키라이\nL008 [152,260,310,272] 와일드터키8 101\nL009 [152,277,364,289] 와일드터키 레어브리드\nL010 [152,294,256,306] 바질헤이든\nL011 [152,311,277,323] 메이커스마크\nL012 [152,327,234,338] 불렛버번\nL013 [152,344,234,355] 불렛라이\nL014 [152,359,296,371] 우드포드리저브\nL015 [152,376,383,388] 우드포드리저브 더블오크\nL016 [152,393,237,405] 포로지스\nL017 [152,410,321,422] 포로지스 싱글베럴\nL018 [152,426,285,437] 러셀 싱글베럴\nL019 [152,442,332,454] 러셀 싱글베럴 라이\nL020 [152,459,217,470] 부커스\nL021 [152,475,265,487] 놉크릭 버번\nL022 [152,492,277,504] 에반윌리암스\nL023 [155,509,338,521] 1776 제임스 E.페퍼\nL024 [152,525,234,536] 잭다니엘\nL025 [152,541,285,553] 잭다니엘 애플\nL026 [796,212,846,221] 30ml\nL027 [787,228,846,238] 8,000\nL028 [787,245,846,255] 8,000\nL029 [790,263,846,272] 9,000\nL030 [779,279,846,288] 12,000\nL031 [779,295,846,304] 14,000\nL032 [790,312,846,322] 8,000\nL033 [776,327,846,338] 10,000\nL034 [776,344,846,354] 10,000\nL035 [779,362,846,371] 12,000\nL036 [776,378,846,388] 20,000\nL037 [790,394,846,403] 8,000\nL038 [779,411,846,421] 12,000\nL039 [775,426,847,437] 15,000\nL040 [776,442,846,453] 16,000\nL041 [779,461,846,470] 28,000\nL042 [779,478,846,487] 10,000\nL043 [787,492,846,502] 8,000\nL044 [776,509,846,520] 13,000\nL045 [787,526,846,536] 8,000\nL046 [787,541,846,553] 8,000\n</ocr_lines>",
+  "n_lines": 46,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 1514
+}

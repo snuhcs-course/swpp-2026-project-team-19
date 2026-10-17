@@ -1,0 +1,753 @@
+{
+  "run_dir": "hybrid_final_v1",
+  "failed_calls": [],
+  "summary": {
+    "item_accuracy": {
+      "mean": 0.9447852760736196,
+      "min": 0.9447852760736196,
+      "max": 0.9447852760736196,
+      "n": 1
+    },
+    "f1_strict": {
+      "mean": 0.9558359621451105,
+      "min": 0.9558359621451105,
+      "max": 0.9558359621451105,
+      "n": 1
+    },
+    "f1_lenient": {
+      "mean": 0.9716088328075709,
+      "min": 0.9716088328075709,
+      "max": 0.9716088328075709,
+      "n": 1
+    },
+    "price_accuracy": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "n": 1
+    },
+    "unit_confusion": {
+      "mean": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+    },
+    "fp": {
+      "mean": 13,
+      "min": 13,
+      "max": 13,
+      "n": 1
+    },
+    "fn": {
+      "mean": 5,
+      "min": 5,
+      "max": 5,
+      "n": 1
+    }
+  },
+  "per_photo_accuracy": {
+    "009_오드비_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "009_오드비_02": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "009_오드비_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "009_오드비_04": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "009_오드비_05": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "009_오드비_06": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "009_오드비_07": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "009_오드비_08": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "009_오드비_09": {
+      "mean": 0.7894736842105263,
+      "min": 0.7894736842105263,
+      "max": 0.7894736842105263
+    },
+    "010_수이_01": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "010_수이_02": {
+      "mean": 0.9428571428571428,
+      "min": 0.9428571428571428,
+      "max": 0.9428571428571428
+    },
+    "010_수이_03": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "010_수이_04": {
+      "mean": 0.7,
+      "min": 0.7,
+      "max": 0.7
+    },
+    "010_수이_05": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    }
+  },
+  "per_bar_accuracy": {
+    "수이": {
+      "mean": 0.9186046511627907,
+      "min": 0.9186046511627907,
+      "max": 0.9186046511627907
+    },
+    "오드비": {
+      "mean": 0.974025974025974,
+      "min": 0.974025974025974,
+      "max": 0.974025974025974
+    }
+  },
+  "runs": {
+    "1": {
+      "missing_photos": [],
+      "total": {
+        "n_gt": 313,
+        "n_out": 321,
+        "matched_strict": 303,
+        "matched": 308,
+        "correct": 308,
+        "fp": 13,
+        "fn": 5,
+        "priced": 308,
+        "price_correct": 308,
+        "unit_confusion": 0,
+        "item_accuracy": 0.9447852760736196,
+        "f1_strict": 0.9558359621451105,
+        "f1_lenient": 0.9716088328075709,
+        "price_accuracy": 1.0
+      },
+      "photos": [
+        {
+          "photo_id": "009_오드비_01",
+          "n_gt": 34,
+          "n_out": 34,
+          "matched_strict": 34,
+          "matched": 34,
+          "correct": 34,
+          "fp": 0,
+          "fn": 0,
+          "priced": 34,
+          "price_correct": 34,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "009_오드비_02",
+          "n_gt": 0,
+          "n_out": 0,
+          "matched_strict": 0,
+          "matched": 0,
+          "correct": 0,
+          "fp": 0,
+          "fn": 0,
+          "priced": 0,
+          "price_correct": 0,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "009_오드비_03",
+          "n_gt": 7,
+          "n_out": 7,
+          "matched_strict": 7,
+          "matched": 7,
+          "correct": 7,
+          "fp": 0,
+          "fn": 0,
+          "priced": 7,
+          "price_correct": 7,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "009_오드비_04",
+          "n_gt": 20,
+          "n_out": 20,
+          "matched_strict": 20,
+          "matched": 20,
+          "correct": 20,
+          "fp": 0,
+          "fn": 0,
+          "priced": 20,
+          "price_correct": 20,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "009_오드비_05",
+          "n_gt": 14,
+          "n_out": 14,
+          "matched_strict": 14,
+          "matched": 14,
+          "correct": 14,
+          "fp": 0,
+          "fn": 0,
+          "priced": 14,
+          "price_correct": 14,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "009_오드비_06",
+          "n_gt": 15,
+          "n_out": 15,
+          "matched_strict": 15,
+          "matched": 15,
+          "correct": 15,
+          "fp": 0,
+          "fn": 0,
+          "priced": 15,
+          "price_correct": 15,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "009_오드비_07",
+          "n_gt": 11,
+          "n_out": 11,
+          "matched_strict": 9,
+          "matched": 11,
+          "correct": 11,
+          "fp": 0,
+          "fn": 0,
+          "priced": 11,
+          "price_correct": 11,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아란 셰리",
+                "price_krw": 20000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아란 세리",
+                "price_krw": 20000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L007"
+                  ],
+                  "price": [
+                    "L019"
+                  ]
+                }
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "아벨라워 아부나흐 셰리",
+                "price_krw": 36000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "아벨라워 아부나흐 세리",
+                "price_krw": 36000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L013"
+                  ],
+                  "price": [
+                    "L025"
+                  ]
+                }
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "009_오드비_08",
+          "n_gt": 34,
+          "n_out": 34,
+          "matched_strict": 31,
+          "matched": 34,
+          "correct": 34,
+          "fp": 0,
+          "fn": 0,
+          "priced": 34,
+          "price_correct": 34,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "맥켈란12 셰리",
+                "price_krw": 18000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "맥켈란12 세리",
+                "price_krw": 18000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L008"
+                  ],
+                  "price": [
+                    "L043"
+                  ]
+                }
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "달모어12셰리",
+                "price_krw": 23000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "달모어12세리",
+                "price_krw": 23000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L016"
+                  ],
+                  "price": [
+                    "L051"
+                  ]
+                }
+              },
+              "counted_correct": true
+            },
+            {
+              "type": "이름 오독(관대 일치로 짝)",
+              "gt": {
+                "raw_name": "글렌드로낙12",
+                "price_krw": 16000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "note": null
+              },
+              "out": {
+                "raw_name": "글렌드로냑12",
+                "price_krw": 16000,
+                "pour_ml": 30,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L020"
+                  ],
+                  "price": [
+                    "L055"
+                  ]
+                }
+              },
+              "counted_correct": true
+            }
+          ]
+        },
+        {
+          "photo_id": "009_오드비_09",
+          "n_gt": 19,
+          "n_out": 15,
+          "matched_strict": 15,
+          "matched": 15,
+          "correct": 15,
+          "fp": 0,
+          "fn": 4,
+          "priced": 15,
+          "price_correct": 15,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "기네스 병",
+                "price_krw": 12000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "산미구엘 병",
+                "price_krw": 9000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "아사히 병",
+                "price_krw": 8000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "코로나 병 + 라임(선택)",
+                "price_krw": 7000,
+                "pour_ml": null,
+                "unit": "bottle",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "010_수이_01",
+          "n_gt": 44,
+          "n_out": 44,
+          "matched_strict": 44,
+          "matched": 44,
+          "correct": 44,
+          "fp": 0,
+          "fn": 0,
+          "priced": 44,
+          "price_correct": 44,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "010_수이_02",
+          "n_gt": 34,
+          "n_out": 34,
+          "matched_strict": 33,
+          "matched": 33,
+          "correct": 33,
+          "fp": 1,
+          "fn": 1,
+          "priced": 33,
+          "price_correct": 33,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Balvenie 16y French Oak (프렌치 오크) 39,000",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L011"
+                  ],
+                  "price": [
+                    "L011"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "누락",
+              "gt": {
+                "raw_name": "Balvenie 16y French Oak (프렌치 오크)",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass",
+                "note": null
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "010_수이_03",
+          "n_gt": 36,
+          "n_out": 36,
+          "matched_strict": 36,
+          "matched": 36,
+          "correct": 36,
+          "fp": 0,
+          "fn": 0,
+          "priced": 36,
+          "price_correct": 36,
+          "unit_confusion": 0,
+          "errors": []
+        },
+        {
+          "photo_id": "010_수이_04",
+          "n_gt": 28,
+          "n_out": 40,
+          "matched_strict": 28,
+          "matched": 28,
+          "correct": 28,
+          "fp": 12,
+          "fn": 0,
+          "priced": 28,
+          "price_correct": 28,
+          "unit_confusion": 0,
+          "errors": [
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "1800 Anejo (아네호 데킬라)",
+                "price_krw": 13000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L040"
+                  ],
+                  "price": [
+                    "L062"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Petron Silver (페트론)",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L041"
+                  ],
+                  "price": [
+                    "L063"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Clase - Azul (클라세아줄)",
+                "price_krw": 39000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L042"
+                  ],
+                  "price": [
+                    "L064"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Hennesy V.S.O.A (헤네시 VSOP)",
+                "price_krw": 15000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L067"
+                  ],
+                  "price": [
+                    "L068"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Hennesy X.O",
+                "price_krw": 42000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L069"
+                  ],
+                  "price": [
+                    "L070"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Remy Martin V.S.O.P (레미 마틴)",
+                "price_krw": 16000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L071"
+                  ],
+                  "price": [
+                    "L072"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Remy Martin 1738",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L073"
+                  ],
+                  "price": [
+                    "L074"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Remy Martin X.O",
+                "price_krw": 45000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L075"
+                  ],
+                  "price": [
+                    "L076"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Camus V.S.O.P (까뮤)",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L077"
+                  ],
+                  "price": [
+                    "L078"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Daniel Royal",
+                "price_krw": 25000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L079"
+                  ],
+                  "price": [
+                    "L080"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Jean Luc Pasquet (장 뤽 파스케)",
+                "price_krw": 30000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L081"
+                  ],
+                  "price": [
+                    "L082"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "오탐(분류 필요)",
+              "out": {
+                "raw_name": "Boulard X.O (불라)",
+                "price_krw": 20000,
+                "pour_ml": null,
+                "unit": "glass",
+                "source_lines": {
+                  "name": [
+                    "L083"
+                  ],
+                  "price": [
+                    "L084"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "photo_id": "010_수이_05",
+          "n_gt": 17,
+          "n_out": 17,
+          "matched_strict": 17,
+          "matched": 17,
+          "correct": 17,
+          "fp": 0,
+          "fn": 0,
+          "priced": 17,
+          "price_correct": 17,
+          "unit_confusion": 0,
+          "errors": []
+        }
+      ]
+    }
+  },
+  "label_set": "final"
+}

@@ -1,0 +1,190 @@
+{
+ "key": "345e78a1ab2f49c18ddb2412a1adbc2cb326cb1dff660e5d2598665c87322541",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "Balvenie 12y(발베니)",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "Balvenie American Oak (아메리칸 오크)",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "Balvenie 14y (럼 캐스크)",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "Balvenie Single Barrel (싱글배럴)",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "Balvenie 16y French Oak (프렌치 오크) 39,000",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "Glenfiddich 12y (글렌피딕)",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "Glenfiddich 12y Sherry",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "Glenfiddich 15y",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "Glenfiddich 18y",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "The Glenlivet 12y (더 글렌리벳)",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "The Glenlivet 15y",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "The Glenlivet 18y",
+    "target": false
+   },
+   {
+    "line": 13,
+    "name": "Macallan 12y Double Cask (맥캘란 더블)",
+    "target": false
+   },
+   {
+    "line": 14,
+    "name": "Macallan 12y Sherry Cask (쉐리)",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "Macallan 15y Double cask",
+    "target": false
+   },
+   {
+    "line": 16,
+    "name": "Macallan 18y Double cask",
+    "target": false
+   },
+   {
+    "line": 17,
+    "name": "Macallan 18y Sherry cask",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "Cragganmore 12y (크라겐모어)",
+    "target": false
+   },
+   {
+    "line": 19,
+    "name": "Tormore Tempranillo Cask (토모어)",
+    "target": true
+   },
+   {
+    "line": 20,
+    "name": "Glenrothes 12y (글렌로시스)",
+    "target": false
+   },
+   {
+    "line": 21,
+    "name": "Glenallachie 8y (글렌알라키)",
+    "target": false
+   },
+   {
+    "line": 22,
+    "name": "Glenallachie 12y",
+    "target": false
+   },
+   {
+    "line": 23,
+    "name": "Glenallachie 15y",
+    "target": false
+   },
+   {
+    "line": 24,
+    "name": "Glenallachie 2014 Sinteis",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "Glenfarclas 105(글렌파클라스)",
+    "target": false
+   },
+   {
+    "line": 26,
+    "name": "Glenfarclas 10y",
+    "target": false
+   },
+   {
+    "line": 27,
+    "name": "Glenfarclas 15y",
+    "target": false
+   },
+   {
+    "line": 28,
+    "name": "Tamdhu 12y (탐듀)",
+    "target": false
+   },
+   {
+    "line": 29,
+    "name": "Tamdhu 15y",
+    "target": false
+   },
+   {
+    "line": 30,
+    "name": "Benriach 12y (벤리악)",
+    "target": false
+   },
+   {
+    "line": 31,
+    "name": "Aberlour 12y (아벨라워)",
+    "target": false
+   },
+   {
+    "line": 32,
+    "name": "Aberlour 14y (아벨라워)",
+    "target": false
+   },
+   {
+    "line": 33,
+    "name": "Aberlour A'Bunadh (아부나흐)",
+    "target": false
+   },
+   {
+    "line": 34,
+    "name": "Royal Brackla",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Balvenie\",\n      \"age\": 14,\n      \"edition_tokens_en\": [\n        \"Rum\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Balvenie\",\n      \"age\": 16,\n      \"edition_tokens_en\": [\n        \"French\",\n        \"Oak\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Macallan\",\n      \"age\": 18,\n      \"edition_tokens_en\": [\n        \"Sherry\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Tormore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Tempranillo\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 34,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Royal Brackla\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-17T06:28:12.669505+00:00",
+  "latency_ms": 5635,
+  "attempts": 1,
+  "input_tokens": 2261,
+  "output_tokens": 480,
+  "thought_tokens": 125
+ }
+}

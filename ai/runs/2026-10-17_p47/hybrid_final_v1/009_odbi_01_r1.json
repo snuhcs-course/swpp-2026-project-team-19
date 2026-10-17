@@ -1,0 +1,566 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "009_odbi_01.png",
+  "prepared_image": "009_odbi_01.png",
+  "prepared_sha256": "5a817a2991fe198f1183999e979c06a32b01a14617614e065cac5da6730ff262",
+  "started_at": "2026-10-17T06:22:22.965099+00:00",
+  "latency_ms": 7791,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6389,
+  "output_tokens": 2349,
+  "thought_tokens": 0,
+  "total_tokens": 8738,
+  "output": {
+    "items": [
+      {
+        "raw_name": "잭비버스 녹듀16",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006"
+          ],
+          "price": [
+            "L042"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 캐드볼",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L043"
+          ]
+        }
+      },
+      {
+        "raw_name": "샤토가호 밀레짐1984 알마냑",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008",
+            "L009"
+          ],
+          "price": [
+            "L044"
+          ]
+        }
+      },
+      {
+        "raw_name": "샤토가호 밀레짐1991 알마냑",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L010",
+            "L011"
+          ],
+          "price": [
+            "L045"
+          ]
+        }
+      },
+      {
+        "raw_name": "샤토가호 밀레짐 1995 알마냑",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L012"
+          ],
+          "price": [
+            "L046"
+          ]
+        }
+      },
+      {
+        "raw_name": "아쿠아비타 쿨리22 포트",
+        "price_krw": 80000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013"
+          ],
+          "price": [
+            "L047"
+          ]
+        }
+      },
+      {
+        "raw_name": "아쿠아비타 쿨리23 아마로네",
+        "price_krw": 84000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L014"
+          ],
+          "price": [
+            "L048"
+          ]
+        }
+      },
+      {
+        "raw_name": "아쿠아비타 쿨리24 버번",
+        "price_krw": 86000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L015"
+          ],
+          "price": [
+            "L049"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 로얄브라클라11",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L016"
+          ],
+          "price": [
+            "L050"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 벤네비스7 헤빌리 피티드",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L017"
+          ],
+          "price": [
+            "L051"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 쿨일라13",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L018"
+          ],
+          "price": [
+            "L052"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 벤리악11",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L019"
+          ],
+          "price": [
+            "L053"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 올트모어14",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L020"
+          ],
+          "price": [
+            "L054"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 아벨라워13",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L021"
+          ],
+          "price": [
+            "L055"
+          ]
+        }
+      },
+      {
+        "raw_name": "크래프트브로스 독수리 오형제 1호",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022"
+          ],
+          "price": [
+            "L056"
+          ]
+        }
+      },
+      {
+        "raw_name": "크래프트브로스 독수리 오형제 3호",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L057"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 블렌디드10",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L058"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 스페이사이드14M",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L059"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 카메론브릿지16",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L026"
+          ],
+          "price": [
+            "L060"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 카메론브릿지12",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L061"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 노스 브리티쉬15",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028"
+          ],
+          "price": [
+            "L062"
+          ]
+        }
+      },
+      {
+        "raw_name": "사부로마루3 여황제",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L029"
+          ],
+          "price": [
+            "L063"
+          ]
+        }
+      },
+      {
+        "raw_name": "사부로마루4 황제",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L030"
+          ],
+          "price": [
+            "L064"
+          ]
+        }
+      },
+      {
+        "raw_name": "사부로마루5 교황",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L031"
+          ],
+          "price": [
+            "L065"
+          ]
+        }
+      },
+      {
+        "raw_name": "사부로마루6 연인",
+        "price_krw": 46000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L032"
+          ],
+          "price": [
+            "L066"
+          ]
+        }
+      },
+      {
+        "raw_name": "사부로마루7 전차",
+        "price_krw": 57000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033"
+          ],
+          "price": [
+            "L067"
+          ]
+        }
+      },
+      {
+        "raw_name": "TWA 맥더프13 잔혹동화",
+        "price_krw": 39000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L034"
+          ],
+          "price": [
+            "L068"
+          ]
+        }
+      },
+      {
+        "raw_name": "TWA 발메낙11 전갈자리",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L035"
+          ],
+          "price": [
+            "L069"
+          ]
+        }
+      },
+      {
+        "raw_name": "TWA 아드모어9 천칭자리",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L036"
+          ],
+          "price": [
+            "L070"
+          ]
+        }
+      },
+      {
+        "raw_name": "아르마냑 가호 그랑데카르",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L037"
+          ],
+          "price": [
+            "L071"
+          ]
+        }
+      },
+      {
+        "raw_name": "아르마냑 가호 브레이스오브가호",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L038"
+          ],
+          "price": [
+            "L072"
+          ]
+        }
+      },
+      {
+        "raw_name": "아르마냑 가호 에어메일",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L039"
+          ],
+          "price": [
+            "L073"
+          ]
+        }
+      },
+      {
+        "raw_name": "아르마냑 가호 옵시디언",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L040"
+          ],
+          "price": [
+            "L074"
+          ]
+        }
+      },
+      {
+        "raw_name": "아르마냑 가호프리미어 엠파이어",
+        "price_krw": 39000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L041"
+          ],
+          "price": [
+            "L075"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": [{\"raw_name\": \"잭비버스 녹듀16\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L006\"], \"price\": [\"L042\"]}}, {\"raw_name\": \"글렌모렌지 캐드볼\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L043\"]}}, {\"raw_name\": \"샤토가호 밀레짐1984 알마냑\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L008\", \"L009\"], \"price\": [\"L044\"]}}, {\"raw_name\": \"샤토가호 밀레짐1991 알마냑\", \"price_krw\": 35000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L010\", \"L011\"], \"price\": [\"L045\"]}}, {\"raw_name\": \"샤토가호 밀레짐 1995 알마냑\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L012\"], \"price\": [\"L046\"]}}, {\"raw_name\": \"아쿠아비타 쿨리22 포트\", \"price_krw\": 80000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\"], \"price\": [\"L047\"]}}, {\"raw_name\": \"아쿠아비타 쿨리23 아마로네\", \"price_krw\": 84000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\"], \"price\": [\"L048\"]}}, {\"raw_name\": \"아쿠아비타 쿨리24 버번\", \"price_krw\": 86000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L015\"], \"price\": [\"L049\"]}}, {\"raw_name\": \"시그나토리 로얄브라클라11\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L016\"], \"price\": [\"L050\"]}}, {\"raw_name\": \"시그나토리 벤네비스7 헤빌리 피티드\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L017\"], \"price\": [\"L051\"]}}, {\"raw_name\": \"시그나토리 쿨일라13\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L018\"], \"price\": [\"L052\"]}}, {\"raw_name\": \"시그나토리 벤리악11\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L019\"], \"price\": [\"L053\"]}}, {\"raw_name\": \"시그나토리 올트모어14\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L054\"]}}, {\"raw_name\": \"시그나토리 아벨라워13\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\"], \"price\": [\"L055\"]}}, {\"raw_name\": \"크래프트브로스 독수리 오형제 1호\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L056\"]}}, {\"raw_name\": \"크래프트브로스 독수리 오형제 3호\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L023\"], \"price\": [\"L057\"]}}, {\"raw_name\": \"시그나토리 블렌디드10\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L058\"]}}, {\"raw_name\": \"시그나토리 스페이사이드14M\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L059\"]}}, {\"raw_name\": \"시그나토리 카메론브릿지16\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L026\"], \"price\": [\"L060\"]}}, {\"raw_name\": \"시그나토리 카메론브릿지12\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L061\"]}}, {\"raw_name\": \"시그나토리 노스 브리티쉬15\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\"], \"price\": [\"L062\"]}}, {\"raw_name\": \"사부로마루3 여황제\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L029\"], \"price\": [\"L063\"]}}, {\"raw_name\": \"사부로마루4 황제\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L030\"], \"price\": [\"L064\"]}}, {\"raw_name\": \"사부로마루5 교황\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L031\"], \"price\": [\"L065\"]}}, {\"raw_name\": \"사부로마루6 연인\", \"price_krw\": 46000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L032\"], \"price\": [\"L066\"]}}, {\"raw_name\": \"사부로마루7 전차\", \"price_krw\": 57000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L033\"], \"price\": [\"L067\"]}}, {\"raw_name\": \"TWA 맥더프13 잔혹동화\", \"price_krw\": 39000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L034\"], \"price\": [\"L068\"]}}, {\"raw_name\": \"TWA 발메낙11 전갈자리\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L035\"], \"price\": [\"L069\"]}}, {\"raw_name\": \"TWA 아드모어9 천칭자리\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L036\"], \"price\": [\"L070\"]}}, {\"raw_name\": \"아르마냑 가호 그랑데카르\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L037\"], \"price\": [\"L071\"]}}, {\"raw_name\": \"아르마냑 가호 브레이스오브가호\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L038\"], \"price\": [\"L072\"]}}, {\"raw_name\": \"아르마냑 가호 에어메일\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\"], \"price\": [\"L073\"]}}, {\"raw_name\": \"아르마냑 가호 옵시디언\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L040\"], \"price\": [\"L074\"]}}, {\"raw_name\": \"아르마냑 가호프리미어 엠파이어\", \"price_krw\": 39000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L041\"], \"price\": [\"L075\"]}}]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:22:30Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": [{\"raw_name\": \"잭비버스 녹듀16\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L006\"], \"price\": [\"L042\"]}}, {\"raw_name\": \"글렌모렌지 캐드볼\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L043\"]}}, {\"raw_name\": \"샤토가호 밀레짐1984 알마냑\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L008\", \"L009\"], \"price\": [\"L044\"]}}, {\"raw_name\": \"샤토가호 밀레짐1991 알마냑\", \"price_krw\": 35000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L010\", \"L011\"], \"price\": [\"L045\"]}}, {\"raw_name\": \"샤토가호 밀레짐 1995 알마냑\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L012\"], \"price\": [\"L046\"]}}, {\"raw_name\": \"아쿠아비타 쿨리22 포트\", \"price_krw\": 80000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\"], \"price\": [\"L047\"]}}, {\"raw_name\": \"아쿠아비타 쿨리23 아마로네\", \"price_krw\": 84000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\"], \"price\": [\"L048\"]}}, {\"raw_name\": \"아쿠아비타 쿨리24 버번\", \"price_krw\": 86000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L015\"], \"price\": [\"L049\"]}}, {\"raw_name\": \"시그나토리 로얄브라클라11\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L016\"], \"price\": [\"L050\"]}}, {\"raw_name\": \"시그나토리 벤네비스7 헤빌리 피티드\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L017\"], \"price\": [\"L051\"]}}, {\"raw_name\": \"시그나토리 쿨일라13\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L018\"], \"price\": [\"L052\"]}}, {\"raw_name\": \"시그나토리 벤리악11\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L019\"], \"price\": [\"L053\"]}}, {\"raw_name\": \"시그나토리 올트모어14\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L054\"]}}, {\"raw_name\": \"시그나토리 아벨라워13\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\"], \"price\": [\"L055\"]}}, {\"raw_name\": \"크래프트브로스 독수리 오형제 1호\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L056\"]}}, {\"raw_name\": \"크래프트브로스 독수리 오형제 3호\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L023\"], \"price\": [\"L057\"]}}, {\"raw_name\": \"시그나토리 블렌디드10\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L058\"]}}, {\"raw_name\": \"시그나토리 스페이사이드14M\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L059\"]}}, {\"raw_name\": \"시그나토리 카메론브릿지16\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L026\"], \"price\": [\"L060\"]}}, {\"raw_name\": \"시그나토리 카메론브릿지12\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L061\"]}}, {\"raw_name\": \"시그나토리 노스 브리티쉬15\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\"], \"price\": [\"L062\"]}}, {\"raw_name\": \"사부로마루3 여황제\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L029\"], \"price\": [\"L063\"]}}, {\"raw_name\": \"사부로마루4 황제\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L030\"], \"price\": [\"L064\"]}}, {\"raw_name\": \"사부로마루5 교황\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L031\"], \"price\": [\"L065\"]}}, {\"raw_name\": \"사부로마루6 연인\", \"price_krw\": 46000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L032\"], \"price\": [\"L066\"]}}, {\"raw_name\": \"사부로마루7 전차\", \"price_krw\": 57000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L033\"], \"price\": [\"L067\"]}}, {\"raw_name\": \"TWA 맥더프13 잔혹동화\", \"price_krw\": 39000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L034\"], \"price\": [\"L068\"]}}, {\"raw_name\": \"TWA 발메낙11 전갈자리\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L035\"], \"price\": [\"L069\"]}}, {\"raw_name\": \"TWA 아드모어9 천칭자리\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L036\"], \"price\": [\"L070\"]}}, {\"raw_name\": \"아르마냑 가호 그랑데카르\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L037\"], \"price\": [\"L071\"]}}, {\"raw_name\": \"아르마냑 가호 브레이스오브가호\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L038\"], \"price\": [\"L072\"]}}, {\"raw_name\": \"아르마냑 가호 에어메일\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\"], \"price\": [\"L073\"]}}, {\"raw_name\": \"아르마냑 가호 옵시디언\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L040\"], \"price\": [\"L074\"]}}, {\"raw_name\": \"아르마냑 가호프리미어 엠파이어\", \"price_krw\": 39000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L041\"], \"price\": [\"L075\"]}}]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0TsTxSJf1WHXNXGjD/f29Oe7lCLFWb9DHdVs1sRlFesz//HA95Fms0VqAZqSAAGFQLjUlSDPCh96raDwJjdb+faxGHoJSoPYYnmVFI8MjUpbh8gbZV6wHMlao=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": [{\"raw_name\": \"잭비버스 녹듀16\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L006\"], \"price\": [\"L042\"]}}, {\"raw_name\": \"글렌모렌지 캐드볼\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L043\"]}}, {\"raw_name\": \"샤토가호 밀레짐1984 알마냑\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L008\", \"L009\"], \"price\": [\"L044\"]}}, {\"raw_name\": \"샤토가호 밀레짐1991 알마냑\", \"price_krw\": 35000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L010\", \"L011\"], \"price\": [\"L045\"]}}, {\"raw_name\": \"샤토가호 밀레짐 1995 알마냑\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L012\"], \"price\": [\"L046\"]}}, {\"raw_name\": \"아쿠아비타 쿨리22 포트\", \"price_krw\": 80000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\"], \"price\": [\"L047\"]}}, {\"raw_name\": \"아쿠아비타 쿨리23 아마로네\", \"price_krw\": 84000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\"], \"price\": [\"L048\"]}}, {\"raw_name\": \"아쿠아비타 쿨리24 버번\", \"price_krw\": 86000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L015\"], \"price\": [\"L049\"]}}, {\"raw_name\": \"시그나토리 로얄브라클라11\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L016\"], \"price\": [\"L050\"]}}, {\"raw_name\": \"시그나토리 벤네비스7 헤빌리 피티드\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L017\"], \"price\": [\"L051\"]}}, {\"raw_name\": \"시그나토리 쿨일라13\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L018\"], \"price\": [\"L052\"]}}, {\"raw_name\": \"시그나토리 벤리악11\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L019\"], \"price\": [\"L053\"]}}, {\"raw_name\": \"시그나토리 올트모어14\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L054\"]}}, {\"raw_name\": \"시그나토리 아벨라워13\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\"], \"price\": [\"L055\"]}}, {\"raw_name\": \"크래프트브로스 독수리 오형제 1호\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L056\"]}}, {\"raw_name\": \"크래프트브로스 독수리 오형제 3호\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L023\"], \"price\": [\"L057\"]}}, {\"raw_name\": \"시그나토리 블렌디드10\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L058\"]}}, {\"raw_name\": \"시그나토리 스페이사이드14M\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L059\"]}}, {\"raw_name\": \"시그나토리 카메론브릿지16\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L026\"], \"price\": [\"L060\"]}}, {\"raw_name\": \"시그나토리 카메론브릿지12\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L061\"]}}, {\"raw_name\": \"시그나토리 노스 브리티쉬15\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\"], \"price\": [\"L062\"]}}, {\"raw_name\": \"사부로마루3 여황제\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L029\"], \"price\": [\"L063\"]}}, {\"raw_name\": \"사부로마루4 황제\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L030\"], \"price\": [\"L064\"]}}, {\"raw_name\": \"사부로마루5 교황\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L031\"], \"price\": [\"L065\"]}}, {\"raw_name\": \"사부로마루6 연인\", \"price_krw\": 46000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L032\"], \"price\": [\"L066\"]}}, {\"raw_name\": \"사부로마루7 전차\", \"price_krw\": 57000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L033\"], \"price\": [\"L067\"]}}, {\"raw_name\": \"TWA 맥더프13 잔혹동화\", \"price_krw\": 39000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L034\"], \"price\": [\"L068\"]}}, {\"raw_name\": \"TWA 발메낙11 전갈자리\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L035\"], \"price\": [\"L069\"]}}, {\"raw_name\": \"TWA 아드모어9 천칭자리\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L036\"], \"price\": [\"L070\"]}}, {\"raw_name\": \"아르마냑 가호 그랑데카르\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L037\"], \"price\": [\"L071\"]}}, {\"raw_name\": \"아르마냑 가호 브레이스오브가호\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L038\"], \"price\": [\"L072\"]}}, {\"raw_name\": \"아르마냑 가호 에어메일\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\"], \"price\": [\"L073\"]}}, {\"raw_name\": \"아르마냑 가호 옵시디언\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L040\"], \"price\": [\"L074\"]}}, {\"raw_name\": \"아르마냑 가호프리미어 엠파이어\", \"price_krw\": 39000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L041\"], \"price\": [\"L075\"]}}]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:22:30Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1078
+        },
+        {
+          "modality": "text",
+          "tokens": 5311
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 6389,
+      "total_output_tokens": 2349,
+      "total_thought_tokens": 0,
+      "total_tokens": 8738,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 75,
+    "price_like_lines": 35,
+    "uncited_price_lines": 1,
+    "uncited": [
+      "L003"
+    ],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [98,25,217,44] 21:07\nL002 [776,27,838,43] LTE\nL003 [861,27,903,40] 42\nL004 [880,101,928,124] X\nL005 [152,211,228,223] -한정판\nL006 [152,228,310,239] 잭비버스 녹듀16\nL007 [152,245,324,256] 글렌모렌지 캐드볼\nL008 [152,260,349,272] 샤토가호 밀레짐1984\nL009 [355,260,417,272] 알마냑\nL010 [152,277,349,289] 샤토가호 밀레짐1991\nL011 [355,277,417,289] 알마냑\nL012 [152,294,417,306] 샤토가호 밀레짐 1995 알마냑\nL013 [152,311,375,323] 아쿠아비타 쿨리22 포트\nL014 [152,327,415,338] 아쿠아비타 쿨리23 아마로네\nL015 [152,344,375,355] 아쿠아비타 쿨리24 버번\nL016 [152,359,406,371] 시그나토리 로얄브라클라11\nL017 [152,376,491,388] 시그나토리 벤네비스7 헤빌리 피티드\nL018 [152,393,347,405] 시그나토리 쿨일라13\nL019 [152,410,347,422] 시그나토리 벤리악11\nL020 [152,426,366,437] 시그나토리 올트모어14\nL021 [152,442,366,454] 시그나토리 아벨라워13\nL022 [152,459,471,471] 크래프트브로스 독수리 오형제 1호\nL023 [152,475,474,487] 크래프트브로스 독수리 오형제 3호\nL024 [152,492,366,504] 시그나토리 블렌디드10\nL025 [152,509,423,521] 시그나토리 스페이사이드14M\nL026 [152,525,406,536] 시그나토리 카메론브릿지16\nL027 [152,541,406,553] 시그나토리 카메론브릿지12\nL028 [152,558,417,570] 시그나토리 노스 브리티쉬15\nL029 [152,576,336,586] 사부로마루3 여황제\nL030 [152,591,316,603] 사부로마루4 황제\nL031 [152,608,316,620] 사부로마루5 교황\nL032 [152,624,316,635] 사부로마루6 연인\nL033 [152,640,316,652] 사부로마루7 전차\nL034 [155,657,383,669] TWA 맥더프13 잔혹동화\nL035 [155,674,381,686] TWA 발메낙11 전갈자리\nL036 [155,690,389,701] TWA 아드모어9 천칭자리\nL037 [152,707,392,719] 아르마냑 가호 그랑데카르\nL038 [152,723,451,734] 아르마냑 가호 브레이스오브가호\nL039 [152,739,372,751] 아르마냑 가호 에어메일\nL040 [152,756,372,768] 아르마냑 가호 옵시디언\nL041 [152,773,449,785] 아르마냑 가호프리미어 엠파이어\nL042 [776,228,846,238] 60,000\nL043 [779,246,846,255] 21,000\nL044 [779,263,846,272] 40,000\nL045 [776,277,846,288] 35,000\nL046 [779,295,846,304] 30,000\nL047 [779,312,846,322] 80,000\nL048 [776,327,846,337] 84,000\nL049 [776,344,846,354] 86,000\nL050 [779,362,846,371] 20,000\nL051 [776,378,846,388] 20,000\nL052 [779,394,846,403] 20,000\nL053 [779,411,846,420] 36,000\nL054 [776,427,846,436] 36,000\nL055 [776,442,846,453] 40,000\nL056 [779,461,846,470] 17,000\nL057 [779,478,846,487] 17,000\nL058 [779,493,846,502] 12,000\nL059 [779,510,846,519] 28,000\nL060 [776,526,846,536] 19,000\nL061 [776,541,846,553] 17,000\nL062 [779,560,846,569] 19,000\nL063 [779,577,846,586] 40,000\nL064 [779,592,846,601] 43,000\nL065 [779,609,846,618] 43,000\nL066 [779,626,846,635] 46,000\nL067 [776,640,846,652] 57,000\nL068 [779,659,846,668] 39,000\nL069 [779,676,846,685] 32,000\nL070 [776,690,846,700] 30,000\nL071 [776,707,846,717] 37,000\nL072 [779,725,846,734] 43,000\nL073 [776,741,846,751] 37,000\nL074 [776,757,846,768] 37,000\nL075 [779,775,846,784] 39,000\n</ocr_lines>",
+  "n_lines": 75,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 2179
+}

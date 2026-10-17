@@ -1,0 +1,564 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "009_odbi_08.png",
+  "prepared_image": "009_odbi_08.png",
+  "prepared_sha256": "a1139688c0525ffe42db6b5397ac92d86cb70d285e1d109a22ec0bbaee6c7a2f",
+  "started_at": "2026-10-17T06:23:07.919128+00:00",
+  "latency_ms": 11621,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6237,
+  "output_tokens": 3056,
+  "thought_tokens": 1561,
+  "total_tokens": 10854,
+  "output": {
+    "items": [
+      {
+        "raw_name": "글렌피딕12",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006"
+          ],
+          "price": [
+            "L041"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌피딕15",
+        "price_krw": 18000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L042"
+          ]
+        }
+      },
+      {
+        "raw_name": "맥켈란12 세리",
+        "price_krw": 18000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008"
+          ],
+          "price": [
+            "L043"
+          ]
+        }
+      },
+      {
+        "raw_name": "맥켈란12 더블",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L044"
+          ]
+        }
+      },
+      {
+        "raw_name": "맥켈란18 쉐리",
+        "price_krw": 60000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L010"
+          ],
+          "price": [
+            "L045"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌파클라스105",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L011"
+          ],
+          "price": [
+            "L046"
+          ]
+        }
+      },
+      {
+        "raw_name": "발베니12 더블우드",
+        "price_krw": 15000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L012"
+          ],
+          "price": [
+            "L047"
+          ]
+        }
+      },
+      {
+        "raw_name": "발베니14 캐리비안 캐스크",
+        "price_krw": 22000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013"
+          ],
+          "price": [
+            "L048"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌리벳12",
+        "price_krw": 13000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L014"
+          ],
+          "price": [
+            "L049"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌리벳18",
+        "price_krw": 35000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L015"
+          ],
+          "price": [
+            "L050"
+          ]
+        }
+      },
+      {
+        "raw_name": "달모어12세리",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L016"
+          ],
+          "price": [
+            "L051"
+          ]
+        }
+      },
+      {
+        "raw_name": "달모어15",
+        "price_krw": 32000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L017"
+          ],
+          "price": [
+            "L052"
+          ]
+        }
+      },
+      {
+        "raw_name": "로얄브라클라12",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L018"
+          ],
+          "price": [
+            "L053"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌그란트15",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L019"
+          ],
+          "price": [
+            "L054"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로냑12",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L020"
+          ],
+          "price": [
+            "L055"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙15",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L021"
+          ],
+          "price": [
+            "L056"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙18",
+        "price_krw": 46000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022"
+          ],
+          "price": [
+            "L057"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 오드 투 더 엠버스",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L058"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 오드 투 더 벨리",
+        "price_krw": 19000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L059"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 오드 투 더 다크",
+        "price_krw": 22000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L060"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 오리지널",
+        "price_krw": 11000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L026"
+          ],
+          "price": [
+            "L061"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 라산타",
+        "price_krw": 12000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L062"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 컨타루반",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028"
+          ],
+          "price": [
+            "L063"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 더 넥타",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L029"
+          ],
+          "price": [
+            "L064"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 시그넷 리저브",
+        "price_krw": 70000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L030"
+          ],
+          "price": [
+            "L065"
+          ]
+        }
+      },
+      {
+        "raw_name": "오반14",
+        "price_krw": 19000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L031"
+          ],
+          "price": [
+            "L066"
+          ]
+        }
+      },
+      {
+        "raw_name": "에드라두어10",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L032"
+          ],
+          "price": [
+            "L067"
+          ]
+        }
+      },
+      {
+        "raw_name": "벤로막10",
+        "price_krw": 12000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033"
+          ],
+          "price": [
+            "L068"
+          ]
+        }
+      },
+      {
+        "raw_name": "벤로막12",
+        "price_krw": 18000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L034"
+          ],
+          "price": [
+            "L069"
+          ]
+        }
+      },
+      {
+        "raw_name": "클라이넬리쉬DE",
+        "price_krw": 21000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L035"
+          ],
+          "price": [
+            "L070"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌알라키8",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L036"
+          ],
+          "price": [
+            "L071"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌알라키 10cs 배치13",
+        "price_krw": 28000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L037"
+          ],
+          "price": [
+            "L072"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌알라키12",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L038"
+          ],
+          "price": [
+            "L073"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌알라키15",
+        "price_krw": 32000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L039"
+          ],
+          "price": [
+            "L074"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌피딕12\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕15\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L042\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥켈란12 세리\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L043\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥켈란12 더블\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L044\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥켈란18 쉐리\",\n      \"price_krw\": 60000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌파클라스105\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L046\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니12 더블우드\",\n      \"price_krw\": 15000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L047\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니14 캐리비안 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L048\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌리벳12\",\n      \"price_krw\": 13000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L049\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌리벳18\",\n      \"price_krw\": 35000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L050\"]\n      }\n    },\n    {\n      \"raw_name\": \"달모어12세리\",\n      \"price_krw\": 23000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L051\"]\n      }\n    },\n    {\n      \"raw_name\": \"달모어15\",\n      \"price_krw\": 32000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L052\"]\n      }\n    },\n    {\n      \"raw_name\": \"로얄브라클라12\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L053\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌그란트15\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로냑12\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙15\",\n      \"price_krw\": 23000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙18\",\n      \"price_krw\": 46000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 오드 투 더 엠버스\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 오드 투 더 벨리\",\n      \"price_krw\": 19000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 오드 투 더 다크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L060\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 11000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L061\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L062\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 컨타루반\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 더 넥타\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷 리저브\",\n      \"price_krw\": 70000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"오반14\",\n      \"price_krw\": 19000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"에드라두어10\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"벤로막10\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L068\"]\n      }\n    },\n    {\n      \"raw_name\": \"벤로막12\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"클라이넬리쉬DE\",\n      \"price_krw\": 21000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L070\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키8\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L071\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 10cs 배치13\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L072\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키12\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L038\"],\n        \"price\": [\"L073\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키15\",\n      \"price_krw\": 32000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L039\"],\n        \"price\": [\"L074\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:23:19Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌피딕12\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕15\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L042\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥켈란12 세리\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L043\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥켈란12 더블\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L044\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥켈란18 쉐리\",\n      \"price_krw\": 60000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌파클라스105\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L046\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니12 더블우드\",\n      \"price_krw\": 15000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L047\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니14 캐리비안 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L048\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌리벳12\",\n      \"price_krw\": 13000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L049\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌리벳18\",\n      \"price_krw\": 35000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L050\"]\n      }\n    },\n    {\n      \"raw_name\": \"달모어12세리\",\n      \"price_krw\": 23000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L051\"]\n      }\n    },\n    {\n      \"raw_name\": \"달모어15\",\n      \"price_krw\": 32000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L052\"]\n      }\n    },\n    {\n      \"raw_name\": \"로얄브라클라12\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L053\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌그란트15\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로냑12\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙15\",\n      \"price_krw\": 23000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙18\",\n      \"price_krw\": 46000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 오드 투 더 엠버스\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 오드 투 더 벨리\",\n      \"price_krw\": 19000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 오드 투 더 다크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L060\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 11000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L061\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L062\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 컨타루반\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 더 넥타\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷 리저브\",\n      \"price_krw\": 70000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"오반14\",\n      \"price_krw\": 19000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"에드라두어10\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"벤로막10\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L068\"]\n      }\n    },\n    {\n      \"raw_name\": \"벤로막12\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"클라이넬리쉬DE\",\n      \"price_krw\": 21000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L070\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키8\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L071\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 10cs 배치13\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L072\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키12\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L038\"],\n        \"price\": [\"L073\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키15\",\n      \"price_krw\": 32000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L039\"],\n        \"price\": [\"L074\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌피딕12\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L041\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕15\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L042\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥켈란12 세리\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L043\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥켈란12 더블\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L044\"]\n      }\n    },\n    {\n      \"raw_name\": \"맥켈란18 쉐리\",\n      \"price_krw\": 60000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L045\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌파클라스105\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L046\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니12 더블우드\",\n      \"price_krw\": 15000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L047\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니14 캐리비안 캐스크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L048\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌리벳12\",\n      \"price_krw\": 13000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L049\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌리벳18\",\n      \"price_krw\": 35000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L050\"]\n      }\n    },\n    {\n      \"raw_name\": \"달모어12세리\",\n      \"price_krw\": 23000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L051\"]\n      }\n    },\n    {\n      \"raw_name\": \"달모어15\",\n      \"price_krw\": 32000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L017\"],\n        \"price\": [\"L052\"]\n      }\n    },\n    {\n      \"raw_name\": \"로얄브라클라12\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L053\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌그란트15\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L054\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로냑12\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L020\"],\n        \"price\": [\"L055\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙15\",\n      \"price_krw\": 23000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L021\"],\n        \"price\": [\"L056\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙18\",\n      \"price_krw\": 46000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L022\"],\n        \"price\": [\"L057\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 오드 투 더 엠버스\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L058\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 오드 투 더 벨리\",\n      \"price_krw\": 19000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L059\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 오드 투 더 다크\",\n      \"price_krw\": 22000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L060\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 11000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L061\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 라산타\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L062\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 컨타루반\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L063\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 더 넥타\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L064\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷 리저브\",\n      \"price_krw\": 70000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L065\"]\n      }\n    },\n    {\n      \"raw_name\": \"오반14\",\n      \"price_krw\": 19000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L031\"],\n        \"price\": [\"L066\"]\n      }\n    },\n    {\n      \"raw_name\": \"에드라두어10\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L032\"],\n        \"price\": [\"L067\"]\n      }\n    },\n    {\n      \"raw_name\": \"벤로막10\",\n      \"price_krw\": 12000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L033\"],\n        \"price\": [\"L068\"]\n      }\n    },\n    {\n      \"raw_name\": \"벤로막12\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L034\"],\n        \"price\": [\"L069\"]\n      }\n    },\n    {\n      \"raw_name\": \"클라이넬리쉬DE\",\n      \"price_krw\": 21000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L035\"],\n        \"price\": [\"L070\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키8\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L036\"],\n        \"price\": [\"L071\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 10cs 배치13\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L037\"],\n        \"price\": [\"L072\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키12\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L038\"],\n        \"price\": [\"L073\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키15\",\n      \"price_krw\": 32000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L039\"],\n        \"price\": [\"L074\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:23:19Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1078
+        },
+        {
+          "modality": "text",
+          "tokens": 5159
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 6237,
+      "total_output_tokens": 3056,
+      "total_thought_tokens": 1561,
+      "total_tokens": 10854,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 74,
+    "price_like_lines": 35,
+    "uncited_price_lines": 1,
+    "uncited": [
+      "L003"
+    ],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [98,25,217,44] 21:07\nL002 [776,27,838,43] LTE\nL003 [861,27,903,40] 42\nL004 [880,101,928,124] X\nL005 [152,211,313,223] -싱글몰트 위스키\nL006 [152,228,260,239] 글렌피딕12\nL007 [152,245,260,256] 글렌피딕15\nL008 [151,260,285,272] 맥켈란12 세리\nL009 [151,277,288,289] 맥켈란12 더블\nL010 [151,294,288,306] 맥켈란18 쉐리\nL011 [152,311,310,323] 글렌파클라스105\nL012 [152,327,327,338] 발베니12 더블우드\nL013 [152,344,394,355] 발베니14 캐리비안 캐스크\nL014 [152,360,260,372] 글렌리벳12\nL015 [152,376,260,388] 글렌리벳18\nL016 [152,393,277,405] 달모어12세리\nL017 [152,410,239,422] 달모어15\nL018 [152,426,299,437] 로얄브라클라12\nL019 [152,442,279,454] 글렌그란트15\nL020 [152,459,279,471] 글렌드로냑12\nL021 [152,475,279,487] 글렌드로낙15\nL022 [152,492,279,504] 글렌드로낙18\nL023 [152,509,434,521] 글렌드로낙 오드 투 더 엠버스\nL024 [152,524,411,536] 글렌드로낙 오드 투 더 벨리\nL025 [152,541,411,553] 글렌드로낙 오드 투 더 다크\nL026 [152,558,341,570] 글렌모렌지 오리지널\nL027 [152,574,324,587] 글렌모렌지 라산타\nL028 [152,591,344,603] 글렌모렌지 컨타루반\nL029 [152,608,336,620] 글렌모렌지 더 넥타\nL030 [152,624,392,637] 글렌모렌지 시그넷 리저브\nL031 [152,640,220,652] 오반14\nL032 [152,657,279,669] 에드라두어10\nL033 [152,674,239,686] 벤로막10\nL034 [152,690,239,701] 벤로막12\nL035 [152,707,304,719] 클라이넬리쉬DE\nL036 [152,723,268,736] 글렌알라키8\nL037 [152,739,372,751] 글렌알라키 10cs 배치13\nL038 [152,756,279,768] 글렌알라키12\nL039 [152,773,279,785] 글렌알라키15\nL040 [796,212,846,221] 30ml\nL041 [779,229,846,238] 14,000\nL042 [779,246,846,255] 18,000\nL043 [779,263,846,272] 18,000\nL044 [779,279,846,288] 16,000\nL045 [779,295,846,304] 60,000\nL046 [779,312,846,322] 17,000\nL047 [779,327,846,338] 15,000\nL048 [776,344,846,354] 22,000\nL049 [779,362,846,371] 13,000\nL050 [776,378,846,388] 35,000\nL051 [776,393,846,403] 23,000\nL052 [779,411,846,420] 32,000\nL053 [776,427,846,437] 16,000\nL054 [776,442,846,454] 20,000\nL055 [779,461,846,470] 16,000\nL056 [779,478,846,487] 23,000\nL057 [779,493,846,502] 46,000\nL058 [779,510,846,519] 20,000\nL059 [776,526,846,536] 19,000\nL060 [776,541,846,553] 22,000\nL061 [779,560,846,569] 11,000\nL062 [779,577,846,586] 12,000\nL063 [779,591,846,601] 16,000\nL064 [776,608,846,618] 17,000\nL065 [776,625,846,635] 70,000\nL066 [779,643,846,651] 19,000\nL067 [779,659,846,668] 14,000\nL068 [779,676,846,685] 12,000\nL069 [781,691,846,700] 18,000\nL070 [779,708,846,717] 21,000\nL071 [781,725,846,734] 16,000\nL072 [779,742,846,751] 28,000\nL073 [776,757,846,768] 20,000\nL074 [779,775,846,784] 32,000\n</ocr_lines>",
+  "n_lines": 74,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 1845
+}

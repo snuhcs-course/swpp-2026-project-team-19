@@ -1,0 +1,1547 @@
+{
+ "extraction": {
+  "수이": {
+   "n_gt": 159,
+   "n_out": 171,
+   "matched_strict": 158,
+   "matched": 158,
+   "correct": 158,
+   "fp": 13,
+   "fn": 1,
+   "priced": 158,
+   "price_correct": 158,
+   "unit_confusion": 0,
+   "item_accuracy": 0.9186046511627907,
+   "f1_strict": 0.9575757575757576,
+   "f1_lenient": 0.9575757575757576,
+   "price_accuracy": 1.0
+  },
+  "오드비": {
+   "n_gt": 154,
+   "n_out": 150,
+   "matched_strict": 145,
+   "matched": 150,
+   "correct": 150,
+   "fp": 0,
+   "fn": 4,
+   "priced": 150,
+   "price_correct": 150,
+   "unit_confusion": 0,
+   "item_accuracy": 0.974025974025974,
+   "f1_strict": 0.9539473684210527,
+   "f1_lenient": 0.9868421052631579,
+   "price_accuracy": 1.0
+  },
+  "전체": {
+   "n_gt": 313,
+   "n_out": 321,
+   "matched_strict": 303,
+   "matched": 308,
+   "correct": 308,
+   "fp": 13,
+   "fn": 5,
+   "priced": 308,
+   "price_correct": 308,
+   "unit_confusion": 0,
+   "item_accuracy": 0.9447852760736196,
+   "f1_strict": 0.9558359621451105,
+   "f1_lenient": 0.9716088328075709,
+   "price_accuracy": 1.0
+  }
+ },
+ "extraction_flags": {
+  "009_odbi_01.png": {
+   "n_lines": 75,
+   "price_like_lines": 35,
+   "uncited_price_lines": 1,
+   "uncited": [
+    "L003"
+   ],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "009_odbi_02.png": {
+   "n_lines": 40,
+   "price_like_lines": 16,
+   "uncited_price_lines": 16,
+   "uncited": [
+    "L003",
+    "L012",
+    "L013",
+    "L014",
+    "L015",
+    "L016",
+    "L017",
+    "L019",
+    "L020",
+    "L021",
+    "L032",
+    "L033",
+    "L034",
+    "L035",
+    "L039",
+    "L040"
+   ],
+   "flag_missing": true,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "009_odbi_03.png": {
+   "n_lines": 19,
+   "price_like_lines": 8,
+   "uncited_price_lines": 1,
+   "uncited": [
+    "L003"
+   ],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "009_odbi_04.png": {
+   "n_lines": 46,
+   "price_like_lines": 21,
+   "uncited_price_lines": 1,
+   "uncited": [
+    "L003"
+   ],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "009_odbi_05.png": {
+   "n_lines": 37,
+   "price_like_lines": 15,
+   "uncited_price_lines": 1,
+   "uncited": [
+    "L003"
+   ],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "009_odbi_06.png": {
+   "n_lines": 36,
+   "price_like_lines": 16,
+   "uncited_price_lines": 1,
+   "uncited": [
+    "L003"
+   ],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "009_odbi_07.png": {
+   "n_lines": 28,
+   "price_like_lines": 12,
+   "uncited_price_lines": 1,
+   "uncited": [
+    "L003"
+   ],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "009_odbi_08.png": {
+   "n_lines": 74,
+   "price_like_lines": 35,
+   "uncited_price_lines": 1,
+   "uncited": [
+    "L003"
+   ],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "009_odbi_09.jpeg": {
+   "n_lines": 46,
+   "price_like_lines": 12,
+   "uncited_price_lines": 4,
+   "uncited": [
+    "L043",
+    "L044",
+    "L045",
+    "L046"
+   ],
+   "flag_missing": true,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "010_sui_01.jpeg": {
+   "n_lines": 91,
+   "price_like_lines": 43,
+   "uncited_price_lines": 0,
+   "uncited": [],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "010_sui_02.jpeg": {
+   "n_lines": 69,
+   "price_like_lines": 33,
+   "uncited_price_lines": 0,
+   "uncited": [],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "010_sui_03.jpeg": {
+   "n_lines": 74,
+   "price_like_lines": 35,
+   "uncited_price_lines": 0,
+   "uncited": [],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "010_sui_04.jpeg": {
+   "n_lines": 84,
+   "price_like_lines": 39,
+   "uncited_price_lines": 0,
+   "uncited": [],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  },
+  "010_sui_05.jpeg": {
+   "n_lines": 47,
+   "price_like_lines": 0,
+   "uncited_price_lines": 0,
+   "uncited": [],
+   "flag_missing": false,
+   "invalid_refs": [],
+   "items_without_name_source": 0
+  }
+ },
+ "hybrid_attempts": {
+  "009_odbi_01.png": 1,
+  "009_odbi_02.png": 1,
+  "009_odbi_03.png": 1,
+  "009_odbi_04.png": 1,
+  "009_odbi_05.png": 1,
+  "009_odbi_06.png": 1,
+  "009_odbi_07.png": 1,
+  "009_odbi_08.png": 1,
+  "009_odbi_09.jpeg": 1,
+  "010_sui_01.jpeg": 1,
+  "010_sui_02.jpeg": 1,
+  "010_sui_03.jpeg": 1,
+  "010_sui_04.jpeg": 1,
+  "010_sui_05.jpeg": 1
+ },
+ "tokens_per_call_mean": {
+  "input_tokens": 5706.928571428572,
+  "output_tokens": 2008.0714285714287,
+  "thought_tokens": 938.2857142857143
+ },
+ "matching_e2e": {
+  "수이": {
+   "photos": 5,
+   "lines": 158,
+   "outcomes": {
+    "correct": 118,
+    "ambiguous_ok": 28,
+    "overconfident": 1,
+    "unmatched": 8,
+    "ambiguous_bad": 3
+   },
+   "known_gold_lines": 151,
+   "e2e_top1_correct": 118,
+   "e2e_top1": 0.7814569536423841,
+   "paired_known": 150,
+   "paired_top1": 0.7866666666666666,
+   "false_merge": 0,
+   "overconfident": 1,
+   "false_merge_rate": 0.006329113924050633,
+   "burden_totals": {
+    "confirm": 19,
+    "choose": 9,
+    "register": 8,
+    "wrong": 3
+   },
+   "missed_total": 1,
+   "unpaired_unconfirmed_total": 13,
+   "per_photo": {
+    "confirm": 3.8,
+    "choose": 1.8,
+    "register": 1.6,
+    "wrong": 0.6,
+    "missed": 0.2,
+    "unpaired_unconfirmed": 2.6
+   }
+  },
+  "오드비": {
+   "photos": 9,
+   "lines": 150,
+   "outcomes": {
+    "ambiguous_ok": 70,
+    "unmatched": 26,
+    "correct": 54
+   },
+   "known_gold_lines": 134,
+   "e2e_top1_correct": 54,
+   "e2e_top1": 0.40298507462686567,
+   "paired_known": 134,
+   "paired_top1": 0.40298507462686567,
+   "false_merge": 0,
+   "overconfident": 0,
+   "false_merge_rate": 0.0,
+   "burden_totals": {
+    "confirm": 63,
+    "choose": 7,
+    "register": 26,
+    "wrong": 0
+   },
+   "missed_total": 4,
+   "unpaired_unconfirmed_total": 0,
+   "per_photo": {
+    "confirm": 7.0,
+    "choose": 0.7777777777777778,
+    "register": 2.888888888888889,
+    "wrong": 0.0,
+    "missed": 0.4444444444444444,
+    "unpaired_unconfirmed": 0.0
+   }
+  },
+  "전체": {
+   "photos": 14,
+   "lines": 308,
+   "outcomes": {
+    "ambiguous_ok": 98,
+    "unmatched": 34,
+    "correct": 172,
+    "overconfident": 1,
+    "ambiguous_bad": 3
+   },
+   "known_gold_lines": 285,
+   "e2e_top1_correct": 172,
+   "e2e_top1": 0.6035087719298246,
+   "paired_known": 284,
+   "paired_top1": 0.6056338028169014,
+   "false_merge": 0,
+   "overconfident": 1,
+   "false_merge_rate": 0.003246753246753247,
+   "burden_totals": {
+    "confirm": 82,
+    "choose": 16,
+    "register": 34,
+    "wrong": 3
+   },
+   "missed_total": 5,
+   "unpaired_unconfirmed_total": 13,
+   "per_photo": {
+    "confirm": 5.857142857142857,
+    "choose": 1.1428571428571428,
+    "register": 2.4285714285714284,
+    "wrong": 0.21428571428571427,
+    "missed": 0.35714285714285715,
+    "unpaired_unconfirmed": 0.9285714285714286
+   }
+  }
+ },
+ "matching_label": {
+  "수이": {
+   "photos": 5,
+   "lines": 159,
+   "outcomes": {
+    "correct": 119,
+    "ambiguous_ok": 28,
+    "overconfident": 1,
+    "unmatched": 8,
+    "ambiguous_bad": 3
+   },
+   "known_gold_lines": 151,
+   "e2e_top1_correct": 119,
+   "e2e_top1": 0.7880794701986755,
+   "paired_known": 151,
+   "paired_top1": 0.7880794701986755,
+   "false_merge": 0,
+   "overconfident": 1,
+   "false_merge_rate": 0.006289308176100629,
+   "burden_totals": {
+    "confirm": 20,
+    "choose": 8,
+    "register": 8,
+    "wrong": 3
+   },
+   "missed_total": 0,
+   "unpaired_unconfirmed_total": 0,
+   "per_photo": {
+    "confirm": 4.0,
+    "choose": 1.6,
+    "register": 1.6,
+    "wrong": 0.6,
+    "missed": 0.0,
+    "unpaired_unconfirmed": 0.0
+   }
+  },
+  "오드비": {
+   "photos": 9,
+   "lines": 154,
+   "outcomes": {
+    "unmatched": 32,
+    "ambiguous_ok": 66,
+    "correct": 56
+   },
+   "known_gold_lines": 134,
+   "e2e_top1_correct": 56,
+   "e2e_top1": 0.417910447761194,
+   "paired_known": 134,
+   "paired_top1": 0.417910447761194,
+   "false_merge": 0,
+   "overconfident": 0,
+   "false_merge_rate": 0.0,
+   "burden_totals": {
+    "confirm": 60,
+    "choose": 6,
+    "register": 32,
+    "wrong": 0
+   },
+   "missed_total": 0,
+   "unpaired_unconfirmed_total": 0,
+   "per_photo": {
+    "confirm": 6.666666666666667,
+    "choose": 0.6666666666666666,
+    "register": 3.5555555555555554,
+    "wrong": 0.0,
+    "missed": 0.0,
+    "unpaired_unconfirmed": 0.0
+   }
+  },
+  "전체": {
+   "photos": 14,
+   "lines": 313,
+   "outcomes": {
+    "unmatched": 40,
+    "ambiguous_ok": 94,
+    "correct": 175,
+    "overconfident": 1,
+    "ambiguous_bad": 3
+   },
+   "known_gold_lines": 285,
+   "e2e_top1_correct": 175,
+   "e2e_top1": 0.6140350877192983,
+   "paired_known": 285,
+   "paired_top1": 0.6140350877192983,
+   "false_merge": 0,
+   "overconfident": 1,
+   "false_merge_rate": 0.003194888178913738,
+   "burden_totals": {
+    "confirm": 80,
+    "choose": 14,
+    "register": 40,
+    "wrong": 3
+   },
+   "missed_total": 0,
+   "unpaired_unconfirmed_total": 0,
+   "per_photo": {
+    "confirm": 5.714285714285714,
+    "choose": 1.0,
+    "register": 2.857142857142857,
+    "wrong": 0.21428571428571427,
+    "missed": 0.0,
+    "unpaired_unconfirmed": 0.0
+   }
+  }
+ },
+ "counts_e2e": {
+  "extracted_lines": 321,
+  "paired_lines": 308,
+  "unpaired_lines": 13,
+  "gold_lines": 313,
+  "missed_gold_lines": 5,
+  "gold_conflicts": 0
+ },
+ "counts_label": {
+  "extracted_lines": 313,
+  "paired_lines": 313,
+  "unpaired_lines": 0,
+  "gold_lines": 313,
+  "missed_gold_lines": 0,
+  "gold_conflicts": 0
+ },
+ "unpaired_e2e": {
+  "counts": {
+   "confirm_recommended": 1,
+   "unmatched": 12
+  },
+  "unconfirmed_per_photo": {
+   "010_수이_02": 1,
+   "010_수이_04": 12
+  },
+  "lines": [
+   {
+    "photo_id": "010_수이_02",
+    "name": "Balvenie 16y French Oak (프렌치 오크) 39,000",
+    "kind": "confirm_recommended",
+    "status": "ambiguous",
+    "rank1": "The Balvenie 16 French Oak",
+    "method": "llm"
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "1800 Anejo (아네호 데킬라)",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Petron Silver (페트론)",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Clase - Azul (클라세아줄)",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Hennesy V.S.O.A (헤네시 VSOP)",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Hennesy X.O",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Remy Martin V.S.O.P (레미 마틴)",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Remy Martin 1738",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Remy Martin X.O",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Camus V.S.O.P (까뮤)",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Daniel Royal",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Jean Luc Pasquet (장 뤽 파스케)",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "Boulard X.O (불라)",
+    "kind": "unmatched",
+    "status": "unmatched",
+    "rank1": null,
+    "method": null
+   }
+  ]
+ },
+ "confirm_recommended": {
+  "e2e": {
+   "rule": {
+    "n": 4,
+    "correct": 4,
+    "precision": 1.0
+   },
+   "llm": {
+    "n": 76,
+    "correct": 75,
+    "precision": 0.9868421052631579
+   }
+  },
+  "label": {
+   "rule": {
+    "n": 4,
+    "correct": 4,
+    "precision": 1.0
+   },
+   "llm": {
+    "n": 74,
+    "correct": 73,
+    "precision": 0.9864864864864865
+   }
+  }
+ },
+ "accept_error_rate": {
+  "e2e": 0.006493506493506494,
+  "label": 0.006389776357827476
+ },
+ "s1s3_only": {
+  "e2e": {
+   "known_top1": 0.6056338028169014,
+   "false_merge_rate": 0.003246753246753247,
+   "owner_burden_totals": {
+    "confirm": 14,
+    "choose": 22,
+    "register": 92,
+    "wrong": 7
+   },
+   "e2e_top1": {
+    "known_gold_lines": 285,
+    "correct": 172,
+    "top1": 0.6035087719298246
+   }
+  },
+  "label": {
+   "known_top1": 0.6140350877192983,
+   "false_merge_rate": 0.003194888178913738,
+   "owner_burden_totals": {
+    "confirm": 14,
+    "choose": 21,
+    "register": 95,
+    "wrong": 7
+   },
+   "e2e_top1": {
+    "known_gold_lines": 285,
+    "correct": 175,
+    "top1": 0.6140350877192983
+   }
+  }
+ },
+ "latency_s": {
+  "오드비": {
+   "clova": {
+    "n": 9,
+    "mean": 1.8017777777777777,
+    "p50": 1.768,
+    "p95": 2.45
+   },
+   "gemini": {
+    "n": 9,
+    "mean": 7.234222222222222,
+    "p50": 7.791,
+    "p95": 11.621
+   },
+   "m3a": {
+    "n": 9,
+    "mean": 22.569,
+    "p50": 10.126,
+    "p95": 76.737
+   },
+   "total": {
+    "n": 9,
+    "mean": 31.605,
+    "p50": 19.537,
+    "p95": 86.707
+   }
+  },
+  "전체": {
+   "clova": {
+    "n": 14,
+    "mean": 2.0827857142857145,
+    "p50": 2.1310000000000002,
+    "p95": 2.826
+   },
+   "gemini": {
+    "n": 14,
+    "mean": 8.466571428571429,
+    "p50": 8.3835,
+    "p95": 13.469
+   },
+   "m3a": {
+    "n": 14,
+    "mean": 18.973499999999998,
+    "p50": 7.92,
+    "p95": 76.737
+   },
+   "total": {
+    "n": 14,
+    "mean": 29.52285714285714,
+    "p50": 20.7225,
+    "p95": 86.707
+   }
+  },
+  "수이": {
+   "clova": {
+    "n": 5,
+    "mean": 2.5886,
+    "p50": 2.632,
+    "p95": 2.826
+   },
+   "gemini": {
+    "n": 5,
+    "mean": 10.6848,
+    "p50": 10.836,
+    "p95": 13.469
+   },
+   "m3a": {
+    "n": 5,
+    "mean": 12.5016,
+    "p50": 5.635,
+    "p95": 25.958
+   },
+   "total": {
+    "n": 5,
+    "mean": 25.775,
+    "p50": 21.908,
+    "p95": 38.025
+   }
+  },
+  "m3a_called_only": {
+   "n": 13,
+   "mean": 20.433,
+   "p50": 10.126,
+   "p95": 76.737
+  }
+ },
+ "llm": {
+  "e2e": {
+   "model": "gemini-3.1-flash-lite",
+   "thinking_level": "low",
+   "api_calls_this_run": 13,
+   "by_kind": {
+    "m3a": {
+     "requests": 13,
+     "api_calls": 13,
+     "cache_hits": 0,
+     "parse_errors": 0,
+     "input_tokens": 25551,
+     "output_tokens": 13830,
+     "thought_tokens": 3169,
+     "mean_latency_ms": 20433
+    }
+   }
+  },
+  "label": {
+   "model": "gemini-3.1-flash-lite",
+   "thinking_level": "low",
+   "api_calls_this_run": 8,
+   "by_kind": {
+    "m3a": {
+     "requests": 13,
+     "api_calls": 8,
+     "cache_hits": 5,
+     "parse_errors": 0,
+     "input_tokens": 25316,
+     "output_tokens": 12687,
+     "thought_tokens": 4201,
+     "mean_latency_ms": 12872
+    }
+   }
+  },
+  "drop_products": {
+   "model": "gemini-3.1-flash-lite",
+   "thinking_level": "low",
+   "api_calls_this_run": 7,
+   "by_kind": {
+    "m3a": {
+     "requests": 13,
+     "api_calls": 7,
+     "cache_hits": 6,
+     "parse_errors": 0,
+     "input_tokens": 25551,
+     "output_tokens": 15911,
+     "thought_tokens": 3071,
+     "mean_latency_ms": 18396
+    }
+   }
+  }
+ },
+ "drop_products": {
+  "by_kind": {
+   "absent": {
+    "unmatched": 65,
+    "ambiguous_bad": 18
+   },
+   "non_whisky": {
+    "unmatched": 11
+   },
+   "unknown": {
+    "unmatched": 9,
+    "ambiguous_ok": 3,
+    "overconfident": 1
+   },
+   "known": {
+    "ambiguous_ok": 49,
+    "correct": 151,
+    "unmatched": 1
+   }
+  },
+  "by_bar": {
+   "오드비": {
+    "unmatched": 54,
+    "ambiguous_bad": 12,
+    "ambiguous_ok": 33,
+    "correct": 51
+   },
+   "수이": {
+    "correct": 100,
+    "ambiguous_ok": 19,
+    "overconfident": 1,
+    "unmatched": 32,
+    "ambiguous_bad": 6
+   }
+  },
+  "matching": {
+   "수이": {
+    "photos": 5,
+    "lines": 158,
+    "outcomes": {
+     "correct": 100,
+     "ambiguous_ok": 19,
+     "overconfident": 1,
+     "unmatched": 32,
+     "ambiguous_bad": 6
+    },
+    "known_gold_lines": 118,
+    "e2e_top1_correct": 100,
+    "e2e_top1": 0.847457627118644,
+    "paired_known": 117,
+    "paired_top1": 0.8547008547008547,
+    "false_merge": 0,
+    "overconfident": 1,
+    "false_merge_rate": 0.006329113924050633,
+    "burden_totals": {
+     "confirm": 13,
+     "choose": 6,
+     "register": 32,
+     "wrong": 6
+    },
+    "missed_total": 1,
+    "unpaired_unconfirmed_total": 13,
+    "per_photo": {
+     "confirm": 2.6,
+     "choose": 1.2,
+     "register": 6.4,
+     "wrong": 1.2,
+     "missed": 0.2,
+     "unpaired_unconfirmed": 2.6
+    }
+   },
+   "오드비": {
+    "photos": 9,
+    "lines": 150,
+    "outcomes": {
+     "unmatched": 54,
+     "ambiguous_bad": 12,
+     "ambiguous_ok": 33,
+     "correct": 51
+    },
+    "known_gold_lines": 84,
+    "e2e_top1_correct": 51,
+    "e2e_top1": 0.6071428571428571,
+    "paired_known": 84,
+    "paired_top1": 0.6071428571428571,
+    "false_merge": 0,
+    "overconfident": 0,
+    "false_merge_rate": 0.0,
+    "burden_totals": {
+     "confirm": 30,
+     "choose": 3,
+     "register": 54,
+     "wrong": 12
+    },
+    "missed_total": 4,
+    "unpaired_unconfirmed_total": 0,
+    "per_photo": {
+     "confirm": 3.3333333333333335,
+     "choose": 0.3333333333333333,
+     "register": 6.0,
+     "wrong": 1.3333333333333333,
+     "missed": 0.4444444444444444,
+     "unpaired_unconfirmed": 0.0
+    }
+   },
+   "전체": {
+    "photos": 14,
+    "lines": 308,
+    "outcomes": {
+     "unmatched": 86,
+     "ambiguous_bad": 18,
+     "ambiguous_ok": 52,
+     "correct": 151,
+     "overconfident": 1
+    },
+    "known_gold_lines": 202,
+    "e2e_top1_correct": 151,
+    "e2e_top1": 0.7475247524752475,
+    "paired_known": 201,
+    "paired_top1": 0.7512437810945274,
+    "false_merge": 0,
+    "overconfident": 1,
+    "false_merge_rate": 0.003246753246753247,
+    "burden_totals": {
+     "confirm": 43,
+     "choose": 9,
+     "register": 86,
+     "wrong": 18
+    },
+    "missed_total": 5,
+    "unpaired_unconfirmed_total": 13,
+    "per_photo": {
+     "confirm": 3.0714285714285716,
+     "choose": 0.6428571428571429,
+     "register": 6.142857142857143,
+     "wrong": 1.2857142857142858,
+     "missed": 0.35714285714285715,
+     "unpaired_unconfirmed": 0.9285714285714286
+    }
+   }
+  },
+  "absent_lines": [
+   {
+    "photo_id": "009_오드비_01",
+    "name": "시그나토리 쿨일라13",
+    "gold": "new:signatory-caol-ila-13",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": true
+   },
+   {
+    "photo_id": "009_오드비_01",
+    "name": "시그나토리 올트모어14",
+    "gold": "new:signatory-aultmore-14",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": true
+   },
+   {
+    "photo_id": "009_오드비_01",
+    "name": "시그나토리 아벨라워13",
+    "gold": "new:signatory-aberlour-13",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": true
+   },
+   {
+    "photo_id": "009_오드비_01",
+    "name": "시그나토리 카메론브릿지12",
+    "gold": "new:signatory-cameronbridge-12",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "009_오드비_03",
+    "name": "시그나토리 싱글몰트 링크우드14",
+    "gold": "new:signatory-linkwood-14",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": true
+   },
+   {
+    "photo_id": "009_오드비_03",
+    "name": "시그나토리 싱글몰트 벤네비스13",
+    "gold": "new:signatory-ben-nevis-13",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": true
+   },
+   {
+    "photo_id": "009_오드비_03",
+    "name": "캠벨타운 싱글몰트 글렌스코샤12",
+    "gold": "new:glen-scotia-12",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": true
+   },
+   {
+    "photo_id": "009_오드비_04",
+    "name": "포로지스",
+    "gold": "new:four-roses-bourbon",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "009_오드비_08",
+    "name": "글렌드로낙 오드 투 더 다크",
+    "gold": "new:glendronach-ode-to-the-dark",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "009_오드비_08",
+    "name": "벤로막12",
+    "gold": "new:benromach-12",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": true
+   },
+   {
+    "photo_id": "009_오드비_08",
+    "name": "글렌알라키 10cs 배치13",
+    "gold": "new:glenallachie-10-cs-batch-13",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "009_오드비_09",
+    "name": "발베니12 골드캐스크",
+    "gold": "new:balvenie-12-golden-cask",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "010_수이_01",
+    "name": "Octomore 16.2 (옥토모어)",
+    "gold": "new:octomore-16-2",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "010_수이_01",
+    "name": "Ileach CS (일리악)",
+    "gold": "new:ileach-cs",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "010_수이_02",
+    "name": "Tormore Tempranillo Cask (토모어)",
+    "gold": "new:dl-tormore-13-tempranillo",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "010_수이_03",
+    "name": "JohnnieWalker Double Black (더블블랙)",
+    "gold": "new:johnnie-walker-double-black",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "김과장 #3 (하이랜드 파크)",
+    "gold": "new:kimgwajang-3-highland-park",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   },
+   {
+    "photo_id": "010_수이_04",
+    "name": "김과장 #4 (클라이넬리쉬)",
+    "gold": "new:kimgwajang-4-clynelish",
+    "kind": "absent",
+    "outcome": "ambiguous_bad",
+    "status": "ambiguous",
+    "confirm_recommended": false
+   }
+  ]
+ },
+ "known_limitations": [
+  {
+   "photo_id": "009_오드비_01",
+   "gold_line": "잭비버스 녹듀16",
+   "gold": "jack-wiebers-knockdhu-16",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "잭비버스 녹듀16"
+   ],
+   "label_outcome": "unmatched",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "009_오드비_01",
+   "gold_line": "아쿠아비타 쿨리22 포트",
+   "gold": "aqua-vitae-cooley-22-port",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "아쿠아비타 쿨리22 포트"
+   ],
+   "label_outcome": "ambiguous_ok",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "009_오드비_01",
+   "gold_line": "아쿠아비타 쿨리23 아마로네",
+   "gold": "aqua-vitae-cooley-23-amarone",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "아쿠아비타 쿨리23 아마로네"
+   ],
+   "label_outcome": "ambiguous_ok",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "009_오드비_01",
+   "gold_line": "아쿠아비타 쿨리24 버번",
+   "gold": "aqua-vitae-cooley-24-bourbon",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "아쿠아비타 쿨리24 버번"
+   ],
+   "label_outcome": "ambiguous_ok",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "009_오드비_01",
+   "gold_line": "크래프트브로스 독수리 오형제 1호",
+   "gold": "craft-bros-eagle-1",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "크래프트브로스 독수리 오형제 1호"
+   ],
+   "label_outcome": "unmatched",
+   "label_vetoes": null,
+   "e2e_outcome": "unmatched",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "009_오드비_01",
+   "gold_line": "크래프트브로스 독수리 오형제 3호",
+   "gold": "craft-bros-eagle-3",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "크래프트브로스 독수리 오형제 3호"
+   ],
+   "label_outcome": "unmatched",
+   "label_vetoes": null,
+   "e2e_outcome": "unmatched",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "009_오드비_04",
+   "gold_line": "놉크릭 버번",
+   "gold": "knob-creek",
+   "limits": [
+    "age_null"
+   ],
+   "extracted_as": [
+    "놉크릭 버번"
+   ],
+   "label_outcome": "ambiguous_ok",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "009_오드비_08",
+   "gold_line": "글렌모렌지 오리지널",
+   "gold": "glenmorangie-original",
+   "limits": [
+    "age_inconsistent"
+   ],
+   "extracted_as": [
+    "글렌모렌지 오리지널"
+   ],
+   "label_outcome": "correct",
+   "label_vetoes": null,
+   "e2e_outcome": "correct",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "009_오드비_09",
+   "gold_line": "몰트맨 싱글몰트 페터캐른37 / 행사",
+   "gold": "maltman-fettercairn-37",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "몰트맨 싱글몰트 페터캐른37 / 행사"
+   ],
+   "label_outcome": "ambiguous_ok",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "009_오드비_09",
+   "gold_line": "더 노스스타 아드모어26 / 행사",
+   "gold": "north-star-ardmore-26",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "더 노스스타 아드모어26 / 행사"
+   ],
+   "label_outcome": "ambiguous_ok",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_01",
+   "gold_line": "Blair Athol Sangiovese Cask (블레어 아쏠)",
+   "gold": "dl-blair-athol-13-sangiovese",
+   "limits": [
+    "bottler_missing_menu"
+   ],
+   "extracted_as": [
+    "Blair Athol Sangiovese Cask (블레어 아쏠)"
+   ],
+   "label_outcome": "unmatched",
+   "label_vetoes": null,
+   "e2e_outcome": "unmatched",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_02",
+   "gold_line": "Tormore Tempranillo Cask (토모어)",
+   "gold": "dl-tormore-13-tempranillo",
+   "limits": [
+    "bottler_missing_menu"
+   ],
+   "extracted_as": [
+    "Tormore Tempranillo Cask (토모어)"
+   ],
+   "label_outcome": "ambiguous_bad",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_bad",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_03",
+   "gold_line": "Glenmorangie Org (글렌모렌지)",
+   "gold": "glenmorangie-original",
+   "limits": [
+    "age_inconsistent"
+   ],
+   "extracted_as": [
+    "Glenmorangie Org (글렌모렌지)"
+   ],
+   "label_outcome": "ambiguous_ok",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_03",
+   "gold_line": "Knob Creek 9y (납 크릭)",
+   "gold": "knob-creek",
+   "limits": [
+    "age_null"
+   ],
+   "extracted_as": [
+    "Knob Creek 9y (납 크릭)"
+   ],
+   "label_outcome": "correct",
+   "label_vetoes": null,
+   "e2e_outcome": "correct",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "SANSIBAR 21y Batch4 (산시바)",
+   "gold": "unknown",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "SANSIBAR 21y Batch4 (산시바)"
+   ],
+   "label_outcome": "unmatched",
+   "label_vetoes": null,
+   "e2e_outcome": "unmatched",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "SANSIBAR 21y",
+   "gold": "unknown",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "SANSIBAR 21y"
+   ],
+   "label_outcome": "unmatched",
+   "label_vetoes": null,
+   "e2e_outcome": "unmatched",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "Eld Vatten 11y (브룩라디)",
+   "gold": "eld-vatten-bruichladdich-11",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "Eld Vatten 11y (브룩라디)"
+   ],
+   "label_outcome": "unmatched",
+   "label_vetoes": null,
+   "e2e_outcome": "unmatched",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "Eld Vatten 14y (벤네비스)",
+   "gold": "eld-vatten-ben-nevis-14",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "Eld Vatten 14y (벤네비스)"
+   ],
+   "label_outcome": "unmatched",
+   "label_vetoes": null,
+   "e2e_outcome": "unmatched",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "김과장 #3 (하이랜드 파크)",
+   "gold": "kimgwajang-3-highland-park",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "김과장 #3 (하이랜드 파크)"
+   ],
+   "label_outcome": "ambiguous_bad",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_bad",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "김과장 #4 (클라이넬리쉬)",
+   "gold": "kimgwajang-4-clynelish",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "김과장 #4 (클라이넬리쉬)"
+   ],
+   "label_outcome": "ambiguous_bad",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_bad",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "The Nectar 11y (글렌 오드)",
+   "gold": "nectar-glen-ord-11",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "The Nectar 11y (글렌 오드)"
+   ],
+   "label_outcome": "ambiguous_ok",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "The Nectar 12y (밀튼 더프)",
+   "gold": "nectar-miltonduff-12",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "The Nectar 12y (밀튼 더프)"
+   ],
+   "label_outcome": "ambiguous_ok",
+   "label_vetoes": null,
+   "e2e_outcome": "ambiguous_ok",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "The Maltman Dailuaine 14y (달루인)",
+   "gold": "maltman-dailuaine-14",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "The Maltman Dailuaine 14y (달루인)"
+   ],
+   "label_outcome": "correct",
+   "label_vetoes": null,
+   "e2e_outcome": "correct",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "The Maltman DeanSton 14y (딘스톤)",
+   "gold": "maltman-deanston-14",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "The Maltman DeanSton 14y (딘스톤)"
+   ],
+   "label_outcome": "correct",
+   "label_vetoes": null,
+   "e2e_outcome": "correct",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "The Maltman Campbeltown 10y",
+   "gold": "maltman-campbeltown-10",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "The Maltman Campbeltown 10y"
+   ],
+   "label_outcome": "correct",
+   "label_vetoes": null,
+   "e2e_outcome": "correct",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_04",
+   "gold_line": "The Maltman Master's Blend 34y",
+   "gold": "maltman-masters-blend-34",
+   "limits": [
+    "new_bottler"
+   ],
+   "extracted_as": [
+    "The Maltman Master's Blend 34y"
+   ],
+   "label_outcome": "correct",
+   "label_vetoes": null,
+   "e2e_outcome": "correct",
+   "e2e_vetoes": [
+    null
+   ]
+  },
+  {
+   "photo_id": "010_수이_05",
+   "gold_line": "글렌모렌지 오리지널",
+   "gold": "glenmorangie-original",
+   "limits": [
+    "age_inconsistent"
+   ],
+   "extracted_as": [
+    "글렌모렌지 오리지널"
+   ],
+   "label_outcome": "correct",
+   "label_vetoes": null,
+   "e2e_outcome": "correct",
+   "e2e_vetoes": [
+    null
+   ]
+  }
+ ]
+}

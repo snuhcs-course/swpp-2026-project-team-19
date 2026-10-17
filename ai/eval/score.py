@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10; 2026-10-17, P47 final set). Reviewed by Jinwoo Park.
 """Score extraction runs against a label set (ai/docs/eval_plan.md).
 
     python ai/eval/score.py ai/runs/2026-10-04_A [ai/runs/2026-10-04_A2 ...]
@@ -46,6 +46,10 @@ LABEL_SETS = {
     "test_v1_1": {"labels": REPO_ROOT / "eval" / "labels_heldout_v1_1.json",
                   "sha256": "047bf7d6f7274552f0dce0a4922ce7a72fa4282459d6cf1f6bbfb5271082c986",
                   "photo_dir": "eval_photos_test"},
+    # final (P47 only, ai/docs/p47_plan.md): 수이·오드비, guideline v2.3, v1.1 raw_name rule
+    "final": {"labels": REPO_ROOT / "eval" / "labels_final_v1.json",
+              "sha256": "a8ac42bb36df6b2151b6e6e8938ca141fff5bcbaca2fe391804e4702d3defbf1",
+              "photo_dir": "eval_photos_final"},
 }
 LABELS_PATH = LABEL_SETS["val"]["labels"]
 LABELS_SHA256 = LABEL_SETS["val"]["sha256"]

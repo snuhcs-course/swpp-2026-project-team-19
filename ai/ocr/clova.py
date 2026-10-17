@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, P12). Reviewed by Jinwoo Park.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, P12; 2026-10-17, P47 final set). Reviewed by Jinwoo Park.
 """CLOVA General OCR (V2) calls with a response cache (ai/docs/p12_plan.md).
 
     python ai/ocr/clova.py --set val                       # all val photos, table off + on
@@ -42,7 +42,7 @@ LANG = "ko"
 RETRY_STATUS = {429, 500, 502, 503, 504}
 MAX_ATTEMPTS = 4
 TIMEOUT_S = 120
-PHOTO_SETS = {"val": "eval_photos", "test": "eval_photos_test"}
+PHOTO_SETS = {"val": "eval_photos", "test": "eval_photos_test", "final": "eval_photos_final"}
 
 
 class ClovaError(Exception):

@@ -539,3 +539,34 @@
 
 ### 결과
 - `ai/runs/2026-10-14_e2e/README.md`: 하이브리드 test 0.995(3회, r1 1.000), E1 0.842, CLOVA+LLM 0.883. 종단 Top-1 하이브리드 C0 0.770 / C1 0.377(라벨과 같음, 놓친 줄 0), E1 0.733 / 0.366, CLOVA+LLM 0.726 / 0.331. 가격 근거 줄 인용 오류(r2 미라보_05 15건)와 누락 감지 오탐(비위스키 섹션)은 한계로 기록
+
+## P47 (I2) 최종 평가 실행 (2026-10-17)
+
+- **브랜치:** `i2-p47` (base `d3163c0`, 워크트리 `wt-p47`). 실행 전 커밋 `4b81670`, push 안 함
+- **시간(대략):** Claude 작업 약 1시간 (동결 기록·하네스 파악 20분, final split 배선·드라이런·회귀 확인 15분, 실행 10분, 집계·보고서 15분). 담당자 검토 시간 별도
+- **토큰(대략):** Claude Code 세션 약 20만 토큰. Gemini 3.5 입력 8.0만 / 출력 2.8만 / thought 1.3만(14회), 3.1 입력 5.7만 / 출력 3.2만 / thought 0.6만(M3a 28회)
+
+### 진행 순서
+1. Claude가 `p47_plan.md`(origin/i2-catalog-v2)와 `d3163c0`의 `hybrid.py`, `e2e_match.py`, `match_eval.py`, `clova.py`, `score.py`를 읽고, final split 배선 범위를 정함
+2. 데이터 5개를 i2-catalog-v2에서 가져오고 배선 추가: `--set final`(hybrid·clova·score), `e2e_match.py --split final [--catalog drop_products]`. `match_eval.py`는 고치지 않고 `e2e_match.py`에서 `match_eval.SEED`를 카탈로그 v2 스냅샷으로 지정
+3. 드라이런 `p47_preflight.py`(API 0회): 14장 OCR 캐시 766줄, 라벨 313항목, 정답 ref가 두 스냅샷에 모두 있는지, 라벨 입력 M3a 호출 수(13) 집계
+4. 회귀 확인(캐시만): test split 라벨·하이브리드 종단 숫자가 10/14 보고서와 같음. pytest 74개 통과
+5. 사용자 OK 뒤 실행 전 커밋(4b81670) → 하이브리드 14회 → 종단 → 라벨 기준선 → drop_products 보조, 각 1회 → `score.py --set final`, `p47_report.py`로 집계 → `p47_result.md`
+
+### AI가 정한 것 (사람 확인 필요)
+- eval_5bars는 정답 상품이 다 있으므로 정답 `new:<key>`를 카탈로그 상품 `<key>`로 읽고 C0만 평가 (C1을 쓰면 같은 상품이 다른 id로 두 번 들어감)
+- M3a 60회 상한을 P47 전체에 적용: 단계별 `--limit`을 남은 수(60, 47, 39)로
+- hybrid.py가 `ai/runs/2026-10-17_e2e/`에 쓴 출력을 내용 그대로 `2026-10-17_p47/`로 옮김 (동결 파일에 출력 경로 옵션을 더하지 않으려고)
+- 5절 한계 해당 줄은 정답 상품 key로 골라냄(`p47_report.py` LIMITS)
+
+### 검증
+- 동결 경로 diff 빈 결과(`backend/app/matching ai/match_llm ai/ocr/hybrid_prompt_v1.md ai/ocr/lines.py ai/eval/match_eval.py`), hybrid.py는 `--set` 한 줄
+- 결과 문서의 라벨↔종단 차이 줄(3줄)과 원인은 줄 단위 비교로 확인한 뒤 적음 (초안의 추정 2건을 고침)
+- 결과·캐시 파일에 API 키 없음(`.env` 값으로 grep 0건)
+
+### 사용 중 있었던 문제
+- 회귀 확인에서 test 라벨 입력에 E2E 캐시를 지정해 CacheMiss → 라벨 입력 캐시는 `2026-10-14_m3/cache`였음
+- pytest 기본 임시 폴더 권한 오류 → `--basetemp`를 스크래치 폴더로
+
+### 결과
+- `ai/docs/p47_result.md`: 추출 0.945(가격 1.000), 종단 Top-1 0.604 / 라벨 0.614 (수이 0.781 / 0.788, 오드비 0.403 / 0.418), false merge 0.003(overconfident 1), 사진당 (a) 5.9 (b)+(c)+(d) 3.8, 지연 평균 29.5초

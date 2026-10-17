@@ -1,0 +1,186 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "009_odbi_03.png",
+  "prepared_image": "009_odbi_03.png",
+  "prepared_sha256": "da0adfe47d12f5d004d26f09c4029e9d558c0ea39972d5f76b2e58fd02085440",
+  "started_at": "2026-10-17T06:22:33.908287+00:00",
+  "latency_ms": 4880,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 4663,
+  "output_tokens": 662,
+  "thought_tokens": 0,
+  "total_tokens": 5325,
+  "output": {
+    "items": [
+      {
+        "raw_name": "글렌알라키11 팔로 코르타도",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006"
+          ],
+          "price": [
+            "L013"
+          ]
+        }
+      },
+      {
+        "raw_name": "싱글몰트 에드라두어12cs 비스코",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L014"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 싱글몰트 링크우드14",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008"
+          ],
+          "price": [
+            "L015"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 싱글몰트 벤네비스13",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L016"
+          ]
+        }
+      },
+      {
+        "raw_name": "캠벨타운 싱글몰트 글렌스코샤12",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L010"
+          ],
+          "price": [
+            "L017"
+          ]
+        }
+      },
+      {
+        "raw_name": "캠벨타운 글렌스코샤15",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L011"
+          ],
+          "price": [
+            "L018"
+          ]
+        }
+      },
+      {
+        "raw_name": "캠벨타운 글렌스코샤 빅토리아나",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L012"
+          ],
+          "price": [
+            "L019"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌알라키11 팔로 코르타도\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"싱글몰트 에드라두어12cs 비스코\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리 싱글몰트 링크우드14\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리 싱글몰트 벤네비스13\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"캠벨타운 싱글몰트 글렌스코샤12\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L017\"]\n      }\n    },\n    {\n      \"raw_name\": \"캠벨타운 글렌스코샤15\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"캠벨타운 글렌스코샤 빅토리아나\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L019\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:22:38Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌알라키11 팔로 코르타도\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"싱글몰트 에드라두어12cs 비스코\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리 싱글몰트 링크우드14\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리 싱글몰트 벤네비스13\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"캠벨타운 싱글몰트 글렌스코샤12\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L017\"]\n      }\n    },\n    {\n      \"raw_name\": \"캠벨타운 글렌스코샤15\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"캠벨타운 글렌스코샤 빅토리아나\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L019\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0TtSJ42OKHQn5WSdTNLaLryFjFfmqjlyTsfOcxFJzPU/rwmfZCyZHGKAxDq27iXFNX8ITFAxa1cEbluJWLOtPtoicDszJm9iuvqRZLPUyebyZHABrsO0WvQAM=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌알라키11 팔로 코르타도\",\n      \"price_krw\": 27000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"싱글몰트 에드라두어12cs 비스코\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리 싱글몰트 링크우드14\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리 싱글몰트 벤네비스13\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"캠벨타운 싱글몰트 글렌스코샤12\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L017\"]\n      }\n    },\n    {\n      \"raw_name\": \"캠벨타운 글렌스코샤15\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"캠벨타운 글렌스코샤 빅토리아나\",\n      \"price_krw\": 29000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L019\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:22:38Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 3585
+        },
+        {
+          "modality": "image",
+          "tokens": 1078
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 4663,
+      "total_output_tokens": 662,
+      "total_thought_tokens": 0,
+      "total_tokens": 5325,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 19,
+    "price_like_lines": 8,
+    "uncited_price_lines": 1,
+    "uncited": [
+      "L003"
+    ],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [98,25,217,44] 21:07\nL002 [776,27,838,43] LTE\nL003 [861,27,903,40] 42\nL004 [880,100,928,124] X\nL005 [152,211,228,223] -한정판\nL006 [152,228,415,239] 글렌알라키11 팔로 코르타도\nL007 [152,245,457,256] 싱글몰트 에드라두어12cs 비스코\nL008 [152,260,454,272] 시그나토리 싱글몰트 링크우드14\nL009 [152,277,454,289] 시그나토리 싱글몰트 벤네비스13\nL010 [152,294,454,306] 캠벨타운 싱글몰트 글렌스코샤12\nL011 [152,311,369,323] 캠벨타운 글렌스코샤15\nL012 [152,327,451,338] 캠벨타운 글렌스코샤 빅토리아나\nL013 [776,228,846,238] 27,000\nL014 [776,245,846,255] 40,000\nL015 [779,263,846,272] 20,000\nL016 [776,279,846,289] 20,000\nL017 [779,295,846,304] 15,000\nL018 [779,312,846,322] 18,000\nL019 [776,327,846,338] 29,000\n</ocr_lines>",
+  "n_lines": 19,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 1309
+}

@@ -1,0 +1,301 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "009_odbi_09.jpeg",
+  "prepared_image": "009_odbi_09.jpg",
+  "prepared_sha256": "b4f4dc9c31cd0003cb0d8abb7e2c676de9d9b99312e0b81b73c787005c427dc3",
+  "started_at": "2026-10-17T06:23:19.573346+00:00",
+  "latency_ms": 8741,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5496,
+  "output_tokens": 1387,
+  "thought_tokens": 1605,
+  "total_tokens": 8488,
+  "output": {
+    "items": [
+      {
+        "raw_name": "몰트맨 싱글몰트 페터캐른37 / 행사",
+        "price_krw": 70000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L003"
+          ],
+          "price": [
+            "L010"
+          ]
+        }
+      },
+      {
+        "raw_name": "와일드터키 아카이브 골드포일16 / 행사",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L004"
+          ],
+          "price": [
+            "L011"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌알라키19 엑스 솔레라 / 한정파 행사",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L005"
+          ],
+          "price": [
+            "L012"
+          ]
+        }
+      },
+      {
+        "raw_name": "시그나토리 노스 브리티쉬 싱글그레인34 / 행사",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006"
+          ],
+          "price": [
+            "L013"
+          ]
+        }
+      },
+      {
+        "raw_name": "아일라 싱글몰트 보모어21 셰리 / 행사",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L014"
+          ]
+        }
+      },
+      {
+        "raw_name": "믹터스 토스티드 배럴 피니쉬 / 행사",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008"
+          ],
+          "price": [
+            "L015"
+          ]
+        }
+      },
+      {
+        "raw_name": "더 노스스타 아드모어26 / 행사",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L016"
+          ]
+        }
+      },
+      {
+        "raw_name": "카발란 증류소 킹 카 위스키 올드보틀",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L031"
+          ]
+        }
+      },
+      {
+        "raw_name": "하이랜드파크CS R.4",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "발베니12 골드캐스크",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L033"
+          ]
+        }
+      },
+      {
+        "raw_name": "벤리악 쿼터캐스크",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L026"
+          ],
+          "price": [
+            "L034"
+          ]
+        }
+      },
+      {
+        "raw_name": "로크로몬드12",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L035"
+          ]
+        }
+      },
+      {
+        "raw_name": "로크로몬드18",
+        "price_krw": 31000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      },
+      {
+        "raw_name": "신도 더 블렌디드",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L029"
+          ],
+          "price": [
+            "L037"
+          ]
+        }
+      },
+      {
+        "raw_name": "라프로익15",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L030"
+          ],
+          "price": [
+            "L038"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"몰트맨 싱글몰트 페터캐른37 / 행사\",\n      \"price_krw\": 70000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L003\"],\n        \"price\": [\"L010\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 아카이브 골드포일16 / 행사\",\n      \"price_krw\": 50000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L004\"],\n        \"price\": [\"L011\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키19 엑스 솔레라 / 한정파 행사\",\n      \"price_krw\": 60000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리 노스 브리티쉬 싱글그레인34 / 행사\",\n      \"price_krw\": 50000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"아일라 싱글몰트 보모어21 셰리 / 행사\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"믹터스 토스티드 배럴 피니쉬 / 행사\",\n      \"price_krw\": 60000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"더 노스스타 아드모어26 / 행사\",\n      \"price_krw\": 50000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"카발란 증류소 킹 카 위스키 올드보틀\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드파크CS R.4\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니12 골드캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"벤리악 쿼터캐스크\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"로크로몬드12\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"로크로몬드18\",\n      \"price_krw\": 31000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"신도 더 블렌디드\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L037\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익15\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L038\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:23:27Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"몰트맨 싱글몰트 페터캐른37 / 행사\",\n      \"price_krw\": 70000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L003\"],\n        \"price\": [\"L010\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 아카이브 골드포일16 / 행사\",\n      \"price_krw\": 50000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L004\"],\n        \"price\": [\"L011\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키19 엑스 솔레라 / 한정파 행사\",\n      \"price_krw\": 60000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리 노스 브리티쉬 싱글그레인34 / 행사\",\n      \"price_krw\": 50000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"아일라 싱글몰트 보모어21 셰리 / 행사\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"믹터스 토스티드 배럴 피니쉬 / 행사\",\n      \"price_krw\": 60000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"더 노스스타 아드모어26 / 행사\",\n      \"price_krw\": 50000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"카발란 증류소 킹 카 위스키 올드보틀\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드파크CS R.4\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니12 골드캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"벤리악 쿼터캐스크\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"로크로몬드12\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"로크로몬드18\",\n      \"price_krw\": 31000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"신도 더 블렌디드\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L037\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익15\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L038\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"몰트맨 싱글몰트 페터캐른37 / 행사\",\n      \"price_krw\": 70000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L003\"],\n        \"price\": [\"L010\"]\n      }\n    },\n    {\n      \"raw_name\": \"와일드터키 아카이브 골드포일16 / 행사\",\n      \"price_krw\": 50000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L004\"],\n        \"price\": [\"L011\"]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키19 엑스 솔레라 / 한정파 행사\",\n      \"price_krw\": 60000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L005\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"시그나토리 노스 브리티쉬 싱글그레인34 / 행사\",\n      \"price_krw\": 50000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"아일라 싱글몰트 보모어21 셰리 / 행사\",\n      \"price_krw\": 40000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"믹터스 토스티드 배럴 피니쉬 / 행사\",\n      \"price_krw\": 60000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"더 노스스타 아드모어26 / 행사\",\n      \"price_krw\": 50000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"카발란 증류소 킹 카 위스키 올드보틀\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L023\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"하이랜드파크CS R.4\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"발베니12 골드캐스크\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"벤리악 쿼터캐스크\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"로크로몬드12\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"로크로몬드18\",\n      \"price_krw\": 31000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"신도 더 블렌디드\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L037\"]\n      }\n    },\n    {\n      \"raw_name\": \"라프로익15\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L038\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:23:27Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 4432
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 5496,
+      "total_output_tokens": 1387,
+      "total_thought_tokens": 1605,
+      "total_tokens": 8488,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 46,
+    "price_like_lines": 12,
+    "uncited_price_lines": 4,
+    "uncited": [
+      "L043",
+      "L044",
+      "L045",
+      "L046"
+    ],
+    "flag_missing": true,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [357,0,672,38] IVIENU\nL002 [367,52,657,86] 행사 & 새로온 친구들\nL003 [141,90,500,112] 몰트맨 싱글몰트 페터캐른37 / 행사\nL004 [139,118,540,143] 와일드터키 아카이브 골드포일16 / 행사\nL005 [141,148,550,173] 글렌알라키19 엑스 솔레라 / 한정파 행사\nL006 [142,178,611,203] 시그나토리 노스 브리티쉬 싱글그레인34 / 행사\nL007 [144,208,529,230] 아일라 싱글몰트 보모어21 셰리 / 행사\nL008 [144,237,505,259] 믹터스 토스티드 배럴 피니쉬 / 행사\nL009 [144,268,458,288] 더 노스스타 아드모어26 / 행사\nL010 [797,103,875,120] * 70,000\nL011 [793,131,873,148] *50,000\nL012 [795,160,873,177] *60,000\nL013 [795,189,873,206] *50,000\nL014 [793,217,873,234] *40,000\nL015 [793,246,871,263] *60,000\nL016 [793,275,871,290] *50,000\nL017 [144,328,425,347] 올드풀티니 3종 세트 / 행사\nL018 [146,356,550,376] 사부로마루 피트 위스키 5종 세트 / 행사\nL019 [146,386,456,406] 아르마냑 가호 5종 세트 / 행사\nL020 [792,331,870,347] *60,000\nL021 [779,359,871,376] *160,000\nL022 [779,388,870,405] *140,000\nL023 [146,445,516,464] 카발란 증류소 킹 카 위스키 올드보틀\nL024 [147,474,349,492] 하이랜드파크CS R.4\nL025 [147,502,351,522] 발베니12 골드캐스크\nL026 [147,530,330,551] 벤리악 쿼터캐스크\nL027 [147,560,281,578] 로크로몬드12\nL028 [149,588,281,607] 로크로몬드18\nL029 [149,617,319,637] 신도 더 블렌디드\nL030 [149,646,260,665] 라프로익15\nL031 [800,444,870,461] 28,000\nL032 [800,471,868,488] 25,000\nL033 [800,500,868,517] 18,000\nL034 [800,527,866,544] 15,000\nL035 [800,556,866,573] 14,000\nL036 [799,583,866,600] 31,000\nL037 [799,611,866,627] 17,000\nL038 [799,638,866,655] 18,000\nL039 [152,842,248,861] 기네스 병\nL040 [154,869,269,888] 산미구엘 병\nL041 [154,896,246,916] 아사히 병\nL042 [154,923,378,943] 코로나 병 + 라임(선택)\nL043 [798,829,863,846] 12,000\nL044 [807,856,863,874] 9,000\nL045 [805,882,861,900] 8,000\nL046 [805,910,861,927] 7,000\n</ocr_lines>",
+  "n_lines": 46,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 2450
+}
