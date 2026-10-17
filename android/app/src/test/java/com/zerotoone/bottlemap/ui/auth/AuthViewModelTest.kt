@@ -183,6 +183,25 @@ class AuthViewModelTest {
     }
 
     @Test
+    fun lateAuthenticatedSdkEventAfterLogoutCannotRestorePreviousAccount() = runTest(dispatcher) {
+        val fake = FakeAuthGateway()
+        fake.events.value = AuthSessionEvent.Authenticated
+        val vm = AuthViewModel(fake)
+        advanceUntilIdle()
+        assertTrue(vm.state.value is AuthUiState.SignedIn)
+
+        vm.logout()
+        advanceUntilIdle()
+        assertEquals(AuthUiState.Guest, vm.state.value)
+        val requestsBeforeLateEvent = fake.meRequests
+        // Model a delayed SDK emission from the old session.
+        fake.events.value = AuthSessionEvent.Authenticated
+        advanceUntilIdle()
+        assertEquals(AuthUiState.Guest, vm.state.value)
+        assertEquals(requestsBeforeLateEvent, fake.meRequests)
+    }
+
+    @Test
     fun sdkGuestAfterProfileErrorExitsErrorInsteadOfRetryingWithoutSession() = runTest(dispatcher) {
         val fake = FakeAuthGateway()
         fake.meError = BottleMapApiException(code = "SERVICE_UNAVAILABLE", message = "temporary")
