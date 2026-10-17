@@ -122,3 +122,21 @@ P32: orientation policy retained/documented; small-screen/IME layout code added.
 5. Navigate to My Page with a restored session; initialization should not flash during a fast resolution, but explicit Google sign-in progress still appears immediately.
 
 **Verification status:** code and reviewable commits pushed; Gradle execution and new physical-device tests pending. No changes to Portrait-only policy, Backend API, Supabase token management, or Kakao marker positioning.
+
+## Follow-up: Map GL surface persisting over Bar Detail on Back (2026-10-18)
+
+**Device report:** prior transient-loading and Navigation changes worked, but returning from Map to Bar Detail briefly left a *real, rendered Kakao map* layered over the Bar Detail page. This is different from the incorrect message/Loading flash addressed above.
+
+**SDK/rendering cause:** Kakao `MapView` contains a native `GLSurfaceView`/`SurfaceView`. During a Compose Navigation pop animation the old map destination may remain composed while the renderer's Surface is composited independently, temporarily overlapping the incoming detail page.
+
+**Minimal frontend fix:** `BarLocationMapScreen` now has a shared exit callback for both its toolbar Back arrow and Android's system Back via `BackHandler`. Before popping, it immediately sets `MapView.visibility` **and** `MapView.getSurfaceView().visibility` to `INVISIBLE`; repeated Back presses are ignored. On `ON_PAUSE` the surface is likewise hidden and the existing SDK `pause()` is called. On `ON_RESUME` visibility is restored and the existing SDK `resume()` is called. During `DisposableEffect.onDispose`, the view is hidden first, then the existing `pause()/finish()` cleanup runs. Do not change the native map's marker or coordinate calculations, and do not make Navigation animations longer.
+
+**Regression evidence required after this fix:**
+1. Enter map, pan/zoom, Back via header arrow → Bar Detail. **No map frame may cover the detail UI**, even during rapid taps.
+2. Repeat with Samsung system Back **button or gesture**; confirm only one destination pops.
+3. From map: Home/background → foreground. **Map and anchored marker reappear correctly**, not as a black/blank Surface.
+4. Enter and leave map before the Kakao SDK becomes Ready; navigate into map again. No crash, leaked GL view, duplicate map/marker or stale instance.
+5. Repeat Map → Detail → Map at least 5 times, including slow/failed network where applicable. Verify Error/Retry still appears as needed and no stuck loading overlay.
+6. Verify Guest/Signed-in account, Search → Results → Detail navigation and existing Portrait-only/small-screen layout remain unchanged.
+
+**Verification status:** source patch pushed to existing P31/P32 branch; this specific change still requires a fresh local Android build and physical-device run.
