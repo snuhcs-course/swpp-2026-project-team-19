@@ -38,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun BarDetailScreen(
     barId: String,
     onBack: () -> Unit,
+    onBackAndRefreshResults: () -> Unit = onBack,
     viewModel: BarDetailViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -47,6 +48,7 @@ fun BarDetailScreen(
         BarDetailContent(
             state = state,
             onBack = onBack,
+            onBackAndRefreshResults = onBackAndRefreshResults,
             onRetry = viewModel::retry,
         )
     }
@@ -56,8 +58,12 @@ fun BarDetailScreen(
 private fun BarDetailContent(
     state: BarDetailUiState,
     onBack: () -> Unit,
+    onBackAndRefreshResults: () -> Unit = onBack,
     onRetry: () -> Unit,
 ) {
+    val effectiveBack = if (
+        state is BarDetailUiState.Error && state.refreshResultsOnBack
+    ) onBackAndRefreshResults else onBack
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,7 +75,7 @@ private fun BarDetailContent(
                 .padding(horizontal = 12.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = onBack) { Text("←") }
+            TextButton(onClick = effectiveBack) { Text("←") }
             Text(
                 text = "바 상세",
                 color = MaterialTheme.colorScheme.onBackground,
@@ -99,7 +105,7 @@ private fun BarDetailContent(
                 title = "메뉴를 불러오지 못했어요",
                 description = state.message,
                 buttonLabel = if (state.canRetry) "다시 시도" else "검색 결과로 돌아가기",
-                onButtonClick = if (state.canRetry) onRetry else onBack,
+                onButtonClick = if (state.canRetry) onRetry else effectiveBack,
             )
         }
     }
