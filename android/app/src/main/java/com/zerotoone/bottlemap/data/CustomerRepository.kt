@@ -21,7 +21,6 @@ class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource {
             ApiClient.api.getPublishedBarMenu(barId)
         }
 
-
     override suspend fun searchBars(query: String): SearchBarsResponseDto =
         ApiClient.call {
             // Public guest endpoint: do not attach owner/session credentials.
