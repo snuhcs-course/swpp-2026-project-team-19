@@ -41,9 +41,9 @@ On Android-relevant PRs, require:
 
 | Run | Commit | Event | Lint | Unit test | APK | Reports | Evidence |
 |---|---|---|---|---|---|---|---|
-| Initial PR verification | TBD | PR | TBD | TBD | TBD | TBD | TBD |
-| Intentional failing JUnit test | TBD | PR | TBD | **Expected Failed** | TBD | TBD | TBD |
-| Restored passing test | TBD | PR | TBD | TBD | TBD | TBD | TBD |
+| Initial verification (feature branch) | `1f9c8b6` | push | Passed | Passed (53 tests) | Passed | Lint XML/HTML, unit test XML/HTML, APK | [Run 39051720904](https://github.com/snuhcs-course/swpp-2026-project-team-19/actions/runs/39051720904) |
+| Intentional failing JUnit test | `4467a71` | PR #40 | Passed | **Failed (54 tests; 1 intentionally failed)** | Passed | Uploaded reports | [Run 39052068445](https://github.com/snuhcs-course/swpp-2026-project-team-19/actions/runs/39052068445) |
+| Restored passing test | `a0053aa` | PR #40 | Pending | Pending | Pending | Pending | Run pending at documentation update |
 
 Store the failing test code, failing job URL, runner log, final successful run URL, and explicit merge-block evidence. Record test pass/fail and run time here, *not* in Section 3 Status.
 
@@ -62,6 +62,6 @@ Populate official cases with 10 required columns (ID, Title, Basis, Level, Preco
 
 ## I2-P37/P38 Definition of Done
 
-- P37: workflow committed, PR and `main` trigger validated, three Gradle checks green, reports and APK uploaded, Backend CI unchanged.
-- P38: isolated failing JUnit test on validation branch, red CI with logs, **enforced** merge block verified by admin, failing test removed, final CI green.
+- P37: workflow committed, feature-branch Android CI successfully ran all three Gradle jobs and uploaded reports/APK; `main` trigger can only be verified after the workflow is merged into `main`, so P37 remains In Progress. Backend CI unchanged.
+- P38: isolated failing JUnit test in draft PR #40; red unit-test CI verified (53 passing + 1 intentional failure), logs archived in Actions. The failing test was removed in commit `a0053aa`. Restoration CI and **enforced** merge-block verification remain outstanding; repository rulesets list is empty and branch protection read returned 403 for the linked account.
 - Until all associated run and permission evidence exists, both tasks remain **In Progress**.
