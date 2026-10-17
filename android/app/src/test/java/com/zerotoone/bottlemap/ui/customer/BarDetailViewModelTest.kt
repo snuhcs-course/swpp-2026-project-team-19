@@ -50,7 +50,7 @@ class BarDetailViewModelTest {
         assertEquals("관악 위스키 바", result.bar.name)
         assertEquals(2, result.bar.items.size)
         assertEquals("글렌피딕 12년", result.bar.items[0].menuDisplayName)
-        assertEquals("잔  · 30 ml  ₩17,000".replace("  · ", " · "), result.bar.items[0].options[0].text)
+        assertEquals("잔 · 30 ml  ₩17,000", result.bar.items[0].options[0].text)
         assertEquals("병  ₩160,000", result.bar.items[0].options[1].text)
         assertEquals("Deanston 12", result.bar.items[1].menuDisplayName)
         assertTrue(result.bar.publishedAtText!!.contains("2026"))
@@ -108,6 +108,19 @@ class BarDetailViewModelTest {
         advanceUntilIdle()
         assertTrue(vm.state.value is BarDetailUiState.Success)
         assertEquals(listOf("bar-2", "bar-2"), fake.requests)
+    }
+
+    @Test
+    fun serverUnavailableKeepsRecoverableRetryState() {
+        val error = classifyBarDetailError(
+            BottleMapApiException(
+                code = "SERVICE_UNAVAILABLE",
+                httpStatus = 503,
+                message = "unavailable",
+            ),
+        )
+        assertTrue(error.canRetry)
+        assertTrue(error.message.contains("일시적으로"))
     }
 
     @Test
