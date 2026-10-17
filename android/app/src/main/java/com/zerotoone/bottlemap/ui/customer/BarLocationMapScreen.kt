@@ -13,11 +13,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -114,10 +114,15 @@ private fun BarLocationContent(barId: String, bar: BarDetailUiModel) {
         MapStatusMessage("이 바의 위치 정보가 없거나 올바르지 않습니다.")
         return
     }
-    Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // The BAR ADDRESS card repeats the address already shown above the map.
+        // Hide only this duplicate on short portrait screens so the native
+        // map stays usable instead of being squeezed below the viewport.
+        val compactHeight = maxHeight < 560.dp
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
         Text(
             text = target.name,
             color = MaterialTheme.colorScheme.onBackground,
@@ -131,14 +136,14 @@ private fun BarLocationContent(barId: String, bar: BarDetailUiModel) {
         )
         KakaoMapPanel(
             target = target,
-            modifier = Modifier.weight(1f).fillMaxWidth().heightIn(min = 220.dp),
+            modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         Text(
             text = "지도에서 바의 위치를 확인하세요.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall,
         )
-        Surface(
+        if (!compactHeight) Surface(
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(15.dp),
@@ -160,7 +165,8 @@ private fun BarLocationContent(barId: String, bar: BarDetailUiModel) {
                 )
             }
         }
-    }
+        }
+}
 }
 
 @Composable
