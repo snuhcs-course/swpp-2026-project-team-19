@@ -76,6 +76,9 @@ class BarDetailViewModel(
         if (currentBarId == barId) return
         currentBarId = barId
         if (barId.isBlank()) {
+            // Invalidate a prior in-flight request even if this route is malformed.
+            requestVersion++
+            requestJob?.cancel()
             _state.value = BarDetailUiState.Error("업장을 찾을 수 없습니다.", canRetry = false)
             return
         }
