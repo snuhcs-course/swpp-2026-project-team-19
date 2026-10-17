@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,6 +100,7 @@ private fun BarDetailContent(
 
         when (state) {
             BarDetailUiState.Loading -> BarDetailMessage(
+                modifier = Modifier.weight(1f),
                 title = "메뉴를 불러오는 중입니다",
                 description = "현재 게시된 바 메뉴를 확인하고 있어요.",
                 showProgress = true,
@@ -116,6 +119,7 @@ private fun BarDetailContent(
             )
 
             is BarDetailUiState.Error -> BarDetailMessage(
+                modifier = Modifier.weight(1f),
                 title = "메뉴를 불러오지 못했어요",
                 description = state.message,
                 buttonLabel = if (state.canRetry) "다시 시도" else "검색 결과로 돌아가기",
@@ -311,6 +315,7 @@ private fun BarMenuItemCard(item: BarMenuItemUiModel) {
 
 @Composable
 private fun BarDetailMessage(
+    modifier: Modifier = Modifier,
     title: String,
     description: String,
     showProgress: Boolean = false,
@@ -320,8 +325,9 @@ private fun BarDetailMessage(
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
         Column(
