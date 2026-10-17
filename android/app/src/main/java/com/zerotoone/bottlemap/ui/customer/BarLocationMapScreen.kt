@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -116,57 +118,58 @@ private fun BarLocationContent(barId: String, bar: BarDetailUiModel) {
     }
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         // The BAR ADDRESS card repeats the address already shown above the map.
-        // Hide only this duplicate on short portrait screens so the native
-        // map stays usable instead of being squeezed below the viewport.
+        // On short portrait screens, preserve room for the interactive map.
         val compactHeight = maxHeight < 560.dp
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-        Text(
-            text = target.name,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            text = target.address,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        KakaoMapPanel(
-            target = target,
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-        )
-        Text(
-            text = "지도에서 바의 위치를 확인하세요.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall,
-        )
-        if (!compactHeight) Surface(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(15.dp),
-        ) {
-            Column(
-                modifier = Modifier.padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    text = "BAR ADDRESS",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = target.address,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+            Text(
+                text = target.name,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = target.address,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            KakaoMapPanel(
+                target = target,
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+            )
+            Text(
+                text = "지도에서 바의 위치를 확인하세요.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            if (!compactHeight) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(15.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(
+                            text = "BAR ADDRESS",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = target.address,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
             }
         }
-        }
-}
+    }
 }
 
 @Composable
@@ -207,6 +210,7 @@ private fun KakaoMapPanel(target: BarMapTarget, modifier: Modifier) {
                 is MapRenderStatus.Error -> Column(
                     modifier = Modifier.fillMaxSize()
                         .background(MaterialTheme.colorScheme.surface)
+                        .verticalScroll(rememberScrollState())
                         .padding(18.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
