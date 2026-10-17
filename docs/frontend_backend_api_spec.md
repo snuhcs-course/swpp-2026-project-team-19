@@ -57,6 +57,7 @@ GET 상품 검색 (검색어 + 선택적 위치)
 - ID: 문자열로 표현한 UUID
 - 시각: UTC 기준 RFC 3339 문자열
 - 가격: 원 단위 정수
+- 좌표: WGS84 위도·경도를 십진 도 숫자로 표현한다. `latitude`는 -90~90, `longitude`는 -180~180이고 소수점 아래 6자리까지 저장한다. 응답의 업장 좌표는 `null`이 아니다(3.9.4)
 - 퍼센트·점수: 별도 표기가 없으면 `0.0`부터 `1.0`
 - 값이 없다는 의미는 빈 문자열이 아니라 `null`
 
@@ -544,7 +545,7 @@ Authorization: Bearer <access-token>
 | `barId` | UUID 문자열 | 아니오 | |
 | `name` | 문자열 | 아니오 | 업장명 |
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
-| `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표 |
+| `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
 | `status` | `active` \| `inactive` | 아니오 | |
 | `activeMenuImport` | 객체 | 예 | 미완료 메뉴 등록 작업. 없으면 `null`. 3.4와 같다 |
@@ -657,6 +658,8 @@ GET /api/bars/{barId}/menu
 | 해당 업장의 업주 | `200` | `200` |
 | operator | `200` | `200` |
 
+업주 행은 업주 기능(3.11)을 구현하는 I3부터 적용한다. 그 전에는 업주도 customer와 같다.
+
 `200 OK`
 
 ```json
@@ -718,7 +721,7 @@ GET /api/bars/{barId}/menu
 | `barId` | UUID 문자열 | 아니오 | |
 | `name` | 문자열 | 아니오 | 업장명 |
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
-| `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표 |
+| `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
 | `menuBoardId` | UUID 문자열 | 예 | 현재 메뉴판. 반영된 메뉴가 없으면 `null` |
 | `publishedAt` | RFC 3339 문자열 | 예 | 현재 메뉴판이 마지막으로 반영된 시각. 반영된 메뉴가 없으면 `null` |
@@ -761,6 +764,8 @@ GET /api/bars/{barId}/menu
 
 메뉴판은 있지만 검수에서 모든 항목을 내렸으면 `menuBoardId`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
 
+그 밖에 값이 없을 수 있는 필드는 `phone`, `options[].optionLabel`, `options[].pourMl`뿐이며 모두 `null`로 온다. 프론트엔드는 해당 표시만 생략한다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
+
 #### 3.9.2 메뉴 등록이 진행 중일 때
 
 이 API는 메뉴 등록 작업의 상태를 반영하지 않는다. 등록 작업이 처리 중(`uploaded`, `processing`)이거나 검수 대기(`ready_for_review`)이거나 실패(`failed`)여도 현재 게시된 메뉴를 그대로 반환하며, 진행 중이라는 표시도 하지 않는다. 고객은 검수를 마치고 `review-and-apply`로 반영된 메뉴만 본다. operator와 업주가 진행 중인 작업을 확인할 때는 3.6의 `activeMenuImport`를 사용한다.
@@ -774,6 +779,12 @@ GET /api/bars/{barId}/menu
 | 네트워크 오류, `5xx` | | | 오류 상태와 재시도 버튼 |
 
 이 API는 공개 API이므로 `403`을 반환하지 않는다.
+
+#### 3.9.4 지도 좌표
+
+- `latitude`, `longitude`는 업장 위치의 WGS84 좌표(십진 도)다. Kakao 지도의 `LatLng.from(latitude, longitude)`에 그대로 넣는다. 같은 업장은 3.4, 3.6, 3.10 응답에서도 같은 좌표다.
+- 좌표를 모르는 업장은 등록하지 않으므로 응답의 좌표는 `null`이 아니다. 서버는 주소로 좌표를 계산하지 않는다(3.5). `bars` 테이블의 CHECK 제약이 범위를 벗어난 좌표의 저장을 막는다.
+- 프론트엔드는 그래도 받은 좌표를 검사한다. 값이 없거나, 유한한 숫자가 아니거나, 범위를 벗어났거나, `0, 0`이면 지도를 열지 않고 위치를 표시할 수 없다고 안내한다. 업장 이름, 주소, 메뉴는 그대로 표시한다.
 
 ### 3.10 고객 상품 검색
 
@@ -956,7 +967,7 @@ options
 | `items[].barId` | UUID 문자열 | 아니오 | |
 | `items[].barName` | 문자열 | 아니오 | |
 | `items[].address` | 문자열 | 아니오 | |
-| `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표 |
+| `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `items[].distanceMeters` | 정수 | 예 | 고객 위치와 업장 사이의 직선 거리(미터). 위치를 보내지 않으면 `null` |
 | `items[].productId` | UUID 문자열 | 아니오 | `matchedProducts`의 상품 중 하나 |
 | `items[].productDisplayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`) |

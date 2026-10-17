@@ -102,7 +102,9 @@ def read_bar_menu_imports(
         "is treated as no token rather than failing with `503`.\n"
         "- Inactive bars are returned only to operators. Anonymous callers and customers get "
         "`404 BAR_NOT_FOUND`, the same as for a missing bar.\n"
-        "- A bar without a published menu returns `200` with `menuBoardId: null` and `items: []`.\n"
+        "- A bar without a published menu returns `200` with `menuBoardId: null` and `items: []`. A menu "
+        "whose items were all taken down keeps `menuBoardId` and `publishedAt`, with `items: []`.\n"
+        "- `phone`, `optionLabel` and `pourMl` are null when missing. Coordinates are WGS84 and never null.\n"
         "- Items and their options are sorted by `sortOrder`."
     ),
     responses=error_responses(
