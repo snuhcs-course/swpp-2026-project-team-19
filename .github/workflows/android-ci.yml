@@ -14,8 +14,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-ci-${{ github.event.pull_request.number || github.ref }
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }
+  group: android-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   changes:
@@ -25,7 +25,7 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      android: ${{ steps.filter.outputs.android }
+      android: ${{ steps.filter.outputs.android }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -48,7 +48,7 @@ jobs:
   android-lint:
     name: Android / lint
     needs: changes
-    if: ${{ needs.changes.outputs.android == 'true' }
+    if: ${{ needs.changes.outputs.android == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -78,7 +78,7 @@ jobs:
   android-unit-tests:
     name: Android / unit tests
     needs: changes
-    if: ${{ needs.changes.outputs.android == 'true' }
+    if: ${{ needs.changes.outputs.android == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -109,7 +109,7 @@ jobs:
   android-debug-build:
     name: Android / debug APK
     needs: changes
-    if: ${{ needs.changes.outputs.android == 'true' }
+    if: ${{ needs.changes.outputs.android == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
