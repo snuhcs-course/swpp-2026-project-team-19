@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.zerotoone.bottlemap.ui.customer.BarDetailPendingScreen
+import com.zerotoone.bottlemap.ui.customer.BarDetailScreen
 import com.zerotoone.bottlemap.ui.customer.SearchResultsScreen
 import com.zerotoone.bottlemap.ui.customer.SearchScreen
 import com.zerotoone.bottlemap.ui.mode.ModeSelectionScreen
@@ -131,7 +131,7 @@ private fun NavGraphBuilder.customerGraph(
                 type = NavType.StringType
             }),
         ) { backStackEntry ->
-            BarDetailPendingScreen(
+            BarDetailScreen(
                 barId = backStackEntry.arguments?.getString(Routes.BAR_ID_ARGUMENT).orEmpty(),
                 onBack = onBack,
             )
