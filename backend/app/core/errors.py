@@ -1,8 +1,9 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #12). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #12); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 """Common error response format (API spec, section 9).
 
 Every error is returned as {"error": {"code", "message", "details", "fieldErrors"}}.
 Clients branch on `code`; `message` is a default text that can be shown to users.
+An unexpected exception becomes `500 INTERNAL_ERROR` in the same shape, without its details.
 """
 
 from typing import Any
@@ -107,7 +108,14 @@ async def _http_exception(_: Request, exc: StarletteHTTPException) -> JSONRespon
     return error_response(exc.status_code, code, str(exc.detail), headers=getattr(exc, "headers", None))
 
 
+async def _unexpected_error(_: Request, exc: Exception) -> JSONResponse:
+    # Nothing about the exception goes to the client. Starlette raises it again after this
+    # response is sent, so the server log (journalctl) still gets the traceback.
+    return error_response(500, "INTERNAL_ERROR", "일시적인 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.")
+
+
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(ApiError, _api_error)
     app.add_exception_handler(RequestValidationError, _validation_error)
     app.add_exception_handler(StarletteHTTPException, _http_exception)
+    app.add_exception_handler(Exception, _unexpected_error)

@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11, #12, #13). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11, #12, #13); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 """The generated OpenAPI document serves as the API reference, so keep it matching real responses."""
 
 import pytest
@@ -16,19 +16,23 @@ def schema():
 @pytest.mark.parametrize(
     ("method", "path", "statuses"),
     [
-        ("get", "/api/search/bars", {"422"}),
-        ("get", "/api/bars/{barId}/menu", {"401", "404", "422"}),
-        ("get", "/api/bars", {"401", "403", "422", "503"}),
-        ("get", "/api/bars/{barId}/menu-imports", {"401", "403", "404", "422", "503"}),
+        ("get", "/api/search/bars", {"422", "500"}),
+        ("get", "/api/bars/{barId}/menu", {"401", "404", "422", "500"}),
+        ("get", "/api/bars", {"401", "403", "422", "500", "503"}),
+        ("get", "/api/bars/{barId}/menu-imports", {"401", "403", "404", "422", "500", "503"}),
         (
             "post",
             "/api/bars/{barId}/menu-imports",
-            {"401", "403", "404", "409", "413", "415", "422", "503"},
+            {"401", "403", "404", "409", "413", "415", "422", "500", "503"},
         ),
-        ("get", "/api/menu-imports/{menuImportId}", {"401", "403", "404", "422", "503"}),
-        ("post", "/api/menu-imports/{menuImportId}/review-and-apply", {"401", "403", "404", "409", "422", "503"}),
-        ("get", "/api/catalog/brands", {"401", "403", "422", "503"}),
-        ("get", "/api/catalog/products", {"401", "403", "422", "503"}),
+        ("get", "/api/menu-imports/{menuImportId}", {"401", "403", "404", "422", "500", "503"}),
+        (
+            "post",
+            "/api/menu-imports/{menuImportId}/review-and-apply",
+            {"401", "403", "404", "409", "422", "500", "503"},
+        ),
+        ("get", "/api/catalog/brands", {"401", "403", "422", "500", "503"}),
+        ("get", "/api/catalog/products", {"401", "403", "422", "500", "503"}),
     ],
 )
 def test_error_responses_use_the_common_format(schema, method, path, statuses):
