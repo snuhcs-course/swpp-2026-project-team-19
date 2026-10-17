@@ -2,6 +2,7 @@
 package com.zerotoone.bottlemap.navigation
 
 import android.net.Uri
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -13,6 +14,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.zerotoone.bottlemap.ui.auth.AccountScreen
+import com.zerotoone.bottlemap.ui.auth.AuthUiState
+import com.zerotoone.bottlemap.ui.auth.AuthViewModel
+import com.zerotoone.bottlemap.ui.auth.GoogleLoginScreen
 import com.zerotoone.bottlemap.ui.customer.BarDetailScreen
 import com.zerotoone.bottlemap.ui.customer.BarDetailViewModel
 import com.zerotoone.bottlemap.ui.customer.BarLocationMapScreen
@@ -30,6 +35,8 @@ private object Routes {
 
     const val CUSTOMER_GRAPH = "customer"
     const val CUSTOMER_SEARCH = "customer/search"
+    const val CUSTOMER_ACCOUNT = "customer/account"
+    const val CUSTOMER_LOGIN = "customer/login"
     const val CUSTOMER_SEARCH_RESULTS = "customer/search-results"
     const val CUSTOMER_QUERY_ARGUMENT = "query"
     const val BAR_ID_ARGUMENT = "barId"
@@ -50,6 +57,8 @@ private object Routes {
 @Composable
 fun BottleMapNavHost() {
     val navController = rememberNavController()
+    // Single Activity-scoped state shared by My Page, Login and restored sessions.
+    val authViewModel: AuthViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -64,6 +73,8 @@ fun BottleMapNavHost() {
 
         customerGraph(
             navController = navController,
+            authViewModel = authViewModel,
+            onOpenAccount = { navController.navigate(Routes.CUSTOMER_ACCOUNT) },
             onOpenResults = { query ->
                 val encodedQuery = Uri.encode(query)
                 navController.navigate(
@@ -103,6 +114,8 @@ fun BottleMapNavHost() {
 
 private fun NavGraphBuilder.customerGraph(
     navController: NavHostController,
+    authViewModel: AuthViewModel,
+    onOpenAccount: () -> Unit,
     onOpenResults: (String) -> Unit,
     onBack: () -> Unit,
     onInvalidQuery: (String) -> Unit,
@@ -120,9 +133,35 @@ private fun NavGraphBuilder.customerGraph(
                 .collectAsStateWithLifecycle().value
             SearchScreen(
                 onOpenResults = onOpenResults,
+                onOpenAccount = onOpenAccount,
                 serverValidationErrorCode = validationErrorCode,
                 onClearServerValidation = {
                     backStackEntry.savedStateHandle[SEARCH_VALIDATION_ERROR_KEY] = null
+                },
+            )
+        }
+        composable(Routes.CUSTOMER_ACCOUNT) {
+            val state = authViewModel.state.collectAsStateWithLifecycle().value
+            AccountScreen(
+                state = state,
+                onBack = onBack,
+                onOpenLogin = { navController.navigate(Routes.CUSTOMER_LOGIN) },
+                onLogout = authViewModel::logout,
+                onRetryAccount = authViewModel::retryAccountSync,
+            )
+        }
+        composable(Routes.CUSTOMER_LOGIN) {
+            val state = authViewModel.state.collectAsStateWithLifecycle().value
+            LaunchedEffect(state) {
+                if (state is AuthUiState.SignedIn) navController.popBackStack()
+            }
+            GoogleLoginScreen(
+                state = state,
+                authViewModel = authViewModel,
+                onBack = onBack,
+                onContinueGuest = {
+                    authViewModel.continueAsGuest()
+                    navController.popBackStack()
                 },
             )
         }
