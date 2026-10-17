@@ -54,8 +54,8 @@ class BarDetailViewModelTest {
         assertEquals("병  ₩160,000", result.bar.items[0].options[1].text)
         assertEquals("Deanston 12", result.bar.items[1].menuDisplayName)
         assertTrue(result.bar.publishedAtText!!.contains("2026"))
-        assertEquals(37.478321, result.bar.latitude, 0.000001)
-        assertEquals(126.951234, result.bar.longitude, 0.000001)
+        assertEquals(37.478321, result.bar.latitude!!, 0.000001)
+        assertEquals(126.951234, result.bar.longitude!!, 0.000001)
     }
 
     @Test
