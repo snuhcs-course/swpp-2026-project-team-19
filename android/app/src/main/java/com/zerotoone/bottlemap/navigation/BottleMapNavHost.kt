@@ -4,6 +4,7 @@ package com.zerotoone.bottlemap.navigation
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -12,6 +13,8 @@ import androidx.navigation.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.zerotoone.bottlemap.ui.customer.BarDetailScreen
+import com.zerotoone.bottlemap.ui.customer.BarDetailViewModel
+import com.zerotoone.bottlemap.ui.customer.BarLocationMapScreen
 import com.zerotoone.bottlemap.ui.customer.SearchResultsScreen
 import com.zerotoone.bottlemap.ui.customer.SearchScreen
 import com.zerotoone.bottlemap.ui.mode.ModeSelectionScreen
@@ -30,6 +33,8 @@ private object Routes {
     const val CUSTOMER_QUERY_ARGUMENT = "query"
     const val BAR_ID_ARGUMENT = "barId"
     const val CUSTOMER_BAR_DETAIL_ROUTE = "customer/bar-detail/{" + BAR_ID_ARGUMENT + "}"
+    const val CUSTOMER_BAR_MAP = "customer/bar-map"
+    const val CUSTOMER_BAR_MAP_ROUTE = CUSTOMER_BAR_MAP + "/{" + BAR_ID_ARGUMENT + "}"
     const val CUSTOMER_SEARCH_RESULTS_ROUTE =
         CUSTOMER_SEARCH_RESULTS + "?" + CUSTOMER_QUERY_ARGUMENT + "={" + CUSTOMER_QUERY_ARGUMENT + "}"
 
@@ -73,6 +78,9 @@ fun BottleMapNavHost() {
             onOpenBarDetail = { barId ->
                 navController.navigate("customer/bar-detail/" + Uri.encode(barId))
             },
+            onOpenBarMap = { barId ->
+                navController.navigate(Routes.CUSTOMER_BAR_MAP + "/" + Uri.encode(barId))
+            },
             onMissingBarReturn = {
                 navController.previousBackStackEntry?.savedStateHandle
                     ?.set(REFRESH_AFTER_MISSING_BAR_KEY, true)
@@ -96,6 +104,7 @@ private fun NavGraphBuilder.customerGraph(
     onBack: () -> Unit,
     onInvalidQuery: (String) -> Unit,
     onOpenBarDetail: (String) -> Unit,
+    onOpenBarMap: (String) -> Unit,
     onMissingBarReturn: () -> Unit,
 ) {
     navigation(
@@ -149,7 +158,45 @@ private fun NavGraphBuilder.customerGraph(
                 barId = backStackEntry.arguments?.getString(Routes.BAR_ID_ARGUMENT).orEmpty(),
                 onBack = onBack,
                 onBackAndRefreshResults = onMissingBarReturn,
+                onOpenMap = onOpenBarMap,
             )
+        }
+        composable(
+            route = Routes.CUSTOMER_BAR_MAP_ROUTE,
+            arguments = listOf(navArgument(Routes.BAR_ID_ARGUMENT) {
+                type = NavType.StringType
+            }),
+        ) { backStackEntry ->
+            val barId = backStackEntry.arguments?.getString(Routes.BAR_ID_ARGUMENT).orEmpty()
+            // Reuse the Bar Detail entry's ViewModel. The published bar/coordinate
+            // response is already loaded, so opening the map makes no duplicate API call.
+            val parentEntry = navController.previousBackStackEntry
+            val parentIsDetail = parentEntry?.destination?.route ==
+                Routes.CUSTOMER_BAR_DETAIL_ROUTE
+            if (parentIsDetail && parentEntry != null) {
+                val detailViewModel: BarDetailViewModel = viewModel(
+                    viewModelStoreOwner = parentEntry,
+                )
+                val detailState = detailViewModel.state.collectAsStateWithLifecycle().value
+                BarLocationMapScreen(
+                    barId = barId,
+                    detailState = detailState,
+                    onBack = onBack,
+                    onRetryDetail = detailViewModel::retry,
+                )
+            } else {
+                // No fabricated state or API request when this internal-only
+                // destination is opened without the Bar Detail back stack.
+                BarLocationMapScreen(
+                    barId = barId,
+                    detailState = com.zerotoone.bottlemap.ui.customer.BarDetailUiState.Error(
+                        message = "바 상세에서 위치 보기를 다시 실행해 주세요.",
+                        canRetry = false,
+                    ),
+                    onBack = onBack,
+                    onRetryDetail = {},
+                )
+            }
         }
     }
 }
