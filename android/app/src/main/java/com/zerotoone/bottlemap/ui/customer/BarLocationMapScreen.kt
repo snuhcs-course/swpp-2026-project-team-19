@@ -57,6 +57,7 @@ import com.kakao.vectormap.label.LabelOptions
 import com.kakao.vectormap.label.LabelStyle
 import com.kakao.vectormap.label.LabelTextBuilder
 import com.zerotoone.bottlemap.BuildConfig
+import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.delay
 
@@ -94,7 +95,9 @@ fun BarLocationMapScreen(
                 )
             }
             when (detailState) {
-                BarDetailUiState.Loading -> MapStatusMessage("바 정보를 불러오고 있습니다.", loading = true)
+                BarDetailUiState.Loading -> DelayedLoading {
+                    MapStatusMessage("바 정보를 불러오고 있습니다.", loading = true)
+                }
                 is BarDetailUiState.Error -> MapStatusMessage(
                     message = detailState.message,
                     retry = if (detailState.canRetry) onRetryDetail else null,
@@ -211,11 +214,15 @@ private fun KakaoMapPanel(target: BarMapTarget, modifier: Modifier) {
                 onStatusChange = { state = it },
             )
             when (val current = state) {
-                MapRenderStatus.Loading -> Box(
-                    modifier = Modifier.fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator() }
+                MapRenderStatus.Loading -> DelayedLoading(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
+                        contentAlignment = Alignment.Center,
+                    ) { CircularProgressIndicator() }
+                }
                 MapRenderStatus.Ready -> Unit
                 is MapRenderStatus.Error -> Column(
                     modifier = Modifier.fillMaxSize()
