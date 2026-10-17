@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.zerotoone.bottlemap.ui.customer.BarDetailPendingScreen
+import com.zerotoone.bottlemap.ui.customer.BarDetailScreen
 import com.zerotoone.bottlemap.ui.customer.SearchResultsScreen
 import com.zerotoone.bottlemap.ui.customer.SearchScreen
 import com.zerotoone.bottlemap.ui.mode.ModeSelectionScreen
@@ -19,6 +19,7 @@ import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 
 private const val SEARCH_VALIDATION_ERROR_KEY = "searchValidationErrorCode"
+private const val REFRESH_AFTER_MISSING_BAR_KEY = "refreshAfterMissingBar"
 
 private object Routes {
     const val MODE_SELECTION = "mode-selection"
@@ -72,6 +73,11 @@ fun BottleMapNavHost() {
             onOpenBarDetail = { barId ->
                 navController.navigate("customer/bar-detail/" + Uri.encode(barId))
             },
+            onMissingBarReturn = {
+                navController.previousBackStackEntry?.savedStateHandle
+                    ?.set(REFRESH_AFTER_MISSING_BAR_KEY, true)
+                navController.popBackStack()
+            },
         )
 
         ownerGraph(
@@ -90,6 +96,7 @@ private fun NavGraphBuilder.customerGraph(
     onBack: () -> Unit,
     onInvalidQuery: (String) -> Unit,
     onOpenBarDetail: (String) -> Unit,
+    onMissingBarReturn: () -> Unit,
 ) {
     navigation(
         route = Routes.CUSTOMER_GRAPH,
@@ -116,7 +123,14 @@ private fun NavGraphBuilder.customerGraph(
                 },
             ),
         ) { backStackEntry ->
+            val refreshAfterMissingBar = backStackEntry.savedStateHandle
+                .getStateFlow(REFRESH_AFTER_MISSING_BAR_KEY, false)
+                .collectAsStateWithLifecycle().value
             SearchResultsScreen(
+                refreshAfterMissingBar = refreshAfterMissingBar,
+                onRefreshHandled = {
+                    backStackEntry.savedStateHandle[REFRESH_AFTER_MISSING_BAR_KEY] = false
+                },
                 query = backStackEntry.arguments
                     ?.getString(Routes.CUSTOMER_QUERY_ARGUMENT)
                     .orEmpty(),
@@ -131,9 +145,10 @@ private fun NavGraphBuilder.customerGraph(
                 type = NavType.StringType
             }),
         ) { backStackEntry ->
-            BarDetailPendingScreen(
+            BarDetailScreen(
                 barId = backStackEntry.arguments?.getString(Routes.BAR_ID_ARGUMENT).orEmpty(),
                 onBack = onBack,
+                onBackAndRefreshResults = onMissingBarReturn,
             )
         }
     }

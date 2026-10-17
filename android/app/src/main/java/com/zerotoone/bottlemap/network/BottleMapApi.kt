@@ -33,6 +33,11 @@ interface BottleMapApi {
         @Query("cursor") cursor: String? = null,
     ): MenuImportListResponseDto
 
+    @GET("api/bars/{barId}/menu")
+    suspend fun getPublishedBarMenu(
+        @Path("barId") barId: String,
+    ): BarMenuResponseDto
+
     @GET("api/search/bars")
     suspend fun searchBars(
         @Query("query") query: String,

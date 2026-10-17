@@ -109,6 +109,26 @@ class SearchResultsViewModelTest {
     }
 
     @Test
+    fun barNotFoundRefreshesResultsWithoutChangingSearchQuery() = runTest(dispatcher) {
+        val fake = FakeSource { response(it, withBar = true) }
+        val vm = SearchResultsViewModel(fake)
+        vm.search("Deanston 12")
+        advanceUntilIdle()
+        assertEquals(1, fake.requests.size)
+
+        // Normal screen re-entry should not launch another search.
+        vm.search("Deanston 12")
+        advanceUntilIdle()
+        assertEquals(1, fake.requests.size)
+
+        // Only the BAR_NOT_FOUND navigation event requests a fresh result list.
+        vm.refreshAfterMissingBar()
+        advanceUntilIdle()
+        assertEquals(listOf("Deanston 12", "Deanston 12"), fake.requests)
+        assertTrue(vm.state.value is CustomerSearchUiState.Success)
+    }
+
+    @Test
     fun oldResponseCannotOverrideNewerSearch() = runTest(dispatcher) {
         val gate = CompletableDeferred<SearchBarsResponseDto>()
         val fake = FakeSource { query ->
