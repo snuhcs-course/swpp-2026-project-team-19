@@ -13,7 +13,7 @@ val releaseApiBaseUrl = configuredApiBaseUrl ?: "https://api.example.invalid/"
 // Native Android app keys are bundled into APKs; restrict use via package+key-hash
 // registration in Kakao Developers. Never commit a real value to this repository.
 fun stringBuildConfigValue(value: String): String =
-    "\\\"" + value.replace("\\\\", "\\\\\\\\").replace("\\\"", "\\\\\\"") + "\\\""
+    "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
 val supabaseUrl = providers.gradleProperty("BOTTLEMAP_SUPABASE_URL").orElse("").get()
 val supabasePublishableKey = providers.gradleProperty("BOTTLEMAP_SUPABASE_PUBLISHABLE_KEY").orElse("").get()
