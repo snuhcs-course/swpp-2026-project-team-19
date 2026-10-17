@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.NumberFormat
 import java.util.Locale
@@ -128,12 +129,15 @@ private fun SearchResultsContent(
         }
 
         when (state) {
-            CustomerSearchUiState.Loading -> SearchStatusPanel(
+            CustomerSearchUiState.Loading -> DelayedLoading(
                 modifier = Modifier.weight(1f),
-                title = "검색 중입니다",
-                description = "등록된 메뉴를 확인하고 있어요.",
-                isLoading = true,
-            )
+            ) {
+                SearchStatusPanel(
+                    title = "검색 중입니다",
+                    description = "등록된 메뉴를 확인하고 있어요.",
+                    isLoading = true,
+                )
+            }
             is CustomerSearchUiState.Success -> ResultsSuccess(
                 state = state,
                 onOpenBarDetail = onOpenBarDetail,
