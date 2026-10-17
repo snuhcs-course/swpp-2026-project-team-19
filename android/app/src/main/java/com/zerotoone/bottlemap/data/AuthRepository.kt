@@ -73,8 +73,9 @@ class SupabaseGoogleAuthGateway : AuthGateway {
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                // Broken developer console configuration must not crash Guest UX.
-                emit(AuthSessionEvent.Guest)
+                // An SDK initialization outage does not prove no saved session.
+                // Show a recoverable account error; Guest search is independent.
+                emit(AuthSessionEvent.Refreshing)
             }
         }
     }
