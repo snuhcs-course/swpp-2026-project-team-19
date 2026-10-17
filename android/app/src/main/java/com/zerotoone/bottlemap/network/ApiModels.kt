@@ -236,3 +236,35 @@ data class MenuImportListResponseDto(
     val items: List<MenuImportListItemDto> = emptyList(),
     val nextCursor: String? = null,
 )
+
+// P24 - GET /api/bars/{barId}/menu (API spec section 3.9).
+// These DTO names and nullabilities match the current backend Pydantic schema.
+data class BarMenuOptionDto(
+    val menuEntryOptionId: String,
+    val optionLabel: String?,
+    val pourMl: Int?,
+    val priceKrw: Int,
+    val sortOrder: Int,
+)
+
+data class BarMenuItemDto(
+    val menuBoardEntryId: String,
+    val barMenuItemId: String,
+    val productId: String,
+    // Published menu label, NOT the canonical catalog product name.
+    val displayName: String,
+    val sortOrder: Int,
+    val options: List<BarMenuOptionDto>,
+)
+
+data class BarMenuResponseDto(
+    val barId: String,
+    val name: String,
+    val address: String,
+    val latitude: Double,
+    val longitude: Double,
+    val phone: String?,
+    val menuBoardId: String?,
+    val publishedAt: String?,
+    val items: List<BarMenuItemDto>,
+)
