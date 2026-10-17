@@ -1,6 +1,11 @@
 // AI-assisted implementation draft (2026-10-17, I2-P25/A6). Device verification pending.
 package com.zerotoone.bottlemap.ui.customer
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -292,13 +297,22 @@ private fun KakaoMapView(
                             // Kakao Label is the native map marker. Its position
                             // uses latitude FIRST and longitude SECOND.
                             val position = LatLng.from(target.latitude, target.longitude)
+                            // A typographic "●" shares the text box's layout,
+                            // which makes the apparent marker drift off the exact
+                            // location when users zoom. Use a real SDK icon label
+                            // anchored by its bottom-center tip to this LatLng.
                             val options = LabelOptions.from(target.barId, position)
                                 .setStyles(
-                                    LabelStyle.from().setTextStyles(
-                                        22, android.graphics.Color.rgb(24, 54, 80),
-                                    ),
+                                    LabelStyle.from(createBarPinBitmap())
+                                        .setAnchorPoint(0.5f, 1.0f)
+                                        .setTextStyles(
+                                            18,
+                                            Color.WHITE,
+                                            2,
+                                            Color.rgb(12, 22, 38),
+                                        ),
                                 )
-                                .setTexts(LabelTextBuilder().setTexts("● " + target.name))
+                                .setTexts(LabelTextBuilder().setTexts(target.name))
                             val label = kakaoMap.labelManager?.layer?.addLabel(options)
                             if (label == null) {
                                 report(MapRenderStatus.Error("바 위치 마커를 표시할 수 없습니다."))
@@ -331,6 +345,41 @@ private fun KakaoMapView(
             runCatching { view.finish() }
         }
     }
+}
+
+/**
+ * Pixel-precise pin whose point sits at the bottom center of its bitmap.
+ * Kakao's LabelStyle anchor (0.5, 1.0) then binds this point to the
+ * backend LatLng. The SDK moves the icon geographically while zooming/panning.
+ */
+private fun createBarPinBitmap(): Bitmap {
+    val bitmap = Bitmap.createBitmap(48, 64, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val pinShape = Path().apply {
+        moveTo(24f, 64f)
+        cubicTo(17f, 53f, 5f, 38f, 5f, 24f)
+        cubicTo(5f, 13f, 13f, 5f, 24f, 5f)
+        cubicTo(35f, 5f, 43f, 13f, 43f, 24f)
+        cubicTo(43f, 38f, 31f, 53f, 24f, 64f)
+        close()
+    }
+    val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(214, 183, 126)
+        style = Paint.Style.FILL
+    }
+    canvas.drawPath(pinShape, fill)
+    val outline = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(12, 22, 38)
+        style = Paint.Style.STROKE
+        strokeWidth = 2.5f
+    }
+    canvas.drawPath(pinShape, outline)
+    val hole = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(12, 22, 38)
+        style = Paint.Style.FILL
+    }
+    canvas.drawCircle(24f, 24f, 8f, hole)
+    return bitmap
 }
 
 @Composable
