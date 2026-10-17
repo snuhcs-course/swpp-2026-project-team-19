@@ -1,10 +1,11 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, PR #26; 2026-10-17). Reviewed by Haeul Yang.
 import time
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from sqlalchemy import select
 
-from app.models import BarMenuItem, BarStatus
+from app.models import BarMenuItem, BarStatus, MenuBoardEntry
 from app.services.search import distance_meters
 from tests.auth_support import connection_error, new_signing_key
 from tests.factories import make_bar, make_brand, make_product, publish_menu
@@ -177,6 +178,102 @@ def test_distance_meters():
     assert distance_meters(37.478, 126.951, 37.478, 126.951) == 0
     # Seoul City Hall to Gangnam Station is about 8.8 km.
     assert 8_700 < distance_meters(37.5663, 126.9779, 37.4979, 127.0276) < 8_900
+
+
+# ---- result card fields: bar identity, prices, pour sizes, menu update date (API spec, section 3.10.3) ----
+
+
+def test_options_carry_label_pour_size_and_price_as_written(client, db_session, glenfiddich):
+    bar = make_bar(db_session)
+    publish_menu(
+        db_session,
+        bar,
+        [(glenfiddich[12], "글렌피딕 12년", [("잔", 30, 17000), (None, 15, 9000), ("병", None, 160000)])],
+    )
+
+    (item,) = search(client, query="Glenfiddich 12")["items"]
+
+    # Every option of the entry, with nulls kept as null rather than left out or emptied.
+    assert item["options"] == [
+        {"optionLabel": "잔", "pourMl": 30, "priceKrw": 17000, "sortOrder": 1},
+        {"optionLabel": None, "pourMl": 15, "priceKrw": 9000, "sortOrder": 2},
+        {"optionLabel": "병", "pourMl": None, "priceKrw": 160000, "sortOrder": 3},
+    ]
+
+
+def test_options_follow_sort_order_not_insert_order(client, db_session, glenfiddich):
+    bar = make_bar(db_session)
+    publish_menu(db_session, bar, [(glenfiddich[12], "12", [("병", None, 160000), ("잔", 30, 17000)])])
+    entry = db_session.scalars(select(MenuBoardEntry)).one()
+    entry.options[0].sort_order = 3  # the bottle, inserted first, now comes last
+    db_session.flush()
+    # A real request reads the options from the database; drop the list this test session already holds.
+    db_session.expire(entry, ["options"])
+
+    (item,) = search(client, query="Glenfiddich 12")["items"]
+
+    assert [(o["optionLabel"], o["sortOrder"]) for o in item["options"]] == [("잔", 2), ("병", 3)]
+
+
+def test_each_row_carries_its_own_bar_and_menu(client, db_session, glenfiddich):
+    seorosang = make_bar(db_session, "Seorosang", latitude="37.477648", longitude="126.963763")
+    malt = make_bar(db_session, "Malt House", latitude="37.484102", longitude="126.929815")
+    publish_menu(db_session, seorosang, [(glenfiddich[12], "글렌피딕 12Y", [("잔", 30, 17000)])], published_at=T0)
+    publish_menu(
+        db_session,
+        malt,
+        [(glenfiddich[12], "Glenfiddich 12 Years", [(None, 15, 9000)])],
+        published_at=T0 - timedelta(days=2),
+    )
+
+    items = {item["barId"]: item for item in search(client, query="Glenfiddich 12", **ORIGIN)["items"]}
+
+    def card(item):
+        return {key: item[key] for key in ("barName", "address", "latitude", "longitude", "menuDisplayName")} | {
+            "prices": [o["priceKrw"] for o in item["options"]],
+            "menuUpdatedAt": item["menuUpdatedAt"],
+        }
+
+    assert card(items[str(seorosang.id)]) == {
+        "barName": "Seorosang",
+        "address": "Seorosang address",
+        "latitude": 37.477648,
+        "longitude": 126.963763,
+        "menuDisplayName": "글렌피딕 12Y",
+        "prices": [17000],
+        "menuUpdatedAt": "2026-10-04T09:15:00Z",
+    }
+    assert card(items[str(malt.id)]) == {
+        "barName": "Malt House",
+        "address": "Malt House address",
+        "latitude": 37.484102,
+        "longitude": 126.929815,
+        "menuDisplayName": "Glenfiddich 12 Years",
+        "prices": [9000],
+        "menuUpdatedAt": "2026-10-02T09:15:00Z",
+    }
+    assert {item["productDisplayName"] for item in items.values()} == {"Glenfiddich 12"}
+    assert all(isinstance(item["distanceMeters"], int) for item in items.values())
+
+
+def test_menu_updated_at_is_sent_in_utc(client, db_session, glenfiddich):
+    seoul = timezone(timedelta(hours=9))
+    published = datetime(2026, 10, 4, 18, 15, 30, 123456, tzinfo=seoul)
+    publish_menu(db_session, make_bar(db_session), [(glenfiddich[12], "12", [(None, 30, 1)])], published_at=published)
+
+    (item,) = search(client, query="Glenfiddich 12")["items"]
+
+    assert item["menuUpdatedAt"] == "2026-10-04T09:15:30.123456Z"
+
+
+def test_menu_updated_at_follows_the_latest_publish(client, db_session, glenfiddich):
+    board = publish_menu(db_session, make_bar(db_session), [(glenfiddich[12], "12", [(None, 30, 1)])], published_at=T0)
+    board.published_at = T0 + timedelta(days=7)  # the board is republished in place
+    db_session.flush()
+
+    (item,) = search(client, query="Glenfiddich 12")["items"]
+
+    assert item["menuUpdatedAt"] == "2026-10-11T09:15:00Z"
 
 
 # ---- guest search and tokens (API spec, sections 3.1.5 and 3.10) ----
