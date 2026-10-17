@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, E2E). Reviewed by Jinwoo Park.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, E2E; 2026-10-17, P47 final split). Reviewed by Jinwoo Park.
 """End-to-end matching: extraction output -> S1+S2b+S3 -> M3a (ai/docs/e2e_plan.md, 2절).
 
     python ai/eval/e2e_match.py --source label --split test \
@@ -6,6 +6,7 @@
     python ai/eval/e2e_match.py --source ai/runs/2026-10-13_test_v2_A2 --run 1 --split test \
         --m3-cache ai/runs/<date>_e2e/m3_cache --json <out>                       # one extraction run
     python ai/eval/e2e_match.py ... --split dev --bars Beck                        # Beck (dev, supplementary)
+    python ai/eval/e2e_match.py --source <hybrid final run dir> --split final         [--catalog drop_products] --m3-cache <dir> --json <out>                  # P47 (ai/docs/p47_plan.md)
 
 Lines are the extracted raw_names of a photo in output order, glass/bottle items once.
 Extracted items are paired with the label v1.1 items by score.py (unit-aware strict, then
@@ -18,6 +19,13 @@ outcome kinds are counted; gold lines with no paired item are "missed".
 The matching code, prompts and rules are the frozen M3a (commit 1ace927) and are only
 imported. M3a gets one call per photo for the lines S1+S2b+S3 leaves unconfirmed in C0 or
 C1; the call cap is 60 per run (gemini-3.1-flash-lite).
+
+Split "final" (P47, ai/docs/p47_plan.md): 수이·오드비 photos, labels_final_v1, match_gold_final_v1
+and a catalog v2 snapshot in place of catalog_v1_draft (match_eval.SEED is pointed at it; the
+matching code is unchanged). The eval_5bars snapshot already holds the gold products (C1 style),
+so the gold refs new:<key> that the snapshot holds are read as the catalog product <key> and only
+C0 (the snapshot as is) is evaluated. With --catalog drop_products the products seen only at
+수이·오드비 are absent; their refs stay new:<key> ("absent", expected unmatched).
 """
 
 from __future__ import annotations
@@ -42,14 +50,17 @@ from score import load_labels, load_photo_map, match_photo  # noqa: E402
 from app.matching.types import ExtractedProduct  # noqa: E402  (backend on sys.path via match_eval)
 
 GOLD = REPO_ROOT / "eval" / "match_gold_v1_1.json"
+FINAL_GOLD = REPO_ROOT / "eval" / "match_gold_final_v1.json"
+FINAL_CATALOGS = {"eval_5bars": REPO_ROOT / "ai" / "catalog" / "catalog_v2_eval_5bars.json",
+                  "drop_products": REPO_ROOT / "ai" / "catalog" / "catalog_v2_eval_5bars_drop_products.json"}
 M3_CALL_LIMIT = 60  # gemini-3.1-flash-lite calls per run (e2e_plan.md)
 RUN_FILE = re.compile(r"^(?P<stem>.+)_r(?P<run>\d+)\.json$")
 
 
-def load_run(run_dir: Path, run: int) -> dict[str, list[dict]]:
+def load_run(run_dir: Path, run: int, label_set: str = "test") -> dict[str, list[dict]]:
     """photo_id -> extracted items of run `run` (failed / unparseable calls -> [])."""
     from extract import data_dir
-    stem_to_id = load_photo_map(data_dir(), "test")
+    stem_to_id = load_photo_map(data_dir(), label_set)
     out = {}
     for f in sorted(run_dir.glob(f"*_r{run}.json")):
         m = RUN_FILE.match(f.name)
@@ -58,6 +69,38 @@ def load_run(run_dir: Path, run: int) -> dict[str, list[dict]]:
         rec = json.loads(f.read_text(encoding="utf-8"))
         out[stem_to_id[m["stem"]]] = (rec.get("output") or {"items": []})["items"]
     return out
+
+
+def final_gold(catalog_path: Path) -> dict:
+    """match_gold_final_v1 with the new:<key> refs the catalog snapshot holds read as <key>."""
+    gold = json.loads(FINAL_GOLD.read_text(encoding="utf-8"))
+    keys = {p["key"] for p in json.loads(catalog_path.read_text(encoding="utf-8"))["products"]}
+    missing = set()
+
+    def ref(r: str) -> str:
+        key = r.removeprefix("new:")
+        if r.startswith("new:"):
+            return key if key in keys else r
+        if key not in keys:
+            missing.add(r)
+        return r
+
+    for photo in gold["photos"]:
+        for item in photo["items"]:
+            g = item["gold"]
+            if g in ("unknown", "non_whisky"):
+                continue
+            item["gold"] = ("both:" if g.startswith("both:") else "") + "|".join(ref(r) for r in gold_refs(g))
+    if missing:
+        raise SystemExit(f"gold refs not in {catalog_path.name}: {sorted(missing)}")
+    return gold
+
+
+def check_labels_final(gold: dict, labels: dict[str, list[dict]]) -> None:
+    """Same check as check_labels_v1_1, against labels_final_v1."""
+    for photo in gold["photos"]:
+        if [i["raw_name"] for i in photo["items"]] != [i["raw_name"] for i in labels[photo["photo_id"]]]:
+            raise SystemExit(f"{photo['photo_id']}: gold names differ from labels_final_v1")
 
 
 def pair_items(labels: list[dict], items: list[dict]) -> dict[int, int]:
@@ -100,13 +143,13 @@ def build_lines(gold: dict, labels: dict, extracted: dict, photo_ids: list[str])
     return out
 
 
-def make_engine(llm, gold: dict, photo_lines: dict, in_split: set[str]):
+def make_engine(llm, gold: dict, photo_lines: dict, in_split: set[str], conditions=("C0", "C1")):
     from m3 import M3
     engine = M3(llm, {pid: [r["name"] for r in p["lines"]] for pid, p in photo_lines.items()}, product_meta(gold))
     catalogs = {}
     for pid, p in photo_lines.items():
         targets = set()
-        for condition in ("C0", "C1"):
+        for condition in conditions:
             key = (p["bar"], condition)
             if key not in catalogs:
                 catalogs[key] = load_catalog(p["bar"], condition, gold["new_products"], in_split)[0]
@@ -164,7 +207,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--source", required=True, help='"label" or an extraction run directory')
     parser.add_argument("--run", type=int, default=1)
-    parser.add_argument("--split", default="test", choices=["dev", "test"])
+    parser.add_argument("--split", default="test", choices=["dev", "test", "final"])
+    parser.add_argument("--catalog", default="eval_5bars", choices=sorted(FINAL_CATALOGS),
+                        help="final split: catalog v2 snapshot")
     parser.add_argument("--bars", nargs="+", help="only these bars (e.g. Beck on dev)")
     parser.add_argument("--m3-cache", type=Path, required=True)
     parser.add_argument("--cache-only", action="store_true")
@@ -173,15 +218,23 @@ def main() -> None:
     args = parser.parse_args()
 
     from llm import CachedLLM
-    gold = json.loads(GOLD.read_text(encoding="utf-8"))
-    check_labels_v1_1(gold)
-    labels = {**load_labels("val_v1_1"), **load_labels("test_v1_1")}
+    if args.split == "final":
+        match_eval.SEED = FINAL_CATALOGS[args.catalog]
+        gold = final_gold(match_eval.SEED)
+        labels = load_labels("final")
+        check_labels_final(gold, labels)
+        conditions = ("C0",)
+    else:
+        gold = json.loads(GOLD.read_text(encoding="utf-8"))
+        check_labels_v1_1(gold)
+        labels = {**load_labels("val_v1_1"), **load_labels("test_v1_1")}
+        conditions = ("C0", "C1")
     photo_ids = [p["photo_id"] for p in gold["photos"]
                  if p["split"] == args.split and (not args.bars or p["bar"] in args.bars)]
     if args.source == "label":
         extracted = {pid: labels[pid] for pid in photo_ids}
     else:
-        extracted = load_run(Path(args.source), args.run)
+        extracted = load_run(Path(args.source), args.run, "final" if args.split == "final" else "test")
         missing = [pid for pid in photo_ids if pid not in extracted]
         if missing:
             print(f"WARNING: no record for {missing} (scored as empty)")
@@ -189,7 +242,7 @@ def main() -> None:
     photo_lines = build_lines(gold, labels, extracted, photo_ids)
 
     llm = CachedLLM(args.m3_cache, cache_only=args.cache_only, limit=args.limit)
-    engine, catalogs = make_engine(llm, gold, photo_lines, in_split)
+    engine, catalogs = make_engine(llm, gold, photo_lines, in_split, conditions)
 
     paired_gold = {"new_products": gold["new_products"], "photos": [
         {"photo_id": pid, "bar": p["bar"], "split": p["split"],
@@ -200,11 +253,12 @@ def main() -> None:
     match_eval.split_new_products = lambda _gold, _split: in_split  # C1 catalog from the real gold, not the paired lines
 
     out = {"source": args.source, "run": args.run, "split": args.split, "bars": args.bars,
+           "catalog": match_eval.SEED.relative_to(REPO_ROOT).as_posix(),
            "photos": photo_ids, "lines": {}, "results": []}
     for pid, p in photo_lines.items():
         out["lines"][pid] = p
     for matcher in (M3_BASE, "M3a"):
-        for condition in ("C0", "C1"):
+        for condition in conditions:
             r = match_eval.evaluate(matcher, condition, args.split, tmp, engine if matcher == "M3a" else None)
             r["e2e_top1"] = e2e_top1(photo_lines, r, condition)
             r["unpaired"] = unpaired_outcomes(photo_lines, engine, catalogs, condition) if matcher == "M3a" else None

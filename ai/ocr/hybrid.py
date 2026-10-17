@@ -234,7 +234,7 @@ def write_json(path: Path, obj) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--set", dest="label_set", choices=["val", "test"], default="val")
+    parser.add_argument("--set", dest="label_set", choices=["val", "test", "final"], default="val")
     parser.add_argument("--photos", nargs="+")
     parser.add_argument("--runs", type=int, default=1)
     parser.add_argument("--first-run", type=int, default=1, help="number of the first run (r2, r3 later)")
