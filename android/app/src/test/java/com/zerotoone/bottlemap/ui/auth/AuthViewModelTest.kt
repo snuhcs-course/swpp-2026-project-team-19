@@ -145,6 +145,17 @@ class AuthViewModelTest {
     }
 
     @Test
+    fun sdkRefreshFailureDuringRestorationShowsRetryInsteadOfEndlessLoading() = runTest(dispatcher) {
+        val fake = FakeAuthGateway()
+        fake.events.value = AuthSessionEvent.Refreshing
+        val vm = AuthViewModel(fake)
+        advanceUntilIdle()
+        val state = vm.state.value as AuthUiState.SignInError
+        assertTrue(state.canRetryProfile)
+        assertEquals(0, fake.logouts)
+    }
+
+    @Test
     fun logoutImmediatelyHidesIdentityAndIgnoresLateUncancellableProfileResponse() = runTest(dispatcher) {
         val fake = FakeAuthGateway()
         val heldProfile = CompletableDeferred<CurrentUserDto>()
