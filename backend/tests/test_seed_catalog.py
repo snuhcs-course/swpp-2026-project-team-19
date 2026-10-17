@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
+# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, 2026-10-18). Reviewed by Haeul Yang.
 from uuid import uuid4
 
 import pytest
@@ -10,7 +10,7 @@ from scripts.seed_catalog import load
 from tests.factories import make_brand
 
 
-def seeds(brand_name: str = "Seed Brand") -> tuple[dict, dict]:
+def seeds(brand_name: str = "Seed Brand", latitude: float = 37.478, longitude: float = 126.951) -> tuple[dict, dict]:
     brand_id = str(uuid4())
     catalog = {
         "brands": [
@@ -39,8 +39,8 @@ def seeds(brand_name: str = "Seed Brand") -> tuple[dict, dict]:
                 "id": str(uuid4()),
                 "name": "Seed Bar",
                 "address": "서울특별시 관악구 관악로 1",
-                "latitude": 37.478,
-                "longitude": 126.951,
+                "latitude": latitude,
+                "longitude": longitude,
                 "phone": None,
                 "status": "active",
             }
@@ -80,5 +80,16 @@ def test_a_load_that_fails_changes_nothing_and_leaves_the_connection_usable(db_s
 
     with pytest.raises(IntegrityError):
         load(db_session.connection(), *seeds("Taken Brand"), dry_run=dry_run)
+
+    assert counts(db_session) == before
+
+
+@pytest.mark.parametrize(("latitude", "longitude"), [(126.951, 37.478), (37.478, 181.0), (-90.5, 126.951)])
+def test_coordinates_out_of_range_are_rejected(db_session, latitude, longitude):
+    # Swapped latitude and longitude is the likely mistake; the bars CHECK constraints catch it.
+    before = counts(db_session)
+
+    with pytest.raises(IntegrityError, match="ck_bars_l"):
+        load(db_session.connection(), *seeds(latitude=latitude, longitude=longitude), dry_run=False)
 
     assert counts(db_session) == before
