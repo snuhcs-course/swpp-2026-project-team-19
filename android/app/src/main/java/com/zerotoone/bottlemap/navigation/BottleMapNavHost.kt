@@ -23,6 +23,7 @@ import com.zerotoone.bottlemap.ui.customer.BarDetailViewModel
 import com.zerotoone.bottlemap.ui.customer.BarLocationMapScreen
 import com.zerotoone.bottlemap.ui.customer.SearchResultsScreen
 import com.zerotoone.bottlemap.ui.customer.SearchScreen
+import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import com.zerotoone.bottlemap.ui.mode.ModeSelectionScreen
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
@@ -210,14 +211,17 @@ private fun NavGraphBuilder.customerGraph(
             }),
         ) { backStackEntry ->
             val barId = backStackEntry.arguments?.getString(Routes.BAR_ID_ARGUMENT).orEmpty()
-            // Reuse the Bar Detail entry's ViewModel. The published bar/coordinate
-            // response is already loaded, so opening the map makes no duplicate API call.
-            val parentEntry = navController.previousBackStackEntry
-            val parentIsDetail = parentEntry?.destination?.route ==
-                Routes.CUSTOMER_BAR_DETAIL_ROUTE
-            if (parentIsDetail && parentEntry != null) {
+            // previousBackStackEntry is NOT stable during animated pop:
+            // when returning Map -> Detail it can briefly refer to Results.
+            // Look up the actual detail destination by route, and verify its ID.
+            val detailEntry = runCatching {
+                navController.getBackStackEntry(Routes.CUSTOMER_BAR_DETAIL_ROUTE)
+            }.getOrNull()?.takeIf { entry ->
+                entry.arguments?.getString(Routes.BAR_ID_ARGUMENT) == barId
+            }
+            if (detailEntry != null) {
                 val detailViewModel: BarDetailViewModel = viewModel(
-                    viewModelStoreOwner = parentEntry,
+                    viewModelStoreOwner = detailEntry,
                 )
                 // On process recreation the parent ViewModel can be new.
                 // load() deduplicates the same barId, so a normal map visit
@@ -233,17 +237,20 @@ private fun NavGraphBuilder.customerGraph(
                     onRetryDetail = detailViewModel::retry,
                 )
             } else {
-                // No fabricated state or API request when this internal-only
-                // destination is opened without the Bar Detail back stack.
-                BarLocationMapScreen(
-                    barId = barId,
-                    detailState = com.zerotoone.bottlemap.ui.customer.BarDetailUiState.Error(
-                        message = "바 상세에서 위치 보기를 다시 실행해 주세요.",
-                        canRetry = false,
-                    ),
-                    onBack = onBack,
-                    onRetryDetail = {},
-                )
+                // An orphan map destination is a real navigation error, not a
+                // transient Loading state. Allow a brief transition to settle
+                // before showing guidance; do not block Back navigation.
+                DelayedLoading {
+                    BarLocationMapScreen(
+                        barId = barId,
+                        detailState = com.zerotoone.bottlemap.ui.customer.BarDetailUiState.Error(
+                            message = "바 상세에서 위치 보기를 다시 실행해 주세요.",
+                            canRetry = false,
+                        ),
+                        onBack = onBack,
+                        onRetryDetail = {},
+                    )
+                }
             }
         }
     }
