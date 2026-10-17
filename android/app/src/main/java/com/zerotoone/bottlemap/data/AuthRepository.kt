@@ -8,7 +8,7 @@ import com.zerotoone.bottlemap.network.CurrentUserDto
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
-import io.github.jan.supabase.auth.providers.IDToken
+import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.createSupabaseClient
 import java.io.IOException
@@ -110,7 +110,8 @@ class SupabaseGoogleAuthGateway : AuthGateway {
             val current = client.auth.currentSessionOrNull()?.accessToken ?: return@withLock null
             if (current != staleToken) return@withLock current
             try {
-                client.auth.refreshCurrentSession().accessToken
+                client.auth.refreshCurrentSession()
+                client.auth.currentSessionOrNull()?.accessToken
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: IOException) {
