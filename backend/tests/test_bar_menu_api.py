@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, 2026-10-18). Reviewed by Haeul Yang.
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -81,6 +81,27 @@ def test_bar_without_menu_board_returns_empty_menu(client, db_session):
     body = response.json()
     assert (body["menuBoardId"], body["publishedAt"], body["items"]) == (None, None, [])
     assert body["name"] == "Whisky Bokchun"
+
+
+def test_board_with_every_item_removed_keeps_its_id_and_date(client, db_session):
+    # Spec 3.9.1: the app tells "no menu yet" (null id) from "nothing on sale now" (id, no items).
+    bar = make_bar(db_session)
+    board = publish_menu(db_session, bar, [], published_at=datetime(2026, 10, 4, 9, 15, tzinfo=timezone.utc))
+
+    body = client.get(f"/api/bars/{bar.id}/menu").json()
+
+    assert (body["menuBoardId"], body["publishedAt"], body["items"]) == (str(board.id), "2026-10-04T09:15:00Z", [])
+
+
+def test_missing_phone_is_null(client, db_session):
+    bar = make_bar(db_session)
+    bar.phone = None
+    db_session.flush()
+
+    body = client.get(f"/api/bars/{bar.id}/menu").json()
+
+    assert body["phone"] is None
+    assert {"name", "address", "latitude", "longitude"} <= body.keys()
 
 
 @pytest.mark.parametrize("bar_id", [str(uuid4()), "not-a-uuid"])

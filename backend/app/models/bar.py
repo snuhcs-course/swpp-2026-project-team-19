@@ -1,10 +1,10 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #8). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #8); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Enum as SQLAlchemyEnum, Numeric, String, func, text
+from sqlalchemy import CheckConstraint, DateTime, Enum as SQLAlchemyEnum, Numeric, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Uuid
 
@@ -18,6 +18,10 @@ class BarStatus(str, Enum):
 
 class Bar(Base):
     __tablename__ = "bars"
+    __table_args__ = (
+        CheckConstraint("latitude BETWEEN -90 AND 90", name="ck_bars_latitude_range"),
+        CheckConstraint("longitude BETWEEN -180 AND 180", name="ck_bars_longitude_range"),
+    )
 
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(150), nullable=False)

@@ -1,4 +1,5 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 import pytest
@@ -177,6 +178,19 @@ def test_publishing_the_sample_review(db_session, sample, glenfiddich):
     # The bar now has a menu item for the new product; the one for Glenfiddich 15 is kept.
     items = set(db_session.scalars(select(BarMenuItem.product_id).where(BarMenuItem.bar_id == sample.bar.id)))
     assert items == {glenfiddich[12].id, glenfiddich[15].id, catalog.product_ids[sample.items[3].id]}
+
+
+def test_publishing_again_keeps_the_board_and_moves_its_date(client, db_session, sample, glenfiddich):
+    # The customer bar detail shows publishedAt as the menu's last update (spec 3.9).
+    earlier = datetime(2026, 10, 1, tzinfo=timezone.utc)
+    sample.board.published_at = earlier
+    db_session.flush()
+
+    publish(db_session, sample, valid_body(sample, glenfiddich))
+
+    body = client.get(f"/api/bars/{sample.bar.id}/menu").json()
+    assert body["menuBoardId"] == str(sample.board.id)
+    assert datetime.fromisoformat(body["publishedAt"]) > earlier
 
 
 def test_ignored_removal_and_corrected_name(db_session, sample, glenfiddich):

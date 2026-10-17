@@ -138,8 +138,8 @@ Table bars {
   id uuid [pk]
   name varchar(150) [not null]
   address varchar(500) [not null]
-  latitude decimal(9,6) [not null]
-  longitude decimal(9,6) [not null]
+  latitude decimal(9,6) [not null, note: 'WGS84; CHECK between -90 and 90']
+  longitude decimal(9,6) [not null, note: 'WGS84; CHECK between -180 and 180']
   phone varchar(30)
   status bar_status [not null, default: 'active']
   created_at timestamptz [not null]
