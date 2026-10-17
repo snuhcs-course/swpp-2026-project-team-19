@@ -4,6 +4,7 @@ package com.zerotoone.bottlemap.ui.auth
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
@@ -30,6 +31,14 @@ internal fun GoogleSignInButton(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    // ViewModel survives Activity recreation; the selection coroutine does not.
+    // Clear only the pending Credential Manager stage on Back/recreation.
+    // Once the ID token reaches the ViewModel, its Supabase exchange continues
+    // independently in viewModelScope.
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.cancelCredentialSelectionIfPending() }
+    }
 
     Button(
         enabled = enabled,
