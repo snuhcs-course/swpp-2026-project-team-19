@@ -91,14 +91,27 @@ def test_brand_search_merges_products_and_counts_rows(client, db_session, glenfi
 def test_unknown_product_has_no_matched_products(client, db_session, glenfiddich):
     body = search(client, query="없는위스키")
 
-    assert (body["matchType"], body["matchedProducts"], body["items"]) == ("none", [], [])
+    assert (body["matchType"], body["matchedProducts"], body["items"], body["truncated"]) == ("none", [], [], False)
 
 
 def test_known_product_without_bars_has_matched_products_but_no_items(client, db_session, glenfiddich):
     body = search(client, query="글렌피딕 15년")
 
-    assert [p["resultCount"] for p in body["matchedProducts"]] == [0]
-    assert body["items"] == []
+    assert body["matchType"] == "alias_exact"
+    assert [(p["displayName"], p["resultCount"]) for p in body["matchedProducts"]] == [("Glenfiddich 15", 0)]
+    assert (body["items"], body["truncated"]) == ([], False)
+
+
+def test_known_brand_without_bars_lists_its_products_but_no_items(client, db_session, glenfiddich):
+    body = search(client, query="Glenfiddich")
+
+    assert body["matchType"] == "brand"
+    assert [(p["displayName"], p["resultCount"]) for p in body["matchedProducts"]] == [
+        ("Glenfiddich 12", 0),
+        ("Glenfiddich 15", 0),
+        ("Glenfiddich 18", 0),
+    ]
+    assert (body["items"], body["truncated"]) == ([], False)
 
 
 def test_inactive_bars_and_items_off_the_current_board_are_excluded(client, db_session, glenfiddich):
@@ -112,6 +125,52 @@ def test_inactive_bars_and_items_off_the_current_board_are_excluded(client, db_s
 
     assert body["items"] == []
     assert body["matchedProducts"][0]["resultCount"] == 0
+
+
+@pytest.fixture
+def yoichi(db_session):
+    # "요이치" is the brand alias and also the alias of the flagship Single Malt, as in the service catalog.
+    brand = make_brand(db_session, "Yoichi", aliases=("요이치",))
+    return {
+        "single malt": make_product(db_session, brand, "Yoichi Single Malt", aliases=("요이치",)),
+        "10": make_product(db_session, brand, "Yoichi 10", aliases=("요이치 10년",), age_years=10),
+    }
+
+
+def test_brand_search_lists_the_exact_product_first(client, db_session, yoichi):
+    # The 10 is sold nearer, but the customer typed the Single Malt's name.
+    near = make_bar(db_session, "Near Bar", latitude="37.488000", longitude="126.951000")
+    far = make_bar(db_session, "Far Bar", latitude="37.498000", longitude="126.951000")
+    farther = make_bar(db_session, "Farther Bar", latitude="37.508000", longitude="126.951000")
+    publish_menu(db_session, near, [(yoichi["10"], "요이치 10", [(None, 30, 1)])])
+    publish_menu(db_session, far, [(yoichi["single malt"], "요이치", [(None, 30, 1)])])
+    publish_menu(db_session, farther, [(yoichi["single malt"], "요이치", [(None, 30, 1)])])
+
+    body = search(client, query="요이치", **ORIGIN)
+
+    assert body["matchType"] == "brand"
+    assert [p["displayName"] for p in body["matchedProducts"]] == ["Yoichi Single Malt", "Yoichi 10"]
+    # Exact product rows first, each group nearest first.
+    assert [(i["barName"], i["productDisplayName"]) for i in body["items"]] == [
+        ("Far Bar", "Yoichi Single Malt"),
+        ("Farther Bar", "Yoichi Single Malt"),
+        ("Near Bar", "Yoichi 10"),
+    ]
+
+
+def test_brand_search_without_location_keeps_newest_menu_first_within_each_group(client, db_session, yoichi):
+    for name, product, age_days in [
+        ("Old Malt Bar", "single malt", 3),
+        ("New Malt Bar", "single malt", 1),
+        ("Newest Ten Bar", "10", 0),
+    ]:
+        bar = make_bar(db_session, name)
+        published_at = T0 - timedelta(days=age_days)
+        publish_menu(db_session, bar, [(yoichi[product], "요이치", [(None, 30, 1)])], published_at=published_at)
+
+    items = search(client, query="요이치")["items"]
+
+    assert [i["barName"] for i in items] == ["New Malt Bar", "Old Malt Bar", "Newest Ten Bar"]
 
 
 def test_without_location_newest_menu_comes_first_then_bar_name(client, db_session, glenfiddich):

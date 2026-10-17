@@ -42,7 +42,7 @@
 ### 3.2 고객 검색
 
 1. 고객의 검색어를 메뉴 매칭과 같은 정규화 함수로 정규화한다.
-2. `product_aliases.normalized_alias` 정확 일치, `brand_aliases.normalized_alias` 정확 일치(해당 브랜드의 활성 상품 전체), 상품 별칭 부분 일치 순서로 상품을 찾고 처음 결과가 나온 단계에서 멈춘다. 검색 시점에는 임베딩과 LLM을 사용하지 않는다.
+2. `brand_aliases.normalized_alias` 정확 일치(해당 브랜드의 활성 상품 전체), `product_aliases.normalized_alias` 정확 일치, 상품 별칭 부분 일치 순서로 상품을 찾고 활성 상품이 나온 첫 단계에서 멈춘다. 브랜드 별칭과 정확히 같은 검색어는 상품 별칭과도 같더라도 브랜드 결과가 된다. 그래서 브랜드 이름은 어떤 표기로 검색해도 같은 상품 집합을 낸다. 이때 검색어와 같은 별칭을 가진 상품(다른 브랜드 상품 포함)을 결과 앞에 둔다. 검색 시점에는 임베딩과 LLM을 사용하지 않는다.
 3. 매칭된 모든 상품의 `bar_menu_items`를 찾는다.
 4. 활성 업장의 현재 `menu_board_entries`에 연결된 업장 메뉴 항목만 노출한다.
 5. `menu_entry_options`에서 가격과 용량을, `menu_boards.published_at`에서 메뉴 갱신일을 가져온다.

@@ -1,8 +1,9 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 import pytest
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
+from sqlalchemy.exc import OperationalError
 
 from app.core.errors import ApiError, field_path, register_error_handlers
 from app.main import app as main_app
@@ -36,7 +37,11 @@ def make_client() -> TestClient:
     def teapot():
         raise HTTPException(status_code=418, detail="I'm a teapot")
 
-    return TestClient(app)
+    @app.get("/broken")
+    def broken():
+        raise RuntimeError("secret detail that must not reach the client")
+
+    return TestClient(app, raise_server_exceptions=False)
 
 
 def test_api_error_uses_the_common_format():
@@ -114,3 +119,65 @@ def test_auth_errors_keep_status_and_headers(monkeypatch):
 )
 def test_field_path(loc, expected):
     assert field_path(loc) == expected
+
+
+# ---- unexpected errors (API spec, section 9.2) ----
+
+INTERNAL_ERROR = {
+    "error": {
+        "code": "INTERNAL_ERROR",
+        "message": "일시적인 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+        "details": None,
+        "fieldErrors": [],
+    }
+}
+
+
+def test_unexpected_error_uses_the_common_format_without_details():
+    response = make_client().get("/broken")
+
+    assert response.status_code == 500
+    assert response.headers["content-type"] == "application/json"
+    assert response.json() == INTERNAL_ERROR
+    assert "secret" not in response.text
+
+
+def test_unexpected_error_still_reaches_the_server_log():
+    # Starlette raises the exception again after sending the response, so uvicorn logs the traceback.
+    app = FastAPI()
+    register_error_handlers(app)
+
+    @app.get("/broken")
+    def broken():
+        raise RuntimeError("boom")
+
+    with pytest.raises(RuntimeError, match="boom"):
+        TestClient(app).get("/broken")
+
+
+def database_down(*args, **kwargs):
+    raise OperationalError("SELECT secret_column FROM users", {}, Exception("password authentication failed"))
+
+
+def test_search_failure_is_an_internal_error(client, monkeypatch):
+    import app.api.routes.search as search_route
+
+    monkeypatch.setattr(search_route, "search_bars", database_down)
+
+    response = TestClient(main_app, raise_server_exceptions=False).get("/api/search/bars", params={"query": "x"})
+
+    assert (response.status_code, response.json()) == (500, INTERNAL_ERROR)
+    assert "secret" not in response.text and "password" not in response.text
+
+
+def test_protected_route_failure_is_an_internal_error(client, token_for, monkeypatch):
+    import app.api.routes.catalog as catalog_route
+
+    monkeypatch.setattr(catalog_route, "search_brands", database_down)
+    operator = {"Authorization": f"Bearer {token_for('operator')}"}
+
+    response = TestClient(main_app, raise_server_exceptions=False).get(
+        "/api/catalog/brands", params={"query": "x"}, headers=operator
+    )
+
+    assert (response.status_code, response.json()) == (500, INTERNAL_ERROR)

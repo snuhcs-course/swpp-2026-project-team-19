@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #12). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #12); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-17). Reviewed by Haeul Yang.
 """Customer product search: bars that currently sell the products a query resolves to (API spec, section 3.10)."""
 
 import math
@@ -76,11 +76,13 @@ def _selling_entries(session: Session, product_ids: list[UUID]):
     return session.execute(query).all()
 
 
-def _sort_key(item: SearchResultItem, *, by_distance: bool) -> tuple:
-    """Distance ascending with a location, else newest menu first; then bar name (spec),
-    then product name and ids so ties always come back in the same order."""
+def _sort_key(item: SearchResultItem, *, by_distance: bool, exact_product_ids: frozenset[UUID]) -> tuple:
+    """Rows of exact product-alias matches first (they matter in brand results); then distance
+    ascending with a location, else newest menu first; then bar name (spec), then product name and
+    ids so ties always come back in the same order."""
     primary = item.distanceMeters if by_distance else -item.menuUpdatedAt.timestamp()
-    return (primary, item.barName, item.productDisplayName, str(item.barId), str(item.productId))
+    exact_first = item.productId not in exact_product_ids
+    return (exact_first, primary, item.barName, item.productDisplayName, str(item.barId), str(item.productId))
 
 
 def search_bars(
@@ -119,7 +121,11 @@ def search_bars(
         )
         for entry, product_id, bar, published_at in rows
     ]
-    items.sort(key=lambda item: _sort_key(item, by_distance=lat is not None))
+    items.sort(
+        key=lambda item: _sort_key(
+            item, by_distance=lat is not None, exact_product_ids=resolution.exact_product_ids
+        )
+    )
 
     counts = Counter(item.productId for item in items)
     matched = [

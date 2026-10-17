@@ -797,13 +797,15 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 검색어는 메뉴 등록의 상품 매칭과 같은 백엔드 공통 정규화 함수로 정규화한다. 검색 시점에는 임베딩과 LLM을 호출하지 않고, 아래 단계를 순서대로 시도해 활성 상품을 하나라도 찾은 단계에서 멈춘다. 찾은 상품을 판매하는 업장이 없어도 다음 단계로 넘어가지 않는다.
 
 ```text
-1. alias_exact
+1. brand
+   brand_aliases.normalized_alias 정확 일치
+   → 해당 브랜드의 활성 상품 전체 (상품 별칭과도 정확히 같아도 이 단계에서 멈춘다)
+   + 검색어와 같은 검색용 별칭을 가진 다른 브랜드의 활성 상품
+   정확 일치 상품을 먼저 둔다(3.10.2)
+
+2. alias_exact
    product_aliases.normalized_alias 정확 일치
    (is_searchable = true, products.is_active = true)
-
-2. brand
-   brand_aliases.normalized_alias 정확 일치
-   → 해당 브랜드의 활성 상품 전체
 
 3. partial
    is_searchable 상품 별칭 중 정규화 검색어를 포함하는 별칭
@@ -812,6 +814,10 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 4. none
    일치하는 상품 없음
 ```
+
+브랜드 단계를 먼저 시도하는 이유: 대표 상품이 브랜드 이름을 별칭으로 갖는 경우가 많다(예: Royal Brackla 12의 별칭 `Royal Brackla`). 상품 별칭을 먼저 보면 `Royal Brackla`는 12년만, `로얄브라클라`는 그 브랜드의 상품 전체를 돌려주어 고객이 입력한 표기에 따라 결과가 달라진다. 브랜드 이름의 어떤 표기로 찾든 같은 결과를 주기 위해 브랜드 별칭과 정확히 같은 검색어는 브랜드 결과로 해석한다. `로얄브라클라 12년`처럼 브랜드 이름보다 긴 검색어는 브랜드 별칭과 같지 않으므로 상품 별칭 단계에서 그 상품을 찾는다. 브랜드에 활성 상품이 없으면 다음 단계로 넘어간다.
+
+브랜드 결과에서도 고객이 입력한 이름 그대로인 상품을 놓치지 않도록, 검색어와 같은 검색용 별칭을 가진 상품("정확 일치 상품")은 `matchedProducts`와 `items`에서 먼저 둔다. 예를 들어 `요이치`는 Yoichi 브랜드 전체를 돌려주되, 별칭이 `요이치`인 Yoichi Single Malt를 Yoichi 10보다 앞에 둔다. 정확 일치 상품이 다른 브랜드의 상품이어도 결과에 포함한다. 같은 브랜드라도 표기에 따라 정확 일치 상품이 달라질 수 있으므로(예: `Yoichi`는 어떤 상품 별칭과도 같지 않다), 상품 집합은 같아도 순서는 표기에 따라 다를 수 있다.
 
 어느 단계든 일치한 상품이 여러 개이면 모든 상품의 판매 업장을 하나의 목록으로 합쳐 반환한다. 예를 들어 `글렌피딕`이 브랜드 별칭으로 해석되면 Glenfiddich 12, 15, 18을 판매하는 업장이 함께 나온다. 각 결과에는 상품 정보가 포함되므로 프론트엔드는 카드마다 상품명을 표시한다.
 
@@ -845,13 +851,16 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 
 ```text
 items
-  lat·lng가 있으면  distanceMeters 오름차순
-  lat·lng가 없으면  menuUpdatedAt 내림차순
-  동점이면          barName → productDisplayName → barId → productId 오름차순
+  정확 일치 상품의 행 먼저, 그다음 나머지 (brand 단계에서만 차이가 난다)
+  각 묶음 안에서
+    lat·lng가 있으면  distanceMeters 오름차순
+    lat·lng가 없으면  menuUpdatedAt 내림차순
+    동점이면          barName → productDisplayName → barId → productId 오름차순
 
 matchedProducts
-  alias_exact, brand  displayName 오름차순
-  partial             일치한 별칭이 짧은 상품부터, 같으면 displayName 오름차순
+  alias_exact  displayName 오름차순
+  brand        정확 일치 상품 먼저, 그다음 나머지. 각 묶음 안에서 displayName 오름차순
+  partial      일치한 별칭이 짧은 상품부터, 같으면 displayName 오름차순
 
 options
   sortOrder 오름차순
@@ -1005,7 +1014,7 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 - 파라미터 누락, 범위, 숫자 형식 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `BLANK`, `STRING_TOO_LONG`, `LAT_LNG_REQUIRED_TOGETHER`, `NOT_SEARCHABLE`을 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
 - 프론트엔드는 요청 전에 검색어의 앞뒤 공백을 지우고, 빈 검색어면 API를 호출하지 않는다. 검색 입력 칸은 100자로 제한한다. 그래도 서버가 `query` 오류를 반환하면 위 표대로 `code`를 기준으로 문구를 보여 준다.
 - 위치 권한이 없거나 위치를 얻지 못하면 `lat`과 `lng`를 둘 다 빼고 요청한다. 결과는 `menuUpdatedAt` 순으로 정렬되고 `distanceMeters`는 `null`이다.
-- 네트워크 오류와 `5xx`는 오류 상태와 재시도 버튼을 보여 준다.
+- 네트워크 오류와 `5xx`(`500 INTERNAL_ERROR`, `503`, 프록시의 `502`·`504` 포함)는 오류 상태와 재시도 버튼을 보여 준다(9.6).
 
 ### 3.11 업주 신청과 승인
 
@@ -2143,6 +2152,8 @@ HTTP/1.1 200 OK
 }
 ```
 
+API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR`)까지 모두 이 형식이다. API 앞단의 프록시나 네트워크에서 생긴 오류는 예외이며 9.6을 따른다.
+
 `error.message`는 사용자 표시가 가능한 한국어 기본 문구다. 프론트엔드는 분기 처리에 `message`가 아니라 `code`를 사용한다. `fieldErrors[].message`는 9.3처럼 영어일 수 있으므로, 프론트엔드는 필드 오류를 표시할 때 `code`를 기준으로 자체 문구를 보여 준다.
 
 ### 9.2 주요 오류 코드
@@ -2172,6 +2183,7 @@ HTTP/1.1 200 OK
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | 지원하지 않는 이미지 형식 | 지원 형식 안내 |
 | `422` | `VALIDATION_FAILED` | 필드 값이나 옵션 구성이 잘못됨 | `fieldErrors` 표시 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 동일 검수 요청 재시도 |
+| `500` | `INTERNAL_ERROR` | 예상하지 못한 서버 오류(DB 연결 실패, 코드 오류 등). 모든 API에서 생길 수 있다. 원인은 응답에 담지 않고 서버 로그에만 남긴다 | 잠시 후 재시도 안내 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버의 인증 설정 누락 또는 오류, Supabase JWKS 조회 실패 (3.1.5) | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않음 |
 
 라우팅이나 인증 단계에서 생긴 HTTP 오류 중 위 표에 없는 상태 코드는 같은 공통 형식에 `code = HTTP_ERROR`로 반환한다. 프론트엔드는 HTTP 상태 코드 기준의 일반 오류 메시지를 보여 준다.
@@ -2232,6 +2244,19 @@ HTTP/1.1 200 OK
 ```
 
 이 경우 신규 상품은 생성되지 않고 `menuImport`는 `ready_for_review`를 유지한다.
+
+### 9.6 API가 만들지 않은 오류
+
+다음 오류는 API가 만든 응답이 아니므로 9.1 형식이 아닐 수 있다. 프론트엔드는 응답 본문을 9.1 형식으로 읽지 못하면 `message`를 쓰지 않고 HTTP 상태나 오류 종류로 판단한다.
+
+| 상황 | 클라이언트가 받는 것 | 프론트엔드 처리 |
+|---|---|---|
+| 기기가 오프라인이거나, 연결·응답 시간이 초과됨 | 응답 없음 | 네트워크 연결 확인 안내와 재시도 |
+| API 프로세스가 멈췄거나 다시 시작하는 중 | 프록시(Caddy)의 `502` 또는 `504`. 본문이 비어 있거나 JSON이 아니다 | 서버 오류로 보고 잠시 후 재시도 안내 |
+| 요청 본문이 프록시 한도(35MB)를 넘음 | 프록시의 `413`. JSON이 아니다 | `413 UPLOAD_TOO_LARGE`(4.4)와 같게 사진 수나 크기를 줄이도록 안내. 정상적인 업로드는 API의 한도(전체 30MB)에 먼저 걸린다 |
+| 응답 본문이 기대한 JSON이 아님 | `2xx`이지만 해석할 수 없는 본문 | 네트워크 오류가 아니라 서버 응답 오류로 보고 재시도 안내 |
+
+서버 오류 문구에는 서버가 보낸 원문이나 HTTP 상태 번호를 그대로 노출하지 않는다.
 
 ## 10. 프론트엔드 상태 처리 기준
 

@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 """OpenAPI models for the common error format produced by app.core.errors."""
 
 from typing import Any
@@ -34,10 +34,15 @@ def error_responses(*entries: tuple[int, str]) -> dict[int | str, dict[str, Any]
     """`responses=` for a route: (status, description listing the error codes) pairs.
 
     A 422 entry is always included, replacing FastAPI's default validation error
-    schema, which does not match what the API returns.
+    schema, which does not match what the API returns, and so is the 500 that any
+    route can answer when something unexpected fails.
     """
     responses: dict[int | str, dict[str, Any]] = {
-        422: {"model": ErrorResponse, "description": "`VALIDATION_FAILED`: see `fieldErrors`."}
+        422: {"model": ErrorResponse, "description": "`VALIDATION_FAILED`: see `fieldErrors`."},
+        500: {
+            "model": ErrorResponse,
+            "description": "`INTERNAL_ERROR`: an unexpected server error. Retry later; the response has no details.",
+        },
     }
     for status, description in entries:
         responses[status] = {"model": ErrorResponse, "description": description}

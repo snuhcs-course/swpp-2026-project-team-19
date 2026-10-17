@@ -1,12 +1,20 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-17). Reviewed by Haeul Yang.
 """Resolve a customer search query to catalog products (API spec, section 3.10.1).
 
 The steps run in order and stop at the first one that finds an active product:
-alias_exact -> brand -> partial -> none. No embedding or LLM is used at search time.
+brand -> alias_exact -> partial -> none. No embedding or LLM is used at search time.
+
+The brand step comes first so that a brand name always shows the whole brand. A flagship
+product often has the brand name as an alias too (Royal Brackla 12 as "Royal Brackla"); with
+the product step first, "Royal Brackla" would show only the 12 while "로얄브라클라" showed every
+Royal Brackla, so the result would depend on which spelling the customer typed. The products
+whose alias equals the query still come first, and a product of another brand with that alias is
+included, so the brand step never hides an exact product match.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
+from uuid import UUID
 
 from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session, joinedload
@@ -23,8 +31,12 @@ PARTIAL_LIMIT = 10
 class QueryResolution:
     normalized_query: str
     match_type: MatchType
-    # Each with `brand` loaded. Sorted by display name, except partial (closest alias first).
+    # Each with `brand` loaded. Sorted by display name, except that exact product-alias matches come
+    # first in the brand step and partial matches are sorted closest alias first.
     products: list[Product]
+    # Products with a searchable alias equal to the query: all of them for alias_exact, the ones
+    # the brand step puts first, none for partial. Callers list their rows first too.
+    exact_product_ids: frozenset[UUID] = field(default_factory=frozenset)
 
 
 def _active_products() -> Select[tuple[Product]]:
@@ -65,8 +77,17 @@ def _partial(session: Session, normalized: str) -> list[Product]:
 def resolve_search_query(session: Session, query: str) -> QueryResolution:
     """Callers reject queries that normalize to an empty string before calling this."""
     normalized = normalize(query)
-    for match_type, step in (("alias_exact", _alias_exact), ("brand", _brand), ("partial", _partial)):
-        products = step(session, normalized)
-        if products:
-            return QueryResolution(normalized, match_type, products)
+    exact = _alias_exact(session, normalized)
+    exact_ids = frozenset(product.id for product in exact)
+
+    brand = _brand(session, normalized)
+    if brand:
+        # Exact product matches first (of any brand), then the rest of the brand.
+        rest = [product for product in brand if product.id not in exact_ids]
+        return QueryResolution(normalized, "brand", exact + rest, exact_ids)
+    if exact:
+        return QueryResolution(normalized, "alias_exact", exact, exact_ids)
+    partial = _partial(session, normalized)
+    if partial:
+        return QueryResolution(normalized, "partial", partial)
     return QueryResolution(normalized, "none", [])
