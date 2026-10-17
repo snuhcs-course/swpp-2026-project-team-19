@@ -42,11 +42,19 @@ fun SearchResultsScreen(
     onBack: () -> Unit,
     onOpenBarDetail: (String) -> Unit,
     onInvalidQuery: (String) -> Unit,
+    refreshAfterMissingBar: Boolean = false,
+    onRefreshHandled: () -> Unit = {},
     viewModel: SearchResultsViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(query) { viewModel.search(query) }
+    LaunchedEffect(refreshAfterMissingBar) {
+        if (refreshAfterMissingBar) {
+            viewModel.refreshAfterMissingBar()
+            onRefreshHandled()
+        }
+    }
     LaunchedEffect(state) {
         if (state is CustomerSearchUiState.InvalidQuery) {
             onInvalidQuery((state as CustomerSearchUiState.InvalidQuery).fieldErrorCode)
