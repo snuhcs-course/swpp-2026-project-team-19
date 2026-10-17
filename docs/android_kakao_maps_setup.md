@@ -43,6 +43,9 @@ $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 - [ ] Actual installed ARM device shows a Kakao vector map inside BottleMap.
 - [ ] Search result -> bar detail -> Kakao map -> Back -> detail -> Back -> search results.
 - [ ] Marker/name correspond to the **same barId** and the coordinates returned from `GET /api/bars/{barId}/menu`.
+- [ ] Zoom in and out repeatedly: the pin's bottom tip must stay on the same geographic point, not shift away from the building/address location.
+- [ ] Pan the map, then zoom: the pin must move with its real geographic location (not stay fixed to a screen pixel).
+- [ ] Leave map, return, and switch to a different bar: only the selected bar's pin is visible at the new API-provided position.
 - [ ] Selecting a different bar creates a marker at the different backend location.
 - [ ] Failed map authentication/network initialization shows an error and Retry.
 - [ ] Invalid/missing latitude or longitude never opens a fabricated map location.
