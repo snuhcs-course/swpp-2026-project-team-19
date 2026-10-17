@@ -29,6 +29,7 @@ sealed interface BarDetailUiState {
     data class Error(
         val message: String,
         val canRetry: Boolean = true,
+        val refreshResultsOnBack: Boolean = false,
     ) : BarDetailUiState
 }
 
@@ -116,6 +117,7 @@ internal fun classifyBarDetailError(error: Exception): BarDetailUiState.Error =
             "BAR_NOT_FOUND" -> BarDetailUiState.Error(
                 message = "업장을 찾을 수 없습니다. 검색 결과로 돌아가 주세요.",
                 canRetry = false,
+                refreshResultsOnBack = true,
             )
             "NETWORK_ERROR" -> BarDetailUiState.Error(
                 "네트워크 연결을 확인한 뒤 다시 시도해 주세요.",
