@@ -40,6 +40,7 @@ fun BarDetailScreen(
     barId: String,
     onBack: () -> Unit,
     onBackAndRefreshResults: () -> Unit = onBack,
+    onOpenMap: (String) -> Unit = {},
     viewModel: BarDetailViewModel = viewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -59,6 +60,7 @@ fun BarDetailScreen(
             onBack = onBack,
             onBackAndRefreshResults = onBackAndRefreshResults,
             onRetry = viewModel::retry,
+            onOpenMap = onOpenMap,
         )
     }
 }
@@ -69,6 +71,7 @@ private fun BarDetailContent(
     onBack: () -> Unit,
     onBackAndRefreshResults: () -> Unit = onBack,
     onRetry: () -> Unit,
+    onOpenMap: (String) -> Unit = {},
 ) {
     val effectiveBack = if (
         state is BarDetailUiState.Error && state.refreshResultsOnBack
@@ -103,11 +106,13 @@ private fun BarDetailContent(
             is BarDetailUiState.Success -> BarDetailMenuList(
                 bar = state.bar,
                 emptyReason = null,
+                onOpenMap = onOpenMap,
             )
 
             is BarDetailUiState.Empty -> BarDetailMenuList(
                 bar = state.bar,
                 emptyReason = state.reason,
+                onOpenMap = onOpenMap,
             )
 
             is BarDetailUiState.Error -> BarDetailMessage(
@@ -124,6 +129,7 @@ private fun BarDetailContent(
 private fun BarDetailMenuList(
     bar: BarDetailUiModel,
     emptyReason: EmptyMenuReason?,
+    onOpenMap: (String) -> Unit,
 ) {
     // A single LazyColumn scrolls the identity, update date, and entire menu.
     // No visible scrollbar or nested vertically scrollable containers.
@@ -177,14 +183,23 @@ private fun BarDetailMenuList(
         }
 
         item {
-            // I2-P25 implements location/map navigation. Keep the design slot
-            // without presenting a dead clickable map action as working.
+            // The backend's lat/lng are validated before navigation; never
+            // substitute a default point for a missing or malformed location.
+            val validLocation = validatedBarLocation(bar)
             OutlinedButton(
-                onClick = {},
-                enabled = false,
+                onClick = { onOpenMap(bar.barId) },
+                enabled = validLocation != null,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("지도에서 위치 보기 · 다음 작업")
+                Text("지도에서 위치 보기")
+            }
+            if (validLocation == null) {
+                Text(
+                    text = "이 바의 위치 정보를 확인할 수 없습니다.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
             }
         }
 
