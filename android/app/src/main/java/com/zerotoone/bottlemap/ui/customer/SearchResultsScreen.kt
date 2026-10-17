@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.NumberFormat
 import java.util.Locale
@@ -115,6 +118,8 @@ private fun SearchResultsContent(
                 text = query,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = "검색한 위스키를 제공하는 바",
@@ -124,11 +129,15 @@ private fun SearchResultsContent(
         }
 
         when (state) {
-            CustomerSearchUiState.Loading -> SearchStatusPanel(
-                title = "검색 중입니다",
-                description = "등록된 메뉴를 확인하고 있어요.",
-                isLoading = true,
-            )
+            CustomerSearchUiState.Loading -> DelayedLoading(
+                modifier = Modifier.weight(1f),
+            ) {
+                SearchStatusPanel(
+                    title = "검색 중입니다",
+                    description = "등록된 메뉴를 확인하고 있어요.",
+                    isLoading = true,
+                )
+            }
             is CustomerSearchUiState.Success -> ResultsSuccess(
                 state = state,
                 onOpenBarDetail = onOpenBarDetail,
@@ -137,6 +146,7 @@ private fun SearchResultsContent(
             is CustomerSearchUiState.Empty -> {
                 val unknown = state.reason == EmptySearchReason.UNKNOWN_PRODUCT
                 SearchStatusPanel(
+                modifier = Modifier.weight(1f),
                     title = if (unknown) "일치하는 주류가 없어요" else "등록된 판매 바가 없어요",
                     description = if (unknown) {
                         "다른 철자나 제품명을 입력해 보세요."
@@ -148,12 +158,14 @@ private fun SearchResultsContent(
                 )
             }
             is CustomerSearchUiState.InvalidQuery -> SearchStatusPanel(
+                modifier = Modifier.weight(1f),
                 title = "검색어를 확인해 주세요",
                 description = searchValidationMessage(state.fieldErrorCode),
                 actionLabel = "검색어 변경",
                 onAction = onBack,
             )
             is CustomerSearchUiState.Error -> SearchStatusPanel(
+                modifier = Modifier.weight(1f),
                 title = "결과를 불러오지 못했어요",
                 description = state.message,
                 actionLabel = if (state.canRetry) "다시 시도" else "검색어 변경",
@@ -240,16 +252,14 @@ private fun SearchResultCard(
                 text = result.barName,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+                // LazyColumn owns vertical scrolling: let long bar names wrap.
             )
             if (result.address.isNotBlank()) {
                 Text(
                     text = result.address,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                    // Long addresses wrap within the scrollable result card.
                 )
             }
             Text(
@@ -298,6 +308,7 @@ private fun SearchResultCard(
 
 @Composable
 private fun SearchStatusPanel(
+    modifier: Modifier = Modifier,
     title: String,
     description: String,
     isLoading: Boolean = false,
@@ -308,8 +319,9 @@ private fun SearchStatusPanel(
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
         Column(
@@ -363,6 +375,22 @@ private fun ResultsSuccessPreview() {
                     ),
                 ),
                 truncated = false,
+            ),
+            onBack = {},
+            onOpenBarDetail = {},
+            onRetry = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 320, heightDp = 568, fontScale = 1.3f)
+@Composable
+private fun CompactPortraitSearchErrorPreview() {
+    I2CustomerSearchTheme {
+        SearchResultsContent(
+            query = "아주 긴 위스키 이름을 검색했을 때에도 다시 시도 버튼이 보여야 합니다",
+            state = CustomerSearchUiState.Error(
+                "연결 상태를 확인하고 다시 시도해 주세요.",
             ),
             onBack = {},
             onOpenBarDetail = {},

@@ -111,6 +111,44 @@ class BarDetailViewModelTest {
     }
 
     @Test
+    fun mismatchedResponseCannotReplaceSelectedBarAndRetryUsesOriginalId() = runTest(dispatcher) {
+        var returnWrongBar = true
+        val fake = FakeSource { requestedId ->
+            if (returnWrongBar) {
+                returnWrongBar = false
+                response("different-bar")
+            } else {
+                response(requestedId)
+            }
+        }
+        val vm = BarDetailViewModel(fake)
+        vm.load("selected-bar")
+        advanceUntilIdle()
+        assertTrue(vm.state.value is BarDetailUiState.Error)
+
+        vm.retry()
+        advanceUntilIdle()
+        val result = vm.state.value as BarDetailUiState.Success
+        assertEquals("selected-bar", result.bar.barId)
+        assertEquals(listOf("selected-bar", "selected-bar"), fake.requests)
+    }
+
+    @Test
+    fun recreatedBarDetailViewModelCanReloadUsingRestoredRouteId() = runTest(dispatcher) {
+        val fake = FakeSource { response(it) }
+        val first = BarDetailViewModel(fake)
+        first.load("bar-17")
+        advanceUntilIdle()
+
+        val recreated = BarDetailViewModel(fake)
+        recreated.load("bar-17")
+        advanceUntilIdle()
+
+        assertEquals("bar-17", (recreated.state.value as BarDetailUiState.Success).bar.barId)
+        assertEquals(listOf("bar-17", "bar-17"), fake.requests)
+    }
+
+    @Test
     fun serverUnavailableKeepsRecoverableRetryState() {
         val error = classifyBarDetailError(
             BottleMapApiException(

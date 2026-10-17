@@ -10,6 +10,8 @@ import com.zerotoone.bottlemap.network.SearchOptionDto
 import com.zerotoone.bottlemap.network.SearchResultDto
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -150,6 +152,60 @@ class SearchResultsViewModelTest {
             CustomerSearchUiState.Empty(EmptySearchReason.NO_BARS),
             vm.state.value,
         )
+    }
+
+    @Test
+    fun invalidQueryInvalidatesEvenAnUncancellableOlderRequest() = runTest(dispatcher) {
+        val gate = CompletableDeferred<SearchBarsResponseDto>()
+        val fake = FakeSource { query ->
+            if (query == "first") {
+                // Simulate a callback that returns despite request cancellation.
+                withContext(NonCancellable) { gate.await() }
+            } else response(query)
+        }
+        val vm = SearchResultsViewModel(fake)
+
+        vm.search("first")
+        runCurrent()
+        vm.search("   ")
+        assertEquals(CustomerSearchUiState.InvalidQuery("BLANK"), vm.state.value)
+        gate.complete(response("first", withBar = true))
+        advanceUntilIdle()
+
+        assertEquals(CustomerSearchUiState.InvalidQuery("BLANK"), vm.state.value)
+        assertEquals(listOf("first"), fake.requests)
+    }
+
+    @Test
+    fun duplicateSearchDuringLoadingDoesNotSendSecondRequest() = runTest(dispatcher) {
+        val gate = CompletableDeferred<SearchBarsResponseDto>()
+        val fake = FakeSource { gate.await() }
+        val vm = SearchResultsViewModel(fake)
+        vm.search("Deanston 12")
+        runCurrent()
+        vm.search("  Deanston 12  ")
+        runCurrent()
+        assertEquals(listOf("Deanston 12"), fake.requests)
+        gate.complete(response("Deanston 12", withBar = true))
+        advanceUntilIdle()
+        assertTrue(vm.state.value is CustomerSearchUiState.Success)
+    }
+
+    @Test
+    fun recreatedResultsViewModelCanReloadFromRestoredQueryRoute() = runTest(dispatcher) {
+        val fake = FakeSource { response(it, withBar = true) }
+        val first = SearchResultsViewModel(fake)
+        first.search("Ardbeg 10")
+        advanceUntilIdle()
+
+        // NavHost persists the query in its route; a new VM can re-fetch
+        // after process recreation instead of parceling the entire result.
+        val recreated = SearchResultsViewModel(fake)
+        recreated.search("Ardbeg 10")
+        advanceUntilIdle()
+
+        assertTrue(recreated.state.value is CustomerSearchUiState.Success)
+        assertEquals(listOf("Ardbeg 10", "Ardbeg 10"), fake.requests)
     }
 
     @Test

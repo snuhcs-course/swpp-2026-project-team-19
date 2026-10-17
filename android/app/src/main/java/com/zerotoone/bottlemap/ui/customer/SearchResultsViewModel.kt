@@ -30,6 +30,11 @@ class SearchResultsViewModel(
     fun search(query: String) {
         val trimmed = query.trim()
         if (trimmed.isEmpty() || trimmed.length > 100) {
+            // Invalid navigation/input must invalidate an in-flight request.
+            // Otherwise a late old response could overwrite InvalidQuery.
+            ++requestVersion
+            requestJob?.cancel()
+            currentQuery = ""
             _state.value = CustomerSearchUiState.InvalidQuery(
                 if (trimmed.isEmpty()) "BLANK" else "STRING_TOO_LONG",
             )

@@ -103,6 +103,9 @@ class BarDetailViewModel(
         requestJob = viewModelScope.launch {
             try {
                 val response = source.getPublishedBarMenu(barId)
+                // Never render another bar's data beneath the selected route.
+                // This also guards against a malformed/stale backend response.
+                check(response.barId == barId) { "Bar ID mismatch in menu response." }
                 if (version == requestVersion) _state.value = response.toBarDetailUiState()
             } catch (cancelled: CancellationException) {
                 throw cancelled

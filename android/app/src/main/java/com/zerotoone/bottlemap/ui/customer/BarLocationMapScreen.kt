@@ -9,16 +9,21 @@ import android.graphics.Path
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,6 +59,7 @@ import com.kakao.vectormap.label.LabelOptions
 import com.kakao.vectormap.label.LabelStyle
 import com.kakao.vectormap.label.LabelTextBuilder
 import com.zerotoone.bottlemap.BuildConfig
+import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.delay
 
@@ -74,6 +80,20 @@ fun BarLocationMapScreen(
     onBack: () -> Unit,
     onRetryDetail: () -> Unit,
 ) {
+    // Kakao MapView embeds a native GL Surface. Navigation Compose may keep
+    // the outgoing destination composed during its pop animation, leaving that
+    // Surface briefly drawn above the Bar Detail destination. Hide it
+    // synchronously BEFORE changing the back stack.
+    var activeMapView by remember { mutableStateOf<MapView?>(null) }
+    var leavingMap by remember { mutableStateOf(false) }
+    fun exitMap() {
+        if (leavingMap) return
+        leavingMap = true
+        activeMapView?.let(::hideMapSurface)
+        onBack()
+    }
+    BackHandler(enabled = !leavingMap, onBack = ::exitMap)
+
     I2CustomerSearchTheme {
         Column(
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
@@ -82,7 +102,7 @@ fun BarLocationMapScreen(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TextButton(onClick = onBack) { Text("←") }
+                TextButton(onClick = ::exitMap) { Text("←") }
                 Text(
                     text = "지도에서 위치 보기",
                     style = MaterialTheme.typography.titleLarge,
@@ -90,21 +110,45 @@ fun BarLocationMapScreen(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
             }
-            when (detailState) {
-                BarDetailUiState.Loading -> MapStatusMessage("바 정보를 불러오고 있습니다.", loading = true)
+            // The exiting destination may remain composed during NavHost's
+            // transition. Remove its AndroidView from composition immediately.
+            if (!leavingMap) when (detailState) {
+                BarDetailUiState.Loading -> DelayedLoading {
+                    MapStatusMessage("바 정보를 불러오고 있습니다.", loading = true)
+                }
                 is BarDetailUiState.Error -> MapStatusMessage(
                     message = detailState.message,
                     retry = if (detailState.canRetry) onRetryDetail else null,
                 )
-                is BarDetailUiState.Success -> BarLocationContent(barId, detailState.bar)
-                is BarDetailUiState.Empty -> BarLocationContent(barId, detailState.bar)
+                is BarDetailUiState.Success -> BarLocationContent(
+                    barId, detailState.bar,
+                    onMapViewChanged = { view ->
+                        activeMapView = view
+                        // A late SDK/map attachment must never revive an
+                        // outgoing GL surface after Back was requested.
+                        if (leavingMap) view?.let(::hideMapSurface)
+                    },
+                )
+                is BarDetailUiState.Empty -> BarLocationContent(
+                    barId, detailState.bar,
+                    onMapViewChanged = { view ->
+                        activeMapView = view
+                        // A late SDK/map attachment must never revive an
+                        // outgoing GL surface after Back was requested.
+                        if (leavingMap) view?.let(::hideMapSurface)
+                    },
+                )
             }
         }
     }
 }
 
 @Composable
-private fun BarLocationContent(barId: String, bar: BarDetailUiModel) {
+private fun BarLocationContent(
+    barId: String,
+    bar: BarDetailUiModel,
+    onMapViewChanged: (MapView?) -> Unit,
+) {
     if (barId != bar.barId) {
         MapStatusMessage("선택한 바의 정보가 일치하지 않습니다.")
         return
@@ -114,57 +158,78 @@ private fun BarLocationContent(barId: String, bar: BarDetailUiModel) {
         MapStatusMessage("이 바의 위치 정보가 없거나 올바르지 않습니다.")
         return
     }
-    Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = target.name,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            text = target.address,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        KakaoMapPanel(
-            target = target,
-            modifier = Modifier.weight(1f).fillMaxWidth().heightIn(min = 220.dp),
-        )
-        Text(
-            text = "지도에서 바의 위치를 확인하세요.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Surface(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(15.dp),
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // The BAR ADDRESS card repeats the address already shown above the map.
+        // On short portrait screens, preserve room for the interactive map.
+        val compactHeight = maxHeight < 560.dp
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // Keep long bar names/addresses readable without shrinking the
+            // interactive map to zero height on a small portrait device.
             Column(
-                modifier = Modifier.padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.fillMaxWidth()
+                    .heightIn(max = if (compactHeight) 112.dp else 180.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = "BAR ADDRESS",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelSmall,
+                    text = target.name,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = target.address,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium,
                 )
+            }
+            KakaoMapPanel(
+                target = target,
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                onMapViewChanged = onMapViewChanged,
+            )
+            Text(
+                text = "지도에서 바의 위치를 확인하세요.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            if (!compactHeight) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(15.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(
+                            text = "BAR ADDRESS",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = target.address,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun KakaoMapPanel(target: BarMapTarget, modifier: Modifier) {
+private fun KakaoMapPanel(
+    target: BarMapTarget,
+    modifier: Modifier,
+    onMapViewChanged: (MapView?) -> Unit,
+) {
     if (BuildConfig.KAKAO_NATIVE_APP_KEY.isBlank()) {
         MapStatusMessage(
             "Kakao 지도 앱 키가 설정되지 않았습니다. 개발 환경의 Kakao Native App Key를 확인해 주세요.",
@@ -190,17 +255,23 @@ private fun KakaoMapPanel(target: BarMapTarget, modifier: Modifier) {
                 target = target,
                 modifier = Modifier.fillMaxSize(),
                 onStatusChange = { state = it },
+                onMapViewChanged = onMapViewChanged,
             )
             when (val current = state) {
-                MapRenderStatus.Loading -> Box(
-                    modifier = Modifier.fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
-                    contentAlignment = Alignment.Center,
-                ) { CircularProgressIndicator() }
+                MapRenderStatus.Loading -> DelayedLoading(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
+                        contentAlignment = Alignment.Center,
+                    ) { CircularProgressIndicator() }
+                }
                 MapRenderStatus.Ready -> Unit
                 is MapRenderStatus.Error -> Column(
                     modifier = Modifier.fillMaxSize()
                         .background(MaterialTheme.colorScheme.surface)
+                        .verticalScroll(rememberScrollState())
                         .padding(18.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -222,6 +293,7 @@ private fun KakaoMapView(
     target: BarMapTarget,
     modifier: Modifier,
     onStatusChange: (MapRenderStatus) -> Unit,
+    onMapViewChanged: (MapView?) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val owner = LocalLifecycleOwner.current
@@ -255,6 +327,7 @@ private fun KakaoMapView(
     )
 
     DisposableEffect(view, owner, target) {
+        onMapViewChanged(view)
         val disposed = AtomicBoolean(false)
         val handler = Handler(Looper.getMainLooper())
         fun report(value: MapRenderStatus) {
@@ -264,8 +337,16 @@ private fun KakaoMapView(
         }
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_RESUME -> runCatching { view.resume() }
-                Lifecycle.Event.ON_PAUSE -> runCatching { view.pause() }
+                Lifecycle.Event.ON_RESUME -> runCatching {
+                    // Returning from the app background: show and resume.
+                    showMapSurface(view)
+                    view.resume()
+                }
+                Lifecycle.Event.ON_PAUSE -> runCatching {
+                    // Also cover system Back / navigation outside the arrow button.
+                    hideMapSurface(view)
+                    view.pause()
+                }
                 else -> Unit
             }
         }
@@ -340,11 +421,30 @@ private fun KakaoMapView(
 
         onDispose {
             disposed.set(true)
+            onMapViewChanged(null)
+            // Native GL surfaces must be hidden before SDK teardown, not only
+            // when AndroidView is eventually detached after pop animations.
+            hideMapSurface(view)
             owner.lifecycle.removeObserver(observer)
             runCatching { view.pause() }
             runCatching { view.finish() }
         }
     }
+}
+
+/**
+ * SurfaceView/GLSurfaceView is composited separately from Compose. Changing
+ * both levels avoids a leftover map layer above the returning detail screen.
+ * These calls must be made on the main thread (BackHandler/Lifecycle observer).
+ */
+private fun hideMapSurface(view: MapView) {
+    view.visibility = View.INVISIBLE
+    runCatching { view.surfaceView?.visibility = View.INVISIBLE }
+}
+
+private fun showMapSurface(view: MapView) {
+    view.visibility = View.VISIBLE
+    runCatching { view.surfaceView?.visibility = View.VISIBLE }
 }
 
 /**
