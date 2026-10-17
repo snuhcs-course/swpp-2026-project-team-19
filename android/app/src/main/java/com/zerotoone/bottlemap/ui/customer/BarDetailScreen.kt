@@ -382,6 +382,20 @@ private fun BarDetailSuccessPreview() {
     }
 }
 
+@Preview(showBackground = true, widthDp = 320, heightDp = 568, fontScale = 1.3f)
+@Composable
+private fun CompactPortraitDetailErrorPreview() {
+    I2CustomerSearchTheme {
+        BarDetailContent(
+            state = BarDetailUiState.Error(
+                "네트워크가 불안정합니다. 연결을 확인한 후 같은 업장으로 다시 요청해 주세요.",
+            ),
+            onBack = {},
+            onRetry = {},
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun BarDetailErrorPreview() {
