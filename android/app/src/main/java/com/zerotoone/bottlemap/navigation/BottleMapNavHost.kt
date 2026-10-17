@@ -1,9 +1,11 @@
 // AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #7, #15). Reviewed by Hojin Nam.
+// AI-assisted with ChatGPT/GPT-6 (Hojin Nam, 2026-10-18, PR #38). Human review pending.
 package com.zerotoone.bottlemap.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
@@ -214,10 +216,12 @@ private fun NavGraphBuilder.customerGraph(
             // previousBackStackEntry is NOT stable during animated pop:
             // when returning Map -> Detail it can briefly refer to Results.
             // Look up the actual detail destination by route, and verify its ID.
-            val detailEntry = runCatching {
-                navController.getBackStackEntry(Routes.CUSTOMER_BAR_DETAIL_ROUTE)
-            }.getOrNull()?.takeIf { entry ->
-                entry.arguments?.getString(Routes.BAR_ID_ARGUMENT) == barId
+            val detailEntry = remember(backStackEntry, navController, barId) {
+                runCatching {
+                    navController.getBackStackEntry(Routes.CUSTOMER_BAR_DETAIL_ROUTE)
+                }.getOrNull()?.takeIf { entry ->
+                    entry.arguments?.getString(Routes.BAR_ID_ARGUMENT) == barId
+                }
             }
             if (detailEntry != null) {
                 val detailViewModel: BarDetailViewModel = viewModel(
