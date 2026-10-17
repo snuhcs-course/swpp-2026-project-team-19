@@ -248,16 +248,14 @@ private fun SearchResultCard(
                 text = result.barName,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+                // LazyColumn owns vertical scrolling: let long bar names wrap.
             )
             if (result.address.isNotBlank()) {
                 Text(
                     text = result.address,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                    // Long addresses wrap within the scrollable result card.
                 )
             }
             Text(
