@@ -120,7 +120,7 @@ jobs:
               raise SystemExit("No JUnit tests executed; failing rather than accepting an empty test run")
           PY
         env:
-          CI_TESTS_RAN: \${{ steps.unit_test.outcome == 'success' }}
+          CI_TESTS_RAN: ${{ steps.unit_test.outcome == 'success' }}
       - name: Upload unit-test XML and HTML reports
         if: always()
         uses: actions/upload-artifact@v7
