@@ -41,6 +41,7 @@ interface BottleMapApi {
     @GET("api/bars/{barId}/menu")
     suspend fun getPublishedBarMenu(
         @Path("barId") barId: String,
+        @Header("Authorization") authorization: String? = null,
     ): BarMenuResponseDto
 
     @GET("api/search/bars")
