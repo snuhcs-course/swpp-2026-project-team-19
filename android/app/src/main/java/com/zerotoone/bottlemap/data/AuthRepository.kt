@@ -142,8 +142,33 @@ class SupabaseGoogleAuthGateway : AuthGateway {
     }
 
     override suspend fun fetchCurrentUser(): CurrentUserDto {
-        val token = currentAccessTokenOrNull()
-            ?: throw BottleMapApiException(code = "UNAUTHENTICATED", message = "로그인 세션이 없습니다.")
+        // Protected /api/me is not a Guest request. Distinguish an absent
+        // Supabase session from an offline SDK initialization/refresh failure.
+        val token = if (!configured) null else try {
+            client.auth.awaitInitialization()
+            if (client.auth.sessionStatus.value is SessionStatus.RefreshFailure) {
+                throw BottleMapApiException(
+                    code = "NETWORK_ERROR",
+                    message = "Supabase 세션 갱신 중 연결을 확인해 주세요.",
+                )
+            }
+            client.auth.currentSessionOrNull()?.accessToken
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: BottleMapApiException) {
+            throw error
+        } catch (_: Exception) {
+            throw BottleMapApiException(
+                code = "NETWORK_ERROR",
+                message = "Supabase 세션을 확인할 수 없습니다. 다시 시도해 주세요.",
+            )
+        }
+        if (token == null) {
+            throw BottleMapApiException(
+                code = "UNAUTHENTICATED",
+                message = "로그인 세션이 없습니다.",
+            )
+        }
         return try {
             ApiClient.call { ApiClient.api.getMe("Bearer $token") }
         } catch (error: BottleMapApiException) {
@@ -152,7 +177,10 @@ class SupabaseGoogleAuthGateway : AuthGateway {
                 ?: throw BottleMapApiException(
                     // An offline refresh may leave a valid persisted session.
                     // Treat that as transient, not as a confirmed logout.
-                    code = if (currentAccessTokenOrNull() != null) {
+                    code = if (
+                        client.auth.sessionStatus.value is SessionStatus.RefreshFailure ||
+                        currentAccessTokenOrNull() != null
+                    ) {
                         "NETWORK_ERROR"
                     } else {
                         "UNAUTHENTICATED"
