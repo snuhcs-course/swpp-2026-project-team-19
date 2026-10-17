@@ -100,3 +100,25 @@ P32: orientation policy retained/documented; small-screen/IME layout code added.
 - Decision: Portrait-only removes landscape rotation tests, not Activity/process recreation tests.
 - AI support: existing code/contract review, minimal frontend fixes, tests, test/decision documentation.
 - Human to verify: Gradle success logs, S22/S23 behavior, small viewport/font/keyboard, Android lifecycle and Google/Supabase + Kakao SDK interactions.
+
+## Post-device-test polish: transient navigation/loading feedback (2026-10-18)
+
+**Trigger:** human tester reported that the previous P31/P32 branch built and passed the required on-device test matrix, but noticed a brief flash of "바 상세에서 위치 보기를 다시 실행해 주세요" while going **Map → Bar Detail** and brief loading-only screens during fast navigation. That device report applies to the earlier P31/P32 commits; this additional polish needs a new verification run.
+
+**Root cause and fix (Navigation):** `NavHost`'s map destination previously selected its detail ViewModel using `navController.previousBackStackEntry`. During animated Pop, that can refer to Results instead of Detail. The map now queries `getBackStackEntry(CUSTOMER_BAR_DETAIL_ROUTE)` directly and checks its `barId` before reusing its ViewModel. An actually orphaned map route still shows the original guidance after a short 300ms settling period; the message is *not* used as the ordinary transition placeholder.
+
+**UX tuning (UI only):**
+- Shared `DelayedLoading` in `ui/common/DelayedLoading.kt`, initial delay `300ms`.
+- Search Results and Bar Detail display their existing spinner/loading message only when loading persists >= 300ms.
+- The map detail loading message and Kakao startup spinner overlay also use the same threshold.
+- My Page/login **session initialization** uses delayed feedback; a **user-triggered Google sign-in** keeps immediate progress indication.
+- **Never delay actual failure, Empty state, retry/back actions, or a successful result.** Do not increase API timeouts or add an artificial minimum loading period. Loading cancellation/disposal cancels the timer automatically.
+
+**New acceptance checks (must rerun):**
+1. Fast Search → Results → Detail → Map → Detail (including system Back) should have no spinner/stray map instruction flash.
+2. Repeat Map → Detail rapidly several times and confirm the selected bar and marker remain correct.
+3. Offline Search and Bar Detail must show Loading if still pending after about 300ms, followed by an immediate real Error+Retry. Reconnect and ensure success appears without a forced 300ms wait.
+4. Enter Map with slow SDK init: spinner appears after about 300ms; on SDK failure, Error/Retry appears immediately; leaving before readiness never produces an old spinner.
+5. Navigate to My Page with a restored session; initialization should not flash during a fast resolution, but explicit Google sign-in progress still appears immediately.
+
+**Verification status:** code and reviewable commits pushed; Gradle execution and new physical-device tests pending. No changes to Portrait-only policy, Backend API, Supabase token management, or Kakao marker positioning.
