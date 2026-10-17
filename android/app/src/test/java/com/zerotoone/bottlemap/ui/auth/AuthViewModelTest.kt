@@ -159,7 +159,9 @@ class AuthViewModelTest {
     fun logoutImmediatelyHidesIdentityAndIgnoresLateUncancellableProfileResponse() = runTest(dispatcher) {
         val fake = FakeAuthGateway()
         val heldProfile = CompletableDeferred<CurrentUserDto>()
+        val heldLogout = CompletableDeferred<Unit>()
         fake.pendingProfile = heldProfile
+        fake.pendingLogout = heldLogout
         fake.events.value = AuthSessionEvent.Authenticated
         val vm = AuthViewModel(fake)
         advanceUntilIdle()
@@ -171,8 +173,13 @@ class AuthViewModelTest {
         assertEquals(AuthUiState.Guest, vm.state.value)
         heldProfile.complete(fake.user)
         advanceUntilIdle()
+        // Even before remote sign-out completes or the SDK emits Guest,
+        // the stale profile response must not resurrect SignedIn.
         assertEquals(AuthUiState.Guest, vm.state.value)
         assertEquals(1, fake.logouts)
+        heldLogout.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(AuthUiState.Guest, vm.state.value)
     }
 
     @Test
@@ -264,6 +271,7 @@ class AuthViewModelTest {
         var meRequests = 0
         var meError: BottleMapApiException? = null
         var pendingProfile: CompletableDeferred<CurrentUserDto>? = null
+        var pendingLogout: CompletableDeferred<Unit>? = null
         val user = CurrentUserDto(
             userId = "user-1",
             email = "user@example.com",
@@ -289,6 +297,7 @@ class AuthViewModelTest {
 
         override suspend fun logout() {
             logouts++
+            pendingLogout?.await()
             events.value = AuthSessionEvent.Guest
         }
     }
