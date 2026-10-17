@@ -94,8 +94,14 @@ fun AccountScreen(
                     }
                     is AuthUiState.SignInError -> {
                         AccountPanel("계정 확인이 필요해요", state.message)
-                        Button(onClick = onRetryAccount, modifier = Modifier.fillMaxWidth()) {
-                            Text("계정 확인 다시 시도")
+                        if (state.canRetryProfile) {
+                            Button(onClick = onRetryAccount, modifier = Modifier.fillMaxWidth()) {
+                                Text("계정 확인 다시 시도")
+                            }
+                        } else {
+                            Button(onClick = onOpenLogin, modifier = Modifier.fillMaxWidth()) {
+                                Text("Google 계정으로 로그인")
+                            }
                         }
                         OutlinedButton(onClick = onLogout, modifier = Modifier.fillMaxWidth()) {
                             Text("Guest로 계속")
