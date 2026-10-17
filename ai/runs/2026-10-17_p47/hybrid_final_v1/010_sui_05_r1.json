@@ -1,0 +1,324 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "010_sui_05.jpeg",
+  "prepared_image": "010_sui_05.jpg",
+  "prepared_sha256": "ad1f69e73c6bbefffb428aaf47cdfd84ecd21d3e0c62429ff19b921c02576446",
+  "started_at": "2026-10-17T06:24:11.979486+00:00",
+  "latency_ms": 9984,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5372,
+  "output_tokens": 1711,
+  "thought_tokens": 2123,
+  "total_tokens": 9206,
+  "output": {
+    "items": [
+      {
+        "raw_name": "메이커스마크",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L003"
+          ],
+          "price": [
+            "L012"
+          ]
+        }
+      },
+      {
+        "raw_name": "듀어스12년",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L004"
+          ],
+          "price": [
+            "L013"
+          ]
+        }
+      },
+      {
+        "raw_name": "몽키숄더",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L005"
+          ],
+          "price": [
+            "L014"
+          ]
+        }
+      },
+      {
+        "raw_name": "라프로윅 10년",
+        "price_krw": 220000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L006"
+          ],
+          "price": [
+            "L015"
+          ]
+        }
+      },
+      {
+        "raw_name": "탈리스커 10년",
+        "price_krw": 220000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L016"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 오리지널",
+        "price_krw": 230000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L008"
+          ],
+          "price": [
+            "L017"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌드로낙 12년",
+        "price_krw": 230000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L018"
+          ]
+        }
+      },
+      {
+        "raw_name": "헤네시 VSOP",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L010"
+          ],
+          "price": [
+            "L019"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌피딕12년",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L011"
+          ],
+          "price": [
+            "L020"
+          ]
+        }
+      },
+      {
+        "raw_name": "탐듀 12년",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L021"
+          ],
+          "price": [
+            "L029"
+          ]
+        }
+      },
+      {
+        "raw_name": "달모어 12년",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L022"
+          ],
+          "price": [
+            "L030"
+          ]
+        }
+      },
+      {
+        "raw_name": "맥캘란 12년 더블",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L031"
+          ]
+        }
+      },
+      {
+        "raw_name": "맥캘란 12년 쉐리",
+        "price_krw": 320000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "발베니 12년",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L033"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌알라키 12년",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L026"
+          ],
+          "price": [
+            "L034"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니블루",
+        "price_krw": 700000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L035"
+          ]
+        }
+      },
+      {
+        "raw_name": "글렌모렌지 시그넷",
+        "price_krw": 700000,
+        "pour_ml": null,
+        "unit": "bottle",
+        "source_lines": {
+          "name": [
+            "L028"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"메이커스마크\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L003\"\n        ],\n        \"price\": [\n          \"L012\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"듀어스12년\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L004\"\n        ],\n        \"price\": [\n          \"L013\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L005\"\n        ],\n        \"price\": [\n          \"L014\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"라프로윅 10년\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L006\"\n        ],\n        \"price\": [\n          \"L015\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"탈리스커 10년\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L007\"\n        ],\n        \"price\": [\n          \"L016\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L008\"\n        ],\n        \"price\": [\n          \"L017\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12년\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L009\"\n        ],\n        \"price\": [\n          \"L018\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"헤네시 VSOP\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L010\"\n        ],\n        \"price\": [\n          \"L019\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕12년\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L011\"\n        ],\n        \"price\": [\n          \"L020\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"탐듀 12년\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L021\"\n        ],\n        \"price\": [\n          \"L029\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"달모어 12년\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L022\"\n        ],\n        \"price\": [\n          \"L030\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 12년 더블\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L023\"\n        ],\n        \"price\": [\n          \"L031\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 12년 쉐리\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L024\"\n        ],\n        \"price\": [\n          \"L032\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"발베니 12년\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L025\"\n        ],\n        \"price\": [\n          \"L033\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 12년\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L026\"\n        ],\n        \"price\": [\n          \"L034\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"조니블루\",\n      \"price_krw\": 700000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L027\"\n        ],\n        \"price\": [\n          \"L035\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 700000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L028\"\n        ],\n        \"price\": [\n          \"L036\"\n        ]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:24:21Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"메이커스마크\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L003\"\n        ],\n        \"price\": [\n          \"L012\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"듀어스12년\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L004\"\n        ],\n        \"price\": [\n          \"L013\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L005\"\n        ],\n        \"price\": [\n          \"L014\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"라프로윅 10년\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L006\"\n        ],\n        \"price\": [\n          \"L015\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"탈리스커 10년\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L007\"\n        ],\n        \"price\": [\n          \"L016\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L008\"\n        ],\n        \"price\": [\n          \"L017\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12년\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L009\"\n        ],\n        \"price\": [\n          \"L018\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"헤네시 VSOP\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L010\"\n        ],\n        \"price\": [\n          \"L019\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕12년\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L011\"\n        ],\n        \"price\": [\n          \"L020\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"탐듀 12년\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L021\"\n        ],\n        \"price\": [\n          \"L029\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"달모어 12년\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L022\"\n        ],\n        \"price\": [\n          \"L030\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 12년 더블\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L023\"\n        ],\n        \"price\": [\n          \"L031\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 12년 쉐리\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L024\"\n        ],\n        \"price\": [\n          \"L032\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"발베니 12년\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L025\"\n        ],\n        \"price\": [\n          \"L033\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 12년\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L026\"\n        ],\n        \"price\": [\n          \"L034\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"조니블루\",\n      \"price_krw\": 700000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L027\"\n        ],\n        \"price\": [\n          \"L035\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 700000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L028\"\n        ],\n        \"price\": [\n          \"L036\"\n        ]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"메이커스마크\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L003\"\n        ],\n        \"price\": [\n          \"L012\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"듀어스12년\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L004\"\n        ],\n        \"price\": [\n          \"L013\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 150000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L005\"\n        ],\n        \"price\": [\n          \"L014\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"라프로윅 10년\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L006\"\n        ],\n        \"price\": [\n          \"L015\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"탈리스커 10년\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L007\"\n        ],\n        \"price\": [\n          \"L016\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 오리지널\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L008\"\n        ],\n        \"price\": [\n          \"L017\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌드로낙 12년\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L009\"\n        ],\n        \"price\": [\n          \"L018\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"헤네시 VSOP\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L010\"\n        ],\n        \"price\": [\n          \"L019\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌피딕12년\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L011\"\n        ],\n        \"price\": [\n          \"L020\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"탐듀 12년\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L021\"\n        ],\n        \"price\": [\n          \"L029\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"달모어 12년\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L022\"\n        ],\n        \"price\": [\n          \"L030\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 12년 더블\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L023\"\n        ],\n        \"price\": [\n          \"L031\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"맥캘란 12년 쉐리\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L024\"\n        ],\n        \"price\": [\n          \"L032\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"발베니 12년\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L025\"\n        ],\n        \"price\": [\n          \"L033\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌알라키 12년\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L026\"\n        ],\n        \"price\": [\n          \"L034\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"조니블루\",\n      \"price_krw\": 700000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L027\"\n        ],\n        \"price\": [\n          \"L035\"\n        ]\n      }\n    },\n    {\n      \"raw_name\": \"글렌모렌지 시그넷\",\n      \"price_krw\": 700000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\",\n      \"source_lines\": {\n        \"name\": [\n          \"L028\"\n        ],\n        \"price\": [\n          \"L036\"\n        ]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:24:21Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 4308
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 5372,
+      "total_output_tokens": 1711,
+      "total_thought_tokens": 2123,
+      "total_tokens": 9206,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 47,
+    "price_like_lines": 0,
+    "uncited_price_lines": 0,
+    "uncited": [],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [313,49,697,84] BOTTLE SELECTION\nL002 [419,87,584,108] 바틀 세트 / 단품 리스트\nL003 [105,158,202,176] 메이커스마크\nL004 [105,181,186,198] 듀어스12년\nL005 [104,204,168,222] 몽키숄더\nL006 [103,226,201,242] 라프로윅 10년\nL007 [104,250,201,267] 탈리스커 10년\nL008 [102,272,246,290] 글렌모렌지 오리지널\nL009 [100,295,215,313] 글렌드로낙 12년\nL010 [100,319,198,336] 헤네시 VSOP\nL011 [99,342,196,360] 글렌피딕12년\nL012 [446,148,484,164] 15만\nL013 [446,172,484,188] 15만\nL014 [446,196,482,210] 15만\nL015 [446,220,482,234] 22만\nL016 [444,243,484,259] 22만\nL017 [444,268,481,282] 23만\nL018 [444,292,482,307] 23만\nL019 [444,316,482,332] 24만\nL020 [444,340,481,354] 25만\nL021 [521,146,594,164] 탐듀 12년\nL022 [519,169,609,188] 달모어 12년\nL023 [519,192,649,211] 맥캘란 12년 더블\nL024 [519,217,649,236] 맥캘란 12년 쉐리\nL025 [519,242,611,259] 발베니 12년\nL026 [517,265,646,283] 글렌알라키 12년\nL027 [517,290,588,307] 조니블루\nL028 [517,315,660,332] 글렌모렌지 시그넷\nL029 [889,141,927,155] 25만\nL030 [889,165,931,181] 27만\nL031 [889,190,931,206] 27만\nL032 [889,214,931,230] 32만\nL033 [889,238,929,254] 28만\nL034 [891,263,932,280] 28만\nL035 [891,288,932,305] 70만\nL036 [891,312,932,329] 70만\nL037 [382,481,661,524] Dish Menu\nL038 [62,532,535,581] 하몽을 곁들인 감자튀김.\nL039 [573,539,703,587] 1.5만\nL040 [64,589,460,633] 과일·치즈 플레이트\nL041 [573,594,698,638] 3.3만\nL042 [67,642,151,683] 교자\nL043 [576,655,705,697] 1.5만\nL044 [66,694,401,745] 훈제굴 플레이트\nL045 [580,709,706,750] 1.5만\nL046 [74,754,427,800] 안키모와 바게트\nL047 [590,765,719,809] 1.5만\n</ocr_lines>",
+  "n_lines": 47,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 2083
+}

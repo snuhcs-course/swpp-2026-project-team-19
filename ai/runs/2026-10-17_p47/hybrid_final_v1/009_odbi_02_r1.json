@@ -1,0 +1,102 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "009_odbi_02.png",
+  "prepared_image": "009_odbi_02.png",
+  "prepared_sha256": "176866205a687557bf7eae1d6cb512404ced860ac6df4aa2ed432e4dfbe7e04b",
+  "started_at": "2026-10-17T06:22:30.790729+00:00",
+  "latency_ms": 3088,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5215,
+  "output_tokens": 5,
+  "thought_tokens": 541,
+  "total_tokens": 5761,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:22:33Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:22:33Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 4137
+        },
+        {
+          "modality": "image",
+          "tokens": 1078
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 5215,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 541,
+      "total_tokens": 5761,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 40,
+    "price_like_lines": 16,
+    "uncited_price_lines": 16,
+    "uncited": [
+      "L003",
+      "L012",
+      "L013",
+      "L014",
+      "L015",
+      "L016",
+      "L017",
+      "L019",
+      "L020",
+      "L021",
+      "L032",
+      "L033",
+      "L034",
+      "L035",
+      "L039",
+      "L040"
+    ],
+    "flag_missing": true,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [98,25,217,44] 21:07\nL002 [776,27,838,43] LTE\nL003 [861,27,903,40] 42\nL004 [880,100,928,124] X\nL005 [152,211,282,223] -꼬냑(브랜디)\nL006 [152,228,282,239] 헤네시 VSOP\nL007 [152,245,302,256] 레미마틴 VSOP\nL008 [152,261,262,272] 까뮤 VSOP\nL009 [152,277,296,289] 다니엘부쥬 XO\nL010 [152,294,344,306] 다니엘부쥬 로얄 CS\nL011 [152,311,262,323] 불라 VSOP\nL012 [779,229,846,238] 14,000\nL013 [779,246,846,255] 14,000\nL014 [779,263,846,272] 14,000\nL015 [779,280,846,288] 34,000\nL016 [779,295,846,304] 30,000\nL017 [779,312,846,322] 14,000\nL018 [796,345,846,354] 30ml\nL019 [790,362,846,371] 8,000\nL020 [787,378,846,388] 8,000\nL021 [787,393,846,403] 9,000\nL022 [152,344,186,355] -진\nL023 [152,359,296,371] 탱커레이NO.10\nL024 [152,376,293,388] 봄베이사파이어\nL025 [152,393,237,405] 헨드릭스\nL026 [152,426,228,437] -데킬라\nL027 [152,442,344,454] 호세쿠엘보 에스페샬\nL028 [152,459,398,470] 호세쿠엘보 1800 레포사도\nL029 [152,475,377,487] 호세쿠엘보 1800 아네호\nL030 [152,492,383,504] 호세쿠엘보 크리스탈리노\nL031 [793,426,846,436] 30ml\nL032 [787,442,846,454] 8,000\nL033 [779,461,846,470] 14,000\nL034 [779,478,846,487] 16,000\nL035 [776,492,846,502] 21,000\nL036 [152,525,186,536] -럼\nL037 [152,541,344,553] 플렌테이션 파인애플\nL038 [152,558,296,570] 플렌테이션 XO\nL039 [787,541,846,553] 9,000\nL040 [779,560,846,569] 15,000\n</ocr_lines>",
+  "n_lines": 40,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 1768
+}

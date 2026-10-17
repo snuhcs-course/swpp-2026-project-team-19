@@ -1,0 +1,4 @@
+== ai/runs/2026-10-17_p47/hybrid_final_v1 r1 / final : {'extracted_lines': 321, 'paired_lines': 308, 'unpaired_lines': 13, 'gold_lines': 313, 'missed_gold_lines': 5, 'gold_conflicts': 0}
+  S1+S2b+S3  C0  lines 308  top1 0.606  e2e top1 0.604  FM 0.003  burden {'confirm': 14, 'choose': 22, 'register': 92, 'wrong': 7}  rule 4/5  llm 0/0  accept err 0.0065  per photo a 1.0 bcd 8.6
+  M3a        C0  lines 308  top1 0.606  e2e top1 0.604  FM 0.003  burden {'confirm': 82, 'choose': 16, 'register': 34, 'wrong': 3}  rule 4/4  llm 75/76  accept err 0.0065  per photo a 5.9 bcd 3.8  unpaired {'confirm_recommended': 1, 'unmatched': 12}
+LLM: {"model": "gemini-3.1-flash-lite", "thinking_level": "low", "api_calls_this_run": 13, "by_kind": {"m3a": {"requests": 13, "api_calls": 13, "cache_hits": 0, "parse_errors": 0, "input_tokens": 25551, "output_tokens": 13830, "thought_tokens": 3169, "mean_latency_ms": 20433}}}

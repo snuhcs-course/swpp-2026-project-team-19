@@ -1,0 +1,284 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "009_odbi_05.png",
+  "prepared_image": "009_odbi_05.png",
+  "prepared_sha256": "1958135667d3b38d0825839a2098fc299badabe84165ac67afc6d1f03b2af57e",
+  "started_at": "2026-10-17T06:22:46.745129+00:00",
+  "latency_ms": 10285,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5128,
+  "output_tokens": 1234,
+  "thought_tokens": 2411,
+  "total_tokens": 8773,
+  "output": {
+    "items": [
+      {
+        "raw_name": "조니워커블랙",
+        "price_krw": 10000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006"
+          ],
+          "price": [
+            "L012"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니워커그린",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L013"
+          ]
+        }
+      },
+      {
+        "raw_name": "조니워커블루",
+        "price_krw": 45000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008"
+          ],
+          "price": [
+            "L014"
+          ]
+        }
+      },
+      {
+        "raw_name": "올드파12",
+        "price_krw": 10000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L015"
+          ]
+        }
+      },
+      {
+        "raw_name": "몽키숄더",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L010"
+          ],
+          "price": [
+            "L016"
+          ]
+        }
+      },
+      {
+        "raw_name": "제임슨",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L018"
+          ],
+          "price": [
+            "L021"
+          ]
+        }
+      },
+      {
+        "raw_name": "부시밀 블랙 부쉬",
+        "price_krw": 10000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L019"
+          ],
+          "price": [
+            "L022"
+          ]
+        }
+      },
+      {
+        "raw_name": "기린 싱글그레인 후지",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L031"
+          ]
+        }
+      },
+      {
+        "raw_name": "기린 싱글브렌디드 후지",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "미야기코 싱글몰트",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L026"
+          ],
+          "price": [
+            "L033"
+          ]
+        }
+      },
+      {
+        "raw_name": "요이치 싱글몰트",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L034"
+          ]
+        }
+      },
+      {
+        "raw_name": "다케츠루 싱글몰트",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L028"
+          ],
+          "price": [
+            "L035"
+          ]
+        }
+      },
+      {
+        "raw_name": "하쿠슈DR",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L029"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      },
+      {
+        "raw_name": "산토리 히비키 하모니",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L030"
+          ],
+          "price": [
+            "L037"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"조니워커블랙\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커그린\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커블루\",\n      \"price_krw\": 45000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"올드파12\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"제임슨\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"부시밀 블랙 부쉬\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L022\"]\n      }\n    },\n    {\n      \"raw_name\": \"기린 싱글그레인 후지\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"기린 싱글브렌디드 후지\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"미야기코 싱글몰트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"요이치 싱글몰트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"다케츠루 싱글몰트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"하쿠슈DR\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리 히비키 하모니\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L037\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:22:56Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"조니워커블랙\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커그린\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커블루\",\n      \"price_krw\": 45000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"올드파12\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"제임슨\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"부시밀 블랙 부쉬\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L022\"]\n      }\n    },\n    {\n      \"raw_name\": \"기린 싱글그레인 후지\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"기린 싱글브렌디드 후지\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"미야기코 싱글몰트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"요이치 싱글몰트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"다케츠루 싱글몰트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"하쿠슈DR\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리 히비키 하모니\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L037\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"조니워커블랙\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L012\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커그린\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L013\"]\n      }\n    },\n    {\n      \"raw_name\": \"조니워커블루\",\n      \"price_krw\": 45000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L014\"]\n      }\n    },\n    {\n      \"raw_name\": \"올드파12\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L015\"]\n      }\n    },\n    {\n      \"raw_name\": \"몽키숄더\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L016\"]\n      }\n    },\n    {\n      \"raw_name\": \"제임슨\",\n      \"price_krw\": 8000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L018\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"부시밀 블랙 부쉬\",\n      \"price_krw\": 10000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L019\"],\n        \"price\": [\"L022\"]\n      }\n    },\n    {\n      \"raw_name\": \"기린 싱글그레인 후지\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L024\"],\n        \"price\": [\"L031\"]\n      }\n    },\n    {\n      \"raw_name\": \"기린 싱글브렌디드 후지\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L025\"],\n        \"price\": [\"L032\"]\n      }\n    },\n    {\n      \"raw_name\": \"미야기코 싱글몰트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L026\"],\n        \"price\": [\"L033\"]\n      }\n    },\n    {\n      \"raw_name\": \"요이치 싱글몰트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L027\"],\n        \"price\": [\"L034\"]\n      }\n    },\n    {\n      \"raw_name\": \"다케츠루 싱글몰트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L028\"],\n        \"price\": [\"L035\"]\n      }\n    },\n    {\n      \"raw_name\": \"하쿠슈DR\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L029\"],\n        \"price\": [\"L036\"]\n      }\n    },\n    {\n      \"raw_name\": \"산토리 히비키 하모니\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L030\"],\n        \"price\": [\"L037\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:22:56Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 4050
+        },
+        {
+          "modality": "image",
+          "tokens": 1078
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 5128,
+      "total_output_tokens": 1234,
+      "total_thought_tokens": 2411,
+      "total_tokens": 8773,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 37,
+    "price_like_lines": 15,
+    "uncited_price_lines": 1,
+    "uncited": [
+      "L003"
+    ],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [98,25,217,44] 21:07\nL002 [776,27,838,43] LTE\nL003 [861,27,903,40] 42\nL004 [880,101,928,124] X\nL005 [152,211,313,223] -블렌디드 위스키\nL006 [152,228,273,239] 조니워커블랙\nL007 [152,245,273,256] 조니워커그린\nL008 [152,261,277,272] 조니워커블루\nL009 [152,277,239,289] 올드파12\nL010 [152,294,234,306] 몽키숄더\nL011 [796,212,846,221] 30ml\nL012 [776,228,846,238] 10,000\nL013 [779,246,846,255] 16,000\nL014 [779,263,846,272] 45,000\nL015 [776,277,846,289] 10,000\nL016 [790,295,846,304] 8,000\nL017 [152,327,313,338] -아이리쉬 위스키\nL018 [152,344,217,355] 제임슨\nL019 [152,359,313,371] 부시밀 블랙 부쉬\nL020 [793,327,846,337] 30ml\nL021 [787,344,846,354] 8,000\nL022 [779,362,846,371] 10,000\nL023 [152,393,277,405] -일본 위스키\nL024 [152,410,353,422] 기린 싱글그레인 후지\nL025 [152,426,372,437] 기린 싱글브렌디드 후지\nL026 [152,442,324,454] 미야기코 싱글몰트\nL027 [152,459,304,471] 요이치 싱글몰트\nL028 [152,475,324,487] 다케츠루 싱글몰트\nL029 [152,492,245,504] 하쿠슈DR\nL030 [152,509,353,521] 산토리 히비키 하모니\nL031 [779,411,846,420] 18,000\nL032 [776,426,846,437] 18,000\nL033 [776,442,846,453] 18,000\nL034 [779,461,846,470] 18,000\nL035 [779,478,846,487] 18,000\nL036 [779,493,846,502] 19,000\nL037 [779,510,846,519] 19,000\n</ocr_lines>",
+  "n_lines": 37,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 2399
+}

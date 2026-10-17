@@ -1,0 +1,647 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "010_sui_04.jpeg",
+  "prepared_image": "010_sui_04.jpg",
+  "prepared_sha256": "ce9268eea120585f175f27e5f79ab0665bd3dcb78bbb32afc5d821c32a9564fb",
+  "started_at": "2026-10-17T06:24:01.098308+00:00",
+  "latency_ms": 10836,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6609,
+  "output_tokens": 4078,
+  "thought_tokens": 0,
+  "total_tokens": 10687,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Yamazaki 12y (야마자키 12년)",
+        "price_krw": 46000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L003"
+          ],
+          "price": [
+            "L004"
+          ]
+        }
+      },
+      {
+        "raw_name": "Yamazaki Dr (야마자키 Dr)",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L005"
+          ],
+          "price": [
+            "L006"
+          ]
+        }
+      },
+      {
+        "raw_name": "Hakushu Dr (하쿠슈 Dr)",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L008"
+          ]
+        }
+      },
+      {
+        "raw_name": "Hibiki (히비키)",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L010"
+          ]
+        }
+      },
+      {
+        "raw_name": "Kavalan Original (카발란)",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L011"
+          ],
+          "price": [
+            "L012"
+          ]
+        }
+      },
+      {
+        "raw_name": "Kavalan Triple Sherry Cask",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013"
+          ],
+          "price": [
+            "L014"
+          ]
+        }
+      },
+      {
+        "raw_name": "Kavalan Vinho Barrique",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L015"
+          ],
+          "price": [
+            "L016"
+          ]
+        }
+      },
+      {
+        "raw_name": "SANSIBAR 21y Batch4 (산시바)",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L017"
+          ],
+          "price": [
+            "L018"
+          ]
+        }
+      },
+      {
+        "raw_name": "SANSIBAR 21y",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L019",
+            "L020"
+          ],
+          "price": [
+            "L020"
+          ]
+        }
+      },
+      {
+        "raw_name": "High Coast Sherry",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L021"
+          ],
+          "price": [
+            "L022"
+          ]
+        }
+      },
+      {
+        "raw_name": "High Coast Maria PX Sherry",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L023"
+          ],
+          "price": [
+            "L024"
+          ]
+        }
+      },
+      {
+        "raw_name": "High Coast Eva Beer Cask",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L026"
+          ]
+        }
+      },
+      {
+        "raw_name": "Eld Vatten 8y (엘드바튼)",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L028"
+          ]
+        }
+      },
+      {
+        "raw_name": "Eld Vatten 11y (브룩라디)",
+        "price_krw": 48000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L029"
+          ],
+          "price": [
+            "L030"
+          ]
+        }
+      },
+      {
+        "raw_name": "Eld Vatten 14y (벤네비스)",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L031"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "김과장 #2 (바베이도스 럼)",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033"
+          ],
+          "price": [
+            "L034"
+          ]
+        }
+      },
+      {
+        "raw_name": "김과장 #3 (하이랜드 파크)",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L035"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      },
+      {
+        "raw_name": "김과장 #4 (클라이넬리쉬)",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L037"
+          ],
+          "price": [
+            "L038"
+          ]
+        }
+      },
+      {
+        "raw_name": "Hakushu 12y",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L065"
+          ],
+          "price": [
+            "L066"
+          ]
+        }
+      },
+      {
+        "raw_name": "The Nectar 11y (글렌 오드)",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L044"
+          ],
+          "price": [
+            "L045"
+          ]
+        }
+      },
+      {
+        "raw_name": "The Nectar 12y (밀튼 더프)",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L046"
+          ],
+          "price": [
+            "L047"
+          ]
+        }
+      },
+      {
+        "raw_name": "The Maltman Dailuaine 14y (달루인)",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L048"
+          ],
+          "price": [
+            "L049"
+          ]
+        }
+      },
+      {
+        "raw_name": "The Maltman DeanSton 14y (딘스톤)",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L050"
+          ],
+          "price": [
+            "L051"
+          ]
+        }
+      },
+      {
+        "raw_name": "The Maltman Campbeltown 10y",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L052"
+          ],
+          "price": [
+            "L053"
+          ]
+        }
+      },
+      {
+        "raw_name": "The Maltman Master's Blend 34y",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L054"
+          ],
+          "price": [
+            "L055"
+          ]
+        }
+      },
+      {
+        "raw_name": "Whisky Agency Bruichladdich 12y",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L056"
+          ],
+          "price": [
+            "L057"
+          ]
+        }
+      },
+      {
+        "raw_name": "Whisky Agency Secret Islay 6y",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L058"
+          ],
+          "price": [
+            "L059"
+          ]
+        }
+      },
+      {
+        "raw_name": "Signatory Speyside M Sherry",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L060"
+          ],
+          "price": [
+            "L061"
+          ]
+        }
+      },
+      {
+        "raw_name": "1800 Anejo (아네호 데킬라)",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L040"
+          ],
+          "price": [
+            "L062"
+          ]
+        }
+      },
+      {
+        "raw_name": "Petron Silver (페트론)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L041"
+          ],
+          "price": [
+            "L063"
+          ]
+        }
+      },
+      {
+        "raw_name": "Clase - Azul (클라세아줄)",
+        "price_krw": 39000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L042"
+          ],
+          "price": [
+            "L064"
+          ]
+        }
+      },
+      {
+        "raw_name": "Hennesy V.S.O.A (헤네시 VSOP)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L067"
+          ],
+          "price": [
+            "L068"
+          ]
+        }
+      },
+      {
+        "raw_name": "Hennesy X.O",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L069"
+          ],
+          "price": [
+            "L070"
+          ]
+        }
+      },
+      {
+        "raw_name": "Remy Martin V.S.O.P (레미 마틴)",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L071"
+          ],
+          "price": [
+            "L072"
+          ]
+        }
+      },
+      {
+        "raw_name": "Remy Martin 1738",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L073"
+          ],
+          "price": [
+            "L074"
+          ]
+        }
+      },
+      {
+        "raw_name": "Remy Martin X.O",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L075"
+          ],
+          "price": [
+            "L076"
+          ]
+        }
+      },
+      {
+        "raw_name": "Camus V.S.O.P (까뮤)",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L077"
+          ],
+          "price": [
+            "L078"
+          ]
+        }
+      },
+      {
+        "raw_name": "Daniel Royal",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L079"
+          ],
+          "price": [
+            "L080"
+          ]
+        }
+      },
+      {
+        "raw_name": "Jean Luc Pasquet (장 뤽 파스케)",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L081"
+          ],
+          "price": [
+            "L082"
+          ]
+        }
+      },
+      {
+        "raw_name": "Boulard X.O (불라)",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L083"
+          ],
+          "price": [
+            "L084"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": [\n  {\n    \"raw_name\": \"Yamazaki 12y (야마자키 12년)\",\n    \"price_krw\": 46000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L003\"\n      ],\n      \"price\": [\n        \"L004\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Yamazaki Dr (야마자키 Dr)\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L005\"\n      ],\n      \"price\": [\n        \"L006\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hakushu Dr (하쿠슈 Dr)\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L007\"\n      ],\n      \"price\": [\n        \"L008\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hibiki (히비키)\",\n    \"price_krw\": 23000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L009\"\n      ],\n      \"price\": [\n        \"L010\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Kavalan Original (카발란)\",\n    \"price_krw\": 23000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L011\"\n      ],\n      \"price\": [\n        \"L012\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Kavalan Triple Sherry Cask\",\n    \"price_krw\": 24000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L013\"\n      ],\n      \"price\": [\n        \"L014\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Kavalan Vinho Barrique\",\n    \"price_krw\": 43000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L015\"\n      ],\n      \"price\": [\n        \"L016\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"SANSIBAR 21y Batch4 (산시바)\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L017\"\n      ],\n      \"price\": [\n        \"L018\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"SANSIBAR 21y\",\n    \"price_krw\": 27000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L019\",\n        \"L020\"\n      ],\n      \"price\": [\n        \"L020\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"High Coast Sherry\",\n    \"price_krw\": 26000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L021\"\n      ],\n      \"price\": [\n        \"L022\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"High Coast Maria PX Sherry\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L023\"\n      ],\n      \"price\": [\n        \"L024\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"High Coast Eva Beer Cask\",\n    \"price_krw\": 26000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L025\"\n      ],\n      \"price\": [\n        \"L026\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Eld Vatten 8y (엘드바튼)\",\n    \"price_krw\": 23000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L027\"\n      ],\n      \"price\": [\n        \"L028\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Eld Vatten 11y (브룩라디)\",\n    \"price_krw\": 48000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L029\"\n      ],\n      \"price\": [\n        \"L030\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Eld Vatten 14y (벤네비스)\",\n    \"price_krw\": 50000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L031\"\n      ],\n      \"price\": [\n        \"L032\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"김과장 #2 (바베이도스 럼)\",\n    \"price_krw\": 40000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L033\"\n      ],\n      \"price\": [\n        \"L034\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"김과장 #3 (하이랜드 파크)\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L035\"\n      ],\n      \"price\": [\n        \"L036\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"김과장 #4 (클라이넬리쉬)\",\n    \"price_krw\": 29000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L037\"\n      ],\n      \"price\": [\n        \"L038\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hakushu 12y\",\n    \"price_krw\": 35000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L065\"\n      ],\n      \"price\": [\n        \"L066\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Nectar 11y (글렌 오드)\",\n    \"price_krw\": 27000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L044\"\n      ],\n      \"price\": [\n        \"L045\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Nectar 12y (밀튼 더프)\",\n    \"price_krw\": 27000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L046\"\n      ],\n      \"price\": [\n        \"L047\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman Dailuaine 14y (달루인)\",\n    \"price_krw\": 32000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L048\"\n      ],\n      \"price\": [\n        \"L049\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman DeanSton 14y (딘스톤)\",\n    \"price_krw\": 28000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L050\"\n      ],\n      \"price\": [\n        \"L051\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman Campbeltown 10y\",\n    \"price_krw\": 33000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L052\"\n      ],\n      \"price\": [\n        \"L053\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman Master's Blend 34y\",\n    \"price_krw\": 50000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L054\"\n      ],\n      \"price\": [\n        \"L055\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Whisky Agency Bruichladdich 12y\",\n    \"price_krw\": 50000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L056\"\n      ],\n      \"price\": [\n        \"L057\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Whisky Agency Secret Islay 6y\",\n    \"price_krw\": 22000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L058\"\n      ],\n      \"price\": [\n        \"L059\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Signatory Speyside M Sherry\",\n    \"price_krw\": 24000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L060\"\n      ],\n      \"price\": [\n        \"L061\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"1800 Anejo (아네호 데킬라)\",\n    \"price_krw\": 13000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L040\"\n      ],\n      \"price\": [\n        \"L062\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Petron Silver (페트론)\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L041\"\n      ],\n      \"price\": [\n        \"L063\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Clase - Azul (클라세아줄)\",\n    \"price_krw\": 39000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L042\"\n      ],\n      \"price\": [\n        \"L064\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hennesy V.S.O.A (헤네시 VSOP)\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L067\"\n      ],\n      \"price\": [\n        \"L068\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hennesy X.O\",\n    \"price_krw\": 42000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L069\"\n      ],\n      \"price\": [\n        \"L070\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Remy Martin V.S.O.P (레미 마틴)\",\n    \"price_krw\": 16000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L071\"\n      ],\n      \"price\": [\n        \"L072\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Remy Martin 1738\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L073\"\n      ],\n      \"price\": [\n        \"L074\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Remy Martin X.O\",\n    \"price_krw\": 45000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L075\"\n      ],\n      \"price\": [\n        \"L076\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Camus V.S.O.P (까뮤)\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L077\"\n      ],\n      \"price\": [\n        \"L078\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Daniel Royal\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L079\"\n      ],\n      \"price\": [\n        \"L080\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Jean Luc Pasquet (장 뤽 파스케)\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L081\"\n      ],\n      \"price\": [\n        \"L082\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Boulard X.O (불라)\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L083\"\n      ],\n      \"price\": [\n        \"L084\"\n      ]\n    }\n  }\n]}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:24:11Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": [\n  {\n    \"raw_name\": \"Yamazaki 12y (야마자키 12년)\",\n    \"price_krw\": 46000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L003\"\n      ],\n      \"price\": [\n        \"L004\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Yamazaki Dr (야마자키 Dr)\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L005\"\n      ],\n      \"price\": [\n        \"L006\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hakushu Dr (하쿠슈 Dr)\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L007\"\n      ],\n      \"price\": [\n        \"L008\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hibiki (히비키)\",\n    \"price_krw\": 23000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L009\"\n      ],\n      \"price\": [\n        \"L010\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Kavalan Original (카발란)\",\n    \"price_krw\": 23000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L011\"\n      ],\n      \"price\": [\n        \"L012\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Kavalan Triple Sherry Cask\",\n    \"price_krw\": 24000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L013\"\n      ],\n      \"price\": [\n        \"L014\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Kavalan Vinho Barrique\",\n    \"price_krw\": 43000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L015\"\n      ],\n      \"price\": [\n        \"L016\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"SANSIBAR 21y Batch4 (산시바)\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L017\"\n      ],\n      \"price\": [\n        \"L018\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"SANSIBAR 21y\",\n    \"price_krw\": 27000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L019\",\n        \"L020\"\n      ],\n      \"price\": [\n        \"L020\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"High Coast Sherry\",\n    \"price_krw\": 26000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L021\"\n      ],\n      \"price\": [\n        \"L022\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"High Coast Maria PX Sherry\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L023\"\n      ],\n      \"price\": [\n        \"L024\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"High Coast Eva Beer Cask\",\n    \"price_krw\": 26000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L025\"\n      ],\n      \"price\": [\n        \"L026\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Eld Vatten 8y (엘드바튼)\",\n    \"price_krw\": 23000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L027\"\n      ],\n      \"price\": [\n        \"L028\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Eld Vatten 11y (브룩라디)\",\n    \"price_krw\": 48000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L029\"\n      ],\n      \"price\": [\n        \"L030\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Eld Vatten 14y (벤네비스)\",\n    \"price_krw\": 50000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L031\"\n      ],\n      \"price\": [\n        \"L032\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"김과장 #2 (바베이도스 럼)\",\n    \"price_krw\": 40000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L033\"\n      ],\n      \"price\": [\n        \"L034\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"김과장 #3 (하이랜드 파크)\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L035\"\n      ],\n      \"price\": [\n        \"L036\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"김과장 #4 (클라이넬리쉬)\",\n    \"price_krw\": 29000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L037\"\n      ],\n      \"price\": [\n        \"L038\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hakushu 12y\",\n    \"price_krw\": 35000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L065\"\n      ],\n      \"price\": [\n        \"L066\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Nectar 11y (글렌 오드)\",\n    \"price_krw\": 27000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L044\"\n      ],\n      \"price\": [\n        \"L045\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Nectar 12y (밀튼 더프)\",\n    \"price_krw\": 27000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L046\"\n      ],\n      \"price\": [\n        \"L047\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman Dailuaine 14y (달루인)\",\n    \"price_krw\": 32000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L048\"\n      ],\n      \"price\": [\n        \"L049\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman DeanSton 14y (딘스톤)\",\n    \"price_krw\": 28000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L050\"\n      ],\n      \"price\": [\n        \"L051\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman Campbeltown 10y\",\n    \"price_krw\": 33000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L052\"\n      ],\n      \"price\": [\n        \"L053\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman Master's Blend 34y\",\n    \"price_krw\": 50000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L054\"\n      ],\n      \"price\": [\n        \"L055\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Whisky Agency Bruichladdich 12y\",\n    \"price_krw\": 50000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L056\"\n      ],\n      \"price\": [\n        \"L057\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Whisky Agency Secret Islay 6y\",\n    \"price_krw\": 22000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L058\"\n      ],\n      \"price\": [\n        \"L059\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Signatory Speyside M Sherry\",\n    \"price_krw\": 24000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L060\"\n      ],\n      \"price\": [\n        \"L061\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"1800 Anejo (아네호 데킬라)\",\n    \"price_krw\": 13000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L040\"\n      ],\n      \"price\": [\n        \"L062\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Petron Silver (페트론)\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L041\"\n      ],\n      \"price\": [\n        \"L063\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Clase - Azul (클라세아줄)\",\n    \"price_krw\": 39000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L042\"\n      ],\n      \"price\": [\n        \"L064\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hennesy V.S.O.A (헤네시 VSOP)\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L067\"\n      ],\n      \"price\": [\n        \"L068\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hennesy X.O\",\n    \"price_krw\": 42000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L069\"\n      ],\n      \"price\": [\n        \"L070\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Remy Martin V.S.O.P (레미 마틴)\",\n    \"price_krw\": 16000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L071\"\n      ],\n      \"price\": [\n        \"L072\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Remy Martin 1738\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L073\"\n      ],\n      \"price\": [\n        \"L074\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Remy Martin X.O\",\n    \"price_krw\": 45000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L075\"\n      ],\n      \"price\": [\n        \"L076\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Camus V.S.O.P (까뮤)\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L077\"\n      ],\n      \"price\": [\n        \"L078\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Daniel Royal\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L079\"\n      ],\n      \"price\": [\n        \"L080\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Jean Luc Pasquet (장 뤽 파스케)\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L081\"\n      ],\n      \"price\": [\n        \"L082\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Boulard X.O (불라)\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L083\"\n      ],\n      \"price\": [\n        \"L084\"\n      ]\n    }\n  }\n]}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0T9lXPsHzn961Gmr2oWV9wC0dbWGqSJGjjD/SFQ6RnQ3eoc7LwXlArA8MqklPBFk+7isRGTVeHz+2T3530XRF9tYM8eB6Vx8MduOc5NR0bmQjyI1hTjk1c4ro=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": [\n  {\n    \"raw_name\": \"Yamazaki 12y (야마자키 12년)\",\n    \"price_krw\": 46000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L003\"\n      ],\n      \"price\": [\n        \"L004\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Yamazaki Dr (야마자키 Dr)\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L005\"\n      ],\n      \"price\": [\n        \"L006\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hakushu Dr (하쿠슈 Dr)\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L007\"\n      ],\n      \"price\": [\n        \"L008\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hibiki (히비키)\",\n    \"price_krw\": 23000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L009\"\n      ],\n      \"price\": [\n        \"L010\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Kavalan Original (카발란)\",\n    \"price_krw\": 23000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L011\"\n      ],\n      \"price\": [\n        \"L012\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Kavalan Triple Sherry Cask\",\n    \"price_krw\": 24000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L013\"\n      ],\n      \"price\": [\n        \"L014\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Kavalan Vinho Barrique\",\n    \"price_krw\": 43000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L015\"\n      ],\n      \"price\": [\n        \"L016\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"SANSIBAR 21y Batch4 (산시바)\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L017\"\n      ],\n      \"price\": [\n        \"L018\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"SANSIBAR 21y\",\n    \"price_krw\": 27000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L019\",\n        \"L020\"\n      ],\n      \"price\": [\n        \"L020\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"High Coast Sherry\",\n    \"price_krw\": 26000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L021\"\n      ],\n      \"price\": [\n        \"L022\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"High Coast Maria PX Sherry\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L023\"\n      ],\n      \"price\": [\n        \"L024\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"High Coast Eva Beer Cask\",\n    \"price_krw\": 26000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L025\"\n      ],\n      \"price\": [\n        \"L026\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Eld Vatten 8y (엘드바튼)\",\n    \"price_krw\": 23000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L027\"\n      ],\n      \"price\": [\n        \"L028\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Eld Vatten 11y (브룩라디)\",\n    \"price_krw\": 48000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L029\"\n      ],\n      \"price\": [\n        \"L030\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Eld Vatten 14y (벤네비스)\",\n    \"price_krw\": 50000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L031\"\n      ],\n      \"price\": [\n        \"L032\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"김과장 #2 (바베이도스 럼)\",\n    \"price_krw\": 40000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L033\"\n      ],\n      \"price\": [\n        \"L034\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"김과장 #3 (하이랜드 파크)\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L035\"\n      ],\n      \"price\": [\n        \"L036\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"김과장 #4 (클라이넬리쉬)\",\n    \"price_krw\": 29000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L037\"\n      ],\n      \"price\": [\n        \"L038\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hakushu 12y\",\n    \"price_krw\": 35000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L065\"\n      ],\n      \"price\": [\n        \"L066\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Nectar 11y (글렌 오드)\",\n    \"price_krw\": 27000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L044\"\n      ],\n      \"price\": [\n        \"L045\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Nectar 12y (밀튼 더프)\",\n    \"price_krw\": 27000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L046\"\n      ],\n      \"price\": [\n        \"L047\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman Dailuaine 14y (달루인)\",\n    \"price_krw\": 32000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L048\"\n      ],\n      \"price\": [\n        \"L049\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman DeanSton 14y (딘스톤)\",\n    \"price_krw\": 28000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L050\"\n      ],\n      \"price\": [\n        \"L051\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman Campbeltown 10y\",\n    \"price_krw\": 33000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L052\"\n      ],\n      \"price\": [\n        \"L053\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"The Maltman Master's Blend 34y\",\n    \"price_krw\": 50000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L054\"\n      ],\n      \"price\": [\n        \"L055\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Whisky Agency Bruichladdich 12y\",\n    \"price_krw\": 50000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L056\"\n      ],\n      \"price\": [\n        \"L057\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Whisky Agency Secret Islay 6y\",\n    \"price_krw\": 22000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L058\"\n      ],\n      \"price\": [\n        \"L059\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Signatory Speyside M Sherry\",\n    \"price_krw\": 24000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L060\"\n      ],\n      \"price\": [\n        \"L061\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"1800 Anejo (아네호 데킬라)\",\n    \"price_krw\": 13000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L040\"\n      ],\n      \"price\": [\n        \"L062\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Petron Silver (페트론)\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L041\"\n      ],\n      \"price\": [\n        \"L063\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Clase - Azul (클라세아줄)\",\n    \"price_krw\": 39000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L042\"\n      ],\n      \"price\": [\n        \"L064\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hennesy V.S.O.A (헤네시 VSOP)\",\n    \"price_krw\": 15000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L067\"\n      ],\n      \"price\": [\n        \"L068\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Hennesy X.O\",\n    \"price_krw\": 42000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L069\"\n      ],\n      \"price\": [\n        \"L070\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Remy Martin V.S.O.P (레미 마틴)\",\n    \"price_krw\": 16000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L071\"\n      ],\n      \"price\": [\n        \"L072\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Remy Martin 1738\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L073\"\n      ],\n      \"price\": [\n        \"L074\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Remy Martin X.O\",\n    \"price_krw\": 45000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L075\"\n      ],\n      \"price\": [\n        \"L076\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Camus V.S.O.P (까뮤)\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L077\"\n      ],\n      \"price\": [\n        \"L078\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Daniel Royal\",\n    \"price_krw\": 25000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L079\"\n      ],\n      \"price\": [\n        \"L080\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Jean Luc Pasquet (장 뤽 파스케)\",\n    \"price_krw\": 30000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L081\"\n      ],\n      \"price\": [\n        \"L082\"\n      ]\n    }\n  },\n  {\n    \"raw_name\": \"Boulard X.O (불라)\",\n    \"price_krw\": 20000,\n    \"pour_ml\": null,\n    \"unit\": \"glass\",\n    \"source_lines\": {\n      \"name\": [\n        \"L083\"\n      ],\n      \"price\": [\n        \"L084\"\n      ]\n    }\n  }\n]}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:24:11Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 5545
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 6609,
+      "total_output_tokens": 4078,
+      "total_thought_tokens": 0,
+      "total_tokens": 10687,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 84,
+    "price_like_lines": 39,
+    "uncited_price_lines": 0,
+    "uncited": [],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [90,122,272,141] 독립병입, 일본, 대만\nL002 [503,122,785,139] INDEPENDENT BOTTLERS\nL003 [87,157,312,174] Yamazaki 12y (야마자키 12년)\nL004 [420,159,472,170] 46,000\nL005 [87,179,292,195] Yamazaki Dr (야마자키 Dr)\nL006 [418,180,472,193] 30,000\nL007 [85,201,269,217] Hakushu Dr (하쿠슈 Dr)\nL008 [418,202,472,215] 30,000\nL009 [83,224,199,240] Hibiki (히비키)\nL010 [418,224,472,237] 23,000\nL011 [81,246,281,263] Kavalan Original (카발란)\nL012 [418,246,470,259] 23,000\nL013 [79,268,295,282] Kavalan Triple Sherry Cask\nL014 [418,268,470,282] 24,000\nL015 [78,290,267,305] Kavalan Vinho Barrique\nL016 [418,290,470,303] 43,000\nL017 [76,311,324,328] SANSIBAR 21y Batch4 (산시바)\nL018 [418,312,470,325] 25,000\nL019 [74,335,167,347] SANSIBAR\nL020 [168,336,470,350] 21y27,000\nL021 [73,358,219,372] High Coast Sherry\nL022 [416,358,470,371] 26,000\nL023 [71,380,299,394] High Coast Maria PX Sherry\nL024 [416,380,470,393] 30,000\nL025 [69,402,278,417] High Coast Eva Beer Cask\nL026 [416,402,470,415] 26,000\nL027 [67,424,260,441] Eld Vatten 8y (엘드바튼)\nL028 [415,424,470,438] 23,000\nL029 [64,448,267,465] Eld Vatten 11y (브룩라디)\nL030 [415,448,469,461] 48,000\nL031 [62,472,267,490] Eld Vatten 14y (벤네비스)\nL032 [415,471,469,486] 50,000\nL033 [62,496,262,513] 김과장 #2 (바베이도스 럼)\nL034 [414,496,469,509] 40,000\nL035 [61,521,260,539] 김과장 #3 (하이랜드 파크)\nL036 [413,521,469,534] 25,000\nL037 [57,547,255,564] 김과장 #4 (클라이넬리쉬)\nL038 [413,545,469,560] 29,000\nL039 [505,363,609,377] TEQUILA\nL040 [505,396,719,414] 1800 Anejo (아네호 데킬라)\nL041 [503,420,679,438] Petron Silver (페트론)\nL042 [505,444,705,462] Clase - Azul (클라세아줄)\nL043 [505,480,739,495] COGNAC & BRANDY\nL044 [503,155,703,172] The Nectar 11y (글렌 오드)\nL045 [838,151,893,165] 27,000\nL046 [503,175,707,193] The Nectar 12y (밀튼 더프)\nL047 [840,173,894,186] 27,000\nL048 [503,195,785,212] The Maltman Dailuaine 14y (달루인)\nL049 [844,194,897,207] 32,000\nL050 [505,217,786,235] The Maltman DeanSton 14y (딘스톤)\nL051 [845,216,900,230] 28,000\nL052 [505,240,753,257] The Maltman Campbeltown 10y\nL053 [847,238,901,251] 33,000\nL054 [505,261,762,278] The Maltman Master's Blend 34y\nL055 [850,259,905,273] 50,000\nL056 [507,283,771,301] Whisky Agency Bruichladdich 12y\nL057 [852,281,906,294] 50,000\nL058 [507,306,741,323] Whisky Agency Secret Islay 6y\nL059 [854,302,910,316] 22,000\nL060 [505,328,732,345] Signatory Speyside M Sherry\nL061 [855,324,911,338] 24,000\nL062 [863,393,920,406] 13,000\nL063 [864,418,922,431] 15,000\nL064 [866,443,924,456] 39,000\nL065 [61,570,186,590] Hakushu 12y\nL066 [411,566,479,583] 35,000\nL067 [503,517,769,535] Hennesy V.S.O.A (헤네시 VSOP)\nL068 [873,517,932,531] 15,000\nL069 [505,544,613,558] Hennesy X.O\nL070 [877,543,936,559] 42,000\nL071 [505,567,779,585] Remy Martin V.S.O.P (레미 마틴)\nL072 [878,567,939,583] 16,000\nL073 [503,594,661,608] Remy Martin 1738\nL074 [880,594,939,608] 20,000\nL075 [503,618,656,634] Remy Martin X.O\nL076 [884,620,944,635] 45,000\nL077 [505,643,689,661] Camus V.S.O.P (까뮤)\nL078 [885,644,946,661] 20,000\nL079 [503,670,618,688] Daniel Royal\nL080 [887,672,948,688] 25,000\nL081 [503,696,778,716] Jean Luc Pasquet (장 뤽 파스케)\nL082 [889,698,951,715] 30,000\nL083 [503,725,674,743] Boulard X.O (불라)\nL084 [892,726,955,742] 20,000\n</ocr_lines>",
+  "n_lines": 84,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 2826
+}

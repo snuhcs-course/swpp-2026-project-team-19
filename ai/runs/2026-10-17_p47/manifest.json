@@ -1,0 +1,63 @@
+{
+  "task": "P47 (I2) final evaluation, ai/docs/p47_plan.md",
+  "date": "2026-10-17",
+  "code_commit": "4b81670a12934ad0e9c513bcbb510b2dc132a69f",
+  "code_commit_note": "P47 (I2): final split wiring and frozen data; committed before any API call. Base d3163c0 (frozen configuration).",
+  "frozen_paths_diff_vs_d3163c0": "empty: backend/app/matching ai/match_llm ai/ocr/hybrid_prompt_v1.md ai/ocr/lines.py ai/eval/match_eval.py; ai/ocr/hybrid.py differs only in the --set choices line",
+  "data_sha256": {
+    "eval/labels_final_v1.json": "a8ac42bb36df6b2151b6e6e8938ca141fff5bcbaca2fe391804e4702d3defbf1",
+    "eval/match_gold_final_v1.json": "069ad55a6afef75b357a7e05aab3b2c969e113ccf7d20969def82750fb83ed57",
+    "ai/catalog/catalog_v2_eval_5bars.json": "49e3963fd0fbee5c0028104cb487e5556e08c86bf0a71efdbf0aa0a607e1dc19",
+    "ai/catalog/catalog_v2_eval_5bars_drop_products.json": "b9d3d346afb819eeccd273696a3aa1523bb43469a1c36136e749c452f92c4789",
+    "ai/ocr/hybrid_prompt_v1.md": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+    "ai/match_llm/translate_prompt_v3.md": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "what": "hybrid extraction v1 x r1, CLOVA cache only (table-off)",
+      "cmd": "python ai/ocr/hybrid.py --set final --tag final_v1 --runs 1 --date 2026-10-17",
+      "out": "hybrid_final_v1/ (written to ai/runs/2026-10-17_e2e/hybrid_final_v1 by the frozen script, moved here unchanged)",
+      "model": "gemini-3.5-flash-lite",
+      "thinking_level": "medium",
+      "api_calls": 14,
+      "retries": 0,
+      "photos_with_record": 14,
+      "clova_calls": 0
+    },
+    {
+      "step": 2,
+      "what": "S1+S2b+S3 -> M3a, catalog_v2_eval_5bars (C0)",
+      "cmd": "python ai/eval/e2e_match.py --source ai/runs/2026-10-17_p47/hybrid_final_v1 --run 1 --split final --m3-cache ai/runs/2026-10-17_p47/m3_cache --limit 60 --json ai/runs/2026-10-17_p47/e2e_hybrid_r1.json",
+      "model": "gemini-3.1-flash-lite (M3a frozen)",
+      "api_calls": 13
+    },
+    {
+      "step": 3,
+      "what": "label-input baseline, same catalog and matcher",
+      "cmd": "python ai/eval/e2e_match.py --source label --split final --m3-cache ai/runs/2026-10-17_p47/m3_cache --limit 47 --json ai/runs/2026-10-17_p47/e2e_label.json",
+      "api_calls": 8,
+      "cache_hits": 5
+    },
+    {
+      "step": 4,
+      "what": "auxiliary: same extraction, catalog_v2_eval_5bars_drop_products (new-product table only)",
+      "cmd": "python ai/eval/e2e_match.py --source ai/runs/2026-10-17_p47/hybrid_final_v1 --run 1 --split final --catalog drop_products --m3-cache ai/runs/2026-10-17_p47/m3_cache --limit 39 --json ai/runs/2026-10-17_p47/e2e_hybrid_r1_drop_products.json",
+      "api_calls": 7,
+      "cache_hits": 6
+    },
+    {
+      "step": "score",
+      "cmd": "python ai/eval/score.py --set final ai/runs/2026-10-17_p47/hybrid_final_v1 ; python ai/eval/p47_report.py ai/runs/2026-10-17_p47",
+      "api_calls": 0
+    }
+  ],
+  "api_calls_total": {
+    "hybrid_gemini-3.5-flash-lite": 14,
+    "m3a_gemini-3.1-flash-lite": 28,
+    "clova": 0
+  },
+  "m3a_limit_note": "M3a cap 60 for the whole P47; per-step --limit set to the remainder (60, 47, 39)",
+  "reruns": "none; each step ran once",
+  "api_tier": "free (inputs may be used to improve Google products)"
+}

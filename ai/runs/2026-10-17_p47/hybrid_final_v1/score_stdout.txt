@@ -1,0 +1,25 @@
+
+== hybrid_final_v1  (failed calls: 0)
+  item_accuracy   mean 0.945  min 0.945  max 0.945  (n=1)
+  f1_strict       mean 0.956  min 0.956  max 0.956  (n=1)
+  f1_lenient      mean 0.972  min 0.972  max 0.972  (n=1)
+  price_accuracy  mean 1.000  min 1.000  max 1.000  (n=1)
+  unit_confusion  mean 0.000  min 0.000  max 0.000  (n=1)
+  fp              mean 13.000  min 13.000  max 13.000  (n=1)
+  fn              mean 5.000  min 5.000  max 5.000  (n=1)
+  009_오드비_01           acc mean 1.000  [1.000-1.000]
+  009_오드비_02           acc mean 1.000  [1.000-1.000]
+  009_오드비_03           acc mean 1.000  [1.000-1.000]
+  009_오드비_04           acc mean 1.000  [1.000-1.000]
+  009_오드비_05           acc mean 1.000  [1.000-1.000]
+  009_오드비_06           acc mean 1.000  [1.000-1.000]
+  009_오드비_07           acc mean 1.000  [1.000-1.000]
+  009_오드비_08           acc mean 1.000  [1.000-1.000]
+  009_오드비_09           acc mean 0.789  [0.789-0.789]
+  010_수이_01            acc mean 1.000  [1.000-1.000]
+  010_수이_02            acc mean 0.943  [0.943-0.943]
+  010_수이_03            acc mean 1.000  [1.000-1.000]
+  010_수이_04            acc mean 0.700  [0.700-0.700]
+  010_수이_05            acc mean 1.000  [1.000-1.000]
+  [bar] 수이             acc mean 0.919  [0.919-0.919]
+  [bar] 오드비            acc mean 0.974  [0.974-0.974]

@@ -1,0 +1,88 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "label_set": "final",
+  "runs": [
+    1
+  ],
+  "prompt_version": "v1",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "call_limit": 80,
+  "photos": {
+    "009_odbi_01.png": {
+      "n_lines": 75,
+      "prepared": "009_odbi_01.png",
+      "ocr_latency_ms": 2179
+    },
+    "009_odbi_02.png": {
+      "n_lines": 40,
+      "prepared": "009_odbi_02.png",
+      "ocr_latency_ms": 1768
+    },
+    "009_odbi_03.png": {
+      "n_lines": 19,
+      "prepared": "009_odbi_03.png",
+      "ocr_latency_ms": 1309
+    },
+    "009_odbi_04.png": {
+      "n_lines": 46,
+      "prepared": "009_odbi_04.png",
+      "ocr_latency_ms": 1514
+    },
+    "009_odbi_05.png": {
+      "n_lines": 37,
+      "prepared": "009_odbi_05.png",
+      "ocr_latency_ms": 2399
+    },
+    "009_odbi_06.png": {
+      "n_lines": 36,
+      "prepared": "009_odbi_06.png",
+      "ocr_latency_ms": 1388
+    },
+    "009_odbi_07.png": {
+      "n_lines": 28,
+      "prepared": "009_odbi_07.png",
+      "ocr_latency_ms": 1364
+    },
+    "009_odbi_08.png": {
+      "n_lines": 74,
+      "prepared": "009_odbi_08.png",
+      "ocr_latency_ms": 1845
+    },
+    "009_odbi_09.jpeg": {
+      "n_lines": 46,
+      "prepared": "009_odbi_09.jpg",
+      "ocr_latency_ms": 2450
+    },
+    "010_sui_01.jpeg": {
+      "n_lines": 91,
+      "prepared": "010_sui_01.jpg",
+      "ocr_latency_ms": 2632
+    },
+    "010_sui_02.jpeg": {
+      "n_lines": 69,
+      "prepared": "010_sui_02.jpg",
+      "ocr_latency_ms": 2804
+    },
+    "010_sui_03.jpeg": {
+      "n_lines": 74,
+      "prepared": "010_sui_03.jpg",
+      "ocr_latency_ms": 2598
+    },
+    "010_sui_04.jpeg": {
+      "n_lines": 84,
+      "prepared": "010_sui_04.jpg",
+      "ocr_latency_ms": 2826
+    },
+    "010_sui_05.jpeg": {
+      "n_lines": 47,
+      "prepared": "010_sui_05.jpg",
+      "ocr_latency_ms": 2083
+    }
+  },
+  "api_tier": "free (inputs may be used to improve Google products)",
+  "written_at": "2026-10-17T06:22:22.891936+00:00"
+}

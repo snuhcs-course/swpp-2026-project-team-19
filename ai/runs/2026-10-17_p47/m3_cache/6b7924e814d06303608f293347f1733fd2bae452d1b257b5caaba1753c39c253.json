@@ -1,0 +1,95 @@
+{
+ "key": "6b7924e814d06303608f293347f1733fd2bae452d1b257b5caaba1753c39c253",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "보모어12",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "보모어18",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "아드벡 위 비스티",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "아드벡10",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "아드벡 우거다일",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "아드벡 코리브레칸",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "라가불린16",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "라프로익 쿼터캐스크",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "라프로익10",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "라프로익10 쉐리",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "라프로익10cs",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "탈리스커10",
+    "target": false
+   },
+   {
+    "line": 13,
+    "name": "브룩라디18",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "브룩라디 포트샬롯10",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "브룩라디 클래식 스토티시 발리",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Ardbeg\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Wee\", \"Beastie\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Laphroaig\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\"Sherry\", \"Oak\", \"Finish\"],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"쉐리\",\n          \"expansion\": \"Sherry Oak Finish\"\n        }\n      ]\n    },\n    {\n      \"line\": 11,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Laphroaig\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\"CS\"],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"CS\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bruichladdich\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bruichladdich\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\"Port\", \"Charlotte\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bruichladdich\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"The\", \"Classic\", \"Laddie\", \"Scottish\", \"Barley\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-17T06:26:42.850294+00:00",
+  "latency_ms": 32068,
+  "attempts": 1,
+  "input_tokens": 1674,
+  "output_tokens": 609,
+  "thought_tokens": 111
+ }
+}

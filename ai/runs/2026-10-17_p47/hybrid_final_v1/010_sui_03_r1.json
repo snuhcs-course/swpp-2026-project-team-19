@@ -1,0 +1,590 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "010_sui_03.jpeg",
+  "prepared_image": "010_sui_03.jpg",
+  "prepared_sha256": "c9c081394d4669d7f02927851804ac30055e942c1bdaf075629c33145007ca86",
+  "started_at": "2026-10-17T06:23:53.022002+00:00",
+  "latency_ms": 8026,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6352,
+  "output_tokens": 2494,
+  "thought_tokens": 0,
+  "total_tokens": 8846,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Glenmorangie Org (글렌모렌지)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L011"
+          ],
+          "price": [
+            "L012"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenmorangie Lasanta (라산타)",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013"
+          ],
+          "price": [
+            "L014"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenmorangie Quinta Ruban (퀸타루반)",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L015"
+          ],
+          "price": [
+            "L016"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenmorangie The Nectar (더 넥타)",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L017"
+          ],
+          "price": [
+            "L018"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenmorangie 18y",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L019"
+          ],
+          "price": [
+            "L019"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenmorangie Signet (시그넷)",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L020"
+          ],
+          "price": [
+            "L021"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenmorangie Cadball (캐드볼)",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L022"
+          ],
+          "price": [
+            "L023"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glenmorangie Calvados Cask (깔바도스 캐스크)",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L024"
+          ],
+          "price": [
+            "L004"
+          ]
+        }
+      },
+      {
+        "raw_name": "Tomatin 12y (토마틴)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L005"
+          ],
+          "price": [
+            "L006"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glengoyne 12y (글렌고인)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L008"
+          ]
+        }
+      },
+      {
+        "raw_name": "Glengoyne 15y (글렌고인)",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L010"
+          ]
+        }
+      },
+      {
+        "raw_name": "JohnnieWalker Double Black (더블블랙)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L056"
+          ],
+          "price": [
+            "L057"
+          ]
+        }
+      },
+      {
+        "raw_name": "JohnnieWalker Green (그린)",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L058"
+          ],
+          "price": [
+            "L059"
+          ]
+        }
+      },
+      {
+        "raw_name": "JohnnieWalker Blue (블루)",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L060"
+          ],
+          "price": [
+            "L061"
+          ]
+        }
+      },
+      {
+        "raw_name": "Macnair's Lum Reek 10y (맥네어스 럼 릭)",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L062"
+          ],
+          "price": [
+            "L063"
+          ]
+        }
+      },
+      {
+        "raw_name": "Monkey Shoulder (몽키 숄더)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L064"
+          ],
+          "price": [
+            "L065"
+          ]
+        }
+      },
+      {
+        "raw_name": "Compass Box (컴파스 박스)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L066"
+          ],
+          "price": [
+            "L067"
+          ]
+        }
+      },
+      {
+        "raw_name": "Royal Salute (로얄살루트 21년)",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L068"
+          ],
+          "price": [
+            "L069"
+          ]
+        }
+      },
+      {
+        "raw_name": "Maker's Mark (메이커스 마크)",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L025"
+          ],
+          "price": [
+            "L026"
+          ]
+        }
+      },
+      {
+        "raw_name": "Maker's Mark C.S",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L027"
+          ],
+          "price": [
+            "L028"
+          ]
+        }
+      },
+      {
+        "raw_name": "Wild Turkey 8y (와일드터키)",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L029"
+          ],
+          "price": [
+            "L030"
+          ]
+        }
+      },
+      {
+        "raw_name": "Wild Turkey Rarebreed (레어브리드)",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L031"
+          ],
+          "price": [
+            "L032"
+          ]
+        }
+      },
+      {
+        "raw_name": "Wild Turkey Rarebreed Rye (라이)",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L033"
+          ],
+          "price": [
+            "L034"
+          ]
+        }
+      },
+      {
+        "raw_name": "Wild Turkey Rye (라이)",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L035"
+          ],
+          "price": [
+            "L036"
+          ]
+        }
+      },
+      {
+        "raw_name": "Wild Turkey Rye 101 (라이 101)",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L037"
+          ],
+          "price": [
+            "L038"
+          ]
+        }
+      },
+      {
+        "raw_name": "Knob Creek 9y (납 크릭)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L039"
+          ],
+          "price": [
+            "L040"
+          ]
+        }
+      },
+      {
+        "raw_name": "Knob Creek Rye (라이)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L041"
+          ],
+          "price": [
+            "L042"
+          ]
+        }
+      },
+      {
+        "raw_name": "Woodford Reserve (우드포드리저브)",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L043"
+          ],
+          "price": [
+            "L044"
+          ]
+        }
+      },
+      {
+        "raw_name": "Woodford Reserve Rye (라이)",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L045"
+          ],
+          "price": [
+            "L046"
+          ]
+        }
+      },
+      {
+        "raw_name": "Woodford Reserve Double Oak (더블 오크)",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L047"
+          ],
+          "price": [
+            "L048"
+          ]
+        }
+      },
+      {
+        "raw_name": "Noah's Mill (노아스밀)",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L049"
+          ],
+          "price": [
+            "L050"
+          ]
+        }
+      },
+      {
+        "raw_name": "Angel's Envy (엔젤스엔비)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L051"
+          ],
+          "price": [
+            "L052"
+          ]
+        }
+      },
+      {
+        "raw_name": "Booker's (부커스)",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L053"
+          ],
+          "price": [
+            "L054"
+          ]
+        }
+      },
+      {
+        "raw_name": "Four Roses Single Barrel (포 로지스 싱글배럴)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L055"
+          ],
+          "price": [
+            "L072"
+          ]
+        }
+      },
+      {
+        "raw_name": "Four Roses Small Batch (스몰 배치)",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L070"
+          ],
+          "price": [
+            "L073"
+          ]
+        }
+      },
+      {
+        "raw_name": "Widow Jane 10y (위도우 제인)",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L071"
+          ],
+          "price": [
+            "L074"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": [\n  {\"raw_name\": \"Glenmorangie Org (글렌모렌지)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L011\"], \"price\": [\"L012\"]}},\n  {\"raw_name\": \"Glenmorangie Lasanta (라산타)\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\"], \"price\": [\"L014\"]}},\n  {\"raw_name\": \"Glenmorangie Quinta Ruban (퀸타루반)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L015\"], \"price\": [\"L016\"]}},\n  {\"raw_name\": \"Glenmorangie The Nectar (더 넥타)\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L017\"], \"price\": [\"L018\"]}},\n  {\"raw_name\": \"Glenmorangie 18y\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L019\"], \"price\": [\"L019\"]}},\n  {\"raw_name\": \"Glenmorangie Signet (시그넷)\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L021\"]}},\n  {\"raw_name\": \"Glenmorangie Cadball (캐드볼)\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L023\"]}},\n  {\"raw_name\": \"Glenmorangie Calvados Cask (깔바도스 캐스크)\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L004\"]}},\n  {\"raw_name\": \"Tomatin 12y (토마틴)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L005\"], \"price\": [\"L006\"]}},\n  {\"raw_name\": \"Glengoyne 12y (글렌고인)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L008\"]}},\n  {\"raw_name\": \"Glengoyne 15y (글렌고인)\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L009\"], \"price\": [\"L010\"]}},\n  {\"raw_name\": \"JohnnieWalker Double Black (더블블랙)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L056\"], \"price\": [\"L057\"]}},\n  {\"raw_name\": \"JohnnieWalker Green (그린)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L058\"], \"price\": [\"L059\"]}},\n  {\"raw_name\": \"JohnnieWalker Blue (블루)\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L060\"], \"price\": [\"L061\"]}},\n  {\"raw_name\": \"Macnair's Lum Reek 10y (맥네어스 럼 릭)\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L062\"], \"price\": [\"L063\"]}},\n  {\"raw_name\": \"Monkey Shoulder (몽키 숄더)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L064\"], \"price\": [\"L065\"]}},\n  {\"raw_name\": \"Compass Box (컴파스 박스)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L066\"], \"price\": [\"L067\"]}},\n  {\"raw_name\": \"Royal Salute (로얄살루트 21년)\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L068\"], \"price\": [\"L069\"]}},\n  {\"raw_name\": \"Maker's Mark (메이커스 마크)\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L026\"]}},\n  {\"raw_name\": \"Maker's Mark C.S\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L028\"]}},\n  {\"raw_name\": \"Wild Turkey 8y (와일드터키)\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L029\"], \"price\": [\"L030\"]}},\n  {\"raw_name\": \"Wild Turkey Rarebreed (레어브리드)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L031\"], \"price\": [\"L032\"]}},\n  {\"raw_name\": \"Wild Turkey Rarebreed Rye (라이)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L033\"], \"price\": [\"L034\"]}},\n  {\"raw_name\": \"Wild Turkey Rye (라이)\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L035\"], \"price\": [\"L036\"]}},\n  {\"raw_name\": \"Wild Turkey Rye 101 (라이 101)\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L037\"], \"price\": [\"L038\"]}},\n  {\"raw_name\": \"Knob Creek 9y (납 크릭)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\"], \"price\": [\"L040\"]}},\n  {\"raw_name\": \"Knob Creek Rye (라이)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L041\"], \"price\": [\"L042\"]}},\n  {\"raw_name\": \"Woodford Reserve (우드포드리저브)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L043\"], \"price\": [\"L044\"]}},\n  {\"raw_name\": \"Woodford Reserve Rye (라이)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L045\"], \"price\": [\"L046\"]}},\n  {\"raw_name\": \"Woodford Reserve Double Oak (더블 오크)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L047\"], \"price\": [\"L048\"]}},\n  {\"raw_name\": \"Noah's Mill (노아스밀)\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L049\"], \"price\": [\"L050\"]}},\n  {\"raw_name\": \"Angel's Envy (엔젤스엔비)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L051\"], \"price\": [\"L052\"]}},\n  {\"raw_name\": \"Booker's (부커스)\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L053\"], \"price\": [\"L054\"]}},\n  {\"raw_name\": \"Four Roses Single Barrel (포 로지스 싱글배럴)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L055\"], \"price\": [\"L072\"]}},\n  {\"raw_name\": \"Four Roses Small Batch (스몰 배치)\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L070\"], \"price\": [\"L073\"]}},\n  {\"raw_name\": \"Widow Jane 10y (위도우 제인)\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L071\"], \"price\": [\"L074\"]}}\n]}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:24:00Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": [\n  {\"raw_name\": \"Glenmorangie Org (글렌모렌지)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L011\"], \"price\": [\"L012\"]}},\n  {\"raw_name\": \"Glenmorangie Lasanta (라산타)\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\"], \"price\": [\"L014\"]}},\n  {\"raw_name\": \"Glenmorangie Quinta Ruban (퀸타루반)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L015\"], \"price\": [\"L016\"]}},\n  {\"raw_name\": \"Glenmorangie The Nectar (더 넥타)\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L017\"], \"price\": [\"L018\"]}},\n  {\"raw_name\": \"Glenmorangie 18y\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L019\"], \"price\": [\"L019\"]}},\n  {\"raw_name\": \"Glenmorangie Signet (시그넷)\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L021\"]}},\n  {\"raw_name\": \"Glenmorangie Cadball (캐드볼)\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L023\"]}},\n  {\"raw_name\": \"Glenmorangie Calvados Cask (깔바도스 캐스크)\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L004\"]}},\n  {\"raw_name\": \"Tomatin 12y (토마틴)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L005\"], \"price\": [\"L006\"]}},\n  {\"raw_name\": \"Glengoyne 12y (글렌고인)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L008\"]}},\n  {\"raw_name\": \"Glengoyne 15y (글렌고인)\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L009\"], \"price\": [\"L010\"]}},\n  {\"raw_name\": \"JohnnieWalker Double Black (더블블랙)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L056\"], \"price\": [\"L057\"]}},\n  {\"raw_name\": \"JohnnieWalker Green (그린)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L058\"], \"price\": [\"L059\"]}},\n  {\"raw_name\": \"JohnnieWalker Blue (블루)\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L060\"], \"price\": [\"L061\"]}},\n  {\"raw_name\": \"Macnair's Lum Reek 10y (맥네어스 럼 릭)\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L062\"], \"price\": [\"L063\"]}},\n  {\"raw_name\": \"Monkey Shoulder (몽키 숄더)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L064\"], \"price\": [\"L065\"]}},\n  {\"raw_name\": \"Compass Box (컴파스 박스)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L066\"], \"price\": [\"L067\"]}},\n  {\"raw_name\": \"Royal Salute (로얄살루트 21년)\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L068\"], \"price\": [\"L069\"]}},\n  {\"raw_name\": \"Maker's Mark (메이커스 마크)\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L026\"]}},\n  {\"raw_name\": \"Maker's Mark C.S\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L028\"]}},\n  {\"raw_name\": \"Wild Turkey 8y (와일드터키)\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L029\"], \"price\": [\"L030\"]}},\n  {\"raw_name\": \"Wild Turkey Rarebreed (레어브리드)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L031\"], \"price\": [\"L032\"]}},\n  {\"raw_name\": \"Wild Turkey Rarebreed Rye (라이)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L033\"], \"price\": [\"L034\"]}},\n  {\"raw_name\": \"Wild Turkey Rye (라이)\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L035\"], \"price\": [\"L036\"]}},\n  {\"raw_name\": \"Wild Turkey Rye 101 (라이 101)\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L037\"], \"price\": [\"L038\"]}},\n  {\"raw_name\": \"Knob Creek 9y (납 크릭)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\"], \"price\": [\"L040\"]}},\n  {\"raw_name\": \"Knob Creek Rye (라이)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L041\"], \"price\": [\"L042\"]}},\n  {\"raw_name\": \"Woodford Reserve (우드포드리저브)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L043\"], \"price\": [\"L044\"]}},\n  {\"raw_name\": \"Woodford Reserve Rye (라이)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L045\"], \"price\": [\"L046\"]}},\n  {\"raw_name\": \"Woodford Reserve Double Oak (더블 오크)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L047\"], \"price\": [\"L048\"]}},\n  {\"raw_name\": \"Noah's Mill (노아스밀)\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L049\"], \"price\": [\"L050\"]}},\n  {\"raw_name\": \"Angel's Envy (엔젤스엔비)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L051\"], \"price\": [\"L052\"]}},\n  {\"raw_name\": \"Booker's (부커스)\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L053\"], \"price\": [\"L054\"]}},\n  {\"raw_name\": \"Four Roses Single Barrel (포 로지스 싱글배럴)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L055\"], \"price\": [\"L072\"]}},\n  {\"raw_name\": \"Four Roses Small Batch (스몰 배치)\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L070\"], \"price\": [\"L073\"]}},\n  {\"raw_name\": \"Widow Jane 10y (위도우 제인)\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L071\"], \"price\": [\"L074\"]}}\n]}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0TT0t3pbF9ZZ/GQWia+mZ58/8PEXd9hHkzYelSotEsQZOBqa60KzfKvJ+RiDRvamZV+p/Yc02+9Z6WU4TU0Ea9nZsFBFCXwKb8l0Opxx4YdOJUMEQjBpF+phw=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": [\n  {\"raw_name\": \"Glenmorangie Org (글렌모렌지)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L011\"], \"price\": [\"L012\"]}},\n  {\"raw_name\": \"Glenmorangie Lasanta (라산타)\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\"], \"price\": [\"L014\"]}},\n  {\"raw_name\": \"Glenmorangie Quinta Ruban (퀸타루반)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L015\"], \"price\": [\"L016\"]}},\n  {\"raw_name\": \"Glenmorangie The Nectar (더 넥타)\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L017\"], \"price\": [\"L018\"]}},\n  {\"raw_name\": \"Glenmorangie 18y\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L019\"], \"price\": [\"L019\"]}},\n  {\"raw_name\": \"Glenmorangie Signet (시그넷)\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L021\"]}},\n  {\"raw_name\": \"Glenmorangie Cadball (캐드볼)\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L023\"]}},\n  {\"raw_name\": \"Glenmorangie Calvados Cask (깔바도스 캐스크)\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L004\"]}},\n  {\"raw_name\": \"Tomatin 12y (토마틴)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L005\"], \"price\": [\"L006\"]}},\n  {\"raw_name\": \"Glengoyne 12y (글렌고인)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L008\"]}},\n  {\"raw_name\": \"Glengoyne 15y (글렌고인)\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L009\"], \"price\": [\"L010\"]}},\n  {\"raw_name\": \"JohnnieWalker Double Black (더블블랙)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L056\"], \"price\": [\"L057\"]}},\n  {\"raw_name\": \"JohnnieWalker Green (그린)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L058\"], \"price\": [\"L059\"]}},\n  {\"raw_name\": \"JohnnieWalker Blue (블루)\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L060\"], \"price\": [\"L061\"]}},\n  {\"raw_name\": \"Macnair's Lum Reek 10y (맥네어스 럼 릭)\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L062\"], \"price\": [\"L063\"]}},\n  {\"raw_name\": \"Monkey Shoulder (몽키 숄더)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L064\"], \"price\": [\"L065\"]}},\n  {\"raw_name\": \"Compass Box (컴파스 박스)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L066\"], \"price\": [\"L067\"]}},\n  {\"raw_name\": \"Royal Salute (로얄살루트 21년)\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L068\"], \"price\": [\"L069\"]}},\n  {\"raw_name\": \"Maker's Mark (메이커스 마크)\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L026\"]}},\n  {\"raw_name\": \"Maker's Mark C.S\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L028\"]}},\n  {\"raw_name\": \"Wild Turkey 8y (와일드터키)\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L029\"], \"price\": [\"L030\"]}},\n  {\"raw_name\": \"Wild Turkey Rarebreed (레어브리드)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L031\"], \"price\": [\"L032\"]}},\n  {\"raw_name\": \"Wild Turkey Rarebreed Rye (라이)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L033\"], \"price\": [\"L034\"]}},\n  {\"raw_name\": \"Wild Turkey Rye (라이)\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L035\"], \"price\": [\"L036\"]}},\n  {\"raw_name\": \"Wild Turkey Rye 101 (라이 101)\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L037\"], \"price\": [\"L038\"]}},\n  {\"raw_name\": \"Knob Creek 9y (납 크릭)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\"], \"price\": [\"L040\"]}},\n  {\"raw_name\": \"Knob Creek Rye (라이)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L041\"], \"price\": [\"L042\"]}},\n  {\"raw_name\": \"Woodford Reserve (우드포드리저브)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L043\"], \"price\": [\"L044\"]}},\n  {\"raw_name\": \"Woodford Reserve Rye (라이)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L045\"], \"price\": [\"L046\"]}},\n  {\"raw_name\": \"Woodford Reserve Double Oak (더블 오크)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L047\"], \"price\": [\"L048\"]}},\n  {\"raw_name\": \"Noah's Mill (노아스밀)\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L049\"], \"price\": [\"L050\"]}},\n  {\"raw_name\": \"Angel's Envy (엔젤스엔비)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L051\"], \"price\": [\"L052\"]}},\n  {\"raw_name\": \"Booker's (부커스)\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L053\"], \"price\": [\"L054\"]}},\n  {\"raw_name\": \"Four Roses Single Barrel (포 로지스 싱글배럴)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L055\"], \"price\": [\"L072\"]}},\n  {\"raw_name\": \"Four Roses Small Batch (스몰 배치)\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L070\"], \"price\": [\"L073\"]}},\n  {\"raw_name\": \"Widow Jane 10y (위도우 제인)\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L071\"], \"price\": [\"L074\"]}}\n]}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:24:00Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 5288
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 6352,
+      "total_output_tokens": 2494,
+      "total_thought_tokens": 0,
+      "total_tokens": 8846,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 74,
+    "price_like_lines": 35,
+    "uncited_price_lines": 0,
+    "uncited": [],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [81,219,358,241] HIGHLAND (CONTINUED)\nL002 [498,213,691,230] BOURBON & RYE\nL003 [52,551,267,564] BLENDED WHISKY\nL004 [411,439,465,453] 20,000\nL005 [59,464,226,480] Tomatin 12y (토마틴)\nL006 [410,462,465,475] 15,000\nL007 [57,487,260,506] Glengoyne 12y (글렌고인)\nL008 [410,487,465,500] 15,000\nL009 [56,513,259,530] Glengoyne 15y (글렌고인)\nL010 [410,512,465,525] 20,000\nL011 [78,255,316,275] Glenmorangie Org (글렌모렌지)\nL012 [411,252,465,266] 15,000\nL013 [76,277,314,297] Glenmorangie Lasanta (라산타)\nL014 [411,276,465,289] 17,000\nL015 [74,299,377,319] Glenmorangie Quinta Ruban (퀸타루반)\nL016 [411,299,465,312] 18,000\nL017 [71,324,340,342] Glenmorangie The Nectar (더 넥타)\nL018 [411,323,465,337] 19,000\nL019 [69,346,465,363] Glenmorangie 18y30,000\nL020 [67,370,297,387] Glenmorangie Signet (시그넷)\nL021 [411,370,465,383] 43,000\nL022 [64,394,309,411] Glenmorangie Cadball (캐드볼)\nL023 [411,393,465,406] 19,000\nL024 [62,418,434,435] Glenmorangie Calvados Cask (깔바도스 캐스크)\nL025 [500,247,738,264] Maker's Mark (메이커스 마크)\nL026 [847,245,901,258] 13,000\nL027 [500,272,647,287] Maker's Mark C.S\nL028 [849,268,904,281] 16,000\nL029 [502,292,726,311] Wild Turkey 8y (와일드터키)\nL030 [852,290,906,303] 13,000\nL031 [502,314,793,335] Wild Turkey Rarebreed (레어브리드)\nL032 [854,313,910,327] 16,000\nL033 [502,338,778,358] Wild Turkey Rarebreed Rye (라이)\nL034 [856,337,911,350] 18,000\nL035 [502,366,689,383] Wild Turkey Rye (라이)\nL036 [859,360,915,375] 13,000\nL037 [502,389,753,407] Wild Turkey Rye 101 (라이 101)\nL038 [861,385,917,400] 14,000\nL039 [500,414,698,431] Knob Creek 9y (납 크릭)\nL040 [863,410,920,425] 15,000\nL041 [500,438,689,456] Knob Creek Rye (라이)\nL042 [864,435,922,449] 15,000\nL043 [502,462,795,480] Woodford Reserve (우드포드리저브)\nL044 [866,461,924,475] 16,000\nL045 [502,488,743,506] Woodford Reserve Rye (라이)\nL046 [868,487,925,500] 16,000\nL047 [502,513,854,530] Woodford Reserve Double Oak (더블 오크)\nL048 [870,511,929,526] 18,000\nL049 [500,539,688,557] Noah's Mill (노아스밀)\nL050 [873,537,931,552] 23,000\nL051 [502,565,719,583] Angel's Envy (엔젤스엔비)\nL052 [875,563,934,578] 15,000\nL053 [500,591,649,609] Booker's (부커스)\nL054 [877,591,938,605] 33,000\nL055 [502,617,887,635] Four Roses Single Barrel (포 로지스 싱글배럴)\nL056 [48,587,373,605] JohnnieWalker Double Black (더블블랙)\nL057 [408,587,465,600] 15,000\nL058 [47,613,278,631] JohnnieWalker Green (그린)\nL059 [408,613,465,629] 16,000\nL060 [45,639,264,658] JohnnieWalker Blue (블루)\nL061 [408,639,465,655] 40,000\nL062 [43,665,382,685] Macnair's Lum Reek 10y (맥네어스 럼 릭)\nL063 [406,665,465,682] 23,000\nL064 [43,692,279,711] Monkey Shoulder (몽키 숄더)\nL065 [406,692,465,710] 15,000\nL066 [41,720,262,738] Compass Box (컴파스 박스)\nL067 [406,720,465,737] 15,000\nL068 [38,747,290,767] Royal Salute (로얄살루트 21년)\nL069 [404,749,465,766] 27,000\nL070 [502,668,804,686] Four Roses Small Batch (스몰 배치)\nL071 [503,694,760,714] Widow Jane 10y (위도우 제인)\nL072 [882,642,942,657] 15,000\nL073 [884,668,946,684] 17,000\nL074 [887,695,949,711] 30,000\n</ocr_lines>",
+  "n_lines": 74,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 2598
+}

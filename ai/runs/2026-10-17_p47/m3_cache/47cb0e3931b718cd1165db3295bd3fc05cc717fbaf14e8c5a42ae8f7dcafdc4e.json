@@ -1,0 +1,190 @@
+{
+ "key": "47cb0e3931b718cd1165db3295bd3fc05cc717fbaf14e8c5a42ae8f7dcafdc4e",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "글렌피딕12",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "글렌피딕15",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "맥켈란12 세리",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "맥켈란12 더블",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "맥켈란18 쉐리",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "글렌파클라스105",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "발베니12 더블우드",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "발베니14 캐리비안 캐스크",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "글렌리벳12",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "글렌리벳18",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "달모어12세리",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "달모어15",
+    "target": false
+   },
+   {
+    "line": 13,
+    "name": "로얄브라클라12",
+    "target": false
+   },
+   {
+    "line": 14,
+    "name": "글렌그란트15",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "글렌드로냑12",
+    "target": false
+   },
+   {
+    "line": 16,
+    "name": "글렌드로낙15",
+    "target": false
+   },
+   {
+    "line": 17,
+    "name": "글렌드로낙18",
+    "target": false
+   },
+   {
+    "line": 18,
+    "name": "글렌드로낙 오드 투 더 엠버스",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "글렌드로낙 오드 투 더 벨리",
+    "target": true
+   },
+   {
+    "line": 20,
+    "name": "글렌드로낙 오드 투 더 다크",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "글렌모렌지 오리지널",
+    "target": false
+   },
+   {
+    "line": 22,
+    "name": "글렌모렌지 라산타",
+    "target": false
+   },
+   {
+    "line": 23,
+    "name": "글렌모렌지 컨타루반",
+    "target": true
+   },
+   {
+    "line": 24,
+    "name": "글렌모렌지 더 넥타",
+    "target": true
+   },
+   {
+    "line": 25,
+    "name": "글렌모렌지 시그넷 리저브",
+    "target": true
+   },
+   {
+    "line": 26,
+    "name": "오반14",
+    "target": false
+   },
+   {
+    "line": 27,
+    "name": "에드라두어10",
+    "target": false
+   },
+   {
+    "line": 28,
+    "name": "벤로막10",
+    "target": false
+   },
+   {
+    "line": 29,
+    "name": "벤로막12",
+    "target": false
+   },
+   {
+    "line": 30,
+    "name": "클라이넬리쉬DE",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "글렌알라키8",
+    "target": false
+   },
+   {
+    "line": 32,
+    "name": "글렌알라키 10cs 배치13",
+    "target": true
+   },
+   {
+    "line": 33,
+    "name": "글렌알라키12",
+    "target": false
+   },
+   {
+    "line": 34,
+    "name": "글렌알라키15",
+    "target": false
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Macallan\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Macallan\",\n      \"age\": 18,\n      \"edition_tokens_en\": [\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"GlenDronach\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Ode\",\n        \"to\",\n        \"the\",\n        \"Embers\"\n      ],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"GlenDronach\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Ode\",\n        \"to\",\n        \"the\",\n        \"Valley\"\n      ],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"GlenDronach\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Ode\",\n        \"to\",\n        \"the\",\n        \"Dark\"\n      ],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 23,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Quinta\",\n        \"Ruban\"\n      ],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 24,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"The\",\n        \"Nectar\"\n      ],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Signet\",\n        \"Reserve\"\n      ],\n      \"kind\": \"whisky\"\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Clynelish\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"DE\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"DE\",\n          \"expansion\": \"Distillers Edition\"\n        }\n      ]\n    },\n    {\n      \"line\": 32,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"GlenAllachie\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\n        \"CS\",\n        \"Batch\",\n        \"13\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"CS\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-17T06:27:20.271784+00:00",
+  "latency_ms": 41850,
+  "attempts": 1,
+  "input_tokens": 2151,
+  "output_tokens": 987,
+  "thought_tokens": 152
+ }
+}
