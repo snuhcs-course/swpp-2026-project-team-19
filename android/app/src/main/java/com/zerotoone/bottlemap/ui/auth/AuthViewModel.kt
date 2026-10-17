@@ -65,11 +65,16 @@ class AuthViewModel(
                         }
                     }
                     AuthSessionEvent.Refreshing -> {
-                        // Offline SDK refresh is transient; do not discard identity.
+                        // Supabase RefreshFailure is transient (network/server).
+                        // Preserve a previously displayed identity; otherwise
+                        // show a retryable message instead of endless loading.
                         if (!signingIn && !logoutInProgress &&
                             _state.value !is AuthUiState.SignedIn
                         ) {
-                            _state.value = AuthUiState.Initializing
+                            _state.value = AuthUiState.SignInError(
+                                "세션을 갱신하지 못했습니다. 연결을 확인하고 다시 시도해 주세요.",
+                                canRetryProfile = true,
+                            )
                         }
                     }
                     AuthSessionEvent.Authenticated -> {
