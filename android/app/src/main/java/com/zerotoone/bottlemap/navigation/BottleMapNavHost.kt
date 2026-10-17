@@ -177,6 +177,12 @@ private fun NavGraphBuilder.customerGraph(
                 val detailViewModel: BarDetailViewModel = viewModel(
                     viewModelStoreOwner = parentEntry,
                 )
+                // On process recreation the parent ViewModel can be new.
+                // load() deduplicates the same barId, so a normal map visit
+                // does not request bar detail again.
+                androidx.compose.runtime.LaunchedEffect(barId) {
+                    detailViewModel.load(barId)
+                }
                 val detailState = detailViewModel.state.collectAsStateWithLifecycle().value
                 BarLocationMapScreen(
                     barId = barId,
