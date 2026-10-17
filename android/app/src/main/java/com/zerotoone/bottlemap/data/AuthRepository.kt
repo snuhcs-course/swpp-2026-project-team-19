@@ -117,7 +117,14 @@ class SupabaseGoogleAuthGateway : AuthGateway {
                     code = "UNAUTHENTICATED",
                     message = "세션이 만료되었습니다. 다시 로그인해 주세요.",
                 )
-            ApiClient.call { ApiClient.api.getMe("Bearer $refreshed") }
+            try {
+                ApiClient.call { ApiClient.api.getMe("Bearer $refreshed") }
+            } catch (retryError: BottleMapApiException) {
+                if (retryError.code == "UNAUTHENTICATED") {
+                    logout()
+                }
+                throw retryError
+            }
         }
     }
 
