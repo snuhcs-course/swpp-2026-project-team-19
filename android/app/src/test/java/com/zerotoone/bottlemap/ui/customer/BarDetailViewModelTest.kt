@@ -135,6 +135,7 @@ class BarDetailViewModelTest {
         advanceUntilIdle()
         val error = vm.state.value as BarDetailUiState.Error
         assertFalse(error.canRetry)
+        assertTrue(error.refreshResultsOnBack)
         vm.retry()
         advanceUntilIdle()
         assertEquals(listOf("missing-bar"), fake.requests)
