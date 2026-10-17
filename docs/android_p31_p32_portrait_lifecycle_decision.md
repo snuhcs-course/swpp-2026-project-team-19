@@ -140,3 +140,15 @@ P32: orientation policy retained/documented; small-screen/IME layout code added.
 6. Verify Guest/Signed-in account, Search → Results → Detail navigation and existing Portrait-only/small-screen layout remain unchanged.
 
 **Verification status:** source patch pushed to existing P31/P32 branch; this specific change still requires a fresh local Android build and physical-device run.
+
+## Latest human verification report (2026-10-18, before PR)
+
+The Android frontend owner reports that **all P31/P32 device checks now pass**, including the final fix for the Kakao GL Surface overlay during Map → Bar Detail navigation, the nullable `SurfaceView?` compile fix, and the previously reviewed UI fitting correctly on the device.
+
+This supersedes older **pending verification** notes above for the *reported human test status*. No raw Gradle logs/screenshots, independent emulator replay, or GitHub Actions CI run were provided to the assistant; the PR must distinguish **owner-reported PASS** from independently attached build/CI evidence.
+
+### Scope/quality sign-off
+- P31: Search/Detail loading, empty, error/retry, query/bar ID preservation and Back navigation — **owner reports PASS**.
+- P32: Portrait-only, Activity/background lifecycle and small-device fitting, map/native Surface/Back, Guest/Auth regression — **owner reports PASS**.
+- Actual Human and AI time spent: not measured; task estimate remains 5 hours and must not be reported as actual elapsed time.
+- No Backend or AI contract changes. Continue to require peer code review prior to merge.
