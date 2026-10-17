@@ -7,6 +7,8 @@ import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.CurrentUserDto
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.exception.AuthErrorCode
+import io.github.jan.supabase.auth.exception.AuthRestException
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.status.SessionStatus
@@ -114,12 +116,26 @@ class SupabaseGoogleAuthGateway : AuthGateway {
                 client.auth.currentSessionOrNull()?.accessToken
             } catch (cancelled: CancellationException) {
                 throw cancelled
+            } catch (error: AuthRestException) {
+                // Only known invalid/revoked refresh tokens justify dropping
+                // local credentials. A 5xx/temporary service failure must not.
+                if (error.errorCode in setOf(
+                        AuthErrorCode.RefreshTokenNotFound,
+                        AuthErrorCode.RefreshTokenAlreadyUsed,
+                        AuthErrorCode.SessionNotFound,
+                        AuthErrorCode.SessionExpired,
+                        AuthErrorCode.InvalidCredentials,
+                    )
+                ) {
+                    client.auth.clearSession()
+                }
+                null
             } catch (_: IOException) {
                 // Offline refresh is transient: preserve the SDK-stored session.
                 null
             } catch (_: Exception) {
-                runCatching { client.auth.signOut() }
-                client.auth.clearSession()
+                // Unknown SDK/transport errors should not erase valid storage.
+                // The SDK may already have emitted a definitive Guest event.
                 null
             }
         }
