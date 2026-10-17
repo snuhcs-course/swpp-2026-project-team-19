@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -115,6 +117,8 @@ private fun SearchResultsContent(
                 text = query,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = "검색한 위스키를 제공하는 바",
@@ -125,6 +129,7 @@ private fun SearchResultsContent(
 
         when (state) {
             CustomerSearchUiState.Loading -> SearchStatusPanel(
+                modifier = Modifier.weight(1f),
                 title = "검색 중입니다",
                 description = "등록된 메뉴를 확인하고 있어요.",
                 isLoading = true,
@@ -137,6 +142,7 @@ private fun SearchResultsContent(
             is CustomerSearchUiState.Empty -> {
                 val unknown = state.reason == EmptySearchReason.UNKNOWN_PRODUCT
                 SearchStatusPanel(
+                modifier = Modifier.weight(1f),
                     title = if (unknown) "일치하는 주류가 없어요" else "등록된 판매 바가 없어요",
                     description = if (unknown) {
                         "다른 철자나 제품명을 입력해 보세요."
@@ -148,12 +154,14 @@ private fun SearchResultsContent(
                 )
             }
             is CustomerSearchUiState.InvalidQuery -> SearchStatusPanel(
+                modifier = Modifier.weight(1f),
                 title = "검색어를 확인해 주세요",
                 description = searchValidationMessage(state.fieldErrorCode),
                 actionLabel = "검색어 변경",
                 onAction = onBack,
             )
             is CustomerSearchUiState.Error -> SearchStatusPanel(
+                modifier = Modifier.weight(1f),
                 title = "결과를 불러오지 못했어요",
                 description = state.message,
                 actionLabel = if (state.canRetry) "다시 시도" else "검색어 변경",
@@ -298,6 +306,7 @@ private fun SearchResultCard(
 
 @Composable
 private fun SearchStatusPanel(
+    modifier: Modifier = Modifier,
     title: String,
     description: String,
     isLoading: Boolean = false,
@@ -308,8 +317,9 @@ private fun SearchStatusPanel(
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
         Column(
