@@ -15,8 +15,9 @@ import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.collect
+
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -53,14 +54,25 @@ class SupabaseGoogleAuthGateway : AuthGateway {
     }
     private val refreshMutex = Mutex()
 
-    override val events: Flow<AuthSessionEvent> by lazy {
-        if (!configured) flowOf(AuthSessionEvent.Guest)
-        else client.auth.sessionStatus.map { status ->
-            when (status) {
-                SessionStatus.Initializing -> AuthSessionEvent.Initializing
-                is SessionStatus.NotAuthenticated -> AuthSessionEvent.Guest
-                is SessionStatus.Authenticated -> AuthSessionEvent.Authenticated
-                is SessionStatus.RefreshFailure -> AuthSessionEvent.Refreshing
+    override val events: Flow<AuthSessionEvent> = flow {
+        emit(AuthSessionEvent.Initializing)
+        if (!configured) {
+            emit(AuthSessionEvent.Guest)
+        } else {
+            try {
+                client.auth.sessionStatus.collect { status ->
+                    emit(when (status) {
+                        SessionStatus.Initializing -> AuthSessionEvent.Initializing
+                        is SessionStatus.NotAuthenticated -> AuthSessionEvent.Guest
+                        is SessionStatus.Authenticated -> AuthSessionEvent.Authenticated
+                        is SessionStatus.RefreshFailure -> AuthSessionEvent.Refreshing
+                    })
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                // Broken developer console configuration must not crash Guest UX.
+                emit(AuthSessionEvent.Guest)
             }
         }
     }
@@ -77,8 +89,15 @@ class SupabaseGoogleAuthGateway : AuthGateway {
     /** Always read the SDK's current session. Never cache the access token in UI state. */
     suspend fun currentAccessTokenOrNull(): String? {
         if (!configured) return null
-        client.auth.awaitInitialization()
-        return client.auth.currentSessionOrNull()?.accessToken
+        return try {
+            client.auth.awaitInitialization()
+            client.auth.currentSessionOrNull()?.accessToken
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            // Misconfiguration/temporary SDK failure cannot block guest bar data.
+            null
+        }
     }
 
     /**
