@@ -29,11 +29,19 @@ class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource {
             if (error.code != "UNAUTHENTICATED") throw error
             val newToken = auth.refreshAccessTokenAfter401(token)
             // If refresh fails, fall back to guest WITHOUT the stale token.
-            ApiClient.call {
-                ApiClient.api.getPublishedBarMenu(
-                    barId,
-                    newToken?.let { "Bearer $it" },
-                )
+            try {
+                ApiClient.call {
+                    ApiClient.api.getPublishedBarMenu(
+                        barId,
+                        newToken?.let { "Bearer $it" },
+                    )
+                }
+            } catch (retryError: BottleMapApiException) {
+                if (retryError.code != "UNAUTHENTICATED" || newToken == null) throw retryError
+                // A second 401 is not retryable. Drop the stale signed-in
+                // session and show the same public bar as a Guest.
+                auth.logout()
+                ApiClient.call { ApiClient.api.getPublishedBarMenu(barId) }
             }
         }
     }
