@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.data
 
 import com.zerotoone.bottlemap.network.ApiClient
 import com.zerotoone.bottlemap.network.BarMenuResponseDto
+import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.SearchBarsResponseDto
 
 /** Existing network implementation behind a minimal test seam; not a new architecture. */
@@ -15,11 +16,27 @@ interface CustomerBarDetailSource {
 }
 
 class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource {
-    override suspend fun getPublishedBarMenu(barId: String): BarMenuResponseDto =
-        ApiClient.call {
-            // Guest-visible public endpoint; do not inject operator credentials.
+    override suspend fun getPublishedBarMenu(barId: String): BarMenuResponseDto {
+        val auth = AppAuth.gateway
+        val token = auth.currentAccessTokenOrNull()
+        // Public guest request: no credentials. Signed-in request: optional JWT.
+        if (token == null) return ApiClient.call {
             ApiClient.api.getPublishedBarMenu(barId)
         }
+        return try {
+            ApiClient.call { ApiClient.api.getPublishedBarMenu(barId, "Bearer $token") }
+        } catch (error: BottleMapApiException) {
+            if (error.code != "UNAUTHENTICATED") throw error
+            val newToken = auth.refreshAccessTokenAfter401(token)
+            // If refresh fails, fall back to guest WITHOUT the stale token.
+            ApiClient.call {
+                ApiClient.api.getPublishedBarMenu(
+                    barId,
+                    newToken?.let { "Bearer $it" },
+                )
+            }
+        }
+    }
 
     override suspend fun searchBars(query: String): SearchBarsResponseDto =
         ApiClient.call {
