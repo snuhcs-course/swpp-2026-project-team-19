@@ -797,13 +797,15 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 검색어는 메뉴 등록의 상품 매칭과 같은 백엔드 공통 정규화 함수로 정규화한다. 검색 시점에는 임베딩과 LLM을 호출하지 않고, 아래 단계를 순서대로 시도해 활성 상품을 하나라도 찾은 단계에서 멈춘다. 찾은 상품을 판매하는 업장이 없어도 다음 단계로 넘어가지 않는다.
 
 ```text
-1. alias_exact
+1. brand
+   brand_aliases.normalized_alias 정확 일치
+   → 해당 브랜드의 활성 상품 전체 (상품 별칭과도 정확히 같아도 이 단계에서 멈춘다)
+   + 검색어와 같은 검색용 별칭을 가진 다른 브랜드의 활성 상품
+   정확 일치 상품을 먼저 둔다(3.10.2)
+
+2. alias_exact
    product_aliases.normalized_alias 정확 일치
    (is_searchable = true, products.is_active = true)
-
-2. brand
-   brand_aliases.normalized_alias 정확 일치
-   → 해당 브랜드의 활성 상품 전체
 
 3. partial
    is_searchable 상품 별칭 중 정규화 검색어를 포함하는 별칭
@@ -812,6 +814,10 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 4. none
    일치하는 상품 없음
 ```
+
+브랜드 단계를 먼저 시도하는 이유: 대표 상품이 브랜드 이름을 별칭으로 갖는 경우가 많다(예: Royal Brackla 12의 별칭 `Royal Brackla`). 상품 별칭을 먼저 보면 `Royal Brackla`는 12년만, `로얄브라클라`는 그 브랜드의 상품 전체를 돌려주어 고객이 입력한 표기에 따라 결과가 달라진다. 브랜드 이름의 어떤 표기로 찾든 같은 결과를 주기 위해 브랜드 별칭과 정확히 같은 검색어는 브랜드 결과로 해석한다. `로얄브라클라 12년`처럼 브랜드 이름보다 긴 검색어는 브랜드 별칭과 같지 않으므로 상품 별칭 단계에서 그 상품을 찾는다. 브랜드에 활성 상품이 없으면 다음 단계로 넘어간다.
+
+브랜드 결과에서도 고객이 입력한 이름 그대로인 상품을 놓치지 않도록, 검색어와 같은 검색용 별칭을 가진 상품("정확 일치 상품")은 `matchedProducts`와 `items`에서 먼저 둔다. 예를 들어 `요이치`는 Yoichi 브랜드 전체를 돌려주되, 별칭이 `요이치`인 Yoichi Single Malt를 Yoichi 10보다 앞에 둔다. 정확 일치 상품이 다른 브랜드의 상품이어도 결과에 포함한다. 같은 브랜드라도 표기에 따라 정확 일치 상품이 달라질 수 있으므로(예: `Yoichi`는 어떤 상품 별칭과도 같지 않다), 상품 집합은 같아도 순서는 표기에 따라 다를 수 있다.
 
 어느 단계든 일치한 상품이 여러 개이면 모든 상품의 판매 업장을 하나의 목록으로 합쳐 반환한다. 예를 들어 `글렌피딕`이 브랜드 별칭으로 해석되면 Glenfiddich 12, 15, 18을 판매하는 업장이 함께 나온다. 각 결과에는 상품 정보가 포함되므로 프론트엔드는 카드마다 상품명을 표시한다.
 
@@ -845,13 +851,16 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 
 ```text
 items
-  lat·lng가 있으면  distanceMeters 오름차순
-  lat·lng가 없으면  menuUpdatedAt 내림차순
-  동점이면          barName → productDisplayName → barId → productId 오름차순
+  정확 일치 상품의 행 먼저, 그다음 나머지 (brand 단계에서만 차이가 난다)
+  각 묶음 안에서
+    lat·lng가 있으면  distanceMeters 오름차순
+    lat·lng가 없으면  menuUpdatedAt 내림차순
+    동점이면          barName → productDisplayName → barId → productId 오름차순
 
 matchedProducts
-  alias_exact, brand  displayName 오름차순
-  partial             일치한 별칭이 짧은 상품부터, 같으면 displayName 오름차순
+  alias_exact  displayName 오름차순
+  brand        정확 일치 상품 먼저, 그다음 나머지. 각 묶음 안에서 displayName 오름차순
+  partial      일치한 별칭이 짧은 상품부터, 같으면 displayName 오름차순
 
 options
   sortOrder 오름차순
