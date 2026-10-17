@@ -16,6 +16,8 @@ class BottleMapApplication : Application() {
             } catch (error: LinkageError) {
                 // SDK native libraries are ARM-only; keep non-ARM emulators usable.
                 Log.e("BottleMapKakao", "SDK native library unavailable", error)
+            } catch (error: Exception) {
+                Log.e("BottleMapKakao", "SDK initialization failed", error)
             }
         }
     }
