@@ -439,12 +439,12 @@ private fun KakaoMapView(
  */
 private fun hideMapSurface(view: MapView) {
     view.visibility = View.INVISIBLE
-    runCatching { view.surfaceView.visibility = View.INVISIBLE }
+    runCatching { view.surfaceView?.visibility = View.INVISIBLE }
 }
 
 private fun showMapSurface(view: MapView) {
     view.visibility = View.VISIBLE
-    runCatching { view.surfaceView.visibility = View.VISIBLE }
+    runCatching { view.surfaceView?.visibility = View.VISIBLE }
 }
 
 /**
