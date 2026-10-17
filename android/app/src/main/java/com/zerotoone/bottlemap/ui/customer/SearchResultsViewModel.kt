@@ -50,6 +50,15 @@ class SearchResultsViewModel(
         }
     }
 
+    /** Only BAR_NOT_FOUND from the detail screen requests this refresh.
+     * Normal back navigation retains the existing result list unchanged.
+     */
+    fun refreshAfterMissingBar() {
+        if (currentQuery.isNotBlank() && _state.value !is CustomerSearchUiState.Loading) {
+            load()
+        }
+    }
+
     private fun load() {
         val query = currentQuery
         val version = ++requestVersion
