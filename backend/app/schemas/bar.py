@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.schemas.common import Latitude, Longitude
+
 
 class ActiveMenuImport(BaseModel):
     menuImportId: UUID
@@ -14,8 +16,8 @@ class BarListItem(BaseModel):
     barId: UUID
     name: str
     address: str
-    latitude: float
-    longitude: float
+    latitude: Latitude
+    longitude: Longitude
     phone: str | None
     status: Literal["active", "inactive"]
     activeMenuImport: ActiveMenuImport | None = Field(

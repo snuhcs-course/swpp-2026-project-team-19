@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from app.schemas.common import UtcDateTime
+from app.schemas.common import Latitude, Longitude, UtcDateTime
 
 
 class MenuOptionResponse(BaseModel):
@@ -27,8 +27,8 @@ class BarMenuResponse(BaseModel):
     barId: UUID
     name: str
     address: str
-    latitude: float
-    longitude: float
+    latitude: Latitude
+    longitude: Longitude
     phone: str | None
     menuBoardId: UUID | None = Field(description="null when the bar has no published menu")
     publishedAt: UtcDateTime | None = Field(description="When the current menu was published; null without one")

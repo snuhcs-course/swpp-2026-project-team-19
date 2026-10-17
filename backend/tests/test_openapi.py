@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11, #12, #13). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11, #12, #13); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 """The generated OpenAPI document serves as the API reference, so keep it matching real responses."""
 
 import pytest
@@ -45,6 +45,19 @@ def test_timestamps_are_documented_as_date_time(schema):
     assert properties["SearchResultItem"]["properties"]["menuUpdatedAt"]["format"] == "date-time"
     assert {"type": "string", "format": "date-time"} in properties["BarMenuResponse"]["properties"]["publishedAt"]["anyOf"]
 
+
+
+@pytest.mark.parametrize("model", ["BarMenuResponse", "SearchResultItem", "BarListItem"])
+def test_bar_coordinates_are_documented_as_required_with_their_ranges(schema, model):
+    component = schema["components"]["schemas"][model]
+    properties = component["properties"]
+    assert {"latitude", "longitude"} <= set(component["required"])
+    assert (properties["latitude"]["type"], properties["latitude"]["minimum"], properties["latitude"]["maximum"]) == (
+        "number",
+        -90,
+        90,
+    )
+    assert (properties["longitude"]["minimum"], properties["longitude"]["maximum"]) == (-180, 180)
 
 @pytest.mark.parametrize(
     ("method", "path"),

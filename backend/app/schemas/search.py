@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from app.schemas.common import UtcDateTime
+from app.schemas.common import Latitude, Longitude, UtcDateTime
 
 
 class MatchedProductResponse(BaseModel):
@@ -29,8 +29,8 @@ class SearchResultItem(BaseModel):
     barId: UUID
     barName: str
     address: str
-    latitude: float
-    longitude: float
+    latitude: Latitude
+    longitude: Longitude
     distanceMeters: int | None = Field(
         description="Straight-line distance from lat/lng in whole meters; null when no location was sent"
     )
