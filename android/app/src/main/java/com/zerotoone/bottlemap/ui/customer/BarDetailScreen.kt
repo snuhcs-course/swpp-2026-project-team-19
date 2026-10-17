@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
@@ -98,12 +99,15 @@ private fun BarDetailContent(
         }
 
         when (state) {
-            BarDetailUiState.Loading -> BarDetailMessage(
+            BarDetailUiState.Loading -> DelayedLoading(
                 modifier = Modifier.weight(1f),
-                title = "메뉴를 불러오는 중입니다",
-                description = "현재 게시된 바 메뉴를 확인하고 있어요.",
-                showProgress = true,
-            )
+            ) {
+                BarDetailMessage(
+                    title = "메뉴를 불러오는 중입니다",
+                    description = "현재 게시된 바 메뉴를 확인하고 있어요.",
+                    showProgress = true,
+                )
+            }
 
             is BarDetailUiState.Success -> BarDetailMenuList(
                 bar = state.bar,
