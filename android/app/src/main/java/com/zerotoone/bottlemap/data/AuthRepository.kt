@@ -134,8 +134,14 @@ class SupabaseGoogleAuthGateway : AuthGateway {
             if (error.code != "UNAUTHENTICATED") throw error
             val refreshed = refreshAccessTokenAfter401(token)
                 ?: throw BottleMapApiException(
-                    code = "UNAUTHENTICATED",
-                    message = "세션이 만료되었습니다. 다시 로그인해 주세요.",
+                    // An offline refresh may leave a valid persisted session.
+                    // Treat that as transient, not as a confirmed logout.
+                    code = if (currentAccessTokenOrNull() != null) {
+                        "NETWORK_ERROR"
+                    } else {
+                        "UNAUTHENTICATED"
+                    },
+                    message = "세션을 갱신할 수 없습니다. 연결 상태를 확인해 주세요.",
                 )
             try {
                 ApiClient.call { ApiClient.api.getMe("Bearer $refreshed") }
