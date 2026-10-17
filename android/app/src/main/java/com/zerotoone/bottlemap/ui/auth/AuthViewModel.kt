@@ -43,6 +43,9 @@ class AuthViewModel(
     private var signingIn = false
     private var awaitingGoogleCredential = false
     private var logoutInProgress = false
+    // Ignore a late SDK Authenticated emission after explicit logout until
+    // the user intentionally begins a fresh Google sign-in.
+    private var suppressAuthenticatedEventsUntilSignIn = false
     private var signInJob: Job? = null
 
     init {
@@ -78,7 +81,7 @@ class AuthViewModel(
                         }
                     }
                     AuthSessionEvent.Authenticated -> {
-                        if (!logoutInProgress) {
+                        if (!logoutInProgress && !suppressAuthenticatedEventsUntilSignIn) {
                             signingIn = false
                             awaitingGoogleCredential = false
                             loadProfile(++generation)
@@ -96,6 +99,7 @@ class AuthViewModel(
             _state.value is AuthUiState.SignedIn
         ) return false
         generation++
+        suppressAuthenticatedEventsUntilSignIn = false
         signingIn = true
         awaitingGoogleCredential = true
         _state.value = AuthUiState.SigningIn
@@ -152,6 +156,7 @@ class AuthViewModel(
         // old identity; do not wait for an SDK event or remote sign-out.
         val operationGeneration = ++generation
         logoutInProgress = true
+        suppressAuthenticatedEventsUntilSignIn = true
         signingIn = false
         awaitingGoogleCredential = false
         signInJob?.cancel()
