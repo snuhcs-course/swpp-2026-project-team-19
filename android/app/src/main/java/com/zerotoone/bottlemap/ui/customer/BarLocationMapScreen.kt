@@ -219,7 +219,25 @@ private fun KakaoMapView(
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val owner = LocalLifecycleOwner.current
-    val view = remember(target.barId, target.latitude, target.longitude) { MapView(context) }
+    val view = remember(target.barId, target.latitude, target.longitude) {
+        try {
+            MapView(context)
+        } catch (error: LinkageError) {
+            Log.e("BottleMapKakao", "Native MapView library unavailable", error)
+            null
+        } catch (error: Exception) {
+            Log.e("BottleMapKakao", "MapView creation failed", error)
+            null
+        }
+    }
+    if (view == null) {
+        LaunchedEffect(target.barId) {
+            onStatusChange(MapRenderStatus.Error(
+                "이 기기에서 Kakao 지도 엔진을 실행할 수 없습니다. ARM 지원 기기에서 확인해 주세요.",
+            ))
+        }
+        return
+    }
 
     AndroidView(
         factory = { view },
@@ -294,6 +312,9 @@ private fun KakaoMapView(
             if (owner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                 view.resume()
             }
+        } catch (error: LinkageError) {
+            Log.e("BottleMapKakao", "MapView native startup unavailable", error)
+            report(MapRenderStatus.Error("이 기기에서 지도 엔진을 사용할 수 없습니다."))
         } catch (error: Exception) {
             Log.e("BottleMapKakao", "MapView startup error", error)
             report(MapRenderStatus.Error("지도를 시작할 수 없습니다."))
