@@ -68,6 +68,26 @@ To check the backend account endpoint using a valid session, use Android's signe
 - [ ] Expired session: SDK refreshes; invalid refresh token returns to Guest/safe sign-in state without an infinite loop.
 - [ ] Login with Google and visit bar detail/map; signed-in account does not block public search.
 
+### PR #35 review regression checks (after auth race fixes)
+
+**Keep PR #35 unmerged until these have been checked on the current branch head.**
+
+1. **Stale profile response vs. Logout**: from Signed-in My Page, trigger Logout while profile/account work could still be running. Guest must appear immediately and the previous account must never reappear. The `AuthViewModelTest.logoutImmediatelyHidesIdentityAndIgnoresLateUncancellableProfileResponse` unit test deterministically simulates a late non-cancellable response.
+2. **Expired/invalid session**: use a dedicated Google/Supabase test account and a safely invalidated refresh session. After SDK reports NotAuthenticated or Backend `401 UNAUTHENTICATED` (following its one permitted refresh), My Page must transition to Guest without retrying `/api/me` endlessly.
+3. **Transient outage**: sign in, disable mobile data/Wi-Fi temporarily while profile refresh is needed, then restore connectivity. A `NETWORK_ERROR` or `503` must retain Supabase credentials and offer account sync Retry, not silently log out.
+4. **Offline Logout**: sign in, turn off networking, tap Logout, force-stop and relaunch. Account must still be Guest. Re-enable the network and confirm that old authenticated UI/token does not reappear.
+5. **Credential Manager screen exit**: while the Google account chooser is open, press system Back; repeat after Home/background and Activity recreation (Developer options > Don't keep activities can help). Returning to Login must allow another attempt, not remain stuck on SigningIn. Leaving the UI **after** delivering the Google credential should not cancel the ViewModel-owned Supabase exchange.
+6. **Guest regression**: with no session and after logout, run Search → Results → Bar Detail → Kakao Map; also check navigation Back. Authentication must never gate these views.
+
+To retain a local build/test log **outside the repository** (do not paste access tokens into logs):
+
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug "-PBOTTLEMAP_API_BASE_URL=https://bottlemap.o-r.kr/" 2>&1 |
+    Tee-Object -FilePath "$HOME\Desktop\bottlemap-pr35-android-build.log"
+```
+
+Confirm `BUILD SUCCESSFUL`, record the tested commit SHA (`git rev-parse HEAD`), Android device/OS, and concise pass/fail notes. Redact any OAuth/client credentials or tokens before sharing evidence with reviewers. No Android GitHub Actions job is added by this task.
+
 ### Troubleshooting
 
 - No Google accounts / account chooser error: Google Play services installed, correct Web client ID, Android OAuth package and SHA-1, and Google OAuth test users.
