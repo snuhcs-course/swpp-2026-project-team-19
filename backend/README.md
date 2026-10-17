@@ -151,7 +151,7 @@ The script is safe to re-run. `--dry-run` runs the whole load and prints how man
 uv run --env-file .env python scripts/seed_menu.py
 ```
 
-Each run resets that bar's current menu board to the seed contents and sets `published_at` to now, so it also restores the menu after testing uploads or publishing. Existing bar menu items are reused by bar and product. Whisky Bokchun has no seeded menu and is kept empty for the live registration demo.
+Each run resets that bar's current menu board to the seed contents and sets `published_at` to now, so it also restores the menu after testing uploads or publishing. Existing bar menu items are reused by bar and product. Only Seorosang has a menu seed; the other bars start without a menu until one is uploaded and published.
 
 ### Changing the normalization rules
 
