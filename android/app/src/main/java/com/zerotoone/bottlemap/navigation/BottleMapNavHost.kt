@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -62,6 +63,7 @@ fun BottleMapNavHost() {
         }
 
         customerGraph(
+            navController = navController,
             onOpenResults = { query ->
                 val encodedQuery = Uri.encode(query)
                 navController.navigate(
@@ -100,6 +102,7 @@ fun BottleMapNavHost() {
 }
 
 private fun NavGraphBuilder.customerGraph(
+    navController: NavHostController,
     onOpenResults: (String) -> Unit,
     onBack: () -> Unit,
     onInvalidQuery: (String) -> Unit,
