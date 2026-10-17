@@ -110,7 +110,9 @@ fun BarLocationMapScreen(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
             }
-            when (detailState) {
+            // The exiting destination may remain composed during NavHost's
+            // transition. Remove its AndroidView from composition immediately.
+            if (!leavingMap) when (detailState) {
                 BarDetailUiState.Loading -> DelayedLoading {
                     MapStatusMessage("바 정보를 불러오고 있습니다.", loading = true)
                 }
@@ -120,11 +122,21 @@ fun BarLocationMapScreen(
                 )
                 is BarDetailUiState.Success -> BarLocationContent(
                     barId, detailState.bar,
-                    onMapViewChanged = { activeMapView = it },
+                    onMapViewChanged = { view ->
+                        activeMapView = view
+                        // A late SDK/map attachment must never revive an
+                        // outgoing GL surface after Back was requested.
+                        if (leavingMap) view?.let(::hideMapSurface)
+                    },
                 )
                 is BarDetailUiState.Empty -> BarLocationContent(
                     barId, detailState.bar,
-                    onMapViewChanged = { activeMapView = it },
+                    onMapViewChanged = { view ->
+                        activeMapView = view
+                        // A late SDK/map attachment must never revive an
+                        // outgoing GL surface after Back was requested.
+                        if (leavingMap) view?.let(::hideMapSurface)
+                    },
                 )
             }
         }
