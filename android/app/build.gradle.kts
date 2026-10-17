@@ -9,6 +9,11 @@ val configuredApiBaseUrl = providers.gradleProperty("BOTTLEMAP_API_BASE_URL")
     ?.let { if (it.endsWith("/")) it else it + "/" }
 val debugApiBaseUrl = configuredApiBaseUrl ?: "http://10.0.2.2:8000/"
 val releaseApiBaseUrl = configuredApiBaseUrl ?: "https://api.example.invalid/"
+// Native Android app keys are bundled into APKs; restrict use via package+key-hash
+// registration in Kakao Developers. Never commit a real value to this repository.
+val kakaoNativeAppKey = providers.gradleProperty("BOTTLEMAP_KAKAO_NATIVE_APP_KEY")
+    .orElse("")
+    .get()
 
 android {
     namespace = "com.zerotoone.bottlemap"
@@ -20,6 +25,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"$kakaoNativeAppKey\"")
     }
 
     buildTypes {
@@ -56,6 +62,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.kakao.maps)
 
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.moshi)
