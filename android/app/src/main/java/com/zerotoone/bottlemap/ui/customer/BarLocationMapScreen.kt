@@ -267,9 +267,8 @@ private fun KakaoMapView(
         owner.lifecycle.addObserver(observer)
 
         try {
-            // Compose detaches AndroidView when this destination leaves. Disable
-            // automatic finish-on-detach and own finish() exactly once below.
-            view.setFinishManually(true)
+            // Compose detaches AndroidView when this destination leaves.
+            // Start before selecting manual cleanup, per SDK 2.13.5 lifecycle guidance.
             view.start(
                 object : MapLifeCycleCallback() {
                     override fun onMapDestroy() {
@@ -313,6 +312,7 @@ private fun KakaoMapView(
                     }
                 },
             )
+            view.setFinishManually(true)
             if (owner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                 view.resume()
             }
