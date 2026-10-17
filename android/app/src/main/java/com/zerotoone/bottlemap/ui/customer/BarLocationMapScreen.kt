@@ -47,6 +47,7 @@ import com.kakao.vectormap.MapLifeCycleCallback
 import com.kakao.vectormap.MapView
 import com.kakao.vectormap.label.LabelOptions
 import com.kakao.vectormap.label.LabelStyle
+import com.kakao.vectormap.label.LabelTextBuilder
 import com.zerotoone.bottlemap.BuildConfig
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.delay
@@ -298,8 +299,8 @@ private fun KakaoMapView(
                                         22, android.graphics.Color.rgb(24, 54, 80),
                                     ),
                                 )
-                                .setTexts("● " + target.name)
-                            val label = kakaoMap.labelManager.layer.addLabel(options)
+                                .setTexts(LabelTextBuilder().setTexts("● " + target.name))
+                            val label = kakaoMap.labelManager?.layer?.addLabel(options)
                             if (label == null) {
                                 report(MapRenderStatus.Error("바 위치 마커를 표시할 수 없습니다."))
                             } else {
