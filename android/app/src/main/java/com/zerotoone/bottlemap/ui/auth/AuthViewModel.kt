@@ -9,136 +9,213 @@ import com.zerotoone.bottlemap.data.AuthSessionEvent
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.CurrentUserDto
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 sealed interface AuthUiState {
     data object Initializing : AuthUiState
     data object Guest : AuthUiState
     data object SigningIn : AuthUiState
     data class SignedIn(val user: CurrentUserDto) : AuthUiState
-    data class SignInError(val message: String) : AuthUiState
+    /** Retry account sync only when a potentially valid Supabase session remains. */
+    data class SignInError(
+        val message: String,
+        val canRetryProfile: Boolean = false,
+    ) : AuthUiState
 }
 
-/** One auth state source shared by Login, My Page and navigation. */
+/**
+ * One Activity-scoped UI state source. Every operation has a generation so a
+ * previous /api/me result cannot resurrect a signed-out user's identity.
+ */
 class AuthViewModel(
     private val gateway: AuthGateway = AppAuth.gateway,
 ) : ViewModel() {
     private val _state = MutableStateFlow<AuthUiState>(AuthUiState.Initializing)
     val state: StateFlow<AuthUiState> = _state.asStateFlow()
+
+    private var generation = 0L
     private var signingIn = false
+    private var awaitingGoogleCredential = false
+    private var logoutInProgress = false
+    private var signInJob: Job? = null
 
     init {
         viewModelScope.launch {
             gateway.events.collectLatest { event ->
                 when (event) {
                     AuthSessionEvent.Initializing -> {
-                        if (!signingIn) _state.value = AuthUiState.Initializing
+                        if (!signingIn && !logoutInProgress &&
+                            _state.value !is AuthUiState.SignedIn
+                        ) {
+                            _state.value = AuthUiState.Initializing
+                        }
                     }
                     AuthSessionEvent.Guest -> {
-                        if (!signingIn && _state.value !is AuthUiState.SignInError) {
+                        // A definitive SDK sign-out always wins over a prior
+                        // SignInError; a temporary backend 503 does not emit Guest.
+                        if (!signingIn) {
+                            if (!logoutInProgress) generation++
                             _state.value = AuthUiState.Guest
                         }
                     }
                     AuthSessionEvent.Refreshing -> {
-                        // Transient offline refresh does not destroy a stored session.
-                        if (_state.value !is AuthUiState.SignedIn && !signingIn) {
+                        // Offline SDK refresh is transient; do not discard identity.
+                        if (!signingIn && !logoutInProgress &&
+                            _state.value !is AuthUiState.SignedIn
+                        ) {
                             _state.value = AuthUiState.Initializing
                         }
                     }
                     AuthSessionEvent.Authenticated -> {
-                        signingIn = false
-                        loadProfile()
+                        if (!logoutInProgress) {
+                            signingIn = false
+                            awaitingGoogleCredential = false
+                            loadProfile(++generation)
+                        }
                     }
                 }
             }
         }
     }
 
-    /** Called once per user click before launching Credential Manager. */
+    /** Called once per user click before opening Credential Manager. */
     fun beginGoogleSignIn(): Boolean {
-        if (_state.value == AuthUiState.SigningIn ||
+        if (signingIn || logoutInProgress ||
             _state.value == AuthUiState.Initializing ||
             _state.value is AuthUiState.SignedIn
         ) return false
+        generation++
         signingIn = true
+        awaitingGoogleCredential = true
         _state.value = AuthUiState.SigningIn
         return true
     }
 
     fun acceptGoogleCredential(idToken: String, rawNonce: String) {
-        if (!signingIn) return
-        viewModelScope.launch {
+        if (!signingIn || !awaitingGoogleCredential || logoutInProgress) return
+        awaitingGoogleCredential = false
+        val operationGeneration = generation
+        signInJob = viewModelScope.launch {
             try {
                 gateway.signInWithGoogleIdToken(idToken, rawNonce)
-                // SDK emits Authenticated, which calls GET /api/me through loadProfile().
+                // Authenticated SDK event triggers GET /api/me.
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                signingIn = false
-                _state.value = AuthUiState.SignInError(
-                    "로그인을 완료하지 못했습니다. 설정과 네트워크를 확인한 뒤 다시 시도해 주세요.",
-                )
+                if (operationGeneration == generation && !logoutInProgress) {
+                    signingIn = false
+                    _state.value = AuthUiState.SignInError(
+                        "로그인을 완료하지 못했습니다. 설정과 네트워크를 확인한 뒤 다시 시도해 주세요.",
+                    )
+                }
+            } finally {
+                if (signInJob === coroutineContext[Job]) signInJob = null
             }
         }
     }
 
     fun googleCancelled() {
-        if (!signingIn) return
+        if (!signingIn || !awaitingGoogleCredential) return
+        generation++
         signingIn = false
+        awaitingGoogleCredential = false
         _state.value = AuthUiState.Guest
     }
 
     fun googleFailed() {
-        if (!signingIn) return
+        if (!signingIn || !awaitingGoogleCredential) return
+        generation++
         signingIn = false
+        awaitingGoogleCredential = false
         _state.value = AuthUiState.SignInError(
             "Google 계정을 연결하지 못했습니다. 다시 시도할 수 있습니다.",
         )
     }
 
+    /** Called on composition disposal (back, recreation) before token exchange. */
+    fun cancelCredentialSelectionIfPending() = googleCancelled()
+
     fun continueAsGuest() {
+        if (logoutInProgress) return
+        // Immediately invalidate in-flight profile/sign-in work and hide the
+        // old identity; do not wait for an SDK event or remote sign-out.
+        val operationGeneration = ++generation
+        logoutInProgress = true
         signingIn = false
+        awaitingGoogleCredential = false
+        signInJob?.cancel()
+        _state.value = AuthUiState.Guest
+
         viewModelScope.launch {
             try {
                 gateway.logout()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                // Guest access must not be blocked by sign-out network errors.
+                // Gateway clears local Supabase credentials even if remote fails.
+            } finally {
+                if (generation == operationGeneration) logoutInProgress = false
             }
-            _state.value = AuthUiState.Guest
         }
     }
 
     fun logout() = continueAsGuest()
 
     fun retryAccountSync() {
-        if (_state.value !is AuthUiState.SignInError) return
-        viewModelScope.launch { loadProfile() }
+        val error = _state.value as? AuthUiState.SignInError ?: return
+        if (!error.canRetryProfile || logoutInProgress) return
+        val operationGeneration = ++generation
+        viewModelScope.launch { loadProfile(operationGeneration) }
     }
 
-    private suspend fun loadProfile() {
+    private suspend fun loadProfile(operationGeneration: Long) {
+        if (operationGeneration != generation || logoutInProgress) return
         _state.value = AuthUiState.Initializing
         try {
             val user = gateway.fetchCurrentUser()
-            _state.value = AuthUiState.SignedIn(user)
+            if (operationGeneration == generation && !logoutInProgress) {
+                _state.value = AuthUiState.SignedIn(user)
+            }
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: BottleMapApiException) {
-            _state.value = AuthUiState.SignInError(
-                when (error.code) {
-                    "UNAUTHENTICATED" -> "세션이 만료되었습니다. 다시 로그인해 주세요."
-                    "SERVICE_UNAVAILABLE" -> "인증 서버를 일시적으로 이용할 수 없습니다."
-                    "NETWORK_ERROR" -> "네트워크 연결을 확인해 주세요."
-                    else -> "계정 정보를 불러오지 못했습니다."
-                },
-            )
+            if (operationGeneration != generation || logoutInProgress) return
+            when (error.code) {
+                "UNAUTHENTICATED" -> {
+                    // Confirmed invalid session, not a network/503 outage.
+                    // Guest is a normal usable state; do not retry /api/me.
+                    continueAsGuest()
+                }
+                "SERVICE_UNAVAILABLE", "NETWORK_ERROR" -> {
+                    _state.value = AuthUiState.SignInError(
+                        if (error.code == "NETWORK_ERROR") {
+                            "네트워크 연결을 확인해 주세요."
+                        } else {
+                            "인증 서버를 일시적으로 이용할 수 없습니다."
+                        },
+                        canRetryProfile = true,
+                    )
+                }
+                else -> {
+                    _state.value = AuthUiState.SignInError(
+                        "계정 정보를 불러오지 못했습니다.",
+                        canRetryProfile = true,
+                    )
+                }
+            }
         } catch (_: Exception) {
-            _state.value = AuthUiState.SignInError("계정 정보를 확인하지 못했습니다.")
+            if (operationGeneration == generation && !logoutInProgress) {
+                _state.value = AuthUiState.SignInError(
+                    "계정 정보를 확인하지 못했습니다.",
+                    canRetryProfile = true,
+                )
+            }
         }
     }
 }
