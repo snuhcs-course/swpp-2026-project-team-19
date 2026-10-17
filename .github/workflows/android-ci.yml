@@ -1,8 +1,8 @@
 # AI-assisted with ChatGPT/GPT-6 for Hojin Nam (2026-10-18, I2-P37/P38). Human review pending.
 name: Android CI
 
-# Do not put paths filters here: required checks can remain Pending when a workflow is skipped.
-# Detect Android changes in a job instead; unrelated PRs get skipped (successful) Android jobs.
+# Do not use workflow-level path filters: a skipped workflow can leave PR checks Pending.
+# Android jobs are skipped on unrelated changes; team policy requires manual merge review.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -95,7 +95,32 @@ jobs:
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v5
       - name: Run JUnit 4 local tests
+        id: unit_test
         run: ./gradlew :app:testDebugUnitTest --no-daemon
+      - name: Summarize JUnit results and reject empty test runs
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import glob
+          import os
+          import xml.etree.ElementTree as ET
+          files = glob.glob("android/app/build/test-results/testDebugUnitTest/TEST-*.xml")
+          counts = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+          for file in files:
+              suite = ET.parse(file).getroot()
+              for key in counts:
+                  counts[key] += int(suite.attrib.get(key, "0"))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as out:
+              out.write("## Android JUnit 4 local tests\n\n")
+              out.write("| Tests | Failures | Errors | Skipped |\n")
+              out.write("|---:|---:|---:|---:|\n")
+              out.write("| {tests} | {failures} | {errors} | {skipped} |\n".format(**counts))
+          if counts["tests"] == 0 and os.environ.get("CI_TESTS_RAN") == "true":
+              raise SystemExit("No JUnit tests executed; failing rather than accepting an empty test run")
+          PY
+        env:
+          CI_TESTS_RAN: \${{ steps.unit_test.outcome == 'success' }}
       - name: Upload unit-test XML and HTML reports
         if: always()
         uses: actions/upload-artifact@v7
