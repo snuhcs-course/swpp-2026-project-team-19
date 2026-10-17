@@ -1,0 +1,162 @@
+# AI-assisted with ChatGPT/GPT-6 for Hojin Nam (2026-10-18, I2-P37/P38). Human review pending.
+name: Android CI
+
+# Do not use workflow-level path filters: a skipped workflow can leave PR checks Pending.
+# Android jobs are skipped on unrelated changes; team policy requires manual merge review.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: Android / changes
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Detect Android changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            android:
+              - 'android/**'
+              - '.github/workflows/android-ci.yml'
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle/**'
+              - 'gradle.properties'
+              - 'gradlew'
+              - 'gradlew.bat'
+
+  android-lint:
+    name: Android / lint
+    needs: changes
+    if: ${{ needs.changes.outputs.android == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK 37
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@v5
+      - name: Run Android lint
+        run: ./gradlew :app:lintDebug --no-daemon
+      - name: Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-lint-reports
+          path: |
+            android/app/build/reports/lint-results-debug.*
+          if-no-files-found: ignore
+
+  android-unit-tests:
+    name: Android / unit tests
+    needs: changes
+    if: ${{ needs.changes.outputs.android == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK 37
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@v5
+      - name: Run JUnit 4 local tests
+        id: unit_test
+        run: ./gradlew :app:testDebugUnitTest --no-daemon
+      - name: Summarize JUnit results and reject empty test runs
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import glob
+          import os
+          import xml.etree.ElementTree as ET
+          files = glob.glob("android/app/build/test-results/testDebugUnitTest/TEST-*.xml")
+          counts = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+          for file in files:
+              suite = ET.parse(file).getroot()
+              for key in counts:
+                  counts[key] += int(suite.attrib.get(key, "0"))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as out:
+              out.write("## Android JUnit 4 local tests\n\n")
+              out.write("| Tests | Failures | Errors | Skipped |\n")
+              out.write("|---:|---:|---:|---:|\n")
+              out.write("| {tests} | {failures} | {errors} | {skipped} |\n".format(**counts))
+          if counts["tests"] == 0 and os.environ.get("CI_TESTS_RAN") == "true":
+              raise SystemExit("No JUnit tests executed; failing rather than accepting an empty test run")
+          PY
+        env:
+          CI_TESTS_RAN: ${{ steps.unit_test.outcome == 'success' }}
+      - name: Upload unit-test XML and HTML reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-unit-test-reports
+          path: |
+            android/app/build/test-results/testDebugUnitTest/**
+            android/app/build/reports/tests/testDebugUnitTest/**
+          if-no-files-found: ignore
+
+  android-debug-build:
+    name: Android / debug APK
+    needs: changes
+    if: ${{ needs.changes.outputs.android == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK 37
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@v5
+      # Empty BuildConfig credentials are supported for compilation; this job never connects
+      # to production Backend, Google, Supabase, or Kakao services.
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Upload installable debug APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
