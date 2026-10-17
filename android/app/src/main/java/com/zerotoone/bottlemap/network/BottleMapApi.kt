@@ -13,6 +13,11 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface BottleMapApi {
+    @GET("api/me")
+    suspend fun getMe(
+        @Header("Authorization") authorization: String,
+    ): CurrentUserDto
+
     @POST("api/auth/temp-login")
     suspend fun temporaryLogin(): TemporaryLoginResponseDto
 
@@ -36,6 +41,7 @@ interface BottleMapApi {
     @GET("api/bars/{barId}/menu")
     suspend fun getPublishedBarMenu(
         @Path("barId") barId: String,
+        @Header("Authorization") authorization: String? = null,
     ): BarMenuResponseDto
 
     @GET("api/search/bars")

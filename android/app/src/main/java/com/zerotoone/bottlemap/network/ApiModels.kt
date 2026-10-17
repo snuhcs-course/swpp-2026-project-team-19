@@ -18,6 +18,14 @@ data class FieldErrorDto(
     val message: String,
 )
 
+data class CurrentUserDto(
+    val userId: String,
+    val email: String?,
+    val displayName: String?,
+    val userType: String,
+    val updatedAt: String,
+)
+
 data class TemporaryLoginResponseDto(
     val accessToken: String,
     val tokenType: String,

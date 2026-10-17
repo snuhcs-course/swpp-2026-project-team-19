@@ -4,6 +4,7 @@ package com.zerotoone.bottlemap.ui.customer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +38,7 @@ private const val MAX_QUERY_LENGTH = 100
 @Composable
 fun SearchScreen(
     onOpenResults: (String) -> Unit,
+    onOpenAccount: () -> Unit = {},
     serverValidationErrorCode: String? = null,
     onClearServerValidation: () -> Unit = {},
 ) {
@@ -76,6 +79,7 @@ fun SearchScreen(
                 onClearServerValidation()
             },
             onSearch = submit,
+            onOpenAccount = onOpenAccount,
         )
     }
 }
@@ -90,6 +94,7 @@ private fun SearchContent(
     onQueryChange: (String) -> Unit,
     onClear: () -> Unit,
     onSearch: () -> Unit,
+    onOpenAccount: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -100,13 +105,19 @@ private fun SearchContent(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(
-                text = "◉ BottleMap",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 22.dp),
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "◉ BottleMap",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+                TextButton(onClick = onOpenAccount) { Text("마이페이지") }
+            }
         }
 
         Column(
@@ -187,7 +198,7 @@ private fun SearchContent(
 @Composable
 private fun I2SearchInitialPreview() {
     I2CustomerSearchTheme {
-        SearchContent("", false, false, false, null, {}, {}, {})
+        SearchContent("", false, false, false, null, {}, {}, {}, {})
     }
 }
 
@@ -195,7 +206,7 @@ private fun I2SearchInitialPreview() {
 @Composable
 private fun I2SearchEnteredPreview() {
     I2CustomerSearchTheme {
-        SearchContent("Deanston 12", false, true, false, null, {}, {}, {})
+        SearchContent("Deanston 12", false, true, false, null, {}, {}, {}, {})
     }
 }
 
