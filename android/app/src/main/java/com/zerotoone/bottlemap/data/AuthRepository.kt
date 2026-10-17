@@ -11,7 +11,9 @@ import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.IDToken
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.createSupabaseClient
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -92,6 +94,9 @@ class SupabaseGoogleAuthGateway : AuthGateway {
                 client.auth.refreshCurrentSession().accessToken
             } catch (cancelled: CancellationException) {
                 throw cancelled
+            } catch (_: IOException) {
+                // Offline refresh is transient: preserve the SDK-stored session.
+                null
             } catch (_: Exception) {
                 runCatching { client.auth.signOut() }
                 client.auth.clearSession()
@@ -119,9 +124,10 @@ class SupabaseGoogleAuthGateway : AuthGateway {
     override suspend fun logout() {
         if (!configured) return
         try {
-            client.auth.signOut()
+            // A remote outage must not block returning to Guest indefinitely.
+            withTimeoutOrNull(3_000L) { client.auth.signOut() }
         } finally {
-            // Also drop local credentials on failed remote sign-out (offline/logout).
+            // Also drop local credentials on failed/offline remote sign-out.
             client.auth.clearSession()
         }
     }
