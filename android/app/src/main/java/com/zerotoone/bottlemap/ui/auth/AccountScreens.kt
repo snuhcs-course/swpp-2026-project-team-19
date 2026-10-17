@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zerotoone.bottlemap.ui.customer.I2CustomerSearchTheme
+import com.zerotoone.bottlemap.ui.common.DelayedLoading
 
 /** Figma P1 guest / P2 member account surface, available without signing in. */
 @Composable
@@ -54,10 +55,12 @@ fun AccountScreen(
                     fontWeight = FontWeight.Bold,
                 )
                 when (state) {
-                    AuthUiState.Initializing -> AccountPanel(
-                        "세션을 확인하고 있습니다.",
-                        "기존 Guest 검색은 로그인 없이 사용할 수 있습니다.",
-                    ) { CircularProgressIndicator() }
+                    AuthUiState.Initializing -> DelayedLoading {
+                        AccountPanel(
+                            "세션을 확인하고 있습니다.",
+                            "기존 Guest 검색은 로그인 없이 사용할 수 있습니다.",
+                        ) { CircularProgressIndicator() }
+                    }
                     AuthUiState.Guest -> {
                         AccountPanel(
                             "Guest로 이용 중",
@@ -148,7 +151,12 @@ fun GoogleLoginScreen(
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 when (state) {
-                    AuthUiState.SigningIn, AuthUiState.Initializing -> {
+                    AuthUiState.Initializing -> DelayedLoading {
+                        CircularProgressIndicator()
+                        Text("로그인을 처리하고 있습니다.")
+                    }
+                    // Explicit user-initiated sign-in needs immediate feedback.
+                    AuthUiState.SigningIn -> {
                         CircularProgressIndicator()
                         Text("로그인을 처리하고 있습니다.")
                     }
