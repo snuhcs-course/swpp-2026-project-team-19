@@ -43,8 +43,9 @@ data class BarDetailUiModel(
     val name: String,
     val address: String,
     val phone: String?,
-    val latitude: Double,
-    val longitude: Double,
+    // UI model is defensive; the current backend contract requires both.
+    val latitude: Double?,
+    val longitude: Double?,
     val publishedAtText: String?,
     val items: List<BarMenuItemUiModel>,
 )
