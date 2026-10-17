@@ -90,14 +90,27 @@ def test_brand_search_merges_products_and_counts_rows(client, db_session, glenfi
 def test_unknown_product_has_no_matched_products(client, db_session, glenfiddich):
     body = search(client, query="없는위스키")
 
-    assert (body["matchType"], body["matchedProducts"], body["items"]) == ("none", [], [])
+    assert (body["matchType"], body["matchedProducts"], body["items"], body["truncated"]) == ("none", [], [], False)
 
 
 def test_known_product_without_bars_has_matched_products_but_no_items(client, db_session, glenfiddich):
     body = search(client, query="글렌피딕 15년")
 
-    assert [p["resultCount"] for p in body["matchedProducts"]] == [0]
-    assert body["items"] == []
+    assert body["matchType"] == "alias_exact"
+    assert [(p["displayName"], p["resultCount"]) for p in body["matchedProducts"]] == [("Glenfiddich 15", 0)]
+    assert (body["items"], body["truncated"]) == ([], False)
+
+
+def test_known_brand_without_bars_lists_its_products_but_no_items(client, db_session, glenfiddich):
+    body = search(client, query="Glenfiddich")
+
+    assert body["matchType"] == "brand"
+    assert [(p["displayName"], p["resultCount"]) for p in body["matchedProducts"]] == [
+        ("Glenfiddich 12", 0),
+        ("Glenfiddich 15", 0),
+        ("Glenfiddich 18", 0),
+    ]
+    assert (body["items"], body["truncated"]) == ([], False)
 
 
 def test_inactive_bars_and_items_off_the_current_board_are_excluded(client, db_session, glenfiddich):

@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-17). Reviewed by Haeul Yang.
 from decimal import Decimal
 from uuid import uuid4
 
@@ -93,8 +93,20 @@ def body_from_review(review):
     }
 
 
+def customer_search(client, query):
+    return client.get("/api/search/bars", params={"query": query}).json()
+
+
+def prices_found(client, query):
+    return [[o["priceKrw"] for o in i["options"]] for i in customer_search(client, query)["items"]]
+
+
 def test_review_to_customer_search(client, db_session, sample, operator, glenfiddich):
     review = client.get(f"/api/menu-imports/{sample.menu_import.id}", headers=operator).json()
+    # Waiting for review changes nothing customers see (API spec, section 3.10.2).
+    assert prices_found(client, "글렌피딕 12년") == [[8000, 17000]]
+    assert prices_found(client, "글렌피딕 15년") == [[21000]]
+    assert customer_search(client, "Unknown Distillery 25")["matchType"] == "none"
 
     body = applied(client, sample, body_from_review(review), operator)
 
@@ -124,6 +136,10 @@ def test_review_to_customer_search(client, db_session, sample, operator, glenfid
     assert [(i["barId"], i["menuDisplayName"]) for i in search["items"]] == [
         (str(sample.bar.id), "Unknown Distillery 25")
     ]
+    # Once applied: the new price shows, and the removed 15 is recognized but sold nowhere.
+    assert prices_found(client, "글렌피딕 12년") == [[9000, 17000]]
+    removed = customer_search(client, "글렌피딕 15년")
+    assert ([p["resultCount"] for p in removed["matchedProducts"]], removed["items"]) == ([0], [])
     # The bar accepts the next upload.
     response = client.post(
         f"/api/bars/{sample.bar.id}/menu-imports",
