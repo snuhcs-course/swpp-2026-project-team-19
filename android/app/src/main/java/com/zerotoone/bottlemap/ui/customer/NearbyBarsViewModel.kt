@@ -51,9 +51,11 @@ class NearbyBarsViewModel(
 
     private var currentPermission = NearbyPermission.NONE
     private var query: Job? = null
+    private var requestVersion = 0L
 
     fun updatePermission(permission: NearbyPermission) {
         if (permission != NearbyPermission.PRECISE) {
+            ++requestVersion
             query?.cancel()
             currentPermission = permission
             _state.value = when (permission) {
@@ -67,19 +69,23 @@ class NearbyBarsViewModel(
         val newlyGranted = currentPermission != NearbyPermission.PRECISE
         currentPermission = permission
         if (newlyGranted || _state.value is NearbyUiState.Initial ||
-            _state.value is NearbyUiState.PermissionRequired
+            _state.value is NearbyUiState.PermissionRequired ||
+            _state.value is NearbyUiState.LocationServicesDisabled
         ) refresh()
     }
 
     fun refresh() {
         if (currentPermission != NearbyPermission.PRECISE) return
+        val version = ++requestVersion
         query?.cancel()
         _state.value = NearbyUiState.LoadingLocation
         query = viewModelScope.launch {
             try {
                 val origin = locationSource.currentLocation()
+                if (version != requestVersion) return@launch
                 _state.value = NearbyUiState.LoadingBars
                 val complete = barsSource.listNearbyCandidates(origin)
+                if (version != requestVersion) return@launch
                 val nearby = filterNearbyBars(origin, complete)
                 if (nearby.isEmpty()) {
                     savedStateHandle["nearbySelectedBarId"] = null
@@ -94,6 +100,7 @@ class NearbyBarsViewModel(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
+                if (version != requestVersion) return@launch
                 _state.value = when (error) {
                     is NearbyLocationServicesDisabledException ->
                         NearbyUiState.LocationServicesDisabled
