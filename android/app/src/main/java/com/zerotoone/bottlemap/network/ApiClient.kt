@@ -50,12 +50,15 @@ object ApiClient {
         }
         .build()
 
-    val api: BottleMapApi = Retrofit.Builder()
+    private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BuildConfig.API_BASE_URL)
         .client(httpClient)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
-        .create(BottleMapApi::class.java)
+
+    val api: BottleMapApi = retrofit.create(BottleMapApi::class.java)
+
+    fun <T> createService(type: Class<T>): T = retrofit.create(type)
 
     private val errorAdapter = moshi.adapter(ApiErrorEnvelopeDto::class.java)
 

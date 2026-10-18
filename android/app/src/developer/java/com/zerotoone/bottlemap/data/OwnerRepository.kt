@@ -4,6 +4,7 @@ package com.zerotoone.bottlemap.data
 import com.zerotoone.bottlemap.network.ApiClient
 import com.zerotoone.bottlemap.network.BarDto
 import com.zerotoone.bottlemap.network.BottleMapApiException
+import com.zerotoone.bottlemap.network.OwnerEndpoint
 import com.zerotoone.bottlemap.network.MenuImportAcceptedDto
 import com.zerotoone.bottlemap.network.MenuImportStatusDto
 import com.zerotoone.bottlemap.network.ReviewAndApplyRequestDto
@@ -17,7 +18,7 @@ class OwnerRepository {
 
     private suspend fun ensureAccessToken(): String {
         accessToken?.let { return it }
-        val token = ApiClient.call { ApiClient.api.temporaryLogin() }.accessToken
+        val token = ApiClient.call { OwnerEndpoint.api.temporaryLogin() }.accessToken
         accessToken = token
         return token
     }
@@ -38,7 +39,7 @@ class OwnerRepository {
         buildList {
             var cursor: String? = null
             do {
-                val page = ApiClient.api.getBars(
+                val page = OwnerEndpoint.api.getBars(
                     authorization = authorization,
                     status = "active",
                     limit = 100,
@@ -52,7 +53,7 @@ class OwnerRepository {
 
     suspend fun getMenuImport(menuImportId: String): MenuImportStatusDto =
         withOperatorAuth { authorization ->
-            ApiClient.api.getMenuImport(
+            OwnerEndpoint.api.getMenuImport(
                 authorization = authorization,
                 menuImportId = menuImportId,
             )
@@ -70,7 +71,7 @@ class OwnerRepository {
             image.filename,
             imageBody,
         )
-        ApiClient.api.uploadMenuImport(
+        OwnerEndpoint.api.uploadMenuImport(
             authorization = authorization,
             idempotencyKey = idempotencyKey,
             barId = barId,
@@ -83,7 +84,7 @@ class OwnerRepository {
         menuImportId: String,
         request: ReviewAndApplyRequestDto,
     ): ReviewAppliedResponseDto = withOperatorAuth { authorization ->
-        ApiClient.api.reviewAndApply(
+        OwnerEndpoint.api.reviewAndApply(
             authorization = authorization,
             menuImportId = menuImportId,
             request = request,
@@ -91,7 +92,7 @@ class OwnerRepository {
     }
 }
 
-object Repositories {
-    val customer: CustomerRepository by lazy { CustomerRepository() }
+/** Developer-only operator repository; absent from customer variants. */
+object OwnerRepositories {
     val owner: OwnerRepository by lazy { OwnerRepository() }
 }
