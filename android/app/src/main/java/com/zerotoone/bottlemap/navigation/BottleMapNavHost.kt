@@ -28,16 +28,11 @@ import com.zerotoone.bottlemap.ui.customer.SearchScreen
 import com.zerotoone.bottlemap.ui.customer.NearbyBarsScreen
 import com.zerotoone.bottlemap.ui.customer.nearbyBarsViewModel
 import com.zerotoone.bottlemap.ui.common.DelayedLoading
-import com.zerotoone.bottlemap.ui.mode.ModeSelectionScreen
-import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
-import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 
 private const val SEARCH_VALIDATION_ERROR_KEY = "searchValidationErrorCode"
 private const val REFRESH_AFTER_MISSING_BAR_KEY = "refreshAfterMissingBar"
 
 private object Routes {
-    const val MODE_SELECTION = "mode-selection"
-
     const val CUSTOMER_GRAPH = "customer"
     const val CUSTOMER_SEARCH = "customer/search"
     const val CUSTOMER_NEARBY = "customer/nearby"
@@ -52,12 +47,7 @@ private object Routes {
     const val CUSTOMER_SEARCH_RESULTS_ROUTE =
         CUSTOMER_SEARCH_RESULTS + "?" + CUSTOMER_QUERY_ARGUMENT + "={" + CUSTOMER_QUERY_ARGUMENT + "}"
 
-    const val OWNER_GRAPH = "owner"
-    const val OWNER_MENU_UPLOAD = "owner/menu-upload"
-    const val OWNER_EXTRACTION_REVIEW = "owner/extraction-review"
-    const val MENU_IMPORT_ID_ARGUMENT = "menuImportId"
-    const val OWNER_EXTRACTION_REVIEW_ROUTE =
-        OWNER_EXTRACTION_REVIEW + "/{" + MENU_IMPORT_ID_ARGUMENT + "}"
+
 }
 
 @Composable
@@ -68,15 +58,8 @@ fun BottleMapNavHost() {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.MODE_SELECTION,
+        startDestination = variantStartDestination,
     ) {
-        composable(Routes.MODE_SELECTION) {
-            ModeSelectionScreen(
-                onCustomerSelected = { navController.navigate(Routes.CUSTOMER_GRAPH) },
-                onOwnerSelected = { navController.navigate(Routes.OWNER_GRAPH) },
-            )
-        }
-
         customerGraph(
             navController = navController,
             authViewModel = authViewModel,
@@ -108,14 +91,7 @@ fun BottleMapNavHost() {
             },
         )
 
-        ownerGraph(
-            onOpenReview = { importId ->
-                navController.navigate(
-                    Routes.OWNER_EXTRACTION_REVIEW + "/" + Uri.encode(importId)
-                )
-            },
-            onBack = { navController.popBackStack() },
-        )
+        registerVariantRoutes(navController)
     }
 }
 
@@ -277,35 +253,6 @@ private fun NavGraphBuilder.customerGraph(
                     )
                 }
             }
-        }
-    }
-}
-
-private fun NavGraphBuilder.ownerGraph(
-    onOpenReview: (String) -> Unit,
-    onBack: () -> Unit,
-) {
-    navigation(
-        route = Routes.OWNER_GRAPH,
-        startDestination = Routes.OWNER_MENU_UPLOAD,
-    ) {
-        composable(Routes.OWNER_MENU_UPLOAD) {
-            MenuUploadScreen(onOpenReview = onOpenReview)
-        }
-        composable(
-            route = Routes.OWNER_EXTRACTION_REVIEW_ROUTE,
-            arguments = listOf(
-                navArgument(Routes.MENU_IMPORT_ID_ARGUMENT) {
-                    type = NavType.StringType
-                },
-            ),
-        ) { backStackEntry ->
-            ExtractionReviewScreen(
-                menuImportId = backStackEntry.arguments
-                    ?.getString(Routes.MENU_IMPORT_ID_ARGUMENT)
-                    .orEmpty(),
-                onBack = onBack,
-            )
         }
     }
 }
