@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-18  
 **Owner:** Android frontend  
-**Status:** FRONTEND PROTOTYPE ONLY — publicly accessible complete Nearby-bar API is **not agreed**. Do not mark either task Done or this PR ready to merge as a complete feature.
+**Status:** Android integration written for Backend A9 PR #43 (API spec 3.12). **PR #43 open/unmerged, deployment and physical-device E2E not verified**; do not mark A7/A8 done until verification.
 
 This is an English, repository-side draft for the team Testing Documentation Wiki. It follows the course **4 — Testing Documentation Guidelines** (Plan vs Results) and the previously agreed 10-column Section 3.1 test-case format. **The live Testing Documentation Wiki registry could not be retrieved**; identifiers below are provisional and must be checked for collisions before adding official Wiki cases.
 
@@ -10,35 +10,32 @@ This is an English, repository-side draft for the team Testing Documentation Wik
 
 - A7: on-demand foreground precise location, filter **all eligible active bars** within 500.0 m, distance-sort, swipeable carousel; Guest and member both supported.
 - A8: same selected bar ID controls card highlight, Kakao label highlight/camera focus, marker-click→card sync and Bar Detail navigation; handle denied permission, empty, network and map failures.
-- Latest Backend contract: `docs/frontend_backend_api_spec.md`, merged PR #39. `GET /api/bars` is **operator-only**. `GET /api/search/bars` only returns matches for a particular whisky query and may truncate at `limit`; `GET /api/search/bar-names` is a query-dependent public owner-application search. None is a complete Guest-accessible Nearby catalog.
-- No Backend or AI code was modified. No fake locations/bars are shown in the real UI. `AwaitingPublicNearbyApi` returns an **explicit contract-unavailable Error**, not an empty result or partial nearby list.
-- Latest Figma design `BottleMap-Wireframe-I2` page `00 — I2 Requirements Wireflows`, S0/S1 (node `5:3`/`5:38`): the Search screen **already contains** a `내 주변 바` Carousel (x=16, y=520, 204x150 in 360dp) next to a `Nearby Map` tile (x=228, y=520). It also depicts Bottom Navigation. Current Android Search does **not** implement that Bottom Navigation. As an **explicit temporary deviation**, this branch adds the `내 주변 바` heading and a `500m 내 주변 바 · 지도에서 보기` action below the search box; the Carousel + full map are on a separate Nearby route. Populating a home-screen carousel with real bars and confirming final Figma placement requires a complete public Backend Nearby API. No sample bar or fictitious bar card is rendered in production.
-- Android stays Portrait-only. No background location permission or updates, no location storage/logging.
+- Proposed latest Backend contract: PR #43, `docs/frontend_backend_api_spec.md` section 3.12. `GET /api/search/nearby-bars?lat=...&lng=...&radiusMeters=500` is public, works for Guests, returns **all active bars**, no pagination or truncation. Server provides integer rounded `distanceMeters` and a nullable `menuUpdatedAt`. **PR #43 has not yet merged or been confirmed deployed.** Earlier routes (`/api/bars` operator-only and whisky `/api/search/bars`) must NOT be used as Nearby substitutes.
+- No Backend or AI code was modified here. `BackendNearbyBarsRepository` calls the real section 3.12 public endpoint using the existing `ApiClient`; the response maps to domain bars without client Haversine filtering or resorting. If the server has not deployed PR #43, a 404 is shown as a recoverable deployment error, NOT as an empty result. No fake bars in production UI.
+- Latest Figma design `BottleMap-Wireframe-I2` page `00 — I2 Requirements Wireflows`, S0/S1 (node `5:3`/`5:38`): the Search screen **already contains** a `내 주변 바` Carousel (x=16, y=520, 204x150 in 360dp) next to a `Nearby Map` tile (x=228, y=520). It also depicts Bottom Navigation. Current Android Search does **not** implement that Bottom Navigation. As an **explicit temporary deviation**, this branch adds the `내 주변 바` heading and a `500m 내 주변 바 · 지도에서 보기` action below the search box; the Carousel + full map are on a separate Nearby route. Finalizing the full home-screen Figma carousel (as opposed to the separate Nearby route) still requires a frontend UI placement decision and on-device review. No sample bar or fictitious bar card is rendered in production.
+- Android stays Portrait-only. No background location permission or updates, no location storage. The Android OkHttp Debug BASIC logger bypasses the `/api/search/nearby-bars` URL so it does not log coordinates. **Server URL access logs still contain lat/lng, explicitly disclosed in Backend API spec 3.12.3; ask Backend owner to review log redaction/retention policy.**
 - Personal-data principle: only a single location fix in foreground, used in memory for the request and distance calculation. Check location service access/recovery on device.
 
-## 2. Architecture and interface blocker
+## 2. Architecture and resolved data-interface blocker (deployment pending)
 
 ```text
 Customer Search -> Nearby Route
-  -> Runtime location permissions (NONE/APPROXIMATE/PRECISE/PERMANENTLY_DENIED)
-  -> AndroidNearbyLocationSource (Fused Location, single cancellable fix)
-  -> NearbyBarsSource.listNearbyCandidates(origin)
-  -> filterNearbyBars(origin, completeActiveBarCatalog)  // <= 500.0 m inclusive
+  -> on-demand foreground permission (NONE/APPROXIMATE/PRECISE/PERMANENTLY_DENIED)
+  -> AndroidNearbyLocationSource (Fused Location, cancellable single fix)
+  -> BackendNearbyBarsRepository (ApiClient, public GET /api/search/nearby-bars)
+      request lat + lng + radiusMeters=500, no Authorization
+      response complete items[]; server-filtered and sorted, no pagination
+  -> NearbyBarsResponseDto.toNearbyBars()  // validated, dedup ID, NOT re-filtered
   -> NearbyBarsViewModel.StateFlow (Success/Empty/Error)
-  -> LazyRow carousel + Kakao native label layer (selectedBarId only)
+  -> LazyRow + Kakao native labels (selectedBarId is sole selection source)
   -> selected bar Detail route
 ```
 
-The production source remains `AwaitingPublicNearbyApi` until Backend owner agrees a **public contract** that provides complete active-bar data covering all 500 m candidates (either a radius-filtered endpoint with explicit completeness semantics or a fully paginated list available to Guest). The interface **must** specify:
+**Authoritative boundary:** Backend PR #43 includes bars when **rounded integer** `distanceMeters <= radiusMeters`; this includes raw 500.4m rounded down to 500m. The old pure Haversine filter in `NearbyBarsRepository.kt` remains as a unit-test utility, but is **not used on production API results**. The frontend keeps the server-provided order/distance and deduplicates IDs while rejecting malformed coordinates/distance as a response error.
 
-1. Access for Guest and authenticated customer; no operator token.
-2. Geometry: WGS84 latitude/longitude, center latitude/longitude and 500 m radius, radius semantics (straight line), boundary inclusion, precision.
-3. Response: existing ID/name/address/lat/lng fields (map existing `BarDto` contract where applicable), active/inactive visibility, explicit missing-coordinate behavior.
-4. Pagination/completeness: total rows or `nextCursor` and when there are no more pages. Never claim full nearby results from one truncated `GET /api/search/bars` page.
-5. Empty/network/429/503 and rate limits. Preserve Guest access; avoid long-term location storage.
-6. Confirm whether distance is server-calculated or frontend-calculated; **do not double-filter differently**. This branch has frontend Haversine filtering from a complete catalog.
+**Interface resolution:** A9 PR #43 supplies the complete public contract, including active bars with unpublished/empty menus. **Still open/unmerged** at implementation time; confirm approval/merge, deployment, and live API response with Backend owner. No backend changes made in this Android PR. Dependency tracked in issue #42.
 
-**Blocking dependency owner:** Backend. **Frontend follow-up:** replace only `AwaitingPublicNearbyApi` with an adapter to the agreed Retrofit contract, add contract tests and on-device data completeness checks. No guessed Retrofit endpoint or DTO committed.
+**Privacy:** The HTTP GET necessarily sends coordinates in its URL, which the Backend currently logs. No Android log stores the nearby URL. This does **not** imply the coordinates are absent from server access logs; check Backend owner’s retention/redaction policy.
 
 ## 3. Unit and integration test plan — provisional Section 3.1 cases
 
@@ -52,14 +49,14 @@ Columns: **ID, Title, Basis, Level, Preconditions, Steps, Expected Result, Owner
 | A7A8-DRAFT-04 | Denied/approximate | A7 permission handling | Unit | Fake location/source | Reject or approximate-only | No location/network request or 500m claim | Android | `permissionDeniedAndApproximateDoNotRequestLocation` | Written; run pending |
 | A7A8-DRAFT-05 | Loading/Success/Empty | A7 state transitions | Unit | Fake sources | Allow precise, fetch nonempty/empty | Loading→Success or Empty | Android | `precisePermissionTransitionsThroughLocationAndBarsToSuccess`, `empty500mResultIsDistinctFromBackendFailure` | Written; run pending |
 | A7A8-DRAFT-06 | Network Retry | A7 error handling | Unit | First fetch fails | Trigger Retry after restoring source | One retry and Success | Android | `errorRetrySucceedsWithoutAutoPermissionPrompt` | Written; run pending |
-| A7A8-DRAFT-07 | Contract incomplete | A7 data completeness | Unit | Production source unavailable | Request complete Nearby catalog | Honest non-retryable Error; never fake Empty | Android | `catalogUnavailableNeverPretendsToBeEmpty` | Written; run pending |
+| A7A8-DRAFT-07 | API not yet deployed | A7 deployment handling | Unit | Fake HTTP 404 | Request nearby | Visible deployment error, not fake Empty | Android | `api404BeforeBackendDeploymentIsNotDisplayedAsEmpty` | Written; run pending |
 | A7A8-DRAFT-08 | Selection sync | A8 card/marker focus | Unit | Fake 2 bars | Select from card then marker | Same ID in SavedStateHandle; unknown ID ignored | Android | `carouselAndMarkerSelectionBothUseSameSavedBarId` | Written; run pending |
 | A7A8-DRAFT-09 | Resume/permission revoke | A7 lifecycle | Unit | Fake in-flight state | Revoke permission | Pending request canceled, PermissionRequired | Android | `permissionRevokedWhileLoadingIsHandled` | Written; run pending |
 | A7A8-DRAFT-10 | Repeat navigation refresh | A7/A8 lifecycle | Unit | Fake loaded results | Recheck precise permission | No extra location/catalog request | Android | `backgroundPermissionRecheckDoesNotRepeatSuccessfulNetworkRequest` | Written; run pending |
 | A7A8-DRAFT-11 | Real permission & fix | A7 location | Device | Samsung device | Allow precise / deny / approximate / disable GPS | Appropriate state and no background prompt | Android | Manual scenario | Not run |
-| A7A8-DRAFT-12 | Real carousel/map/end-to-end | A7/A8 integration | Device | **Public backend Nearby contract available** | Swipe/select markers/open Detail/back | Complete 500m active bars, synced marker, no overlay | Android+Backend | Manual scenario | **Blocked: API** |
+| A7A8-DRAFT-12 | Real carousel/map/end-to-end | A7/A8 integration | Device | **A9 PR #43 merged/deployed and API accessible** | Swipe/select markers/open Detail/back | Complete 500m active bars, synced marker, no overlay | Android+Backend | Manual scenario | **Not run; awaiting deployment/device** |
 
-No test uses production Google/Supabase/Kakao/Location API in unit tests; use interfaces and fakes. Coverage target for this new domain logic should be reviewed with team; do not invent a numerical project threshold.
+Additional automated contract tests: `NearbyBarsDtoContractTest` deserializes exact A9 JSON including `menuUpdatedAt: null`, confirms server-rounded 500m inclusion without local refiltering, preserves order, deduplicates IDs and rejects malformed input; `NearbyBarsViewModelTest.serverIncludedRounded500mBarIsNotLocallyRefiltered` protects the edge case. No test uses production Google/Supabase/Kakao/Location API in unit tests; use interfaces and fakes. Coverage target for this new domain logic should be reviewed with team; do not invent a numerical project threshold.
 
 ## 4. Exact reproduction and CI
 
@@ -83,7 +80,7 @@ CI can confirm compilation, JVM state tests, and APK packaging. CI **cannot** va
 |---|---|---|---|---|---|
 | Distance + selection | JUnit 4 | 500m/sort/invalid/dedup/selection checks pass | Pending | — | Android CI unit-test artifact |
 | Location/permissions | Manual S22/S23 | Precise/approximate/deny/timeout/disabled covered | Pending | — | Device notes and screenshots |
-| Multi-marker and carousel | Kakao Maps SDK device | Swipe, marker focus, return/back, no duplicate | Blocked on complete API | — | Device recording |
+| Multi-marker and carousel | Kakao Maps SDK device | Swipe, marker focus, return/back, no duplicate | Not run; A9 deployment/device pending | — | Device recording |
 | Android Lint | Gradle/GitHub Actions | Pass | Pending | — | `Android / lint` |
 | Debug APK | Gradle/GitHub Actions | Pass | Pending | — | `Android / debug APK` |
 
@@ -92,5 +89,5 @@ Test counts, pass/fail, dated commit SHA and coverage **must be copied from actu
 ## 6. AI-assisted development trace
 
 - AI role: audited source of truth and current API rights; wrote Android-only location, filtering, ViewModel, screen, native map, tests and this draft.
-- Human role: resolve public Nearby catalog with Backend owner, review exact Figma placement and accuracy policy, run Gradle/CI and physical-device location/Kakao regression, record results in the Wiki.
+- Human role: confirm Backend A9 PR #43 merge/deployment, review server URL access logging/retention, reconcile Figma home-carousel placement, run physical-device location/Kakao regression, record results in the Wiki.
 - **Human elapsed / Agent elapsed:** not instrumented; 3.5h + 2.5h are estimates, not measured work time.
