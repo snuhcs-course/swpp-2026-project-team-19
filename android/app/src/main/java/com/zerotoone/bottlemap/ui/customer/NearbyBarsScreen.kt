@@ -1,4 +1,4 @@
-// AI-assisted Compose UI (2026-10-18, I2-A7/A8). Live public API pending.
+// AI-assisted Compose UI (2026-10-18, I2-A7/A8). Integrated with A9 API PR #43.
 package com.zerotoone.bottlemap.ui.customer
 
 import android.Manifest
@@ -61,7 +61,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.createSavedStateHandle
 import com.kakao.vectormap.MapView
 import com.zerotoone.bottlemap.data.AndroidNearbyLocationSource
-import com.zerotoone.bottlemap.data.AwaitingPublicNearbyApi
+import com.zerotoone.bottlemap.data.BackendNearbyBarsRepository
 import com.zerotoone.bottlemap.data.NearbyBar
 
 @Composable
@@ -218,7 +218,7 @@ private fun nearbyBarsViewModel(): NearbyBarsViewModel {
                 extras: CreationExtras,
             ): T = NearbyBarsViewModel(
                 locationSource = AndroidNearbyLocationSource(context),
-                barsSource = AwaitingPublicNearbyApi,
+                barsSource = BackendNearbyBarsRepository(),
                 savedStateHandle = extras.createSavedStateHandle(),
             ) as T
         }
@@ -330,6 +330,12 @@ private fun NearbyResultContent(
                             color = MaterialTheme.colorScheme.primary,
                         )
                         Text(bar.address, style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            bar.menuUpdatedAt?.let(::formatMenuTimestamp)
+                                ?: "아직 등록된 메뉴가 없습니다",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         if (selected) Text(
                             "지도에서 선택됨",
                             style = MaterialTheme.typography.labelSmall,
