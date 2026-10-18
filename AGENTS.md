@@ -65,7 +65,7 @@ Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) i
 - Auth is `Authorization: Bearer <token>` with a Supabase access token from Google login (spec 3.1). `POST /api/auth/temp-login` stays for local development, and for the demo server only until Google login works in the app. The backend accepts both kinds: Supabase tokens are verified with the project's public keys (`SUPABASE_URL`), and temp-login tokens only while `TEMP_AUTH_ENABLED=true`.
 - Permissions come from the server, never from the client or the token's claims. A Supabase user's `users.user_type` (`customer` or `operator`) is read from the database on every request, and a user without a row is a customer; a temporary token takes its role from `TEMP_AUTH_USER_TYPE` on the server.
 - Being a bar owner is not a user type but a `bar_owners` row linking a user to one bar, created when an operator approves an owner application (spec 3.11).
-- Customer search (`GET /api/search/bars`) and bar menu (`GET /api/bars/{barId}/menu`) are public. Bar management, menu import, and review APIs are for operators and the bar's approved owner; the catalogue search APIs are for operators and owners. Approving owner applications is operator-only. The full table is in spec 2.2.
+- Customer search (`GET /api/search/bars`), nearby bars (`GET /api/search/nearby-bars`), and bar menu (`GET /api/bars/{barId}/menu`) are public. Bar management, menu import, and review APIs are for operators and the bar's approved owner; the catalogue search APIs are for operators and owners. Approving owner applications is operator-only. The full table is in spec 2.2.
 
 ## Android notes
 

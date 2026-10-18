@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_session
 from app.schemas.errors import error_responses
-from app.schemas.search import SearchBarsResponse
+from app.schemas.search import NearbyBarsResponse, SearchBarsResponse
+from app.services.nearby_bars import DEFAULT_RADIUS_METERS, MAX_RADIUS_METERS, find_nearby_bars
 from app.services.search import search_bars
 
 router = APIRouter(prefix="/api/search", tags=["search"])
@@ -52,3 +53,38 @@ def read_search_bars(
     session: Session = Depends(get_session),
 ) -> SearchBarsResponse:
     return search_bars(session, query, lat=lat, lng=lng, limit=limit)
+
+
+@router.get(
+    "/nearby-bars",
+    response_model=NearbyBarsResponse,
+    summary="Every active bar within a radius of the customer",
+    description=(
+        "Public; the Authorization header is not read, so every caller gets the same result. "
+        "The location is used only to compute distance and is not stored, but it is part of the URL "
+        "and so appears in the server's access log.\n\n"
+        "- Only active bars, including bars without a published menu or whose menu has no items.\n"
+        "- `distanceMeters` is the haversine distance rounded to whole meters, as in `/api/search/bars`. "
+        "A bar is included when that rounded distance is at most `radiusMeters`, a bar exactly at the "
+        "radius too, so no item is farther than the radius. The app must not filter again.\n"
+        "- All matching bars, with no paging or truncation, nearest first; ties by `barId`.\n"
+        "- No bar nearby is `200` with `items: []`."
+    ),
+    responses=error_responses(
+        (
+            422,
+            "`VALIDATION_FAILED`: `lat` or `lng` `MISSING`; `lat`, `lng` or `radiusMeters` "
+            "`GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL` (also for `nan` and `inf`); `FLOAT_PARSING` "
+            "(`lat`, `lng`) or `INT_PARSING` (`radiusMeters`, decimals included).",
+        ),
+    ),
+)
+def read_nearby_bars(
+    lat: Annotated[float, Query(ge=-90, le=90, description="Customer latitude (WGS84)")],
+    lng: Annotated[float, Query(ge=-180, le=180, description="Customer longitude (WGS84)")],
+    radius_meters: Annotated[
+        int, Query(alias="radiusMeters", ge=1, le=MAX_RADIUS_METERS, description="Radius in meters")
+    ] = DEFAULT_RADIUS_METERS,
+    session: Session = Depends(get_session),
+) -> NearbyBarsResponse:
+    return find_nearby_bars(session, lat, lng, radius_meters)

@@ -376,20 +376,20 @@ def another_scheme(supabase, token_for, monkeypatch):
     return "Basic dXNlcjpwYXNz"
 
 
-@pytest.mark.parametrize(
-    "authorization",
-    [
-        expired_supabase_token,
-        supabase_token_signed_by_another_key,
-        malformed_token,
-        temporary_token_after_temporary_login_is_off,
-        supabase_token_without_supabase_url,
-        supabase_token_while_signing_keys_are_out_of_reach,
-        valid_supabase_token,
-        another_scheme,
-    ],
-    ids=lambda case: case.__name__,
-)
+# Authorization headers a route that does not read the header must answer like no header at all.
+ANY_AUTHORIZATION = [
+    expired_supabase_token,
+    supabase_token_signed_by_another_key,
+    malformed_token,
+    temporary_token_after_temporary_login_is_off,
+    supabase_token_without_supabase_url,
+    supabase_token_while_signing_keys_are_out_of_reach,
+    valid_supabase_token,
+    another_scheme,
+]
+
+
+@pytest.mark.parametrize("authorization", ANY_AUTHORIZATION, ids=lambda case: case.__name__)
 def test_guest_search_ignores_any_token(
     client, db_session, glenfiddich, supabase, token_for, monkeypatch, authorization
 ):
