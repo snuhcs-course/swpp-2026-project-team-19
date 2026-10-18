@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -39,6 +40,7 @@ private const val MAX_QUERY_LENGTH = 100
 fun SearchScreen(
     onOpenResults: (String) -> Unit,
     onOpenAccount: () -> Unit = {},
+    onOpenNearby: () -> Unit = {},
     serverValidationErrorCode: String? = null,
     onClearServerValidation: () -> Unit = {},
 ) {
@@ -80,6 +82,7 @@ fun SearchScreen(
             },
             onSearch = submit,
             onOpenAccount = onOpenAccount,
+            onOpenNearby = onOpenNearby,
         )
     }
 }
@@ -95,6 +98,7 @@ private fun SearchContent(
     onClear: () -> Unit,
     onSearch: () -> Unit,
     onOpenAccount: () -> Unit,
+    onOpenNearby: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -190,6 +194,14 @@ private fun SearchContent(
             ) {
                 Text("판매하는 바 찾기")
             }
+            // Keep NearBy optional and independent of the guest whisky query.
+            // The existing customer search and My Page header remain unchanged.
+            OutlinedButton(
+                onClick = onOpenNearby,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("내 주변 바 500m 보기")
+            }
         }
     }
 }
@@ -198,7 +210,7 @@ private fun SearchContent(
 @Composable
 private fun I2SearchInitialPreview() {
     I2CustomerSearchTheme {
-        SearchContent("", false, false, false, null, {}, {}, {}, {})
+        SearchContent("", false, false, false, null, {}, {}, {}, {}, {})
     }
 }
 
@@ -206,7 +218,7 @@ private fun I2SearchInitialPreview() {
 @Composable
 private fun I2SearchEnteredPreview() {
     I2CustomerSearchTheme {
-        SearchContent("Deanston 12", false, true, false, null, {}, {}, {}, {})
+        SearchContent("Deanston 12", false, true, false, null, {}, {}, {}, {}, {})
     }
 }
 
