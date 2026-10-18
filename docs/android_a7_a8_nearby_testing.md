@@ -12,22 +12,22 @@ This is an English, repository-side draft for the team Testing Documentation Wik
 - A8: same selected bar ID controls card highlight, Kakao label highlight/camera focus, marker-click→card sync and Bar Detail navigation; handle denied permission, empty, network and map failures.
 - Proposed latest Backend contract: PR #43, `docs/frontend_backend_api_spec.md` section 3.12. `GET /api/search/nearby-bars?lat=...&lng=...&radiusMeters=500` is public, works for Guests, returns **all active bars**, no pagination or truncation. Server provides integer rounded `distanceMeters` and a nullable `menuUpdatedAt`. **PR #43 has not yet merged or been confirmed deployed.** Earlier routes (`/api/bars` operator-only and whisky `/api/search/bars`) must NOT be used as Nearby substitutes.
 - No Backend or AI code was modified here. `BackendNearbyBarsRepository` calls the real section 3.12 public endpoint using the existing `ApiClient`; the response maps to domain bars without client Haversine filtering or resorting. If the server has not deployed PR #43, a 404 is shown as a recoverable deployment error, NOT as an empty result. No fake bars in production UI.
-- Latest Figma design `BottleMap-Wireframe-I2` page `00 — I2 Requirements Wireflows`, S0/S1 (node `5:3`/`5:38`): the Search screen **already contains** a `내 주변 바` Carousel (x=16, y=520, 204x150 in 360dp) next to a `Nearby Map` tile (x=228, y=520). It also depicts Bottom Navigation. Current Android Search does **not** implement that Bottom Navigation. As an **explicit temporary deviation**, this branch adds the `내 주변 바` heading and a `500m 내 주변 바 · 지도에서 보기` action below the search box; the Carousel + full map are on a separate Nearby route. Finalizing the full home-screen Figma carousel (as opposed to the separate Nearby route) still requires a frontend UI placement decision and on-device review. No sample bar or fictitious bar card is rendered in production.
+- Latest Figma `BottleMap-Wireframe-I2` S0/S1 (node `5:3`/`5:38`) places a `내 주변 바` carousel next to a `Nearby Map` tile on Search home. This branch now renders the real server-sourced horizontal home carousel and a map-entry tile **after the user opted in and loaded nearby results**. Before permission/data are available, the home preview is a navigation prompt, never sample bars. The full carousel + map screen lives on the Nearby route, and the two destinations share a **Customer-graph ViewModel** so selection, bars and user location do not refetch on normal navigation. Current app still lacks Figma Bottom Navigation (pre-existing gap, not an A7/A8 introduction). Human review should verify small Portrait layout and pixel-level Figma placement.
 - Android stays Portrait-only. No background location permission or updates, no location storage. The Android OkHttp Debug BASIC logger bypasses the `/api/search/nearby-bars` URL so it does not log coordinates. **Server URL access logs still contain lat/lng, explicitly disclosed in Backend API spec 3.12.3; ask Backend owner to review log redaction/retention policy.**
 - Personal-data principle: only a single location fix in foreground, used in memory for the request and distance calculation. Check location service access/recovery on device.
 
 ## 2. Architecture and resolved data-interface blocker (deployment pending)
 
 ```text
-Customer Search -> Nearby Route
+Customer Search (real carousel preview + Map tile after first user opt-in) -> Nearby Route
   -> on-demand foreground permission (NONE/APPROXIMATE/PRECISE/PERMANENTLY_DENIED)
   -> AndroidNearbyLocationSource (Fused Location, cancellable single fix)
   -> BackendNearbyBarsRepository (ApiClient, public GET /api/search/nearby-bars)
       request lat + lng + radiusMeters=500, no Authorization
       response complete items[]; server-filtered and sorted, no pagination
   -> NearbyBarsResponseDto.toNearbyBars()  // validated, dedup ID, NOT re-filtered
-  -> NearbyBarsViewModel.StateFlow (Success/Empty/Error)
-  -> LazyRow + Kakao native labels (selectedBarId is sole selection source)
+  -> Customer-graph-scoped NearbyBarsViewModel.StateFlow (Success/Empty/Error)
+  -> Search-home LazyRow preview + Nearby-screen LazyRow + Kakao labels (same selectedBarId)
   -> selected bar Detail route
 ```
 
@@ -89,5 +89,5 @@ Test counts, pass/fail, dated commit SHA and coverage **must be copied from actu
 ## 6. AI-assisted development trace
 
 - AI role: audited source of truth and current API rights; wrote Android-only location, filtering, ViewModel, screen, native map, tests and this draft.
-- Human role: confirm Backend A9 PR #43 merge/deployment, review server URL access logging/retention, reconcile Figma home-carousel placement, run physical-device location/Kakao regression, record results in the Wiki.
+- Human role: confirm Backend A9 PR #43 merge/deployment, review server URL access logging/retention, visually verify Figma home-carousel placement and existing Bottom Navigation gap, run physical-device location/Kakao regression, record results in the Wiki.
 - **Human elapsed / Agent elapsed:** not instrumented; 3.5h + 2.5h are estimates, not measured work time.
