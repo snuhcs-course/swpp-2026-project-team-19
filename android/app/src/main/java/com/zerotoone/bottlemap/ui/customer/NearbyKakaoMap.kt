@@ -49,6 +49,7 @@ import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.NearbyBar
 import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.delay
 
 private sealed interface NearbyMapStatus {
     data object Loading : NearbyMapStatus
@@ -77,6 +78,15 @@ fun NearbyKakaoMap(
         var map by remember { mutableStateOf<KakaoMap?>(null) }
         var labels by remember { mutableStateOf<Map<String, Label>>(emptyMap()) }
         val selected = bars.firstOrNull { it.barId == selectedBarId }
+
+        // Fail visibly instead of leaving an endless loader when the native
+        // Kakao SDK never calls onMapReady/onMapError.
+        LaunchedEffect(status) {
+            if (status == NearbyMapStatus.Loading) {
+                delay(25_000)
+                if (status == NearbyMapStatus.Loading) status = NearbyMapStatus.Error
+            }
+        }
 
         // This updates in place: NO duplicate addLabel on carousel swipes.
         LaunchedEffect(selectedBarId, map, labels) {
