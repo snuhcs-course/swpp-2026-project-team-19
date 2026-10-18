@@ -77,6 +77,15 @@ fun NearbyBarsScreen(
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var leaving by remember { mutableStateOf(false) }
+    var navigatingToDetail by remember { mutableStateOf(false) }
+
+    fun openDetail(id: String) {
+        if (navigatingToDetail || leaving) return
+        navigatingToDetail = true
+        // The native GL Surface can outlive the outgoing Compose destination.
+        mapView?.let(::hideNearbyNativeSurface)
+        onOpenBarDetail(id)
+    }
 
     fun back() {
         if (leaving) return
@@ -101,7 +110,10 @@ fun NearbyBarsScreen(
 
     LaunchedEffect(Unit) { updatePermissions() }
     // No automatic permission dialog on app launch, resume or refusal.
-    val currentRefresh = rememberUpdatedState(newValue = { updatePermissions() })
+    val currentRefresh = rememberUpdatedState(newValue = {
+        navigatingToDetail = false
+        updatePermissions()
+    })
     DisposableEffect(owner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) currentRefresh.value()
@@ -186,7 +198,7 @@ fun NearbyBarsScreen(
                         bars = current.bars,
                         selectedBarId = selectedBarId,
                         onSelect = viewModel::selectBar,
-                        onOpenBarDetail = onOpenBarDetail,
+                        onOpenBarDetail = ::openDetail,
                         onMapViewChanged = { mapView = it },
                     )
                 }
