@@ -53,6 +53,21 @@ data class BarListResponseDto(
     val nextCursor: String? = null,
 )
 
+// Backend A9 PR #43, API spec 3.12. Server distance in rounded integer meters.
+data class NearbyBarItemDto(
+    val barId: String,
+    val name: String,
+    val address: String,
+    val latitude: Double,
+    val longitude: Double,
+    val distanceMeters: Int,
+    val menuUpdatedAt: String?,
+)
+
+data class NearbyBarsResponseDto(
+    val items: List<NearbyBarItemDto>,
+)
+
 data class MatchedProductDto(
     val productId: String,
     val displayName: String,

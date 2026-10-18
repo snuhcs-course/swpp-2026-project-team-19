@@ -3,6 +3,13 @@ package com.zerotoone.bottlemap.ui.customer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,14 +20,26 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
+import android.Manifest
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zerotoone.bottlemap.data.NearbyBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,6 +58,8 @@ private const val MAX_QUERY_LENGTH = 100
 fun SearchScreen(
     onOpenResults: (String) -> Unit,
     onOpenAccount: () -> Unit = {},
+    onOpenNearby: () -> Unit = {},
+    nearbyViewModel: NearbyBarsViewModel? = null,
     serverValidationErrorCode: String? = null,
     onClearServerValidation: () -> Unit = {},
 ) {
@@ -54,6 +75,29 @@ fun SearchScreen(
     val canSearch = normalizedInput.isNotEmpty() && !tooLong &&
         !navigating && serverValidationErrorCode == null
     val keyboard = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val nearbyState = nearbyViewModel?.state?.collectAsStateWithLifecycle()?.value
+    val selectedNearbyId = nearbyViewModel?.selectedBarId?.collectAsStateWithLifecycle()?.value
+    val nearbyBars = (nearbyState as? NearbyUiState.Success)?.bars.orEmpty()
+
+    // Home preview never starts location acquisition without user action.
+    // When coming back from Android Settings, revoke a stale preview if precise
+    // permission has been removed; the Nearby route remains opt-in.
+    DisposableEffect(lifecycleOwner, nearbyViewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME &&
+                nearbyViewModel != null &&
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_FINE_LOCATION,
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                nearbyViewModel.updatePermission(NearbyPermission.NONE)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     val submit = {
         if (canSearch) {
@@ -80,6 +124,12 @@ fun SearchScreen(
             },
             onSearch = submit,
             onOpenAccount = onOpenAccount,
+            onOpenNearby = onOpenNearby,
+            nearbyBars = nearbyBars,
+            selectedNearbyBarId = selectedNearbyId,
+            onSelectNearbyBar = { id ->
+                if (nearbyViewModel?.selectBar(id) == true) onOpenNearby()
+            },
         )
     }
 }
@@ -95,6 +145,10 @@ private fun SearchContent(
     onClear: () -> Unit,
     onSearch: () -> Unit,
     onOpenAccount: () -> Unit,
+    onOpenNearby: () -> Unit,
+    nearbyBars: List<NearbyBar> = emptyList(),
+    selectedNearbyBarId: String? = null,
+    onSelectNearbyBar: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -190,6 +244,104 @@ private fun SearchContent(
             ) {
                 Text("판매하는 바 찾기")
             }
+            // I2 Figma S0/S1: an actual nearby carousel alongside a map tile.
+            // Populate only after a user deliberately granted precise location
+            // and the A9 public backend returned complete results.
+            Text(
+                text = "내 주변 바",
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (nearbyBars.isNotEmpty()) {
+                    LazyRow(
+                        modifier = Modifier.weight(2f).height(150.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(nearbyBars, key = { it.barId }) { bar ->
+                            OutlinedCard(
+                                onClick = { onSelectNearbyBar(bar.barId) },
+                                modifier = Modifier.width(186.dp).height(150.dp),
+                                border = BorderStroke(
+                                    if (bar.barId == selectedNearbyBarId) 2.dp else 1.dp,
+                                    if (bar.barId == selectedNearbyBarId)
+                                        MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.outlineVariant,
+                                ),
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                                ) {
+                                    Text("NEARBY · 500m", style = MaterialTheme.typography.labelSmall)
+                                    Text(
+                                        bar.name,
+                                        maxLines = 1,
+                                        style = MaterialTheme.typography.titleSmall,
+                                    )
+                                    Text(
+                                        "${bar.distanceMeters.toInt()}m",
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                    Text(
+                                        bar.address,
+                                        maxLines = 1,
+                                        style = MaterialTheme.typography.labelSmall,
+                                    )
+                                    Text(
+                                        bar.menuUpdatedAt?.let(::formatMenuTimestamp)
+                                            ?: "아직 등록된 메뉴 없음",
+                                        style = MaterialTheme.typography.labelSmall,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    OutlinedCard(
+                        onClick = onOpenNearby,
+                        modifier = Modifier.weight(2f).height(150.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Text("NEARBY · 500m", style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                "현재 위치로 내 주변 바를 확인해 보세요.",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            Text(
+                                "위치 사용하고 보기 →",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                }
+                OutlinedCard(
+                    onClick = onOpenNearby,
+                    modifier = Modifier.weight(1.1f).height(150.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text("⌖", style = MaterialTheme.typography.headlineMedium)
+                        Text("주변 바", style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            "지도에서 보기 →",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -198,7 +350,7 @@ private fun SearchContent(
 @Composable
 private fun I2SearchInitialPreview() {
     I2CustomerSearchTheme {
-        SearchContent("", false, false, false, null, {}, {}, {}, {})
+        SearchContent("", false, false, false, null, {}, {}, {}, {}, {})
     }
 }
 
@@ -206,7 +358,7 @@ private fun I2SearchInitialPreview() {
 @Composable
 private fun I2SearchEnteredPreview() {
     I2CustomerSearchTheme {
-        SearchContent("Deanston 12", false, true, false, null, {}, {}, {}, {})
+        SearchContent("Deanston 12", false, true, false, null, {}, {}, {}, {}, {})
     }
 }
 

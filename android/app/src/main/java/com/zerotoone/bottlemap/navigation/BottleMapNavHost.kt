@@ -25,6 +25,8 @@ import com.zerotoone.bottlemap.ui.customer.BarDetailViewModel
 import com.zerotoone.bottlemap.ui.customer.BarLocationMapScreen
 import com.zerotoone.bottlemap.ui.customer.SearchResultsScreen
 import com.zerotoone.bottlemap.ui.customer.SearchScreen
+import com.zerotoone.bottlemap.ui.customer.NearbyBarsScreen
+import com.zerotoone.bottlemap.ui.customer.nearbyBarsViewModel
 import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import com.zerotoone.bottlemap.ui.mode.ModeSelectionScreen
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
@@ -38,6 +40,7 @@ private object Routes {
 
     const val CUSTOMER_GRAPH = "customer"
     const val CUSTOMER_SEARCH = "customer/search"
+    const val CUSTOMER_NEARBY = "customer/nearby"
     const val CUSTOMER_ACCOUNT = "customer/account"
     const val CUSTOMER_LOGIN = "customer/login"
     const val CUSTOMER_SEARCH_RESULTS = "customer/search-results"
@@ -78,6 +81,7 @@ fun BottleMapNavHost() {
             navController = navController,
             authViewModel = authViewModel,
             onOpenAccount = { navController.navigate(Routes.CUSTOMER_ACCOUNT) },
+            onOpenNearby = { navController.navigate(Routes.CUSTOMER_NEARBY) },
             onOpenResults = { query ->
                 val encodedQuery = Uri.encode(query)
                 navController.navigate(
@@ -119,6 +123,7 @@ private fun NavGraphBuilder.customerGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     onOpenAccount: () -> Unit,
+    onOpenNearby: () -> Unit,
     onOpenResults: (String) -> Unit,
     onBack: () -> Unit,
     onInvalidQuery: (String) -> Unit,
@@ -131,16 +136,32 @@ private fun NavGraphBuilder.customerGraph(
         startDestination = Routes.CUSTOMER_SEARCH,
     ) {
         composable(Routes.CUSTOMER_SEARCH) { backStackEntry ->
+            val nearbyOwner = remember(backStackEntry, navController) {
+                navController.getBackStackEntry(Routes.CUSTOMER_GRAPH)
+            }
+            val nearbyViewModel = nearbyBarsViewModel(nearbyOwner)
             val validationErrorCode = backStackEntry.savedStateHandle
                 .getStateFlow<String?>(SEARCH_VALIDATION_ERROR_KEY, null)
                 .collectAsStateWithLifecycle().value
             SearchScreen(
                 onOpenResults = onOpenResults,
                 onOpenAccount = onOpenAccount,
+                onOpenNearby = onOpenNearby,
+                nearbyViewModel = nearbyViewModel,
                 serverValidationErrorCode = validationErrorCode,
                 onClearServerValidation = {
                     backStackEntry.savedStateHandle[SEARCH_VALIDATION_ERROR_KEY] = null
                 },
+            )
+        }
+        composable(Routes.CUSTOMER_NEARBY) { backStackEntry ->
+            val nearbyOwner = remember(backStackEntry, navController) {
+                navController.getBackStackEntry(Routes.CUSTOMER_GRAPH)
+            }
+            NearbyBarsScreen(
+                onBack = onBack,
+                onOpenBarDetail = onOpenBarDetail,
+                viewModel = nearbyBarsViewModel(nearbyOwner),
             )
         }
         composable(Routes.CUSTOMER_ACCOUNT) {

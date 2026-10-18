@@ -38,7 +38,16 @@ object ApiClient {
         .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
-        .addInterceptor(logging)
+        // Debug BASIC logging prints full URLs, including the user's lat/lng.
+        // Never log this privacy-sensitive Nearby request on the Android device.
+        // Backend access logs are a separate concern (API spec 3.12.3).
+        .addInterceptor { chain ->
+            if (chain.request().url.encodedPath == "/api/search/nearby-bars") {
+                chain.proceed(chain.request())
+            } else {
+                logging.intercept(chain)
+            }
+        }
         .build()
 
     val api: BottleMapApi = Retrofit.Builder()
