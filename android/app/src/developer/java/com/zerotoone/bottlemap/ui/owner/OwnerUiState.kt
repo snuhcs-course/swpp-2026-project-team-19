@@ -2,6 +2,7 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import com.zerotoone.bottlemap.data.SelectedMenuImage
+import com.zerotoone.bottlemap.network.ImportProgressDto
 
 enum class ImportModeUi(
     val apiValue: String,
@@ -32,7 +33,11 @@ data class MenuUploadUiState(
     val loadingBars: Boolean = true,
     val bars: List<OwnerBarUiModel> = emptyList(),
     val selectedBarId: String? = null,
-    val selectedImage: SelectedMenuImage? = null,
+    val selectedImages: List<SelectedMenuImage> = emptyList(),
+    val selectionBusy: Boolean = false,
+    val imagePreparation: Map<String, String> = emptyMap(),
+    val extractionProgress: ImportProgressDto? = null,
+    val failedImportRequiresNewAttempt: Boolean = false,
     val mode: ImportModeUi = ImportModeUi.PARTIAL_UPDATE,
     val working: Boolean = false,
     val statusMessage: String? = null,
