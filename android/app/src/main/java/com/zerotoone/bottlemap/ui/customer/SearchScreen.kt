@@ -194,13 +194,22 @@ private fun SearchContent(
             ) {
                 Text("판매하는 바 찾기")
             }
-            // Keep NearBy optional and independent of the guest whisky query.
-            // The existing customer search and My Page header remain unchanged.
+            // The I2 wireflow S0 shows a "내 주변 바" section alongside a
+            // "지도에서 보기" entry. Actual cards stay in the Nearby route
+            // until the Backend provides a complete public nearby catalog;
+            // never show fabricated bar cards on the search home screen.
+            Text(
+                text = "내 주변 바",
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 8.dp),
+            )
             OutlinedButton(
                 onClick = onOpenNearby,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("내 주변 바 500m 보기")
+                Text("500m 내 주변 바 · 지도에서 보기 →")
             }
         }
     }
