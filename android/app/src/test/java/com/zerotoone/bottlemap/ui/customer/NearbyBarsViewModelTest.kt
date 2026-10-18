@@ -2,6 +2,7 @@
 package com.zerotoone.bottlemap.ui.customer
 
 import androidx.lifecycle.SavedStateHandle
+import com.zerotoone.bottlemap.data.NearbyBar
 import com.zerotoone.bottlemap.data.NearbyBarCandidate
 import com.zerotoone.bottlemap.data.NearbyBarsSource
 import com.zerotoone.bottlemap.data.NearbyCoordinate
@@ -153,16 +154,43 @@ class NearbyBarsViewModelTest {
     }
 
     @Test
-    fun catalogUnavailableNeverPretendsToBeEmpty() = runTest(dispatcher) {
-        val vm = NearbyBarsViewModel(
-            FakeLocation(origin),
-            com.zerotoone.bottlemap.data.AwaitingPublicNearbyApi,
+    fun api404BeforeBackendDeploymentIsNotDisplayedAsEmpty() = runTest(dispatcher) {
+        val source = FakeBars(emptyList())
+        source.failure = com.zerotoone.bottlemap.network.BottleMapApiException(
+            httpStatus = 404,
+            code = "HTTP_404",
+            message = "endpoint missing",
         )
+        val vm = NearbyBarsViewModel(FakeLocation(origin), source)
         vm.updatePermission(NearbyPermission.PRECISE)
         advanceUntilIdle()
         val error = vm.state.value as NearbyUiState.Error
-        assertFalse(error.canRetry)
-        assertTrue(error.message.contains("API 계약"))
+        assertTrue(error.message.contains("아직 제공하지 않습니다"))
+    }
+
+    @Test
+    fun serverIncludedRounded500mBarIsNotLocallyRefiltered() = runTest(dispatcher) {
+        val beyondRadius = NearbyCoordinate(
+            origin.latitude + Math.toDegrees(500.4 / 6_371_000.0),
+            origin.longitude,
+        )
+        assertTrue(distanceMeters(origin, beyondRadius) > 500.0)
+        val source = object : NearbyBarsSource {
+            override suspend fun listNearbyBars(origin: NearbyCoordinate): List<NearbyBar> =
+                listOf(NearbyBar(
+                    barId = "rounded-edge",
+                    name = "Backend rounded edge",
+                    address = "Test",
+                    location = beyondRadius,
+                    distanceMeters = 500.0,
+                ))
+        }
+        val vm = NearbyBarsViewModel(FakeLocation(origin), source)
+        vm.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        val result = vm.state.value as NearbyUiState.Success
+        assertEquals(listOf("rounded-edge"), result.bars.map { it.barId })
+        assertEquals(500.0, result.bars.first().distanceMeters, 0.0001)
     }
 
     @Test
@@ -242,12 +270,14 @@ class NearbyBarsViewModelTest {
     private class FakeBars(var items: List<NearbyBarCandidate>) : NearbyBarsSource {
         var count = 0
         var failure: Exception? = null
-        override suspend fun listNearbyCandidates(
+        override suspend fun listNearbyBars(
             origin: NearbyCoordinate,
-        ): List<NearbyBarCandidate> {
+        ): List<NearbyBar> {
             count++
             failure?.let { throw it }
-            return items
+            // Fake test-only catalog. The production Backend A9 adapter uses
+            // authoritative server results directly, without this filter.
+            return filterNearbyBars(origin, items)
         }
     }
 }
