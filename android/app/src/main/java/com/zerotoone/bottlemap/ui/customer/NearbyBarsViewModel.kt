@@ -6,13 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.NearbyBar
 import com.zerotoone.bottlemap.data.NearbyBarsSource
-import com.zerotoone.bottlemap.data.NearbyContractUnavailableException
 import com.zerotoone.bottlemap.data.NearbyCoordinate
 import com.zerotoone.bottlemap.data.NearbyLocationInaccurateException
 import com.zerotoone.bottlemap.data.NearbyLocationServicesDisabledException
 import com.zerotoone.bottlemap.data.NearbyLocationSource
 import com.zerotoone.bottlemap.data.NearbyLocationUnavailableException
-import com.zerotoone.bottlemap.data.filterNearbyBars
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,9 +82,10 @@ class NearbyBarsViewModel(
                 val origin = locationSource.currentLocation()
                 if (version != requestVersion) return@launch
                 _state.value = NearbyUiState.LoadingBars
-                val complete = barsSource.listNearbyCandidates(origin)
+                // Backend A9 already filters on the rounded integer distance,
+                // returns ALL active bars, and sorts nearest first. Never re-filter.
+                val nearby = barsSource.listNearbyBars(origin)
                 if (version != requestVersion) return@launch
-                val nearby = filterNearbyBars(origin, complete)
                 if (nearby.isEmpty()) {
                     savedStateHandle["nearbySelectedBarId"] = null
                     _state.value = NearbyUiState.Empty
@@ -108,8 +107,16 @@ class NearbyBarsViewModel(
                         NearbyUiState.Error("정확한 위치를 확인하지 못했습니다. 실외에서 다시 시도해 주세요.")
                     is NearbyLocationUnavailableException ->
                         NearbyUiState.Error("현재 위치를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.")
-                    is NearbyContractUnavailableException ->
-                        NearbyUiState.Error(error.message.orEmpty(), canRetry = false)
+                    is com.zerotoone.bottlemap.network.BottleMapApiException ->
+                        when (error.code) {
+                            "VALIDATION_FAILED" ->
+                                NearbyUiState.Error("위치 요청에 문제가 있습니다. 앱을 다시 실행해 주세요.", canRetry = false)
+                            "HTTP_404" ->
+                                NearbyUiState.Error("서버에서 주변 바 기능을 아직 제공하지 않습니다. 배포 상태를 확인해 주세요.")
+                            "NETWORK_ERROR" ->
+                                NearbyUiState.Error("네트워크 연결을 확인하고 다시 시도해 주세요.")
+                            else -> NearbyUiState.Error("주변 바 조회에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+                        }
                     is SecurityException -> NearbyUiState.PermissionRequired
                     else -> NearbyUiState.Error("주변 바를 불러오지 못했습니다. 연결을 확인해 주세요.")
                 }
