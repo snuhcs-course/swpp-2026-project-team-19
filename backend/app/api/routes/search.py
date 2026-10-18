@@ -61,8 +61,8 @@ def read_search_bars(
     summary="Every active bar within a radius of the customer",
     description=(
         "Public; the Authorization header is not read, so every caller gets the same result. "
-        "The location is used only to compute distance and is not stored, but it is part of the URL "
-        "and so appears in the server's access log.\n\n"
+        "The location is used only to compute distance and is not stored; the access log keeps the "
+        "path without the query string, so it is not logged either.\n\n"
         "- Only active bars, including bars without a published menu or whose menu has no items.\n"
         "- `distanceMeters` is the haversine distance rounded to whole meters, as in `/api/search/bars`. "
         "A bar is included when that rounded distance is at most `radiusMeters`, a bar exactly at the "

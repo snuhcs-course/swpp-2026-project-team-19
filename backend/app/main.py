@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #9, #16, #19); Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #14). Reviewed by Haeul Yang and Jinwoo Park.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #9, #16, #19); Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #14); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-19). Reviewed by Haeul Yang and Jinwoo Park.
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from app.api.deps import get_image_storage, get_menu_extractor
 from app.api.router import api_router
+from app.core.access_log import strip_query_strings_from_access_log
 from app.core.auth_config import load_supabase_auth_settings
 from app.core.errors import register_error_handlers
 from app.core.security import warn_if_temporary_login_is_on
@@ -27,6 +28,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     get_version()
     yield
 
+
+# The customer's location arrives in query strings; keep it out of the access log.
+strip_query_strings_from_access_log()
 
 app = FastAPI(title="BottleMap API", version="0.1.0", lifespan=lifespan)
 register_error_handlers(app)
