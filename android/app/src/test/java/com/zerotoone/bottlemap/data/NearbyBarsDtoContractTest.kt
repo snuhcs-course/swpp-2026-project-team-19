@@ -74,9 +74,9 @@ class NearbyBarsDtoContractTest {
     }
 
     @Test
-    fun missingRequiredFieldIsNotSilentlyInvented() {
+    fun missingRequiredDistanceIsNotSilentlyInvented() {
         val invalid = """{"items":[{"barId":"A","name":"A","address":"A",
-            "latitude":37.478,"longitude":126.951,"distanceMeters":25}]}"""
+            "latitude":37.478,"longitude":126.951,"menuUpdatedAt":null}]}"""
         assertThrows(JsonDataException::class.java) { adapter.fromJson(invalid) }
     }
 
