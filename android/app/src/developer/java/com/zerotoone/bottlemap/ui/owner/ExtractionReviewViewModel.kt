@@ -3,7 +3,7 @@ package com.zerotoone.bottlemap.ui.owner
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zerotoone.bottlemap.data.Repositories
+import com.zerotoone.bottlemap.data.OwnerRepositories
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.ChangeDecisionDto
 import com.zerotoone.bottlemap.network.MenuImportStatusDto
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ExtractionReviewViewModel : ViewModel() {
-    private val repository = Repositories.owner
+    private val repository = OwnerRepositories.owner
 
     private val _state = MutableStateFlow<ExtractionReviewUiState>(ExtractionReviewUiState.Loading)
     val state: StateFlow<ExtractionReviewUiState> = _state.asStateFlow()

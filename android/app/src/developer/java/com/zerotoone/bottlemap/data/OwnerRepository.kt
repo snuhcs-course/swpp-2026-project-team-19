@@ -92,7 +92,7 @@ class OwnerRepository {
     }
 }
 
-object Repositories {
-    val customer: CustomerRepository by lazy { CustomerRepository() }
+/** Developer-only operator repository; absent from customer variants. */
+object OwnerRepositories {
     val owner: OwnerRepository by lazy { OwnerRepository() }
 }

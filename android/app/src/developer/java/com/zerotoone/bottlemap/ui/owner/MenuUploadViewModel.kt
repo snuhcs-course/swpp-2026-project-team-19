@@ -6,7 +6,7 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.ImageUploadPreparer
-import com.zerotoone.bottlemap.data.Repositories
+import com.zerotoone.bottlemap.data.OwnerRepositories
 import com.zerotoone.bottlemap.network.BarDto
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import java.util.UUID
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 class MenuUploadViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
-    private val repository = Repositories.owner
+    private val repository = OwnerRepositories.owner
     private val imagePreparer = ImageUploadPreparer(application.contentResolver)
 
     private val _state = MutableStateFlow(MenuUploadUiState())
