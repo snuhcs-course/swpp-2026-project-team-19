@@ -4,12 +4,20 @@ package com.zerotoone.bottlemap.ui.owner
 import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.ImageUploadPreparer
+import com.zerotoone.bottlemap.data.PreparedMenuImage
+import com.zerotoone.bottlemap.data.MenuPhotoPreparationException
+import com.zerotoone.bottlemap.data.MAX_MENU_PHOTOS
+import com.zerotoone.bottlemap.data.appendMenuPhotos
+import com.zerotoone.bottlemap.data.removeMenuPhoto
+import com.zerotoone.bottlemap.data.prepareMenuBatch
 import com.zerotoone.bottlemap.data.OwnerRepositories
 import com.zerotoone.bottlemap.network.BarDto
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +26,7 @@ import kotlinx.coroutines.launch
 
 class MenuUploadViewModel(
     application: Application,
+    private val savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
     private val repository = OwnerRepositories.owner
     private val imagePreparer = ImageUploadPreparer(application.contentResolver)
@@ -26,9 +35,34 @@ class MenuUploadViewModel(
     val state: StateFlow<MenuUploadUiState> = _state.asStateFlow()
 
     private var pendingIdempotencyKey: String? = null
+    // Same key and exact photo bytes reused on a failed HTTP transport retry.
+    private var cachedPreparedImages: List<PreparedMenuImage>? = null
+    private var selectionGeneration = 0L
+    private val savedPhotoKey = "ownerMenuPhotoUris"
 
     init {
         loadBars()
+        restoreSelectedImages()
+    }
+
+    private fun rememberPhotos() {
+        savedStateHandle[savedPhotoKey] = ArrayList(_state.value.selectedImages.map { it.uri })
+    }
+
+    private fun invalidateDraft() {
+        pendingIdempotencyKey = null
+        cachedPreparedImages = null
+        _state.value = _state.value.copy(
+            extractionProgress = null,
+            imagePreparation = emptyMap(),
+            failedImportRequiresNewAttempt = false,
+        )
+    }
+
+    private fun restoreSelectedImages() {
+        val uris = savedStateHandle.get<ArrayList<String>>(savedPhotoKey).orEmpty()
+        if (uris.isEmpty()) return
+        addImages(uris.map(Uri::parse))
     }
 
     fun loadBars() {
