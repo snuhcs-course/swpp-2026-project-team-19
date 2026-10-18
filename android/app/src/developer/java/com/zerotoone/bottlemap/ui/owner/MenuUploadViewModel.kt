@@ -7,16 +7,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.ImageUploadPreparer
-import com.zerotoone.bottlemap.data.PreparedMenuImage
 import com.zerotoone.bottlemap.data.MenuPhotoPreparationException
 import com.zerotoone.bottlemap.data.MAX_MENU_PHOTOS
 import com.zerotoone.bottlemap.data.appendMenuPhotos
 import com.zerotoone.bottlemap.data.removeMenuPhoto
-import com.zerotoone.bottlemap.data.prepareMenuBatch
+import com.zerotoone.bottlemap.data.MenuUploadRetryCache
 import com.zerotoone.bottlemap.data.OwnerRepositories
 import com.zerotoone.bottlemap.network.BarDto
 import com.zerotoone.bottlemap.network.BottleMapApiException
-import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,9 +32,7 @@ class MenuUploadViewModel(
     private val _state = MutableStateFlow(MenuUploadUiState())
     val state: StateFlow<MenuUploadUiState> = _state.asStateFlow()
 
-    private var pendingIdempotencyKey: String? = null
-    // Same key and exact photo bytes reused on a failed HTTP transport retry.
-    private var cachedPreparedImages: List<PreparedMenuImage>? = null
+    private val retryCache = MenuUploadRetryCache()
     private var selectionGeneration = 0L
     private val savedPhotoKey = "ownerMenuPhotoUris"
 
@@ -50,8 +46,7 @@ class MenuUploadViewModel(
     }
 
     private fun invalidateDraft() {
-        pendingIdempotencyKey = null
-        cachedPreparedImages = null
+        retryCache.clear()
         _state.value = _state.value.copy(
             extractionProgress = null,
             imagePreparation = emptyMap(),
@@ -191,7 +186,7 @@ class MenuUploadViewModel(
             try {
                 // Validate the complete immutable selection before any HTTP request.
                 // Reuse exact compressed bytes after a network/timeout failure.
-                val prepared = cachedPreparedImages ?: prepareMenuBatch(
+                val prepared = retryCache.prepareIfNeeded(
                     snapshot.selectedImages,
                     prepare = { photo -> imagePreparer.prepare(Uri.parse(photo.uri)) },
                     onPrepared = { order ->
@@ -201,10 +196,8 @@ class MenuUploadViewModel(
                             statusMessage = "Prepared " + order + "/" + snapshot.selectedImages.size,
                         )
                     },
-                ).also { cachedPreparedImages = it }
-                val key = pendingIdempotencyKey ?: UUID.randomUUID().toString().also {
-                    pendingIdempotencyKey = it
-                }
+                )
+                val key = retryCache.key()
                 _state.value = _state.value.copy(
                     statusMessage = "Uploading all " + prepared.size + " photos together...",
                 )
@@ -240,7 +233,7 @@ class MenuUploadViewModel(
                         return@launch
                     }
                 }
-                if (error.code == "IDEMPOTENCY_KEY_REUSED") pendingIdempotencyKey = null
+                if (error.code == "IDEMPOTENCY_KEY_REUSED") retryCache.discardKey()
                 _state.value = _state.value.copy(
                     working = false, statusMessage = null,
                     errorMessage = when (error.code) {
@@ -306,7 +299,7 @@ class MenuUploadViewModel(
                     }
 
                     "ready_for_review" -> {
-                        pendingIdempotencyKey = null
+                        retryCache.clear()
                         _state.value = _state.value.copy(
                             working = false,
                             statusMessage = null,
@@ -335,7 +328,7 @@ class MenuUploadViewModel(
                     }
 
                     "applied" -> {
-                        pendingIdempotencyKey = null
+                        retryCache.clear()
                         _state.value = _state.value.copy(
                             working = false,
                             statusMessage = null,
