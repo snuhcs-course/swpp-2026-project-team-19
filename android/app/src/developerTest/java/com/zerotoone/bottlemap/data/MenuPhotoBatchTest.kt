@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.data
 
 import com.zerotoone.bottlemap.network.MenuImportAcceptedDto
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CancellationException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -155,6 +156,21 @@ class MenuPhotoBatchTest {
         assertThrows(IllegalArgumentException::class.java) {
             runBlocking { prepareMenuBatch((1..6).map { photo(it.toString()) }, { jpeg() }) }
         }
+    }
+
+    @Test fun navigationCancellationPropagatesWithoutUploading() {
+        var sent = false
+        assertThrows(CancellationException::class.java) {
+            runBlocking {
+                submitMenuBatch(listOf(photo("a")), {
+                    throw CancellationException("Owner screen closed")
+                }, {
+                    sent = true
+                    accepted
+                })
+            }
+        }
+        assertFalse(sent)
     }
 
     @Test fun duplicateUriAddedAgainDoesNotChangeSelection() {
