@@ -93,46 +93,79 @@ class MenuUploadViewModel(
     }
 
     fun selectBar(barId: String) {
-        if (_state.value.working) return
-        _state.value = _state.value.copy(
-            selectedBarId = barId,
-            selectedImage = null,
-            statusMessage = null,
-            errorMessage = null,
-        )
-        pendingIdempotencyKey = null
+        if (_state.value.working || _state.value.selectionBusy) return
+        if (_state.value.selectedBarId == barId) return
+        _state.value = _state.value.copy(selectedBarId = barId, selectedImages = emptyList(),
+            statusMessage = null, errorMessage = null)
+        rememberPhotos()
+        invalidateDraft()
     }
 
     fun setMode(mode: ImportModeUi) {
-        if (_state.value.working) return
-        if (_state.value.mode == mode) return
-        _state.value = _state.value.copy(mode = mode)
-        pendingIdempotencyKey = null
+        if (_state.value.working || _state.value.selectionBusy || _state.value.mode == mode) return
+        _state.value = _state.value.copy(mode = mode, errorMessage = null)
+        invalidateDraft()
     }
 
-    fun selectImage(uri: Uri) {
-        if (_state.value.working) return
+    fun addImages(uris: List<Uri>) {
+        if (uris.isEmpty() || _state.value.working || _state.value.selectionBusy) return
+        val existing = _state.value.selectedImages.mapTo(mutableSetOf()) { it.uri }
+        val newUris = uris.distinctBy { it.toString() }.filterNot { it.toString() in existing }
+        val duplicates = uris.size - newUris.size
+        val remaining = (MAX_MENU_PHOTOS - existing.size).coerceAtLeast(0)
+        val accepted = newUris.take(remaining)
+        val overLimit = newUris.size - accepted.size
+        if (accepted.isEmpty()) {
+            _state.value = _state.value.copy(errorMessage = when {
+                overLimit > 0 -> "Maximum 5 photos. Remove one first."
+                duplicates > 0 -> "These photos are already selected."
+                else -> null
+            })
+            return
+        }
+        val generation = ++selectionGeneration
+        _state.value = _state.value.copy(selectionBusy = true, errorMessage = null)
         viewModelScope.launch {
-            runCatching { imagePreparer.describe(uri) }
-                .onSuccess { selected ->
-                    _state.value = _state.value.copy(
-                        selectedImage = selected,
-                        errorMessage = null,
-                    )
-                    pendingIdempotencyKey = null
+            val described = mutableListOf<com.zerotoone.bottlemap.data.SelectedMenuImage>()
+            val errors = mutableListOf<String>()
+            accepted.forEachIndexed { index, uri ->
+                try {
+                    described.add(imagePreparer.describe(uri))
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    errors.add("Photo #" + (index + 1) + ": " + (error.message ?: "unreadable"))
                 }
-                .onFailure { error ->
-                    _state.value = _state.value.copy(
-                        errorMessage = error.message ?: "Unable to use this image.",
-                    )
-                }
+            }
+            if (generation != selectionGeneration) return@launch
+            val result = appendMenuPhotos(_state.value.selectedImages, described)
+            val messages = errors + listOfNotNull(
+                duplicates.takeIf { it > 0 }?.let { it.toString() + " duplicate(s) ignored." },
+                overLimit.takeIf { it > 0 }?.let { it.toString() + " photo(s) over the limit." },
+            )
+            _state.value = _state.value.copy(selectionBusy = false, selectedImages = result.images,
+                errorMessage = messages.joinToString(" ").ifBlank { null })
+            if (described.isNotEmpty()) {
+                rememberPhotos()
+                invalidateDraft()
+            }
         }
     }
 
-    fun clearImage() {
-        if (_state.value.working) return
-        _state.value = _state.value.copy(selectedImage = null, errorMessage = null)
-        pendingIdempotencyKey = null
+    fun removeImage(uri: String) {
+        if (_state.value.working || _state.value.selectionBusy) return
+        val remaining = removeMenuPhoto(_state.value.selectedImages, uri)
+        if (remaining.size == _state.value.selectedImages.size) return
+        _state.value = _state.value.copy(selectedImages = remaining, errorMessage = null)
+        rememberPhotos()
+        invalidateDraft()
+    }
+
+    fun startNewAttemptAfterFailure() {
+        if (_state.value.working || !_state.value.failedImportRequiresNewAttempt) return
+        invalidateDraft()
+        _state.value = _state.value.copy(statusMessage = null,
+            errorMessage = "New attempt ready. All selected photos will be resubmitted together.")
     }
 
     fun continueActiveImport() {
