@@ -1,9 +1,13 @@
 // AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #7, #15). Reviewed by Hojin Nam.
 package com.zerotoone.bottlemap.ui.owner
 
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,8 +30,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import com.zerotoone.bottlemap.data.MAX_MENU_PHOTOS
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,11 +52,17 @@ fun MenuUploadScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val picker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        if (uri != null) {
-            viewModel.selectImage(uri)
+        contract = ActivityResultContracts.PickMultipleVisualMedia(MAX_MENU_PHOTOS),
+    ) { uris ->
+        // Picker grants temporary read access; persist it when supported so
+        // SavedStateHandle URIs can survive process recreation.
+        uris.forEach { uri ->
+            runCatching {
+                viewModel.getApplication<android.app.Application>().contentResolver
+                    .takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
         }
+        viewModel.addImages(uris)
     }
 
     LaunchedEffect(state.openReviewImportId) {
@@ -82,7 +101,8 @@ fun MenuUploadScreen(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                     )
                 },
-                onClearPhoto = viewModel::clearImage,
+                onRemovePhoto = viewModel::removeImage,
+                onNewAttempt = viewModel::startNewAttemptAfterFailure,
                 onSetMode = viewModel::setMode,
                 onUpload = viewModel::upload,
                 onContinueImport = viewModel::continueActiveImport,
@@ -125,7 +145,8 @@ private fun OwnerUploadContent(
     state: MenuUploadUiState,
     onSelectBar: (String) -> Unit,
     onPickPhoto: () -> Unit,
-    onClearPhoto: () -> Unit,
+    onRemovePhoto: (String) -> Unit,
+    onNewAttempt: () -> Unit,
     onSetMode: (ImportModeUi) -> Unit,
     onUpload: () -> Unit,
     onContinueImport: () -> Unit,
@@ -255,48 +276,65 @@ private fun OwnerUploadContent(
 
             item {
                 Text(
-                    text = "3. Choose a menu photo",
+                    text = "3. Choose menu photos (" + state.selectedImages.size + "/5)",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
             }
 
             item {
+                Text(
+                    "Select up to five pages, 10 MB each / 30 MB total. " +
+                        "The order shown is the extraction order. Unsupported formats are converted to JPEG.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            item {
+                OutlinedButton(
+                    onClick = onPickPhoto,
+                    enabled = !state.working && !state.selectionBusy &&
+                        state.selectedImages.size < MAX_MENU_PHOTOS,
+                ) {
+                    Text(if (state.selectedImages.isEmpty()) "Choose gallery photos" else "Add photos")
+                }
+            }
+
+            if (state.selectionBusy) {
+                item { Text("Checking selected photos…") }
+            }
+
+            if (state.selectedImages.isEmpty()) {
+                item { Text("No menu photos selected. Add at least one page to continue.") }
+            }
+
+            items(state.selectedImages, key = { it.uri }) { photo ->
+                val order = state.selectedImages.indexOf(photo) + 1
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
+                    tonalElevation = 1.dp,
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Text(
-                            state.selectedImage?.displayName ?: "No photo selected",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                        Text(
-                            "JPEG/PNG are uploaded directly when safe; unsupported formats are converted to JPEG.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(
-                                onClick = onPickPhoto,
-                                enabled = !state.working,
-                            ) {
-                                Text(if (state.selectedImage == null) "Choose Photo" else "Change Photo")
-                            }
-                            if (state.selectedImage != null) {
-                                OutlinedButton(
-                                    onClick = onClearPhoto,
-                                    enabled = !state.working,
-                                ) {
-                                    Text("Remove")
-                                }
+                        MenuPhotoThumbnail(photo.uri)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Page $order · " + photo.displayName,
+                                style = MaterialTheme.typography.bodyMedium)
+                            state.imagePreparation[photo.uri]?.let { status ->
+                                Text(status, style = MaterialTheme.typography.labelSmall,
+                                    color = if (status.startsWith("Failed"))
+                                        MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
                             }
                         }
+                        OutlinedButton(
+                            onClick = { onRemovePhoto(photo.uri) },
+                            enabled = !state.working && !state.selectionBusy,
+                        ) { Text("Remove") }
                     }
                 }
             }
@@ -304,11 +342,32 @@ private fun OwnerUploadContent(
             item {
                 Button(
                     onClick = onUpload,
-                    enabled = !state.working && state.selectedImage != null && selectedBar != null,
-                ) {
-                    Text("Upload & Extract")
+                    enabled = !state.working && !state.selectionBusy &&
+                        state.selectedImages.isNotEmpty() && selectedBar != null &&
+                        !state.failedImportRequiresNewAttempt,
+                ) { Text("Upload " + state.selectedImages.size + " photos & Extract") }
+            }
+
+            if (state.failedImportRequiresNewAttempt) {
+                item {
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Text("This extraction failed. The server cannot retry only the failed page.")
+                            Text("Starting a new attempt uploads every selected page again; no failed import is published.")
+                            Button(onClick = onNewAttempt, enabled = !state.working) {
+                                Text("Start a new attempt")
+                            }
+                        }
+                    }
                 }
             }
+
         }
 
         if (state.working) {
@@ -321,6 +380,15 @@ private fun OwnerUploadContent(
                     CircularProgressIndicator()
                     Text(state.statusMessage ?: "Working…")
                 }
+            }
+        }
+
+        if (state.extractionProgress != null) {
+            item {
+                val p = state.extractionProgress!!
+                Text("Server extraction: " + p.completedImages + "/" + p.totalImages +
+                    " completed; " + p.failedImages + " failed.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 
@@ -349,5 +417,37 @@ private fun OwnerUploadContent(
                 }
             }
         }
+    }
+}
+
+/** Bounded-size local thumbnail; cannot decode a full-size gallery bitmap on the UI thread. */
+@Composable
+private fun MenuPhotoThumbnail(uriString: String) {
+    val resolver = LocalContext.current.contentResolver
+    val thumbnail by produceState<ImageBitmap?>(initialValue = null, key1 = uriString) {
+        value = withContext(Dispatchers.IO) {
+            runCatching {
+                val uri = Uri.parse(uriString)
+                val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+                if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return@runCatching null
+                var sample = 1
+                while (bounds.outWidth / sample > 180 || bounds.outHeight / sample > 180) sample *= 2
+                val options = BitmapFactory.Options().apply { inSampleSize = sample }
+                resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+                    ?.asImageBitmap()
+            }.getOrNull()
+        }
+    }
+    if (thumbnail != null) {
+        Image(
+            bitmap = thumbnail!!,
+            contentDescription = "Selected menu photo preview",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(76.dp),
+        )
+    } else {
+        Text("Preview unavailable", modifier = Modifier.size(76.dp),
+            style = MaterialTheme.typography.labelSmall)
     }
 }
