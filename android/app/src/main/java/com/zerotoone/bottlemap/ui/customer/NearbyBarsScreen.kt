@@ -208,7 +208,10 @@ fun NearbyBarsScreen(
 }
 
 @Composable
-private fun nearbyBarsViewModel(): NearbyBarsViewModel {
+internal fun nearbyBarsViewModel(
+    owner: androidx.lifecycle.ViewModelStoreOwner =
+        checkNotNull(androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner.current),
+): NearbyBarsViewModel {
     val context = LocalContext.current.applicationContext
     val factory = remember(context) {
         object : ViewModelProvider.Factory {
@@ -223,7 +226,7 @@ private fun nearbyBarsViewModel(): NearbyBarsViewModel {
             ) as T
         }
     }
-    return viewModel(factory = factory)
+    return viewModel(viewModelStoreOwner = owner, factory = factory)
 }
 
 private fun nearbyPermission(
