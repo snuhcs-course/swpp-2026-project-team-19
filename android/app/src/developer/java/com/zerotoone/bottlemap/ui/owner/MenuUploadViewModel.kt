@@ -176,57 +176,83 @@ class MenuUploadViewModel(
     fun upload() {
         val snapshot = _state.value
         val bar = selectedBar() ?: return
-        val selected = snapshot.selectedImage ?: return
-        if (snapshot.working) return
-
-        val key = pendingIdempotencyKey ?: UUID.randomUUID().toString().also {
-            pendingIdempotencyKey = it
+        if (snapshot.working || snapshot.selectionBusy || snapshot.selectedImages.isEmpty()) return
+        if (snapshot.failedImportRequiresNewAttempt) {
+            _state.value = snapshot.copy(
+                errorMessage = "Server extraction failed. Choose New attempt before resubmitting the batch."
+            )
+            return
         }
-
         _state.value = snapshot.copy(
-            working = true,
-            statusMessage = "Preparing menu photo…",
-            errorMessage = null,
+            working = true, statusMessage = "Preparing photos...", errorMessage = null,
+            extractionProgress = null,
         )
         viewModelScope.launch {
             try {
-                val prepared = imagePreparer.prepare(Uri.parse(selected.uri))
-                _state.value = _state.value.copy(statusMessage = "Uploading menu…")
+                // Validate the complete immutable selection before any HTTP request.
+                // Reuse exact compressed bytes after a network/timeout failure.
+                val prepared = cachedPreparedImages ?: prepareMenuBatch(
+                    snapshot.selectedImages,
+                    prepare = { photo -> imagePreparer.prepare(Uri.parse(photo.uri)) },
+                    onPrepared = { order ->
+                        val photo = snapshot.selectedImages[order - 1]
+                        _state.value = _state.value.copy(
+                            imagePreparation = _state.value.imagePreparation + (photo.uri to "Ready"),
+                            statusMessage = "Prepared " + order + "/" + snapshot.selectedImages.size,
+                        )
+                    },
+                ).also { cachedPreparedImages = it }
+                val key = pendingIdempotencyKey ?: UUID.randomUUID().toString().also {
+                    pendingIdempotencyKey = it
+                }
+                _state.value = _state.value.copy(
+                    statusMessage = "Uploading all " + prepared.size + " photos together...",
+                )
                 val accepted = repository.uploadMenuImport(
                     barId = bar.barId,
-                    image = prepared,
+                    images = prepared,
                     mode = snapshot.mode.apiValue,
                     idempotencyKey = key,
                 )
-                startPollingInCurrentJob(
-                    accepted.menuImportId,
-                    accepted.pollAfterMs,
+                require(accepted.imageCount == prepared.size) {
+                    "Server accepted an unexpected number of images."
+                }
+                startPollingInCurrentJob(accepted.menuImportId, accepted.pollAfterMs)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: MenuPhotoPreparationException) {
+                val photo = snapshot.selectedImages[error.imageOrder - 1]
+                _state.value = _state.value.copy(
+                    working = false, statusMessage = null,
+                    imagePreparation = _state.value.imagePreparation +
+                        (photo.uri to ("Failed: " + (error.cause?.message ?: "invalid image"))),
+                    errorMessage = (error.message ?: "Unable to prepare an image.") +
+                        " No photos were uploaded. Remove or replace this photo and retry.",
                 )
             } catch (error: BottleMapApiException) {
                 if (error.code == "ACTIVE_IMPORT_EXISTS") {
                     val existing = error.details?.get("menuImportId") as? String
                     if (existing != null) {
+                        _state.value = _state.value.copy(
+                            statusMessage = "Continuing existing import, not uploading again.",
+                        )
                         startPollingInCurrentJob(existing, 0L)
                         return@launch
                     }
                 }
-                if (error.code == "IDEMPOTENCY_KEY_REUSED") {
-                    pendingIdempotencyKey = null
-                }
+                if (error.code == "IDEMPOTENCY_KEY_REUSED") pendingIdempotencyKey = null
                 _state.value = _state.value.copy(
-                    working = false,
-                    statusMessage = null,
-                    errorMessage = if (error.code == "IDEMPOTENCY_KEY_REUSED") {
-                        "This upload key was already used with different content. Tap Upload again to start a new submit attempt."
-                    } else {
-                        error.message
+                    working = false, statusMessage = null,
+                    errorMessage = when (error.code) {
+                        "IDEMPOTENCY_KEY_REUSED" -> "Request key conflict; submit with a fresh key."
+                        "NETWORK_ERROR" -> "Network interrupted. Retry uses the same images and key."
+                        else -> error.message
                     },
                 )
-            } catch (error: Throwable) {
+            } catch (error: Exception) {
                 _state.value = _state.value.copy(
-                    working = false,
-                    statusMessage = null,
-                    errorMessage = error.message ?: "Menu upload failed.",
+                    working = false, statusMessage = null,
+                    errorMessage = error.message ?: "Upload failed. Try again with the same request.",
                 )
             }
         }
