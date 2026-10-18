@@ -26,6 +26,7 @@ import com.zerotoone.bottlemap.ui.customer.BarLocationMapScreen
 import com.zerotoone.bottlemap.ui.customer.SearchResultsScreen
 import com.zerotoone.bottlemap.ui.customer.SearchScreen
 import com.zerotoone.bottlemap.ui.customer.NearbyBarsScreen
+import com.zerotoone.bottlemap.ui.customer.nearbyBarsViewModel
 import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import com.zerotoone.bottlemap.ui.mode.ModeSelectionScreen
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
@@ -135,6 +136,10 @@ private fun NavGraphBuilder.customerGraph(
         startDestination = Routes.CUSTOMER_SEARCH,
     ) {
         composable(Routes.CUSTOMER_SEARCH) { backStackEntry ->
+            val nearbyOwner = remember(backStackEntry, navController) {
+                navController.getBackStackEntry(Routes.CUSTOMER_GRAPH)
+            }
+            val nearbyViewModel = nearbyBarsViewModel(nearbyOwner)
             val validationErrorCode = backStackEntry.savedStateHandle
                 .getStateFlow<String?>(SEARCH_VALIDATION_ERROR_KEY, null)
                 .collectAsStateWithLifecycle().value
@@ -142,16 +147,21 @@ private fun NavGraphBuilder.customerGraph(
                 onOpenResults = onOpenResults,
                 onOpenAccount = onOpenAccount,
                 onOpenNearby = onOpenNearby,
+                nearbyViewModel = nearbyViewModel,
                 serverValidationErrorCode = validationErrorCode,
                 onClearServerValidation = {
                     backStackEntry.savedStateHandle[SEARCH_VALIDATION_ERROR_KEY] = null
                 },
             )
         }
-        composable(Routes.CUSTOMER_NEARBY) {
+        composable(Routes.CUSTOMER_NEARBY) { backStackEntry ->
+            val nearbyOwner = remember(backStackEntry, navController) {
+                navController.getBackStackEntry(Routes.CUSTOMER_GRAPH)
+            }
             NearbyBarsScreen(
                 onBack = onBack,
                 onOpenBarDetail = onOpenBarDetail,
+                viewModel = nearbyBarsViewModel(nearbyOwner),
             )
         }
         composable(Routes.CUSTOMER_ACCOUNT) {
