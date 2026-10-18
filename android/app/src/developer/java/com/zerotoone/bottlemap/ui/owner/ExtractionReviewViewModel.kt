@@ -158,6 +158,13 @@ private fun MenuImportStatusDto.toReviewUiModelOrNull(): ReviewUiModel? {
     return ReviewUiModel(
         menuImportId = menuImportId,
         reviewVersion = version,
+        pages = images.sortedBy { it.imageOrder }.map { image ->
+            ReviewPageUiModel(
+                imageId = image.imageId,
+                imageOrder = image.imageOrder,
+                itemIds = image.items.sortedBy { it.itemOrder }.map { it.extractedItemId },
+            )
+        },
         items = images
             .sortedBy { it.imageOrder }
             .flatMap { image -> image.items.sortedBy { it.itemOrder } }

@@ -60,8 +60,15 @@ data class ReviewItemUiModel(
     val needsReview: Boolean,
 )
 
+data class ReviewPageUiModel(
+    val imageId: String,
+    val imageOrder: Int,
+    val itemIds: List<String>,
+)
+
 data class ReviewUiModel(
     val menuImportId: String,
+    val pages: List<ReviewPageUiModel> = emptyList(),
     val reviewVersion: Int,
     val items: List<ReviewItemUiModel>,
     val proposedChanges: List<String>,
