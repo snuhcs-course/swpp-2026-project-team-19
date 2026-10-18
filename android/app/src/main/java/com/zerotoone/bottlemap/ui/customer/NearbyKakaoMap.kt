@@ -217,11 +217,11 @@ private fun NearbyNativeMap(
                                         kakaoMap: KakaoMap,
                                         layer: LabelLayer,
                                         label: Label,
-                                    ) {
-                                        val selectedId = label.tag as? String ?: return
-                                        if (created.containsKey(selectedId)) {
-                                            report { latestSelection.value(selectedId) }
-                                        }
+                                    ): Boolean {
+                                        val selectedId = label.tag as? String ?: return false
+                                        if (!created.containsKey(selectedId)) return false
+                                        report { latestSelection.value(selectedId) }
+                                        return true
                                     }
                                 },
                             )
