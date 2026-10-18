@@ -65,8 +65,13 @@ OPERATOR_ONLY = [
 ]
 # Any signed-in user; tested in test_users_api.py and test_auth_api.py.
 SIGNED_IN = {("get", "/api/me")}
-# No token needed; tested in test_search_api.py, test_bar_menu_api.py and test_auth_api.py.
-PUBLIC = {("get", "/api/search/bars"), ("get", "/api/bars/{barId}/menu"), ("post", "/api/auth/temp-login")}
+# No token needed; tested in test_search_api.py, test_nearby_bars_api.py, test_bar_menu_api.py and test_auth_api.py.
+PUBLIC = {
+    ("get", "/api/search/bars"),
+    ("get", "/api/search/nearby-bars"),
+    ("get", "/api/bars/{barId}/menu"),
+    ("post", "/api/auth/temp-login"),
+}
 
 SUPABASE_SUBJECT = "0b6b3f5e-6f1f-4c2a-9a55-6d3e2f1a7c10"
 

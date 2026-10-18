@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 from typing import Literal
 from uuid import UUID
 
@@ -55,3 +55,24 @@ class SearchBarsResponse(BaseModel):
         "was recognized but no active bar currently sells it."
     )
     truncated: bool = Field(description="True when more rows matched than `limit`")
+
+
+class NearbyBarItem(BaseModel):
+    barId: UUID
+    name: str
+    address: str
+    latitude: Latitude
+    longitude: Longitude
+    distanceMeters: int = Field(
+        description="Straight-line (haversine) distance from lat/lng in whole meters; at most `radiusMeters`"
+    )
+    menuUpdatedAt: UtcDateTime | None = Field(
+        description="When this bar's current menu was published (`publishedAt` of GET /api/bars/{barId}/menu); "
+        "null when the bar has never had a published menu, set even when that menu has no items"
+    )
+
+
+class NearbyBarsResponse(BaseModel):
+    items: list[NearbyBarItem] = Field(
+        description="Every active bar within the radius, nearest first; ties by barId. Never truncated."
+    )

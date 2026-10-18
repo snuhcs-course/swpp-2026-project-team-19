@@ -159,12 +159,19 @@ def database_down(*args, **kwargs):
     raise OperationalError("SELECT secret_column FROM users", {}, Exception("password authentication failed"))
 
 
-def test_search_failure_is_an_internal_error(client, monkeypatch):
+@pytest.mark.parametrize(
+    ("service", "url", "params"),
+    [
+        ("search_bars", "/api/search/bars", {"query": "x"}),
+        ("find_nearby_bars", "/api/search/nearby-bars", {"lat": 37.478, "lng": 126.951}),
+    ],
+)
+def test_search_failure_is_an_internal_error(client, monkeypatch, service, url, params):
     import app.api.routes.search as search_route
 
-    monkeypatch.setattr(search_route, "search_bars", database_down)
+    monkeypatch.setattr(search_route, service, database_down)
 
-    response = TestClient(main_app, raise_server_exceptions=False).get("/api/search/bars", params={"query": "x"})
+    response = TestClient(main_app, raise_server_exceptions=False).get(url, params=params)
 
     assert (response.status_code, response.json()) == (500, INTERNAL_ERROR)
     assert "secret" not in response.text and "password" not in response.text
