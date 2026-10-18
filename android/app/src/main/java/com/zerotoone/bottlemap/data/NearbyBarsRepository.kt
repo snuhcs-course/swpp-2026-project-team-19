@@ -31,6 +31,7 @@ data class NearbyBar(
     val address: String,
     val location: NearbyCoordinate,
     val distanceMeters: Double,
+    val menuUpdatedAt: String? = null,
 )
 
 const val NEARBY_RADIUS_METERS = 500.0
@@ -49,8 +50,9 @@ fun distanceMeters(from: NearbyCoordinate, to: NearbyCoordinate): Double {
 }
 
 /**
- * Caller must supply the COMPLETE active-bar catalog for the user vicinity,
- * not truncated/paginated product search results. Stable distance then ID sort.
+ * Pure Haversine domain utility for deterministic distance boundary tests.
+ * NOT used on Backend A9 results: the server includes bars based on rounded
+ * integer meters, so a local floating-point filter would wrongly omit them.
  */
 fun filterNearbyBars(
     origin: NearbyCoordinate,
@@ -82,23 +84,9 @@ interface NearbyLocationSource {
 }
 
 /**
- * Must return EVERY active bar that could be inside 500 m, including full
- * pagination. Returning a product-search subset is a correctness violation.
+ * Production A9 source returns a COMPLETE server-filtered, server-sorted catalog.
+ * Never re-filter raw distances on Android; server rounds to integer meters.
  */
 interface NearbyBarsSource {
-    suspend fun listNearbyCandidates(origin: NearbyCoordinate): List<NearbyBarCandidate>
-}
-
-class NearbyContractUnavailableException : IllegalStateException(
-    "공개 주변 바 목록 API 계약이 아직 없습니다. Backend 담당자의 Nearby 조회 API가 필요합니다.",
-)
-
-/**
- * Production-safe placeholder: fail explicitly instead of presenting a
- * partial search dataset as all bars within 500m.
- */
-object AwaitingPublicNearbyApi : NearbyBarsSource {
-    override suspend fun listNearbyCandidates(origin: NearbyCoordinate): List<NearbyBarCandidate> {
-        throw NearbyContractUnavailableException()
-    }
+    suspend fun listNearbyBars(origin: NearbyCoordinate): List<NearbyBar>
 }
