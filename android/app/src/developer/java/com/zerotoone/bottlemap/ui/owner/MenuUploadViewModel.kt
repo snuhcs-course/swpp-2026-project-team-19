@@ -267,6 +267,7 @@ class MenuUploadViewModel(
         _state.value = _state.value.copy(
             working = true,
             statusMessage = "Checking existing menu import…",
+            failedImportRequiresNewAttempt = false,
             errorMessage = null,
         )
         viewModelScope.launch {
@@ -298,9 +299,10 @@ class MenuUploadViewModel(
                         _state.value = _state.value.copy(
                             working = true,
                             statusMessage = progressText,
+                            extractionProgress = progress,
                             errorMessage = null,
                         )
-                        waitMs = status.pollAfterMs ?: 3000L
+                        waitMs = (status.pollAfterMs ?: 3000L).coerceIn(1000L, 10000L)
                     }
 
                     "ready_for_review" -> {
@@ -310,16 +312,24 @@ class MenuUploadViewModel(
                             statusMessage = null,
                             errorMessage = null,
                             openReviewImportId = menuImportId,
+                            extractionProgress = status.progress,
                         )
                         return
                     }
 
                     "failed" -> {
-                        pendingIdempotencyKey = null
+                        // No per-photo retry API: extraction stops on the first failure.
                         _state.value = _state.value.copy(
                             working = false,
                             statusMessage = null,
-                            errorMessage = status.failure?.message ?: "Menu extraction failed.",
+                            extractionProgress = status.progress,
+                            failedImportRequiresNewAttempt = true,
+                            errorMessage = (status.failure?.message ?: "Menu extraction failed.") +
+                                " This entire import is terminal: " +
+                                (status.progress?.completedImages ?: 0) + "/" +
+                                (status.progress?.totalImages ?: 0) + " extracted, " +
+                                (status.progress?.failedImages ?: 0) + " failed. " +
+                                "Review the selected pages before starting a NEW batch.",
                         )
                         return
                     }
