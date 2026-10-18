@@ -2,6 +2,7 @@
 package com.zerotoone.bottlemap.data
 
 import com.zerotoone.bottlemap.network.MenuImportAcceptedDto
+import kotlinx.coroutines.CancellationException
 
 const val MAX_MENU_PHOTOS = 5
 const val MAX_MENU_PHOTO_BYTES = 10 * 1024 * 1024
@@ -74,6 +75,9 @@ suspend fun prepareMenuBatch(
             require(bytes <= MAX_MENU_TOTAL_BYTES) { "Combined photos exceed 30 MB." }
             result.add(image)
             onPrepared(order)
+        } catch (cancelled: CancellationException) {
+            // Navigation away or lifecycle destruction must cancel preparation.
+            throw cancelled
         } catch (error: Exception) {
             throw MenuPhotoPreparationException(order, error)
         }
