@@ -44,6 +44,14 @@ interface BottleMapApi {
         @Header("Authorization") authorization: String? = null,
     ): BarMenuResponseDto
 
+    // Backend A9 PR #43, API spec 3.12. Public, complete, server-sorted results.
+    @GET("api/search/nearby-bars")
+    suspend fun getNearbyBars(
+        @Query("lat") latitude: Double,
+        @Query("lng") longitude: Double,
+        @Query("radiusMeters") radiusMeters: Int = 500,
+    ): NearbyBarsResponseDto
+
     @GET("api/search/bars")
     suspend fun searchBars(
         @Query("query") query: String,
