@@ -43,16 +43,16 @@ Columns: **ID, Title, Basis, Level, Preconditions, Steps, Expected Result, Owner
 
 | ID | Title | Basis | Level | Preconditions | Steps | Expected Result | Owner | Test | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| A7A8-DRAFT-01 | 500m boundary inclusive | A7 500m | Unit | Fake coordinates | Feed 499m, 500m, 501m | First two included; last excluded | Android | `radiusIncludesInsideAndExactly500mAndExcludesOutside` | Written; run pending |
-| A7A8-DRAFT-02 | Distance/order/dedup | A7 distance sort | Unit | Duplicate candidate IDs | Pass unordered candidates | Sorted nearest first; one card per ID | Android | `sortsByDistanceThenIdAndRemovesDuplicateBarIds` | Written; run pending |
-| A7A8-DRAFT-03 | Invalid coordinates | A7 coordinate validation | Unit | Null, NaN, range errors | Filter invalid bars | Discard invalid candidates; no fabricated points | Android | `excludesMissingInvalidNonFiniteAndSwappedCoordinates` | Written; run pending |
-| A7A8-DRAFT-04 | Denied/approximate | A7 permission handling | Unit | Fake location/source | Reject or approximate-only | No location/network request or 500m claim | Android | `permissionDeniedAndApproximateDoNotRequestLocation` | Written; run pending |
-| A7A8-DRAFT-05 | Loading/Success/Empty | A7 state transitions | Unit | Fake sources | Allow precise, fetch nonempty/empty | Loading→Success or Empty | Android | `precisePermissionTransitionsThroughLocationAndBarsToSuccess`, `empty500mResultIsDistinctFromBackendFailure` | Written; run pending |
-| A7A8-DRAFT-06 | Network Retry | A7 error handling | Unit | First fetch fails | Trigger Retry after restoring source | One retry and Success | Android | `errorRetrySucceedsWithoutAutoPermissionPrompt` | Written; run pending |
-| A7A8-DRAFT-07 | API not yet deployed | A7 deployment handling | Unit | Fake HTTP 404 | Request nearby | Visible deployment error, not fake Empty | Android | `api404BeforeBackendDeploymentIsNotDisplayedAsEmpty` | Written; run pending |
-| A7A8-DRAFT-08 | Selection sync | A8 card/marker focus | Unit | Fake 2 bars | Select from card then marker | Same ID in SavedStateHandle; unknown ID ignored | Android | `carouselAndMarkerSelectionBothUseSameSavedBarId` | Written; run pending |
-| A7A8-DRAFT-09 | Resume/permission revoke | A7 lifecycle | Unit | Fake in-flight state | Revoke permission | Pending request canceled, PermissionRequired | Android | `permissionRevokedWhileLoadingIsHandled` | Written; run pending |
-| A7A8-DRAFT-10 | Repeat navigation refresh | A7/A8 lifecycle | Unit | Fake loaded results | Recheck precise permission | No extra location/catalog request | Android | `backgroundPermissionRecheckDoesNotRepeatSuccessfulNetworkRequest` | Written; run pending |
+| A7A8-DRAFT-01 | 500m boundary inclusive | A7 500m | Unit | Fake coordinates | Feed 499m, 500m, 501m | First two included; last excluded | Android | `radiusIncludesInsideAndExactly500mAndExcludesOutside` | Written; passed in Android CI run 39135708473 |
+| A7A8-DRAFT-02 | Distance/order/dedup | A7 distance sort | Unit | Duplicate candidate IDs | Pass unordered candidates | Sorted nearest first; one card per ID | Android | `sortsByDistanceThenIdAndRemovesDuplicateBarIds` | Written; passed in Android CI run 39135708473 |
+| A7A8-DRAFT-03 | Invalid coordinates | A7 coordinate validation | Unit | Null, NaN, range errors | Filter invalid bars | Discard invalid candidates; no fabricated points | Android | `excludesMissingInvalidNonFiniteAndSwappedCoordinates` | Written; passed in Android CI run 39135708473 |
+| A7A8-DRAFT-04 | Denied/approximate | A7 permission handling | Unit | Fake location/source | Reject or approximate-only | No location/network request or 500m claim | Android | `permissionDeniedAndApproximateDoNotRequestLocation` | Written; passed in Android CI run 39135708473 |
+| A7A8-DRAFT-05 | Loading/Success/Empty | A7 state transitions | Unit | Fake sources | Allow precise, fetch nonempty/empty | Loading→Success or Empty | Android | `precisePermissionTransitionsThroughLocationAndBarsToSuccess`, `empty500mResultIsDistinctFromBackendFailure` | Written; passed in Android CI run 39135708473 |
+| A7A8-DRAFT-06 | Network Retry | A7 error handling | Unit | First fetch fails | Trigger Retry after restoring source | One retry and Success | Android | `errorRetrySucceedsWithoutAutoPermissionPrompt` | Written; passed in Android CI run 39135708473 |
+| A7A8-DRAFT-07 | API not yet deployed | A7 deployment handling | Unit | Fake HTTP 404 | Request nearby | Visible deployment error, not fake Empty | Android | `api404BeforeBackendDeploymentIsNotDisplayedAsEmpty` | Written; passed in Android CI run 39135708473 |
+| A7A8-DRAFT-08 | Selection sync | A8 card/marker focus | Unit | Fake 2 bars | Select from card then marker | Same ID in SavedStateHandle; unknown ID ignored | Android | `carouselAndMarkerSelectionBothUseSameSavedBarId` | Written; passed in Android CI run 39135708473 |
+| A7A8-DRAFT-09 | Resume/permission revoke | A7 lifecycle | Unit | Fake in-flight state | Revoke permission | Pending request canceled, PermissionRequired | Android | `permissionRevokedWhileLoadingIsHandled` | Written; passed in Android CI run 39135708473 |
+| A7A8-DRAFT-10 | Repeat navigation refresh | A7/A8 lifecycle | Unit | Fake loaded results | Recheck precise permission | No extra location/catalog request | Android | `backgroundPermissionRecheckDoesNotRepeatSuccessfulNetworkRequest` | Written; passed in Android CI run 39135708473 |
 | A7A8-DRAFT-11 | Real permission & fix | A7 location | Device | Samsung device | Allow precise / deny / approximate / disable GPS | Appropriate state and no background prompt | Android | Manual scenario | Not run |
 | A7A8-DRAFT-12 | Real carousel/map/end-to-end | A7/A8 integration | Device | **A9 PR #43 merged/deployed and API accessible** | Swipe/select markers/open Detail/back | Complete 500m active bars, synced marker, no overlay | Android+Backend | Manual scenario | **Not run; awaiting deployment/device** |
 
@@ -78,11 +78,13 @@ CI can confirm compilation, JVM state tests, and APK packaging. CI **cannot** va
 
 | Component | Framework | Planned goal | Actual | Date | Command / Report |
 |---|---|---|---|---|---|
-| Distance + selection | JUnit 4 | 500m/sort/invalid/dedup/selection checks pass | Pending | — | Android CI unit-test artifact |
+| Distance + selection + A9 DTO contract | JUnit 4 / Moshi | 500m, rounded-server edge, invalid/dedup, state/selection and JSON fixture checks pass | **Pass: 73 JUnit tests, 0 failures** | 2026-10-18 | Android CI run 39135708473 (`:app:testDebugUnitTest`), unit report artifact |
 | Location/permissions | Manual S22/S23 | Precise/approximate/deny/timeout/disabled covered | Pending | — | Device notes and screenshots |
 | Multi-marker and carousel | Kakao Maps SDK device | Swipe, marker focus, return/back, no duplicate | Not run; A9 deployment/device pending | — | Device recording |
-| Android Lint | Gradle/GitHub Actions | Pass | Pending | — | `Android / lint` |
-| Debug APK | Gradle/GitHub Actions | Pass | Pending | — | `Android / debug APK` |
+| Android Lint | Gradle/GitHub Actions | Pass | **Passed** | 2026-10-18 | Run 39135708473, `Android / lint` artifact |
+| Debug APK | Gradle/GitHub Actions | Pass | **Passed** | 2026-10-18 | Run 39135708473, `Android / debug APK` artifact |
+
+**Observed verification:** GitHub Actions Android CI [run #39135708473](https://github.com/snuhcs-course/swpp-2026-project-team-19/actions/runs/39135708473), PR #41 commit `fd833bc38fdabaa30b9276d0c5ffd5f389cf7949`: `Android / changes`, `Android / lint`, `Android / unit tests`, `Android / debug APK` all **success**. The preceding run #39135192059 had 73 executed unit tests and **1 failure**, `missingRequiredFieldIsNotSilentlyInvented`, because the nullable `menuUpdatedAt` can decode to null when omitted by Moshi. We corrected the test to assert the required `distanceMeters` field is present; the subsequent run is green, without skipping any tests. CI ran locally isolated JUnit tests; no production location/Kakao services were exercised. Backend A9 PR #43 reports Backend CI successful, but is still unmerged. **Do not mark physical-device work as tested.**
 
 Test counts, pass/fail, dated commit SHA and coverage **must be copied from actual runs**. The project course guideline requires English Testing Documentation on the **team GitHub Wiki** and a PDF submission at iteration close; this repository draft is not a substitute for publishing/updating that Wiki.
 
