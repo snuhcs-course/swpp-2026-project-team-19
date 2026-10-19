@@ -38,7 +38,7 @@ class CameraCaptureSessionTest {
         fun take(photo: CameraPhoto) { files[photo.fileName] = true }
     }
 
-    private fun selected(photo: CameraPhoto) = SelectedMenuImage(photo.uri, photo.fileName)
+    private fun captured(photo: CameraPhoto) = SelectedMenuImage(photo.uri, photo.fileName)
     private fun gallery(id: String) = SelectedMenuImage("content://gallery/" + id, "menu-" + id + ".jpg")
 
     @Test fun successfulCaptureNeedsUserAcceptanceThenAddsToExistingGallery() = runBlocking {
@@ -51,8 +51,8 @@ class CameraCaptureSessionTest {
         assertNull(capture.pending)
         assertEquals(pending, capture.preview)
         val photo = (capture.accept() as CameraCaptureResult.Accepted).photo
-        val selected = appendMenuPhotos(listOf(gallery("a")), listOf(selected(photo))).images
-        assertEquals(listOf(gallery("a"), selected(photo)), selected)
+        val selected = appendMenuPhotos(listOf(gallery("a")), listOf(captured(photo))).images
+        assertEquals(listOf(gallery("a"), captured(photo)), selected)
         assertNull(capture.preview)
         assertTrue(photo.fileName in store.files)
     }
@@ -80,7 +80,7 @@ class CameraCaptureSessionTest {
         val store = FakeCameraStorage()
         val capture = CameraCaptureSession(store)
         val accepted = store.create().also { store.take(it) }
-        val selected = listOf(gallery("a"), selected(accepted))
+        val selected = listOf(gallery("a"), captured(accepted))
         val first = capture.start()
         store.take(first)
         capture.finish(true)
@@ -88,7 +88,7 @@ class CameraCaptureSessionTest {
         assertNotEquals(first.fileName, retake.fileName)
         assertEquals(CameraCaptureResult.Canceled, capture.finish(false))
         assertEquals(first, capture.preview)
-        assertEquals(selected, selected)
+        assertEquals(2, selected.size)
         assertTrue(first.fileName in store.files)
         assertTrue(accepted.fileName in store.files)
     }
@@ -128,7 +128,7 @@ class CameraCaptureSessionTest {
             store.take(photo)
             capture.finish(true)
             val accepted = (capture.accept() as CameraCaptureResult.Accepted).photo
-            selected = appendMenuPhotos(selected, listOf(selected(accepted))).images
+            selected = appendMenuPhotos(selected, listOf(captured(accepted))).images
         }
         assertEquals(5, selected.size)
         assertEquals(listOf("menu-a.jpg", "menu-b.jpg", "capture-1.jpg",
@@ -143,8 +143,8 @@ class CameraCaptureSessionTest {
         store.take(photo)
         capture.finish(true)
         val confirmed = (capture.accept() as CameraCaptureResult.Accepted).photo
-        val first = appendMenuPhotos(emptyList(), listOf(selected(confirmed))).images
-        val repeated = appendMenuPhotos(first, listOf(selected(confirmed)))
+        val first = appendMenuPhotos(emptyList(), listOf(captured(confirmed))).images
+        val repeated = appendMenuPhotos(first, listOf(captured(confirmed)))
         assertEquals(1, repeated.duplicates)
         assertEquals(first, repeated.images)
     }
@@ -156,7 +156,7 @@ class CameraCaptureSessionTest {
         store.take(photo)
         capture.finish(true)
         capture.accept()
-        val selected = listOf(gallery("a"), selected(photo))
+        val selected = listOf(gallery("a"), captured(photo))
         capture.deleteIfOwned(gallery("a").uri)
         assertTrue(photo.fileName in store.files)
         capture.deleteIfOwned(photo.uri)
