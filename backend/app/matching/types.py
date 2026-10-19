@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5); ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Jinwoo Park and Haeul Yang.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5; 2026-10-13, P22); ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Jinwoo Park and Haeul Yang.
 """Input, output and catalog access types for product matching.
 
 These are plain dataclasses so matching does not depend on SQLAlchemy models.
@@ -11,7 +11,9 @@ from decimal import Decimal
 from typing import Any, Literal, Protocol
 from uuid import UUID
 
-ResolutionStatus = Literal["exact_match", "ambiguous", "unmatched"]
+# "multi" (one menu line naming two products) comes only from `resolve_product_staged`;
+# menu import does not store it yet.
+ResolutionStatus = Literal["exact_match", "ambiguous", "unmatched", "multi"]
 MatchMethod = Literal["alias", "embedding", "llm"]
 
 
@@ -34,6 +36,7 @@ class ProductInfo:
     display_name: str
     age_years: int | None = None
     edition_name: str | None = None
+    brand_id: UUID | None = None
 
 
 @dataclass(frozen=True)
@@ -52,6 +55,8 @@ class ResolutionResult:
     status: ResolutionStatus
     candidates: tuple[Candidate, ...] = ()
     proposed_product_id: UUID | None = None
+    # For "multi": one exact_match result per product, in menu order (proposed_product_id is None).
+    parts: tuple["ResolutionResult", ...] = ()
 
 
 class CatalogLookup(Protocol):
@@ -67,4 +72,20 @@ class CatalogLookup(Protocol):
 
     def get_normalized_aliases(self, product_id: UUID) -> list[str]:
         """Return every normalized alias of the product."""
+        ...
+
+    def find_brand_ids_by_alias(self, normalized_alias: str) -> list[UUID]:
+        """Return distinct brand ids whose normalized brand alias equals the argument."""
+        ...
+
+    def get_brand_product_ids(self, brand_id: UUID) -> list[UUID]:
+        """Return the ids of the brand's active products."""
+        ...
+
+    def list_normalized_aliases(self) -> list[tuple[str, UUID]]:
+        """Return (normalized alias, product id) for every alias of every active product."""
+        ...
+
+    def list_normalized_brand_aliases(self) -> list[tuple[str, UUID]]:
+        """Return (normalized alias, brand id) for every brand alias."""
         ...

@@ -1,0 +1,360 @@
+{
+ "key": "ef6d3632c60f5a06c5f3e98c165d195c018efa36d0d5bfc2e0fe62e41f93a151",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "글렌그란트 10년",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "글렌리벳 12년",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "글렌피딕 12년",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "글렌피딕 15년",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "발베니 12년",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "발베니 14년 캐리비언 캐스크",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "맥캘란 12년 더블 캐스크",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "맥캘란 15년 더블 캐스크",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "글렌알라키 10년 CS",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "글렌알라키 12년",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "글렌알라키 15년",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "로즈아일 12년",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "글렌글라사 샌드앤드",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "글렌모렌지 오리지널",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "글렌모렌지 라산타 12년",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "글렌모렌지 킨타 루반 14년",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "글렌모렌지 시그넷",
+    "target": false
+   },
+   {
+    "line": 18,
+    "name": "글렌드로낙 12년",
+    "target": false
+   },
+   {
+    "line": 19,
+    "name": "글렌드로낙 15년",
+    "target": false
+   },
+   {
+    "line": 20,
+    "name": "글렌드로낙 18년",
+    "target": false
+   },
+   {
+    "line": 21,
+    "name": "글렌드로낙 포트우드",
+    "target": true
+   },
+   {
+    "line": 22,
+    "name": "글렌드로낙 피티드",
+    "target": true
+   },
+   {
+    "line": 23,
+    "name": "글렌드로낙 29년 1993 빈티지 캐스크보틀링",
+    "target": true
+   },
+   {
+    "line": 24,
+    "name": "탈리스커 10년",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "달모어 12년",
+    "target": false
+   },
+   {
+    "line": 26,
+    "name": "오반 14년",
+    "target": false
+   },
+   {
+    "line": 27,
+    "name": "달위니 15년",
+    "target": false
+   },
+   {
+    "line": 28,
+    "name": "글렌파클라스 105",
+    "target": false
+   },
+   {
+    "line": 29,
+    "name": "크라이넬리시 14년",
+    "target": false
+   },
+   {
+    "line": 30,
+    "name": "라프로익 10년",
+    "target": false
+   },
+   {
+    "line": 31,
+    "name": "라프로익 PX 캐스크",
+    "target": true
+   },
+   {
+    "line": 32,
+    "name": "보모어 12년",
+    "target": false
+   },
+   {
+    "line": 33,
+    "name": "아드벡 10년",
+    "target": false
+   },
+   {
+    "line": 34,
+    "name": "아드벡 우거다일",
+    "target": false
+   },
+   {
+    "line": 35,
+    "name": "아드벡 코리브레칸",
+    "target": false
+   },
+   {
+    "line": 36,
+    "name": "아드벡 스펙타클러",
+    "target": true
+   },
+   {
+    "line": 37,
+    "name": "아드벡 25년",
+    "target": true
+   },
+   {
+    "line": 38,
+    "name": "라가볼린 8년",
+    "target": false
+   },
+   {
+    "line": 39,
+    "name": "라가불린 16년",
+    "target": false
+   },
+   {
+    "line": 40,
+    "name": "킬호만 사닉",
+    "target": true
+   },
+   {
+    "line": 41,
+    "name": "킬호만 배치 스트렝스",
+    "target": true
+   },
+   {
+    "line": 42,
+    "name": "롱로우 피티드",
+    "target": true
+   },
+   {
+    "line": 43,
+    "name": "빅 피트",
+    "target": true
+   },
+   {
+    "line": 44,
+    "name": "옥토모어 13.1",
+    "target": true
+   },
+   {
+    "line": 45,
+    "name": "옥토모어 14.3",
+    "target": true
+   },
+   {
+    "line": 46,
+    "name": "옥토모어 15.3",
+    "target": true
+   },
+   {
+    "line": 47,
+    "name": "옥토모어 16.3",
+    "target": true
+   },
+   {
+    "line": 48,
+    "name": "아란 10년",
+    "target": false
+   },
+   {
+    "line": 49,
+    "name": "마크리무어 CS",
+    "target": true
+   },
+   {
+    "line": 50,
+    "name": "킬커란 12년",
+    "target": true
+   },
+   {
+    "line": 51,
+    "name": "스프링뱅크 10년",
+    "target": true
+   },
+   {
+    "line": 52,
+    "name": "글렌스코시아 10년",
+    "target": true
+   },
+   {
+    "line": 53,
+    "name": "레드브레스트 12년",
+    "target": true
+   },
+   {
+    "line": 54,
+    "name": "폴 존 피티드",
+    "target": false
+   },
+   {
+    "line": 55,
+    "name": "히비키 하모니",
+    "target": true
+   },
+   {
+    "line": 56,
+    "name": "야마자키 12년",
+    "target": true
+   },
+   {
+    "line": 57,
+    "name": "기원 호랑이",
+    "target": true
+   },
+   {
+    "line": 58,
+    "name": "조니워커 블랙",
+    "target": false
+   },
+   {
+    "line": 59,
+    "name": "조니워커 블루",
+    "target": false
+   },
+   {
+    "line": 60,
+    "name": "발렌타인 21년",
+    "target": true
+   },
+   {
+    "line": 61,
+    "name": "로얄 살루트 21년",
+    "target": false
+   },
+   {
+    "line": 62,
+    "name": "듀어스 18년",
+    "target": true
+   },
+   {
+    "line": 63,
+    "name": "몽키 숄더",
+    "target": false
+   },
+   {
+    "line": 64,
+    "name": "메이커스 마크",
+    "target": false
+   },
+   {
+    "line": 65,
+    "name": "와일드터키 81",
+    "target": true
+   },
+   {
+    "line": 66,
+    "name": "와일드터키 라이",
+    "target": true
+   },
+   {
+    "line": 67,
+    "name": "와일드터키 레어브리드",
+    "target": false
+   },
+   {
+    "line": 68,
+    "name": "사가모어 라이 CS",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 6,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Balvenie\",\n      \"age\": 14,\n      \"edition_tokens_en\": [\n        \"Caribbean\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"GlenAllachie\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\n        \"CS\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"CS\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Roseisle\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenglassaugh\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Sandend\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\n        \"Lasanta\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": 14,\n      \"edition_tokens_en\": [\n        \"Quinta\",\n        \"Ruban\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 21,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Glendronach\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Port\",\n        \"Wood\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 22,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Glendronach\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Peated\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 23,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Glendronach\",\n      \"age\": 29,\n      \"edition_tokens_en\": [\n        \"1993\",\n        \"Vintage\",\n        \"Cask\",\n        \"Bottling\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 31,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Laphroaig\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"PX\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 36,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Ardbeg\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Spectacular\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 37,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Ardbeg\",\n      \"age\": 25,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 40,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilkerran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Saanig\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 41,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilkerran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Batch\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 42,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Longrow\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Peated\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 43,\n      \"bottler_en\": \"Douglas Laing\",\n      \"distillery_en\": null,\n      \"brand_en\": \"Big Peat\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 44,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"13.1\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 45,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"14.3\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 46,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"15.3\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 47,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"16.3\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 49,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Machrie Moor\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"CS\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"CS\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    },\n    {\n      \"line\": 50,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kilkerran\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 51,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Springbank\",\n      \"age\": 10,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 52,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glen Scotia\",\n      \"age\": 10,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 53,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Redbreast\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 55,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hibiki\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Harmony\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 56,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Yamazaki\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 57,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Three Societies\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Tiger\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 60,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Ballantine's\",\n      \"age\": 21,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 62,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Dewar's\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 65,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Wild Turkey\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"81\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 66,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Wild Turkey\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Rye\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 68,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Sagamore Spirit\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Rye\",\n        \"CS\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"CS\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-14T08:51:50.651859+00:00",
+  "latency_ms": 7333,
+  "attempts": 1,
+  "input_tokens": 3014,
+  "output_tokens": 3059,
+  "thought_tokens": 128
+ }
+}

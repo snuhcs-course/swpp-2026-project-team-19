@@ -1,0 +1,224 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v2",
+  "prompt_sha256": "87314f7784a57513cea270fef34d2c7d9a1147f2d1b337b1bfd73841ce5cab96",
+  "source_image": "012_beck_03.jpeg",
+  "prepared_image": "012_beck_03.jpg",
+  "prepared_sha256": "f2de6f5bc360231da04d9696ace0b83c6d067c9da71fad48055df3d31dda7417",
+  "started_at": "2026-10-13T02:23:40.838138+00:00",
+  "latency_ms": 5526,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2811,
+  "output_tokens": 1090,
+  "thought_tokens": 0,
+  "total_tokens": 3901,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Glenfiddich 15yo",
+        "price_krw": 22000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Oban 14yo",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glengrant 15yo",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Dalwhinny 15yo",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenlivet 15yo",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Bowmore 15yo",
+        "price_krw": 27000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Machrie Moor",
+        "price_krw": 27000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Hakushu DR",
+        "price_krw": 32000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Hibiki DR",
+        "price_krw": 32000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Lagavulin 16yo",
+        "price_krw": 33000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfiddich 18yo",
+        "price_krw": 40000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Bowmore 18yo",
+        "price_krw": 40000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan 15yo",
+        "price_krw": 40000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenmorangie Signet",
+        "price_krw": 55000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Yamazaki 12yo",
+        "price_krw": 55000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Ballentine 30yo",
+        "price_krw": 60000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfiddich 21yo",
+        "price_krw": 65000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan 18yo",
+        "price_krw": 80000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfarclas 25yo",
+        "price_krw": 80000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Caol ila 25yo",
+        "price_krw": 90000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라프로익 25년",
+        "price_krw": 120000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "히비키 21년",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "히비키 블렌더스 쵸이스",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니 18년 PX",
+        "price_krw": 55000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 DR 마데라카스크",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": [\n  {\"raw_name\": \"Glenfiddich 15yo\", \"price_krw\": 22000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Oban 14yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glengrant 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Dalwhinny 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenlivet 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 15yo\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Machrie Moor\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hakushu DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hibiki DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Lagavulin 16yo\", \"price_krw\": 33000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 15yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenmorangie Signet\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Yamazaki 12yo\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Ballentine 30yo\", \"price_krw\": 60000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 21yo\", \"price_krw\": 65000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 18yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfarclas 25yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Caol ila 25yo\", \"price_krw\": 90000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"라프로익 25년\", \"price_krw\": 120000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 21년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 블렌더스 쵸이스\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"발베니 18년 PX\", \"price_krw\": 55000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란 DR 마데라카스크\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\"}\n]}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-13T02:23:46Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": [\n  {\"raw_name\": \"Glenfiddich 15yo\", \"price_krw\": 22000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Oban 14yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glengrant 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Dalwhinny 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenlivet 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 15yo\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Machrie Moor\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hakushu DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hibiki DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Lagavulin 16yo\", \"price_krw\": 33000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 15yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenmorangie Signet\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Yamazaki 12yo\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Ballentine 30yo\", \"price_krw\": 60000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 21yo\", \"price_krw\": 65000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 18yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfarclas 25yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Caol ila 25yo\", \"price_krw\": 90000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"라프로익 25년\", \"price_krw\": 120000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 21년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 블렌더스 쵸이스\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"발베니 18년 PX\", \"price_krw\": 55000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란 DR 마데라카스크\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\"}\n]}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0TS6y4oYMVCVuSvGUePfn2vExZVN7nV48ri0D9Ckk452P7CMXaeQ4RsSV5WTwwPkBl32HF5z3U9dGilC/dKWl4v4Fwco1c/pJZ8FP0moBL1PJPXn0c9lm0raQ=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": [\n  {\"raw_name\": \"Glenfiddich 15yo\", \"price_krw\": 22000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Oban 14yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glengrant 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Dalwhinny 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenlivet 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 15yo\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Machrie Moor\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hakushu DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hibiki DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Lagavulin 16yo\", \"price_krw\": 33000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 15yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenmorangie Signet\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Yamazaki 12yo\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Ballentine 30yo\", \"price_krw\": 60000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 21yo\", \"price_krw\": 65000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 18yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfarclas 25yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Caol ila 25yo\", \"price_krw\": 90000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"라프로익 25년\", \"price_krw\": 120000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 21년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 블렌더스 쵸이스\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"발베니 18년 PX\", \"price_krw\": 55000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란 DR 마데라카스크\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\"}\n]}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-13T02:23:46Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1747
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2811,
+      "total_output_tokens": 1090,
+      "total_thought_tokens": 0,
+      "total_tokens": 3901,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 1
+}

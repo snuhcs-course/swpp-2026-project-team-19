@@ -1,0 +1,177 @@
+{
+ "files": {
+  "eval/labels_final_v1.json": "a8ac42bb36df6b2151b6e6e8938ca141fff5bcbaca2fe391804e4702d3defbf1",
+  "eval/match_gold_final_v1.json": "069ad55a6afef75b357a7e05aab3b2c969e113ccf7d20969def82750fb83ed57",
+  "ai/catalog/catalog_v2_eval_5bars.json": "49e3963fd0fbee5c0028104cb487e5556e08c86bf0a71efdbf0aa0a607e1dc19",
+  "ai/catalog/catalog_v2_eval_5bars_drop_products.json": "b9d3d346afb819eeccd273696a3aa1523bb43469a1c36136e749c452f92c4789",
+  "ai/ocr/hybrid_prompt_v1.md": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "ai/match_llm/translate_prompt_v3.md": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4"
+ },
+ "photos": {
+  "009_odbi_01.png": {
+   "photo_id": "009_오드비_01",
+   "ocr_lines": 75,
+   "ocr_latency_ms": 2179,
+   "label_items": 34,
+   "label_lines": 34
+  },
+  "009_odbi_02.png": {
+   "photo_id": "009_오드비_02",
+   "ocr_lines": 40,
+   "ocr_latency_ms": 1768,
+   "label_items": 0,
+   "label_lines": 0
+  },
+  "009_odbi_03.png": {
+   "photo_id": "009_오드비_03",
+   "ocr_lines": 19,
+   "ocr_latency_ms": 1309,
+   "label_items": 7,
+   "label_lines": 7
+  },
+  "009_odbi_04.png": {
+   "photo_id": "009_오드비_04",
+   "ocr_lines": 46,
+   "ocr_latency_ms": 1514,
+   "label_items": 20,
+   "label_lines": 20
+  },
+  "009_odbi_05.png": {
+   "photo_id": "009_오드비_05",
+   "ocr_lines": 37,
+   "ocr_latency_ms": 2399,
+   "label_items": 14,
+   "label_lines": 14
+  },
+  "009_odbi_06.png": {
+   "photo_id": "009_오드비_06",
+   "ocr_lines": 36,
+   "ocr_latency_ms": 1388,
+   "label_items": 15,
+   "label_lines": 15
+  },
+  "009_odbi_07.png": {
+   "photo_id": "009_오드비_07",
+   "ocr_lines": 28,
+   "ocr_latency_ms": 1364,
+   "label_items": 11,
+   "label_lines": 11
+  },
+  "009_odbi_08.png": {
+   "photo_id": "009_오드비_08",
+   "ocr_lines": 74,
+   "ocr_latency_ms": 1845,
+   "label_items": 34,
+   "label_lines": 34
+  },
+  "009_odbi_09.jpeg": {
+   "photo_id": "009_오드비_09",
+   "ocr_lines": 46,
+   "ocr_latency_ms": 2450,
+   "label_items": 19,
+   "label_lines": 19
+  },
+  "010_sui_01.jpeg": {
+   "photo_id": "010_수이_01",
+   "ocr_lines": 91,
+   "ocr_latency_ms": 2632,
+   "label_items": 44,
+   "label_lines": 44
+  },
+  "010_sui_02.jpeg": {
+   "photo_id": "010_수이_02",
+   "ocr_lines": 69,
+   "ocr_latency_ms": 2804,
+   "label_items": 34,
+   "label_lines": 34
+  },
+  "010_sui_03.jpeg": {
+   "photo_id": "010_수이_03",
+   "ocr_lines": 74,
+   "ocr_latency_ms": 2598,
+   "label_items": 36,
+   "label_lines": 36
+  },
+  "010_sui_04.jpeg": {
+   "photo_id": "010_수이_04",
+   "ocr_lines": 84,
+   "ocr_latency_ms": 2826,
+   "label_items": 28,
+   "label_lines": 28
+  },
+  "010_sui_05.jpeg": {
+   "photo_id": "010_수이_05",
+   "ocr_lines": 47,
+   "ocr_latency_ms": 2083,
+   "label_items": 17,
+   "label_lines": 17
+  }
+ },
+ "catalogs": {
+  "eval_5bars": {
+   "products": 529,
+   "product_aliases": 1513,
+   "final_only_product_aliases": 0,
+   "final_only_brand_aliases": [],
+   "gold_line_kinds": {
+    "known": 285,
+    "non_whisky": 15,
+    "unknown": 13
+   },
+   "label_m3a_target_lines": 137,
+   "label_m3a_calls": 13,
+   "label_m3a_targets_per_photo": {
+    "009_오드비_01": 34,
+    "009_오드비_02": 0,
+    "009_오드비_03": 7,
+    "009_오드비_04": 12,
+    "009_오드비_05": 9,
+    "009_오드비_06": 6,
+    "009_오드비_07": 3,
+    "009_오드비_08": 9,
+    "009_오드비_09": 18,
+    "010_수이_01": 5,
+    "010_수이_02": 4,
+    "010_수이_03": 9,
+    "010_수이_04": 17,
+    "010_수이_05": 4
+   }
+  },
+  "drop_products": {
+   "products": 447,
+   "product_aliases": 1431,
+   "final_only_product_aliases": 0,
+   "final_only_brand_aliases": [],
+   "gold_line_kinds": {
+    "absent": 83,
+    "non_whisky": 15,
+    "unknown": 13,
+    "known": 202
+   },
+   "label_m3a_target_lines": 158,
+   "label_m3a_calls": 13,
+   "label_m3a_targets_per_photo": {
+    "009_오드비_01": 34,
+    "009_오드비_02": 0,
+    "009_오드비_03": 7,
+    "009_오드비_04": 12,
+    "009_오드비_05": 9,
+    "009_오드비_06": 6,
+    "009_오드비_07": 4,
+    "009_오드비_08": 10,
+    "009_오드비_09": 19,
+    "010_수이_01": 13,
+    "010_수이_02": 5,
+    "010_수이_03": 12,
+    "010_수이_04": 23,
+    "010_수이_05": 4
+   }
+  }
+ },
+ "totals": {
+  "photos": 14,
+  "ocr_lines": 766,
+  "label_items": 313,
+  "label_lines": 313
+ }
+}

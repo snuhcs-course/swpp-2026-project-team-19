@@ -1,0 +1,45 @@
+{
+ "key": "dc0d5f98cb3be5776780dccd92f00855e0f4c8ce6188382dd3aca85e890ea699",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Arran Quarter Cask",
+  "context_lines": [],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Arran",
+   "age": null,
+   "edition_tokens_en": [
+    "Quarter",
+    "Cask"
+   ],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Arran 10",
+    "age": 10,
+    "edition": null
+   },
+   {
+    "no": "2",
+    "name": "Arran Bodega Sherry Cask",
+    "age": null,
+    "edition": "Bodega Sherry Cask"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"메뉴에 적힌 'Quarter Cask'는 에디션이 일치하는 상품이 목록에 없음.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:04.219001+00:00",
+  "latency_ms": 1467,
+  "attempts": 1,
+  "input_tokens": 909,
+  "output_tokens": 41,
+  "thought_tokens": 133
+ }
+}

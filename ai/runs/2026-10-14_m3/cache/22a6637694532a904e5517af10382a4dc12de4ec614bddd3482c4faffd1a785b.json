@@ -1,0 +1,45 @@
+{
+ "key": "22a6637694532a904e5517af10382a4dc12de4ec614bddd3482c4faffd1a785b",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Maker`s Mark Cask Strength",
+  "context_lines": [
+   "James E Pepper 1776 Bourbon Whiskey",
+   "Cleveland Black Reserve Bourbon",
+   "Rowan`s Creek",
+   "Taylor Small Batch",
+   "Templeton Rye Barrel Strength"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Maker's Mark",
+   "age": null,
+   "edition_tokens_en": [
+    "Cask",
+    "Strength"
+   ],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Maker's Mark",
+    "age": null,
+    "edition": null
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"메뉴에는 'Cask Strength' 에디션이 명시되어 있으나, 옵션에는 기본 'Maker's Mark' 제품만 존재하여 다른 상품입니다.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:55:59.718736+00:00",
+  "latency_ms": 1736,
+  "attempts": 1,
+  "input_tokens": 912,
+  "output_tokens": 53,
+  "thought_tokens": 117
+ }
+}

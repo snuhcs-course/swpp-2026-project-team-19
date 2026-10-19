@@ -1,0 +1,395 @@
+{
+  "run_dir": "2026-10-13_val_v2_A2",
+  "note": "post-hoc diagnostic; not part of the eval_plan.md decision rule",
+  "summary": {
+    "official": {
+      "mean": 0.9820086710089347,
+      "min": 0.9641255605381166,
+      "max": 1.0
+    },
+    "diag": {
+      "mean": 0.9820086710089347,
+      "min": 0.9641255605381166,
+      "max": 1.0
+    }
+  },
+  "per_bar": {
+    "서로상": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "위스키복춘": {
+      "official": {
+        "mean": 0.9730326134928244,
+        "min": 0.9463087248322147,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.9730326134928244,
+        "min": 0.9463087248322147,
+        "max": 1.0
+      }
+    }
+  },
+  "per_photo": {
+    "007_위스키복춘_01": {
+      "official": {
+        "mean": 0.9662447257383966,
+        "min": 0.9493670886075949,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.9662447257383966,
+        "min": 0.9493670886075949,
+        "max": 1.0
+      }
+    },
+    "007_위스키복춘_02": {
+      "official": {
+        "mean": 0.9753086419753086,
+        "min": 0.9259259259259259,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 0.9753086419753086,
+        "min": 0.9259259259259259,
+        "max": 1.0
+      }
+    },
+    "007_위스키복춘_03": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "007_위스키복춘_04": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "008_서로상_01": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "008_서로상_02": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "008_서로상_03": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "008_서로상_04": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    },
+    "008_서로상_05": {
+      "official": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "diag": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      }
+    }
+  },
+  "runs": {
+    "1": {
+      "official": 0.9819004524886877,
+      "diag": 0.9819004524886877,
+      "rescued": 0,
+      "bars": {
+        "위스키복춘": {
+          "official": 0.9727891156462585,
+          "diag": 0.9727891156462585
+        },
+        "서로상": {
+          "official": 1.0,
+          "diag": 1.0
+        }
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "fp": 2,
+          "correct": 75,
+          "rescued": []
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "fp": 0,
+          "correct": 52,
+          "rescued": []
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "fp": 0,
+          "correct": 16,
+          "rescued": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "fp": 0,
+          "correct": 0,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "fp": 0,
+          "correct": 20,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "fp": 0,
+          "correct": 18,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "fp": 0,
+          "correct": 22,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "fp": 0,
+          "correct": 0,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "fp": 0,
+          "correct": 14,
+          "rescued": []
+        }
+      ]
+    },
+    "2": {
+      "official": 1.0,
+      "diag": 1.0,
+      "rescued": 0,
+      "bars": {
+        "위스키복춘": {
+          "official": 1.0,
+          "diag": 1.0
+        },
+        "서로상": {
+          "official": 1.0,
+          "diag": 1.0
+        }
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "fp": 0,
+          "correct": 77,
+          "rescued": []
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "fp": 0,
+          "correct": 52,
+          "rescued": []
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "fp": 0,
+          "correct": 16,
+          "rescued": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "fp": 0,
+          "correct": 0,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "fp": 0,
+          "correct": 20,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "fp": 0,
+          "correct": 18,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "fp": 0,
+          "correct": 22,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "fp": 0,
+          "correct": 0,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "fp": 0,
+          "correct": 14,
+          "rescued": []
+        }
+      ]
+    },
+    "3": {
+      "official": 0.9641255605381166,
+      "diag": 0.9641255605381166,
+      "rescued": 0,
+      "bars": {
+        "위스키복춘": {
+          "official": 0.9463087248322147,
+          "diag": 0.9463087248322147
+        },
+        "서로상": {
+          "official": 1.0,
+          "diag": 1.0
+        }
+      },
+      "photos": [
+        {
+          "photo_id": "007_위스키복춘_01",
+          "n_gt": 77,
+          "fp": 2,
+          "correct": 75,
+          "rescued": []
+        },
+        {
+          "photo_id": "007_위스키복춘_02",
+          "n_gt": 52,
+          "fp": 2,
+          "correct": 50,
+          "rescued": []
+        },
+        {
+          "photo_id": "007_위스키복춘_03",
+          "n_gt": 16,
+          "fp": 0,
+          "correct": 16,
+          "rescued": []
+        },
+        {
+          "photo_id": "007_위스키복춘_04",
+          "n_gt": 0,
+          "fp": 0,
+          "correct": 0,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_01",
+          "n_gt": 20,
+          "fp": 0,
+          "correct": 20,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_02",
+          "n_gt": 18,
+          "fp": 0,
+          "correct": 18,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_03",
+          "n_gt": 22,
+          "fp": 0,
+          "correct": 22,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_04",
+          "n_gt": 0,
+          "fp": 0,
+          "correct": 0,
+          "rescued": []
+        },
+        {
+          "photo_id": "008_서로상_05",
+          "n_gt": 14,
+          "fp": 0,
+          "correct": 14,
+          "rescued": []
+        }
+      ]
+    }
+  },
+  "label_set": "val"
+}

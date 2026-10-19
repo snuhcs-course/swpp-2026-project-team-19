@@ -1,0 +1,434 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v2",
+  "prompt_sha256": "87314f7784a57513cea270fef34d2c7d9a1147f2d1b337b1bfd73841ce5cab96",
+  "source_image": "011_mirabeau_03.jpeg",
+  "prepared_image": "011_mirabeau_03.jpg",
+  "prepared_sha256": "91a377bd66e7baecc589bcc1f71d91f96d5ffe2cc5753bb8c73620261e90655e",
+  "started_at": "2026-10-13T02:24:56.771867+00:00",
+  "latency_ms": 15622,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2811,
+  "output_tokens": 2939,
+  "thought_tokens": 3119,
+  "total_tokens": 8869,
+  "output": {
+    "items": [
+      {
+        "raw_name": "라가불린(Lagavulin) 8년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라가불린(Lagavulin) 11년 스위트 피트",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라가불린(Lagavulin) 디스틸러리 에디션 2023",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라가불린(Lagavulin) 16년",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 마키어 베이",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 사닉",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트랭스",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 코리아 스몰배치",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 배치 스트랭스",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 사닉 캐스크 스트랭스",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 피노 셰리 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 꼬냑 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) PX 셰리 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 로크곰",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 100% 아일라",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 포트 싱글 캐스크 피니시",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 소테른 캐스크",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 포트 캐스크",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 16년",
+        "price_krw": 54000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브룩라디(Bruichladdich) 스코티시 발리",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브룩라디(Bruichladdich) 아일라 발리",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브룩라디(Bruichladdich) 18년",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브룩라디(Bruichladdich) 블랙아트 에디션 11",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포트샬롯(Port Charlotte) 10년",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포트샬롯(Port Charlotte) 아일라 발리 2014",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포트샬롯(Port Charlotte) PMC:01",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 14.1",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 14.2",
+        "price_krw": 47000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 15.1",
+        "price_krw": 47000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 15.2",
+        "price_krw": 49000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 15.3",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "쿨일라(Caol Ila) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "쿨일라(Caol Ila) 18년",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 크루아 모나",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 안클라닥",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 토호카흐",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 에리네 그레이뉴",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트랭스",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 14년 루비포트 캐스크 피니시",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 18년",
+        "price_krw": 48000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 10년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 쿼터 캐스크",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 포트 캐스크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 아마로네 캐스크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 소테른 캐스크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 셰리 캐스크 캐스크 스트랭스",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 마크리무어 캐스크 스트랭스",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 마크리무어 10년",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 시그니처 시리즈",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 프라이빗 캐스크 No.2",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 18년",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 21년",
+        "price_krw": 68000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 25년",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 스카이",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 10년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 더 와일드 블루",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 스톰",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 18년",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 25년",
+        "price_krw": 95000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\"raw_name\": \"라가불린(Lagavulin) 8년\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"라가불린(Lagavulin) 11년 스위트 피트\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"라가불린(Lagavulin) 디스틸러리 에디션 2023\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"라가불린(Lagavulin) 16년\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 마키어 베이\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 사닉\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 마키어베이 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 코리아 스몰배치\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 배치 스트랭스\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 사닉 캐스크 스트랭스\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 피노 셰리 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 꼬냑 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) PX 셰리 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 로크곰\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 100% 아일라\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 포트 싱글 캐스크 피니시\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 소테른 캐스크\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 포트 캐스크\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 16년\", \"price_krw\": 54000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 스코티시 발리\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 아일라 발리\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 18년\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 블랙아트 에디션 11\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"포트샬롯(Port Charlotte) 10년\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"포트샬롯(Port Charlotte) 아일라 발리 2014\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"포트샬롯(Port Charlotte) PMC:01\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 14.1\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 14.2\", \"price_krw\": 47000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 15.1\", \"price_krw\": 47000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 15.2\", \"price_krw\": 49000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 15.3\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"쿨일라(Caol Ila) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"쿨일라(Caol Ila) 18년\", \"price_krw\": 42000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 크루아 모나\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 안클라닥\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 토호카흐\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 에리네 그레이뉴\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 12년 캐스크 스트랭스\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 14년 루비포트 캐스크 피니시\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 18년\", \"price_krw\": 48000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 10년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 쿼터 캐스크\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 포트 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 아마로네 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 소테른 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 셰리 캐스크 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 마크리무어 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 마크리무어 10년\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 시그니처 시리즈\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 프라이빗 캐스크 No.2\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 18년\", \"price_krw\": 50000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 21년\", \"price_krw\": 68000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 25년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 스카이\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 10년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 더 와일드 블루\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 스톰\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 18년\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 25년\", \"price_krw\": 95000, \"pour_ml\": null, \"unit\": \"glass\"}\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-13T02:25:12Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\"raw_name\": \"라가불린(Lagavulin) 8년\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"라가불린(Lagavulin) 11년 스위트 피트\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"라가불린(Lagavulin) 디스틸러리 에디션 2023\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"라가불린(Lagavulin) 16년\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 마키어 베이\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 사닉\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 마키어베이 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 코리아 스몰배치\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 배치 스트랭스\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 사닉 캐스크 스트랭스\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 피노 셰리 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 꼬냑 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) PX 셰리 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 로크곰\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 100% 아일라\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 포트 싱글 캐스크 피니시\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 소테른 캐스크\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 포트 캐스크\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 16년\", \"price_krw\": 54000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 스코티시 발리\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 아일라 발리\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 18년\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 블랙아트 에디션 11\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"포트샬롯(Port Charlotte) 10년\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"포트샬롯(Port Charlotte) 아일라 발리 2014\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"포트샬롯(Port Charlotte) PMC:01\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 14.1\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 14.2\", \"price_krw\": 47000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 15.1\", \"price_krw\": 47000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 15.2\", \"price_krw\": 49000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 15.3\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"쿨일라(Caol Ila) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"쿨일라(Caol Ila) 18년\", \"price_krw\": 42000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 크루아 모나\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 안클라닥\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 토호카흐\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 에리네 그레이뉴\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 12년 캐스크 스트랭스\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 14년 루비포트 캐스크 피니시\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 18년\", \"price_krw\": 48000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 10년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 쿼터 캐스크\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 포트 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 아마로네 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 소테른 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 셰리 캐스크 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 마크리무어 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 마크리무어 10년\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 시그니처 시리즈\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 프라이빗 캐스크 No.2\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 18년\", \"price_krw\": 50000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 21년\", \"price_krw\": 68000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 25년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 스카이\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 10년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 더 와일드 블루\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 스톰\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 18년\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 25년\", \"price_krw\": 95000, \"pour_ml\": null, \"unit\": \"glass\"}\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\"raw_name\": \"라가불린(Lagavulin) 8년\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"라가불린(Lagavulin) 11년 스위트 피트\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"라가불린(Lagavulin) 디스틸러리 에디션 2023\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"라가불린(Lagavulin) 16년\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 마키어 베이\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 사닉\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 마키어베이 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 코리아 스몰배치\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 배치 스트랭스\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 사닉 캐스크 스트랭스\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 피노 셰리 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 꼬냑 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) PX 셰리 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 로크곰\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 100% 아일라\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 포트 싱글 캐스크 피니시\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 소테른 캐스크\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 포트 캐스크\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"킬호만(Kilchoman) 16년\", \"price_krw\": 54000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 스코티시 발리\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 아일라 발리\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 18년\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"브룩라디(Bruichladdich) 블랙아트 에디션 11\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"포트샬롯(Port Charlotte) 10년\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"포트샬롯(Port Charlotte) 아일라 발리 2014\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"포트샬롯(Port Charlotte) PMC:01\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 14.1\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 14.2\", \"price_krw\": 47000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 15.1\", \"price_krw\": 47000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 15.2\", \"price_krw\": 49000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"옥토모어(Octomore) 15.3\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"쿨일라(Caol Ila) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"쿨일라(Caol Ila) 18년\", \"price_krw\": 42000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 크루아 모나\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 안클라닥\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 토호카흐\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 에리네 그레이뉴\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 12년 캐스크 스트랭스\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 14년 루비포트 캐스크 피니시\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"부나하벤(Bunnahabhain) 18년\", \"price_krw\": 48000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 10년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 쿼터 캐스크\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 포트 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 아마로네 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 소테른 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 셰리 캐스크 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 마크리무어 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 마크리무어 10년\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 시그니처 시리즈\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 프라이빗 캐스크 No.2\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 18년\", \"price_krw\": 50000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 21년\", \"price_krw\": 68000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"아란(Arran) 25년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 스카이\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 10년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 더 와일드 블루\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 스톰\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 18년\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\"},\n    {\"raw_name\": \"탈리스커(Talisker) 25년\", \"price_krw\": 95000, \"pour_ml\": null, \"unit\": \"glass\"}\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-13T02:25:12Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 1747
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2811,
+      "total_output_tokens": 2939,
+      "total_thought_tokens": 3119,
+      "total_tokens": 8869,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 2
+}

@@ -1,0 +1,44 @@
+{
+ "key": "6be3ad9419ae1eede191e1b31cc285fa2515d4fba70a8436ee5f5ad5e1b7cfb8",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Octomore 13.1",
+  "context_lines": [
+   "Glenfarclas 105",
+   "Abelour A`bunadh",
+   "Lagavulin 12yo 2018",
+   "Laphroaig 10yo Cask Strength",
+   "Kavalan Solist"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Octomore",
+   "age": null,
+   "edition_tokens_en": [
+    "13.1"
+   ],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Octomore 16.1",
+    "age": null,
+    "edition": "16.1"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"에디션(13.1 vs 16.1)이 서로 다르므로 다른 상품입니다.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:17.720214+00:00",
+  "latency_ms": 1846,
+  "attempts": 1,
+  "input_tokens": 932,
+  "output_tokens": 40,
+  "thought_tokens": 132
+ }
+}

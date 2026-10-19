@@ -1,0 +1,242 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "009_odbi_07.png",
+  "prepared_image": "009_odbi_07.png",
+  "prepared_sha256": "c6d43085e019e7297b530f966e33042091829241ef4eaf5a910348fe8198f330",
+  "started_at": "2026-10-17T06:23:04.134375+00:00",
+  "latency_ms": 3753,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 4871,
+  "output_tokens": 979,
+  "thought_tokens": 0,
+  "total_tokens": 5850,
+  "output": {
+    "items": [
+      {
+        "raw_name": "아란10",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L006"
+          ],
+          "price": [
+            "L018"
+          ]
+        }
+      },
+      {
+        "raw_name": "아란 세리",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L007"
+          ],
+          "price": [
+            "L019"
+          ]
+        }
+      },
+      {
+        "raw_name": "아란 포트",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L008"
+          ],
+          "price": [
+            "L020"
+          ]
+        }
+      },
+      {
+        "raw_name": "아란 아마로네",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L009"
+          ],
+          "price": [
+            "L021"
+          ]
+        }
+      },
+      {
+        "raw_name": "아란18",
+        "price_krw": 56000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L010"
+          ],
+          "price": [
+            "L022"
+          ]
+        }
+      },
+      {
+        "raw_name": "아벨라워12",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L011"
+          ],
+          "price": [
+            "L023"
+          ]
+        }
+      },
+      {
+        "raw_name": "아벨라워14",
+        "price_krw": 27000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L012"
+          ],
+          "price": [
+            "L024"
+          ]
+        }
+      },
+      {
+        "raw_name": "아벨라워 아부나흐 세리",
+        "price_krw": 36000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L013"
+          ],
+          "price": [
+            "L025"
+          ]
+        }
+      },
+      {
+        "raw_name": "올드풀티니 허다트",
+        "price_krw": 18000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L014"
+          ],
+          "price": [
+            "L026"
+          ]
+        }
+      },
+      {
+        "raw_name": "올트풀티니15",
+        "price_krw": 28000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L015"
+          ],
+          "price": [
+            "L027"
+          ]
+        }
+      },
+      {
+        "raw_name": "올드풀티니18",
+        "price_krw": 35000,
+        "pour_ml": 30,
+        "unit": "glass",
+        "source_lines": {
+          "name": [
+            "L016"
+          ],
+          "price": [
+            "L028"
+          ]
+        }
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"아란10\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 세리\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L019\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 포트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L020\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 아마로네\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란18\",\n      \"price_krw\": 56000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L022\"]\n      }\n    },\n    {\n      \"raw_name\": \"아벨라워12\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L023\"]\n      }\n    },\n    {\n      \"raw_name\": \"아벨라워14\",\n      \"price_krw\": 27000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L024\"]\n      }\n    },\n    {\n      \"raw_name\": \"아벨라워 아부나흐 세리\",\n      \"price_krw\": 36000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L025\"]\n      }\n    },\n    {\n      \"raw_name\": \"올드풀티니 허다트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"올트풀티니15\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"올드풀티니18\",\n      \"price_krw\": 35000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L028\"]\n      }\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-17T06:23:07Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"아란10\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 세리\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L019\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 포트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L020\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 아마로네\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란18\",\n      \"price_krw\": 56000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L022\"]\n      }\n    },\n    {\n      \"raw_name\": \"아벨라워12\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L023\"]\n      }\n    },\n    {\n      \"raw_name\": \"아벨라워14\",\n      \"price_krw\": 27000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L024\"]\n      }\n    },\n    {\n      \"raw_name\": \"아벨라워 아부나흐 세리\",\n      \"price_krw\": 36000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L025\"]\n      }\n    },\n    {\n      \"raw_name\": \"올드풀티니 허다트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"올트풀티니15\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"올드풀티니18\",\n      \"price_krw\": 35000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L028\"]\n      }\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "EmAKXgFpFH0TeTl0oX6Jw5qeiGq9x02KHOZDihkhvhFdFNGfhKDbp8tEHIcD4Eu57Goo60vR/Xs0L+MJPjkcmPG3fZ8cirOXFpATg5FYYcut01R9keTvqjVyXParpc1i+w8=",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"아란10\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L006\"],\n        \"price\": [\"L018\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 세리\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L007\"],\n        \"price\": [\"L019\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 포트\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L008\"],\n        \"price\": [\"L020\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란 아마로네\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L009\"],\n        \"price\": [\"L021\"]\n      }\n    },\n    {\n      \"raw_name\": \"아란18\",\n      \"price_krw\": 56000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L010\"],\n        \"price\": [\"L022\"]\n      }\n    },\n    {\n      \"raw_name\": \"아벨라워12\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L011\"],\n        \"price\": [\"L023\"]\n      }\n    },\n    {\n      \"raw_name\": \"아벨라워14\",\n      \"price_krw\": 27000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L012\"],\n        \"price\": [\"L024\"]\n      }\n    },\n    {\n      \"raw_name\": \"아벨라워 아부나흐 세리\",\n      \"price_krw\": 36000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L013\"],\n        \"price\": [\"L025\"]\n      }\n    },\n    {\n      \"raw_name\": \"올드풀티니 허다트\",\n      \"price_krw\": 18000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L014\"],\n        \"price\": [\"L026\"]\n      }\n    },\n    {\n      \"raw_name\": \"올트풀티니15\",\n      \"price_krw\": 28000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L015\"],\n        \"price\": [\"L027\"]\n      }\n    },\n    {\n      \"raw_name\": \"올드풀티니18\",\n      \"price_krw\": 35000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\",\n      \"source_lines\": {\n        \"name\": [\"L016\"],\n        \"price\": [\"L028\"]\n      }\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-17T06:23:07Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1078
+        },
+        {
+          "modality": "text",
+          "tokens": 3793
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 4871,
+      "total_output_tokens": 979,
+      "total_thought_tokens": 0,
+      "total_tokens": 5850,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 28,
+    "price_like_lines": 12,
+    "uncited_price_lines": 1,
+    "uncited": [
+      "L003"
+    ],
+    "flag_missing": false,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v1",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [98,25,217,44] 21:07\nL002 [776,27,838,43] LTE\nL003 [861,27,903,40] 42\nL004 [880,101,928,124] X\nL005 [152,211,313,223] -싱글몰트 위스키\nL006 [152,228,220,239] 아란10\nL007 [152,245,243,256] 아란 세리\nL008 [152,260,245,272] 아란 포트\nL009 [152,277,285,289] 아란 아마로네\nL010 [152,294,220,306] 아란18\nL011 [152,311,260,323] 아벨라워12\nL012 [152,327,260,338] 아벨라워14\nL013 [152,344,372,355] 아벨라워 아부나흐 세리\nL014 [152,359,324,371] 올드풀티니 허다트\nL015 [152,376,279,388] 올트풀티니15\nL016 [152,393,279,405] 올드풀티니18\nL017 [796,212,846,221] 30ml\nL018 [776,228,846,238] 16,000\nL019 [776,245,846,255] 20,000\nL020 [779,263,846,272] 20,000\nL021 [776,279,846,289] 20,000\nL022 [779,295,846,304] 56,000\nL023 [779,312,846,322] 17,000\nL024 [776,327,846,337] 27,000\nL025 [776,344,846,354] 36,000\nL026 [779,362,846,371] 18,000\nL027 [776,378,846,388] 28,000\nL028 [776,393,846,403] 35,000\n</ocr_lines>",
+  "n_lines": 28,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 1364
+}

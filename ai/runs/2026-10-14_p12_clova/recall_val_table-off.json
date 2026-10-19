@@ -1,0 +1,283 @@
+{
+  "label_set": "val",
+  "clova": {
+    "source": "clova table-off",
+    "missing_cache": [],
+    "total": {
+      "n_items": 219,
+      "name_exact": 217,
+      "name_approx": 219,
+      "name_one_line": 217,
+      "n_priced": 219,
+      "price_found": 219,
+      "name_exact_recall": 0.9908675799086758,
+      "name_approx_recall": 1.0,
+      "name_one_line_recall": 0.9908675799086758,
+      "price_recall": 1.0
+    },
+    "per_bar": {
+      "서로상": {
+        "n_items": 74,
+        "name_exact": 74,
+        "name_approx": 74,
+        "name_one_line": 74,
+        "n_priced": 74,
+        "price_found": 74,
+        "name_exact_recall": 1.0,
+        "name_approx_recall": 1.0,
+        "name_one_line_recall": 1.0,
+        "price_recall": 1.0
+      },
+      "위스키복춘": {
+        "n_items": 145,
+        "name_exact": 143,
+        "name_approx": 145,
+        "name_one_line": 143,
+        "n_priced": 145,
+        "price_found": 145,
+        "name_exact_recall": 0.9862068965517241,
+        "name_approx_recall": 1.0,
+        "name_one_line_recall": 0.9862068965517241,
+        "price_recall": 1.0
+      }
+    },
+    "photos": [
+      {
+        "photo_id": "007_위스키복춘_01",
+        "n_items": 77,
+        "name_exact": 75,
+        "name_approx": 77,
+        "name_one_line": 75,
+        "n_priced": 77,
+        "price_found": 77,
+        "missed_names": []
+      },
+      {
+        "photo_id": "007_위스키복춘_02",
+        "n_items": 52,
+        "name_exact": 52,
+        "name_approx": 52,
+        "name_one_line": 52,
+        "n_priced": 52,
+        "price_found": 52,
+        "missed_names": []
+      },
+      {
+        "photo_id": "007_위스키복춘_03",
+        "n_items": 16,
+        "name_exact": 16,
+        "name_approx": 16,
+        "name_one_line": 16,
+        "n_priced": 16,
+        "price_found": 16,
+        "missed_names": []
+      },
+      {
+        "photo_id": "007_위스키복춘_04",
+        "n_items": 0,
+        "name_exact": 0,
+        "name_approx": 0,
+        "name_one_line": 0,
+        "n_priced": 0,
+        "price_found": 0,
+        "missed_names": []
+      },
+      {
+        "photo_id": "008_서로상_01",
+        "n_items": 20,
+        "name_exact": 20,
+        "name_approx": 20,
+        "name_one_line": 20,
+        "n_priced": 20,
+        "price_found": 20,
+        "missed_names": []
+      },
+      {
+        "photo_id": "008_서로상_02",
+        "n_items": 18,
+        "name_exact": 18,
+        "name_approx": 18,
+        "name_one_line": 18,
+        "n_priced": 18,
+        "price_found": 18,
+        "missed_names": []
+      },
+      {
+        "photo_id": "008_서로상_03",
+        "n_items": 22,
+        "name_exact": 22,
+        "name_approx": 22,
+        "name_one_line": 22,
+        "n_priced": 22,
+        "price_found": 22,
+        "missed_names": []
+      },
+      {
+        "photo_id": "008_서로상_04",
+        "n_items": 0,
+        "name_exact": 0,
+        "name_approx": 0,
+        "name_one_line": 0,
+        "n_priced": 0,
+        "price_found": 0,
+        "missed_names": []
+      },
+      {
+        "photo_id": "008_서로상_05",
+        "n_items": 14,
+        "name_exact": 14,
+        "name_approx": 14,
+        "name_one_line": 14,
+        "n_priced": 14,
+        "price_found": 14,
+        "missed_names": []
+      }
+    ]
+  },
+  "e1": {
+    "source": "E1 2026-10-13_val_v2_A2",
+    "n_runs": 3,
+    "total": {
+      "name_exact_recall": 0.969558599695586,
+      "name_approx_recall": 0.9878234398782344,
+      "name_one_line_recall": 0.9421613394216134,
+      "price_recall": 1.0
+    },
+    "per_bar": {
+      "서로상": {
+        "name_exact_recall": 1.0,
+        "name_approx_recall": 1.0,
+        "name_one_line_recall": 1.0,
+        "price_recall": 1.0
+      },
+      "위스키복춘": {
+        "name_exact_recall": 0.9540229885057471,
+        "name_approx_recall": 0.9816091954022989,
+        "name_one_line_recall": 0.9126436781609195,
+        "price_recall": 1.0
+      }
+    },
+    "runs": {
+      "1": {
+        "total": {
+          "n_items": 219,
+          "name_exact": 215,
+          "name_approx": 217,
+          "name_one_line": 209,
+          "n_priced": 219,
+          "price_found": 219,
+          "name_exact_recall": 0.9817351598173516,
+          "name_approx_recall": 0.9908675799086758,
+          "name_one_line_recall": 0.954337899543379,
+          "price_recall": 1.0
+        },
+        "per_bar": {
+          "서로상": {
+            "n_items": 74,
+            "name_exact": 74,
+            "name_approx": 74,
+            "name_one_line": 74,
+            "n_priced": 74,
+            "price_found": 74,
+            "name_exact_recall": 1.0,
+            "name_approx_recall": 1.0,
+            "name_one_line_recall": 1.0,
+            "price_recall": 1.0
+          },
+          "위스키복춘": {
+            "n_items": 145,
+            "name_exact": 141,
+            "name_approx": 143,
+            "name_one_line": 135,
+            "n_priced": 145,
+            "price_found": 145,
+            "name_exact_recall": 0.9724137931034482,
+            "name_approx_recall": 0.9862068965517241,
+            "name_one_line_recall": 0.9310344827586207,
+            "price_recall": 1.0
+          }
+        }
+      },
+      "2": {
+        "total": {
+          "n_items": 219,
+          "name_exact": 213,
+          "name_approx": 217,
+          "name_one_line": 207,
+          "n_priced": 219,
+          "price_found": 219,
+          "name_exact_recall": 0.9726027397260274,
+          "name_approx_recall": 0.9908675799086758,
+          "name_one_line_recall": 0.9452054794520548,
+          "price_recall": 1.0
+        },
+        "per_bar": {
+          "서로상": {
+            "n_items": 74,
+            "name_exact": 74,
+            "name_approx": 74,
+            "name_one_line": 74,
+            "n_priced": 74,
+            "price_found": 74,
+            "name_exact_recall": 1.0,
+            "name_approx_recall": 1.0,
+            "name_one_line_recall": 1.0,
+            "price_recall": 1.0
+          },
+          "위스키복춘": {
+            "n_items": 145,
+            "name_exact": 139,
+            "name_approx": 143,
+            "name_one_line": 133,
+            "n_priced": 145,
+            "price_found": 145,
+            "name_exact_recall": 0.9586206896551724,
+            "name_approx_recall": 0.9862068965517241,
+            "name_one_line_recall": 0.9172413793103448,
+            "price_recall": 1.0
+          }
+        }
+      },
+      "3": {
+        "total": {
+          "n_items": 219,
+          "name_exact": 209,
+          "name_approx": 215,
+          "name_one_line": 203,
+          "n_priced": 219,
+          "price_found": 219,
+          "name_exact_recall": 0.954337899543379,
+          "name_approx_recall": 0.9817351598173516,
+          "name_one_line_recall": 0.9269406392694064,
+          "price_recall": 1.0
+        },
+        "per_bar": {
+          "서로상": {
+            "n_items": 74,
+            "name_exact": 74,
+            "name_approx": 74,
+            "name_one_line": 74,
+            "n_priced": 74,
+            "price_found": 74,
+            "name_exact_recall": 1.0,
+            "name_approx_recall": 1.0,
+            "name_one_line_recall": 1.0,
+            "price_recall": 1.0
+          },
+          "위스키복춘": {
+            "n_items": 145,
+            "name_exact": 135,
+            "name_approx": 141,
+            "name_one_line": 129,
+            "n_priced": 145,
+            "price_found": 145,
+            "name_exact_recall": 0.9310344827586207,
+            "name_approx_recall": 0.9724137931034482,
+            "name_one_line_recall": 0.8896551724137931,
+            "price_recall": 1.0
+          }
+        }
+      }
+    }
+  }
+}

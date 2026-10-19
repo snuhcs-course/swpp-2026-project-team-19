@@ -1,0 +1,1316 @@
+[
+ {
+  "item_ids": [
+   "011_미라보_01#33"
+  ],
+  "photo_id": "011_미라보_01",
+  "stem": "011_mirabeau_01",
+  "raw_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   82,
+   82
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "맥네어스 럼릭(Macnair's Lum Reek) 10년 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_01#34"
+  ],
+  "photo_id": "011_미라보_01",
+  "stem": "011_mirabeau_01",
+  "raw_name": "커티샥(Cutty Shark) 프로히비션",
+  "label_piece": "커티샥",
+  "label_token": "커티샥",
+  "ocr_text": "커디샥",
+  "ocr_token": "커디샥",
+  "distance": 1,
+  "fields": [
+   90,
+   90
+  ],
+  "category": "B",
+  "print_text": "커디샥",
+  "new_name": "커디샥(Cutty Shark) 프로히비션",
+  "note": "영문 '(Cutty Shark)'는 라벨이 이미 인쇄대로다.",
+  "pattern": "커티샥→커디샥",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_02#1"
+  ],
+  "photo_id": "011_미라보_02",
+  "stem": "011_mirabeau_02",
+  "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트렝스 배치 4",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   8,
+   8
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 배치 4",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_02#2"
+  ],
+  "photo_id": "011_미라보_02",
+  "stem": "011_mirabeau_02",
+  "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트렝스 헤더",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   8,
+   8
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 헤더",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_02#14"
+  ],
+  "photo_id": "011_미라보_02",
+  "stem": "011_mirabeau_02",
+  "raw_name": "스프링뱅크(Springbank) 12년 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   103,
+   103
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "스프링뱅크(Springbank) 12년 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_02#25"
+  ],
+  "photo_id": "011_미라보_02",
+  "stem": "011_mirabeau_02",
+  "raw_name": "고든앤맥페일(Gordon&Macphail) 부나하벤 헤빌리 피티드 11년",
+  "label_piece": "헤빌리",
+  "label_token": "헤빌리",
+  "ocr_text": "혜빌리",
+  "ocr_token": "혜빌리",
+  "distance": 1,
+  "fields": [
+   28,
+   28
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": null,
+  "pattern": "헤빌리→혜빌리",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_02#34"
+  ],
+  "photo_id": "011_미라보_02",
+  "stem": "011_mirabeau_02",
+  "raw_name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   77,
+   77
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_03#6"
+  ],
+  "photo_id": "011_미라보_03",
+  "stem": "011_mirabeau_03",
+  "raw_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   29,
+   29
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_03#8"
+  ],
+  "photo_id": "011_미라보_03",
+  "stem": "011_mirabeau_03",
+  "raw_name": "킬호만(Kilchoman) 배치 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   29,
+   29
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "킬호만(Kilchoman) 배치 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_03#9"
+  ],
+  "photo_id": "011_미라보_03",
+  "stem": "011_mirabeau_03",
+  "raw_name": "킬호만(Kilchoman) 사닉 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   29,
+   29
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "킬호만(Kilchoman) 사닉 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_03#37"
+  ],
+  "photo_id": "011_미라보_03",
+  "stem": "011_mirabeau_03",
+  "raw_name": "부나하벤(Bunnahabhain) 에리너 그레이뉴",
+  "label_piece": "에리너",
+  "label_token": "에리너",
+  "ocr_text": "에리네",
+  "ocr_token": "에리네",
+  "distance": 1,
+  "fields": [
+   25,
+   25
+  ],
+  "category": "B",
+  "print_text": "에리네",
+  "new_name": "부나하벤(Bunnahabhain) 에리네 그레이뉴",
+  "note": null,
+  "pattern": "에리너→에리네",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_03#38"
+  ],
+  "photo_id": "011_미라보_03",
+  "stem": "011_mirabeau_03",
+  "raw_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   29,
+   29
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_03#46"
+  ],
+  "photo_id": "011_미라보_03",
+  "stem": "011_mirabeau_03",
+  "raw_name": "아란(Arran) 셰리 캐스크 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   133,
+   133
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "아란(Arran) 셰리 캐스크 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_03#47"
+  ],
+  "photo_id": "011_미라보_03",
+  "stem": "011_mirabeau_03",
+  "raw_name": "아란(Arran) 마크리무어 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   133,
+   133
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "아란(Arran) 마크리무어 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_03#49"
+  ],
+  "photo_id": "011_미라보_03",
+  "stem": "011_mirabeau_03",
+  "raw_name": "아란(Arran) 시그니쳐 시리즈",
+  "label_piece": "시그니쳐",
+  "label_token": "시그니쳐",
+  "ocr_text": "시그니처",
+  "ocr_token": "시그니처",
+  "distance": 1,
+  "fields": [
+   139,
+   139
+  ],
+  "category": "B",
+  "print_text": "시그니처",
+  "new_name": "아란(Arran) 시그니처 시리즈",
+  "note": "진우 판독: 인쇄 '시그니처 시리즈'.",
+  "pattern": "시그니쳐→시그니처",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_04#15"
+  ],
+  "photo_id": "011_미라보_04",
+  "stem": "011_mirabeau_04",
+  "raw_name": "글렌드로낙(Glendronach) 오드 투더 엡버스",
+  "label_piece": "엡버스",
+  "label_token": "엡버스",
+  "ocr_text": "엠버스",
+  "ocr_token": "엠버스",
+  "distance": 1,
+  "fields": [
+   94,
+   94
+  ],
+  "category": "B",
+  "print_text": "엠버스",
+  "new_name": "글렌드로낙(Glendronach) 오드 투더 엠버스",
+  "note": "인쇄 '엠버스' (진우 확인). P12 리포트의 A 분류를 정정.",
+  "pattern": "엡버스→엠버스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_04#23"
+  ],
+  "photo_id": "011_미라보_04",
+  "stem": "011_mirabeau_04",
+  "raw_name": "토마틴(Tomatin) 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   138,
+   138
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "토마틴(Tomatin) 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_04#30"
+  ],
+  "photo_id": "011_미라보_04",
+  "stem": "011_mirabeau_04",
+  "raw_name": "글렌기어리(Glengarioch) 1997 배치12 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   43,
+   43
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "글렌기어리(Glengarioch) 1997 배치12 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_04#47"
+  ],
+  "photo_id": "011_미라보_04",
+  "stem": "011_mirabeau_04",
+  "raw_name": "라프로익(Laphroaig) 10년 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   121,
+   121
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "라프로익(Laphroaig) 10년 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_04#49"
+  ],
+  "photo_id": "011_미라보_04",
+  "stem": "011_mirabeau_04",
+  "raw_name": "라프로익(Laphroaig) 25년 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   121,
+   121
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "라프로익(Laphroaig) 25년 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_05#2"
+  ],
+  "photo_id": "011_미라보_05",
+  "stem": "011_mirabeau_05",
+  "raw_name": "벤로막(Benromach) 12년 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   10,
+   10
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "벤로막(Benromach) 12년 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_05#15"
+  ],
+  "photo_id": "011_미라보_05",
+  "stem": "011_mirabeau_05",
+  "raw_name": "글렌파클라스(Glenfarclas) 105 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   94,
+   94
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "글렌파클라스(Glenfarclas) 105 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_05#20"
+  ],
+  "photo_id": "011_미라보_05",
+  "stem": "011_mirabeau_05",
+  "raw_name": "글렌고인(Glengoyne) 배치 10 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   138,
+   138
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "글렌고인(Glengoyne) 배치 10 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_05#22"
+  ],
+  "photo_id": "011_미라보_05",
+  "stem": "011_mirabeau_05",
+  "raw_name": "클라이넬리쉬(Clynelish) 14년",
+  "label_piece": "클라이넬리쉬",
+  "label_token": "클라이넬리쉬",
+  "ocr_text": "클라이녤리쉬",
+  "ocr_token": "클라이녤리쉬",
+  "distance": 1,
+  "fields": [
+   145,
+   145
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "제목 줄 오독이 아래 2개 항목에 번짐.",
+  "pattern": "클라이넬리쉬→클라이녤리쉬",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_05#23"
+  ],
+  "photo_id": "011_미라보_05",
+  "stem": "011_mirabeau_05",
+  "raw_name": "클라이넬리쉬(Clynelish) 디스틸러리 에디션",
+  "label_piece": "클라이넬리쉬",
+  "label_token": "클라이넬리쉬",
+  "ocr_text": "클라이녤리쉬",
+  "ocr_token": "클라이녤리쉬",
+  "distance": 1,
+  "fields": [
+   145,
+   145
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "제목 줄 오독이 아래 2개 항목에 번짐.",
+  "pattern": "클라이넬리쉬→클라이녤리쉬",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_05#25"
+  ],
+  "photo_id": "011_미라보_05",
+  "stem": "011_mirabeau_05",
+  "raw_name": "달모어(Dalmore) 12년 세리캐스크 셀렉트",
+  "label_piece": "세리캐스크",
+  "label_token": "세리캐스크",
+  "ocr_text": "셰리캐스크",
+  "ocr_token": "셰리캐스크",
+  "distance": 1,
+  "fields": [
+   29,
+   29
+  ],
+  "category": "B",
+  "print_text": "셰리캐스크",
+  "new_name": "달모어(Dalmore) 12년 셰리캐스크 셀렉트",
+  "note": "진우 판독: 인쇄 '12년 셰리캐스크 셀렉트'.",
+  "pattern": "세리캐스크→셰리캐스크",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_05#40"
+  ],
+  "photo_id": "011_미라보_05",
+  "stem": "011_mirabeau_05",
+  "raw_name": "에드라두어(Edradour) 12년 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   94,
+   94
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "에드라두어(Edradour) 12년 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_05#42"
+  ],
+  "photo_id": "011_미라보_05",
+  "stem": "011_mirabeau_05",
+  "raw_name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   94,
+   94
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_05#43"
+  ],
+  "photo_id": "011_미라보_05",
+  "stem": "011_mirabeau_05",
+  "raw_name": "에드라두어(Edradour) 21년 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   94,
+   94
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "에드라두어(Edradour) 21년 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_06#24"
+  ],
+  "photo_id": "011_미라보_06",
+  "stem": "011_mirabeau_06",
+  "raw_name": "맥캘란(Maccallan) 12년 더블 캐스크",
+  "label_piece": "맥캘란",
+  "label_token": "맥캘란",
+  "ocr_text": "맥켈란",
+  "ocr_token": "맥켈란",
+  "distance": 1,
+  "fields": [
+   40,
+   40
+  ],
+  "category": "B",
+  "print_text": "맥켈란",
+  "new_name": "맥켈란(Maccallan) 12년 더블 캐스크",
+  "note": "제목 줄 '맥켈란(Maccallan)' 아래 6개 항목 모두에 붙는 브랜드 제목.",
+  "pattern": "맥캘란→맥켈란",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_06#25"
+  ],
+  "photo_id": "011_미라보_06",
+  "stem": "011_mirabeau_06",
+  "raw_name": "맥캘란(Maccallan) 12년 셰리 캐스크",
+  "label_piece": "맥캘란",
+  "label_token": "맥캘란",
+  "ocr_text": "맥켈란",
+  "ocr_token": "맥켈란",
+  "distance": 1,
+  "fields": [
+   40,
+   40
+  ],
+  "category": "B",
+  "print_text": "맥켈란",
+  "new_name": "맥켈란(Maccallan) 12년 셰리 캐스크",
+  "note": "제목 줄 '맥켈란(Maccallan)' 아래 6개 항목 모두에 붙는 브랜드 제목.",
+  "pattern": "맥캘란→맥켈란",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_06#26"
+  ],
+  "photo_id": "011_미라보_06",
+  "stem": "011_mirabeau_06",
+  "raw_name": "맥캘란(Maccallan) 15년 더블 캐스크",
+  "label_piece": "맥캘란",
+  "label_token": "맥캘란",
+  "ocr_text": "맥켈란",
+  "ocr_token": "맥켈란",
+  "distance": 1,
+  "fields": [
+   40,
+   40
+  ],
+  "category": "B",
+  "print_text": "맥켈란",
+  "new_name": "맥켈란(Maccallan) 15년 더블 캐스크",
+  "note": "제목 줄 '맥켈란(Maccallan)' 아래 6개 항목 모두에 붙는 브랜드 제목.",
+  "pattern": "맥캘란→맥켈란",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_06#27"
+  ],
+  "photo_id": "011_미라보_06",
+  "stem": "011_mirabeau_06",
+  "raw_name": "맥캘란(Maccallan) 클래식컷 2025",
+  "label_piece": "맥캘란",
+  "label_token": "맥캘란",
+  "ocr_text": "맥켈란",
+  "ocr_token": "맥켈란",
+  "distance": 1,
+  "fields": [
+   40,
+   40
+  ],
+  "category": "B",
+  "print_text": "맥켈란",
+  "new_name": "맥켈란(Maccallan) 클래식컷 2025",
+  "note": "제목 줄 '맥켈란(Maccallan)' 아래 6개 항목 모두에 붙는 브랜드 제목.",
+  "pattern": "맥캘란→맥켈란",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_06#28"
+  ],
+  "photo_id": "011_미라보_06",
+  "stem": "011_mirabeau_06",
+  "raw_name": "맥캘란(Maccallan) 18년 더블캐스크",
+  "label_piece": "맥캘란",
+  "label_token": "맥캘란",
+  "ocr_text": "맥켈란",
+  "ocr_token": "맥켈란",
+  "distance": 1,
+  "fields": [
+   40,
+   40
+  ],
+  "category": "B",
+  "print_text": "맥켈란",
+  "new_name": "맥켈란(Maccallan) 18년 더블캐스크",
+  "note": "제목 줄 '맥켈란(Maccallan)' 아래 6개 항목 모두에 붙는 브랜드 제목.",
+  "pattern": "맥캘란→맥켈란",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_06#29"
+  ],
+  "photo_id": "011_미라보_06",
+  "stem": "011_mirabeau_06",
+  "raw_name": "맥캘란(Maccallan) 18년 셰리 캐스크",
+  "label_piece": "맥캘란",
+  "label_token": "맥캘란",
+  "ocr_text": "맥켈란",
+  "ocr_token": "맥켈란",
+  "distance": 1,
+  "fields": [
+   40,
+   40
+  ],
+  "category": "B",
+  "print_text": "맥켈란",
+  "new_name": "맥켈란(Maccallan) 18년 셰리 캐스크",
+  "note": "제목 줄 '맥켈란(Maccallan)' 아래 6개 항목 모두에 붙는 브랜드 제목.",
+  "pattern": "맥캘란→맥켈란",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_06#31"
+  ],
+  "photo_id": "011_미라보_06",
+  "stem": "011_mirabeau_06",
+  "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야도 셰리 피니시",
+  "label_piece": "아몬티야도",
+  "label_token": "아몬티야도",
+  "ocr_text": "아몬티야또",
+  "ocr_token": "아몬티야또",
+  "distance": 1,
+  "fields": [
+   77,
+   77
+  ],
+  "category": "B",
+  "print_text": "아몬티야또",
+  "new_name": "글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시",
+  "note": null,
+  "pattern": "아몬티야도→아몬티야또",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_06#39"
+  ],
+  "photo_id": "011_미라보_06",
+  "stem": "011_mirabeau_06",
+  "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   118,
+   118
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "글렌알라키(Glenallachie) 10년 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_07#2"
+  ],
+  "photo_id": "011_미라보_07",
+  "stem": "011_mirabeau_07",
+  "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   10,
+   10
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "메이커스 마크(Maker's Mark) 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_08#12"
+  ],
+  "photo_id": "011_미라보_08",
+  "stem": "011_mirabeau_08",
+  "raw_name": "미셸쿠브어(Michel Couveur) 언익스팩티드 넘버3 CS",
+  "label_piece": "언익스팩티드",
+  "label_token": "언익스팩티드",
+  "ocr_text": "언익스펙티드",
+  "ocr_token": "언익스펙티드",
+  "distance": 1,
+  "fields": [
+   133,
+   133
+  ],
+  "category": "B",
+  "print_text": "언익스펙티드",
+  "new_name": "미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS",
+  "note": null,
+  "pattern": "언익스팩티드→언익스펙티드",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_08#15"
+  ],
+  "photo_id": "011_미라보_08",
+  "stem": "011_mirabeau_08",
+  "raw_name": "기원(Ki-Won) 배치 3 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   24,
+   24
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "기원(Ki-Won) 배치 3 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_08#18"
+  ],
+  "photo_id": "011_미라보_08",
+  "stem": "011_mirabeau_08",
+  "raw_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   24,
+   24
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_09#9"
+  ],
+  "photo_id": "011_미라보_09",
+  "stem": "011_mirabeau_09",
+  "raw_name": "닛카(Nikka) 미야기쿄 싱글몰트",
+  "label_piece": "미야기쿄",
+  "label_token": "미야기쿄",
+  "ocr_text": "미아기쿄",
+  "ocr_token": "미아기쿄",
+  "distance": 1,
+  "fields": [
+   51,
+   51
+  ],
+  "category": "B",
+  "print_text": "미아기쿄",
+  "new_name": "닛카(Nikka) 미아기쿄 싱글몰트",
+  "note": "진우 판독: 인쇄 '미아기쿄 싱글몰트'.",
+  "pattern": "미야기쿄→미아기쿄",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_09#26"
+  ],
+  "photo_id": "011_미라보_09",
+  "stem": "011_mirabeau_09",
+  "raw_name": "네터잭(Natterjack) 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   59,
+   59
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "네터잭(Natterjack) 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_09#29"
+  ],
+  "photo_id": "011_미라보_09",
+  "stem": "011_mirabeau_09",
+  "raw_name": "암룻(Amrut) 퓨전",
+  "label_piece": "퓨전",
+  "label_token": "퓨전",
+  "ocr_text": "퓨젼",
+  "ocr_token": "퓨젼",
+  "distance": 1,
+  "fields": [
+   105,
+   105
+  ],
+  "category": "B",
+  "print_text": "퓨젼",
+  "new_name": "암룻(Amrut) 퓨젼",
+  "note": "P12 리포트에서 인쇄 '퓨젼' 확인. 진우 검토에서 이의 없음.",
+  "pattern": "퓨전→퓨젼",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_09#30"
+  ],
+  "photo_id": "011_미라보_09",
+  "stem": "011_mirabeau_09",
+  "raw_name": "암룻(Amrut) 인디안 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   59,
+   59
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "암룻(Amrut) 인디안 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "011_미라보_09#31"
+  ],
+  "photo_id": "011_미라보_09",
+  "stem": "011_mirabeau_09",
+  "raw_name": "암룻(Amrut) 피티드 인디안 캐스크 스트렝스",
+  "label_piece": "스트렝스",
+  "label_token": "스트렝스",
+  "ocr_text": "스트랭스",
+  "ocr_token": "스트랭스",
+  "distance": 1,
+  "fields": [
+   59,
+   59
+  ],
+  "category": "B",
+  "print_text": "스트랭스",
+  "new_name": "암룻(Amrut) 피티드 인디안 캐스크 스트랭스",
+  "note": "이 9장 OCR 전체에 '스트렝스'는 0회, '스트랭스'만 나온다.",
+  "pattern": "스트렝스→스트랭스",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "012_Beck_01#7"
+  ],
+  "photo_id": "012_Beck_01",
+  "stem": "012_beck_01",
+  "raw_name": "Rowan`s Creek",
+  "label_piece": "Rowan`s",
+  "label_token": "rowan`s",
+  "ocr_text": "Rowan's",
+  "ocr_token": "rowans",
+  "distance": 1,
+  "fields": [
+   56,
+   56
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음.",
+  "pattern": "rowan`s→rowans",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "012_Beck_01#10"
+  ],
+  "photo_id": "012_Beck_01",
+  "stem": "012_beck_01",
+  "raw_name": "Maker`s Mark Cask Strength",
+  "label_piece": "Maker`s",
+  "label_token": "maker`s",
+  "ocr_text": "Maker's",
+  "ocr_token": "makers",
+  "distance": 1,
+  "fields": [
+   14,
+   14
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음.",
+  "pattern": "maker`s→makers",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "012_Beck_01#12"
+  ],
+  "photo_id": "012_Beck_01",
+  "stem": "012_beck_01",
+  "raw_name": "Noah`s Mill",
+  "label_piece": "Noah`s",
+  "label_token": "noah`s",
+  "ocr_text": "Noah's",
+  "ocr_token": "noahs",
+  "distance": 1,
+  "fields": [
+   23,
+   23
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음.",
+  "pattern": "noah`s→noahs",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "012_Beck_01#13"
+  ],
+  "photo_id": "012_Beck_01",
+  "stem": "012_beck_01",
+  "raw_name": "Booker`s",
+  "label_piece": "Booker`s",
+  "label_token": "booker`s",
+  "ocr_text": "Booker's",
+  "ocr_token": "bookers",
+  "distance": 1,
+  "fields": [
+   25,
+   25
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음.",
+  "pattern": "booker`s→bookers",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "012_Beck_02#4"
+  ],
+  "photo_id": "012_Beck_02",
+  "stem": "012_beck_02",
+  "raw_name": "Abelour A`bunadh",
+  "label_piece": "A`bunadh",
+  "label_token": "a`bunadh",
+  "ocr_text": "A'bunadh",
+  "ocr_token": "abunadh",
+  "distance": 1,
+  "fields": [
+   11,
+   11
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "진우 판독: 인쇄가 백틱(`). 라벨이 인쇄와 같고 CLOVA가 아포스트로피로 읽음.",
+  "pattern": "a`bunadh→abunadh",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "012_Beck_04#24",
+   "012_Beck_04#25",
+   "012_Beck_04#26"
+  ],
+  "photo_id": "012_Beck_04",
+  "stem": "012_beck_04",
+  "raw_name": "Caol Ila 12yo",
+  "label_piece": "Ila",
+  "label_token": "ila",
+  "ocr_text": "lla",
+  "ocr_token": "lla",
+  "distance": 1,
+  "fields": [
+   39,
+   39
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "산세리프 대문자 I와 소문자 l은 글꼴상 같은 모양.",
+  "pattern": "ila→lla",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "013_포레스트_01#5"
+  ],
+  "photo_id": "013_포레스트_01",
+  "stem": "013_forest_01",
+  "raw_name": "발베니 14년 캐리비안 캐스크",
+  "label_piece": "캐리비안",
+  "label_token": "캐리비안",
+  "ocr_text": "캐리비언",
+  "ocr_token": "캐리비언",
+  "distance": 1,
+  "fields": [
+   35,
+   35
+  ],
+  "category": "B",
+  "print_text": "캐리비언",
+  "new_name": "발베니 14년 캐리비언 캐스크",
+  "note": null,
+  "pattern": "캐리비안→캐리비언",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "013_포레스트_01#12"
+  ],
+  "photo_id": "013_포레스트_01",
+  "stem": "013_forest_01",
+  "raw_name": "글렌글라사 샌드엔드",
+  "label_piece": "샌드엔드",
+  "label_token": "샌드엔드",
+  "ocr_text": "샌드앤드",
+  "ocr_token": "샌드앤드",
+  "distance": 1,
+  "fields": [
+   55,
+   55
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": null,
+  "pattern": "샌드엔드→샌드앤드",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "013_포레스트_01#15"
+  ],
+  "photo_id": "013_포레스트_01",
+  "stem": "013_forest_01",
+  "raw_name": "글렌모렌지 퀸타 루반 14년",
+  "label_piece": "퀸타",
+  "label_token": "퀸타",
+  "ocr_text": "킨타",
+  "ocr_token": "킨타",
+  "distance": 1,
+  "fields": [
+   170,
+   170
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": "진우 판독: 인쇄는 '퀸타'. CLOVA 오독 (P12 리포트의 B 분류를 정정).",
+  "pattern": "퀸타→킨타",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "013_포레스트_01#35"
+  ],
+  "photo_id": "013_포레스트_01",
+  "stem": "013_forest_01",
+  "raw_name": "아드벡 스펙타큘러",
+  "label_piece": "스펙타큘러",
+  "label_token": "스펙타큘러",
+  "ocr_text": "스펙타클러",
+  "ocr_token": "스펙타클러",
+  "distance": 1,
+  "fields": [
+   83,
+   83
+  ],
+  "category": "A",
+  "print_text": null,
+  "new_name": null,
+  "note": null,
+  "pattern": "스펙타큘러→스펙타클러",
+  "split": "test"
+ },
+ {
+  "item_ids": [
+   "007_위스키복춘_01#14",
+   "007_위스키복춘_01#15"
+  ],
+  "photo_id": "007_위스키복춘_01",
+  "stem": "007_bokchun_01",
+  "raw_name": "글렌모렌지 퀸타루반",
+  "label_piece": "퀸타루반",
+  "label_token": "퀸타루반",
+  "ocr_text": "퀀타루반",
+  "ocr_token": "퀀타루반",
+  "distance": 1,
+  "fields": [
+   24,
+   24
+  ],
+  "category": "B",
+  "print_text": "퀀타루반",
+  "new_name": "글렌모렌지 퀀타루반",
+  "note": "val. 진우 판독: 인쇄 '퀀타루반'.",
+  "pattern": "퀸타루반→퀀타루반",
+  "split": "val"
+ }
+]

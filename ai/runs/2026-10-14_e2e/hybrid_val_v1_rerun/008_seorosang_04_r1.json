@@ -1,0 +1,109 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "source_image": "008_seorosang_04.png",
+  "prepared_image": "008_seorosang_04.png",
+  "prepared_sha256": "4c3886715fed44180129ef76dfc40a64b766593ba2388841f32c92d95c5d93ca",
+  "started_at": "2026-10-14T08:28:52.376127+00:00",
+  "latency_ms": 3287,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5086,
+  "output_tokens": 5,
+  "thought_tokens": 419,
+  "total_tokens": 5510,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T08:28:55Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T08:28:55Z",
+    "usage": {
+      "cached_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1487
+        },
+        {
+          "modality": "image",
+          "tokens": 399
+        }
+      ],
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1078
+        },
+        {
+          "modality": "text",
+          "tokens": 4008
+        }
+      ],
+      "total_cached_tokens": 1886,
+      "total_input_tokens": 5086,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 419,
+      "total_tokens": 5510,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "source_check": {
+    "n_lines": 40,
+    "price_like_lines": 13,
+    "uncited_price_lines": 13,
+    "uncited": [
+      "L001",
+      "L005",
+      "L006",
+      "L011",
+      "L012",
+      "L017",
+      "L018",
+      "L023",
+      "L024",
+      "L029",
+      "L030",
+      "L035",
+      "L036"
+    ],
+    "flag_missing": true,
+    "invalid_refs": [],
+    "items_without_name_source": 0
+  },
+  "run": 1,
+  "prompt_version": "v2",
+  "user_text": "메뉴판 사진 한 장과, 같은 사진의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [855,27,897,40] 26\nL002 [96,25,220,44] 22:00\nL003 [880,100,928,124] X\nL004 [73,220,293,238] COCKTAIL\nL005 [449,277,474,286] 10\nL006 [900,279,925,286] 17\nL007 [75,277,192,286] Gin & Tonic\nL008 [75,288,126,298] 진 토닉\nL009 [525,277,592,286] Gimlet\nL010 [525,289,558,298] 김렛\nL011 [449,311,474,319] 16\nL012 [900,311,928,319] 16\nL013 [75,311,175,319] Godfather\nL014 [73,320,124,331] 갓파더\nL015 [525,311,663,320] Cosmopolitan\nL016 [525,322,621,331] 코스모폴리탄\nL017 [449,344,474,351] 15\nL018 [900,344,925,351] 18\nL019 [73,342,279,354] Long Island Iced Tea\nL020 [75,354,226,363] 롱 아일랜드 아이스 티\nL021 [522,342,589,353] Mojito\nL022 [525,354,575,363] 모히또\nL023 [449,376,477,384] 17\nL024 [900,376,925,384] 17\nL025 [73,374,149,385] Daquiri\nL026 [75,387,138,396] 다이퀴리\nL027 [525,375,595,384] Martini\nL028 [525,387,575,396] 마티니\nL029 [449,409,474,417] 16\nL030 [900,409,928,417] 20\nL031 [75,409,155,417] Gin Fizz\nL032 [75,419,130,428] 진 피즈\nL033 [528,409,668,417] Old Fashioned\nL034 [522,418,609,428] 올드 패션드\nL035 [449,440,477,449] 16\nL036 [900,441,925,449] 21\nL037 [73,440,155,450] Negroni\nL038 [73,450,138,461] 네그로니\nL039 [525,441,604,449] Sidecar\nL040 [522,450,589,461] 사이드카\n</ocr_lines>",
+  "n_lines": 40,
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "ocr_latency_ms": 1974
+}

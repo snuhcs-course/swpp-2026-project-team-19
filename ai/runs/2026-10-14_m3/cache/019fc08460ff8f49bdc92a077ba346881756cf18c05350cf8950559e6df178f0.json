@@ -1,0 +1,61 @@
+{
+ "key": "019fc08460ff8f49bdc92a077ba346881756cf18c05350cf8950559e6df178f0",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "발베니 18년 PX",
+  "context_lines": [
+   "Glenfarclas 25yo",
+   "Caol ila 25yo",
+   "라프로익 25년",
+   "히비키 21년",
+   "히비키 블랜더스 쵸이스"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Balvenie",
+   "age": 18,
+   "edition_tokens_en": [
+    "PX"
+   ],
+   "expansions": [
+    {
+     "token": "PX",
+     "expansion": "Pedro Ximénez"
+    }
+   ]
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "The Balvenie 12 DoubleWood",
+    "age": 12,
+    "edition": "DoubleWood"
+   },
+   {
+    "no": "2",
+    "name": "The Balvenie 14 Caribbean Cask",
+    "age": 14,
+    "edition": "Caribbean Cask"
+   },
+   {
+    "no": "3",
+    "name": "The Balvenie 21 PortWood",
+    "age": 21,
+    "edition": "PortWood"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"목록에 발베니 18년 PX 제품이 존재하지 않음.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:53.723497+00:00",
+  "latency_ms": 1650,
+  "attempts": 1,
+  "input_tokens": 1015,
+  "output_tokens": 35,
+  "thought_tokens": 145
+ }
+}

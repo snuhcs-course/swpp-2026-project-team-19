@@ -1,0 +1,51 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "label_set": "val",
+  "runs": 3,
+  "prompt_version": "v1",
+  "prompt_sha256": "695a74d1aa387aff0358197c412dffcc01354f7e79be6bb36417ce14504b68df",
+  "gap_factor": 2.5,
+  "ocr_variant": "off",
+  "photos": {
+    "007_bokchun_01.jpg": {
+      "n_lines": 122,
+      "ocr_latency_ms": 2648
+    },
+    "007_bokchun_02.jpg": {
+      "n_lines": 84,
+      "ocr_latency_ms": 2454
+    },
+    "007_bokchun_03.jpg": {
+      "n_lines": 44,
+      "ocr_latency_ms": 2711
+    },
+    "007_bokchun_04.jpg": {
+      "n_lines": 68,
+      "ocr_latency_ms": 3883
+    },
+    "008_seorosang_01.png": {
+      "n_lines": 45,
+      "ocr_latency_ms": 1752
+    },
+    "008_seorosang_02.png": {
+      "n_lines": 41,
+      "ocr_latency_ms": 1752
+    },
+    "008_seorosang_03.png": {
+      "n_lines": 48,
+      "ocr_latency_ms": 2100
+    },
+    "008_seorosang_04.png": {
+      "n_lines": 40,
+      "ocr_latency_ms": 1974
+    },
+    "008_seorosang_05.png": {
+      "n_lines": 32,
+      "ocr_latency_ms": 1985
+    }
+  },
+  "api_tier": "free (inputs may be used to improve Google products)",
+  "written_at": "2026-10-14T04:55:56.894595+00:00"
+}

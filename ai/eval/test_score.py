@@ -148,3 +148,34 @@ def test_aggregate_pools_photos_not_mean_of_photos():
 
 def test_labels_file_locked():
     assert hashlib.sha256(LABELS_PATH.read_bytes()).hexdigest() == LABELS_SHA256
+
+
+# ---------- test set (held-out, I2) ----------
+
+def test_test_label_set_pinned_and_has_bars():
+    from score import LABEL_SETS, load_bars, load_labels
+    cfg = LABEL_SETS["test"]
+    assert hashlib.sha256(cfg["labels"].read_bytes()).hexdigest() == cfg["sha256"]
+    labels, bars = load_labels("test"), load_bars("test")
+    assert len(labels) == 14 and sum(map(len, labels.values())) == 575
+    assert set(bars.values()) == {"미라보", "Beck", "포레스트"}
+
+
+def test_two_glass_pours_pair_by_price_not_order():
+    # Beck_04 style: 30ml and 45ml glass rows share raw_name and unit
+    gt = [item("Talisker 10yo", 14000), item("Talisker 10yo", 19900), item("Talisker 10yo", 250000, "bottle")]
+    out = list(reversed(gt))
+    assert score_photo(gt, out)["correct"] == 3
+
+
+def test_per_bar_accuracy_pools_items_within_bar(tmp_path):
+    import json
+    from score import score_run_dir
+    labels = {"A_01": [item("x")], "A_02": [item("y"), item("z")], "B_01": [item("w")]}
+    bars = {"A_01": "A", "A_02": "A", "B_01": "B"}
+    outs = {"A_01": [item("x")], "A_02": [item("y")], "B_01": []}
+    for pid, items in outs.items():
+        (tmp_path / f"{pid}_r1.json").write_text(json.dumps({"output": {"items": items}}), encoding="utf-8")
+    r = score_run_dir(tmp_path, labels, {pid: pid for pid in labels}, bars=bars)
+    assert r["per_bar_accuracy"]["A"]["mean"] == 2 / 3
+    assert r["per_bar_accuracy"]["B"]["mean"] == 0

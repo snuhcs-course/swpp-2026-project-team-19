@@ -1,0 +1,90 @@
+{
+ "key": "323f63cfefacb78802a4b6ac84a8fb80aab909e98251be6302c69622e29778bb",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "조니워커블랙",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "조니워커그린",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "조니워커블루",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "올드파12",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "몽키숄더",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "제임슨",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "부시밀 블랙 부쉬",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "기린 싱글그레인 후지",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "기린 싱글브렌디드 후지",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "미야기코 싱글몰트",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "요이치 싱글몰트",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "다케츠루 싱글몰트",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "하쿠슈DR",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "산토리 히비키 하모니",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Johnnie Walker\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Green\",\n        \"Label\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Old Parr\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bushmills\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Black\",\n        \"Bush\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kirin Fuji\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Single\",\n        \"Grain\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kirin Fuji\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Single\",\n        \"Blended\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Miyagikyo\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Single\",\n        \"Malt\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Taketsuru\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Pure\",\n        \"Malt\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hakushu\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"DR\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"DR\",\n          \"expansion\": \"Distiller's Reserve\"\n        }\n      ]\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hibiki\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Japanese\",\n        \"Harmony\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-17T06:26:38.349829+00:00",
+  "latency_ms": 3796,
+  "attempts": 1,
+  "input_tokens": 1645,
+  "output_tokens": 867,
+  "thought_tokens": 109
+ }
+}

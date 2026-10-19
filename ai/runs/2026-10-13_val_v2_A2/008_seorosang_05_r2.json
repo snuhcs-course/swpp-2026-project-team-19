@@ -1,0 +1,158 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v2",
+  "prompt_sha256": "87314f7784a57513cea270fef34d2c7d9a1147f2d1b337b1bfd73841ce5cab96",
+  "source_image": "008_seorosang_05.png",
+  "prepared_image": "008_seorosang_05.png",
+  "prepared_sha256": "0267b1102ead2147cc49471ec8b3bacd2610d2e01988f550874936a7e6d26f63",
+  "started_at": "2026-10-13T02:33:43.699054+00:00",
+  "latency_ms": 7523,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2825,
+  "output_tokens": 921,
+  "thought_tokens": 1202,
+  "total_tokens": 4948,
+  "output": {
+    "items": [
+      {
+        "raw_name": "글렌피딕12년 / Glenfiddich 12Y",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕12년 / Glenfiddich 12Y",
+        "price_krw": 220000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌피딕15년 / Glenfiddich 15Y",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕15년 / Glenfiddich 15Y",
+        "price_krw": 300000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니12년 더블우드 / Balvenie 12yDW",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌로시스 12년 / Glenrothes 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌로시스 12년 / Glenrothes 12Y",
+        "price_krw": 210000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "맥칼란12년 쉐리 / Macallan 12ySC",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥칼란12년 쉐리 / Macallan 12ySC",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "맥칼란12년 더블 / Macallan 12yDC",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥칼란12년 더블 / Macallan 12yDC",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "크라겐모어 12년 / Cragganmore 12Y",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "크라겐모어 12년 / Cragganmore 12Y",
+        "price_krw": 230000,
+        "pour_ml": null,
+        "unit": "bottle"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌피딕12년 / Glenfiddich 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕12년 / Glenfiddich 12Y\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌피딕15년 / Glenfiddich 15Y\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕15년 / Glenfiddich 15Y\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"발베니12년 더블우드 / Balvenie 12yDW\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니12년 더블우드 / Balvenie 12yDW\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌로시스 12년 / Glenrothes 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로시스 12년 / Glenrothes 12Y\",\n      \"price_krw\": 210000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 쉐리 / Macallan 12ySC\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 쉐리 / Macallan 12ySC\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 더블 / Macallan 12yDC\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 더블 / Macallan 12yDC\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"크라겐모어 12년 / Cragganmore 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"크라겐모어 12년 / Cragganmore 12Y\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-13T02:33:51Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌피딕12년 / Glenfiddich 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕12년 / Glenfiddich 12Y\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌피딕15년 / Glenfiddich 15Y\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕15년 / Glenfiddich 15Y\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"발베니12년 더블우드 / Balvenie 12yDW\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니12년 더블우드 / Balvenie 12yDW\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌로시스 12년 / Glenrothes 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로시스 12년 / Glenrothes 12Y\",\n      \"price_krw\": 210000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 쉐리 / Macallan 12ySC\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 쉐리 / Macallan 12ySC\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 더블 / Macallan 12yDC\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 더블 / Macallan 12yDC\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"크라겐모어 12년 / Cragganmore 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"크라겐모어 12년 / Cragganmore 12Y\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"글렌피딕12년 / Glenfiddich 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕12년 / Glenfiddich 12Y\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌피딕15년 / Glenfiddich 15Y\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌피딕15년 / Glenfiddich 15Y\",\n      \"price_krw\": 300000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"발베니12년 더블우드 / Balvenie 12yDW\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"발베니12년 더블우드 / Balvenie 12yDW\",\n      \"price_krw\": 250000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글렌로시스 12년 / Glenrothes 12Y\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글렌로시스 12년 / Glenrothes 12Y\",\n      \"price_krw\": 210000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 쉐리 / Macallan 12ySC\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 쉐리 / Macallan 12ySC\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 더블 / Macallan 12yDC\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"맥칼란12년 더블 / Macallan 12yDC\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"크라겐모어 12년 / Cragganmore 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"크라겐모어 12년 / Cragganmore 12Y\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-13T02:33:51Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1747
+        },
+        {
+          "modality": "image",
+          "tokens": 1078
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2825,
+      "total_output_tokens": 921,
+      "total_thought_tokens": 1202,
+      "total_tokens": 4948,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 2
+}

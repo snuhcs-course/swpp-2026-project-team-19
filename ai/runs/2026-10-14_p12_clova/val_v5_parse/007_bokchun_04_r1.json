@@ -1,0 +1,71 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "c5337461726680c74341c2292dbc79c2622ce278fe43e1587d4577a93f3431cd",
+  "started_at": "2026-10-14T05:17:28.537118+00:00",
+  "latency_ms": 3172,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 4240,
+  "output_tokens": 5,
+  "thought_tokens": 833,
+  "total_tokens": 5078,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:17:31Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:17:31Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 4240
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 4240,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 833,
+      "total_tokens": 5078,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 1,
+  "source_image": "007_bokchun_04.jpg",
+  "prompt_version": "v5",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [375,41,627,83] Cocktail\nL002 [817,87,845,101] 1.8\nL003 [819,115,852,131] 1.6\nL004 [826,146,854,159] 1.6\nL005 [830,176,859,189] 1.8\nL006 [833,207,863,220] 1.6\nL007 [838,238,868,251] 1.6\nL008 [841,270,873,286] 1.8\nL009 [847,305,877,318] 1,8\nL010 [851,339,882,353] 1.6\nL011 [856,374,887,388] 1.8\nL012 [877,531,911,548] 1.5\nL013 [882,573,917,590] 1.8\nL014 [356,641,385,656] 1.6\nL015 [359,601,387,617] 1.6\nL016 [361,564,389,577] 1.6\nL017 [363,525,391,539] 1.6\nL018 [366,488,394,502] 1.8\nL019 [368,453,396,467] 1.8\nL020 [370,419,397,432] 1.8\nL021 [373,385,399,398] 1.8\nL022 [375,353,401,366] 1.6\nL023 [377,320,403,333] 1.8\nL024 [378,290,404,302] 1.6\nL025 [382,259,406,272] 1.8\nL026 [384,229,408,242] 1.6\nL027 [385,200,410,214] 1.7\nL028 [387,172,411,185] 1.5\nL029 [389,144,413,157] 1.5\nL030 [391,118,415,130] 1.2\nL031 [352,682,384,698] 1.8\nL032 [161,121,208,134] 진토닉\nL033 [156,147,191,163] 김렛\nL034 [151,174,219,190] 다이퀴리\nL035 [147,201,250,219] 드라이 마티니\nL036 [140,230,226,248] 보스턴쿨러\nL037 [137,260,238,278] 하이랜드쿨러\nL038 [132,289,234,308] 코스모폴리탄\nL039 [126,320,198,339] 올드패션\nL040 [121,352,193,370] 파우스트\nL041 [116,383,205,403] 위스키사워\nL042 [109,417,165,437] 갓파더\nL043 [104,451,177,470] 사이드카\nL044 [97,486,154,504] 잭로즈\nL045 [92,523,149,542] 진피즈\nL046 [85,559,198,580] 에메랄드쿨러\nL047 [77,597,176,618] 그래스호퍼\nL048 [72,636,151,657] 네그로니\nL049 [65,677,145,698] 불바디에\nL050 [58,718,158,740] 라스트워드\nL051 [48,759,196,785] 헤밍웨이 스페셜\nL052 [41,802,108,826] 롭로이\nL053 [344,812,375,829] 1.8\nL054 [347,767,378,785] 1.6\nL055 [347,724,384,741] 2.0\nL056 [573,569,614,589] 입춘\nL057 [571,530,614,549] 복춘\nL058 [562,490,691,513] Signature\nL059 [564,107,687,129] 프랭크시나트라\nL060 [566,137,654,156] 슬로진피즈\nL061 [565,164,657,186] 찰리채플린\nL062 [567,195,622,215] 앤하탄\nL063 [566,223,660,245] 카카오피즈\nL064 [566,250,702,275] 엘더플라워 사워\nL065 [568,284,681,307] 롱아일랜드티\nL066 [568,315,683,339] 프렌치커넥션\nL067 [568,349,666,372] 카타르시스\nL068 [569,385,629,406] 올드파\n</ocr_lines>",
+  "ocr_variant": "off",
+  "n_lines": 68,
+  "gap_factor": 2.5,
+  "layout": "lines",
+  "ocr_latency_ms": 3883
+}

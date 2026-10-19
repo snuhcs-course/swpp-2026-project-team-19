@@ -1,0 +1,190 @@
+{
+ "key": "3aa9ee9c6c52034b123adafe0d0829cd6386c994f736e2f87a42b7c371e1fcdd",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "잭비버스 녹듀16",
+    "target": true
+   },
+   {
+    "line": 2,
+    "name": "글렌모렌지 캐드볼",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "샤토가호 밀레짐1984 알마냑",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "샤토가호 밀레짐1991 알마냑",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "샤토가호 밀레짐 1995 알마냑",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "아쿠아비타 쿨리22 포트",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "아쿠아비타 쿨리23 아마로네",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "아쿠아비타 쿨리24 버번",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "시그나토리 로얄브라클라11",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "시그나토리 벤네비스7 헤빌리 피티드",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "시그나토리 쿨일라13",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "시그나토리 벤리악11",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "시그나토리 올트모어14",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "시그나토리 아벨라워13",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "크래프트브로스 독수리 오형제 1호",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "크래프트브로스 독수리 오형제 3호",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "시그나토리 블렌디드10",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "시그나토리 스페이사이드14M",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "시그나토리 카메론브릿지16",
+    "target": true
+   },
+   {
+    "line": 20,
+    "name": "시그나토리 카메론브릿지12",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "시그나토리 노스 브리티쉬15",
+    "target": true
+   },
+   {
+    "line": 22,
+    "name": "사부로마루3 여황제",
+    "target": true
+   },
+   {
+    "line": 23,
+    "name": "사부로마루4 황제",
+    "target": true
+   },
+   {
+    "line": 24,
+    "name": "사부로마루5 교황",
+    "target": true
+   },
+   {
+    "line": 25,
+    "name": "사부로마루6 연인",
+    "target": true
+   },
+   {
+    "line": 26,
+    "name": "사부로마루7 전차",
+    "target": true
+   },
+   {
+    "line": 27,
+    "name": "TWA 맥더프13 잔혹동화",
+    "target": true
+   },
+   {
+    "line": 28,
+    "name": "TWA 발메낙11 전갈자리",
+    "target": true
+   },
+   {
+    "line": 29,
+    "name": "TWA 아드모어9 천칭자리",
+    "target": true
+   },
+   {
+    "line": 30,
+    "name": "아르마냑 가호 그랑데카르",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "아르마냑 가호 브레이스오브가호",
+    "target": true
+   },
+   {
+    "line": 32,
+    "name": "아르마냑 가호 에어메일",
+    "target": true
+   },
+   {
+    "line": 33,
+    "name": "아르마냑 가호 옵시디언",
+    "target": true
+   },
+   {
+    "line": 34,
+    "name": "아르마냑 가호프리미어 엠파이어",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 1,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Jack Wiebers\",\n      \"age\": 16,\n      \"edition_tokens_en\": [\n        \"Knockdhu\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Cadboll\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Château de Gaube\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Millesime\",\n        \"1984\",\n        \"Armagnac\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Château de Gaube\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Millesime\",\n        \"1991\",\n        \"Armagnac\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Château de Gaube\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Millesime\",\n        \"1995\",\n        \"Armagnac\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 6,\n      \"bottler_en\": \"Aquavitae\",\n      \"distillery_en\": \"Cooley\",\n      \"brand_en\": null,\n      \"age\": 22,\n      \"edition_tokens_en\": [\n        \"Port\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": \"Aquavitae\",\n      \"distillery_en\": \"Cooley\",\n      \"brand_en\": null,\n      \"age\": 23,\n      \"edition_tokens_en\": [\n        \"Amarone\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": \"Aquavitae\",\n      \"distillery_en\": \"Cooley\",\n      \"brand_en\": null,\n      \"age\": 24,\n      \"edition_tokens_en\": [\n        \"Bourbon\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Royal Brackla\",\n      \"brand_en\": null,\n      \"age\": 11,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Ben Nevis\",\n      \"brand_en\": null,\n      \"age\": 7,\n      \"edition_tokens_en\": [\n        \"Heavily\",\n        \"Peated\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 11,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Caol Ila\",\n      \"brand_en\": null,\n      \"age\": 13,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Benriach\",\n      \"brand_en\": null,\n      \"age\": 11,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Allt-A-Bhainne\",\n      \"brand_en\": null,\n      \"age\": 14,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Aberlour\",\n      \"brand_en\": null,\n      \"age\": 13,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Craftbros\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"No.1\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Craftbros\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"No.3\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": 10,\n      \"edition_tokens_en\": [\n        \"Blended\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": 14,\n      \"edition_tokens_en\": [\n        \"Speyside\",\n        \"M\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Cameronbridge\",\n      \"brand_en\": null,\n      \"age\": 16,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Cameronbridge\",\n      \"brand_en\": null,\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 21,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"North British\",\n      \"brand_en\": null,\n      \"age\": 15,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 22,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Saburo Maru\",\n      \"age\": 3,\n      \"edition_tokens_en\": [\n        \"Empress\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 23,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Saburo Maru\",\n      \"age\": 4,\n      \"edition_tokens_en\": [\n        \"Emperor\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 24,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Saburo Maru\",\n      \"age\": 5,\n      \"edition_tokens_en\": [\n        \"Pope\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Saburo Maru\",\n      \"age\": 6,\n      \"edition_tokens_en\": [\n        \"Lovers\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 26,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Saburo Maru\",\n      \"age\": 7,\n      \"edition_tokens_en\": [\n        \"Chariot\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 27,\n      \"bottler_en\": \"The Whisky Agency\",\n      \"distillery_en\": \"Macduff\",\n      \"brand_en\": null,\n      \"age\": 13,\n      \"edition_tokens_en\": [\n        \"Fairytale\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 28,\n      \"bottler_en\": \"The Whisky Agency\",\n      \"distillery_en\": \"Balmenach\",\n      \"brand_en\": null,\n      \"age\": 11,\n      \"edition_tokens_en\": [\n        \"Scorpio\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 29,\n      \"bottler_en\": \"The Whisky Agency\",\n      \"distillery_en\": \"Ardmore\",\n      \"brand_en\": null,\n      \"age\": 9,\n      \"edition_tokens_en\": [\n        \"Libra\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Château de Gaube\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Grande\",\n        \"Carre\",\n        \"Armagnac\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 31,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Château de Gaube\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Brace\",\n        \"of\",\n        \"Gaube\",\n        \"Armagnac\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 32,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Château de Gaube\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Air\",\n        \"Mail\",\n        \"Armagnac\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 33,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Château de Gaube\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Obsidian\",\n        \"Armagnac\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 34,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Château de Gaube\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Premier\",\n        \"Empire\",\n        \"Armagnac\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-17T06:24:43.731434+00:00",
+  "latency_ms": 76737,
+  "attempts": 1,
+  "input_tokens": 2289,
+  "output_tokens": 3237,
+  "thought_tokens": 114
+ }
+}

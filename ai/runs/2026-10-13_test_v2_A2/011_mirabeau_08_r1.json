@@ -1,0 +1,284 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v2",
+  "prompt_sha256": "87314f7784a57513cea270fef34d2c7d9a1147f2d1b337b1bfd73841ce5cab96",
+  "source_image": "011_mirabeau_08.jpeg",
+  "prepared_image": "011_mirabeau_08.jpg",
+  "prepared_sha256": "e8e6151f251591b1f77c577fd1668506d9be6d1fd1063fdd2b176718201009a2",
+  "started_at": "2026-10-13T02:22:55.224594+00:00",
+  "latency_ms": 13686,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2811,
+  "output_tokens": 1733,
+  "thought_tokens": 2165,
+  "total_tokens": 6709,
+  "output": {
+    "items": [
+      {
+        "raw_name": "하이 코스트(High Coast) 신코 배치 2",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "스타워드(Starward) 솔레라",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "오마르(Omar) 버번",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "오마르(Omar) 셰리",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 클래식",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 엑스 버번 오크",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 포트캐스크 피니시",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 트리플 셰리",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 올로로소 셰리",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 솔리스트 올로로소 셰리",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 솔리스트 포트",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란(Kavalan) 비노 바리끄",
+        "price_krw": 44000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS",
+        "price_krw": 31000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "미셸쿠브어(Michel Couveur) 오버에이지드",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "미셸쿠브어(Michel Couveur) 오버에이지드 코리아 에디션",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 3 캐스크 스트렝스",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 4 스모크",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 4 피티드",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 5 포트 캐스크 스트렝스",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 배치 7",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 시그니처",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "기원(Ki-Won) 레드페퍼 캐스크",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "밀크 앤 허니(M&H) 버번 싱글 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "밀크 앤 허니(M&H) PX 셰리 싱글 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭다니엘(Jack Daniel) 넘버 7",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭다니엘(Jack Daniel) 애플",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭다니엘(Jack Daniel) 싱글 배럴 100 프루프",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "버팔로 트레이스(Buffalo Trace) 버번",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "버팔로 트레이스(Buffalo Trace) 웰러 12년",
+        "price_krw": 38000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 101 라이",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 8년 버번",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 레어브리드 버번",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 레어브리드 라이",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드 터키(Wild Turkey) 12년 버번",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": [\n  {\"raw_name\": \"하이 코스트(High Coast) 신코 배치 2\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"스타워드(Starward) 솔레라\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"오마르(Omar) 버번\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"오마르(Omar) 셰리\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 클래식\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 엑스 버번 오크\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 포트캐스크 피니시\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 트리플 셰리\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 올로로소 셰리\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 솔리스트 올로로소 셰리\", \"price_krw\": 41000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 솔리스트 포트\", \"price_krw\": 41000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 비노 바리끄\", \"price_krw\": 44000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS\", \"price_krw\": 31000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드 코리아 에디션\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 3 캐스크 스트렝스\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 4 스모크\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 4 피티드\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 5 포트 캐스크 스트렝스\", \"price_krw\": 29000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 7\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 시그니처\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 레드페퍼 캐스크\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"밀크 앤 허니(M&H) 버번 싱글 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"밀크 앤 허니(M&H) PX 셰리 싱글 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"잭다니엘(Jack Daniel) 넘버 7\", \"price_krw\": 10000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"잭다니엘(Jack Daniel) 애플\", \"price_krw\": 10000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"잭다니엘(Jack Daniel) 싱글 배럴 100 프루프\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"버팔로 트레이스(Buffalo Trace) 버번\", \"price_krw\": 11000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 12년\", \"price_krw\": 38000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 101 라이\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 8년 버번\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 버번\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 라이\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 12년 버번\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\"}\n]}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-13T02:23:08Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": [\n  {\"raw_name\": \"하이 코스트(High Coast) 신코 배치 2\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"스타워드(Starward) 솔레라\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"오마르(Omar) 버번\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"오마르(Omar) 셰리\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 클래식\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 엑스 버번 오크\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 포트캐스크 피니시\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 트리플 셰리\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 올로로소 셰리\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 솔리스트 올로로소 셰리\", \"price_krw\": 41000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 솔리스트 포트\", \"price_krw\": 41000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 비노 바리끄\", \"price_krw\": 44000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS\", \"price_krw\": 31000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드 코리아 에디션\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 3 캐스크 스트렝스\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 4 스모크\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 4 피티드\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 5 포트 캐스크 스트렝스\", \"price_krw\": 29000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 7\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 시그니처\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 레드페퍼 캐스크\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"밀크 앤 허니(M&H) 버번 싱글 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"밀크 앤 허니(M&H) PX 셰리 싱글 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"잭다니엘(Jack Daniel) 넘버 7\", \"price_krw\": 10000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"잭다니엘(Jack Daniel) 애플\", \"price_krw\": 10000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"잭다니엘(Jack Daniel) 싱글 배럴 100 프루프\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"버팔로 트레이스(Buffalo Trace) 버번\", \"price_krw\": 11000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 12년\", \"price_krw\": 38000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 101 라이\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 8년 버번\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 버번\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 라이\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 12년 버번\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\"}\n]}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": [\n  {\"raw_name\": \"하이 코스트(High Coast) 신코 배치 2\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"스타워드(Starward) 솔레라\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"오마르(Omar) 버번\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"오마르(Omar) 셰리\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 클래식\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 엑스 버번 오크\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 포트캐스크 피니시\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 트리플 셰리\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 올로로소 셰리\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 솔리스트 올로로소 셰리\", \"price_krw\": 41000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 솔리스트 포트\", \"price_krw\": 41000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란(Kavalan) 비노 바리끄\", \"price_krw\": 44000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS\", \"price_krw\": 31000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"미셸쿠브어(Michel Couveur) 오버에이지드 코리아 에디션\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 3 캐스크 스트렝스\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 4 스모크\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 4 피티드\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 5 포트 캐스크 스트렝스\", \"price_krw\": 29000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 배치 7\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 시그니처\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"기원(Ki-Won) 레드페퍼 캐스크\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"밀크 앤 허니(M&H) 버번 싱글 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"밀크 앤 허니(M&H) PX 셰리 싱글 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"잭다니엘(Jack Daniel) 넘버 7\", \"price_krw\": 10000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"잭다니엘(Jack Daniel) 애플\", \"price_krw\": 10000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"잭다니엘(Jack Daniel) 싱글 배럴 100 프루프\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"버팔로 트레이스(Buffalo Trace) 버번\", \"price_krw\": 11000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"버팔로 트레이스(Buffalo Trace) 웰러 12년\", \"price_krw\": 38000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 101 라이\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 8년 버번\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 버번\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 레어브리드 라이\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"와일드 터키(Wild Turkey) 12년 버번\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\"}\n]}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-13T02:23:08Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1747
+        },
+        {
+          "modality": "image",
+          "tokens": 1064
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2811,
+      "total_output_tokens": 1733,
+      "total_thought_tokens": 2165,
+      "total_tokens": 6709,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 1
+}

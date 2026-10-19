@@ -1,0 +1,224 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v2",
+  "prompt_sha256": "87314f7784a57513cea270fef34d2c7d9a1147f2d1b337b1bfd73841ce5cab96",
+  "source_image": "012_beck_03.jpeg",
+  "prepared_image": "012_beck_03.jpg",
+  "prepared_sha256": "f2de6f5bc360231da04d9696ace0b83c6d067c9da71fad48055df3d31dda7417",
+  "started_at": "2026-10-13T02:30:18.018131+00:00",
+  "latency_ms": 10211,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2811,
+  "output_tokens": 1090,
+  "thought_tokens": 2061,
+  "total_tokens": 5962,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Glenfiddich 15yo",
+        "price_krw": 22000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Oban 14yo",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glengrant 15yo",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Dalwhinny 15yo",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenlivet 15yo",
+        "price_krw": 23000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Bowmore 15yo",
+        "price_krw": 27000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Machrie Moor",
+        "price_krw": 27000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Hakushu DR",
+        "price_krw": 32000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Hibiki DR",
+        "price_krw": 32000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Lagavulin 16yo",
+        "price_krw": 33000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfiddich 18yo",
+        "price_krw": 40000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Bowmore 18yo",
+        "price_krw": 40000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan 15yo",
+        "price_krw": 40000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenmorangie Signet",
+        "price_krw": 55000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Yamazaki 12yo",
+        "price_krw": 55000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Ballentine 30yo",
+        "price_krw": 60000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfiddich 21yo",
+        "price_krw": 65000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan 18yo",
+        "price_krw": 80000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfarclas 25yo",
+        "price_krw": 80000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Caol ila 25yo",
+        "price_krw": 90000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라프로익 25년",
+        "price_krw": 120000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "히비키 21년",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "히비키 블렌더스 쵸이스",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니 18년 PX",
+        "price_krw": 55000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 DR 마데라카스크",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": [\n  {\"raw_name\": \"Glenfiddich 15yo\", \"price_krw\": 22000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Oban 14yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glengrant 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Dalwhinny 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenlivet 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 15yo\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Machrie Moor\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hakushu DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hibiki DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Lagavulin 16yo\", \"price_krw\": 33000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 15yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenmorangie Signet\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Yamazaki 12yo\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Ballentine 30yo\", \"price_krw\": 60000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 21yo\", \"price_krw\": 65000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 18yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfarclas 25yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Caol ila 25yo\", \"price_krw\": 90000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"라프로익 25년\", \"price_krw\": 120000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 21년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 블렌더스 쵸이스\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"발베니 18년 PX\", \"price_krw\": 55000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란 DR 마데라카스크\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\"}\n]}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-13T02:30:28Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": [\n  {\"raw_name\": \"Glenfiddich 15yo\", \"price_krw\": 22000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Oban 14yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glengrant 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Dalwhinny 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenlivet 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 15yo\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Machrie Moor\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hakushu DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hibiki DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Lagavulin 16yo\", \"price_krw\": 33000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 15yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenmorangie Signet\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Yamazaki 12yo\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Ballentine 30yo\", \"price_krw\": 60000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 21yo\", \"price_krw\": 65000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 18yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfarclas 25yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Caol ila 25yo\", \"price_krw\": 90000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"라프로익 25년\", \"price_krw\": 120000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 21년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 블렌더스 쵸이스\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"발베니 18년 PX\", \"price_krw\": 55000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란 DR 마데라카스크\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\"}\n]}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": [\n  {\"raw_name\": \"Glenfiddich 15yo\", \"price_krw\": 22000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Oban 14yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glengrant 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Dalwhinny 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenlivet 15yo\", \"price_krw\": 23000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 15yo\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Machrie Moor\", \"price_krw\": 27000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hakushu DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Hibiki DR\", \"price_krw\": 32000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Lagavulin 16yo\", \"price_krw\": 33000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Bowmore 18yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 15yo\", \"price_krw\": 40000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenmorangie Signet\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Yamazaki 12yo\", \"price_krw\": 55000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Ballentine 30yo\", \"price_krw\": 60000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfiddich 21yo\", \"price_krw\": 65000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Macallan 18yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Glenfarclas 25yo\", \"price_krw\": 80000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"Caol ila 25yo\", \"price_krw\": 90000, \"pour_ml\": 30, \"unit\": \"glass\"},\n  {\"raw_name\": \"라프로익 25년\", \"price_krw\": 120000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 21년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"히비키 블렌더스 쵸이스\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"발베니 18년 PX\", \"price_krw\": 55000, \"pour_ml\": null, \"unit\": \"glass\"},\n  {\"raw_name\": \"카발란 DR 마데라카스크\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\"}\n]}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-13T02:30:28Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 1747
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2811,
+      "total_output_tokens": 1090,
+      "total_thought_tokens": 2061,
+      "total_tokens": 5962,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3
+}

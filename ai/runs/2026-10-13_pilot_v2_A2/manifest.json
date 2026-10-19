@@ -1,0 +1,23 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "media_resolution": "default",
+  "prompt_version": "v2",
+  "prompt_sha256": "87314f7784a57513cea270fef34d2c7d9a1147f2d1b337b1bfd73841ce5cab96",
+  "label_set": "test",
+  "labels_sha256": "07bc5e07e84b43d445520b4e4488ecbf7f928d1ecf5ae6b7b0d94c0908ac98d7",
+  "runs": 1,
+  "photos": {
+    "011_mirabeau_05.jpeg": {
+      "prepared": "011_mirabeau_05.jpg",
+      "prepared_sha256": "f80b1dc354db947cb938c85cb397e32f65e1bb35da3e844b181410b03727bf29"
+    }
+  },
+  "api_tier": "free (inputs may be used to improve Google products)",
+  "written_at": "2026-10-13T02:18:00.965419+00:00"
+}

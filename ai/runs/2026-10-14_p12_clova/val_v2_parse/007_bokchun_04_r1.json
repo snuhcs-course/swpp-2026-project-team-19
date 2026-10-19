@@ -1,0 +1,71 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "372bede8674eac276b9b68fd33ccc98e1950d6c6a3b46cb46d9e28642acf8875",
+  "started_at": "2026-10-14T05:03:34.510430+00:00",
+  "latency_ms": 2524,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 3603,
+  "output_tokens": 5,
+  "thought_tokens": 563,
+  "total_tokens": 4171,
+  "output": {
+    "items": []
+  },
+  "parse_error": null,
+  "raw_text": "{\"items\": []}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:03:36Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\"items\": []}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\"items\": []}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:03:36Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 3603
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 3603,
+      "total_output_tokens": 5,
+      "total_thought_tokens": 563,
+      "total_tokens": 4171,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 1,
+  "source_image": "007_bokchun_04.jpg",
+  "prompt_version": "v2",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_rows>\nR001 y=41 | [375-627] Cocktail\nR002 y=87 | [817-845] 1.8\nR003 y=107 | [161-208] 진토닉 | [391-415] 1.2 | [564-687] 프랭크시나트라 | [819-852] 1.6\nR004 y=137 | [156-191] 김렛 | [389-413] 1.5 | [566-654] 슬로진피즈 | [826-854] 1.6\nR005 y=164 | [151-219] 다이퀴리 | [387-411] 1.5 | [565-657] 찰리채플린 | [830-859] 1.8\nR006 y=195 | [147-250] 드라이 마티니 | [385-410] 1.7 | [567-622] 앤하탄 | [833-863] 1.6\nR007 y=223 | [140-226] 보스턴쿨러 | [384-408] 1.6 | [566-660] 카카오피즈 | [838-868] 1.6\nR008 y=250 | [137-238] 하이랜드쿨러 | [382-406] 1.8 | [566-702] 엘더플라워 사워 | [841-873] 1.8\nR009 y=284 | [132-234] 코스모폴리탄 | [378-404] 1.6 | [568-681] 롱아일랜드티 | [847-877] 1,8\nR010 y=315 | [126-198] 올드패션 | [377-403] 1.8 | [568-683] 프렌치커넥션\nR011 y=339 | [851-882] 1.6\nR012 y=349 | [121-193] 파우스트 | [375-401] 1.6 | [568-666] 카타르시스\nR013 y=374 | [116-205] 위스키사워 | [373-399] 1.8 | [569-629] 올드파 | [856-887] 1.8\nR014 y=417 | [109-165] 갓파더 | [370-397] 1.8\nR015 y=451 | [104-177] 사이드카 | [368-396] 1.8\nR016 y=486 | [97-154] 잭로즈 | [366-394] 1.8 | [562-691] Signature\nR017 y=523 | [92-149] 진피즈 | [363-391] 1.6 | [571-614] 복춘 | [877-911] 1.5\nR018 y=559 | [85-198] 에메랄드쿨러 | [361-389] 1.6 | [573-614] 입춘 | [882-917] 1.8\nR019 y=597 | [77-176] 그래스호퍼 | [359-387] 1.6\nR020 y=636 | [72-151] 네그로니 | [356-385] 1.6\nR021 y=677 | [65-145] 불바디에 | [352-384] 1.8\nR022 y=718 | [58-158] 라스트워드 | [347-384] 2.0\nR023 y=759 | [48-196] 헤밍웨이 스페셜 | [347-378] 1.6\nR024 y=802 | [41-108] 롭로이 | [344-375] 1.8\n</ocr_rows>",
+  "ocr_variant": "off",
+  "n_lines": 68,
+  "gap_factor": 2.5,
+  "layout": "rows",
+  "ocr_latency_ms": 3883
+}

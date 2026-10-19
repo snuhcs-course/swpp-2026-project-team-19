@@ -1,0 +1,15 @@
+[1/14] r1 009_odbi_01.png: 34 items, in 6389 out 2349 thought 0, 7791 ms, uncited price lines 1/35
+[2/14] r1 009_odbi_02.png: 0 items, in 5215 out 5 thought 541, 3088 ms, uncited price lines 16/16 FLAG
+[3/14] r1 009_odbi_03.png: 7 items, in 4663 out 662 thought 0, 4880 ms, uncited price lines 1/8
+[4/14] r1 009_odbi_04.png: 20 items, in 5385 out 1770 thought 892, 7897 ms, uncited price lines 1/21
+[5/14] r1 009_odbi_05.png: 14 items, in 5128 out 1234 thought 2411, 10285 ms, uncited price lines 1/15
+[6/14] r1 009_odbi_06.png: 15 items, in 5110 out 1320 thought 1593, 7052 ms, uncited price lines 1/16
+[7/14] r1 009_odbi_07.png: 11 items, in 4871 out 979 thought 0, 3753 ms, uncited price lines 1/12
+[8/14] r1 009_odbi_08.png: 34 items, in 6237 out 3056 thought 1561, 11621 ms, uncited price lines 1/35
+[9/14] r1 009_odbi_09.jpeg: 15 items, in 5496 out 1387 thought 1605, 8741 ms, uncited price lines 4/12 FLAG
+[10/14] r1 010_sui_01.jpeg: 44 items, in 6854 out 3970 thought 0, 11109 ms, uncited price lines 0/43
+[11/14] r1 010_sui_02.jpeg: 34 items, in 6216 out 3098 thought 2410, 13469 ms, uncited price lines 0/33
+[12/14] r1 010_sui_03.jpeg: 36 items, in 6352 out 2494 thought 0, 8026 ms, uncited price lines 0/35
+[13/14] r1 010_sui_04.jpeg: 40 items, in 6609 out 4078 thought 0, 10836 ms, uncited price lines 0/39
+[14/14] r1 010_sui_05.jpeg: 17 items, in 5372 out 1711 thought 2123, 9984 ms, uncited price lines 0/0
+API calls this run: 14 (limit 80)

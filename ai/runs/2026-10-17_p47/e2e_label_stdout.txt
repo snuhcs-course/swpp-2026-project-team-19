@@ -1,0 +1,4 @@
+== label r1 / final : {'extracted_lines': 313, 'paired_lines': 313, 'unpaired_lines': 0, 'gold_lines': 313, 'missed_gold_lines': 0, 'gold_conflicts': 0}
+  S1+S2b+S3  C0  lines 313  top1 0.614  e2e top1 0.614  FM 0.003  burden {'confirm': 14, 'choose': 21, 'register': 95, 'wrong': 7}  rule 4/5  llm 0/0  accept err 0.0064  per photo a 1.0 bcd 8.8
+  M3a        C0  lines 313  top1 0.614  e2e top1 0.614  FM 0.003  burden {'confirm': 80, 'choose': 14, 'register': 40, 'wrong': 3}  rule 4/4  llm 73/74  accept err 0.0064  per photo a 5.7 bcd 4.1  unpaired {}
+LLM: {"model": "gemini-3.1-flash-lite", "thinking_level": "low", "api_calls_this_run": 8, "by_kind": {"m3a": {"requests": 13, "api_calls": 8, "cache_hits": 5, "parse_errors": 0, "input_tokens": 25316, "output_tokens": 12687, "thought_tokens": 4201, "mean_latency_ms": 12872}}}

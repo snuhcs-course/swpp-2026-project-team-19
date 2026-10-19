@@ -1,0 +1,4044 @@
+{
+ "source": "ai/runs/2026-10-13_test_v2_A2",
+ "run": 1,
+ "split": "dev",
+ "bars": [
+  "Beck"
+ ],
+ "photos": [
+  "012_Beck_01",
+  "012_Beck_02",
+  "012_Beck_03",
+  "012_Beck_04"
+ ],
+ "lines": {
+  "012_Beck_01": {
+   "bar": "Beck",
+   "split": "dev",
+   "lines": [
+    {
+     "name": "Buffalo Trace / Makrt's Mark",
+     "gold": "both:new:buffalo-trace|makers-mark",
+     "gold_lines": [
+      "Buffalo Trace / Makrt's Mark"
+     ]
+    },
+    {
+     "name": "Wildturkey 101",
+     "gold": "wild-turkey-101-8",
+     "gold_lines": [
+      "Wildturkey 101"
+     ]
+    },
+    {
+     "name": "Four Roses Small Batch",
+     "gold": "new:four-roses-small-batch",
+     "gold_lines": [
+      "Four Roses Small Batch"
+     ]
+    },
+    {
+     "name": "James E Pepper 1776 Rye Whiskey",
+     "gold": "new:james-e-pepper-1776-rye",
+     "gold_lines": [
+      "James E Pepper 1776 Rye Whiskey"
+     ]
+    },
+    {
+     "name": "James E Pepper 1776 Bourbon Whiskey",
+     "gold": "new:james-e-pepper-1776-bourbon",
+     "gold_lines": [
+      "James E Pepper 1776 Bourbon Whiskey"
+     ]
+    },
+    {
+     "name": "Cleveland Black Reserve Bourbon",
+     "gold": "new:cleveland-black-reserve",
+     "gold_lines": [
+      "Cleveland Black Reserve Bourbon"
+     ]
+    },
+    {
+     "name": "Rowan`s Creek",
+     "gold": "rowans-creek",
+     "gold_lines": [
+      "Rowan`s Creek"
+     ]
+    },
+    {
+     "name": "Taylor Small Batch",
+     "gold": "new:eh-taylor-small-batch",
+     "gold_lines": [
+      "Taylor Small Batch"
+     ]
+    },
+    {
+     "name": "Templeton Rye Barrel Strength",
+     "gold": "new:templeton-rye-barrel-strength",
+     "gold_lines": [
+      "Templeton Rye Barrel Strength"
+     ]
+    },
+    {
+     "name": "Maker`s Mark Cask Strength",
+     "gold": "new:makers-mark-cask-strength",
+     "gold_lines": [
+      "Maker`s Mark Cask Strength"
+     ]
+    },
+    {
+     "name": "Old Pepper Rye Single Barrel",
+     "gold": "new:old-pepper-rye-single-barrel",
+     "gold_lines": [
+      "Old Pepper Rye Single Barrel"
+     ]
+    },
+    {
+     "name": "Noah`s Mill",
+     "gold": "noahs-mill",
+     "gold_lines": [
+      "Noah`s Mill"
+     ]
+    },
+    {
+     "name": "Booker`s",
+     "gold": "bookers",
+     "gold_lines": [
+      "Booker`s"
+     ]
+    }
+   ],
+   "conflicts": 0,
+   "gold_lines": [
+    {
+     "name": "Buffalo Trace / Makrt's Mark",
+     "gold": "both:new:buffalo-trace|makers-mark",
+     "extracted": [
+      "Buffalo Trace / Makrt's Mark"
+     ]
+    },
+    {
+     "name": "Wildturkey 101",
+     "gold": "wild-turkey-101-8",
+     "extracted": [
+      "Wildturkey 101"
+     ]
+    },
+    {
+     "name": "Four Roses Small Batch",
+     "gold": "new:four-roses-small-batch",
+     "extracted": [
+      "Four Roses Small Batch"
+     ]
+    },
+    {
+     "name": "James E Pepper 1776 Rye Whiskey",
+     "gold": "new:james-e-pepper-1776-rye",
+     "extracted": [
+      "James E Pepper 1776 Rye Whiskey"
+     ]
+    },
+    {
+     "name": "James E Pepper 1776 Bourbon Whiskey",
+     "gold": "new:james-e-pepper-1776-bourbon",
+     "extracted": [
+      "James E Pepper 1776 Bourbon Whiskey"
+     ]
+    },
+    {
+     "name": "Cleveland Black Reserve Bourbon",
+     "gold": "new:cleveland-black-reserve",
+     "extracted": [
+      "Cleveland Black Reserve Bourbon"
+     ]
+    },
+    {
+     "name": "Rowan`s Creek",
+     "gold": "rowans-creek",
+     "extracted": [
+      "Rowan`s Creek"
+     ]
+    },
+    {
+     "name": "Taylor Small Batch",
+     "gold": "new:eh-taylor-small-batch",
+     "extracted": [
+      "Taylor Small Batch"
+     ]
+    },
+    {
+     "name": "Templeton Rye Barrel Strength",
+     "gold": "new:templeton-rye-barrel-strength",
+     "extracted": [
+      "Templeton Rye Barrel Strength"
+     ]
+    },
+    {
+     "name": "Maker`s Mark Cask Strength",
+     "gold": "new:makers-mark-cask-strength",
+     "extracted": [
+      "Maker`s Mark Cask Strength"
+     ]
+    },
+    {
+     "name": "Old Pepper Rye Single Barrel",
+     "gold": "new:old-pepper-rye-single-barrel",
+     "extracted": [
+      "Old Pepper Rye Single Barrel"
+     ]
+    },
+    {
+     "name": "Noah`s Mill",
+     "gold": "noahs-mill",
+     "extracted": [
+      "Noah`s Mill"
+     ]
+    },
+    {
+     "name": "Booker`s",
+     "gold": "bookers",
+     "extracted": [
+      "Booker`s"
+     ]
+    }
+   ],
+   "n_items": 14,
+   "n_paired_items": 14
+  },
+  "012_Beck_02": {
+   "bar": "Beck",
+   "split": "dev",
+   "lines": [
+    {
+     "name": "Arran Quarter Cask",
+     "gold": "new:arran-quarter-cask",
+     "gold_lines": [
+      "Arran Quarter Cask"
+     ]
+    },
+    {
+     "name": "Arran Sherry cask",
+     "gold": "arran-sherry-cask",
+     "gold_lines": [
+      "Arran Sherry cask"
+     ]
+    },
+    {
+     "name": "Ardbeg Uigeadail",
+     "gold": "ardbeg-uigeadail",
+     "gold_lines": [
+      "Ardbeg Uigeadail"
+     ]
+    },
+    {
+     "name": "Glenfarclas 105",
+     "gold": "glenfarclas-105",
+     "gold_lines": [
+      "Glenfarclas 105"
+     ]
+    },
+    {
+     "name": "Abelour A`bunadh",
+     "gold": "aberlour-abunadh",
+     "gold_lines": [
+      "Abelour A`bunadh"
+     ]
+    },
+    {
+     "name": "Lagavulin 12yo 2018",
+     "gold": "new:lagavulin-12-2018",
+     "gold_lines": [
+      "Lagavulin 12yo 2018"
+     ]
+    },
+    {
+     "name": "Laphroaig 10yo Cask Strength",
+     "gold": "new:laphroaig-10-cask-strength",
+     "gold_lines": [
+      "Laphroaig 10yo Cask Strength"
+     ]
+    },
+    {
+     "name": "Kavalan Solist",
+     "gold": "unknown",
+     "gold_lines": [
+      "Kavalan Solist"
+     ]
+    },
+    {
+     "name": "Octomore 13.1",
+     "gold": "new:octomore-13-1",
+     "gold_lines": [
+      "Octomore 13.1"
+     ]
+    },
+    {
+     "name": "Macallan Classic Cut 2020",
+     "gold": "new:macallan-classic-cut-2020",
+     "gold_lines": [
+      "Macallan Classic Cut 2020"
+     ]
+    }
+   ],
+   "conflicts": 0,
+   "gold_lines": [
+    {
+     "name": "Arran Quarter Cask",
+     "gold": "new:arran-quarter-cask",
+     "extracted": [
+      "Arran Quarter Cask"
+     ]
+    },
+    {
+     "name": "Arran Sherry cask",
+     "gold": "arran-sherry-cask",
+     "extracted": [
+      "Arran Sherry cask"
+     ]
+    },
+    {
+     "name": "Ardbeg Uigeadail",
+     "gold": "ardbeg-uigeadail",
+     "extracted": [
+      "Ardbeg Uigeadail"
+     ]
+    },
+    {
+     "name": "Glenfarclas 105",
+     "gold": "glenfarclas-105",
+     "extracted": [
+      "Glenfarclas 105"
+     ]
+    },
+    {
+     "name": "Abelour A`bunadh",
+     "gold": "aberlour-abunadh",
+     "extracted": [
+      "Abelour A`bunadh"
+     ]
+    },
+    {
+     "name": "Lagavulin 12yo 2018",
+     "gold": "new:lagavulin-12-2018",
+     "extracted": [
+      "Lagavulin 12yo 2018"
+     ]
+    },
+    {
+     "name": "Laphroaig 10yo Cask Strength",
+     "gold": "new:laphroaig-10-cask-strength",
+     "extracted": [
+      "Laphroaig 10yo Cask Strength"
+     ]
+    },
+    {
+     "name": "Kavalan Solist",
+     "gold": "unknown",
+     "extracted": [
+      "Kavalan Solist"
+     ]
+    },
+    {
+     "name": "Octomore 13.1",
+     "gold": "new:octomore-13-1",
+     "extracted": [
+      "Octomore 13.1"
+     ]
+    },
+    {
+     "name": "Macallan Classic Cut 2020",
+     "gold": "new:macallan-classic-cut-2020",
+     "extracted": [
+      "Macallan Classic Cut 2020"
+     ]
+    }
+   ],
+   "n_items": 10,
+   "n_paired_items": 10
+  },
+  "012_Beck_03": {
+   "bar": "Beck",
+   "split": "dev",
+   "lines": [
+    {
+     "name": "Glenfiddich 15yo",
+     "gold": "glenfiddich-15",
+     "gold_lines": [
+      "Glenfiddich 15yo"
+     ]
+    },
+    {
+     "name": "Oban 14yo",
+     "gold": "oban-14",
+     "gold_lines": [
+      "Oban 14yo"
+     ]
+    },
+    {
+     "name": "Glengrant 15yo",
+     "gold": "glen-grant-15",
+     "gold_lines": [
+      "Glengrant 15yo"
+     ]
+    },
+    {
+     "name": "Dalwhinny 15yo",
+     "gold": "dalwhinnie-15",
+     "gold_lines": [
+      "Dalwhinny 15yo"
+     ]
+    },
+    {
+     "name": "Glenlivet 15yo",
+     "gold": "glenlivet-15",
+     "gold_lines": [
+      "Glenlivet 15yo"
+     ]
+    },
+    {
+     "name": "Bowmore 15yo",
+     "gold": "bowmore-15",
+     "gold_lines": [
+      "Bowmore 15yo"
+     ]
+    },
+    {
+     "name": "Machrie Moor",
+     "gold": "new:arran-machrie-moor",
+     "gold_lines": [
+      "Machrie Moor"
+     ]
+    },
+    {
+     "name": "Hakushu DR",
+     "gold": "new:hakushu-distillers-reserve",
+     "gold_lines": [
+      "Hakushu DR"
+     ]
+    },
+    {
+     "name": "Hibiki DR",
+     "gold": "new:hibiki-japanese-harmony",
+     "gold_lines": [
+      "Hibiki DR"
+     ]
+    },
+    {
+     "name": "Lagavulin 16yo",
+     "gold": "lagavulin-16",
+     "gold_lines": [
+      "Lagavulin 16yo"
+     ]
+    },
+    {
+     "name": "Glenfiddich 18yo",
+     "gold": "glenfiddich-18",
+     "gold_lines": [
+      "Glenfiddich 18yo"
+     ]
+    },
+    {
+     "name": "Bowmore 18yo",
+     "gold": "new:bowmore-18",
+     "gold_lines": [
+      "Bowmore 18yo"
+     ]
+    },
+    {
+     "name": "Macallan 15yo",
+     "gold": "macallan-15-double-cask",
+     "gold_lines": [
+      "Macallan 15yo"
+     ]
+    },
+    {
+     "name": "Glenmorangie Signet",
+     "gold": "glenmorangie-signet",
+     "gold_lines": [
+      "Glenmorangie Signet"
+     ]
+    },
+    {
+     "name": "Yamazaki 12yo",
+     "gold": "new:yamazaki-12",
+     "gold_lines": [
+      "Yamazaki 12yo"
+     ]
+    },
+    {
+     "name": "Ballentine 30yo",
+     "gold": "new:ballantines-30",
+     "gold_lines": [
+      "Ballentine 30yo"
+     ]
+    },
+    {
+     "name": "Glenfiddich 21yo",
+     "gold": "glenfiddich-21",
+     "gold_lines": [
+      "Glenfiddich 21yo"
+     ]
+    },
+    {
+     "name": "Macallan 18yo",
+     "gold": "unknown",
+     "gold_lines": [
+      "Macallan 18yo"
+     ]
+    },
+    {
+     "name": "Glenfarclas 25yo",
+     "gold": "new:glenfarclas-25",
+     "gold_lines": [
+      "Glenfarclas 25yo"
+     ]
+    },
+    {
+     "name": "Caol ila 25yo",
+     "gold": "new:caol-ila-25",
+     "gold_lines": [
+      "Caol ila 25yo"
+     ]
+    },
+    {
+     "name": "라프로익 25년",
+     "gold": "new:laphroaig-25",
+     "gold_lines": [
+      "라프로익 25년"
+     ]
+    },
+    {
+     "name": "히비키 21년",
+     "gold": "new:hibiki-21",
+     "gold_lines": [
+      "히비키 21년"
+     ]
+    },
+    {
+     "name": "히비키 블렌더스 쵸이스",
+     "gold": "new:hibiki-blenders-choice",
+     "gold_lines": [
+      "히비키 블랜더스 쵸이스"
+     ]
+    },
+    {
+     "name": "발베니 18년 PX",
+     "gold": "new:balvenie-18-px",
+     "gold_lines": [
+      "발베니 18년 PX"
+     ]
+    },
+    {
+     "name": "카발란 DR 마데라카스크",
+     "gold": "new:kavalan-distillery-reserve-madeira",
+     "gold_lines": [
+      "카발란 DR 마데라캐스크"
+     ]
+    }
+   ],
+   "conflicts": 0,
+   "gold_lines": [
+    {
+     "name": "Glenfiddich 15yo",
+     "gold": "glenfiddich-15",
+     "extracted": [
+      "Glenfiddich 15yo"
+     ]
+    },
+    {
+     "name": "Oban 14yo",
+     "gold": "oban-14",
+     "extracted": [
+      "Oban 14yo"
+     ]
+    },
+    {
+     "name": "Glengrant 15yo",
+     "gold": "glen-grant-15",
+     "extracted": [
+      "Glengrant 15yo"
+     ]
+    },
+    {
+     "name": "Dalwhinny 15yo",
+     "gold": "dalwhinnie-15",
+     "extracted": [
+      "Dalwhinny 15yo"
+     ]
+    },
+    {
+     "name": "Glenlivet 15yo",
+     "gold": "glenlivet-15",
+     "extracted": [
+      "Glenlivet 15yo"
+     ]
+    },
+    {
+     "name": "Bowmore 15yo",
+     "gold": "bowmore-15",
+     "extracted": [
+      "Bowmore 15yo"
+     ]
+    },
+    {
+     "name": "Machrie Moor",
+     "gold": "new:arran-machrie-moor",
+     "extracted": [
+      "Machrie Moor"
+     ]
+    },
+    {
+     "name": "Hakushu DR",
+     "gold": "new:hakushu-distillers-reserve",
+     "extracted": [
+      "Hakushu DR"
+     ]
+    },
+    {
+     "name": "Hibiki DR",
+     "gold": "new:hibiki-japanese-harmony",
+     "extracted": [
+      "Hibiki DR"
+     ]
+    },
+    {
+     "name": "Lagavulin 16yo",
+     "gold": "lagavulin-16",
+     "extracted": [
+      "Lagavulin 16yo"
+     ]
+    },
+    {
+     "name": "Glenfiddich 18yo",
+     "gold": "glenfiddich-18",
+     "extracted": [
+      "Glenfiddich 18yo"
+     ]
+    },
+    {
+     "name": "Bowmore 18yo",
+     "gold": "new:bowmore-18",
+     "extracted": [
+      "Bowmore 18yo"
+     ]
+    },
+    {
+     "name": "Macallan 15yo",
+     "gold": "macallan-15-double-cask",
+     "extracted": [
+      "Macallan 15yo"
+     ]
+    },
+    {
+     "name": "Glenmorangie Signet",
+     "gold": "glenmorangie-signet",
+     "extracted": [
+      "Glenmorangie Signet"
+     ]
+    },
+    {
+     "name": "Yamazaki 12yo",
+     "gold": "new:yamazaki-12",
+     "extracted": [
+      "Yamazaki 12yo"
+     ]
+    },
+    {
+     "name": "Ballentine 30yo",
+     "gold": "new:ballantines-30",
+     "extracted": [
+      "Ballentine 30yo"
+     ]
+    },
+    {
+     "name": "Glenfiddich 21yo",
+     "gold": "glenfiddich-21",
+     "extracted": [
+      "Glenfiddich 21yo"
+     ]
+    },
+    {
+     "name": "Macallan 18yo",
+     "gold": "unknown",
+     "extracted": [
+      "Macallan 18yo"
+     ]
+    },
+    {
+     "name": "Glenfarclas 25yo",
+     "gold": "new:glenfarclas-25",
+     "extracted": [
+      "Glenfarclas 25yo"
+     ]
+    },
+    {
+     "name": "Caol ila 25yo",
+     "gold": "new:caol-ila-25",
+     "extracted": [
+      "Caol ila 25yo"
+     ]
+    },
+    {
+     "name": "라프로익 25년",
+     "gold": "new:laphroaig-25",
+     "extracted": [
+      "라프로익 25년"
+     ]
+    },
+    {
+     "name": "히비키 21년",
+     "gold": "new:hibiki-21",
+     "extracted": [
+      "히비키 21년"
+     ]
+    },
+    {
+     "name": "히비키 블랜더스 쵸이스",
+     "gold": "new:hibiki-blenders-choice",
+     "extracted": [
+      "히비키 블렌더스 쵸이스"
+     ]
+    },
+    {
+     "name": "발베니 18년 PX",
+     "gold": "new:balvenie-18-px",
+     "extracted": [
+      "발베니 18년 PX"
+     ]
+    },
+    {
+     "name": "카발란 DR 마데라캐스크",
+     "gold": "new:kavalan-distillery-reserve-madeira",
+     "extracted": [
+      "카발란 DR 마데라카스크"
+     ]
+    }
+   ],
+   "n_items": 25,
+   "n_paired_items": 25
+  },
+  "012_Beck_04": {
+   "bar": "Beck",
+   "split": "dev",
+   "lines": [
+    {
+     "name": "Talisker 10yo",
+     "gold": "talisker-10",
+     "gold_lines": [
+      "Talisker 10yo"
+     ]
+    },
+    {
+     "name": "Bushmil 10yo",
+     "gold": "new:bushmills-10",
+     "gold_lines": [
+      "Bushmil 10yo"
+     ]
+    },
+    {
+     "name": "Glengrant 10yo",
+     "gold": "glen-grant-10",
+     "gold_lines": [
+      "Glengrant 10yo"
+     ]
+    },
+    {
+     "name": "Auchentoshan 12yo",
+     "gold": "auchentoshan-12",
+     "gold_lines": [
+      "Auchentoshan 12yo"
+     ]
+    },
+    {
+     "name": "Glenfiddich 12yo",
+     "gold": "glenfiddich-12",
+     "gold_lines": [
+      "Glenfiddich 12yo"
+     ]
+    },
+    {
+     "name": "Bowmore 12yo",
+     "gold": "bowmore-12",
+     "gold_lines": [
+      "Bowmore 12yo"
+     ]
+    },
+    {
+     "name": "Laphroaig 10yo",
+     "gold": "laphroaig-10",
+     "gold_lines": [
+      "Laphroaig 10yo"
+     ]
+    },
+    {
+     "name": "Glenlivet 12yo",
+     "gold": "glenlivet-12",
+     "gold_lines": [
+      "Glenlivet 12yo"
+     ]
+    },
+    {
+     "name": "Caol Ila 12yo",
+     "gold": "new:caol-ila-12",
+     "gold_lines": [
+      "Caol Ila 12yo"
+     ]
+    },
+    {
+     "name": "Ardbeg 10yo",
+     "gold": "ardbeg-10",
+     "gold_lines": [
+      "Ardbeg 10yo"
+     ]
+    },
+    {
+     "name": "Balvenie 12yo",
+     "gold": "balvenie-12-doublewood",
+     "gold_lines": [
+      "Balvenie 12yo"
+     ]
+    },
+    {
+     "name": "Glendronach 12yo",
+     "gold": "glendronach-12",
+     "gold_lines": [
+      "Glendronach 12yo"
+     ]
+    },
+    {
+     "name": "Kilchoman Sanaig",
+     "gold": "new:kilchoman-sanaig",
+     "gold_lines": [
+      "Kilchoman Sanaig"
+     ]
+    },
+    {
+     "name": "Laphroaig Quater Cask",
+     "gold": "laphroaig-quarter-cask",
+     "gold_lines": [
+      "Laphroaig Quater Cask"
+     ]
+    },
+    {
+     "name": "Macallan 12yo Double Cask",
+     "gold": "macallan-12-double-cask",
+     "gold_lines": [
+      "Macallan 12yo Double Cask"
+     ]
+    },
+    {
+     "name": "Macallan 12yo Sheryy Cask",
+     "gold": "macallan-12-sherry-oak",
+     "gold_lines": [
+      "Macallan 12yo Sheryy Cask"
+     ]
+    }
+   ],
+   "conflicts": 0,
+   "gold_lines": [
+    {
+     "name": "Talisker 10yo",
+     "gold": "talisker-10",
+     "extracted": [
+      "Talisker 10yo"
+     ]
+    },
+    {
+     "name": "Bushmil 10yo",
+     "gold": "new:bushmills-10",
+     "extracted": [
+      "Bushmil 10yo"
+     ]
+    },
+    {
+     "name": "Glengrant 10yo",
+     "gold": "glen-grant-10",
+     "extracted": [
+      "Glengrant 10yo"
+     ]
+    },
+    {
+     "name": "Auchentoshan 12yo",
+     "gold": "auchentoshan-12",
+     "extracted": [
+      "Auchentoshan 12yo"
+     ]
+    },
+    {
+     "name": "Glenfiddich 12yo",
+     "gold": "glenfiddich-12",
+     "extracted": [
+      "Glenfiddich 12yo"
+     ]
+    },
+    {
+     "name": "Bowmore 12yo",
+     "gold": "bowmore-12",
+     "extracted": [
+      "Bowmore 12yo"
+     ]
+    },
+    {
+     "name": "Laphroaig 10yo",
+     "gold": "laphroaig-10",
+     "extracted": [
+      "Laphroaig 10yo"
+     ]
+    },
+    {
+     "name": "Glenlivet 12yo",
+     "gold": "glenlivet-12",
+     "extracted": [
+      "Glenlivet 12yo"
+     ]
+    },
+    {
+     "name": "Caol Ila 12yo",
+     "gold": "new:caol-ila-12",
+     "extracted": [
+      "Caol Ila 12yo"
+     ]
+    },
+    {
+     "name": "Ardbeg 10yo",
+     "gold": "ardbeg-10",
+     "extracted": [
+      "Ardbeg 10yo"
+     ]
+    },
+    {
+     "name": "Balvenie 12yo",
+     "gold": "balvenie-12-doublewood",
+     "extracted": [
+      "Balvenie 12yo"
+     ]
+    },
+    {
+     "name": "Glendronach 12yo",
+     "gold": "glendronach-12",
+     "extracted": [
+      "Glendronach 12yo"
+     ]
+    },
+    {
+     "name": "Kilchoman Sanaig",
+     "gold": "new:kilchoman-sanaig",
+     "extracted": [
+      "Kilchoman Sanaig"
+     ]
+    },
+    {
+     "name": "Laphroaig Quater Cask",
+     "gold": "laphroaig-quarter-cask",
+     "extracted": [
+      "Laphroaig Quater Cask"
+     ]
+    },
+    {
+     "name": "Macallan 12yo Double Cask",
+     "gold": "macallan-12-double-cask",
+     "extracted": [
+      "Macallan 12yo Double Cask"
+     ]
+    },
+    {
+     "name": "Macallan 12yo Sheryy Cask",
+     "gold": "macallan-12-sherry-oak",
+     "extracted": [
+      "Macallan 12yo Sheryy Cask"
+     ]
+    }
+   ],
+   "n_items": 48,
+   "n_paired_items": 48
+  }
+ },
+ "results": [
+  {
+   "matcher": "S1+S2b+S3",
+   "condition": "C0",
+   "split": "dev",
+   "lines": 64,
+   "known_top1": 0.8125,
+   "false_merge_rate": 0.0,
+   "confirm_recommended": 5,
+   "by_kind": {
+    "absent": {
+     "ambiguous_ok": 1,
+     "unmatched": 27,
+     "ambiguous_bad": 2
+    },
+    "known": {
+     "correct": 26,
+     "ambiguous_ok": 6
+    },
+    "unknown": {
+     "ambiguous_ok": 1,
+     "unmatched": 1
+    }
+   },
+   "by_bar": {
+    "Beck": {
+     "ambiguous_ok": 8,
+     "correct": 26,
+     "unmatched": 28,
+     "ambiguous_bad": 2
+    }
+   },
+   "owner_burden": {
+    "012_Beck_01": 9,
+    "012_Beck_02": 7,
+    "012_Beck_03": 16,
+    "012_Beck_04": 6
+   },
+   "photos_under_limit": 0.0,
+   "owner_burden_by_kind": {
+    "012_Beck_01": {
+     "confirm": 1,
+     "choose": 0,
+     "register": 8,
+     "wrong": 0
+    },
+    "012_Beck_02": {
+     "confirm": 1,
+     "choose": 1,
+     "register": 3,
+     "wrong": 2
+    },
+    "012_Beck_03": {
+     "confirm": 2,
+     "choose": 0,
+     "register": 14,
+     "wrong": 0
+    },
+    "012_Beck_04": {
+     "confirm": 2,
+     "choose": 1,
+     "register": 3,
+     "wrong": 0
+    }
+   },
+   "owner_burden_totals": {
+    "confirm": 6,
+    "choose": 2,
+    "register": 28,
+    "wrong": 2
+   },
+   "photos_under_limit_without_confirm": 0.25,
+   "errors": [
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Buffalo Trace / Makrt's Mark",
+     "gold": "both:new:buffalo-trace|makers-mark",
+     "kind": "absent",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Arran Quarter Cask",
+     "gold": "new:arran-quarter-cask",
+     "kind": "absent",
+     "outcome": "ambiguous_bad",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Abelour A`bunadh",
+     "gold": "aberlour-abunadh",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Laphroaig 10yo Cask Strength",
+     "gold": "new:laphroaig-10-cask-strength",
+     "kind": "absent",
+     "outcome": "ambiguous_bad",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Kavalan Solist",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Dalwhinny 15yo",
+     "gold": "dalwhinnie-15",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 15yo",
+     "gold": "macallan-15-double-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 18yo",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Balvenie 12yo",
+     "gold": "balvenie-12-doublewood",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Laphroaig Quater Cask",
+     "gold": "laphroaig-quarter-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Macallan 12yo Sheryy Cask",
+     "gold": "macallan-12-sherry-oak",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    }
+   ],
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 5,
+     "correct": 5,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 0,
+     "correct": 0,
+     "precision": null
+    }
+   },
+   "accept_error_rate": 0.0,
+   "from_register": {},
+   "m3_lines": [],
+   "e2e_top1": {
+    "known_gold_lines": 32,
+    "correct": 26,
+    "top1": 0.8125
+   },
+   "unpaired": null,
+   "per_photo": {
+    "012_Beck_01": {
+     "a": 1,
+     "bcd": 8,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_02": {
+     "a": 1,
+     "bcd": 6,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_03": {
+     "a": 2,
+     "bcd": 14,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_04": {
+     "a": 2,
+     "bcd": 4,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    }
+   }
+  },
+  {
+   "matcher": "S1+S2b+S3",
+   "condition": "C1",
+   "split": "dev",
+   "lines": 64,
+   "known_top1": 0.7258064516129032,
+   "false_merge_rate": 0.0,
+   "confirm_recommended": 6,
+   "by_kind": {
+    "known": {
+     "partial": 1,
+     "correct": 45,
+     "unmatched": 7,
+     "ambiguous_ok": 9
+    },
+    "unknown": {
+     "ambiguous_ok": 1,
+     "unmatched": 1
+    }
+   },
+   "by_bar": {
+    "Beck": {
+     "partial": 1,
+     "correct": 45,
+     "unmatched": 8,
+     "ambiguous_ok": 10
+    }
+   },
+   "owner_burden": {
+    "012_Beck_01": 1,
+    "012_Beck_02": 2,
+    "012_Beck_03": 11,
+    "012_Beck_04": 4
+   },
+   "photos_under_limit": 0.75,
+   "owner_burden_by_kind": {
+    "012_Beck_01": {
+     "confirm": 0,
+     "choose": 0,
+     "register": 1,
+     "wrong": 0
+    },
+    "012_Beck_02": {
+     "confirm": 1,
+     "choose": 1,
+     "register": 0,
+     "wrong": 0
+    },
+    "012_Beck_03": {
+     "confirm": 4,
+     "choose": 0,
+     "register": 7,
+     "wrong": 0
+    },
+    "012_Beck_04": {
+     "confirm": 2,
+     "choose": 2,
+     "register": 0,
+     "wrong": 0
+    }
+   },
+   "owner_burden_totals": {
+    "confirm": 7,
+    "choose": 3,
+    "register": 8,
+    "wrong": 0
+   },
+   "photos_under_limit_without_confirm": 0.75,
+   "errors": [
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Buffalo Trace / Makrt's Mark",
+     "gold": "both:new:buffalo-trace|makers-mark",
+     "kind": "known",
+     "outcome": "partial",
+     "status": "exact_match",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Taylor Small Batch",
+     "gold": "new:eh-taylor-small-batch",
+     "kind": "known",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Abelour A`bunadh",
+     "gold": "aberlour-abunadh",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Kavalan Solist",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Dalwhinny 15yo",
+     "gold": "dalwhinnie-15",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Machrie Moor",
+     "gold": "new:arran-machrie-moor",
+     "kind": "known",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Hakushu DR",
+     "gold": "new:hakushu-distillers-reserve",
+     "kind": "known",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Hibiki DR",
+     "gold": "new:hibiki-japanese-harmony",
+     "kind": "known",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 15yo",
+     "gold": "macallan-15-double-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Ballentine 30yo",
+     "gold": "new:ballantines-30",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 18yo",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "히비키 21년",
+     "gold": "new:hibiki-21",
+     "kind": "known",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "히비키 블렌더스 쵸이스",
+     "gold": "new:hibiki-blenders-choice",
+     "kind": "known",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "발베니 18년 PX",
+     "gold": "new:balvenie-18-px",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "카발란 DR 마데라카스크",
+     "gold": "new:kavalan-distillery-reserve-madeira",
+     "kind": "known",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Bushmil 10yo",
+     "gold": "new:bushmills-10",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Balvenie 12yo",
+     "gold": "balvenie-12-doublewood",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Laphroaig Quater Cask",
+     "gold": "laphroaig-quarter-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Macallan 12yo Sheryy Cask",
+     "gold": "macallan-12-sherry-oak",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    }
+   ],
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 6,
+     "correct": 6,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 0,
+     "correct": 0,
+     "precision": null
+    }
+   },
+   "accept_error_rate": 0.0,
+   "from_register": {},
+   "m3_lines": [],
+   "e2e_top1": {
+    "known_gold_lines": 62,
+    "correct": 45,
+    "top1": 0.7258064516129032
+   },
+   "unpaired": null,
+   "per_photo": {
+    "012_Beck_01": {
+     "a": 0,
+     "bcd": 1,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_02": {
+     "a": 1,
+     "bcd": 1,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_03": {
+     "a": 4,
+     "bcd": 7,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_04": {
+     "a": 2,
+     "bcd": 2,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    }
+   }
+  },
+  {
+   "matcher": "M3a",
+   "condition": "C0",
+   "split": "dev",
+   "lines": 64,
+   "known_top1": 0.8125,
+   "false_merge_rate": 0.0,
+   "confirm_recommended": 7,
+   "by_kind": {
+    "absent": {
+     "ambiguous_ok": 1,
+     "unmatched": 27,
+     "ambiguous_bad": 2
+    },
+    "known": {
+     "correct": 26,
+     "ambiguous_ok": 6
+    },
+    "unknown": {
+     "ambiguous_ok": 1,
+     "unmatched": 1
+    }
+   },
+   "by_bar": {
+    "Beck": {
+     "ambiguous_ok": 8,
+     "correct": 26,
+     "unmatched": 28,
+     "ambiguous_bad": 2
+    }
+   },
+   "owner_burden": {
+    "012_Beck_01": 9,
+    "012_Beck_02": 7,
+    "012_Beck_03": 16,
+    "012_Beck_04": 6
+   },
+   "photos_under_limit": 0.0,
+   "owner_burden_by_kind": {
+    "012_Beck_01": {
+     "confirm": 1,
+     "choose": 0,
+     "register": 8,
+     "wrong": 0
+    },
+    "012_Beck_02": {
+     "confirm": 1,
+     "choose": 1,
+     "register": 3,
+     "wrong": 2
+    },
+    "012_Beck_03": {
+     "confirm": 2,
+     "choose": 0,
+     "register": 14,
+     "wrong": 0
+    },
+    "012_Beck_04": {
+     "confirm": 3,
+     "choose": 0,
+     "register": 3,
+     "wrong": 0
+    }
+   },
+   "owner_burden_totals": {
+    "confirm": 7,
+    "choose": 1,
+    "register": 28,
+    "wrong": 2
+   },
+   "photos_under_limit_without_confirm": 0.25,
+   "errors": [
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Buffalo Trace / Makrt's Mark",
+     "gold": "both:new:buffalo-trace|makers-mark",
+     "kind": "absent",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Arran Quarter Cask",
+     "gold": "new:arran-quarter-cask",
+     "kind": "absent",
+     "outcome": "ambiguous_bad",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Abelour A`bunadh",
+     "gold": "aberlour-abunadh",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Laphroaig 10yo Cask Strength",
+     "gold": "new:laphroaig-10-cask-strength",
+     "kind": "absent",
+     "outcome": "ambiguous_bad",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Kavalan Solist",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Dalwhinny 15yo",
+     "gold": "dalwhinnie-15",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 15yo",
+     "gold": "macallan-15-double-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 18yo",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Balvenie 12yo",
+     "gold": "balvenie-12-doublewood",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Laphroaig Quater Cask",
+     "gold": "laphroaig-quarter-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Macallan 12yo Sheryy Cask",
+     "gold": "macallan-12-sherry-oak",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    }
+   ],
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 5,
+     "correct": 5,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 2,
+     "correct": 2,
+     "precision": 1.0
+    }
+   },
+   "accept_error_rate": 0.0,
+   "from_register": {},
+   "m3_lines": [
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Buffalo Trace / Makrt's Mark",
+     "gold": "both:new:buffalo-trace|makers-mark",
+     "kind": "absent",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 1,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Buffalo Trace / Maker's Mark",
+      "age": null,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Buffalo Trace / Maker's Mark",
+     "found": {
+      "Maker's Mark": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Maker's Mark"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Four Roses Small Batch",
+     "gold": "new:four-roses-small-batch",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 3,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Four Roses",
+      "age": null,
+      "edition_tokens_en": [
+       "Small",
+       "Batch"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Four Roses Small Batch",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "James E Pepper 1776 Rye Whiskey",
+     "gold": "new:james-e-pepper-1776-rye",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 4,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "James E. Pepper",
+      "age": null,
+      "edition_tokens_en": [
+       "1776",
+       "Rye"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "James E. Pepper 1776 Rye",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "James E Pepper 1776 Bourbon Whiskey",
+     "gold": "new:james-e-pepper-1776-bourbon",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 5,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "James E. Pepper",
+      "age": null,
+      "edition_tokens_en": [
+       "1776",
+       "Bourbon"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "James E. Pepper 1776 Bourbon",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Cleveland Black Reserve Bourbon",
+     "gold": "new:cleveland-black-reserve",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 6,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Cleveland",
+      "age": null,
+      "edition_tokens_en": [
+       "Black",
+       "Reserve",
+       "Bourbon"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Cleveland Black Reserve Bourbon",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Taylor Small Batch",
+     "gold": "new:eh-taylor-small-batch",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 8,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "E.H. Taylor",
+      "age": null,
+      "edition_tokens_en": [
+       "Small",
+       "Batch"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "E.H. Taylor Small Batch",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Templeton Rye Barrel Strength",
+     "gold": "new:templeton-rye-barrel-strength",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 9,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Templeton",
+      "age": null,
+      "edition_tokens_en": [
+       "Rye",
+       "Barrel",
+       "Strength"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Templeton Rye Barrel Strength",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Maker`s Mark Cask Strength",
+     "gold": "new:makers-mark-cask-strength",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 10,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Maker's Mark",
+      "age": null,
+      "edition_tokens_en": [
+       "Cask",
+       "Strength"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Maker's Mark Cask Strength",
+     "found": {
+      "Maker's Mark": [
+       "tokens"
+      ]
+     },
+     "vetoed": [
+      {
+       "product": "Maker's Mark",
+       "via": [
+        "tokens"
+       ],
+       "rules": [
+        "edition_mismatch"
+       ]
+      }
+     ],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Old Pepper Rye Single Barrel",
+     "gold": "new:old-pepper-rye-single-barrel",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 11,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Old Pepper",
+      "age": null,
+      "edition_tokens_en": [
+       "Rye",
+       "Single",
+       "Barrel"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Old Pepper Rye Single Barrel",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Arran Quarter Cask",
+     "gold": "new:arran-quarter-cask",
+     "kind": "absent",
+     "outcome": "ambiguous_bad",
+     "burden": "wrong",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": "alias",
+     "translation": {
+      "line": 1,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Arran",
+      "age": null,
+      "edition_tokens_en": [
+       "Quarter",
+       "Cask"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Arran Quarter Cask",
+     "found": {
+      "Arran Bodega Sherry Cask": [
+       "relookup"
+      ]
+     },
+     "vetoed": [
+      {
+       "product": "Arran Bodega Sherry Cask",
+       "via": [
+        "relookup"
+       ],
+       "rules": [
+        "edition_mismatch"
+       ]
+      }
+     ],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Abelour A`bunadh",
+     "gold": "aberlour-abunadh",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 5,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Aberlour",
+      "age": null,
+      "edition_tokens_en": [
+       "A'bunadh"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Aberlour A'bunadh",
+     "found": {
+      "Aberlour A'bunadh": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Aberlour A'bunadh"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Lagavulin 12yo 2018",
+     "gold": "new:lagavulin-12-2018",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 6,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Lagavulin",
+      "age": 12,
+      "edition_tokens_en": [
+       "2018"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Lagavulin 12 2018",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Laphroaig 10yo Cask Strength",
+     "gold": "new:laphroaig-10-cask-strength",
+     "kind": "absent",
+     "outcome": "ambiguous_bad",
+     "burden": "wrong",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": "alias",
+     "translation": {
+      "line": 7,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Laphroaig",
+      "age": 10,
+      "edition_tokens_en": [
+       "Cask",
+       "Strength"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Laphroaig 10 Cask Strength",
+     "found": {
+      "Laphroaig 10": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [
+      {
+       "product": "Laphroaig 10",
+       "via": [
+        "relookup",
+        "tokens"
+       ],
+       "rules": [
+        "edition_mismatch"
+       ]
+      }
+     ],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Kavalan Solist",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "ambiguous_ok",
+     "burden": "choose",
+     "base_status": "ambiguous",
+     "base_n": 2,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 8,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Kavalan",
+      "age": null,
+      "edition_tokens_en": [
+       "Solist"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Kavalan Solist",
+     "found": {
+      "Kavalan Solist Oloroso Sherry": [
+       "relookup"
+      ],
+      "Kavalan Solist Vinho Barrique": [
+       "relookup"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Kavalan Solist Oloroso Sherry",
+      "Kavalan Solist Vinho Barrique"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Octomore 13.1",
+     "gold": "new:octomore-13-1",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 9,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Octomore",
+      "age": null,
+      "edition_tokens_en": [
+       "13.1"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Octomore 13.1",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Macallan Classic Cut 2020",
+     "gold": "new:macallan-classic-cut-2020",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 10,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Macallan",
+      "age": null,
+      "edition_tokens_en": [
+       "Classic",
+       "Cut",
+       "2020"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Macallan Classic Cut 2020",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Dalwhinny 15yo",
+     "gold": "dalwhinnie-15",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 4,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Dalwhinnie",
+      "age": 15,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Dalwhinnie 15",
+     "found": {
+      "Dalwhinnie 15": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Dalwhinnie 15"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Machrie Moor",
+     "gold": "new:arran-machrie-moor",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 7,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Arran",
+      "age": null,
+      "edition_tokens_en": [
+       "Machrie",
+       "Moor"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Arran Machrie Moor",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Hakushu DR",
+     "gold": "new:hakushu-distillers-reserve",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 8,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Hakushu",
+      "age": null,
+      "edition_tokens_en": [
+       "DR"
+      ],
+      "expansions": [
+       {
+        "token": "DR",
+        "expansion": "Distiller's Reserve"
+       }
+      ],
+      "kind": "whisky"
+     },
+     "english_name": "Hakushu DR",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Hibiki DR",
+     "gold": "new:hibiki-japanese-harmony",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 9,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Hibiki",
+      "age": null,
+      "edition_tokens_en": [
+       "DR"
+      ],
+      "expansions": [
+       {
+        "token": "DR",
+        "expansion": "Distiller's Reserve"
+       }
+      ],
+      "kind": "whisky"
+     },
+     "english_name": "Hibiki DR",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Bowmore 18yo",
+     "gold": "new:bowmore-18",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 12,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Bowmore",
+      "age": 18,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Bowmore 18",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 15yo",
+     "gold": "macallan-15-double-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 13,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "The Macallan",
+      "age": 15,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "The Macallan 15",
+     "found": {
+      "The Macallan 15 Double Cask": [
+       "relookup"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "The Macallan 15 Double Cask"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Yamazaki 12yo",
+     "gold": "new:yamazaki-12",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 15,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Yamazaki",
+      "age": 12,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Yamazaki 12",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Ballentine 30yo",
+     "gold": "new:ballantines-30",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 16,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Ballantine's",
+      "age": 30,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Ballantine's 30",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 18yo",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 18,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "The Macallan",
+      "age": 18,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "The Macallan 18",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Glenfarclas 25yo",
+     "gold": "new:glenfarclas-25",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 19,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Glenfarclas",
+      "age": 25,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Glenfarclas 25",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Caol ila 25yo",
+     "gold": "new:caol-ila-25",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 20,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Caol Ila",
+      "age": 25,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Caol Ila 25",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "라프로익 25년",
+     "gold": "new:laphroaig-25",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 21,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Laphroaig",
+      "age": 25,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Laphroaig 25",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "히비키 21년",
+     "gold": "new:hibiki-21",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 22,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Hibiki",
+      "age": 21,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Hibiki 21",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "히비키 블렌더스 쵸이스",
+     "gold": "new:hibiki-blenders-choice",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 23,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Hibiki",
+      "age": null,
+      "edition_tokens_en": [
+       "Blender's",
+       "Choice"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Hibiki Blender's Choice",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "발베니 18년 PX",
+     "gold": "new:balvenie-18-px",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 24,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "The Balvenie",
+      "age": 18,
+      "edition_tokens_en": [
+       "PX"
+      ],
+      "expansions": [
+       {
+        "token": "PX",
+        "expansion": "Pedro Ximenez"
+       }
+      ],
+      "kind": "whisky"
+     },
+     "english_name": "The Balvenie 18 PX",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "카발란 DR 마데라카스크",
+     "gold": "new:kavalan-distillery-reserve-madeira",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 25,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Kavalan",
+      "age": null,
+      "edition_tokens_en": [
+       "DR",
+       "Madeira",
+       "Cask"
+      ],
+      "expansions": [
+       {
+        "token": "DR",
+        "expansion": "Distiller's Reserve"
+       }
+      ],
+      "kind": "whisky"
+     },
+     "english_name": "Kavalan DR Madeira Cask",
+     "found": {
+      "Kavalan Solist Oloroso Sherry": [
+       "relookup"
+      ],
+      "Kavalan Triple Sherry Cask": [
+       "relookup"
+      ]
+     },
+     "vetoed": [
+      {
+       "product": "Kavalan Solist Oloroso Sherry",
+       "via": [
+        "relookup"
+       ],
+       "rules": [
+        "edition_mismatch"
+       ]
+      },
+      {
+       "product": "Kavalan Triple Sherry Cask",
+       "via": [
+        "relookup"
+       ],
+       "rules": [
+        "edition_mismatch"
+       ]
+      }
+     ],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Bushmil 10yo",
+     "gold": "new:bushmills-10",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 2,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Bushmills",
+      "age": 10,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Bushmills 10",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Caol Ila 12yo",
+     "gold": "new:caol-ila-12",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 9,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Caol Ila",
+      "age": 12,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Caol Ila 12",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Balvenie 12yo",
+     "gold": "balvenie-12-doublewood",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 11,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Balvenie",
+      "age": 12,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Balvenie 12",
+     "found": {
+      "The Balvenie 12 DoubleWood": [
+       "relookup"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "The Balvenie 12 DoubleWood"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Kilchoman Sanaig",
+     "gold": "new:kilchoman-sanaig",
+     "kind": "absent",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 13,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Kilchoman",
+      "age": null,
+      "edition_tokens_en": [
+       "Sanaig"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Kilchoman Sanaig",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Laphroaig Quater Cask",
+     "gold": "laphroaig-quarter-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 14,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Laphroaig",
+      "age": null,
+      "edition_tokens_en": [
+       "Quarter",
+       "Cask"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Laphroaig Quarter Cask",
+     "found": {
+      "Laphroaig Quarter Cask": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Laphroaig Quarter Cask"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Macallan 12yo Sheryy Cask",
+     "gold": "macallan-12-sherry-oak",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 2,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 16,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Macallan",
+      "age": 12,
+      "edition_tokens_en": [
+       "Sherry",
+       "Cask"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Macallan 12 Sherry Cask",
+     "found": {
+      "The Macallan 12 Double Cask": [
+       "relookup"
+      ],
+      "The Macallan 12 Sherry Oak": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [
+      {
+       "product": "The Macallan 12 Double Cask",
+       "via": [
+        "relookup"
+       ],
+       "rules": [
+        "edition_mismatch"
+       ]
+      }
+     ],
+     "stage": "M3a",
+     "llm_candidates": [
+      "The Macallan 12 Sherry Oak"
+     ]
+    }
+   ],
+   "e2e_top1": {
+    "known_gold_lines": 32,
+    "correct": 26,
+    "top1": 0.8125
+   },
+   "unpaired": {
+    "counts": {},
+    "unconfirmed_per_photo": {},
+    "lines": []
+   },
+   "per_photo": {
+    "012_Beck_01": {
+     "a": 1,
+     "bcd": 8,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_02": {
+     "a": 1,
+     "bcd": 6,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_03": {
+     "a": 2,
+     "bcd": 14,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_04": {
+     "a": 3,
+     "bcd": 3,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    }
+   }
+  },
+  {
+   "matcher": "M3a",
+   "condition": "C1",
+   "split": "dev",
+   "lines": 64,
+   "known_top1": 0.7258064516129032,
+   "false_merge_rate": 0.0,
+   "confirm_recommended": 14,
+   "by_kind": {
+    "known": {
+     "partial": 1,
+     "correct": 45,
+     "ambiguous_ok": 15,
+     "unmatched": 1
+    },
+    "unknown": {
+     "ambiguous_ok": 1,
+     "unmatched": 1
+    }
+   },
+   "by_bar": {
+    "Beck": {
+     "partial": 1,
+     "correct": 45,
+     "ambiguous_ok": 16,
+     "unmatched": 2
+    }
+   },
+   "owner_burden": {
+    "012_Beck_01": 1,
+    "012_Beck_02": 2,
+    "012_Beck_03": 11,
+    "012_Beck_04": 4
+   },
+   "photos_under_limit": 0.75,
+   "owner_burden_by_kind": {
+    "012_Beck_01": {
+     "confirm": 1,
+     "choose": 0,
+     "register": 0,
+     "wrong": 0
+    },
+    "012_Beck_02": {
+     "confirm": 1,
+     "choose": 1,
+     "register": 0,
+     "wrong": 0
+    },
+    "012_Beck_03": {
+     "confirm": 9,
+     "choose": 0,
+     "register": 2,
+     "wrong": 0
+    },
+    "012_Beck_04": {
+     "confirm": 4,
+     "choose": 0,
+     "register": 0,
+     "wrong": 0
+    }
+   },
+   "owner_burden_totals": {
+    "confirm": 15,
+    "choose": 1,
+    "register": 2,
+    "wrong": 0
+   },
+   "photos_under_limit_without_confirm": 1.0,
+   "errors": [
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Buffalo Trace / Makrt's Mark",
+     "gold": "both:new:buffalo-trace|makers-mark",
+     "kind": "known",
+     "outcome": "partial",
+     "status": "exact_match",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Taylor Small Batch",
+     "gold": "new:eh-taylor-small-batch",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Abelour A`bunadh",
+     "gold": "aberlour-abunadh",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Kavalan Solist",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Dalwhinny 15yo",
+     "gold": "dalwhinnie-15",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Machrie Moor",
+     "gold": "new:arran-machrie-moor",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Hakushu DR",
+     "gold": "new:hakushu-distillers-reserve",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Hibiki DR",
+     "gold": "new:hibiki-japanese-harmony",
+     "kind": "known",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 15yo",
+     "gold": "macallan-15-double-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Ballentine 30yo",
+     "gold": "new:ballantines-30",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 18yo",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "unmatched",
+     "status": "unmatched",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "히비키 21년",
+     "gold": "new:hibiki-21",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "히비키 블렌더스 쵸이스",
+     "gold": "new:hibiki-blenders-choice",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "발베니 18년 PX",
+     "gold": "new:balvenie-18-px",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "카발란 DR 마데라카스크",
+     "gold": "new:kavalan-distillery-reserve-madeira",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": false
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Bushmil 10yo",
+     "gold": "new:bushmills-10",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Balvenie 12yo",
+     "gold": "balvenie-12-doublewood",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Laphroaig Quater Cask",
+     "gold": "laphroaig-quarter-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Macallan 12yo Sheryy Cask",
+     "gold": "macallan-12-sherry-oak",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "status": "ambiguous",
+     "confirm_recommended": true
+    }
+   ],
+   "confirm_recommended_by_source": {
+    "rule": {
+     "n": 6,
+     "correct": 6,
+     "precision": 1.0
+    },
+    "llm": {
+     "n": 8,
+     "correct": 8,
+     "precision": 1.0
+    }
+   },
+   "accept_error_rate": 0.0,
+   "from_register": {
+    "confirm": 6,
+    "confirm_gold_in_candidates": 6
+   },
+   "m3_lines": [
+    {
+     "photo_id": "012_Beck_01",
+     "name": "Taylor Small Batch",
+     "gold": "new:eh-taylor-small-batch",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 8,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "E.H. Taylor",
+      "age": null,
+      "edition_tokens_en": [
+       "Small",
+       "Batch"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "E.H. Taylor Small Batch",
+     "found": {
+      "Colonel E.H. Taylor Small Batch": [
+       "relookup"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Colonel E.H. Taylor Small Batch"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Abelour A`bunadh",
+     "gold": "aberlour-abunadh",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 5,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Aberlour",
+      "age": null,
+      "edition_tokens_en": [
+       "A'bunadh"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Aberlour A'bunadh",
+     "found": {
+      "Aberlour A'bunadh": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Aberlour A'bunadh"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_02",
+     "name": "Kavalan Solist",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "ambiguous_ok",
+     "burden": "choose",
+     "base_status": "ambiguous",
+     "base_n": 2,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 8,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Kavalan",
+      "age": null,
+      "edition_tokens_en": [
+       "Solist"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Kavalan Solist",
+     "found": {
+      "Kavalan Solist Oloroso Sherry": [
+       "relookup"
+      ],
+      "Kavalan Solist Vinho Barrique": [
+       "relookup"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Kavalan Solist Oloroso Sherry",
+      "Kavalan Solist Vinho Barrique"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Dalwhinny 15yo",
+     "gold": "dalwhinnie-15",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 4,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Dalwhinnie",
+      "age": 15,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Dalwhinnie 15",
+     "found": {
+      "Dalwhinnie 15": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Dalwhinnie 15"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Machrie Moor",
+     "gold": "new:arran-machrie-moor",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 7,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Arran",
+      "age": null,
+      "edition_tokens_en": [
+       "Machrie",
+       "Moor"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Arran Machrie Moor",
+     "found": {
+      "Arran Machrie Moor": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Arran Machrie Moor"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Hakushu DR",
+     "gold": "new:hakushu-distillers-reserve",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 8,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Hakushu",
+      "age": null,
+      "edition_tokens_en": [
+       "DR"
+      ],
+      "expansions": [
+       {
+        "token": "DR",
+        "expansion": "Distiller's Reserve"
+       }
+      ],
+      "kind": "whisky"
+     },
+     "english_name": "Hakushu DR",
+     "found": {
+      "Hakushu Distiller's Reserve": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Hakushu Distiller's Reserve"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Hibiki DR",
+     "gold": "new:hibiki-japanese-harmony",
+     "kind": "known",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 9,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Hibiki",
+      "age": null,
+      "edition_tokens_en": [
+       "DR"
+      ],
+      "expansions": [
+       {
+        "token": "DR",
+        "expansion": "Distiller's Reserve"
+       }
+      ],
+      "kind": "whisky"
+     },
+     "english_name": "Hibiki DR",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 15yo",
+     "gold": "macallan-15-double-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 13,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "The Macallan",
+      "age": 15,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "The Macallan 15",
+     "found": {
+      "The Macallan 15 Double Cask": [
+       "relookup"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "The Macallan 15 Double Cask"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Ballentine 30yo",
+     "gold": "new:ballantines-30",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 16,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Ballantine's",
+      "age": 30,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Ballantine's 30",
+     "found": {
+      "Ballantine's 30": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Ballantine's 30"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "Macallan 18yo",
+     "gold": "unknown",
+     "kind": "unknown",
+     "outcome": "unmatched",
+     "burden": "register",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": false,
+     "rank1_method": null,
+     "translation": {
+      "line": 18,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "The Macallan",
+      "age": 18,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "The Macallan 18",
+     "found": {},
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": []
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "히비키 21년",
+     "gold": "new:hibiki-21",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 22,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Hibiki",
+      "age": 21,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Hibiki 21",
+     "found": {
+      "Hibiki 21": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Hibiki 21"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "히비키 블렌더스 쵸이스",
+     "gold": "new:hibiki-blenders-choice",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 23,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Hibiki",
+      "age": null,
+      "edition_tokens_en": [
+       "Blender's",
+       "Choice"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Hibiki Blender's Choice",
+     "found": {
+      "Hibiki Blender's Choice": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Hibiki Blender's Choice"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "발베니 18년 PX",
+     "gold": "new:balvenie-18-px",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 24,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "The Balvenie",
+      "age": 18,
+      "edition_tokens_en": [
+       "PX"
+      ],
+      "expansions": [
+       {
+        "token": "PX",
+        "expansion": "Pedro Ximenez"
+       }
+      ],
+      "kind": "whisky"
+     },
+     "english_name": "The Balvenie 18 PX",
+     "found": {
+      "The Balvenie 18 Pedro Ximenez Cask": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "The Balvenie 18 Pedro Ximenez Cask"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_03",
+     "name": "카발란 DR 마데라카스크",
+     "gold": "new:kavalan-distillery-reserve-madeira",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "unmatched",
+     "base_n": 0,
+     "confirm_recommended": false,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 25,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Kavalan",
+      "age": null,
+      "edition_tokens_en": [
+       "DR",
+       "Madeira",
+       "Cask"
+      ],
+      "expansions": [
+       {
+        "token": "DR",
+        "expansion": "Distiller's Reserve"
+       }
+      ],
+      "kind": "whisky"
+     },
+     "english_name": "Kavalan DR Madeira Cask",
+     "found": {
+      "Kavalan Distillery Reserve Madeira Cask": [
+       "relookup"
+      ],
+      "Kavalan Solist Oloroso Sherry": [
+       "relookup"
+      ],
+      "Kavalan Triple Sherry Cask": [
+       "relookup"
+      ]
+     },
+     "vetoed": [
+      {
+       "product": "Kavalan Solist Oloroso Sherry",
+       "via": [
+        "relookup"
+       ],
+       "rules": [
+        "edition_mismatch"
+       ]
+      },
+      {
+       "product": "Kavalan Triple Sherry Cask",
+       "via": [
+        "relookup"
+       ],
+       "rules": [
+        "edition_mismatch"
+       ]
+      }
+     ],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Kavalan Distillery Reserve Madeira Cask"
+     ],
+     "short_unverified": {
+      "Kavalan Distillery Reserve Madeira Cask": [
+       "dr"
+      ]
+     }
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Bushmil 10yo",
+     "gold": "new:bushmills-10",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 2,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Bushmills",
+      "age": 10,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Bushmills 10",
+     "found": {
+      "Bushmills 10": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Bushmills 10"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Balvenie 12yo",
+     "gold": "balvenie-12-doublewood",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 1,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 11,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Balvenie",
+      "age": 12,
+      "edition_tokens_en": [],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Balvenie 12",
+     "found": {
+      "The Balvenie 12 DoubleWood": [
+       "relookup"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "The Balvenie 12 DoubleWood"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Laphroaig Quater Cask",
+     "gold": "laphroaig-quarter-cask",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 2,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 14,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Laphroaig",
+      "age": null,
+      "edition_tokens_en": [
+       "Quarter",
+       "Cask"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Laphroaig Quarter Cask",
+     "found": {
+      "Laphroaig Quarter Cask": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [],
+     "stage": "M3a",
+     "llm_candidates": [
+      "Laphroaig Quarter Cask"
+     ]
+    },
+    {
+     "photo_id": "012_Beck_04",
+     "name": "Macallan 12yo Sheryy Cask",
+     "gold": "macallan-12-sherry-oak",
+     "kind": "known",
+     "outcome": "ambiguous_ok",
+     "burden": "confirm",
+     "base_status": "ambiguous",
+     "base_n": 2,
+     "confirm_recommended": true,
+     "rank1_gold": true,
+     "rank1_method": "llm",
+     "translation": {
+      "line": 16,
+      "bottler_en": null,
+      "distillery_en": null,
+      "brand_en": "Macallan",
+      "age": 12,
+      "edition_tokens_en": [
+       "Sherry",
+       "Cask"
+      ],
+      "expansions": [],
+      "kind": "whisky"
+     },
+     "english_name": "Macallan 12 Sherry Cask",
+     "found": {
+      "The Macallan 12 Double Cask": [
+       "relookup"
+      ],
+      "The Macallan 12 Sherry Oak": [
+       "relookup",
+       "tokens"
+      ]
+     },
+     "vetoed": [
+      {
+       "product": "The Macallan 12 Double Cask",
+       "via": [
+        "relookup"
+       ],
+       "rules": [
+        "edition_mismatch"
+       ]
+      }
+     ],
+     "stage": "M3a",
+     "llm_candidates": [
+      "The Macallan 12 Sherry Oak"
+     ]
+    }
+   ],
+   "e2e_top1": {
+    "known_gold_lines": 62,
+    "correct": 45,
+    "top1": 0.7258064516129032
+   },
+   "unpaired": {
+    "counts": {},
+    "unconfirmed_per_photo": {},
+    "lines": []
+   },
+   "per_photo": {
+    "012_Beck_01": {
+     "a": 1,
+     "bcd": 0,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_02": {
+     "a": 1,
+     "bcd": 1,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_03": {
+     "a": 9,
+     "bcd": 2,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    },
+    "012_Beck_04": {
+     "a": 4,
+     "bcd": 0,
+     "unpaired_unconfirmed": 0,
+     "missed": 0
+    }
+   }
+  }
+ ],
+ "counts": {
+  "extracted_lines": 64,
+  "paired_lines": 64,
+  "unpaired_lines": 0,
+  "gold_lines": 64,
+  "missed_gold_lines": 0,
+  "gold_conflicts": 0
+ },
+ "llm": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "api_calls_this_run": 4,
+  "by_kind": {
+   "m3a": {
+    "requests": 4,
+    "api_calls": 4,
+    "cache_hits": 0,
+    "parse_errors": 0,
+    "input_tokens": 6794,
+    "output_tokens": 3543,
+    "thought_tokens": 436,
+    "mean_latency_ms": 3638
+   }
+  }
+ },
+ "m3_photos": {
+  "012_Beck_01": {
+   "called": true,
+   "targets": 9,
+   "parse_error": false,
+   "missing_lines": [],
+   "cache_key": "591ee3cb89d90a7b46a7c85549a28ad6035de919c882686df443eab8444a2629"
+  },
+  "012_Beck_02": {
+   "called": true,
+   "targets": 7,
+   "parse_error": false,
+   "missing_lines": [],
+   "cache_key": "e1dc5f57dc9cca9d215545285129641c73a4640d0fc054342145aacbf975fc89"
+  },
+  "012_Beck_03": {
+   "called": true,
+   "targets": 16,
+   "parse_error": false,
+   "missing_lines": [],
+   "cache_key": "af9b98e188f8a3e1b0cd8d68faf9acf60792b26749528fe0ac8f85b880712eee"
+  },
+  "012_Beck_04": {
+   "called": true,
+   "targets": 6,
+   "parse_error": false,
+   "missing_lines": [],
+   "cache_key": "7db3fc8e1a3be628c3081dccf8d593334990d6960c5f1a1d29dec5c1ba8785d3"
+  }
+ }
+}

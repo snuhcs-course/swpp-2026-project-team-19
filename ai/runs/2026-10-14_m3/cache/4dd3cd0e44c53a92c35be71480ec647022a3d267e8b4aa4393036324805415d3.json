@@ -1,0 +1,215 @@
+{
+ "key": "4dd3cd0e44c53a92c35be71480ec647022a3d267e8b4aa4393036324805415d3",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "글렌그란트 15Y",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "글렌드로낙 12Y",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "글렌드로낙 15Y",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "글렌리벳 12Y",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "글렌모렌지 오리지널",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "글렌모렌지 넥타도르",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "글렌모렌지 라산타",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "글렌모렌지 퀀타루반",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "글렌모렌지 시그넷",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "글렌모렌지 18Y",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "글렌알라키 12Y",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "글렌알라키 15Y",
+    "target": false
+   },
+   {
+    "line": 13,
+    "name": "글렌파클라스 105",
+    "target": false
+   },
+   {
+    "line": 14,
+    "name": "글렌피딕 12Y",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "글렌피딕 15Y",
+    "target": false
+   },
+   {
+    "line": 16,
+    "name": "달모어 12Y",
+    "target": false
+   },
+   {
+    "line": 17,
+    "name": "달모어 12Y 쉐리",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "달모어 15Y",
+    "target": false
+   },
+   {
+    "line": 19,
+    "name": "달모어 포트우드 리저브",
+    "target": false
+   },
+   {
+    "line": 20,
+    "name": "달모어 시가몰트 리저브",
+    "target": false
+   },
+   {
+    "line": 21,
+    "name": "로얄브라클라 12Y",
+    "target": false
+   },
+   {
+    "line": 22,
+    "name": "로얄브라클라 18Y",
+    "target": false
+   },
+   {
+    "line": 23,
+    "name": "맥캘란 더블캐스크 12Y",
+    "target": false
+   },
+   {
+    "line": 24,
+    "name": "맥캘란 더블캐스크 15Y",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "부나하벤 12Y",
+    "target": false
+   },
+   {
+    "line": 26,
+    "name": "아란 10Y",
+    "target": false
+   },
+   {
+    "line": 27,
+    "name": "아란 보데가 셰리 캐스크",
+    "target": false
+   },
+   {
+    "line": 28,
+    "name": "아벨라워 아부나흐",
+    "target": false
+   },
+   {
+    "line": 29,
+    "name": "오반 14Y",
+    "target": false
+   },
+   {
+    "line": 30,
+    "name": "카발란 솔리스트 셰리 오크",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "카발란 솔리스트 비노 바리끄",
+    "target": false
+   },
+   {
+    "line": 32,
+    "name": "카발란 트리플 셰리",
+    "target": false
+   },
+   {
+    "line": 33,
+    "name": "클라이넬리쉬 14Y",
+    "target": false
+   },
+   {
+    "line": 34,
+    "name": "발베니 12Y",
+    "target": false
+   },
+   {
+    "line": 35,
+    "name": "발베니 14Y",
+    "target": true
+   },
+   {
+    "line": 36,
+    "name": "츠누키 에디션 2025",
+    "target": false
+   },
+   {
+    "line": 37,
+    "name": "요이치 싱글몰트",
+    "target": false
+   },
+   {
+    "line": 38,
+    "name": "에드라두어 10Y",
+    "target": false
+   },
+   {
+    "line": 39,
+    "name": "노마드",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Quinta\",\n        \"Ruban\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Dalmore\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kavalan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Solist\",\n        \"Sherry\",\n        \"Oak\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 35,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Balvenie\",\n      \"age\": 14,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 39,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Nomad\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "2e7d91f4573a017a2f3f515dd8aacdaae5666005a8c7fdc727442b8e5b6c8e2a",
+  "started_at": "2026-10-14T07:51:16.828681+00:00",
+  "latency_ms": 2833,
+  "attempts": 1,
+  "input_tokens": 2179,
+  "output_tokens": 465,
+  "thought_tokens": 118
+ }
+}

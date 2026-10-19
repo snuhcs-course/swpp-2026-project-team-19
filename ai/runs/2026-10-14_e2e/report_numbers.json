@@ -1,0 +1,2423 @@
+{
+ "extraction": {
+  "E1": {
+   "runs": {
+    "1": {
+     "item_accuracy": 0.8285256410256411,
+     "price_accuracy": 0.9828897338403042,
+     "f1_strict": 0.7930434782608695,
+     "fp": 49,
+     "fn": 49,
+     "beck_04": 0.8125,
+     "clynelish": {
+      "out": "크라이넬리시 14년",
+      "price": 21000,
+      "correct": true,
+      "near": [
+       "크라이넬리시 14년"
+      ]
+     },
+     "gemini_latency_s": 15.297785714285714,
+     "ocr_latency_s": 0.0,
+     "tokens": {
+      "input_tokens": 2812,
+      "output_tokens": 2128.6428571428573,
+      "thought_tokens": 3090.214285714286
+     }
+    },
+    "2": {
+     "item_accuracy": 0.8522727272727273,
+     "price_accuracy": 0.9831460674157303,
+     "f1_strict": 0.8556521739130435,
+     "fp": 41,
+     "fn": 41,
+     "beck_04": 0.8125,
+     "clynelish": {
+      "out": "크라이넬리시 14년",
+      "price": 21000,
+      "correct": true,
+      "near": [
+       "크라이넬리시 14년"
+      ]
+     },
+     "gemini_latency_s": 13.90642857142857,
+     "ocr_latency_s": 0.0,
+     "tokens": {
+      "input_tokens": 2812,
+      "output_tokens": 2113.6428571428573,
+      "thought_tokens": 2847.5
+     }
+    },
+    "3": {
+     "item_accuracy": 0.8444084278768234,
+     "price_accuracy": 0.9774859287054409,
+     "f1_strict": 0.8399999999999999,
+     "fp": 42,
+     "fn": 42,
+     "beck_04": 0.75,
+     "clynelish": {
+      "out": null,
+      "price": null,
+      "correct": false,
+      "near": [
+       "크라이겔라히 14년"
+      ]
+     },
+     "gemini_latency_s": 14.8585,
+     "ocr_latency_s": 0.0,
+     "tokens": {
+      "input_tokens": 2812,
+      "output_tokens": 2065.5,
+      "thought_tokens": 3230.4285714285716
+     }
+    }
+   },
+   "summary": {
+    "item_accuracy": {
+     "mean": 0.8417355987250639,
+     "min": 0.8285256410256411,
+     "max": 0.8522727272727273,
+     "n": 3
+    },
+    "f1_strict": {
+     "mean": 0.8295652173913043,
+     "min": 0.7930434782608695,
+     "max": 0.8556521739130435,
+     "n": 3
+    },
+    "f1_lenient": {
+     "mean": 0.9234782608695652,
+     "min": 0.9147826086956522,
+     "max": 0.928695652173913,
+     "n": 3
+    },
+    "price_accuracy": {
+     "mean": 0.9811739099871585,
+     "min": 0.9774859287054409,
+     "max": 0.9831460674157303,
+     "n": 3
+    },
+    "unit_confusion": {
+     "mean": 0.6666666666666666,
+     "min": 0,
+     "max": 1,
+     "n": 3
+    },
+    "fp": {
+     "mean": 44,
+     "min": 41,
+     "max": 49,
+     "n": 3
+    },
+    "fn": {
+     "mean": 44,
+     "min": 41,
+     "max": 49,
+     "n": 3
+    }
+   },
+   "per_photo": {
+    "011_미라보_01": {
+     "mean": 0.17325800376647835,
+     "min": 0.16666666666666666,
+     "max": 0.1864406779661017
+    },
+    "011_미라보_02": {
+     "mean": 0.7699562916954221,
+     "min": 0.3968253968253968,
+     "max": 1.0
+    },
+    "011_미라보_03": {
+     "mean": 0.9890710382513661,
+     "min": 0.9672131147540983,
+     "max": 1.0
+    },
+    "011_미라보_04": {
+     "mean": 0.9777777777777777,
+     "min": 0.9333333333333333,
+     "max": 1.0
+    },
+    "011_미라보_05": {
+     "mean": 0.9636363636363636,
+     "min": 0.8909090909090909,
+     "max": 1.0
+    },
+    "011_미라보_06": {
+     "mean": 0.8857142857142858,
+     "min": 0.8,
+     "max": 0.9285714285714286
+    },
+    "011_미라보_07": {
+     "mean": 0.9375,
+     "min": 0.9375,
+     "max": 0.9375
+    },
+    "011_미라보_08": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "011_미라보_09": {
+     "mean": 0.8490566037735849,
+     "min": 0.5471698113207547,
+     "max": 1.0
+    },
+    "012_Beck_01": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "012_Beck_02": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "012_Beck_03": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "012_Beck_04": {
+     "mean": 0.7916666666666666,
+     "min": 0.75,
+     "max": 0.8125
+    },
+    "013_포레스트_01": {
+     "mean": 0.9459459459459459,
+     "min": 0.8378378378378378,
+     "max": 1.0
+    }
+   },
+   "per_bar": {
+    "Beck": {
+     "mean": 0.8969072164948454,
+     "min": 0.8762886597938144,
+     "max": 0.9072164948453608
+    },
+    "미라보": {
+     "mean": 0.814413071777004,
+     "min": 0.7864923747276689,
+     "max": 0.8385650224215246
+    },
+    "포레스트": {
+     "mean": 0.9459459459459459,
+     "min": 0.8378378378378378,
+     "max": 1.0
+    }
+   }
+  },
+  "CLOVA+LLM": {
+   "runs": {
+    "1": {
+     "item_accuracy": 0.8211920529801324,
+     "price_accuracy": 0.9900199600798403,
+     "f1_strict": 0.8796380090497737,
+     "fp": 29,
+     "fn": 74,
+     "beck_04": 1.0,
+     "clynelish": {
+      "out": "크라이넬리시 14년",
+      "price": 21000,
+      "correct": true,
+      "near": [
+       "크라이넬리시 14년"
+      ]
+     },
+     "gemini_latency_s": 14.58,
+     "ocr_latency_s": 3.4147857142857143,
+     "tokens": {
+      "input_tokens": 5202.928571428572,
+      "output_tokens": 2223.6428571428573,
+      "thought_tokens": 4504.214285714285
+     }
+    },
+    "2": {
+     "item_accuracy": 0.95578231292517,
+     "price_accuracy": 1.0,
+     "f1_strict": 0.951304347826087,
+     "fp": 13,
+     "fn": 13,
+     "beck_04": 1.0,
+     "clynelish": {
+      "out": "크라이넬리시 14년",
+      "price": 21000,
+      "correct": true,
+      "near": [
+       "크라이넬리시 14년"
+      ]
+     },
+     "gemini_latency_s": 20.30385714285714,
+     "ocr_latency_s": 3.4147857142857143,
+     "tokens": {
+      "input_tokens": 5202.928571428572,
+      "output_tokens": 2412.8571428571427,
+      "thought_tokens": 4363.142857142857
+     }
+    },
+    "3": {
+     "item_accuracy": 0.8713826366559485,
+     "price_accuracy": 1.0,
+     "f1_strict": 0.9054982817869416,
+     "fp": 47,
+     "fn": 33,
+     "beck_04": 1.0,
+     "clynelish": {
+      "out": "크라이넬리시 14년",
+      "price": 21000,
+      "correct": true,
+      "near": [
+       "크라이넬리시 14년"
+      ]
+     },
+     "gemini_latency_s": 17.605214285714286,
+     "ocr_latency_s": 3.4147857142857143,
+     "tokens": {
+      "input_tokens": 5202.928571428572,
+      "output_tokens": 2432.5714285714284,
+      "thought_tokens": 5028.285714285715
+     }
+    }
+   },
+   "summary": {
+    "item_accuracy": {
+     "mean": 0.882785667520417,
+     "min": 0.8211920529801324,
+     "max": 0.95578231292517,
+     "n": 3
+    },
+    "f1_strict": {
+     "mean": 0.9121468795542674,
+     "min": 0.8796380090497737,
+     "max": 0.951304347826087,
+     "n": 3
+    },
+    "f1_lenient": {
+     "mean": 0.9384833707759328,
+     "min": 0.9067873303167421,
+     "max": 0.9773913043478261,
+     "n": 3
+    },
+    "price_accuracy": {
+     "mean": 0.9966733200266135,
+     "min": 0.9900199600798403,
+     "max": 1.0,
+     "n": 3
+    },
+    "unit_confusion": {
+     "mean": 0,
+     "min": 0,
+     "max": 0,
+     "n": 3
+    },
+    "fp": {
+     "mean": 29.666666666666668,
+     "min": 13,
+     "max": 47,
+     "n": 3
+    },
+    "fn": {
+     "mean": 40,
+     "min": 13,
+     "max": 74,
+     "n": 3
+    }
+   },
+   "per_photo": {
+    "011_미라보_01": {
+     "mean": 0.5416666666666666,
+     "min": 0.16666666666666666,
+     "max": 1.0
+    },
+    "011_미라보_02": {
+     "mean": 0.8974358974358975,
+     "min": 0.6923076923076923,
+     "max": 1.0
+    },
+    "011_미라보_03": {
+     "mean": 0.7071428571428572,
+     "min": 0.21666666666666667,
+     "max": 1.0
+    },
+    "011_미라보_04": {
+     "mean": 0.9333333333333333,
+     "min": 0.8666666666666667,
+     "max": 1.0
+    },
+    "011_미라보_05": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "011_미라보_06": {
+     "mean": 0.9597701149425287,
+     "min": 0.8793103448275862,
+     "max": 1.0
+    },
+    "011_미라보_07": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "011_미라보_08": {
+     "mean": 0.9285714285714286,
+     "min": 0.7857142857142857,
+     "max": 1.0
+    },
+    "011_미라보_09": {
+     "mean": 0.8214285714285714,
+     "min": 0.4642857142857143,
+     "max": 1.0
+    },
+    "012_Beck_01": {
+     "mean": 0.8472222222222222,
+     "min": 0.5416666666666666,
+     "max": 1.0
+    },
+    "012_Beck_02": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "012_Beck_03": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "012_Beck_04": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "013_포레스트_01": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    }
+   },
+   "per_bar": {
+    "Beck": {
+     "mean": 0.9657320872274143,
+     "min": 0.897196261682243,
+     "max": 1.0
+    },
+    "미라보": {
+     "mean": 0.8460527318088201,
+     "min": 0.7539863325740319,
+     "max": 0.9385342789598109
+    },
+    "포레스트": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    }
+   }
+  },
+  "hybrid": {
+   "runs": {
+    "1": {
+     "item_accuracy": 1.0,
+     "price_accuracy": 1.0,
+     "f1_strict": 0.9791304347826087,
+     "fp": 0,
+     "fn": 0,
+     "beck_04": 1.0,
+     "clynelish": {
+      "out": "크라이넬리시 14년",
+      "price": 21000,
+      "correct": true,
+      "near": [
+       "크라이넬리시 14년"
+      ]
+     },
+     "gemini_latency_s": 19.026785714285715,
+     "ocr_latency_s": 3.4147857142857143,
+     "tokens": {
+      "input_tokens": 6792.928571428572,
+      "output_tokens": 4041.0714285714284,
+      "thought_tokens": 3459.285714285714
+     }
+    },
+    "2": {
+     "item_accuracy": 0.9913494809688581,
+     "price_accuracy": 0.9982578397212544,
+     "f1_strict": 0.9704861111111112,
+     "fp": 3,
+     "fn": 1,
+     "beck_04": 1.0,
+     "clynelish": {
+      "out": "크라이넬리시 14년",
+      "price": 21000,
+      "correct": true,
+      "near": [
+       "크라이넬리시 14년"
+      ]
+     },
+     "gemini_latency_s": 18.442214285714286,
+     "ocr_latency_s": 3.4147857142857143,
+     "tokens": {
+      "input_tokens": 6792.928571428572,
+      "output_tokens": 4179.428571428572,
+      "thought_tokens": 3243.6428571428573
+     }
+    },
+    "3": {
+     "item_accuracy": 0.9930675909878682,
+     "price_accuracy": 1.0,
+     "f1_strict": 0.9704347826086956,
+     "fp": 2,
+     "fn": 2,
+     "beck_04": 1.0,
+     "clynelish": {
+      "out": "크라이넬리시 14년",
+      "price": 21000,
+      "correct": true,
+      "near": [
+       "크라이넬리시 14년"
+      ]
+     },
+     "gemini_latency_s": 29.941357142857143,
+     "ocr_latency_s": 3.4147857142857143,
+     "tokens": {
+      "input_tokens": 6792.928571428572,
+      "output_tokens": 3967.4285714285716,
+      "thought_tokens": 3538.1428571428573
+     }
+    }
+   },
+   "summary": {
+    "item_accuracy": {
+     "mean": 0.9948056906522421,
+     "min": 0.9913494809688581,
+     "max": 1.0,
+     "n": 3
+    },
+    "f1_strict": {
+     "mean": 0.9733504428341385,
+     "min": 0.9704347826086956,
+     "max": 0.9791304347826087,
+     "n": 3
+    },
+    "f1_lenient": {
+     "mean": 0.9976831723027375,
+     "min": 0.9965217391304347,
+     "max": 1.0,
+     "n": 3
+    },
+    "price_accuracy": {
+     "mean": 0.9994192799070848,
+     "min": 0.9982578397212544,
+     "max": 1.0,
+     "n": 3
+    },
+    "unit_confusion": {
+     "mean": 0.3333333333333333,
+     "min": 0,
+     "max": 1,
+     "n": 3
+    },
+    "fp": {
+     "mean": 1.6666666666666667,
+     "min": 0,
+     "max": 3,
+     "n": 3
+    },
+    "fn": {
+     "mean": 1,
+     "min": 0,
+     "max": 2,
+     "n": 3
+    }
+   },
+   "per_photo": {
+    "011_미라보_01": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "011_미라보_02": {
+     "mean": 0.9710144927536232,
+     "min": 0.9130434782608695,
+     "max": 1.0
+    },
+    "011_미라보_03": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "011_미라보_04": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "011_미라보_05": {
+     "mean": 0.9935897435897436,
+     "min": 0.9807692307692307,
+     "max": 1.0
+    },
+    "011_미라보_06": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "011_미라보_07": {
+     "mean": 0.9791666666666666,
+     "min": 0.9375,
+     "max": 1.0
+    },
+    "011_미라보_08": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "011_미라보_09": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "012_Beck_01": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "012_Beck_02": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "012_Beck_03": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "012_Beck_04": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "013_포레스트_01": {
+     "mean": 0.9904761904761905,
+     "min": 0.9714285714285714,
+     "max": 1.0
+    }
+   },
+   "per_bar": {
+    "Beck": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0
+    },
+    "미라보": {
+     "mean": 0.9943306640209766,
+     "min": 0.9902912621359223,
+     "max": 1.0
+    },
+    "포레스트": {
+     "mean": 0.9904761904761905,
+     "min": 0.9714285714285714,
+     "max": 1.0
+    }
+   }
+  }
+ },
+ "source_lines": {
+  "1": {
+   "counts": {
+    "pairs": 575,
+    "name_cited": 575,
+    "name_precise": 575,
+    "name_full": 575,
+    "priced": 575,
+    "price_cited": 575,
+    "price_number": 573,
+    "price_row": 573
+   },
+   "rates": {
+    "name_precise": 1.0,
+    "name_full": 1.0,
+    "price_number": 0.9965217391304347,
+    "price_row": 0.9965217391304347
+   },
+   "examples": {
+    "name_not_full": [],
+    "price_wrong": [
+     {
+      "photo": "011_미라보_07",
+      "label": "우드포드 리저브(Woodford Reserve) 더블 X.O",
+      "price": 42000,
+      "cited": [
+       "420"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_09",
+      "label": "산토리(Santory) 하쿠슈 12년",
+      "price": 45000,
+      "cited": [
+       "45,0"
+      ],
+      "number_ok": false
+     }
+    ]
+   }
+  },
+  "2": {
+   "counts": {
+    "pairs": 574,
+    "name_cited": 574,
+    "name_precise": 574,
+    "name_full": 574,
+    "priced": 574,
+    "price_cited": 574,
+    "price_number": 558,
+    "price_row": 557
+   },
+   "rates": {
+    "name_precise": 1.0,
+    "name_full": 1.0,
+    "price_number": 0.9721254355400697,
+    "price_row": 0.9703832752613241
+   },
+   "examples": {
+    "name_not_full": [],
+    "price_wrong": [
+     {
+      "photo": "011_미라보_05",
+      "label": "오반(Oban) 리틀 베이",
+      "price": 15000,
+      "cited": [
+       "18.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "글렌파클라스(Glenfarclas) 10년",
+      "price": 16000,
+      "cited": [
+       "17.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "글렌파클라스(Glenfarclas) 12년",
+      "price": 18000,
+      "cited": [
+       "23.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "글렌파클라스(Glenfarclas) 105 캐스크 스트랭스",
+      "price": 20000,
+      "cited": [
+       "26.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "글렌파클라스(Glenfarclas) 15년",
+      "price": 23000,
+      "cited": [
+       "27.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "글렌파클라스(Glenfarclas) 25년",
+      "price": 65000,
+      "cited": [
+       "29.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "글렌고인(Glengoyne) 12년",
+      "price": 16000,
+      "cited": [
+       "16.0"
+      ],
+      "number_ok": true
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "글렌고인(Glengoyne) 15년",
+      "price": 23000,
+      "cited": [
+       "18.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "글렌고인(Glengoyne) 배치 10 캐스크 스트랭스",
+      "price": 25000,
+      "cited": [
+       "20.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "글렌고인(Glengoyne) 18년",
+      "price": 34000,
+      "cited": [
+       "23.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "아벨라워(Aberlour) 12년",
+      "price": 17000,
+      "cited": [
+       "20.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "아벨라워(Aberlour) 14년",
+      "price": 23000,
+      "cited": [
+       "20.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "아벨라워(Aberlour) 아부나흐 알바",
+      "price": 26000,
+      "cited": [
+       "25.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "아벨라워(Aberlour) 아부나흐",
+      "price": 27000,
+      "cited": [
+       "25.0"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_05",
+      "label": "아벨라워(Aberlour) 16년",
+      "price": 29000,
+      "cited": [
+       "28.0"
+      ],
+      "number_ok": false
+     }
+    ]
+   }
+  },
+  "3": {
+   "counts": {
+    "pairs": 573,
+    "name_cited": 573,
+    "name_precise": 573,
+    "name_full": 573,
+    "priced": 573,
+    "price_cited": 573,
+    "price_number": 571,
+    "price_row": 571
+   },
+   "rates": {
+    "name_precise": 1.0,
+    "name_full": 1.0,
+    "price_number": 0.9965095986038395,
+    "price_row": 0.9965095986038395
+   },
+   "examples": {
+    "name_not_full": [],
+    "price_wrong": [
+     {
+      "photo": "011_미라보_07",
+      "label": "우드포드 리저브(Woodford Reserve) 더블 X.O",
+      "price": 42000,
+      "cited": [
+       "420"
+      ],
+      "number_ok": false
+     },
+     {
+      "photo": "011_미라보_09",
+      "label": "산토리(Santory) 하쿠슈 12년",
+      "price": 45000,
+      "cited": [
+       "45,0"
+      ],
+      "number_ok": false
+     }
+    ]
+   }
+  }
+ },
+ "missed_check": [
+  {
+   "run": 1,
+   "photo": "011_미라보_01",
+   "items": 35,
+   "labels": 35,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 35,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 1,
+   "photo": "011_미라보_02",
+   "items": 44,
+   "labels": 44,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 44,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 1,
+   "photo": "011_미라보_03",
+   "items": 60,
+   "labels": 60,
+   "fn": 0,
+   "uncited": 1,
+   "price_lines": 66,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "18"
+   ]
+  },
+  {
+   "run": 1,
+   "photo": "011_미라보_04",
+   "items": 58,
+   "labels": 58,
+   "fn": 0,
+   "uncited": 1,
+   "price_lines": 59,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "3.0"
+   ]
+  },
+  {
+   "run": 1,
+   "photo": "011_미라보_05",
+   "items": 52,
+   "labels": 52,
+   "fn": 0,
+   "uncited": 3,
+   "price_lines": 53,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "14",
+    "61",
+    "12"
+   ]
+  },
+  {
+   "run": 1,
+   "photo": "011_미라보_06",
+   "items": 54,
+   "labels": 54,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 54,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 1,
+   "photo": "011_미라보_07",
+   "items": 31,
+   "labels": 31,
+   "fn": 0,
+   "uncited": 2,
+   "price_lines": 34,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "2.0",
+    "2.0"
+   ]
+  },
+  {
+   "run": 1,
+   "photo": "011_미라보_08",
+   "items": 35,
+   "labels": 35,
+   "fn": 0,
+   "uncited": 2,
+   "price_lines": 37,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "46",
+    "10"
+   ]
+  },
+  {
+   "run": 1,
+   "photo": "011_미라보_09",
+   "items": 41,
+   "labels": 41,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 40,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 1,
+   "photo": "012_Beck_01",
+   "items": 14,
+   "labels": 14,
+   "fn": 0,
+   "uncited": 9,
+   "price_lines": 23,
+   "flag": true,
+   "real_miss": false,
+   "uncited_text": [
+    "20,000",
+    "20,000",
+    "320,000",
+    "320,000",
+    "40,000",
+    "50,000",
+    "55,000",
+    "65,000",
+    "55,000"
+   ]
+  },
+  {
+   "run": 1,
+   "photo": "012_Beck_02",
+   "items": 10,
+   "labels": 10,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 10,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 1,
+   "photo": "012_Beck_03",
+   "items": 25,
+   "labels": 25,
+   "fn": 0,
+   "uncited": 5,
+   "price_lines": 30,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "160,000",
+    "190,000",
+    "60,000",
+    "70,000",
+    "60,000"
+   ]
+  },
+  {
+   "run": 1,
+   "photo": "012_Beck_04",
+   "items": 48,
+   "labels": 48,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 48,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 1,
+   "photo": "013_포레스트_01",
+   "items": 68,
+   "labels": 68,
+   "fn": 0,
+   "uncited": 3,
+   "price_lines": 71,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "92",
+    "₩16,000",
+    "₩44,000"
+   ]
+  },
+  {
+   "run": 2,
+   "photo": "011_미라보_01",
+   "items": 35,
+   "labels": 35,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 35,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 2,
+   "photo": "011_미라보_02",
+   "items": 44,
+   "labels": 44,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 44,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 2,
+   "photo": "011_미라보_03",
+   "items": 60,
+   "labels": 60,
+   "fn": 0,
+   "uncited": 1,
+   "price_lines": 66,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "18"
+   ]
+  },
+  {
+   "run": 2,
+   "photo": "011_미라보_04",
+   "items": 58,
+   "labels": 58,
+   "fn": 0,
+   "uncited": 1,
+   "price_lines": 59,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "3.0"
+   ]
+  },
+  {
+   "run": 2,
+   "photo": "011_미라보_05",
+   "items": 52,
+   "labels": 52,
+   "fn": 0,
+   "uncited": 10,
+   "price_lines": 53,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "14",
+    "61",
+    "12",
+    "15.0",
+    "21.0",
+    "65.0",
+    "16.0",
+    "23.0",
+    "25.0",
+    "34.0"
+   ]
+  },
+  {
+   "run": 2,
+   "photo": "011_미라보_06",
+   "items": 54,
+   "labels": 54,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 54,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 2,
+   "photo": "011_미라보_07",
+   "items": 31,
+   "labels": 31,
+   "fn": 1,
+   "uncited": 2,
+   "price_lines": 34,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "2.0",
+    "2.0"
+   ]
+  },
+  {
+   "run": 2,
+   "photo": "011_미라보_08",
+   "items": 35,
+   "labels": 35,
+   "fn": 0,
+   "uncited": 2,
+   "price_lines": 37,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "46",
+    "10"
+   ]
+  },
+  {
+   "run": 2,
+   "photo": "011_미라보_09",
+   "items": 41,
+   "labels": 41,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 40,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 2,
+   "photo": "012_Beck_01",
+   "items": 14,
+   "labels": 14,
+   "fn": 0,
+   "uncited": 9,
+   "price_lines": 23,
+   "flag": true,
+   "real_miss": false,
+   "uncited_text": [
+    "20,000",
+    "20,000",
+    "320,000",
+    "320,000",
+    "40,000",
+    "50,000",
+    "55,000",
+    "65,000",
+    "55,000"
+   ]
+  },
+  {
+   "run": 2,
+   "photo": "012_Beck_02",
+   "items": 10,
+   "labels": 10,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 10,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 2,
+   "photo": "012_Beck_03",
+   "items": 25,
+   "labels": 25,
+   "fn": 0,
+   "uncited": 5,
+   "price_lines": 30,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "160,000",
+    "190,000",
+    "60,000",
+    "70,000",
+    "60,000"
+   ]
+  },
+  {
+   "run": 2,
+   "photo": "012_Beck_04",
+   "items": 48,
+   "labels": 48,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 48,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 2,
+   "photo": "013_포레스트_01",
+   "items": 70,
+   "labels": 68,
+   "fn": 0,
+   "uncited": 1,
+   "price_lines": 71,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "92"
+   ]
+  },
+  {
+   "run": 3,
+   "photo": "011_미라보_01",
+   "items": 35,
+   "labels": 35,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 35,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 3,
+   "photo": "011_미라보_02",
+   "items": 44,
+   "labels": 44,
+   "fn": 2,
+   "uncited": 0,
+   "price_lines": 44,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 3,
+   "photo": "011_미라보_03",
+   "items": 60,
+   "labels": 60,
+   "fn": 0,
+   "uncited": 1,
+   "price_lines": 66,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "18"
+   ]
+  },
+  {
+   "run": 3,
+   "photo": "011_미라보_04",
+   "items": 58,
+   "labels": 58,
+   "fn": 0,
+   "uncited": 1,
+   "price_lines": 59,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "3.0"
+   ]
+  },
+  {
+   "run": 3,
+   "photo": "011_미라보_05",
+   "items": 52,
+   "labels": 52,
+   "fn": 0,
+   "uncited": 3,
+   "price_lines": 53,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "14",
+    "61",
+    "12"
+   ]
+  },
+  {
+   "run": 3,
+   "photo": "011_미라보_06",
+   "items": 54,
+   "labels": 54,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 54,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 3,
+   "photo": "011_미라보_07",
+   "items": 31,
+   "labels": 31,
+   "fn": 0,
+   "uncited": 2,
+   "price_lines": 34,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "2.0",
+    "2.0"
+   ]
+  },
+  {
+   "run": 3,
+   "photo": "011_미라보_08",
+   "items": 35,
+   "labels": 35,
+   "fn": 0,
+   "uncited": 2,
+   "price_lines": 37,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "46",
+    "10"
+   ]
+  },
+  {
+   "run": 3,
+   "photo": "011_미라보_09",
+   "items": 41,
+   "labels": 41,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 40,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 3,
+   "photo": "012_Beck_01",
+   "items": 14,
+   "labels": 14,
+   "fn": 0,
+   "uncited": 9,
+   "price_lines": 23,
+   "flag": true,
+   "real_miss": false,
+   "uncited_text": [
+    "20,000",
+    "20,000",
+    "320,000",
+    "320,000",
+    "40,000",
+    "50,000",
+    "55,000",
+    "65,000",
+    "55,000"
+   ]
+  },
+  {
+   "run": 3,
+   "photo": "012_Beck_02",
+   "items": 10,
+   "labels": 10,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 10,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 3,
+   "photo": "012_Beck_03",
+   "items": 25,
+   "labels": 25,
+   "fn": 0,
+   "uncited": 5,
+   "price_lines": 30,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "160,000",
+    "190,000",
+    "60,000",
+    "70,000",
+    "60,000"
+   ]
+  },
+  {
+   "run": 3,
+   "photo": "012_Beck_04",
+   "items": 48,
+   "labels": 48,
+   "fn": 0,
+   "uncited": 0,
+   "price_lines": 48,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": []
+  },
+  {
+   "run": 3,
+   "photo": "013_포레스트_01",
+   "items": 68,
+   "labels": 68,
+   "fn": 0,
+   "uncited": 3,
+   "price_lines": 71,
+   "flag": false,
+   "real_miss": false,
+   "uncited_text": [
+    "92",
+    "₩16,000",
+    "₩44,000"
+   ]
+  }
+ ],
+ "matching": {
+  "clova_llm_beck": {
+   "counts": {
+    "extracted_lines": 64,
+    "paired_lines": 64,
+    "unpaired_lines": 0,
+    "gold_lines": 64,
+    "missed_gold_lines": 0,
+    "gold_conflicts": 0
+   },
+   "llm": {
+    "model": "gemini-3.1-flash-lite",
+    "thinking_level": "low",
+    "api_calls_this_run": 4,
+    "by_kind": {
+     "m3a": {
+      "requests": 4,
+      "api_calls": 4,
+      "cache_hits": 0,
+      "parse_errors": 0,
+      "input_tokens": 6795,
+      "output_tokens": 3453,
+      "thought_tokens": 465,
+      "mean_latency_ms": 5566
+     }
+    }
+   },
+   "rows": {
+    "S1+S2b+S3/C0": {
+     "lines": 64,
+     "top1": 0.8125,
+     "e2e_top1": 0.8125,
+     "fm": 0.0,
+     "confirm": 6,
+     "choose": 2,
+     "register": 28,
+     "wrong": 2,
+     "rule": "5/5",
+     "llm": "0/0",
+     "accept_err": 0.0,
+     "a_per_photo": 1.5,
+     "bcd_per_photo": 8,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "S1+S2b+S3/C1": {
+     "lines": 64,
+     "top1": 0.7258064516129032,
+     "e2e_top1": 0.7258064516129032,
+     "fm": 0.0,
+     "confirm": 7,
+     "choose": 3,
+     "register": 8,
+     "wrong": 0,
+     "rule": "6/6",
+     "llm": "0/0",
+     "accept_err": 0.0,
+     "a_per_photo": 1.75,
+     "bcd_per_photo": 2.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "M3a/C0": {
+     "lines": 64,
+     "top1": 0.8125,
+     "e2e_top1": 0.8125,
+     "fm": 0.0,
+     "confirm": 7,
+     "choose": 1,
+     "register": 28,
+     "wrong": 2,
+     "rule": "5/5",
+     "llm": "2/2",
+     "accept_err": 0.0,
+     "a_per_photo": 1.75,
+     "bcd_per_photo": 7.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    },
+    "M3a/C1": {
+     "lines": 64,
+     "top1": 0.7258064516129032,
+     "e2e_top1": 0.7258064516129032,
+     "fm": 0.0,
+     "confirm": 15,
+     "choose": 1,
+     "register": 2,
+     "wrong": 0,
+     "rule": "6/6",
+     "llm": "8/8",
+     "accept_err": 0.0,
+     "a_per_photo": 3.75,
+     "bcd_per_photo": 0.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    }
+   },
+   "unpaired_title": {
+    "unpaired": 0,
+    "title_pattern": 0,
+    "examples": []
+   }
+  },
+  "clova_llm_test": {
+   "counts": {
+    "extracted_lines": 433,
+    "paired_lines": 404,
+    "unpaired_lines": 29,
+    "gold_lines": 478,
+    "missed_gold_lines": 74,
+    "gold_conflicts": 0
+   },
+   "llm": {
+    "model": "gemini-3.1-flash-lite",
+    "thinking_level": "low",
+    "api_calls_this_run": 10,
+    "by_kind": {
+     "m3a": {
+      "requests": 10,
+      "api_calls": 10,
+      "cache_hits": 0,
+      "parse_errors": 0,
+      "input_tokens": 26385,
+      "output_tokens": 28967,
+      "thought_tokens": 4084,
+      "mean_latency_ms": 11739
+     }
+    }
+   },
+   "rows": {
+    "S1+S2b+S3/C0": {
+     "lines": 404,
+     "top1": 0.7716535433070866,
+     "e2e_top1": 0.725925925925926,
+     "fm": 0.0,
+     "confirm": 17,
+     "choose": 3,
+     "register": 255,
+     "wrong": 31,
+     "rule": "6/10",
+     "llm": "0/0",
+     "accept_err": 0.009900990099009901,
+     "a_per_photo": 1.7,
+     "bcd_per_photo": 28.9,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 7.4,
+     "unpaired": null
+    },
+    "S1+S2b+S3/C1": {
+     "lines": 404,
+     "top1": 0.39054726368159204,
+     "e2e_top1": 0.33052631578947367,
+     "fm": 0.0,
+     "confirm": 54,
+     "choose": 37,
+     "register": 141,
+     "wrong": 15,
+     "rule": "13/16",
+     "llm": "0/0",
+     "accept_err": 0.007425742574257425,
+     "a_per_photo": 5.4,
+     "bcd_per_photo": 19.3,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 7.4,
+     "unpaired": null
+    },
+    "M3a/C0": {
+     "lines": 404,
+     "top1": 0.7716535433070866,
+     "e2e_top1": 0.725925925925926,
+     "fm": 0.0,
+     "confirm": 22,
+     "choose": 1,
+     "register": 252,
+     "wrong": 31,
+     "rule": "6/10",
+     "llm": "8/10",
+     "accept_err": 0.01485148514851485,
+     "a_per_photo": 2.2,
+     "bcd_per_photo": 28.4,
+     "unpaired_unconfirmed_per_photo": 2.7,
+     "missed_per_photo": 7.4,
+     "unpaired": {
+      "unmatched": 27,
+      "confirmed": 2
+     }
+    },
+    "M3a/C1": {
+     "lines": 404,
+     "top1": 0.39054726368159204,
+     "e2e_top1": 0.33052631578947367,
+     "fm": 0.0,
+     "confirm": 186,
+     "choose": 22,
+     "register": 36,
+     "wrong": 3,
+     "rule": "13/13",
+     "llm": "162/163",
+     "accept_err": 0.0024752475247524753,
+     "a_per_photo": 18.6,
+     "bcd_per_photo": 6.1,
+     "unpaired_unconfirmed_per_photo": 2.6,
+     "missed_per_photo": 7.4,
+     "unpaired": {
+      "unmatched": 17,
+      "confirm_recommended": 9,
+      "confirmed": 3
+     }
+    }
+   },
+   "unpaired_title": {
+    "unpaired": 29,
+    "title_pattern": 22,
+    "examples": [
+     {
+      "photo": "011_미라보_02",
+      "extracted": "밀튼더프 10년",
+      "gold_line": "고든앤맥페일(Gordon&Macphail) 밀튼더프 10년"
+     },
+     {
+      "photo": "011_미라보_02",
+      "extracted": "부나하벤 10년",
+      "gold_line": "고든앤맥페일(Gordon&Macphail) 부나하벤 10년"
+     },
+     {
+      "photo": "011_미라보_02",
+      "extracted": "글렌로티스 11년",
+      "gold_line": "고든앤맥페일(Gordon&Macphail) 글렌로티스 11년"
+     },
+     {
+      "photo": "011_미라보_02",
+      "extracted": "로얄 브라클라 14년",
+      "gold_line": "헌터랭(Hunterlaing) 로얄 브라클라 14년"
+     },
+     {
+      "photo": "011_미라보_02",
+      "extracted": "크라겐모어 26년",
+      "gold_line": "헌터랭(Hunterlaing) 크라겐모어 26년"
+     },
+     {
+      "photo": "011_미라보_02",
+      "extracted": "킬커란 12년",
+      "gold_line": "글렌가일(Glengyle) 킬커란 12년"
+     },
+     {
+      "photo": "011_미라보_02",
+      "extracted": "킬커란 16년",
+      "gold_line": "글렌가일(Glengyle) 킬커란 16년"
+     },
+     {
+      "photo": "011_미라보_09",
+      "extracted": "월드 위스키 아오",
+      "gold_line": "산토리(Santory) 월드 위스키 아오"
+     }
+    ]
+   }
+  },
+  "E1_beck": {
+   "counts": {
+    "extracted_lines": 64,
+    "paired_lines": 64,
+    "unpaired_lines": 0,
+    "gold_lines": 64,
+    "missed_gold_lines": 0,
+    "gold_conflicts": 0
+   },
+   "llm": {
+    "model": "gemini-3.1-flash-lite",
+    "thinking_level": "low",
+    "api_calls_this_run": 4,
+    "by_kind": {
+     "m3a": {
+      "requests": 4,
+      "api_calls": 4,
+      "cache_hits": 0,
+      "parse_errors": 0,
+      "input_tokens": 6794,
+      "output_tokens": 3543,
+      "thought_tokens": 436,
+      "mean_latency_ms": 3638
+     }
+    }
+   },
+   "rows": {
+    "S1+S2b+S3/C0": {
+     "lines": 64,
+     "top1": 0.8125,
+     "e2e_top1": 0.8125,
+     "fm": 0.0,
+     "confirm": 6,
+     "choose": 2,
+     "register": 28,
+     "wrong": 2,
+     "rule": "5/5",
+     "llm": "0/0",
+     "accept_err": 0.0,
+     "a_per_photo": 1.5,
+     "bcd_per_photo": 8,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "S1+S2b+S3/C1": {
+     "lines": 64,
+     "top1": 0.7258064516129032,
+     "e2e_top1": 0.7258064516129032,
+     "fm": 0.0,
+     "confirm": 7,
+     "choose": 3,
+     "register": 8,
+     "wrong": 0,
+     "rule": "6/6",
+     "llm": "0/0",
+     "accept_err": 0.0,
+     "a_per_photo": 1.75,
+     "bcd_per_photo": 2.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "M3a/C0": {
+     "lines": 64,
+     "top1": 0.8125,
+     "e2e_top1": 0.8125,
+     "fm": 0.0,
+     "confirm": 7,
+     "choose": 1,
+     "register": 28,
+     "wrong": 2,
+     "rule": "5/5",
+     "llm": "2/2",
+     "accept_err": 0.0,
+     "a_per_photo": 1.75,
+     "bcd_per_photo": 7.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    },
+    "M3a/C1": {
+     "lines": 64,
+     "top1": 0.7258064516129032,
+     "e2e_top1": 0.7258064516129032,
+     "fm": 0.0,
+     "confirm": 15,
+     "choose": 1,
+     "register": 2,
+     "wrong": 0,
+     "rule": "6/6",
+     "llm": "8/8",
+     "accept_err": 0.0,
+     "a_per_photo": 3.75,
+     "bcd_per_photo": 0.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    }
+   },
+   "unpaired_title": {
+    "unpaired": 0,
+    "title_pattern": 0,
+    "examples": []
+   }
+  },
+  "E1_test": {
+   "counts": {
+    "extracted_lines": 478,
+    "paired_lines": 430,
+    "unpaired_lines": 48,
+    "gold_lines": 478,
+    "missed_gold_lines": 48,
+    "gold_conflicts": 0
+   },
+   "llm": {
+    "model": "gemini-3.1-flash-lite",
+    "thinking_level": "low",
+    "api_calls_this_run": 10,
+    "by_kind": {
+     "m3a": {
+      "requests": 10,
+      "api_calls": 10,
+      "cache_hits": 0,
+      "parse_errors": 0,
+      "input_tokens": 27527,
+      "output_tokens": 34346,
+      "thought_tokens": 3409,
+      "mean_latency_ms": 8875
+     }
+    }
+   },
+   "rows": {
+    "S1+S2b+S3/C0": {
+     "lines": 430,
+     "top1": 0.7388059701492538,
+     "e2e_top1": 0.7333333333333333,
+     "fm": 0.0,
+     "confirm": 23,
+     "choose": 3,
+     "register": 270,
+     "wrong": 35,
+     "rule": "12/15",
+     "llm": "0/0",
+     "accept_err": 0.0069767441860465115,
+     "a_per_photo": 2.3,
+     "bcd_per_photo": 30.8,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 4.8,
+     "unpaired": null
+    },
+    "S1+S2b+S3/C1": {
+     "lines": 430,
+     "top1": 0.40749414519906324,
+     "e2e_top1": 0.3663157894736842,
+     "fm": 0.0,
+     "confirm": 54,
+     "choose": 30,
+     "register": 154,
+     "wrong": 18,
+     "rule": "17/19",
+     "llm": "0/0",
+     "accept_err": 0.004651162790697674,
+     "a_per_photo": 5.4,
+     "bcd_per_photo": 20.2,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 4.8,
+     "unpaired": null
+    },
+    "M3a/C0": {
+     "lines": 430,
+     "top1": 0.7388059701492538,
+     "e2e_top1": 0.7333333333333333,
+     "fm": 0.0,
+     "confirm": 27,
+     "choose": 1,
+     "register": 268,
+     "wrong": 35,
+     "rule": "12/15",
+     "llm": "6/8",
+     "accept_err": 0.011627906976744186,
+     "a_per_photo": 2.7,
+     "bcd_per_photo": 30.4,
+     "unpaired_unconfirmed_per_photo": 4.8,
+     "missed_per_photo": 4.8,
+     "unpaired": {
+      "unmatched": 47,
+      "confirm_recommended": 1
+     }
+    },
+    "M3a/C1": {
+     "lines": 430,
+     "top1": 0.40749414519906324,
+     "e2e_top1": 0.3663157894736842,
+     "fm": 0.0,
+     "confirm": 190,
+     "choose": 27,
+     "register": 35,
+     "wrong": 4,
+     "rule": "17/17",
+     "llm": "161/162",
+     "accept_err": 0.002325581395348837,
+     "a_per_photo": 19,
+     "bcd_per_photo": 6.6,
+     "unpaired_unconfirmed_per_photo": 4.8,
+     "missed_per_photo": 4.8,
+     "unpaired": {
+      "unmatched": 34,
+      "confirm_recommended": 13,
+      "candidates": 1
+     }
+    }
+   },
+   "unpaired_title": {
+    "unpaired": 48,
+    "title_pattern": 40,
+    "examples": [
+     {
+      "photo": "011_미라보_01",
+      "extracted": "벤네비스 7년 아티스트 콜렉티브",
+      "gold_line": "라 메종드 위스키(LMDW) 벤네비스 7년 아티스트 콜렉티브"
+     },
+     {
+      "photo": "011_미라보_01",
+      "extracted": "쿨일라 9년 아티스트 콜렉티브",
+      "gold_line": "라 메종드 위스키(LMDW) 쿨일라 9년 아티스트 콜렉티브"
+     },
+     {
+      "photo": "011_미라보_01",
+      "extracted": "카발란 솔리스트 올로로소 7년",
+      "gold_line": "더 위스키 에이전시(TWA) 카발란 솔리스트 올로로소 7년"
+     },
+     {
+      "photo": "011_미라보_01",
+      "extracted": "카발란 솔리스트 포트 8년",
+      "gold_line": "더 위스키 에이전시(TWA) 카발란 솔리스트 포트 8년"
+     },
+     {
+      "photo": "011_미라보_01",
+      "extracted": "로얄 브라클라 14년",
+      "gold_line": "사마롤리(Smaroli) 로얄 브라클라 14년"
+     },
+     {
+      "photo": "011_미라보_01",
+      "extracted": "쿨일라 13년",
+      "gold_line": "사마롤리(Smaroli) 쿨일라 13년"
+     },
+     {
+      "photo": "011_미라보_01",
+      "extracted": "SR 22 탈리스커 11년",
+      "gold_line": "디아지오 SR(Diagio SR) SR 22 탈리스커 11년"
+     },
+     {
+      "photo": "011_미라보_01",
+      "extracted": "SR 23 오반 11년",
+      "gold_line": "디아지오 SR(Diagio SR) SR 23 오반 11년"
+     }
+    ]
+   }
+  },
+  "hybrid_beck": {
+   "counts": {
+    "extracted_lines": 64,
+    "paired_lines": 64,
+    "unpaired_lines": 0,
+    "gold_lines": 64,
+    "missed_gold_lines": 0,
+    "gold_conflicts": 0
+   },
+   "llm": {
+    "model": "gemini-3.1-flash-lite",
+    "thinking_level": "low",
+    "api_calls_this_run": 0,
+    "by_kind": {
+     "m3a": {
+      "requests": 4,
+      "api_calls": 0,
+      "cache_hits": 4,
+      "parse_errors": 0,
+      "input_tokens": 6795,
+      "output_tokens": 3473,
+      "thought_tokens": 424,
+      "mean_latency_ms": 5652
+     }
+    }
+   },
+   "rows": {
+    "S1+S2b+S3/C0": {
+     "lines": 64,
+     "top1": 0.8125,
+     "e2e_top1": 0.8125,
+     "fm": 0.0,
+     "confirm": 6,
+     "choose": 2,
+     "register": 28,
+     "wrong": 2,
+     "rule": "5/5",
+     "llm": "0/0",
+     "accept_err": 0.0,
+     "a_per_photo": 1.5,
+     "bcd_per_photo": 8,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "S1+S2b+S3/C1": {
+     "lines": 64,
+     "top1": 0.7258064516129032,
+     "e2e_top1": 0.7258064516129032,
+     "fm": 0.0,
+     "confirm": 7,
+     "choose": 3,
+     "register": 8,
+     "wrong": 0,
+     "rule": "6/6",
+     "llm": "0/0",
+     "accept_err": 0.0,
+     "a_per_photo": 1.75,
+     "bcd_per_photo": 2.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "M3a/C0": {
+     "lines": 64,
+     "top1": 0.8125,
+     "e2e_top1": 0.8125,
+     "fm": 0.0,
+     "confirm": 7,
+     "choose": 1,
+     "register": 28,
+     "wrong": 2,
+     "rule": "5/5",
+     "llm": "2/2",
+     "accept_err": 0.0,
+     "a_per_photo": 1.75,
+     "bcd_per_photo": 7.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    },
+    "M3a/C1": {
+     "lines": 64,
+     "top1": 0.7258064516129032,
+     "e2e_top1": 0.7258064516129032,
+     "fm": 0.0,
+     "confirm": 15,
+     "choose": 1,
+     "register": 2,
+     "wrong": 0,
+     "rule": "6/6",
+     "llm": "8/8",
+     "accept_err": 0.0,
+     "a_per_photo": 3.75,
+     "bcd_per_photo": 0.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    }
+   },
+   "unpaired_title": {
+    "unpaired": 0,
+    "title_pattern": 0,
+    "examples": []
+   }
+  },
+  "hybrid_test": {
+   "counts": {
+    "extracted_lines": 478,
+    "paired_lines": 478,
+    "unpaired_lines": 0,
+    "gold_lines": 478,
+    "missed_gold_lines": 0,
+    "gold_conflicts": 0
+   },
+   "llm": {
+    "model": "gemini-3.1-flash-lite",
+    "thinking_level": "low",
+    "api_calls_this_run": 8,
+    "by_kind": {
+     "m3a": {
+      "requests": 10,
+      "api_calls": 8,
+      "cache_hits": 2,
+      "parse_errors": 0,
+      "input_tokens": 27968,
+      "output_tokens": 33904,
+      "thought_tokens": 1120,
+      "mean_latency_ms": 9263
+     }
+    }
+   },
+   "rows": {
+    "S1+S2b+S3/C0": {
+     "lines": 478,
+     "top1": 0.7703703703703704,
+     "e2e_top1": 0.7703703703703704,
+     "fm": 0.0,
+     "confirm": 19,
+     "choose": 3,
+     "register": 312,
+     "wrong": 40,
+     "rule": "7/12",
+     "llm": "0/0",
+     "accept_err": 0.010460251046025104,
+     "a_per_photo": 1.9,
+     "bcd_per_photo": 35.5,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "S1+S2b+S3/C1": {
+     "lines": 478,
+     "top1": 0.37684210526315787,
+     "e2e_top1": 0.37684210526315787,
+     "fm": 0.0,
+     "confirm": 63,
+     "choose": 44,
+     "register": 171,
+     "wrong": 21,
+     "rule": "14/18",
+     "llm": "0/0",
+     "accept_err": 0.008368200836820083,
+     "a_per_photo": 6.3,
+     "bcd_per_photo": 23.6,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "M3a/C0": {
+     "lines": 478,
+     "top1": 0.7703703703703704,
+     "e2e_top1": 0.7703703703703704,
+     "fm": 0.0,
+     "confirm": 23,
+     "choose": 1,
+     "register": 310,
+     "wrong": 40,
+     "rule": "7/12",
+     "llm": "7/9",
+     "accept_err": 0.014644351464435146,
+     "a_per_photo": 2.3,
+     "bcd_per_photo": 35.1,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    },
+    "M3a/C1": {
+     "lines": 478,
+     "top1": 0.37684210526315787,
+     "e2e_top1": 0.37684210526315787,
+     "fm": 0.0,
+     "confirm": 221,
+     "choose": 37,
+     "register": 39,
+     "wrong": 2,
+     "rule": "14/14",
+     "llm": "193/194",
+     "accept_err": 0.0020920502092050207,
+     "a_per_photo": 22.1,
+     "bcd_per_photo": 7.8,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    }
+   },
+   "unpaired_title": {
+    "unpaired": 0,
+    "title_pattern": 0,
+    "examples": []
+   }
+  },
+  "label_beck": {
+   "counts": {
+    "extracted_lines": 64,
+    "paired_lines": 64,
+    "unpaired_lines": 0,
+    "gold_lines": 64,
+    "missed_gold_lines": 0,
+    "gold_conflicts": 0
+   },
+   "llm": {
+    "model": "gemini-3.1-flash-lite",
+    "thinking_level": "low",
+    "api_calls_this_run": 0,
+    "by_kind": {
+     "m3a": {
+      "requests": 4,
+      "api_calls": 0,
+      "cache_hits": 4,
+      "parse_errors": 0,
+      "input_tokens": 6794,
+      "output_tokens": 3440,
+      "thought_tokens": 461,
+      "mean_latency_ms": 3531
+     }
+    }
+   },
+   "rows": {
+    "S1+S2b+S3/C0": {
+     "lines": 64,
+     "top1": 0.8125,
+     "e2e_top1": 0.8125,
+     "fm": 0.0,
+     "confirm": 6,
+     "choose": 2,
+     "register": 28,
+     "wrong": 2,
+     "rule": "5/5",
+     "llm": "0/0",
+     "accept_err": 0.0,
+     "a_per_photo": 1.5,
+     "bcd_per_photo": 8,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "S1+S2b+S3/C1": {
+     "lines": 64,
+     "top1": 0.7258064516129032,
+     "e2e_top1": 0.7258064516129032,
+     "fm": 0.0,
+     "confirm": 7,
+     "choose": 3,
+     "register": 8,
+     "wrong": 0,
+     "rule": "6/6",
+     "llm": "0/0",
+     "accept_err": 0.0,
+     "a_per_photo": 1.75,
+     "bcd_per_photo": 2.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "M3a/C0": {
+     "lines": 64,
+     "top1": 0.8125,
+     "e2e_top1": 0.8125,
+     "fm": 0.0,
+     "confirm": 7,
+     "choose": 1,
+     "register": 28,
+     "wrong": 2,
+     "rule": "5/5",
+     "llm": "2/2",
+     "accept_err": 0.0,
+     "a_per_photo": 1.75,
+     "bcd_per_photo": 7.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    },
+    "M3a/C1": {
+     "lines": 64,
+     "top1": 0.7258064516129032,
+     "e2e_top1": 0.7258064516129032,
+     "fm": 0.0,
+     "confirm": 15,
+     "choose": 1,
+     "register": 2,
+     "wrong": 0,
+     "rule": "6/6",
+     "llm": "8/8",
+     "accept_err": 0.0,
+     "a_per_photo": 3.75,
+     "bcd_per_photo": 0.75,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    }
+   },
+   "unpaired_title": {
+    "unpaired": 0,
+    "title_pattern": 0,
+    "examples": []
+   }
+  },
+  "label_test": {
+   "counts": {
+    "extracted_lines": 478,
+    "paired_lines": 478,
+    "unpaired_lines": 0,
+    "gold_lines": 478,
+    "missed_gold_lines": 0,
+    "gold_conflicts": 0
+   },
+   "llm": {
+    "model": "gemini-3.1-flash-lite",
+    "thinking_level": "low",
+    "api_calls_this_run": 0,
+    "by_kind": {
+     "m3a": {
+      "requests": 10,
+      "api_calls": 0,
+      "cache_hits": 10,
+      "parse_errors": 0,
+      "input_tokens": 27965,
+      "output_tokens": 33645,
+      "thought_tokens": 1143,
+      "mean_latency_ms": 10226
+     }
+    }
+   },
+   "rows": {
+    "S1+S2b+S3/C0": {
+     "lines": 478,
+     "top1": 0.7703703703703704,
+     "e2e_top1": 0.7703703703703704,
+     "fm": 0.0,
+     "confirm": 19,
+     "choose": 3,
+     "register": 311,
+     "wrong": 41,
+     "rule": "7/12",
+     "llm": "0/0",
+     "accept_err": 0.010460251046025104,
+     "a_per_photo": 1.9,
+     "bcd_per_photo": 35.5,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "S1+S2b+S3/C1": {
+     "lines": 478,
+     "top1": 0.37684210526315787,
+     "e2e_top1": 0.37684210526315787,
+     "fm": 0.0,
+     "confirm": 62,
+     "choose": 45,
+     "register": 171,
+     "wrong": 21,
+     "rule": "14/18",
+     "llm": "0/0",
+     "accept_err": 0.008368200836820083,
+     "a_per_photo": 6.2,
+     "bcd_per_photo": 23.7,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": null
+    },
+    "M3a/C0": {
+     "lines": 478,
+     "top1": 0.7703703703703704,
+     "e2e_top1": 0.7703703703703704,
+     "fm": 0.0,
+     "confirm": 23,
+     "choose": 1,
+     "register": 309,
+     "wrong": 41,
+     "rule": "7/12",
+     "llm": "7/9",
+     "accept_err": 0.014644351464435146,
+     "a_per_photo": 2.3,
+     "bcd_per_photo": 35.1,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    },
+    "M3a/C1": {
+     "lines": 478,
+     "top1": 0.37684210526315787,
+     "e2e_top1": 0.37684210526315787,
+     "fm": 0.0,
+     "confirm": 219,
+     "choose": 37,
+     "register": 41,
+     "wrong": 2,
+     "rule": "14/14",
+     "llm": "193/194",
+     "accept_err": 0.0020920502092050207,
+     "a_per_photo": 21.9,
+     "bcd_per_photo": 8,
+     "unpaired_unconfirmed_per_photo": 0,
+     "missed_per_photo": 0,
+     "unpaired": {}
+    }
+   },
+   "unpaired_title": {
+    "unpaired": 0,
+    "title_pattern": 0,
+    "examples": []
+   }
+  }
+ }
+}

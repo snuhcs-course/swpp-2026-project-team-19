@@ -1,0 +1,280 @@
+{
+ "key": "1853b3040b2264c3aa81e3c4bb3023205bf9b0f8f1c47dc0696a227625907e0d",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "크라겐모어(Cragganmore) 12년",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "벤로막(Benromach) 10년",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "벤로막(Benromach) 12년 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "벤로막(Benromach) 피트 스모크",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "벤로막(Benromach) 2013 빈티지",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "벤로막(Benromach) 15년",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "벤로막(Benromach) 싱글 캐스크",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "벤로막(Benromach) 21년",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "벤리악(Benriach) 10년",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "벤리악(Benriach) 12년",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "벤리악(Benriach) 12년 스모키",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "오반(Oban) 리틀 베이",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "오반(Oban) 14년",
+    "target": false
+   },
+   {
+    "line": 14,
+    "name": "글렌파클라스(Glenfarclas) 10년",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "글렌파클라스(Glenfarclas) 12년",
+    "target": false
+   },
+   {
+    "line": 16,
+    "name": "글렌파클라스(Glenfarclas) 105 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "글렌파클라스(Glenfarclas) 15년",
+    "target": false
+   },
+   {
+    "line": 18,
+    "name": "글렌파클라스(Glenfarclas) 25년",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "글렌고인(Glengoyne) 12년",
+    "target": false
+   },
+   {
+    "line": 20,
+    "name": "글렌고인(Glengoyne) 15년",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "글렌고인(Glengoyne) 배치 10 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 22,
+    "name": "글렌고인(Glengoyne) 18년",
+    "target": true
+   },
+   {
+    "line": 23,
+    "name": "클라이녤리쉬(Clynelish) 14년",
+    "target": false
+   },
+   {
+    "line": 24,
+    "name": "클라이녤리쉬(Clynelish) 디스틸러리 에디션",
+    "target": true
+   },
+   {
+    "line": 25,
+    "name": "달모어(Dalmore) 12년",
+    "target": false
+   },
+   {
+    "line": 26,
+    "name": "달모어(Dalmore) 12년 셰리캐스크 셀렉트",
+    "target": false
+   },
+   {
+    "line": 27,
+    "name": "달모어(Dalmore) 포트우드",
+    "target": false
+   },
+   {
+    "line": 28,
+    "name": "달모어(Dalmore) 15년",
+    "target": false
+   },
+   {
+    "line": 29,
+    "name": "달모어(Dalmore) 시가몰트",
+    "target": false
+   },
+   {
+    "line": 30,
+    "name": "달모어(Dalmore) 킹 알렉산더 3세",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "달모어(Dalmore) 18년",
+    "target": true
+   },
+   {
+    "line": 32,
+    "name": "아벨라워(Aberlour) 12년",
+    "target": false
+   },
+   {
+    "line": 33,
+    "name": "아벨라워(Aberlour) 14년",
+    "target": true
+   },
+   {
+    "line": 34,
+    "name": "아벨라워(Aberlour) 아부나흐 알바",
+    "target": true
+   },
+   {
+    "line": 35,
+    "name": "아벨라워(Aberlour) 아부나흐",
+    "target": false
+   },
+   {
+    "line": 36,
+    "name": "아벨라워(Aberlour) 16년",
+    "target": true
+   },
+   {
+    "line": 37,
+    "name": "エ드라두어(Edradour) 10년",
+    "target": false
+   },
+   {
+    "line": 38,
+    "name": "에드라두어(Edradour) 10년 발렌친",
+    "target": true
+   },
+   {
+    "line": 39,
+    "name": "에드라두어(Edradour) 12년 칼레도니아",
+    "target": true
+   },
+   {
+    "line": 40,
+    "name": "에드라두어(Edradour) 12년 보르도 캐스크",
+    "target": true
+   },
+   {
+    "line": 41,
+    "name": "에드라두어(Edradour) 12년 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 42,
+    "name": "에드라두어(Edradour) 12년 소테른 캐스크",
+    "target": true
+   },
+   {
+    "line": 43,
+    "name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 44,
+    "name": "에드라두어(Edradour) 21년 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 45,
+    "name": "달위니(Dalwhinnie) 15년",
+    "target": false
+   },
+   {
+    "line": 46,
+    "name": "로얄브라클라(Royal Brackla) 12년",
+    "target": false
+   },
+   {
+    "line": 47,
+    "name": "로얄브라클라(Royal Brackla) 18년",
+    "target": false
+   },
+   {
+    "line": 48,
+    "name": "로얄브라클라(Royal Brackla) 21년",
+    "target": true
+   },
+   {
+    "line": 49,
+    "name": "아녹(Ancnoc) 12년",
+    "target": true
+   },
+   {
+    "line": 50,
+    "name": "아녹(Ancnoc) 피티드 셰리",
+    "target": true
+   },
+   {
+    "line": 51,
+    "name": "아녹(Ancnoc) 피트 하트",
+    "target": true
+   },
+   {
+    "line": 52,
+    "name": "아녹(Ancnoc) 18년",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Benromach\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Cask\", \"Strength\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Benromach\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Peat\", \"Smoke\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Benromach\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"2013\", \"Vintage\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Benromach\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Single\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Benromach\",\n      \"age\": 21,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Benriach\",\n      \"age\": 10,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 11,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Benriach\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Smoky\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Oban\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Little\", \"Bay\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenfarclas\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"105\", \"Cask\", \"Strength\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenfarclas\",\n      \"age\": 25,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glengoyne\",\n      \"age\": 15,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 21,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glengoyne\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Batch\", \"10\", \"Cask\", \"Strength\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 22,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glengoyne\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 24,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Clynelish\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Distillery\", \"Edition\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Dalmore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"King\", \"Alexander\", \"III\"],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"III\",\n          \"expansion\": \"3\"\n        }\n      ]\n    },\n    {\n      \"line\": 31,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Dalmore\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 33,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Aberlour\",\n      \"age\": 14,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 34,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Aberlour\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"A'bunadh\", \"Alba\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 36,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Aberlour\",\n      \"age\": 16,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 38,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Edradour\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\"Valinch\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 39,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Edradour\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Caledonia\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 40,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Edradour\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Bordeaux\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 41,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Edradour\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Cask\", \"Strength\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 42,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Edradour\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Sauternes\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 43,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Edradour\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\"Single\", \"Cask\", \"Cask\", \"Strength\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 44,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Edradour\",\n      \"age\": 21,\n      \"edition_tokens_en\": [\"Cask\", \"Strength\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 48,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Royal Brackla\",\n      \"age\": 21,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 49,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"anCnoc\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 50,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"anCnoc\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Peated\", \"Sherry\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 51,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"anCnoc\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Peat\", \"Heart\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 52,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"anCnoc\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-14T08:48:48.844454+00:00",
+  "latency_ms": 7022,
+  "attempts": 1,
+  "input_tokens": 2947,
+  "output_tokens": 2723,
+  "thought_tokens": 101
+ }
+}

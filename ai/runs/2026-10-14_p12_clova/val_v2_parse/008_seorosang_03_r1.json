@@ -1,0 +1,204 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "372bede8674eac276b9b68fd33ccc98e1950d6c6a3b46cb46d9e28642acf8875",
+  "started_at": "2026-10-14T05:03:55.523864+00:00",
+  "latency_ms": 8652,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 3366,
+  "output_tokens": 1391,
+  "thought_tokens": 2351,
+  "total_tokens": 7108,
+  "output": {
+    "items": [
+      {
+        "raw_name": "달위니15년 / Dalwhinnie 15Y",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달위니15년 / Dalwhinnie 15Y",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어12년 / Dalmore 12Y",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어12년 / Dalmore 12Y",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어15년 / Dalmore 15Y",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어15년 / Dalmore 15Y",
+        "price_krw": 380000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글랜모렌지 오리지날 / Glenmorangie OG",
+        "price_krw": 200000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글랜모렌지 라산타 / Glenmorangie Lasanta",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글랜모렌지 넥타도르 / Glenmorangie Nectar D'or",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글랜모렌지18년 / Glenmorangie 18Y",
+        "price_krw": 450000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글랜드로낙12년 / Glendronach 12Y",
+        "price_krw": 230000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글랜고인12년 / Glengoyne 12Y",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글랜고인12년 / Glengoyne 12Y",
+        "price_krw": 220000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "오반14년 / Oban 14Y",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "오반14년 / Oban 14Y",
+        "price_krw": 320000,
+        "pour_ml": null,
+        "unit": "bottle"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"달위니15년 / Dalwhinnie 15Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달위니15년 / Dalwhinnie 15Y\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어12년 / Dalmore 12Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어12년 / Dalmore 12Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어15년 / Dalmore 15Y\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어15년 / Dalmore 15Y\",\n      \"price_krw\": 380000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 오리지날 / Glenmorangie OG\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 오리지날 / Glenmorangie OG\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 라산타 / Glenmorangie Lasanta\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 라산타 / Glenmorangie Lasanta\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 넥타도르 / Glenmorangie Nectar D'or\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 넥타도르 / Glenmorangie Nectar D'or\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지18년 / Glenmorangie 18Y\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지18년 / Glenmorangie 18Y\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜드로낙12년 / Glendronach 12Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜드로낙12년 / Glendronach 12Y\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜고인12년 / Glengoyne 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜고인12년 / Glengoyne 12Y\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"오반14년 / Oban 14Y\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오반14년 / Oban 14Y\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:04:04Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"달위니15년 / Dalwhinnie 15Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달위니15년 / Dalwhinnie 15Y\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어12년 / Dalmore 12Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어12년 / Dalmore 12Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어15년 / Dalmore 15Y\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어15년 / Dalmore 15Y\",\n      \"price_krw\": 380000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 오리지날 / Glenmorangie OG\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 오리지날 / Glenmorangie OG\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 라산타 / Glenmorangie Lasanta\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 라산타 / Glenmorangie Lasanta\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 넥타도르 / Glenmorangie Nectar D'or\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 넥타도르 / Glenmorangie Nectar D'or\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지18년 / Glenmorangie 18Y\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지18년 / Glenmorangie 18Y\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜드로낙12년 / Glendronach 12Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜드로낙12년 / Glendronach 12Y\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜고인12년 / Glengoyne 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜고인12년 / Glengoyne 12Y\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"오반14년 / Oban 14Y\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오반14년 / Oban 14Y\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"달위니15년 / Dalwhinnie 15Y\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달위니15년 / Dalwhinnie 15Y\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어12년 / Dalmore 12Y\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어12년 / Dalmore 12Y\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"달모어15년 / Dalmore 15Y\",\n      \"price_krw\": 24000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"달모어15년 / Dalmore 15Y\",\n      \"price_krw\": 380000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 오리지날 / Glenmorangie OG\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 오리지날 / Glenmorangie OG\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 라산타 / Glenmorangie Lasanta\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 라산타 / Glenmorangie Lasanta\",\n      \"price_krw\": 240000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 넥타도르 / Glenmorangie Nectar D'or\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 넥타도르 / Glenmorangie Nectar D'or\",\n      \"price_krw\": 270000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban\",\n      \"price_krw\": 280000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지18년 / Glenmorangie 18Y\",\n      \"price_krw\": 28000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜모렌지18년 / Glenmorangie 18Y\",\n      \"price_krw\": 450000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜드로낙12년 / Glendronach 12Y\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜드로낙12년 / Glendronach 12Y\",\n      \"price_krw\": 230000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"글랜고인12년 / Glengoyne 12Y\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"글랜고인12년 / Glengoyne 12Y\",\n      \"price_krw\": 220000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"오반14년 / Oban 14Y\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"오반14년 / Oban 14Y\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:04:04Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 3366
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 3366,
+      "total_output_tokens": 1391,
+      "total_thought_tokens": 2351,
+      "total_tokens": 7108,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 1,
+  "source_image": "008_seorosang_03.png",
+  "prompt_version": "v2",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_rows>\nR001 y=25 | [96-220] 22:00 | [855-897] 26\nR002 y=100 | [880-928] X\nR003 y=137 | [42-324] HIGHLAND\nR004 y=205 | [45-234] Dalwhinnie 15Y | [751-781] 18 | [880-928] 280\nR005 y=220 | [45-152] 달위니15년\nR006 y=246 | [45-200] Dalmore 12Y | [751-781] 17 | [880-928] 270\nR007 y=260 | [45-152] 달모어12년\nR008 y=286 | [45-200] Dalmore 15Y | [751-785] 24 | [880-928] 380\nR009 y=300 | [45-149] 달모어15년\nR010 y=326 | [44-265] Glenmorangie OG | [753-785] 12 | [880-928] 200\nR011 y=341 | [45-226] 글랜모렌지 오리지날\nR012 y=367 | [45-321] Glenmorangie Lasanta | [751-785] 15 | [880-928] 240\nR013 y=381 | [45-209] 글랜모렌지 라산타\nR014 y=407 | [45-364] Glenmorangie Nectar D'or | [751-781] 17 | [880-928] 270\nR015 y=423 | [45-226] 글랜모렌지 넥타도르\nR016 y=449 | [45-392] Glenmorangie Quinta Ruban | [751-781] 18 | [880-928] 280\nR017 y=463 | [45-226] 글랜모렌지 퀸타루반\nR018 y=489 | [45-271] Glenmorangie 18Y | [751-785] 28 | [880-928] 450\nR019 y=504 | [45-188] 글랜모렌지18년\nR020 y=530 | [45-256] Glendronach 12Y | [751-781] 15 | [880-928] 230\nR021 y=544 | [45-188] 글랜드로낙12년\nR022 y=569 | [45-231] Glengoyne 12Y | [753-785] 14 | [880-928] 220\nR023 y=585 | [45-172] 글랜고인12년\nR024 y=609 | [44-164] Oban 14Y | [751-781] 20 | [880-928] 320\nR025 y=623 | [44-131] 오반14년\n</ocr_rows>",
+  "ocr_variant": "off",
+  "n_lines": 48,
+  "gap_factor": 2.5,
+  "layout": "rows",
+  "ocr_latency_ms": 2100
+}

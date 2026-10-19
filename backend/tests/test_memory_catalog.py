@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5). Reviewed by Jinwoo Park.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5; 2026-10-13, P22). Reviewed by Jinwoo Park.
 import json
 from pathlib import Path
 from uuid import UUID
@@ -65,3 +65,46 @@ def test_from_seed_skips_inactive_products_and_excluded_sources(tmp_path):
     assert catalog.get_normalized_aliases(product_id) == ["monkeyshoulder", "몽키숄더"]
     assert catalog.get_product(UUID("00000000-0000-0000-0000-000000000002")) is None
     assert catalog.find_product_ids_by_alias("retired") == []
+
+
+def test_brand_lookup():
+    brand, other = UUID(int=100), UUID(int=101)
+    first, second, unbranded = UUID(int=1), UUID(int=2), UUID(int=3)
+    catalog = InMemoryCatalog(
+        [
+            ProductInfo(first, "Macallan 12", brand_id=brand),
+            ProductInfo(second, "Macallan 15", brand_id=brand),
+            ProductInfo(unbranded, "Unbranded"),
+        ],
+        [],
+        [(brand, "The Macallan"), (brand, "맥캘란"), (other, "Other")],
+    )
+
+    assert catalog.find_brand_ids_by_alias("themacallan") == [brand]
+    assert catalog.find_brand_ids_by_alias("맥캘란") == [brand]
+    assert catalog.find_brand_ids_by_alias("macallan") == []
+    assert catalog.get_brand_product_ids(brand) == [first, second]
+    assert catalog.get_brand_product_ids(other) == []
+
+
+@pytest.mark.skipif(not SEED_PATH.exists(), reason="ai/catalog seed is not checked out")
+def test_from_seed_loads_brands():
+    catalog = InMemoryCatalog.from_seed(SEED_PATH)
+
+    [macallan] = catalog.find_brand_ids_by_alias("맥캘란")
+    assert catalog.find_brand_ids_by_alias("themacallan") == [macallan]
+    products = [catalog.get_product(pid) for pid in catalog.get_brand_product_ids(macallan)]
+    assert {p.display_name for p in products} >= {"The Macallan 12 Double Cask", "The Macallan 15 Double Cask"}
+    assert all(p.brand_id == macallan for p in products)
+
+
+def test_list_aliases_for_edit_distance():
+    brand, product = UUID(int=100), UUID(int=1)
+    catalog = InMemoryCatalog(
+        [ProductInfo(product, "Dalwhinnie 15", 15, brand_id=brand)],
+        [(product, "Dalwhinnie 15"), (product, "달위니 15년")],
+        [(brand, "Dalwhinnie"), (brand, "달위니")],
+    )
+
+    assert catalog.list_normalized_aliases() == [("dalwhinnie15", product), ("달위니15", product)]
+    assert catalog.list_normalized_brand_aliases() == [("dalwhinnie", brand), ("달위니", brand)]

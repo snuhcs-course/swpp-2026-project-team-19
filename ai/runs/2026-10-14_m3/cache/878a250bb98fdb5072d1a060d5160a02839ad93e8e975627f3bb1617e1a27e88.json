@@ -1,0 +1,54 @@
+{
+ "key": "878a250bb98fdb5072d1a060d5160a02839ad93e8e975627f3bb1617e1a27e88",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Macallan 18yo",
+  "context_lines": [
+   "Macallan 15yo",
+   "Glenmorangie Signet",
+   "Yamazaki 12yo",
+   "Ballentine 30yo",
+   "Glenfiddich 21yo"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Macallan",
+   "age": 18,
+   "edition_tokens_en": [],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "The Macallan 12 Double Cask",
+    "age": 12,
+    "edition": "Double Cask"
+   },
+   {
+    "no": "2",
+    "name": "The Macallan 12 Sherry Oak",
+    "age": 12,
+    "edition": "Sherry Oak"
+   },
+   {
+    "no": "3",
+    "name": "The Macallan 15 Double Cask",
+    "age": 15,
+    "edition": "Double Cask"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"제공된 옵션 중에는 18년 숙성 제품이 없습니다.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:40.222536+00:00",
+  "latency_ms": 3041,
+  "attempts": 1,
+  "input_tokens": 996,
+  "output_tokens": 34,
+  "thought_tokens": 138
+ }
+}

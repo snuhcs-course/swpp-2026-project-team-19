@@ -1,0 +1,48 @@
+{
+ "key": "986ed52a53df74e7ffa8cf22f56d92001d01995b3d7d14a494a6aada31c65848",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Bowmore 18yo",
+  "context_lines": [
+   "Machrie Moor",
+   "Hakushu DR",
+   "Hibiki DR",
+   "Lagavulin 16yo",
+   "Glenfiddich 18yo"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Bowmore",
+   "age": 18,
+   "edition_tokens_en": [],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Bowmore 12",
+    "age": 12,
+    "edition": null
+   },
+   {
+    "no": "2",
+    "name": "Bowmore 15",
+    "age": 15,
+    "edition": null
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"메뉴의 'Bowmore 18yo'는 연수가 18년이나, 목록에는 12년과 15년 상품만 있어 일치하는 상품이 없음.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:31.221572+00:00",
+  "latency_ms": 1347,
+  "attempts": 1,
+  "input_tokens": 933,
+  "output_tokens": 58,
+  "thought_tokens": 103
+ }
+}

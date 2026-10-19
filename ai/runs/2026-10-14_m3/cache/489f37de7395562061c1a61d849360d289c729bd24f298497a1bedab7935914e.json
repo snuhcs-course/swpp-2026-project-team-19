@@ -1,0 +1,51 @@
+{
+ "key": "489f37de7395562061c1a61d849360d289c729bd24f298497a1bedab7935914e",
+ "kind": "m3b",
+ "input": {
+  "menu_line": "Laphroaig 10yo Cask Strength",
+  "context_lines": [
+   "Arran Sherry cask",
+   "Ardbeg Uigeadail",
+   "Glenfarclas 105",
+   "Abelour A`bunadh",
+   "Lagavulin 12yo 2018"
+  ],
+  "translation": {
+   "bottler_en": null,
+   "distillery_en": null,
+   "brand_en": "Laphroaig",
+   "age": 10,
+   "edition_tokens_en": [
+    "Cask",
+    "Strength"
+   ],
+   "expansions": []
+  },
+  "options": [
+   {
+    "no": "1",
+    "name": "Laphroaig 10",
+    "age": 10,
+    "edition": null
+   },
+   {
+    "no": "2",
+    "name": "Laphroaig Quarter Cask",
+    "age": null,
+    "edition": "Quarter Cask"
+   }
+  ]
+ },
+ "output_text": "{\n  \"choice\": \"none\",\n  \"reason\": \"메뉴의 'Cask Strength' 에디션과 일치하는 상품이 목록에 없습니다.\"\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+  "started_at": "2026-10-14T07:56:13.219886+00:00",
+  "latency_ms": 2461,
+  "attempts": 1,
+  "input_tokens": 965,
+  "output_tokens": 38,
+  "thought_tokens": 123
+ }
+}

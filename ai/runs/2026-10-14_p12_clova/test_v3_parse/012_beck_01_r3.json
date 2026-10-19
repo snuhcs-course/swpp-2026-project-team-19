@@ -1,0 +1,216 @@
+{
+  "condition": "OCR+LLM",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "sdk": "google-genai 2.28.0",
+  "api": "interactions",
+  "store": false,
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "prompt_sha256": "e62c33be4b7fb80769b5f8e71628a480f31f5f0382b66ab8267a63aab0242127",
+  "started_at": "2026-10-14T05:35:18.745458+00:00",
+  "latency_ms": 18666,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 3992,
+  "output_tokens": 1282,
+  "thought_tokens": 3812,
+  "total_tokens": 9086,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Buffalo Trace / Makrt's Mark",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Wildturkey 101",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Four Roses Small Batch",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "James E Pepper 1776 Rye Whiskey",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "James E Pepper 1776 Bourbon Whiskey",
+        "price_krw": 17000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Cleveland Black Reserve Bourbon",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Rowan's Creek",
+        "price_krw": 27000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Taylor Small Batch",
+        "price_krw": 38000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Templeton Rye Barrel Strength",
+        "price_krw": 26000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Maker's Mark Cask Strength",
+        "price_krw": 33000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Old Pepper Rye Single Barrel",
+        "price_krw": 35000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Noah's Mill",
+        "price_krw": 42000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Booker's",
+        "price_krw": 48000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Remy Martin V.S.O.P",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Remy Martin V.S.O.P",
+        "price_krw": 320000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Hennessy V.S.O.P",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Hennessy V.S.O.P",
+        "price_krw": 320000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Boulard X.O",
+        "price_krw": 40000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Boulard X.O",
+        "price_krw": 200000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Camus X.O",
+        "price_krw": 50000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Remy Martin X.O",
+        "price_krw": 55000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Hennessy X.O",
+        "price_krw": 65000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Camus X.O Borderies",
+        "price_krw": 55000,
+        "pour_ml": 30,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Buffalo Trace / Makrt's Mark\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Wildturkey 101\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Four Roses Small Batch\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"James E Pepper 1776 Rye Whiskey\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"James E Pepper 1776 Bourbon Whiskey\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Cleveland Black Reserve Bourbon\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Rowan's Creek\",\n      \"price_krw\": 27000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Taylor Small Batch\",\n      \"price_krw\": 38000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Templeton Rye Barrel Strength\",\n      \"price_krw\": 26000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Maker's Mark Cask Strength\",\n      \"price_krw\": 33000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Old Pepper Rye Single Barrel\",\n      \"price_krw\": 35000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Noah's Mill\",\n      \"price_krw\": 42000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Booker's\",\n      \"price_krw\": 48000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Remy Martin V.S.O.P\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Remy Martin V.S.O.P\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Hennessy V.S.O.P\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Hennessy V.S.O.P\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Boulard X.O\",\n      \"price_krw\": 40000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Boulard X.O\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Camus X.O\",\n      \"price_krw\": 50000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Remy Martin X.O\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Hennessy X.O\",\n      \"price_krw\": 65000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Camus X.O Borderies\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-14T05:35:36Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Buffalo Trace / Makrt's Mark\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Wildturkey 101\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Four Roses Small Batch\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"James E Pepper 1776 Rye Whiskey\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"James E Pepper 1776 Bourbon Whiskey\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Cleveland Black Reserve Bourbon\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Rowan's Creek\",\n      \"price_krw\": 27000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Taylor Small Batch\",\n      \"price_krw\": 38000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Templeton Rye Barrel Strength\",\n      \"price_krw\": 26000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Maker's Mark Cask Strength\",\n      \"price_krw\": 33000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Old Pepper Rye Single Barrel\",\n      \"price_krw\": 35000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Noah's Mill\",\n      \"price_krw\": 42000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Booker's\",\n      \"price_krw\": 48000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Remy Martin V.S.O.P\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Remy Martin V.S.O.P\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Hennessy V.S.O.P\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Hennessy V.S.O.P\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Boulard X.O\",\n      \"price_krw\": 40000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Boulard X.O\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Camus X.O\",\n      \"price_krw\": 50000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Remy Martin X.O\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Hennessy X.O\",\n      \"price_krw\": 65000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Camus X.O Borderies\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"Buffalo Trace / Makrt's Mark\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Wildturkey 101\",\n      \"price_krw\": 14000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Four Roses Small Batch\",\n      \"price_krw\": 16000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"James E Pepper 1776 Rye Whiskey\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"James E Pepper 1776 Bourbon Whiskey\",\n      \"price_krw\": 17000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Cleveland Black Reserve Bourbon\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Rowan's Creek\",\n      \"price_krw\": 27000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Taylor Small Batch\",\n      \"price_krw\": 38000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Templeton Rye Barrel Strength\",\n      \"price_krw\": 26000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Maker's Mark Cask Strength\",\n      \"price_krw\": 33000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Old Pepper Rye Single Barrel\",\n      \"price_krw\": 35000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Noah's Mill\",\n      \"price_krw\": 42000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Booker's\",\n      \"price_krw\": 48000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Remy Martin V.S.O.P\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Remy Martin V.S.O.P\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Hennessy V.S.O.P\",\n      \"price_krw\": 20000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Hennessy V.S.O.P\",\n      \"price_krw\": 320000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Boulard X.O\",\n      \"price_krw\": 40000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Boulard X.O\",\n      \"price_krw\": 200000,\n      \"pour_ml\": null,\n      \"unit\": \"bottle\"\n    },\n    {\n      \"raw_name\": \"Camus X.O\",\n      \"price_krw\": 50000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Remy Martin X.O\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Hennessy X.O\",\n      \"price_krw\": 65000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"Camus X.O Borderies\",\n      \"price_krw\": 55000,\n      \"pour_ml\": 30,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-14T05:35:36Z",
+    "usage": {
+      "cached_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 1896
+        }
+      ],
+      "input_tokens_by_modality": [
+        {
+          "modality": "text",
+          "tokens": 3992
+        }
+      ],
+      "total_cached_tokens": 1896,
+      "total_input_tokens": 3992,
+      "total_output_tokens": 1282,
+      "total_thought_tokens": 3812,
+      "total_tokens": 9086,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3,
+  "source_image": "012_beck_01.jpeg",
+  "prompt_version": "v3",
+  "user_text": "아래는 메뉴판 사진 한 장의 OCR 줄 목록이다. 규칙에 따라 항목을 추출해.\n\n<ocr_lines>\nL001 [57,119,337,156] 아메리칸 위스키\nL002 [62,627,337,654] Remy Martin V.S.O.P\nL003 [62,655,292,680] Hennessy V.S.O.P\nL004 [64,582,462,615] 브랜디 (꼬냑, 깔바도스)\nL005 [59,441,470,467] Templeton Rye Barrel Strength\nL006 [64,469,437,493] Maker's Mark Cask Strength\nL007 [62,496,451,519] Old Pepper Rye Single Barrel\nL008 [64,523,219,543] Noah's Mill\nL009 [62,548,179,570] Booker's\nL010 [62,395,500,429] 아메리칸 캐스크 스트렝스\nL011 [54,166,448,194] Buffalo Trace / Makrt's Mark\nL012 [55,194,261,222] Wildturkey 101\nL013 [59,225,377,248] Four Roses Small Batch\nL014 [57,252,528,280] James E Pepper 1776 Rye Whiskey\nL015 [57,279,589,308] James E Pepper 1776 Bourbon Whiskey\nL016 [59,306,502,330] Cleveland Black Reserve Bourbon\nL017 [61,334,259,356] Rowan's Creek\nL018 [59,361,311,386] Taylor Small Batch\nL019 [729,127,797,146] Glass\nL020 [731,154,795,173] 30ml\nL021 [719,180,804,202] 14,000\nL022 [719,206,804,228] 14,000\nL023 [719,233,802,254] 16,000\nL024 [717,259,800,281] 17,000\nL025 [715,285,800,307] 17,000\nL026 [715,314,800,335] 20,000\nL027 [713,339,800,361] 27,000\nL028 [713,365,800,387] 38,000\nL029 [726,392,792,410] Glass\nL030 [726,418,790,436] 30ml\nL031 [713,443,799,465] 26,000\nL032 [713,469,799,491] 33,000\nL033 [713,497,797,517] 35,000\nL034 [713,522,797,543] 42,000\nL035 [712,547,797,569] 48,000\nL036 [722,574,790,592] Glass\nL037 [722,599,788,618] 30ml\nL038 [713,626,795,646] 20,000\nL039 [710,651,795,672] 20,000\nL040 [880,624,979,644] 320,000\nL041 [882,651,981,670] 320,000\nL042 [889,182,988,206] 200,000\nL043 [904,130,979,150] Bottle\nL044 [63,736,224,758] Boulard X.O\nL045 [62,762,210,786] Camus X.O\nL046 [60,788,292,817] Remy Martin X.O\nL047 [60,818,247,845] Hennessy X.O\nL048 [60,841,345,870] Camus X.O Borderies\nL049 [724,703,788,721] 30ml\nL050 [710,728,797,750] 40,000\nL051 [712,754,797,776] 50,000\nL052 [712,781,799,803] 55,000\nL053 [712,807,799,829] 65,000\nL054 [713,833,800,855] 55,000\n</ocr_lines>",
+  "ocr_variant": "off",
+  "n_lines": 54,
+  "gap_factor": 2.5,
+  "layout": "lines",
+  "ocr_latency_ms": 2211
+}

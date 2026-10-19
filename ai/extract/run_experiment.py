@@ -3,6 +3,7 @@
 
     python ai/extract/run_experiment.py                      # 9 photos x 5 runs x A/A2/B
     python ai/extract/run_experiment.py --tag pilot --runs 1 --photos 007_bokchun_03.jpg
+    python ai/extract/run_experiment.py --set test --tag test --conditions A2 --runs 3
 
 Writes ai/runs/<date>[_<tag>]_<condition>/<photo_stem>_r<k>.json plus manifest.json.
 Existing records are skipped, so an interrupted run can be resumed with the same
@@ -22,11 +23,15 @@ from pathlib import Path
 from extract import (CONDITIONS, PROMPT_VERSION, REPO_ROOT, call_model, load_prompt,
                      data_dir, genai, make_client, prepare_image, sha256_file)
 
-LABELS_PATH = REPO_ROOT / "eval" / "labels_v1.json"
+LABEL_SETS = {
+    "val": (REPO_ROOT / "eval" / "labels_v1.json", "eval_photos"),
+    "test": (REPO_ROOT / "eval" / "labels_heldout_v1.json", "eval_photos_test"),
+}
+LABELS_PATH = LABEL_SETS["val"][0]
 
 
-def eval_photos(names: list[str] | None) -> list[Path]:
-    photo_dir = data_dir() / "eval_photos"
+def eval_photos(names: list[str] | None, label_set: str = "val") -> list[Path]:
+    photo_dir = data_dir() / LABEL_SETS[label_set][1]
     mapping = json.loads((photo_dir / "photo_map.json").read_text(encoding="utf-8"))["map"]
     chosen = names or sorted(mapping)
     unknown = [n for n in chosen if n not in mapping]
@@ -43,12 +48,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--conditions", nargs="+", default=list(CONDITIONS), choices=list(CONDITIONS))
     parser.add_argument("--runs", type=int, default=5)
-    parser.add_argument("--photos", nargs="+", help="eval photo filenames (default: all 9)")
+    parser.add_argument("--set", dest="label_set", choices=sorted(LABEL_SETS), default="val",
+                        help="val: eval_photos (9) / test: eval_photos_test (14, held-out)")
+    parser.add_argument("--photos", nargs="+", help="eval photo filenames (default: all in the set)")
     parser.add_argument("--date", default=date.today().isoformat())
     parser.add_argument("--tag", help="extra name part, e.g. pilot")
     args = parser.parse_args()
 
-    photos = eval_photos(args.photos)
+    photos = eval_photos(args.photos, args.label_set)
+    labels_path = LABEL_SETS[args.label_set][0]
     prepared = {p.name: prepare_image(p) for p in photos}  # once per photo, before any call
     prefix = args.date + (f"_{args.tag}" if args.tag else "")
     run_dirs = {c: REPO_ROOT / "ai" / "runs" / f"{prefix}_{c}" for c in args.conditions}
@@ -61,7 +69,8 @@ def main() -> None:
             "sdk": f"google-genai {genai.__version__}", "api": "interactions", "store": False,
             "temperature": 1.0, "media_resolution": "default",
             "prompt_version": PROMPT_VERSION, "prompt_sha256": hashlib.sha256(load_prompt().encode("utf-8")).hexdigest(),
-            "labels_sha256": sha256_file(LABELS_PATH),
+            "label_set": args.label_set,
+            "labels_sha256": sha256_file(labels_path),
             "runs": args.runs,
             "photos": {name: {"prepared": p.name, "prepared_sha256": sha256_file(p)}
                        for name, p in prepared.items()},

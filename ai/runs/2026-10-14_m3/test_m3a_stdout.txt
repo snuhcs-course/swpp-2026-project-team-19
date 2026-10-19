@@ -1,0 +1,75 @@
+
+== S1+S2b+S3 / C0 / test  (478 lines)
+  known top-1 0.770   false merge rate 0.000   photos with owner burden < 5: 0.00   confirm recommended 12   accept error rate 0.010
+  confirm recommended by source: rule 7/12, llm 0/0
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  absent                    0              0              0             41            299              0              0
+  known                   104              0             22              0              9              0              0
+  unknown                   0              0              0              0              3              0              0
+  [bar] 미라보                69              0             20             40            281              0              0
+  [bar] 포레스트               35              0              2              1             30              0              0
+  owner burden per photo: 011_미라보_01 33, 011_미라보_02 41, 011_미라보_03 54, 011_미라보_04 46, 011_미라보_05 31, 011_미라보_06 35, 011_미라보_07 29, 011_미라보_08 33, 011_미라보_09 39, 013_포레스트_01 33
+  owner burden by kind (all photos): confirm 19, choose 3, register 311, wrong 41   photos with choose+register+wrong < 5: 0.00
+
+== S1+S2b+S3 / C1 / test  (478 lines)
+  known top-1 0.377   false merge rate 0.000   photos with owner burden < 5: 0.00   confirm recommended 18   accept error rate 0.008
+  confirm recommended by source: rule 14/18, llm 0/0
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  known                   179              0            107             21            168              0              0
+  unknown                   0              0              0              0              3              0              0
+  [bar] 미라보               138              0            104             19            149              0              0
+  [bar] 포레스트               41              0              3              2             22              0              0
+  owner burden per photo: 011_미라보_01 29, 011_미라보_02 32, 011_미라보_03 38, 011_미라보_04 31, 011_미라보_05 21, 011_미라보_06 24, 011_미라보_07 28, 011_미라보_08 33, 011_미라보_09 36, 013_포레스트_01 27
+  owner burden by kind (all photos): confirm 62, choose 45, register 171, wrong 21   photos with choose+register+wrong < 5: 0.00
+
+== M3a / C0 / test  (478 lines)
+  known top-1 0.770   false merge rate 0.000   photos with owner burden < 5: 0.00   confirm recommended 21   accept error rate 0.015
+  confirm recommended by source: rule 7/12, llm 7/9
+  from register (unmatched in S1+S2b+S3): {'confirm': 2, 'confirm_gold_in_candidates': 2}
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  absent                    0              0              0             41            299              0              0
+  known                   104              0             24              0              7              0              0
+  unknown                   0              0              0              0              3              0              0
+  [bar] 미라보                69              0             22             40            279              0              0
+  [bar] 포레스트               35              0              2              1             30              0              0
+  owner burden per photo: 011_미라보_01 33, 011_미라보_02 41, 011_미라보_03 54, 011_미라보_04 46, 011_미라보_05 31, 011_미라보_06 35, 011_미라보_07 29, 011_미라보_08 33, 011_미라보_09 39, 013_포레스트_01 33
+  owner burden by kind (all photos): confirm 23, choose 1, register 309, wrong 41   photos with choose+register+wrong < 5: 0.00
+
+== M3a / C1 / test  (478 lines)
+  known top-1 0.377   false merge rate 0.000   photos with owner burden < 5: 0.00   confirm recommended 208   accept error rate 0.002
+  confirm recommended by source: rule 14/14, llm 193/194
+  from register (unmatched in S1+S2b+S3): {'confirm': 117, 'confirm_gold_in_candidates': 117, 'choose': 13, 'choose_gold_in_candidates': 13}
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  known                   179              0            255              2             39              0              0
+  unknown                   0              0              1              0              2              0              0
+  [bar] 미라보               138              0            236              1             35              0              0
+  [bar] 포레스트               41              0             20              1              6              0              0
+  owner burden per photo: 011_미라보_01 29, 011_미라보_02 32, 011_미라보_03 38, 011_미라보_04 31, 011_미라보_05 21, 011_미라보_06 24, 011_미라보_07 28, 011_미라보_08 33, 011_미라보_09 36, 013_포레스트_01 27
+  owner burden by kind (all photos): confirm 219, choose 37, register 41, wrong 2   photos with choose+register+wrong < 5: 0.10
+
+== M3a/replace / C0 / test  (478 lines)
+  known top-1 0.770   false merge rate 0.000   photos with owner burden < 5: 0.00   confirm recommended 21   accept error rate 0.015
+  confirm recommended by source: rule 7/12, llm 7/9
+  from register (unmatched in S1+S2b+S3): {'confirm': 2, 'confirm_gold_in_candidates': 2}
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  absent                    0              0              0             41            299              0              0
+  known                   104              0             24              0              7              0              0
+  unknown                   0              0              0              0              3              0              0
+  [bar] 미라보                69              0             22             40            279              0              0
+  [bar] 포레스트               35              0              2              1             30              0              0
+  owner burden per photo: 011_미라보_01 33, 011_미라보_02 41, 011_미라보_03 54, 011_미라보_04 46, 011_미라보_05 31, 011_미라보_06 35, 011_미라보_07 29, 011_미라보_08 33, 011_미라보_09 39, 013_포레스트_01 33
+  owner burden by kind (all photos): confirm 23, choose 1, register 309, wrong 41   photos with choose+register+wrong < 5: 0.00
+
+== M3a/replace / C1 / test  (478 lines)
+  known top-1 0.377   false merge rate 0.000   photos with owner burden < 5: 0.00   confirm recommended 225   accept error rate 0.002
+  confirm recommended by source: rule 14/14, llm 210/211
+  from register (unmatched in S1+S2b+S3): {'confirm': 117, 'confirm_gold_in_candidates': 117, 'choose': 13, 'choose_gold_in_candidates': 13}
+  kind                correct        partial   ambiguous_ok  ambiguous_bad      unmatched    false_merge  overconfident
+  known                   179              0            255              2             39              0              0
+  unknown                   0              0              1              0              2              0              0
+  [bar] 미라보               138              0            236              1             35              0              0
+  [bar] 포레스트               41              0             20              1              6              0              0
+  owner burden per photo: 011_미라보_01 29, 011_미라보_02 32, 011_미라보_03 38, 011_미라보_04 31, 011_미라보_05 21, 011_미라보_06 24, 011_미라보_07 28, 011_미라보_08 33, 011_미라보_09 36, 013_포레스트_01 27
+  owner burden by kind (all photos): confirm 236, choose 20, register 41, wrong 2   photos with choose+register+wrong < 5: 0.20
+
+LLM: {"model": "gemini-3.1-flash-lite", "thinking_level": "low", "api_calls_this_run": 10, "by_kind": {"m3a": {"requests": 10, "api_calls": 10, "cache_hits": 0, "parse_errors": 0, "input_tokens": 27965, "output_tokens": 33645, "thought_tokens": 1143, "mean_latency_ms": 10226}}}

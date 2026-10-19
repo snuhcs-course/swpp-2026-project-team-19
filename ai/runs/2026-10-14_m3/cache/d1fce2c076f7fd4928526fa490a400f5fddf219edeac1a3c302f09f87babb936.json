@@ -1,0 +1,175 @@
+{
+ "key": "d1fce2c076f7fd4928526fa490a400f5fddf219edeac1a3c302f09f87babb936",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "메이커스 마크(Maker's Mark) 버번",
+    "target": true
+   },
+   {
+    "line": 2,
+    "name": "메이커스 마크(Maker's Mark) 46",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "메이커스 마크(Maker's Mark) 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "리뎀션(Redemption) 라이",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "놉 크릭(Knob Creek) 버번",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "놉 크릭(Knob Creek) 라이",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "이글레어(Eagle Rare) 10년",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "포로지스(Four Roses) 싱글 배럴",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "러셀(Russel's) 10년 버번",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "러셀(Russel's) 버번 싱글 배럴",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "러셀(Russel's) 라이 싱글 배럴",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "1776 제임스 E.페퍼(1776 James E. Pepper) 버번",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "1776 제임스 E.페퍼(1776 James E. Pepper) 라이",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "믹터스(Michter's) 버번",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "믹터스(Michter's) 라이",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "사제락(Sazerac) 라이",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "브로큰 배럴(Broken Barrel) 버번 포트 캐스크",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "베이커스(Baker's) 버번",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "바톤 1792(Barton 1792) 1792 풀 프루프",
+    "target": true
+   },
+   {
+    "line": 20,
+    "name": "우드포드 리저브(Woodford Reserve) 버번",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "우드포드 리저브(Woodford Reserve) 더블오크",
+    "target": false
+   },
+   {
+    "line": 22,
+    "name": "우드포드 리저브(Woodford Reserve) 더블 X.O",
+    "target": true
+   },
+   {
+    "line": 23,
+    "name": "윌렛(Willet) 로완스크릭",
+    "target": true
+   },
+   {
+    "line": 24,
+    "name": "윌렛(Willet) 팟 스틸 리저브",
+    "target": true
+   },
+   {
+    "line": 25,
+    "name": "윌렛(Willet) 노아스밀",
+    "target": true
+   },
+   {
+    "line": 26,
+    "name": "윌렛(Willet) 위티드 버번 8년",
+    "target": true
+   },
+   {
+    "line": 27,
+    "name": "배럴(Barrel) 라이 씨그라스",
+    "target": true
+   },
+   {
+    "line": 28,
+    "name": "블랑톤(Blanton) 버번 싱글배럴",
+    "target": true
+   },
+   {
+    "line": 29,
+    "name": "블랑톤(Blanton) SFTB",
+    "target": true
+   },
+   {
+    "line": 30,
+    "name": "부커스(Booker's) 버번",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "일라이저 크레이그(Elijah Craig) 버번 배럴 프루프",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 1,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Maker's Mark\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Maker's Mark\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"46\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Maker's Mark\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Cask\", \"Strength\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Redemption\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Rye\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Knob Creek\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 6,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Knob Creek\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Rye\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Four Roses\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Single\", \"Barrel\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Russell's Reserve\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Russell's Reserve\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\", \"Single\", \"Barrel\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 11,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Russell's Reserve\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Rye\", \"Single\", \"Barrel\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"James E. Pepper\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"1776\", \"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"James E. Pepper\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"1776\", \"Rye\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Michter's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Michter's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Rye\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Sazerac\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Rye\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Broken Barrel\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\", \"Port\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Baker's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"1792\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Full\", \"Proof\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Woodford Reserve\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 22,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Woodford Reserve\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Double\", \"X.O\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 23,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Willett\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Rowan's\", \"Creek\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 24,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Willett\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Pot\", \"Still\", \"Reserve\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Willett\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Noah's\", \"Mill\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 26,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Willett\",\n      \"age\": 8,\n      \"edition_tokens_en\": [\"Wheated\", \"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 27,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Barrell\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Rye\", \"Seagrass\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 28,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Blanton's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\", \"Single\", \"Barrel\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 29,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Blanton's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"SFTB\"],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"SFTB\",\n          \"expansion\": \"Straight From The Barrel\"\n        }\n      ]\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Booker's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 31,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Elijah Craig\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Bourbon\", \"Barrel\", \"Proof\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-14T08:00:25.765664+00:00",
+  "latency_ms": 6750,
+  "attempts": 1,
+  "input_tokens": 2263,
+  "output_tokens": 2558,
+  "thought_tokens": 114
+ }
+}

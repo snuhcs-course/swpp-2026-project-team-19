@@ -1,0 +1,145 @@
+{
+ "key": "cce647034e0fa6959fa8710e578169174b60967b0e87ed90b857fa60c7450346",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "Glenfiddich 15yo",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "Oban 14yo",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "Glengrant 15yo",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "Dalwhinny 15yo",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "Glenlivet 15yo",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "Bowmore 15yo",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "Machrie Moor",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "Hakushu DR",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "Hibiki DR",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "Lagavulin 16yo",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "Glenfiddich 18yo",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "Bowmore 18yo",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "Macallan 15yo",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "Glenmorangie Signet",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "Yamazaki 12yo",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "Ballentine 30yo",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "Glenfiddich 21yo",
+    "target": false
+   },
+   {
+    "line": 18,
+    "name": "Macallan . 18yo",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "Glenfarclas 25yo",
+    "target": true
+   },
+   {
+    "line": 20,
+    "name": "Caol ila 25yo",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "라프로익 25년",
+    "target": true
+   },
+   {
+    "line": 22,
+    "name": "히비키 21년",
+    "target": true
+   },
+   {
+    "line": 23,
+    "name": "히비키 블랜더스 쵸이스",
+    "target": true
+   },
+   {
+    "line": 24,
+    "name": "발베니 18년 PX",
+    "target": true
+   },
+   {
+    "line": 25,
+    "name": "카발란 DR 마데라캐스크",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Dalwhinnie\",\n      \"age\": 15,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Arran\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Machrie\",\n        \"Moor\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hakushu\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"DR\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"DR\",\n          \"expansion\": \"Distiller's Reserve\"\n        }\n      ]\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hibiki\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"DR\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"DR\",\n          \"expansion\": \"Distiller's Reserve\"\n        }\n      ]\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bowmore\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Macallan\",\n      \"age\": 15,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Yamazaki\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Ballantine's\",\n      \"age\": 30,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Macallan\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenfarclas\",\n      \"age\": 25,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Caol Ila\",\n      \"age\": 25,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 21,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Laphroaig\",\n      \"age\": 25,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 22,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hibiki\",\n      \"age\": 21,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 23,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hibiki\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Blender's\",\n        \"Choice\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 24,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Balvenie\",\n      \"age\": 18,\n      \"edition_tokens_en\": [\n        \"PX\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"PX\",\n          \"expansion\": \"Pedro Ximénez\"\n        }\n      ]\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kavalan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"DR\",\n        \"Madeira\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"DR\",\n          \"expansion\": \"Distiller's Reserve\"\n        }\n      ]\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-14T08:50:36.789145+00:00",
+  "latency_ms": 4015,
+  "attempts": 1,
+  "input_tokens": 1910,
+  "output_tokens": 1512,
+  "thought_tokens": 107
+ }
+}

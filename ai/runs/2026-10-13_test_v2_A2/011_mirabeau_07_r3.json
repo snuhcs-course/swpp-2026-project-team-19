@@ -1,0 +1,260 @@
+{
+  "condition": "A2",
+  "model": "gemini-3.5-flash-lite",
+  "sdk": "google-genai 2.28.0",
+  "retry_policy": "own retries x6, SDK retries off, timeout 300s, wall 330s",
+  "api": "interactions",
+  "store": false,
+  "temperature": 1.0,
+  "thinking_level": "medium",
+  "media_resolution": "default (unspecified, 1120 tokens/image)",
+  "prompt_version": "v2",
+  "prompt_sha256": "87314f7784a57513cea270fef34d2c7d9a1147f2d1b337b1bfd73841ce5cab96",
+  "source_image": "011_mirabeau_07.jpeg",
+  "prepared_image": "011_mirabeau_07.jpg",
+  "prepared_sha256": "972a22e86ab3cef1f333ce05f0367e8608ea8b6a7d5adc32678a0003a6224716",
+  "started_at": "2026-10-13T02:29:21.313859+00:00",
+  "latency_ms": 13826,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 2811,
+  "output_tokens": 1889,
+  "thought_tokens": 3257,
+  "total_tokens": 7957,
+  "output": {
+    "items": [
+      {
+        "raw_name": "메이커스 마크(Maker's Mark) 버번",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "메이커스 마크(Maker's Mark) 46",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트랭스",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "리뎀션(Redemption) 라이",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "놉 크릭(Knob Creek) 버번",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "놉 크릭(Knob Creek) 라이",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "이글레어(Eagle Rare) 10년",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포로지스(Four Roses) 싱글 배럴",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "러셀(Russel's) 10년 버번",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "러셀(Russel's) 버번 싱글 배럴",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "러셀(Russel's) 라이 싱글 배럴",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "1776 제임스 E.페퍼(1776 James E. Pepper) 버번",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "1776 제임스 E.페퍼(1776 James E. Pepper) 라이",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "믹터스(Michter's) 버번",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "믹터스(Michter's) 라이",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "사제락(Sazerac) 라이",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브로큰 배럴(Broken Barrel) 버번 포트 캐스크",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "베이커스(Baker's) 버번",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "바톤 1792(Barton 1792) 1792 풀 프루프",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "우드포드 리저브(Woodford Reserve) 버번",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "우드포드 리저브(Woodford Reserve) 더블오크",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "우드포드 리저브(Woodford Reserve) 더블 X.O",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "윌렛(Willet) 로완스크릭",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "윌렛(Willet) 팟 스틸 리저브",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "윌렛(Willet) 노아스밀",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "윌렛(Willet) 위티드 버번 8년",
+        "price_krw": 70000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "배럴(Barrell) 라이 씨글라스",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "블량톤(Blanton) 버번 싱글배럴",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "블량톤(Blanton) SFTB",
+        "price_krw": 62000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부커스(Booker's) 버번",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "일라이저 크레이그(Elijah Craig) 버번 배럴 프루프",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "parse_error": null,
+  "raw_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"메이커스 마크(Maker's Mark) 버번\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"메이커스 마크(Maker's Mark) 46\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"메이커스 마크(Maker's Mark) 캐스크 스트랭스\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"리뎀션(Redemption) 라이\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"놉 크릭(Knob Creek) 버번\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"놉 크릭(Knob Creek) 라이\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"이글레어(Eagle Rare) 10년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"포로지스(Four Roses) 싱글 배럴\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"러셀(Russel's) 10년 버번\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"러셀(Russel's) 버번 싱글 배럴\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"러셀(Russel's) 라이 싱글 배럴\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"1776 제임스 E.페퍼(1776 James E. Pepper) 버번\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"1776 제임스 E.페퍼(1776 James E. Pepper) 라이\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"믹터스(Michter's) 버번\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"믹터스(Michter's) 라이\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"사제락(Sazerac) 라이\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"브로큰 배럴(Broken Barrel) 버번 포트 캐스크\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"베이커스(Baker's) 버번\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"바톤 1792(Barton 1792) 1792 풀 프루프\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포드 리저브(Woodford Reserve) 버번\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블오크\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블 X.O\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 로완스크릭\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 팟 스틸 리저브\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 노아스밀\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 위티드 버번 8년\",\n      \"price_krw\": 70000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"배럴(Barrell) 라이 씨글라스\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"블량톤(Blanton) 버번 싱글배럴\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"블량톤(Blanton) SFTB\",\n      \"price_krw\": 62000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"부커스(Booker's) 버번\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"일라이저 크레이그(Elijah Craig) 버번 배럴 프루프\",\n      \"price_krw\": 37000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+  "raw_response": {
+    "status": "completed",
+    "created": "2026-10-13T02:29:35Z",
+    "id": "",
+    "model": "gemini-3.5-flash-lite",
+    "output_text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"메이커스 마크(Maker's Mark) 버번\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"메이커스 마크(Maker's Mark) 46\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"메이커스 마크(Maker's Mark) 캐스크 스트랭스\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"리뎀션(Redemption) 라이\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"놉 크릭(Knob Creek) 버번\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"놉 크릭(Knob Creek) 라이\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"이글레어(Eagle Rare) 10년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"포로지스(Four Roses) 싱글 배럴\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"러셀(Russel's) 10년 버번\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"러셀(Russel's) 버번 싱글 배럴\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"러셀(Russel's) 라이 싱글 배럴\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"1776 제임스 E.페퍼(1776 James E. Pepper) 버번\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"1776 제임스 E.페퍼(1776 James E. Pepper) 라이\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"믹터스(Michter's) 버번\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"믹터스(Michter's) 라이\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"사제락(Sazerac) 라이\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"브로큰 배럴(Broken Barrel) 버번 포트 캐스크\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"베이커스(Baker's) 버번\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"바톤 1792(Barton 1792) 1792 풀 프루프\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포드 리저브(Woodford Reserve) 버번\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블오크\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블 X.O\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 로완스크릭\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 팟 스틸 리저브\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 노아스밀\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 위티드 버번 8년\",\n      \"price_krw\": 70000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"배럴(Barrell) 라이 씨글라스\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"블량톤(Blanton) 버번 싱글배럴\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"블량톤(Blanton) SFTB\",\n      \"price_krw\": 62000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"부커스(Booker's) 버번\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"일라이저 크레이그(Elijah Craig) 버번 배럴 프루프\",\n      \"price_krw\": 37000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+    "service_tier": "standard",
+    "steps": [
+      {
+        "signature": "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",
+        "type": "thought"
+      },
+      {
+        "content": [
+          {
+            "text": "{\n  \"items\": [\n    {\n      \"raw_name\": \"메이커스 마크(Maker's Mark) 버번\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"메이커스 마크(Maker's Mark) 46\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"메이커스 마크(Maker's Mark) 캐스크 스트랭스\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"리뎀션(Redemption) 라이\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"놉 크릭(Knob Creek) 버번\",\n      \"price_krw\": 12000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"놉 크릭(Knob Creek) 라이\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"이글레어(Eagle Rare) 10년\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"포로지스(Four Roses) 싱글 배럴\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"러셀(Russel's) 10년 버번\",\n      \"price_krw\": 13000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"러셀(Russel's) 버번 싱글 배럴\",\n      \"price_krw\": 16000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"러셀(Russel's) 라이 싱글 배럴\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"1776 제임스 E.페퍼(1776 James E. Pepper) 버번\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"1776 제임스 E.페퍼(1776 James E. Pepper) 라이\",\n      \"price_krw\": 14000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"믹터스(Michter's) 버번\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"믹터스(Michter's) 라이\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"사제락(Sazerac) 라이\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"브로큰 배럴(Broken Barrel) 버번 포트 캐스크\",\n      \"price_krw\": 15000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"베이커스(Baker's) 버번\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"바톤 1792(Barton 1792) 1792 풀 프루프\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포드 리저브(Woodford Reserve) 버번\",\n      \"price_krw\": 17000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블오크\",\n      \"price_krw\": 19000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블 X.O\",\n      \"price_krw\": 42000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 로완스크릭\",\n      \"price_krw\": 18000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 팟 스틸 리저브\",\n      \"price_krw\": 20000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 노아스밀\",\n      \"price_krw\": 21000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"윌렛(Willet) 위티드 버번 8년\",\n      \"price_krw\": 70000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"배럴(Barrell) 라이 씨글라스\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"블량톤(Blanton) 버번 싱글배럴\",\n      \"price_krw\": 25000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"블량톤(Blanton) SFTB\",\n      \"price_krw\": 62000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"부커스(Booker's) 버번\",\n      \"price_krw\": 35000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    },\n    {\n      \"raw_name\": \"일라이저 크레이그(Elijah Craig) 버번 배럴 프루프\",\n      \"price_krw\": 37000,\n      \"pour_ml\": null,\n      \"unit\": \"glass\"\n    }\n  ]\n}",
+            "type": "text"
+          }
+        ],
+        "type": "model_output"
+      }
+    ],
+    "updated": "2026-10-13T02:29:35Z",
+    "usage": {
+      "input_tokens_by_modality": [
+        {
+          "modality": "image",
+          "tokens": 1064
+        },
+        {
+          "modality": "text",
+          "tokens": 1747
+        }
+      ],
+      "total_cached_tokens": 0,
+      "total_input_tokens": 2811,
+      "total_output_tokens": 1889,
+      "total_thought_tokens": 3257,
+      "total_tokens": 7957,
+      "total_tool_use_tokens": 0
+    },
+    "object": "interaction"
+  },
+  "run": 3
+}
