@@ -39,6 +39,8 @@ class MenuUploadViewModel(
     private val retryCache = MenuUploadRetryCache()
     private var selectionGeneration = 0L
     private val savedPhotoKey = "ownerMenuPhotoUris"
+    private val savedBarKey = "ownerSelectedBarId"
+    private val savedModeKey = "ownerImportMode"
     private val cameraPendingKey = "ownerCameraPendingFile"
     private val cameraPreviewKey = "ownerCameraPreviewFile"
     private val cameraStorage = OwnerCameraPhotoStorage(application)
@@ -49,6 +51,12 @@ class MenuUploadViewModel(
     )
 
     init {
+        _state.value = _state.value.copy(
+            selectedBarId = savedStateHandle.get<String>(savedBarKey),
+            mode = ImportModeUi.entries.firstOrNull {
+                it.name == savedStateHandle.get<String>(savedModeKey)
+            } ?: ImportModeUi.PARTIAL_UPDATE,
+        )
         syncCameraState()
         loadBars()
         restoreSelectedImages()
@@ -212,7 +220,9 @@ class MenuUploadViewModel(
     private fun restoreSelectedImages() {
         val uris = savedStateHandle.get<ArrayList<String>>(savedPhotoKey).orEmpty()
         if (uris.isEmpty()) return
-        addImages(uris.map(Uri::parse))
+        // Restoring selected gallery/camera photos must NOT be blocked by a
+        // simultaneously restored pending-camera output or unconfirmed preview.
+        addImages(uris.map(Uri::parse), restoring = true)
     }
 
     fun loadBars() {
@@ -232,6 +242,7 @@ class MenuUploadViewModel(
                         bars = mapped,
                         selectedBarId = selected,
                     )
+                    savedStateHandle[savedBarKey] = selected
                 }
                 .onFailure { error ->
                     _state.value = _state.value.copy(
@@ -250,21 +261,26 @@ class MenuUploadViewModel(
         val oldPhotos = _state.value.selectedImages
         _state.value = _state.value.copy(selectedBarId = barId, selectedImages = emptyList(),
             statusMessage = null, errorMessage = null)
+        savedStateHandle[savedBarKey] = barId
         rememberPhotos()
         oldPhotos.forEach { cameraSession.deleteIfOwned(it.uri) }
         invalidateDraft()
     }
 
     fun setMode(mode: ImportModeUi) {
-        if (_state.value.working || _state.value.selectionBusy || _state.value.mode == mode) return
+        if (_state.value.working || _state.value.selectionBusy ||
+            _state.value.cameraPending || _state.value.cameraChecking ||
+            _state.value.cameraPreviewUri != null || _state.value.mode == mode
+        ) return
         _state.value = _state.value.copy(mode = mode, errorMessage = null)
+        savedStateHandle[savedModeKey] = mode.name
         invalidateDraft()
     }
 
-    fun addImages(uris: List<Uri>) {
+    fun addImages(uris: List<Uri>, restoring: Boolean = false) {
         if (uris.isEmpty() || _state.value.working || _state.value.selectionBusy ||
-            _state.value.cameraPending || _state.value.cameraChecking ||
-            _state.value.cameraPreviewUri != null
+            (!restoring && (_state.value.cameraPending || _state.value.cameraChecking ||
+                _state.value.cameraPreviewUri != null))
         ) return
         val existing = _state.value.selectedImages.mapTo(mutableSetOf()) { it.uri }
         val newUris = uris.distinctBy { it.toString() }.filterNot { it.toString() in existing }
