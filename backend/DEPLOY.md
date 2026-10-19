@@ -214,6 +214,8 @@ The workflow refuses to run when the server is not running the `main` commit it 
 
 The seed upserts by id: rows in the seed overwrite changes made to the same rows on the server, and rows removed from the seed are not deleted (see `scripts/seed_catalog.py`).
 
+**Demo menu boards.** The modes `demo-menus-dry-run` and `demo-menus-apply` of the same workflow load only `ai/catalog/menu_seed_*_demo_v1.json` with `scripts/seed_menu.py` (one transaction per file). Each file replaces that bar's current menu board, so run them only when that is intended; `dry-run`/`apply` never touch menu boards. The demo files are built from human-reviewed labels (`ai/catalog/build_menu_seeds_demo.py`), not from the AI pipeline.
+
 
 ## 6. Operations
 
