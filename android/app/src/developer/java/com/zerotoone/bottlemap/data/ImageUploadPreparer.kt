@@ -31,6 +31,10 @@ class ImageUploadPreparer(
     private val contentResolver: ContentResolver,
 ) {
     suspend fun describe(uri: Uri): SelectedMenuImage = withContext(Dispatchers.IO) {
+        // Picker URI may be revoked after process recreation or canceled by provider.
+        contentResolver.openInputStream(uri)?.use { stream ->
+            if (stream.read() < 0) throw IOException("Selected image is empty.")
+        } ?: throw IOException("Selected image cannot be read. Choose it again.")
         SelectedMenuImage(
             uri = uri.toString(),
             displayName = queryDisplayName(uri) ?: "menu-photo",

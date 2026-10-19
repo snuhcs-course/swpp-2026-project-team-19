@@ -61,21 +61,23 @@ class OwnerRepository {
 
     suspend fun uploadMenuImport(
         barId: String,
-        image: PreparedMenuImage,
+        images: List<PreparedMenuImage>,
         mode: String,
         idempotencyKey: String,
     ): MenuImportAcceptedDto = withOperatorAuth { authorization ->
-        val imageBody = image.bytes.toRequestBody(image.mimeType.toMediaType())
-        val imagePart = MultipartBody.Part.createFormData(
-            "images",
-            image.filename,
-            imageBody,
-        )
+        require(images.isNotEmpty()) { "Menu import must include photos" }
+        val imageParts = images.map { image ->
+            MultipartBody.Part.createFormData(
+                "images",
+                image.filename,
+                image.bytes.toRequestBody(image.mimeType.toMediaType()),
+            )
+        }
         OwnerEndpoint.api.uploadMenuImport(
             authorization = authorization,
             idempotencyKey = idempotencyKey,
             barId = barId,
-            images = listOf(imagePart),
+            images = imageParts,
             mode = mode.toRequestBody("text/plain".toMediaType()),
         )
     }

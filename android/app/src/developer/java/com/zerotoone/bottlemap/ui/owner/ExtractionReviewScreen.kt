@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +24,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -102,6 +106,24 @@ private fun ReviewReadyState(
     state: ExtractionReviewUiState.Ready,
     onApply: () -> Unit,
 ) {
+    var confirmPublish by remember { mutableStateOf(false) }
+    if (confirmPublish) {
+        AlertDialog(
+            onDismissRequest = { confirmPublish = false },
+            title = { Text("Publish this menu?") },
+            text = {
+                Text("All " + state.review.pages.size + " extracted page(s) and " +
+                    state.review.proposedChanges.size + " proposed change(s) will be " +
+                    "accepted together. Inspect every page and price before publishing.")
+            },
+            confirmButton = {
+                Button(onClick = { confirmPublish = false; onApply() }) { Text("Confirm & Publish") }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { confirmPublish = false }) { Text("Cancel") }
+            },
+        )
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(20.dp),
@@ -130,11 +152,24 @@ private fun ReviewReadyState(
             }
         }
 
-        items(
-            items = state.review.items,
-            key = { it.extractedItemId },
-        ) { item ->
-            ReviewItemCard(item)
+        item {
+            Text(
+                "Extracted pages: " + state.review.pages.size + " · " +
+                    state.review.items.size + " item(s). Extraction is ready, not published.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        state.review.pages.forEach { page ->
+            item(key = "page-" + page.imageId) {
+                Text("Page " + page.imageOrder + " · " + page.itemIds.size + " extracted item(s)",
+                    style = MaterialTheme.typography.titleMedium)
+            }
+            items(
+                items = state.review.items.filter { it.extractedItemId in page.itemIds },
+                key = { it.extractedItemId },
+            ) { item ->
+                ReviewItemCard(item)
+            }
         }
 
         if (state.review.proposedChanges.isNotEmpty()) {
@@ -165,8 +200,8 @@ private fun ReviewReadyState(
         }
 
         item {
-            Button(onClick = onApply) {
-                Text("Confirm & Publish")
+            Button(onClick = { confirmPublish = true }) {
+                Text("Review all pages & Publish")
             }
         }
     }
