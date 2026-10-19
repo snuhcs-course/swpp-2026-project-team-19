@@ -35,6 +35,11 @@ data class MenuUploadUiState(
     val selectedBarId: String? = null,
     val selectedImages: List<SelectedMenuImage> = emptyList(),
     val selectionBusy: Boolean = false,
+    /** Pending output URI may survive process recreation while the camera is open. */
+    val cameraPending: Boolean = false,
+    val cameraChecking: Boolean = false,
+    /** Not yet added to selectedImages: user must Use, Retake, or Discard. */
+    val cameraPreviewUri: String? = null,
     val imagePreparation: Map<String, String> = emptyMap(),
     val extractionProgress: ImportProgressDto? = null,
     val failedImportRequiresNewAttempt: Boolean = false,

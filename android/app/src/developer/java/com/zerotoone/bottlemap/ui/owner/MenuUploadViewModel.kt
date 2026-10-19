@@ -6,6 +6,9 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.zerotoone.bottlemap.data.CameraCaptureResult
+import com.zerotoone.bottlemap.data.CameraCaptureSession
+import com.zerotoone.bottlemap.data.OwnerCameraPhotoStorage
 import com.zerotoone.bottlemap.data.ImageUploadPreparer
 import com.zerotoone.bottlemap.data.MenuPhotoPreparationException
 import com.zerotoone.bottlemap.data.MAX_MENU_PHOTOS
@@ -21,6 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 
 class MenuUploadViewModel(
     application: Application,
@@ -35,10 +39,169 @@ class MenuUploadViewModel(
     private val retryCache = MenuUploadRetryCache()
     private var selectionGeneration = 0L
     private val savedPhotoKey = "ownerMenuPhotoUris"
+    private val savedBarKey = "ownerSelectedBarId"
+    private val savedModeKey = "ownerImportMode"
+    private val cameraPendingKey = "ownerCameraPendingFile"
+    private val cameraPreviewKey = "ownerCameraPreviewFile"
+    private val cameraStorage = OwnerCameraPhotoStorage(application)
+    private val cameraSession = CameraCaptureSession(
+        cameraStorage,
+        restoredPending = savedStateHandle.get<String>(cameraPendingKey)?.let(cameraStorage::restore),
+        restoredPreview = savedStateHandle.get<String>(cameraPreviewKey)?.let(cameraStorage::restore),
+    )
 
     init {
+        _state.value = _state.value.copy(
+            selectedBarId = savedStateHandle.get<String>(savedBarKey),
+            mode = ImportModeUi.entries.firstOrNull {
+                it.name == savedStateHandle.get<String>(savedModeKey)
+            } ?: ImportModeUi.PARTIAL_UPDATE,
+        )
+        syncCameraState()
         loadBars()
         restoreSelectedImages()
+        // A camera process kill can leave a photo in filesDir: retain saved references,
+        // discard only old unreferenced private files off the main thread.
+        val keep = savedStateHandle.get<ArrayList<String>>(savedPhotoKey).orEmpty().toSet() +
+            listOfNotNull(cameraSession.pending?.uri, cameraSession.preview?.uri)
+        viewModelScope.launch(Dispatchers.IO) {
+            cameraStorage.pruneOldOrphans(keep, System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000)
+        }
+    }
+
+    private fun syncCameraState() {
+        savedStateHandle[cameraPendingKey] = cameraSession.pending?.fileName
+        savedStateHandle[cameraPreviewKey] = cameraSession.preview?.fileName
+        _state.value = _state.value.copy(
+            cameraPending = cameraSession.pending != null,
+            cameraPreviewUri = cameraSession.preview?.uri,
+        )
+    }
+
+    /**
+     * The external camera owns capture permission; this app only supplies a writable
+     * FileProvider URI. No CAMERA runtime permission or full-image Bitmap is needed.
+     */
+    fun startCameraCapture(retake: Boolean = false): Uri? {
+        val current = _state.value
+        if (current.working || current.selectionBusy || current.cameraChecking ||
+            cameraSession.pending != null || current.selectedImages.size >= MAX_MENU_PHOTOS
+        ) return null
+        return try {
+            val photo = if (retake) cameraSession.retake() else cameraSession.start()
+            syncCameraState() // persist output BEFORE launching external camera
+            _state.value = _state.value.copy(errorMessage = null, statusMessage = null)
+            Uri.parse(photo.uri)
+        } catch (error: Exception) {
+            syncCameraState()
+            _state.value = _state.value.copy(
+                errorMessage = error.message ?: "Cannot prepare camera photo. Check storage availability.",
+            )
+            null
+        }
+    }
+
+    /** Also handles launch errors such as a missing camera app and URI grant failures. */
+    fun cameraLaunchFailed(reason: String) {
+        cameraSession.discardPending()
+        syncCameraState()
+        _state.value = _state.value.copy(
+            cameraChecking = false,
+            errorMessage = "Unable to open camera: " + reason,
+        )
+    }
+
+    /** A canceled TakePicture leaves the prior accepted gallery/camera pages untouched. */
+    fun onCameraCaptureResult(success: Boolean) {
+        if (cameraSession.pending == null || _state.value.cameraChecking) return
+        _state.value = _state.value.copy(cameraChecking = true)
+        viewModelScope.launch {
+            try {
+                when (val result = cameraSession.finish(success)) {
+                    is CameraCaptureResult.PreviewReady -> {
+                        _state.value = _state.value.copy(
+                            errorMessage = null,
+                            statusMessage = "Review the new photo. Choose Use photo or Retake.",
+                        )
+                    }
+                    is CameraCaptureResult.Invalid -> {
+                        _state.value = _state.value.copy(errorMessage = result.message)
+                    }
+                    CameraCaptureResult.Canceled -> {
+                        _state.value = _state.value.copy(
+                            errorMessage = null,
+                            statusMessage = "Camera canceled. Existing photos were kept.",
+                        )
+                    }
+                    else -> Unit
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } finally {
+                syncCameraState()
+                _state.value = _state.value.copy(cameraChecking = false)
+            }
+        }
+    }
+
+    /** Recover when the camera result callback was lost after process recreation. */
+    fun recoverInterruptedCamera() = onCameraCaptureResult(true)
+
+    fun discardInterruptedCamera() {
+        if (_state.value.cameraChecking) return
+        cameraSession.discardPending()
+        syncCameraState()
+        _state.value = _state.value.copy(errorMessage = null)
+    }
+
+    fun discardCameraPreview() {
+        if (_state.value.cameraChecking) return
+        cameraSession.discardPreview()
+        syncCameraState()
+    }
+
+    /** Confirmed camera URI enters exactly the same A14 batch list as gallery picks. */
+    fun useCapturedPhoto() {
+        if (_state.value.working || _state.value.selectionBusy || _state.value.cameraChecking ||
+            cameraSession.pending != null || cameraSession.preview == null
+        ) return
+        _state.value = _state.value.copy(cameraChecking = true)
+        viewModelScope.launch {
+            try {
+                when (val result = cameraSession.accept()) {
+                    is CameraCaptureResult.Accepted -> {
+                        val current = _state.value
+                        val selected = com.zerotoone.bottlemap.data.SelectedMenuImage(
+                            uri = result.photo.uri,
+                            displayName = result.photo.fileName,
+                        )
+                        val update = appendMenuPhotos(current.selectedImages, listOf(selected))
+                        if (update.images.size != current.selectedImages.size + 1) {
+                            // Prevent orphaned camera files if the selection filled meanwhile.
+                            cameraStorage.delete(result.photo)
+                            _state.value = current.copy(errorMessage = "Photo limit reached; capture discarded.")
+                        } else {
+                            _state.value = current.copy(
+                                selectedImages = update.images,
+                                errorMessage = null,
+                                statusMessage = "Camera photo added. You can capture another page.",
+                            )
+                            rememberPhotos()
+                            invalidateDraft()
+                        }
+                    }
+                    is CameraCaptureResult.Invalid -> _state.value = _state.value.copy(
+                        errorMessage = result.message + " Retake the photo.",
+                    )
+                    else -> Unit
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } finally {
+                syncCameraState()
+                _state.value = _state.value.copy(cameraChecking = false)
+            }
+        }
     }
 
     private fun rememberPhotos() {
@@ -57,7 +220,9 @@ class MenuUploadViewModel(
     private fun restoreSelectedImages() {
         val uris = savedStateHandle.get<ArrayList<String>>(savedPhotoKey).orEmpty()
         if (uris.isEmpty()) return
-        addImages(uris.map(Uri::parse))
+        // Restoring selected gallery/camera photos must NOT be blocked by a
+        // simultaneously restored pending-camera output or unconfirmed preview.
+        addImages(uris.map(Uri::parse), restoring = true)
     }
 
     fun loadBars() {
@@ -77,6 +242,7 @@ class MenuUploadViewModel(
                         bars = mapped,
                         selectedBarId = selected,
                     )
+                    savedStateHandle[savedBarKey] = selected
                 }
                 .onFailure { error ->
                     _state.value = _state.value.copy(
@@ -88,22 +254,34 @@ class MenuUploadViewModel(
     }
 
     fun selectBar(barId: String) {
-        if (_state.value.working || _state.value.selectionBusy) return
+        if (_state.value.working || _state.value.selectionBusy || _state.value.cameraPending ||
+            _state.value.cameraChecking || _state.value.cameraPreviewUri != null
+        ) return
         if (_state.value.selectedBarId == barId) return
+        val oldPhotos = _state.value.selectedImages
         _state.value = _state.value.copy(selectedBarId = barId, selectedImages = emptyList(),
             statusMessage = null, errorMessage = null)
+        savedStateHandle[savedBarKey] = barId
         rememberPhotos()
+        oldPhotos.forEach { cameraSession.deleteIfOwned(it.uri) }
         invalidateDraft()
     }
 
     fun setMode(mode: ImportModeUi) {
-        if (_state.value.working || _state.value.selectionBusy || _state.value.mode == mode) return
+        if (_state.value.working || _state.value.selectionBusy ||
+            _state.value.cameraPending || _state.value.cameraChecking ||
+            _state.value.cameraPreviewUri != null || _state.value.mode == mode
+        ) return
         _state.value = _state.value.copy(mode = mode, errorMessage = null)
+        savedStateHandle[savedModeKey] = mode.name
         invalidateDraft()
     }
 
-    fun addImages(uris: List<Uri>) {
-        if (uris.isEmpty() || _state.value.working || _state.value.selectionBusy) return
+    fun addImages(uris: List<Uri>, restoring: Boolean = false) {
+        if (uris.isEmpty() || _state.value.working || _state.value.selectionBusy ||
+            (!restoring && (_state.value.cameraPending || _state.value.cameraChecking ||
+                _state.value.cameraPreviewUri != null))
+        ) return
         val existing = _state.value.selectedImages.mapTo(mutableSetOf()) { it.uri }
         val newUris = uris.distinctBy { it.toString() }.filterNot { it.toString() in existing }
         val duplicates = uris.size - newUris.size
@@ -148,11 +326,14 @@ class MenuUploadViewModel(
     }
 
     fun removeImage(uri: String) {
-        if (_state.value.working || _state.value.selectionBusy) return
+        if (_state.value.working || _state.value.selectionBusy || _state.value.cameraChecking ||
+            _state.value.cameraPending || _state.value.cameraPreviewUri != null
+        ) return
         val remaining = removeMenuPhoto(_state.value.selectedImages, uri)
         if (remaining.size == _state.value.selectedImages.size) return
         _state.value = _state.value.copy(selectedImages = remaining, errorMessage = null)
         rememberPhotos()
+        cameraSession.deleteIfOwned(uri) // NEVER deletes a gallery provider's original
         invalidateDraft()
     }
 
@@ -171,7 +352,10 @@ class MenuUploadViewModel(
     fun upload() {
         val snapshot = _state.value
         val bar = selectedBar() ?: return
-        if (snapshot.working || snapshot.selectionBusy || snapshot.selectedImages.isEmpty()) return
+        if (snapshot.working || snapshot.selectionBusy || snapshot.cameraPending ||
+            snapshot.cameraChecking || snapshot.cameraPreviewUri != null ||
+            snapshot.selectedImages.isEmpty()
+        ) return
         if (snapshot.failedImportRequiresNewAttempt) {
             _state.value = snapshot.copy(
                 errorMessage = "Server extraction failed. Choose New attempt before resubmitting the batch."
@@ -252,7 +436,15 @@ class MenuUploadViewModel(
     }
 
     fun consumeReviewNavigation() {
-        _state.value = _state.value.copy(openReviewImportId = null)
+        // The Backend now owns the completed images; clear only app-owned camera drafts.
+        val usedPhotos = _state.value.selectedImages
+        _state.value = _state.value.copy(
+            openReviewImportId = null,
+            selectedImages = emptyList(),
+        )
+        rememberPhotos()
+        usedPhotos.forEach { cameraSession.deleteIfOwned(it.uri) }
+        invalidateDraft()
     }
 
     private fun startPolling(menuImportId: String, initialDelayMs: Long) {
