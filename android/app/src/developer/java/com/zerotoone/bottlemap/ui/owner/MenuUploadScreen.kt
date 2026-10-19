@@ -1,6 +1,8 @@
 // AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #7, #15). Reviewed by Hojin Nam.
 package com.zerotoone.bottlemap.ui.owner
 
+import android.content.ClipData
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -31,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -42,6 +45,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -63,6 +67,26 @@ fun MenuUploadScreen(
             }
         }
         viewModel.addImages(uris)
+    }
+    // External TakePicture has no CAMERA permission requirement.
+    val camera = rememberLauncherForActivityResult(
+        contract = remember {
+            object : ActivityResultContracts.TakePicture() {
+                override fun createIntent(context: Context, input: Uri): Intent =
+                    super.createIntent(context, input).apply {
+                        clipData = ClipData.newUri(context.contentResolver, "Menu photo", input)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    }
+            }
+        },
+    ) { success -> viewModel.onCameraCaptureResult(success) }
+    fun launchCamera(retake: Boolean) {
+        val uri = viewModel.startCameraCapture(retake) ?: return
+        try {
+            camera.launch(uri)
+        } catch (error: Exception) {
+            viewModel.cameraLaunchFailed(error.message ?: "Camera unavailable.")
+        }
     }
 
     LaunchedEffect(state.openReviewImportId) {
@@ -102,6 +126,12 @@ fun MenuUploadScreen(
                     )
                 },
                 onRemovePhoto = viewModel::removeImage,
+                onTakePhoto = { launchCamera(false) },
+                onRetakePhoto = { launchCamera(true) },
+                onUseCameraPhoto = viewModel::useCapturedPhoto,
+                onDiscardCameraPreview = viewModel::discardCameraPreview,
+                onRecoverCamera = viewModel::recoverInterruptedCamera,
+                onDiscardPendingCamera = viewModel::discardInterruptedCamera,
                 onNewAttempt = viewModel::startNewAttemptAfterFailure,
                 onSetMode = viewModel::setMode,
                 onUpload = viewModel::upload,
@@ -146,6 +176,12 @@ private fun OwnerUploadContent(
     onSelectBar: (String) -> Unit,
     onPickPhoto: () -> Unit,
     onRemovePhoto: (String) -> Unit,
+    onTakePhoto: () -> Unit,
+    onRetakePhoto: () -> Unit,
+    onUseCameraPhoto: () -> Unit,
+    onDiscardCameraPreview: () -> Unit,
+    onRecoverCamera: () -> Unit,
+    onDiscardPendingCamera: () -> Unit,
     onNewAttempt: () -> Unit,
     onSetMode: (ImportModeUi) -> Unit,
     onUpload: () -> Unit,
@@ -199,7 +235,9 @@ private fun OwnerUploadContent(
                     }
                     OutlinedButton(
                         onClick = { onSelectBar(bar.barId) },
-                        enabled = !state.working && !selected,
+                        enabled = !state.working && !selected && !state.selectionBusy &&
+                            !state.cameraPending && !state.cameraChecking &&
+                            state.cameraPreviewUri == null,
                     ) {
                         Text(if (selected) "Selected" else "Select")
                     }
@@ -292,12 +330,70 @@ private fun OwnerUploadContent(
             }
 
             item {
-                OutlinedButton(
-                    onClick = onPickPhoto,
-                    enabled = !state.working && !state.selectionBusy &&
-                        state.selectedImages.size < MAX_MENU_PHOTOS,
-                ) {
-                    Text(if (state.selectedImages.isEmpty()) "Choose gallery photos" else "Add photos")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = onPickPhoto,
+                        enabled = !state.working && !state.selectionBusy && !state.cameraPending &&
+                            !state.cameraChecking && state.cameraPreviewUri == null &&
+                            state.selectedImages.size < MAX_MENU_PHOTOS,
+                    ) { Text("Add gallery photos") }
+                    OutlinedButton(
+                        onClick = onTakePhoto,
+                        enabled = !state.working && !state.selectionBusy && !state.cameraPending &&
+                            !state.cameraChecking && state.cameraPreviewUri == null &&
+                            state.selectedImages.size < MAX_MENU_PHOTOS,
+                    ) { Text("Take photo") }
+                }
+            }
+
+            if (state.cameraPending && !state.cameraChecking) {
+                item {
+                    Surface(color = MaterialTheme.colorScheme.secondaryContainer,
+                        shape = RoundedCornerShape(12.dp)) {
+                        Column(modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Camera return pending. If capture was interrupted, recover or discard it.")
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedButton(onClick = onRecoverCamera) { Text("Recover") }
+                                OutlinedButton(onClick = onDiscardPendingCamera) { Text("Discard") }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (state.cameraChecking) {
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        Text("Checking camera photo…")
+                    }
+                }
+            }
+
+            if (state.cameraPreviewUri != null && !state.cameraPending) {
+                item {
+                    Surface(shape = RoundedCornerShape(12.dp), tonalElevation = 2.dp,
+                        modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text("Review captured photo", style = MaterialTheme.typography.titleMedium)
+                            MenuPhotoThumbnail(state.cameraPreviewUri, 168.dp)
+                            Text("The image is added to your batch only after Use photo.",
+                                style = MaterialTheme.typography.bodySmall)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(onClick = onUseCameraPhoto, enabled = !state.cameraChecking) {
+                                    Text("Use photo")
+                                }
+                                OutlinedButton(onClick = onRetakePhoto, enabled = !state.cameraChecking) {
+                                    Text("Retake")
+                                }
+                                OutlinedButton(onClick = onDiscardCameraPreview,
+                                    enabled = !state.cameraChecking) { Text("Discard") }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -333,7 +429,9 @@ private fun OwnerUploadContent(
                         }
                         OutlinedButton(
                             onClick = { onRemovePhoto(photo.uri) },
-                            enabled = !state.working && !state.selectionBusy,
+                            enabled = !state.working && !state.selectionBusy &&
+                                !state.cameraPending && !state.cameraChecking &&
+                                state.cameraPreviewUri == null,
                         ) { Text("Remove") }
                     }
                 }
@@ -343,6 +441,8 @@ private fun OwnerUploadContent(
                 Button(
                     onClick = onUpload,
                     enabled = !state.working && !state.selectionBusy &&
+                        !state.cameraPending && !state.cameraChecking &&
+                        state.cameraPreviewUri == null &&
                         state.selectedImages.isNotEmpty() && selectedBar != null &&
                         !state.failedImportRequiresNewAttempt,
                 ) { Text("Upload " + state.selectedImages.size + " photos & Extract") }
@@ -422,7 +522,7 @@ private fun OwnerUploadContent(
 
 /** Bounded-size local thumbnail; cannot decode a full-size gallery bitmap on the UI thread. */
 @Composable
-private fun MenuPhotoThumbnail(uriString: String) {
+private fun MenuPhotoThumbnail(uriString: String, previewSize: Dp = 76.dp) {
     val resolver = LocalContext.current.contentResolver
     val thumbnail by produceState<ImageBitmap?>(initialValue = null, key1 = uriString) {
         value = withContext(Dispatchers.IO) {
@@ -444,10 +544,10 @@ private fun MenuPhotoThumbnail(uriString: String) {
             bitmap = thumbnail!!,
             contentDescription = "Selected menu photo preview",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.size(76.dp),
+            modifier = Modifier.size(previewSize),
         )
     } else {
-        Text("Preview unavailable", modifier = Modifier.size(76.dp),
+        Text("Preview unavailable", modifier = Modifier.size(previewSize),
             style = MaterialTheme.typography.labelSmall)
     }
 }
