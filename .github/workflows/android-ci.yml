@@ -178,6 +178,9 @@ jobs:
                   raise SystemExit(f"Owner class inclusion mismatch: {variant}: {owner_present}")
               if variant == "customer" and b"ModeSelectionScreen" in dex:
                   raise SystemExit("Customer APK contains developer role selection screen")
+              camera_storage = b"OwnerCameraPhotoStorage" in dex
+              if camera_storage != (variant == "developer"):
+                  raise SystemExit(f"Developer-only camera code inclusion mismatch: {variant}: {camera_storage}")
               print(f"{variant}: owner compiled={owner_present}, APK={apks[0]}")
           PY
       - name: Upload Customer debug APK
