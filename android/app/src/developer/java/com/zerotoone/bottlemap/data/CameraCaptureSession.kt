@@ -1,6 +1,8 @@
 // I2 A15: unit-testable external-camera capture state; no camera hardware dependency.
 package com.zerotoone.bottlemap.data
 
+import kotlinx.coroutines.CancellationException
+
 data class CameraPhoto(val fileName: String, val uri: String)
 
 interface CameraPhotoStorage {
@@ -44,8 +46,11 @@ class CameraCaptureSession(
         }
         return try {
             storage.validate(photo)
+            preview?.let(storage::delete) // only replace preview after a successful retake
             preview = photo
             CameraCaptureResult.PreviewReady(photo)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (error: Exception) {
             storage.delete(photo)
             CameraCaptureResult.Invalid(error.message ?: "Captured photo is not readable.")
@@ -58,6 +63,8 @@ class CameraCaptureSession(
             storage.validate(photo)
             preview = null
             CameraCaptureResult.Accepted(photo)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (error: Exception) {
             preview = null
             storage.delete(photo)
@@ -66,8 +73,9 @@ class CameraCaptureSession(
     }
 
     fun retake(): CameraPhoto {
-        discardPreview()
-        return start()
+        check(pending == null && preview != null) { "Only an unconfirmed preview can be retaken." }
+        // Preserve the previous unconfirmed photo if camera launch/capture is cancelled.
+        return storage.create().also { pending = it }
     }
 
     fun discardPreview() {
