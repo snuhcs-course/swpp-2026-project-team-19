@@ -1,4 +1,5 @@
 # AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
+# Modified with Claude Code (Jinwoo Park, 2026-10-19): demo menu board modes (deploy/seed.sh).
 name: Seed catalog
 
 # Manual only: Actions → Seed catalog → Run workflow on main. Run dry-run first, then apply.
@@ -6,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "dry-run prints the counts and rolls back; apply commits"
+        description: "dry-run prints the counts and rolls back; apply commits. demo-menus-* load only the demo menu boards (ai/catalog/menu_seed_*_demo_v1.json)"
         type: choice
-        options: [dry-run, apply]
+        options: [dry-run, apply, demo-menus-dry-run, demo-menus-apply]
         default: dry-run
 
 permissions: {}

@@ -1,4 +1,5 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
+# Modified with Claude Code (Jinwoo Park, 2026-10-19): --dry-run (load, print, roll back) for the demo menu seed workflow mode.
 """Reset a bar's current menu board to a seed file (default: the Seorosang demo menu).
 
 The bar and every product in the menu must already exist, so run `seed_catalog.py` first.
@@ -10,6 +11,9 @@ one transaction.
     cd backend
     uv run --env-file .env python scripts/seed_catalog.py
     uv run --env-file .env python scripts/seed_menu.py
+    uv run --env-file .env python scripts/seed_menu.py --menu ../ai/catalog/menu_seed_sui_demo_v1.json --dry-run
+
+With --dry-run the whole load runs and prints its counts, then rolls back.
 """
 
 import argparse
@@ -109,12 +113,23 @@ def seed(conn: Connection, menu: dict) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--menu", type=Path, default=CATALOG_DIR / "menu_seed_seorosang_v1.json")
+    parser.add_argument("--dry-run", action="store_true", help="Load and print the counts, then roll back")
     args = parser.parse_args()
 
     menu = json.loads(args.menu.read_text(encoding="utf-8"))
-    print(f"menu: {args.menu.name} ({menu['version']})")
-    with get_engine().begin() as conn:
-        seed(conn, menu)
+    print(f"menu: {args.menu.name} ({menu['version']})" + (" [dry run]" if args.dry_run else ""))
+    with get_engine().connect() as conn:
+        transaction = conn.begin()
+        try:
+            seed(conn, menu)
+        except BaseException:
+            transaction.rollback()
+            raise
+        if args.dry_run:
+            transaction.rollback()
+            print("dry run: rolled back")
+        else:
+            transaction.commit()
 
 
 if __name__ == "__main__":
