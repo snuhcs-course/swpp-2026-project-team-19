@@ -48,6 +48,9 @@ sealed interface MapDiscoveryState {
 }
 
 /** The SDK computes the radius from visible screen corners, never to filter bars locally. */
+/** Camera center and zoom are persisted only in the route-scoped SavedStateHandle. */
+data class DiscoveryCamera(val center: NearbyCoordinate, val zoomLevel: Int)
+
 data class NearbyViewport(
     val center: NearbyCoordinate,
     val radiusMeters: Int,
@@ -77,6 +80,34 @@ class NearbyBarsViewModel(
 
     val selectedBarId: StateFlow<String?> =
         savedStateHandle.getStateFlow<String?>("nearbySelectedBarId", null)
+    val focusBarId: StateFlow<String?> =
+        savedStateHandle.getStateFlow<String?>("nearbyFocusBarId", null)
+
+    fun savedCamera(): DiscoveryCamera? {
+        val latitude = savedStateHandle.get<Double>("mapCenterLatitude") ?: return null
+        val longitude = savedStateHandle.get<Double>("mapCenterLongitude") ?: return null
+        val zoom = savedStateHandle.get<Int>("mapZoomLevel") ?: return null
+        val point = NearbyCoordinate(latitude, longitude)
+        return point.takeIf { it.isValid() && zoom in 1..21 }
+            ?.let { DiscoveryCamera(it, zoom) }
+    }
+
+    fun rememberCamera(center: NearbyCoordinate, zoomLevel: Int) {
+        if (!center.isValid() || zoomLevel !in 1..21 || _origin.value == null) return
+        savedStateHandle["mapCenterLatitude"] = center.latitude
+        savedStateHandle["mapCenterLongitude"] = center.longitude
+        savedStateHandle["mapZoomLevel"] = zoomLevel
+    }
+
+    fun consumeFocusRequest() {
+        savedStateHandle["nearbyFocusBarId"] = null
+    }
+
+    private fun clearCamera() {
+        savedStateHandle.remove<Double>("mapCenterLatitude")
+        savedStateHandle.remove<Double>("mapCenterLongitude")
+        savedStateHandle.remove<Int>("mapZoomLevel")
+    }
 
     private var currentPermission = NearbyPermission.NONE
     private var query: Job? = null
@@ -97,6 +128,8 @@ class NearbyBarsViewModel(
             _markers.value = emptyList()
             lastViewport = null
             savedStateHandle["nearbySelectedBarId"] = null
+            savedStateHandle["nearbyFocusBarId"] = null
+            clearCamera()
             _state.value = when (permission) {
                 NearbyPermission.NONE -> NearbyUiState.PermissionRequired
                 NearbyPermission.PERMANENTLY_DENIED -> NearbyUiState.PermissionPermanentlyDenied
@@ -122,6 +155,7 @@ class NearbyBarsViewModel(
         mapVersion++
         mapQuery?.cancel()
         lastViewport = null
+        clearCamera()
         _map.value = MapDiscoveryState.Initial
         _markers.value = emptyList()
         _origin.value = null
@@ -214,6 +248,8 @@ class NearbyBarsViewModel(
      */
     fun leaveDiscovery() {
         savedStateHandle["nearbySelectedBarId"] = null
+        savedStateHandle["nearbyFocusBarId"] = null
+        clearCamera()
     }
 
     fun selectBar(barId: String): Boolean {
@@ -221,6 +257,7 @@ class NearbyBarsViewModel(
         val markers = _markers.value
         if ((carousel + markers).none { it.barId == barId }) return false
         savedStateHandle["nearbySelectedBarId"] = barId
+        savedStateHandle["nearbyFocusBarId"] = barId
         return true
     }
 
