@@ -2,7 +2,7 @@
 
 ## 1. 목적과 범위
 
-이 문서는 메뉴판 사진 등록부터 통합 검수와 현재 메뉴판 반영까지, 그리고 고객의 상품 검색, 주변 업장 조회와 업장 메뉴 조회에서 프론트엔드와 백엔드가 주고받는 HTTP API를 정의한다.
+이 문서는 메뉴판 사진 등록부터 통합 검수와 현재 메뉴판 반영까지, 그리고 고객의 상품 검색, 주변·지도 업장 조회와 업장 메뉴 조회에서 프론트엔드와 백엔드가 주고받는 HTTP API를 정의한다.
 
 포함 범위:
 
@@ -13,7 +13,7 @@
 - 추출 항목·옵션·상품 후보·임시 diff 통합 조회
 - 검수 중 브랜드와 상품 검색
 - 모든 검수 결정의 일괄 제출과 메뉴 반영
-- 고객의 상품 검색, 주변 업장 조회와 업장 상세 메뉴 조회
+- 고객의 상품 검색, 주변·지도 업장 조회와 업장 상세 메뉴 조회
 - 멱등성, 검수 버전 충돌과 공통 오류 응답
 
 제외 범위:
@@ -54,6 +54,17 @@ GET 주변 업장 조회 (위치 + 반경)
 → GET 업장 메뉴 조회로 업장 상세 표시
 ```
 
+지도 화면은 다음 흐름을 사용한다.
+
+```text
+지도 카메라 이동이 멈춤
+→ GET 지도 영역 업장 조회 (화면 영역)
+→ 마커와 목록 표시
+→ (선택) GET 업장 이름 검색으로 업장을 찾아 그 위치로 지도 이동
+→ 업장 선택
+→ GET 업장 메뉴 조회로 업장 상세 표시
+```
+
 ## 2. 공통 규칙
 
 ### 2.1 기본 형식
@@ -81,7 +92,7 @@ GET 주변 업장 조회 (위치 + 반경)
 
 | API | 비로그인 | customer | 해당 업장의 업주 | operator |
 |---|---|---|---|---|
-| `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/bar-names` | O | O | O | O |
+| `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names` | O | O | O | O |
 | `GET /api/bars/{barId}/menu` | 활성 업장만 | 활성 업장만 | O | O |
 | `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
 | `POST /api/owner-applications`, `GET /api/me/owner-applications` | | O | O | O |
@@ -188,13 +199,14 @@ ignore
 | `GET` | `/api/bars/{barId}/menu` | 업장 정보와 현재 게시 메뉴판 조회 (공개) |
 | `GET` | `/api/search/bars` | 고객 상품 검색과 판매 업장 목록 조회 (공개) |
 | `GET` | `/api/search/nearby-bars` | 고객 위치 반경 안의 활성 업장 조회 (공개) |
+| `GET` | `/api/search/map-bars` | 지도 화면 영역 안의 활성 업장 조회 (공개) |
 | `POST` | `/api/bars/{barId}/menu-imports` | 사진 업로드와 AI 처리 작업 생성 |
 | `GET` | `/api/menu-imports/{menuImportId}` | 처리 상태 또는 통합 검수 데이터 조회 |
 | `GET` | `/api/catalog/brands` | 검수 중 기존 브랜드 검색 |
 | `GET` | `/api/catalog/products` | 검수 중 기존 상품 검색 |
 | `POST` | `/api/menu-imports/{menuImportId}/review-and-apply` | 전체 검수 결정 제출과 원자적 반영 |
 | `POST` | `/api/menu-imports/{menuImportId}/cancel` | 미완료 메뉴 등록 작업 취소 |
-| `GET` | `/api/search/bar-names` | 업주 신청용 업장 이름·주소 검색 (공개) |
+| `GET` | `/api/search/bar-names` | 업장 이름·주소 검색. 업주 신청과 고객 지도 검색용 (공개) |
 | `POST` | `/api/owner-applications` | 업주 신청 |
 | `GET` | `/api/me/owner-applications` | 내 업주 신청 목록 |
 | `GET` | `/api/owner-applications/{applicationId}` | 업주 신청 상세 |
@@ -213,7 +225,7 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 
 사용자는 다음과 같이 구분한다.
 
-- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/bars/{barId}/menu`)만 호출하며 `users` 행을 만들지 않는다.
+- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/bars/{barId}/menu`)만 호출하며 `users` 행을 만들지 않는다.
 - **로그인 사용자**: Google 계정으로 로그인한 사용자다. 최초 `GET /api/me` 호출 때 `customer`로 생성된다.
 - Supabase의 익명 로그인(anonymous sign-in)은 사용하지 않는다. `is_anonymous = true`인 token은 `401`로 거부한다.
 
@@ -320,7 +332,7 @@ API 응답 401 UNAUTHENTICATED
 - 여러 요청이 동시에 `401`을 받아도 세션 갱신은 한 번만 하고, 나머지 요청은 그 결과를 기다려 재시도한다.
 - 공개 API 처리:
   - `GET /api/bars/{barId}/menu`는 `Authorization` 헤더가 있으면 token을 검증하고, 잘못된 token이면 `401`을 반환한다. 프론트엔드는 위 재시도 흐름을 똑같이 적용하되, 세션 갱신에 실패하면 로그인 화면으로 보내지 않고 로그아웃한 뒤 헤더 없이 비로그인 사용자로 다시 요청한다. 단, 서버가 지금 token을 확인할 수 없으면(위 표의 `503` 조건) 이 API는 `503` 대신 token이 없는 것처럼 비로그인 사용자로 처리한다. 공개 정보라서 Supabase 장애 중에도 로그인 사용자가 업장 상세를 볼 수 있게 하려는 것이다. 이때는 operator도 비활성 업장을 볼 수 없다(`404`).
-  - `GET /api/search/bars`와 `GET /api/search/nearby-bars`는 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
+  - `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`는 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
 
 #### 3.1.6 백엔드 설정 항목
 
@@ -792,7 +804,7 @@ GET /api/bars/{barId}/menu
 
 #### 3.9.4 지도 좌표
 
-- `latitude`, `longitude`는 업장 위치의 WGS84 좌표(십진 도)다. Kakao 지도의 `LatLng.from(latitude, longitude)`에 그대로 넣는다. 같은 업장은 3.4, 3.6, 3.10, 3.12 응답에서도 같은 좌표다.
+- `latitude`, `longitude`는 업장 위치의 WGS84 좌표(십진 도)다. Kakao 지도의 `LatLng.from(latitude, longitude)`에 그대로 넣는다. 같은 업장은 3.4, 3.6, 3.10, 3.11.11, 3.12, 3.13 응답에서도 같은 좌표다.
 - 좌표를 모르는 업장은 등록하지 않으므로 응답의 좌표는 `null`이 아니다. 서버는 주소로 좌표를 계산하지 않는다(3.5). `bars` 테이블의 CHECK 제약이 범위를 벗어난 좌표의 저장을 막는다.
 - 프론트엔드는 그래도 받은 좌표를 검사한다. 값이 없거나, 유한한 숫자가 아니거나, 범위를 벗어났거나, `0, 0`이면 지도를 열지 않고 위치를 표시할 수 없다고 안내한다. 업장 이름, 주소, 메뉴는 그대로 표시한다.
 
@@ -1367,15 +1379,18 @@ operator만 호출할 수 있다. 업장의 현재 업주 관계를 해제하고
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
 | `404` | `BAR_OWNER_NOT_FOUND` | 업장에 현재 업주가 없음 | 업장 상세(3.6) 재조회 |
 
-#### 3.11.11 신청할 업장 검색
+#### 3.11.11 업장 이름 검색
 
-`existing_bar` 신청에서 신청자가 자기 업장을 고를 때 사용한다. 업장 이름이나 주소의 일부로 활성 업장을 찾는다. 상품으로 업장을 찾는 고객 검색(3.10)과는 다른 API다.
+업장 이름이나 주소의 일부로 활성 업장을 찾는다. 상품으로 업장을 찾는 고객 검색(3.10)과는 다른 API다. 두 곳에서 사용한다.
+
+- 업주 신청: `existing_bar` 신청에서 신청자가 자기 업장을 고른다.
+- 고객 지도 검색: 지도 화면에서 업장 이름으로 찾아 그 위치로 지도를 옮긴다. 이미 불러온 영역 밖의 업장도 찾을 수 있다.
 
 ```http
 GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
 ```
 
-로그인 없이 호출할 수 있는 공개 API이며 `Authorization` 헤더를 사용하지 않는다. 반환하는 값은 활성 업장의 공개 정보(3.9에서도 볼 수 있는 이름과 주소)와 업주 등록 여부뿐이다.
+로그인 없이 호출할 수 있는 공개 API이며 `Authorization` 헤더를 사용하지 않는다. 반환하는 값은 활성 업장의 공개 정보(3.9에서도 볼 수 있는 이름, 주소, 좌표)와 업주 등록 여부뿐이다.
 
 | Query | 필수 | 기본값 | 설명 |
 |---|---|---|---|
@@ -1391,6 +1406,8 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
       "barId": "22222222-2222-4222-8222-222222222222",
       "name": "관악 위스키 바",
       "address": "서울특별시 관악구 관악로 1 2층",
+      "latitude": 37.478321,
+      "longitude": 126.951234,
       "hasOwner": true
     }
   ],
@@ -1402,10 +1419,14 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
 |---|---|---|---|
 | `items[].barId` | UUID 문자열 | 아니오 | |
 | `items[].name`, `items[].address` | 문자열 | 아니오 | |
+| `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4. 고객 지도 검색에서 지도를 옮길 위치 |
 | `items[].hasOwner` | 불리언 | 아니오 | 현재 업주가 있으면 `true`. 이 업장에 신청하면 `409 BAR_OWNER_EXISTS`다 |
 | `truncated` | 불리언 | 아니오 | `limit`보다 많이 일치했으면 `true` |
 
-비활성 업장은 결과에 없다. 신청자의 업장이 목록에 없으면 프론트엔드는 `new_bar` 신청을 안내한다. `hasOwner = true`인 업장은 선택할 수 없게 하고 operator 문의를 안내한다.
+비활성 업장은 결과에 없다.
+
+- 업주 신청: 신청자의 업장이 목록에 없으면 프론트엔드는 `new_bar` 신청을 안내한다. `hasOwner = true`인 업장은 선택할 수 없게 하고 operator 문의를 안내한다.
+- 고객 지도 검색: `hasOwner`는 쓰지 않는다. 결과를 고르면 그 좌표로 지도를 옮기고, 옮긴 영역의 업장은 3.13으로 불러온다. 결과가 없으면 등록된 업장이 없다고 안내한다.
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
@@ -1413,7 +1434,7 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
 
 ### 3.12 내 주변 업장 조회
 
-고객 위치에서 반경 안에 있는 활성 업장을 모두 반환한다. 주변 업장 목록과 지도에 사용한다. 상품으로 업장을 찾는 고객 검색(3.10), 업주 신청용 업장 이름 검색(3.11.11)과는 다른 API다.
+고객 위치에서 반경 안에 있는 활성 업장을 모두 반환한다. 고객 위치 기준의 주변 업장 목록에 사용한다. 지도 화면에 보이는 영역은 3.13으로 불러온다. 상품으로 업장을 찾는 고객 검색(3.10), 업장 이름 검색(3.11.11), 지도 영역 조회(3.13)와는 다른 API다.
 
 로그인 없이 호출할 수 있는 공개 API이며, `Authorization` 헤더를 보내도 읽지 않는다(3.1.5). 결과는 호출자와 관계없이 같다.
 
@@ -1495,6 +1516,108 @@ GET /api/search/nearby-bars?lat=37.478&lng=126.951&radiusMeters=500
 - `lat`, `lng`는 필수이므로 위치 권한이 없거나 위치를 얻지 못하면 이 API를 호출하지 않는다.
 - 네트워크 오류와 `5xx`(`500 INTERNAL_ERROR`, 프록시의 `502`·`504` 포함)는 오류 상태와 재시도 버튼을 보여 준다(9.6).
 - 이 API는 `401`, `403`, `404`를 반환하지 않으며, 요청 수 제한(`429`)도 없다.
+
+### 3.13 지도 영역 안의 업장 조회
+
+지도 화면에 보이는 영역 안의 활성 업장을 모두 반환한다. 지도 마커와 지도 화면의 목록에 사용한다. 고객 위치를 중심으로 한 반경 조회(3.12)는 반경이 최대 3 km라 그보다 넓은 화면을 채울 수 없으므로, 지도 화면은 이 API를 쓴다.
+
+로그인 없이 호출할 수 있는 공개 API이며, `Authorization` 헤더를 보내도 읽지 않는다(3.1.5). 결과는 호출자와 관계없이 같다.
+
+```http
+GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
+```
+
+| Query | 필수 | 기본값 | 설명 |
+|---|---|---|---|
+| `south` | 예 | 없음 | 영역 남쪽 경계 위도. -90~90 |
+| `west` | 예 | 없음 | 영역 서쪽 경계 경도. -180~180 |
+| `north` | 예 | 없음 | 영역 북쪽 경계 위도. -90~90. `south` 이상 |
+| `east` | 예 | 없음 | 영역 동쪽 경계 경도. -180~180. `west` 이상 |
+
+좌표는 WGS84 십진 도다(2.1). 지도 SDK가 주는 화면 영역의 남서·북동 모서리를 그대로 보낸다.
+
+#### 3.13.1 영역 안의 업장
+
+- `south ≤ latitude ≤ north`이고 `west ≤ longitude ≤ east`인 활성 업장을 포함한다. 경계 위의 업장도 포함한다.
+- 비활성 업장은 operator가 호출해도 결과에 없다.
+- 게시된 메뉴가 없는 업장과 메뉴판의 항목이 모두 내려간 업장도 포함한다(3.12와 같다).
+- 페이지 없이 조건에 맞는 업장을 모두 반환하며, 결과를 자르지 않는다. 결과 크기는 영역 상한(3.13.2)으로 제한한다.
+- `barId` 순으로 정렬한다. 지도 마커용이라 순서에 의미는 없고, 같은 요청에 항상 같은 순서로 답하기 위한 것이다. 목록을 다른 순서로 보여 줄 때는 프론트엔드가 정렬한다.
+- 날짜 변경선(경도 ±180°)을 넘는 영역은 받지 않는다(`west > east`는 `422`). 서비스 지역이 국내라 지도 화면이 날짜 변경선에 걸리지 않는다.
+
+#### 3.13.2 영역 상한
+
+영역의 남북 폭(`north - south`)과 동서 폭(`east - west`)은 각각 `0.2`도 이하여야 한다. 넘으면 `422`다.
+
+| 기준 | 남북 0.2도 | 동서 0.2도 |
+|---|---|---|
+| 서울(위도 37.5°) | 약 22 km | 약 18 km |
+| 제주(위도 33.5°) | 약 22 km | 약 19 km |
+
+- 결과를 자르지 않으므로 응답 크기를 영역으로 제한해야 한다. 0.2도 영역은 약 400 km²로 서울 면적(약 605 km²)의 3분의 2 정도다. 업장이 늘어 서울 전역에 2,000곳이 있어도 한 응답은 1,300곳 정도이며, 항목 하나가 약 250바이트이므로 300 KB 남짓이다.
+- 3.12의 최대 반경 3 km(지름 6 km)보다 충분히 넓어, 구 단위부터 여러 구에 걸친 화면까지 한 번에 채울 수 있다. 이보다 넓은 화면에서는 마커가 겹쳐 하나씩 구분할 수 없으므로, 업장 하나하나가 아니라 묶음(클러스터)으로 보여 줘야 한다. 그런 화면은 이 API의 범위가 아니다.
+- 미터가 아니라 도 단위로 정해서, 앱이 지도 SDK의 화면 영역만으로 요청 전에 검사할 수 있다. 같은 도라도 동서 거리는 위도가 높을수록 줄지만, 국내에서는 차이가 작다.
+- 프론트엔드는 화면 영역이 상한을 넘으면 이 API를 호출하지 않고 지도를 확대하라고 안내한다. 이미 표시한 마커는 지우지 않아도 된다.
+- 업장 수가 늘어 상한을 바꿀 때 늘리는 것은 기존 앱을 깨지 않지만(앱이 더 좁은 영역만 요청할 뿐이다), 줄이는 것은 계약 변경이다.
+
+#### 3.13.3 응답
+
+`200 OK`. 항목은 3.12의 항목에서 `distanceMeters`만 뺀 형식이다.
+
+```json
+{
+  "items": [
+    {
+      "barId": "22222222-2222-4222-8222-222222222222",
+      "name": "관악 위스키 바",
+      "address": "서울특별시 관악구 관악로 1 2층",
+      "latitude": 37.478321,
+      "longitude": 126.951234,
+      "menuUpdatedAt": "2026-10-02T11:00:00Z"
+    },
+    {
+      "barId": "33333333-3333-4333-8333-333333333333",
+      "name": "샤로수길 몰트",
+      "address": "서울특별시 관악구 관악로14길 10",
+      "latitude": 37.479874,
+      "longitude": 126.954512,
+      "menuUpdatedAt": null
+    }
+  ]
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `items` | 배열 | 아니오 | 영역 안의 활성 업장 전체. 없으면 `[]` |
+| `items[].barId` | UUID 문자열 | 아니오 | |
+| `items[].name`, `items[].address` | 문자열 | 아니오 | |
+| `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
+| `items[].menuUpdatedAt` | RFC 3339 문자열 | 예 | 3.12의 `menuUpdatedAt`과 같다. 게시된 메뉴가 한 번도 없으면 `null`이고, 메뉴판은 있지만 항목이 0개이면 값이 있다 |
+
+영역 안에 업장이 없으면 `200 OK`와 `items = []`를 반환한다. 프론트엔드는 이 영역에 업장이 없다는 빈 상태를 표시한다.
+
+#### 3.13.4 위치 정보
+
+- 지도 영역은 보통 사용자가 있는 곳이나 관심 있는 곳을 드러내므로 고객 위치(3.12.3)와 같게 다룬다.
+- 서버는 `south`, `west`, `north`, `east`를 업장을 거르는 데만 사용하며 DB에 저장하지 않는다.
+- 서버 접근 로그에서도 네 값을 지우고 경로만 남긴다(`GET /api/search/map-bars`).
+
+#### 3.13.5 오류와 프론트엔드 처리
+
+입력이 잘못되면 `422 VALIDATION_FAILED`를 반환한다(9.1, 9.3).
+
+| 상황 | `fieldErrors[].path` | `fieldErrors[].code` | 프론트엔드 처리 |
+|---|---|---|---|
+| `south`, `west`, `north`, `east` 중 빠진 값이 있음 | 빠진 파라미터 | `MISSING` | 앱 버그. 일반 오류와 재시도 |
+| 범위를 벗어남(`nan`, `inf` 포함) | 해당 파라미터 | `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL` | 앱 버그. 일반 오류와 재시도 |
+| 숫자가 아님 | 해당 파라미터 | `FLOAT_PARSING` | 앱 버그. 일반 오류와 재시도 |
+| `south > north` 또는 `west > east` | `north` 또는 `east` | `BOUNDS_INVERTED` | 앱 버그. 일반 오류와 재시도 |
+| 남북 폭 또는 동서 폭이 `0.2`도 초과 | `north` 또는 `east` | `BOUNDS_TOO_LARGE` | 지도를 확대하라는 안내. 앱이 요청 전에 검사하므로 보통은 오지 않는다 |
+
+- 빠진 값, 범위, 숫자 형식 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `BOUNDS_INVERTED`(남북 먼저), `BOUNDS_TOO_LARGE`(남북 먼저)를 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
+- 네트워크 오류와 `5xx`(`500 INTERNAL_ERROR`, 프록시의 `502`·`504` 포함)는 오류 상태와 재시도 버튼을 보여 준다(9.6).
+- 이 API는 `401`, `403`, `404`를 반환하지 않으며, 요청 수 제한(`429`)도 없다. 지도를 움직일 때마다 호출하므로 프론트엔드는 카메라 이동이 멈춘 뒤에 호출하고, 늦게 도착한 이전 영역의 응답은 버린다.
 
 ## 4. 메뉴 등록 요청
 
@@ -2318,7 +2441,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
 - **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `EXTRA_FORBIDDEN`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `COORDINATES_REQUIRED`.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`.
 
 ### 9.4 검수 버전 충돌
 
