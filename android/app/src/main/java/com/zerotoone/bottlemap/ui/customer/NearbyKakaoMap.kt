@@ -51,6 +51,7 @@ import com.kakao.vectormap.label.LabelTextBuilder
 import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.BarPin
 import com.zerotoone.bottlemap.data.mapBoundsFromCorners
+import com.zerotoone.bottlemap.data.viewportCornerPixels
 import com.zerotoone.bottlemap.data.MapPlace
 import com.zerotoone.bottlemap.data.NearbyCoordinate
 import com.zerotoone.bottlemap.ui.common.DelayedLoading
@@ -77,6 +78,9 @@ fun NearbyKakaoMap(
     onSearchedPlaceFocusApplied: () -> Unit,
     onFocusApplied: () -> Unit,
     onCameraChanged: (NearbyCoordinate, Int) -> Unit,
+    onMapCameraMoving: () -> Unit,
+    onMapViewportUnavailable: () -> Unit,
+    viewportRetryToken: Int,
     onSelectBar: (String) -> Unit,
     onViewportChanged: (MapViewport) -> Unit,
     recenterToken: Int,
@@ -94,7 +98,10 @@ fun NearbyKakaoMap(
         var nativeMap by remember { mutableStateOf<KakaoMap?>(null) }
         val markers = remember { linkedMapOf<String, Pair<NearbyCoordinate, Label>>() }
         var placeLabel by remember { mutableStateOf<Label?>(null) }
+        var requestViewportSnapshot by remember { mutableStateOf<(() -> Unit)?>(null) }
         val currentSelect = rememberUpdatedState(onSelectBar)
+        val currentMoving = rememberUpdatedState(onMapCameraMoving)
+        val currentUnavailable = rememberUpdatedState(onMapViewportUnavailable)
         val currentViewport = rememberUpdatedState(onViewportChanged)
         val currentCameraChanged = rememberUpdatedState(onCameraChanged)
         val currentNativeMap = rememberUpdatedState(nativeMap)
@@ -166,8 +173,10 @@ fun NearbyKakaoMap(
             val map = nativeMap ?: return@LaunchedEffect
             val place = focusSearchedPlace ?: return@LaunchedEffect
             if (!place.coordinate.isValid()) return@LaunchedEffect
+            currentMoving.value()
             map.moveCamera(CameraUpdateFactory.newCenterPosition(
                 LatLng.from(place.coordinate.latitude, place.coordinate.longitude)))
+            requestViewportSnapshot?.invoke()
             onSearchedPlaceFocusApplied()
         }
 
@@ -186,15 +195,25 @@ fun NearbyKakaoMap(
             val map = nativeMap ?: return@LaunchedEffect
             val target = focusTarget?.takeIf { it.barId == focusBarId }
                 ?: return@LaunchedEffect
+            currentMoving.value()
             map.moveCamera(CameraUpdateFactory.newCenterPosition(
                 LatLng.from(target.location.latitude, target.location.longitude),
             ))
+            requestViewportSnapshot?.invoke()
             onFocusApplied()
         }
         LaunchedEffect(recenterToken, nativeMap) {
-            if (recenterToken > 0) nativeMap?.moveCamera(
-                CameraUpdateFactory.newCenterPosition(
+            if (recenterToken > 0 && nativeMap != null) {
+                currentMoving.value()
+                nativeMap.moveCamera(CameraUpdateFactory.newCenterPosition(
                     LatLng.from(origin.latitude, origin.longitude)))
+                requestViewportSnapshot?.invoke()
+            }
+        }
+        LaunchedEffect(viewportRetryToken, nativeMap, listCovered) {
+            if (nativeMap != null && !listCovered) {
+                requestViewportSnapshot?.invoke()
+            }
         }
 
         Box(modifier = modifier) {
@@ -207,35 +226,65 @@ fun NearbyKakaoMap(
                     fun post(action: () -> Unit) {
                         handler.post { if (!disposed.get()) action() }
                     }
-                    fun publishViewport(map: KakaoMap, cameraPosition: CameraPosition?) {
-                        val snapshot = cameraPosition ?: return
-                        val position = snapshot.position
-                        val center = NearbyCoordinate(position.latitude, position.longitude)
-                        if (!center.isValid()) return
-                        val width = view.width
-                        val height = view.height
-                        // Query real visible edges only. Never guess a 3km radius.
-                        val corners = if (width > 0 && height > 0) {
-                            listOf(0 to 0, width to 0, 0 to height, width to height)
-                                .mapNotNull { (x, y) ->
-                                    runCatching { map.fromScreenPoint(x, y) }.getOrNull()
-                                        ?.let { NearbyCoordinate(it.latitude, it.longitude) }
+                    // Every native camera event gets a new generation. A
+                    // delayed projection from an older position cannot publish
+                    // stale bounds after the user pans/searches/zooms again.
+                    var viewportGeneration = 0L
+                    fun scheduleViewportSample(map: KakaoMap, firstDelayMs: Long = 140L) {
+                        val generation = ++viewportGeneration
+                        fun sample(attempt: Int) {
+                            if (disposed.get() || generation != viewportGeneration) return
+                            // Kakao MapView dimensions and its actual map viewport
+                            // can differ (padding/resize/SurfaceView startup).
+                            val position = runCatching { map.cameraPosition }.getOrNull()
+                            val rect = runCatching { map.viewport }.getOrNull()
+                            val pixels = rect?.let {
+                                viewportCornerPixels(it.left, it.top, it.right, it.bottom)
+                            }
+                            val corners = pixels?.mapNotNull { (x, y) ->
+                                runCatching { map.fromScreenPoint(x, y) }.getOrNull()?.let {
+                                    NearbyCoordinate(it.latitude, it.longitude)
                                 }
-                        } else emptyList()
-                        val bounds = mapBoundsFromCorners(corners)
-                        post {
-                            currentCameraChanged.value(center, snapshot.zoomLevel)
-                            if (bounds != null) currentViewport.value(MapViewport(bounds))
+                            }.orEmpty()
+                            val center = position?.position?.let {
+                                NearbyCoordinate(it.latitude, it.longitude)
+                            }
+                            val bounds = mapBoundsFromCorners(corners, center)
+                            if (bounds != null && center != null) {
+                                post {
+                                    if (generation == viewportGeneration) {
+                                        currentCameraChanged.value(center, position.zoomLevel)
+                                        currentViewport.value(MapViewport(bounds))
+                                    }
+                                }
+                            } else if (attempt < 5) {
+                                // During first layout or a programmatic camera
+                                // move, the SDK may temporarily return null/
+                                // obsolete corner projections. Try again after
+                                // it has settled, without polling indefinitely.
+                                handler.postDelayed({ sample(attempt + 1) }, 180L + 80L * attempt)
+                            } else {
+                                post {
+                                    if (generation == viewportGeneration) {
+                                        currentUnavailable.value()
+                                    }
+                                }
+                            }
                         }
+                        handler.postDelayed({ sample(0) }, firstDelayMs)
                     }
                     val observer = LifecycleEventObserver { _, event ->
                         when (event) {
                             Lifecycle.Event.ON_RESUME -> {
                                 runCatching { view.resume() }
                                 if (currentCovered.value) hideNearbyNativeSurface(view)
-                                else showNearbyNativeSurface(view)
+                                else {
+                                    showNearbyNativeSurface(view)
+                                    currentNativeMap.value?.let { scheduleViewportSample(it, 220L) }
+                                }
                             }
                             Lifecycle.Event.ON_PAUSE -> {
+                                ++viewportGeneration
                                 hideNearbyNativeSurface(view)
                                 runCatching { view.pause() }
                             }
@@ -282,6 +331,19 @@ fun NearbyKakaoMap(
                                                 }
                                             },
                                         )
+                                        map.setOnCameraMoveStartListener(
+                                            object : KakaoMap.OnCameraMoveStartListener {
+                                                override fun onCameraMoveStart(
+                                                    kakaoMap: KakaoMap,
+                                                    gestureType: GestureType,
+                                                ) {
+                                                    post {
+                                                        ++viewportGeneration
+                                                        currentMoving.value()
+                                                    }
+                                                }
+                                            },
+                                        )
                                         map.setOnCameraMoveEndListener(
                                             object : KakaoMap.OnCameraMoveEndListener {
                                                 override fun onCameraMoveEnd(
@@ -289,20 +351,31 @@ fun NearbyKakaoMap(
                                                     position: CameraPosition,
                                                     gestureType: GestureType,
                                                 ) {
-                                                    publishViewport(kakaoMap, position)
+                                                    // Read the SDK camera + projection *after*
+                                                    // the move, rather than using the event's
+                                                    // potentially early camera snapshot.
+                                                    post { scheduleViewportSample(kakaoMap) }
+                                                }
+                                            },
+                                        )
+                                        map.setOnViewportChangeListener(
+                                            object : KakaoMap.OnViewportChangeListener {
+                                                override fun onViewportChanged(
+                                                    kakaoMap: KakaoMap,
+                                                    rect: android.graphics.Rect,
+                                                ) {
+                                                    post { scheduleViewportSample(kakaoMap) }
                                                 }
                                             },
                                         )
                                         post {
+                                            requestViewportSnapshot = {
+                                                scheduleViewportSample(map, 200L)
+                                            }
                                             nativeMap = map
                                             status = NearbyMapStatus.Ready
+                                            scheduleViewportSample(map, 220L)
                                         }
-                                        // The initial camera position is valid before any gesture.
-                                        handler.postDelayed({
-                                            if (!disposed.get()) {
-                                                publishViewport(map, map.cameraPosition)
-                                            }
-                                        }, 350L)
                                     } catch (_: Exception) {
                                         post { status = NearbyMapStatus.Error }
                                     }
@@ -317,6 +390,8 @@ fun NearbyKakaoMap(
                         post { status = NearbyMapStatus.Error }
                     }
                     onDispose {
+                        ++viewportGeneration
+                        requestViewportSnapshot = null
                         val lastPosition = currentNativeMap.value?.cameraPosition
                         if (lastPosition != null) {
                             val center = NearbyCoordinate(
