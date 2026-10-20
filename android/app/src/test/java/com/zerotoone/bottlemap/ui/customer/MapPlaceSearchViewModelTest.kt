@@ -2,7 +2,7 @@ package com.zerotoone.bottlemap.ui.customer
 
 import com.zerotoone.bottlemap.data.MapPlace
 import com.zerotoone.bottlemap.data.MapPlaceSearchSource
-import com.zerotoone.bottlemap.data.NearbyBar
+import com.zerotoone.bottlemap.data.CombinedMapPlaceSearchSource
 import com.zerotoone.bottlemap.data.NearbyCoordinate
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -136,34 +136,38 @@ class MapPlaceSearchViewModelTest {
     }
 
 
-    @Test fun registeredWhiskyBarsCanBeFoundWithoutGeocoderProvider() = runTest(dispatcher) {
-        val offline = FakeSource().apply { shouldFail = true }
-        val vm = MapPlaceSearchViewModel(offline)
-        val bars = listOf(
-            NearbyBar("whisky", "위스키복춘", "서울특별시 관악구", shop.coordinate, 120.0),
-            NearbyBar("seoro", "서로상", "서울특별시 관악구", station.coordinate, 160.0),
-        )
-        vm.search("위스키복춘", bars)
-        assertEquals(listOf("위스키복춘"),
-            (vm.state.value as MapPlaceSearchState.Results).places.map { it.name })
-        assertTrue(offline.queries.isEmpty())
-        vm.search("서로상", bars)
-        assertEquals(listOf("서로상"),
-            (vm.state.value as MapPlaceSearchState.Results).places.map { it.name })
-        assertTrue(vm.select((vm.state.value as MapPlaceSearchState.Results).places.single()))
-        assertEquals("seoro", vm.selected.value?.barId)
-        assertTrue(offline.queries.isEmpty())
+    @Test fun globalBackendBarMatchesWithoutCallingGeocoder() = runTest(dispatcher) {
+        val bar = MapPlace("위스키복춘", "서울 관악구", shop.coordinate, "b1")
+        val backend = FakeSource().apply { response = listOf(bar) }
+        val geo = FakeSource().apply { shouldFail = true }
+        val vm = MapPlaceSearchViewModel(CombinedMapPlaceSearchSource(backend, geo))
+        vm.search("위스키복춘")
+        advanceUntilIdle()
+        assertEquals(listOf(bar), (vm.state.value as MapPlaceSearchState.Results).places)
+        assertEquals("b1", (vm.state.value as MapPlaceSearchState.Results).places.single().barId)
+        assertEquals(listOf("위스키복춘"), backend.queries)
+        assertTrue(geo.queries.isEmpty())
     }
 
-    @Test fun missingRegisteredBarFallsBackToGeocoder() = runTest(dispatcher) {
-        val fake = FakeSource().apply { response = listOf(station) }
-        val vm = MapPlaceSearchViewModel(fake)
-        val bars = listOf(
-            NearbyBar("whisky", "위스키복춘", "서울", shop.coordinate, 12.0))
-        vm.search("강남역", bars)
+    @Test fun unknownBackendNameFallsBackToDeviceStationLookup() = runTest(dispatcher) {
+        val backend = FakeSource()
+        val geo = FakeSource().apply { response = listOf(station) }
+        val vm = MapPlaceSearchViewModel(CombinedMapPlaceSearchSource(backend, geo))
+        vm.search("강남역")
         advanceUntilIdle()
-        assertEquals(listOf("강남역"), fake.queries)
+        assertEquals(listOf("강남역"), backend.queries)
+        assertEquals(listOf("강남역"), geo.queries)
         assertEquals(listOf(station), (vm.state.value as MapPlaceSearchState.Results).places)
+    }
+
+    @Test fun backendFailureIsReportedInsteadOfSilentlyHidingOutageAsGeocoderResult() = runTest(dispatcher) {
+        val backend = FakeSource().apply { shouldFail = true }
+        val geo = FakeSource().apply { response = listOf(station) }
+        val vm = MapPlaceSearchViewModel(CombinedMapPlaceSearchSource(backend, geo))
+        vm.search("서로상")
+        advanceUntilIdle()
+        assertTrue(vm.state.value is MapPlaceSearchState.Error)
+        assertTrue(geo.queries.isEmpty())
     }
 
     @Test fun repeatedOrInvalidResultCoordinatesAreDiscarded() = runTest(dispatcher) {
