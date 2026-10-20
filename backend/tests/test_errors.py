@@ -1,4 +1,6 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18, 2026-10-20). Reviewed by Haeul Yang.
+import importlib
+
 import pytest
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.testclient import TestClient
@@ -160,16 +162,15 @@ def database_down(*args, **kwargs):
 
 
 @pytest.mark.parametrize(
-    ("service", "url", "params"),
+    ("route", "service", "url", "params"),
     [
-        ("search_bars", "/api/search/bars", {"query": "x"}),
-        ("find_nearby_bars", "/api/search/nearby-bars", {"lat": 37.478, "lng": 126.951}),
+        ("search", "search_bars", "/api/search/bars", {"query": "x"}),
+        ("search", "find_nearby_bars", "/api/search/nearby-bars", {"lat": 37.478, "lng": 126.951}),
+        ("bars", "get_bar_menu", "/api/bars/22222222-2222-4222-8222-222222222222/menu", {}),
     ],
 )
-def test_search_failure_is_an_internal_error(client, monkeypatch, service, url, params):
-    import app.api.routes.search as search_route
-
-    monkeypatch.setattr(search_route, service, database_down)
+def test_public_route_failure_is_an_internal_error(client, monkeypatch, route, service, url, params):
+    monkeypatch.setattr(importlib.import_module(f"app.api.routes.{route}"), service, database_down)
 
     response = TestClient(main_app, raise_server_exceptions=False).get(url, params=params)
 
