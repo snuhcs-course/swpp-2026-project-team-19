@@ -214,7 +214,7 @@ fun NearbyKakaoMap(
                                 }
                         } else emptyList()
                         post {
-                            currentCameraChanged.value(center, position.zoomLevel)
+                            currentCameraChanged.value(center, cameraPosition.zoomLevel)
                             currentViewport.value(discoveryViewport(center, corners))
                         }
                     }
