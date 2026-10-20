@@ -114,6 +114,7 @@ fun NearbyKakaoMap(
         val currentSelect = rememberUpdatedState(onSelectBar)
         val currentViewport = rememberUpdatedState(onViewportChanged)
         val currentCameraChanged = rememberUpdatedState(onCameraChanged)
+        val currentNativeMap = rememberUpdatedState(nativeMap)
         val ctx = LocalContext.current
         val owner = LocalLifecycleOwner.current
         val view = remember {
@@ -295,7 +296,7 @@ fun NearbyKakaoMap(
                         post { status = NearbyMapStatus.Error }
                     }
                     onDispose {
-                        val lastPosition = nativeMap?.cameraPosition
+                        val lastPosition = currentNativeMap.value?.cameraPosition
                         if (lastPosition != null) {
                             val center = NearbyCoordinate(
                                 lastPosition.position.latitude, lastPosition.position.longitude)
