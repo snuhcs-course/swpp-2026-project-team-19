@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_session
 from app.schemas.errors import error_responses
-from app.schemas.search import BarNamesResponse, NearbyBarsResponse, SearchBarsResponse
+from app.schemas.search import BarNamesResponse, MapBarsResponse, NearbyBarsResponse, SearchBarsResponse
 from app.services.bar_name_search import DEFAULT_LIMIT, MAX_LIMIT, search_bar_names
+from app.services.map_bars import MAX_SPAN_DEGREES, find_map_bars
 from app.services.nearby_bars import DEFAULT_RADIUS_METERS, MAX_RADIUS_METERS, find_nearby_bars
 from app.services.search import search_bars
 
@@ -120,3 +121,37 @@ def read_bar_names(
     session: Session = Depends(get_session),
 ) -> BarNamesResponse:
     return search_bar_names(session, query, limit)
+
+
+@router.get(
+    "/map-bars",
+    response_model=MapBarsResponse,
+    summary="Every active bar inside the area shown on the map",
+    description=(
+        "Public; the Authorization header is not read, so every caller gets the same result. The area "
+        "is used only to select bars and is not stored; it is also removed from the server's access log.\n\n"
+        "- Active bars with `south <= latitude <= north` and `west <= longitude <= east`, edges included, "
+        "with or without a published menu.\n"
+        "- All of them, with no paging or truncation, sorted by `barId`.\n"
+        f"- `north - south` and `east - west` must each be at most {MAX_SPAN_DEGREES} degrees. Areas "
+        "across the antimeridian (`west > east`) are not accepted.\n"
+        "- No bar in the area is `200` with `items: []`."
+    ),
+    responses=error_responses(
+        (
+            422,
+            "`VALIDATION_FAILED`: `south`, `west`, `north` or `east` `MISSING`, `GREATER_THAN_EQUAL` or "
+            "`LESS_THAN_EQUAL` (also for `nan` and `inf`) or `FLOAT_PARSING`, possibly several at once. "
+            "Then, one at a time: `north` or `east` `BOUNDS_INVERTED` (south above north, west east of "
+            f"east), then `north` or `east` `BOUNDS_TOO_LARGE` (wider than {MAX_SPAN_DEGREES} degrees).",
+        ),
+    ),
+)
+def read_map_bars(
+    south: Annotated[float, Query(ge=-90, le=90, description="Southern edge latitude (WGS84)")],
+    west: Annotated[float, Query(ge=-180, le=180, description="Western edge longitude (WGS84)")],
+    north: Annotated[float, Query(ge=-90, le=90, description="Northern edge latitude (WGS84)")],
+    east: Annotated[float, Query(ge=-180, le=180, description="Eastern edge longitude (WGS84)")],
+    session: Session = Depends(get_session),
+) -> MapBarsResponse:
+    return find_map_bars(session, south, west, north, east)

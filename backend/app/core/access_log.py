@@ -1,20 +1,21 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-19). Reviewed by Haeul Yang.
+# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-19, 2026-10-21). Reviewed by Haeul Yang.
 """Keep the customer's location out of uvicorn's access log.
 
-The search APIs take the location as `lat`/`lng` query parameters (spec 3.10, 3.12). The server
-does not store it, and the access log in journald should not keep it either. Each access line drops
-those two parameters and keeps the rest of the query, such as the search text, for later analysis.
+The search APIs take the customer's location as `lat`/`lng` (spec 3.10, 3.12) and the map area as
+`south`/`west`/`north`/`east` (spec 3.13) query parameters. The server does not store them, and the
+access log in journald should not keep them either. Each access line drops those parameters and
+keeps the rest of the query, such as the search text, for later analysis.
 """
 
 import logging
 from urllib.parse import unquote_plus
 
 ACCESS_LOGGER = "uvicorn.access"
-LOCATION_PARAMS = frozenset({"lat", "lng"})
+LOCATION_PARAMS = frozenset({"lat", "lng", "south", "west", "north", "east"})
 
 
 def without_location(path: str) -> str:
-    """The path with every `lat` and `lng` parameter removed; the other parameters stay as sent."""
+    """The path with every location parameter removed; the other parameters stay as sent."""
     base, sep, query = path.partition("?")
     if not sep:
         return path

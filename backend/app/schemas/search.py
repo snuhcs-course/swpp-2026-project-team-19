@@ -74,6 +74,24 @@ class BarNamesResponse(BaseModel):
     truncated: bool = Field(description="True when more bars matched than `limit`")
 
 
+class MapBarItem(BaseModel):
+    barId: UUID
+    name: str
+    address: str
+    latitude: Latitude
+    longitude: Longitude
+    menuUpdatedAt: UtcDateTime | None = Field(
+        description="When this bar's current menu was published, as in GET /api/search/nearby-bars; "
+        "null when the bar has never had a published menu, set even when that menu has no items"
+    )
+
+
+class MapBarsResponse(BaseModel):
+    items: list[MapBarItem] = Field(
+        description="Every active bar inside the area, edges included, by barId. Never truncated."
+    )
+
+
 class NearbyBarItem(BaseModel):
     barId: UUID
     name: str

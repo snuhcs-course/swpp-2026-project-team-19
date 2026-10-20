@@ -65,11 +65,12 @@ OPERATOR_ONLY = [
 ]
 # Any signed-in user; tested in test_users_api.py and test_auth_api.py.
 SIGNED_IN = {("get", "/api/me")}
-# No token needed; tested in test_search_api.py, test_nearby_bars_api.py, test_bar_names_api.py,
-# test_bar_menu_api.py and test_auth_api.py.
+# No token needed; tested in test_search_api.py, test_nearby_bars_api.py, test_map_bars_api.py,
+# test_bar_names_api.py, test_bar_menu_api.py and test_auth_api.py.
 PUBLIC = {
     ("get", "/api/search/bars"),
     ("get", "/api/search/nearby-bars"),
+    ("get", "/api/search/map-bars"),
     ("get", "/api/search/bar-names"),
     ("get", "/api/bars/{barId}/menu"),
     ("post", "/api/auth/temp-login"),

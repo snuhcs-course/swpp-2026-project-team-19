@@ -167,6 +167,7 @@ def database_down(*args, **kwargs):
         ("search", "search_bars", "/api/search/bars", {"query": "x"}),
         ("search", "find_nearby_bars", "/api/search/nearby-bars", {"lat": 37.478, "lng": 126.951}),
         ("search", "search_bar_names", "/api/search/bar-names", {"query": "x"}),
+        ("search", "find_map_bars", "/api/search/map-bars", {"south": 37.4, "west": 126.9, "north": 37.5, "east": 127}),
         ("bars", "get_bar_menu", "/api/bars/22222222-2222-4222-8222-222222222222/menu", {}),
     ],
 )

@@ -29,7 +29,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-# The customer's location arrives as lat/lng query parameters; keep it out of the access log.
+# The location (lat/lng) and the map area (south/west/north/east) arrive as query parameters;
+# keep them out of the access log.
 strip_location_from_access_log()
 
 app = FastAPI(title="BottleMap API", version="0.1.0", lifespan=lifespan)
