@@ -1,6 +1,10 @@
 // AI-assisted implementation draft (2026-10-17, I2-P25/A6). Device verification pending.
 package com.zerotoone.bottlemap.ui.customer
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -12,6 +16,7 @@ import android.util.Log
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +48,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -158,6 +165,7 @@ private fun BarLocationContent(
         MapStatusMessage("이 바의 위치 정보가 없거나 올바르지 않습니다.")
         return
     }
+    val context = LocalContext.current
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         // The BAR ADDRESS card repeats the address already shown above the map.
         // On short portrait screens, preserve room for the interactive map.
@@ -191,33 +199,33 @@ private fun BarLocationContent(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 onMapViewChanged = onMapViewChanged,
             )
-            Text(
-                text = "지도에서 바의 위치를 확인하세요.",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-            )
-            if (!compactHeight) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(15.dp),
+            // The exact Backend address is copied. Empty addresses are not actionable.
+            Surface(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(bottom = if (compactHeight) 6.dp else 16.dp)
+                    .clickable(enabled = target.address.isNotBlank(), role = Role.Button) {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE)
+                            as ClipboardManager
+                        clipboard.setPrimaryClip(
+                            ClipData.newPlainText("Bar Address", target.address))
+                        Toast.makeText(context, "주소가 복사되었습니다.", Toast.LENGTH_SHORT).show()
+                    },
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(15.dp),
+            ) {
+                Column(
+                    modifier = Modifier.padding(if (compactHeight) 8.dp else 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Column(
-                        modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        Text(
-                            text = "BAR ADDRESS",
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = target.address,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
+                    Text("BAR ADDRESS · 탭하여 복사",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold)
+                    Text(
+                        text = target.address,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }
