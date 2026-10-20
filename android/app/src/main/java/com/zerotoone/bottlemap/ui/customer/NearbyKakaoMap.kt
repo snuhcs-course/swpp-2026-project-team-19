@@ -50,6 +50,7 @@ import com.kakao.vectormap.label.LabelStyle
 import com.kakao.vectormap.label.LabelTextBuilder
 import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.MAX_NEARBY_API_RADIUS_METERS
+import com.zerotoone.bottlemap.data.MapPlace
 import com.zerotoone.bottlemap.data.NearbyBar
 import com.zerotoone.bottlemap.data.NearbyCoordinate
 import com.zerotoone.bottlemap.data.distanceMeters
@@ -94,6 +95,9 @@ fun NearbyKakaoMap(
     focusBarId: String?,
     initialCamera: DiscoveryCamera?,
     listCovered: Boolean,
+    searchedPlace: MapPlace?,
+    focusSearchedPlace: MapPlace?,
+    onSearchedPlaceFocusApplied: () -> Unit,
     onFocusApplied: () -> Unit,
     onCameraChanged: (NearbyCoordinate, Int) -> Unit,
     onSelectBar: (String) -> Unit,
@@ -112,6 +116,7 @@ fun NearbyKakaoMap(
         var status by remember { mutableStateOf<NearbyMapStatus>(NearbyMapStatus.Loading) }
         var nativeMap by remember { mutableStateOf<KakaoMap?>(null) }
         val markers = remember { linkedMapOf<String, Pair<NearbyCoordinate, Label>>() }
+        var placeLabel by remember { mutableStateOf<Label?>(null) }
         val currentSelect = rememberUpdatedState(onSelectBar)
         val currentViewport = rememberUpdatedState(onViewportChanged)
         val currentCameraChanged = rememberUpdatedState(onCameraChanged)
@@ -160,6 +165,31 @@ fun NearbyKakaoMap(
                 stored.second.setStyles(nearbyMarkerStyle(id == selectedBarId))
                 stored.second.invalidate()
             }
+        }
+
+        // Generic geocoder places are never treated as Backend bars. Their pin
+        // has no BottleMap barId and cannot navigate to Bar Detail.
+        LaunchedEffect(nativeMap, searchedPlace) {
+            placeLabel?.remove()
+            placeLabel = null
+            val map = nativeMap ?: return@LaunchedEffect
+            val place = searchedPlace ?: return@LaunchedEffect
+            if (place.coordinate.isValid()) {
+                placeLabel = map.labelManager?.layer?.addLabel(
+                    LabelOptions.from("__searched_location__",
+                        LatLng.from(place.coordinate.latitude, place.coordinate.longitude))
+                        .setStyles(searchPlaceMarkerStyle())
+                        .setClickable(false),
+                )
+            }
+        }
+        LaunchedEffect(nativeMap, focusSearchedPlace) {
+            val map = nativeMap ?: return@LaunchedEffect
+            val place = focusSearchedPlace ?: return@LaunchedEffect
+            if (!place.coordinate.isValid()) return@LaunchedEffect
+            map.moveCamera(CameraUpdateFactory.newCenterPosition(
+                LatLng.from(place.coordinate.latitude, place.coordinate.longitude)))
+            onSearchedPlaceFocusApplied()
         }
 
         // Selection styling updates without restarting the map or requiring a
@@ -321,6 +351,7 @@ fun NearbyKakaoMap(
                         runCatching { view.pause() }
                         runCatching { view.finish() }
                         markers.clear()
+                        placeLabel = null
                     }
                 }
             } else {
@@ -341,6 +372,22 @@ fun NearbyKakaoMap(
             }
         }
     }
+}
+
+private fun searchPlaceMarkerStyle(): LabelStyle {
+    val bitmap = Bitmap.createBitmap(42, 42, Bitmap.Config.ARGB_8888)
+    Canvas(bitmap).apply {
+        drawCircle(21f, 21f, 18f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+        })
+        drawCircle(21f, 21f, 14f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.rgb(121, 78, 201)
+        })
+        drawCircle(21f, 21f, 5f, Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+        })
+    }
+    return LabelStyle.from(bitmap).setAnchorPoint(0.5f, 0.5f)
 }
 
 private fun userLocationStyle(): LabelStyle {
