@@ -93,6 +93,7 @@ fun NearbyKakaoMap(
     focusTarget: NearbyBar?,
     focusBarId: String?,
     initialCamera: DiscoveryCamera?,
+    listCovered: Boolean,
     onFocusApplied: () -> Unit,
     onCameraChanged: (NearbyCoordinate, Int) -> Unit,
     onSelectBar: (String) -> Unit,
@@ -115,6 +116,7 @@ fun NearbyKakaoMap(
         val currentViewport = rememberUpdatedState(onViewportChanged)
         val currentCameraChanged = rememberUpdatedState(onCameraChanged)
         val currentNativeMap = rememberUpdatedState(nativeMap)
+        val currentCovered = rememberUpdatedState(listCovered)
         val ctx = LocalContext.current
         val owner = LocalLifecycleOwner.current
         val view = remember {
@@ -210,9 +212,9 @@ fun NearbyKakaoMap(
                     val observer = LifecycleEventObserver { _, event ->
                         when (event) {
                             Lifecycle.Event.ON_RESUME -> {
-                                view.visibility = View.VISIBLE
-                                view.surfaceView?.visibility = View.VISIBLE
                                 runCatching { view.resume() }
+                                if (currentCovered.value) hideNearbyNativeSurface(view)
+                                else showNearbyNativeSurface(view)
                             }
                             Lifecycle.Event.ON_PAUSE -> {
                                 hideNearbyNativeSurface(view)
