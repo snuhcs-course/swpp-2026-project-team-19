@@ -24,7 +24,7 @@ class BackendMapBarsRepositoryTest {
         assertEquals(null, bars[0].menuUpdatedAt)
         assertEquals("2026-10-21T01:00:00Z", bars[1].menuUpdatedAt)
         assertTrue(bars[0] is BarPin)
-        assertFalse(bars[0] is NearbyBar)
+        assertFalse((bars[0] as Any) is NearbyBar)
         val moshi = ApiClient.moshi.adapter(MapBarsResponseDto::class.java)
         val parsed = moshi.fromJson("""{"items":[{"barId":"test","name":"Test","address":"Seoul","latitude":37.5,"longitude":127.0,"menuUpdatedAt":null}]}""")
         assertEquals("test", parsed!!.items.single().barId)
