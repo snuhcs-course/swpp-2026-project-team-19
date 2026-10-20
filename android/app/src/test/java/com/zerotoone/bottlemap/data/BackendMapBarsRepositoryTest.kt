@@ -12,6 +12,35 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class BackendMapBarsRepositoryTest {
+    @Test fun kakaoViewportPixelCornersStayInsideExclusiveRightAndBottom() {
+        assertEquals(listOf(
+            0 to 0, 1079 to 0, 0 to 1919, 1079 to 1919,
+        ), viewportCornerPixels(0, 0, 1080, 1920))
+        assertEquals(listOf(
+            10 to 25, 209 to 25, 10 to 424, 209 to 424,
+        ), viewportCornerPixels(10, 25, 210, 425))
+        assertEquals(null, viewportCornerPixels(0, 0, 0, 100))
+        assertEquals(null, viewportCornerPixels(0, 0, 200, 1))
+        assertEquals(null, viewportCornerPixels(40, 20, 39, 60))
+    }
+
+    @Test fun transientProjectionWithoutAllCornersOrCurrentCameraIsRejected() {
+        val corners = listOf(
+            NearbyCoordinate(37.48, 126.94),
+            NearbyCoordinate(37.48, 126.96),
+            NearbyCoordinate(37.47, 126.94),
+            NearbyCoordinate(37.47, 126.96),
+        )
+        assertEquals(MapBounds(37.47, 126.94, 37.48, 126.96),
+            mapBoundsFromCorners(corners, NearbyCoordinate(37.475, 126.95)))
+        assertEquals(null, mapBoundsFromCorners(corners.take(3), NearbyCoordinate(37.475, 126.95)))
+        assertEquals(null, mapBoundsFromCorners(corners, NearbyCoordinate(37.9, 127.5)))
+        assertEquals(null, mapBoundsFromCorners(
+            List(4) { NearbyCoordinate(37.475, 126.95) }, NearbyCoordinate(37.475, 126.95)))
+        assertEquals(null, mapBoundsFromCorners(
+            corners.take(3) + NearbyCoordinate(Double.NaN, 126.96)))
+    }
+
     @Test fun serverMapFieldsAreMappedWithoutInventingDistanceOrSorting() {
         val response = MapBarsResponseDto(
             items = listOf(

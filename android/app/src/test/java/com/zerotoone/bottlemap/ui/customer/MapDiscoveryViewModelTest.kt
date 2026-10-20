@@ -74,6 +74,88 @@ class MapDiscoveryViewModelTest {
                 override suspend fun currentLocation(): NearbyCoordinate = user
             }, nearby, handle, map)
 
+    @Test fun searchingAfterOldEmptyMustClearFalseEmptyAndRecoverToBars() = runTest(dispatcher) {
+        val fakeMap = MapFake()
+        val model = vm(NearbyFake(), fakeMap)
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        model.onViewportChanged(MapViewport(a))
+        advanceUntilIdle()
+        assertTrue((model.map.value as MapDiscoveryState.Ready).bars.isEmpty())
+        // Search result moves the native camera; a stale Ready(empty) must
+        // disappear immediately even if the new viewport projection is not ready.
+        model.onMapCameraMoving()
+        assertEquals(MapDiscoveryState.Loading, model.map.value)
+        model.onMapViewportUnavailable()
+        assertTrue(model.map.value is MapDiscoveryState.Error)
+        assertEquals(listOf(a), fakeMap.calls)
+        // A later native projection/retry uses the *new* bounds and recovers.
+        fakeMap.bars = listOf(mapped("searched-bar"))
+        model.onViewportChanged(MapViewport(b))
+        advanceUntilIdle()
+        assertEquals(listOf(a, b), fakeMap.calls)
+        assertEquals(listOf("searched-bar"), model.markers.value.map { it.barId })
+        assertEquals(b, (model.map.value as MapDiscoveryState.Ready).bounds)
+    }
+
+    @Test fun cameraMoveInvalidatesInFlightEmptyResponseEvenIfCancelledCallCompletes() = runTest(dispatcher) {
+        val response = CompletableDeferred<List<MapBar>>()
+        val source = object : MapBarsSource {
+            override suspend fun listMapBars(bounds: MapBounds): List<MapBar> =
+                withContext(NonCancellable) { response.await() }
+        }
+        val model = vm(NearbyFake(), source)
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        model.onViewportChanged(MapViewport(a))
+        advanceTimeBy(351)
+        runCurrent()
+        model.onMapCameraMoving()
+        model.onMapViewportUnavailable()
+        response.complete(emptyList())
+        advanceUntilIdle()
+        assertTrue(model.map.value is MapDiscoveryState.Error)
+    }
+
+    @Test fun crossingZoomLimitByLessThanToleranceStillShowsZoomPrompt() = runTest(dispatcher) {
+        val fakeMap = MapFake()
+        val model = vm(NearbyFake(), fakeMap)
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        val valid = MapBounds(37.40, 126.80, 37.59995, 126.97)
+        val invalid = valid.copy(north = 37.60005)
+        assertTrue(valid.isSupportedByBackend())
+        assertFalse(invalid.isSupportedByBackend())
+        assertTrue(valid.isNearlySameAs(invalid))
+        model.onViewportChanged(MapViewport(valid))
+        advanceUntilIdle()
+        model.onViewportChanged(MapViewport(invalid))
+        assertEquals(MapDiscoveryState.TooWide, model.map.value)
+        assertEquals(listOf(valid), fakeMap.calls)
+        model.onViewportChanged(MapViewport(a))
+        advanceUntilIdle()
+        assertEquals(a, (model.map.value as MapDiscoveryState.Ready).bounds)
+        assertEquals(listOf(valid, a), fakeMap.calls)
+    }
+
+    @Test fun manualRetryAfterFailedProjectionMustUseFreshBoundsNotPreviousArea() = runTest(dispatcher) {
+        val fakeMap = MapFake().apply { bars = listOf(mapped("new")) }
+        val model = vm(NearbyFake(), fakeMap)
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        model.onViewportChanged(MapViewport(a))
+        advanceUntilIdle()
+        model.onMapCameraMoving()
+        model.onMapViewportUnavailable()
+        model.retryMap()
+        advanceUntilIdle()
+        // No stale-map retry: the UI requests a new native projection instead.
+        assertEquals(listOf(a), fakeMap.calls)
+        model.onViewportChanged(MapViewport(b))
+        advanceUntilIdle()
+        assertEquals(listOf(a, b), fakeMap.calls)
+    }
+
     @Test fun mapUsesBoundsAndCarouselRemainsIndependent1000m() = runTest(dispatcher) {
         val near = NearbyFake().apply { current = listOf(nearby("near")) }
         val map = MapFake().apply { bars = listOf(mapped("far")) }
