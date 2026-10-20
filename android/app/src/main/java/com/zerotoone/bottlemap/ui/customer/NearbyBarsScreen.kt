@@ -114,6 +114,7 @@ fun NearbyBarsScreen(
     var placeQuery by rememberSaveable { mutableStateOf("") }
     var placeResultsVisible by rememberSaveable { mutableStateOf(false) }
     var recenterToken by remember { mutableIntStateOf(0) }
+    var viewportRetryToken by remember { mutableIntStateOf(0) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var leaving by remember { mutableStateOf(false) }
     var navigating by remember { mutableStateOf(false) }
@@ -206,6 +207,9 @@ fun NearbyBarsScreen(
                     onSearchedPlaceFocusApplied = placeSearchViewModel::consumeFocus,
                     onFocusApplied = viewModel::consumeFocusRequest,
                     onCameraChanged = viewModel::rememberCamera,
+                    onMapCameraMoving = viewModel::onMapCameraMoving,
+                    onMapViewportUnavailable = viewModel::onMapViewportUnavailable,
+                    viewportRetryToken = viewportRetryToken,
                     onSelectBar = {
                         placeSearchViewModel.clear()
                         viewModel.selectBar(it)
@@ -266,7 +270,7 @@ fun NearbyBarsScreen(
                     NearbyFullList(
                         state = mapState,
                         bars = mapBars,
-                        onRetry = viewModel::retryMap,
+                        onRetry = { viewportRetryToken++ },
                         onSelect = { barId ->
                             placeSearchViewModel.clear()
                             if (viewModel.selectBar(barId)) listVisible = false
@@ -301,7 +305,7 @@ fun NearbyBarsScreen(
                         ) {
                             Text(hint, style = MaterialTheme.typography.bodySmall)
                             if (mapState is MapDiscoveryState.Error) {
-                                TextButton(onClick = viewModel::retryMap) { Text("재시도") }
+                                TextButton(onClick = { viewportRetryToken++ }) { Text("재시도") }
                             }
                         }
                     }
