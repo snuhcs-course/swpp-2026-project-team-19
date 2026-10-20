@@ -47,7 +47,7 @@ class NearbyBarsDtoContractTest {
     fun keepsServerResultAndOrderAtRounded500mEvenIfRawDistanceIsBeyondRadius() {
         val outsideAsDouble = Math.toDegrees(500.4 / 6_371_000.0)
         val response = NearbyBarsResponseDto(listOf(
-            dto("A", latitude = outsideAsDouble, distance = 500),
+            dto("A", latitude = outsideAsDouble, longitude = 0.0, distance = 500),
             dto("B", latitude = 0.0, longitude = 0.01, distance = 50),
         ))
         val bars = response.toNearbyBars()
