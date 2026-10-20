@@ -47,8 +47,8 @@ class NearbyBarsDtoContractTest {
     fun keepsServerResultAndOrderAtRounded500mEvenIfRawDistanceIsBeyondRadius() {
         val outsideAsDouble = Math.toDegrees(500.4 / 6_371_000.0)
         val response = NearbyBarsResponseDto(listOf(
-            dto("A", latitude = outsideAsDouble, distance = 500),
-            dto("B", latitude = 0.0, distance = 50),
+            dto("A", latitude = outsideAsDouble, longitude = 0.0, distance = 500),
+            dto("B", latitude = 0.0, longitude = 0.01, distance = 50),
         ))
         val bars = response.toNearbyBars()
         assertTrue(distanceMeters(NearbyCoordinate(0.0, 0.0), bars[0].location) > 500)
@@ -86,7 +86,7 @@ class NearbyBarsDtoContractTest {
             NearbyBarsResponseDto(listOf(dto("bad", latitude = 126.951))).toNearbyBars()
         }
         assertThrows(IllegalArgumentException::class.java) {
-            NearbyBarsResponseDto(listOf(dto("bad", distance = 501))).toNearbyBars()
+            NearbyBarsResponseDto(listOf(dto("bad", distance = 3001))).toNearbyBars()
         }
         assertThrows(IllegalArgumentException::class.java) {
             NearbyBarsResponseDto(listOf(dto(" "))).toNearbyBars()
@@ -95,8 +95,8 @@ class NearbyBarsDtoContractTest {
 
     private fun dto(
         id: String,
-        latitude: Double = 0.0,
-        longitude: Double = 0.0,
+        latitude: Double = 37.478,
+        longitude: Double = 126.951,
         distance: Int = 25,
     ) = com.zerotoone.bottlemap.network.NearbyBarItemDto(
         barId = id, name = "test", address = "test",

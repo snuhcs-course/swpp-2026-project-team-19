@@ -1,6 +1,10 @@
 // AI-assisted implementation draft (2026-10-17, I2-P25/A6). Device verification pending.
 package com.zerotoone.bottlemap.ui.customer
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -11,7 +15,9 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,7 +49,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -158,6 +172,8 @@ private fun BarLocationContent(
         MapStatusMessage("이 바의 위치 정보가 없거나 올바르지 않습니다.")
         return
     }
+    val context = LocalContext.current
+    val addressToCopy = copyableBarAddress(target.address)
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         // The BAR ADDRESS card repeats the address already shown above the map.
         // On short portrait screens, preserve room for the interactive map.
@@ -191,32 +207,58 @@ private fun BarLocationContent(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 onMapViewChanged = onMapViewChanged,
             )
-            Text(
-                text = "지도에서 바의 위치를 확인하세요.",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-            )
-            if (!compactHeight) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(15.dp),
+            // The exact Backend address is copied. Empty addresses are not actionable.
+            Surface(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(bottom = if (compactHeight) 6.dp else 16.dp)
+                    .clickable(enabled = addressToCopy != null, role = Role.Button) {
+                        val address = addressToCopy ?: return@clickable
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE)
+                            as ClipboardManager
+                        clipboard.setPrimaryClip(
+                            ClipData.newPlainText("Bar Address", address))
+                        Toast.makeText(context, "주소가 복사되었습니다.", Toast.LENGTH_SHORT).show()
+                    },
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(15.dp),
+            ) {
+                Column(
+                    modifier = Modifier.padding(if (compactHeight) 8.dp else 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Column(
-                        modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(
-                            text = "BAR ADDRESS",
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
                             text = target.address,
+                            modifier = Modifier.weight(1f),
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
                         )
+                        if (addressToCopy != null) {
+                            val iconColor = MaterialTheme.colorScheme.primary
+                            Canvas(
+                                modifier = Modifier.size(24.dp).semantics {
+                                    contentDescription = "주소 복사"
+                                },
+                            ) {
+                                val line = 2.dp.toPx()
+                                drawRect(
+                                    color = iconColor,
+                                    topLeft = Offset(size.width * 0.29f, size.height * 0.10f),
+                                    size = Size(size.width * 0.57f, size.height * 0.65f),
+                                    style = Stroke(line),
+                                )
+                                drawRect(
+                                    color = iconColor,
+                                    topLeft = Offset(size.width * 0.13f, size.height * 0.29f),
+                                    size = Size(size.width * 0.57f, size.height * 0.61f),
+                                    style = Stroke(line),
+                                )
+                            }
+                        }
                     }
                 }
             }

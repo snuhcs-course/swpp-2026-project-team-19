@@ -25,16 +25,35 @@ data class NearbyBarCandidate(
     val location: NearbyCoordinate?,
 )
 
+/** Common map-display identity, without assuming a distance exists. */
+interface BarPin {
+    val barId: String
+    val name: String
+    val address: String
+    val location: NearbyCoordinate
+}
+
 data class NearbyBar(
-    val barId: String,
-    val name: String,
-    val address: String,
-    val location: NearbyCoordinate,
+    override val barId: String,
+    override val name: String,
+    override val address: String,
+    override val location: NearbyCoordinate,
     val distanceMeters: Double,
     val menuUpdatedAt: String? = null,
-)
+) : BarPin
 
-const val NEARBY_RADIUS_METERS = 500.0
+/** Unlike NearbyBar, GET /api/search/map-bars has no distance. */
+data class MapBar(
+    override val barId: String,
+    override val name: String,
+    override val address: String,
+    override val location: NearbyCoordinate,
+    val menuUpdatedAt: String? = null,
+) : BarPin
+
+const val NEARBY_CAROUSEL_RADIUS_METERS = 1000
+const val MAX_NEARBY_API_RADIUS_METERS = 3000
+const val NEARBY_RADIUS_METERS = NEARBY_CAROUSEL_RADIUS_METERS.toDouble()
 private const val EARTH_RADIUS_METERS = 6_371_000.0
 
 /** Pure, deterministic Haversine distance; lat FIRST, lng SECOND. */
@@ -89,4 +108,8 @@ interface NearbyLocationSource {
  */
 interface NearbyBarsSource {
     suspend fun listNearbyBars(origin: NearbyCoordinate): List<NearbyBar>
+
+    /** Allows viewport queries without changing the existing A7 test-double contract. */
+    suspend fun listNearbyBars(origin: NearbyCoordinate, radiusMeters: Int): List<NearbyBar> =
+        listNearbyBars(origin)
 }

@@ -110,3 +110,32 @@ data class BarMenuResponseDto(
     val publishedAt: String?,
     val items: List<BarMenuItemDto>,
 )
+
+// Backend PR #54: GET /api/search/bar-names (public).
+data class BarNameItemDto(
+    val barId: String,
+    val name: String,
+    val address: String,
+    val latitude: Double,
+    val longitude: Double,
+    val hasOwner: Boolean,
+)
+
+data class BarNamesResponseDto(
+    val items: List<BarNameItemDto>,
+    val truncated: Boolean,
+)
+
+// Backend PR #54: GET /api/search/map-bars (no distanceMeters).
+data class MapBarItemDto(
+    val barId: String,
+    val name: String,
+    val address: String,
+    val latitude: Double,
+    val longitude: Double,
+    val menuUpdatedAt: String?,
+)
+
+data class MapBarsResponseDto(
+    val items: List<MapBarItemDto>,
+)

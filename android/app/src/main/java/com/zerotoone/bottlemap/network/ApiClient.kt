@@ -42,7 +42,9 @@ object ApiClient {
         // Never log this privacy-sensitive Nearby request on the Android device.
         // Backend access logs are a separate concern (API spec 3.12.3).
         .addInterceptor { chain ->
-            if (chain.request().url.encodedPath == "/api/search/nearby-bars") {
+            if (chain.request().url.encodedPath == "/api/search/nearby-bars" ||
+                chain.request().url.encodedPath == "/api/search/map-bars"
+            ) {
                 chain.proceed(chain.request())
             } else {
                 logging.intercept(chain)
