@@ -203,9 +203,10 @@ fun NearbyKakaoMap(
             onFocusApplied()
         }
         LaunchedEffect(recenterToken, nativeMap) {
-            if (recenterToken > 0 && nativeMap != null) {
+            val map = nativeMap
+            if (recenterToken > 0 && map != null) {
                 currentMoving.value()
-                nativeMap.moveCamera(CameraUpdateFactory.newCenterPosition(
+                map.moveCamera(CameraUpdateFactory.newCenterPosition(
                     LatLng.from(origin.latitude, origin.longitude)))
                 requestViewportSnapshot?.invoke()
             }
