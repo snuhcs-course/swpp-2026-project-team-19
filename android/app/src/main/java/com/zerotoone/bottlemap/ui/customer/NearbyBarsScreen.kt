@@ -157,6 +157,7 @@ fun NearbyBarsScreen(
                     focusTarget = selected,
                     focusBarId = focusBarId,
                     initialCamera = viewModel.savedCamera(),
+                    listCovered = listVisible,
                     onFocusApplied = viewModel::consumeFocusRequest,
                     onCameraChanged = viewModel::rememberCamera,
                     onSelectBar = { viewModel.selectBar(it) },
@@ -543,3 +544,8 @@ private fun NearbyFullList(
     }
 }
 
+
+internal fun showNearbyNativeSurface(view: MapView) {
+    view.visibility = View.VISIBLE
+    view.surfaceView?.visibility = View.VISIBLE
+}
