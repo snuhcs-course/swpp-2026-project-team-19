@@ -227,6 +227,12 @@ class MapDiscoveryViewModelTest {
         model.leaveDiscovery()
         assertNull(model.savedCamera())
         assertNull(model.selectedBarId.value)
+        // Kakao MapView can be disposed after Navigation has already popped.
+        model.rememberCamera(lastPannedPoint, 13)
+        assertNull(model.savedCamera())
+        model.beginDiscovery()
+        model.rememberCamera(lastPannedPoint, 13)
+        assertEquals(DiscoveryCamera(lastPannedPoint, 13), model.savedCamera())
     }
 
     @Test fun cameraSurvivesRecreatedViewModelAndInitialPermissionRestore() = runTest(dispatcher) {

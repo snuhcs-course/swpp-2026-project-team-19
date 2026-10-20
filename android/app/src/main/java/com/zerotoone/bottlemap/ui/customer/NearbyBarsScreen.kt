@@ -126,7 +126,10 @@ fun NearbyBarsScreen(
         hasRequestedPermission = true
         updatePermissions()
     }
-    LaunchedEffect(Unit) { updatePermissions() }
+    LaunchedEffect(Unit) {
+        viewModel.beginDiscovery()
+        updatePermissions()
+    }
     val onResume = rememberUpdatedState(newValue = {
         navigating = false
         updatePermissions()

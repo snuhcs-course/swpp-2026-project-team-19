@@ -93,7 +93,9 @@ class NearbyBarsViewModel(
     }
 
     fun rememberCamera(center: NearbyCoordinate, zoomLevel: Int) {
-        if (!center.isValid() || zoomLevel !in 1..21 || _origin.value == null) return
+        if (!acceptingCameraChanges || !center.isValid() ||
+            zoomLevel !in 1..21 || _origin.value == null
+        ) return
         savedStateHandle["mapCenterLatitude"] = center.latitude
         savedStateHandle["mapCenterLongitude"] = center.longitude
         savedStateHandle["mapZoomLevel"] = zoomLevel
@@ -115,6 +117,12 @@ class NearbyBarsViewModel(
     private var requestVersion = 0L
     private var mapVersion = 0L
     private var lastViewport: NearbyViewport? = null
+    // A late MapView.onDispose after popping Nearby must not persist the exited camera.
+    private var acceptingCameraChanges = true
+
+    fun beginDiscovery() {
+        acceptingCameraChanges = true
+    }
 
     fun updatePermission(permission: NearbyPermission) {
         if (permission == NearbyPermission.NONE || permission == NearbyPermission.PERMANENTLY_DENIED) {
@@ -251,6 +259,7 @@ class NearbyBarsViewModel(
      *  Returning from Bar Detail to the same map retains the chosen bar.
      */
     fun leaveDiscovery() {
+        acceptingCameraChanges = false
         mapVersion++
         mapQuery?.cancel()
         lastViewport = null
