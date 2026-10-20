@@ -236,6 +236,15 @@ class NearbyBarsViewModel(
     /** Load the exact visible bounds after the camera gesture. No 3km circle. */
     fun onViewportChanged(viewport: MapViewport, force: Boolean = false) {
         if (_origin.value == null || !acceptingCameraChanges) return
+        // Check API support *before* near-equality short-circuit: zoom can
+        // cross the 0.2-degree limit by less than the movement tolerance.
+        if (!viewport.bounds.isSupportedByBackend()) {
+            lastViewport = viewport
+            ++mapVersion
+            mapQuery?.cancel()
+            _map.value = MapDiscoveryState.TooWide
+            return
+        }
         val previous = lastViewport
         if (!force && previous != null &&
             previous.bounds.isNearlySameAs(viewport.bounds) &&
@@ -244,11 +253,6 @@ class NearbyBarsViewModel(
         lastViewport = viewport
         val version = ++mapVersion
         mapQuery?.cancel()
-        if (!viewport.bounds.isSupportedByBackend()) {
-            // Contract max span 0.2 degrees on each axis. Never send 422 knowingly.
-            _map.value = MapDiscoveryState.TooWide
-            return
-        }
         _map.value = MapDiscoveryState.Loading
         mapQuery = viewModelScope.launch {
             delay(350)
