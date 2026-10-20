@@ -13,6 +13,13 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -79,10 +86,14 @@ fun NearbyBarsScreen(
     val mapState by viewModel.map.collectAsStateWithLifecycle()
     val mapBars by viewModel.markers.collectAsStateWithLifecycle()
     val selectedId by viewModel.selectedBarId.collectAsStateWithLifecycle()
+    val focusBarId by viewModel.focusBarId.collectAsStateWithLifecycle()
     val carousel = (state as? NearbyUiState.Success)?.bars.orEmpty()
     val selected = (mapBars + carousel).firstOrNull { it.barId == selectedId }
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
-    var recenterToken by rememberSaveable { mutableIntStateOf(0) }
+    // Keep Native MapView mounted beneath the full-page list so switching modes
+    // does not lose its camera/labels or reinitialize the Kakao SDK.
+    var listVisible by rememberSaveable { mutableStateOf(false) }
+    var recenterToken by remember { mutableIntStateOf(0) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var leaving by remember { mutableStateOf(false) }
     var navigating by remember { mutableStateOf(false) }
@@ -126,126 +137,226 @@ fun NearbyBarsScreen(
         lifecycle.lifecycle.addObserver(observer)
         onDispose { lifecycle.lifecycle.removeObserver(observer) }
     }
+    LaunchedEffect(listVisible, mapView) {
+        mapView?.let {
+            if (listVisible) hideNearbyNativeSurface(it)
+            else showNearbyNativeSurface(it)
+        }
+    }
 
     I2CustomerSearchTheme {
-        Column(Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = ::back) { Text("←") }
-                Text("지도에서 바 찾기", style = MaterialTheme.typography.titleLarge)
-            }
+        // The map owns the entire screen; header, list and selected-card overlay
+        // draw on TOP of it instead of shrinking the map's available height.
+        Box(Modifier.fillMaxSize()) {
             val fix = origin
             if (fix != null && !leaving) {
-                Box(Modifier.fillMaxWidth().weight(1f)) {
-                    NearbyKakaoMap(
-                        origin = fix,
-                        bars = mapBars,
-                        selectedBarId = selectedId,
-                        focusTarget = selected,
-                        onSelectBar = { viewModel.selectBar(it) },
-                        onViewportChanged = { viewModel.onViewportChanged(it) },
-                        recenterToken = recenterToken,
-                        onMapViewChanged = {
-                            mapView = it
-                            if (leaving) it?.let(::hideNearbyNativeSurface)
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                    OutlinedButton(onClick = { recenterToken++ },
-                        modifier = Modifier.align(Alignment.TopEnd).padding(12.dp)) {
-                        Text("⌖ 내 위치")
-                    }
-                }
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                    Text("대략적인 위치를 사용 중입니다. 거리에는 오차가 있을 수 있습니다.",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall)
-                }
-                when (val mapResult = mapState) {
-                    MapDiscoveryState.Initial, MapDiscoveryState.Loading ->
-                        Text("지도에서 바를 찾는 중…", modifier = Modifier.padding(horizontal = 16.dp),
-                            style = MaterialTheme.typography.bodySmall)
-                    is MapDiscoveryState.Ready ->
-                        Text(
-                            when {
-                                mapResult.partiallyCovered ->
-                                    "지도 범위가 3km 한도를 초과합니다. 중심 3km 이내 바만 표시됩니다."
-                                mapResult.bars.isEmpty() ->
-                                    "이 지도 영역에 등록된 바가 없습니다. 지도를 이동해 보세요."
-                                else -> "지도 중심 ${mapResult.radiusMeters}m · ${mapResult.bars.size}개 바"
-                            },
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall)
-                    is MapDiscoveryState.Error ->
-                        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically) {
-                            Text(mapResult.message, modifier = Modifier.weight(1f),
-                                style = MaterialTheme.typography.bodySmall)
-                            TextButton(onClick = viewModel::retryMap) { Text("재시도") }
-                        }
-                }
-                if (selected != null) OutlinedCard(
-                    onClick = { detail(selected.barId) },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                NearbyKakaoMap(
+                    origin = fix,
+                    bars = mapBars,
+                    selectedBarId = selectedId,
+                    focusTarget = selected,
+                    focusBarId = focusBarId,
+                    initialCamera = viewModel.savedCamera(),
+                    onFocusApplied = viewModel::consumeFocusRequest,
+                    onCameraChanged = viewModel::rememberCamera,
+                    onSelectBar = { viewModel.selectBar(it) },
+                    onViewportChanged = { viewModel.onViewportChanged(it) },
+                    recenterToken = recenterToken,
+                    onMapViewChanged = { attached ->
+                        mapView = attached
+                        if (leaving || listVisible) attached?.let(::hideNearbyNativeSurface)
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else if (!leaving) {
+                Box(
+                    Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Column(Modifier.padding(10.dp)) {
-                        Text(selected.name, style = MaterialTheme.typography.titleSmall)
-                        Text(selected.address, style = MaterialTheme.typography.bodySmall)
-                        Text("Bar Detail 보기 →", color = MaterialTheme.colorScheme.primary)
-                    }
-                }
-                Text("내 위치에서 1km · 가까운 순서",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.titleSmall)
-                when (val current = state) {
-                    NearbyUiState.LoadingBars, NearbyUiState.LoadingLocation, NearbyUiState.Initial ->
-                        NearbyStatus("1km 안의 바를 조회 중입니다.", loading = true)
-                    NearbyUiState.Empty ->
-                        NearbyStatus("현재 위치에서 1km 이내에 등록된 바가 없습니다.",
-                            button = "다시 검색", onAction = viewModel::refresh)
-                    is NearbyUiState.Error ->
-                        NearbyStatus(current.message,
+                    when (val current = state) {
+                        NearbyUiState.Initial, NearbyUiState.LoadingLocation, NearbyUiState.LoadingBars ->
+                            NearbyStatus("현재 위치를 확인하고 있습니다.", loading = true)
+                        NearbyUiState.PermissionRequired -> NearbyStatus(
+                            "지도를 보려면 위치 권한이 필요합니다.",
+                            button = "위치 권한 허용",
+                            onAction = {
+                                permissionLauncher.launch(arrayOf(
+                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION))
+                            })
+                        NearbyUiState.PermissionPermanentlyDenied -> NearbyStatus(
+                            "위치 권한을 사용할 수 없습니다.",
+                            button = "앱 설정 열기",
+                            onAction = {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = Uri.parse("package:${context.packageName}")
+                                    })
+                            })
+                        NearbyUiState.LocationServicesDisabled -> NearbyStatus(
+                            "위치 서비스를 켠 뒤 다시 시도해 주세요.",
+                            button = "위치 설정",
+                            onAction = { context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) })
+                        is NearbyUiState.Error -> NearbyStatus(
+                            current.message,
                             button = if (current.canRetry) "다시 시도" else null,
                             onAction = viewModel::refresh)
-                    is NearbyUiState.Success -> NearbyCarousel(
-                        bars = current.bars, selectedBarId = selectedId,
-                        onSelect = viewModel::selectBar, onOpenDetail = ::detail)
-                    else -> Unit
+                        else -> NearbyStatus("현재 위치를 확인할 수 없습니다.",
+                            button = "다시 시도", onAction = viewModel::refresh)
+                    }
                 }
-            } else if (!leaving) {
-                when (val current = state) {
-                    NearbyUiState.Initial -> NearbyStatus("위치 권한을 확인하고 있습니다.")
-                    NearbyUiState.PermissionRequired -> NearbyStatus(
-                        "지도를 보려면 위치 권한이 필요합니다. 주류 검색은 권한 없이 사용할 수 있어요.",
-                        button = "위치 권한 허용",
-                        onAction = {
-                            permissionLauncher.launch(arrayOf(
-                                Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.ACCESS_FINE_LOCATION))
-                        })
-                    NearbyUiState.PermissionPermanentlyDenied -> NearbyStatus(
-                        "위치 권한을 사용할 수 없습니다. Android 앱 설정에서 변경해 주세요.",
-                        button = "앱 설정 열기",
-                        onAction = {
-                            context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.parse("package:${context.packageName}")
-                            })
-                        })
-                    NearbyUiState.LocationServicesDisabled -> NearbyStatus(
-                        "위치 서비스가 꺼져 있습니다. 위치 서비스를 켜고 다시 시도해 주세요.",
-                        button = "위치 설정 열기",
-                        onAction = { context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) })
-                    NearbyUiState.LoadingLocation, NearbyUiState.LoadingBars ->
-                        NearbyStatus("현재 위치를 확인하고 있습니다.", loading = true)
-                    is NearbyUiState.Error -> NearbyStatus(current.message,
-                        button = if (current.canRetry) "다시 시도" else null,
-                        onAction = viewModel::refresh)
-                    else -> NearbyStatus("위치 정보를 확인할 수 없습니다.",
-                        button = "다시 시도", onAction = viewModel::refresh)
+            }
+
+            if (fix != null && !leaving && listVisible) {
+                // Full map-area overlay, not another destination or bottom sheet.
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    NearbyFullList(
+                        state = mapState,
+                        bars = mapBars,
+                        onRetry = viewModel::retryMap,
+                        onSelect = { barId ->
+                            if (viewModel.selectBar(barId)) listVisible = false
+                        },
+                        onOpenDetail = ::detail,
+                    )
                 }
-                TextButton(onClick = ::back) { Text("검색으로 돌아가기") }
+            }
+
+            if (fix != null && !leaving && !listVisible) {
+                // Display messages only when actionable or when Backend cannot
+                // cover the full viewport. No permanent caption below the map.
+                val hint = when (val current = mapState) {
+                    is MapDiscoveryState.Error -> current.message
+                    is MapDiscoveryState.Ready -> when {
+                        current.partiallyCovered -> "지도 중심 3km 내 매장만 표시됩니다."
+                        current.bars.isEmpty() -> "현재 지도에 매장이 없습니다."
+                        else -> null
+                    }
+                    else -> null
+                }
+                if (hint != null) {
+                    Surface(
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                            .padding(horizontal = 20.dp, vertical = 148.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                        shadowElevation = 3.dp,
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(hint, style = MaterialTheme.typography.bodySmall)
+                            if (mapState is MapDiscoveryState.Error) {
+                                TextButton(onClick = viewModel::retryMap) { Text("재시도") }
+                            }
+                        }
+                    }
+                }
+                if (selected != null) {
+                    Surface(
+                        onClick = { detail(selected.barId) },
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                            .fillMaxWidth().padding(start = 18.dp, end = 18.dp, bottom = 90.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        shadowElevation = 6.dp,
+                        color = MaterialTheme.colorScheme.surface,
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(selected.name, style = MaterialTheme.typography.titleMedium,
+                                    maxLines = 1)
+                                Text(selected.address, style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2)
+                            }
+                            Text("상세 보기 ›",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+                // Compact target-style location control near the bottom right.
+                Surface(
+                    onClick = { recenterToken++ },
+                    modifier = Modifier.align(Alignment.BottomEnd)
+                        .padding(end = 16.dp, bottom = 24.dp)
+                        .size(52.dp),
+                    shape = CircleShape,
+                    shadowElevation = 5.dp,
+                    color = MaterialTheme.colorScheme.surface,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text("⌖", style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.semantics { contentDescription = "내 위치로 이동" })
+                    }
+                }
+            }
+
+            if (fix != null && !leaving) {
+                Surface(
+                    onClick = { listVisible = !listVisible },
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp),
+                    shape = RoundedCornerShape(50.dp),
+                    shadowElevation = 5.dp,
+                    color = MaterialTheme.colorScheme.surface,
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 22.dp, vertical = 13.dp),
+                        horizontalArrangement = Arrangement.spacedBy(9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(if (listVisible) "▣" else "☰", style = MaterialTheme.typography.titleMedium)
+                        Text(if (listVisible) "지도보기" else "목록보기",
+                            style = MaterialTheme.typography.titleSmall)
+                    }
+                }
+            }
+
+            // A compact back arrow + Search tab. No separate page title/filters/tags.
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Surface(
+                    onClick = ::back,
+                    shape = CircleShape,
+                    shadowElevation = 4.dp,
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.size(48.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text("‹", style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.semantics { contentDescription = "검색 화면으로 돌아가기" })
+                    }
+                }
+                Surface(
+                    onClick = ::back,
+                    shape = RoundedCornerShape(26.dp),
+                    shadowElevation = 4.dp,
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text("⌕", style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("주류 검색", style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
         }
     }
@@ -369,3 +480,66 @@ internal fun hideNearbyNativeSurface(view: MapView) {
     view.visibility = View.INVISIBLE
     view.surfaceView?.visibility = View.INVISIBLE
 }
+/**
+ * The entire visible map data set, NOT the independent user-centered 1km
+ * carousel. The overlay occupies the full map screen, with a fixed toggle.
+ */
+@Composable
+private fun NearbyFullList(
+    state: MapDiscoveryState,
+    bars: List<NearbyBar>,
+    onRetry: () -> Unit,
+    onSelect: (String) -> Unit,
+    onOpenDetail: (String) -> Unit,
+) {
+    when (state) {
+        MapDiscoveryState.Initial, MapDiscoveryState.Loading ->
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        is MapDiscoveryState.Error ->
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                NearbyStatus("매장 목록을 불러오지 못했습니다.",
+                    button = "다시 시도", onAction = onRetry)
+            }
+        is MapDiscoveryState.Ready -> {
+            if (bars.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("이 지도 영역에 매장이 없습니다.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(top = 84.dp, bottom = 106.dp,
+                        start = 16.dp, end = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(bars, key = { it.barId }) { bar ->
+                        OutlinedCard(
+                            onClick = { onSelect(bar.barId) },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                Modifier.fillMaxWidth().padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                    Text(bar.name, style = MaterialTheme.typography.titleMedium)
+                                    Text(bar.address, style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                TextButton(onClick = { onOpenDetail(bar.barId) }) {
+                                    Text("상세 보기")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
