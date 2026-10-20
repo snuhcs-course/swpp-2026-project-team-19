@@ -206,6 +206,57 @@ class MapDiscoveryViewModelTest {
         assertEquals(listOf("two"), model.markers.value.map { it.barId })
     }
 
+    @Test fun returningFromDetailRestoresLastMapCenterAndZoomNotSelectedPin() = runTest(dispatcher) {
+        val source = Source().apply { current = listOf(item("near")) }
+        val handle = SavedStateHandle()
+        val model = vm(source, handle)
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        assertTrue(model.selectBar("near"))
+        assertEquals("near", model.focusBarId.value)
+        model.consumeFocusRequest()
+        assertNull(model.focusBarId.value)
+        val lastPannedPoint = NearbyCoordinate(37.491, 126.979)
+        model.rememberCamera(lastPannedPoint, 13)
+        // Navigating to Detail and popping it does not reset the route-scoped VM.
+        assertEquals(DiscoveryCamera(lastPannedPoint, 13), model.savedCamera())
+        assertEquals("near", model.selectedBarId.value)
+        assertNull(model.focusBarId.value)
+        model.leaveDiscovery()
+        assertNull(model.savedCamera())
+        assertNull(model.selectedBarId.value)
+    }
+
+    @Test fun cameraSurvivesRecreatedViewModelAndInitialPermissionRestore() = runTest(dispatcher) {
+        val state = SavedStateHandle()
+        val source = Source()
+        val old = vm(source, state)
+        old.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        old.rememberCamera(moved, 18)
+        val recreated = vm(Source(), SavedStateHandle(mapOf(
+            "mapCenterLatitude" to moved.latitude,
+            "mapCenterLongitude" to moved.longitude,
+            "mapZoomLevel" to 18,
+        )))
+        assertEquals(DiscoveryCamera(moved, 18), recreated.savedCamera())
+        recreated.updatePermission(NearbyPermission.APPROXIMATE)
+        advanceUntilIdle()
+        assertEquals(DiscoveryCamera(moved, 18), recreated.savedCamera())
+        recreated.refresh()
+        advanceUntilIdle()
+        assertNull(recreated.savedCamera())
+    }
+
+    @Test fun invalidCameraCoordinatesOrZoomAreNotSaved() = runTest(dispatcher) {
+        val model = vm(Source())
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        model.rememberCamera(NearbyCoordinate(95.0, 126.95), 16)
+        model.rememberCamera(user, 0)
+        assertNull(model.savedCamera())
+    }
+
     @Test fun viewportAt3kmLimitIsHonestAboutUncoveredArea() {
         val center = NearbyCoordinate(37.5, 126.9)
         val smallCorners = listOf(
