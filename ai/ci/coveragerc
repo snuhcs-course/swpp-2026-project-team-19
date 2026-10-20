@@ -1,0 +1,30 @@
+# Coverage settings for the AI unit tests (used by .github/workflows/ai-ci.yml).
+# Each component directory is a source root, so a new module that no test imports
+# shows up at 0% instead of being left out.
+# Omitted on purpose: test files, and one-off experiment runners and report
+# generators that are run by hand and not imported by any test.
+[run]
+branch = True
+source =
+    ai/eval
+    ai/extract
+    ai/match_llm
+    ai/ocr
+omit =
+    */test_*.py
+    ai/eval/build_match_gold.py
+    ai/eval/build_match_gold_v1_1.py
+    ai/eval/diag_header.py
+    ai/eval/e2e_match.py
+    ai/eval/e2e_report.py
+    ai/eval/match_eval.py
+    ai/eval/match_gold_test_draft.py
+    ai/eval/p47_preflight.py
+    ai/eval/p47_report.py
+    ai/eval/prepare_test_photos.py
+    ai/eval/report.py
+    ai/eval/rescore_labels_v1_1.py
+    ai/extract/run_experiment.py
+
+[report]
+show_missing = True
