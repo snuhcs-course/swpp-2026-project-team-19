@@ -91,6 +91,7 @@ fun NearbyBarsScreen(
         if (!leaving) {
             leaving = true
             mapView?.let(::hideNearbyNativeSurface)
+            viewModel.leaveDiscovery()
             onBack()
         }
     }

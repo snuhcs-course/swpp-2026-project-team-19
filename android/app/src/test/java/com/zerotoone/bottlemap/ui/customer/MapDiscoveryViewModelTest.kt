@@ -88,6 +88,21 @@ class MapDiscoveryViewModelTest {
         assertEquals(listOf(user to 1000, moved to 2600), source.calls)
     }
 
+    @Test fun exitingDiscoveryClearsSavedSelectionForNextUserCenteredEntry() = runTest(dispatcher) {
+        val source = Source().apply { current = listOf(item("near")) }
+        val handle = SavedStateHandle()
+        val model = vm(source, handle)
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        assertTrue(model.selectBar("near"))
+        assertEquals("near", model.selectedBarId.value)
+        model.leaveDiscovery()
+        assertNull(model.selectedBarId.value)
+        assertNull(handle.get<String>("nearbySelectedBarId"))
+        // Location remains available for Search preview and re-entry.
+        assertEquals(user, model.origin.value)
+    }
+
     @Test fun missingCarouselDoesNotSuppressMapAndAllowsMapMarkerSelection() = runTest(dispatcher) {
         val source = Source().apply { changed = listOf(item("far", moved)) }
         val model = vm(source)

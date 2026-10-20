@@ -209,6 +209,13 @@ class NearbyBarsViewModel(
         lastViewport?.let { onViewportChanged(it, force = true) }
     }
 
+    /** Dismiss a previous selection only when exiting discovery back to Search.
+     *  Returning from Bar Detail to the same map retains the chosen bar.
+     */
+    fun leaveDiscovery() {
+        savedStateHandle["nearbySelectedBarId"] = null
+    }
+
     fun selectBar(barId: String): Boolean {
         val carousel = (_state.value as? NearbyUiState.Success)?.bars.orEmpty()
         val markers = _markers.value
