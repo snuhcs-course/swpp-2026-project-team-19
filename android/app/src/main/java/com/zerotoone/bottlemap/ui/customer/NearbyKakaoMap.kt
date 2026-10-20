@@ -250,7 +250,7 @@ fun NearbyKakaoMap(
                                 NearbyCoordinate(it.latitude, it.longitude)
                             }
                             val bounds = mapBoundsFromCorners(corners, center)
-                            if (bounds != null && center != null) {
+                            if (bounds != null && center != null && position != null) {
                                 post {
                                     if (generation == viewportGeneration) {
                                         currentCameraChanged.value(center, position.zoomLevel)
