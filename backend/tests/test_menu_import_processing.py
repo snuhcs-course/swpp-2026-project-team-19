@@ -1,4 +1,5 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Haeul Yang.
+# Modified with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20, I2-A18): staged matching tests. Reviewed by Jinwoo Park.
 import json
 from contextlib import nullcontext
 from decimal import Decimal
@@ -7,7 +8,13 @@ from pathlib import Path
 import pytest
 from sqlalchemy import select
 
-from app.adapters.extraction import ExtractionError, MockMenuExtractor, load_fixture
+from app.adapters.extraction import (
+    ExtractionError,
+    ExtractionResult,
+    MockMenuExtractor,
+    load_fixture,
+    parse_extraction_response,
+)
 from app.api.deps import get_menu_extractor
 from app.main import app
 from app.models import (
@@ -325,3 +332,67 @@ def test_label_fixture_against_the_seed_catalog(client, db_session, image_storag
     assert (statuses.count(ResolutionStatus.EXACT_MATCH), statuses.count(ResolutionStatus.UNMATCHED)) == (8, 2)
     assert {c[0] for c in changes_of(db_session, menu_import)} == {MenuChangeType.ADD}
     assert len(changes_of(db_session, menu_import)) == 10
+
+
+# ---- I2-A18: staged matching rules in menu import ----
+
+
+def product_line(order, name):
+    return {
+        "itemOrder": order, "rawText": f"{name} 15,000", "lineType": "product", "productName": name,
+        "brandText": None, "ageYears": None, "editionName": None, "abv": None,
+        "options": [{"optionLabel": "잔", "pourMl": None, "priceKrw": 15000}], "confidence": None,
+    }
+
+
+@pytest.fixture
+def menu_lines(use_extractor):
+    def use(*names):
+        payload = {"items": [product_line(order, name) for order, name in enumerate(names, start=1)]}
+
+        class LinesExtractor(MockMenuExtractor):
+            def extract(self, image, content_type, filename):
+                return ExtractionResult(items=parse_extraction_response(payload), raw_output=payload)
+
+        use_extractor(LinesExtractor())
+
+    return use
+
+
+@pytest.mark.parametrize(
+    ("name", "status", "age", "evidence_key"),
+    [
+        # Each line is unmatched by the Iteration 1 alias lookup alone.
+        ("글렌피딕(Glenfiddich) 12년", ResolutionStatus.EXACT_MATCH, 12, "parenExpanded"),  # S1 name variant
+        ("글렌피딕 12년 싱글몰트", ResolutionStatus.AMBIGUOUS, 12, "ageMatch"),  # S2 brand + age
+        ("글렌피닥 15년", ResolutionStatus.EXACT_MATCH, 15, "editDistance"),  # S3 one-letter typo
+    ],
+)
+def test_staged_rules_match_lines_without_an_exact_alias(
+    client, db_session, image_storage, operator, glenfiddich, menu_lines, name, status, age, evidence_key
+):
+    menu_lines(name)
+
+    [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
+
+    assert item.initial_resolution_status == status
+    [candidate] = item.candidates
+    assert candidate.product_id == glenfiddich[age].id
+    assert candidate.method == MatchMethod.ALIAS
+    assert evidence_key in candidate.evidence
+
+
+def test_line_naming_two_products_is_stored_as_ambiguous(client, db_session, image_storage, operator, menu_lines):
+    buffalo = make_product(db_session, make_brand(db_session, "Buffalo Trace"), "Buffalo Trace")
+    makers = make_product(db_session, make_brand(db_session, "Maker's Mark"), "Maker's Mark")
+    menu_lines("Buffalo Trace / Maker's Mark")
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    assert menu_import.status == ImportStatus.READY_FOR_REVIEW
+    [item] = items_of(menu_import)
+    assert item.initial_resolution_status == ResolutionStatus.AMBIGUOUS
+    assert [(c.candidate_rank, c.product_id, c.evidence["multiProduct"]) for c in item.candidates] == [
+        (1, buffalo.id, "Buffalo Trace"),
+        (2, makers.id, "Maker's Mark"),
+    ]

@@ -1,4 +1,5 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #12). Reviewed by Haeul Yang.
+# Modified with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20, I2-A18): staged matching rules. Reviewed by Jinwoo Park.
 """Background processing of a menu import after the upload request has returned.
 
 For each image in order: extract → store items and options (committed per image so
@@ -19,8 +20,9 @@ from sqlalchemy.orm import Session
 
 from app.adapters.extraction import ExtractedItemData, ExtractionError, MenuExtractor
 from app.adapters.storage import ImageStorage
-from app.matching import ExtractedProduct, resolve_product
+from app.matching import ExtractedProduct
 from app.matching.db_catalog import DbCatalog
+from app.matching.staged import resolve_product_staged
 from app.models import (
     ExtractedItem,
     ExtractedOption,
@@ -145,10 +147,15 @@ def _store_item(session: Session, run: ExtractionRun, data: ExtractedItemData) -
         )
 
 
+# Rule stages evaluated in I2 (P22, P47): name variants, brand + age/edition, default product,
+# edit distance. The LLM layer (ai/match_llm) is not used in menu import.
+MATCHING_STAGES = frozenset({"S1", "S2", "S2b", "S3"})
+
+
 def _resolve_and_draft(session: Session, menu_import: MenuImport) -> None:
     catalog = DbCatalog(session)
     for item in product_items(session, menu_import):
-        result = resolve_product(
+        result = resolve_product_staged(
             ExtractedProduct(
                 product_name=item.extracted_product_name,
                 brand_name=item.extracted_brand_name,
@@ -157,8 +164,12 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport) -> None:
                 abv=item.extracted_abv,
             ),
             catalog,
+            MATCHING_STAGES,
         )
-        item.initial_resolution_status = ResolutionStatus(result.status)
+        # "multi" (one line naming two products) has no stored status: the line stays ambiguous
+        # with both products as candidates (evidence "multiProduct"), and the reviewer decides.
+        status = ResolutionStatus.AMBIGUOUS if result.status == "multi" else ResolutionStatus(result.status)
+        item.initial_resolution_status = status
         for candidate in result.candidates:
             session.add(
                 ResolutionCandidate(
