@@ -144,10 +144,12 @@ class NearbyBarsViewModel(
         if (!previouslyGranted || changedAccuracy || _state.value is NearbyUiState.Initial ||
             _state.value is NearbyUiState.PermissionRequired ||
             _state.value is NearbyUiState.LocationServicesDisabled
-        ) refresh()
+        ) refreshInternal(clearSavedCamera = previouslyGranted)
     }
 
-    fun refresh() {
+    fun refresh() = refreshInternal(clearSavedCamera = true)
+
+    private fun refreshInternal(clearSavedCamera: Boolean) {
         if (currentPermission != NearbyPermission.PRECISE &&
             currentPermission != NearbyPermission.APPROXIMATE) return
         val version = ++requestVersion
@@ -155,7 +157,9 @@ class NearbyBarsViewModel(
         mapVersion++
         mapQuery?.cancel()
         lastViewport = null
-        clearCamera()
+        // A recreated Activity still has a SavedStateHandle camera snapshot.
+        // Only an explicit user refresh or permission accuracy change resets it.
+        if (clearSavedCamera) clearCamera()
         _map.value = MapDiscoveryState.Initial
         _markers.value = emptyList()
         _origin.value = null
