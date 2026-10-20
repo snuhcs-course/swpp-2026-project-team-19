@@ -73,6 +73,7 @@ class MapDiscoveryViewModelTest {
         assertEquals(listOf(user to 1000, moved to 2800), source.calls)
         assertEquals(listOf("near"), (model.state.value as NearbyUiState.Success).bars.map { it.barId })
         assertEquals(listOf("map"), (model.map.value as MapDiscoveryState.Ready).bars.map { it.barId })
+        assertEquals(listOf("map"), model.markers.value.map { it.barId })
     }
 
     @Test fun rapidCameraMovesDebounceToOneLatestRequest() = runTest(dispatcher) {
@@ -172,6 +173,22 @@ class MapDiscoveryViewModelTest {
         assertEquals(MapDiscoveryState.Initial, model.map.value)
         assertEquals(NearbyUiState.PermissionRequired, model.state.value)
         assertEquals(1, source.calls.size)
+    }
+
+    @Test fun previousMarkersRemainVisibleWhileNewAreaLoads() = runTest(dispatcher) {
+        val source = Source().apply { changed = listOf(item("one")) }
+        val model = vm(source)
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        model.onViewportChanged(NearbyViewport(user, 1500))
+        advanceUntilIdle()
+        assertEquals(listOf("one"), model.markers.value.map { it.barId })
+        source.changed = listOf(item("two", moved))
+        model.onViewportChanged(NearbyViewport(moved, 1600))
+        assertEquals(MapDiscoveryState.Loading, model.map.value)
+        assertEquals(listOf("one"), model.markers.value.map { it.barId })
+        advanceUntilIdle()
+        assertEquals(listOf("two"), model.markers.value.map { it.barId })
     }
 
     @Test fun viewportAt3kmLimitIsHonestAboutUncoveredArea() {
