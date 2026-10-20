@@ -220,16 +220,12 @@ private fun SearchContent(
                     }
                 },
                 isError = tooLong || serverValidationErrorCode != null,
-                supportingText = {
-                    Text(
-                        when {
-                            tooLong -> "검색어는 공백 제외 100자 이하여야 합니다."
-                            serverValidationErrorCode != null ->
-                                searchValidationMessage(serverValidationErrorCode)
-                            else -> "한글 · English 주류명 검색"
-                        },
-                    )
-                },
+                supportingText = if (tooLong || serverValidationErrorCode != null) {
+                    {
+                        Text(if (tooLong) "검색어는 공백 제외 100자 이하여야 합니다."
+                            else searchValidationMessage(requireNotNull(serverValidationErrorCode)))
+                    }
+                } else null,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Search,
@@ -278,7 +274,7 @@ private fun SearchContent(
                                     modifier = Modifier.padding(12.dp),
                                     verticalArrangement = Arrangement.spacedBy(5.dp),
                                 ) {
-                                    Text("NEARBY · 500m", style = MaterialTheme.typography.labelSmall)
+                                    Text("NEARBY · 1km", style = MaterialTheme.typography.labelSmall)
                                     Text(
                                         bar.name,
                                         maxLines = 1,
@@ -311,7 +307,7 @@ private fun SearchContent(
                             modifier = Modifier.padding(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            Text("NEARBY · 500m", style = MaterialTheme.typography.labelSmall)
+                            Text("NEARBY · 1km", style = MaterialTheme.typography.labelSmall)
                             Text(
                                 "현재 위치로 내 주변 바를 확인해 보세요.",
                                 style = MaterialTheme.typography.bodySmall,

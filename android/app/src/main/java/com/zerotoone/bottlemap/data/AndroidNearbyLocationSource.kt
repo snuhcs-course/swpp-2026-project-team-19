@@ -30,10 +30,13 @@ class AndroidNearbyLocationSource(context: Context) : NearbyLocationSource {
 
     @SuppressLint("MissingPermission")
     override suspend fun currentLocation(): NearbyCoordinate {
-        if (ContextCompat.checkSelfPermission(
-                appContext, Manifest.permission.ACCESS_FINE_LOCATION,
-            ) != PackageManager.PERMISSION_GRANTED
-        ) throw SecurityException("Precise location permission required")
+        val precise = ContextCompat.checkSelfPermission(
+            appContext, Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == PackageManager.PERMISSION_GRANTED
+        val approximate = ContextCompat.checkSelfPermission(
+            appContext, Manifest.permission.ACCESS_COARSE_LOCATION,
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!precise && !approximate) throw SecurityException("Location permission required")
 
         val manager = appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
@@ -43,14 +46,14 @@ class AndroidNearbyLocationSource(context: Context) : NearbyLocationSource {
         val cancellation = CancellationTokenSource()
         try {
             val request = CurrentLocationRequest.Builder()
-                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .setPriority(if (precise) Priority.PRIORITY_HIGH_ACCURACY else Priority.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setMaxUpdateAgeMillis(10_000L)
                 .setDurationMillis(12_000L)
                 .build()
             val fix = withTimeout(15_000L) {
                 client.getCurrentLocation(request, cancellation.token).await()
             } ?: throw NearbyLocationUnavailableException()
-            if (!fix.hasAccuracy() || fix.accuracy > 200f) {
+            if (precise && (!fix.hasAccuracy() || fix.accuracy > 200f)) {
                 throw NearbyLocationInaccurateException()
             }
             val point = NearbyCoordinate(fix.latitude, fix.longitude)

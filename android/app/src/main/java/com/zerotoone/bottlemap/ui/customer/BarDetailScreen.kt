@@ -91,7 +91,7 @@ private fun BarDetailContent(
         ) {
             TextButton(onClick = effectiveBack) { Text("←") }
             Text(
-                text = "바 상세",
+                text = "Bar Detail",
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,

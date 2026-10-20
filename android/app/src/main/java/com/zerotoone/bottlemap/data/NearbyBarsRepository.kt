@@ -34,7 +34,9 @@ data class NearbyBar(
     val menuUpdatedAt: String? = null,
 )
 
-const val NEARBY_RADIUS_METERS = 500.0
+const val NEARBY_CAROUSEL_RADIUS_METERS = 1000
+const val MAX_NEARBY_API_RADIUS_METERS = 3000
+const val NEARBY_RADIUS_METERS = NEARBY_CAROUSEL_RADIUS_METERS.toDouble()
 private const val EARTH_RADIUS_METERS = 6_371_000.0
 
 /** Pure, deterministic Haversine distance; lat FIRST, lng SECOND. */
@@ -89,4 +91,8 @@ interface NearbyLocationSource {
  */
 interface NearbyBarsSource {
     suspend fun listNearbyBars(origin: NearbyCoordinate): List<NearbyBar>
+
+    /** Allows viewport queries without changing the existing A7 test-double contract. */
+    suspend fun listNearbyBars(origin: NearbyCoordinate, radiusMeters: Int): List<NearbyBar> =
+        listNearbyBars(origin)
 }
