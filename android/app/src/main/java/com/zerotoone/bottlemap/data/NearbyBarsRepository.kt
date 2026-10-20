@@ -25,14 +25,31 @@ data class NearbyBarCandidate(
     val location: NearbyCoordinate?,
 )
 
+/** Common map-display identity, without assuming a distance exists. */
+interface BarPin {
+    val barId: String
+    val name: String
+    val address: String
+    val location: NearbyCoordinate
+}
+
 data class NearbyBar(
-    val barId: String,
-    val name: String,
-    val address: String,
-    val location: NearbyCoordinate,
+    override val barId: String,
+    override val name: String,
+    override val address: String,
+    override val location: NearbyCoordinate,
     val distanceMeters: Double,
     val menuUpdatedAt: String? = null,
-)
+) : BarPin
+
+/** Unlike NearbyBar, GET /api/search/map-bars has no distance. */
+data class MapBar(
+    override val barId: String,
+    override val name: String,
+    override val address: String,
+    override val location: NearbyCoordinate,
+    val menuUpdatedAt: String? = null,
+) : BarPin
 
 const val NEARBY_CAROUSEL_RADIUS_METERS = 1000
 const val MAX_NEARBY_API_RADIUS_METERS = 3000
