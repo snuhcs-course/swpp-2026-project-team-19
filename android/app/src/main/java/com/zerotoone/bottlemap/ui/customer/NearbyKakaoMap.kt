@@ -49,14 +49,12 @@ import com.kakao.vectormap.label.LabelOptions
 import com.kakao.vectormap.label.LabelStyle
 import com.kakao.vectormap.label.LabelTextBuilder
 import com.zerotoone.bottlemap.BuildConfig
-import com.zerotoone.bottlemap.data.MAX_NEARBY_API_RADIUS_METERS
+import com.zerotoone.bottlemap.data.BarPin
+import com.zerotoone.bottlemap.data.mapBoundsFromCorners
 import com.zerotoone.bottlemap.data.MapPlace
-import com.zerotoone.bottlemap.data.NearbyBar
 import com.zerotoone.bottlemap.data.NearbyCoordinate
-import com.zerotoone.bottlemap.data.distanceMeters
 import com.zerotoone.bottlemap.ui.common.DelayedLoading
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.ceil
 import kotlinx.coroutines.delay
 
 private sealed interface NearbyMapStatus {
@@ -65,33 +63,12 @@ private sealed interface NearbyMapStatus {
     data object Error : NearbyMapStatus
 }
 
-/**
- * Compute a request circle covering visible corners where possible. If the radius
- * exceeds 3000m the server CANNOT cover the full viewport; report that honestly.
- * Geometry is for API query size only, NEVER for re-filtering response markers.
- */
-internal fun discoveryViewport(
-    center: NearbyCoordinate,
-    corners: List<NearbyCoordinate>,
-): NearbyViewport {
-    require(center.isValid())
-    val furthest = corners.asSequence().filter { it.isValid() }
-        .map { distanceMeters(center, it) }.maxOrNull()
-        ?: MAX_NEARBY_API_RADIUS_METERS.toDouble()
-    val padded = ceil(furthest * 1.1).toInt().coerceAtLeast(100)
-    return NearbyViewport(
-        center,
-        padded.coerceAtMost(MAX_NEARBY_API_RADIUS_METERS),
-        padded > MAX_NEARBY_API_RADIUS_METERS || corners.size < 4,
-    )
-}
-
 @Composable
 fun NearbyKakaoMap(
     origin: NearbyCoordinate,
-    bars: List<NearbyBar>,
+    bars: List<BarPin>,
     selectedBarId: String?,
-    focusTarget: NearbyBar?,
+    focusTarget: BarPin?,
     focusBarId: String?,
     initialCamera: DiscoveryCamera?,
     listCovered: Boolean,
@@ -101,7 +78,7 @@ fun NearbyKakaoMap(
     onFocusApplied: () -> Unit,
     onCameraChanged: (NearbyCoordinate, Int) -> Unit,
     onSelectBar: (String) -> Unit,
-    onViewportChanged: (NearbyViewport) -> Unit,
+    onViewportChanged: (MapViewport) -> Unit,
     recenterToken: Int,
     onMapViewChanged: (MapView?) -> Unit,
     modifier: Modifier = Modifier,
@@ -237,8 +214,7 @@ fun NearbyKakaoMap(
                         if (!center.isValid()) return
                         val width = view.width
                         val height = view.height
-                        // If Kakao's surface has not laid out yet, request the
-                        // maximum supported 3km and disclose incomplete coverage.
+                        // Query real visible edges only. Never guess a 3km radius.
                         val corners = if (width > 0 && height > 0) {
                             listOf(0 to 0, width to 0, 0 to height, width to height)
                                 .mapNotNull { (x, y) ->
@@ -246,9 +222,10 @@ fun NearbyKakaoMap(
                                         ?.let { NearbyCoordinate(it.latitude, it.longitude) }
                                 }
                         } else emptyList()
+                        val bounds = mapBoundsFromCorners(corners)
                         post {
                             currentCameraChanged.value(center, snapshot.zoomLevel)
-                            currentViewport.value(discoveryViewport(center, corners))
+                            if (bounds != null) currentViewport.value(MapViewport(bounds))
                         }
                     }
                     val observer = LifecycleEventObserver { _, event ->
