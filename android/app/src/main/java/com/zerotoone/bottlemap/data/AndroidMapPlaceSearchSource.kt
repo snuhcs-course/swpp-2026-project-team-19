@@ -30,7 +30,11 @@ class AndroidMapPlaceSearchSource(context: Context) : MapPlaceSearchSource {
 
     private fun toPlace(address: Address): MapPlace? {
         val coordinate = NearbyCoordinate(address.latitude, address.longitude)
-        if (!coordinate.isValid()) return null
+        // Geocoder(Locale.KOREA) sets the output LANGUAGE, not the search area.
+        // Exclude foreign matches explicitly even for Korean-language queries.
+        val country = address.countryCode
+        if (!country.isNullOrBlank() && !country.equals("KR", ignoreCase = true)) return null
+        if (!isInKoreaMapBounds(coordinate)) return null
         val line = address.getAddressLine(0).orEmpty()
         val name = address.featureName?.takeIf { it.isNotBlank() }
             ?: address.premises?.takeIf { it.isNotBlank() }

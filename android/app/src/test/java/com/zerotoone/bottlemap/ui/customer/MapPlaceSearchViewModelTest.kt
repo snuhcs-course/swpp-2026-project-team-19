@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.ui.customer
 
 import com.zerotoone.bottlemap.data.MapPlace
 import com.zerotoone.bottlemap.data.MapPlaceSearchSource
+import com.zerotoone.bottlemap.data.NearbyBar
 import com.zerotoone.bottlemap.data.NearbyCoordinate
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -132,6 +133,37 @@ class MapPlaceSearchViewModelTest {
         vm.clear()
         assertNull(vm.selected.value)
         assertNull(vm.focus.value)
+    }
+
+
+    @Test fun registeredWhiskyBarsCanBeFoundWithoutGeocoderProvider() = runTest(dispatcher) {
+        val offline = FakeSource().apply { shouldFail = true }
+        val vm = MapPlaceSearchViewModel(offline)
+        val bars = listOf(
+            NearbyBar("whisky", "위스키복춘", "서울특별시 관악구", shop.coordinate, 120.0),
+            NearbyBar("seoro", "서로상", "서울특별시 관악구", station.coordinate, 160.0),
+        )
+        vm.search("위스키복춘", bars)
+        assertEquals(listOf("위스키복춘"),
+            (vm.state.value as MapPlaceSearchState.Results).places.map { it.name })
+        assertTrue(offline.queries.isEmpty())
+        vm.search("서로상", bars)
+        assertEquals(listOf("서로상"),
+            (vm.state.value as MapPlaceSearchState.Results).places.map { it.name })
+        assertTrue(vm.select((vm.state.value as MapPlaceSearchState.Results).places.single()))
+        assertEquals("seoro", vm.selected.value?.barId)
+        assertTrue(offline.queries.isEmpty())
+    }
+
+    @Test fun missingRegisteredBarFallsBackToGeocoder() = runTest(dispatcher) {
+        val fake = FakeSource().apply { response = listOf(station) }
+        val vm = MapPlaceSearchViewModel(fake)
+        val bars = listOf(
+            NearbyBar("whisky", "위스키복춘", "서울", shop.coordinate, 12.0))
+        vm.search("강남역", bars)
+        advanceUntilIdle()
+        assertEquals(listOf("강남역"), fake.queries)
+        assertEquals(listOf(station), (vm.state.value as MapPlaceSearchState.Results).places)
     }
 
     @Test fun repeatedOrInvalidResultCoordinatesAreDiscarded() = runTest(dispatcher) {

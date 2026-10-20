@@ -9,6 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.zerotoone.bottlemap.data.AndroidMapPlaceSearchSource
 import com.zerotoone.bottlemap.data.MapPlace
+import com.zerotoone.bottlemap.data.NearbyBar
+import com.zerotoone.bottlemap.data.findRegisteredBarPlaces
 import com.zerotoone.bottlemap.data.MapPlaceSearchSource
 import com.zerotoone.bottlemap.data.sanitizePlaces
 import kotlinx.coroutines.CancellationException
@@ -38,7 +40,7 @@ class MapPlaceSearchViewModel(private val source: MapPlaceSearchSource) : ViewMo
     private var job: Job? = null
     private var generation = 0L
 
-    fun search(rawQuery: String) {
+    fun search(rawQuery: String, visibleBars: List<NearbyBar> = emptyList()) {
         val query = rawQuery.trim()
         ++generation
         job?.cancel()
@@ -51,6 +53,13 @@ class MapPlaceSearchViewModel(private val source: MapPlaceSearchSource) : ViewMo
                 _state.value = MapPlaceSearchState.Error("검색어는 100자 이하로 입력해 주세요.")
                 return
             }
+        }
+        // The device geocoder is not a BottleMap DB. Search public Backend bars
+        // ALREADY available for the current map area before best-effort geocoding.
+        val matches = findRegisteredBarPlaces(query, visibleBars)
+        if (matches.isNotEmpty()) {
+            _state.value = MapPlaceSearchState.Results(matches)
+            return
         }
         val version = generation
         _state.value = MapPlaceSearchState.Loading

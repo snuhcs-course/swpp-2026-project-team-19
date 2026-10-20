@@ -119,13 +119,14 @@ fun NearbyBarsScreen(
         listVisible = false
         placeResultsVisible = true
         keyboard?.hide()
-        placeSearchViewModel.search(placeQuery)
+        placeSearchViewModel.search(placeQuery, (mapBars + carousel).distinctBy { it.barId })
     }
     fun choosePlace(place: MapPlace) {
         if (placeSearchViewModel.select(place)) {
             viewModel.clearSelection()
             listVisible = false
             placeResultsVisible = false
+            placeQuery = ""
             keyboard?.hide()
         }
     }
@@ -277,11 +278,8 @@ fun NearbyBarsScreen(
                 // cover the full viewport. No permanent caption below the map.
                 val hint = when (val current = mapState) {
                     is MapDiscoveryState.Error -> current.message
-                    is MapDiscoveryState.Ready -> when {
-                        current.partiallyCovered -> "지도 중심 3km 내 매장만 표시됩니다."
-                        current.bars.isEmpty() -> "현재 지도에 매장이 없습니다."
-                        else -> null
-                    }
+                    is MapDiscoveryState.Ready ->
+                        if (current.bars.isEmpty()) "근처에 매장이 없습니다." else null
                     else -> null
                 }
                 if (hint != null) {
@@ -300,26 +298,6 @@ fun NearbyBarsScreen(
                             Text(hint, style = MaterialTheme.typography.bodySmall)
                             if (mapState is MapDiscoveryState.Error) {
                                 TextButton(onClick = viewModel::retryMap) { Text("재시도") }
-                            }
-                        }
-                    }
-                }
-                val chosenPlace = searchedPlace
-                if (chosenPlace != null && selected == null) {
-                    Surface(
-                        modifier = Modifier.align(Alignment.BottomCenter)
-                            .fillMaxWidth().padding(start = 18.dp, end = 18.dp, bottom = 90.dp),
-                        shape = RoundedCornerShape(18.dp),
-                        shadowElevation = 6.dp,
-                        color = MaterialTheme.colorScheme.surface,
-                    ) {
-                        Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
-                            Text(chosenPlace.name, style = MaterialTheme.typography.titleMedium,
-                                maxLines = 2)
-                            if (chosenPlace.address.isNotBlank()) {
-                                Text(chosenPlace.address, style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 2)
                             }
                         }
                     }
@@ -421,9 +399,9 @@ fun NearbyBarsScreen(
                         is MapPlaceSearchState.Results -> {
                             if (result.places.isEmpty()) {
                                 Text(
-                                    "검색 결과가 없습니다. 다른 장소명으로 검색해 보세요.",
-                                    modifier = Modifier.padding(16.dp),
-                                    textAlign = TextAlign.Center,
+                                    "검색 결과가 없습니다.\n다른 장소명으로 검색해 보세요.",
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    textAlign = TextAlign.Start,
                                 )
                             } else {
                                 LazyColumn {

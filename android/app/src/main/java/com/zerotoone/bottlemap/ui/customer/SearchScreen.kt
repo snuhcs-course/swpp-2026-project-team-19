@@ -80,7 +80,13 @@ fun SearchScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val nearbyState = nearbyViewModel?.state?.collectAsStateWithLifecycle()?.value
     val selectedNearbyId = nearbyViewModel?.selectedBarId?.collectAsStateWithLifecycle()?.value
-    val nearbyBars = (nearbyState as? NearbyUiState.Success)?.bars.orEmpty()
+    val hasNearbyLocationPermission =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+    val nearbyBars = if (hasNearbyLocationPermission)
+        (nearbyState as? NearbyUiState.Success)?.bars.orEmpty() else emptyList()
 
     // Home preview never starts location acquisition without user action.
     // When coming back from Android Settings, revoke a stale preview if precise
@@ -130,6 +136,8 @@ fun SearchScreen(
             onOpenAccount = onOpenAccount,
             onOpenNearby = onOpenNearby,
             nearbyBars = nearbyBars,
+            emptyNearbyText = nearbyCarouselEmptyMessage(
+                hasNearbyLocationPermission, nearbyState),
             selectedNearbyBarId = selectedNearbyId,
             onSelectNearbyBar = { id ->
                 if (nearbyViewModel?.selectBar(id) == true) onOpenNearby()
@@ -151,6 +159,7 @@ private fun SearchContent(
     onOpenAccount: () -> Unit,
     onOpenNearby: () -> Unit,
     nearbyBars: List<NearbyBar> = emptyList(),
+    emptyNearbyText: String = "근처에 매장이 없습니다.",
     selectedNearbyBarId: String? = null,
     onSelectNearbyBar: (String) -> Unit = {},
 ) {
@@ -285,7 +294,7 @@ private fun SearchContent(
                     OutlinedCard(modifier = Modifier.weight(2f).height(136.dp)) {
                         Box(Modifier.fillMaxSize().padding(12.dp),
                             contentAlignment = Alignment.Center) {
-                            Text("근처에 매장이 없습니다.",
+                            Text(emptyNearbyText,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 style = MaterialTheme.typography.bodySmall)
                         }
@@ -331,4 +340,17 @@ internal fun searchValidationMessage(fieldCode: String): String = when (fieldCod
     "STRING_TOO_LONG" -> "검색어는 100자 이하여야 합니다."
     "NOT_SEARCHABLE" -> "검색할 수 있는 문자가 없습니다. 제품명을 입력해 주세요."
     else -> "검색어를 확인해 주세요."
+}
+
+/** The 1km carousel must not claim "no stores" when location was never granted. */
+internal fun nearbyCarouselEmptyMessage(
+    hasLocationPermission: Boolean,
+    state: NearbyUiState?,
+): String = when {
+    !hasLocationPermission -> "위치 권한을 설정해 주세요."
+    state is NearbyUiState.Error -> "근처 매장을 불러오지 못했습니다."
+    state is NearbyUiState.LoadingLocation ||
+        state is NearbyUiState.LoadingBars ||
+        state is NearbyUiState.Initial || state == null -> "근처 매장을 확인하는 중입니다."
+    else -> "근처에 매장이 없습니다."
 }

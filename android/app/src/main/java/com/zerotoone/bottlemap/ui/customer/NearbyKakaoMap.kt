@@ -169,12 +169,14 @@ fun NearbyKakaoMap(
 
         // Generic geocoder places are never treated as Backend bars. Their pin
         // has no BottleMap barId and cannot navigate to Bar Detail.
-        LaunchedEffect(nativeMap, searchedPlace) {
+        LaunchedEffect(nativeMap, searchedPlace, bars) {
             placeLabel?.remove()
             placeLabel = null
             val map = nativeMap ?: return@LaunchedEffect
             val place = searchedPlace ?: return@LaunchedEffect
-            if (place.coordinate.isValid()) {
+            // Avoid drawing a second pin over an existing Backend bar marker.
+            if (place.coordinate.isValid() && (place.barId == null ||
+                    bars.none { it.barId == place.barId })) {
                 placeLabel = map.labelManager?.layer?.addLabel(
                     LabelOptions.from("__searched_location__",
                         LatLng.from(place.coordinate.latitude, place.coordinate.longitude))
