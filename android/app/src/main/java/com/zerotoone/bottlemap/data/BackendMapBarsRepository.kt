@@ -31,15 +31,42 @@ data class MapBounds(
         kotlin.math.abs(east - other.east) < 0.00025
 }
 
-/** Need all four corners: a missing native camera extent cannot be silently guessed. */
-fun mapBoundsFromCorners(corners: List<NearbyCoordinate>): MapBounds? {
-    if (corners.size != 4 || corners.any { !it.isValid() }) return null
-    return MapBounds(
-        south = corners.minOf { it.latitude },
-        west = corners.minOf { it.longitude },
-        north = corners.maxOf { it.latitude },
-        east = corners.maxOf { it.longitude },
+/**
+ * Convert Kakao's pixel viewport Rect [left, top, right, bottom) into valid
+ * screen pixels. Passing right/bottom themselves can return null from
+ * fromScreenPoint(), especially after a zoom/resize. Never guess MapView size.
+ */
+fun viewportCornerPixels(left: Int, top: Int, right: Int, bottom: Int): List<Pair<Int, Int>>? {
+    if (right - left < 2 || bottom - top < 2) return null
+    return listOf(
+        left to top,
+        (right - 1) to top,
+        left to (bottom - 1),
+        (right - 1) to (bottom - 1),
     )
+}
+
+/**
+ * Incomplete/transient Kakao projections are NOT an empty Backend result.
+ * Check all four finite corners plus the actual camera center so an old
+ * projection cannot be mistaken for the just-selected location.
+ */
+fun mapBoundsFromCorners(
+    corners: List<NearbyCoordinate>,
+    cameraCenter: NearbyCoordinate? = null,
+): MapBounds? {
+    if (corners.size != 4 || corners.any { !it.isValid() }) return null
+    if (cameraCenter != null && !cameraCenter.isValid()) return null
+    val south = corners.minOf { it.latitude }
+    val north = corners.maxOf { it.latitude }
+    val west = corners.minOf { it.longitude }
+    val east = corners.maxOf { it.longitude }
+    if (north - south < 1e-8 || east - west < 1e-8) return null
+    if (cameraCenter != null &&
+        (cameraCenter.latitude !in (south - 1e-7)..(north + 1e-7) ||
+            cameraCenter.longitude !in (west - 1e-7)..(east + 1e-7))
+    ) return null
+    return MapBounds(south, west, north, east)
 }
 
 interface MapBarsSource {
