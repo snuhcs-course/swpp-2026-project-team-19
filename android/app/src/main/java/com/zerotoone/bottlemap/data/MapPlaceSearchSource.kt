@@ -36,5 +36,5 @@ internal fun sanitizePlaces(places: List<MapPlace>): List<MapPlace> =
     places.asSequence()
         .filter { it.name.isNotBlank() && isInKoreaMapBounds(it.coordinate) }
         .distinctBy { it.name to it.coordinate }
-        .take(5)
+        .take(50)
         .toList()

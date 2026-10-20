@@ -7,7 +7,7 @@ import com.zerotoone.bottlemap.network.BarNamesResponseDto
 class BackendBarNameSearchSource : MapPlaceSearchSource {
     override suspend fun search(query: String): List<MapPlace> {
         require(query.isNotBlank() && query.length <= 100)
-        val response = ApiClient.call { ApiClient.api.searchBarNames(query = query, limit = 20) }
+        val response = ApiClient.call { ApiClient.api.searchBarNames(query = query, limit = 50) }
         return response.toMapPlaces()
     }
 }

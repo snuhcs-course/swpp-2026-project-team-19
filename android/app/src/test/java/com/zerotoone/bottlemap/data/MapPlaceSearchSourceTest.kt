@@ -24,11 +24,11 @@ class MapPlaceSearchSourceTest {
         assertEquals(listOf(korean), sanitizePlaces(listOf(overseas, korean, nearBorder)))
     }
 
-    @Test fun capsLookupResultsToFiveWithoutInventingMissingPlaces() {
-        val items = (1..10).map {
+    @Test fun capsMapPlaceLookupAtBackendMaximumWithoutInventingMissingPlaces() {
+        val items = (1..55).map {
             MapPlace("place$it", "", NearbyCoordinate(37.5 + it * 0.001, 126.9))
         }
-        assertEquals(items.take(5), sanitizePlaces(items))
+        assertEquals(items.take(50), sanitizePlaces(items))
         assertEquals(emptyList<MapPlace>(), sanitizePlaces(emptyList()))
     }
 }
