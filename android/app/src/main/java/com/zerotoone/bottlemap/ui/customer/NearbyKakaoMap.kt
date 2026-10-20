@@ -232,6 +232,7 @@ fun NearbyKakaoMap(
                     var viewportGeneration = 0L
                     fun scheduleViewportSample(map: KakaoMap, firstDelayMs: Long = 140L) {
                         val generation = ++viewportGeneration
+                        var previousProjection: Pair<com.zerotoone.bottlemap.data.MapBounds, Int>? = null
                         fun sample(attempt: Int) {
                             if (disposed.get() || generation != viewportGeneration) return
                             // Kakao MapView dimensions and its actual map viewport
@@ -251,18 +252,33 @@ fun NearbyKakaoMap(
                             }
                             val bounds = mapBoundsFromCorners(corners, center)
                             if (bounds != null && center != null && position != null) {
-                                post {
-                                    if (generation == viewportGeneration) {
-                                        currentCameraChanged.value(center, position.zoomLevel)
-                                        currentViewport.value(MapViewport(bounds))
+                                val previous = previousProjection
+                                val stable = previous != null &&
+                                    previous.second == position.zoomLevel &&
+                                    kotlin.math.abs(previous.first.south - bounds.south) < 0.000002 &&
+                                    kotlin.math.abs(previous.first.west - bounds.west) < 0.000002 &&
+                                    kotlin.math.abs(previous.first.north - bounds.north) < 0.000002 &&
+                                    kotlin.math.abs(previous.first.east - bounds.east) < 0.000002
+                                if (stable) {
+                                    post {
+                                        if (generation == viewportGeneration) {
+                                            currentCameraChanged.value(center, position.zoomLevel)
+                                            currentViewport.value(MapViewport(bounds))
+                                        }
                                     }
+                                    return
                                 }
-                            } else if (attempt < 5) {
-                                // During first layout or a programmatic camera
-                                // move, the SDK may temporarily return null/
-                                // obsolete corner projections. Try again after
-                                // it has settled, without polling indefinitely.
-                                handler.postDelayed({ sample(attempt + 1) }, 180L + 80L * attempt)
+                                previousProjection = bounds to position.zoomLevel
+                            } else {
+                                previousProjection = null
+                            }
+                            if (attempt < 6) {
+                                // The camera and its screen projection can briefly
+                                // reflect different frames during animation/resize.
+                                // Require two consecutive, stable valid samples.
+                                val delayMs = if (previousProjection != null) 140L
+                                    else 180L + 70L * attempt
+                                handler.postDelayed({ sample(attempt + 1) }, delayMs)
                             } else {
                                 post {
                                     if (generation == viewportGeneration) {
