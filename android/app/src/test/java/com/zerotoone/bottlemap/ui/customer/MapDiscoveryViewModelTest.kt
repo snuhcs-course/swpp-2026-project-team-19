@@ -99,6 +99,8 @@ class MapDiscoveryViewModelTest {
         model.leaveDiscovery()
         assertNull(model.selectedBarId.value)
         assertNull(handle.get<String>("nearbySelectedBarId"))
+        assertEquals(MapDiscoveryState.Initial, model.map.value)
+        assertTrue(model.markers.value.isEmpty())
         // Location remains available for Search preview and re-entry.
         assertEquals(user, model.origin.value)
     }
