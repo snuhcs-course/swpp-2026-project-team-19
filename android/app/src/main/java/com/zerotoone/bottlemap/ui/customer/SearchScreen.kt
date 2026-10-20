@@ -90,6 +90,9 @@ fun SearchScreen(
                 nearbyViewModel != null &&
                 ContextCompat.checkSelfPermission(
                     context, Manifest.permission.ACCESS_FINE_LOCATION,
+                ) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_COARSE_LOCATION,
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 nearbyViewModel.updatePermission(NearbyPermission.NONE)
@@ -242,7 +245,7 @@ private fun SearchContent(
             }
             // I2 Figma S0/S1: an actual nearby carousel alongside a map tile.
             // Populate only after a user deliberately granted precise location
-            // and the A9 public backend returned complete results.
+            // and the A9 public backend returned complete results. Approximate is allowed.
             Text(
                 text = "내 주변 바",
                 color = MaterialTheme.colorScheme.onBackground,
