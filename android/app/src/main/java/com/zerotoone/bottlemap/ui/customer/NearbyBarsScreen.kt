@@ -57,6 +57,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -290,49 +291,76 @@ fun NearbyBarsScreen(
                     MapDiscoveryState.TooWide -> "지도를 확대하면 매장을 볼 수 있습니다."
                     else -> null
                 }
-                if (hint != null) {
-                    Surface(
+                // A single bottom-anchored stack prevents the status message
+                // from colliding with a selected bar card on different font
+                // scales or when its address wraps to two lines.
+                val selectedBar = selected
+                if (hint != null || selectedBar != null) {
+                    Column(
                         modifier = Modifier.align(Alignment.BottomCenter)
-                            .padding(horizontal = 20.dp, vertical = 148.dp),
-                        shape = RoundedCornerShape(18.dp),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
-                        shadowElevation = 3.dp,
+                            .fillMaxWidth()
+                            .padding(
+                                start = 18.dp,
+                                end = 18.dp,
+                                bottom = if (selectedBar != null) 90.dp else 148.dp,
+                            ),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            Text(hint, style = MaterialTheme.typography.bodySmall)
-                            if (mapState is MapDiscoveryState.Error) {
-                                TextButton(onClick = { viewportRetryToken++ }) { Text("재시도") }
+                        if (hint != null) {
+                            Surface(
+                                shape = RoundedCornerShape(18.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                                shadowElevation = 3.dp,
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(
+                                        horizontal = 14.dp, vertical = 9.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    Text(hint, style = MaterialTheme.typography.bodySmall)
+                                    if (mapState is MapDiscoveryState.Error) {
+                                        TextButton(onClick = { viewportRetryToken++ }) {
+                                            Text("재시도")
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-                if (selected != null) {
-                    Surface(
-                        onClick = { detail(selected.barId) },
-                        modifier = Modifier.align(Alignment.BottomCenter)
-                            .fillMaxWidth().padding(start = 18.dp, end = 18.dp, bottom = 90.dp),
-                        shape = RoundedCornerShape(18.dp),
-                        shadowElevation = 6.dp,
-                        color = MaterialTheme.colorScheme.surface,
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(selected.name, style = MaterialTheme.typography.titleMedium,
-                                    maxLines = 1)
-                                Text(selected.address, style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 2)
+                        if (selectedBar != null) {
+                            Surface(
+                                onClick = { detail(selectedBar.barId) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                shadowElevation = 6.dp,
+                                color = MaterialTheme.colorScheme.surface,
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(
+                                        horizontal = 16.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text(
+                                            selectedBar.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            maxLines = 1,
+                                        )
+                                        Text(
+                                            selectedBar.address,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 2,
+                                        )
+                                    }
+                                    Text(
+                                        "상세 보기 ›",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
                             }
-                            Text("상세 보기 ›",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
@@ -478,6 +506,13 @@ fun NearbyBarsScreen(
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        // Material3 TextField draws an underline even with a
+                        // rounded shape. It appears gold when focused and pale
+                        // when unfocused; this map search should have no line.
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent,
                     ),
                 )
             }
