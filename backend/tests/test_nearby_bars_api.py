@@ -5,11 +5,11 @@ import math
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from sqlalchemy import event
 
 from app.models import BarStatus
 from app.services.search import EARTH_RADIUS_METERS, distance_meters
 from tests.factories import make_bar, make_brand, make_product, publish_menu
+from tests.sql_support import recorded_statements
 from tests.test_search_api import ANY_AUTHORIZATION
 
 URL = "/api/search/nearby-bars"
@@ -234,17 +234,8 @@ def test_an_operator_does_not_see_inactive_bars_either(client, db_session, token
 
 
 def statements_of_a_request(client, db_session) -> list[str]:
-    statements = []
-
-    def record(conn, cursor, statement, parameters, context, executemany):
-        statements.append(statement)
-
-    connection = db_session.connection()
-    event.listen(connection, "before_cursor_execute", record)
-    try:
+    with recorded_statements(db_session) as statements:
         nearby(client, radiusMeters=3000)
-    finally:
-        event.remove(connection, "before_cursor_execute", record)
     return statements
 
 
