@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +42,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -56,6 +59,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -72,6 +80,7 @@ import androidx.lifecycle.createSavedStateHandle
 import com.kakao.vectormap.MapView
 import com.zerotoone.bottlemap.data.AndroidNearbyLocationSource
 import com.zerotoone.bottlemap.data.BackendNearbyBarsRepository
+import com.zerotoone.bottlemap.data.MapPlace
 import com.zerotoone.bottlemap.data.NearbyBar
 
 @Composable
@@ -79,8 +88,10 @@ fun NearbyBarsScreen(
     onBack: () -> Unit,
     onOpenBarDetail: (String) -> Unit,
     viewModel: NearbyBarsViewModel = nearbyBarsViewModel(),
+    placeSearchViewModel: MapPlaceSearchViewModel = mapPlaceSearchViewModel(),
 ) {
     val context = LocalContext.current
+    val keyboard = LocalSoftwareKeyboardController.current
     val lifecycle = LocalLifecycleOwner.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val origin by viewModel.origin.collectAsStateWithLifecycle()
@@ -88,19 +99,39 @@ fun NearbyBarsScreen(
     val mapBars by viewModel.markers.collectAsStateWithLifecycle()
     val selectedId by viewModel.selectedBarId.collectAsStateWithLifecycle()
     val focusBarId by viewModel.focusBarId.collectAsStateWithLifecycle()
+    val placeState by placeSearchViewModel.state.collectAsStateWithLifecycle()
+    val searchedPlace by placeSearchViewModel.selected.collectAsStateWithLifecycle()
+    val focusSearchedPlace by placeSearchViewModel.focus.collectAsStateWithLifecycle()
     val carousel = (state as? NearbyUiState.Success)?.bars.orEmpty()
     val selected = (mapBars + carousel).firstOrNull { it.barId == selectedId }
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
     // Keep Native MapView mounted beneath the full-page list so switching modes
     // does not lose its camera/labels or reinitialize the Kakao SDK.
     var listVisible by rememberSaveable { mutableStateOf(false) }
+    var placeQuery by rememberSaveable { mutableStateOf("") }
+    var placeResultsVisible by rememberSaveable { mutableStateOf(false) }
     var recenterToken by remember { mutableIntStateOf(0) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var leaving by remember { mutableStateOf(false) }
     var navigating by remember { mutableStateOf(false) }
 
+    fun searchPlaces() {
+        listVisible = false
+        placeResultsVisible = true
+        keyboard?.hide()
+        placeSearchViewModel.search(placeQuery)
+    }
+    fun choosePlace(place: MapPlace) {
+        if (placeSearchViewModel.select(place)) {
+            viewModel.clearSelection()
+            listVisible = false
+            placeResultsVisible = false
+            keyboard?.hide()
+        }
+    }
     fun back() {
         if (!leaving) {
+            placeSearchViewModel.clear()
             leaving = true
             mapView?.let(::hideNearbyNativeSurface)
             viewModel.leaveDiscovery()
@@ -114,7 +145,11 @@ fun NearbyBarsScreen(
             onOpenBarDetail(id)
         }
     }
-    BackHandler(enabled = !leaving, onBack = ::back)
+    BackHandler(enabled = !leaving && !placeResultsVisible, onBack = ::back)
+    BackHandler(enabled = !leaving && placeResultsVisible) {
+        placeResultsVisible = false
+        keyboard?.hide()
+    }
 
     fun updatePermissions() {
         viewModel.updatePermission(nearbyPermission(
@@ -162,9 +197,15 @@ fun NearbyBarsScreen(
                     focusBarId = focusBarId,
                     initialCamera = viewModel.savedCamera(),
                     listCovered = listVisible,
+                    searchedPlace = searchedPlace,
+                    focusSearchedPlace = focusSearchedPlace,
+                    onSearchedPlaceFocusApplied = placeSearchViewModel::consumeFocus,
                     onFocusApplied = viewModel::consumeFocusRequest,
                     onCameraChanged = viewModel::rememberCamera,
-                    onSelectBar = { viewModel.selectBar(it) },
+                    onSelectBar = {
+                        placeSearchViewModel.clear()
+                        viewModel.selectBar(it)
+                    },
                     onViewportChanged = { viewModel.onViewportChanged(it) },
                     recenterToken = recenterToken,
                     onMapViewChanged = { attached ->
@@ -223,6 +264,7 @@ fun NearbyBarsScreen(
                         bars = mapBars,
                         onRetry = viewModel::retryMap,
                         onSelect = { barId ->
+                            placeSearchViewModel.clear()
                             if (viewModel.selectBar(barId)) listVisible = false
                         },
                         onOpenDetail = ::detail,
@@ -258,6 +300,25 @@ fun NearbyBarsScreen(
                             Text(hint, style = MaterialTheme.typography.bodySmall)
                             if (mapState is MapDiscoveryState.Error) {
                                 TextButton(onClick = viewModel::retryMap) { Text("재시도") }
+                            }
+                        }
+                    }
+                }
+                if (searchedPlace != null && selected == null) {
+                    Surface(
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                            .fillMaxWidth().padding(start = 18.dp, end = 18.dp, bottom = 90.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        shadowElevation = 6.dp,
+                        color = MaterialTheme.colorScheme.surface,
+                    ) {
+                        Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                            Text(searchedPlace.name, style = MaterialTheme.typography.titleMedium,
+                                maxLines = 2)
+                            if (searchedPlace.address.isNotBlank()) {
+                                Text(searchedPlace.address, style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2)
                             }
                         }
                     }
@@ -325,6 +386,74 @@ fun NearbyBarsScreen(
                 }
             }
 
+            if (placeResultsVisible && !leaving) {
+                // Location-name results stay in this destination and overlay
+                // the map; selecting one recenters Kakao Map without creating
+                // a BottleMap bar detail route.
+                Surface(
+                    modifier = Modifier.align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .padding(start = 72.dp, end = 12.dp, top = 78.dp)
+                        .heightIn(max = 320.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 8.dp,
+                ) {
+                    when (val result = placeState) {
+                        MapPlaceSearchState.Idle -> Text(
+                            "장소 이름을 입력해 주세요.",
+                            modifier = Modifier.padding(16.dp),
+                            textAlign = TextAlign.Center,
+                        )
+                        MapPlaceSearchState.Loading -> Box(
+                            Modifier.fillMaxWidth().padding(24.dp),
+                            contentAlignment = Alignment.Center,
+                        ) { CircularProgressIndicator() }
+                        is MapPlaceSearchState.Error -> Column(
+                            modifier = Modifier.fillMaxWidth().padding(14.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(result.message, textAlign = TextAlign.Center)
+                            TextButton(onClick = ::searchPlaces) { Text("다시 검색") }
+                        }
+                        is MapPlaceSearchState.Results -> {
+                            if (result.places.isEmpty()) {
+                                Text(
+                                    "검색 결과가 없습니다. 다른 장소명으로 검색해 보세요.",
+                                    modifier = Modifier.padding(16.dp),
+                                    textAlign = TextAlign.Center,
+                                )
+                            } else {
+                                LazyColumn {
+                                    items(result.places) { place ->
+                                        Surface(
+                                            onClick = { choosePlace(place) },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            color = MaterialTheme.colorScheme.surface,
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.padding(
+                                                    horizontal = 16.dp, vertical = 10.dp),
+                                                verticalArrangement = Arrangement.spacedBy(3.dp),
+                                            ) {
+                                                Text(place.name,
+                                                    style = MaterialTheme.typography.titleSmall)
+                                                if (place.address.isNotBlank()) {
+                                                    Text(place.address,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // A compact back arrow + Search tab. No separate page title/filters/tags.
             Row(
                 modifier = Modifier.fillMaxWidth()
@@ -344,24 +473,26 @@ fun NearbyBarsScreen(
                             modifier = Modifier.semantics { contentDescription = "검색 화면으로 돌아가기" })
                     }
                 }
-                Surface(
-                    onClick = ::back,
-                    shape = RoundedCornerShape(26.dp),
-                    shadowElevation = 4.dp,
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 18.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Text("⌕", style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("주류 검색", style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
+                TextField(
+                    value = placeQuery,
+                    onValueChange = {
+                        placeQuery = it
+                        placeResultsVisible = false
+                    },
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    singleLine = true,
+                    shape = RoundedCornerShape(28.dp),
+                    placeholder = { Text("지하철역 · 매장 · 주소 검색", maxLines = 1) },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = ::searchPlaces),
+                    trailingIcon = {
+                        TextButton(onClick = ::searchPlaces) { Text("검색") }
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    ),
+                )
             }
         }
     }
@@ -427,11 +558,17 @@ private fun NearbyStatus(
     loading: Boolean = false,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(20.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (loading) CircularProgressIndicator()
-        Text(message, color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            message,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
         if (button != null) OutlinedButton(onClick = onAction) { Text(button) }
     }
 }
