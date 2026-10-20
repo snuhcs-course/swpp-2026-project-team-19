@@ -243,29 +243,21 @@ private fun SearchContent(
             ) {
                 Text("판매하는 바 찾기")
             }
-            // I2 Figma S0/S1: an actual nearby carousel alongside a map tile.
-            // Populate only after a user deliberately granted precise location
-            // and the A9 public backend returned complete results. Approximate is allowed.
-            Text(
-                text = "내 주변 바",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+            // The 1km carousel is not a map entry point. Only actual server results
+            // become clickable cards; Unknown/Empty must never navigate on tap.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (nearbyBars.isNotEmpty()) {
                     LazyRow(
-                        modifier = Modifier.weight(2f).height(150.dp),
+                        modifier = Modifier.weight(2f).height(136.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(nearbyBars, key = { it.barId }) { bar ->
                             OutlinedCard(
                                 onClick = { onSelectNearbyBar(bar.barId) },
-                                modifier = Modifier.width(186.dp).height(150.dp),
+                                modifier = Modifier.width(186.dp).height(136.dp),
                                 border = BorderStroke(
                                     if (bar.barId == selectedNearbyBarId) 2.dp else 1.dp,
                                     if (bar.barId == selectedNearbyBarId)
@@ -275,69 +267,40 @@ private fun SearchContent(
                             ) {
                                 Column(
                                     modifier = Modifier.padding(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
                                 ) {
-                                    Text("NEARBY · 1km", style = MaterialTheme.typography.labelSmall)
-                                    Text(
-                                        bar.name,
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.titleSmall,
-                                    )
-                                    Text(
-                                        "${bar.distanceMeters.toInt()}m",
-                                        color = MaterialTheme.colorScheme.primary,
-                                    )
-                                    Text(
-                                        bar.address,
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.labelSmall,
-                                    )
-                                    Text(
-                                        bar.menuUpdatedAt?.let(::formatMenuTimestamp)
-                                            ?: "아직 등록된 메뉴 없음",
-                                        style = MaterialTheme.typography.labelSmall,
-                                    )
+                                    Text(bar.name, maxLines = 1,
+                                        style = MaterialTheme.typography.titleSmall)
+                                    Text("${bar.distanceMeters.toInt()}m",
+                                        color = MaterialTheme.colorScheme.primary)
+                                    Text(bar.address, maxLines = 2,
+                                        style = MaterialTheme.typography.bodySmall)
                                 }
                             }
                         }
                     }
                 } else {
-                    OutlinedCard(
-                        onClick = onOpenNearby,
-                        modifier = Modifier.weight(2f).height(150.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text("NEARBY · 1km", style = MaterialTheme.typography.labelSmall)
-                            Text(
-                                "현재 위치로 내 주변 바를 확인해 보세요.",
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                            Text(
-                                "위치 사용하고 보기 →",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
+                    // Intentionally non-interactive: no nearby data => no carousel card.
+                    OutlinedCard(modifier = Modifier.weight(2f).height(136.dp)) {
+                        Box(Modifier.fillMaxSize().padding(12.dp),
+                            contentAlignment = Alignment.Center) {
+                            Text("근처에 매장이 없습니다.",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
                 OutlinedCard(
                     onClick = onOpenNearby,
-                    modifier = Modifier.weight(1.1f).height(150.dp),
+                    modifier = Modifier.weight(1.1f).height(136.dp),
                 ) {
                     Column(
-                        modifier = Modifier.padding(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize().padding(10.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text("⌖", style = MaterialTheme.typography.headlineMedium)
-                        Text("주변 바", style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            "지도에서 보기 →",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
+                        Text("매장 지도", style = MaterialTheme.typography.titleSmall)
                     }
                 }
             }
