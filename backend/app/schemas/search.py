@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18, 2026-10-21). Reviewed by Haeul Yang.
 from typing import Literal
 from uuid import UUID
 
@@ -55,6 +55,23 @@ class SearchBarsResponse(BaseModel):
         "was recognized but no active bar currently sells it."
     )
     truncated: bool = Field(description="True when more rows matched than `limit`")
+
+
+class BarNameItem(BaseModel):
+    barId: UUID
+    name: str
+    address: str
+    latitude: Latitude
+    longitude: Longitude
+    hasOwner: bool = Field(
+        description="True when the bar has a current owner; an owner application for it would be "
+        "`409 BAR_OWNER_EXISTS`. Always false until bar owners exist (Iteration 3)"
+    )
+
+
+class BarNamesResponse(BaseModel):
+    items: list[BarNameItem] = Field(description="Active bars whose name or address contains the query, by name")
+    truncated: bool = Field(description="True when more bars matched than `limit`")
 
 
 class NearbyBarItem(BaseModel):

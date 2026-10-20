@@ -1420,7 +1420,7 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
 | `items[].barId` | UUID 문자열 | 아니오 | |
 | `items[].name`, `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4. 고객 지도 검색에서 지도를 옮길 위치 |
-| `items[].hasOwner` | 불리언 | 아니오 | 현재 업주가 있으면 `true`. 이 업장에 신청하면 `409 BAR_OWNER_EXISTS`다 |
+| `items[].hasOwner` | 불리언 | 아니오 | 현재 업주가 있으면 `true`. 이 업장에 신청하면 `409 BAR_OWNER_EXISTS`다. 업주 기능(3.11)을 구현하는 I3 전에는 업주가 없으므로 항상 `false`다 |
 | `truncated` | 불리언 | 아니오 | `limit`보다 많이 일치했으면 `true` |
 
 비활성 업장은 결과에 없다.
