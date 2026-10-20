@@ -80,6 +80,8 @@ import androidx.lifecycle.createSavedStateHandle
 import com.kakao.vectormap.MapView
 import com.zerotoone.bottlemap.data.AndroidNearbyLocationSource
 import com.zerotoone.bottlemap.data.BackendNearbyBarsRepository
+import com.zerotoone.bottlemap.data.BarPin
+import com.zerotoone.bottlemap.data.MapBar
 import com.zerotoone.bottlemap.data.MapPlace
 import com.zerotoone.bottlemap.data.NearbyBar
 
@@ -103,7 +105,8 @@ fun NearbyBarsScreen(
     val searchedPlace by placeSearchViewModel.selected.collectAsStateWithLifecycle()
     val focusSearchedPlace by placeSearchViewModel.focus.collectAsStateWithLifecycle()
     val carousel = (state as? NearbyUiState.Success)?.bars.orEmpty()
-    val selected = (mapBars + carousel).firstOrNull { it.barId == selectedId }
+    val selected: BarPin? = mapBars.firstOrNull { it.barId == selectedId }
+        ?: carousel.firstOrNull { it.barId == selectedId }
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
     // Keep Native MapView mounted beneath the full-page list so switching modes
     // does not lose its camera/labels or reinitialize the Kakao SDK.
@@ -119,7 +122,7 @@ fun NearbyBarsScreen(
         listVisible = false
         placeResultsVisible = true
         keyboard?.hide()
-        placeSearchViewModel.search(placeQuery, (mapBars + carousel).distinctBy { it.barId })
+        placeSearchViewModel.search(placeQuery)
     }
     fun choosePlace(place: MapPlace) {
         if (placeSearchViewModel.select(place)) {
@@ -279,7 +282,8 @@ fun NearbyBarsScreen(
                 val hint = when (val current = mapState) {
                     is MapDiscoveryState.Error -> current.message
                     is MapDiscoveryState.Ready ->
-                        if (current.bars.isEmpty()) "근처에 매장이 없습니다." else null
+                        if (current.bars.isEmpty()) "이 지도 영역에 매장이 없습니다." else null
+                    MapDiscoveryState.TooWide -> "지도를 확대하면 매장을 볼 수 있습니다."
                     else -> null
                 }
                 if (hint != null) {
@@ -608,7 +612,7 @@ internal fun hideNearbyNativeSurface(view: MapView) {
 @Composable
 private fun NearbyFullList(
     state: MapDiscoveryState,
-    bars: List<NearbyBar>,
+    bars: List<MapBar>,
     onRetry: () -> Unit,
     onSelect: (String) -> Unit,
     onOpenDetail: (String) -> Unit,
@@ -622,6 +626,10 @@ private fun NearbyFullList(
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 NearbyStatus("매장 목록을 불러오지 못했습니다.",
                     button = "다시 시도", onAction = onRetry)
+            }
+        MapDiscoveryState.TooWide ->
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                NearbyStatus("지도 영역이 너무 넓습니다. 지도를 확대해 주세요.")
             }
         is MapDiscoveryState.Ready -> {
             if (bars.isEmpty()) {
