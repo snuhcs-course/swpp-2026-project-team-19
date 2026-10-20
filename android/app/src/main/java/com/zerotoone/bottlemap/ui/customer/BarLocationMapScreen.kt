@@ -166,6 +166,7 @@ private fun BarLocationContent(
         return
     }
     val context = LocalContext.current
+    val addressToCopy = copyableBarAddress(target.address)
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         // The BAR ADDRESS card repeats the address already shown above the map.
         // On short portrait screens, preserve room for the interactive map.
@@ -203,11 +204,12 @@ private fun BarLocationContent(
             Surface(
                 modifier = Modifier.fillMaxWidth()
                     .padding(bottom = if (compactHeight) 6.dp else 16.dp)
-                    .clickable(enabled = target.address.isNotBlank(), role = Role.Button) {
+                    .clickable(enabled = addressToCopy != null, role = Role.Button) {
+                        val address = addressToCopy ?: return@clickable
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE)
                             as ClipboardManager
                         clipboard.setPrimaryClip(
-                            ClipData.newPlainText("Bar Address", target.address))
+                            ClipData.newPlainText("Bar Address", address))
                         Toast.makeText(context, "주소가 복사되었습니다.", Toast.LENGTH_SHORT).show()
                     },
                 color = MaterialTheme.colorScheme.surface,

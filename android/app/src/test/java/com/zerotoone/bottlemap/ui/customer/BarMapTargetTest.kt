@@ -48,6 +48,15 @@ class BarMapTargetTest {
     }
 
     @Test
+    fun addressCopyPreservesExactBackendBytesAndDisablesEmpty() {
+        val address = " 서울특별시 관악구 관악로 1, 2층 "
+        assertEquals(address, copyableBarAddress(address))
+        assertNull(copyableBarAddress(null))
+        assertNull(copyableBarAddress(""))
+        assertNull(copyableBarAddress("  \t "))
+    }
+
+    @Test
     fun rejectsMissingOrInvalidCoordinatesWithoutDefaultLocation() {
         assertNull(validatedBarLocation(bar(latitude = null)))
         assertNull(validatedBarLocation(bar(longitude = null)))

@@ -30,3 +30,6 @@ internal fun validatedBarLocation(bar: BarDetailUiModel): BarMapTarget? {
         longitude = longitude,
     )
 }
+
+/** No normalization: clipboard must preserve the Backend address verbatim. */
+internal fun copyableBarAddress(address: String?): String? = address?.takeIf { it.isNotBlank() }
