@@ -15,6 +15,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,7 +37,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -48,9 +49,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
@@ -234,11 +238,26 @@ private fun BarLocationContent(
                             style = MaterialTheme.typography.bodyMedium,
                         )
                         if (addressToCopy != null) {
-                            Icon(
-                                imageVector = Icons.Outlined.ContentCopy,
-                                contentDescription = "주소 복사",
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
+                            val iconColor = MaterialTheme.colorScheme.primary
+                            Canvas(
+                                modifier = Modifier.size(24.dp).semantics {
+                                    contentDescription = "주소 복사"
+                                },
+                            ) {
+                                val line = 2.dp.toPx()
+                                drawRect(
+                                    color = iconColor,
+                                    topLeft = Offset(size.width * 0.29f, size.height * 0.10f),
+                                    size = Size(size.width * 0.57f, size.height * 0.65f),
+                                    style = Stroke(line),
+                                )
+                                drawRect(
+                                    color = iconColor,
+                                    topLeft = Offset(size.width * 0.13f, size.height * 0.29f),
+                                    size = Size(size.width * 0.57f, size.height * 0.61f),
+                                    style = Stroke(line),
+                                )
+                            }
                         }
                     }
                 }
