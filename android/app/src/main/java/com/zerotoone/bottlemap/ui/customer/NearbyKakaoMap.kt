@@ -199,7 +199,8 @@ fun NearbyKakaoMap(
                         handler.post { if (!disposed.get()) action() }
                     }
                     fun publishViewport(map: KakaoMap, cameraPosition: CameraPosition?) {
-                        val position = cameraPosition?.position ?: return
+                        val snapshot = cameraPosition ?: return
+                        val position = snapshot.position
                         val center = NearbyCoordinate(position.latitude, position.longitude)
                         if (!center.isValid()) return
                         val width = view.width
@@ -214,7 +215,7 @@ fun NearbyKakaoMap(
                                 }
                         } else emptyList()
                         post {
-                            currentCameraChanged.value(center, cameraPosition.zoomLevel)
+                            currentCameraChanged.value(center, snapshot.zoomLevel)
                             currentViewport.value(discoveryViewport(center, corners))
                         }
                     }
