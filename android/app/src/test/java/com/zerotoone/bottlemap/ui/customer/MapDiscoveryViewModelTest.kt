@@ -1,10 +1,14 @@
 package com.zerotoone.bottlemap.ui.customer
 
 import androidx.lifecycle.SavedStateHandle
+import com.zerotoone.bottlemap.data.MapBar
+import com.zerotoone.bottlemap.data.MapBarsSource
+import com.zerotoone.bottlemap.data.MapBounds
 import com.zerotoone.bottlemap.data.NearbyBar
 import com.zerotoone.bottlemap.data.NearbyBarsSource
 import com.zerotoone.bottlemap.data.NearbyCoordinate
 import com.zerotoone.bottlemap.data.NearbyLocationSource
+import com.zerotoone.bottlemap.data.mapBoundsFromCorners
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,256 +34,236 @@ class MapDiscoveryViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val user = NearbyCoordinate(37.478, 126.951)
     private val moved = NearbyCoordinate(37.485, 126.960)
+    private val a = MapBounds(37.475, 126.947, 37.480, 126.955)
+    private val b = MapBounds(37.480, 126.955, 37.495, 126.975)
 
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { Dispatchers.resetMain() }
 
-    private fun item(id: String, center: NearbyCoordinate = user, meters: Double = 10.0) =
-        NearbyBar(id, "Bar " + id, "Test address " + id, center, meters)
+    private fun nearby(id: String) =
+        NearbyBar(id, "Bar " + id, "Address", user, 8.0)
+    private fun mapped(id: String, at: NearbyCoordinate = moved) =
+        MapBar(id, "Bar " + id, "Address", at)
 
-    private class Source : NearbyBarsSource {
+    private class NearbyFake : NearbyBarsSource {
         val calls = mutableListOf<Pair<NearbyCoordinate, Int>>()
-        var current = listOf<NearbyBar>()
-        var changed = listOf<NearbyBar>()
-        var failMap = false
+        var current: List<NearbyBar> = emptyList()
         override suspend fun listNearbyBars(origin: NearbyCoordinate): List<NearbyBar> =
             listNearbyBars(origin, 1000)
         override suspend fun listNearbyBars(origin: NearbyCoordinate, radiusMeters: Int): List<NearbyBar> {
             calls += origin to radiusMeters
-            if (radiusMeters != 1000 && failMap) throw IllegalStateException("network")
-            return if (radiusMeters == 1000) current else changed
+            return current
         }
     }
 
-    private fun vm(source: NearbyBarsSource, handle: SavedStateHandle = SavedStateHandle()) =
+    private class MapFake : MapBarsSource {
+        val calls = mutableListOf<MapBounds>()
+        var bars: List<MapBar> = emptyList()
+        var fail = false
+        override suspend fun listMapBars(bounds: MapBounds): List<MapBar> {
+            calls += bounds
+            if (fail) throw IllegalStateException("offline")
+            return bars
+        }
+    }
+
+    private fun vm(nearby: NearbyBarsSource, map: MapBarsSource,
+                   handle: SavedStateHandle = SavedStateHandle()) =
         NearbyBarsViewModel(
             object : NearbyLocationSource {
                 override suspend fun currentLocation(): NearbyCoordinate = user
-            }, source, handle)
+            }, nearby, handle, map)
 
-    @Test fun initialCarouselIs1000mAndMapQueriesIndependently() = runTest(dispatcher) {
-        val source = Source().apply {
-            current = listOf(item("near"))
-            changed = listOf(item("map", moved))
-        }
-        val model = vm(source)
+    @Test fun mapUsesBoundsAndCarouselRemainsIndependent1000m() = runTest(dispatcher) {
+        val near = NearbyFake().apply { current = listOf(nearby("near")) }
+        val map = MapFake().apply { bars = listOf(mapped("far")) }
+        val model = vm(near, map)
         model.updatePermission(NearbyPermission.PRECISE)
         advanceUntilIdle()
-        assertEquals(listOf(user to 1000), source.calls)
-        assertEquals(user, model.origin.value)
-        assertEquals(null, model.selectedBarId.value)
-        model.onViewportChanged(NearbyViewport(moved, 2800))
+        assertEquals(listOf(user to 1000), near.calls)
+        assertEquals(emptyList<MapBounds>(), map.calls)
+        model.onViewportChanged(MapViewport(b))
         advanceUntilIdle()
-        assertEquals(listOf(user to 1000, moved to 2800), source.calls)
+        assertEquals(listOf(b), map.calls)
         assertEquals(listOf("near"), (model.state.value as NearbyUiState.Success).bars.map { it.barId })
-        assertEquals(listOf("map"), (model.map.value as MapDiscoveryState.Ready).bars.map { it.barId })
-        assertEquals(listOf("map"), model.markers.value.map { it.barId })
+        assertEquals(listOf("far"), model.markers.value.map { it.barId })
+        assertEquals(b, (model.map.value as MapDiscoveryState.Ready).bounds)
     }
 
-    @Test fun rapidCameraMovesDebounceToOneLatestRequest() = runTest(dispatcher) {
-        val source = Source()
-        val model = vm(source)
+    @Test fun cameraMovesDebounceAndQueryLatestOnly() = runTest(dispatcher) {
+        val map = MapFake()
+        val model = vm(NearbyFake(), map)
         model.updatePermission(NearbyPermission.APPROXIMATE)
         advanceUntilIdle()
-        model.onViewportChanged(NearbyViewport(user, 1400))
+        model.onViewportChanged(MapViewport(a))
         advanceTimeBy(100)
-        model.onViewportChanged(NearbyViewport(moved, 2600))
+        model.onViewportChanged(MapViewport(b))
         advanceUntilIdle()
-        assertEquals(listOf(user to 1000, moved to 2600), source.calls)
+        assertEquals(listOf(b), map.calls)
     }
 
-    @Test fun exitingDiscoveryClearsSavedSelectionForNextUserCenteredEntry() = runTest(dispatcher) {
-        val source = Source().apply { current = listOf(item("near")) }
-        val handle = SavedStateHandle()
-        val model = vm(source, handle)
+    @Test fun sameViewportSkipsButNewZoomFetches() = runTest(dispatcher) {
+        val map = MapFake()
+        val model = vm(NearbyFake(), map)
         model.updatePermission(NearbyPermission.PRECISE)
         advanceUntilIdle()
-        assertTrue(model.selectBar("near"))
-        assertEquals("near", model.selectedBarId.value)
-        model.leaveDiscovery()
-        assertNull(model.selectedBarId.value)
-        assertNull(handle.get<String>("nearbySelectedBarId"))
-        assertEquals(MapDiscoveryState.Initial, model.map.value)
-        assertTrue(model.markers.value.isEmpty())
-        // Location remains available for Search preview and re-entry.
-        assertEquals(user, model.origin.value)
+        model.onViewportChanged(MapViewport(a))
+        advanceUntilIdle()
+        model.onViewportChanged(MapViewport(a.copy(south = a.south + 0.00001)))
+        advanceUntilIdle()
+        assertEquals(1, map.calls.size)
+        model.onViewportChanged(MapViewport(b))
+        advanceUntilIdle()
+        assertEquals(2, map.calls.size)
     }
 
-    @Test fun missingCarouselDoesNotSuppressMapAndAllowsMapMarkerSelection() = runTest(dispatcher) {
-        val source = Source().apply { changed = listOf(item("far", moved)) }
-        val model = vm(source)
+    @Test fun oversizedAreaSkipsApiShowsZoomInAndKeepsPriorMarkers() = runTest(dispatcher) {
+        val map = MapFake().apply { bars = listOf(mapped("one")) }
+        val model = vm(NearbyFake(), map)
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        model.onViewportChanged(MapViewport(a))
+        advanceUntilIdle()
+        val tooWide = MapBounds(37.3, 126.80, 37.501, 126.96)
+        model.onViewportChanged(MapViewport(tooWide))
+        advanceUntilIdle()
+        assertEquals(MapDiscoveryState.TooWide, model.map.value)
+        assertEquals(listOf(a), map.calls)
+        assertEquals(listOf("one"), model.markers.value.map { it.barId })
+        map.bars = listOf(mapped("two"))
+        model.onViewportChanged(MapViewport(b))
+        advanceUntilIdle()
+        assertEquals(listOf(a, b), map.calls)
+        assertEquals(listOf("two"), model.markers.value.map { it.barId })
+    }
+
+    @Test fun partialCarouselNotNeededToSelectMapBar() = runTest(dispatcher) {
+        val map = MapFake().apply { bars = listOf(mapped("remote")) }
+        val model = vm(NearbyFake(), map)
         model.updatePermission(NearbyPermission.PRECISE)
         advanceUntilIdle()
         assertEquals(NearbyUiState.Empty, model.state.value)
-        assertEquals(user, model.origin.value)
-        model.onViewportChanged(NearbyViewport(moved, 1500))
+        model.onViewportChanged(MapViewport(b))
         advanceUntilIdle()
-        assertTrue(model.selectBar("far"))
-        assertEquals("far", model.selectedBarId.value)
-        assertFalse(model.selectBar("missing"))
+        assertTrue(model.selectBar("remote"))
+        assertFalse(model.selectBar("unknown"))
+        assertEquals("remote", model.selectedBarId.value)
     }
 
-    @Test fun mapQueryFailureCanRetryWithoutDiscardingCarousel() = runTest(dispatcher) {
-        val source = Source().apply { current = listOf(item("near")); failMap = true }
-        val model = vm(source)
+    @Test fun mapErrorAndRetryDoNotChangeCarousel() = runTest(dispatcher) {
+        val near = NearbyFake().apply { current = listOf(nearby("near")) }
+        val map = MapFake().apply { fail = true }
+        val model = vm(near, map)
         model.updatePermission(NearbyPermission.PRECISE)
         advanceUntilIdle()
-        model.onViewportChanged(NearbyViewport(moved, 2100))
+        model.onViewportChanged(MapViewport(a))
         advanceUntilIdle()
         assertTrue(model.map.value is MapDiscoveryState.Error)
         assertEquals(listOf("near"), (model.state.value as NearbyUiState.Success).bars.map { it.barId })
-        source.failMap = false
+        map.fail = false
         model.retryMap()
         advanceUntilIdle()
         assertTrue(model.map.value is MapDiscoveryState.Ready)
-        assertEquals(3, source.calls.size)
+        assertEquals(listOf(a, a), map.calls)
     }
 
-    @Test fun requeryUnchangedViewportIsSkippedButZoomChangeIsFetched() = runTest(dispatcher) {
-        val source = Source()
-        val model = vm(source)
-        model.updatePermission(NearbyPermission.PRECISE)
-        advanceUntilIdle()
-        model.onViewportChanged(NearbyViewport(user, 2000))
-        advanceUntilIdle()
-        model.onViewportChanged(NearbyViewport(user, 2020))
-        advanceUntilIdle()
-        assertEquals(2, source.calls.size)
-        model.onViewportChanged(NearbyViewport(user, 2400))
-        advanceUntilIdle()
-        assertEquals(3, source.calls.size)
-    }
-
-    @Test fun oldSlowBackendResultMustNotOverwriteNewMarkers() = runTest(dispatcher) {
-        val first = CompletableDeferred<List<NearbyBar>>()
-        val second = CompletableDeferred<List<NearbyBar>>()
-        val source = object : NearbyBarsSource {
-            override suspend fun listNearbyBars(origin: NearbyCoordinate): List<NearbyBar> = listOf(item("near"))
-            override suspend fun listNearbyBars(origin: NearbyCoordinate, radiusMeters: Int): List<NearbyBar> {
-                if (radiusMeters == 1000) return listOf(item("near"))
-                // Deliberately ignore cancellation to prove stale-request version protection.
-                return withContext(NonCancellable) {
-                    if (radiusMeters == 1700) first.await() else second.await()
-                }
-            }
+    @Test fun staleRequestCannotOverwriteMarkersEvenWhenBackendIgnoresCancel() = runTest(dispatcher) {
+        val first = CompletableDeferred<List<MapBar>>()
+        val second = CompletableDeferred<List<MapBar>>()
+        val map = object : MapBarsSource {
+            override suspend fun listMapBars(bounds: MapBounds): List<MapBar> =
+                withContext(NonCancellable) { if (bounds == a) first.await() else second.await() }
         }
-        val model = vm(source)
+        val model = vm(NearbyFake(), map)
         model.updatePermission(NearbyPermission.PRECISE)
         advanceUntilIdle()
-        model.onViewportChanged(NearbyViewport(user, 1700))
+        model.onViewportChanged(MapViewport(a))
         advanceTimeBy(351); runCurrent()
-        model.onViewportChanged(NearbyViewport(moved, 2000))
+        model.onViewportChanged(MapViewport(b))
         advanceTimeBy(351); runCurrent()
-        second.complete(listOf(item("new", moved)))
+        second.complete(listOf(mapped("new")))
         runCurrent()
-        assertEquals(listOf("new"), (model.map.value as MapDiscoveryState.Ready).bars.map { it.barId })
-        first.complete(listOf(item("old")))
+        assertEquals(listOf("new"), model.markers.value.map { it.barId })
+        first.complete(listOf(mapped("old")))
         advanceUntilIdle()
-        assertEquals(listOf("new"), (model.map.value as MapDiscoveryState.Ready).bars.map { it.barId })
+        assertEquals(listOf("new"), model.markers.value.map { it.barId })
     }
 
-    @Test fun permissionRevokedClearsLocationAndPendingMapState() = runTest(dispatcher) {
-        val source = Source()
-        val model = vm(source)
+    @Test fun previousMarkersRemainWhileNextAreaLoading() = runTest(dispatcher) {
+        val map = MapFake().apply { bars = listOf(mapped("one")) }
+        val model = vm(NearbyFake(), map)
         model.updatePermission(NearbyPermission.PRECISE)
         advanceUntilIdle()
-        model.onViewportChanged(NearbyViewport(user, 2000))
-        model.updatePermission(NearbyPermission.NONE)
-        advanceUntilIdle()
-        assertNull(model.origin.value)
-        assertEquals(MapDiscoveryState.Initial, model.map.value)
-        assertEquals(NearbyUiState.PermissionRequired, model.state.value)
-        assertEquals(1, source.calls.size)
-    }
-
-    @Test fun previousMarkersRemainVisibleWhileNewAreaLoads() = runTest(dispatcher) {
-        val source = Source().apply { changed = listOf(item("one")) }
-        val model = vm(source)
-        model.updatePermission(NearbyPermission.PRECISE)
-        advanceUntilIdle()
-        model.onViewportChanged(NearbyViewport(user, 1500))
-        advanceUntilIdle()
-        assertEquals(listOf("one"), model.markers.value.map { it.barId })
-        source.changed = listOf(item("two", moved))
-        model.onViewportChanged(NearbyViewport(moved, 1600))
+        model.onViewportChanged(MapViewport(a)); advanceUntilIdle()
+        map.bars = listOf(mapped("two"))
+        model.onViewportChanged(MapViewport(b))
         assertEquals(MapDiscoveryState.Loading, model.map.value)
         assertEquals(listOf("one"), model.markers.value.map { it.barId })
         advanceUntilIdle()
         assertEquals(listOf("two"), model.markers.value.map { it.barId })
     }
 
-    @Test fun returningFromDetailRestoresLastMapCenterAndZoomNotSelectedPin() = runTest(dispatcher) {
-        val source = Source().apply { current = listOf(item("near")) }
-        val handle = SavedStateHandle()
-        val model = vm(source, handle)
+    @Test fun permissionRevocationClearsMapAndPendingRequest() = runTest(dispatcher) {
+        val map = MapFake()
+        val model = vm(NearbyFake(), map)
+        model.updatePermission(NearbyPermission.PRECISE)
+        advanceUntilIdle()
+        model.onViewportChanged(MapViewport(a))
+        model.updatePermission(NearbyPermission.NONE)
+        advanceUntilIdle()
+        assertNull(model.origin.value)
+        assertEquals(MapDiscoveryState.Initial, model.map.value)
+        assertTrue(model.markers.value.isEmpty())
+        assertEquals(emptyList<MapBounds>(), map.calls)
+    }
+
+    @Test fun detailReturnRestoresLastCameraButSearchExitClearsIt() = runTest(dispatcher) {
+        val near = NearbyFake().apply { current = listOf(nearby("near")) }
+        val model = vm(near, MapFake())
         model.updatePermission(NearbyPermission.PRECISE)
         advanceUntilIdle()
         assertTrue(model.selectBar("near"))
-        assertEquals("near", model.focusBarId.value)
         model.consumeFocusRequest()
-        assertNull(model.focusBarId.value)
-        val lastPannedPoint = NearbyCoordinate(37.491, 126.979)
-        model.rememberCamera(lastPannedPoint, 13)
-        // Navigating to Detail and popping it does not reset the route-scoped VM.
-        assertEquals(DiscoveryCamera(lastPannedPoint, 13), model.savedCamera())
-        assertEquals("near", model.selectedBarId.value)
+        model.rememberCamera(moved, 13)
+        assertEquals(DiscoveryCamera(moved, 13), model.savedCamera())
         assertNull(model.focusBarId.value)
         model.leaveDiscovery()
         assertNull(model.savedCamera())
-        assertNull(model.selectedBarId.value)
-        // Kakao MapView can be disposed after Navigation has already popped.
-        model.rememberCamera(lastPannedPoint, 13)
+        model.rememberCamera(moved, 13) // disposed MapView must not resurrect camera
         assertNull(model.savedCamera())
         model.beginDiscovery()
-        model.rememberCamera(lastPannedPoint, 13)
-        assertEquals(DiscoveryCamera(lastPannedPoint, 13), model.savedCamera())
+        model.rememberCamera(moved, 13)
+        assertEquals(DiscoveryCamera(moved, 13), model.savedCamera())
     }
 
-    @Test fun cameraSurvivesRecreatedViewModelAndInitialPermissionRestore() = runTest(dispatcher) {
-        val state = SavedStateHandle()
-        val source = Source()
-        val old = vm(source, state)
-        old.updatePermission(NearbyPermission.PRECISE)
-        advanceUntilIdle()
-        old.rememberCamera(moved, 18)
-        val recreated = vm(Source(), SavedStateHandle(mapOf(
+    @Test fun restoredSavedStateAndPermissionRecheckKeepCamera() = runTest(dispatcher) {
+        val handle = SavedStateHandle(mapOf(
             "mapCenterLatitude" to moved.latitude,
             "mapCenterLongitude" to moved.longitude,
             "mapZoomLevel" to 18,
-        )))
-        assertEquals(DiscoveryCamera(moved, 18), recreated.savedCamera())
-        recreated.updatePermission(NearbyPermission.APPROXIMATE)
+        ))
+        val model = vm(NearbyFake(), MapFake(), handle)
+        model.updatePermission(NearbyPermission.APPROXIMATE)
         advanceUntilIdle()
-        assertEquals(DiscoveryCamera(moved, 18), recreated.savedCamera())
-        recreated.refresh()
+        assertEquals(DiscoveryCamera(moved, 18), model.savedCamera())
+        model.refresh()
         advanceUntilIdle()
-        assertNull(recreated.savedCamera())
-    }
-
-    @Test fun invalidCameraCoordinatesOrZoomAreNotSaved() = runTest(dispatcher) {
-        val model = vm(Source())
-        model.updatePermission(NearbyPermission.PRECISE)
-        advanceUntilIdle()
-        model.rememberCamera(NearbyCoordinate(95.0, 126.95), 16)
-        model.rememberCamera(user, 0)
+        assertNull(model.savedCamera())
+        model.rememberCamera(NearbyCoordinate(95.0, 0.0), 16)
         assertNull(model.savedCamera())
     }
 
-    @Test fun viewportAt3kmLimitIsHonestAboutUncoveredArea() {
-        val center = NearbyCoordinate(37.5, 126.9)
-        val smallCorners = listOf(
-            center.copy(latitude = 37.501), center.copy(latitude = 37.499),
-            center.copy(longitude = 126.901), center.copy(longitude = 126.899),
+    @Test fun screenCornerBoundsRejectMissingAndSupportExactPoint() {
+        val corners = listOf(
+            NearbyCoordinate(37.48, 126.94),
+            NearbyCoordinate(37.48, 126.96),
+            NearbyCoordinate(37.47, 126.94),
+            NearbyCoordinate(37.47, 126.96),
         )
-        val small = discoveryViewport(center, smallCorners)
-        assertTrue(small.radiusMeters in 100..3000)
-        assertFalse(small.partiallyCovered)
-        val largeCorners = smallCorners.map { it.copy(latitude = it.latitude + 0.10) }
-        val large = discoveryViewport(center, largeCorners)
-        assertEquals(3000, large.radiusMeters)
-        assertTrue(large.partiallyCovered)
-        val unavailable = discoveryViewport(center, emptyList())
-        assertEquals(3000, unavailable.radiusMeters)
-        assertTrue(unavailable.partiallyCovered)
+        assertEquals(MapBounds(37.47, 126.94, 37.48, 126.96),
+            mapBoundsFromCorners(corners))
+        assertNull(mapBoundsFromCorners(corners.take(2)))
+        assertFalse(MapBounds(37.3, 126.8, 37.501, 126.9).isSupportedByBackend())
+        assertTrue(MapBounds(37.29, 126.8, 37.49, 127.0).isSupportedByBackend())
     }
 }
