@@ -4,7 +4,10 @@ package com.zerotoone.bottlemap.ui.customer
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zerotoone.bottlemap.data.MAX_NEARBY_API_RADIUS_METERS
+import com.zerotoone.bottlemap.data.BackendMapBarsRepository
+import com.zerotoone.bottlemap.data.MapBar
+import com.zerotoone.bottlemap.data.MapBarsSource
+import com.zerotoone.bottlemap.data.MapBounds
 import com.zerotoone.bottlemap.data.NEARBY_CAROUSEL_RADIUS_METERS
 import com.zerotoone.bottlemap.data.NearbyBar
 import com.zerotoone.bottlemap.data.NearbyBarsSource
@@ -43,30 +46,23 @@ sealed interface NearbyUiState {
 sealed interface MapDiscoveryState {
     data object Initial : MapDiscoveryState
     data object Loading : MapDiscoveryState
-    data class Ready(val bars: List<NearbyBar>, val radiusMeters: Int, val partiallyCovered: Boolean) : MapDiscoveryState
+    data class Ready(val bars: List<MapBar>, val bounds: MapBounds) : MapDiscoveryState
+    data object TooWide : MapDiscoveryState
     data class Error(val message: String) : MapDiscoveryState
 }
 
-/** The SDK computes the radius from visible screen corners, never to filter bars locally. */
-/** Camera center and zoom are persisted only in the route-scoped SavedStateHandle. */
+/** Route-scoped center/zoom survives Bar Detail navigation. */
 data class DiscoveryCamera(val center: NearbyCoordinate, val zoomLevel: Int)
 
-data class NearbyViewport(
-    val center: NearbyCoordinate,
-    val radiusMeters: Int,
-    val partiallyCovered: Boolean = false,
-) {
-    init {
-        require(center.isValid())
-        require(radiusMeters in 1..MAX_NEARBY_API_RADIUS_METERS)
-    }
-}
+/** Camera viewport is a WGS84 box, not a center/radius approximation. */
+data class MapViewport(val bounds: MapBounds)
 
 /** Selected bar is a single shared ID across map markers and the 1km carousel. */
 class NearbyBarsViewModel(
     private val locationSource: NearbyLocationSource,
     private val barsSource: NearbyBarsSource,
     private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
+    private val mapBarsSource: MapBarsSource = BackendMapBarsRepository(),
 ) : ViewModel() {
     private val _state = MutableStateFlow<NearbyUiState>(NearbyUiState.Initial)
     val state: StateFlow<NearbyUiState> = _state.asStateFlow()
@@ -75,8 +71,8 @@ class NearbyBarsViewModel(
     private val _map = MutableStateFlow<MapDiscoveryState>(MapDiscoveryState.Initial)
     val map: StateFlow<MapDiscoveryState> = _map.asStateFlow()
     // Keep the previous visible markers while a new viewport request is in flight.
-    private val _markers = MutableStateFlow<List<NearbyBar>>(emptyList())
-    val markers: StateFlow<List<NearbyBar>> = _markers.asStateFlow()
+    private val _markers = MutableStateFlow<List<MapBar>>(emptyList())
+    val markers: StateFlow<List<MapBar>> = _markers.asStateFlow()
 
     val selectedBarId: StateFlow<String?> =
         savedStateHandle.getStateFlow<String?>("nearbySelectedBarId", null)
@@ -116,7 +112,7 @@ class NearbyBarsViewModel(
     private var mapQuery: Job? = null
     private var requestVersion = 0L
     private var mapVersion = 0L
-    private var lastViewport: NearbyViewport? = null
+    private var lastViewport: MapViewport? = null
     // A late MapView.onDispose after popping Nearby must not persist the exited camera.
     private var acceptingCameraChanges = true
 
@@ -213,30 +209,30 @@ class NearbyBarsViewModel(
         }
     }
 
-    /** Called only after native camera movement ends. Coalesce fast gestures and ignore stale replies. */
-    fun onViewportChanged(viewport: NearbyViewport, force: Boolean = false) {
+    /** Load the exact visible bounds after the camera gesture. No 3km circle. */
+    fun onViewportChanged(viewport: MapViewport, force: Boolean = false) {
         if (_origin.value == null) return
         val previous = lastViewport
         if (!force && previous != null &&
-            distanceMeters(previous.center, viewport.center) < 80.0 &&
-            kotlin.math.abs(previous.radiusMeters - viewport.radiusMeters) <
-                kotlin.math.max(50, previous.radiusMeters / 10) &&
-            previous.partiallyCovered == viewport.partiallyCovered &&
+            previous.bounds.isNearlySameAs(viewport.bounds) &&
             _map.value !is MapDiscoveryState.Error
         ) return
         lastViewport = viewport
         val version = ++mapVersion
         mapQuery?.cancel()
+        if (!viewport.bounds.isSupportedByBackend()) {
+            // Contract max span 0.2 degrees on each axis. Never send 422 knowingly.
+            _map.value = MapDiscoveryState.TooWide
+            return
+        }
         _map.value = MapDiscoveryState.Loading
         mapQuery = viewModelScope.launch {
-            delay(350) // one request at the end of a gesture, not on every camera frame
+            delay(350)
             try {
-                val bars = barsSource.listNearbyBars(viewport.center, viewport.radiusMeters)
-                    .distinctBy { it.barId }
+                val bars = mapBarsSource.listMapBars(viewport.bounds).distinctBy { it.barId }
                 if (version != mapVersion || _origin.value == null) return@launch
                 _markers.value = bars
-                _map.value = MapDiscoveryState.Ready(
-                    bars, viewport.radiusMeters, viewport.partiallyCovered)
+                _map.value = MapDiscoveryState.Ready(bars, viewport.bounds)
                 val id = selectedBarId.value
                 val carousel = (_state.value as? NearbyUiState.Success)?.bars.orEmpty()
                 if (id != null && bars.none { it.barId == id } &&
@@ -244,9 +240,12 @@ class NearbyBarsViewModel(
                 ) savedStateHandle["nearbySelectedBarId"] = null
             } catch (cancelled: CancellationException) {
                 throw cancelled
-            } catch (_: Exception) {
-                if (version == mapVersion) _map.value =
-                    MapDiscoveryState.Error("이 지도 영역의 바를 불러오지 못했습니다.")
+            } catch (error: Exception) {
+                if (version != mapVersion) return@launch
+                _map.value = if (error is com.zerotoone.bottlemap.network.BottleMapApiException &&
+                    error.fieldErrors.any { it.code == "BOUNDS_TOO_LARGE" }
+                ) MapDiscoveryState.TooWide else MapDiscoveryState.Error(
+                    "이 지도 영역의 매장을 불러오지 못했습니다.")
             }
         }
     }
