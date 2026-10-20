@@ -270,6 +270,11 @@ class NearbyBarsViewModel(
         clearCamera()
     }
 
+    fun clearSelection() {
+        savedStateHandle["nearbySelectedBarId"] = null
+        savedStateHandle["nearbyFocusBarId"] = null
+    }
+
     fun selectBar(barId: String): Boolean {
         val carousel = (_state.value as? NearbyUiState.Success)?.bars.orEmpty()
         val markers = _markers.value
