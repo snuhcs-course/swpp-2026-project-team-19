@@ -91,6 +91,10 @@ fun NearbyKakaoMap(
     bars: List<NearbyBar>,
     selectedBarId: String?,
     focusTarget: NearbyBar?,
+    focusBarId: String?,
+    initialCamera: DiscoveryCamera?,
+    onFocusApplied: () -> Unit,
+    onCameraChanged: (NearbyCoordinate, Int) -> Unit,
     onSelectBar: (String) -> Unit,
     onViewportChanged: (NearbyViewport) -> Unit,
     recenterToken: Int,
@@ -109,6 +113,7 @@ fun NearbyKakaoMap(
         val markers = remember { linkedMapOf<String, Pair<NearbyCoordinate, Label>>() }
         val currentSelect = rememberUpdatedState(onSelectBar)
         val currentViewport = rememberUpdatedState(onViewportChanged)
+        val currentCameraChanged = rememberUpdatedState(onCameraChanged)
         val ctx = LocalContext.current
         val owner = LocalLifecycleOwner.current
         val view = remember {
@@ -154,18 +159,16 @@ fun NearbyKakaoMap(
             }
         }
 
-        LaunchedEffect(selectedBarId, nativeMap) {
+        // Only deliberate selection requests can focus a bar. Returning from
+        // Bar Detail must NOT re-focus the selected pin over the saved viewport.
+        LaunchedEffect(focusBarId, focusTarget, nativeMap) {
             val map = nativeMap ?: return@LaunchedEffect
-            val target = focusTarget?.takeIf { it.barId == selectedBarId }
+            val target = focusTarget?.takeIf { it.barId == focusBarId }
                 ?: return@LaunchedEffect
-            // Bar selection moves the map, but moving the map never selects a bar.
             map.moveCamera(CameraUpdateFactory.newCenterPosition(
                 LatLng.from(target.location.latitude, target.location.longitude),
             ))
-            markers.forEach { (id, stored) ->
-                stored.second.setStyles(nearbyMarkerStyle(id == selectedBarId))
-                stored.second.invalidate()
-            }
+            onFocusApplied()
         }
         LaunchedEffect(recenterToken, nativeMap) {
             if (recenterToken > 0) nativeMap?.moveCamera(
@@ -198,7 +201,10 @@ fun NearbyKakaoMap(
                                         ?.let { NearbyCoordinate(it.latitude, it.longitude) }
                                 }
                         } else emptyList()
-                        post { currentViewport.value(discoveryViewport(center, corners)) }
+                        post {
+                            currentCameraChanged.value(center, position.zoomLevel)
+                            currentViewport.value(discoveryViewport(center, corners))
+                        }
                     }
                     val observer = LifecycleEventObserver { _, event ->
                         when (event) {
@@ -224,9 +230,11 @@ fun NearbyKakaoMap(
                                 }
                             },
                             object : KakaoMapReadyCallback() {
-                                override fun getPosition(): LatLng =
-                                    LatLng.from(origin.latitude, origin.longitude)
-                                override fun getZoomLevel(): Int = 16
+                                override fun getPosition(): LatLng {
+                                    val center = initialCamera?.center ?: origin
+                                    return LatLng.from(center.latitude, center.longitude)
+                                }
+                                override fun getZoomLevel(): Int = initialCamera?.zoomLevel ?: 16
                                 override fun onMapReady(map: KakaoMap) {
                                     try {
                                         val layer = map.labelManager?.layer
@@ -287,6 +295,12 @@ fun NearbyKakaoMap(
                         post { status = NearbyMapStatus.Error }
                     }
                     onDispose {
+                        val lastPosition = nativeMap?.cameraPosition
+                        if (lastPosition != null) {
+                            val center = NearbyCoordinate(
+                                lastPosition.position.latitude, lastPosition.position.longitude)
+                            if (center.isValid()) currentCameraChanged.value(center, lastPosition.zoomLevel)
+                        }
                         disposed.set(true)
                         onMapViewChanged(null)
                         hideNearbyNativeSurface(view)
