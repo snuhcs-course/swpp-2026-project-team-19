@@ -27,7 +27,7 @@ SOURCES = [  # (labels file, gold file)
     ("labels_heldout_v1_1.json", "match_gold_v1_1.json"),
     ("labels_final_v1.json", "match_gold_final_v1.json"),
 ]
-TARGET = {"위스키복춘": "위스키복춘", "미라보": "미라보", "수이": "수이바", "오드비": "오드비"}
+TARGET = {"위스키복춘": "위스키복춘", "미라보": "미라보", "수이": "수이", "오드비": "오드비"}
 
 gold_photos = {}
 for _, g in SOURCES:

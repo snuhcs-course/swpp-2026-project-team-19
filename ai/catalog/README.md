@@ -104,7 +104,7 @@ v1 위에 평가 정답의 새 상품과 메뉴판 표기를 더한 판입니다
 | `catalog_v2_eval_5bars.json` | P47 평가용. 상품은 전부, `menu:수이`·`menu:오드비`만 출처인 별칭 254개 제외 (상품 529, 별칭 1513) | X |
 | `catalog_v2_eval_5bars_drop_products.json` | 새 상품 판정 테스트용 (`--drop-products`). 수이·오드비에서만 나온 상품 82개와 그 브랜드 18개까지 제외 (상품 447, 별칭 1431) | X |
 | `catalog_v2_draft.json` | 위 스냅샷의 원본 | X |
-| `bars_v2.json` | 바 7곳 (v1 2곳 + 미라보, 벡(Beck), 포레스트, 오드비, 수이바) | O |
+| `bars_v2.json` | 바 7곳 (v1 2곳 + 미라보, 벡(Beck), 포레스트, 오드비, 수이) | O |
 
 main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있습니다. 적재하지 않는 파일(`catalog_v2_draft.json`, 평가 스냅샷 두 개)과 생성·검사 스크립트는 AI 브랜치 `i2-catalog-v2`에 있습니다. 만드는 순서: `python ai/catalog/build_catalog_v2.py` → `python ai/catalog/export_snapshot.py --drop-products` → `python ai/catalog/check_catalog_v2.py <파일...>`.
 
@@ -156,7 +156,7 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 | beck | 벡 | 장소 블로그 제목이 "Beck" | 없음 |
 | forest | 포레스트 | 관악구가 아니라 하남시 미사. 팀이 알려준 주소(2026-10-15)와 카카오 장소 1200932955(칵테일바)의 도로명 주소가 같고, 블로그 후기에 위스키 바로 나옴 (2026-10-15 확인) | 없음 |
 | odbi | 오드비 | 블로그 "샤로수길 위스키바 오드비" | 없음 (전화는 카카오맵 미등록이라 팀이 알려준 0507 가상번호, 2026-10-15) |
-| sui | 수이바 | 카카오 메뉴(하몽을 곁들인 감자튀김, 교자, 안키모와 바게트)가 사진 010_sui_05의 Dish Menu와 같음 | 전화 null (TODO, 카카오맵 미등록) |
+| sui | 수이 | 카카오 메뉴(하몽을 곁들인 감자튀김, 교자, 안키모와 바게트)가 사진 010_sui_05의 Dish Menu와 같음 | 전화 null (TODO, 카카오맵 미등록) |
 
 ## 생성 별칭 (2026-10-15)
 
