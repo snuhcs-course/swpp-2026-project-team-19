@@ -245,8 +245,9 @@ fun NearbyKakaoMap(
                                                     label: Label,
                                                 ): Boolean {
                                                     val id = label.tag as? String ?: return false
-                                                    if (!markers.containsKey(id)) return false
-                                                    post { currentSelect.value(id) }
+                                                    post {
+                                                        if (markers.containsKey(id)) currentSelect.value(id)
+                                                    }
                                                     return true
                                                 }
                                             },

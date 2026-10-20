@@ -77,9 +77,9 @@ fun NearbyBarsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val origin by viewModel.origin.collectAsStateWithLifecycle()
     val mapState by viewModel.map.collectAsStateWithLifecycle()
+    val mapBars by viewModel.markers.collectAsStateWithLifecycle()
     val selectedId by viewModel.selectedBarId.collectAsStateWithLifecycle()
     val carousel = (state as? NearbyUiState.Success)?.bars.orEmpty()
-    val mapBars = (mapState as? MapDiscoveryState.Ready)?.bars.orEmpty()
     val selected = (mapBars + carousel).firstOrNull { it.barId == selectedId }
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
     var recenterToken by rememberSaveable { mutableIntStateOf(0) }

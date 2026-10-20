@@ -71,6 +71,9 @@ class NearbyBarsViewModel(
     val origin: StateFlow<NearbyCoordinate?> = _origin.asStateFlow()
     private val _map = MutableStateFlow<MapDiscoveryState>(MapDiscoveryState.Initial)
     val map: StateFlow<MapDiscoveryState> = _map.asStateFlow()
+    // Keep the previous visible markers while a new viewport request is in flight.
+    private val _markers = MutableStateFlow<List<NearbyBar>>(emptyList())
+    val markers: StateFlow<List<NearbyBar>> = _markers.asStateFlow()
 
     val selectedBarId: StateFlow<String?> =
         savedStateHandle.getStateFlow<String?>("nearbySelectedBarId", null)
@@ -91,6 +94,7 @@ class NearbyBarsViewModel(
             currentPermission = permission
             _origin.value = null
             _map.value = MapDiscoveryState.Initial
+            _markers.value = emptyList()
             lastViewport = null
             savedStateHandle["nearbySelectedBarId"] = null
             _state.value = when (permission) {
@@ -119,6 +123,7 @@ class NearbyBarsViewModel(
         mapQuery?.cancel()
         lastViewport = null
         _map.value = MapDiscoveryState.Initial
+        _markers.value = emptyList()
         _origin.value = null
         _state.value = NearbyUiState.LoadingLocation
         query = viewModelScope.launch {
@@ -183,6 +188,7 @@ class NearbyBarsViewModel(
                 val bars = barsSource.listNearbyBars(viewport.center, viewport.radiusMeters)
                     .distinctBy { it.barId }
                 if (version != mapVersion || _origin.value == null) return@launch
+                _markers.value = bars
                 _map.value = MapDiscoveryState.Ready(
                     bars, viewport.radiusMeters, viewport.partiallyCovered)
                 val id = selectedBarId.value
@@ -205,7 +211,7 @@ class NearbyBarsViewModel(
 
     fun selectBar(barId: String): Boolean {
         val carousel = (_state.value as? NearbyUiState.Success)?.bars.orEmpty()
-        val markers = (_map.value as? MapDiscoveryState.Ready)?.bars.orEmpty()
+        val markers = _markers.value
         if ((carousel + markers).none { it.barId == barId }) return false
         savedStateHandle["nearbySelectedBarId"] = barId
         return true
