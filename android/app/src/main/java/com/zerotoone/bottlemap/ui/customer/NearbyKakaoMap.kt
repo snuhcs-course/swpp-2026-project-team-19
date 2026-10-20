@@ -90,6 +90,7 @@ fun NearbyKakaoMap(
     origin: NearbyCoordinate,
     bars: List<NearbyBar>,
     selectedBarId: String?,
+    focusTarget: NearbyBar?,
     onSelectBar: (String) -> Unit,
     onViewportChanged: (NearbyViewport) -> Unit,
     recenterToken: Int,
@@ -153,9 +154,10 @@ fun NearbyKakaoMap(
             }
         }
 
-        LaunchedEffect(selectedBarId, nativeMap, bars) {
+        LaunchedEffect(selectedBarId, nativeMap) {
             val map = nativeMap ?: return@LaunchedEffect
-            val target = bars.firstOrNull { it.barId == selectedBarId } ?: return@LaunchedEffect
+            val target = focusTarget?.takeIf { it.barId == selectedBarId }
+                ?: return@LaunchedEffect
             // Bar selection moves the map, but moving the map never selects a bar.
             map.moveCamera(CameraUpdateFactory.newCenterPosition(
                 LatLng.from(target.location.latitude, target.location.longitude),
