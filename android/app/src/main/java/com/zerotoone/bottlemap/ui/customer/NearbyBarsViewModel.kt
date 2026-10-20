@@ -251,6 +251,11 @@ class NearbyBarsViewModel(
      *  Returning from Bar Detail to the same map retains the chosen bar.
      */
     fun leaveDiscovery() {
+        mapVersion++
+        mapQuery?.cancel()
+        lastViewport = null
+        _map.value = MapDiscoveryState.Initial
+        _markers.value = emptyList()
         savedStateHandle["nearbySelectedBarId"] = null
         savedStateHandle["nearbyFocusBarId"] = null
         clearCamera()
