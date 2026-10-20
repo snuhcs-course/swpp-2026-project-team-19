@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-19). Reviewed by Haeul Yang.
+# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-19, 2026-10-21). Reviewed by Haeul Yang.
 import logging
 
 import pytest
@@ -20,6 +20,8 @@ UVICORN_FORMAT = '%s - "%s %s HTTP/%s" %d'
         ("/api/search/bars?lat=1&lat=2&query=x&lng=&l%61t=3", "/api/search/bars?query=x"),
         # Names that only contain lat or lng are kept.
         ("/api/search/bars?query=latte&latitude=1&flat=2", "/api/search/bars?query=latte&latitude=1&flat=2"),
+        ("/api/search/map-bars?south=37.47&west=126.94&north=37.49&east=126.97", "/api/search/map-bars"),
+        ("/api/search/bar-names?query=%EB%B3%B5&limit=20", "/api/search/bar-names?query=%EB%B3%B5&limit=20"),
         ("/api/bars/abc/menu", "/api/bars/abc/menu"),
         ("/api/bars?", "/api/bars?"),
     ],

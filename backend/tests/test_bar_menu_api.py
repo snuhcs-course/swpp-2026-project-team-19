@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, 2026-10-18). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, 2026-10-18, 2026-10-20). Reviewed by Haeul Yang.
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -7,6 +7,7 @@ import pytest
 from app.models import BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption, User, UserType
 from tests.auth_support import connection_error
 from tests.factories import make_bar, make_brand, make_product, publish_menu
+from tests.sql_support import recorded_statements
 
 def test_returns_bar_and_menu_in_display_order(client, db_session):
     bar = make_bar(db_session, "Seorosang", latitude="37.477648", longitude="126.963763")
@@ -113,6 +114,27 @@ def test_unknown_bar_returns_bar_not_found(client, bar_id):
     assert response.json()["error"]["details"] == {"barId": bar_id}
 
 
+@pytest.mark.parametrize(
+    "spelling",
+    [
+        str.upper,
+        lambda bar_id: bar_id.replace("-", ""),
+        lambda bar_id: f"{{{bar_id}}}",
+        lambda bar_id: f"urn:uuid:{bar_id}",
+    ],
+    ids=["upper case", "no hyphens", "braces", "urn prefix"],
+)
+def test_other_spellings_of_the_uuid_find_the_bar(client, db_session, spelling):
+    # Kept on purpose: any text Python reads as this UUID names the bar. The response always
+    # gives the canonical form, which is what the app keeps.
+    bar = make_bar(db_session)
+
+    response = client.get(f"/api/bars/{spelling(str(bar.id))}/menu")
+
+    assert response.status_code == 200
+    assert response.json()["barId"] == str(bar.id)
+
+
 def test_inactive_bar_is_hidden_from_anonymous_and_customer(client, db_session, token_for):
     bar = make_bar(db_session, status=BarStatus.INACTIVE)
     customer = token_for("customer")
@@ -203,3 +225,76 @@ def test_protected_routes_still_answer_503_when_tokens_cannot_be_checked(client,
     )
 
     assert (response.status_code, response.json()["error"]["code"]) == (503, "SERVICE_UNAVAILABLE")
+
+
+def test_after_a_401_the_same_request_without_a_token_succeeds(client, db_session, token_for):
+    # Spec 3.1.5: when the session cannot be refreshed, the app retries a public route as a guest.
+    bar = make_bar(db_session)
+    token_for("customer")  # enables temporary auth
+
+    rejected = client.get(f"/api/bars/{bar.id}/menu", headers={"Authorization": "Bearer not-a-jwt"})
+    retried = client.get(f"/api/bars/{bar.id}/menu")
+
+    assert rejected.status_code == 401
+    assert retried.status_code == 200
+    assert retried.json()["barId"] == str(bar.id)
+
+
+# ---- every field is always present; a missing value is null (spec 3.9, 3.9.1) ----
+
+BAR_FIELDS = {"barId", "name", "address", "latitude", "longitude", "phone", "menuBoardId", "publishedAt", "items"}
+ITEM_FIELDS = {"menuBoardEntryId", "barMenuItemId", "productId", "displayName", "sortOrder", "options"}
+OPTION_FIELDS = {"menuEntryOptionId", "optionLabel", "pourMl", "priceKrw", "sortOrder"}
+
+
+def test_a_bar_with_nothing_optional_still_sends_every_field(client, db_session):
+    bar = make_bar(db_session)
+    bar.phone = None
+    db_session.flush()
+
+    body = client.get(f"/api/bars/{bar.id}/menu").json()
+
+    assert set(body) == BAR_FIELDS
+    assert (body["phone"], body["menuBoardId"], body["publishedAt"], body["items"]) == (None, None, None, [])
+
+
+def test_menu_items_and_options_send_every_field(client, db_session):
+    bar = make_bar(db_session)
+    product = make_product(db_session, make_brand(db_session, "Ardbeg"), "Ardbeg 10")
+    publish_menu(db_session, bar, [(product, "Ardbeg 10", [(None, None, 12000), ("잔", 30, 13000)])])
+
+    body = client.get(f"/api/bars/{bar.id}/menu").json()
+
+    assert set(body) == BAR_FIELDS
+    [item] = body["items"]
+    assert set(item) == ITEM_FIELDS
+    assert [set(option) for option in item["options"]] == [OPTION_FIELDS, OPTION_FIELDS]
+    assert (item["options"][0]["optionLabel"], item["options"][0]["pourMl"]) == (None, None)
+
+
+# ---- the number of queries does not grow with the menu ----
+
+
+def statements_for_menu(client, db_session, bar) -> list[str]:
+    with recorded_statements(db_session) as statements:
+        response = client.get(f"/api/bars/{bar.id}/menu")
+    assert response.status_code == 200
+    return statements
+
+
+def test_the_number_of_queries_does_not_grow_with_the_menu(client, db_session):
+    brand = make_brand(db_session, "Ardbeg")
+    products = [make_product(db_session, brand, f"Ardbeg {i}") for i in range(20)]
+    small = make_bar(db_session, "Small")
+    publish_menu(db_session, small, [(products[0], "Ardbeg 0", [(None, 30, 10000)])])
+    large = make_bar(db_session, "Large")
+    options = [("잔", 30, 10000), ("병", None, 200000)]
+    publish_menu(db_session, large, [(product, product.display_name, options) for product in products])
+    db_session.expire_all()  # nothing comes from the session's cache
+
+    with_one_item = statements_for_menu(client, db_session, small)
+    db_session.expire_all()
+    with_twenty_items = statements_for_menu(client, db_session, large)
+
+    assert len(with_one_item) == len(with_twenty_items)
+    assert all(statement.lstrip().upper().startswith("SELECT") for statement in with_twenty_items)

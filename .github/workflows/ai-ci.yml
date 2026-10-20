@@ -1,0 +1,86 @@
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20). Reviewed by Jinwoo Park.
+name: AI CI
+
+# No workflow-level path filter, for the same reason as Android CI: a skipped workflow
+# leaves a required check Pending. The changes job skips the tests on unrelated PRs instead.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: AI / changes
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      ai: ${{ steps.filter.outputs.ai }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Detect AI changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          # ai/match_llm imports the backend matching code, so backend changes there count too.
+          filters: |
+            ai:
+              - 'ai/**'
+              - 'backend/app/matching/**'
+              - 'backend/app/core/**'
+              - '.github/workflows/ai-ci.yml'
+
+  ai-tests:
+    name: AI / unit tests
+    needs: changes
+    if: ${{ needs.changes.outputs.ai == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      UV_PYTHON: "3.12"
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: ai/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          uv venv .venv-ai
+          uv pip install --python .venv-ai -r ai/requirements.txt
+
+      - name: Run AI tests with coverage
+        # Offline: no API keys and no network calls. The live CLOVA test skips itself.
+        run: >-
+          .venv-ai/bin/python -m pytest ai -p no:cacheprovider -rs -o xfail_strict=true
+          --cov --cov-config=ai/ci/coveragerc --cov-report=term
+          --cov-report=json:ai-coverage.json --junitxml=ai-junit.xml
+
+      - name: Check test count, skips and coverage
+        # Fails when tests were deleted or skipped without being listed in ai/ci/test_policy.json.
+        if: ${{ !cancelled() }}
+        run: .venv-ai/bin/python ai/ci/check_test_report.py ai-junit.xml ai-coverage.json --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload test and coverage reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ai-test-reports
+          path: |
+            ai-junit.xml
+            ai-coverage.json
+          if-no-files-found: ignore

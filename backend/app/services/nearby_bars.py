@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
+# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18, 2026-10-21). Reviewed by Haeul Yang.
 """Active bars within a radius of the customer (API spec, section 3.12).
 
 One query reads the bars inside a latitude/longitude box around the circle, and the haversine
@@ -10,7 +10,7 @@ longitude limit instead of splitting the range. There are few bars, so no spatia
 import math
 from dataclasses import dataclass
 
-from sqlalchemy import select
+from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
 from app.models import Bar, BarStatus, MenuBoard
@@ -49,15 +49,21 @@ def bounding_box(lat: float, lng: float, radius_meters: float) -> BoundingBox:
     return BoundingBox(min_lat, max_lat, lng - d_lng, lng + d_lng)
 
 
+def active_bars_with_menu_time() -> Select:
+    """(id, name, address, latitude, longitude, published_at or None) of every active bar; callers
+    add the area. Also used by the map-area query (spec 3.13)."""
+    return (
+        select(Bar.id, Bar.name, Bar.address, Bar.latitude, Bar.longitude, MenuBoard.published_at)
+        .outerjoin(MenuBoard, MenuBoard.bar_id == Bar.id)  # at most one board per bar
+        .where(Bar.status == BarStatus.ACTIVE)
+    )
+
+
 def find_nearby_bars(
     session: Session, lat: float, lng: float, radius_meters: int = DEFAULT_RADIUS_METERS
 ) -> NearbyBarsResponse:
     box = bounding_box(lat, lng, radius_meters)
-    query = (
-        select(Bar.id, Bar.name, Bar.address, Bar.latitude, Bar.longitude, MenuBoard.published_at)
-        .outerjoin(MenuBoard, MenuBoard.bar_id == Bar.id)  # at most one board per bar
-        .where(Bar.status == BarStatus.ACTIVE, Bar.latitude.between(box.min_lat, box.max_lat))
-    )
+    query = active_bars_with_menu_time().where(Bar.latitude.between(box.min_lat, box.max_lat))
     if box.min_lng is not None:
         query = query.where(Bar.longitude.between(box.min_lng, box.max_lng))
 

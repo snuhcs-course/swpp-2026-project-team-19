@@ -1,0 +1,13 @@
+{
+  "_comment": "Read by ai/ci/check_test_report.py in AI CI. min_tests and allowed_skips guard against tests being deleted or skipped; change them only in a PR that says why. coverage_targets are reported, not enforced.",
+  "min_tests": 141,
+  "allowed_skips": {
+    "ai.ocr.test_ocr::test_live_clova_call": "Calls the real CLOVA OCR API; runs only when CLOVA keys are set, which CI does not do."
+  },
+  "coverage_targets": {
+    "ai/match_llm": 90,
+    "ai/ocr": 55,
+    "ai/eval": 55,
+    "ai/extract": 55
+  }
+}
