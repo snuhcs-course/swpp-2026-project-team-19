@@ -18,6 +18,8 @@ def schema():
     [
         ("get", "/api/search/bars", {"422", "500"}),
         ("get", "/api/search/nearby-bars", {"422", "500"}),
+        ("get", "/api/search/bar-names", {"422", "500"}),
+        ("get", "/api/search/map-bars", {"422", "500"}),
         ("get", "/api/bars/{barId}/menu", {"401", "404", "422", "500"}),
         ("get", "/api/bars", {"401", "403", "422", "500", "503"}),
         ("get", "/api/bars/{barId}/menu-imports", {"401", "403", "404", "422", "500", "503"}),
