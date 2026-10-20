@@ -304,7 +304,8 @@ fun NearbyBarsScreen(
                         }
                     }
                 }
-                if (searchedPlace != null && selected == null) {
+                val chosenPlace = searchedPlace
+                if (chosenPlace != null && selected == null) {
                     Surface(
                         modifier = Modifier.align(Alignment.BottomCenter)
                             .fillMaxWidth().padding(start = 18.dp, end = 18.dp, bottom = 90.dp),
@@ -313,10 +314,10 @@ fun NearbyBarsScreen(
                         color = MaterialTheme.colorScheme.surface,
                     ) {
                         Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
-                            Text(searchedPlace.name, style = MaterialTheme.typography.titleMedium,
+                            Text(chosenPlace.name, style = MaterialTheme.typography.titleMedium,
                                 maxLines = 2)
-                            if (searchedPlace.address.isNotBlank()) {
-                                Text(searchedPlace.address, style = MaterialTheme.typography.bodySmall,
+                            if (chosenPlace.address.isNotBlank()) {
+                                Text(chosenPlace.address, style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 2)
                             }
@@ -484,7 +485,7 @@ fun NearbyBarsScreen(
                     shape = RoundedCornerShape(28.dp),
                     placeholder = { Text("지하철역 · 매장 · 주소 검색", maxLines = 1) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = ::searchPlaces),
+                    keyboardActions = KeyboardActions(onSearch = { searchPlaces() }),
                     trailingIcon = {
                         TextButton(onClick = ::searchPlaces) { Text("검색") }
                     },
