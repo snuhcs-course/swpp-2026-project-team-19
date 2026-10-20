@@ -35,6 +35,11 @@ internal fun isInKoreaMapBounds(coordinate: NearbyCoordinate): Boolean =
 internal fun sanitizePlaces(places: List<MapPlace>): List<MapPlace> =
     places.asSequence()
         .filter { it.name.isNotBlank() && isInKoreaMapBounds(it.coordinate) }
-        .distinctBy { it.name to it.coordinate }
+        // BottleMap bars have stable unique IDs even when two entries share
+        // a display name and coordinates. Device POIs have no such ID.
+        .distinctBy { place ->
+            place.barId?.let { "bar:" + it }
+                ?: "poi:${place.name}:${place.coordinate.latitude}:${place.coordinate.longitude}"
+        }
         .take(50)
         .toList()

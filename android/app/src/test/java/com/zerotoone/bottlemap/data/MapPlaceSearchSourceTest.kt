@@ -24,6 +24,14 @@ class MapPlaceSearchSourceTest {
         assertEquals(listOf(korean), sanitizePlaces(listOf(overseas, korean, nearBorder)))
     }
 
+    @Test fun distinctRegisteredBarIdsAtSameAddressAreNotCollapsed() {
+        val point = NearbyCoordinate(37.48, 126.95)
+        val first = MapPlace("동명 바", "서울", point, barId = "bar-1")
+        val second = MapPlace("동명 바", "서울", point, barId = "bar-2")
+        val duplicate = first.copy()
+        assertEquals(listOf(first, second), sanitizePlaces(listOf(first, second, duplicate)))
+    }
+
     @Test fun capsMapPlaceLookupAtBackendMaximumWithoutInventingMissingPlaces() {
         val items = (1..55).map {
             MapPlace("place$it", "", NearbyCoordinate(37.5 + it * 0.001, 126.9))
