@@ -162,6 +162,15 @@ fun NearbyKakaoMap(
             }
         }
 
+        // Selection styling updates without restarting the map or requiring a
+        // new nearby HTTP result.
+        LaunchedEffect(nativeMap, selectedBarId) {
+            if (nativeMap != null) markers.forEach { (id, pair) ->
+                pair.second.setStyles(nearbyMarkerStyle(id == selectedBarId))
+                pair.second.invalidate()
+            }
+        }
+
         // Only deliberate selection requests can focus a bar. Returning from
         // Bar Detail must NOT re-focus the selected pin over the saved viewport.
         LaunchedEffect(focusBarId, focusTarget, nativeMap) {
