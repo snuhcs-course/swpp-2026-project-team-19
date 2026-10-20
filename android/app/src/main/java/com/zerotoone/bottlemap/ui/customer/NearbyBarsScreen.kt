@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -71,35 +73,39 @@ fun NearbyBarsScreen(
     viewModel: NearbyBarsViewModel = nearbyBarsViewModel(),
 ) {
     val context = LocalContext.current
-    val owner = LocalLifecycleOwner.current
+    val lifecycle = LocalLifecycleOwner.current
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val selectedBarId by viewModel.selectedBarId.collectAsStateWithLifecycle()
+    val origin by viewModel.origin.collectAsStateWithLifecycle()
+    val mapState by viewModel.map.collectAsStateWithLifecycle()
+    val selectedId by viewModel.selectedBarId.collectAsStateWithLifecycle()
+    val carousel = (state as? NearbyUiState.Success)?.bars.orEmpty()
+    val mapBars = (mapState as? MapDiscoveryState.Ready)?.bars.orEmpty()
+    val selected = (mapBars + carousel).firstOrNull { it.barId == selectedId }
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
+    var recenterToken by rememberSaveable { mutableIntStateOf(0) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var leaving by remember { mutableStateOf(false) }
-    var navigatingToDetail by remember { mutableStateOf(false) }
-
-    fun openDetail(id: String) {
-        if (navigatingToDetail || leaving) return
-        navigatingToDetail = true
-        // The native GL Surface can outlive the outgoing Compose destination.
-        mapView?.let(::hideNearbyNativeSurface)
-        onOpenBarDetail(id)
-    }
+    var navigating by remember { mutableStateOf(false) }
 
     fun back() {
-        if (leaving) return
-        leaving = true
-        mapView?.let(::hideNearbyNativeSurface)
-        onBack()
+        if (!leaving) {
+            leaving = true
+            mapView?.let(::hideNearbyNativeSurface)
+            onBack()
+        }
+    }
+    fun detail(id: String) {
+        if (!leaving && !navigating) {
+            navigating = true
+            mapView?.let(::hideNearbyNativeSurface)
+            onOpenBarDetail(id)
+        }
     }
     BackHandler(enabled = !leaving, onBack = ::back)
 
-    val activity = context as? Activity
     fun updatePermissions() {
-        viewModel.updatePermission(
-            nearbyPermission(context, activity, hasRequestedPermission),
-        )
+        viewModel.updatePermission(nearbyPermission(
+            context, context as? Activity, hasRequestedPermission))
     }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -107,101 +113,138 @@ fun NearbyBarsScreen(
         hasRequestedPermission = true
         updatePermissions()
     }
-
     LaunchedEffect(Unit) { updatePermissions() }
-    // No automatic permission dialog on app launch, resume or refusal.
-    val currentRefresh = rememberUpdatedState(newValue = {
-        navigatingToDetail = false
+    val onResume = rememberUpdatedState(newValue = {
+        navigating = false
         updatePermissions()
     })
-    DisposableEffect(owner) {
+    DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) currentRefresh.value()
+            if (event == Lifecycle.Event.ON_RESUME) onResume.value()
         }
-        owner.lifecycle.addObserver(observer)
-        onDispose { owner.lifecycle.removeObserver(observer) }
+        lifecycle.lifecycle.addObserver(observer)
+        onDispose { lifecycle.lifecycle.removeObserver(observer) }
     }
 
     I2CustomerSearchTheme {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        Column(Modifier.fillMaxSize()) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = ::back) { Text("←") }
-                Text(
-                    text = "내 주변 바 · 500m",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
+                Text("지도에서 바 찾기", style = MaterialTheme.typography.titleLarge)
             }
-
-            when (val current = state) {
-                NearbyUiState.Initial -> NearbyStatus("위치 권한 상태를 확인하고 있습니다.")
-                NearbyUiState.PermissionRequired -> NearbyStatus(
-                    message = "내 주변 바를 보려면 위치 권한이 필요합니다. 기존 주류 검색은 권한 없이 사용할 수 있어요.",
-                    button = "위치 권한 허용",
-                    onAction = {
-                        permissionLauncher.launch(arrayOf(
-                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                        ))
-                    },
-                )
-                NearbyUiState.PermissionPermanentlyDenied -> NearbyStatus(
-                    message = "위치 권한을 사용할 수 없습니다. Android 앱 설정에서 위치 권한을 변경할 수 있어요.",
-                    button = "앱 설정 열기",
-                    onAction = {
-                        context.startActivity(
-                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.parse("package:${context.packageName}")
-                            },
-                        )
-                    },
-                )
-                NearbyUiState.ApproximateOnly -> NearbyStatus(
-                    message = "대략적 위치만으로는 500m 범위를 정확하게 판정할 수 없습니다. 정확한 위치를 허용해 주세요.",
-                    button = "정확한 위치 허용",
-                    onAction = {
-                        permissionLauncher.launch(arrayOf(
-                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                        ))
-                    },
-                )
-                NearbyUiState.LocationServicesDisabled -> NearbyStatus(
-                    message = "위치 서비스가 꺼져 있습니다. 휴대폰 위치 서비스를 켠 뒤 다시 시도해 주세요.",
-                    button = "위치 설정 열기",
-                    onAction = {
-                        context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                    },
-                )
-                NearbyUiState.LoadingLocation -> NearbyStatus(
-                    message = "현재 위치를 확인하고 있습니다.", loading = true,
-                )
-                NearbyUiState.LoadingBars -> NearbyStatus(
-                    message = "500m 안의 바를 확인하고 있습니다.", loading = true,
-                )
-                NearbyUiState.Empty -> NearbyStatus(
-                    message = "반경 500m 안에 등록된 활성 바가 없습니다.",
-                    button = "다시 검색", onAction = viewModel::refresh,
-                )
-                is NearbyUiState.Error -> NearbyStatus(
-                    message = current.message,
-                    button = if (current.canRetry) "다시 시도" else null,
-                    onAction = viewModel::refresh,
-                )
-                is NearbyUiState.Success -> {
-                    // Map controls and carousel both observe selectedBarId.
-                    // Selection state never lives inside Kakao marker objects.
-                    NearbyResultContent(
-                        bars = current.bars,
-                        selectedBarId = selectedBarId,
-                        onSelect = viewModel::selectBar,
-                        onOpenBarDetail = ::openDetail,
-                        onMapViewChanged = { mapView = it },
+            val fix = origin
+            if (fix != null && !leaving) {
+                Box(Modifier.fillMaxWidth().weight(1f)) {
+                    NearbyKakaoMap(
+                        origin = fix,
+                        bars = mapBars,
+                        selectedBarId = selectedId,
+                        focusTarget = selected,
+                        onSelectBar = { viewModel.selectBar(it) },
+                        onViewportChanged = { viewModel.onViewportChanged(it) },
+                        recenterToken = recenterToken,
+                        onMapViewChanged = {
+                            mapView = it
+                            if (leaving) it?.let(::hideNearbyNativeSurface)
+                        },
+                        modifier = Modifier.fillMaxSize(),
                     )
+                    OutlinedButton(onClick = { recenterToken++ },
+                        modifier = Modifier.align(Alignment.TopEnd).padding(12.dp)) {
+                        Text("⌖ 내 위치")
+                    }
                 }
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                    Text("대략적인 위치를 사용 중입니다. 거리에는 오차가 있을 수 있습니다.",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall)
+                }
+                when (val mapResult = mapState) {
+                    MapDiscoveryState.Initial, MapDiscoveryState.Loading ->
+                        Text("지도에서 바를 찾는 중…", modifier = Modifier.padding(horizontal = 16.dp),
+                            style = MaterialTheme.typography.bodySmall)
+                    is MapDiscoveryState.Ready ->
+                        Text(
+                            when {
+                                mapResult.partiallyCovered ->
+                                    "지도 범위가 3km 한도를 초과합니다. 중심 3km 이내 바만 표시됩니다."
+                                mapResult.bars.isEmpty() ->
+                                    "이 지도 영역에 등록된 바가 없습니다. 지도를 이동해 보세요."
+                                else -> "지도 중심 ${mapResult.radiusMeters}m · ${mapResult.bars.size}개 바"
+                            },
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.bodySmall)
+                    is MapDiscoveryState.Error ->
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            Text(mapResult.message, modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.bodySmall)
+                            TextButton(onClick = viewModel::retryMap) { Text("재시도") }
+                        }
+                }
+                if (selected != null) OutlinedCard(
+                    onClick = { detail(selected.barId) },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                ) {
+                    Column(Modifier.padding(10.dp)) {
+                        Text(selected.name, style = MaterialTheme.typography.titleSmall)
+                        Text(selected.address, style = MaterialTheme.typography.bodySmall)
+                        Text("Bar Detail 보기 →", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                Text("내 위치에서 1km · 가까운 순서",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.titleSmall)
+                when (val current = state) {
+                    NearbyUiState.LoadingBars, NearbyUiState.LoadingLocation, NearbyUiState.Initial ->
+                        NearbyStatus("1km 안의 바를 조회 중입니다.", loading = true)
+                    NearbyUiState.Empty ->
+                        NearbyStatus("현재 위치에서 1km 이내에 등록된 바가 없습니다.",
+                            button = "다시 검색", onAction = viewModel::refresh)
+                    is NearbyUiState.Error ->
+                        NearbyStatus(current.message,
+                            button = if (current.canRetry) "다시 시도" else null,
+                            onAction = viewModel::refresh)
+                    is NearbyUiState.Success -> NearbyCarousel(
+                        bars = current.bars, selectedBarId = selectedId,
+                        onSelect = viewModel::selectBar, onOpenDetail = ::detail)
+                    else -> Unit
+                }
+            } else if (!leaving) {
+                when (val current = state) {
+                    NearbyUiState.Initial -> NearbyStatus("위치 권한을 확인하고 있습니다.")
+                    NearbyUiState.PermissionRequired -> NearbyStatus(
+                        "지도를 보려면 위치 권한이 필요합니다. 주류 검색은 권한 없이 사용할 수 있어요.",
+                        button = "위치 권한 허용",
+                        onAction = {
+                            permissionLauncher.launch(arrayOf(
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.ACCESS_FINE_LOCATION))
+                        })
+                    NearbyUiState.PermissionPermanentlyDenied -> NearbyStatus(
+                        "위치 권한을 사용할 수 없습니다. Android 앱 설정에서 변경해 주세요.",
+                        button = "앱 설정 열기",
+                        onAction = {
+                            context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.parse("package:${context.packageName}")
+                            })
+                        })
+                    NearbyUiState.LocationServicesDisabled -> NearbyStatus(
+                        "위치 서비스가 꺼져 있습니다. 위치 서비스를 켜고 다시 시도해 주세요.",
+                        button = "위치 설정 열기",
+                        onAction = { context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) })
+                    NearbyUiState.LoadingLocation, NearbyUiState.LoadingBars ->
+                        NearbyStatus("현재 위치를 확인하고 있습니다.", loading = true)
+                    is NearbyUiState.Error -> NearbyStatus(current.message,
+                        button = if (current.canRetry) "다시 시도" else null,
+                        onAction = viewModel::refresh)
+                    else -> NearbyStatus("위치 정보를 확인할 수 없습니다.",
+                        button = "다시 시도", onAction = viewModel::refresh)
+                }
+                TextButton(onClick = ::back) { Text("검색으로 돌아가기") }
             }
         }
     }
@@ -277,81 +320,47 @@ private fun NearbyStatus(
 }
 
 @Composable
-private fun NearbyResultContent(
+private fun NearbyCarousel(
     bars: List<NearbyBar>,
     selectedBarId: String?,
     onSelect: (String) -> Boolean,
-    onOpenBarDetail: (String) -> Unit,
-    onMapViewChanged: (MapView?) -> Unit,
+    onOpenDetail: (String) -> Unit,
 ) {
-    val selectedBar = bars.firstOrNull { it.barId == selectedBarId }
     val listState = rememberLazyListState()
     LaunchedEffect(selectedBarId, bars) {
         val index = bars.indexOfFirst { it.barId == selectedBarId }
         if (index >= 0) listState.animateScrollToItem(index)
     }
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+    LazyRow(
+        state = listState,
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.padding(bottom = 10.dp),
     ) {
-        NearbyKakaoMap(
-            bars = bars,
-            selectedBarId = selectedBarId,
-            onSelectBar = { onSelect(it) },
-            onMapViewChanged = onMapViewChanged,
-            modifier = Modifier.fillMaxWidth().weight(1f),
-        )
-        Text(
-            "거리순 · 현재 위치에서 직선거리 500m 이내",
-            modifier = Modifier.padding(horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall,
-        )
-        LazyRow(
-            state = listState,
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            items(bars, key = { it.barId }) { bar ->
-                val selected = bar.barId == selectedBarId
-                OutlinedCard(
-                    onClick = { onSelect(bar.barId) },
-                    modifier = Modifier.fillParentMaxWidth(0.78f).heightIn(min = 112.dp),
-                    border = BorderStroke(
-                        if (selected) 2.dp else 1.dp,
-                        if (selected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.outlineVariant,
-                    ),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        Text(bar.name, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            "${bar.distanceMeters.toInt()}m 떨어짐",
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                        Text(bar.address, style = MaterialTheme.typography.bodySmall)
-                        Text(
-                            bar.menuUpdatedAt?.let(::formatMenuTimestamp)
-                                ?: "아직 등록된 메뉴가 없습니다",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        if (selected) Text(
-                            "지도에서 선택됨",
-                            style = MaterialTheme.typography.labelSmall,
-                        )
+        items(bars, key = { it.barId }) { bar ->
+            val selected = bar.barId == selectedBarId
+            OutlinedCard(
+                onClick = { onSelect(bar.barId) },
+                modifier = Modifier.fillParentMaxWidth(0.78f).heightIn(min = 112.dp),
+                border = BorderStroke(
+                    if (selected) 2.dp else 1.dp,
+                    if (selected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.outlineVariant,
+                ),
+            ) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(bar.name, style = MaterialTheme.typography.titleMedium)
+                    Text("${bar.distanceMeters.toInt()}m",
+                        color = MaterialTheme.colorScheme.primary)
+                    Text(bar.address, style = MaterialTheme.typography.bodySmall)
+                    Text(bar.menuUpdatedAt?.let(::formatMenuTimestamp) ?: "메뉴 등록 전",
+                        style = MaterialTheme.typography.labelSmall)
+                    if (selected) TextButton(onClick = { onOpenDetail(bar.barId) }) {
+                        Text("Bar Detail →")
                     }
                 }
             }
         }
-        Button(
-            enabled = selectedBar != null,
-            onClick = { selectedBar?.let { onOpenBarDetail(it.barId) } },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
-        ) { Text("선택한 바 상세 보기") }
     }
 }
 
