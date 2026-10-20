@@ -209,13 +209,37 @@ class NearbyBarsViewModel(
         }
     }
 
+    /**
+     * Invalidate an old Ready(empty) state as soon as the camera starts moving.
+     * Otherwise a skipped/failed SDK projection can leave the previous region's
+     * "no stores" message pinned over a completely different map location.
+     */
+    fun onMapCameraMoving() {
+        if (_origin.value == null || !acceptingCameraChanges) return
+        mapVersion++
+        mapQuery?.cancel()
+        lastViewport = null
+        _map.value = MapDiscoveryState.Loading
+        // Retain previous markers while loading, as in the existing UX policy.
+    }
+
+    /** A failed native viewport projection is not a successful empty API result. */
+    fun onMapViewportUnavailable() {
+        if (_origin.value == null || !acceptingCameraChanges) return
+        mapVersion++
+        mapQuery?.cancel()
+        lastViewport = null
+        _map.value = MapDiscoveryState.Error(
+            "지도 영역을 확인하지 못했습니다. 다시 시도해 주세요.")
+    }
+
     /** Load the exact visible bounds after the camera gesture. No 3km circle. */
     fun onViewportChanged(viewport: MapViewport, force: Boolean = false) {
-        if (_origin.value == null) return
+        if (_origin.value == null || !acceptingCameraChanges) return
         val previous = lastViewport
         if (!force && previous != null &&
             previous.bounds.isNearlySameAs(viewport.bounds) &&
-            _map.value !is MapDiscoveryState.Error
+            _map.value is MapDiscoveryState.Ready
         ) return
         lastViewport = viewport
         val version = ++mapVersion
