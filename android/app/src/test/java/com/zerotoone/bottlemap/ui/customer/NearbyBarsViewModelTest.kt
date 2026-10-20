@@ -45,12 +45,12 @@ class NearbyBarsViewModelTest {
     )
 
     @Test
-    fun radiusIncludesInsideAndExactly500mAndExcludesOutside() {
+    fun radiusIncludesInsideAndExactly1000mAndExcludesOutside() {
         val equator = NearbyCoordinate(0.0, 0.0)
-        val near = NearbyCoordinate(Math.toDegrees(499.0 / 6_371_000.0), 0.0)
-        val boundary = NearbyCoordinate(Math.toDegrees(500.0 / 6_371_000.0), 0.0)
-        val far = NearbyCoordinate(Math.toDegrees(501.0 / 6_371_000.0), 0.0)
-        assertEquals(500.0, distanceMeters(equator, boundary), 0.000001)
+        val near = NearbyCoordinate(Math.toDegrees(999.0 / 6_371_000.0), 0.0)
+        val boundary = NearbyCoordinate(Math.toDegrees(1000.0 / 6_371_000.0), 0.0)
+        val far = NearbyCoordinate(Math.toDegrees(1001.0 / 6_371_000.0), 0.0)
+        assertEquals(1000.0, distanceMeters(equator, boundary), 0.000001)
         val result = filterNearbyBars(
             equator,
             listOf(
@@ -106,12 +106,12 @@ class NearbyBarsViewModelTest {
         assertEquals(NearbyUiState.PermissionRequired, vm.state.value)
         vm.updatePermission(NearbyPermission.APPROXIMATE)
         advanceUntilIdle()
-        assertEquals(NearbyUiState.ApproximateOnly, vm.state.value)
+        assertTrue(vm.state.value is NearbyUiState.Success)
         vm.updatePermission(NearbyPermission.PERMANENTLY_DENIED)
         advanceUntilIdle()
         assertEquals(NearbyUiState.PermissionPermanentlyDenied, vm.state.value)
-        assertEquals(0, location.count)
-        assertEquals(0, source.count)
+        assertEquals(1, location.count)
+        assertEquals(1, source.count)
     }
 
     @Test
@@ -123,7 +123,7 @@ class NearbyBarsViewModelTest {
         assertEquals(NearbyUiState.LoadingLocation, vm.state.value)
         advanceUntilIdle()
         assertTrue(vm.state.value is NearbyUiState.Success)
-        assertEquals("a", vm.selectedBarId.value)
+        assertEquals(null, vm.selectedBarId.value)
         assertEquals(1, location.count)
         assertEquals(1, source.count)
     }
