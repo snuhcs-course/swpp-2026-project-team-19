@@ -40,3 +40,5 @@ show_missing = true
 skip_covered = true
 # CI fails below this; database tests that silently skip would drop well under it.
 fail_under = 98
+# Compare the exact total: with the default precision 0, 97.6% rounds to 98 and passes.
+precision = 2
