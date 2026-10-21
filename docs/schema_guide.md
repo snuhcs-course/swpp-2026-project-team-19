@@ -56,7 +56,7 @@
 2. 각 이미지의 세트 소속을 `eval_samples`에 기록한다.
 3. 사람이 만든 상품 정답을 `eval_ground_truth_items`에, 가격·용량 정답을 `eval_ground_truth_options`에 저장한다.
 4. 구현 전에 선택한 추출 방식으로 각 이미지의 `extraction_runs`를 실행한다.
-5. 정답과 실행 결과를 비교해 이름 F1, 가격 정확도, Top-1 정확도, false-merge 비율을 계산한다. 특히 `initial_resolution_status = exact_match`였지만 정답 상품과 다른 경우를 확실하다고 판단한 잘못된 병합으로 집계할 수 있다. OCR+LLM과 Vision LLM 중 어떤 방식을 사용할지는 구현 전 별도 실험으로 결정한다.
+5. 정답과 실행 결과를 비교해 이름 F1, 가격 정확도, Top-1 정확도, false-merge 비율을 계산한다. 특히 `initial_resolution_status = exact_match`였지만 정답 상품과 다른 경우를 확실하다고 판단한 잘못된 병합으로 집계할 수 있고, 후보의 `evidence.rule`로 규칙별(`alias`, `S1`, `S2`, `S2b`, `S3`) 잘못된 병합 비율을 나눠 볼 수 있다. OCR+LLM과 Vision LLM 중 어떤 방식을 사용할지는 구현 전 별도 실험으로 결정한다.
 
 ### 3.4 업주 등록과 승인
 
@@ -142,8 +142,8 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 | 값 | 의미 |
 |---|---|
-| `exact_match` | 정규화된 상품 별칭이 충돌 없이 정확히 하나의 상품과 일치했다. |
-| `ambiguous` | 기존 상품 후보는 있지만 정확한 단일 별칭 일치가 아니어서 운영자 판단이 필요하다. 유사도 검색 결과가 하나뿐이어도 이 상태다. |
+| `exact_match` | 매칭 규칙이 충돌 없이 정확히 하나의 상품을 확정했다. 규칙은 상품 별칭 정확 일치와 단계 규칙 S1(이름 변형), S2(브랜드+연수·에디션), S2b(기본 상품), S3(숫자가 있는 이름의 1글자 오타)이며, 어느 규칙이 찾았는지는 후보의 `evidence.rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)에 남는다. |
+| `ambiguous` | 기존 상품 후보는 있지만 규칙이 하나로 확정하지 못해 운영자 판단이 필요하다. 후보가 하나뿐이어도 확인 권장(`confirmRecommended`)이면 이 상태다. |
 | `unmatched` | 상품 매칭을 실행했지만 유효한 기존 상품 후보가 남지 않았다. |
 
 `extracted_items.initial_resolution_status`는 최초 후보 생성이 끝날 때 한 번 저장하고 운영자 검수로 변경하지 않는다. 최초 AI 분류가 비상품이어서 상품 매칭을 실행하지 않은 항목은 `null`이다. 이를 통해 운영자가 상품을 선택하거나 새로 등록한 뒤에도 시스템의 원래 판단을 평가할 수 있다.
@@ -554,7 +554,7 @@ MVP에서는 한 업장에 `uploaded`, `processing`, `ready_for_review` 상태�
 | `candidate_rank` | `smallint`, NOT NULL | `1` | 운영자에게 보여줄 후보 순서와 Top-1 평가에 사용한다. |
 | `score` | `decimal(7,6)`, nullable | `0.932100` | 규칙 임베딩 LLM 등이 계산한 비교 점수다. |
 | `method` | `match_method`, NOT NULL | `embedding` | 여러 발견 신호 중 후보의 최종 순위를 결정한 대표 방법을 기록한다. |
-| `evidence` | `json`, nullable | `{"brandExact":true,"ageExact":true,"embeddingSimilarity":0.91}` | 후보 점수와 순위가 나온 근거를 구조화해 저장한다. 정확 별칭 여부, 브랜드·연수 일치, 에디션 충돌, 문자열·임베딩 유사도, LLM `reasonCode` 등 실제 계산에 사용한 값만 넣는다. |
+| `evidence` | `json`, nullable | `{"brandExact":true,"ageExact":true,"embeddingSimilarity":0.91}` | 후보 점수와 순위가 나온 근거를 구조화해 저장한다. 정확 별칭 여부, 브랜드·연수 일치, 에디션 충돌, 문자열·임베딩 유사도, LLM `reasonCode` 등 실제 계산에 사용한 값만 넣는다. 후보를 찾은 매칭 규칙은 `rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)에 기록한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:42:10Z` | 후보 생성 시점이다. |
 
 **핵심 제약:** 같은 추출 항목에서 순위가 중복되지 않으며 `(extracted_item_id, product_id)`도 unique다. 따라서 하나의 상품은 후보 목록에 한 번만 나타난다. 별칭 정확 일치, 브랜드·연수·에디션 일치, 문자열·임베딩 점수와 LLM 판단은 별도 후보 행이 아니라 하나의 `evidence`로 합친다. 후보를 다시 계산할 때는 기존 후보 행을 최신 결과로 교체하므로 과거 `evidence` 이력은 보존하지 않는다. `evidence`는 운영자 설명과 디버깅을 돕지만 최종 상품 선택 자체는 `extracted_items.selected_product_id`에 기록한다. 후보 재정렬에 사용한 모델과 프롬프트 설정은 백엔드 코드에서 버전 관리하며 후보 행마다 복제하지 않으므로 별도의 `matching_runs` 테이블은 두지 않는다.

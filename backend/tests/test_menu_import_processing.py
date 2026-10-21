@@ -1,5 +1,5 @@
 # AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Haeul Yang.
-# Modified with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20, I2-A18): staged matching tests. Reviewed by Jinwoo Park.
+# Modified with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20, I2-A18; 2026-10-21, I2-A22): staged matching tests. Reviewed by Jinwoo Park.
 import json
 from contextlib import nullcontext
 from decimal import Decimal
@@ -360,16 +360,16 @@ def menu_lines(use_extractor):
 
 
 @pytest.mark.parametrize(
-    ("name", "status", "age", "evidence_key"),
+    ("name", "status", "age", "evidence_key", "rule"),
     [
         # Each line is unmatched by the Iteration 1 alias lookup alone.
-        ("글렌피딕(Glenfiddich) 12년", ResolutionStatus.EXACT_MATCH, 12, "parenExpanded"),  # S1 name variant
-        ("글렌피딕 12년 싱글몰트", ResolutionStatus.AMBIGUOUS, 12, "ageMatch"),  # S2 brand + age
-        ("글렌피닥 15년", ResolutionStatus.EXACT_MATCH, 15, "editDistance"),  # S3 one-letter typo
+        ("글렌피딕(Glenfiddich) 12년", ResolutionStatus.EXACT_MATCH, 12, "parenExpanded", "S1"),  # name variant
+        ("글렌피딕 12년 싱글몰트", ResolutionStatus.AMBIGUOUS, 12, "ageMatch", "S2"),  # brand + age
+        ("글렌피닥 15년", ResolutionStatus.EXACT_MATCH, 15, "editDistance", "S3"),  # one-letter typo
     ],
 )
 def test_staged_rules_match_lines_without_an_exact_alias(
-    client, db_session, image_storage, operator, glenfiddich, menu_lines, name, status, age, evidence_key
+    client, db_session, image_storage, operator, glenfiddich, menu_lines, name, status, age, evidence_key, rule
 ):
     menu_lines(name)
 
@@ -380,6 +380,7 @@ def test_staged_rules_match_lines_without_an_exact_alias(
     assert candidate.product_id == glenfiddich[age].id
     assert candidate.method == MatchMethod.ALIAS
     assert evidence_key in candidate.evidence
+    assert candidate.evidence["rule"] == rule  # I2-A22: tells a rule's exact_match from an exact alias match
 
 
 def test_line_naming_two_products_is_stored_as_ambiguous(client, db_session, image_storage, operator, menu_lines):
@@ -392,7 +393,7 @@ def test_line_naming_two_products_is_stored_as_ambiguous(client, db_session, ima
     assert menu_import.status == ImportStatus.READY_FOR_REVIEW
     [item] = items_of(menu_import)
     assert item.initial_resolution_status == ResolutionStatus.AMBIGUOUS
-    assert [(c.candidate_rank, c.product_id, c.evidence["multiProduct"]) for c in item.candidates] == [
-        (1, buffalo.id, "Buffalo Trace"),
-        (2, makers.id, "Maker's Mark"),
+    assert [(c.candidate_rank, c.product_id, c.evidence["multiProduct"], c.evidence["rule"]) for c in item.candidates] == [
+        (1, buffalo.id, "Buffalo Trace", "S1"),
+        (2, makers.id, "Maker's Mark", "S1"),
     ]
