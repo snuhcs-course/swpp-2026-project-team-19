@@ -425,8 +425,11 @@ Table extracted_items {
   when the reviewer accepts it and stores only a changed classification; the effective type is
   COALESCE(corrected_line_type, extracted_line_type).
   initial_resolution_status permanently preserves the first entity-resolution outcome for items initially
-  classified as product: exact_match for one conflict-free exact alias match, ambiguous when non-exact
-  candidates remain, and unmatched when no valid candidate remains. It stays null when matching was not run,
+  classified as product: exact_match when the matching rules confirm exactly one product without a conflict,
+  ambiguous when candidates remain for review, and unmatched when no valid candidate remains. The rules are
+  the exact alias match and the staged rules S1 (name variants), S2 (brand + age/edition), S2b (default
+  product) and S3 (one-letter typo in a name with digits); evidence.rule of each candidate names the one
+  that found it ("alias", "S1", "S2", "S2b", "S3"). It stays null when matching was not run,
   including items initially classified as non-products, and is not changed by review.
   selected_product_id remains nullable until entity resolution is confirmed.
   When the reviewer accepts proposedProductId, selected_match_method copies that candidate's method.
@@ -483,6 +486,7 @@ Table resolution_candidates {
   method records the representative method that determined the candidate's final rank.
   evidence stores the latest structured matching signals for the candidate, such as exact alias,
   brand/age agreement, edition conflict, string/embedding similarity, and an optional LLM reason code.
+  evidence.rule names the matching rule that found the candidate ("alias", "S1", "S2", "S2b", "S3").
   Reranking model and prompt configuration are managed in backend code rather than copied into each candidate row.
   Historical candidate evidence versions are not retained.
   '''

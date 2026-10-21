@@ -1,4 +1,4 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13, P22). Reviewed by Jinwoo Park.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13, P22; 2026-10-21, I2-A22). Reviewed by Jinwoo Park.
 from uuid import UUID
 
 import pytest
@@ -160,7 +160,9 @@ def test_brand_and_the_only_product_of_that_age_is_exact(catalog):
 
     assert result.status == "exact_match"
     assert result.proposed_product_id == MACALLAN_15_DOUBLE
-    assert result.candidates[0].evidence == {"brandMatch": "macallan", "ageMatch": 15, "brandName": "Macallan 15yo"}
+    assert result.candidates[0].evidence == {
+        "brandMatch": "macallan", "ageMatch": 15, "brandName": "Macallan 15yo", "rule": "S2"
+    }
 
 
 def test_edition_token_picks_one_of_the_products_of_that_age(catalog):
@@ -355,3 +357,43 @@ def test_edit_distance_ties_are_ambiguous():
 def test_s3_runs_only_when_s2_found_nothing(catalog):
     # S2 already offers the Kavalan Solist products; S3 does not add anything.
     assert staged("Kavalan Solist", catalog, "S2b", "S3") == staged("Kavalan Solist", catalog, "S2b")
+
+
+# ---- I2-A22: the step that found each candidate is recorded as evidence["rule"] ----
+
+
+def rules(result):
+    return [c.evidence.get("rule") for c in result.candidates]
+
+
+def test_no_stages_records_no_rule(catalog):
+    result = resolve_product_staged(ExtractedProduct(product_name="Glenfiddich 12"), catalog)
+
+    assert result.status == "exact_match"
+    assert rules(result) == [None]
+
+
+def test_rule_of_each_step(catalog, glenfiddich):
+    cases = [
+        (staged("Glenfiddich 12", glenfiddich, "S2b", "S3"), "exact_match", "alias"),
+        (s1("아벨라워(Aberlour) 12년", catalog), "exact_match", "S1"),
+        (staged("맥캘란 더블캐스크 12Y", catalog), "exact_match", "S2"),
+        (staged("글렌피딕 12년", glenfiddich, "S2b"), "exact_match", "S2b"),  # default product
+        (staged("글렌피딕 15년", glenfiddich, "S2b"), "ambiguous", "S2b"),  # confirm recommended
+        (staged("Glenfidich 12yo", glenfiddich, "S2b", "S3"), "exact_match", "S3"),
+        (staged("Glanfidich 15yo", glenfiddich, "S2b", "S3"), "ambiguous", "S3"),
+    ]
+    for result, status, rule in cases:
+        assert result.status == status
+        assert rules(result) == [rule] * len(result.candidates)
+
+
+def test_two_products_on_one_line_are_an_s1_rule(catalog):
+    assert rules(s1("Buffalo Trace / Maker's Mark", catalog)) == ["S1", "S1"]
+
+
+def test_ambiguous_s2_candidates_record_s2(catalog):
+    result = staged("Macallan 12yo", catalog, "S2b")
+
+    assert result.status == "ambiguous"
+    assert rules(result) == ["S2", "S2"]

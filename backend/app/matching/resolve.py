@@ -1,10 +1,11 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5). Reviewed by Jinwoo Park.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5; 2026-10-21, I2-A22). Reviewed by Jinwoo Park.
 """Initial product resolution for one extracted menu line (matching flow doc, sections 6, 8, 10).
 
-Iteration 1 covers normalization and exact alias matching only. Brand lookup,
-similarity scoring and LLM reranking are not implemented yet, so a name with
-no exact alias match is returned as unmatched. This module never writes to
-the database; the caller stores the result.
+This function does normalization and exact alias matching only, so a name with
+no exact alias match is returned as unmatched. Name variants, brand + age/edition
+lookups and edit distance are added on top of it by `staged.py` (S1-S3), which
+menu import uses; no LLM is used. This module never writes to the database; the
+caller stores the result.
 """
 
 from typing import Any

@@ -611,6 +611,8 @@ extracted_options #2
 
 이 절은 모든 `extracted_items`의 역할을 검수하고, 그중 AI가 `extracted_line_type = product`로 분류한 항목에 최초 상품 매칭을 수행하는 과정을 한눈에 보기 위한 요약이다. 운영자는 최초 역할과 상품 매칭 결과를 모두 최종 판단한다. 각 단계의 상세 규칙과 저장 필드는 7장부터 18장까지 설명한다.
 
+> **현재 구현 (I2-A18, I2-A22):** 백엔드는 아래 정확 일치(8장) 다음에 단계 규칙 S1(이름 변형), S2(브랜드+연수·에디션), S2b(기본 상품), S3(숫자가 있는 이름의 1글자 오타)를 실행한다(`backend/app/matching/staged.py`). 11장의 점수 계산과 12장의 LLM 재정렬은 서버에 없다. 따라서 `exact_match`는 정확 별칭 일치뿐 아니라 이 규칙들이 상품 하나를 확정한 경우에도 나오며, 어느 규칙인지는 후보 `evidence.rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)로 구분한다. 한 줄에 다른 브랜드의 두 상품이 있으면(S1) 두 상품을 후보로 남긴 `ambiguous`로 저장한다.
+
 ```text
 for each extracted_item:
     if extracted_line_type != product:
@@ -1573,7 +1575,7 @@ products
 | `extracted_edition_name` | AI가 에디션 표기를 추출한 경우 |
 | `extracted_abv` | AI가 도수를 추출한 경우 |
 | `extraction_confidence` | AI 추출 직후 |
-| `initial_resolution_status` | 최초 후보 생성 완료 시 `exact_match`, `ambiguous`, `unmatched` 중 하나를 저장하고 검수 후에도 변경하지 않음. 매칭 미실행 항목은 null |
+| `initial_resolution_status` | 최초 후보 생성 완료 시 `exact_match`, `ambiguous`, `unmatched` 중 하나를 저장하고 검수 후에도 변경하지 않음. `exact_match`를 확정한 규칙은 후보 `evidence.rule`에 남음. 매칭 미실행 항목은 null |
 | `selected_product_id` | 운영자가 기존 또는 신규 상품을 확정한 후 |
 | `selected_match_method` | 1순위 제안 확정이면 후보 `method` 복사, 다른 선택·검색·신규 등록이면 `manual` |
 | `match_confidence` | 최종 선택 상품이 후보에 있으면 해당 `score` 복사, 직접 검색·신규 등록·비상품이면 null |

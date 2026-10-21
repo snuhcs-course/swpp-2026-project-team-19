@@ -1922,7 +1922,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - `extractedLineType`은 AI의 최초 분류이며 검수 후에도 변경되지 않는다.
 - `correctedLineType`은 운영자가 최초 분류를 바꾼 경우에만 값이 있고, 그대로 승인한 경우 `null`이다.
 - `effectiveLineType`은 `correctedLineType ?? extractedLineType`으로 계산한 현재 검수 기준 역할이다.
-- `initialResolutionStatus`는 최초 상품 매칭 결과다. `exact_match`는 충돌 없는 단일 정확 별칭 일치, `ambiguous`는 검토할 후보가 있으나 정확 단일 일치가 아닌 상태, `unmatched`는 유효 후보가 없는 상태다. 최초 분류가 비상품이라 매칭하지 않은 항목은 `null`이다.
+- `initialResolutionStatus`는 최초 상품 매칭 결과다. `exact_match`는 매칭 규칙(상품 별칭 정확 일치 또는 단계 규칙 S1·S2·S2b·S3)이 충돌 없이 상품 하나를 확정한 상태, `ambiguous`는 검토할 후보가 있으나 하나로 확정하지 못한 상태, `unmatched`는 유효 후보가 없는 상태다. 어느 규칙이 후보를 찾았는지는 후보 `evidence.rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)에 있다. 최초 분류가 비상품이라 매칭하지 않은 항목은 `null`이다.
 - `candidates`는 같은 상품을 중복하지 않으며 `candidateRank` 오름차순이다.
 - `proposedProductId`는 `candidateRank = 1`의 상품이거나 후보가 없으면 `null`이다.
 - `newProductDraft`는 화면 입력을 돕는 계산값이며 실제 카탈로그 행이 아니다.

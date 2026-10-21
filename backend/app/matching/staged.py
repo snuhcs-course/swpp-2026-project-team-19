@@ -1,10 +1,15 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13, P22). Reviewed by Jinwoo Park.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13, P22; 2026-10-21, I2-A22). Reviewed by Jinwoo Park.
 """Product resolution with optional stages on top of `resolve_product` (eval_plan.md, 매칭 평가).
 
     resolve_product_staged(item, catalog, stages={"S1", "S2", "S2b", "S3"})
 
-With no stages this is exactly `resolve_product`, which menu import still uses.
-Stages only add lookups; `normalize` and the alias rules stay the same.
+With no stages this is exactly `resolve_product`. Menu import calls it with S1, S2,
+S2b and S3 (I2-A18). Stages only add lookups; `normalize` and the alias rules stay
+the same.
+
+With any stage, every candidate's evidence also gets `rule`, the step that found it:
+"alias" (the plain exact alias lookup), "S1", "S2", "S2b" or "S3". An exact_match
+decided by a rule can then be told apart from an exact alias match.
 
 S1  name preprocessing, tried only when the plain lookup finds nothing
     - "제목(English) 나머지" is also looked up as "제목 나머지" and "English 나머지"
@@ -86,10 +91,28 @@ def resolve_product_staged(
     return _resolve_one(item, catalog, stages)
 
 
+def _with_rule(result: ResolutionResult, rule: str) -> ResolutionResult:
+    """Record the step that found each candidate in its evidence ("rule").
+
+    S2 candidates chosen by the S2b default-product rule (defaultProduct, or confirmRecommended,
+    which S2 only sets with S2b) are recorded as "S2b".
+    """
+
+    def rule_of(candidate: Candidate) -> str:
+        if rule == "S2" and ("defaultProduct" in candidate.evidence or "confirmRecommended" in candidate.evidence):
+            return "S2b"
+        return rule
+
+    candidates = tuple(replace(c, evidence={**c.evidence, "rule": rule_of(c)}) for c in result.candidates)
+    return replace(result, candidates=candidates)
+
+
 def _resolve_one(item: ExtractedProduct, catalog: CatalogLookup, stages: frozenset[str]) -> ResolutionResult:
     result = resolve_product(item, catalog)
-    if result.status != "unmatched" or "S1" not in stages:
+    if not stages:
         return result
+    if result.status != "unmatched" or "S1" not in stages:
+        return _with_rule(result, "alias")
     variants = _parenthesis_variants(item.product_name)
     if variants:
         result = _merge(
@@ -97,7 +120,7 @@ def _resolve_one(item: ExtractedProduct, catalog: CatalogLookup, stages: frozens
             "parenExpanded",
         )
     if result.status != "unmatched" or "S2" not in stages:
-        return result
+        return _with_rule(result, "S1")
 
     # S2: the whole name, its parenthesis variants, and each side of "A / B".
     names = [item.product_name, *variants]
@@ -106,14 +129,14 @@ def _resolve_one(item: ExtractedProduct, catalog: CatalogLookup, stages: frozens
     default_product = "S2b" in stages
     result = _merge(((name, _resolve_by_brand(name, item, catalog, default_product)) for name in names), "brandName")
     if result.status != "unmatched" or "S3" not in stages:
-        return result
+        return _with_rule(result, "S2")
 
     # S3: edit distance to product aliases and to brand aliases (then S2b).
     lookups = []
     for name in names:
         lookups.append((name, _resolve_by_alias_distance(name, catalog)))
         lookups.append((name, _resolve_by_brand_distance(name, item, catalog)))
-    return _merge(lookups, "fuzzyName")
+    return _with_rule(_merge(lookups, "fuzzyName"), "S3")
 
 
 def _parenthesis_variants(name: str) -> list[str]:
@@ -199,7 +222,7 @@ def _resolve_two_products(
         return None
 
     candidates = tuple(
-        replace(part.candidates[0], rank=rank, evidence={**part.candidates[0].evidence, "multiProduct": side})
+        replace(part.candidates[0], rank=rank, evidence={**part.candidates[0].evidence, "multiProduct": side, "rule": "S1"})
         for rank, (side, part) in enumerate(zip(sides, parts, strict=True), start=1)
     )
     return ResolutionResult(status="multi", candidates=candidates, parts=tuple(parts))
