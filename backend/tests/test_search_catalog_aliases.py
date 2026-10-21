@@ -1,4 +1,5 @@
 # AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-17). Reviewed by Haeul Yang.
+# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-21). Reviewed by Jinwoo Park.
 """Every alias of the service catalog finds what it names (API spec, section 3.10.1).
 
 The real catalog (`ai/catalog`) is loaded into the test database and every searchable alias is
@@ -21,7 +22,7 @@ from pathlib import Path
 from uuid import UUID
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from app.models import Brand, BrandAlias, Product, ProductAlias
 from app.services.search_query import resolve_search_query
@@ -39,6 +40,11 @@ pytestmark = pytest.mark.skipif(
 def catalog(db_session):
     catalog_json, bars_json = (json.loads(path.read_text(encoding="utf-8")) for path in SEED_FILES)
     seed(db_session.connection(), catalog_json, bars_json)
+    # Refresh the planner statistics for the rows just seeded. Without this the planner can use
+    # statistics that autovacuum took while the tables were empty (rows of earlier tests that were
+    # rolled back), estimate one row per table, and run every search as a nested loop over the
+    # whole catalog: the file then takes minutes in CI instead of seconds.
+    db_session.execute(text("ANALYZE"))
     return db_session
 
 
