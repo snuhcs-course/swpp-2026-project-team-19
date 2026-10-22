@@ -1,6 +1,7 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
+# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, 2026-10-23). Reviewed by Haeul Yang.
 """GET /api/me: creating and syncing the BottleMap user (API spec, section 3.2)."""
 
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 import pytest
@@ -147,3 +148,70 @@ def test_temporary_user_row_follows_the_setting(client, token_for, db_session, m
 
     user = db_session.scalars(select(User).where(User.auth_subject == "local-dev-user")).one()
     assert (body["userType"], user.user_type) == ("customer", UserType.CUSTOMER)
+
+
+# ---- updatedAt is when the stored user last changed (spec 3.2) ----
+
+# Not UTC and with microseconds, so the comparison also covers the string format.
+EARLIER = datetime(2026, 10, 4, 18, 15, 30, 123456, tzinfo=timezone(timedelta(hours=9)))
+EARLIER_TEXT = "2026-10-04T09:15:30.123456Z"
+
+
+def stored_user_changed_at(db_session, subject, when):
+    user = db_session.scalars(select(User).where(User.auth_subject == subject)).one()
+    user.updated_at = when
+    db_session.flush()
+
+
+@pytest.mark.parametrize(
+    "claims",
+    [{}, {"email": " user@example.com "}, {"user_metadata": {"name": "Google 이름"}}],
+    ids=["same token", "same email with spaces", "another Google name"],
+)
+def test_a_call_that_changes_nothing_keeps_updated_at(client, supabase, db_session, claims):
+    # The app calls GET /api/me on every start; that alone is not a change.
+    me(client, supabase.token(sub=SUBJECT))
+    stored_user_changed_at(db_session, SUBJECT, EARLIER)
+
+    body = me(client, supabase.token(sub=SUBJECT, **claims))
+
+    assert body["updatedAt"] == EARLIER_TEXT
+
+
+@pytest.mark.parametrize(
+    "email",
+    ["new@example.com", None],
+    ids=["another email", "email removed from the token"],
+)
+def test_an_email_change_moves_updated_at(client, supabase, db_session, email):
+    me(client, supabase.token(sub=SUBJECT, email="old@example.com"))
+    stored_user_changed_at(db_session, SUBJECT, EARLIER)
+
+    body = me(client, supabase.token(sub=SUBJECT, email=email))
+
+    assert body["email"] == email
+    assert datetime.fromisoformat(body["updatedAt"]) > EARLIER
+
+
+def test_an_email_cleared_because_another_user_took_it_moves_updated_at(client, supabase, db_session):
+    me(client, supabase.token(sub=SUBJECT, email="mine@example.com"))
+    stored_user_changed_at(db_session, SUBJECT, EARLIER)
+    add_user(db_session, "someone-else", email="theirs@example.com")
+
+    body = me(client, supabase.token(sub=SUBJECT, email="theirs@example.com"))
+
+    assert body["email"] is None
+    assert datetime.fromisoformat(body["updatedAt"]) > EARLIER
+
+
+def test_a_temporary_role_change_moves_updated_at(client, token_for, db_session, monkeypatch):
+    token = token_for("operator")
+    me(client, token)
+    stored_user_changed_at(db_session, "local-dev-user", EARLIER)
+    assert me(client, token)["updatedAt"] == EARLIER_TEXT
+
+    monkeypatch.setenv("TEMP_AUTH_USER_TYPE", "customer")
+    body = me(client, token)
+
+    assert body["userType"] == "customer"
+    assert datetime.fromisoformat(body["updatedAt"]) > EARLIER
