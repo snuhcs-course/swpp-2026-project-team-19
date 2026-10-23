@@ -160,7 +160,7 @@ pytest ai
 Iteration 2 results (details in the Testing Documentation):
 - **Backend:** 918 tests passed, 98.95% coverage (after P40)
 - **AI:** 141 tests (140 passed, 1 allowed skip that needs live CLOVA keys); coverage targets met for all four components
-- **Android:** 53 JVM unit tests passed; coverage not measured yet
+- **Android:** 110 JVM unit tests in 14 files passed for each flavor; coverage not measured yet
 - **Device check:** 20 of 20 customer checks passed on a Galaxy S23 (developer flavor, deployed backend, reported by Hojin Nam)
 
 ## Known Limitations and TODOs
