@@ -1,10 +1,12 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-20). Reviewed by Haeul Yang.
-"""One bar seen through the bar menu (API spec 3.9), customer search (3.10) and nearby bars (3.12).
+# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-20, 2026-10-23). Reviewed by Haeul Yang.
+"""One bar seen through every public API that lists it.
 
-The three must agree on the bar's name, address, coordinates (3.9.4) and menu update time
-(`publishedAt` = `menuUpdatedAt`): the app shows the time on result cards and on the bar detail.
-A menu import that is not applied yet changes none of them (3.9.2); applying one moves the time in
-all three at once.
+The bar menu (API spec 3.9), customer search (3.10), nearby bars (3.12) and map bars (3.13) must
+agree on the bar's name, address, coordinates (3.9.4) and menu update time (`publishedAt` =
+`menuUpdatedAt`): the app shows the time on result cards and on the bar detail. Bar-name search
+(3.11.11) has no time but must agree on the rest, since the map moves to its coordinates. A menu
+import that is not applied yet changes none of them (3.9.2); applying one moves the time in all of
+them at once.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -15,7 +17,7 @@ from app.models import BarStatus, ImportStatus
 from tests.factories import make_bar, make_brand, make_product, publish_menu
 from tests.review_support import make_glenfiddich, upload_sample_review, valid_body
 
-# Not UTC and with microseconds, so the three APIs must also agree on the string format.
+# Not UTC and with microseconds, so the APIs must also agree on the string format.
 EARLIER = datetime(2026, 10, 4, 18, 15, 30, 123456, tzinfo=timezone(timedelta(hours=9)))
 EARLIER_TEXT = "2026-10-04T09:15:30.123456Z"
 SAMPLE_MENU = [("글렌피딕 12년", [8000, 17000]), ("글렌피딕 15년", [21000])]
@@ -40,25 +42,48 @@ def sample(client, db_session, image_storage, operator, glenfiddich):
     return sample
 
 
-def bar_views(client, bar) -> tuple[dict, list[dict]]:
-    """The bar menu, and the search rows and nearby item of the same bar, each as one shape."""
+def listings(client, bar) -> dict[str, list[dict]]:
+    """The rows each listing API gives for the bar's surroundings, by API."""
+    location = {"lat": float(bar.latitude), "lng": float(bar.longitude)}
+    area = {"south": location["lat"] - 0.01, "north": location["lat"] + 0.01}
+    area |= {"west": location["lng"] - 0.01, "east": location["lng"] + 0.01}
+    requests = {
+        "search": ("/api/search/bars", {"query": "글렌피딕", **location}),
+        "nearby": ("/api/search/nearby-bars", location),
+        "map": ("/api/search/map-bars", area),
+        "names": ("/api/search/bar-names", {"query": bar.name}),
+    }
+    found = {}
+    for api, (url, params) in requests.items():
+        response = client.get(url, params=params)
+        assert response.status_code == 200, response.text
+        found[api] = response.json()["items"]
+    return found
+
+
+def bar_views(client, bar) -> tuple[dict, list[dict], list[dict]]:
+    """The bar menu; the bar's rows with a menu time (search, nearby, map); its bar-name rows."""
     menu = client.get(f"/api/bars/{bar.id}/menu")
     assert menu.status_code == 200, menu.text
-    location = {"lat": float(bar.latitude), "lng": float(bar.longitude)}
-    search = client.get("/api/search/bars", params={"query": "글렌피딕", **location}).json()["items"]
-    nearby = client.get("/api/search/nearby-bars", params=location).json()["items"]
-    others = [
-        {key: row[key] for key in ("address", "latitude", "longitude", "menuUpdatedAt")}
-        | {"name": row.get("barName", row.get("name"))}
-        for row in search + nearby
+    found = listings(client, bar)
+
+    def shape(row, keys):
+        return {key: row[key] for key in keys} | {"name": row.get("barName", row.get("name"))}
+
+    timed = [
+        shape(row, ("address", "latitude", "longitude", "menuUpdatedAt"))
+        for api in ("search", "nearby", "map")
+        for row in found[api]
         if row["barId"] == str(bar.id)
     ]
-    return menu.json(), others
+    named = [shape(row, ("address", "latitude", "longitude")) for row in found["names"] if row["barId"] == str(bar.id)]
+    return menu.json(), timed, named
 
 
-def as_menu_shape(menu: dict) -> dict:
+def as_menu_shape(menu: dict, *, with_time: bool = True) -> dict:
     keys = ("name", "address", "latitude", "longitude")
-    return {key: menu[key] for key in keys} | {"menuUpdatedAt": menu["publishedAt"]}
+    shape = {key: menu[key] for key in keys}
+    return shape | {"menuUpdatedAt": menu["publishedAt"]} if with_time else shape
 
 
 def menu_lines(menu: dict) -> list:
@@ -73,12 +98,13 @@ def test_an_import_not_applied_changes_no_view(client, db_session, sample, statu
     sample.menu_import.status = status
     db_session.flush()
 
-    menu, others = bar_views(client, sample.bar)
+    menu, timed, named = bar_views(client, sample.bar)
 
     assert (menu["menuBoardId"], menu["publishedAt"]) == (str(sample.board.id), EARLIER_TEXT)
     assert menu_lines(menu) == SAMPLE_MENU
-    # Two search rows (the 12 and the 15) and the nearby item, all with the same bar and time.
-    assert others == [as_menu_shape(menu)] * 3
+    # Two search rows (the 12 and the 15), the nearby item and the map item: same bar and time.
+    assert timed == [as_menu_shape(menu)] * 4
+    assert named == [as_menu_shape(menu, with_time=False)]
 
 
 def test_applying_the_import_moves_the_time_in_every_view(client, db_session, sample, operator, glenfiddich):
@@ -89,13 +115,14 @@ def test_applying_the_import_moves_the_time_in_every_view(client, db_session, sa
     )
     assert response.status_code == 200, response.text
 
-    menu, others = bar_views(client, sample.bar)
+    menu, timed, named = bar_views(client, sample.bar)
 
     assert menu["menuBoardId"] == str(sample.board.id)
     assert datetime.fromisoformat(menu["publishedAt"]) > EARLIER
     assert menu_lines(menu) != SAMPLE_MENU
-    # The 15 was removed, so one search row (the 12) and the nearby item.
-    assert others == [as_menu_shape(menu)] * 2
+    # The 15 was removed, so one search row (the 12), the nearby item and the map item.
+    assert timed == [as_menu_shape(menu)] * 3
+    assert named == [as_menu_shape(menu, with_time=False)]
 
 
 def test_a_deactivated_bar_leaves_every_view(client, db_session):
@@ -103,14 +130,12 @@ def test_a_deactivated_bar_leaves_every_view(client, db_session):
     product = make_product(db_session, make_brand(db_session, "Glenfiddich", aliases=("글렌피딕",)), "Glenfiddich 12")
     bar = make_bar(db_session, "Seorosang")
     publish_menu(db_session, bar, [(product, "글렌피딕 12년", [(None, 30, 17000)])], published_at=EARLIER)
-    _, before = bar_views(client, bar)
-    assert len(before) == 2
+    _, timed, named = bar_views(client, bar)
+    assert (len(timed), len(named)) == (3, 1)
 
     bar.status = BarStatus.INACTIVE
     db_session.flush()
 
     menu = client.get(f"/api/bars/{bar.id}/menu")
     assert (menu.status_code, menu.json()["error"]["code"]) == (404, "BAR_NOT_FOUND")
-    location = {"lat": float(bar.latitude), "lng": float(bar.longitude)}
-    assert client.get("/api/search/bars", params={"query": "글렌피딕", **location}).json()["items"] == []
-    assert client.get("/api/search/nearby-bars", params=location).json()["items"] == []
+    assert listings(client, bar) == {"search": [], "nearby": [], "map": [], "names": []}

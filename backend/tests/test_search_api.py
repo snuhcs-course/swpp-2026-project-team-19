@@ -1,4 +1,4 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, PR #26; 2026-10-17). Reviewed by Haeul Yang.
+# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, PR #26; 2026-10-17; 2026-10-23). Reviewed by Haeul Yang.
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -9,6 +9,7 @@ from app.models import BarMenuItem, BarStatus, MenuBoardEntry
 from app.services.search import distance_meters
 from tests.auth_support import connection_error, new_signing_key
 from tests.factories import make_bar, make_brand, make_product, publish_menu
+from tests.sql_support import recorded_statements
 
 T0 = datetime(2026, 10, 4, 9, 15, tzinfo=timezone.utc)
 ORIGIN = {"lat": 37.478, "lng": 126.951}
@@ -405,3 +406,82 @@ def test_guest_search_ignores_any_token(
     assert with_token.json()["items"]
     # The header is not even read: no signing keys were looked up.
     assert supabase.jwks.fetches == 0
+
+
+# ---- every field is always present; a missing value is null (spec 3.10.3) ----
+
+RESPONSE_FIELDS = {"query", "matchType", "matchedProducts", "items", "truncated"}
+PRODUCT_FIELDS = {"productId", "displayName", "brandName", "ageYears", "editionName", "resultCount"}
+ITEM_FIELDS = {
+    "barId",
+    "barName",
+    "address",
+    "latitude",
+    "longitude",
+    "distanceMeters",
+    "productId",
+    "productDisplayName",
+    "menuDisplayName",
+    "options",
+    "menuUpdatedAt",
+}
+OPTION_FIELDS = {"optionLabel", "pourMl", "priceKrw", "sortOrder"}
+
+
+def test_every_field_is_sent_even_when_its_value_is_missing(client, db_session):
+    # No age, no edition, an option with neither label nor pour size, and no location sent.
+    product = make_product(db_session, make_brand(db_session, "Ardbeg"), "Ardbeg Uigeadail")
+    bar = make_bar(db_session, "Seorosang")
+    publish_menu(db_session, bar, [(product, "Uigeadail", [(None, None, 15000)])], published_at=T0)
+
+    body = search(client, query="Ardbeg Uigeadail")
+
+    assert set(body) == RESPONSE_FIELDS
+    [matched] = body["matchedProducts"]
+    assert set(matched) == PRODUCT_FIELDS
+    assert (matched["ageYears"], matched["editionName"]) == (None, None)
+    [item] = body["items"]
+    assert set(item) == ITEM_FIELDS
+    assert item["distanceMeters"] is None
+    [option] = item["options"]
+    assert set(option) == OPTION_FIELDS
+    assert (option["optionLabel"], option["pourMl"]) == (None, None)
+
+
+def test_a_recognized_product_sold_nowhere_still_sends_every_field(client, glenfiddich):
+    body = search(client, query="글렌피딕 15년")
+
+    assert set(body) == RESPONSE_FIELDS
+    assert [set(product) for product in body["matchedProducts"]] == [PRODUCT_FIELDS]
+    assert (body["items"], body["truncated"]) == ([], False)
+
+
+# ---- the number of queries does not grow with the results ----
+
+
+def statements_for_search(client, db_session, **params) -> list[str]:
+    db_session.expire_all()  # nothing comes from the session's cache
+    with recorded_statements(db_session) as statements:
+        search(client, **params)
+    return statements
+
+
+@pytest.mark.parametrize(
+    "params",
+    [{"query": "글렌피딕"}, {"query": "글렌피딕 12년", **ORIGIN}, {"query": "피딕", **ORIGIN}],
+    ids=["brand", "exact alias with location", "partial"],
+)
+def test_the_number_of_queries_does_not_grow_with_the_results(client, db_session, glenfiddich, params):
+    first = make_bar(db_session, "Bar 0")
+    publish_menu(db_session, first, [(glenfiddich[12], "글렌피딕 12년", [("잔", 30, 17000)])])
+    with_one_row = statements_for_search(client, db_session, **params)
+
+    options = [("잔", 30, 17000), ("병", None, 300000)]
+    for i in range(1, 10):
+        bar = make_bar(db_session, f"Bar {i}", latitude=f"37.47{i}000")
+        publish_menu(db_session, bar, [(glenfiddich[age], f"글렌피딕 {age}년", options) for age in (12, 15, 18)])
+    with_many_rows = statements_for_search(client, db_session, **params)
+
+    assert len(search(client, **params)["items"]) >= 10  # one row before
+    assert len(with_one_row) == len(with_many_rows)
+    assert all(statement.lstrip().upper().startswith("SELECT") for statement in with_many_rows)
