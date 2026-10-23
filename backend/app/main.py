@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #9, #16, #19); Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #14); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-19). Reviewed by Haeul Yang and Jinwoo Park.
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 

@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12, #17). Reviewed by Haeul Yang.
 import pytest
 from sqlalchemy import select
 

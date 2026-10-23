@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13, P22; 2026-10-21, I2-A22). Reviewed by Jinwoo Park.
 """Product resolution with optional stages on top of `resolve_product` (eval_plan.md, 매칭 평가).
 
     resolve_product_staged(item, catalog, stages={"S1", "S2", "S2b", "S3"})

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, E2E; 2026-10-17, P47 final split). Reviewed by Jinwoo Park.
 """End-to-end matching: extraction output -> S1+S2b+S3 -> M3a (ai/docs/e2e_plan.md, 2절).
 
     python ai/eval/e2e_match.py --source label --split test \

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, E2E). Reviewed by Jinwoo Park.
 """Numbers for ai/runs/<date>_e2e/README.md (ai/docs/e2e_plan.md). No API calls.
 
     python ai/eval/e2e_report.py --e2e ai/runs/2026-10-14_e2e > ai/runs/2026-10-14_e2e/report_numbers.json

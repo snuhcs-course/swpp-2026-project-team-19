@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #16). Reviewed by Haeul Yang.
 import os
 
 from sqlalchemy.engine import URL

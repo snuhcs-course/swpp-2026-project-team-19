@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13). Reviewed by Jinwoo Park.
 """Copy the held-out test photos into <data_dir>/eval_photos_test with ASCII names.
 
     python ai/eval/prepare_test_photos.py <folder with the Drive downloads>

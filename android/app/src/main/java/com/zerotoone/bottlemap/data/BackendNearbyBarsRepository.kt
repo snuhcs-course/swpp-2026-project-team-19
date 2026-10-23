@@ -1,4 +1,3 @@
-// AI-assisted Android frontend integration, 2026-10-18, Backend A9 PR #43 (spec 3.12).
 package com.zerotoone.bottlemap.data
 
 import com.zerotoone.bottlemap.network.ApiClient

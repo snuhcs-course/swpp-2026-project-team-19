@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
 """POST /api/menu-imports/{id}/review-and-apply: confirm the review and publish the menu in
 one SERIALIZABLE transaction (API spec 8, flow doc 17).
 

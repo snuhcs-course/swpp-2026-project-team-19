@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-20, 2026-10-23). Reviewed by Haeul Yang.
 """One bar seen through every public API that lists it.
 
 The bar menu (API spec 3.9), customer search (3.10), nearby bars (3.12) and map bars (3.13) must

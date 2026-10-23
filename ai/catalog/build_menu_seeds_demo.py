@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-19). Reviewed by Jinwoo Park.
 """Build menu seed files (scripts/seed_menu.py format) from human-reviewed labels + match gold.
 
 One board entry per catalog product per bar (bar_menu_items is unique per bar+product).

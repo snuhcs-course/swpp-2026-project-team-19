@@ -1,4 +1,3 @@
-// AI-assisted test draft (2026-10-13, I2-P13/P14). Human test execution pending.
 package com.zerotoone.bottlemap.ui.customer
 
 import com.zerotoone.bottlemap.data.CustomerSearchSource

@@ -1,4 +1,3 @@
-// AI-assisted tests for I2-A7/A8. All data below is test-only, never live UI.
 package com.zerotoone.bottlemap.ui.customer
 
 import androidx.lifecycle.SavedStateHandle

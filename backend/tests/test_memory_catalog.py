@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5; 2026-10-13, P22). Reviewed by Jinwoo Park.
 import json
 from pathlib import Path
 from uuid import UUID

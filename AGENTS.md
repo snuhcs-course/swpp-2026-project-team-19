@@ -81,20 +81,6 @@ Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) i
 - Every `/api` route is listed with its permission in `backend/tests/test_route_permissions.py`; add a new route there when you create it.
 - `scripts/reset_demo.py` and `scripts/reset_menu_imports.py` delete data. Do not run them against the deployed database unless explicitly asked.
 
-## Code file header (team rule)
-
-Every code file starts with one comment line recording AI use, for example:
-
-```python
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10). Reviewed by Jinwoo Park.
-```
-
-```kotlin
-// AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #7). Reviewed by Hojin Nam.
-```
-
-When you create a code file, add this line with your tool and model, the member you are working for, and today's date; add the PR number once it exists. When you substantially change an existing file, append your entry to its header instead of replacing it.
-
 ## Git and PRs
 
 - Branch from `main` as `feature/i<iteration>-<task-id>-<short-name>`, all lowercase, for example `feature/i2-p9-google-token-verification` for task P9 in Iteration 2.

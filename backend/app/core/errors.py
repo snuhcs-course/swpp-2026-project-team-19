@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #12); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 """Common error response format (API spec, section 9).
 
 Every error is returned as {"error": {"code", "message", "details", "fieldErrors"}}.

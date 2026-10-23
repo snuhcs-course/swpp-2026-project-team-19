@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13; 2026-10-14, M3). Reviewed by Jinwoo Park.
 """Evaluate product matching on labeled menu lines (eval_plan.md, 매칭 평가).
 
     python ai/eval/match_eval.py                       # dev split, matcher M0, both catalog conditions

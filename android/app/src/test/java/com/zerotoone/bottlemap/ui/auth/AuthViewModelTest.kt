@@ -1,4 +1,3 @@
-// AI-assisted tests (2026-10-17, I2-P19/P20/A5). Run :app:testDebugUnitTest.
 package com.zerotoone.bottlemap.ui.auth
 
 import com.zerotoone.bottlemap.data.AuthGateway

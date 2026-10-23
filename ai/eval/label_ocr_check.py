@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, L1). Reviewed by Jinwoo Park.
 """Check label names against the printed menu text read by CLOVA OCR.
 
     python ai/eval/label_ocr_check.py --set test --out review/test_ocr_check.html

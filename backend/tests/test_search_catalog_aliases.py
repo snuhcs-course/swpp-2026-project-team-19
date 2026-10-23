@@ -1,5 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-17). Reviewed by Haeul Yang.
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-21). Reviewed by Jinwoo Park.
 """Every alias of the service catalog finds what it names (API spec, section 3.10.1).
 
 The real catalog (`ai/catalog`) is loaded into the test database and every searchable alias is

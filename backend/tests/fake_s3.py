@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #16). Reviewed by Haeul Yang.
 """In-memory stand-in for the boto3 S3 client calls that S3ImageStorage makes."""
 
 import io

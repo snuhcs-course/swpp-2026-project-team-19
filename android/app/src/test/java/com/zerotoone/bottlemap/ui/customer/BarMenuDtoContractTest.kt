@@ -1,4 +1,3 @@
-// AI-assisted tests (2026-10-17, I2-P24). Execute with :app:testDebugUnitTest.
 package com.zerotoone.bottlemap.ui.customer
 
 import com.squareup.moshi.JsonDataException

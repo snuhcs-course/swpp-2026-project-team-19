@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, M3). Reviewed by Jinwoo Park.
 """Offline tests for the M3 layer (no API call: a fake LLM returns fixed outputs)."""
 
 import json

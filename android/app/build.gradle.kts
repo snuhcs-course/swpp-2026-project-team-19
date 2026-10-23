@@ -1,4 +1,3 @@
-// AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #7, #15). Reviewed by Hojin Nam.
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)

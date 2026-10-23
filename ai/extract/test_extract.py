@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20). Reviewed by Jinwoo Park.
 """Unit tests for the retry, timeout and response handling of extract.py.
 
 A fake client stands in for Gemini, so no network call or API key is needed,

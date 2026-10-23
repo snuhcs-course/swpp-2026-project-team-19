@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20). Reviewed by Jinwoo Park.
 """Unit tests for the AI CI gate (check_test_report.py) on small JUnit and coverage fixtures."""
 
 import json

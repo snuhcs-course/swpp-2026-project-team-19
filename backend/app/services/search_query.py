@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-17). Reviewed by Haeul Yang.
 """Resolve a customer search query to catalog products (API spec, section 3.10.1).
 
 The steps run in order and stop at the first one that finds an active product:

@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #12). Reviewed by Haeul Yang.
 """Shared setup for review submission tests: a sample import ready for review and a valid body."""
 
 from dataclasses import dataclass

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-14). Reviewed by Haeul Yang.
 """Public keys that verify Supabase access tokens (API spec, section 3.1.2).
 
 Supabase publishes its signing keys as a JWKS. The set is cached for ten minutes, under the

@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
-# Modified with Claude Code (Jinwoo Park, 2026-10-19): demo-menus-dry-run / demo-menus-apply modes.
 # Load the catalog seed (scripts/seed_catalog.py) into this server's database.
 #
 # Run by the seed-only SSH key, whose authorized_keys line forces this script (DEPLOY.md, section 5).
