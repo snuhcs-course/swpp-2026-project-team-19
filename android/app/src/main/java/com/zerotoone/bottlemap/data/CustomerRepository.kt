@@ -1,4 +1,3 @@
-// AI-assisted implementation draft (2026-10-13, I2-P13/P14). Human build/review pending.
 package com.zerotoone.bottlemap.data
 
 import com.zerotoone.bottlemap.network.ApiClient

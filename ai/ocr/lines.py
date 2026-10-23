@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, P12). Reviewed by Jinwoo Park.
 """Rebuild text lines (with boxes) from a CLOVA General OCR V2 response.
 
 Fields come in reading order; `lineBreak: true` marks the last field of a line.

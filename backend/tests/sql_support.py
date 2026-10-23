@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-20). Reviewed by Haeul Yang.
 """Record the SQL a request runs, to check that the number of queries does not grow with the data."""
 
 from collections.abc import Iterator

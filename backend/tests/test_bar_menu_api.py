@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, 2026-10-18, 2026-10-20). Reviewed by Haeul Yang.
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-06, PR #10; 2026-10-17, P47 final set). Reviewed by Jinwoo Park.
 """Score extraction runs against a label set (ai/docs/eval_plan.md).
 
     python ai/eval/score.py ai/runs/2026-10-04_A [ai/runs/2026-10-04_A2 ...]

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-15, P35). Reviewed by Jinwoo Park.
 """Hybrid extraction (CLOVA OCR + Gemini) and EXTRACTION_MODE. CLOVA goes through an httpx
 MockTransport or a fake call_ocr, Gemini through a fake client; no test calls a real API."""
 

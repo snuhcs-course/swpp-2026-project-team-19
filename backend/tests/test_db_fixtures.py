@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
 from decimal import Decimal
 from pathlib import Path
 

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, E2E). Reviewed by Jinwoo Park.
 """Unit tests for the hybrid extractor (no network)."""
 
 import json

@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3). Reviewed by Haeul Yang.
 from datetime import datetime
 from enum import Enum
 from uuid import UUID, uuid4

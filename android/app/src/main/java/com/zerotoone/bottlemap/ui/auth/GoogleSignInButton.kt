@@ -1,4 +1,3 @@
-// AI-assisted implementation (2026-10-17, I2-P19/A5). Device verification pending.
 package com.zerotoone.bottlemap.ui.auth
 
 import androidx.compose.material3.Button

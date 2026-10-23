@@ -1,4 +1,3 @@
-// AI-assisted implementation (2026-10-18, I2-A7).
 package com.zerotoone.bottlemap.data
 
 import android.Manifest

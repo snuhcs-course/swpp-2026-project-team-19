@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18, 2026-10-21). Reviewed by Haeul Yang.
 """Active bars within a radius of the customer (API spec, section 3.12).
 
 One query reads the bars inside a latitude/longitude box around the circle, and the haversine

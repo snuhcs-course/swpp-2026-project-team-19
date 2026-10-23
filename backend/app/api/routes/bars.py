@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #13). Reviewed by Haeul Yang.
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query

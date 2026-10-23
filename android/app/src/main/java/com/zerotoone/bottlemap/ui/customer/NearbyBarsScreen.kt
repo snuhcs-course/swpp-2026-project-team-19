@@ -1,4 +1,3 @@
-// AI-assisted Compose UI (2026-10-18, I2-A7/A8). Integrated with A9 API PR #43.
 package com.zerotoone.bottlemap.ui.customer
 
 import android.Manifest

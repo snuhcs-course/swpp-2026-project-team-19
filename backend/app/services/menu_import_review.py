@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Haeul Yang.
 """Read side of a menu import: progress while processing, the failure, or the full review payload."""
 
 from uuid import UUID

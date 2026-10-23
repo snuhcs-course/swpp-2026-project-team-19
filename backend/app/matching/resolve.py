@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5; 2026-10-21, I2-A22). Reviewed by Jinwoo Park.
 """Initial product resolution for one extracted menu line (matching flow doc, sections 6, 8, 10).
 
 This function does normalization and exact alias matching only, so a name with

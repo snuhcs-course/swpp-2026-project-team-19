@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, M3). Reviewed by Jinwoo Park.
 """Matching LLM layer on top of S1+S2b+S3 (eval_plan.md, M3 사전 등록).
 
     engine = M3(llm, lines_by_photo, products)

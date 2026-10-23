@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-17). Reviewed by Haeul Yang.
 from app.services.search_query import PARTIAL_LIMIT, resolve_search_query
 from tests.factories import make_brand, make_product
 

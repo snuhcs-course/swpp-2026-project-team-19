@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #19). Reviewed by Haeul Yang.
 from fastapi import APIRouter
 
 from app.core.version import get_version

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, E2E). Reviewed by Jinwoo Park.
 """Hybrid extraction: photo + cached CLOVA lines -> items with source lines (ai/docs/e2e_plan.md).
 
     python ai/ocr/hybrid.py --set val --tag val_v1 --runs 1

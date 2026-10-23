@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, P12). Reviewed by Jinwoo Park.
 """Stage 1: how much of the label text exists in the OCR output (ai/docs/p12_plan.md).
 
     python ai/ocr/recall.py --set val

@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #12); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-17). Reviewed by Haeul Yang.
 """Customer product search: bars that currently sell the products a query resolves to (API spec, section 3.10)."""
 
 import math

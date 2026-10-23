@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, L1). Reviewed by Jinwoo Park.
 """Unit tests for label_ocr_check.py and build_labels_v1_1.rebuild (no photos, no API)."""
 
 from __future__ import annotations

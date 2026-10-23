@@ -1,5 +1,3 @@
-// AI-generated with ChatGPT (Hojin Nam, 2026-10-06, PR #7, #15). Reviewed by Hojin Nam.
-// AI-assisted with ChatGPT/GPT-6 (Hojin Nam, 2026-10-18, PR #38). Human review pending.
 package com.zerotoone.bottlemap.navigation
 
 import android.net.Uri

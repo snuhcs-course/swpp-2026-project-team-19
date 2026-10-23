@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, M3). Reviewed by Jinwoo Park.
 """Veto tests for the M3 layer with made-up products that are not in the eval set or catalog.
 
 Fake distillery "Fernhollow" (페른홀로우) and its products; the independent bottler is a real

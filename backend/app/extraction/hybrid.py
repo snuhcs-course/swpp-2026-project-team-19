@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-15, P35). Reviewed by Jinwoo Park.
 """Hybrid extraction: CLOVA OCR lines + the photo -> Gemini with the frozen hybrid prompt v1.
 
 Same request as ai/ocr/hybrid.py (E2E, condition A2): user text = header + `<ocr_lines>`,

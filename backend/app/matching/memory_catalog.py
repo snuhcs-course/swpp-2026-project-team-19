@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5; 2026-10-13, P22). Reviewed by Jinwoo Park.
 """In-memory `CatalogLookup` loaded from the seed JSON, for tests and offline evaluation."""
 
 import json

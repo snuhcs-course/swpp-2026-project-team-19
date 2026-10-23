@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
 """Who may call each implemented API (API spec, section 2.2), with both kinds of token.
 
 Every `/api` route is listed below. A new route fails `test_every_api_route_is_classified`

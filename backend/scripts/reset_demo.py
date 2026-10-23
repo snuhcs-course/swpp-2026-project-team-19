@@ -1,5 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-07, PR #20). Reviewed by Haeul Yang.
-# Modified with Claude Code (Jinwoo Park, 2026-10-15): default seed files are now catalog v2 (PR #24).
 """Reset the database to the state right after seeding, e.g. after rehearsing the demo.
 
 What a rehearsal leaves behind is removed:

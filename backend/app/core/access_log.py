@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-19, 2026-10-21). Reviewed by Haeul Yang.
 """Keep the customer's location out of uvicorn's access log.
 
 The search APIs take the customer's location as `lat`/`lng` (spec 3.10, 3.12) and the map area as

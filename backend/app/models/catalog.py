@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #8, #11). Reviewed by Haeul Yang.
 from datetime import datetime
 from decimal import Decimal
 from uuid import UUID, uuid4

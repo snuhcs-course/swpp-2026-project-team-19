@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
 """Where a Supabase user's role comes from (API spec, section 3.1.4): `users.user_type`, never the token.
 
 Which routes need an operator is unchanged here; these tests only check the source of the role.

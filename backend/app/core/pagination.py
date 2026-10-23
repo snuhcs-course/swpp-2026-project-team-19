@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #13). Reviewed by Haeul Yang.
 """Opaque cursors for keyset pagination.
 
 A cursor holds the sort key of the last item of a page (e.g. [name, id]); the next page

@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-14). Reviewed by Haeul Yang.
 """Bearer-token checks for the API (API spec, sections 3.1.2 to 3.1.5).
 
 Two kinds of token are accepted:

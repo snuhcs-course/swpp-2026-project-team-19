@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-05, PR #5). Reviewed by Jinwoo Park.
 from uuid import UUID
 
 import pytest

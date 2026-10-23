@@ -1,5 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
-# Modified with Claude Code (Jinwoo Park, 2026-10-19): demo menu board modes (deploy/seed.sh).
 name: Seed catalog
 
 # Manual only: Actions → Seed catalog → Run workflow on main. Run dry-run first, then apply.

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, P12; 2026-10-17, P47 final set). Reviewed by Jinwoo Park.
 """CLOVA General OCR (V2) calls with a response cache (ai/docs/p12_plan.md).
 
     python ai/ocr/clova.py --set val                       # all val photos, table off + on

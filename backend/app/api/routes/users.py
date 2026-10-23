@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 

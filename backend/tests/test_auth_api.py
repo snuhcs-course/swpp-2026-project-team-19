@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-07, PR #17); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-14). Reviewed by Haeul Yang.
 """Temporary login and temporary-token checks (API spec, section 3.1.3).
 
 The role of a temporary token comes from TEMP_AUTH_USER_TYPE at request time, not from the token.

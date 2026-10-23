@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 """The bounding box that narrows the nearby-bar query (API spec, section 3.12).
 
 The box may be larger than the circle but must never cut off a point inside it, or a bar within

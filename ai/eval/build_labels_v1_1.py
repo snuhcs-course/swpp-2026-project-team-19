@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, L1). Reviewed by Jinwoo Park.
 """Build labels v1.1: raw_name as printed on the menu (approved fixes only).
 
     python ai/eval/build_labels_v1_1.py

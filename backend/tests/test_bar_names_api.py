@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-21). Reviewed by Haeul Yang.
 """GET /api/search/bar-names: active bars by part of their name or address (API spec, section 3.11.11)."""
 
 import pytest

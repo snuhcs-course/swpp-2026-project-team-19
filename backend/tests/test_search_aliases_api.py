@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-17). Reviewed by Haeul Yang.
 """Customer search finds the same whisky by its Korean and English names (API spec, section 3.10.1).
 
 A product search must give the same response, apart from the `query` echo, whichever language,

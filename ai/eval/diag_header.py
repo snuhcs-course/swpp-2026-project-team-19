@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13). Reviewed by Jinwoo Park.
 """Post-hoc diagnostic: item accuracy ignoring the brand/bottler title rule.
 
     python ai/eval/diag_header.py --set test ai/runs/2026-10-13_test_v2_A2

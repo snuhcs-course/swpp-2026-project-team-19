@@ -1,4 +1,3 @@
-// AI-assisted implementation draft (2026-10-17, I2-P25/A6). Human verification pending.
 package com.zerotoone.bottlemap.ui.customer
 
 /**

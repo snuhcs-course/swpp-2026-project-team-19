@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-15, P35). Reviewed by Jinwoo Park.
 """Hybrid menu extraction (CLOVA OCR + Gemini, frozen hybrid prompt v1) behind `MenuExtractor`.
 
 Selected with MENU_EXTRACTOR=gemini and EXTRACTION_MODE=hybrid (default EXTRACTION_MODE=gemini

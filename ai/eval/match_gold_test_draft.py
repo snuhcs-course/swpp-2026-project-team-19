@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13). Reviewed by Jinwoo Park.
 """Layer-2 gold draft for the matching TEST split (미라보, 포레스트).
 
     python ai/eval/match_gold_test_draft.py   # writes eval/match_gold_test_draft.json
