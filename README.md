@@ -28,6 +28,8 @@ Customer (guest or Google sign-in)
 
 [Watch on YouTube](https://youtube.com/shorts/nqEcSemJcAA): customer search → bar comparison → bar detail and Kakao Map, then the developer-build owner flow (select bar → gallery or camera → extraction result).
 
+Video file in this branch: [`iteration2_demo.mp4`](./iteration2_demo.mp4) (1 min 42 s, no audio). It was recorded on 2026-10-19, before the final Iteration 2 UI polish (I2-A19), so the home screen still shows the earlier Nearby Bars section and the bar 수이 appears under its old name 수이바. Every feature shown in the video is in this branch.
+
 ## Features Demonstrated in Iteration 2
 
 ### Customer (`customer` and `developer` builds)
