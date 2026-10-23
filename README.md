@@ -10,71 +10,81 @@ BottleMap is an Android application for drinkers who want to find bars serving a
 
 Developed by **Team 19 — Zero to One** for the SNU Software Development Principles and Practices course.
 
-## Iteration 1
+## Iteration 2
+
+Iteration 2 focused on the **customer side** of the app. Owner registration features stay in a developer-only build until Iteration 3.
 
 ```text
-Owner uploads menu photo
-→ AI extraction
-→ product matching
-→ owner review / publish
-→ customer whisky search
-→ serving-bar results
+Customer (guest or Google sign-in)
+→ whisky search
+→ serving-bar results (price, pour size, menu update date)
+→ bar detail with full menu
+→ map and nearby-bar discovery
 ```
 
-Iteration 1 is demonstrated through a **live demo on Android devices**.
+### Demo Video
 
-## Features
+[![Iteration 2 demo video](https://img.youtube.com/vi/nqEcSemJcAA/hqdefault.jpg)](https://youtube.com/shorts/nqEcSemJcAA)
 
-### Customer
-- Search whisky by product name or supported alias
-- Resolve names against the canonical catalogue
-- Show bars currently serving the matched product
-- Show bar name, price, pour size / option label, menu update date, and distance when available
-- Handle loading, unknown-product, no-bars, and network/API error states
+[Watch on YouTube](https://youtube.com/shorts/nqEcSemJcAA): customer search → bar comparison → bar detail and Kakao Map, then the developer-build owner flow (select bar → gallery or camera → extraction result).
 
-### Owner / Operator
-- Temporary operator login for the Iteration 1 demo
-- Load registered bars and resume unfinished imports
-- Select a menu image with Android Photo Picker
-- Validate and prepare JPEG/PNG images before upload
-- Upload menu image and poll extraction status
-- Review real AI extraction/matching results
-- Apply current backend proposals and publish
-- Search the published result from Customer mode
+## Features Demonstrated in Iteration 2
+
+### Customer (`customer` and `developer` builds)
+- Search without signing in (guest), or sign in with Google (Supabase Auth); the session is kept across app restarts until logout
+- Search a whisky by Korean or English name or alias
+- Result cards with bar, price, pour size, and menu update date; separate empty states for an unknown product and for no serving bars; retry on network or server errors
+- Bar Detail screen with the full published menu, options, and update time; tap the address to copy it
+- Embedded Kakao Map with bar markers from stored coordinates; bars without coordinates are handled
+- Map-first bar discovery: bars in the visible map area, bar-name search on the map, and a nearby-bar carousel (1 km) that focuses the bar's marker
+- Location-permission handling: denied permission and no nearby bars fall back without blocking search
+
+### Owner / Operator (`developer` build only)
+- Select a bar, choose several menu photos from the gallery or take them with the in-app camera, and submit them in one import
+- See the extraction result screen; the developer demo stops there and does not publish menus (temporary operator login, as in Iteration 1)
+
+### Backend
+- Public APIs for product search, bar menu/detail, nearby bars, map-area bars, and bar-name search
+- Server verification of Google sign-in tokens (Supabase); protected owner endpoints
+- Customer location is not written to the API access log
 
 ### AI / Data
-- Gemini-based menu extraction
-- Canonical whisky catalogue with Korean/English aliases
-- Product entity resolution for menu upload and search
-- Evaluation scripts and preserved experiment outputs
+- Hybrid menu extraction on the server: CLOVA OCR lines and the photo go to Gemini together (`EXTRACTION_MODE=hybrid`); if OCR fails, the photo alone goes to Gemini
+- Product matching in menu import with staged rules after the exact alias match: S1 name variants, S2 brand + age/edition, S2b default product, S3 one-letter typo; each candidate records the rule that found it in `evidence.rule`
+- Catalog v2 covering the pilot bars' whiskies, with Korean aliases for customer search
+- Reviewed menus of four pilot bars published for customer search
+- Evaluated but not deployed: an LLM matching layer and Naver Search candidates (results in the Design Documentation)
+
+### CI/CD
+- **Backend CI/CD:** tests on PostgreSQL; the check fails if line + branch coverage of `backend/app` is below 98%. `main` is deployed to the server after the tests pass
+- **Android CI:** lint, unit tests, and debug APK builds for both flavors
+- **AI CI:** AI unit tests with per-component coverage and a check that fails when tests are deleted or skipped
 
 ## Tech Stack
 
-**Android:** Kotlin, Jetpack Compose, Material 3, Navigation Compose, ViewModel, Retrofit, OkHttp, Moshi  
+**Android:** Kotlin, Jetpack Compose, Material 3, Navigation Compose, ViewModel, Retrofit, OkHttp, Moshi, Kakao Maps SDK, Supabase Auth (Google sign-in)  
 **Backend:** FastAPI, PostgreSQL, SQLAlchemy, Alembic  
-**AI:** Gemini vision model, canonical product catalogue, alias matching  
-**Deployment:** AWS EC2, RDS, S3, Caddy/HTTPS
+**AI:** CLOVA OCR + Gemini (hybrid extraction), catalog aliases with staged matching rules  
+**Deployment:** AWS EC2, RDS, S3, Caddy/HTTPS, GitHub Actions
 
 ## Repository Structure
 
 ```text
 .
-├── android/
-├── backend/
-├── ai/
-├── eval/
-├── .github/
+├── android/     Android app (customer and developer flavors)
+├── backend/     FastAPI server, matching, extraction adapters, tests
+├── ai/          catalog, extraction/OCR/matching experiments, evaluation, AI tests
+├── eval/        evaluation data
+├── docs/        API spec, schema, matching flow, images
+├── .github/     CI/CD workflows
 └── README.md
 ```
 
 ## Getting Started
 
 ### Prerequisites
-- Android Studio
-- JDK 17
-- Android SDK 37
-- Android device or emulator
-- Minimum Android SDK: 26
+- Android Studio, JDK 17, Android SDK 37 (minimum SDK 26)
+- Android device or emulator; location and camera features need a real device
 
 ### Clone
 
@@ -83,33 +93,39 @@ git clone https://github.com/snuhcs-course/swpp-2026-project-team-19.git
 cd swpp-2026-project-team-19
 ```
 
-### Build for the deployed backend
+### Build Settings
 
-macOS/Linux:
+Pass these as Gradle properties (`-P...` or `~/.gradle/gradle.properties`). Never commit real keys; ask the team for them.
+
+| Property | Needed for |
+|---|---|
+| `BOTTLEMAP_API_BASE_URL` | Backend URL. Deployed server: `https://bottlemap.o-r.kr/`. Debug default: `http://10.0.2.2:8000/` (emulator → local backend) |
+| `BOTTLEMAP_KAKAO_NATIVE_APP_KEY` | Kakao Map. The app's package and signing-key hash must be registered in Kakao Developers |
+| `BOTTLEMAP_SUPABASE_URL`, `BOTTLEMAP_SUPABASE_PUBLISHABLE_KEY`, `BOTTLEMAP_GOOGLE_WEB_CLIENT_ID` | Google sign-in. Guest search does not need it |
+
+### Build
+
+| Flavor | Contents | Command |
+|---|---|---|
+| `customer` | Customer features only (regular distribution) | `./gradlew :app:assembleCustomerDebug` |
+| `developer` | Customer features + owner menu registration | `./gradlew :app:assembleDeveloperDebug` |
+
+Example for the deployed backend (Windows: `.\gradlew.bat`):
 
 ```bash
-./gradlew :app:assembleDebug -PBOTTLEMAP_API_BASE_URL=https://bottlemap.o-r.kr/
+./gradlew :app:assembleCustomerDebug \
+  -PBOTTLEMAP_API_BASE_URL=https://bottlemap.o-r.kr/ \
+  -PBOTTLEMAP_KAKAO_NATIVE_APP_KEY=<key> \
+  -PBOTTLEMAP_SUPABASE_URL=<url> \
+  -PBOTTLEMAP_SUPABASE_PUBLISHABLE_KEY=<key> \
+  -PBOTTLEMAP_GOOGLE_WEB_CLIENT_ID=<client-id>
 ```
 
-Windows PowerShell:
-
-```powershell
-.\gradlew.bat :app:assembleDebug -PBOTTLEMAP_API_BASE_URL=https://bottlemap.o-r.kr/
-```
-
-APK output:
-
-```text
-android/app/build/outputs/apk/debug/
-```
-
-> The default debug endpoint is `http://10.0.2.2:8000/` for local emulator development. For the deployed demo backend, pass `BOTTLEMAP_API_BASE_URL` explicitly.
+APK output: `android/app/build/outputs/apk/<flavor>/debug/`
 
 ## Local Backend
 
-See [`backend/README.md`](backend/README.md).
-
-Typical setup:
+See [`backend/README.md`](backend/README.md) for every setting.
 
 ```bash
 cd backend
@@ -121,101 +137,55 @@ uv run --env-file .env python scripts/seed_menu.py
 uv run --env-file .env uvicorn app.main:app --reload
 ```
 
-Local API: `http://127.0.0.1:8000`  
-Swagger UI: `http://127.0.0.1:8000/docs`
+`MENU_EXTRACTOR=mock` needs no API keys. Real extraction needs `MENU_EXTRACTOR=gemini` with `GEMINI_API_KEY`, `EXTRACTION_MODEL`, `EXTRACTION_THINKING_LEVEL`, and, for `EXTRACTION_MODE=hybrid`, `CLOVA_OCR_INVOKE_URL` and `CLOVA_OCR_SECRET`.
+
+Local API: `http://127.0.0.1:8000` · Swagger UI: `http://127.0.0.1:8000/docs`
 
 ## Testing
 
-### Android
-
 ```bash
-./gradlew :app:testDebugUnitTest
-./gradlew :app:assembleDebug
+# Android
+./gradlew :app:lintCustomerDebug :app:lintDeveloperDebug
+./gradlew :app:testCustomerDebugUnitTest :app:testDeveloperDebugUnitTest
+
+# Backend (PostgreSQL test database, see backend/README.md)
+cd backend && uv run --env-file .env pytest --cov
+
+# AI (commands and policy in the Testing Documentation, section 2.1)
+pytest ai
 ```
 
-Current unit tests cover customer search mapping and owner review-decision mapping, including unknown product/no-bars distinction, nullable pour sizes, RFC3339 timestamps, and unresolved review decisions.
+Iteration 2 results (details in the Testing Documentation):
+- **Backend:** 918 tests passed, 98.95% coverage (after P40)
+- **AI:** 141 tests (140 passed, 1 allowed skip that needs live CLOVA keys); coverage targets met for all four components
+- **Android:** 53 JVM unit tests passed; coverage not measured yet
+- **Device check:** 20 of 20 customer checks passed on a Galaxy S23 (developer flavor, deployed backend, reported by Hojin Nam)
 
-### Backend
+## Known Limitations and TODOs
 
-```bash
-cd backend
-uv run --env-file .env pytest --cov
-```
-
-Backend CI/CD runs the tests on relevant pull requests and pushes to `main`, and deploys `main` to the server after they pass. The current Iteration 1 baseline reports **434 passing tests** and about **99% line-and-branch coverage**.
-
-## Live Demo Flow
-
-### Owner
-1. Open **Owner** mode.
-2. Select the demo bar.
-3. Choose a real menu image.
-4. Upload it.
-5. Wait for AI extraction/matching.
-6. Review the extracted menu.
-7. Confirm and publish.
-
-### Customer
-1. Open **Customer** mode on the second phone.
-2. Search for a whisky published in the owner flow.
-3. Confirm that the corresponding bar appears.
-4. Check price / option information and update time.
-
-## Known Limitations
-
-- Android currently supports one image per menu import, while the backend supports multiple images.
-- Iteration 1 review is a minimal thin slice and is not yet a full catalogue-correction editor.
-- Bar detail and map interaction are deferred beyond the Iteration 1 results-list slice.
-- Temporary operator authentication is for the demo period only.
-- Gemini extraction latency can vary from several seconds to longer.
-- Menu processing runs inside the FastAPI process; a server restart during processing can leave an import stuck in `processing`.
-- Android has local unit tests, but no permanent Android GitHub Actions workflow on `main`.
-- Release builds have no production backend URL by default; the URL must be supplied at build time.
-
-## Demo Readiness Checklist
-
-- [ ] Pull latest `main`
-- [ ] Confirm deployed `/health` works
-- [ ] Confirm temporary operator login is enabled
-- [ ] Confirm demo catalogue/database state
-- [ ] Build with `https://bottlemap.o-r.kr/`
-- [ ] Install the same verified build on both demo phones
-- [ ] Run `:app:testDebugUnitTest`
-- [ ] Run `:app:assembleDebug`
-- [ ] Smoke-test Owner upload → extraction → review → publish
-- [ ] Smoke-test Customer search on the second phone
-- [ ] Keep one known-good JPEG/PNG demo menu image on-device
-- [ ] Confirm stable network access
-- [ ] Freeze code/config/demo data after the final smoke test unless a critical fix is needed
+- **User testing:** external customer testing planned for Iteration 2 was moved to Iteration 3.
+- **Owner features:** only in the developer build, with the temporary operator login; owner accounts and the full owner flow are Iteration 3 work.
+- **Devices:** the device check used one Galaxy S23 and the developer flavor; the Galaxy S22 and the customer flavor were not checked on a device.
+- **Android coverage:** no coverage report (JaCoCo) yet.
+- **Matching:** the server runs rules only (exact alias and S1–S3). The LLM matching layer was evaluated but is not deployed. Menus written in Korean transliteration are still often left for the owner to match.
+- **Processing:** menu processing runs inside the API process; a server restart during processing can leave an import in `processing`.
+- **Build keys:** the Kakao, Supabase, and Google values are not in the repository and must be supplied at build time; release builds have no backend URL by default.
 
 ## Documentation
 
-Project documentation is maintained in the GitHub Wiki:
+Project documents are in the [GitHub Wiki](https://github.com/snuhcs-course/swpp-2026-project-team-19/wiki):
 - Proposal
 - Requirements and Specifications
 - Design Documentation
 - Testing Documentation
+- AI Collaboration Reports and Prompt Logs (Iterations 1 and 2)
 - Risk Management
-- Meeting Logs
-- Iteration 1 Pilot Survey Results
-- AI Collaboration Report
+- Daily Standup Meeting Log
+- Pilot Survey Results
 
 ## Team
 
 **Team 19 — Zero to One**
-- Nam Hojin — Android Frontend / Product Definition
+- Nam Hojin — Android Frontend / Product Definition (Iteration 2 PM)
 - Yang Haeul — Backend / Integration
-- Park Jinwoo — AI / Iteration 1 PM
-
-## Iteration 1 Status
-
-The core thin slice is integrated on `main`:
-
-```text
-menu photo upload
-→ AI extraction
-→ product matching
-→ human review / publication
-→ customer whisky search
-→ serving-bar result
-```
+- Park Jinwoo — AI
