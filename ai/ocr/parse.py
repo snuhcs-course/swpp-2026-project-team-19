@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, P12). Reviewed by Jinwoo Park.
 """Stage 2: OCR lines + boxes -> items with a text LLM (ai/docs/p12_plan.md).
 
     python ai/ocr/parse.py --set val --tag val_v1 --runs 3

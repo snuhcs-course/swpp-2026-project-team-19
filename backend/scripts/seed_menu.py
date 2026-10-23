@@ -1,5 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9). Reviewed by Haeul Yang.
-# Modified with Claude Code (Jinwoo Park, 2026-10-19): --dry-run (load, print, roll back) for the demo menu seed workflow mode.
 """Reset a bar's current menu board to a seed file (default: the Seorosang demo menu).
 
 The bar and every product in the menu must already exist, so run `seed_catalog.py` first.

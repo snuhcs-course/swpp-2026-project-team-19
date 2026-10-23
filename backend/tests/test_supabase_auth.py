@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-14). Reviewed by Haeul Yang.
 """Supabase access-token checks (API spec, sections 3.1.2 and 3.1.5).
 
 Tokens are signed in the test and verified against a JWKS served from memory (`supabase` fixture);

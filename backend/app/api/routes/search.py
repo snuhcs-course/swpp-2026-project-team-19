@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18, 2026-10-21). Reviewed by Haeul Yang.
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query

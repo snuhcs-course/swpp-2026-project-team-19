@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11). Reviewed by Haeul Yang.
 """Draft diff between a menu import's proposed items and the bar's current menu board.
 
 Pure functions over plain data so the rules are easy to test. The diff is a proposal for

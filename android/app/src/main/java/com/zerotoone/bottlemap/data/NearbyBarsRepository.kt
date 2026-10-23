@@ -1,4 +1,3 @@
-// AI-assisted Android frontend foundation (2026-10-18, I2-A7/A8).
 package com.zerotoone.bottlemap.data
 
 import kotlin.math.asin

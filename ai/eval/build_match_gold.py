@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-13). Reviewed by Jinwoo Park.
 """Build eval/match_gold_v1.json: the product each labeled menu line refers to.
 
     python ai/eval/build_match_gold.py

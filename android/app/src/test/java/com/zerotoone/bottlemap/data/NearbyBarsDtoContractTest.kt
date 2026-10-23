@@ -1,4 +1,3 @@
-// AI-assisted tests: Backend A9 PR #43 / API spec 3.12; no network or SDK calls.
 package com.zerotoone.bottlemap.data
 
 import com.squareup.moshi.JsonDataException

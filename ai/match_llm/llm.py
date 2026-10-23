@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, M3). Reviewed by Jinwoo Park.
 """Gemini calls for the matching LLM layer, with a response cache and a call cap (eval_plan.md, M3).
 
     llm = CachedLLM(cache_dir)

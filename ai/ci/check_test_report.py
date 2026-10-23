@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20). Reviewed by Jinwoo Park.
 """Check the AI test run against ai/ci/test_policy.json and print a Markdown summary.
 
     python ai/ci/check_test_report.py <junit.xml> <coverage.json> [--summary FILE]

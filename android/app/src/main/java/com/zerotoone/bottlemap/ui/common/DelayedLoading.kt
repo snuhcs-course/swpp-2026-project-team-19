@@ -1,4 +1,3 @@
-// AI-assisted UI stabilization (2026-10-18, I2-P31/P32).
 package com.zerotoone.bottlemap.ui.common
 
 import androidx.compose.foundation.layout.Box

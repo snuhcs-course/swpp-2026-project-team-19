@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-17, P47). Reviewed by Jinwoo Park.
 """P47 numbers from the run outputs (ai/docs/p47_plan.md, 4절·5절). Reads files only, no API call.
 
     python ai/eval/p47_report.py ai/runs/2026-10-17_p47

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-14). Reviewed by Haeul Yang.
 """Supabase access-token settings from environment variables (API spec, sections 3.1.2 and 3.1.6).
 
 Supabase signs access tokens with an asymmetric key and publishes the public keys at

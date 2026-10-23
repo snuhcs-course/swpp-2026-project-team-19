@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-07, PR #19). Reviewed by Haeul Yang.
 """The commit this process runs, reported by /health so a deployment can be checked from outside."""
 
 import subprocess

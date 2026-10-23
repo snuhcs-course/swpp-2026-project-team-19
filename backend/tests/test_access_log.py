@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-19, 2026-10-21). Reviewed by Haeul Yang.
 import logging
 
 import pytest

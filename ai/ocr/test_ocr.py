@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, P12). Reviewed by Jinwoo Park.
 """Unit tests on a synthetic CLOVA V2 response fixture. No network, except
 test_live_clova_call, which runs only when CLOVA keys are in the environment / .env."""
 

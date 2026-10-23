@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-04, PR #3, #9, #11, #12). Reviewed by Haeul Yang.
 from fastapi import APIRouter
 
 from app.api.routes.auth import router as auth_router

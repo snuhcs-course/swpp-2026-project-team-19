@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20). Reviewed by Jinwoo Park.
 name: AI CI
 
 # No workflow-level path filter, for the same reason as Android CI: a skipped workflow

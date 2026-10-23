@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-15, P35). Reviewed by Jinwoo Park.
 """CLOVA General OCR (V2) for the hybrid extractor, from ai/ocr/clova.py and ai/ocr/lines.py.
 
 One call per photo, table detection off (the E2E hybrid setting). The image sent is the

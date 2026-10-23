@@ -1,5 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #8); Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
-# Modified with Claude Code (Jinwoo Park, 2026-10-15): default seed files are now catalog v2 (PR #24).
 """Load the pilot bars and the product catalog seed (ai/catalog/) into the database.
 
 Brands, products, and bars are upserted by id, so re-running after editing the JSON

@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #16). Reviewed by Haeul Yang.
 """Storage for uploaded menu photos.
 
 The database keeps only the storage key. `LocalImageStorage` writes to disk for local

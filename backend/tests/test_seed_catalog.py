@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, 2026-10-18). Reviewed by Haeul Yang.
 from uuid import uuid4
 
 import pytest

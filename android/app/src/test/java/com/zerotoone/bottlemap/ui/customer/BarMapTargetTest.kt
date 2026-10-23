@@ -1,4 +1,3 @@
-// AI-assisted tests (2026-10-17, I2-P25/A6). Execute :app:testDebugUnitTest.
 package com.zerotoone.bottlemap.ui.customer
 
 import org.junit.Assert.assertEquals

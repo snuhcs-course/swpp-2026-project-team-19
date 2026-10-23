@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-21). Reviewed by Haeul Yang.
 """Find active bars by part of their name or address (API spec, section 3.11.11).
 
 Used to pick one's bar in an owner application and to find a bar on the customer map. The query

@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15). Reviewed by Haeul Yang.
 """The BottleMap user behind a verified token (API spec, section 3.2).
 
 `GET /api/me` is the only place that creates users. The first call stores the token's subject

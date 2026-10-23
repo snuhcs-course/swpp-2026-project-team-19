@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-21). Reviewed by Haeul Yang.
 """GET /api/search/map-bars: every active bar inside the map area (API spec, section 3.13)."""
 
 from datetime import datetime, timedelta, timezone

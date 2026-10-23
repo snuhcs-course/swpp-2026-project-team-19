@@ -1,4 +1,3 @@
-// AI-assisted implementation draft (2026-10-13, I2-P14). Human build/review pending.
 package com.zerotoone.bottlemap.ui.customer
 
 /** Search request state is owned by SearchResultsViewModel. */

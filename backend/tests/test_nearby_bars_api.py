@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-18). Reviewed by Haeul Yang.
 """GET /api/search/nearby-bars: every active bar within a radius (API spec, section 3.12)."""
 
 import math

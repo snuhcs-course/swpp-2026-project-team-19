@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-21). Reviewed by Haeul Yang.
 """Active bars inside the area shown on the customer's map (API spec, section 3.13).
 
 Every bar inside the area, edges included, in one query and without truncation: the size limit on

@@ -1,4 +1,3 @@
-# AI-assisted with ChatGPT/GPT-6 for Hojin Nam (2026-10-18, I2-P37/P38). Human review pending.
 name: Android CI
 
 # Do not use workflow-level path filters: a skipped workflow can leave PR checks Pending.

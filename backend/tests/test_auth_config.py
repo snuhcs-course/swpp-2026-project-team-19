@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-14). Reviewed by Haeul Yang.
 import pytest
 
 from app.core.auth_config import AuthConfigError, load_supabase_auth_settings

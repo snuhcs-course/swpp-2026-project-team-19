@@ -1,4 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #9, #11, #12, #16). Reviewed by Haeul Yang.
 """Shared fixtures for tests that need PostgreSQL.
 
 Tests that use `db_session` or `client` run against the database named by

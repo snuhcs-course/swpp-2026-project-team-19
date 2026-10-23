@@ -1,5 +1,3 @@
-# AI-generated with ChatGPT (Haeul Yang, 2026-10-06, PR #11, #12). Reviewed by Haeul Yang.
-# Modified with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-20, I2-A18): staged matching rules. Reviewed by Jinwoo Park.
 """Background processing of a menu import after the upload request has returned.
 
 For each image in order: extract → store items and options (committed per image so

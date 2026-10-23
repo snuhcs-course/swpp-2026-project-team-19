@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Haeul Yang, 2026-10-15, 2026-10-23). Reviewed by Haeul Yang.
 """GET /api/me: creating and syncing the BottleMap user (API spec, section 3.2)."""
 
 from datetime import datetime, timedelta, timezone

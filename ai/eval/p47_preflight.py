@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-17, P47). Reviewed by Jinwoo Park.
 """P47 dry run: load everything the final run needs, without any API call (ai/docs/p47_plan.md).
 
     python ai/eval/p47_preflight.py [--json ai/runs/2026-10-17_p47/preflight.json]

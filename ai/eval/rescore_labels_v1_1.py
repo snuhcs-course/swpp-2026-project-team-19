@@ -1,4 +1,3 @@
-# AI-generated with Claude Code/Claude Opus 5.5 (Jinwoo Park, 2026-10-14, L1). Reviewed by Jinwoo Park.
 """Rescore stored outputs with labels v1.1 (no API call, no new model output).
 
     python ai/eval/rescore_labels_v1_1.py [--date 2026-10-14]
