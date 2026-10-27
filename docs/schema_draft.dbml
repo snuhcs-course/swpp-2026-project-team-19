@@ -178,7 +178,7 @@ Table bar_owner_applications {
   opening_date date [not null, note: 'Business opening date on the certificate']
   business_verification_result business_verification_result [not null, note: 'Latest NTS check. Never not_matched at submission, because such an application is not created']
   business_status business_status [note: 'From the latest NTS check; null unless the result is matched']
-  business_checked_at timestamptz [not null, note: 'When the latest NTS check was attempted']
+  business_checked_at timestamptz [not null, note: 'When the stored result was obtained; a failed operator recheck changes nothing']
   contact_phone varchar(30) [not null]
   applicant_note varchar(500)
   status owner_application_status [not null, default: 'pending']
@@ -192,8 +192,8 @@ Table bar_owner_applications {
     (status, created_at)
     (applicant_user_id, created_at)
     (bar_id)
-    (applicant_user_id, bar_id) [unique, note: "Partial: where status = 'pending' and application_type = 'existing_bar'"]
-    (applicant_user_id, business_registration_number) [unique, note: "Partial: where status = 'pending' and application_type = 'new_bar'"]
+    (applicant_user_id, bar_id) [note: "Unique where status = 'pending' and application_type = 'existing_bar'"]
+    (applicant_user_id, business_registration_number) [note: "Unique where status = 'pending' and application_type = 'new_bar'"]
   }
 
   Note: '''

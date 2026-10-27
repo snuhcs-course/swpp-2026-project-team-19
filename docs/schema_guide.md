@@ -282,7 +282,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `opening_date` | `date`, NOT NULL | `2020-03-02` | 사업자등록증의 개업연월일이다. 국세청 진위확인에 필요하다. |
 | `business_verification_result` | `business_verification_result`, NOT NULL | `matched` | 마지막 국세청 진위확인 결과다. 운영자가 승인 전에 판단 근거로 본다. |
 | `business_status` | `business_status`, nullable | `active` | 마지막 확인에서 국세청이 알려 준 사업자 상태다. 결과가 `matched`가 아니면 `null`이다. 신청자에게도 보여 준다. |
-| `business_checked_at` | `timestamptz`, NOT NULL | `2026-10-14T03:00:00Z` | 마지막으로 국세청 확인을 시도한 시각이다. |
+| `business_checked_at` | `timestamptz`, NOT NULL | `2026-10-14T03:00:00Z` | 저장된 검증 결과를 얻은 시각이다. 신청할 때 `unavailable`이 되었으면 그 시도 시각이다. 운영자의 다시 검증이 실패하면 결과와 함께 바뀌지 않는다. |
 | `contact_phone` | `varchar(30)`, NOT NULL | `010-1234-5678` | 운영자가 확인을 위해 연락할 번호다. 업장 전화번호와 다를 수 있다. |
 | `applicant_note` | `varchar(500)`, nullable | `대표 본인입니다` | 신청자가 남긴 메모다. |
 | `status` | `owner_application_status`, NOT NULL, 기본 `pending` | `pending` | 신청 처리 상태다. |

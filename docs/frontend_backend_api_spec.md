@@ -1178,7 +1178,7 @@ closed      폐업자
 | `businessStatus` | `BusinessStatus` | 예 | 마지막 검증에서 국세청이 알려 준 사업자 상태. 검증 결과가 `matched`가 아니거나 국세청이 상태를 알려 주지 않으면 `null`. 신청자에게도 보여 준다 |
 | `businessVerification` | 객체 | 예 | operator에게만 값이 있고, 신청자 본인이 조회하면 `null` |
 | `businessVerification.result` | `BusinessVerificationResult` | 아니오 | 마지막 검증 결과 |
-| `businessVerification.checkedAt` | RFC 3339 문자열 | 아니오 | 마지막으로 검증을 시도한 시각 |
+| `businessVerification.checkedAt` | RFC 3339 문자열 | 아니오 | `result`를 얻은 시각. 신청할 때 `unavailable`이 되었으면 그 시도 시각이다. 다시 검증(3.11.13)이 실패하면 `result`와 함께 바뀌지 않는다 |
 | `contactPhone` | 문자열 | 아니오 | 운영자가 확인을 위해 연락할 번호 |
 | `applicantNote` | 문자열 | 예 | 신청자 메모 |
 | `rejectionReason` | 문자열 | 예 | `rejected`일 때만 값이 있다 |
@@ -1562,7 +1562,7 @@ Authorization: Bearer <access-token>
 operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 사업자등록번호, 대표자명, 개업일자로 국세청 진위확인 API를 다시 호출하고 결과를 저장한다. 신청할 때 검증 서비스에 연결하지 못한 신청(`unavailable`)이나, 승인 전에 사업자 상태를 다시 확인할 때 쓴다.
 
 - 검증 서비스가 응답하면 `businessVerification.result`(`matched` 또는 `not_matched`), `businessStatus`, `businessVerification.checkedAt`을 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다. 신청 상태(`status`)는 바뀌지 않는다. `not_matched`이면 operator가 거절한다.
-- 검증 서비스에 연결하지 못하면 저장된 결과를 바꾸지 않고 `503 BUSINESS_VERIFICATION_UNAVAILABLE`을 반환한다.
+- 검증 서비스에 연결하지 못하면 저장된 결과와 `checkedAt`을 바꾸지 않고 `503 BUSINESS_VERIFICATION_UNAVAILABLE`을 반환한다. 실패한 시도는 기록하지 않는다.
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
