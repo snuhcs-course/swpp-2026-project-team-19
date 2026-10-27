@@ -101,7 +101,7 @@ Rules for AI first-pass review of pull requests. The AI review comments only: it
 
 ### What to check
 
-- **The PR description against the diff.** Every required template section is filled in, and a section or block that does not apply (the unused "Contract and scope" block, an empty "Notes for reviewers") is left empty or removed. If "Contract and scope" says there is no contract change, check that no API path, field, error code, schema, or behavior the other side relies on changed. If it says there is one, check that the specs in `docs/` were updated in the same PR. If the diff needs a manual step (a new env var or secret, a workflow to run), check that "After merge" lists it.
+- **The PR description against the diff.** Every required template section is filled in. Exactly one "Contract and scope" block is kept and the unused one is removed; an optional section with nothing to say ("Notes for reviewers") is left empty or removed. If "Contract and scope" says there is no contract change, check that no API path, field, error code, schema, or behavior the other side relies on changed. If it says there is one, check that the specs in `docs/` were updated in the same PR. If the diff needs a manual step (a new env var or secret, a workflow to run), check that "After merge" lists it.
 - **Correctness**: bugs, unhandled error or failure cases, and behavior that differs from the specs in `docs/`.
 - **The rules in this file**, especially "API conventions", "Android notes", "Backend notes", and "Never commit", and the test rules under "Commands".
 - **Tests**: no test is deleted, skipped, or weakened without a reason in the PR.
@@ -125,9 +125,6 @@ A PR needs a careful human review if it touches any of these. Judge by what the 
 
 ### Review output
 
-Start the review with one line:
+Report each finding as a review comment on `file:line`, most severe first, with what is wrong and a concrete failure case. Mark a finding as uncertain when you could not confirm it.
 
-- `Needs human review: yes (<areas>)` when any risk area applies, or
-- `Needs human review: no`
-
-Then list findings, most severe first. Each finding gives `file:line`, what is wrong, and a concrete failure case. Mark a finding as uncertain when you could not confirm it. If there are no findings, say so in one line.
+When the PR touches a risk area, also report one P1 finding titled `Needs human review: <areas>`, on the first changed line in one of those areas, listing every risk area the PR touches. Report it even when the change itself looks correct.
