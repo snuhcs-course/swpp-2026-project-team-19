@@ -7,7 +7,7 @@
 포함 범위:
 
 - Google 로그인 후 BottleMap 사용자 확인, 인증 오류 처리
-- 업주 신청, operator 승인과 업주 권한
+- 업주 신청(사업자등록증 사진 읽기, 사업자등록 정보 1차 검증), operator 승인과 업주 권한
 - 메뉴 사진 업로드와 비동기 처리 시작
 - 처리 상태 polling
 - 추출 항목·옵션·상품 후보·임시 diff 통합 조회
@@ -19,6 +19,7 @@
 제외 범위:
 
 - 백엔드와 OCR·LLM·Vision LLM 사이의 요청
+- 백엔드와 국세청 사업자등록정보 API 사이의 요청
 - 작업 큐와 AI 워커 내부 통신
 - 운영자용 카탈로그 일반 CRUD
 - 중간 검수 결과 자동 저장
@@ -95,10 +96,10 @@ GET 주변 업장 조회 (위치 + 반경)
 | `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names` | O | O | O | O |
 | `GET /api/bars/{barId}/menu` | 활성 업장만 | 활성 업장만 | O | O |
 | `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
-| `POST /api/owner-applications`, `GET /api/me/owner-applications` | | O | O | O |
+| `POST /api/owner-applications`, `GET /api/me/owner-applications`, `POST /api/owner-applications/business-certificate-ocr` | | O | O | O |
 | `GET /api/owner-applications/{applicationId}` | | 본인 신청만 | 본인 신청만 | O |
 | `POST /api/owner-applications/{applicationId}/cancel` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
-| `GET /api/owner-applications`, `POST .../approve`, `POST .../reject` | | | | O |
+| `GET /api/owner-applications`, `POST .../approve`, `POST .../reject`, `POST .../verify-business` | | | | O |
 | `DELETE /api/bars/{barId}/owner` | | | | O |
 | `GET /api/bars`, `POST /api/bars` | | | | O |
 | `GET /api/bars/{barId}` | | | O | O |
@@ -207,13 +208,15 @@ ignore
 | `POST` | `/api/menu-imports/{menuImportId}/review-and-apply` | 전체 검수 결정 제출과 원자적 반영 |
 | `POST` | `/api/menu-imports/{menuImportId}/cancel` | 미완료 메뉴 등록 작업 취소 |
 | `GET` | `/api/search/bar-names` | 업장 이름·주소 검색. 업주 신청과 고객 지도 검색용 (공개) |
-| `POST` | `/api/owner-applications` | 업주 신청 |
+| `POST` | `/api/owner-applications/business-certificate-ocr` | 사업자등록증 사진에서 신청 항목 읽기 |
+| `POST` | `/api/owner-applications` | 업주 신청과 사업자등록 정보 1차 검증 |
 | `GET` | `/api/me/owner-applications` | 내 업주 신청 목록 |
 | `GET` | `/api/owner-applications/{applicationId}` | 업주 신청 상세 |
 | `POST` | `/api/owner-applications/{applicationId}/cancel` | 업주 신청 취소 |
 | `GET` | `/api/owner-applications` | operator의 업주 신청 목록 |
 | `POST` | `/api/owner-applications/{applicationId}/approve` | 업주 신청 승인 |
 | `POST` | `/api/owner-applications/{applicationId}/reject` | 업주 신청 거절 |
+| `POST` | `/api/owner-applications/{applicationId}/verify-business` | 사업자등록 정보 다시 검증 |
 | `GET` | `/api/me/bars` | 내가 업주인 업장 목록 |
 | `DELETE` | `/api/bars/{barId}/owner` | 업주 해제 |
 
@@ -1057,20 +1060,29 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 
 - 한 업장에는 현재 업주가 최대 한 명이다. 한 사용자는 여러 업장의 업주가 될 수 있다.
 - 신청은 두 종류다. `existing_bar`는 이미 등록된 업장의 업주 신청이고, `new_bar`는 아직 없는 업장을 등록하면서 업주가 되는 신청이다.
-- 신청자는 사업자등록번호와 연락처를 제출한다. operator는 이 값을 앱 밖에서 확인한 뒤 승인하거나 거절한다. 사업자등록번호와 연락처는 신청자 본인과 operator에게만 보여 준다.
+- 신청자는 사업자등록번호, 대표자명, 개업일자와 연락처를 제출한다. 사업자등록증 사진을 올리면 앞의 세 값을 읽어 입력란을 미리 채울 수 있다(3.11.12).
+- 백엔드는 신청을 받을 때 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자가 서로 맞는지 1차 검증한다(3.11.2). 맞지 않으면 신청을 만들지 않고 신청자가 입력을 고치게 한다. 검증 서비스에 연결하지 못하면 신청은 받고 결과를 `unavailable`로 남긴다.
+- 외부 API를 부르는 두 요청은 사용자마다 하루 5회로 제한한다: 신청할 때의 국세청 진위확인(3.11.2)과 사업자등록증 OCR(3.11.12). 남의 사업자등록번호로 대표자명과 개업일자를 맞춰 보는 시도와 외부 API 호출 한도 소진을 막기 위해서다. 규칙은 3.11.14에 있다.
+- operator는 웹 대시보드에서 신청과 검증 결과를 보고, 실제 매장이 있는지 확인한 뒤 승인하거나 거절한다.
+- 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자 본인과 operator에게만 보여 준다. 검증 결과 중 신청자에게는 사업자 상태(`businessStatus`)만 보여 준다. 백엔드는 이 값들을 로그에 남기지 않는다.
 - 신청 결과는 알림으로 보내지 않는다. 신청자는 3.11.3으로 상태를 확인한다.
 
 ```text
 [신청자]
 GET /api/me                                  (users 행이 없으면 먼저 생성)
 GET /api/search/bar-names?query=...          (기존 업장 신청이면 업장 선택, 3.11.11)
-POST /api/owner-applications                 → pending
+POST /api/owner-applications/business-certificate-ocr
+                                             (선택. 사업자등록증 사진으로 입력란 채우기, 3.11.12)
+POST /api/owner-applications                 → 1차 검증 후 pending
+                                               (정보가 맞지 않으면 422, 입력을 고쳐 다시 신청)
 GET /api/me/owner-applications               → 상태 확인
 POST /api/owner-applications/{id}/cancel     → canceled (pending일 때만)
 
-[operator]
-GET /api/owner-applications?status=pending  → 대기 목록
-사업자등록번호·연락처를 앱 밖에서 확인
+[operator, 웹 대시보드]
+GET /api/owner-applications?status=pending  → 대기 목록과 검증 결과
+POST /api/owner-applications/{id}/verify-business
+                                             (검증 결과가 unavailable이면 다시 검증, 3.11.13)
+실제 매장이 있는지 확인
 POST /api/owner-applications/{id}/approve    → approved, 업주 관계 생성 (new_bar는 업장도 생성)
 POST /api/owner-applications/{id}/reject     → rejected
 
@@ -1089,6 +1101,26 @@ canceled
 ```
 
 `approved`, `rejected`, `canceled`는 최종 상태이며 다시 바뀌지 않는다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
+
+`BusinessVerificationResult`: 국세청 진위확인 결과
+
+```text
+matched       사업자등록번호, 대표자명, 개업일자가 국세청 정보와 맞음
+not_matched   맞지 않음 (operator가 다시 검증했을 때만 저장된다. 신청 시점에는 신청을 만들지 않는다)
+unavailable   검증 서비스 오류, 시간 초과, 호출 한도 초과로 확인하지 못함
+```
+
+국세청 API는 세 값 중 어느 것이 틀렸는지 알려 주지 않으므로 결과는 이 셋뿐이다.
+
+`BusinessStatus`: 국세청이 알려 준 사업자 상태
+
+```text
+active      계속사업자
+suspended   휴업자
+closed      폐업자
+```
+
+휴업이나 폐업 사업자도 신청은 받는다. 승인할지는 operator가 판단한다.
 
 #### 3.11.1 업주 신청 응답 형식
 
@@ -1110,7 +1142,14 @@ canceled
     "address": "서울특별시 관악구 관악로 1 2층"
   },
   "proposedBar": null,
-  "businessRegistrationNumber": "1234567890",
+  "businessRegistrationNumber": "1234567891",
+  "representativeName": "김사장",
+  "openingDate": "2020-03-02",
+  "businessStatus": "active",
+  "businessVerification": {
+    "result": "matched",
+    "checkedAt": "2026-10-14T03:00:00Z"
+  },
   "contactPhone": "010-1234-5678",
   "applicantNote": "대표 본인입니다",
   "rejectionReason": null,
@@ -1134,6 +1173,12 @@ canceled
 | `proposedBar.name`, `proposedBar.address` | 문자열 | 아니오 | |
 | `proposedBar.phone` | 문자열 | 예 | |
 | `businessRegistrationNumber` | 문자열 | 아니오 | 하이픈을 뺀 숫자 10자리 |
+| `representativeName` | 문자열 | 아니오 | 사업자등록증의 대표자 성명 |
+| `openingDate` | `YYYY-MM-DD` 문자열 | 아니오 | 사업자등록증의 개업연월일 |
+| `businessStatus` | `BusinessStatus` | 예 | 마지막 검증에서 국세청이 알려 준 사업자 상태. 검증 결과가 `matched`가 아니거나 국세청이 상태를 알려 주지 않으면 `null`. 신청자에게도 보여 준다 |
+| `businessVerification` | 객체 | 예 | operator에게만 값이 있고, 신청자 본인이 조회하면 `null` |
+| `businessVerification.result` | `BusinessVerificationResult` | 아니오 | 마지막 검증 결과 |
+| `businessVerification.checkedAt` | RFC 3339 문자열 | 아니오 | 마지막으로 검증을 시도한 시각 |
 | `contactPhone` | 문자열 | 아니오 | 운영자가 확인을 위해 연락할 번호 |
 | `applicantNote` | 문자열 | 예 | 신청자 메모 |
 | `rejectionReason` | 문자열 | 예 | `rejected`일 때만 값이 있다 |
@@ -1156,7 +1201,9 @@ Content-Type: application/json
 {
   "applicationType": "existing_bar",
   "barId": "22222222-2222-4222-8222-222222222222",
-  "businessRegistrationNumber": "123-45-67890",
+  "businessRegistrationNumber": "123-45-67891",
+  "representativeName": "김사장",
+  "openingDate": "2020-03-02",
   "contactPhone": "010-1234-5678",
   "applicantNote": "대표 본인입니다"
 }
@@ -1172,7 +1219,9 @@ Content-Type: application/json
     "address": "서울특별시 관악구 신림로 2 3층",
     "phone": "02-1234-5678"
   },
-  "businessRegistrationNumber": "123-45-67890",
+  "businessRegistrationNumber": "123-45-67891",
+  "representativeName": "김사장",
+  "openingDate": "2020-03-02",
   "contactPhone": "010-1234-5678",
   "applicantNote": null
 }
@@ -1186,11 +1235,25 @@ Content-Type: application/json
 | `proposedBar.name` | 예 | 앞뒤 공백을 지운 뒤 1~150자 |
 | `proposedBar.address` | 예 | 앞뒤 공백을 지운 뒤 1~500자 |
 | `proposedBar.phone` | 아니오 | 30자 이하. 없으면 `null` |
-| `businessRegistrationNumber` | 예 | 하이픈과 공백을 지운 뒤 숫자 10자리. 하이픈 없이 저장한다 |
+| `businessRegistrationNumber` | 예 | 하이픈과 공백을 지운 뒤 숫자 10자리이고, 국세청 검증번호(마지막 자리) 계산이 맞아야 한다. 아니면 `INVALID_BUSINESS_NUMBER`. 하이픈 없이 저장한다 |
+| `representativeName` | 예 | 사업자등록증의 대표자 성명 그대로. 앞뒤 공백을 지운 뒤 1~100자 |
+| `openingDate` | 예 | 사업자등록증의 개업연월일. `YYYY-MM-DD`. 한국 시간 기준 오늘보다 뒤이면 `DATE_IN_FUTURE` |
 | `contactPhone` | 예 | 앞뒤 공백을 지운 뒤 1~30자 |
 | `applicantNote` | 아니오 | 500자 이하. 공백뿐이면 `null`로 저장한다 |
 
 새 업장의 좌표는 신청자가 보내지 않는다. 승인할 때 operator가 주소를 확인하고 좌표를 입력한다(3.11.7).
+
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다. 사업자등록 정보 검증은 외부 API를 부르므로 마지막에 한다.
+
+1. 요청 형식과 위 필드 규칙 (`422 VALIDATION_FAILED`)
+2. `users` 행 (`404 USER_NOT_FOUND`)
+3. `existing_bar`의 업장과 현재 업주 (`404 BAR_NOT_FOUND`, `409 BAR_OWNER_EXISTS`)
+4. 본인의 대기 중 신청 (`409 OWNER_APPLICATION_EXISTS`)
+5. 오늘의 진위확인 횟수 (`429 RATE_LIMITED`, 3.11.14)
+6. 국세청 진위확인 API로 `businessRegistrationNumber`, `representativeName`, `openingDate` 검증
+   - 맞음: 신청을 만들고 `businessVerification.result = matched`, `businessStatus`에 사업자 상태를 저장한다.
+   - 맞지 않음: 신청을 만들지 않고 `422 BUSINESS_VERIFICATION_FAILED`를 반환한다.
+   - 검증 서비스 오류, 시간 초과, 호출 한도 초과, 또는 서버에 검증 설정이 없음: 신청을 만들고 `businessVerification.result = unavailable`, `businessStatus = null`로 저장한다. operator가 나중에 다시 검증한다(3.11.13).
 
 `201 Created`, `Location: /api/owner-applications/{applicationId}`, 본문은 `OwnerApplication`(`status = pending`)이다.
 
@@ -1200,8 +1263,10 @@ Content-Type: application/json
 | `404` | `USER_NOT_FOUND` | `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `BAR_NOT_FOUND` | `existing_bar`의 업장이 없거나, 비활성이거나, `barId`가 UUID 형식이 아님 | 업장 선택 화면으로 돌아가 다시 선택 |
 | `409` | `BAR_OWNER_EXISTS` | 업장에 이미 현재 업주가 있음(본인 포함) | "이미 업주가 등록된 업장입니다" 안내 |
-| `409` | `OWNER_APPLICATION_EXISTS` | 같은 사용자가 같은 업장에 대기 중인 신청이 있음. `details.applicationId`에 기존 신청 ID | 기존 신청 상세로 이동 |
-| `422` | `VALIDATION_FAILED` | 위 규칙 위반. 사업자등록번호 형식 오류는 `fieldErrors[].code = INVALID_BUSINESS_NUMBER` | `fieldErrors` 표시 |
+| `409` | `OWNER_APPLICATION_EXISTS` | 같은 사용자의 대기 중인 신청이 있음. `existing_bar`는 같은 업장, `new_bar`는 같은 사업자등록번호의 `new_bar` 신청. `details.applicationId`에 기존 신청 ID | 기존 신청 상세로 이동 |
+| `422` | `VALIDATION_FAILED` | 위 규칙 위반. 사업자등록번호 형식이나 검증번호 오류는 `fieldErrors[].code = INVALID_BUSINESS_NUMBER`, 미래의 개업일자는 `DATE_IN_FUTURE` | `fieldErrors` 표시 |
+| `422` | `BUSINESS_VERIFICATION_FAILED` | 사업자등록번호, 대표자명, 개업일자가 국세청 정보와 맞지 않음. 신청은 만들어지지 않는다 | 세 값을 사업자등록증과 같게 입력했는지 확인하라고 안내하고, 입력값을 유지한 채 수정하게 한다 |
+| `429` | `RATE_LIMITED` | 오늘 진위확인을 5회 했음(3.11.14). 신청은 만들어지지 않는다. `details.retryAfter`에 다음 초기화 시각 | 내일 다시 신청하라고 안내하고, 입력값을 유지한다 |
 
 #### 3.11.3 내 업주 신청 목록
 
@@ -1210,7 +1275,7 @@ GET /api/me/owner-applications
 Authorization: Bearer <access-token>
 ```
 
-호출자 본인의 신청을 모든 상태에 대해 최근 신청부터 반환한다. 페이지네이션은 두지 않는다. 신청이 없으면 `items = []`다.
+호출자 본인의 신청을 모든 상태에 대해 최근 신청부터 반환한다. 페이지네이션은 두지 않는다. 신청이 없거나 `users` 행이 아직 없으면 `items = []`다. 신청자 본인의 조회이므로 각 신청의 `businessVerification`은 `null`이고 `businessStatus`만 보여 준다(3.11.1). operator가 호출해도 본인의 신청만 나온다.
 
 ```json
 {
@@ -1256,10 +1321,11 @@ operator만 호출할 수 있다.
 |---|---|---|---|
 | `status` | 아니오 | `pending` | `pending`, `approved`, `rejected`, `canceled`, `all` |
 | `applicationType` | 아니오 | 없음 | `existing_bar`, `new_bar`. 없으면 둘 다 |
+| `verificationResult` | 아니오 | 없음 | `matched`, `not_matched`, `unavailable`. 없으면 모두. 다시 검증할 신청을 찾을 때 쓴다 |
 | `limit` | 아니오 | `20` | 1~100 |
-| `cursor` | 아니오 | 없음 | 다음 페이지 cursor |
+| `cursor` | 아니오 | 없음 | 이전 응답의 `nextCursor`. 형식은 정하지 않으며, 같은 필터로만 쓸 수 있다 |
 
-정렬은 `status = pending`이면 오래된 신청부터(처리 순서), 그 외에는 최근 신청부터다.
+정렬은 `status = pending`이면 오래된 신청부터(처리 순서), 그 외에는 최근 신청부터다. 응답의 각 신청에는 `businessVerification`이 들어 있다.
 
 ```json
 {
@@ -1270,6 +1336,13 @@ operator만 호출할 수 있다.
 }
 ```
 
+`nextCursor`는 다음 페이지가 없으면 `null`이다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `422` | `VALIDATION_FAILED` | 허용하지 않는 `status`, `applicationType`, `verificationResult`(`LITERAL_ERROR`), `limit` 범위 밖, 읽을 수 없거나 다른 필터에서 받은 `cursor`(`INVALID_CURSOR`) | 필터를 초기화하고 첫 페이지부터 다시 조회 |
+
 #### 3.11.7 업주 신청 승인
 
 ```http
@@ -1278,7 +1351,7 @@ Authorization: Bearer <access-token>
 Content-Type: application/json
 ```
 
-operator만 호출할 수 있다.
+operator만 호출할 수 있다. 사업자등록 정보 검증 결과가 `matched`가 아니어도 승인할 수 있다. 판단은 operator가 하며, 대시보드는 `unavailable`인 신청을 먼저 다시 검증(3.11.13)하도록 안내한다.
 
 - `existing_bar`: 요청 본문이 없거나 `{}`다.
 - `new_bar`: operator가 확인한 업장 정보를 보낸다. 프론트엔드는 `proposedBar`를 초기값으로 채우고, operator가 주소를 확인해 좌표를 입력한다. 필드 규칙은 3.5와 같다.
@@ -1324,7 +1397,7 @@ Content-Type: application/json
 }
 ```
 
-operator만 호출할 수 있다. `reason`은 필수이며 앞뒤 공백을 지운 뒤 1~500자다. 신청자에게 그대로 보여 준다. `200 OK`, 본문은 `OwnerApplication`(`status = rejected`)이다. 오류는 3.11.7의 `403`, `404`, `409 INVALID_APPLICATION_STATE`, `422`와 같다.
+operator만 호출할 수 있다. `reason`은 필수이며 앞뒤 공백을 지운 뒤 1~500자다. 신청자에게 그대로 보여 준다. 사업자등록 정보 검증 결과와 관계없이 거절할 수 있다. `200 OK`, 본문은 `OwnerApplication`(`status = rejected`)이다. 오류는 3.11.7의 `403`, `404`, `409 INVALID_APPLICATION_STATE`와 같고, `422 VALIDATION_FAILED`는 `reason`이 없거나(`MISSING`), 공백뿐이거나(`BLANK`), 500자를 넘을 때(`STRING_TOO_LONG`)다.
 
 #### 3.11.9 내가 관리하는 업장 목록
 
@@ -1333,7 +1406,7 @@ GET /api/me/bars
 Authorization: Bearer <access-token>
 ```
 
-로그인한 사용자 누구나 호출할 수 있다. 호출자가 현재 업주인 업장을 이름순으로 반환한다. 업주가 아니면 `items = []`이며, operator도 본인이 업주인 업장만 나온다(전체 업장은 3.4). 프론트엔드는 목록이 비어 있지 않으면 업주 메뉴를 보여 준다. 업장마다 3.6과 같은 형식이다.
+로그인한 사용자 누구나 호출할 수 있다. 호출자가 현재 업주인 업장을 이름순으로 반환한다. 업주가 아니거나 `users` 행이 아직 없으면 `items = []`이며, operator도 본인이 업주인 업장만 나온다(전체 업장은 3.4). 프론트엔드는 목록이 비어 있지 않으면 업주 메뉴를 보여 준다. 업장마다 3.6과 같은 형식이다.
 
 ```json
 {
@@ -1420,7 +1493,7 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
 | `items[].barId` | UUID 문자열 | 아니오 | |
 | `items[].name`, `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4. 고객 지도 검색에서 지도를 옮길 위치 |
-| `items[].hasOwner` | 불리언 | 아니오 | 현재 업주가 있으면 `true`. 이 업장에 신청하면 `409 BAR_OWNER_EXISTS`다. 업주 기능(3.11)을 구현하는 I3 전에는 업주가 없으므로 항상 `false`다 |
+| `items[].hasOwner` | 불리언 | 아니오 | 현재 업주가 있으면 `true`. 이 업장에 신청하면 `409 BAR_OWNER_EXISTS`다 |
 | `truncated` | 불리언 | 아니오 | `limit`보다 많이 일치했으면 `true` |
 
 비활성 업장은 결과에 없다.
@@ -1431,6 +1504,99 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `422` | `VALIDATION_FAILED` | `query` 없음(`MISSING`), 공백뿐(`BLANK`), 100자 초과(`STRING_TOO_LONG`), `limit` 범위 밖 | 검색창 아래에 안내 |
+
+#### 3.11.12 사업자등록증 사진 읽기
+
+신청자가 사업자등록증 사진을 올리면 신청 입력란을 미리 채울 값을 읽어 돌려준다. 신청은 만들지 않으며 선택 기능이다. 사진이 없거나 이 API가 실패해도 신청자는 값을 직접 입력해 3.11.2로 신청할 수 있다.
+
+```http
+POST /api/owner-applications/business-certificate-ocr
+Authorization: Bearer <access-token>
+Content-Type: multipart/form-data
+```
+
+| multipart 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `image` | 이미지 파일 1개 | 예 | 사업자등록증 사진. JPEG 또는 PNG, 10MB 이하. 형식 판별은 4.1과 같다 |
+
+로그인한 사용자 누구나 호출할 수 있고 `users` 행이 없어도 된다. 백엔드는 메뉴 사진과 같은 CLOVA OCR로 글자를 읽고 정해진 규칙으로 항목을 찾는다. 처리는 동기이며 작업을 만들지 않는다. **사진과 읽은 값은 서버에 저장하지 않고 로그에도 남기지 않는다.**
+
+`200 OK`
+
+```json
+{
+  "businessRegistrationNumber": "1234567891",
+  "representativeName": "김사장",
+  "openingDate": "2020-03-02",
+  "businessName": "신림 몰트 하우스",
+  "address": "서울특별시 관악구 신림로 2 3층"
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `businessRegistrationNumber` | 문자열 | 예 | 하이픈을 뺀 10자리. 검증번호 계산(3.11.2)이 맞지 않으면 잘못 읽은 것으로 보고 `null` |
+| `representativeName` | 문자열 | 예 | 대표자 성명 |
+| `openingDate` | `YYYY-MM-DD` 문자열 | 예 | 개업연월일. 날짜로 읽을 수 없으면 `null` |
+| `businessName` | 문자열 | 예 | 상호. `new_bar` 신청의 `proposedBar.name` 초기값으로 쓸 수 있다 |
+| `address` | 문자열 | 예 | 사업장 소재지. `new_bar` 신청의 `proposedBar.address` 초기값으로 쓸 수 있다 |
+
+읽지 못한 항목은 `null`이며, 하나도 읽지 못해도 `200`에 모든 값이 `null`이다. 프론트엔드는 읽은 값으로 입력란을 채우고 신청자가 확인하고 고친 뒤 신청하게 한다. 읽은 값을 확인 없이 바로 제출하지 않는다. 사업자등록 정보 검증은 이 API가 아니라 3.11.2에서 한다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `413` | `UPLOAD_TOO_LARGE` | 10MB 초과. `details.maxImageBytes`에 제한값 | 사진을 다시 압축해 재시도 |
+| `415` | `UNSUPPORTED_IMAGE_TYPE` | JPEG·PNG가 아니거나 선언한 형식과 내용이 다름 | JPEG로 바꿔 재시도 |
+| `422` | `VALIDATION_FAILED` | `image` 없음(`MISSING`) 또는 사진이 2개 이상 | 사진 다시 선택 |
+| `429` | `RATE_LIMITED` | 오늘 OCR을 5회 했음(3.11.14). `details.retryAfter`에 다음 초기화 시각 | 직접 입력하도록 안내 |
+| `503` | `OCR_UNAVAILABLE` | 서버에 OCR 설정이 없거나, OCR 호출이 재시도 후에도 실패 | 직접 입력하도록 안내. 잠시 후 다시 시도할 수 있다 |
+
+#### 3.11.13 사업자등록 정보 다시 검증
+
+```http
+POST /api/owner-applications/{applicationId}/verify-business
+Authorization: Bearer <access-token>
+```
+
+operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 사업자등록번호, 대표자명, 개업일자로 국세청 진위확인 API를 다시 호출하고 결과를 저장한다. 신청할 때 검증 서비스에 연결하지 못한 신청(`unavailable`)이나, 승인 전에 사업자 상태를 다시 확인할 때 쓴다.
+
+- 검증 서비스가 응답하면 `businessVerification.result`(`matched` 또는 `not_matched`), `businessStatus`, `businessVerification.checkedAt`을 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다. 신청 상태(`status`)는 바뀌지 않는다. `not_matched`이면 operator가 거절한다.
+- 검증 서비스에 연결하지 못하면 저장된 결과를 바꾸지 않고 `503 BUSINESS_VERIFICATION_UNAVAILABLE`을 반환한다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없거나 `applicationId`가 UUID 형식이 아님 | 신청 목록 재조회 |
+| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회 |
+| `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | 검증 서비스 오류, 시간 초과, 호출 한도 초과, 또는 서버에 검증 설정이 없음 | 잠시 후 다시 시도 안내 |
+
+#### 3.11.14 진위확인과 OCR 요청 수 제한
+
+| 대상 | 한도 | 세는 요청 |
+|---|---|---|
+| 업주 신청의 국세청 진위확인 (3.11.2) | 사용자마다 하루 5회 | 3.11.2의 1~5단계를 통과해 국세청 API를 실제로 호출한 요청. 결과(`matched`, `not_matched`, `unavailable`)와 관계없이 센다. 서버에 검증 설정이 없어 호출하지 않은 요청은 세지 않는다 |
+| 사업자등록증 OCR (3.11.12) | 사용자마다 하루 5회 | `413`, `415`, `422` 검사를 통과해 CLOVA OCR을 실제로 호출한 요청. 읽은 항목이 없어도, 호출이 실패해 `503`이 되어도 센다. 서버에 OCR 설정이 없어 호출하지 않은 요청은 세지 않는다 |
+
+- 사용자는 token의 `sub`(3.1.2)로 구분한다. OCR은 `users` 행이 없어도 호출할 수 있으므로 `users.id`가 아니라 `sub`로 센다.
+- 두 한도는 따로 센다. operator의 다시 검증(3.11.13)은 제한하지 않는다.
+- 하루는 한국 시간(KST) 자정에 초기화된다.
+- 한도를 넘으면 외부 API를 호출하지 않고 `429 RATE_LIMITED`를 반환한다. `details.retryAfter`에 다음 초기화 시각(RFC 3339, UTC)을 담는다.
+
+```json
+{
+  "error": {
+    "code": "RATE_LIMITED",
+    "message": "오늘 사업자등록 정보 확인 횟수를 모두 사용했습니다. 내일 다시 시도해 주세요.",
+    "details": {
+      "retryAfter": "2026-10-28T15:00:00Z"
+    },
+    "fieldErrors": []
+  }
+}
+```
+
+- 횟수는 서버 메모리에 저장한다. 서버가 재시작되면 횟수가 초기화되며, 이 한계는 받아들인다. API 프로세스가 하나(worker 1개)일 때만 한도가 정확하다.
 
 ### 3.12 내 주변 업장 조회
 
@@ -2400,8 +2566,8 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
 | `405` | `METHOD_NOT_ALLOWED` | 경로는 있지만 허용하지 않는 HTTP 메서드 | 요청 메서드 확인 |
 | `409` | `BAR_OWNER_EXISTS` | 이미 현재 업주가 있는 업장에 신청 또는 승인 (3.11) | 안내. operator는 해당 신청을 거절 |
-| `409` | `OWNER_APPLICATION_EXISTS` | 같은 업장에 본인의 대기 중 신청이 있음 (3.11.2) | `details.applicationId`의 신청으로 이동 |
-| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소 (3.11) | 신청 상세 재조회 |
+| `409` | `OWNER_APPLICATION_EXISTS` | 같은 업장, 또는 같은 사업자등록번호의 `new_bar`에 본인의 대기 중 신청이 있음 (3.11.2) | `details.applicationId`의 신청으로 이동 |
+| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소·다시 검증 (3.11) | 신청 상세 재조회 |
 | `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 키에 다른 요청 내용 | 새 키로 명시적 재요청 |
 | `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있음. `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 재업로드 |
 | `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가. 예: `ready_for_review`가 아닌 작업의 검수 제출, `applied`·`failed` 작업의 취소. `details.status`에 현재 상태 | 상태 재조회 |
@@ -2411,6 +2577,10 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `413` | `UPLOAD_TOO_LARGE` | 파일 개수 또는 크기 초과 | 이미지 축소 또는 개수 조정 |
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | 지원하지 않는 이미지 형식 | 지원 형식 안내 |
 | `422` | `VALIDATION_FAILED` | 필드 값이나 옵션 구성이 잘못됨 | `fieldErrors` 표시 |
+| `422` | `BUSINESS_VERIFICATION_FAILED` | 업주 신청의 사업자등록번호, 대표자명, 개업일자가 국세청 정보와 맞지 않음 (3.11.2) | 입력값을 유지한 채 수정 안내 |
+| `429` | `RATE_LIMITED` | 업주 신청의 진위확인 또는 사업자등록증 OCR을 오늘 5회 했음. `details.retryAfter`에 다음 초기화 시각 (3.11.14) | 내일 다시 시도 안내. OCR은 직접 입력 안내 |
+| `503` | `OCR_UNAVAILABLE` | 사업자등록증 사진을 읽는 OCR 설정이 없거나 호출 실패 (3.11.12) | 직접 입력 안내 |
+| `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | operator의 다시 검증에서 국세청 API에 연결하지 못함 (3.11.13) | 잠시 후 재시도 안내 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 동일 검수 요청 재시도 |
 | `500` | `INTERNAL_ERROR` | 예상하지 못한 서버 오류(DB 연결 실패, 코드 오류 등). 모든 API에서 생길 수 있다. 원인은 응답에 담지 않고 서버 로그에만 남긴다 | 잠시 후 재시도 안내 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버의 인증 설정 누락 또는 오류, Supabase JWKS 조회 실패 (3.1.5) | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않음 |
@@ -2441,7 +2611,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
 - **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `EXTRA_FORBIDDEN`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`.
 
 ### 9.4 검수 버전 충돌
 

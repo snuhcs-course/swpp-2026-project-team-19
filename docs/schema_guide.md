@@ -24,7 +24,7 @@
 | 추출 옵션 | 추출 상품 항목에 속한 가격·용량 조합 | 15ml 8,000원, 30ml 15,000원 |
 | 평가 세트 | 성능 측정에 사용할 고정된 이미지 묶음 | Iteration 1 Held-out Set |
 | 업주 | 운영자 승인을 받아 특정 업장을 관리하는 사용자. 사용자 유형이 아니라 사용자와 업장의 관계다 | 관악 위스키 바의 사장 |
-| 업주 신청 | 사용자가 기존 업장 또는 새 업장의 업주가 되겠다고 낸 요청 | 사업자등록번호와 연락처를 적어 관악 위스키 바 업주 신청 |
+| 업주 신청 | 사용자가 기존 업장 또는 새 업장의 업주가 되겠다고 낸 요청 | 사업자등록번호, 대표자명, 개업일자와 연락처를 적어 관악 위스키 바 업주 신청 |
 
 ## 3 전체 데이터 흐름
 
@@ -60,14 +60,15 @@
 
 ### 3.4 업주 등록과 승인
 
-1. 로그인한 사용자가 업주 신청을 낸다. 기존 업장이면 `bar_id`를, 새 업장이면 업장명·주소·전화번호를 적고, 사업자등록번호와 연락처를 함께 `bar_owner_applications`에 `pending`으로 저장한다.
-2. 운영자가 대기 중인 신청 목록을 보고, 사업자등록번호와 연락처를 앱 밖에서 확인한다.
-3. 승인하면 같은 트랜잭션에서 다음을 처리한다.
+1. 로그인한 사용자가 업주 신청을 낸다. 기존 업장이면 `bar_id`를, 새 업장이면 업장명·주소·전화번호를 적고, 사업자등록번호, 대표자명, 개업일자와 연락처를 함께 적는다. 사업자등록증 사진을 올리면 OCR로 읽은 값이 입력란에 미리 채워진다. 사진은 저장하지 않는다.
+2. 백엔드가 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자를 1차 검증한다. 맞지 않으면 행을 만들지 않고 신청자가 입력을 고친다. 맞으면 `business_verification_result = matched`와 사업자 상태를, 검증 서비스에 연결하지 못하면 `unavailable`을 저장하고 `bar_owner_applications`에 `pending`으로 저장한다.
+3. 운영자가 웹 대시보드에서 대기 중인 신청과 검증 결과를 보고, 실제 매장이 있는지 확인한다. `unavailable`이면 다시 검증한다.
+4. 승인하면 같은 트랜잭션에서 다음을 처리한다.
    - 기존 업장: 현재 업주가 없는지 다시 확인하고 `bar_owners` 행을 만든다.
    - 새 업장: 운영자가 확인한 업장 정보(좌표 포함)로 `bars` 행을 만들고, 신청의 `bar_id`에 저장한 뒤 `bar_owners` 행을 만든다.
-4. 거절하면 사유를 `rejection_reason`에 남긴다. 신청자는 대기 중인 신청을 직접 취소할 수 있다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
-5. 승인된 업주는 자기 업장의 정보 수정과 메뉴 등록·검수·반영을 할 수 있다. 권한은 매 요청 `bar_owners`에서 확인하므로 승인이나 해제가 다음 요청부터 반영된다.
-6. 운영자는 업주 관계를 해제할 수 있다. 행을 지우지 않고 `revoked_at`을 기록한다.
+5. 거절하면 사유를 `rejection_reason`에 남긴다. 신청자는 대기 중인 신청을 직접 취소할 수 있다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
+6. 승인된 업주는 자기 업장의 정보 수정과 메뉴 등록·검수·반영을 할 수 있다. 권한은 매 요청 `bar_owners`에서 확인하므로 승인이나 해제가 다음 요청부터 반영된다.
+7. 운영자는 업주 관계를 해제할 수 있다. 행을 지우지 않고 `revoked_at`을 기록한다.
 
 구체적인 요청·응답 형식은 API 명세의 업주 신청과 승인 절을 따른다.
 
@@ -209,6 +210,24 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 `approved`, `rejected`, `canceled`는 최종 상태이며 다시 바뀌지 않는다. 승인 뒤 업주 관계를 해제해도 신청은 `approved`로 남고, 해제는 `bar_owners.revoked_at`으로 표현한다.
 
+### 4.16 business_verification_result
+
+| 값 | 의미 |
+|---|---|
+| `matched` | 사업자등록번호, 대표자명, 개업일자가 국세청 정보와 맞음 |
+| `not_matched` | 맞지 않음. 신청할 때 맞지 않으면 행을 만들지 않으므로, 운영자가 다시 검증했을 때만 저장된다 |
+| `unavailable` | 검증 서비스 오류, 시간 초과, 호출 한도 초과로 확인하지 못함. 운영자가 다시 검증한다 |
+
+### 4.17 business_status
+
+| 값 | 의미 |
+|---|---|
+| `active` | 계속사업자 |
+| `suspended` | 휴업자 |
+| `closed` | 폐업자 |
+
+휴업이나 폐업 사업자의 신청도 받으며, 승인 여부는 운영자가 판단한다.
+
 ## 5 Accounts and Bars
 
 ### 5.1 users
@@ -258,7 +277,12 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `proposed_bar_name` | `varchar(150)`, nullable | `신림 몰트 하우스` | `new_bar`에서만 쓰며 필수다. 승인할 때 운영자가 고칠 수 있다. |
 | `proposed_address` | `varchar(500)`, nullable | `서울특별시 관악구 신림로 2 3층` | `new_bar`에서만 쓰며 필수다. |
 | `proposed_phone` | `varchar(30)`, nullable | `02-1234-5678` | `new_bar`에서만 쓰며 선택이다. |
-| `business_registration_number` | `char(10)`, NOT NULL | `1234567890` | 하이픈을 뺀 사업자등록번호 10자리다. 운영자가 실제 사업자인지 확인하는 근거다. |
+| `business_registration_number` | `char(10)`, NOT NULL | `1234567891` | 하이픈을 뺀 사업자등록번호 10자리이며 검증번호가 맞아야 한다. 운영자가 실제 사업자인지 확인하는 근거다. |
+| `representative_name` | `varchar(100)`, NOT NULL | `김사장` | 사업자등록증의 대표자 성명이다. 국세청 진위확인에 필요하다. |
+| `opening_date` | `date`, NOT NULL | `2020-03-02` | 사업자등록증의 개업연월일이다. 국세청 진위확인에 필요하다. |
+| `business_verification_result` | `business_verification_result`, NOT NULL | `matched` | 마지막 국세청 진위확인 결과다. 운영자가 승인 전에 판단 근거로 본다. |
+| `business_status` | `business_status`, nullable | `active` | 마지막 확인에서 국세청이 알려 준 사업자 상태다. 결과가 `matched`가 아니면 `null`이다. 신청자에게도 보여 준다. |
+| `business_checked_at` | `timestamptz`, NOT NULL | `2026-10-14T03:00:00Z` | 마지막으로 국세청 확인을 시도한 시각이다. |
 | `contact_phone` | `varchar(30)`, NOT NULL | `010-1234-5678` | 운영자가 확인을 위해 연락할 번호다. 업장 전화번호와 다를 수 있다. |
 | `applicant_note` | `varchar(500)`, nullable | `대표 본인입니다` | 신청자가 남긴 메모다. |
 | `status` | `owner_application_status`, NOT NULL, 기본 `pending` | `pending` | 신청 처리 상태다. |
@@ -271,9 +295,11 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 **핵심 제약:**
 
 - `existing_bar`는 `bar_id`가 필수이고 `proposed_*`가 모두 `null`이다. `new_bar`는 `proposed_bar_name`과 `proposed_address`가 필수이고, `bar_id`는 `approved`일 때만 값이 있다.
-- 한 사용자는 같은 기존 업장에 `pending` 신청을 하나만 가질 수 있다. 서로 다른 사용자가 같은 업장에 동시에 신청할 수는 있지만, 하나가 승인되면 나머지는 승인할 수 없고 운영자가 거절한다.
+- 한 사용자는 같은 기존 업장에 `pending` 신청을 하나만 가질 수 있고, 같은 사업자등록번호로 `new_bar` `pending` 신청을 하나만 가질 수 있다. 서로 다른 사용자가 같은 업장에 동시에 신청할 수는 있지만, 하나가 승인되면 나머지는 승인할 수 없고 운영자가 거절한다.
 - `rejected`이면 `rejection_reason`이 필수다. `approved`와 `rejected`이면 `reviewed_by_user_id`와 `reviewed_at`이 필수다.
-- 사업자등록번호와 연락처는 신청자와 운영자에게만 보여 주며 공개 API에 포함하지 않는다. 실제 값은 저장소에 커밋하지 않는다.
+- `business_status`는 `business_verification_result = matched`일 때만 값이 있을 수 있다.
+- 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자와 운영자에게만 보여 주며 공개 API에 포함하지 않고 로그에도 남기지 않는다. 검증 결과 중 신청자에게는 `business_status`만 보여 준다. 실제 값은 저장소에 커밋하지 않는다.
+- 사업자등록증 사진과 OCR로 읽은 값은 저장하지 않는다. 신청자가 확인한 값만 신청으로 저장된다.
 
 ### 5.4 bar_owners
 

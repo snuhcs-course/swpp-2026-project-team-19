@@ -116,6 +116,18 @@ Enum owner_application_status {
   canceled
 }
 
+Enum business_verification_result {
+  matched
+  not_matched
+  unavailable
+}
+
+Enum business_status {
+  active
+  suspended
+  closed
+}
+
 Table users {
   id uuid [pk]
   auth_subject varchar(255) [not null, unique, note: 'Supabase Auth user ID (the access token sub, a UUID string)']
@@ -161,7 +173,12 @@ Table bar_owner_applications {
   proposed_bar_name varchar(150) [note: 'new_bar only']
   proposed_address varchar(500) [note: 'new_bar only']
   proposed_phone varchar(30) [note: 'new_bar only; optional']
-  business_registration_number char(10) [not null, note: 'Ten digits without hyphens']
+  business_registration_number char(10) [not null, note: 'Ten digits without hyphens; the check digit must be valid']
+  representative_name varchar(100) [not null, note: 'As on the business registration certificate']
+  opening_date date [not null, note: 'Business opening date on the certificate']
+  business_verification_result business_verification_result [not null, note: 'Latest NTS check. Never not_matched at submission, because such an application is not created']
+  business_status business_status [note: 'From the latest NTS check; null unless the result is matched']
+  business_checked_at timestamptz [not null, note: 'When the latest NTS check was attempted']
   contact_phone varchar(30) [not null]
   applicant_note varchar(500)
   status owner_application_status [not null, default: 'pending']
@@ -180,14 +197,19 @@ Table bar_owner_applications {
   Note: '''
   A user's request to become the owner of a bar. existing_bar claims a bar already in bars;
   new_bar asks to register a bar that is not in bars yet. The applicant gives a business registration
-  number and a contact phone, and an operator checks them outside the app before deciding.
+  number, representative name, opening date and a contact phone. The backend checks the first three
+  with the National Tax Service (NTS) validation API before creating the row: a mismatch creates no
+  row, and an API failure stores unavailable so an operator can check again. Operators review the
+  application and its check result in the web dashboard before deciding.
   Approving an existing_bar application creates the bar_owners row. Approving a new_bar application
   creates the bars row from the operator's confirmed bar details (including coordinates) and the
   bar_owners row in the same transaction, and stores the new bar's id in bar_id.
   Only pending applications can be approved, rejected or canceled; the other statuses are final.
-  An applicant may have only one pending application per existing bar. A rejected or canceled
-  applicant may apply again with a new row. Business registration numbers and contact phones are
-  visible only to the applicant and operators.
+  An applicant may have only one pending application per existing bar, and one pending new_bar
+  application per business registration number. A rejected or canceled applicant may apply again
+  with a new row. Business registration numbers, representative names, opening dates and contact
+  phones are visible only to the applicant and operators; the applicant sees only business_status
+  of the check result. Certificate photos read by OCR are not stored.
   '''
 }
 
