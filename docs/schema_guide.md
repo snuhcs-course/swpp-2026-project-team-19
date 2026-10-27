@@ -295,7 +295,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 **핵심 제약:**
 
 - `existing_bar`는 `bar_id`가 필수이고 `proposed_*`가 모두 `null`이다. `new_bar`는 `proposed_bar_name`과 `proposed_address`가 필수이고, `bar_id`는 `approved`일 때만 값이 있다.
-- 한 사용자는 같은 기존 업장에 `pending` 신청을 하나만 가질 수 있고, 같은 사업자등록번호로 `new_bar` `pending` 신청을 하나만 가질 수 있다. 서로 다른 사용자가 같은 업장에 동시에 신청할 수는 있지만, 하나가 승인되면 나머지는 승인할 수 없고 운영자가 거절한다.
+- 한 사용자는 같은 기존 업장에 `pending` 신청을 하나만 가질 수 있고, 같은 사업자등록번호로 `new_bar` `pending` 신청을 하나만 가질 수 있다. 동시에 들어온 신청도 막도록 두 규칙 모두 PostgreSQL 부분 unique 인덱스로 보장한다(아래 무결성 규칙). 서로 다른 사용자가 같은 업장에 동시에 신청할 수는 있지만, 하나가 승인되면 나머지는 승인할 수 없고 운영자가 거절한다.
 - `rejected`이면 `rejection_reason`이 필수다. `approved`와 `rejected`이면 `reviewed_by_user_id`와 `reviewed_at`이 필수다.
 - `business_status`는 `business_verification_result = matched`일 때만 값이 있을 수 있다.
 - 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자와 운영자에게만 보여 주며 공개 API에 포함하지 않고 로그에도 남기지 않는다. 검증 결과 중 신청자에게는 `business_status`만 보여 준다. 실제 값은 저장소에 커밋하지 않는다.
@@ -769,7 +769,8 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 최종 확정은 신규 브랜드·상품 중복 재검사와 생성, 추출 결과 확정, diff 재계산, 현재 메뉴판 반영을 모두 포함한 하나의 `SERIALIZABLE` 트랜잭션으로 실행한다. 직렬화 충돌이면 전체를 롤백하고 처음부터 최대 3회 재시도한다. AI 호출과 객체 저장소 작업 같은 외부 부수 효과는 재시도될 수 있는 이 트랜잭션 안에서 실행하지 않는다.
 - 한 업장에는 `uploaded`, `processing`, `ready_for_review` 상태의 `menu_imports`가 동시에 하나만 존재해야 한다. PostgreSQL 부분 unique 인덱스와 업장 행 잠금·트랜잭션 검사를 함께 사용해 보장한다.
 - 한 업장에는 `revoked_at IS NULL`인 `bar_owners`가 최대 하나여야 한다. PostgreSQL 부분 unique 인덱스로 보장한다.
-- 한 사용자는 같은 업장에 `status = pending`인 `bar_owner_applications`를 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending'`)로 보장한다.
+- 한 사용자는 같은 업장에 `status = pending`인 `existing_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending' AND application_type = 'existing_bar'`)로 보장한다.
+- 한 사용자는 같은 사업자등록번호로 `status = pending`인 `new_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `business_registration_number` WHERE `status = 'pending' AND application_type = 'new_bar'`)로 보장한다.
 - `bar_owner_applications.business_registration_number`는 숫자 10자리여야 한다.
 - 외래키 삭제 정책은 이력 보존을 우선해 핵심 사용자 업장 상품 이미지에 `RESTRICT` 또는 soft delete를 검토한다.
 

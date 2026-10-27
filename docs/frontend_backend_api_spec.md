@@ -1248,7 +1248,7 @@ Content-Type: application/json
 1. 요청 형식과 위 필드 규칙 (`422 VALIDATION_FAILED`)
 2. `users` 행 (`404 USER_NOT_FOUND`)
 3. `existing_bar`의 업장과 현재 업주 (`404 BAR_NOT_FOUND`, `409 BAR_OWNER_EXISTS`)
-4. 본인의 대기 중 신청 (`409 OWNER_APPLICATION_EXISTS`)
+4. 본인의 대기 중 신청 (`409 OWNER_APPLICATION_EXISTS`). DB의 부분 unique 인덱스로도 보장하므로, 동시에 들어온 같은 신청은 행을 만들 때 하나만 성공하고 나머지는 `409 OWNER_APPLICATION_EXISTS`가 된다. 이때 진위확인 호출 횟수는 이미 쓴 것으로 센다
 5. 오늘의 진위확인 횟수 (`429 RATE_LIMITED`, 3.11.14)
 6. 국세청 진위확인 API로 `businessRegistrationNumber`, `representativeName`, `openingDate` 검증
    - 맞음: 신청을 만들고 `businessVerification.result = matched`, `businessStatus`에 사업자 상태를 저장한다.
@@ -1579,6 +1579,7 @@ operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 �
 | 사업자등록증 OCR (3.11.12) | 사용자마다 하루 5회 | `413`, `415`, `422` 검사를 통과해 CLOVA OCR을 실제로 호출한 요청. 읽은 항목이 없어도, 호출이 실패해 `503`이 되어도 센다. 서버에 OCR 설정이 없어 호출하지 않은 요청은 세지 않는다 |
 
 - 사용자는 token의 `sub`(3.1.2)로 구분한다. OCR은 `users` 행이 없어도 호출할 수 있으므로 `users.id`가 아니라 `sub`로 센다.
+- 임시 로그인(3.1.3) 토큰은 모두 `sub`가 같으므로 한도 하나를 함께 쓴다. 임시 로그인은 로컬 개발과 Google 로그인 전환 전의 데모 서버에서만 쓰므로 이 한계를 받아들인다.
 - 두 한도는 따로 센다. operator의 다시 검증(3.11.13)은 제한하지 않는다.
 - 하루는 한국 시간(KST) 자정에 초기화된다.
 - 한도를 넘으면 외부 API를 호출하지 않고 `429 RATE_LIMITED`를 반환한다. `details.retryAfter`에 다음 초기화 시각(RFC 3339, UTC)을 담는다.

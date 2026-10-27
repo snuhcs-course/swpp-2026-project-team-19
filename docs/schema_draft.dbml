@@ -192,6 +192,8 @@ Table bar_owner_applications {
     (status, created_at)
     (applicant_user_id, created_at)
     (bar_id)
+    (applicant_user_id, bar_id) [unique, note: "Partial: where status = 'pending' and application_type = 'existing_bar'"]
+    (applicant_user_id, business_registration_number) [unique, note: "Partial: where status = 'pending' and application_type = 'new_bar'"]
   }
 
   Note: '''
