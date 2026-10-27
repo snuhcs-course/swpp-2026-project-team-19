@@ -85,6 +85,7 @@ Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) i
 
 - Branch from `main` as `feature/i<iteration>-<task-id>-<short-name>`, all lowercase, for example `feature/i2-p9-google-token-verification` for task P9 in Iteration 2.
 - The PR title is `I<iteration>-<task ID>: <task summary>`, for example `I2-P9: Implement server verification of Google login tokens; handle invalid and expired credentials`. A PR that covers several tasks lists them with `/`, as in `I2-P13/P14: ...`. PRs are squash-merged.
+- Fill in the PR template (`.github/pull_request_template.md`). Keep only the block under "Contract and scope" that applies, and write "None" under "After merge" when there is nothing to do.
 - Commit or push only when the member you are working for asks.
 - Merging to `main` deploys the backend to production automatically after CI passes, so `main` must stay deployable.
 
@@ -93,3 +94,37 @@ Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) i
 - Secrets: any `.env` file (only `.env.example`), API keys, database passwords, JWT secrets, SSH keys. Do not paste them into chat or logs either.
 - Anything under `data/`, including menu photos: owners consented to their use in the project, not to publishing them, and the repository is public.
 - Build outputs (`android/app/build/`, APKs), `backend/.venv/`, and coverage files.
+
+## Review guidelines
+
+Rules for AI first-pass review of pull requests. The AI review comments only: it does not push commits, approve, or merge. A person still approves every PR.
+
+### What to check
+
+- **The PR description against the diff.** Every required template section is filled in. Exactly one "Contract and scope" block is kept and the unused one is removed; an optional section with nothing to say ("Notes for reviewers") is left empty or removed. If "Contract and scope" says there is no contract change, check that no API path, field, error code, schema, or behavior the other side relies on changed. If it says there is one, check that the specs in `docs/` were updated in the same PR. If the diff needs a manual step (a new env var or secret, a workflow to run), check that "After merge" lists it.
+- **Correctness**: bugs, unhandled error or failure cases, and behavior that differs from the specs in `docs/`.
+- **The rules in this file**, especially "API conventions", "Android notes", "Backend notes", and "Never commit", and the test rules under "Commands".
+- **Tests**: no test is deleted, skipped, or weakened without a reason in the PR.
+
+Do not comment on formatting or naming that matches the surrounding code, and do not restate the diff.
+
+### Risk areas: flag for human review
+
+A PR needs a careful human review if it touches any of these. Judge by what the diff does, not only by the paths listed.
+
+| Area | Typical paths or signs |
+|---|---|
+| Auth and permissions | `backend/app/core/security.py`, `auth_config.py`, `tokens.py`, permission checks in routes or services, `backend/tests/test_route_permissions.py`, Android login and session code |
+| Database schema | `backend/alembic/versions/`, `backend/app/models/`, `docs/schema_draft.dbml` |
+| Deployment and CI | `.github/workflows/`, `backend/deploy/`, `backend/DEPLOY.md`, new env vars or secrets, coverage or test settings in `backend/pyproject.toml` |
+| Data deletion or bulk writes | `backend/scripts/` (reset and seed scripts), code that deletes rows or files |
+| Matching | `backend/app/matching/`, matching rules in `docs/menu_ai_matching_flow.md` |
+| Privacy | anything under `data/`, logging of locations, emails, or tokens, personal data in responses |
+| FE/BE contract | `docs/frontend_backend_api_spec.md`, request or response shapes, error codes |
+| Agent and review rules | `AGENTS.md`, `CLAUDE.md`, `.github/pull_request_template.md`, the AI review workflow |
+
+### Review output
+
+Report each finding as a review comment on `file:line`, most severe first, with what is wrong and a concrete failure case. Mark a finding as uncertain when you could not confirm it.
+
+When the PR touches a risk area, also report one P1 finding titled `Needs human review: <areas>`, on the first changed line in one of those areas, listing every risk area the PR touches. Report it even when the change itself looks correct.
