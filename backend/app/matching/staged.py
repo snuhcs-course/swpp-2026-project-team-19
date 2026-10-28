@@ -22,6 +22,13 @@ S2  brand + attributes (needs S1), tried only when no alias matched
       Exact only for a single product that every edition token fits; with no
       age, only when edition tokens pick out one product. Anything else is
       ambiguous (owner picks) or unmatched.
+    - the brand written again ("Aberlour 12 (아벨라워)") is not an edition token, a name
+      variant that is only a brand is used only when the other names find nothing, and
+      with no age, tokens too short to check ("DR") do not rule a product out (I3-A4)
+    - when edition tokens picked the product but its edition name has words the line
+      does not have ("anCnoc Sherry" -> anCnoc Peated Sherry Cask), the line is
+      ambiguous with that one candidate, evidence editionOnlyInProduct and
+      confirmRecommended (I3-A4). Words such as cask, oak, finish do not count.
 S2b default product (needs S2), applied to the products S2 narrowed by brand + age
     - no edition token and exactly one product of that age without an edition -> exact
     - one candidate that has an edition but no edition token in the name -> ambiguous
@@ -32,9 +39,18 @@ S3  edit distance (needs S2b), tried only when S2 found nothing either
       edit distance of 1 (6 characters or fewer) or 2 (longer), counting Hangul syllables
     - never exact, except one candidate at distance <= 1 for a name with digits;
       otherwise ambiguous, with confirmRecommended when there is one candidate
+    - where that exact case has a Hangul name part of 3 syllables or fewer (the text
+      before the first number: 달모어 18 vs 보모어 18), S3 offers nothing (I3-A4)
+
+Korean whisky words (with S2, I3-A4): a line that S1-S3 leave unconfirmed is looked up
+again with the Hangul words of `vocab_ko_en.json` in English (셰리 캐스크 -> sherry cask,
+`vocabulary.py`). The retry is taken when it confirms the line, or finds candidates for
+a line that had none; its candidates get evidence `vocabulary` (the English name) and
+keep the `rule` of the step that found them.
 """
 
 import re
+import unicodedata
 from collections.abc import Collection, Iterable
 from dataclasses import replace
 from typing import Any
@@ -43,6 +59,7 @@ from uuid import UUID
 from app.core.normalize import normalize
 from app.matching.resolve import BILINGUAL_SEPARATOR, resolve_product
 from app.matching.types import Candidate, CatalogLookup, ExtractedProduct, ProductInfo, ResolutionResult
+from app.matching.vocabulary import Vocabulary, load_vocabulary, to_english
 
 STAGES = frozenset({"S1", "S2", "S2b", "S3"})
 # Each stage runs on top of the one named here.
@@ -70,6 +87,9 @@ _NEUTRAL_TOKENS = frozenset({"whisky", "whiskey", "위스키"})
 # so they are kept but never count as fitting a product.
 _MIN_LATIN_TOKEN = 3
 _MIN_OTHER_TOKEN = 2
+# Korean -> English whisky words (vocab_ko_en.json): the retry after S1-S3 and the edition check.
+_VOCABULARY: Vocabulary | None = load_vocabulary()
+_CONFIRMED = ("exact_match", "multi")
 
 
 def resolve_product_staged(
@@ -83,6 +103,22 @@ def resolve_product_staged(
             raise ValueError(f"Stage {stage} runs on top of {needed}")
     if item.product_name is None:
         return UNMATCHED
+    result = _resolve_line(item, catalog, stages)
+    if "S2" not in stages or _VOCABULARY is None or result.status in _CONFIRMED:
+        return result
+    # Korean whisky words in English: taken when that confirms the line, or finds
+    # candidates for a line that had none.
+    english = to_english(item.product_name, _VOCABULARY)
+    if english == item.product_name:
+        return result
+    retry = _resolve_line(replace(item, product_name=english), catalog, stages)
+    if retry.status in _CONFIRMED or (result.status == "unmatched" and retry.status != "unmatched"):
+        candidates = tuple(replace(c, evidence={**c.evidence, "vocabulary": english}) for c in retry.candidates)
+        return replace(retry, candidates=candidates)
+    return result
+
+
+def _resolve_line(item: ExtractedProduct, catalog: CatalogLookup, stages: frozenset[str]) -> ResolutionResult:
     if "S1" in stages:
         pair = _resolve_two_products(item, catalog, stages)
         if pair is not None:
@@ -98,7 +134,9 @@ def _with_rule(result: ResolutionResult, rule: str) -> ResolutionResult:
     """
 
     def rule_of(candidate: Candidate) -> str:
-        if rule == "S2" and ("defaultProduct" in candidate.evidence or "confirmRecommended" in candidate.evidence):
+        evidence = candidate.evidence
+        default = "defaultProduct" in evidence
+        if rule == "S2" and (default or ("confirmRecommended" in evidence and "editionOnlyInProduct" not in evidence)):
             return "S2b"
         return rule
 
@@ -126,7 +164,17 @@ def _resolve_one(item: ExtractedProduct, catalog: CatalogLookup, stages: frozens
     if BILINGUAL_SEPARATOR in item.product_name:
         names += [side.strip() for side in item.product_name.split(BILINGUAL_SEPARATOR) if side.strip()]
     default_product = "S2b" in stages
-    result = _merge(((name, _resolve_by_brand(name, item, catalog, default_product)) for name in names), "brandName")
+
+    def by_brand(lookup_names: list[str]) -> ResolutionResult:
+        lookups = ((name, _resolve_by_brand(name, item, catalog, default_product)) for name in lookup_names)
+        return _merge(lookups, "brandName")
+
+    # A name that is only a brand ("아벨라워" of "Aberlour 12 (아벨라워)") offers every product
+    # of it, so it is used only when the other names find nothing.
+    informative = [name for name in names if not _only_brand(name, catalog)]
+    result = by_brand(informative) if 0 < len(informative) < len(names) else UNMATCHED
+    if result.status == "unmatched":
+        result = by_brand(names)
     if result.status != "unmatched" or "S3" not in stages:
         return _with_rule(result, "S2")
 
@@ -272,9 +320,69 @@ def _split_age(rest: str) -> tuple[int | None, list[str]]:
     return age, tokens
 
 
+def _checkable(token: str) -> bool:
+    return len(token) >= (_MIN_LATIN_TOKEN if token.isascii() else _MIN_OTHER_TOKEN)
+
+
 def _token_fits(token: str, targets: list[str]) -> bool:
-    min_length = _MIN_LATIN_TOKEN if token.isascii() else _MIN_OTHER_TOKEN
-    return len(token) >= min_length and any(token in target for target in targets)
+    return _checkable(token) and any(token in target for target in targets)
+
+
+# Edition words that say nothing about which product it is (ai/match_llm NEUTRAL_TOKENS,
+# plus label and bourbon): "Sherry Oak" is the same product as "Sherry".
+_EDITION_NEUTRAL_WORDS = frozenset(
+    {"the", "whisky", "whiskey", "scotch", "single", "malt", "year", "years", "old", "yo", "edition", "release", "no"}
+    | {"cask", "casks", "oak", "barrel", "wood", "finish", "finished", "matured", "label", "bourbon"}
+)
+_WORD = re.compile(r"[a-z0-9]+")
+
+
+def _words(text: str) -> list[str]:
+    """Lowercase Latin words and numbers: "Private Cask No.2" -> ["private", "cask", "no", "2"]."""
+    return _WORD.findall(unicodedata.normalize("NFKC", text).lower().replace("'", "").replace("’", ""))
+
+
+def _edition_words_not_in_line(
+    product: ProductInfo, item: ExtractedProduct, brand_aliases: list[str], catalog: CatalogLookup
+) -> list[str]:
+    """Words of the product's edition name that the menu line does not have (neutral words aside).
+
+    The line counts in English too (vocabulary). A product alias whose text after the brand
+    and without digits is all in the line also covers it ("맥캘란 더블캐스크 12Y" and the alias
+    "맥캘란 12년 더블 캐스크"), since Korean words cannot be compared word by word.
+    """
+    if not product.edition_name:
+        return []
+    lines = [item.product_name or ""]
+    if _VOCABULARY is not None:
+        lines.append(to_english(lines[0], _VOCABULARY))
+    texts = [_DIGITS.sub("", normalize(line)) for line in lines]
+    line_words = {word for line in lines for word in _words(line)}
+    missing = []
+    for word in dict.fromkeys(_words(product.edition_name)):
+        if word in _EDITION_NEUTRAL_WORDS:
+            continue
+        # Numbers and short words ("PX") as whole words, longer words anywhere ("doublewood").
+        whole_word = word.isdigit() or len(word) < _MIN_LATIN_TOKEN
+        if not (word in line_words if whole_word else any(word in text for text in texts)):
+            missing.append(word)
+    if not missing:
+        return []
+    prefixes = sorted(brand_aliases, key=len, reverse=True)
+    for alias in catalog.get_normalized_aliases(product.product_id):
+        rest = next((alias[len(prefix):] for prefix in prefixes if alias.startswith(prefix)), alias)
+        rest = _DIGITS.sub("", rest)
+        if rest and any(rest in text for text in texts):
+            return []
+    return missing
+
+
+def _only_brand(name: str, catalog: CatalogLookup) -> bool:
+    return bool(catalog.find_brand_ids_by_alias(normalize(name)))
+
+
+def _without_brand(tokens: list[str], brand_aliases: list[str]) -> list[str]:
+    return [token for token in tokens if token not in brand_aliases]
 
 
 def _resolve_by_brand(
@@ -299,6 +407,9 @@ def _narrow_brand(
     age, tokens = _split_age(rest)
     if age is None:
         age = item.age_years
+    # The brand written again ("Aberlour 12 (아벨라워)") is not an edition token.
+    brand_aliases = [alias for alias, brand_id in catalog.list_normalized_brand_aliases() if brand_id in brand_ids]
+    tokens = _without_brand(tokens, brand_aliases)
 
     products: list[ProductInfo] = []
     for brand_id in brand_ids:
@@ -331,12 +442,19 @@ def _narrow_brand(
     else:
         # No age: only edition tokens can pick the product.
         exact = bool(tokens) and len(full) == 1
-        chosen = full if exact else [product for product, fitted in fits if fitted or not tokens]
+        # Tokens too short to check ("DR") do not rule a product out.
+        checkable = [token for token in tokens if _checkable(token)]
+        chosen = full if exact else [product for product, fitted in fits if fitted or not checkable]
     if not chosen:
         return UNMATCHED
     confirm = (
         default_product and not exact and not tokens and len(chosen) == 1 and chosen[0].edition_name is not None
     )
+    # Edition tokens picked one product, but it has edition words the line does not have
+    # ("anCnoc Sherry" -> anCnoc Peated Sherry Cask): the owner confirms it.
+    only_in_product = _edition_words_not_in_line(chosen[0], item, brand_aliases, catalog) if exact and tokens else []
+    if only_in_product:
+        exact = False
 
     by_fit = {product.product_id: fitted for product, fitted in fits}
     ranked = sorted(chosen, key=lambda p: (-len(by_fit[p.product_id]), p.display_name, str(p.product_id)))
@@ -354,6 +472,9 @@ def _narrow_brand(
         if default_product and exact and not tokens:
             evidence["defaultProduct"] = True
         if confirm:
+            evidence["confirmRecommended"] = True
+        if only_in_product:
+            evidence["editionOnlyInProduct"] = only_in_product
             evidence["confirmRecommended"] = True
         candidates.append(
             Candidate(
@@ -420,6 +541,18 @@ def _closest(digits: list[str], text: str, aliases: Iterable[tuple[str, UUID]]) 
     return best
 
 
+# One syllable off in a short Hangul name is as likely another brand (달모어 18 / 보모어 18,
+# 아녹 18 / 아란 18): where S3 would confirm such a name, it offers nothing instead.
+_SHORT_HANGUL_NAME = 3
+_HANGUL_SYLLABLES = re.compile(r"^[가-힣]+$")
+
+
+def _short_hangul_name(normalized: str) -> bool:
+    """True when the name before its first number is Hangul of 3 syllables or fewer ("달모어18")."""
+    head = re.split(r"\d", normalized, maxsplit=1)[0] or _DIGITS.sub("", normalized)
+    return len(head) <= _SHORT_HANGUL_NAME and bool(_HANGUL_SYLLABLES.match(head))
+
+
 def _exact_allowed(candidate_count: int, distance: int, has_digits: bool) -> bool:
     return candidate_count == 1 and distance <= 1 and has_digits
 
@@ -435,6 +568,8 @@ def _resolve_by_alias_distance(name: str, catalog: CatalogLookup) -> ResolutionR
         return UNMATCHED
     found.sort(key=lambda entry: (entry[0], entry[1].display_name, str(entry[1].product_id)))
     exact = _exact_allowed(len(found), found[0][0], bool(digits))
+    if exact and _short_hangul_name(normalize(name)):
+        return UNMATCHED
     candidates = []
     for rank, (distance, product, alias) in enumerate(found, start=1):
         evidence: dict[str, Any] = {"fuzzyAlias": alias, "editDistance": distance}
@@ -453,7 +588,7 @@ def _resolve_by_alias_distance(name: str, catalog: CatalogLookup) -> ResolutionR
 def _resolve_by_brand_distance(name: str, item: ExtractedProduct, catalog: CatalogLookup) -> ResolutionResult:
     """Brand found by edit distance (Dalwhinny -> Dalwhinnie), then narrowed by S2b."""
     brand_aliases = catalog.list_normalized_brand_aliases()
-    chosen: tuple[int, list[UUID], str, str] | None = None  # distance, brand ids, alias, rest
+    chosen: tuple[int, list[UUID], str, str, str] | None = None  # distance, brand ids, alias, head, rest
     for head, rest in _brand_prefixes(name):
         best = _closest(*_digits_and_text(normalize(head)), brand_aliases)
         if not best:
@@ -462,10 +597,10 @@ def _resolve_by_brand_distance(name: str, item: ExtractedProduct, catalog: Catal
         # Longer prefixes come first, so a shorter one replaces them only when strictly closer.
         if chosen is None or distance < chosen[0]:
             nearest = [brand_id for brand_id, found in best.items() if found[0] == distance]
-            chosen = (distance, nearest, best[nearest[0]][1], rest)
+            chosen = (distance, nearest, best[nearest[0]][1], head, rest)
     if chosen is None:
         return UNMATCHED
-    distance, brand_ids, alias, rest = chosen
+    distance, brand_ids, alias, head, rest = chosen
     result = _narrow_brand(
         brand_ids, {"fuzzyBrand": alias, "editDistance": distance}, rest, item, catalog, default_product=True
     )
@@ -473,7 +608,7 @@ def _resolve_by_brand_distance(name: str, item: ExtractedProduct, catalog: Catal
         return result
     has_digits = bool(_DIGITS.search(normalize(name)))
     if result.status == "exact_match" and _exact_allowed(len(brand_ids), distance, has_digits):
-        return result
+        return UNMATCHED if _short_hangul_name(normalize(head)) else result
     single = len(result.candidates) == 1
     candidates = tuple(
         replace(

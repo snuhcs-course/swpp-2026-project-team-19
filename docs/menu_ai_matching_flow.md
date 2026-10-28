@@ -613,6 +613,8 @@ extracted_options #2
 
 > **현재 구현 (I2-A18, I2-A22):** 백엔드는 아래 정확 일치(8장) 다음에 단계 규칙 S1(이름 변형), S2(브랜드+연수·에디션), S2b(기본 상품), S3(숫자가 있는 이름의 1글자 오타)를 실행한다(`backend/app/matching/staged.py`). 11장의 점수 계산과 12장의 LLM 재정렬은 서버에 없다. 따라서 `exact_match`는 정확 별칭 일치뿐 아니라 이 규칙들이 상품 하나를 확정한 경우에도 나오며, 어느 규칙인지는 후보 `evidence.rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)로 구분한다. 한 줄에 다른 브랜드의 두 상품이 있으면(S1) 두 상품을 후보로 남긴 `ambiguous`로 저장한다.
 
+> **안전 규칙과 위스키 용어 사전 (I3-A4):** (1) S3는 숫자 앞 이름이 3음절 이하 한글일 때 1음절 차이로 확정하지 않고 후보도 내지 않는다(`달모어 18` ≠ `보모어 18`). (2) S2가 에디션 토큰으로 상품 하나를 골랐어도 그 상품의 `edition_name`에 줄에 없는 단어가 있으면(cask·oak·finish 같은 중립어 제외) 확정하지 않고 그 상품 하나를 확인 권장(`confirmRecommended`)으로 남기며, 빠진 단어를 evidence `editionOnlyInProduct`에 적는다(`anCnoc Sherry` → anCnoc Peated Sherry Cask). (3) 줄에 다시 쓴 브랜드명(`Aberlour 12 (아벨라워)`)은 에디션 토큰이 아니고, 브랜드명뿐인 이름 변형은 다른 이름이 아무것도 못 찾을 때만 쓴다. (4) S1–S3가 확정하지 못한 줄은 `backend/app/matching/vocab_ko_en.json`의 한글 위스키 용어를 영어로 바꿔(셰리 캐스크 → sherry cask, 더블우드 → double wood) 한 번 더 찾고, 확정되거나 후보가 없던 줄에 후보가 생길 때만 그 결과를 쓴다. 이때 후보 evidence `vocabulary`에 바꾼 이름이 들어가고 `rule`은 그 후보를 찾은 단계 그대로다. 사전은 카탈로그 영어 에디션·표준명 단어와 외래어 표기 지식만으로 만들었다(파일의 `about`).
+
 ```text
 for each extracted_item:
     if extracted_line_type != product:

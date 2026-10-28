@@ -250,3 +250,28 @@ S1+S2b+S3(P22 채택) 위에 LLM 층을 더한다. 운영 매칭(`resolve_produc
   `python ai/eval/match_eval.py --split test --gold eval/match_gold_v1_1.json --matcher S1+S2b+S3 M3a M3a/replace --m3-cache ai/runs/2026-10-14_m3/cache --json ai/runs/2026-10-14_m3/test_m3a.json`
 
 **M3 test 결과 (2026-10-14, 1회 실행).** 동결 커밋 `1ace9275718ddb55e00827c1db49461204fb445f`에서 등록 명령으로 M3a만 실행(호출 10회). C1: (c) 171 → 41, LLM 확인 권장 193/194, 수락 시 오답률 0.002. C0: LLM 확인 권장 7/9, 수락 시 오답률 0.015(기준선 0.010은 S2b·S3 확인 권장 오답). Top-1·false merge rate는 S1+S2b+S3와 같음. 상세와 한계는 `ai/runs/2026-10-14_m3/README.md`. 실행 후 규칙·프롬프트는 바꾸지 않았다.
+
+## I3-A4: 규칙 매칭 안전 규칙(E1)과 한→영 위스키 용어 사전(E2) (I3, 2026-10-28, dev만)
+
+W7 오류 분석의 실험 E1·E2. 규칙은 `backend/app/matching/staged.py`, 사전은 `backend/app/matching/vocab_ko_en.json`(설명은 `docs/menu_ai_matching_flow.md` 6장 메모). Gemini 호출 0, I3 test 자료는 쓰지 않았다.
+
+- **측정 설정:** dev 5개 바(위스키복춘·서로상·미라보·수이·오드비), 정답 1층 줄 이름 입력(잔·병 중복 제거, 29장 836줄, 알려진 줄 802), 메뉴 등록과 같은 S1+S2+S2b+S3, 바마다 leave-one-bar-out 카탈로그(`catalog_v2_service.json`에서 그 바 메뉴에서만 나온 별칭·`generated:*`·`template:paren-strip` 별칭 제거 = `eval`, 그 바에서만 본 상품까지 제거 = `dropprod`). 지표 정의는 W7 오류 분석과 같다.
+- **사전 등록한 합격선:** eval Top-1이 W7 기준선 0.542보다 +0.06 이상, eval false merge 줄이 기준선 1보다 늘지 않음, dropprod false merge ≤ 1(기준선 3).
+- **사전 만드는 법:** 영어 쪽은 카탈로그 상품 2개 이상의 `edition_name`에 나오거나, 2개 이상의 표준명에 나오고 브랜드명에는 없는 단어(제외 목록과 이유는 파일 `about`). 한글 쪽은 외래어 표기법과 흔한 변이형으로 썼다. dev 메뉴 줄과 카탈로그 한글 별칭은 보지 않았다. 다만 작성자는 W7 오류 분석의 예시(셰리오크, 소테른 캐스크 등)를 이미 읽었으므로 dev 숫자는 약간 낙관적일 수 있다.
+- **S3 짧은 한글 이름 처리:** "후보 없음"과 "확인 권장 후보", "확인 권장 없는 후보"를 다 쟀다. eval은 셋이 같고, dropprod는 업주가 볼 줄 수가 같으면서 "후보 없음"만 틀린 후보 목록·틀린 확인 권장이 늘지 않아 "후보 없음"을 골랐다.
+
+| 카탈로그 | 설정 | Top-1 | FM 줄 | 틀린 확인 권장 | 사진당 업주가 볼 줄 (a 확인 / b 선택 / c 직접 등록 / d 오답 후보) |
+|---|---|---|---|---|---|
+| eval | 기준선 (main) | 0.542 | 1 | 4 | 13.79 (2.62 / 2.48 / 7.83 / 0.86) |
+| eval | E1만 | 0.520 | 0 | 4 | 14.45 (3.28 / 2.55 / 7.79 / 0.83) |
+| eval | E2만 | 0.661 | 1 | 2 | 10.52 (2.48 / 2.45 / 4.97 / 0.62) |
+| eval | **E1+E2 (채택)** | **0.642** | **0** | 3 | **11.07** (2.97 / 2.38 / 5.10 / 0.62) |
+| dropprod | 기준선 | 0.758 | 3 | 6 | 16.21 (1.24 / 1.24 / 11.86 / 1.86) |
+| dropprod | E1만 | 0.722 | 0 | 6 | 16.90 (1.86 / 1.31 / 11.90 / 1.83) |
+| dropprod | E2만 | 0.802 | 4 | 5 | 15.45 (1.14 / 1.00 / 11.07 / 2.24) |
+| dropprod | **E1+E2 (채택)** | 0.783 | **0** | 6 | 15.90 (1.45 / 1.03 / 11.28 / 2.14) |
+
+- **판정:** E1+E2는 세 합격선을 모두 만족한다(Top-1 +0.100, eval FM 1 → 0, dropprod FM 3 → 0). E2만은 dropprod FM이 4라 불합격이고(Kavalan 올로로소 셰리 → Solist), E1만은 FM은 0이지만 Top-1이 0.022 낮다. 그래서 둘을 같이 넣는다.
+- **잃은 정답 8줄 (eval):** 모두 E1(b)가 확인 권장으로 내린 줄이고 빠진 단어가 실제 에디션 단어다(아란 셰리 → Bodega Sherry Cask, Kavalan Vinho Barrique → Solist Vinho Barrique, 달모어 포트우드 → Port Wood Reserve 등). 업주는 후보 1개를 확인만 하면 된다.
+- **남은 위험:** dropprod에서 카탈로그에 없는 상품 줄 10개가 unmatched → 틀린 후보 목록이 됐다(사전 재조회가 비슷한 상품을 찾음, d 1.86 → 2.14). 확정은 아니다.
+- `tests/test_db_catalog.py`의 219줄(215 exact / 4 unmatched)은 `resolve_product`라 바뀌지 않고, 같은 줄을 메뉴 등록 단계로 돌려도 main과 결과가 같다.
