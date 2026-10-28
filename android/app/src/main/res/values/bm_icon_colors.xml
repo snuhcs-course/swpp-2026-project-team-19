@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Fallback line colour for res/drawable/ic_bm_*.xml, used only when a drawable is drawn
+  without a tint (for example Image(painterResource(..)) or a View). Compose code draws the icons
+  with BmIcon, which ignores this value and takes its colours from MaterialTheme.colorScheme.
+  The value must stay equal to BottleMapPalette.textPrimary in ui/theme/Tokens.kt.
+  The accent path has no colour resource: it is transparent in XML and coloured by BmIcon.
+-->
+<resources>
+    <color name="bm_icon_line">#FFF2EDE8</color> <!-- BottleMapPalette.textPrimary -->
+</resources>
