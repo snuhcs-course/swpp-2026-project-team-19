@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BottleMap icon "camera" (docs/android_icons.md). Draw it with BmIcon (ui/common/BmIcon.kt).
+     "skeleton": the 1.5 outline (style A). "accent": the shape filled only when selected (style B);
+     transparent here, BmIcon colours it from MaterialTheme.colorScheme.primary at runtime. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:name="accent"
+        android:fillColor="#00000000"
+        android:pathData="M8.25 13.25 A3.75 3.75 0 1 1 15.75 13.25 A3.75 3.75 0 1 1 8.25 13.25 Z" />
+    <path
+        android:name="skeleton"
+        android:fillColor="#00000000"
+        android:strokeColor="@color/bm_icon_line"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M2.75 9 A2.5 2.5 0 0 1 5.25 6.5 H7.75 L9.25 4 H14.75 L16.25 6.5 H18.75 A2.5 2.5 0 0 1 21.25 9 V17.5 A2.5 2.5 0 0 1 18.75 20 H5.25 A2.5 2.5 0 0 1 2.75 17.5 Z M8.25 13.25 A3.75 3.75 0 1 1 15.75 13.25 A3.75 3.75 0 1 1 8.25 13.25 Z" />
+    <path
+        android:name="skeleton_dot"
+        android:fillColor="@color/bm_icon_line"
+        android:pathData="M17.1 9.4 A0.8 0.8 0 1 1 18.7 9.4 A0.8 0.8 0 1 1 17.1 9.4 Z" />
+</vector>
