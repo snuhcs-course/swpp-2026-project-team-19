@@ -22,13 +22,18 @@ S2  brand + attributes (needs S1), tried only when no alias matched
       Exact only for a single product that every edition token fits; with no
       age, only when edition tokens pick out one product. Anything else is
       ambiguous (owner picks) or unmatched.
-    - the brand written again ("Aberlour 12 (아벨라워)") is not an edition token, a name
-      variant that is only a brand is used only when the other names find nothing, and
-      with no age, tokens too short to check ("DR") do not rule a product out (I3-A4)
+    - the brand written again ("Aberlour 12 (아벨라워)", also over two tokens) is not an
+      edition token, a name variant that is only a brand is used only when the other
+      names find nothing, and with no age, Latin letter tokens too short to check ("DR")
+      do not rule a product out; numbers still do (I3-A4)
+    - a number on the line other than the age (a year, "#2", "16.2") rules out a product
+      whose name has other numbers (Classic Cut 2020 for "클래식컷 2025") (I3-A4)
     - when edition tokens picked the product but its edition name has words the line
       does not have ("anCnoc Sherry" -> anCnoc Peated Sherry Cask), the line is
       ambiguous with that one candidate, evidence editionOnlyInProduct and
-      confirmRecommended (I3-A4). Words such as cask, oak, finish do not count.
+      confirmRecommended (I3-A4). Words such as cask, oak, finish do not count, and
+      when the line has Hangul words the vocabulary does not know ("비노 바리끄"), only
+      words the vocabulary could have translated count as missing.
 S2b default product (needs S2), applied to the products S2 narrowed by brand + age
     - no edition token and exactly one product of that age without an edition -> exact
     - one candidate that has an edition but no edition token in the name -> ambiguous
@@ -40,13 +45,15 @@ S3  edit distance (needs S2b), tried only when S2 found nothing either
     - never exact, except one candidate at distance <= 1 for a name with digits;
       otherwise ambiguous, with confirmRecommended when there is one candidate
     - where that exact case has a Hangul name part of 3 syllables or fewer (the text
-      before the first number: 달모어 18 vs 보모어 18), S3 offers nothing (I3-A4)
+      before the first number, without a leading 더/The and punctuation: 달모어 18 vs
+      보모어 18, 더 달무어 18, 아드백-10), S3 offers nothing (I3-A4)
 
 Korean whisky words (with S2, I3-A4): a line that S1-S3 leave unconfirmed is looked up
 again with the Hangul words of `vocab_ko_en.json` in English (셰리 캐스크 -> sherry cask,
 `vocabulary.py`). The retry is taken when it confirms the line, or finds candidates for
-a line that had none; its candidates get evidence `vocabulary` (the English name) and
-keep the `rule` of the step that found them.
+a line that had none and an edition token fits the first candidate (not brand + age
+alone: 시그나토리 쿨일라13 is not offered Signatory Macduff 13). Its candidates get
+evidence `vocabulary` (the English name) and keep the `rule` of the step that found them.
 """
 
 import re
@@ -89,6 +96,7 @@ _MIN_LATIN_TOKEN = 3
 _MIN_OTHER_TOKEN = 2
 # Korean -> English whisky words (vocab_ko_en.json): the retry after S1-S3 and the edition check.
 _VOCABULARY: Vocabulary | None = load_vocabulary()
+_VOCABULARY_WORDS = frozenset(word for term in _VOCABULARY.english.values() for word in term.split())
 _CONFIRMED = ("exact_match", "multi")
 
 
@@ -106,16 +114,24 @@ def resolve_product_staged(
     result = _resolve_line(item, catalog, stages)
     if "S2" not in stages or _VOCABULARY is None or result.status in _CONFIRMED:
         return result
-    # Korean whisky words in English: taken when that confirms the line, or finds
-    # candidates for a line that had none.
+    # Korean whisky words in English: taken when that confirms the line, or finds candidates
+    # for a line that had none and an edition word fits the first of them (not brand + age only).
     english = to_english(item.product_name, _VOCABULARY)
     if english == item.product_name:
         return result
     retry = _resolve_line(replace(item, product_name=english), catalog, stages)
-    if retry.status in _CONFIRMED or (result.status == "unmatched" and retry.status != "unmatched"):
+    if retry.status in _CONFIRMED or (result.status == "unmatched" and _words_fit(retry)):
         candidates = tuple(replace(c, evidence={**c.evidence, "vocabulary": english}) for c in retry.candidates)
         return replace(retry, candidates=candidates)
     return result
+
+
+def _words_fit(result: ResolutionResult) -> bool:
+    """The first candidate fits an edition token, or the line has none left over."""
+    if not result.candidates:
+        return False
+    evidence = result.candidates[0].evidence
+    return bool(evidence.get("editionMatch")) or "editionUnmatched" not in evidence
 
 
 def _resolve_line(item: ExtractedProduct, catalog: CatalogLookup, stages: frozenset[str]) -> ResolutionResult:
@@ -320,12 +336,25 @@ def _split_age(rest: str) -> tuple[int | None, list[str]]:
     return age, tokens
 
 
-def _checkable(token: str) -> bool:
-    return len(token) >= (_MIN_LATIN_TOKEN if token.isascii() else _MIN_OTHER_TOKEN)
-
-
 def _token_fits(token: str, targets: list[str]) -> bool:
-    return _checkable(token) and any(token in target for target in targets)
+    min_length = _MIN_LATIN_TOKEN if token.isascii() else _MIN_OTHER_TOKEN
+    return len(token) >= min_length and any(token in target for target in targets)
+
+
+def _short_letters(token: str) -> bool:
+    """A Latin letter token too short to check ("dr", "px"); numbers are never this."""
+    return token.isascii() and token.isalpha() and len(token) < _MIN_LATIN_TOKEN
+
+
+_NUMBER = re.compile(r"\d+(?:\.\d+)?")
+
+
+def _number_conflict(product: ProductInfo, numbers: list[str]) -> bool:
+    """True when the product's name has numbers besides its age and a number of the line is not one
+    of them ("2025" vs Classic Cut 2020, "2" vs Kim Gwajang #3, "16.2" vs Octomore 14.1)."""
+    text = unicodedata.normalize("NFKC", f"{product.display_name} {product.edition_name or ''}")
+    own = set(_DIGITS.findall(text)) - {str(product.age_years)}
+    return bool(own) and any(number not in own for number in numbers)
 
 
 # Edition words that say nothing about which product it is (ai/match_llm NEUTRAL_TOKENS,
@@ -366,15 +395,32 @@ def _edition_words_not_in_line(
         whole_word = word.isdigit() or len(word) < _MIN_LATIN_TOKEN
         if not (word in line_words if whole_word else any(word in text for text in texts)):
             missing.append(word)
+    if missing and _unexplained_hangul(lines[-1], brand_aliases):
+        # The line has Hangul words the vocabulary does not know ("비노 바리끄"): they may be the
+        # missing words, so only words the vocabulary could have translated count as missing.
+        missing = [word for word in missing if word in _VOCABULARY_WORDS]
     if not missing:
         return []
     prefixes = sorted(brand_aliases, key=len, reverse=True)
     for alias in catalog.get_normalized_aliases(product.product_id):
         rest = next((alias[len(prefix):] for prefix in prefixes if alias.startswith(prefix)), alias)
         rest = _DIGITS.sub("", rest)
-        if rest and any(rest in text for text in texts):
+        # A remainder without letters ("." of "16.1") says nothing.
+        if _LETTER.search(rest) and any(rest in text for text in texts):
             return []
     return missing
+
+
+_HANGUL_WORD = re.compile(r"[가-힣]+")
+_LETTER = re.compile(r"[^\W\d_]")
+# Hangul that is not an edition word: the age unit and the category word.
+_NOT_EDITION_HANGUL = frozenset({"년", "위스키"})
+
+
+def _unexplained_hangul(line: str, brand_aliases: list[str]) -> bool:
+    """True when the line (already through the vocabulary) has a Hangul word that is not a brand."""
+    words = _without_brand(_HANGUL_WORD.findall(line), brand_aliases)
+    return any(word not in _NOT_EDITION_HANGUL for word in words)
 
 
 def _only_brand(name: str, catalog: CatalogLookup) -> bool:
@@ -382,7 +428,16 @@ def _only_brand(name: str, catalog: CatalogLookup) -> bool:
 
 
 def _without_brand(tokens: list[str], brand_aliases: list[str]) -> list[str]:
-    return [token for token in tokens if token not in brand_aliases]
+    """Drop the tokens, or runs of tokens ("컴파스", "박스"), that spell a brand alias."""
+    kept, start = [], 0
+    while start < len(tokens):
+        end = next((end for end in range(len(tokens), start, -1) if "".join(tokens[start:end]) in brand_aliases), None)
+        if end is None:
+            kept.append(tokens[start])
+            start += 1
+        else:
+            start = end
+    return kept
 
 
 def _resolve_by_brand(
@@ -419,6 +474,16 @@ def _narrow_brand(
                 products.append(product)
     if age is not None:
         products = [product for product in products if product.age_years == age]
+    # A number on the line other than the age (year, batch, "#2", "16.1") rules out a product
+    # whose name has different numbers. The whole line counts, so a variant that is only the
+    # brand ("옥토모어" of "Octomore 16.2 (옥토모어)") keeps the number too.
+    line_age, line_tokens = _split_age(item.product_name or "")
+    numbers = [
+        token for token in dict.fromkeys([*tokens, *line_tokens])
+        if _NUMBER.fullmatch(token) and token not in (str(age), str(line_age))
+    ]
+    if numbers:
+        products = [product for product in products if not _number_conflict(product, numbers)]
     if not products:
         return UNMATCHED
 
@@ -442,9 +507,9 @@ def _narrow_brand(
     else:
         # No age: only edition tokens can pick the product.
         exact = bool(tokens) and len(full) == 1
-        # Tokens too short to check ("DR") do not rule a product out.
-        checkable = [token for token in tokens if _checkable(token)]
-        chosen = full if exact else [product for product, fitted in fits if fitted or not checkable]
+        # Letter tokens too short to check ("DR") do not rule a product out.
+        deciding = [token for token in tokens if not _short_letters(token)]
+        chosen = full if exact else [product for product, fitted in fits if fitted or not deciding]
     if not chosen:
         return UNMATCHED
     confirm = (
@@ -547,9 +612,15 @@ _SHORT_HANGUL_NAME = 3
 _HANGUL_SYLLABLES = re.compile(r"^[가-힣]+$")
 
 
-def _short_hangul_name(normalized: str) -> bool:
-    """True when the name before its first number is Hangul of 3 syllables or fewer ("달모어18")."""
-    head = re.split(r"\d", normalized, maxsplit=1)[0] or _DIGITS.sub("", normalized)
+_ARTICLE = re.compile(r"^\s*(?:the|더)\s+", re.IGNORECASE)
+_NOT_WORD = re.compile(r"[\W_]")
+
+
+def _short_hangul_name(name: str) -> bool:
+    """True when the name before its first number, without a leading article ("더 ", "The ")
+    and punctuation, is Hangul of 3 syllables or fewer ("달모어 18", "더 달무어 18", "아드백-10")."""
+    text = _NOT_WORD.sub("", normalize(_ARTICLE.sub("", name)))
+    head = re.split(r"\d", text, maxsplit=1)[0] or _DIGITS.sub("", text)
     return len(head) <= _SHORT_HANGUL_NAME and bool(_HANGUL_SYLLABLES.match(head))
 
 
@@ -568,7 +639,7 @@ def _resolve_by_alias_distance(name: str, catalog: CatalogLookup) -> ResolutionR
         return UNMATCHED
     found.sort(key=lambda entry: (entry[0], entry[1].display_name, str(entry[1].product_id)))
     exact = _exact_allowed(len(found), found[0][0], bool(digits))
-    if exact and _short_hangul_name(normalize(name)):
+    if exact and _short_hangul_name(name):
         return UNMATCHED
     candidates = []
     for rank, (distance, product, alias) in enumerate(found, start=1):
@@ -608,7 +679,7 @@ def _resolve_by_brand_distance(name: str, item: ExtractedProduct, catalog: Catal
         return result
     has_digits = bool(_DIGITS.search(normalize(name)))
     if result.status == "exact_match" and _exact_allowed(len(brand_ids), distance, has_digits):
-        return UNMATCHED if _short_hangul_name(normalize(head)) else result
+        return UNMATCHED if _short_hangul_name(head) else result
     single = len(result.candidates) == 1
     candidates = tuple(
         replace(

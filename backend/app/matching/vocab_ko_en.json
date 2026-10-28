@@ -5,7 +5,8 @@
     "English side: words of ai/catalog/catalog_v2_service.json (2026-10-28) that are in the edition_name of 2 or more products, or in the display_name of 2 or more products and in no brand canonical_name.",
     "Left out from that list: words of 1-2 letters and abbreviations with no Korean spelling (a, an, l, w, na, no, ex, us, px, iii, lmdw), year (normalize already drops 년), the function words the, of, to, from, and words that would break brand names or Korean words: glen and ben alone (kept only in the phrases glen ord and ben nevis), lum (럼 is rum), hana (하나 is a Korean word), reek (only with lum).",
     "Phrases: caol ila, ben nevis, glen ord and pedro ximenez are entries of their own because a menu writes them as one Hangul word.",
-    "Korean side: written from the National Institute of Korean Language loanword rules and common spelling variants (셰리/쉐리/세리, 피니시/피니쉬, 스트렝스/스트랭스). No menu line of any bar, and no Korean alias of the catalog, was used to write it.",
+    "Korean side: standard loanword spellings (National Institute of Korean Language rules) plus non-standard variants and importer spellings. No menu file or Korean catalog alias was read while writing it, but the author had already read the W7 dev error analysis, whose examples include some of these spellings.",
+    "21 spellings are non-standard variants or importer names that also appear in dev menu lines: 스트랭스 로얄 벤리악 쉐리 인디안 베럴 콜렉티브 딘스톤 브리티쉬 팟 피니쉬 블랜드 해빌리 오리지날 녹듀 밀튼더프 히메네즈 (17 variants) and 쿨일라 브룩라디 부나하벤 아부나흐 (importer names). All 21 are also in generated:* catalog aliases, 4 of them (로얄 벤리악 쉐리 아부나흐) in menu aliases of non-dev bars. Dev Top-1 (eval, 2026-10-28) is 0.643 with them, 0.608 without the 17 variants and 0.599 without all 21. A clean measurement is the frozen I3 test.",
     "Keys of terms are English; each Korean spelling may map to one English term only (checked by the loader)."
   ],
   "terms": {
