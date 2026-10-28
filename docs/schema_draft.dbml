@@ -173,7 +173,7 @@ Table bar_owner_applications {
   proposed_bar_name varchar(150) [note: 'new_bar only']
   proposed_address varchar(500) [note: 'new_bar only']
   proposed_phone varchar(30) [note: 'new_bar only; optional']
-  business_registration_number char(10) [not null, note: 'Ten digits without hyphens; the check digit must be valid']
+  business_registration_number char(10) [not null, note: 'Ten digits without hyphens (CHECK); the API also checks the check digit']
   representative_name varchar(100) [not null, note: 'As on the business registration certificate']
   opening_date date [not null, note: 'Business opening date on the certificate']
   business_verification_result business_verification_result [not null, note: 'Latest NTS check. Never not_matched at submission, because such an application is not created']
@@ -182,9 +182,9 @@ Table bar_owner_applications {
   contact_phone varchar(30) [not null]
   applicant_note varchar(500)
   status owner_application_status [not null, default: 'pending']
-  reviewed_by_user_id uuid [ref: > users.id, note: 'The operator who approved or rejected it']
+  reviewed_by_user_id uuid [ref: > users.id, note: 'The operator who approved or rejected it; set with reviewed_at exactly when approved or rejected']
   reviewed_at timestamptz
-  rejection_reason varchar(500) [note: 'Required when rejected; shown to the applicant']
+  rejection_reason varchar(500) [note: 'Set exactly when rejected; shown to the applicant']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 
@@ -222,7 +222,7 @@ Table bar_owners {
   application_id uuid [not null, unique, ref: - bar_owner_applications.id]
   created_at timestamptz [not null, note: 'When the application was approved']
   revoked_at timestamptz
-  revoked_by_user_id uuid [ref: > users.id, note: 'The operator who revoked the ownership']
+  revoked_by_user_id uuid [ref: > users.id, note: 'The operator who revoked the ownership; set exactly when revoked_at is']
 
   indexes {
     bar_id [note: 'Unique where revoked_at is null: at most one current owner per bar']
