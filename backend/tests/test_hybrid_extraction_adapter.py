@@ -167,6 +167,107 @@ def test_call_ocr_opens_and_closes_its_own_client(monkeypatch):
     assert len(seen) == 1 and client.is_closed
 
 
+# ---- wall-clock deadline (certificate OCR; Codex review on #67) ----
+
+DEADLINE = clova.ClovaSettings(
+    invoke_url="https://ocr.example.test/general", secret="clova-secret", max_attempts=2, timeout_s=15, deadline_s=35
+)
+
+
+class FakeMonotonic:
+    """Seconds since the call started; `step` is added on every reading."""
+
+    def __init__(self, step=0.0):
+        self.now, self.step = 0.0, step
+
+    def __call__(self):
+        self.now += self.step
+        return self.now
+
+
+@pytest.fixture
+def monotonic(monkeypatch):
+    fake = FakeMonotonic()
+    monkeypatch.setattr(clova, "monotonic", fake)
+    return fake
+
+
+def test_deadline_stops_a_response_that_keeps_trickling(monotonic):
+    def chunks():
+        for _ in range(10):
+            monotonic.now += 10  # each chunk arrives within the read timeout, but the whole takes 100 s
+            yield b" "
+
+    client, seen = mock_client(httpx.Response(200, stream=IterStream(chunks())))
+    with pytest.raises(clova.ClovaOCRError, match="35 s deadline after 1 attempt"):
+        clova.call_ocr(DEADLINE, jpeg(), "image/jpeg", client)
+    assert len(seen) == 1 and monotonic.now <= 50
+
+
+def test_deadline_stops_a_slow_upload(monotonic, monkeypatch):
+    monkeypatch.setattr(clova, "CHUNK_BYTES", 1024)
+    monotonic.step = 1.0  # every chunk sent takes a second
+    client, seen = mock_client(httpx.Response(200, json=OCR_RESPONSE))
+    with pytest.raises(clova.ClovaOCRError, match="deadline"):
+        clova.call_ocr(DEADLINE, jpeg((1500, 1500)), "image/jpeg", client)
+    assert monotonic.now <= 37
+
+
+def test_no_retry_that_would_start_after_the_deadline(monotonic, monkeypatch):
+    waits = []
+    monkeypatch.setattr(clova, "sleep", waits.append)
+
+    def slow_503(request):
+        monotonic.now += 32
+        return httpx.Response(503)
+
+    client = httpx.Client(transport=httpx.MockTransport(slow_503))
+    with pytest.raises(clova.ClovaOCRError, match="after 1 attempt.*HTTP 503"):
+        clova.call_ocr(DEADLINE, jpeg(), "image/jpeg", client)
+    assert waits == []
+
+
+def test_a_pause_that_overruns_the_deadline_ends_the_call(monotonic, monkeypatch):
+    monkeypatch.setattr(clova, "sleep", lambda seconds: setattr(monotonic, "now", monotonic.now + 60))
+    client, seen = mock_client(httpx.Response(503), httpx.Response(200, json=OCR_RESPONSE))
+    with pytest.raises(clova.ClovaOCRError, match="deadline after 2 attempt"):
+        clova.call_ocr(DEADLINE, jpeg(), "image/jpeg", client)
+    assert len(seen) == 1
+
+
+def test_each_attempt_times_out_within_what_is_left(monotonic):
+    timeouts = []
+
+    def handler(request):
+        timeouts.append(request.extensions["timeout"]["read"])
+        monotonic.now += 15
+        return httpx.Response(503) if len(timeouts) == 1 else httpx.Response(200, json=OCR_RESPONSE)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    out = clova.call_ocr(DEADLINE, jpeg(), "image/jpeg", client)
+    # 15 s for the first attempt, then 35 - 15 - 5 (the pause) = 15, capped by the per-attempt 15 s.
+    assert (out["attempts"], out["response"]) == (2, OCR_RESPONSE)
+    assert timeouts == [15, 15]
+
+
+def test_deadline_request_has_a_content_length_and_the_same_body(monotonic):
+    client, seen = mock_client(httpx.Response(200, json=OCR_RESPONSE))
+    clova.call_ocr(DEADLINE, jpeg(), "image/jpeg", client)
+    request = seen[0]
+    assert "transfer-encoding" not in request.headers
+    assert int(request.headers["content-length"]) == len(request.content)
+    body = json.loads(request.content)
+    assert (body["version"], body["images"][0]["format"]) == ("V2", "jpg")
+
+
+class IterStream(httpx.SyncByteStream):
+    def __init__(self, chunks):
+        self.chunks = chunks
+
+    def __iter__(self):
+        yield from self.chunks
+
+
 def test_very_long_photo_is_downscaled_for_ocr():
     out = io.BytesIO()
     Image.new("RGB", (40, 8000), "white").save(out, format="PNG")

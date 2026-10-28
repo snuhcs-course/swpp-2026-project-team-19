@@ -4,10 +4,17 @@ One call per photo, table detection off (the E2E hybrid setting). The image sent
 prepared photo (same bytes as the Gemini call) unless its long side is >= 8,000 px; then a
 downscaled JPEG is sent. Line boxes are reported on a 0-1000 scale of the image, so they do
 not depend on that downscale. The secret is read from CLOVA_OCR_SECRET and never logged.
+
+With `deadline_s` set (the business certificate OCR, which the app waits for), the whole call,
+retries included, stops at that many seconds: the body is sent and read in chunks with the
+clock checked between them, each attempt's timeouts are capped by the time left, and no retry
+starts that could not finish before it. One socket operation already under way can still run
+for up to its timeout, so the worst case is `deadline_s` plus the per-attempt `timeout_s`.
 """
 
 import base64
 import io
+import json
 import logging
 import os
 import statistics
@@ -30,8 +37,10 @@ RETRY_STATUS = {429, 500, 502, 503, 504}
 GAP_FACTOR = 2.5  # ai/ocr/lines.py, tuned on val only (ai/docs/p12_plan.md)
 FORMATS = {"image/jpeg": "jpg", "image/png": "png"}
 
-# Replaced in tests so retries do not wait.
+# Replaced in tests so retries do not wait and deadlines can be reached without waiting.
 sleep = time.sleep
+monotonic = time.monotonic
+CHUNK_BYTES = 64 * 1024
 
 
 class ClovaOCRError(Exception):
@@ -44,9 +53,13 @@ class ClovaSettings:
     secret: str
     max_attempts: int = 3
     timeout_s: float = 60
+    deadline_s: float | None = None  # wall-clock limit for the whole call, retries included
 
     def __repr__(self) -> str:  # keep the secret out of logs and tracebacks
-        return f"ClovaSettings(max_attempts={self.max_attempts}, timeout_s={self.timeout_s})"
+        return (
+            f"ClovaSettings(max_attempts={self.max_attempts}, timeout_s={self.timeout_s}, "
+            f"deadline_s={self.deadline_s})"
+        )
 
 
 def load_clova_settings() -> ClovaSettings:
@@ -61,6 +74,44 @@ def load_clova_settings() -> ClovaSettings:
 
 
 # ---- the call ----
+
+
+class _DeadlinePassed(Exception):
+    pass
+
+
+def _post_before(client: httpx.Client, settings: ClovaSettings, body: dict, headers: dict, deadline: float):
+    """POST `body`, giving up at `deadline` (a `monotonic()` time) while sending or reading."""
+    left = deadline - monotonic()
+    if left <= 0:
+        raise _DeadlinePassed
+    data = json.dumps(body, separators=(",", ":")).encode("ascii")
+
+    def chunks():
+        for start in range(0, len(data), CHUNK_BYTES):
+            if monotonic() > deadline:
+                raise _DeadlinePassed
+            yield data[start : start + CHUNK_BYTES]
+
+    # With Content-Length set, httpx sends the chunks as one plain body, not chunked encoding.
+    request = client.build_request(
+        "POST",
+        settings.invoke_url,
+        content=chunks(),
+        headers={**headers, "Content-Length": str(len(data))},
+        timeout=httpx.Timeout(min(settings.timeout_s, left)),
+    )
+    response = client.send(request, stream=True)
+    try:
+        content = bytearray()
+        for chunk in response.iter_bytes():
+            content += chunk
+            if monotonic() > deadline:
+                raise _DeadlinePassed
+    finally:
+        response.close()
+    # The bytes are already decoded, so the new response gets no Content-Encoding header.
+    return httpx.Response(response.status_code, content=bytes(content), request=request)
 
 
 def ocr_image(image: bytes, mime_type: str) -> tuple[bytes, str, tuple[int, int]]:
@@ -91,6 +142,7 @@ def call_ocr(settings: ClovaSettings, image: bytes, mime_type: str, client: http
         "enableTableDetection": False,
     }
     headers = {"X-OCR-SECRET": settings.secret, "Content-Type": "application/json"}
+    deadline = None if settings.deadline_s is None else monotonic() + settings.deadline_s
     own = client is None
     client = client or httpx.Client(timeout=settings.timeout_s)
     try:
@@ -99,9 +151,16 @@ def call_ocr(settings: ClovaSettings, image: bytes, mime_type: str, client: http
             attempts += 1
             t0 = time.perf_counter()
             try:
-                response = client.post(settings.invoke_url, json=body, headers=headers)
+                if deadline is None:
+                    response = client.post(settings.invoke_url, json=body, headers=headers)
+                else:
+                    response = _post_before(client, settings, body, headers, deadline)
                 status = response.status_code
                 detail = f"HTTP {status}"
+            except _DeadlinePassed as exc:
+                raise ClovaOCRError(
+                    f"CLOVA OCR stopped at its {settings.deadline_s:g} s deadline after {attempts} attempt(s)"
+                ) from exc
             except (httpx.TimeoutException, httpx.NetworkError) as exc:
                 response, status, detail = None, None, type(exc).__name__
             except httpx.HTTPError as exc:  # e.g. a malformed invoke URL: not worth retrying
@@ -109,7 +168,9 @@ def call_ocr(settings: ClovaSettings, image: bytes, mime_type: str, client: http
             latency_ms = round((time.perf_counter() - t0) * 1000)
             if status == 200:
                 break
-            if (status is None or status in RETRY_STATUS) and attempts < settings.max_attempts:
+            retryable = (status is None or status in RETRY_STATUS) and attempts < settings.max_attempts
+            # A retry that would start after the deadline is not made.
+            if retryable and (deadline is None or monotonic() + 5 * attempts < deadline):
                 logger.warning("CLOVA OCR retry %d/%d after %s", attempts, settings.max_attempts - 1, detail)
                 sleep(5 * attempts)
                 continue

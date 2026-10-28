@@ -351,7 +351,7 @@ def test_ocr_settings_come_from_the_clova_variables(monkeypatch):
     reader = deps.get_certificate_ocr()
     assert isinstance(reader, ClovaCertificateOcr)
     assert reader.settings.invoke_url == "https://ocr.example.test/custom/v1/1/abc/general"
-    assert (reader.settings.timeout_s, reader.settings.max_attempts) == (20.0, 2)
+    assert (reader.settings.timeout_s, reader.settings.max_attempts, reader.settings.deadline_s) == (15.0, 2, 35.0)
 
 
 def test_default_limiter_and_clock():
