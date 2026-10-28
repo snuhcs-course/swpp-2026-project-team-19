@@ -18,6 +18,12 @@ WALL_TIMEOUT_S = 75.0
 
 
 class GeminiMatchingLLM:
+    """A new client per request, as extraction does per photo: `call_with_retries` replaces a client
+    whose request hung past the wall-clock timeout only inside that call (the abandoned thread may
+    still be using it), so keeping one client here could hand the hung one to the next request.
+    `client` (tests only) is used for every request instead.
+    """
+
     def __init__(self, api_key: str, client: Any = None) -> None:
         # ExtractionSettings keeps the key out of its repr.
         self._settings = ExtractionSettings(
@@ -39,10 +45,9 @@ class GeminiMatchingLLM:
             generation_config={"thinking_level": THINKING_LEVEL},
             store=False,
         )
-        if self._client is None:
-            self._client = gemini.make_client(self._settings)
+        client = self._client if self._client is not None else gemini.make_client(self._settings)
         try:
-            result = gemini.call_with_retries(self._settings, request, self._client)
+            result = gemini.call_with_retries(self._settings, request, client)
         except ModelCallError as error:
             raise MatchingLLMError(str(error)) from error
         return getattr(result.interaction, "output_text", None) or ""

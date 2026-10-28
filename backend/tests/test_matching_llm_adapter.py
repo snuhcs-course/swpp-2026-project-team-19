@@ -108,18 +108,41 @@ def test_errors_become_matching_llm_errors_without_the_key():
         GeminiMatchingLLM("k", client=FakeClient(StatusError(400))).generate_json("P", {}, {})
 
 
-def test_client_is_created_once_from_the_key(monkeypatch):
+def test_client_that_hit_the_hard_timeout_is_not_reused(monkeypatch):
+    """call_with_retries drops a client whose request hung (it may still be in use by the abandoned
+    thread); the next request must not get that client back from the adapter."""
+    clients = iter(["client-1", "client-2", "client-3"])
+    used = []
+
+    def create(client, request, settings):
+        used.append(client)
+        if len(used) == 1:
+            raise gemini.HardTimeout("no response within 75s")
+        return answer("{}")
+
+    monkeypatch.setattr(gemini, "make_client", lambda settings: next(clients))
+    monkeypatch.setattr(gemini, "_create_with_deadline", create)
+    llm = GeminiMatchingLLM("secret-test-key")
+
+    assert llm.generate_json("P", {}, {}) == "{}"  # hangs on client-1, succeeds on a new client-2
+    assert llm.generate_json("P", {}, {}) == "{}"
+
+    assert used == ["client-1", "client-2", "client-3"]
+
+
+def test_each_request_gets_a_new_client_from_the_key(monkeypatch):
     made = []
 
     def make(settings):
         made.append(settings)
-        return FakeClient(answer("a"), answer("b"))
+        return FakeClient(answer(f"answer {len(made)}"))
 
     monkeypatch.setattr(gemini, "make_client", make)
     llm = GeminiMatchingLLM("secret-test-key")
 
-    assert [llm.generate_json("P", {}, {}), llm.generate_json("P", {}, {})] == ["a", "b"]
-    [settings] = made
+    assert [llm.generate_json("P", {}, {}), llm.generate_json("P", {}, {})] == ["answer 1", "answer 2"]
+    assert len(made) == 2
+    settings = made[0]
     assert (settings.api_key, settings.model, settings.thinking_level, settings.max_attempts) == (
         "secret-test-key", "gemini-3.1-flash-lite", "low", MAX_ATTEMPTS)
     assert "secret-test-key" not in repr(settings)
