@@ -26,8 +26,9 @@ S2  brand + attributes (needs S1), tried only when no alias matched
       edition token, a name variant that is only a brand is used only when the other
       names find nothing, and with no age, Latin letter tokens too short to check ("DR")
       do not rule a product out; numbers still do (I3-A4)
-    - a number on the line other than the age (a year, "#2", "16.2") rules out a product
-      whose name has other numbers (Classic Cut 2020 for "클래식컷 2025") (I3-A4)
+    - numbers on the line other than the age (a year, "#2", "16.2"; strength, volume,
+      servings and prices such as "46%", "700 ml", "16,000원" left out) rule out a product
+      whose name has numbers and none of them (Classic Cut 2020 for "클래식컷 2025") (I3-A4)
     - when edition tokens picked the product but its edition name has words the line
       does not have ("anCnoc Sherry" -> anCnoc Peated Sherry Cask), the line is
       ambiguous with that one candidate, evidence editionOnlyInProduct and
@@ -350,11 +351,23 @@ _NUMBER = re.compile(r"\d+(?:\.\d+)?")
 
 
 def _number_conflict(product: ProductInfo, numbers: list[str]) -> bool:
-    """True when the product's name has numbers besides its age and a number of the line is not one
+    """True when the product's name has numbers besides its age and none of the line's numbers is one
     of them ("2025" vs Classic Cut 2020, "2" vs Kim Gwajang #3, "16.2" vs Octomore 14.1)."""
     text = unicodedata.normalize("NFKC", f"{product.display_name} {product.edition_name or ''}")
     own = set(_DIGITS.findall(text)) - {str(product.age_years)}
-    return bool(own) and any(number not in own for number in numbers)
+    return bool(own) and not own & set(numbers)
+
+
+# Strength, volume, serving and price ("46%", "700 ml", "2잔", "16,000원") are not product numbers.
+_MEASURE = re.compile(
+    r"\d+(?:[.,]\d+)*\s*(?:%|ml|cl|l|도|잔|병|샷|원|won)(?![a-z])|\d{1,3}(?:,\d{3})+", re.IGNORECASE
+)
+
+
+def _line_numbers(text: str) -> list[str]:
+    """Numbers written on the line, without strength, volume, serving and price expressions."""
+    _, tokens = _split_age(_MEASURE.sub(" ", text))
+    return [token for token in tokens if _NUMBER.fullmatch(token)]
 
 
 # Edition words that say nothing about which product it is (ai/match_llm NEUTRAL_TOKENS,
@@ -477,10 +490,10 @@ def _narrow_brand(
     # A number on the line other than the age (year, batch, "#2", "16.1") rules out a product
     # whose name has different numbers. The whole line counts, so a variant that is only the
     # brand ("옥토모어" of "Octomore 16.2 (옥토모어)") keeps the number too.
-    line_age, line_tokens = _split_age(item.product_name or "")
+    line_age, _ = _split_age(item.product_name or "")
     numbers = [
-        token for token in dict.fromkeys([*tokens, *line_tokens])
-        if _NUMBER.fullmatch(token) and token not in (str(age), str(line_age))
+        number for number in dict.fromkeys([*_line_numbers(rest), *_line_numbers(item.product_name or "")])
+        if number not in (str(age), str(line_age))
     ]
     if numbers:
         products = [product for product in products if not _number_conflict(product, numbers)]

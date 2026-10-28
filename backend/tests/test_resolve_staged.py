@@ -668,3 +668,47 @@ def test_vocabulary_retry_needs_an_edition_word_that_fits():
     )
     # "쿨일라" is Caol Ila: the Macduff of the same age is not offered.
     assert menu("시그나토리 쿨일라13", catalog).status == "unmatched"
+
+
+JD, FARCLAS, MICHTERS = (_id(800 + n) for n in range(3))
+NO7, FARCLAS_105, CUT_2020_B, OCTO_14_B, US1 = (_id(n) for n in range(811, 816))
+
+
+@pytest.fixture
+def strengths():
+    products = [
+        ProductInfo(NO7, "Jack Daniel's Old No.7", None, "Old No.7", brand_id=JD),
+        ProductInfo(FARCLAS_105, "Glenfarclas 105", None, "105", brand_id=FARCLAS),
+        ProductInfo(CUT_2020_B, "The Macallan Classic Cut 2020", None, "Classic Cut 2020", brand_id=MACALLAN_CUT),
+        ProductInfo(OCTO_14_B, "Octomore 14.1", None, "14.1", brand_id=OCTOMORE),
+        ProductInfo(US1, "Michter's US*1 Small Batch Bourbon", None, "US*1 Small Batch Bourbon", brand_id=MICHTERS),
+    ]
+    aliases = [(product.product_id, product.display_name) for product in products]
+    aliases += [(NO7, "잭다니엘 넘버7"), (US1, "믹터스 US1 버번")]
+    brand_aliases = [(JD, "잭다니엘"), (FARCLAS, "Glenfarclas"), (FARCLAS, "글렌파클라스"), (MACALLAN_CUT, "맥캘란")]
+    brand_aliases += [(OCTOMORE, "옥토모어"), (MICHTERS, "믹터스")]
+    return InMemoryCatalog(products, aliases, brand_aliases)
+
+
+@pytest.mark.parametrize(
+    ("name", "product"),
+    [
+        ("잭다니엘 넘버7 40%", NO7),
+        ("글렌파클라스 105 60%", FARCLAS_105),
+        ("Glenfarclas 105 700 ml", FARCLAS_105),
+        ("Glenfarclas 105 700ml 16,000원", FARCLAS_105),
+        ("맥캘란 클래식컷 2020 52.5%", CUT_2020_B),
+        ("옥토모어 14.1 59.1%", OCTO_14_B),
+        ("옥토모어 14.1 1.6", OCTO_14_B),  # price written as 1.6 (16,000): 14.1 still matches
+        ("믹터스 US1 버번 45.7%", US1),
+    ],
+)
+def test_strength_volume_and_price_are_not_product_numbers(strengths, name, product):
+    assert product in {c.product_id for c in menu(name, strengths).candidates}
+
+
+def test_line_numbers_leave_out_measures():
+    from app.matching.staged import _line_numbers
+
+    assert _line_numbers("Glenfarclas 105 60% 700 ml 2잔 16,000원") == ["105"]
+    assert _line_numbers("옥토모어 14.1 59.1도") == ["14.1"]
