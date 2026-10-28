@@ -37,7 +37,8 @@ def test_kst_day_and_next_reset():
 def test_limit_per_subject_and_kind():
     limiter = InMemoryDailyLimiter()
     assert DAILY_LIMIT == 5
-    assert [limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) for _ in range(6)] == [True] * 5 + [False]
+    days = [limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) for _ in range(6)]
+    assert days == [date(2026, 10, 28)] * 5 + [None]
     # The refused request is not counted.
     assert limiter.used("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) == 5
     # Another user, and another kind for the same user, have their own counts.
@@ -47,23 +48,44 @@ def test_limit_per_subject_and_kind():
 
 def test_counts_reset_at_midnight_kst():
     limiter = InMemoryDailyLimiter(daily_limit=1)
-    assert limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
-    assert not limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
-    assert limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, AT_MIDNIGHT)
+    assert limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) == date(2026, 10, 28)
+    assert limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) is None
+    assert limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, AT_MIDNIGHT) == date(2026, 10, 29)
     # A request that read the clock before midnight but arrives late counts against the new day.
-    assert not limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
+    assert limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) is None
     assert limiter.used("a", BUSINESS_CERTIFICATE_OCR, AT_MIDNIGHT) == 1
 
 
 def test_release_gives_back_one_unit():
     limiter = InMemoryDailyLimiter(daily_limit=2)
+    day = limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
     limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
-    limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
-    limiter.release("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
+    limiter.release("a", BUSINESS_CERTIFICATE_OCR, day)
     assert limiter.used("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) == 1
-    limiter.release("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
-    limiter.release("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)  # nothing left: stays at 0
+    limiter.release("a", BUSINESS_CERTIFICATE_OCR, day)
+    limiter.release("a", BUSINESS_CERTIFICATE_OCR, day)  # nothing left: stays at 0
     assert limiter.used("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) == 0
+
+
+def test_release_after_midnight_does_not_refund_the_new_day():
+    """Codex review: a unit acquired before midnight and given back after it must not lower the new day's count."""
+    limiter = InMemoryDailyLimiter(daily_limit=1)
+    old_day = limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
+    assert limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, AT_MIDNIGHT) == date(2026, 10, 29)
+
+    limiter.release("a", BUSINESS_CERTIFICATE_OCR, old_day)
+
+    assert limiter.used("a", BUSINESS_CERTIFICATE_OCR, AT_MIDNIGHT) == 1
+    assert limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, AT_MIDNIGHT) is None
+
+
+def test_a_late_acquire_counted_against_the_new_day_is_released_from_it():
+    limiter = InMemoryDailyLimiter(daily_limit=2)
+    limiter.acquire("b", BUSINESS_CERTIFICATE_OCR, AT_MIDNIGHT)  # rolls the limiter to the new day
+    late = limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
+    assert late == date(2026, 10, 29)
+    limiter.release("a", BUSINESS_CERTIFICATE_OCR, late)
+    assert limiter.used("a", BUSINESS_CERTIFICATE_OCR, AT_MIDNIGHT) == 0
 
 
 def test_concurrent_requests_never_exceed_the_limit():
@@ -73,7 +95,7 @@ def test_concurrent_requests_never_exceed_the_limit():
 
     def call():
         barrier.wait()
-        results.append(limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT))
+        results.append(limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) is not None)
 
     threads = [threading.Thread(target=call) for _ in range(20)]
     for thread in threads:
@@ -85,7 +107,7 @@ def test_concurrent_requests_never_exceed_the_limit():
 
 def test_acquire_or_raise_returns_429_with_the_next_reset():
     limiter = InMemoryDailyLimiter(daily_limit=1)
-    acquire_or_raise(limiter, "a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
+    assert acquire_or_raise(limiter, "a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) == date(2026, 10, 28)
     with pytest.raises(ApiError) as caught:
         acquire_or_raise(limiter, "a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT)
     error = caught.value

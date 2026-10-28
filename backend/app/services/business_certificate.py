@@ -86,12 +86,12 @@ def read_business_certificate(
     data, content_type = check_certificate_image(uploads)
     if ocr is None:
         raise ocr_unavailable()
-    acquire_or_raise(limiter, subject, BUSINESS_CERTIFICATE_OCR, now, RATE_LIMITED_MESSAGE)
+    day = acquire_or_raise(limiter, subject, BUSINESS_CERTIFICATE_OCR, now, RATE_LIMITED_MESSAGE)
     try:
         lines = ocr.read_lines(data, content_type)
     except CertificateImageError as error:
         # Nothing was sent to the OCR service, so the request is not counted.
-        limiter.release(subject, BUSINESS_CERTIFICATE_OCR, now)
+        limiter.release(subject, BUSINESS_CERTIFICATE_OCR, day)
         raise ApiError(415, "UNSUPPORTED_IMAGE_TYPE", "사진 파일을 읽을 수 없습니다. JPEG로 바꿔 다시 올려 주세요.") from error
     except CertificateOcrError as error:
         # The message names only the HTTP status or error type, never the photo or its text.

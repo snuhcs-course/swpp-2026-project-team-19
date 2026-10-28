@@ -44,12 +44,14 @@ def rfc3339_utc(moment: datetime) -> str:
 
 
 class DailyRequestLimiter(Protocol):
-    def acquire(self, subject: str, kind: str, now: datetime) -> bool:
-        """Count one request of `kind` for `subject` today (KST). False, and nothing counted, at the limit."""
+    def acquire(self, subject: str, kind: str, now: datetime) -> date | None:
+        """Count one request of `kind` for `subject`. Returns the KST day it was counted against,
+        or None, with nothing counted, when that day's limit is used up."""
         ...
 
-    def release(self, subject: str, kind: str, now: datetime) -> None:
-        """Give back one unit acquired today when the external call was not made after all."""
+    def release(self, subject: str, kind: str, day: date) -> None:
+        """Give back one unit counted against `day` (from `acquire`) when the external call was not
+        made after all. Nothing happens once that day is over: its counts are gone."""
         ...
 
 
@@ -70,19 +72,21 @@ class InMemoryDailyLimiter:
             self._day = day
             self._counts.clear()
 
-    def acquire(self, subject: str, kind: str, now: datetime) -> bool:
+    def acquire(self, subject: str, kind: str, now: datetime) -> date | None:
         with self._lock:
             self._roll_over(now)
             key = (subject, kind)
             used = self._counts.get(key, 0)
             if used >= self.daily_limit:
-                return False
+                return None
             self._counts[key] = used + 1
-            return True
+            return self._day
 
-    def release(self, subject: str, kind: str, now: datetime) -> None:
+    def release(self, subject: str, kind: str, day: date) -> None:
         with self._lock:
-            self._roll_over(now)
+            # A unit counted against a day that is over must not be refunded from the new day.
+            if day != self._day:
+                return
             key = (subject, kind)
             used = self._counts.get(key, 0)
             if used > 1:
@@ -107,7 +111,10 @@ def acquire_or_raise(
     kind: str,
     now: datetime,
     message: str = DEFAULT_RATE_LIMITED_MESSAGE,
-) -> None:
-    """Count one request, or raise `429 RATE_LIMITED` with `details.retryAfter` (next midnight KST, UTC)."""
-    if not limiter.acquire(subject, kind, now):
+) -> date:
+    """Count one request and return the day for `release`, or raise `429 RATE_LIMITED` with
+    `details.retryAfter` (next midnight KST, UTC)."""
+    day = limiter.acquire(subject, kind, now)
+    if day is None:
         raise rate_limited(now, message)
+    return day
