@@ -165,3 +165,13 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 적재: `cd backend && uv run --no-sync --env-file .env python scripts/seed_catalog.py --catalog ../ai/catalog/catalog_v2_service.json --bars ../ai/catalog/bars_v2.json` (추가만 하고 기존 행은 지우지 않음).
 
 괄호 제거 별칭(출처 `template:paren-strip`) 265개: 메뉴 별칭의 괄호 부분을 뺀 형태(예: '쿨일라(Caol Ila) 12년' → '쿨일라 12년'). 고객 검색은 메뉴 매칭 S1과 달리 괄호를 처리하지 않아서 넣음. 연수·에디션이 빠지거나 다른 상품과 겹치면 제외. 검사 규칙 오류로 빠졌던 생성 별칭 19개(숫자 에디션 등)도 복구. 오프라인 검색 측정(손님형 검색어 600개): 47% → 51%, 실제 Naver 표기 49개: 21 → 26.
+
+## 12. v2.2 정비 (2026-10-28)
+
+`catalog_v2_service.json`의 `version`이 `catalog_v2_2_service`로 바뀌었습니다. 파일 이름은 그대로입니다.
+
+- **별칭 12개 추가 (상품 10, 브랜드 2):** 10/7 위스키복춘 앱 게시 때 메뉴 한 줄이 통째로 브랜드이자 상품으로 만들어진 13건(`글렌피디크 12Y` 등)의 표기를 진짜 상품의 별칭으로 붙였습니다. 출처는 `menu:위스키복춘`입니다. 3건(달모어 12Y 셰리, 글렌드로나크 12Y·15Y)은 같은 정규화 별칭이 이미 있어 추가하지 않았습니다. 브랜드 별칭 `글렌피디크`(Glenfiddich), `초누키`(Mars Tsunuki, 메뉴판 표기)를 더했습니다.
+- **별칭 3개 검색 제외 (`is_searchable: false`):** 에디션 상품에 붙어 같은 연수의 다른 상품을 검색에서 가리던 브랜드+연수 별칭입니다. The Balvenie 12 DoubleWood의 `발베니12`, `Balvenie 12yo`, The Balvenie 14 Caribbean Cask의 `발베니 14Y`. 매칭은 `is_searchable`을 보지 않으므로 메뉴의 "발베니 12"는 그대로 DoubleWood로 정확 일치하고(라벨 기준 정답), 고객 검색의 "발베니 12"는 12년 상품 전체를 보여 줍니다. 기본 상품(에디션 없음)의 브랜드+연수 별칭은 그대로 둡니다.
+- **`bars_v2.json`:** 벡, 포레스트를 `inactive`로 바꿨습니다. 운영 DB에서는 이미 inactive라서, 이 파일이 active인 채로 시드를 적용하면 두 바가 다시 켜집니다.
+
+시드는 이미 있는 별칭을 건너뛰고 삭제도 하지 않으므로, 별칭 3개의 `is_searchable` 변경과 앱 게시로 생긴 13건의 비활성화는 SQL로 따로 반영합니다(PR 본문 참고).

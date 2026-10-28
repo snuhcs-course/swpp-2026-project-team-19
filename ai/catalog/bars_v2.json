@@ -57,7 +57,7 @@
       "latitude": 37.476246,
       "longitude": 126.961684,
       "phone": "02-6015-1533",
-      "status": "active",
+      "status": "inactive",
       "kakao_place_id": "22892494",
       "label_bar_name": "Beck"
     },
@@ -69,7 +69,7 @@
       "latitude": 37.563584,
       "longitude": 127.189536,
       "phone": "010-3758-1325",
-      "status": "active",
+      "status": "inactive",
       "kakao_place_id": "1200932955",
       "label_bar_name": "포레스트"
     },
