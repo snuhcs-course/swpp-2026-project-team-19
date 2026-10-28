@@ -71,6 +71,7 @@ SIGNED_IN = {
     ("post", "/api/owner-applications"),
     ("get", "/api/me/owner-applications"),
     ("get", "/api/owner-applications/{applicationId}"),
+    ("post", "/api/owner-applications/{applicationId}/cancel"),
 }
 # No token needed; tested in test_search_api.py, test_nearby_bars_api.py, test_map_bars_api.py,
 # test_bar_names_api.py, test_bar_menu_api.py and test_auth_api.py.

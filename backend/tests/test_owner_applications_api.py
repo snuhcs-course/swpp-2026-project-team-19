@@ -7,7 +7,7 @@ from datetime import date, datetime, timezone
 from uuid import UUID
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import event, func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.adapters.business_verification import BusinessCheck, BusinessVerificationUnavailable
@@ -480,3 +480,87 @@ def test_other_integrity_errors_are_not_reported_as_duplicates(client, db_sessio
 
     with pytest.raises(IntegrityError):
         apply(client, auth, existing_bar_body(bar))
+
+
+# ---- cancel (3.11.5) ----
+
+
+def cancel(client, headers, application_id):
+    return client.post(f"/api/owner-applications/{application_id}/cancel", headers=headers)
+
+
+def test_cancels_my_pending_application(client, db_session, auth, applicant):
+    pending = make_application(db_session, applicant, make_bar(db_session))
+
+    response = cancel(client, auth, pending.id)
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "canceled"
+    assert response.json()["businessVerification"] is None
+    db_session.refresh(pending)
+    assert pending.status == OwnerApplicationStatus.CANCELED
+
+
+def test_locks_the_application_before_changing_it(client, db_session, auth, applicant):
+    pending = make_application(db_session, applicant)
+    statements = []
+
+    def listen(conn, cursor, statement, *args):
+        statements.append(statement)
+
+    event.listen(db_session.get_bind(), "before_cursor_execute", listen)
+    try:
+        assert cancel(client, auth, pending.id).status_code == 200
+    finally:
+        event.remove(db_session.get_bind(), "before_cursor_execute", listen)
+
+    assert any("FROM bar_owner_applications" in s and "FOR UPDATE" in s for s in statements)
+
+
+def test_can_apply_again_after_canceling(client, db_session, auth, applicant, verifier, limiter):
+    bar = make_bar(db_session)
+    pending = make_application(db_session, applicant, bar)
+
+    cancel(client, auth, pending.id)
+
+    assert apply(client, auth, existing_bar_body(bar)).status_code == 201
+
+
+@pytest.mark.parametrize(
+    "status", [OwnerApplicationStatus.CANCELED, OwnerApplicationStatus.REJECTED, OwnerApplicationStatus.APPROVED]
+)
+def test_only_pending_applications_can_be_canceled(client, db_session, auth, applicant, status):
+    operator = make_user(db_session, "operator-subject", user_type=UserType.OPERATOR)
+    finished = make_application(db_session, applicant, make_bar(db_session), status=status, reviewer=operator)
+
+    response = cancel(client, auth, finished.id)
+
+    assert error_of(response) == (409, "INVALID_APPLICATION_STATE")
+    assert response.json()["error"]["details"] == {"status": status.value}
+
+
+@pytest.mark.parametrize("target", ["someone else's", "missing", "malformed"])
+def test_cannot_cancel_other_applications(client, db_session, auth, target):
+    other = make_application(db_session, make_user(db_session, OTHER_SUBJECT))
+    application_id = {"someone else's": str(other.id), "missing": MISSING_ID, "malformed": "x"}[target]
+
+    assert error_of(cancel(client, auth, application_id)) == (404, "OWNER_APPLICATION_NOT_FOUND")
+    db_session.refresh(other)
+    assert other.status == OwnerApplicationStatus.PENDING
+
+
+def test_a_caller_without_a_users_row_cannot_cancel(client, db_session, supabase):
+    other = make_application(db_session, make_user(db_session, OTHER_SUBJECT))
+
+    assert error_of(cancel(client, bearer(supabase), other.id)) == (404, "OWNER_APPLICATION_NOT_FOUND")
+
+
+def test_an_operator_cancels_only_their_own(client, db_session, supabase):
+    operator = make_user(db_session, SUBJECT, user_type=UserType.OPERATOR)
+    others = make_application(db_session, make_user(db_session, OTHER_SUBJECT))
+    mine = make_application(db_session, operator)
+
+    assert error_of(cancel(client, bearer(supabase), others.id)) == (404, "OWNER_APPLICATION_NOT_FOUND")
+    response = cancel(client, bearer(supabase), mine.id)
+    assert response.status_code == 200
+    assert response.json()["businessVerification"]["result"] == "unavailable"

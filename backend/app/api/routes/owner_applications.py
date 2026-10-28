@@ -17,6 +17,7 @@ from app.schemas.owner_application import (
 )
 from app.services.owner_applications import (
     application_responses,
+    cancel_application,
     get_application,
     list_my_applications,
     submit_application,
@@ -125,3 +126,30 @@ def read_owner_application(
     session: Session = Depends(get_session),
 ) -> OwnerApplicationResponse:
     return get_application(session, principal, application_id)
+
+
+@router.post(
+    "/owner-applications/{applicationId}/cancel",
+    response_model=OwnerApplicationResponse,
+    summary="Cancel my pending owner application",
+    description=(
+        "The applicant only; an operator may cancel only their own applications too. No request body. "
+        "A `pending` application becomes `canceled`, a final status; the applicant may apply again. "
+        "`businessVerification` is null unless the caller is an operator."
+    ),
+    responses=error_responses(
+        _UNAUTHENTICATED,
+        (
+            404,
+            "`OWNER_APPLICATION_NOT_FOUND`: no such application, someone else's, or `applicationId` is not a UUID.",
+        ),
+        (409, "`INVALID_APPLICATION_STATE`: the application is not `pending`; `details.status` is its status."),
+        AUTH_UNAVAILABLE,
+    ),
+)
+def cancel_owner_application(
+    application_id: Annotated[str, Path(alias="applicationId", description="Application id (UUID)")],
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> OwnerApplicationResponse:
+    return cancel_application(session, principal, application_id)

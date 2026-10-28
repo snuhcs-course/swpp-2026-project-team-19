@@ -1,4 +1,4 @@
-"""Owner applications for applicants (API spec, sections 3.11.2 to 3.11.4).
+"""Owner applications for applicants (API spec, sections 3.11.2 to 3.11.5).
 
 Applying checks, in the spec's order, the fields, the caller's users row, the claimed bar and its
 owner, the caller's pending applications, and last the NTS business check, which calls an external
@@ -128,6 +128,30 @@ def get_application(session: Session, principal: Principal, application_id: str)
     return application_responses(session, [application], show_verification=operator)[0]
 
 
+def cancel_application(session: Session, principal: Principal, application_id: str) -> OwnerApplicationResponse:
+    """Cancel the caller's own pending application. Operators may cancel only their own too; anything
+    else is 404 like a missing one. The row is locked so that a concurrent approval or rejection
+    (3.11.7, 3.11.8; they must lock it too) and this cancel cannot both succeed."""
+    application = _find(session, application_id, lock=True)
+    if application is None or not _is_applicant(session, principal, application):
+        raise application_not_found()
+    if application.status != OwnerApplicationStatus.PENDING:
+        raise invalid_application_state(application)
+    application.status = OwnerApplicationStatus.CANCELED
+    session.commit()
+    operator = user_type_of(principal, session) == "operator"
+    return application_responses(session, [application], show_verification=operator)[0]
+
+
+def invalid_application_state(application: BarOwnerApplication) -> ApiError:
+    return ApiError(
+        409,
+        "INVALID_APPLICATION_STATE",
+        "이미 처리된 업주 신청입니다.",
+        details={"status": application.status.value},
+    )
+
+
 def application_responses(
     session: Session, applications: Iterable[BarOwnerApplication], *, show_verification: bool
 ) -> list[OwnerApplicationResponse]:
@@ -189,9 +213,9 @@ def _is_applicant(session: Session, principal: Principal, application: BarOwnerA
     return caller is not None and caller.id == application.applicant_user_id
 
 
-def _find(session: Session, application_id: str) -> BarOwnerApplication | None:
+def _find(session: Session, application_id: str, *, lock: bool = False) -> BarOwnerApplication | None:
     try:
-        return session.get(BarOwnerApplication, UUID(application_id))
+        return session.get(BarOwnerApplication, UUID(application_id), with_for_update=lock)
     except ValueError:
         return None
 
