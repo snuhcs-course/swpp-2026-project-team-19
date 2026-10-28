@@ -3,6 +3,7 @@
 CLOVA is replaced by a fake `call_ocr` or an httpx MockTransport; no test calls the real API.
 """
 
+import copy
 import io
 import logging
 import struct
@@ -311,6 +312,66 @@ def test_ocr_failure_is_503_and_counted(client, ocr, limiter, user):
 
     assert error_of(response) == (503, "OCR_UNAVAILABLE")
     assert limiter.used(subject, BUSINESS_CERTIFICATE_OCR, NOW) == 1
+
+
+def _malformed(edit):
+    response = copy.deepcopy(individual_certificate())  # its rows are shared with other tests
+    edit(response["images"][0])
+    return response
+
+
+def _set_word(image, key, value):
+    image["fields"][0][key] = value
+
+
+def _set_vertices(image, vertices, text=None):
+    field = next(f for f in image["fields"] if text is None or f["inferText"] == text)
+    field["boundingPoly"]["vertices"] = vertices
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        pytest.param(_malformed(lambda image: image["fields"].insert(0, "김사장")), id="field-not-an-object"),
+        pytest.param(_malformed(lambda image: image.update(fields=5)), id="fields-not-a-list"),
+        pytest.param(_malformed(lambda image: _set_word(image, "boundingPoly", [1, 2])), id="box-not-an-object"),
+        pytest.param(_malformed(lambda image: _set_vertices(image, [1, 2])), id="vertex-not-an-object"),
+        pytest.param(_malformed(lambda image: _set_vertices(image, [{"x": "1", "y": "2"}])), id="coordinate-not-a-number"),
+        pytest.param(
+            # The address continuation is the only word of its line, so no gap is measured on it.
+            _malformed(lambda image: _set_vertices(image, [{"x": "1", "y": "2"}], text="3층")),
+            id="coordinate-not-a-number-alone-on-its-line",
+        ),
+        pytest.param(_malformed(lambda image: _set_word(image, "inferText", 123)), id="text-not-a-string"),
+    ],
+)
+def test_malformed_ocr_response_is_503_and_counted(client, ocr, limiter, user, caplog, response):
+    """Codex review: CLOVA can answer 200 SUCCESS with fields of the wrong shape. That is a failed
+    OCR call (503, counted as 3.11.14 counts every call made), not a 500."""
+    subject, headers = user
+    ocr.response = response
+    caplog.set_level(logging.DEBUG)
+
+    result = post(client, headers)
+
+    assert error_of(result) == (503, "OCR_UNAVAILABLE")
+    assert limiter.used(subject, BUSINESS_CERTIFICATE_OCR, NOW) == 1
+    assert "OCR failed" in caplog.text and "김사장" not in caplog.text
+
+
+@pytest.mark.parametrize("payload", [[], {"images": ["SUCCESS"]}], ids=["payload-not-an-object", "image-not-an-object"])
+def test_malformed_ocr_payload_is_503_and_counted(client, clock, limiter, user, monkeypatch, payload):
+    """The same through the real call path, where the shape is wrong before any field is read."""
+    mock = httpx.Client(transport=httpx.MockTransport(lambda request: httpx.Response(200, json=payload)))
+    monkeypatch.setattr(clova.httpx, "Client", lambda timeout: mock)
+    app.dependency_overrides[deps.get_certificate_ocr] = lambda: ClovaCertificateOcr(SETTINGS)
+    try:
+        response = post(client, user[1])
+    finally:
+        app.dependency_overrides.pop(deps.get_certificate_ocr, None)
+
+    assert error_of(response) == (503, "OCR_UNAVAILABLE")
+    assert limiter.used(user[0], BUSINESS_CERTIFICATE_OCR, NOW) == 1
 
 
 def test_ocr_is_retried_once_then_503(client, clock, limiter, user, monkeypatch):

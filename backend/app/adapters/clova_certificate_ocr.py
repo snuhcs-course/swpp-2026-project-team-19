@@ -7,6 +7,7 @@ and the text are never stored or logged here.
 """
 
 import io
+import math
 import threading
 from dataclasses import replace
 
@@ -20,7 +21,7 @@ from app.adapters.certificate_ocr import (
     OcrWord,
     PreparedImage,
 )
-from app.extraction.clova import ClovaOCRError, ClovaSettings, build_lines, call_ocr, ocr_image
+from app.extraction.clova import ClovaOCRError, ClovaSettings, Line, build_lines, call_ocr, ocr_image
 
 # The app waits 60 s for a response (OkHttp read timeout). The whole OCR call, retries included,
 # stops at 35 s of wall-clock time; a socket operation already under way can add at most its
@@ -32,6 +33,9 @@ CERTIFICATE_OCR_MAX_ATTEMPTS = 2
 # about 179 MP) and by count (two photos decoded at a time, at most a few hundred MB together).
 MAX_IMAGE_PIXELS = 40_000_000
 DECODE_SLOTS = threading.BoundedSemaphore(2)
+# What reading a CLOVA response of an unexpected shape (a field that is not an object, fields
+# that are not a list, ...) raises in call_ocr and build_lines, which assume the documented shape.
+MALFORMED_RESPONSE_ERRORS = (AttributeError, TypeError, KeyError, IndexError, ValueError)
 
 
 class ClovaCertificateOcr:
@@ -64,12 +68,30 @@ class ClovaCertificateOcr:
         return PreparedImage(data, "image/jpeg" if fmt == "jpg" else "image/png")
 
     def read_lines(self, image: PreparedImage) -> list[OcrLine]:
+        """Raises CertificateOcrError when the call fails or the response does not have the shape
+        CLOVA documents, so either becomes 503 OCR_UNAVAILABLE (3.11.12) and not a 500. The call
+        was made either way, so it stays counted (3.11.14). Messages name only the error type."""
         try:
             result = call_ocr(self.settings, image.data, image.content_type)
+            lines = build_lines(result["response"], gap_factor=float("inf"))
         except ClovaOCRError as error:
             raise CertificateOcrError(str(error)) from error
-        return [
-            OcrLine(tuple(OcrWord(w.text, (w.x0, w.y0, w.x1, w.y1)) for w in line.words))
-            for line in build_lines(result["response"], gap_factor=float("inf"))
-            if line.words
-        ]
+        except MALFORMED_RESPONSE_ERRORS as error:
+            raise CertificateOcrError(f"CLOVA OCR response is malformed: {type(error).__name__}") from error
+        return [_ocr_line(line) for line in lines if line.words]
+
+
+def _is_coordinate(value: object) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def _ocr_line(line: Line) -> OcrLine:
+    """build_lines passes text and coordinates through as CLOVA sent them; the parser needs a
+    string and numbers."""
+    words = []
+    for w in line.words:
+        box = (w.x0, w.y0, w.x1, w.y1)
+        if not isinstance(w.text, str) or not all(_is_coordinate(v) for v in box):
+            raise CertificateOcrError("CLOVA OCR response is malformed: word text or box")
+        words.append(OcrWord(w.text, box))
+    return OcrLine(tuple(words))
