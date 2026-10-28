@@ -344,8 +344,15 @@ def _representative(value: _Value) -> str | None:
     return text
 
 
+def _beside_a_label(lines: list[_Line], index: int) -> bool:
+    return any(other.labels and _same_row(other, lines[index]) for i, other in enumerate(lines) if i != index)
+
+
 def _address(lines: list[_Line], value: _Value) -> str | None:
-    """The address and up to two wrapped lines below it that start under the value, not under the labels."""
+    """The address and up to two wrapped lines below it that start under the value, not under the labels.
+
+    A line on the same row as a label elsewhere (a column-by-column layout) is that label's value.
+    """
     parts = [_clean(value.text)]
     previous = lines[value.line_index]
     for index in range(value.line_index + 1, min(len(lines), value.line_index + 1 + MAX_ADDRESS_CONTINUATION_LINES)):
@@ -356,6 +363,7 @@ def _address(lines: list[_Line], value: _Value) -> str | None:
             or _same_row(previous, line)
             or line.box[1] - previous.box[3] > height
             or line.box[0] < value.x0 - height
+            or _beside_a_label(lines, index)
         ):
             break
         parts.append(_clean(line.text_before_label()))

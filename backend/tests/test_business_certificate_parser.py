@@ -277,6 +277,32 @@ def test_address_takes_at_most_two_wrapped_lines(read):
     assert fields.address == "서울특별시 관악구 신림로 2"
 
 
+def test_address_does_not_take_the_next_fields_value_in_a_column_layout(read):
+    """Codex review: labels first, values after; 발급 사유's value sits right under the address value."""
+    fields = read(
+        response(
+            row(350, "사업장소재지", ":"),
+            row(390, "발급", "사유", ":"),
+            row(350, (400, "서울특별시"), "관악구", "신림로", "2"),
+            row(390, (400, "신규")),
+        )
+    )
+    assert fields.address == "서울특별시 관악구 신림로 2"
+
+
+def test_address_wrap_in_a_column_layout_is_still_joined(read):
+    fields = read(
+        response(
+            row(350, "사업장소재지", ":"),
+            row(440, "사업의", "종류", ":"),
+            row(350, (400, "서울특별시"), "관악구"),
+            row(390, (400, "신림로"), "2"),
+            row(440, (400, "업태"), "음식점업"),
+        )
+    )
+    assert fields.address == "서울특별시 관악구 신림로 2"
+
+
 def test_values_over_the_application_limits_are_null(read):
     long_name = "가" * 151
     fields = read(response(row(200, "상호", ":", long_name), row(250, "대표자", ":", "나" * 101)))
