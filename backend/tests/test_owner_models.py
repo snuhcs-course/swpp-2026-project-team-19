@@ -81,7 +81,11 @@ def test_check_constraints_reject_inconsistent_new_bar_rows(db_session, change):
 def test_rejected_rows_need_a_reason_and_a_reviewer(db_session, column):
     operator = make_user(db_session, "operator-subject")
     rejected = make_application(
-        db_session, make_user(db_session), make_bar(db_session), status=OwnerApplicationStatus.REJECTED, reviewer=operator
+        db_session,
+        make_user(db_session),
+        make_bar(db_session),
+        status=OwnerApplicationStatus.REJECTED,
+        reviewer=operator,
     )
 
     setattr(rejected, column, None)

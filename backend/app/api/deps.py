@@ -9,6 +9,7 @@ from pathlib import Path
 import boto3
 from botocore.config import Config
 
+from app.adapters.business_verification import BusinessVerifier
 from app.adapters.certificate_ocr import CertificateOcr
 from app.adapters.extraction import MenuExtractor, MockMenuExtractor
 from app.adapters.storage import ImageStorage, LocalImageStorage, S3ImageStorage
@@ -89,6 +90,18 @@ def get_certificate_ocr() -> CertificateOcr | None:
         return ClovaCertificateOcr(load_clova_settings())
     except ExtractionConfigError:
         return None
+
+
+def get_business_verifier() -> BusinessVerifier | None:
+    """The NTS business registration check (spec 3.11.2), or None when NTS_SERVICE_KEY is not set.
+
+    Read on each request like the certificate OCR: without the key, applications are still accepted
+    with the result `unavailable`, and nothing is counted against the daily limit.
+    """
+    from app.adapters.nts_business_verification import NtsBusinessVerifier, load_nts_settings
+
+    settings = load_nts_settings()
+    return NtsBusinessVerifier(settings) if settings is not None else None
 
 
 @lru_cache(maxsize=1)
