@@ -7,6 +7,7 @@
 <data_dir>/eval_photos; --set test uses eval/labels_heldout_v1.json with photos in
 <data_dir>/eval_photos_test. Labels are pinned by SHA-256. val_v1_1 / test_v1_1 are
 the same sets with raw_name as printed on the menu (eval/labels_changelog.md).
+--set i3 uses eval/labels_i3_v1.json with photos in <data_dir>/eval_photos_i3.
 
 Each run directory holds one record per call: <photo_stem>_r<k>.json (from
 run_experiment.py). A failed or unparseable call counts as an empty output.
@@ -49,6 +50,10 @@ LABEL_SETS = {
     "final": {"labels": REPO_ROOT / "eval" / "labels_final_v1.json",
               "sha256": "a8ac42bb36df6b2151b6e6e8938ca141fff5bcbaca2fe391804e4702d3defbf1",
               "photo_dir": "eval_photos_final"},
+    # i3 (P30 only, ai/docs/i3_eval_freeze.md): the 8 bars added in I3, guideline v2.3
+    "i3": {"labels": REPO_ROOT / "eval" / "labels_i3_v1.json",
+           "sha256": "486b47c0aa80e242ff4c34deffd6bccd3c4f100829e236a146d4eea5a11267bb",
+           "photo_dir": "eval_photos_i3"},
 }
 LABELS_PATH = LABEL_SETS["val"]["labels"]
 LABELS_SHA256 = LABEL_SETS["val"]["sha256"]
