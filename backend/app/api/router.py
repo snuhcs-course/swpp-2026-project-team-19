@@ -7,6 +7,7 @@ from app.api.routes.catalog import router as catalog_router
 from app.api.routes.health import router as health_router
 from app.api.routes.media import router as media_router
 from app.api.routes.menu_imports import router as menu_imports_router
+from app.api.routes.owner_applications import router as owner_applications_router
 from app.api.routes.search import router as search_router
 from app.api.routes.users import router as users_router
 
@@ -18,5 +19,6 @@ api_router.include_router(search_router)
 api_router.include_router(menu_imports_router)
 api_router.include_router(catalog_router)
 api_router.include_router(business_certificate_router)
+api_router.include_router(owner_applications_router)
 api_router.include_router(health_router)
 api_router.include_router(media_router)

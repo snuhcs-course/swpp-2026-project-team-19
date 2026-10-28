@@ -130,7 +130,7 @@ def test_one_pending_new_bar_application_per_user_and_business_number(db_session
     applicant = make_user(db_session)
     make_application(db_session, applicant, status=OwnerApplicationStatus.CANCELED)
     make_application(db_session, applicant)
-    make_application(db_session, applicant, business_registration_number="1234567808")
+    make_application(db_session, applicant, business_registration_number="1234567800")
     make_application(db_session, make_user(db_session, "other-subject"))
 
     with pytest.raises(IntegrityError):
