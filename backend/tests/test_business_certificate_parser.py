@@ -31,7 +31,8 @@ def lines_of(ocr_response: dict, monkeypatch) -> list[OcrLine]:
     monkeypatch.setattr(
         clova_certificate_ocr, "call_ocr", lambda settings, image, mime_type: {"response": ocr_response, "attempts": 1}
     )
-    return ClovaCertificateOcr(SETTINGS).read_lines(jpeg(), "image/jpeg")
+    reader = ClovaCertificateOcr(SETTINGS)
+    return reader.read_lines(reader.prepare(jpeg(), "image/jpeg"))
 
 
 @pytest.fixture

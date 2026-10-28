@@ -1,8 +1,9 @@
 """Read a business registration certificate photo to prefill an owner application (spec 3.11.12).
 
 Order: one JPEG/PNG of at most 10 MB (`422`, `413`, `415`, as in the menu upload) → OCR configured
-(`503`, not counted) → today's OCR count (`429`, 3.11.14) → one OCR call (`503` on failure,
-counted) → fields found by fixed rules. Nothing is stored, and neither the photo nor any value
+(`503`, not counted) → today's OCR count (`429`, 3.11.14) → the whole image decoded, at most
+40 megapixels (`413` / `415`, not counted) → one OCR call (`503` on failure, counted) → fields
+found by fixed rules. Nothing is stored, and neither the photo nor any value
 read from it is logged: the values are the applicant's personal data.
 
 The rules follow the National Tax Service certificate form: each value follows its label
@@ -18,7 +19,13 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import BinaryIO
 
-from app.adapters.certificate_ocr import CertificateImageError, CertificateOcr, CertificateOcrError, OcrLine
+from app.adapters.certificate_ocr import (
+    CertificateImageError,
+    CertificateImageTooLarge,
+    CertificateOcr,
+    CertificateOcrError,
+    OcrLine,
+)
 from app.core.business_number import normalize_business_number
 from app.core.errors import ApiError, validation_failed
 from app.services.menu_import_upload import MAX_IMAGE_BYTES, check_image_type
@@ -87,12 +94,23 @@ def read_business_certificate(
     if ocr is None:
         raise ocr_unavailable()
     day = acquire_or_raise(limiter, subject, BUSINESS_CERTIFICATE_OCR, now, RATE_LIMITED_MESSAGE)
+    # Decoded only after the limit check, so a caller over the limit cannot make the server decode
+    # photos. A photo that fails here was not sent to the OCR service, so it is not counted.
     try:
-        lines = ocr.read_lines(data, content_type)
+        prepared = ocr.prepare(data, content_type)
+    except CertificateImageTooLarge as error:
+        limiter.release(subject, BUSINESS_CERTIFICATE_OCR, day)
+        raise ApiError(
+            413,
+            "UPLOAD_TOO_LARGE",
+            "사진 해상도가 너무 큽니다. 사진을 줄여 다시 올려 주세요.",
+            details={"maxImageBytes": MAX_IMAGE_BYTES},
+        ) from error
     except CertificateImageError as error:
-        # Nothing was sent to the OCR service, so the request is not counted.
         limiter.release(subject, BUSINESS_CERTIFICATE_OCR, day)
         raise ApiError(415, "UNSUPPORTED_IMAGE_TYPE", "사진 파일을 읽을 수 없습니다. JPEG로 바꿔 다시 올려 주세요.") from error
+    try:
+        lines = ocr.read_lines(prepared)
     except CertificateOcrError as error:
         # The message names only the HTTP status or error type, never the photo or its text.
         logger.warning("Business certificate OCR failed: %s", error)

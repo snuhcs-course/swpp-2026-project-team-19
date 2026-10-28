@@ -16,6 +16,18 @@ class CertificateImageError(Exception):
     """The image could not be decoded, so nothing was sent to the OCR service."""
 
 
+class CertificateImageTooLarge(Exception):
+    """The image has more pixels than may be decoded, so it was not decoded or sent."""
+
+
+@dataclass(frozen=True)
+class PreparedImage:
+    """A fully decoded and checked photo, as it will be sent to the OCR service."""
+
+    data: bytes
+    content_type: str
+
+
 @dataclass(frozen=True)
 class OcrWord:
     text: str
@@ -41,6 +53,10 @@ class OcrLine:
 
 
 class CertificateOcr(Protocol):
-    def read_lines(self, image: bytes, content_type: str) -> list[OcrLine]:
-        """Text lines in reading order. Raises CertificateImageError or CertificateOcrError."""
+    def prepare(self, image: bytes, content_type: str) -> PreparedImage:
+        """Decode the whole image without calling OCR. Raises CertificateImageTooLarge or CertificateImageError."""
+        ...
+
+    def read_lines(self, image: PreparedImage) -> list[OcrLine]:
+        """Text lines in reading order, from one OCR call. Raises CertificateOcrError."""
         ...

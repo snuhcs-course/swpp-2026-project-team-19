@@ -3,11 +3,16 @@
 CLOVA is replaced by a fake `call_ocr` or an httpx MockTransport; no test calls the real API.
 """
 
+import io
 import logging
+import struct
+import threading
+import zlib
 from datetime import UTC, datetime
 
 import httpx
 import pytest
+from PIL import Image
 
 from app.adapters import clova_certificate_ocr
 from app.adapters.clova_certificate_ocr import (
@@ -211,6 +216,81 @@ def test_undecodable_image_is_415_and_not_counted(client, ocr, limiter, user):
 
     assert error_of(response) == (415, "UNSUPPORTED_IMAGE_TYPE")
     assert ocr.calls == [] and limiter.used(subject, BUSINESS_CERTIFICATE_OCR, NOW) == 0
+
+
+def noisy_jpeg() -> bytes:
+    out = io.BytesIO()
+    Image.effect_noise((400, 400), 60).convert("RGB").save(out, format="JPEG", quality=90)
+    return out.getvalue()
+
+
+def png_header_only(width: int, height: int) -> bytes:
+    """A PNG that declares a size but holds almost no pixel data."""
+
+    def chunk(kind: bytes, body: bytes) -> bytes:
+        return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", zlib.crc32(kind + body))
+
+    ihdr = struct.pack(">IIBBBBB", width, height, 8, 0, 0, 0, 0)
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", zlib.compress(b"\x00" * 64)) + chunk(b"IEND", b"")
+
+
+def test_truncated_image_is_415_and_not_counted(client, ocr, limiter, user):
+    """Codex review: the header is valid but the pixel data is cut off; decode it fully before calling CLOVA."""
+    subject, headers = user
+    data = noisy_jpeg()
+    response = post(client, headers, ("c.jpg", data[: len(data) * 2 // 3], "image/jpeg"))
+
+    assert error_of(response) == (415, "UNSUPPORTED_IMAGE_TYPE")
+    assert ocr.calls == [] and limiter.used(subject, BUSINESS_CERTIFICATE_OCR, NOW) == 0
+
+
+def test_too_many_pixels_is_413_and_not_counted(client, ocr, limiter, user):
+    """Codex review: a highly compressed 49-megapixel PNG is far below 10 MB but would be decoded in full."""
+    subject, headers = user
+    out = io.BytesIO()
+    Image.new("1", (7000, 7000)).save(out, format="PNG")
+    assert len(out.getvalue()) < 1024 * 1024
+    response = post(client, headers, ("c.png", out.getvalue(), "image/png"))
+
+    assert error_of(response) == (413, "UPLOAD_TOO_LARGE")
+    assert response.json()["error"]["details"] == {"maxImageBytes": 10 * 1024 * 1024}
+    assert ocr.calls == [] and limiter.used(subject, BUSINESS_CERTIFICATE_OCR, NOW) == 0
+
+
+@pytest.mark.filterwarnings("ignore::PIL.Image.DecompressionBombWarning")
+@pytest.mark.parametrize("side", [12_000, 20_000])  # Pillow only warns at 144 MP and refuses at 400 MP
+def test_decompression_bombs_are_rejected_from_the_header(client, ocr, limiter, user, side):
+    subject, headers = user
+    response = post(client, headers, ("c.png", png_header_only(side, side), "image/png"))
+
+    assert error_of(response) == (413, "UPLOAD_TOO_LARGE")
+    assert ocr.calls == [] and limiter.used(subject, BUSINESS_CERTIFICATE_OCR, NOW) == 0
+
+
+def test_image_at_the_pixel_limit_is_read(client, ocr, user):
+    out = io.BytesIO()
+    Image.new("1", (8000, 5000)).save(out, format="PNG")  # 40 MP, long side over CLOVA's 8,000: downscaled
+    response = post(client, user[1], ("c.png", out.getvalue(), "image/png"))
+
+    assert response.status_code == 200
+    assert ocr.calls == ["image/jpeg"]
+
+
+def test_at_most_two_images_are_decoded_at_once():
+    slots = clova_certificate_ocr.DECODE_SLOTS
+    reader = ClovaCertificateOcr(SETTINGS)
+    done = threading.Event()
+    assert slots.acquire(blocking=False) and slots.acquire(blocking=False)
+    try:
+        assert not slots.acquire(blocking=False)
+        worker = threading.Thread(target=lambda: (reader.prepare(jpeg(), "image/jpeg"), done.set()))
+        worker.start()
+        assert not done.wait(0.2)  # waits for a free slot
+    finally:
+        slots.release()
+        slots.release()
+    worker.join(5)
+    assert done.is_set()
 
 
 # ---- OCR unavailable ----
