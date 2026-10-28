@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -131,10 +132,12 @@ def test_snapshot_holds_active_products_and_their_meta(db_session):
     assert_snapshot_answers_like_the_db(snapshot, DbCatalog(db_session))
     assert snapshot.get_product(red.id) is None and snapshot.get_normalized_aliases(red.id) == []
     assert set(snapshot.meta) == {black.id, bottling.id}
-    assert snapshot.meta[black.id] == ProductMeta(
-        "Johnnie Walker Black", 12, "Black", None,
-        tuple(a.alias_text for a in sorted(black.aliases, key=lambda a: a.normalized_alias)),
-    )
+    # The alias order follows the database collation (CI's PostgreSQL returns the Hangul alias first,
+    # a C-collation database last), and edition_check only tests membership, so compare them as a set.
+    meta = snapshot.meta[black.id]
+    assert replace(meta, aliases=()) == ProductMeta("Johnnie Walker Black", 12, "Black", None)
+    assert sorted(meta.aliases) == sorted(a.alias_text for a in black.aliases)
+    assert len(meta.aliases) == 3
     assert snapshot.meta[bottling.id].bottler == "Signatory"
 
 
