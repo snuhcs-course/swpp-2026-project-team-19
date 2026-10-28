@@ -68,6 +68,18 @@ def detect_image_type(data: bytes) -> tuple[str, str] | None:
     return None
 
 
+def check_image_type(data: bytes, declared_content_type: str | None) -> tuple[str, str] | None:
+    """(file extension, MIME type) if the bytes are JPEG or PNG and a specific declared type agrees.
+
+    Shared with the business certificate OCR (spec 3.11.12), which checks its photo like 4.1.
+    """
+    detected = detect_image_type(data)
+    declared = (declared_content_type or "").lower() or None
+    if detected is None or (declared not in _GENERIC_CONTENT_TYPES and declared != detected[1]):
+        return None
+    return detected
+
+
 def request_fingerprint(bar_id: UUID, mode: ImportMode, owner_note: str | None, images: list[bytes]) -> str:
     """SHA-256 of the canonical request: bar, mode, note, and each image's hash in upload order.
 
@@ -102,9 +114,8 @@ def _check_images(uploads: list[ImageUpload]) -> list[_CheckedImage]:
         total += len(data)
         if total > MAX_TOTAL_BYTES:
             raise _too_large("사진 전체 크기가 너무 큽니다.")
-        detected = detect_image_type(data)
-        declared = (upload.content_type or "").lower() or None
-        if detected is None or (declared not in _GENERIC_CONTENT_TYPES and declared != detected[1]):
+        detected = check_image_type(data, upload.content_type)
+        if detected is None:
             raise ApiError(
                 415,
                 "UNSUPPORTED_IMAGE_TYPE",
