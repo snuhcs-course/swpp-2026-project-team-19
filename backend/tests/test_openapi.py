@@ -35,6 +35,11 @@ def schema():
         ),
         ("get", "/api/catalog/brands", {"401", "403", "422", "500", "503"}),
         ("get", "/api/catalog/products", {"401", "403", "422", "500", "503"}),
+        (
+            "post",
+            "/api/owner-applications/business-certificate-ocr",
+            {"401", "413", "415", "422", "429", "500", "503"},
+        ),
     ],
 )
 def test_error_responses_use_the_common_format(schema, method, path, statuses):

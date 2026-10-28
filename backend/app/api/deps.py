@@ -1,15 +1,18 @@
 """Shared dependencies for adapters, chosen by environment variables. Tests override them."""
 
 import os
-from datetime import timedelta
+from collections.abc import Callable
+from datetime import datetime, timedelta
 from functools import lru_cache
 from pathlib import Path
 
 import boto3
 from botocore.config import Config
 
+from app.adapters.certificate_ocr import CertificateOcr
 from app.adapters.extraction import MenuExtractor, MockMenuExtractor
 from app.adapters.storage import ImageStorage, LocalImageStorage, S3ImageStorage
+from app.services.request_limits import DailyRequestLimiter, InMemoryDailyLimiter, utc_now
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_IMAGE_STORAGE_DIR = BACKEND_DIR / "var" / "images"
@@ -69,3 +72,31 @@ def get_menu_extractor() -> MenuExtractor:
         except ExtractionConfigError as error:
             raise RuntimeError(f"{setting} is not configured: {error}") from error
     raise RuntimeError(f"Unsupported MENU_EXTRACTOR: {kind!r} (supported: mock, gemini)")
+
+
+def get_certificate_ocr() -> CertificateOcr | None:
+    """CLOVA OCR for business certificates (spec 3.11.12), or None when CLOVA_OCR_* is not set.
+
+    Read on each request: the endpoint answers `503 OCR_UNAVAILABLE` without the settings
+    instead of stopping the server, since the OCR is optional.
+    """
+    # Imported here, like the Gemini extractor, so start-up does not load the extraction SDKs.
+    from app.adapters.clova_certificate_ocr import ClovaCertificateOcr
+    from app.extraction.clova import load_clova_settings
+    from app.extraction.errors import ExtractionConfigError
+
+    try:
+        return ClovaCertificateOcr(load_clova_settings())
+    except ExtractionConfigError:
+        return None
+
+
+@lru_cache(maxsize=1)
+def get_request_limiter() -> DailyRequestLimiter:
+    """The one per-process limiter of spec 3.11.14 (the API runs as a single process)."""
+    return InMemoryDailyLimiter()
+
+
+def get_clock() -> Callable[[], datetime]:
+    """The current time (aware, UTC). Tests override it to move across midnight KST."""
+    return utc_now
