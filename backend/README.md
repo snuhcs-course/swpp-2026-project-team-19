@@ -195,7 +195,7 @@ Request and response details, error codes, and rules not covered by the API spec
 | `EXTRACTION_THINKING_LEVEL` | — | Required with `gemini`: `minimal`, `low`, `medium` or `high`; P14 adopted `medium`. |
 | `EXTRACTION_MAX_ATTEMPTS`, `EXTRACTION_REQUEST_TIMEOUT_S`, `EXTRACTION_WALL_TIMEOUT_S` | `6`, `300`, `330` | Optional retry and timeout settings for `gemini` (P14 values). |
 | `EXTRACTION_MODE` | `gemini` | With `MENU_EXTRACTOR=gemini`: `gemini` (photo only) or `hybrid` (CLOVA OCR lines + photo, frozen hybrid prompt v1; OCR line boxes kept in `raw_output`). If OCR fails, the photo goes through `gemini` and the fallback is logged. |
-| `CLOVA_OCR_INVOKE_URL`, `CLOVA_OCR_SECRET` | — | Required with `EXTRACTION_MODE=hybrid` (CLOVA General OCR). Never commit the secret. |
+| `CLOVA_OCR_INVOKE_URL`, `CLOVA_OCR_SECRET` | — | Required with `EXTRACTION_MODE=hybrid` (CLOVA General OCR). Also used by the business certificate OCR (`POST /api/owner-applications/business-certificate-ocr`), which answers `503 OCR_UNAVAILABLE` without them. Never commit the secret. |
 | `MATCHING_LLM_ENABLED` | `false` | `true` runs the LLM matching layer (M3a, `app/matching/llm_layer.py`, `gemini-3.1-flash-lite`) on the lines S1–S3 leave unconfirmed. Needs `GEMINI_API_KEY`; without it the layer stays off and a warning is logged at start-up. Its candidates are always `ambiguous`; a failed call keeps the rule result. |
 | `MATCHING_LLM_MAX_CALLS` | `30` | Model requests per menu import (one per photo for M3a, one per line for M3b); lines left after the cap keep the rule result. Invalid values stop the server at start-up. |
 | `MATCHING_LLM_M3B_ENABLED` | `false` | `true` adds M3b (the LLM picks one of the named brand's products), which was not adopted in the I2 evaluation. |

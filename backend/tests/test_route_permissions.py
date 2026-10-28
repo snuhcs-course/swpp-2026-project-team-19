@@ -62,8 +62,12 @@ OPERATOR_ONLY = [
     Route("get", "/api/catalog/brands", {"params": {"query": "glen"}}, (200, None)),
     Route("get", "/api/catalog/products", {"params": {"query": "glen"}}, (200, None)),
 ]
-# Any signed-in user; tested in test_users_api.py and test_auth_api.py.
-SIGNED_IN = {("get", "/api/me")}
+# Any signed-in user, with or without a users row; tested in test_users_api.py, test_auth_api.py and
+# test_business_certificate_api.py.
+SIGNED_IN = {
+    ("get", "/api/me"),
+    ("post", "/api/owner-applications/business-certificate-ocr"),
+}
 # No token needed; tested in test_search_api.py, test_nearby_bars_api.py, test_map_bars_api.py,
 # test_bar_names_api.py, test_bar_menu_api.py and test_auth_api.py.
 PUBLIC = {

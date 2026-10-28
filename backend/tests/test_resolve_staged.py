@@ -396,3 +396,319 @@ def test_ambiguous_s2_candidates_record_s2(catalog):
 
     assert result.status == "ambiguous"
     assert rules(result) == ["S2", "S2"]
+
+
+# ---- I3-A4: safety rules (short Hangul names, editions only in the product) and vocabulary ----
+
+MENU_STAGES = ("S1", "S2", "S2b", "S3")
+BOWMORE, ARRAN, ANCNOC = (_id(400 + n) for n in range(3))
+BOWMORE_18, ARRAN_18, ANCNOC_12, ANCNOC_PEATED_SHERRY, LAPHROAIG_10 = (_id(n) for n in range(401, 406))
+
+
+@pytest.fixture
+def islands():
+    products = [
+        ProductInfo(BOWMORE_18, "Bowmore 18", age_years=18, brand_id=BOWMORE),
+        ProductInfo(ARRAN_18, "Arran 18", age_years=18, brand_id=ARRAN),
+        ProductInfo(ANCNOC_12, "anCnoc 12", age_years=12, brand_id=ANCNOC),
+        ProductInfo(ANCNOC_PEATED_SHERRY, "anCnoc Peated Sherry Cask", None, "Peated Sherry Cask", brand_id=ANCNOC),
+        ProductInfo(LAPHROAIG_10, "Laphroaig 10", age_years=10),
+    ]
+    aliases = [(product.product_id, product.display_name) for product in products]
+    aliases += [(BOWMORE_18, "보모어 18년"), (ARRAN_18, "아란 18년"), (LAPHROAIG_10, "라프로익 10년")]
+    aliases += [(ANCNOC_PEATED_SHERRY, "아녹 피티드 셰리")]
+    brand_aliases = [(BOWMORE, "Bowmore"), (ARRAN, "Arran"), (ANCNOC, "anCnoc"), (ANCNOC, "아녹")]
+    return InMemoryCatalog(products, aliases, brand_aliases)
+
+
+def menu(name: str, catalog):
+    return resolve_product_staged(ExtractedProduct(product_name=name), catalog, MENU_STAGES)
+
+
+def test_short_hangul_name_one_syllable_off_is_not_confirmed(islands):
+    # 달모어 18 is one syllable from 보모어 18, 아녹 18 from 아란 18: other brands, not typos.
+    assert menu("달모어(Dalmore) 18년", islands).status == "unmatched"
+    assert menu("아녹 18", islands).status == "unmatched"
+    # Four syllables or more is still a typo of that product.
+    result = menu("라프로윅 10년", islands)
+    assert result.status == "exact_match"
+    assert result.proposed_product_id == LAPHROAIG_10
+
+
+def test_short_hangul_brand_one_syllable_off_is_not_confirmed():
+    # Only a brand alias is close, so the brand-distance path of S3 is the one tried.
+    catalog = InMemoryCatalog(
+        [ProductInfo(BOWMORE_18, "Bowmore 18", age_years=18, brand_id=BOWMORE)],
+        [(BOWMORE_18, "Bowmore 18")],
+        [(BOWMORE, "Bowmore"), (BOWMORE, "보모어")],
+    )
+    assert menu("달모어 18년", catalog).status == "unmatched"
+    assert menu("Bowmor 18", catalog).proposed_product_id == BOWMORE_18
+    assert menu("Bowmor 18", catalog).status == "exact_match"
+
+
+def test_short_hangul_name_check():
+    from app.matching.staged import _short_hangul_name
+
+    assert _short_hangul_name("달모어18")
+    assert _short_hangul_name("18아녹")
+    assert not _short_hangul_name("라프로윅10")
+    assert not _short_hangul_name("bowmor18")
+    assert not _short_hangul_name("")
+
+
+def test_edition_words_only_in_the_product_need_confirmation(islands):
+    # "Sherry" fits only Peated Sherry Cask, but "Peated" is not on the line.
+    result = menu("anCnoc Sherry (아녹)", islands)
+
+    assert result.status == "ambiguous"
+    [candidate] = result.candidates
+    assert candidate.product_id == ANCNOC_PEATED_SHERRY
+    assert candidate.evidence["editionOnlyInProduct"] == ["peated"]
+    assert candidate.evidence["confirmRecommended"] is True
+    assert candidate.evidence["rule"] == "S2"
+    # The brand written again in parentheses is not an edition token.
+    assert "editionUnmatched" not in candidate.evidence
+
+
+def test_every_edition_word_on_the_line_is_exact(islands):
+    for name in ("anCnoc Peated Sherry", "아녹 셰리 피티드", "아녹(anCnoc) 피티드 쉐리 캐스크"):
+        result = menu(name, islands)
+        assert result.status == "exact_match", name
+        assert result.proposed_product_id == ANCNOC_PEATED_SHERRY
+
+
+def test_a_product_alias_covers_korean_edition_words(catalog, monkeypatch):
+    # Without the vocabulary, "더블캐스크" is still covered by the alias "맥캘란 12년 더블 캐스크".
+    monkeypatch.setattr("app.matching.staged._VOCABULARY", None)
+
+    assert staged("맥캘란 더블캐스크 12Y", catalog).status == "exact_match"
+    result = staged("카발란 트리플 셰리", catalog)
+    assert result.status == "ambiguous"
+    assert result.candidates[0].evidence["editionOnlyInProduct"] == ["triple", "sherry"]
+
+
+def test_brand_written_again_is_not_an_edition_token(catalog):
+    # Neither the token "맥캘란" nor the variant "맥캘란" (every Macallan product) gets in the way.
+    result = s2("Macallan 15yo (맥캘란)", catalog)
+    assert result.status == "exact_match"
+    assert result.proposed_product_id == MACALLAN_15_DOUBLE
+    # A brand-only name is still used when nothing else finds a product.
+    result = s2("Macallan Blue (맥캘란)", catalog)
+    assert result.status == "ambiguous"
+    assert len(result.candidates) == 3
+
+
+def test_tokens_too_short_to_check_do_not_rule_products_out(catalog):
+    result = s2("Kavalan DR", catalog)
+
+    assert result.status == "ambiguous"
+    assert {c.product_id for c in result.candidates} == {SOLIST_SHERRY, SOLIST_VINHO, TRIPLE_SHERRY}
+
+
+def test_korean_whisky_words_are_tried_in_english(catalog):
+    # "쉐리오크" is not in any alias; in English it is "sherry oak".
+    result = staged("맥캘란 12년 쉐리오크", catalog, "S2b", "S3")
+
+    assert result.status == "exact_match"
+    assert result.proposed_product_id == MACALLAN_12_SHERRY
+    assert result.candidates[0].evidence["vocabulary"] == "맥캘란 12년 sherry oak"
+    assert result.candidates[0].evidence["rule"] == "S2"
+
+
+def test_vocabulary_retry_is_taken_only_when_it_helps(catalog, monkeypatch):
+    # The English name does not confirm the line: the first result is kept.
+    result = staged("맥캘란 12년 블루", catalog, "S2b", "S3")
+    assert result.status == "ambiguous"
+    assert all("vocabulary" not in c.evidence for c in result.candidates)
+    # Confirmed lines and names without a vocabulary word are not tried again.
+    assert "vocabulary" not in staged("맥캘란 12년 셰리 오크", catalog, "S2b").candidates[0].evidence
+    assert staged("Glenfiddich 16yo", catalog, "S2b", "S3").status == "unmatched"
+    # S1 alone never uses the vocabulary.
+    assert s1("맥캘란 12년 쉐리오크", catalog).status == "unmatched"
+    monkeypatch.setattr("app.matching.staged._VOCABULARY", None)
+    assert staged("맥캘란 12년 쉐리오크", catalog, "S2b", "S3").status == "ambiguous"
+
+
+def test_vocabulary_gives_candidates_to_a_line_that_had_none():
+    triple = _id(501)
+    catalog = InMemoryCatalog(
+        [ProductInfo(triple, "Kavalan Triple Sherry Cask", None, "Triple Sherry Cask", brand_id=KAVALAN)],
+        [(triple, "Kavalan Triple Sherry Cask")],
+        [(KAVALAN, "Kavalan")],
+    )
+    # Without the vocabulary neither "카발란" nor "트리플" is known.
+    assert menu("카발란 트리플", catalog).candidates[0].evidence["vocabulary"] == "kavalan triple"
+    result = menu("Kavalan 트리플", catalog)
+    assert result.status == "ambiguous"
+    [candidate] = result.candidates
+    assert candidate.product_id == triple
+    assert candidate.evidence["editionOnlyInProduct"] == ["sherry"]
+    assert candidate.evidence["vocabulary"] == "Kavalan triple"
+
+
+def test_a_product_without_edition_has_no_edition_words_to_check():
+    # The token "피딕" fits the alias "글렌피딕 12년" of a product with no edition name.
+    brand, twelve = _id(601), _id(602)
+    catalog = InMemoryCatalog(
+        [ProductInfo(twelve, "Glenfiddich 12", age_years=12, brand_id=brand)],
+        [(twelve, "Glenfiddich 12"), (twelve, "글렌피딕 12년")],
+        [(brand, "Glenfiddich")],
+    )
+
+    result = menu("Glenfiddich 피딕 12", catalog)
+
+    assert result.status == "exact_match"
+    assert result.candidates[0].evidence["editionMatch"] == ["피딕"]
+
+
+# ---- I3-A4 review fixes ----
+
+KIM, OCTOMORE, MACALLAN_CUT = (_id(700 + n) for n in range(3))
+KIM_3, KIM_4, OCTO_14, OCTO_16, CUT_2020, KIM_PLAIN = (_id(n) for n in range(711, 717))
+
+
+@pytest.fixture
+def numbered():
+    products = [
+        ProductInfo(KIM_3, "Kim Gwajang #3 Highland Park", None, "#3 Highland Park", brand_id=KIM),
+        ProductInfo(KIM_4, "Kim Gwajang #4 Clynelish", None, "#4 Clynelish", brand_id=KIM),
+        ProductInfo(KIM_PLAIN, "Kim Gwajang Blend", None, "Blend", brand_id=KIM),
+        ProductInfo(OCTO_14, "Octomore 14.1", None, "14.1", brand_id=OCTOMORE),
+        ProductInfo(CUT_2020, "The Macallan Classic Cut 2020", None, "Classic Cut 2020", brand_id=MACALLAN_CUT),
+    ]
+    aliases = [(product.product_id, product.display_name) for product in products]
+    brand_aliases = [(KIM, "Kim Gwajang"), (KIM, "김과장"), (OCTOMORE, "Octomore"), (OCTOMORE, "옥토모어")]
+    brand_aliases += [(MACALLAN_CUT, "Macallan"), (MACALLAN_CUT, "맥캘란")]
+    return InMemoryCatalog(products, aliases, brand_aliases)
+
+
+def test_a_different_number_on_the_line_rules_a_product_out(numbered):
+    assert [c.product_id for c in menu("김과장 #3 Highland Park", numbered).candidates] == [KIM_3]
+    # "#4" is not #3: Highland Park fits, but the number rules the product out.
+    assert menu("김과장 #4 Highland Park", numbered).status == "unmatched"
+    # Years and decimals too, also through a variant that is only the brand.
+    assert menu("맥캘란 클래식컷 2025", numbered).status == "unmatched"
+    assert menu("Octomore 16.2 (옥토모어)", numbered).status == "unmatched"
+    # The same number keeps the product.
+    assert menu("Octomore 14.1", numbered).proposed_product_id == OCTO_14
+
+
+def test_number_conflict_ignores_the_age():
+    from app.matching.staged import _number_conflict
+
+    eight = ProductInfo(_id(720), "Wild Turkey 101 8 Year", 8)
+    assert not _number_conflict(eight, ["101"])
+    assert _number_conflict(eight, ["81"])
+    assert not _number_conflict(ProductInfo(_id(721), "Laphroaig 10", 10), ["2023"])
+
+
+def test_short_letter_tokens_only_do_not_rule_products_out(numbered, catalog):
+    # "DR" cannot be checked, so every Kavalan product stays; "#2" (a number) still decides.
+    assert len(s2("Kavalan DR", catalog).candidates) == 3
+    assert menu("김과장 #2", numbered).status == "unmatched"
+
+
+@pytest.mark.parametrize("name", ["더 달무어 18", "The 달무어 18", "달무어-18", "달-무어 18"])
+def test_short_hangul_guard_ignores_article_and_punctuation(name):
+    catalog = InMemoryCatalog(
+        [ProductInfo(BOWMORE_18, "Bowmore 18", age_years=18, brand_id=BOWMORE)],
+        [(BOWMORE_18, "Bowmore 18"), (BOWMORE_18, "달모어 18")],
+        [(BOWMORE, "Bowmore")],
+    )
+    assert menu(name, catalog).status == "unmatched"
+
+
+def test_hangul_the_vocabulary_does_not_know_may_be_the_missing_words():
+    brand, vinho = _id(731), _id(732)
+    catalog = InMemoryCatalog(
+        [ProductInfo(vinho, "Kavalan Vinho Barrique", None, "Vinho Barrique", brand_id=brand)],
+        [(vinho, "Kavalan Vinho Barrique"), (vinho, "카발란 비노 바리끄 셰리")],
+        [(brand, "Kavalan"), (brand, "카발란")],
+    )
+    # "비노 바리끄" is not in the vocabulary: vinho and barrique may be those words.
+    assert menu("카발란 비노 바리끄", catalog).status == "exact_match"
+
+
+def test_a_brand_split_over_tokens_is_still_the_brand():
+    brand, orchard, other = _id(741), _id(742), _id(743)
+    catalog = InMemoryCatalog(
+        [
+            ProductInfo(orchard, "Compass Box Orchard House", None, "Orchard House", brand_id=brand),
+            ProductInfo(other, "Compass Box Hedonism", None, "Hedonism", brand_id=brand),
+        ],
+        [(orchard, "Compass Box Orchard House"), (orchard, "컴파스 박스 오차드 하우스"), (other, "Compass Box Hedonism")],
+        [(brand, "Compass Box"), (brand, "컴파스박스")],
+    )
+    # "컴파스", "박스" spell the brand: no edition token, so no product is picked.
+    result = menu("Compass Box (컴파스 박스)", catalog)
+    assert result.status == "ambiguous"
+    assert len(result.candidates) == 2
+
+
+def test_alias_remainder_without_letters_covers_nothing():
+    brand, octo = _id(751), _id(752)
+    catalog = InMemoryCatalog(
+        [ProductInfo(octo, "Octomore 16.1 Super Heavily Peated", None, "16.1 Super Heavily Peated", brand_id=brand)],
+        [(octo, "Octomore 16.1 Super Heavily Peated"), (octo, "Octomore 16.1")],
+        [(brand, "Octomore")],
+    )
+    # The alias "octomore16.1" leaves "." after the brand and digits; it must not cover the line.
+    result = menu("Octomore 16.1 Super", catalog)
+    assert result.status == "ambiguous"
+    assert result.candidates[0].evidence["editionOnlyInProduct"] == ["heavily", "peated"]
+
+
+def test_vocabulary_retry_needs_an_edition_word_that_fits():
+    signatory, macduff = _id(761), _id(762)
+    catalog = InMemoryCatalog(
+        [ProductInfo(macduff, "Signatory Vintage Macduff 13", 13, "Macduff 13", brand_id=signatory)],
+        [(macduff, "Signatory Vintage Macduff 13")],
+        [(signatory, "Signatory"), (signatory, "시그나토리")],
+    )
+    # "쿨일라" is Caol Ila: the Macduff of the same age is not offered.
+    assert menu("시그나토리 쿨일라13", catalog).status == "unmatched"
+
+
+JD, FARCLAS, MICHTERS = (_id(800 + n) for n in range(3))
+NO7, FARCLAS_105, CUT_2020_B, OCTO_14_B, US1 = (_id(n) for n in range(811, 816))
+
+
+@pytest.fixture
+def strengths():
+    products = [
+        ProductInfo(NO7, "Jack Daniel's Old No.7", None, "Old No.7", brand_id=JD),
+        ProductInfo(FARCLAS_105, "Glenfarclas 105", None, "105", brand_id=FARCLAS),
+        ProductInfo(CUT_2020_B, "The Macallan Classic Cut 2020", None, "Classic Cut 2020", brand_id=MACALLAN_CUT),
+        ProductInfo(OCTO_14_B, "Octomore 14.1", None, "14.1", brand_id=OCTOMORE),
+        ProductInfo(US1, "Michter's US*1 Small Batch Bourbon", None, "US*1 Small Batch Bourbon", brand_id=MICHTERS),
+    ]
+    aliases = [(product.product_id, product.display_name) for product in products]
+    aliases += [(NO7, "잭다니엘 넘버7"), (US1, "믹터스 US1 버번")]
+    brand_aliases = [(JD, "잭다니엘"), (FARCLAS, "Glenfarclas"), (FARCLAS, "글렌파클라스"), (MACALLAN_CUT, "맥캘란")]
+    brand_aliases += [(OCTOMORE, "옥토모어"), (MICHTERS, "믹터스")]
+    return InMemoryCatalog(products, aliases, brand_aliases)
+
+
+@pytest.mark.parametrize(
+    ("name", "product"),
+    [
+        ("잭다니엘 넘버7 40%", NO7),
+        ("글렌파클라스 105 60%", FARCLAS_105),
+        ("Glenfarclas 105 700 ml", FARCLAS_105),
+        ("Glenfarclas 105 700ml 16,000원", FARCLAS_105),
+        ("맥캘란 클래식컷 2020 52.5%", CUT_2020_B),
+        ("옥토모어 14.1 59.1%", OCTO_14_B),
+        ("옥토모어 14.1 1.6", OCTO_14_B),  # price written as 1.6 (16,000): 14.1 still matches
+        ("믹터스 US1 버번 45.7%", US1),
+    ],
+)
+def test_strength_volume_and_price_are_not_product_numbers(strengths, name, product):
+    assert product in {c.product_id for c in menu(name, strengths).candidates}
+
+
+def test_line_numbers_leave_out_measures():
+    from app.matching.staged import _line_numbers
+
+    assert _line_numbers("Glenfarclas 105 60% 700 ml 2잔 16,000원") == ["105"]
+    assert _line_numbers("옥토모어 14.1 59.1도") == ["14.1"]
