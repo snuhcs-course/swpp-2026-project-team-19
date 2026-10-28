@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.api.deps import get_image_storage, get_menu_extractor
+from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
 from app.api.router import api_router
 from app.core.access_log import strip_location_from_access_log
 from app.core.auth_config import load_supabase_auth_settings
@@ -19,6 +19,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # the first upload. The local defaults need nothing.
     get_menu_extractor()
     get_image_storage()
+    # An invalid MATCHING_LLM_MAX_CALLS stops the server; a missing key only logs a warning.
+    get_matching_llm_layer()
     # Invalid Supabase auth settings (e.g. HS256 allowed) stop the server; an unset SUPABASE_URL does not.
     load_supabase_auth_settings()
     # Leave a trace in the server log while anyone can get a token from POST /api/auth/temp-login.
