@@ -1,0 +1,171 @@
+{
+  "_note": "I3 test set (P5/P10 freeze, ai/docs/i3_eval_freeze.md). SHA-256 of each photo in bottlemap-p14/data/eval_photos_i3; the photos themselves are never committed.",
+  "created": "2026-10-28",
+  "photos": [
+    {
+      "file": "014_tale_01.jpeg",
+      "photo_id": "014_테일오브테일즈_01",
+      "sha256": "79fd285dd13e6eac594bd9016793a2fe0d4887f877dacb5de81ba60ed5c845e2"
+    },
+    {
+      "file": "014_tale_02.jpeg",
+      "photo_id": "014_테일오브테일즈_02",
+      "sha256": "4cd4e25e8a2f3d9c51beba6f10aff2ce93a40e9bc2be5c7f005028cdf74b4196"
+    },
+    {
+      "file": "014_tale_03.jpeg",
+      "photo_id": "014_테일오브테일즈_03",
+      "sha256": "638877e6f83d38a79cfa07c0874105425d0ff77ff368c010b7517370f71f9f96"
+    },
+    {
+      "file": "014_tale_04.jpeg",
+      "photo_id": "014_테일오브테일즈_04",
+      "sha256": "b91d6bcb5b3fd47387ca03351af3459c52b6dcfa114e4221dd7b2587ea9a52bc"
+    },
+    {
+      "file": "014_tale_05.jpeg",
+      "photo_id": "014_테일오브테일즈_05",
+      "sha256": "7a20ce55edd4e48bfbe64c2b8509f935f15f39c577e7864ce2806806d6528a8a"
+    },
+    {
+      "file": "014_tale_06.jpeg",
+      "photo_id": "014_테일오브테일즈_06",
+      "sha256": "b326ce79e2b3db1dbe1dc966dc98ddd0355a9695e6d9e1f141c394e6c410eb00"
+    },
+    {
+      "file": "014_tale_07.jpeg",
+      "photo_id": "014_테일오브테일즈_07",
+      "sha256": "1b82d2dfa24fe1d3d7f72075cf697f1d1c144882836c2408e250fed26b3891ad"
+    },
+    {
+      "file": "014_tale_08.jpeg",
+      "photo_id": "014_테일오브테일즈_08",
+      "sha256": "6d8ffc17b6657a83de84b1f4f986b30e1db9e052fb6d5651b67100e93bc36098"
+    },
+    {
+      "file": "014_tale_09.jpeg",
+      "photo_id": "014_테일오브테일즈_09",
+      "sha256": "76dfd9d453d5d41495cdbbc0e862404a635b1b02a5b98040312515f29f9cc4fe"
+    },
+    {
+      "file": "014_tale_10.jpeg",
+      "photo_id": "014_테일오브테일즈_10",
+      "sha256": "59bfe5c000a6b782a24be8822a791530de449dc8897db4954bea6a794d363b24"
+    },
+    {
+      "file": "014_tale_11.jpeg",
+      "photo_id": "014_테일오브테일즈_11",
+      "sha256": "7d31b003ad59444f8e28e5150c8057e43a26e816a3fe7d020eaed42d9611e9c2"
+    },
+    {
+      "file": "015_yeonrim_snu_01.jpeg",
+      "photo_id": "015_연림 서울대입구역점_01",
+      "sha256": "4119cf58fe4400bf0d63544b1b612c3a2f330a6ee57750775c55b041eda95456"
+    },
+    {
+      "file": "015_yeonrim_snu_02.jpeg",
+      "photo_id": "015_연림 서울대입구역점_02",
+      "sha256": "7c6852a91890213436eecbb2c9cdff17aa9ccc351fb5fc8559d8c19f49ded80e"
+    },
+    {
+      "file": "015_yeonrim_snu_03.jpeg",
+      "photo_id": "015_연림 서울대입구역점_03",
+      "sha256": "dbe7ba5c8d9c61c8bdec2d6961c8c8f0cfc73b10ca1577dc3c569a3998db5cf4"
+    },
+    {
+      "file": "015_yeonrim_snu_04.jpeg",
+      "photo_id": "015_연림 서울대입구역점_04",
+      "sha256": "f76e9f39028b270d6beb563bc9d27f50ff789e552111d30b36ae5dc9b84309e1"
+    },
+    {
+      "file": "016_yeonrim_bongcheon_01.png",
+      "photo_id": "016_연림 봉천역점_01",
+      "sha256": "ac657cc6b3148e65dadb7384397aa5281dc082e176b129f5cd4e5a74537c17d1"
+    },
+    {
+      "file": "016_yeonrim_bongcheon_02.png",
+      "photo_id": "016_연림 봉천역점_02",
+      "sha256": "9984282b5124f2964528d5f853913c388f78fccebba75a170dad5b78352d5c82"
+    },
+    {
+      "file": "016_yeonrim_bongcheon_03.png",
+      "photo_id": "016_연림 봉천역점_03",
+      "sha256": "ac180a9f66e72bab0b61b099f4ec4fe4fb59dc7adb0892ccd6cef83a66d08fe7"
+    },
+    {
+      "file": "017_littlegallery_01.png",
+      "photo_id": "017_리틀 갤러리_01",
+      "sha256": "1759b25d03d39a8946bba2ee9c9e13dd6bd8e82df6575f79c62edb5b3a20f85d"
+    },
+    {
+      "file": "017_littlegallery_02.png",
+      "photo_id": "017_리틀 갤러리_02",
+      "sha256": "c8d7143b0841c7a6e68cf861230ccd55ec4202d54c994475d9ba40a12a717e30"
+    },
+    {
+      "file": "017_littlegallery_03.png",
+      "photo_id": "017_리틀 갤러리_03",
+      "sha256": "c11f872246027a4d7f39f3af56d2a7ae86ef94a030d76f52d5c86459f93d6286"
+    },
+    {
+      "file": "018_cheongchun_01.jpeg",
+      "photo_id": "018_청춘위스키 봉천_01",
+      "sha256": "91bb0123684c2d0b8bb99a34f9a3f7a7e563fe0af95b6638d75832ebe3b57b63"
+    },
+    {
+      "file": "018_cheongchun_02.jpeg",
+      "photo_id": "018_청춘위스키 봉천_02",
+      "sha256": "df4ecf5c54a343c36c038bdd9c8547ba11d1e44e7d6c9ef2b3896c96634d2d07"
+    },
+    {
+      "file": "019_sodat_01.jpg",
+      "photo_id": "019_쏘댓page2_01",
+      "sha256": "cd2cac60bbc268b19b4e320b054aed2673005b6df7fb5daf5489b219ab02bf73"
+    },
+    {
+      "file": "019_sodat_02.jpg",
+      "photo_id": "019_쏘댓page2_02",
+      "sha256": "68fd5f832f08f84e5778d57aaea17da96bec4eb47719d8e20f433a4716f188ab"
+    },
+    {
+      "file": "019_sodat_03.jpg",
+      "photo_id": "019_쏘댓page2_03",
+      "sha256": "8a1089e53d47ccc77b53cb152748f1a6ec1359a01a6f6f1e2807e6d587bc5265"
+    },
+    {
+      "file": "019_sodat_04.jpg",
+      "photo_id": "019_쏘댓page2_04",
+      "sha256": "255873b185f1651340bc5b65aebe03cf1bc671610c2998cc001aa52eaccd4d85"
+    },
+    {
+      "file": "019_sodat_05.jpg",
+      "photo_id": "019_쏘댓page2_05",
+      "sha256": "8023373f8464f96cab66296356d218d296619ee5ec3bc57aa0e1021641e09529"
+    },
+    {
+      "file": "019_sodat_06.jpg",
+      "photo_id": "019_쏘댓page2_06",
+      "sha256": "abdf025437f7998492cc76e3e94ed1b8c49a11cbf38e8c4c461eca19a2d237b3"
+    },
+    {
+      "file": "020_nest_01.jpeg",
+      "photo_id": "020_네스트_01",
+      "sha256": "41e5113af4b8aef34ec5af4f9a4fc455c7aa2ffeb3e045d5e79a1168f9add528"
+    },
+    {
+      "file": "020_nest_02.jpeg",
+      "photo_id": "020_네스트_02",
+      "sha256": "dce7d6688633ff0c9902883d01d026e5d143b70d7caefae2b0072078f8cb2e52"
+    },
+    {
+      "file": "021_muyong_01.jpeg",
+      "photo_id": "021_무용의 유용_01",
+      "sha256": "feff560337d1390e4b8249dfbd96d75a3e6a2df638304c6c9022359e92528cae"
+    },
+    {
+      "file": "021_muyong_02.jpeg",
+      "photo_id": "021_무용의 유용_02",
+      "sha256": "d6aea4342c8794ebdb466f778cd0f854d9546cca404c5d560b4477124cdd3c55"
+    }
+  ]
+}
