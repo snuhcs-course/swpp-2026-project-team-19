@@ -11,6 +11,7 @@ are exact only while the API runs as a single process (backend/deploy/bottlemap-
 """
 
 import threading
+from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta, timezone
 from typing import Protocol
 
@@ -33,20 +34,34 @@ def kst_date(now: datetime) -> date:
     return now.astimezone(KST).date()
 
 
+def reset_after(day: date) -> datetime:
+    """The midnight KST that ends the KST day `day`, in UTC."""
+    return datetime.combine(day + timedelta(days=1), time(0), tzinfo=KST).astimezone(UTC)
+
+
 def next_reset(now: datetime) -> datetime:
     """The next midnight KST after `now`, in UTC."""
-    tomorrow = kst_date(now) + timedelta(days=1)
-    return datetime.combine(tomorrow, time(0), tzinfo=KST).astimezone(UTC)
+    return reset_after(kst_date(now))
 
 
 def rfc3339_utc(moment: datetime) -> str:
     return moment.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+@dataclass(frozen=True)
+class Acquisition:
+    """The result of `acquire`. `day` is the KST day the request was checked against, which is
+    the limiter's current day and can be later than the caller's clock near midnight; `counted`
+    is False, with nothing counted, when that day's limit was already used up."""
+
+    day: date
+    counted: bool
+
+
 class DailyRequestLimiter(Protocol):
-    def acquire(self, subject: str, kind: str, now: datetime) -> date | None:
-        """Count one request of `kind` for `subject`. Returns the KST day it was counted against,
-        or None, with nothing counted, when that day's limit is used up."""
+    def acquire(self, subject: str, kind: str, now: datetime) -> Acquisition:
+        """Count one request of `kind` for `subject` against the current KST day, unless that day's
+        limit is used up."""
         ...
 
     def release(self, subject: str, kind: str, day: date) -> None:
@@ -64,23 +79,25 @@ class InMemoryDailyLimiter:
         self._day: date | None = None
         self._counts: dict[tuple[str, str], int] = {}
 
-    def _roll_over(self, now: datetime) -> None:
+    def _roll_over(self, now: datetime) -> date:
+        """Move to `now`'s KST day if it is newer, and return the current day."""
         day = kst_date(now)
         # A request that read the clock just before midnight but got here after a newer one
         # counts against the newer day instead of wiping it.
         if self._day is None or day > self._day:
             self._day = day
             self._counts.clear()
+        return self._day
 
-    def acquire(self, subject: str, kind: str, now: datetime) -> date | None:
+    def acquire(self, subject: str, kind: str, now: datetime) -> Acquisition:
         with self._lock:
-            self._roll_over(now)
+            day = self._roll_over(now)
             key = (subject, kind)
             used = self._counts.get(key, 0)
             if used >= self.daily_limit:
-                return None
+                return Acquisition(day, counted=False)
             self._counts[key] = used + 1
-            return self._day
+            return Acquisition(day, counted=True)
 
     def release(self, subject: str, kind: str, day: date) -> None:
         with self._lock:
@@ -101,8 +118,9 @@ class InMemoryDailyLimiter:
             return self._counts.get((subject, kind), 0)
 
 
-def rate_limited(now: datetime, message: str = DEFAULT_RATE_LIMITED_MESSAGE) -> ApiError:
-    return ApiError(429, "RATE_LIMITED", message, details={"retryAfter": rfc3339_utc(next_reset(now))})
+def rate_limited(day: date, message: str = DEFAULT_RATE_LIMITED_MESSAGE) -> ApiError:
+    """`429 RATE_LIMITED` for a request refused because `day`'s limit is used up."""
+    return ApiError(429, "RATE_LIMITED", message, details={"retryAfter": rfc3339_utc(reset_after(day))})
 
 
 def acquire_or_raise(
@@ -113,8 +131,9 @@ def acquire_or_raise(
     message: str = DEFAULT_RATE_LIMITED_MESSAGE,
 ) -> date:
     """Count one request and return the day for `release`, or raise `429 RATE_LIMITED` with
-    `details.retryAfter` (next midnight KST, UTC)."""
-    day = limiter.acquire(subject, kind, now)
-    if day is None:
-        raise rate_limited(now, message)
-    return day
+    `details.retryAfter`: the end of the day that refused it (midnight KST, UTC). That day comes
+    from the limiter, not from `now`, which may be just before a midnight the limiter has passed."""
+    acquisition = limiter.acquire(subject, kind, now)
+    if not acquisition.counted:
+        raise rate_limited(acquisition.day, message)
+    return acquisition.day
