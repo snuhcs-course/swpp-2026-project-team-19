@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 
 from app.core.security import Principal, get_current_user
 from app.db.session import get_session
-from app.schemas.errors import error_responses
+from app.schemas.bar import MyBarsResponse
+from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
 from app.schemas.user import CurrentUserResponse
+from app.services.bar_detail import my_bars
 from app.services.users import sync_current_user
 
 router = APIRouter(prefix="/api", tags=["users"])
@@ -37,3 +39,22 @@ def read_current_user(
         userType=user.user_type.value,
         updatedAt=user.updated_at,
     )
+
+
+@router.get(
+    "/me/bars",
+    response_model=MyBarsResponse,
+    summary="Bars I own",
+    description=(
+        "Any signed-in user. The bars the caller currently owns (spec 3.11.9), by name, in the format of "
+        "`GET /api/bars/{barId}`; empty when the caller owns none or has no users row yet. An operator gets "
+        "only bars they own themselves (every bar is `GET /api/bars`). The app shows the owner menu when the "
+        "list is not empty."
+    ),
+    responses=error_responses((401, "`UNAUTHENTICATED`: missing, invalid or expired token."), AUTH_UNAVAILABLE),
+)
+def read_my_bars(
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> MyBarsResponse:
+    return MyBarsResponse(items=my_bars(session, principal))
