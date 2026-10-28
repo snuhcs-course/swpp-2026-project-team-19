@@ -1,7 +1,7 @@
 {
-  "version": "catalog_v2_service",
-  "created": "2026-10-14",
-  "based_on": "catalog_v1_draft + eval/match_gold_v1_1.json new_products + menu names of the held-out bars (labels v1.1: 미라보, Beck, 포레스트) + POST_TEST_ALIASES (match_gold_test_draft.py) + eval/match_gold_final_v1.json new_products and menu names (수이, 오드비)",
+  "version": "catalog_v2_2_service",
+  "created": "2026-10-28",
+  "based_on": "catalog_v1_draft + eval/match_gold_v1_1.json new_products + menu names of the held-out bars (labels v1.1: 미라보, Beck, 포레스트) + POST_TEST_ALIASES (match_gold_test_draft.py) + eval/match_gold_final_v1.json new_products and menu names (수이, 오드비) + v2.2 (2026-10-28): menu spellings of 13 app-created duplicate products from the 10/7 위스키복춘 import attached to the real products; brand+age aliases of edition products that hid same-age siblings made non-searchable (matching still uses them)",
   "notes": [
     "ids are UUIDv5(namespace 6b1a1f4e-19b0-4c7a-9a7e-b0771e3a0019, '<kind>:<key>'): stable across rebuilds.",
     "normalized_alias is intentionally omitted: backend normalization function generates it.",
@@ -708,6 +708,14 @@
           "language_code": "ko",
           "sources": [
             "standard"
+          ]
+        },
+        {
+          "id": "8f1978ea-3830-5399-886c-1be05dace12f",
+          "alias_text": "글렌피디크",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
           ]
         }
       ]
@@ -1807,6 +1815,14 @@
           "language_code": "ko",
           "sources": [
             "generated:claude-2026-10-15"
+          ]
+        },
+        {
+          "id": "7fe3caaa-5f21-5943-8cfd-ac80b3e891c2",
+          "alias_text": "초누키",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
           ]
         }
       ]
@@ -4873,6 +4889,15 @@
             "generated:claude-2026-10-15"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "e1fde7c4-3f88-5453-a227-4698ccb564ef",
+          "alias_text": "아벨라워 아부나호",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5404,6 +5429,15 @@
             "template:paren-strip"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "09e3abd4-de6b-5c56-8c63-f7c04fa8dbfc",
+          "alias_text": "아란 보데가 세리 캐스크",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -5554,7 +5588,7 @@
           "sources": [
             "menu:P5온라인"
           ],
-          "is_searchable": true
+          "is_searchable": false
         },
         {
           "id": "fb6267a4-ba77-578b-a730-5d2a5ac10225",
@@ -5608,7 +5642,7 @@
           "sources": [
             "menu:Beck"
           ],
-          "is_searchable": true
+          "is_searchable": false
         },
         {
           "id": "6bd42809-4d16-57c0-b4bf-7a8fd8157508",
@@ -5738,7 +5772,7 @@
           "sources": [
             "menu:위스키복춘"
           ],
-          "is_searchable": true
+          "is_searchable": false
         },
         {
           "id": "c11c770b-3c19-5630-9892-8ffd0749f9c2",
@@ -8160,6 +8194,15 @@
             "menu:수이"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "8c3f0495-0d01-5418-b0b8-750c7ea186ee",
+          "alias_text": "글렌피디크 12Y",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -8303,6 +8346,15 @@
           "language_code": "ko",
           "sources": [
             "generated:claude-2026-10-15"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "a7762828-6cce-57c0-b7e3-6f7b3d9a9fcc",
+          "alias_text": "글렌피디크 15Y",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
           ],
           "is_searchable": true
         }
@@ -9334,6 +9386,15 @@
           "language_code": "ko",
           "sources": [
             "template:paren-strip"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "61474412-71fe-5d02-95af-4f8a503d5810",
+          "alias_text": "글렌모렌지 퀀타루반",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
           ],
           "is_searchable": true
         }
@@ -10417,6 +10478,15 @@
             "template:paren-strip"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "9f1ba760-c721-5023-9be4-8f2c83e6665a",
+          "alias_text": "카발란 솔리스트 세리 오크",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -10489,6 +10559,15 @@
           "language_code": "ko",
           "sources": [
             "generated:claude-2026-10-15"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "ad0c1a1b-8362-50a1-882e-f775b3662c5c",
+          "alias_text": "카발란 트리플 세리",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
           ],
           "is_searchable": true
         }
@@ -11133,6 +11212,15 @@
             "template:paren-strip"
           ],
           "is_searchable": true
+        },
+        {
+          "id": "c999da01-557e-59db-8192-2d5b8ef93b42",
+          "alias_text": "맥칼란 더블캐스크 12Y",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
+          ],
+          "is_searchable": true
         }
       ]
     },
@@ -11270,6 +11358,15 @@
           "language_code": "ko",
           "sources": [
             "template:paren-strip"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "1c3194ea-4598-5005-ae5d-5f72aa2c946a",
+          "alias_text": "맥칼란 더블캐스크 15Y",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
           ],
           "is_searchable": true
         }
@@ -13035,6 +13132,15 @@
           "language_code": "ko",
           "sources": [
             "template:paren-strip"
+          ],
+          "is_searchable": true
+        },
+        {
+          "id": "d092015a-adf3-5309-9da7-114614eb41cc",
+          "alias_text": "초누키 에디션 2025",
+          "language_code": "ko",
+          "sources": [
+            "menu:위스키복춘"
           ],
           "is_searchable": true
         }
