@@ -22,14 +22,26 @@ from app.models.menu_import import (
     ResolutionStatus,
     ReviewStatus,
 )
+from app.models.owner import (
+    BarOwner,
+    BarOwnerApplication,
+    BusinessStatus,
+    BusinessVerificationResult,
+    OwnerApplicationStatus,
+    OwnerApplicationType,
+)
 from app.models.user import User, UserType
 
 __all__ = [
     "Bar",
     "BarMenuItem",
+    "BarOwner",
+    "BarOwnerApplication",
     "BarStatus",
     "Brand",
     "BrandAlias",
+    "BusinessStatus",
+    "BusinessVerificationResult",
     "ExtractedItem",
     "ExtractedOption",
     "ExtractionApproach",
@@ -46,6 +58,8 @@ __all__ = [
     "MenuImage",
     "MenuImport",
     "MenuImportChange",
+    "OwnerApplicationStatus",
+    "OwnerApplicationType",
     "PipelineStatus",
     "Product",
     "ProductAlias",

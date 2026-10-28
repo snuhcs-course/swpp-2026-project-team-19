@@ -1,6 +1,6 @@
 """Builders for database test data. Each helper flushes so generated ids are available."""
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
 
 from sqlalchemy.orm import Session
@@ -9,15 +9,25 @@ from app.core.normalize import normalize
 from app.models import (
     Bar,
     BarMenuItem,
+    BarOwner,
+    BarOwnerApplication,
     BarStatus,
     Brand,
     BrandAlias,
+    BusinessVerificationResult,
     MenuBoard,
     MenuBoardEntry,
     MenuEntryOption,
+    OwnerApplicationStatus,
+    OwnerApplicationType,
     Product,
     ProductAlias,
+    User,
+    UserType,
 )
+
+# Passes the NTS check digit (app/core/business_number.py).
+BUSINESS_NUMBER = "1234567891"
 
 
 def make_bar(
@@ -116,3 +126,66 @@ def publish_menu(
             )
     session.flush()
     return board
+
+
+def make_user(
+    session: Session,
+    subject: str = "user-subject",
+    *,
+    user_type: UserType = UserType.CUSTOMER,
+    email: str | None = None,
+    display_name: str | None = None,
+) -> User:
+    user = User(auth_subject=subject, user_type=user_type, email=email, display_name=display_name)
+    session.add(user)
+    session.flush()
+    return user
+
+
+def make_application(
+    session: Session,
+    applicant: User,
+    bar: Bar | None = None,
+    *,
+    application_type: OwnerApplicationType | None = None,
+    status: OwnerApplicationStatus = OwnerApplicationStatus.PENDING,
+    business_registration_number: str = BUSINESS_NUMBER,
+    reviewer: User | None = None,
+) -> BarOwnerApplication:
+    """An existing_bar application for `bar`, or a new_bar one without it. An approved new_bar
+    application passes `bar` (the bar its approval created) and `application_type`. A reviewed
+    status needs `reviewer`."""
+    if application_type is None:
+        application_type = OwnerApplicationType.NEW_BAR if bar is None else OwnerApplicationType.EXISTING_BAR
+    reviewed = status in (OwnerApplicationStatus.APPROVED, OwnerApplicationStatus.REJECTED)
+    new_bar = application_type == OwnerApplicationType.NEW_BAR
+    application = BarOwnerApplication(
+        applicant_user_id=applicant.id,
+        application_type=application_type,
+        bar_id=bar.id if bar is not None else None,
+        proposed_bar_name="New Bar" if new_bar else None,
+        proposed_address="New Bar address" if new_bar else None,
+        business_registration_number=business_registration_number,
+        representative_name="김사장",
+        opening_date=date(2020, 3, 2),
+        business_verification_result=BusinessVerificationResult.UNAVAILABLE,
+        business_checked_at=datetime(2026, 10, 14, 3, tzinfo=timezone.utc),
+        contact_phone="010-1234-5678",
+        status=status,
+        reviewed_by_user_id=reviewer.id if reviewed and reviewer is not None else None,
+        # Set even without a reviewer, so a test can break the review rule on purpose.
+        reviewed_at=datetime(2026, 10, 14, 5, tzinfo=timezone.utc) if reviewed else None,
+        rejection_reason="확인할 수 없습니다." if status == OwnerApplicationStatus.REJECTED else None,
+    )
+    session.add(application)
+    session.flush()
+    return application
+
+
+def make_owner(session: Session, user: User, bar: Bar, reviewer: User) -> BarOwner:
+    """`user` as the current owner of `bar`, through an approved existing_bar application."""
+    application = make_application(session, user, bar, status=OwnerApplicationStatus.APPROVED, reviewer=reviewer)
+    owner = BarOwner(bar_id=bar.id, user_id=user.id, application_id=application.id)
+    session.add(owner)
+    session.flush()
+    return owner
