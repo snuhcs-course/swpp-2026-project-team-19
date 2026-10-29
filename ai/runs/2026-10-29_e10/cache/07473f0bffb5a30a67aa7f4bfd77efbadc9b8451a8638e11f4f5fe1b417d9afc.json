@@ -1,0 +1,35 @@
+{
+ "key": "07473f0bffb5a30a67aa7f4bfd77efbadc9b8451a8638e11f4f5fe1b417d9afc",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory Macduff"
+    },
+    "sig": "Ep8HCpwHAWkUfRPou6R3TnZbs2TlWJLF/em7KznvNYAjKPRaTM/z/f6qZrL0DQMq9MjwX1N3x/P/itgNN/DI/45WAJ57e1PEYzMUjOqGAzObs7Mrw6vM6ZiY0BPJqdNuarfCkCZFJbj3AQ2LZdl/08j3O/NzYbQ1OuSh96OfNAczVn7PqaQhwXr3GK/kVySXFE7rVUAfIPTBwy2iH8NUmARgLdy39MwfmVS1AyPsDJk9F7J7ueFFOpooqDU1BfeFrexGMx/cgA/zMhPr7EjFVGp4A1tpM3jITSy39cnJ81PFehInKLWL+cfzX+d/c3tpptFAjdr/uQVLltQGQ7iYcYAOtGXPjnrt7HvceFXiY8r9YJOjycpXXgaHV/I5fupy+IS/JiAKgbWhwlslBji1EagnaFifITrnkdFNv2sAA/79apw3OGj3eJIb8HGO6QkfhWLsGyJZwz6i+PzC9W8sA/co8R7cll+DCo/7BO/BJxQ/hq6NyzobfMo37HTp9OV6/r/NL+t1rPtmixZcivVRkeiqbybZiMeppkzXuLlRxhYCtbE4mludAGLn9ABSAkfnhmr4y4oPMV2EJEicqbPnKOzp3cZGSh0dVZ2Zva9ZVB3MyUnQXimcY5H7/Wi0oSf8YA2eNeA/zFuQy0SOwKraZNhqyzoImTjvL+78TaVCF6txr6sgCbrzqt/VkiQ9QzBZRrPZdfqCZCYwhNXYTEHGVy3VN+podChOFfNsVnkIDr5fYrYc3hM16G++WjLArHltQIrhIDgDxC1xqAeYMKNZIyrmUM0CexlBPqZqYln3fpNA0C+k5o8vXaY77Bf/MZk4uWtaQpE1STyNpov+tjuNvdlS8qdlw2vlt+v4lyb6zsdSwTtMyQnOXrU9jfeJH3bz+I6d0AfBsxWeS8Ghflk4/XSA+UVjbJ8CCkHusA6MBbNJJ4bu3yFYeu0Zc1a8KN5vSzvPqaWCeC+Hf3GmiZ9xk1X6OoxYQJUFH/LjYCzY5hGMhFceWWqrLi73eq4dXWJkT/Dp2O/hXLQK2MZcADMTWZizzjXRwVLi7kY3kOUwXM81WvI5k/k6djkE+conCWT7hQliPiR5R1c/wTf1zexypE/AHFPoc6q0Ncl7oPRmmsYNymuF7F7iJhlZ3hmeGO0TmJ7VeLC3Yn74Y5wrn++gaTGjv2+OkJpG1VexZxCqO4T5ygVymIK4dxY87E7CxiM6F2xnLJEuN12QfHvOzgoB6m6o"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory Benriach"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 3512,
+   "output_tokens": 40,
+   "thought_tokens": 268
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:44:29.386493+00:00",
+  "latency_ms": 5326,
+  "attempts": 1,
+  "turn": 2
+ }
+}

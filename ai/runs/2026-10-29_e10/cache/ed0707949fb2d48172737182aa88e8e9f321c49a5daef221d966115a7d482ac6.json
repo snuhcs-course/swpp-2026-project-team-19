@@ -1,0 +1,49 @@
+{
+ "key": "ed0707949fb2d48172737182aa88e8e9f321c49a5daef221d966115a7d482ac6",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Sansibar 21"
+    },
+    "sig": "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"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Svenska Eldvatten 8"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "김과장"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory Speyside M"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 5772,
+   "output_tokens": 81,
+   "thought_tokens": 644
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:55:11.134432+00:00",
+  "latency_ms": 3166,
+  "attempts": 1,
+  "turn": 2
+ }
+}

@@ -1,0 +1,35 @@
+{
+ "key": "af1518c128b95ce73d1ad213e51e88cb58fb6cb0888050c7d753fef50b7d23b6",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Tormore Tempranillo"
+    },
+    "sig": "Ep0LCpoLAWkUfRMBTK/Y/u383a44CptBGGxBuC5tt5Nsyd7SnhyUd6D8JYTvYvX2AKh8yDF/Gx004clYxtPIA3MornwsqGRnvFI68Dly7jN6rSguGj6CvYih2SXkaT/oIIhP8K/x4EZvA8phpfBrhyy9BRVnKTLpgu1vLEwPXhSL7c/TLegMO66QmGV6Y9h4TOlWsYzNwf5/pk2uI91bmnQb9xKzlRvlONPUzl/BzZsDvwei0/flowpOIY46Y1KF2phK1RX2T8e7VRktWTq6DgUKVSn7ZV82lKayVLLXm2vqP9PGNyrOH4BTowvglSm3dCUS/zdV6ygLA1PuMCMrOL13xXU3mhTVDowOAHk2r6/NkErfTtx9dEC0ZY/MTDC19QnOpV2WMtWv8t70LrWLWn0ynGH5ArMTWN/4JcwF0JTMYMZrPeOcZKTkNcAePOUV7Z59LUaLR3tV4hVy8opXVE5QFofbUeQ7nz2I3Iv19ocGbtsrtSW0WLl2MfJR9M3fH8SvpYjzbG4DxZt8bmGh9DfBcN5Z+PtojM6SRbGhoQlVz9oIoR537gh+Uj1vECZjzqVWLk7j+uT2WgpWK+TkAJjVArtR5WC+8kMPv6t/vJFSlJbicbRp9pc7y/1AQiyJIwG7oamVZcBkCOP5sQKaq9q5C4z90JYNPSKNG0AxH6JjGlbnB5GwYhZ1+rQnHsbnoZ9oQ5/wOTtTR/gSvxniGbqs6gWjkJF78m7QcZN5H5mSo3PSpI87TuijOyPqFCIUF+xgCfNAa1MLmOh0IBfyxvb3Ofe8vOtAetShpAp0QoXHrsVvQpwYFX9kUiHm2wCxD9eVm8TvRtsGSuMVevKReldz9CBQpeY4EVbl6oe10rHbfOLeUPq8Ip+m9drzGCWAbt0vgkHI7z2wgnyNFiULlShWm0LjnSCiW8CQ8XsO4H5gY/K1y6wIaW3citK3GBOJMFqRDqBwL/hi0aCg6I8+AvL9elVZ3N8OjAMTrvM8S+fyZGjJcDxSQhWB2p8VoBKsUj0+WssvZsmRCvIxTkKpR/hbYgS3TA1JV8qM2ucTWm7sOtqKLlaxaP3SMUukWI0LF1PK7TesPHSHCE3a1w+SFIdmgKtbtsCGnvYvGNtmuqiw6u8kot6EmT0Ycc/n7EdIEXhNKvvM33HBOTtj2O9FUtKBdy7xZuLP4RYZ+pbYRTlWmairHR3Y3pyXEmyttEP+WdfAxH8I/LlzeBq6sgFcrBN1l1nU+QmMbSGXDbPo53MenpPWgXctZNkmyoZhVb/WzPpuWFTGG54stlYZjh16hm0VJ+HlveJs64bkhiihP8hV/wcvugVwR1/mN8/3bFW8jbSX0eDrD4HgElKAUJHkOaYH/fTTjLk/WZAvmT99gFTF8H7iu9QEqqubJlO0cSlppfcVR/M5Tv9gjW59Jw54n81uPo+NvO/jBivs3LSBXX5hk/UvyV5TDxOGeg3uoBYV6dxCSR9/NVWPrmkatzgs+kDMPs0OPy3jEFcMmdNYqIPhQ2PucUEbGEOCiGmfQfifkbYVzowajOlrX4mhs01470DDgWFa6CnY+H0tr7Nbw3Sjr1MMt8pSAZow0KSGjpXMiJVDWU8Xb9d4pkUSM1yUYrHDIQXNv/M2lzj09SkmW/jyXuOEcZDP3Jb/GxI6yG0d86FmGGdY3CeoCEe09pPf6R5g+h4VJTNWio0HNwYkr7wSm4vGdtwagsPMTmi5W/acW006YQfG4u1e/fkFm9FpizXfsmyrR8uhfGX8nL0KmVDmJzM7MIo3SP2y9FeQcqSzTX5sHDE4trqmGsInT2MLeWC5VAQS7/kD14Uwj6awZx3woNdJJkov04kxYCwhrnVnHM7UXGAEQBp54fqK0owGa2SWDD2UvUkbbkoq9D8o0pM43pU67PKZZ70qs19W8JVK"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glenallachie 2014"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 4379,
+   "output_tokens": 46,
+   "thought_tokens": 419
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:48:19.902051+00:00",
+  "latency_ms": 2869,
+  "attempts": 1,
+  "turn": 2
+ }
+}

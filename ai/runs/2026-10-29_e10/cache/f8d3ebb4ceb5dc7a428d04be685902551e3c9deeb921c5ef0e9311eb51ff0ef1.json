@@ -1,0 +1,154 @@
+{
+ "key": "f8d3ebb4ceb5dc7a428d04be685902551e3c9deeb921c5ef0e9311eb51ff0ef1",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Maker's Mark Bourbon"
+    },
+    "sig": "EvcDCvQDAWkUfRPAXEcFZNh3Q2Mnp+j0a56M25luCQ+17oTFFgjRCZYIWq4FxLNIgLVyA6iz/cMpTqenp0olDeOA0XhVT+cHZtTh5Xln3OSaw5pe2WjZBygiGWZ8lzxAKi6GLWKUODZxp6cUBIeeiOCmVWOjDvPUYsIL4YZ5MlffsGYIr4LP0JWKqosLdKF+prcd1xuqgBgTYae7vlpSliFHncuAE3C3ze2sEVPdJACcg38wF08UXDxmghEz44IFfwukZJweWe8Vy8pMKvciOWN4drbStpNKheuDRuhLpsDSM1hFyANKFzejlzoEoiot2slx5ZP0ywwlcSLahDTbMfUrG8yL8rFT9+GCkAoYcGWyqmyV0tNQvryobjnx7DWCeCx1H7FqE/+2EmywPg9F2A20RimkBXxwthROQ//fz7SURt06iAoNaERWrBnrngNybQMJdKkUotUSBKFf8id1aPLNDauHmeFVF1qnXlBhw8ynt2v4Nq+tqfOck3MO8bdhKp2a/nI68NLz8Cy3qAoCgvH/ZwNIcKzbOq5L8MYsXf+SsYZexY7Q0Ta2GcfpKPYoPMp9LfwaM7dagN1PZfUFga4V0WSO1RO9sqpCKgf0eQxuAcL3AkMN7X/pSeESUs/DaAr+2YSZ7QD6/uTmoG4SSGJJTgSBIXlTQew="
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Russell's Reserve 10 Year Old Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Russell's Reserve Single Barrel Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Russell's Reserve Single Barrel Rye"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "James E. Pepper 1776 Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "James E. Pepper 1776 Rye"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Michter's US*1 Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "1792 Full Proof Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Woodford Reserve Distiller's Select Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Woodford Reserve Double Oaked"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Rowan's Creek"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Willett Pot Still Reserve"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Noah's Mill"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Willett Family Estate Bottled Wheated Bourbon 8 Year Old"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Barrell Seagrass Rye"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Blanton's Single Barrel Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Blanton's Straight From The Barrel"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Booker's Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Elijah Craig Barrel Proof"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 2413,
+   "output_tokens": 421,
+   "thought_tokens": 145
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:53:43.492041+00:00",
+  "latency_ms": 4809,
+  "attempts": 1,
+  "turn": 1
+ }
+}

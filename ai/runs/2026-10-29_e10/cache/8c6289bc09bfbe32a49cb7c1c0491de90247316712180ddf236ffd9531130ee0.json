@@ -1,0 +1,441 @@
+{
+ "key": "8c6289bc09bfbe32a49cb7c1c0491de90247316712180ddf236ffd9531130ee0",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "submit_answers",
+    "args": {
+     "answers": [
+      {
+       "product_id": "p1",
+       "age": 0,
+       "distillery_en": "Suntory",
+       "bottler_en": "",
+       "sure": true,
+       "edition_tokens_en": [
+        "World Whisky AO"
+       ],
+       "line": 1,
+       "brand_en": "Suntory",
+       "kind": "whisky"
+      },
+      {
+       "product_id": "p11",
+       "bottler_en": "",
+       "age": 0,
+       "sure": true,
+       "edition_tokens_en": [
+        "Japanese Harmony"
+       ],
+       "line": 2,
+       "brand_en": "Hibiki",
+       "distillery_en": "Suntory",
+       "kind": "whisky"
+      },
+      {
+       "sure": true,
+       "bottler_en": "",
+       "product_id": "p14",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Distiller's Reserve"
+       ],
+       "distillery_en": "Suntory",
+       "brand_en": "Hakushu",
+       "line": 3,
+       "age": 0
+      },
+      {
+       "line": 4,
+       "bottler_en": "",
+       "product_id": "p20",
+       "kind": "whisky",
+       "edition_tokens_en": [],
+       "brand_en": "Hakushu",
+       "age": 12,
+       "sure": true,
+       "distillery_en": "Suntory"
+      },
+      {
+       "sure": true,
+       "age": 0,
+       "edition_tokens_en": [
+        "Distiller's Reserve"
+       ],
+       "distillery_en": "Suntory",
+       "kind": "whisky",
+       "bottler_en": "",
+       "product_id": "p16",
+       "line": 5,
+       "brand_en": "Yamazaki"
+      },
+      {
+       "product_id": "p33",
+       "line": 6,
+       "edition_tokens_en": [],
+       "distillery_en": "Suntory",
+       "kind": "whisky",
+       "bottler_en": "",
+       "brand_en": "Yamazaki",
+       "age": 12,
+       "sure": true
+      },
+      {
+       "kind": "whisky",
+       "brand_en": "Nikka",
+       "line": 7,
+       "sure": true,
+       "product_id": "p35",
+       "edition_tokens_en": [
+        "From The Barrel"
+       ],
+       "distillery_en": "Nikka",
+       "age": 0,
+       "bottler_en": ""
+      },
+      {
+       "age": 0,
+       "sure": true,
+       "distillery_en": "Nikka",
+       "brand_en": "Nikka",
+       "product_id": "p45",
+       "line": 8,
+       "edition_tokens_en": [
+        "Taketsuru Pure Malt"
+       ],
+       "kind": "whisky",
+       "bottler_en": ""
+      },
+      {
+       "age": 0,
+       "product_id": "p53",
+       "bottler_en": "",
+       "sure": true,
+       "edition_tokens_en": [
+        "Single Malt"
+       ],
+       "line": 9,
+       "distillery_en": "Yoichi",
+       "kind": "whisky",
+       "brand_en": "Nikka"
+      },
+      {
+       "kind": "whisky",
+       "brand_en": "Nikka",
+       "age": 0,
+       "line": 10,
+       "distillery_en": "Miyagikyo",
+       "sure": true,
+       "product_id": "p50",
+       "bottler_en": "",
+       "edition_tokens_en": [
+        "Single Malt"
+       ]
+      },
+      {
+       "age": 0,
+       "sure": true,
+       "line": 11,
+       "product_id": "p55",
+       "brand_en": "Nagahama",
+       "bottler_en": "",
+       "distillery_en": "Nagahama",
+       "edition_tokens_en": [
+        "The Second Batch"
+       ],
+       "kind": "whisky"
+      },
+      {
+       "line": 12,
+       "distillery_en": "Nagahama",
+       "kind": "whisky",
+       "bottler_en": "",
+       "sure": true,
+       "edition_tokens_en": [
+        "PX Sherry Cask"
+       ],
+       "brand_en": "Nagahama",
+       "age": 0,
+       "product_id": "p60"
+      },
+      {
+       "product_id": "p61",
+       "edition_tokens_en": [
+        "Peated PX Sherry Cask"
+       ],
+       "distillery_en": "Nagahama",
+       "age": 0,
+       "line": 13,
+       "brand_en": "Nagahama",
+       "bottler_en": "",
+       "kind": "whisky",
+       "sure": true
+      },
+      {
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "The Lucky Cat May & Hana"
+       ],
+       "product_id": "p72",
+       "line": 14,
+       "age": 0,
+       "bottler_en": "",
+       "distillery_en": "Mars",
+       "sure": true,
+       "brand_en": "Mars"
+      },
+      {
+       "age": 0,
+       "line": 15,
+       "distillery_en": "Mars",
+       "kind": "whisky",
+       "product_id": "p73",
+       "edition_tokens_en": [
+        "The Lucky Cat Hana & Choco"
+       ],
+       "brand_en": "Mars",
+       "sure": true,
+       "bottler_en": ""
+      },
+      {
+       "product_id": "p80",
+       "sure": true,
+       "bottler_en": "",
+       "distillery_en": "Mars",
+       "brand_en": "Mars",
+       "line": 16,
+       "edition_tokens_en": [
+        "Komagatake 2023 Edition"
+       ],
+       "kind": "whisky",
+       "age": 0
+      },
+      {
+       "brand_en": "Mars",
+       "sure": true,
+       "edition_tokens_en": [
+        "Komagatake 2024 Edition"
+       ],
+       "bottler_en": "",
+       "line": 17,
+       "product_id": "p81",
+       "age": 0,
+       "distillery_en": "Mars",
+       "kind": "whisky"
+      },
+      {
+       "bottler_en": "",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Fuji Sanroku Signature Blend"
+       ],
+       "product_id": "p86",
+       "distillery_en": "Kirin Fuji",
+       "line": 19,
+       "brand_en": "Kirin",
+       "sure": true,
+       "age": 0
+      },
+      {
+       "sure": true,
+       "distillery_en": "Kanosuke",
+       "age": 0,
+       "edition_tokens_en": [
+        "Hioki Pot Still"
+       ],
+       "brand_en": "Kanosuke",
+       "product_id": "p91",
+       "kind": "whisky",
+       "line": 21,
+       "bottler_en": ""
+      },
+      {
+       "brand_en": "Bushmills",
+       "sure": true,
+       "edition_tokens_en": [
+        "Black Bush"
+       ],
+       "age": 0,
+       "bottler_en": "",
+       "kind": "whisky",
+       "product_id": "p94",
+       "distillery_en": "Bushmills",
+       "line": 23
+      },
+      {
+       "distillery_en": "Amrut",
+       "product_id": "p46",
+       "sure": true,
+       "age": 0,
+       "bottler_en": "",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Indian Single Malt"
+       ],
+       "brand_en": "Amrut",
+       "line": 28
+      },
+      {
+       "distillery_en": "Amrut",
+       "edition_tokens_en": [
+        "Peated Indian Single Malt"
+       ],
+       "sure": true,
+       "line": 29,
+       "product_id": "p48",
+       "kind": "whisky",
+       "brand_en": "Amrut",
+       "bottler_en": "",
+       "age": 0
+      },
+      {
+       "product_id": "p101",
+       "sure": true,
+       "bottler_en": "",
+       "age": 0,
+       "line": 30,
+       "edition_tokens_en": [
+        "Fusion"
+       ],
+       "brand_en": "Amrut",
+       "distillery_en": "Amrut",
+       "kind": "whisky"
+      },
+      {
+       "bottler_en": "",
+       "sure": true,
+       "product_id": "p47",
+       "kind": "whisky",
+       "brand_en": "Amrut",
+       "age": 0,
+       "edition_tokens_en": [
+        "Indian Single Malt Cask Strength"
+       ],
+       "line": 31,
+       "distillery_en": "Amrut"
+      },
+      {
+       "sure": true,
+       "brand_en": "Amrut",
+       "distillery_en": "Amrut",
+       "edition_tokens_en": [
+        "Naarangi"
+       ],
+       "age": 0,
+       "kind": "whisky",
+       "bottler_en": "",
+       "product_id": "p102",
+       "line": 33
+      },
+      {
+       "edition_tokens_en": [
+        "Intermediate Sherry"
+       ],
+       "line": 34,
+       "bottler_en": "",
+       "kind": "whisky",
+       "product_id": "p65",
+       "age": 0,
+       "distillery_en": "Amrut",
+       "sure": true,
+       "brand_en": "Amrut"
+      },
+      {
+       "product_id": "p103",
+       "edition_tokens_en": [
+        "Portonova"
+       ],
+       "sure": true,
+       "distillery_en": "Amrut",
+       "brand_en": "Amrut",
+       "bottler_en": "",
+       "age": 0,
+       "kind": "whisky",
+       "line": 35
+      },
+      {
+       "kind": "whisky",
+       "brand_en": "Paul John",
+       "bottler_en": "",
+       "edition_tokens_en": [
+        "Classic Select Cask"
+       ],
+       "line": 36,
+       "product_id": "p111",
+       "age": 0,
+       "sure": true,
+       "distillery_en": "Paul John"
+      },
+      {
+       "edition_tokens_en": [
+        "Oloroso Select Cask"
+       ],
+       "distillery_en": "Paul John",
+       "kind": "whisky",
+       "line": 38,
+       "age": 0,
+       "bottler_en": "",
+       "brand_en": "Paul John",
+       "sure": true,
+       "product_id": "p112"
+      },
+      {
+       "line": 39,
+       "brand_en": "Paul John",
+       "edition_tokens_en": [
+        "Pedro Ximenez Select Cask"
+       ],
+       "kind": "whisky",
+       "distillery_en": "Paul John",
+       "bottler_en": "",
+       "product_id": "p114",
+       "sure": true,
+       "age": 0
+      },
+      {
+       "line": 40,
+       "edition_tokens_en": [
+        "Lacrima"
+       ],
+       "kind": "whisky",
+       "age": 0,
+       "bottler_en": "",
+       "brand_en": "Paul John",
+       "product_id": "p115",
+       "sure": true,
+       "distillery_en": "Paul John"
+      },
+      {
+       "product_id": "p116",
+       "edition_tokens_en": [
+        "Ridere"
+       ],
+       "sure": true,
+       "age": 0,
+       "distillery_en": "Paul John",
+       "bottler_en": "",
+       "brand_en": "Paul John",
+       "kind": "whisky",
+       "line": 41
+      }
+     ]
+    },
+    "sig": "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"
+   }
+  ],
+  "usage": {
+   "input_tokens": 13820,
+   "output_tokens": 2260,
+   "thought_tokens": 1401
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:54:22.654921+00:00",
+  "latency_ms": 11729,
+  "attempts": 1,
+  "turn": 2
+ }
+}

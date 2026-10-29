@@ -1,0 +1,154 @@
+{
+ "key": "1c82f9e62a5c09cb918032557804c6b997c5d729fc848f83db34f6643ec2cfd0",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Maltman Fettercairn 37"
+    },
+    "sig": "Eu0DCuoDAWkUfRMlyW7Nsh9p6rYmv5GYcvYgDtP75JHBgnqKWmzyE8Ys/9A78BVdSU4mbidztFok9LFNUlHPbjY6GFFZC1rEQQPRlqCLC6LKahQ9Zte/LLc8N5IY4ahZg9Ua9Xj2sfUkc1azpWmXgmQl2v3rnF2cFc+3cP6IMX+qi9AgvZ5IPXVdSH1XFxHYk8liVaAzykZq4IkvIEomTiGvvWFWOaRMBuL7EFHnTEZWxOGj7toe4GivhlYYYoflMogUIvuCcB9o/KA6lv35DBYG4v9fUa90UBdRzPv3mhBSAUPTBnHEL/JWU4YF1O7mZAKSN3ugVEb36Ces11B3n6n4xHrT3P0JyjddLs9nvfbYmUjmOV30LPAbuF8HGJRr9mRBNNUBiWuvdA/EFuVbEBFHkfwT1WjD4wXvCKIMOhmKi/giHLexeQOnKWrh3P4Q0ObFt6lKmgYATlNl0JyTa1oRDLDZklMZUMcgKTcgeZvm1B27Zblt6p7D7teZ9gbOgmotwRMHAONCzKTd3NrkwtxHU2xBTSCG6u065hseG3yhpo5LpoEUEtOgz4rNC5GLFSPTu/VFSxiss7rEW7KEXItEIxn/YU/E7eFQyTMV7Qm8SmRK1zpZ0bceobBGapP4aG6arRgWSs7OlA6Nehu3Cg=="
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Wild Turkey Archive 16"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glenallachie 19 Ex Solera"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory North British 34"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Bowmore 21 Sherry"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Michter's Toasted Barrel Finish"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "North Star Ardmore 26"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Kavalan King Car"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Highland Park Cask Strength Release 4"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Balvenie 12 Gold Cask"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Benriach Quarter Cask"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Loch Lomond 12"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Loch Lomond 18"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Shin The Blended"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Laphroaig 15"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Guinness"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "San Miguel"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Asahi Super Dry"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Corona Extra"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 1987,
+   "output_tokens": 402,
+   "thought_tokens": 102
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:51:40.809937+00:00",
+  "latency_ms": 4599,
+  "attempts": 1,
+  "turn": 1
+ }
+}

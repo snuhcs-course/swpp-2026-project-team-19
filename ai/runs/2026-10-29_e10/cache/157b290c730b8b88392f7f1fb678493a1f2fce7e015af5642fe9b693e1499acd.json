@@ -1,0 +1,421 @@
+{
+ "key": "157b290c730b8b88392f7f1fb678493a1f2fce7e015af5642fe9b693e1499acd",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "submit_answers",
+    "args": {
+     "answers": [
+      {
+       "brand_en": "",
+       "kind": "whisky",
+       "product_id": "p1",
+       "distillery_en": "Knockdhu",
+       "bottler_en": "Jack Wiebers",
+       "line": 1,
+       "sure": true,
+       "age": 16,
+       "edition_tokens_en": []
+      },
+      {
+       "distillery_en": "",
+       "kind": "whisky",
+       "bottler_en": "",
+       "sure": true,
+       "product_id": "p6",
+       "edition_tokens_en": [
+        "Cadboll",
+        "Estate"
+       ],
+       "age": 0,
+       "brand_en": "Glenmorangie",
+       "line": 2
+      },
+      {
+       "line": 3,
+       "edition_tokens_en": [
+        "Vintage",
+        "1984"
+       ],
+       "brand_en": "Chateau Garreau",
+       "sure": false,
+       "bottler_en": "",
+       "age": 0,
+       "kind": "non_whisky",
+       "distillery_en": "",
+       "product_id": ""
+      },
+      {
+       "sure": false,
+       "edition_tokens_en": [
+        "Vintage",
+        "1991"
+       ],
+       "line": 4,
+       "product_id": "",
+       "distillery_en": "",
+       "brand_en": "Chateau Garreau",
+       "kind": "non_whisky",
+       "age": 0,
+       "bottler_en": ""
+      },
+      {
+       "distillery_en": "",
+       "edition_tokens_en": [
+        "Vintage",
+        "1995"
+       ],
+       "bottler_en": "",
+       "line": 5,
+       "brand_en": "Chateau Garreau",
+       "sure": false,
+       "kind": "non_whisky",
+       "product_id": "",
+       "age": 0
+      },
+      {
+       "line": 6,
+       "age": 22,
+       "product_id": "p16",
+       "edition_tokens_en": [
+        "Port",
+        "Cask"
+       ],
+       "sure": true,
+       "brand_en": "",
+       "kind": "whisky",
+       "bottler_en": "Aqua Vitae",
+       "distillery_en": "Cooley"
+      },
+      {
+       "line": 7,
+       "bottler_en": "Aqua Vitae",
+       "sure": true,
+       "distillery_en": "Cooley",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Amarone",
+        "Cask"
+       ],
+       "brand_en": "",
+       "product_id": "p17",
+       "age": 23
+      },
+      {
+       "sure": true,
+       "age": 24,
+       "product_id": "p18",
+       "edition_tokens_en": [
+        "Bourbon",
+        "Cask"
+       ],
+       "distillery_en": "Cooley",
+       "line": 8,
+       "bottler_en": "Aqua Vitae",
+       "kind": "whisky",
+       "brand_en": ""
+      },
+      {
+       "sure": true,
+       "bottler_en": "Signatory Vintage",
+       "age": 14,
+       "line": 13,
+       "edition_tokens_en": [],
+       "distillery_en": "Aultmore",
+       "kind": "whisky",
+       "product_id": "p32",
+       "brand_en": ""
+      },
+      {
+       "age": 13,
+       "bottler_en": "Signatory Vintage",
+       "kind": "whisky",
+       "distillery_en": "Aberlour",
+       "edition_tokens_en": [],
+       "brand_en": "",
+       "line": 14,
+       "product_id": "p42",
+       "sure": true
+      },
+      {
+       "distillery_en": "",
+       "product_id": "p51",
+       "kind": "whisky",
+       "bottler_en": "",
+       "age": 0,
+       "sure": true,
+       "edition_tokens_en": [
+        "Eagle",
+        "Five",
+        "Brothers",
+        "No.1"
+       ],
+       "line": 15,
+       "brand_en": "Craft Bros"
+      },
+      {
+       "edition_tokens_en": [
+        "Eagle",
+        "Five",
+        "Brothers",
+        "No.3"
+       ],
+       "product_id": "p52",
+       "sure": true,
+       "line": 16,
+       "distillery_en": "",
+       "bottler_en": "",
+       "age": 0,
+       "brand_en": "Craft Bros",
+       "kind": "whisky"
+      },
+      {
+       "sure": false,
+       "bottler_en": "Signatory Vintage",
+       "edition_tokens_en": [],
+       "age": 10,
+       "line": 17,
+       "distillery_en": "Blended",
+       "brand_en": "",
+       "product_id": "",
+       "kind": "whisky"
+      },
+      {
+       "line": 18,
+       "bottler_en": "Signatory Vintage",
+       "sure": false,
+       "brand_en": "",
+       "edition_tokens_en": [],
+       "kind": "whisky",
+       "product_id": "p34",
+       "distillery_en": "Speyside",
+       "age": 14
+      },
+      {
+       "brand_en": "",
+       "sure": true,
+       "edition_tokens_en": [],
+       "bottler_en": "Signatory Vintage",
+       "line": 19,
+       "age": 16,
+       "distillery_en": "Cameronbridge",
+       "kind": "whisky",
+       "product_id": "p57"
+      },
+      {
+       "brand_en": "",
+       "line": 20,
+       "age": 12,
+       "sure": true,
+       "bottler_en": "Signatory Vintage",
+       "distillery_en": "Cameronbridge",
+       "kind": "whisky",
+       "edition_tokens_en": [],
+       "product_id": "p58"
+      },
+      {
+       "distillery_en": "",
+       "bottler_en": "",
+       "brand_en": "Saburomaru",
+       "kind": "whisky",
+       "age": 0,
+       "edition_tokens_en": [
+        "III",
+        "The",
+        "Empress"
+       ],
+       "product_id": "p60",
+       "sure": true,
+       "line": 22
+      },
+      {
+       "line": 23,
+       "age": 0,
+       "bottler_en": "",
+       "sure": true,
+       "edition_tokens_en": [
+        "IV",
+        "The",
+        "Emperor"
+       ],
+       "brand_en": "Saburomaru",
+       "distillery_en": "",
+       "kind": "whisky",
+       "product_id": "p61"
+      },
+      {
+       "distillery_en": "",
+       "edition_tokens_en": [
+        "V",
+        "The",
+        "Hierophant"
+       ],
+       "kind": "whisky",
+       "product_id": "p62",
+       "line": 24,
+       "age": 0,
+       "brand_en": "Saburomaru",
+       "bottler_en": "",
+       "sure": true
+      },
+      {
+       "line": 25,
+       "bottler_en": "",
+       "distillery_en": "",
+       "sure": true,
+       "brand_en": "Saburomaru",
+       "age": 0,
+       "kind": "whisky",
+       "product_id": "p63",
+       "edition_tokens_en": [
+        "VI",
+        "The",
+        "Lovers"
+       ]
+      },
+      {
+       "kind": "whisky",
+       "product_id": "p64",
+       "distillery_en": "",
+       "line": 26,
+       "brand_en": "Saburomaru",
+       "age": 0,
+       "edition_tokens_en": [
+        "VII",
+        "The",
+        "Chariot"
+       ],
+       "bottler_en": "",
+       "sure": true
+      },
+      {
+       "product_id": "p65",
+       "line": 27,
+       "edition_tokens_en": [
+        "Fairy",
+        "Tale"
+       ],
+       "sure": true,
+       "age": 13,
+       "bottler_en": "The Whisky Agency",
+       "kind": "whisky",
+       "distillery_en": "Macduff",
+       "brand_en": ""
+      },
+      {
+       "edition_tokens_en": [
+        "Scorpio"
+       ],
+       "line": 28,
+       "brand_en": "",
+       "distillery_en": "Balmenach",
+       "sure": true,
+       "product_id": "p67",
+       "kind": "whisky",
+       "age": 11,
+       "bottler_en": "The Whisky Agency"
+      },
+      {
+       "kind": "whisky",
+       "product_id": "p66",
+       "distillery_en": "Ardmore",
+       "sure": true,
+       "edition_tokens_en": [
+        "Libra"
+       ],
+       "bottler_en": "The Whisky Agency",
+       "age": 9,
+       "line": 29,
+       "brand_en": ""
+      },
+      {
+       "kind": "non_whisky",
+       "edition_tokens_en": [
+        "Grande",
+        "Carte"
+       ],
+       "product_id": "",
+       "distillery_en": "",
+       "brand_en": "Armagnac Garreau",
+       "line": 30,
+       "sure": false,
+       "age": 0,
+       "bottler_en": ""
+      },
+      {
+       "kind": "non_whisky",
+       "age": 0,
+       "product_id": "",
+       "sure": false,
+       "distillery_en": "",
+       "brand_en": "Armagnac Garreau",
+       "bottler_en": "",
+       "edition_tokens_en": [
+        "Braise",
+        "of",
+        "Garreau"
+       ],
+       "line": 31
+      },
+      {
+       "product_id": "",
+       "sure": false,
+       "line": 32,
+       "age": 0,
+       "edition_tokens_en": [
+        "Air",
+        "Mail"
+       ],
+       "bottler_en": "",
+       "distillery_en": "",
+       "brand_en": "Armagnac Garreau",
+       "kind": "non_whisky"
+      },
+      {
+       "line": 33,
+       "bottler_en": "",
+       "age": 0,
+       "brand_en": "Armagnac Garreau",
+       "sure": false,
+       "edition_tokens_en": [
+        "Obsidian"
+       ],
+       "product_id": "",
+       "distillery_en": "",
+       "kind": "non_whisky"
+      },
+      {
+       "distillery_en": "",
+       "product_id": "",
+       "kind": "non_whisky",
+       "brand_en": "Armagnac Garreau",
+       "age": 0,
+       "sure": false,
+       "edition_tokens_en": [
+        "Premier",
+        "Empire"
+       ],
+       "bottler_en": "",
+       "line": 34
+      }
+     ]
+    },
+    "sig": "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"
+   }
+  ],
+  "usage": {
+   "input_tokens": 10504,
+   "output_tokens": 2097,
+   "thought_tokens": 1461
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:55:40.327677+00:00",
+  "latency_ms": 7699,
+  "attempts": 1,
+  "turn": 2
+ }
+}

@@ -1,0 +1,451 @@
+{
+ "key": "a3de18cf32aaf556cf86da15419921a87a3dbbfd6dcc83339c9c06804c4c4da5",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "submit_answers",
+    "args": {
+     "answers": [
+      {
+       "bottler_en": "Jack Wiebers",
+       "age": 16,
+       "distillery_en": "Knockdhu",
+       "product_id": "",
+       "brand_en": "Knockdhu",
+       "kind": "whisky",
+       "edition_tokens_en": [],
+       "sure": true,
+       "line": 1
+      },
+      {
+       "brand_en": "Glenmorangie",
+       "distillery_en": "Glenmorangie",
+       "bottler_en": "",
+       "kind": "whisky",
+       "sure": true,
+       "age": 0,
+       "line": 2,
+       "edition_tokens_en": [
+        "Cadboll"
+       ],
+       "product_id": "p5"
+      },
+      {
+       "brand_en": "Chateau de Gaube",
+       "kind": "non_whisky",
+       "distillery_en": "Chateau de Gaube",
+       "line": 3,
+       "sure": true,
+       "age": 0,
+       "product_id": "",
+       "bottler_en": "",
+       "edition_tokens_en": [
+        "1984"
+       ]
+      },
+      {
+       "product_id": "",
+       "sure": true,
+       "line": 4,
+       "bottler_en": "",
+       "age": 0,
+       "kind": "non_whisky",
+       "edition_tokens_en": [
+        "1991"
+       ],
+       "brand_en": "Chateau de Gaube",
+       "distillery_en": "Chateau de Gaube"
+      },
+      {
+       "kind": "non_whisky",
+       "edition_tokens_en": [
+        "1995"
+       ],
+       "bottler_en": "",
+       "age": 0,
+       "product_id": "",
+       "distillery_en": "Chateau de Gaube",
+       "sure": true,
+       "line": 5,
+       "brand_en": "Chateau de Gaube"
+      },
+      {
+       "line": 6,
+       "sure": true,
+       "brand_en": "Cooley",
+       "age": 22,
+       "kind": "whisky",
+       "product_id": "",
+       "distillery_en": "Cooley",
+       "bottler_en": "Aquavitae",
+       "edition_tokens_en": [
+        "Port"
+       ]
+      },
+      {
+       "line": 7,
+       "sure": true,
+       "distillery_en": "Cooley",
+       "brand_en": "Cooley",
+       "kind": "whisky",
+       "bottler_en": "Aquavitae",
+       "age": 23,
+       "edition_tokens_en": [
+        "Amarone"
+       ],
+       "product_id": ""
+      },
+      {
+       "edition_tokens_en": [
+        "Bourbon"
+       ],
+       "brand_en": "Cooley",
+       "kind": "whisky",
+       "product_id": "",
+       "sure": true,
+       "age": 24,
+       "line": 8,
+       "distillery_en": "Cooley",
+       "bottler_en": "Aquavitae"
+      },
+      {
+       "line": 9,
+       "product_id": "",
+       "sure": true,
+       "edition_tokens_en": [],
+       "brand_en": "Royal Brackla",
+       "bottler_en": "Signatory Vintage",
+       "distillery_en": "Royal Brackla",
+       "age": 11,
+       "kind": "whisky"
+      },
+      {
+       "distillery_en": "Ben Nevis",
+       "product_id": "",
+       "edition_tokens_en": [
+        "Heavily Peated"
+       ],
+       "bottler_en": "Signatory Vintage",
+       "brand_en": "Ben Nevis",
+       "line": 10,
+       "sure": true,
+       "age": 7,
+       "kind": "whisky"
+      },
+      {
+       "kind": "whisky",
+       "brand_en": "Caol Ila",
+       "sure": true,
+       "line": 11,
+       "edition_tokens_en": [],
+       "age": 13,
+       "bottler_en": "Signatory Vintage",
+       "distillery_en": "Caol Ila",
+       "product_id": ""
+      },
+      {
+       "sure": true,
+       "line": 12,
+       "kind": "whisky",
+       "brand_en": "Benriach",
+       "distillery_en": "Benriach",
+       "bottler_en": "Signatory Vintage",
+       "age": 11,
+       "edition_tokens_en": [],
+       "product_id": ""
+      },
+      {
+       "brand_en": "Allt A Bhainne",
+       "age": 14,
+       "edition_tokens_en": [],
+       "kind": "whisky",
+       "bottler_en": "Signatory Vintage",
+       "product_id": "",
+       "line": 13,
+       "distillery_en": "Allt A Bhainne",
+       "sure": true
+      },
+      {
+       "kind": "whisky",
+       "age": 13,
+       "line": 14,
+       "distillery_en": "Aberlour",
+       "sure": true,
+       "brand_en": "Aberlour",
+       "edition_tokens_en": [],
+       "bottler_en": "Signatory Vintage",
+       "product_id": ""
+      },
+      {
+       "kind": "non_whisky",
+       "edition_tokens_en": [
+        "1"
+       ],
+       "bottler_en": "",
+       "age": 0,
+       "line": 15,
+       "sure": true,
+       "product_id": "",
+       "distillery_en": "",
+       "brand_en": "Craftbros"
+      },
+      {
+       "line": 16,
+       "brand_en": "Craftbros",
+       "sure": true,
+       "kind": "non_whisky",
+       "edition_tokens_en": [
+        "3"
+       ],
+       "distillery_en": "",
+       "bottler_en": "",
+       "age": 0,
+       "product_id": ""
+      },
+      {
+       "bottler_en": "Signatory Vintage",
+       "product_id": "",
+       "edition_tokens_en": [],
+       "kind": "whisky",
+       "distillery_en": "",
+       "line": 17,
+       "brand_en": "Blended",
+       "sure": true,
+       "age": 10
+      },
+      {
+       "distillery_en": "Speyside",
+       "product_id": "",
+       "age": 14,
+       "brand_en": "Speyside",
+       "bottler_en": "Signatory Vintage",
+       "edition_tokens_en": [
+        "M"
+       ],
+       "kind": "whisky",
+       "line": 18,
+       "sure": true
+      },
+      {
+       "brand_en": "Cameronbridge",
+       "bottler_en": "Signatory Vintage",
+       "product_id": "",
+       "line": 19,
+       "edition_tokens_en": [],
+       "sure": true,
+       "distillery_en": "Cameronbridge",
+       "age": 16,
+       "kind": "whisky"
+      },
+      {
+       "age": 12,
+       "product_id": "",
+       "edition_tokens_en": [],
+       "brand_en": "Cameronbridge",
+       "bottler_en": "Signatory Vintage",
+       "distillery_en": "Cameronbridge",
+       "sure": true,
+       "line": 20,
+       "kind": "whisky"
+      },
+      {
+       "sure": true,
+       "line": 21,
+       "distillery_en": "North British",
+       "kind": "whisky",
+       "edition_tokens_en": [],
+       "age": 15,
+       "product_id": "",
+       "brand_en": "North British",
+       "bottler_en": "Signatory Vintage"
+      },
+      {
+       "product_id": "",
+       "brand_en": "Saburomaru",
+       "bottler_en": "",
+       "line": 22,
+       "sure": true,
+       "distillery_en": "Saburomaru",
+       "age": 0,
+       "edition_tokens_en": [
+        "Empress"
+       ],
+       "kind": "whisky"
+      },
+      {
+       "kind": "whisky",
+       "age": 0,
+       "bottler_en": "",
+       "distillery_en": "Saburomaru",
+       "line": 23,
+       "sure": true,
+       "product_id": "",
+       "edition_tokens_en": [
+        "Emperor"
+       ],
+       "brand_en": "Saburomaru"
+      },
+      {
+       "line": 24,
+       "sure": true,
+       "product_id": "",
+       "distillery_en": "Saburomaru",
+       "bottler_en": "",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Pope"
+       ],
+       "brand_en": "Saburomaru",
+       "age": 0
+      },
+      {
+       "line": 25,
+       "sure": true,
+       "kind": "whisky",
+       "brand_en": "Saburomaru",
+       "product_id": "",
+       "distillery_en": "Saburomaru",
+       "edition_tokens_en": [
+        "Lovers"
+       ],
+       "age": 0,
+       "bottler_en": ""
+      },
+      {
+       "kind": "whisky",
+       "age": 0,
+       "product_id": "",
+       "line": 26,
+       "edition_tokens_en": [
+        "Chariot"
+       ],
+       "sure": true,
+       "bottler_en": "",
+       "distillery_en": "Saburomaru",
+       "brand_en": "Saburomaru"
+      },
+      {
+       "kind": "whisky",
+       "bottler_en": "The Whisky Agency",
+       "age": 13,
+       "edition_tokens_en": [
+        "Fairy Tale"
+       ],
+       "distillery_en": "Macduff",
+       "line": 27,
+       "sure": true,
+       "product_id": "",
+       "brand_en": "Macduff"
+      },
+      {
+       "bottler_en": "The Whisky Agency",
+       "edition_tokens_en": [
+        "Scorpion"
+       ],
+       "product_id": "",
+       "line": 28,
+       "distillery_en": "Balmenach",
+       "sure": true,
+       "age": 11,
+       "kind": "whisky",
+       "brand_en": "Balmenach"
+      },
+      {
+       "product_id": "",
+       "edition_tokens_en": [
+        "Libra"
+       ],
+       "distillery_en": "Ardmore",
+       "bottler_en": "The Whisky Agency",
+       "sure": true,
+       "line": 29,
+       "age": 9,
+       "brand_en": "Ardmore",
+       "kind": "whisky"
+      },
+      {
+       "product_id": "",
+       "brand_en": "Chateau de Gaube",
+       "edition_tokens_en": [
+        "Grande Carte"
+       ],
+       "kind": "non_whisky",
+       "sure": true,
+       "bottler_en": "",
+       "age": 0,
+       "line": 30,
+       "distillery_en": "Chateau de Gaube"
+      },
+      {
+       "edition_tokens_en": [
+        "Braise of Gaube"
+       ],
+       "bottler_en": "",
+       "product_id": "",
+       "age": 0,
+       "sure": true,
+       "brand_en": "Chateau de Gaube",
+       "line": 31,
+       "distillery_en": "Chateau de Gaube",
+       "kind": "non_whisky"
+      },
+      {
+       "distillery_en": "Chateau de Gaube",
+       "line": 32,
+       "bottler_en": "",
+       "sure": true,
+       "kind": "non_whisky",
+       "product_id": "",
+       "edition_tokens_en": [
+        "Airmail"
+       ],
+       "brand_en": "Chateau de Gaube",
+       "age": 0
+      },
+      {
+       "distillery_en": "Chateau de Gaube",
+       "kind": "non_whisky",
+       "brand_en": "Chateau de Gaube",
+       "sure": true,
+       "age": 0,
+       "line": 33,
+       "edition_tokens_en": [
+        "Obsidian"
+       ],
+       "product_id": "",
+       "bottler_en": ""
+      },
+      {
+       "product_id": "",
+       "kind": "non_whisky",
+       "age": 0,
+       "sure": true,
+       "line": 34,
+       "bottler_en": "",
+       "brand_en": "Chateau de Gaube",
+       "distillery_en": "Chateau de Gaube",
+       "edition_tokens_en": [
+        "Premier Empire"
+       ]
+      }
+     ]
+    },
+    "sig": "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"
+   }
+  ],
+  "usage": {
+   "input_tokens": 13517,
+   "output_tokens": 2368,
+   "thought_tokens": 982
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:50:00.664945+00:00",
+  "latency_ms": 36118,
+  "attempts": 1,
+  "turn": 2
+ }
+}

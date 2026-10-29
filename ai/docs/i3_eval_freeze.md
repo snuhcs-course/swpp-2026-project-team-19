@@ -176,7 +176,7 @@
 | 카탈로그 v2.3 (C1, C2) | #72 (브랜치 끝 `5163ebb`) | `ai/catalog/catalog_v2_service.json` (`version` `catalog_v2_3_service`) | `9feb1874aae2ee279aba20efc311cde40ecbd6afaf11b607b7869a578eb981e7` (= E8 C1·C2 dev 카탈로그) |
 | 카탈로그 v2 (C0) | `952db5c` | 같은 파일 | `af31feec891be2c75f690c8f2c617c1eecee28aa0c2c59daddaca6cb7673c260` |
 | LLM 층 | #68 (브랜치 끝 `2640fd2`) | `backend/app/matching/llm_layer.py`, `prompts/translate_prompt_v3.md`, `prompts/pick_prompt_v1.md`, `backend/app/adapters/matching_llm.py`, `gemini_matching_llm.py` | `ba443a9da359cc6776e1bfc246b0c93f090d0ad2dc41f0269155a53c063311d1`, `e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4`, `e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14`, `0d4db9f59622f82b96151fe50d92d1f087969366d4cbfcfcdc8de1698df76ec2`, `31153791c14c5e2fec06c3be27024bc770f1723582704c652907f41aebfd5394` (프롬프트 둘은 `ai/match_llm` 원본과 같음) |
-| 하네스 | 이 커밋 | `ai/eval/i3_match_eval.py`, `ai/eval/match_eval.py` | `81efbd67641e608be5ef53a4fdb02dbae0b0b81b6baa3a5d2827907fa16dcac6`, `6f4347d9451e1d0cd7aec689e16fd79be84bc9e9e57a9836de4859e1fcb7e892` |
+| 하네스 | 이 커밋 | `ai/eval/i3_match_eval.py`, `ai/eval/match_eval.py` | `ae53dadd542691b921d5868f01ca5772ea82a968fbd81a7055663966208b8a0c`, `6f4347d9451e1d0cd7aec689e16fd79be84bc9e9e57a9836de4859e1fcb7e892` |
 | 2층 정답 | 이 커밋 | `eval/match_gold_i3_v1.json` | `85e32759fff774c2d6aee6adec8e3d21208d9fe7179294a2d9f7969c9787744e` |
 | 테스트 카탈로그 | 하네스가 실행 때 만든다(파일 없음) | 바 8곳 카탈로그의 digest (`catalog_digest`, 결과 JSON에 기록) | C0 `asis` `932df8cdb3dbf552bf1ca35b567e15d60a3d81cc520128d5a4c2dd39fd793f68`, C0 `full` `788871a2bbdde800440c155db8a90b0077f29057280088b16dfd71a584513593`, C1·C2 `asis` `7c65fa51c4c8370b7d2f6bf5a2f1328668ffb02c5c753ed64f381fa25dfc628a`, C1·C2 `full` `633682b4ef2eaf8d600a03d6bcb01b4df6c12bdf2f544123a900188b12fc6701`. `full` 추가 상품 61 |
 | 종단 줄 맞추기 | `5d49c8a` (3장과 같음) | `ai/eval/score.py`, `ai/eval/e2e_match.py` | |
@@ -194,7 +194,7 @@
 
 ### 4.7 보고
 
-`ai/runs/<날짜>_p10/README.md`와 결과 문서(P30). 표 순서: (1) 판정 표(C2 rules+LLM, 라벨 입력, `full`·`asis`)와 수락 시 오답률 조치 규칙 판정 (2) 구성 × 매처 × 카탈로그 전체 표(라벨 입력, 종단) (3) 업주가 볼 줄 (a)–(d)와 어려운 줄 (4) 포함률 (5) 바별 (6) LLM 호출·지연·오류 (7) FM 줄·틀린 확인 권장 줄 전체 목록(줄, 정답, 결과) (8) 목록 밖 독립병입사 줄 분석.
+`ai/runs/<날짜>_p10/README.md`와 결과 문서(P30). 표 순서: (1) 판정 표(C2 rules+LLM, 라벨 입력, `full`·`asis`)와 수락 시 오답률 조치 규칙 판정 (2) 구성 × 매처 × 카탈로그 전체 표(라벨 입력, 종단) (3) 업주가 볼 줄 (a)–(d)와 어려운 줄 (4) 포함률 (5) 바별 (6) LLM 호출·지연·오류 (7) FM 줄·틀린 확인 권장 줄 전체 목록(줄, 정답, 결과) (8) 목록 밖 독립병입사 줄 분석 (9) 4.10 tool calling 조건과 판정.
 
 ### 4.8 결과 전에 알려진 한계 (고치지 않고 결과와 함께 보고)
 
@@ -220,3 +220,26 @@
 | 반복 | 규칙 1회, M3 3회 | 같음 + 회차 간 캐시 공유 금지 | 캐시를 공유하면 3회가 1회가 된다 |
 | 헤드 카탈로그 | 없음 → (10/29 초안) C3 조건부 | 넣지 않음 | 4.6 |
 | 동결 단위 | 커밋 | 파일 SHA-256 (#68·#72 병합 커밋은 결과에 적음) | 병합 순서와 무관하게 같은 구성을 가리키려고 |
+
+### 4.10 추가 조건: tool calling 매칭 층 (E10, 2026-10-29 사전 등록)
+
+**왜.** M3a는 LLM이 줄을 번역만 하고 카탈로그 찾기는 코드가 한다. 설계 때 계획은 LLM이 도구로 카탈로그를 직접 찾는 방식이었다. E10은 그 방식을 만들어 M3a와 비교한다. dev 5곳으로만 만들었으므로 8곳은 이 조건에도 처음 보는 test다.
+
+**구성: C2 rules+tools.** 규칙 코드·카탈로그는 C2와 같고, rules가 확정하지 못한 줄에 M3a 대신 tool calling 층을 쓴다.
+- 코드: 브랜치 `feature/i3-e10-tool-matching`(#68 위). `backend/app/matching/tool_layer.py` `0b0daad49a6af5344ee2c87da3389af1c164bfcbc2122ca16c5b9069e4734002`, `backend/app/matching/prompts/tool_prompt_v1.md` `86552f34f8ad386ceb42d6b05dfc94cd1ad152554515cc357394089b7a7edd2c`, `backend/app/adapters/gemini_tool_llm.py` `377a374ac10d26deb1610b5179ad91f4885a2d64ee464ad6fbda499ccc24a468`. 하네스는 4.5와 같다(`--llm-mode tools`).
+- 동작: 사진마다 대화 하나, 도구 `search_catalog`·`get_product`·`submit_answers`, 함수 호출 강제, 최대 6턴. 모델은 도구가 보여준 상품만 고를 수 있다(대화마다 임시 id). 고른 상품은 M3a 거부권 중 병입사·연수·다른 상품 별칭에 걸리면 버리고, 에디션 불일치는 확인 권장만 막는다. 합치기는 M3a `combine`과 같아 자동 확정은 없다.
+- 모델: `gemini-3.1-flash-lite`, thinking `low`. 할당량 오류가 나면 그 사진부터 `gemini-3.5-flash-lite`로 대화를 처음부터 다시 하고, 사진마다 쓴 모델을 결과에 적는다.
+- 반복: 라벨 입력, `full`·`asis`, 3회(r1–r3), 회차마다 빈 캐시. 종단은 호출 한도가 남을 때만 r1을 돌리고 보고만 한다.
+
+**채택 판정 (P32 서버 결정용, 이 규칙으로만 한다).** `asis`, 라벨 입력, tools 3회 평균을 C2 rules+M3a 3회 평균과 비교해 아래를 모두 만족하면 서버 LLM 층을 tool calling으로 바꾼다. 하나라도 어기면 M3a를 유지한다.
+1. DB에 있는 술(알려진 줄)의 직접 등록 줄 수(`known_register`) ≤ M3a
+2. DB에 없는 술의 오답 후보 줄 수(`absent_wrong`) ≤ M3a
+3. 틀린 확인 권장 줄 수 ≤ M3a
+4. FM은 rules와 같아야 한다(LLM 층은 확정을 만들지 않음. 다르면 구현 오류)
+5. 사진당 지연 p95 ≤ 60초 (3회를 합쳐서)
+
+`full`의 숫자, 사진당 어려운 줄, LLM 확인 권장 정확도, 호출 수·턴 수·토큰은 같이 보고하고 판정에 쓰지 않는다. NFR-3·NFR-4 판정은 4.4 그대로다(LLM 층이 무엇이든 Top-1·FM은 rules 값).
+
+**dev 이력 (판정 근거 아님).** 2026-10-29 dev 5곳 1회 실행(124회 호출, 사진당 2–3턴)의 처음 사전 기준은 "(c) 직접 등록 ≤ M3a"였고 12줄 차이로 어겼다. 줄 단위로 보니 늘어난 12줄은 모두 DB에 없는 술이었다(M3a는 오답 후보, tools는 맞게 직접 등록). 그래서 기준을 1·2로 나눴다. 또 에디션 불일치 거부권이 맞게 고른 8줄(TWA "Solist"·시리즈 별명, "Bourbon", "SFTB")을 버리는 것을 보고 위처럼 바꿨다. 둘 다 dev 결과를 보고 바꾼 것이라 dev 숫자는 개발 기록일 뿐이다(`ai/runs/2026-10-29_e10/README.md`). 바꾼 뒤 같은 응답으로 다시 채점한 dev 값: `eval_dropprod` 틀린 확인 권장 14 → 6, `known_register` 5 → 2, `absent_wrong` 64 → 54 / `eval` 사진당 어려운 줄 4.17 → 2.14, LLM 확인 권장 205/205.
+
+**호출 수.** 예상 상한 라벨 입력 33장 × 6턴 × 카탈로그 2 × 3회 ≈ 1,200, dev 평균(2–3턴)으로는 약 500. 하루 한도를 넘으면 날을 나눠 돌리고, 끝난 회차는 다시 돌리지 않는다. P30 추출(3.5 flash-lite)을 먼저 돌리고 남은 한도를 쓴다.

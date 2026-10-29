@@ -1,0 +1,49 @@
+{
+ "key": "9a8656ab7368d60804a134784a163425c10bc310230e03cb88030c2ab66eabe6",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "The Maltman Dailuaine"
+    },
+    "sig": "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"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "The Maltman Deanston"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "The Maltman Campbeltown"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "The Maltman Master's Blend"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 10804,
+   "output_tokens": 85,
+   "thought_tokens": 632
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:49:00.040441+00:00",
+  "latency_ms": 3338,
+  "attempts": 1,
+  "turn": 3
+ }
+}

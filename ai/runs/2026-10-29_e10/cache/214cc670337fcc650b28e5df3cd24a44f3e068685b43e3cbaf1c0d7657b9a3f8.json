@@ -1,0 +1,129 @@
+{
+ "key": "214cc670337fcc650b28e5df3cd24a44f3e068685b43e3cbaf1c0d7657b9a3f8",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "submit_answers",
+    "args": {
+     "answers": [
+      {
+       "line": 1,
+       "brand_en": "Glenmorangie",
+       "sure": true,
+       "bottler_en": "",
+       "edition_tokens_en": [
+        "The",
+        "Original"
+       ],
+       "kind": "whisky",
+       "product_id": "p1",
+       "age": 10,
+       "distillery_en": "Glenmorangie"
+      },
+      {
+       "age": 0,
+       "brand_en": "Glenmorangie",
+       "kind": "whisky",
+       "bottler_en": "",
+       "line": 4,
+       "edition_tokens_en": [
+        "Nectar",
+        "d'Or"
+       ],
+       "sure": true,
+       "distillery_en": "Glenmorangie",
+       "product_id": "p3"
+      },
+      {
+       "product_id": "p15",
+       "age": 0,
+       "kind": "whisky",
+       "bottler_en": "",
+       "brand_en": "Glenmorangie",
+       "edition_tokens_en": [
+        "Cadboll",
+        "Estate"
+       ],
+       "line": 7,
+       "distillery_en": "Glenmorangie",
+       "sure": true
+      },
+      {
+       "sure": true,
+       "product_id": "p11",
+       "line": 8,
+       "bottler_en": "",
+       "brand_en": "Glenmorangie",
+       "distillery_en": "Glenmorangie",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Calvados",
+        "Cask",
+        "Finish"
+       ],
+       "age": 12
+      },
+      {
+       "distillery_en": "Maker's Mark",
+       "brand_en": "Maker's Mark",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Cask",
+        "Strength"
+       ],
+       "age": 0,
+       "line": 20,
+       "bottler_en": "",
+       "product_id": "p39",
+       "sure": true
+      },
+      {
+       "brand_en": "Wild Turkey",
+       "edition_tokens_en": [
+        "101"
+       ],
+       "age": 8,
+       "kind": "whisky",
+       "line": 21,
+       "distillery_en": "Wild Turkey",
+       "bottler_en": "",
+       "sure": true,
+       "product_id": "p48"
+      },
+      {
+       "product_id": "p55",
+       "age": 0,
+       "edition_tokens_en": [
+        "Port",
+        "Wine",
+        "Barrel",
+        "Finish"
+       ],
+       "line": 32,
+       "sure": true,
+       "bottler_en": "",
+       "distillery_en": "Angel's Envy",
+       "brand_en": "Angel's Envy",
+       "kind": "whisky"
+      }
+     ]
+    },
+    "sig": "EpwlCpklAWkUfROldk63jtO6KxVSZuMcF4mfeZZaHHRfq4+kHH211kQA/ZWXS4AHumsSLsklsEAlrlYBZHsEgBm7HIDPsYlNxcJ61mW9U5AqUhNyG/W9xQdd4FF44fce6n4UHM9g9tkjPTiT+t3hJ7rTQwWeTFFd4KjNIC6yGIFDZ4oTVIbhLFDnFxwx/sydMC0oabXwljRrErFzTMaulscRKu3mwGvIWm/QmnwSRgYlBAOWV+KfJ+5J6avRqjTTlCpDIzEMqm9eMmAY3QMuEGW+oeiGDcE+gtSk5ivR47S4TZGE4l0ESyNCQRcXc35gY88wQ7IfTnP3KU/LD+OwfMO50Kp+vVkuVxHMBgDom7NcXrXiq6a+PKviqVFu7OpwCKNUk6LlonyDfJPdO8QDVOIfrWZYvLRrpaLurPyiuSX4eEsnNZN3cnIMhisTPX+HycEN+KXAHnYgv1neOms8fCFArybREsUy0NPi2JAWjcd2wKyMRASaZ1SVC7Gl4BN84q7GtO38e7R2SPqyYkBrViH4pIkf/8nWTkXNqny73FAsqyxL9JUDyg9wayu0JltARWE9MmPoxLuuLIyZheQaalZ9FmTzHZjq7FI6L9j7OSpfxC5VeRTe7WxYTiYfBjKqy83sWQwlP1DfNPEg5jaPHjmPaEn5LDbEIZnRs7nbQ0VIup9sRHql2mLyOaQadptEqjtfBofJXjL1Z6zG/IlgM04/eK+9uCISldJiuXwSpH7Yh7r9uR5L5ljeRY7y1guh0tw0MWBPqAcRocoXWAXe5TFnhoPFo1Jj6pLD/5exhDQd715WZlOqpoYx3GolyloMcGNcWxjJxl7Vkh+i/v9ITo0Bplo281ts+icb48xMXVAYIKcd8GEh/cKo7A+45NAUGjgccKk3XFhaVRwflseuwj1l6lrxeBXNcH9N9SNl0OiiI0EhZl20RLU7Fgk+O86l3UCEX6khHoTbzoxsC7/lj/CFyHbdvCzSilaJJ/2gE1ZKGiXuUKTQVH8EJ29KEAPPd1IAcBGAyA3YHeJOHFcIzkEPfJEhOItdw5H23ReVvbB4UQmpauv9vcocCgLemYCQfOqgPM+VlIOTP4hiJsxMmMQd/vjbWYheYY+1cOBQe5Id8u+kQ5Ll87O6MXurT44c6ZxKrd1Y6hSB3rmBhNKmCyy6QUFd+dDbsTLMvCETz0a56rZG+xXywADHm4Z9VeuLO6nLHveoeCzKKn91ZgA2rgXQEXZC/BOdL7u2coQBYB0RzzGY26Zak57qhILlTHWWHVqkw3ULQKk6vo39+Lvq4ZvWtVagmX25btBitc07NHA91EEDVELu+wXd2r70XcTSddZ9T7vFVsF5fMuQSCLE5dC/xBmutSP3C+bCITqa77pzXf/GChSdYLGYeBRPKCEwdHzdll/SQEz4ObFDgW9zVZsPDNQLb3OnSlQvp6qVxQNMtJrx6fz5Vo3pzyEKYDzrvLIzYfA0W33nswISfAEJNANliF7l45owCwX5OY+EmWuZ8LxNOu8KOwhteTXgFU9N3QheW/03SkT3jDPozWEQpdXgyjIpeCKGusMsms2KLR+NUE6U1kBXfaSPwr3suhXqCPtuR7rL5ygPfVH0WTf6Ii/cbmUps3L8FHWxhS+2r63DKAienExo9y1lH/XUQB19NNHiANXpmn6w9wa2cY5Y4DiJBpwB56UICIEa41lGDjWbuxWz0dKqm2kvyLiavsZjmMly6MMwlUi51bs/cjBzZrIsc7tUfp7LRN1MtagbG2wpAp23eXcia9DK3I0ll8nBSqFsNU4SqZ/azGiz6/3M5ev0qMd86tcX7wlkSu0yOTS0CQJ0PKe7KRsn03Lww7HIJ5Kj6LKjfzb1kIP03gYAcucM7+y/KgA6diaL+auUad2P+tX+V096OHyZs3rsHW3DmH7NW97Osslwh5b0uVRxeYTbMRGVBC5K3V2X9DplAOtWD+Ld6aP0ILa7HBXOLrjY5zcjUrKvumf/COAK+CWFDdX3jzM5MLiC7RAju/oWxFyQ/y5GKDx4f7MgoyKUZepCJub9w3w8NUErkGckC3RUWMXmcCkXqV8JIi4tHKjWMUCvagbnPu4JhiaKNS3q7RnRHbk3tlng4CsWMx2yiZVpVp6z6QeLzPuL0adlT99rtNTIY5//MXXCTS8/Z99E662uMTHjTVPq9JBxJ+KrFdZw6Ikl2AkelVu2Bwvtdl4vPHOKoeo+PDq5Xv0MYLoCSDRtGA71zFU9GK9Qa3gByObLmRJSi1yqheZcDeY/UsVyUzbEOpOuFKDpDOAIdu0DFsX+1USrfhYsSwTdIxmqDk2cqtI7oHTDGBEEOmypZ6dTpG447bXqOlLHBod1+WXo0MF3EVWOeFWgOWu0g6aMxX1Oqs8nVNsOnzwv64jTpZlzfywdrNSP1ntTZyG5CpHOftCZdwjuXmExrah0yVETIO5p/V18OPN/rpagzsG3By/dp5CEy9drMRDF+HosqqEsBuiu+yeXPmUKruRLJ1fo4JFulI7I7va7M9vBHp1QQ5rBkDJDm+/aaa69yGTttBfylEf2ZFDgSlJJYON+PSD44dhhf9ihmLEQblb8YUs4LY3KDqQR7TXe2i0mdSa6ItUT6Dy1v32ytuBBYHAOqFoF/cqLe5meqUXccrRd3KG61TZpUt3iLzPQYiIUZANBprDXfa6JOUua9s+edUhM6WQyUfYOPvQDpabWBhptgtpNckFuyJBa3zUirC+PMxyAKfsPpQCPYPwdtoHteUV+FhyOdu0QbQuOVV2SEL4Zs80Y3vH1a9eAmx1iEk7VHkP/MhMDYc2Mmr+uFNOBddeBSIGoXQwVHldAyM08h7w4R3hFQ+x9lBiE/fLMg2MHYyP2uzNbLyHXiYI7Or0Tl7jVMtNQ6HtXVVUfHUQSIcsUPVhfNjIhk2fyAlbrNC8wKVT8DIT0mCgf3MVmvt6xlegdSD3UKc4ioh65lNGUuiMjPEZ7iP13OcyvxSWYqHx0BxG/G1vIvKksgRMT+2/Ge6pY9EtjBzffnREj9MooSV1xoWBQdLaj7PyKWHdyi1AP3WLcfUTRLdud5LR6N/eaHv+UPWGsu6SgPC96sKQMNzoC/Y0Uj7icQlsen0e+GFrs1hGhZgTpacm16HOdOYF7kSDaP/D18gkmGrMxXTx/fWsipPQP64FxBSJyhsUZ6cYfndnZ4DuUVieoU3I1JG6/i7AtI5goI3wqu3mH5XB8Qv6L8KzWhabxI/8iXY5JF9Wq1PN7cQtnXJrVlqQyjka4KGjXEAocr74GIkrh31ClAV9BHl6p4tsmGDRNcr1H7OTy+0Y61GvxqEdNvCVE21+/BmznT/4mXY+C+fOMm521MAgUNPnh3Hj6J6eyHRhh3I0UpcxIyOdQYbrUMwjb/4veuC7sSlyCoIXcOIW+EnyfSku45LEDq6Er2t0AYnyQgHzlMYtqhk5bVbUFOCu1hhsO3VGg0kZ2bR0CRqR2rsy4IAf2Jpwmw+72wUbH2tBC/ydfmIHz1OVSK+VBFGXkwNvZcBLo23/JrnZ0DdvQw2QUj4XTqQFkPm8LeUzeKBH+w8wFsKGAWB78BCXn2qj6S4v+SDjmPBhGM75akTDcOwA+kT/SJYaU7/v5pdIuYhfpYZebpCNEUqybHEgWbTVnfeKUi6eZY6o3I7y3UKIGHfYmeog12xKujKOfvQfMWEq0MPk3toa4aPRmzoUS6xfNKl+IzBftMsKs6G4ycknYQbeAfnqvfP2cyYKvSrKsGwSCoI4sX/LN7J5h7pop2vnO89ng+UHKQ8IEMa4o2+qAJgOYzMReI34Tw/qObVNE4brHzAkvmONEvpG5eO9vtVBX0NYhbsrHWhZUJCyDkZt37hh+l6ECxQrVDq6Rp0L1VHlQVKxt4pnS0PxCbOlE+uFDNF6rKwrCy9LUuBCyRTXwyp8iiPPXV6YGZ/gkPSWRFZlcbv077bbgG9t+IC7oGXDaKephC7EC9QYEiJNH8LX8tlNjcOOmHVOKTJv8+qS5rtTK6KWchVZqL4hC0dSFI2bLz8ybTxvM49ZAZXr3G1F399FhxzZj7BX+34sll/lvGH/+S3W6U+ECPC/n6C5GKGRu5z4TqOgTF3AhOQ8oBPVcHrK0U7K2w0UB/wxEIzIy0i7163ercGMRuxuCB1IcW2pMWTZhTMCTigX0JFpG7ut0HotHUcjqHghPwSII2fegX+bby9Ja6FiLAtA9K8+k8jt8MR9BSNR2Cjjv/HuaTgwmXZxH1FykxwRh54yZcIg69PhcgGWNQz/Lg+4O3mFv41ELy9UBrV3j8XdxNPQpr44JYrLm+mWNExPyWrwGObsK6qzG9dl7Ar/Mmmw4yo2LaW3Rs9leUyPZ8BmUSMWyKrqArnffjiRJ4m+N8xI/3IyZDCottSX2EuNQdfsaOTGWBUlnCVBN8TwF4TBQKKL/JDfQs4x2bIYydRQJ92MUm/tRIveQl3XmkGZGzMOBifL1u1cWAwomcRn7LdVN0mUoHDiorbogpCMWxbu7O2S3fRF0OhIBvSa9F1Vi2I1UwuMvtRiyH75PGHN6okJsIXm9QswlwFfgLj9PM5+Sf1z2WybzKQMK5nuX27Nz7n0nerO+CPm1maNjISfBZLLpQImmpMxGiCDywfmfeM6S1etFgXWJEf8A96UbxKpa8dP2xdc2rg+xES2Qt51s8CaSVMONA3CoCaylQMeCRkBPC5n9urDvpJsCZhw/lzl+x1J/vN1rm4gu/wtRd/SFQu9KuUitFnGCkjtObPJIBMSeuzVW/bt/MOWk3r1ccngsOI7tXjpWEobTVRj3f8mNpNWNmk4TJw44gYTzaMy4G16D9XN6Rrkaj/nnShHqyAr9JyzS+Sli51VT3sy554yuXVRGdjQUraXCEw+4li0uIQhMgrp4skCZszSs5Qm0zS20D/BEn8hGBWpYEgqkjMAssLlGt5VspWrjJJYSOVIHpghDKFYJqXeG0eK/TKvp9Pwrds4eNYPcxq4n8l+5Y2pHXzvbZcLMY3Q0UeB9sJKtPRIdKx3X5tXigTcQDQx30n56nGs9Wi+azROTjSzduTkJofQosx1b00ky4HX6iOTF7P9+7DGz/Rpwlqqgu4hDZnXmkvRyw9Ap2w+45huv8GMVa8U8pxX7Bquizz1sI5WOv8+CPCdNR+VIoIUzW80jZZqjPGK+ay7Cex9vv8spBK1+Ak9wbnY/rpKA9cl5qZ0uB8E+VE/d9mT5APStHqGVo01AHptd8PZQteR0p+1Qy2PLD0EKZwJkJbArXmxPYDBoYNjq2B99nytnxclb+5mgIYVX2lFkKHch/c+/H7dYMMeV4obYQnjjO7EIX1TT01R1C06jLlG5E1aYYW0TDyKDApRdNR7m+M0wmZKYJRFqcHarDPn42f/6a/3QL1u1trVkFENI8dIyVvNzPjCXLIl4W9Y4iqCeEarx5gsOCwcutZF4RzY6LsynD/pvdf4yQrTVf9lTxAOSIUzzINGcy1aKdbmxtLugAMYJh8W+KSge/gdA36vZvHwX6P97eR2jt+u0UCA1DnF++Mvvu9I1YvmLdb8kcm0NZrzinpUcZkm1SxsoslYVpsrod+5KH0r8vmfE3U1ETvxBdFpkLU29Sz/w8Jo1g9UFYLbsM3oJS6gxLEA2otgMs9BLzCr1rikAE2eaLkaXheQD87NTb4NSi/jlHwhHDpjczDyPWlTNAEcxgJluU+gbe/so6bnM+UDm/8BZNQ7sf6GCA4AmayKEQ3mu4V7WtLvFMyMwiHiZ5a3FXuSIdI95z3cpo6HBTOg5QZZx0P2q0p7U+SBxOP2LOeFhjU+d/WVlTqk5/pw394UwObkbAIa6XNrp29lyBrgzBAvlxqgLnYwEyqtcxo6eo3td0Xfn5olGL58Ut4RYG+jeNcObLnjcSlWSS0asspG53c/s+bllQUcpKhOQQ5WZ7DvZ+5s3pft0jDwgEEz0LAobrnQOBCe4WGkjNitM4GrameKPJKvGADB52VPnvWZ+48I0rUdcdKLvJTlm4O34Xynllp6jioJAudGWZLogPhQQnEEnU5wzjHq+1+PoLUY8e77dQv4pPd/hCIpd1I4+ETLrHUvg8ietkjEMJWHVvZYzesNkn2iP2XXWvnu0EwE7WGPVQCCOsW8TekRpvLUci+T7WXZEcWdD07h8/ESYlCLf0SlcxGvMi2lMwiI4K/ZBttSoZs1gZHAh/U4zTpkjG5yPkMkYZBM0fTTw5yMglLBpXQgYjLAzg6pjkFyJdWuPU260Le5th+hhvzHRhUix67liiiewCHwIHevZpYzBoj3uVBAofLZqN+fqXLe2eFNyWOfdLlBb6kOHeN897LMec/rp2UoACN8fskyu"
+   }
+  ],
+  "usage": {
+   "input_tokens": 5678,
+   "output_tokens": 551,
+   "thought_tokens": 1639
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:55:03.464250+00:00",
+  "latency_ms": 7331,
+  "attempts": 1,
+  "turn": 2
+ }
+}

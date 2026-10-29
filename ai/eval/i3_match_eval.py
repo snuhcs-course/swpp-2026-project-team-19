@@ -440,6 +440,194 @@ def make_llm(args, layer):
                              cache_only=args.cache_only, max_calls=args.max_calls, min_interval=args.min_interval)
 
 
+# ---- LLM, tool calling (experiment E10, --llm-mode tools) -------------------------------
+
+class QuotaSwitch(Exception):
+    """The primary model hit its quota and the fallback model takes over; the photo is run again."""
+
+
+class CachedToolLLM:
+    """`ToolLLM` for the harness: one Gemini step per call behind a response cache keyed by
+    (model, thinking level, prompt SHA-256, conversation, tools), minimum interval, 3 more
+    requests after an API error, call cap, and on a quota error a switch to the fallback model
+    (at a photo boundary: the conversation is restarted) or a clean stop."""
+
+    def __init__(self, inners: dict, models: list[str], cache_dir: Path, seed_dirs: list[Path], *,
+                 thinking: str, cache_only: bool, max_calls: int, min_interval: float, retries: int = 3):
+        self.inners, self.models, self.model = inners, models, models[0]
+        self.cache_dir, self.seed_dirs, self.thinking = cache_dir, seed_dirs, thinking
+        self.cache_only, self.max_calls, self.min_interval, self.retries = cache_only, max_calls, min_interval, retries
+        self.api_calls = 0
+        self.counts: Counter[str] = Counter()
+        self.stopped: str | None = None
+        self.switched = False
+        self.photo_latency_ms = 0
+        self.photo_usage: Counter[str] = Counter()
+        self._last = 0.0
+
+    def key(self, system: str, history: list, tools: list) -> str:
+        return sha256_bytes(json.dumps([self.model, self.thinking, sha256_bytes(system.encode("utf-8")), history, tools],
+                                       ensure_ascii=False, sort_keys=True).encode("utf-8"))
+
+    def step(self, system: str, history: list, tools: list) -> dict:
+        if self.stopped:
+            raise StopRun(self.stopped)
+        key = self.key(system, history, tools)
+        path = self.cache_dir / f"{key}.json"
+        record = None
+        if path.exists():
+            record = json.loads(path.read_text(encoding="utf-8"))
+            self.counts["cache_hit"] += 1
+        else:
+            for seed in self.seed_dirs:
+                if (seed / f"{key}.json").exists():
+                    record = json.loads((seed / f"{key}.json").read_text(encoding="utf-8"))
+                    self.counts["seed_hit"] += 1
+                    break
+            if record is None and self.cache_only:
+                self.counts["cache_miss"] += 1
+                raise CacheMiss(key[:12])
+            if record is None:
+                record = self._request(system, history, tools, key)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(record, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+        self.photo_latency_ms += record["meta"].get("latency_ms") or 0
+        for k, v in (record["output"].get("usage") or {}).items():
+            self.photo_usage[k] += v or 0
+        return record["output"]
+
+    def _request(self, system: str, history: list, tools: list, key: str) -> dict:
+        attempts = 0
+        while True:
+            if self.api_calls >= self.max_calls:
+                self.stopped = f"call cap {self.max_calls} reached"
+                raise StopRun(self.stopped)
+            wait = self._last + self.min_interval - time.monotonic()
+            if wait > 0:
+                time.sleep(wait)
+            attempts += 1
+            self.api_calls += 1
+            self._last = time.monotonic()
+            t0 = time.perf_counter()
+            try:
+                output = self.inners[self.model].step(system, history, tools)
+                break
+            except Exception as error:
+                if QUOTA.search(str(error)):
+                    i = self.models.index(self.model)
+                    if i + 1 < len(self.models):
+                        self.model = self.models[i + 1]
+                        self.switched = True
+                        print(f"    quota on {self.models[i]}: switching to {self.model}", file=sys.stderr, flush=True)
+                        raise QuotaSwitch(self.model) from None
+                    self.stopped = f"quota: {type(error).__name__}"
+                    raise StopRun(self.stopped) from None
+                if re.search(r"\b400\b|INVALID_ARGUMENT", str(error)):  # a bad request is a bug: retrying wastes calls
+                    self.stopped = f"bad request: {type(error).__name__}: {str(error)[:300]}"
+                    raise StopRun(self.stopped) from None
+                self.counts["api_error"] += 1
+                if attempts > self.retries:
+                    self.counts["no_answer"] += 1
+                    raise
+                print(f"    LLM retry {attempts}/{self.retries}: {type(error).__name__}: {str(error)[:120]}",
+                      file=sys.stderr, flush=True)
+        self.counts["fresh"] += 1
+        return {"key": key, "kind": "tools", "output": output,
+                "meta": {"model": self.model, "thinking_level": self.thinking,
+                         "started_at": datetime.now(timezone.utc).isoformat(),
+                         "latency_ms": round((time.perf_counter() - t0) * 1000), "attempts": attempts,
+                         "turn": sum(1 for m in history if m["role"] == "model") + 1}}
+
+
+class StubToolLLM:
+    """TEST ONLY (--tools-stub): searches each target line's name, then submits the first result
+    (not sure). No network; exercises the whole tool loop."""
+
+    def step(self, system: str, history: list, tools: list) -> dict:
+        lines = json.loads(history[0]["text"])["lines"]
+        targets = [line for line in lines if line["target"]]
+        if len(history) == 1:
+            return {"calls": [{"name": "search_catalog", "args": {"query": t["name"]}, "sig": None} for t in targets],
+                    "usage": {}}
+        results = history[-1]["responses"]
+        answers = []
+        for t, r in zip(targets, results):
+            found = r["response"].get("results") or []
+            answers.append({"line": t["line"], "product_id": found[0]["product_id"] if found else "", "sure": False,
+                            "bottler_en": "", "distillery_en": "", "brand_en": "", "age": 0,
+                            "edition_tokens_en": [], "kind": "whisky"})
+        return {"calls": [{"name": "submit_answers", "args": {"answers": answers}, "sig": None}], "usage": {}}
+
+
+def run_tools(args, layer, be, seed, new_products, photos, bars, bar_catalogs, targets, base, rows_for,
+              missed_known) -> dict:
+    tool_layer = importlib.import_module("app.matching.tool_layer")
+    models = [m for m in (args.tools_model, args.tools_fallback) if m]
+    if args.tools_stub:
+        inners = {m: StubToolLLM() for m in models}
+    elif args.cache_only:
+        inners = {}
+    else:
+        key = os.environ.get("GEMINI_API_KEY")
+        if not key:
+            raise SystemExit("GEMINI_API_KEY is not set (use --cache-only to score from the cache)")
+        from app.adapters.gemini_tool_llm import GeminiToolLLM
+        inners = {m: GeminiToolLLM(key, m) for m in models}
+    llm = CachedToolLLM(inners, models, args.cache, args.seed_cache, thinking="low", cache_only=args.cache_only,
+                        max_calls=args.max_calls, min_interval=0.0 if args.tools_stub else args.min_interval)
+    pmeta = product_meta(layer, seed, new_products)
+    engines = {bar: tool_layer.ToolEngine(llm, {p.photo_id: [n for n, _ in p.lines] for p in photos if p.bar == bar},
+                                          pmeta) for bar in bars}
+    photo_runs, stop = [], None
+    for photo in photos:
+        rec = {"photo_id": photo.photo_id, "bar": photo.bar, "targets": len(targets[photo.photo_id])}
+        engine = engines[photo.bar]
+        catalog = bar_catalogs[photo.bar].catalog
+        if stop is not None:
+            rec["status"] = "not_run"
+        elif not targets[photo.photo_id]:
+            engine.translate(photo.photo_id, set(), catalog)
+            rec["status"] = "no_targets"
+        else:
+            for _ in range(len(models)):
+                llm.photo_latency_ms, llm.photo_usage, llm.switched = 0, Counter(), False
+                before, fresh = Counter(engine.stats), llm.counts["fresh"]
+                engine.translate(photo.photo_id, targets[photo.photo_id], catalog)
+                if not llm.switched:
+                    break
+                engine.stats = before  # the switched conversation is not counted; it is run again
+            new = Counter(engine.stats) - before
+            if llm.stopped:
+                stop = llm.stopped
+                rec["status"] = "not_run"
+            else:
+                session = engine.sessions.get(photo.photo_id)
+                rec.update({"status": "fresh" if llm.counts["fresh"] > fresh else "cached", "model": llm.model,
+                            "outcome": next(iter(new), None), "latency_ms": llm.photo_latency_ms,
+                            "usage": dict(llm.photo_usage), "session": dict(session.stats) if session else {}})
+        photo_runs.append(rec)
+    resolved = {}
+    for photo in photos:
+        for name, _ in photo.lines:
+            b = base[(photo.photo_id, name)]
+            resolved[(photo.photo_id, name)] = (b if b.status in CONFIRMED else engines[photo.bar].resolve(
+                photo.photo_id, name, bar_catalogs[photo.bar].catalog, b))
+    rows = rows_for(resolved)
+    lat = [p["latency_ms"] for p in photo_runs if p.get("latency_ms")]
+    turns = [p["session"].get("turns", 0) for p in photo_runs if p.get("session")]
+    return {
+        **summarize(rows, photos, missed_known), "rows": rows, "photo_runs": photo_runs, "mode": "tools",
+        "models": models, "complete": stop is None and llm.counts["cache_miss"] == 0, "stop_reason": stop,
+        "cache": args.cache.as_posix(), "api_calls": llm.api_calls, "counts": dict(llm.counts),
+        "engine_stats": {bar: dict(e.stats) for bar, e in engines.items()},
+        "turns_per_photo": ({"mean": statistics.mean(turns), "max": max(turns)} if turns else None),
+        "latency_s": ({"n": len(lat), "mean": statistics.mean(lat) / 1000, "p50": statistics.median(lat) / 1000,
+                       "p95": sorted(lat)[max(0, -(-95 * len(lat) // 100) - 1)] / 1000} if lat else None),
+        "tool_prompt_sha256": sha256_bytes(layer.load_prompt(tool_layer.TOOL_PROMPT).encode("utf-8")),
+        "tool_layer_sha256": sha256_file(Path(tool_layer.__file__)),
+    }
+
+
 # ---- scoring ------------------------------------------------------------------------------
 
 def score_line(be: Backend, photo: Photo, name: str, graw: str, r, b, bc: BarCatalog, dev: bool,
@@ -503,6 +691,8 @@ def stats(rows: list[dict], photos: int) -> dict:
         "hard_per_photo": sum(b[k] for k in ("choose", "register", "wrong")) / photos if photos else None,
         "cr_rule": {"n": len(cr["rule"]), "correct": sum(r["rank1_gold"] for r in cr["rule"])},
         "cr_llm": {"n": len(cr["llm"]), "correct": sum(r["rank1_gold"] for r in cr["llm"])},
+        "known_register": sum(1 for r in rows if r["kind"] == "known" and r["burden"] == "register"),
+        "absent_wrong": sum(1 for r in rows if r["kind"] == "absent" and r["burden"] == "wrong"),
         "llm_targets": sum(r["llm_target"] for r in rows),
         "from_register": sum(1 for r in rows if r["base_status"] == "unmatched" and r["status"] != "unmatched"),
         "from_register_gold_in": sum(1 for r in rows if r["base_status"] == "unmatched"
@@ -560,6 +750,11 @@ def parse_args(argv=None):
     ap.add_argument("--cache-only", action="store_true", help="score from the cache; a miss is an error")
     ap.add_argument("--max-calls", type=int, default=250, help="API calls per command before a clean stop")
     ap.add_argument("--min-interval", type=float, default=4.5, help="seconds between API calls")
+    ap.add_argument("--llm-mode", choices=("m3a", "tools"), default="m3a",
+                    help="m3a: the frozen server layer (#68); tools: tool calling (experiment E10)")
+    ap.add_argument("--tools-model", default="gemini-3.1-flash-lite")
+    ap.add_argument("--tools-fallback", default="gemini-3.5-flash-lite", help="used after a quota error; '' for none")
+    ap.add_argument("--tools-stub", action="store_true", help="TEST ONLY: a local stub instead of Gemini")
     ap.add_argument("--json", type=Path, required=True)
     args = ap.parse_args(argv)
     if args.catalog not in CATALOGS[args.set_]:
@@ -633,7 +828,11 @@ def main(argv=None) -> dict:
         "rules": {**summarize(rules_rows, photos, missed_known), "rows": rules_rows},
     }
 
-    if args.llm:
+    if args.llm and args.llm_mode == "tools":
+        layer = load_llm_layer()
+        result["llm"] = run_tools(args, layer, be, seed, new_products, photos, bars, bar_catalogs, targets, base,
+                                  rows_for, missed_known)
+    elif args.llm:
         layer = load_llm_layer()
         llm = make_llm(args, layer)
         pmeta = product_meta(layer, seed, new_products)

@@ -1,0 +1,35 @@
+{
+ "key": "870b838a3342b461582685c83b867a2a17530bc1823b55f0d05a9f27234f1b82",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Michter's Bourbon"
+    },
+    "sig": "EoQLCoELAWkUfRNfRcMuM4ujbFzbXSRAPpA2HhdtQliyYnu9ownVFTYFvWirTNKQdZTurEYgy5CMPVJH+b85TsmqiIUWBdhb1gudIkCnas7gxZ3L/lF/QBmPCF1C6Dc0AbpHK5lQvIbr/vSD7gIGmDs4qwyWF66zmcf//UC5DlPjmuzWQDYkQRlwOjNh8TBLwLEFopgp4bmLrG/iZAqeF4JOpm3OoNYYSD0ABmbX+Natdlo8gityuNbA60Rv/C6hn7w/DuI6xqx4KlrCha1kde5etGSY/eoYGNPn54rZrv4tmx+gVWsx9ihPTdNrSNVyUF5aqtBvr2bt4mYowQyrZyaBNLgkgRn5AbQwsk40IGwmH0II/82Xe93sFPZj6JhP5+WbY4gI8oylkdm7b3etR9gXUW+GiNWZKiDjzXZTOFhWOZxblYv3Lp9VIYsmaVhUcvfqyybH5+WBMZY3ggAjUM0ETIgngEMHMHx7HdWlRIWxgqviUPg1GEfDVrrV8c82kWUd/Kh5Qz8aQDyg8Vp2rBCvZdZ41uU/hjLi05o65ZOlPHBBFRouJXVfVsLvBmPwYnK/1xAzyL0NWi+Kx/uKEpdVrwtLn5coWGIsFypF00SYrWhNj+5b9GqoJHmsXKgPNqu7ymsR3+92TYR0hsd3EHr7veZBz5c5SZn7JYebCRfhP4mxb/4v+YV5ht3d+GW1FmMVH86TQTT29YWrj33XMCwjscfojn9u7NeWQcAlrSsQEGDVWytxfim6kiS6pi56gM1zvuJMFeQWZ7yCKfAWYVKv2tyrXq6BH3uwejRtgivg88oCygw3aWASQWerN/yb/Ruj/JTRiOHABV7Xx/JDVMvw4XZW8aWUmOl0h4W7KLUZCd89m+YKqbIPolAEnh2qAGG9cyvPm3hftRjlSXaPu6fKgOQjcReSw+fHBl+yUCi63mTOcuVGOx7zT3g9kN6VFC69AVtHeUktc3Ffn28dmXi6dPLQ6O90+gt65/2qxcyfa5/PdndOi1NGGr93v4PIW/Gok8+ZYpUgBm4LVMuAFRWNRfIYGMXIbXhH6amFly2HWe1neRv7sAAz+tTICNbtHCFnZH2QNVW8ZIiCje7UkIj7nvrKeLvjouoMNvD4JE3RvVUjkMI7ajm/roVe9s4SEO3vhRYKVqhm7GWn2WWp505gtt5QKoNbAKnJO0swL5qncXL3z6BCA9vaADS5mIsQ6TCDmScNLfT738YjJaW63ePQUywcNzyDamUh0N8KpdMRxy5vDD6Vnsu7qO3VqJzQMiX8vZBK9aQQ37tiTTuZ5yiM6gGIDGBGPWfeTsxBmqDM3eS7eSF75tYxOGKfnP7X/fH8zOZIlebcLVJuOotOMWgxXH24VG67KBYgEnn2XS/eCaA+PhbJValg5KkYT6Z374XxbOE0WOORdX2PVW1KiVE1fUkWiIBELBH7UEy926ryP+VPLqoBFgErmhq2XY30gsY83hNh2m7ugvyWJCNxkXNCIGArKhd8HcU/YkI7iJiU7v8DDjcxDBmKwz0I1Iq4IBCh8Dv762fVmlYwiJYhxBKxbmN5e06Z+lRIaUA9wSudE6XE1KGdIxmiTd+NmLLKHHEV7lyK81G7r7EtvsQvXcj0v15Ye2li4PFwNQL35+9ZKxzYoa3U1Cr4qHp67FbseyN9eDBwLrRBUhe07TBUhHKWLeq/T+psSbqmaznPKoY/v0mOQORSag5DJCJ5NRbe5liwYAdHLcecyqblDBulPlPuTd5sC00hY7XwRq1hFLiDJKvZLjGx0TgE1h3zYH1Xfs/5xFMoLKYXd9Tbr1ARdTpJHRA66eG6GOLgUexEk1Jitc3fDAFR2amwnNov8zYG0Ck9qVlWogvFH92T7NgUDPQeFIzk9v8="
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Elijah Craig Barrel Proof"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 12204,
+   "output_tokens": 40,
+   "thought_tokens": 447
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:46:59.909296+00:00",
+  "latency_ms": 3120,
+  "attempts": 1,
+  "turn": 4
+ }
+}
