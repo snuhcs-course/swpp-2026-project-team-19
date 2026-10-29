@@ -1,0 +1,115 @@
+{
+ "key": "b468fd6b068b01437a31a37690e893377d14a1599f1cbc9d11b47dcecadfa090",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "몰트맨 싱글몰트 페터캐른37 / 행사",
+    "target": true
+   },
+   {
+    "line": 2,
+    "name": "와일드터키 아카이브 골드포일16 / 행사",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "글렌알라키19 엑스 솔레라 / 한정파 행사",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "시그나토리 노스 브리티쉬 싱글그레인34 / 행사",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "아일라 싱글몰트 보모어21 셰리 / 행사",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "믹터스 토스티드 배럴 피니쉬 / 행사",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "더 노스스타 아드모어26 / 행사",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "카발란 증류소 킹 카 위스키 올드보틀",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "하이랜드파크CS R.4",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "발베니12 골드캐스크",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "벤리악 쿼터캐스크",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "로크로몬드12",
+    "target": false
+   },
+   {
+    "line": 13,
+    "name": "로크로몬드18",
+    "target": false
+   },
+   {
+    "line": 14,
+    "name": "신도 더 블렌디드",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "라프로익15",
+    "target": false
+   },
+   {
+    "line": 16,
+    "name": "기네스 병",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "산미구엘 병",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "아사히 병",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "코로나 병 + 라임(선택)",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 1,\n      \"bottler_en\": \"The Maltman\",\n      \"distillery_en\": \"Fettercairn\",\n      \"brand_en\": null,\n      \"age\": 37,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Wild Turkey\",\n      \"age\": 16,\n      \"edition_tokens_en\": [\n        \"Archive\",\n        \"Gold\",\n        \"Foil\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"GlenAllachie\",\n      \"age\": 19,\n      \"edition_tokens_en\": [\n        \"Ex\",\n        \"Solera\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"North British\",\n      \"brand_en\": null,\n      \"age\": 34,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bowmore\",\n      \"age\": 21,\n      \"edition_tokens_en\": [\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 6,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Michter's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Toasted\",\n        \"Barrel\",\n        \"Finish\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": \"North Star Spirits\",\n      \"distillery_en\": \"Ardmore\",\n      \"brand_en\": null,\n      \"age\": 26,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kavalan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"King\",\n        \"Car\",\n        \"Old\",\n        \"Bottle\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Highland Park\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"CS\",\n        \"R.4\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"CS\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Balvenie\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\n        \"Gold\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Shindo\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"The\",\n        \"Blended\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Guinness\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"San Miguel\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Asahi\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Corona\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Lime\"\n      ],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-28T09:48:03.861002+00:00",
+  "latency_ms": 4206,
+  "attempts": 1,
+  "input_tokens": 1837,
+  "output_tokens": 1406,
+  "thought_tokens": 124
+ }
+}

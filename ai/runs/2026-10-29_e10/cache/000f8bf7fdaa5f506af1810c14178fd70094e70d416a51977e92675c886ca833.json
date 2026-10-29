@@ -1,0 +1,49 @@
+{
+ "key": "000f8bf7fdaa5f506af1810c14178fd70094e70d416a51977e92675c886ca833",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Basil Hayden"
+    },
+    "sig": "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"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Bulleit"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Evan Williams"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Jack Daniel's Apple"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 4696,
+   "output_tokens": 72,
+   "thought_tokens": 1035
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:50:29.333518+00:00",
+  "latency_ms": 7059,
+  "attempts": 1,
+  "turn": 2
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "key": "e837d7975bab496cef0a36aa4941d51e983500a9270a65c5bbb84e4555ed9d59",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Arran Sherry Cask"
+    },
+    "sig": "EsIDCr8DAWkUfRNnt9A9TGUp6556RTftiD/Bvo6rWakwwXLAowuNjehLmeuu8sjlWaUAciFe5hgNzZiSBy2IJERvq0Td3zPw35XtnyRG043KtBTJwOTjyMJtGcmkGKOi9w2DFV7r4V2FOaPLF/iOPoZ912t1LhD/dTYiJtXC6EVcsg0QrqLXi12Kadzlnwz9yw1CysFbpd2mGEcZJ3DcVbqYU2luugTS2Lv0Q+zGSTUn9zacW3RmfFxydxaVxozZN7nCnTwaj9vnOBHqczjSUrFHh7DEhZIYbh+oN2iJ9ZbbyoCa1rYYswhijvAcT/En4psy31fCSFHY3koQ25cvIcmoZMTKf7DG6BMiUP0CNeQkHRR5tAvkFvCRkeCoVx43vbFyIvWgt7KuJtrZAVcx0ysH0g4fweQ3Yh7nP0rfgVZHYbKAQ0dh7yjJyI+er5NX7XVkyrXLc9dhk3a5le6dg5br/L4tH9ADJomPiZyRKrOCwsXmE6TlU4xix7fX+uqLq7+oxsQYohcPTxWkG2JRpQyzXuZ92Yvz9cZz1G3YbrFaenweFWrmocTxGB1/EHmH35LQz2RbIY5eBifvhWAmYdiHTaQe"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Aberlour A'bunadh"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Old Pulteney Huddart"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Old Pulteney 15"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 1721,
+   "output_tokens": 86,
+   "thought_tokens": 127
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:56:18.629406+00:00",
+  "latency_ms": 7064,
+  "attempts": 1,
+  "turn": 1
+ }
+}

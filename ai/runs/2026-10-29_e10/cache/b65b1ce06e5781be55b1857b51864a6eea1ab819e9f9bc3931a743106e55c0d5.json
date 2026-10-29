@@ -1,0 +1,96 @@
+{
+ "key": "b65b1ce06e5781be55b1857b51864a6eea1ab819e9f9bc3931a743106e55c0d5",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "submit_answers",
+    "args": {
+     "answers": [
+      {
+       "bottler_en": "",
+       "sure": true,
+       "kind": "whisky",
+       "age": 14,
+       "line": 3,
+       "edition_tokens_en": [
+        "Caribbean",
+        "Cask"
+       ],
+       "distillery_en": "",
+       "brand_en": "The Balvenie",
+       "product_id": "p1"
+      },
+      {
+       "bottler_en": "",
+       "distillery_en": "",
+       "brand_en": "The Macallan",
+       "kind": "whisky",
+       "age": 18,
+       "edition_tokens_en": [
+        "Sherry",
+        "Oak"
+       ],
+       "line": 17,
+       "product_id": "p11",
+       "sure": true
+      },
+      {
+       "kind": "whisky",
+       "product_id": "",
+       "line": 19,
+       "distillery_en": "",
+       "brand_en": "Tormore",
+       "sure": false,
+       "edition_tokens_en": [
+        "Tempranillo",
+        "Cask"
+       ],
+       "age": 0,
+       "bottler_en": ""
+      },
+      {
+       "brand_en": "Glenallachie",
+       "bottler_en": "",
+       "edition_tokens_en": [
+        "2014",
+        "Sinteis"
+       ],
+       "sure": false,
+       "age": 0,
+       "line": 24,
+       "distillery_en": "",
+       "product_id": "",
+       "kind": "whisky"
+      },
+      {
+       "distillery_en": "",
+       "edition_tokens_en": [],
+       "product_id": "",
+       "line": 34,
+       "kind": "whisky",
+       "age": 0,
+       "brand_en": "Royal Brackla",
+       "bottler_en": "",
+       "sure": false
+      }
+     ]
+    },
+    "sig": "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"
+   }
+  ],
+  "usage": {
+   "input_tokens": 5230,
+   "output_tokens": 361,
+   "thought_tokens": 916
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:48:26.448934+00:00",
+  "latency_ms": 4916,
+  "attempts": 1,
+  "turn": 3
+ }
+}

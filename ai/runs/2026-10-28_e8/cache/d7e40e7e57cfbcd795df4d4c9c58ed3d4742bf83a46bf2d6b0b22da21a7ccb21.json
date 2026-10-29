@@ -1,0 +1,155 @@
+{
+ "key": "d7e40e7e57cfbcd795df4d4c9c58ed3d4742bf83a46bf2d6b0b22da21a7ccb21",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "1792 스몰배치",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "노아스 밀",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "러셀 리저브 싱글배럴",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "로완스 크릭",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "메이커스 마크",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "우드포드 리저브",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "우드포드 리저브 더블오크",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "와일드터키 101 8Y",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "와일드터키 레어브리드",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "이글 레어 10Y",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "납크릭",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "부커스",
+    "target": false
+   },
+   {
+    "line": 13,
+    "name": "라가불린 16Y",
+    "target": false
+   },
+   {
+    "line": 14,
+    "name": "라프로익 10Y",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "라프로익 쿼터캐스크",
+    "target": false
+   },
+   {
+    "line": 16,
+    "name": "아드벡 10Y",
+    "target": false
+   },
+   {
+    "line": 17,
+    "name": "아드벡 우거다일",
+    "target": false
+   },
+   {
+    "line": 18,
+    "name": "아드벡 코리브레칸",
+    "target": false
+   },
+   {
+    "line": 19,
+    "name": "옥토모어 16.1",
+    "target": false
+   },
+   {
+    "line": 20,
+    "name": "포트샬롯 10Y",
+    "target": false
+   },
+   {
+    "line": 21,
+    "name": "하이랜드 파크 12Y",
+    "target": false
+   },
+   {
+    "line": 22,
+    "name": "탈리스커 10Y",
+    "target": false
+   },
+   {
+    "line": 23,
+    "name": "벤로막 10Y",
+    "target": false
+   },
+   {
+    "line": 24,
+    "name": "벤로막 15Y",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "보모어 12Y",
+    "target": false
+   },
+   {
+    "line": 26,
+    "name": "보모어 15Y",
+    "target": false
+   },
+   {
+    "line": 27,
+    "name": "야마자키 스모키",
+    "target": false
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 11,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Knob Creek\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-14T07:55:19.955965+00:00",
+  "latency_ms": 12509,
+  "attempts": 1,
+  "input_tokens": 1974,
+  "output_tokens": 93,
+  "thought_tokens": 107
+ }
+}

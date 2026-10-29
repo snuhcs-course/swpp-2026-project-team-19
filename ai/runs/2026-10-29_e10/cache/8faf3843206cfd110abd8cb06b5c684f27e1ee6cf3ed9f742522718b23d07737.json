@@ -1,0 +1,84 @@
+{
+ "key": "8faf3843206cfd110abd8cb06b5c684f27e1ee6cf3ed9f742522718b23d07737",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glenmorangie The Original"
+    },
+    "sig": "EuADCt0DAWkUfRPldvJD/CEjLqMAclrbJcoFeVDPlJlwoy1thrpfOf2uIouIeym8VbuyoKd1KbepcPnm/v65+SY0wTWhB9V0in8Z74gNd014s861/v3JDnM31VJYpIBE1reHqZXURAwNLSu6tg8gd10KYdrJ9jJOSvXyGsCkZUdljnp4SQ+o7G/VczmCWXEgZoZoRkn5X+LYiKSzH+oCTV1HI1TI5xvNDEo38v3cXJ2E8vyqBuSisW62ogBSql+0Q/C7zRo1aRIu3nUonMzr20LMjnTnUZIv0ABCD3M6zDVNCiMXwuxguWfDcaDkmaB5VqiZK/LgNgo0Qb8k1FQUch2EBS3D5I/az/YmXNFYoEL2n3pLTBPxD/5n0UHfcfqHzYGNQ63ptRybEI56BqoRlFKym5KnJqqGD+f04trVojWuwDmEbwLIeS89H1cpTsjJJXKrVWhcAmd6rc6m1Ags7j4kyXj3N9f4aY2V17oHjEOoU2jykBaFGKiAsfTWqX+mu+5ftFVvivulSzGY8peEkTesmSWib02kFCYaCPpw6H1Of1BQH1PFqnCG+DC1ni7YQ3yjPVhJtICJJ+Lpso2QGZEiYQtzlfBdwbHvPxMHJRR6Or7alzjXHOPdoJ8aWzSW+QLT"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glenmorangie Nectar d'Or"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glenmorangie Cadboll Estate"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glenmorangie Calvados Cask Finish"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Macnair's Lum Reek 10 Year Old"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Compass Box"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Maker's Mark Cask Strength"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Wild Turkey 8 Year Old"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Angel's Envy Bourbon"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 2443,
+   "output_tokens": 202,
+   "thought_tokens": 118
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:54:56.085082+00:00",
+  "latency_ms": 5719,
+  "attempts": 1,
+  "turn": 1
+ }
+}

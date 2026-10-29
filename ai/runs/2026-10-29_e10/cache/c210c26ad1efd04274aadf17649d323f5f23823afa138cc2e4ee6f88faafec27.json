@@ -1,0 +1,91 @@
+{
+ "key": "c210c26ad1efd04274aadf17649d323f5f23823afa138cc2e4ee6f88faafec27",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Maker's Mark Bourbon"
+    },
+    "sig": "EtoECtcEAWkUfROePXUH6s/ESxSDuVWFUpGtKmKtxgHLZ9M7d5GeziEWVuLVfdaw64RLklujEHEkVK8aibk+oGCoMyJsyzYMcqUa4NqjHbch4MT3FkS9OupDhg4HEWbd5Dy8naJbHB8d//u6ucfX4YYaW+6VcUA8qca4LjEIP6oQKpKKBY5Plx9xg8vk/9TEKOzbxGJlnzmE6WO2nh35EGqjVnEQcCUKjs3/hgMje9EV79Hm02aftTRkxoH92gy2I3fOrapNfto9YGBmZQ8UsueRI4+/QNvXwb72fT6SRKfTq+RhCeyJARD9Yo22s3ror3A3oz2F3gcHPpJdFdO165muKavfJiUaLhHiECG3UDDH3RDy2zT7yLk+5I5UGetQPsfHTDRtgJmzxBk1JM6x30ZX8+kmOJ2qYQG+Tenq9nq9fPbnNNkTarax4sJOV5TsoGk7X5mqeg2daRWy//l1uDecM/LLPkhuY/4454rrA95KlAOYwFPluGQ34Ofn0KSf5iXzQ2CFMcI4F+R639uw5DImk13WZJ7l1PrGYw3x+Nhej3wNbI1c0OM4sKrEFNFcEgVVgc+ylVwIoaWTy6zWFlg0MP6MWi8oFNP1dl+k8Wl6CnHzNI/tvd8H6v0Y3b61syBC3wZjkUDHj8d/0lS1nGDm0v996WLBRskH+DtmQaLYleLIG4PLfBPhr7oCrDTqcxDLU+BtXYnKmkQs5PNuuXXHvu2Hrr7mcDgetfqtKnEjIjCMkAbQ2yXyhlBrGv/Ym05Kb3ksVo+sq9//I1S/V6sSlTccSN16QewWctE="
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Maker's Mark 46"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Redemption Rye"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Russell's Reserve 10 Year Old Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Russell's Reserve Single Barrel Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Russell's Reserve Single Barrel Rye"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "James E. Pepper 1776 Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "James E. Pepper 1776 Rye"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Michter's US*1 Bourbon"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Michter's US*1 Rye"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 2413,
+   "output_tokens": 225,
+   "thought_tokens": 150
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:46:45.141040+00:00",
+  "latency_ms": 2629,
+  "attempts": 1,
+  "turn": 1
+ }
+}

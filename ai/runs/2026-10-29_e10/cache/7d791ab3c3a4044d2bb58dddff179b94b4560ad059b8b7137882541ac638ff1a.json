@@ -1,0 +1,70 @@
+{
+ "key": "7d791ab3c3a4044d2bb58dddff179b94b4560ad059b8b7137882541ac638ff1a",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glenallachie 11 Palo Cortado"
+    },
+    "sig": "Ep4ECpsEAWkUfRPw77zhXEtzd33C3/DgW/lOuF/RVNAIibMlOKG3oT30dL9WjM/t7XGm+BkgaqIA5Jcxv7lZIwko4hykx1SFznPD0SmdbJJyBnwBhOptfVaf9JwKOxVs1KdgjEoffeii1//gVW6d8Fm8sXdBX/uplXtJPhnlYU/ZXJI6X+tGe8HxLrilmayliXdfRsr2/YG43SzUb0RYjlQSRAt26HqODnBibEELFDK3NQRUWSlagvtn4Cb/SkKQY44MWjGBhgHkfkjml1sVLYsgSBWlIlSbGwv7qiqShmefcIJ1SuPQAIemtOf9pqXop87HLVY/kKLdS7SRG8Z8fkCY8zrbavgGj8JId/udGR1QrZZjpyKMckaRbTe158KnwoovHWgFWHAc5dAGbPXQT+Gk7K6n4dTxK/QVkQ4BxZKIynDa3+kD3cdPpI2FOGFUXbobrKrUXYyMZWqaPBFNFo74tGDGCROINTxEPaRPnz3Zgn7TY5VPvueBhg/+1HVIIfilBFLWgbA1LQv3JVAa7q1K8q1qgA+5OC9meywIDvNVx9rbEDPLSDWl6yGKpW98BIZbD1PbGtBg0+vroNUjZNMlSGIMmd8bdO6p9zYhuflRaS83RxMT1AvjkLuH+5Z/PIqzGjn1CGXmv5MNGEU8OQtBePJbUoUBYqglYg35i3bv4um/ZWJKXtnKdEe2uLJWgeLKcYwk6o2CRXN1m83AHUU="
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Edradour 12 CS"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory Linkwood 14"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory Ben Nevis 13"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glen Scotia 12"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glen Scotia 15"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glen Scotia Victoriana"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 1678,
+   "output_tokens": 150,
+   "thought_tokens": 151
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:50:04.657928+00:00",
+  "latency_ms": 3989,
+  "attempts": 1,
+  "turn": 1
+ }
+}

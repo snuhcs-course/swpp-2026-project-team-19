@@ -1,0 +1,49 @@
+{
+ "key": "0266e13de7d6fae14269ab47f828ef5938ccc97e91b6857459a9ac83f3e34539",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory Benriach 12"
+    },
+    "sig": "Ev8DCvwDAWkUfRPXmh3MKYD5oWjh8/6rCEi+e54VSMvM3xE65nloDTsLOlQqi9imSjrT17QVNyKpB1EoPoaPqk0f//1gOlZqEiYmJzWzduLzbXcdwR0ljZk8leirQUFlcC6zQUy5JCUadYuIcQnJqFQxwfJfdK0/yC/J5iVDaFHF87S5qjxk7t5mzdNGxhgt1lvifToC+Ggbc5FG14zy6DtOICHxWDr5BOp/4I0/Zm8DFdcUZwAQNmGPDPR9IS7/VIeBi2zHTVg1eLFQHgwPeR0Ii4gOl9vm801eWMM6A4rCvOJmXUGlOQ9x+elUL7j3EQdXpVypmJOXmQtfjlpDnVdEpzdX1uOzmF3BaRb4vb9FOBYuBmiCn0eprHTfp9v1usQKxzxjQ0Mgmcrndpw1DKpUhR4QuRoKDLe5JduwqqSDNAPniUo1XrHQgPL6TUHQiC1d0SNckf1XCXiYoi0goCTZTF2feMpSUTTFx8/cOBrTSQgK4qxrYMrp0QequahE3kQyrK+KzNPsJUkYSszlg6Y1q3IWwYnKPUAHwVkSxxanNbBVyahNMFOJEw38SCrlEEnnSM6rMlBN3lze06zJBDgoeyMcHAPqZSBChpqHck009n7dPGknunMzJqvjG1RHx8A58WAXwuLDACbMkjqV3CResKwGFG4E9MqjH94vpadBNw=="
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory Macduff 13"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Aultmore 12"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory Speyside GL"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 1726,
+   "output_tokens": 87,
+   "thought_tokens": 155
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:44:23.550070+00:00",
+  "latency_ms": 3990,
+  "attempts": 1,
+  "turn": 1
+ }
+}

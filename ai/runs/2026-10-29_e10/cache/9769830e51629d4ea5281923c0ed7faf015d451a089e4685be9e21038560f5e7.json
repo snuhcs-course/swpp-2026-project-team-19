@@ -1,0 +1,126 @@
+{
+ "key": "9769830e51629d4ea5281923c0ed7faf015d451a089e4685be9e21038560f5e7",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Benromach Single Cask"
+    },
+    "sig": "ErgDCrUDAWkUfRMY35A7p4aqflBX7Du5PzNP09kL0JdngNjD73gxtgbBhd5N8R33Sv1RmKZZy3vCcI5l6qzIYA78yY663azGlG1A72N0lhMO9JYua4N/A4Ef8uBlOLbnfAuy25kAYOzXH0NuBvULcGQcMrepzqFArRmidpzoPoFDJRhWWFUGpjrhIfLpdtHiID+RcQpBfGqm5qEfRpyw/joBJmmTdoBgJWygiZSmLrO/mFCnRrlndqlbImYHlwJYgECbaGwPXLSgFtT5NfXjG8EAkSonHHDUulQg83d6VC8zCI3UZPiUztDeqG/TvX7WCwbzPnLXDKhar/baRW6LMU0dhcbJNAqyARouaqdDGdGWJS/+tpAX8a3NdirE6JNgUNSkLsVjHpbxlewhCP/bgXhiePuB+VHLjxSF81+GttAIsN8uDPDpkNc9rOF6t4WnhHoddKdBYQ0gJ2Ox4sroqy7pM0KVZhOs8VDBkhFWGgOZfA/ELmILyUQQngswZhOdlfqwyoYoZC/73g73lSNibBs/dVaehLWPYDZFboVq9YHot/MwyqlIhIXt07vArnd5Fn68BM+YqUYT1sE="
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Benriach 10 Year Old"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Benriach 12 Year Old Smoky"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Oban Little Bay"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glenfarclas 105"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Glengoyne Cask Strength Batch 10"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Clynelish Distillery Edition"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Dalmore Port Wood Reserve"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Dalmore Cigar Malt Reserve"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Dalmore King Alexander III"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Aberlour A'bunadh Alba"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Edradour 10 Year Old Ballechin"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Edradour 12 Year Old Caledonia"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Edradour 12 Year Old Bordeaux Cask"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "AnCnoc Peatheart"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 3093,
+   "output_tokens": 335,
+   "thought_tokens": 90
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:53:22.385481+00:00",
+  "latency_ms": 7627,
+  "attempts": 1,
+  "turn": 1
+ }
+}

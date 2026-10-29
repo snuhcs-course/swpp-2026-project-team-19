@@ -1,0 +1,200 @@
+{
+ "key": "a979ce651e47bcef91268ac7337210cbd348c6157a81b41002110fb5a42534a2",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "Glenmorangie Org (글렌모렌지)",
+    "target": true
+   },
+   {
+    "line": 2,
+    "name": "Glenmorangie Lasanta (라산타)",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "Glenmorangie Quinta Ruban (퀸타루반)",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "Glenmorangie The Nectar (더 넥타)",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "Glenmorangie 18y",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "Glenmorangie Signet (시그넷)",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "Glenmorangie Cadball (캐드볼)",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "Glenmorangie Calvados Cask (깔바도스 캐스크)",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "Tomatin 12y (토마틴)",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "Glengoyne 12y (글렌고인)",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "Glengoyne 15y (글렌고인)",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "JohnnieWalker Double Black (더블블랙)",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "JohnnieWalker Green (그린)",
+    "target": false
+   },
+   {
+    "line": 14,
+    "name": "JohnnieWalker Blue (블루)",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "Macnair’s Lum Reek 10y (맥네어스 럼 릭)",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "Monkey Shoulder (몽키 숄더)",
+    "target": false
+   },
+   {
+    "line": 17,
+    "name": "Compass Box (컴파스 박스)",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "Royal Salute (로얄살루트 21년)",
+    "target": false
+   },
+   {
+    "line": 19,
+    "name": "Maker's Mark (메이커스 마크)",
+    "target": false
+   },
+   {
+    "line": 20,
+    "name": "Maker's Mark C.S",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "Wild Turkey 8y (와일드터키)",
+    "target": true
+   },
+   {
+    "line": 22,
+    "name": "Wild Turkey Rarebreed (레어브리드)",
+    "target": false
+   },
+   {
+    "line": 23,
+    "name": "Wild Turkey Rarebreed Rye (라이)",
+    "target": false
+   },
+   {
+    "line": 24,
+    "name": "Wild Turkey Rye (라이)",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "Wild Turkey Rye 101 (라이 101)",
+    "target": false
+   },
+   {
+    "line": 26,
+    "name": "Knob Creek 9y (납 크릭)",
+    "target": false
+   },
+   {
+    "line": 27,
+    "name": "Knob Creek Rye (라이)",
+    "target": false
+   },
+   {
+    "line": 28,
+    "name": "Woodford Reserve (우드포드리저브)",
+    "target": false
+   },
+   {
+    "line": 29,
+    "name": "Woodford Reserve Rye (라이)",
+    "target": true
+   },
+   {
+    "line": 30,
+    "name": "Woodford Reserve Double Oak (더블 오크)",
+    "target": false
+   },
+   {
+    "line": 31,
+    "name": "Noah's Mill (노아스밀)",
+    "target": false
+   },
+   {
+    "line": 32,
+    "name": "Angel’s Envy (엔젤스엔비)",
+    "target": true
+   },
+   {
+    "line": 33,
+    "name": "Booker's (부커스)",
+    "target": false
+   },
+   {
+    "line": 34,
+    "name": "Four Roses Single Barrel (포 로지스 싱글배럴)",
+    "target": false
+   },
+   {
+    "line": 35,
+    "name": "Four Roses Small Batch (스몰 배치)",
+    "target": false
+   },
+   {
+    "line": 36,
+    "name": "Widow Jane 10y (위도우 제인)",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 1,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"The\",\n        \"Original\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"The\",\n        \"Nectar\",\n        \"d'Or\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Cadboll\",\n        \"Estate\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenmorangie\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Calvados\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Johnnie Walker\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Double\",\n        \"Black\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Macnair's\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\n        \"Lum\",\n        \"Reek\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Compass Box\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Maker's Mark\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"C.S\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"C.S\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    },\n    {\n      \"line\": 21,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Wild Turkey\",\n      \"age\": 8,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 29,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Woodford Reserve\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Rye\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 32,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Angel's Envy\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 36,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Widow Jane\",\n      \"age\": 10,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-28T09:42:17.315739+00:00",
+  "latency_ms": 3803,
+  "attempts": 1,
+  "input_tokens": 2293,
+  "output_tokens": 1132,
+  "thought_tokens": 109
+ }
+}
