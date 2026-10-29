@@ -338,3 +338,16 @@ def test_rerank_orders_an_ambiguous_line_by_embedding_without_confirming(types):
     assert not any(x.evidence.get("confirmRecommended") for x in r.candidates)
     full = p24.apply_policy(amb, ranking(c, b), p24.Policy("rerank", k=3, fill_ambiguous=True, rerank=True), "f", types)
     assert [x.product_id for x in full.candidates] == [b, a, d]  # no room for c: only the rule candidates reordered
+
+
+def test_rerank_only_reorders_without_adding(types):
+    a, b, c = (uuid.uuid4() for _ in range(3))
+    rules = tuple(types.Candidate(product_id=x, rank=i, score=0.8, method="alias") for i, x in enumerate((a, b), 1))
+    amb = types.ResolutionResult(status="ambiguous", candidates=rules, proposed_product_id=a)
+    pol = p24.Policy("ro", fill_ambiguous=True, fill_k=0, rerank=True)
+    r = p24.apply_policy(amb, ranking(c, b, a), pol, "f", types)
+    assert [x.product_id for x in r.candidates] == [b, a] and r.proposed_product_id == b
+    one = types.ResolutionResult(status="ambiguous", candidates=rules[:1], proposed_product_id=a)
+    assert [x.product_id for x in p24.apply_policy(one, ranking(c, a), pol, "f", types).candidates] == [a]
+    none = types.ResolutionResult(status="unmatched")
+    assert len(p24.apply_policy(none, ranking(c, b, a), pol, "f", types).candidates) == 3  # k=5 for unmatched

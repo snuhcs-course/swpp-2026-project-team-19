@@ -290,7 +290,8 @@ class Policy:
     """How embedding candidates join a rules result.
       k               at most k embedding candidates on an unmatched line
       floor           no embedding candidate below this similarity (None: always)
-      fill_ambiguous  also append to ambiguous lines without confirm recommended, up to k in all
+      fill_ambiguous  also append to ambiguous lines without confirm recommended, up to fill_k in all
+      fill_k          the cap for fill_ambiguous (None: k); 0 adds nothing (with rerank: only reorder)
       rerank          ambiguous lines without confirm recommended: the candidates in embedding order
                       (rule candidates the embedding does not rank keep their order, after the others)
       cr_threshold    confirmRecommended on the rank-1 embedding candidate of an unmatched line when
@@ -300,13 +301,15 @@ class Policy:
     k: int = 5
     floor: float | None = None
     fill_ambiguous: bool = False
+    fill_k: int | None = None
     rerank: bool = False
     cr_threshold: float | None = None
     cr_margin: float = 0.0
 
 
 POLICIES = (Policy("unmatched_k5"), Policy("unmatched_k3", k=3), Policy("fill_k5", fill_ambiguous=True),
-            Policy("rerank_k5", fill_ambiguous=True, rerank=True))
+            Policy("rerank_k5", fill_ambiguous=True, rerank=True),
+            Policy("unmatched_k5+rerank_only", fill_ambiguous=True, fill_k=0, rerank=True))
 
 
 def embedding_candidate(Candidate, pid, rank: int, score: float, text: str, model: str, cr: bool = False):
@@ -336,7 +339,7 @@ def apply_policy(base, ranking: list[tuple[object, float, str]], policy: Policy,
         return types.ResolutionResult(status="ambiguous", candidates=cands, proposed_product_id=cands[0].product_id)
     if not policy.fill_ambiguous or any(c.evidence.get("confirmRecommended") for c in base.candidates):
         return base
-    room = max(0, policy.k - len(base.candidates))
+    room = max(0, (policy.k if policy.fill_k is None else policy.fill_k) - len(base.candidates))
     n = len(base.candidates)
     extra = tuple(embedding_candidate(types.Candidate, pid, n + i, s, t, model)
                   for i, (pid, s, t) in enumerate(picks[:room], start=1))
