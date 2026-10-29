@@ -48,7 +48,7 @@
   "Wild Turkey Rye": "81 proof 라이 = Wild Turkey Rye (포레스트·오드비 선례). 101 Rye 가능성 남음 (확신도: medium)",
   "Wild Turkey Longbranch / Rare Breed": "두 상품 모두. Longbranch는 카탈로그에 없어 새 상품 (확신도: high)",
   "Maker's Mark Bourbon": "기본 Maker's Mark (확신도: high)",
-  "Old Forester Bourbon": "에디션 없음 → 기본 Old Forester 86 Proof(새 상품). 100 Proof·1870·1897·1910·1920 등은 고가이고 잔 13,000원은 섹션 최저가급. 포로지스 선례(브랜드명 기본 상품) (확신도: medium)",
+  "Old Forester Bourbon": "에디션 없음 → 기본 Old Forester 86 Proof(새 상품). 100 Proof·1870·1897·1910·1920 등은 고가이고 잔 13,000원은 섹션 최저가급. 포로지스 선례(브랜드명 기본 상품) (확신도: medium) → 2026-10-29 박진우 재검토: unknown. 86 Proof와 Signature 100 Proof가 둘 다 입문 가격대라 메뉴·가격으로 못 가르고, 지난 1년 국내 수입 기록(식약처)에 86 Proof가 없음. 업주에게 물어야 하는 줄",
   "Bulleit Bourbon / Rye": "두 상품 모두 (both:) (확신도: high)",
   "Knob Creek Bourbon / Rye": "두 상품 모두. Bourbon = 카탈로그 Knob Creek(9년 스몰배치 기본 상품) (확신도: high)",
   "Redemption Rye / High Rye": "두 상품 모두. High Rye = Redemption High Rye Bourbon(새 상품) (확신도: medium)",
@@ -195,7 +195,7 @@
   "라가불린 11Y 스윗피트": "Lagavulin 11 Sweet Peat (확신도: high)",
   "조니워커 골드": "현행 골드 = Gold Label Reserve, 새 상품 (확신도: medium)",
   "잭다니엘": "브랜드명만 → 기본 Old No.7 (오드비 선례) (확신도: high)",
-  "잭다니엘 싱글배럴": "에디션 없음 → 기본 Single Barrel Select(새 상품). 카탈로그 Single Barrel 100 Proof는 미라보 '100 프루프' 표기 상품이라 별개 (확신도: medium)",
+  "잭다니엘 싱글배럴": "에디션 없음 → 기본 Single Barrel Select(새 상품). 카탈로그 Single Barrel 100 Proof는 미라보 '100 프루프' 표기 상품이라 별개 (확신도: medium) → 2026-10-29 박진우 재검토: unknown. Single Barrel Select와 Barrel Proof(국내 수입이 더 많음)가 메뉴·가격으로 갈리지 않음. 업주에게 물어야 하는 줄",
   "발렌타인 30Y": "Ballantine's 30 (확신도: high)",
   "로얄살루트": "브랜드명만 → 가장 어린 기본 상품 Royal Salute 21 (Signature Blend). 병 790,000원이 21년급 (확신도: medium)",
   "헤네시 VSOP": "코냑 → non_whisky (서로상·수이 선례) (확신도: high)",
@@ -355,13 +355,6 @@
    "age_years": 11,
    "edition_name": "Longmorn"
   },
-  "jack-daniels-single-barrel-select": {
-   "display_name": "Jack Daniel's Single Barrel Select",
-   "brand": "jack_daniels",
-   "brand_name": "Jack Daniel's",
-   "age_years": null,
-   "edition_name": "Single Barrel Select"
-  },
   "jim-beam-white": {
    "display_name": "Jim Beam White Label",
    "brand": "Jim Beam",
@@ -494,13 +487,6 @@
    "brand_name": "Ezra Brooks",
    "age_years": 7,
    "edition_name": "Old Ezra Barrel Strength"
-  },
-  "old-forester-86": {
-   "display_name": "Old Forester 86 Proof",
-   "brand": "Old Forester",
-   "brand_name": "Old Forester",
-   "age_years": null,
-   "edition_name": "86 Proof"
   },
   "port-askaig-100-proof": {
    "display_name": "Port Askaig 100 Proof",
@@ -1079,7 +1065,7 @@
      "raw_name": "Old Forester Bourbon",
      "unit": "glass",
      "pour_ml": null,
-     "gold": "new:old-forester-86"
+     "gold": "unknown"
     },
     {
      "raw_name": "Buffalo Trace",
@@ -5693,19 +5679,19 @@
      "raw_name": "잭다니엘 싱글배럴",
      "unit": "glass",
      "pour_ml": 30,
-     "gold": "new:jack-daniels-single-barrel-select"
+     "gold": "unknown"
     },
     {
      "raw_name": "잭다니엘 싱글배럴",
      "unit": "glass",
      "pour_ml": 60,
-     "gold": "new:jack-daniels-single-barrel-select"
+     "gold": "unknown"
     },
     {
      "raw_name": "잭다니엘 싱글배럴",
      "unit": "bottle",
      "pour_ml": null,
-     "gold": "new:jack-daniels-single-barrel-select"
+     "gold": "unknown"
     },
     {
      "raw_name": "발렌타인 17Y",

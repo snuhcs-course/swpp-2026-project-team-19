@@ -56,7 +56,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 EVAL_DIR = REPO_ROOT / "ai" / "eval"
 
 I3_GOLD = REPO_ROOT / "eval" / "match_gold_i3_v1.json"
-I3_GOLD_SHA256 = "281437a00d4f0c1141621c0fcd57af42c0920612ceeec214131433fc06f53721"
+I3_GOLD_SHA256 = "85e32759fff774c2d6aee6adec8e3d21208d9fe7179294a2d9f7969c9787744e"
 I3_LABELS = REPO_ROOT / "eval" / "labels_i3_v1.json"
 DEV_GOLD = {"위스키복춘": "eval/match_gold_v1_1.json", "서로상": "eval/match_gold_v1_1.json",
             "미라보": "eval/match_gold_v1_1.json", "수이": "eval/match_gold_final_v1.json",

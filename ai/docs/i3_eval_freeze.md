@@ -78,21 +78,22 @@
 
 | 이름 | 만드는 법 | 대응하는 이전 조건 | 포함률 |
 |---|---|---|---|
-| `full` | 구성의 카탈로그 + I3 2층 정답이 참조하는 `new:` 상품 63개를 표준 영문명 별칭 하나로 추가. 새 브랜드는 영문 브랜드명(`brand_name`)을 별칭 하나로 둔다 | I2 `eval_plan.md` C1, dev `eval` | 1.000 (구성상) |
-| `asis` | 구성의 카탈로그 그대로 (생성·괄호 제거 별칭 포함, 서비스와 같음) | I2 `eval_plan.md` C0, dev `eval_dropprod` | 0.870 (564/648) |
+| `full` | 구성의 카탈로그 + I3 2층 정답이 참조하는 `new:` 상품 61개를 표준 영문명 별칭 하나로 추가. 새 브랜드는 영문 브랜드명(`brand_name`)을 별칭 하나로 둔다 | I2 `eval_plan.md` C1, dev `eval` | 1.000 (구성상) |
+| `asis` | 구성의 카탈로그 그대로 (생성·괄호 제거 별칭 포함, 서비스와 같음) | I2 `eval_plan.md` C0, dev `eval_dropprod` | 0.873 (564/646) |
 
 - 두 카탈로그 모두 8곳 메뉴 표기에서 나온 별칭은 없다(1장 사용 제한). dev `eval`은 생성 별칭을 뺐으므로 dev `eval` 숫자와 바로 비교하지 않는다.
 - `asis`가 업주가 실제로 만나는 상태다. 8곳 술의 서비스 카탈로그 반영은 P30 이후에 한다.
 
 ### 4.2 입력
 
-- **2층 정답:** `eval/match_gold_i3_v1.json` (이 커밋), SHA-256 `281437a00d4f0c1141621c0fcd57af42c0920612ceeec214131433fc06f53721`(하네스가 실행마다 확인). 1층과 같은 방법이다. 라벨러 A·B(Claude)가 서로의 결과를 보지 않고 각각 연결하고, C가 불일치를 판정한 뒤 박진우가 검수했다.
+- **2층 정답:** `eval/match_gold_i3_v1.json` (이 커밋), SHA-256 `85e32759fff774c2d6aee6adec8e3d21208d9fe7179294a2d9f7969c9787744e`(하네스가 실행마다 확인). 1층과 같은 방법이다. 라벨러 A·B(Claude)가 서로의 결과를 보지 않고 각각 연결하고, C가 불일치를 판정한 뒤 박진우가 검수했다.
   - A·B 일치: 978항목 중 954(97.5%), 이름·key 정규화 뒤 975(99.7%). 실제 불일치 3항목·2줄을 C가 판정했다(Waterford 2줄 → `unknown`).
-  - 규약 질문 Q1–Q5는 C의 잠정 답을 박진우가 그대로 받았다(Q1은 세 상품 한 줄 채점 → 이 커밋의 `judge` 수정). 청춘위스키(018) '와일드터키' 한 줄은 81/101을 정할 근거가 없어 `unknown`.
+  - 규약 질문(2026-10-29 박진우 검수): Q1 세 상품 한 줄은 인코딩 유지 + `judge` 수정. Q2 한 줄의 두 상품 중 하나만 특정되는 2줄은 줄 전체 `unknown`(반쪽 정답 형식은 I4). Q3 브랜드명만 적힌 줄은 "기본 상품 하나가 정해지고 가격이 그 급이면 연결"을 유지하되, 박진우 요청으로 연결된 줄을 같은 메뉴의 가격과 식약처 수입식품 신고 1년치로 다시 확인했다. 그중 메뉴·가격으로 상품이 갈리지 않는 2줄(`Old Forester Bourbon`: 86 Proof / Signature 100 Proof, `잭다니엘 싱글배럴`: Single Barrel Select / Barrel Proof)을 `unknown`으로 바꾸고 새 상품 2개를 뺐다. Q4·Q5는 잠정 답 그대로.
+  - 청춘위스키(018) '와일드터키' 한 줄도 81/101을 정할 근거가 없어 `unknown`. 이 셋은 "업주에게 물어야 맞는 줄"이고, `unknown` 채점이 그 동작(확정하면 overconfident, 후보를 보이면 (b) 선택, 하나에 확인 권장을 붙이면 틀린 확인 권장)을 그대로 잰다.
   - 값: 카탈로그 상품 key, `new:<key>`(표준 영문명·브랜드·연수·에디션 기록), `both:`(한 줄에 두세 상품), `unknown`, `non_whisky`. 항목 순서와 `raw_name`은 `eval/labels_i3_v1.json`과 같아야 한다(하네스가 검사).
-- **라벨 입력:** 사진마다 1층 정답 `raw_name`을 메뉴 순서대로, 잔·병 항목은 한 줄로. 978항목 → **675줄**(상품 줄 648 = 카탈로그 553 + `new:` 81 + `both:` 14, `unknown` 23, `non_whisky` 4).
+- **라벨 입력:** 사진마다 1층 정답 `raw_name`을 메뉴 순서대로, 잔·병 항목은 한 줄로. 978항목 → **675줄**(상품 줄 646 = 카탈로그 553 + `new:` 79 + `both:` 14, `unknown` 25, `non_whisky` 4).
 - **종단 입력:** P30 하이브리드 추출 r1–r3(3장 동결 구성)의 결과. 추출 줄 = 사진마다 추출 항목 `raw_name`을 출력 순서대로 중복 없이. 정답 줄에 맞추기는 `e2e_plan.md` 2절과 같다(`e2e_match.build_lines`: `score.py` `match_photo`, 엄격 → 관대 → unit 무시 재짝).
-- **카탈로그 포함률 (매칭과 무관한 입력 성질, 정답과 카탈로그만으로 계산):** C0 `asis` 0.870 (564/648), C1·C2 `asis` 0.870 (564/648), `full`은 모두 1.000. v2와 v2.3은 정답이 참조하는 카탈로그 상품이 같다.
+- **카탈로그 포함률 (매칭과 무관한 입력 성질, 정답과 카탈로그만으로 계산):** C0 `asis` 0.873 (564/646), C1·C2 `asis` 0.873 (564/646), `full`은 모두 1.000. v2와 v2.3은 정답이 참조하는 카탈로그 상품이 같다.
 
 ### 4.3 실행
 
@@ -175,9 +176,9 @@
 | 카탈로그 v2.3 (C1, C2) | #72 (브랜치 끝 `5163ebb`) | `ai/catalog/catalog_v2_service.json` (`version` `catalog_v2_3_service`) | `9feb1874aae2ee279aba20efc311cde40ecbd6afaf11b607b7869a578eb981e7` (= E8 C1·C2 dev 카탈로그) |
 | 카탈로그 v2 (C0) | `952db5c` | 같은 파일 | `af31feec891be2c75f690c8f2c617c1eecee28aa0c2c59daddaca6cb7673c260` |
 | LLM 층 | #68 (브랜치 끝 `2640fd2`) | `backend/app/matching/llm_layer.py`, `prompts/translate_prompt_v3.md`, `prompts/pick_prompt_v1.md`, `backend/app/adapters/matching_llm.py`, `gemini_matching_llm.py` | `ba443a9da359cc6776e1bfc246b0c93f090d0ad2dc41f0269155a53c063311d1`, `e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4`, `e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14`, `0d4db9f59622f82b96151fe50d92d1f087969366d4cbfcfcdc8de1698df76ec2`, `31153791c14c5e2fec06c3be27024bc770f1723582704c652907f41aebfd5394` (프롬프트 둘은 `ai/match_llm` 원본과 같음) |
-| 하네스 | 이 커밋 | `ai/eval/i3_match_eval.py`, `ai/eval/match_eval.py` | `3fba6c68b0147ca83f7ffdf534504e8b1a97c3f3a1407d0a58c6f67e679176df`, `6f4347d9451e1d0cd7aec689e16fd79be84bc9e9e57a9836de4859e1fcb7e892` |
-| 2층 정답 | 이 커밋 | `eval/match_gold_i3_v1.json` | `281437a00d4f0c1141621c0fcd57af42c0920612ceeec214131433fc06f53721` |
-| 테스트 카탈로그 | 하네스가 실행 때 만든다(파일 없음) | 바 8곳 카탈로그의 digest (`catalog_digest`, 결과 JSON에 기록) | C0 `asis` `932df8cdb3dbf552bf1ca35b567e15d60a3d81cc520128d5a4c2dd39fd793f68`, C0 `full` `154638e6dbb3f07b9b14f5888ca38114052a290a7f17dda4e29ee71b7e5596d2`, C1·C2 `asis` `7c65fa51c4c8370b7d2f6bf5a2f1328668ffb02c5c753ed64f381fa25dfc628a`, C1·C2 `full` `1f9c6c362c278ad947a550cc00b24d6adcbf94b92163e096e2d73e33e1f4d6ce`. `full` 추가 상품 63 |
+| 하네스 | 이 커밋 | `ai/eval/i3_match_eval.py`, `ai/eval/match_eval.py` | `81efbd67641e608be5ef53a4fdb02dbae0b0b81b6baa3a5d2827907fa16dcac6`, `6f4347d9451e1d0cd7aec689e16fd79be84bc9e9e57a9836de4859e1fcb7e892` |
+| 2층 정답 | 이 커밋 | `eval/match_gold_i3_v1.json` | `85e32759fff774c2d6aee6adec8e3d21208d9fe7179294a2d9f7969c9787744e` |
+| 테스트 카탈로그 | 하네스가 실행 때 만든다(파일 없음) | 바 8곳 카탈로그의 digest (`catalog_digest`, 결과 JSON에 기록) | C0 `asis` `932df8cdb3dbf552bf1ca35b567e15d60a3d81cc520128d5a4c2dd39fd793f68`, C0 `full` `788871a2bbdde800440c155db8a90b0077f29057280088b16dfd71a584513593`, C1·C2 `asis` `7c65fa51c4c8370b7d2f6bf5a2f1328668ffb02c5c753ed64f381fa25dfc628a`, C1·C2 `full` `633682b4ef2eaf8d600a03d6bcb01b4df6c12bdf2f544123a900188b12fc6701`. `full` 추가 상품 61 |
 | 종단 줄 맞추기 | `5d49c8a` (3장과 같음) | `ai/eval/score.py`, `ai/eval/e2e_match.py` | |
 
 - 실행할 때 결과 JSON의 `catalog_file_sha256`, `catalog_digest`, `gold_sha256`, `translate_prompt_sha256`, `llm_layer_sha256`가 위 값과 같은지 먼저 본다. 다르면 그 차이를 이 표에 적고 4.3 실행 전 점검을 다시 통과한 뒤 실행한다.
