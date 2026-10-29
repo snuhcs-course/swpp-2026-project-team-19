@@ -2090,6 +2090,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - `correctedLineType`은 운영자가 최초 분류를 바꾼 경우에만 값이 있고, 그대로 승인한 경우 `null`이다.
 - `effectiveLineType`은 `correctedLineType ?? extractedLineType`으로 계산한 현재 검수 기준 역할이다.
 - `initialResolutionStatus`는 최초 상품 매칭 결과다. `exact_match`는 매칭 규칙(상품 별칭 정확 일치 또는 단계 규칙 S1·S2·S2b·S3)이 충돌 없이 상품 하나를 확정한 상태, `ambiguous`는 검토할 후보가 있으나 하나로 확정하지 못한 상태, `unmatched`는 유효 후보가 없는 상태다. 어느 규칙이 후보를 찾았는지는 후보 `evidence.rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)에 있다. 최초 분류가 비상품이라 매칭하지 않은 항목은 `null`이다.
+- 서버에서 LLM 매칭 층(M3, 기본 꺼짐)을 켜면 S1~S3가 확정하지 못한 줄에 LLM 후보가 붙을 수 있다. LLM 후보는 `matchMethod = llm`, `evidence.rule`이 `M3a` 또는 `M3b`이고 그 줄의 다른 후보보다 앞 순위다. LLM이 후보를 낸 줄은 항상 `ambiguous`이며 `exact_match`가 되지 않는다. 1순위 후보 `evidence.confirmRecommended`가 `true`이면 그 후보 하나를 확인만 하면 되는 "확인 권장" 줄이다(S2b·S3 후보에도 붙는다). LLM 후보의 그 밖의 `evidence` 키(`via`, `englishName`, `vetoed`, `shortUnverified`)는 디버깅용이다. 규칙은 `docs/menu_ai_matching_flow.md` 6장 "현재 구현"에 있다.
 - `candidates`는 같은 상품을 중복하지 않으며 `candidateRank` 오름차순이다.
 - `proposedProductId`는 `candidateRank = 1`의 상품이거나 후보가 없으면 `null`이다.
 - `newProductDraft`는 화면 입력을 돕는 계산값이며 실제 카탈로그 행이 아니다.

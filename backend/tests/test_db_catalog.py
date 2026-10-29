@@ -1,10 +1,12 @@
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
 from app.matching import ExtractedProduct, resolve_product
-from app.matching.db_catalog import DbCatalog
+from app.matching.db_catalog import CatalogSnapshot, DbCatalog
+from app.matching.llm_layer import IB_BOTTLERS, ProductMeta
 from app.matching.memory_catalog import InMemoryCatalog
 from app.matching.staged import resolve_product_staged
 from scripts.seed_catalog import seed
@@ -97,3 +99,59 @@ def test_staged_matching_is_the_same_on_both_catalogs(db_session):
         stages = {"S1", "S2", "S2b", "S3"}
         expected = resolve_product_staged(extracted, in_memory, stages)
         assert resolve_product_staged(extracted, from_db, stages) == expected, name
+
+
+# ---- CatalogSnapshot (I3: lookups for the LLM matching layer without an open transaction) ----
+
+
+def assert_snapshot_answers_like_the_db(snapshot, from_db):
+    assert snapshot.list_normalized_aliases() == from_db.list_normalized_aliases()
+    assert snapshot.list_normalized_brand_aliases() == from_db.list_normalized_brand_aliases()
+    for alias, product_id in from_db.list_normalized_aliases():
+        assert snapshot.find_product_ids_by_alias(alias) == from_db.find_product_ids_by_alias(alias), alias
+        assert snapshot.get_product(product_id) == from_db.get_product(product_id)
+        assert snapshot.get_normalized_aliases(product_id) == from_db.get_normalized_aliases(product_id)
+    for alias, brand_id in from_db.list_normalized_brand_aliases():
+        assert snapshot.find_brand_ids_by_alias(alias) == from_db.find_brand_ids_by_alias(alias), alias
+        assert snapshot.get_brand_product_ids(brand_id) == from_db.get_brand_product_ids(brand_id)
+    assert snapshot.find_product_ids_by_alias("nosuchalias") == [] == snapshot.find_brand_ids_by_alias("nosuchbrand")
+
+
+def test_snapshot_holds_active_products_and_their_meta(db_session):
+    brand = make_brand(db_session, "Johnnie Walker", aliases=("조니워커",))
+    signatory = make_brand(db_session, "Signatory Vintage")
+    black = make_product(
+        db_session, brand, "Johnnie Walker Black", aliases=("조니워커 블랙",), unsearchable_aliases=("Jonnie walker black",),
+        age_years=12, edition_name="Black",
+    )
+    red = make_product(db_session, brand, "Johnnie Walker Red", aliases=("조니워커 블랙",), is_active=False)
+    bottling = make_product(db_session, signatory, "Signatory Vintage Caol Ila 10", age_years=10)
+
+    snapshot = CatalogSnapshot(db_session)
+
+    assert_snapshot_answers_like_the_db(snapshot, DbCatalog(db_session))
+    assert snapshot.get_product(red.id) is None and snapshot.get_normalized_aliases(red.id) == []
+    assert set(snapshot.meta) == {black.id, bottling.id}
+    # The alias order follows the database collation (CI's PostgreSQL returns the Hangul alias first,
+    # a C-collation database last), and edition_check only tests membership, so compare them as a set.
+    meta = snapshot.meta[black.id]
+    assert replace(meta, aliases=()) == ProductMeta("Johnnie Walker Black", 12, "Black", None)
+    assert sorted(meta.aliases) == sorted(a.alias_text for a in black.aliases)
+    assert len(meta.aliases) == 3
+    assert snapshot.meta[bottling.id].bottler == "Signatory"
+
+
+@pytest.mark.skipif(not all(path.exists() for path in SEED_FILES), reason="ai/catalog seed is not checked out")
+def test_snapshot_answers_like_the_db_on_the_seed_catalog(db_session):
+    catalog_json, bars_json, _ = (json.loads(path.read_text(encoding="utf-8")) for path in SEED_FILES)
+    seed(db_session.connection(), catalog_json, bars_json)
+
+    snapshot = CatalogSnapshot(db_session)
+
+    assert_snapshot_answers_like_the_db(snapshot, DbCatalog(db_session))
+    # Independent bottlings: the products of the 12 P17 bottler brands (same rule as ai/eval/match_eval.py).
+    bottler_brands = {b["id"] for b in catalog_json["brands"] if b["canonical_name"] in {
+        alias for aliases in IB_BOTTLERS.values() for alias in aliases}}
+    expected = {p["id"] for p in catalog_json["products"] if p["brand_id"] in bottler_brands and p.get("is_active", True)}
+    assert {str(pid) for pid, meta in snapshot.meta.items() if meta.bottler is not None} == expected
+    assert len(expected) > 0

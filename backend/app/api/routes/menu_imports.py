@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
-from app.api.deps import get_image_storage, get_menu_extractor
+from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
 from app.core.security import Principal, require_operator
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
+from app.matching.llm_layer import LLMLayerConfig
 from app.models import ImportMode
 from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.menu_import import MenuImportAcceptedResponse, MenuImportStatusResponse
@@ -73,6 +74,7 @@ def upload_menu_import(
     session: Session = Depends(get_session),
     storage: ImageStorage = Depends(get_image_storage),
     extractor: MenuExtractor = Depends(get_menu_extractor),
+    llm_layer: LLMLayerConfig | None = Depends(get_matching_llm_layer),
     session_factory: SessionFactory = Depends(get_session_factory),
     _operator: Principal = Depends(require_operator),
 ) -> MenuImportAcceptedResponse:
@@ -94,6 +96,7 @@ def upload_menu_import(
             session_factory=session_factory,
             storage=storage,
             extractor=extractor,
+            llm_layer=llm_layer,
         )
     status_url = f"/api/menu-imports/{menu_import.id}"
     response.headers["Location"] = status_url
