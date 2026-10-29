@@ -296,7 +296,8 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 - `existing_bar`는 `bar_id`가 필수이고 `proposed_*`가 모두 `null`이다. `new_bar`는 `proposed_bar_name`과 `proposed_address`가 필수이고, `bar_id`는 `approved`일 때만 값이 있다.
 - 한 사용자는 같은 기존 업장에 `pending` 신청을 하나만 가질 수 있고, 같은 사업자등록번호로 `new_bar` `pending` 신청을 하나만 가질 수 있다. 동시에 들어온 신청도 막도록 두 규칙 모두 PostgreSQL 부분 unique 인덱스로 보장한다(아래 무결성 규칙). 서로 다른 사용자가 같은 업장에 동시에 신청할 수는 있지만, 하나가 승인되면 나머지는 승인할 수 없고 운영자가 거절한다.
-- `rejected`이면 `rejection_reason`이 필수다. `approved`와 `rejected`이면 `reviewed_by_user_id`와 `reviewed_at`이 필수다.
+- `rejection_reason`은 `rejected`일 때만, 그리고 반드시 값이 있다. `reviewed_by_user_id`와 `reviewed_at`은 `approved`와 `rejected`일 때만 함께 값이 있고, `pending`과 `canceled`에서는 둘 다 `null`이다.
+- `business_registration_number`는 숫자 10자리다. 검증번호(마지막 자리) 계산은 API가 확인한다.
 - `business_status`는 `business_verification_result = matched`일 때만 값이 있을 수 있다.
 - 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자와 운영자에게만 보여 주며 공개 API에 포함하지 않고 로그에도 남기지 않는다. 검증 결과 중 신청자에게는 `business_status`만 보여 준다. 실제 값은 저장소에 커밋하지 않는다.
 - 사업자등록증 사진과 OCR로 읽은 값은 저장하지 않는다. 신청자가 확인한 값만 신청으로 저장된다.
@@ -315,7 +316,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `revoked_at` | `timestamptz`, nullable | `null` | 운영자가 관계를 해제한 시각이다. `null`이면 현재 업주다. |
 | `revoked_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 관계를 해제한 운영자다. |
 
-**핵심 제약:** 한 업장에는 현재 업주(`revoked_at`이 `null`인 행)가 최대 한 명이다. PostgreSQL 부분 unique 인덱스(`bar_id` WHERE `revoked_at IS NULL`)와 승인 시 업장 행 잠금으로 보장한다. 해제는 행을 지우지 않고 `revoked_at`을 기록해 이력을 남긴다. 업주가 되어도 `users.user_type`은 바뀌지 않는다.
+**핵심 제약:** 한 업장에는 현재 업주(`revoked_at`이 `null`인 행)가 최대 한 명이다. PostgreSQL 부분 unique 인덱스(`bar_id` WHERE `revoked_at IS NULL`)와 승인 시 업장 행 잠금으로 보장한다. 해제는 행을 지우지 않고 `revoked_at`을 기록해 이력을 남기며, `revoked_at`과 `revoked_by_user_id`는 함께 값이 있거나 함께 `null`이다. 업주가 되어도 `users.user_type`은 바뀌지 않는다.
 
 **필요한 이유:** 업주 권한은 업장마다 다르므로 전역 `user_type`으로 표현할 수 없다. 신청과 관계를 나누면 신청 이력(증빙, 거절 사유)과 현재 권한을 따로 관리할 수 있고, 권한 검사는 작은 관계 테이블만 조회하면 된다.
 

@@ -1,6 +1,6 @@
 """Daily per-user limits on requests that call an external API (spec 3.11.14).
 
-Each kind of request (certificate OCR now; the NTS business verification of 3.11.2 later) has
+Each kind of request (the certificate OCR of 3.11.12 and the NTS business verification of 3.11.2) has
 its own count per token `sub`, and every count resets at midnight KST. A caller acquires one
 unit right before the external call and gets `429 RATE_LIMITED` when today's limit is used up,
 so the external API is never called over the limit.
@@ -21,6 +21,7 @@ KST = timezone(timedelta(hours=9), "KST")  # Korea has no daylight saving time
 DAILY_LIMIT = 5
 
 BUSINESS_CERTIFICATE_OCR = "business_certificate_ocr"
+BUSINESS_VERIFICATION = "business_verification"
 
 DEFAULT_RATE_LIMITED_MESSAGE = "오늘 사업자등록 정보 확인 횟수를 모두 사용했습니다. 내일 다시 시도해 주세요."
 

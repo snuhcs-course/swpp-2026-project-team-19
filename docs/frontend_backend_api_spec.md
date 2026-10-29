@@ -1229,17 +1229,19 @@ Content-Type: application/json
 
 | 필드 | 필수 | 규칙 |
 |---|---|---|
-| `applicationType` | 예 | `existing_bar` 또는 `new_bar` |
+| `applicationType` | 예 | `existing_bar` 또는 `new_bar`. 없으면 `fieldErrors[].code = UNION_TAG_NOT_FOUND`, 다른 값이면 `UNION_TAG_INVALID`이며, 이 두 오류의 `path`는 빈 문자열이다 |
 | `barId` | `existing_bar`만 필수 | 활성 업장의 UUID. 3.11.11로 찾는다. `new_bar`에서 보내면 `EXTRA_FORBIDDEN` |
 | `proposedBar` | `new_bar`만 필수 | `existing_bar`에서 보내면 `EXTRA_FORBIDDEN` |
 | `proposedBar.name` | 예 | 앞뒤 공백을 지운 뒤 1~150자 |
 | `proposedBar.address` | 예 | 앞뒤 공백을 지운 뒤 1~500자 |
-| `proposedBar.phone` | 아니오 | 30자 이하. 없으면 `null` |
+| `proposedBar.phone` | 아니오 | 앞뒤 공백을 지운 뒤 30자 이하. 없거나 공백뿐이면 `null` |
 | `businessRegistrationNumber` | 예 | 하이픈과 공백을 지운 뒤 숫자 10자리이고, 국세청 검증번호(마지막 자리) 계산이 맞아야 한다. 아니면 `INVALID_BUSINESS_NUMBER`. 하이픈 없이 저장한다 |
 | `representativeName` | 예 | 사업자등록증의 대표자 성명 그대로. 앞뒤 공백을 지운 뒤 1~100자 |
-| `openingDate` | 예 | 사업자등록증의 개업연월일. `YYYY-MM-DD`. 한국 시간 기준 오늘보다 뒤이면 `DATE_IN_FUTURE` |
+| `openingDate` | 예 | 사업자등록증의 개업연월일. `YYYY-MM-DD` 문자열만 받는다(숫자는 `DATE_TYPE`, 형식 오류는 `DATE_FROM_DATETIME_PARSING`). 한국 시간 기준 오늘보다 뒤이면 `DATE_IN_FUTURE` |
 | `contactPhone` | 예 | 앞뒤 공백을 지운 뒤 1~30자 |
 | `applicantNote` | 아니오 | 500자 이하. 공백뿐이면 `null`로 저장한다 |
+
+길이 규칙이 있는 문자열이 앞뒤 공백을 지운 뒤 비어 있으면 `fieldErrors[].code = STRING_TOO_SHORT`다.
 
 새 업장의 좌표는 신청자가 보내지 않는다. 승인할 때 operator가 주소를 확인하고 좌표를 입력한다(3.11.7).
 
@@ -2612,7 +2614,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
-- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `EXTRA_FORBIDDEN`. `message`는 Pydantic의 영어 기본 문구다.
+- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`. `message`는 Pydantic의 영어 기본 문구다.
 - **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`.
 
 ### 9.4 검수 버전 충돌

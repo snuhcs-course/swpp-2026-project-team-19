@@ -45,6 +45,12 @@ def mock_extractor(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     get_matching_llm_layer.cache_clear()
 
 
+@pytest.fixture(autouse=True)
+def no_nts_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Never call the NTS business check, even when .env has its key; tests fake the verifier."""
+    monkeypatch.delenv("NTS_SERVICE_KEY", raising=False)
+
+
 @pytest.fixture(scope="session")
 def db_engine() -> Iterator[Engine]:
     test_database = os.getenv("POSTGRES_TEST_DATABASE")
