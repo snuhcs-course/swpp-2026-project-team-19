@@ -1,0 +1,240 @@
+{
+ "key": "2a355c60e456ebb2c3d4e26c0925e21e7ac7c2fb6395c4ea9b96d17cbf7de943",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "Ardbeg 10y (아드벡)",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "Ardbeg Wee Beastie 5y (위 비스티)",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "Ardbeg Corryvreckan (코리브레칸)",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "Ardbeg Uiggeadail (우거다일)",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "Ardbeg An Oa (언오)",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "Laphroaig 10y (라프로익)",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "Laphroaig 10y sherry (라프로익쉐리)",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "Laphroaig Quarter Cask (쿼터캐스크)",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "Laphroaig 25y",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "Lagavulin 16y (라가불린)",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "Caol Ila 12y (쿨 일라)",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "anCnoc Sherry (아녹)",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "Bowmore 12y (보모어)",
+    "target": false
+   },
+   {
+    "line": 14,
+    "name": "Bowmore 15y",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "Bowmore 18y",
+    "target": false
+   },
+   {
+    "line": 16,
+    "name": "Bowmore 25y",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "Octomore 16.1 (옥토모어)",
+    "target": false
+   },
+   {
+    "line": 18,
+    "name": "Octomore 16.2 (옥토모어)",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "Octomore 16.3 (옥토모어)",
+    "target": false
+   },
+   {
+    "line": 20,
+    "name": "Ileach CS (일리악)",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "Talisker 10y (탈리스커)",
+    "target": false
+   },
+   {
+    "line": 22,
+    "name": "Bunnahabhain 12y (부나하벤)",
+    "target": false
+   },
+   {
+    "line": 23,
+    "name": "Highland Park 12y (하이랜드파크)",
+    "target": false
+   },
+   {
+    "line": 24,
+    "name": "Highland Park 15y",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "Highland Park 18y",
+    "target": true
+   },
+   {
+    "line": 26,
+    "name": "Kilchoman Saniaig (킬호만 사닉)",
+    "target": false
+   },
+   {
+    "line": 27,
+    "name": "Kilchoman Machir bay (마키어 베이)",
+    "target": false
+   },
+   {
+    "line": 28,
+    "name": "Auchentoshan 18y (오켄토션)",
+    "target": false
+   },
+   {
+    "line": 29,
+    "name": "Auchentoshan 21y",
+    "target": true
+   },
+   {
+    "line": 30,
+    "name": "Jura 10y (주라)",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "Jura 12y",
+    "target": true
+   },
+   {
+    "line": 32,
+    "name": "Jura French Oak",
+    "target": true
+   },
+   {
+    "line": 33,
+    "name": "Jura 18y",
+    "target": true
+   },
+   {
+    "line": 34,
+    "name": "Glenkinchie 12y (글렌킨치)",
+    "target": false
+   },
+   {
+    "line": 35,
+    "name": "Arran 10y (아란)",
+    "target": false
+   },
+   {
+    "line": 36,
+    "name": "Glengrant 15y (글렌그란트)",
+    "target": false
+   },
+   {
+    "line": 37,
+    "name": "Mortlach 16y (몰트락)",
+    "target": false
+   },
+   {
+    "line": 38,
+    "name": "Dalmore 12y (달모어)",
+    "target": false
+   },
+   {
+    "line": 39,
+    "name": "Dalmore 15y",
+    "target": false
+   },
+   {
+    "line": 40,
+    "name": "Dalmore 17y",
+    "target": true
+   },
+   {
+    "line": 41,
+    "name": "Dalwhinnie 15y (달위니)",
+    "target": false
+   },
+   {
+    "line": 42,
+    "name": "Blair Athol Sangiovese Cask (블레어 아쏠)",
+    "target": true
+   },
+   {
+    "line": 43,
+    "name": "Oban 14y (오반)",
+    "target": false
+   },
+   {
+    "line": 44,
+    "name": "Glendronach 12y (글렌드로낙)",
+    "target": false
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Ardbeg\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Uigeadail\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Laphroaig\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"anCnoc\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bowmore\",\n      \"age\": 25,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Octomore\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"16.2\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Ileach\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"CS\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"CS\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Highland Park\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 29,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Auchentoshan\",\n      \"age\": 21,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Jura\",\n      \"age\": 10,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 31,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Jura\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 32,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Jura\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"French\",\n        \"Oak\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 33,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Jura\",\n      \"age\": 18,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 40,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Dalmore\",\n      \"age\": 17,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 42,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Blair Athol\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Sangiovese\",\n        \"Cask\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-28T09:43:57.864771+00:00",
+  "latency_ms": 8824,
+  "attempts": 1,
+  "input_tokens": 2506,
+  "output_tokens": 1259,
+  "thought_tokens": 103
+ }
+}

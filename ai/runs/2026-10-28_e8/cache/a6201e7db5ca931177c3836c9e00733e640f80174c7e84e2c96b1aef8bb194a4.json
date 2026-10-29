@@ -1,0 +1,120 @@
+{
+ "key": "a6201e7db5ca931177c3836c9e00733e640f80174c7e84e2c96b1aef8bb194a4",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "와일드터키81",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "와일드터키라이",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "와일드터키8 101",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "와일드터키 레어브리드",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "바질헤이든",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "메이커스마크",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "불렛버번",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "불렛라이",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "우드포드리저브",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "우드포드리저브 더블오크",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "포로지스",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "포로지스 싱글베럴",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "러셀 싱글베럴",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "러셀 싱글베럴 라이",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "부커스",
+    "target": false
+   },
+   {
+    "line": 16,
+    "name": "놉크릭 버번",
+    "target": false
+   },
+   {
+    "line": 17,
+    "name": "에반윌리암스",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "1776 제임스 E.페퍼",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "잭다니엘",
+    "target": true
+   },
+   {
+    "line": 20,
+    "name": "잭다니엘 애플",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Basil Hayden's\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 11,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Four Roses\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Four Roses\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Single\", \"Barrel\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Russell's Reserve\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Single\", \"Barrel\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Russell's Reserve\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Single\", \"Barrel\", \"Rye\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Evan Williams\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"James E. Pepper 1776\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Jack Daniel's\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Jack Daniel's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Apple\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-28T09:48:47.898666+00:00",
+  "latency_ms": 3614,
+  "attempts": 1,
+  "input_tokens": 1783,
+  "output_tokens": 769,
+  "thought_tokens": 100
+ }
+}

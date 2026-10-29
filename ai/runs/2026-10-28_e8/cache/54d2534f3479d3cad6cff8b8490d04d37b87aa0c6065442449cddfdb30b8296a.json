@@ -1,0 +1,55 @@
+{
+ "key": "54d2534f3479d3cad6cff8b8490d04d37b87aa0c6065442449cddfdb30b8296a",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "글렌알라키11 팔로 코르타도",
+    "target": true
+   },
+   {
+    "line": 2,
+    "name": "싱글몰트 에드라두어12cs 비스코",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "시그나토리 싱글몰트 링크우드14",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "시그나토리 싱글몰트 벤네비스13",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "캠벨타운 싱글몰트 글렌스코샤12",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "캠벨타운 글렌스코샤15",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "캠벨타운 글렌스코샤 빅토리아나",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 1,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"GlenAllachie\",\n      \"age\": 11,\n      \"edition_tokens_en\": [\n        \"Palo\",\n        \"Cortado\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Edradour\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\n        \"CS\",\n        \"Ballechin\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"CS\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    },\n    {\n      \"line\": 3,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Linkwood\",\n      \"brand_en\": null,\n      \"age\": 14,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": \"Ben Nevis\",\n      \"brand_en\": null,\n      \"age\": 13,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glen Scotia\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 6,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glen Scotia\",\n      \"age\": 15,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glen Scotia\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Victoriana\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-28T09:37:46.452451+00:00",
+  "latency_ms": 4525,
+  "attempts": 1,
+  "input_tokens": 1528,
+  "output_tokens": 652,
+  "thought_tokens": 105
+ }
+}

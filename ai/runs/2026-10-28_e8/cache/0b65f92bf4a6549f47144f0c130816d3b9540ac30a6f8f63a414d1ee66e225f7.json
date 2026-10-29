@@ -1,0 +1,290 @@
+{
+ "key": "0b65f92bf4a6549f47144f0c130816d3b9540ac30a6f8f63a414d1ee66e225f7",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "발베니(Balvenie) 12년 더블 우드",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "발베니(Balvenie) 12년 아메리칸 오크",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "발베니(Balvenie) 12년 싱글 배럴",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "발베니(Balvenie) 14년 캐리비안 캐스크",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "발베니(Balvenie) 14년 위크 오브 피트",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "발베니(Balvenie) 15년 마데이라 캐스크",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "발베니(Balvenie) 16년 프렌치 오크",
+    "target": false
+   },
+   {
+    "line": 8,
+    "name": "발베니(Balvenie) 18년 페드로 히메네즈 캐스크",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "발베니(Balvenie) 21년 포트 우드",
+    "target": false
+   },
+   {
+    "line": 10,
+    "name": "글렌리벳(Glenrivet) 12년 더블 오크",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "글렌리벳(Glenrivet) 15년 프렌치 오크",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "글렌리벳(Glenrivet) 18년",
+    "target": false
+   },
+   {
+    "line": 13,
+    "name": "글렌그란트(Glengrant) 12년",
+    "target": false
+   },
+   {
+    "line": 14,
+    "name": "글렌그란트(Glengrant) 15년",
+    "target": false
+   },
+   {
+    "line": 15,
+    "name": "글렌그란트(Glengrant) 18년",
+    "target": false
+   },
+   {
+    "line": 16,
+    "name": "모틀락(Mortlach) 16년",
+    "target": false
+   },
+   {
+    "line": 17,
+    "name": "올트모어(Aultmore) 12년",
+    "target": false
+   },
+   {
+    "line": 18,
+    "name": "올트모어(Aultmore) 18년",
+    "target": false
+   },
+   {
+    "line": 19,
+    "name": "올트모어(Aultmore) 21년",
+    "target": false
+   },
+   {
+    "line": 20,
+    "name": "에버펠디(Aberfeldy) 12년",
+    "target": false
+   },
+   {
+    "line": 21,
+    "name": "에버펠디(Aberfeldy) 16년",
+    "target": false
+   },
+   {
+    "line": 22,
+    "name": "글렌로티스(Glenrothes) 12년",
+    "target": false
+   },
+   {
+    "line": 23,
+    "name": "글렌로티스(Glenrothes) WMC",
+    "target": false
+   },
+   {
+    "line": 24,
+    "name": "글렌로티스(Glenrothes) 18년",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "맥켈란(Maccallan) 12년 더블 캐스크",
+    "target": false
+   },
+   {
+    "line": 26,
+    "name": "맥켈란(Maccallan) 12년 셰리 캐스크",
+    "target": true
+   },
+   {
+    "line": 27,
+    "name": "맥켈란(Maccallan) 15년 더블 캐스크",
+    "target": false
+   },
+   {
+    "line": 28,
+    "name": "맥켈란(Maccallan) 클래식컷 2025",
+    "target": true
+   },
+   {
+    "line": 29,
+    "name": "맥켈란(Maccallan) 18년 더블캐스크",
+    "target": true
+   },
+   {
+    "line": 30,
+    "name": "맥켈란(Maccallan) 18년 셰리 캐스크",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "글렌피딕(Glenfiddich) 12년",
+    "target": false
+   },
+   {
+    "line": 32,
+    "name": "글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시",
+    "target": true
+   },
+   {
+    "line": 33,
+    "name": "글렌피딕(Glenfiddich) 14년",
+    "target": true
+   },
+   {
+    "line": 34,
+    "name": "글렌피딕(Glenfiddich) 15년",
+    "target": false
+   },
+   {
+    "line": 35,
+    "name": "글렌피딕(Glenfiddich) 18년",
+    "target": false
+   },
+   {
+    "line": 36,
+    "name": "글렌피딕(Glenfiddich) 21년 그란 르제르바",
+    "target": true
+   },
+   {
+    "line": 37,
+    "name": "글렌피딕(Glenfiddich) 23년 그랑 크루",
+    "target": true
+   },
+   {
+    "line": 38,
+    "name": "글렌알라키(Glenallachie) 8년",
+    "target": false
+   },
+   {
+    "line": 39,
+    "name": "글렌알라키(Glenallachie) 12년",
+    "target": false
+   },
+   {
+    "line": 40,
+    "name": "글렌알라키(Glenallachie) 10년 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 41,
+    "name": "글렌알라키(Glenallachie) 9년 퀴베 캐스크 피니시",
+    "target": true
+   },
+   {
+    "line": 42,
+    "name": "글렌알라키(Glenallachie) 8년 스코티시 오크 피니시",
+    "target": true
+   },
+   {
+    "line": 43,
+    "name": "글렌알라키(Glenallachie) 10년 루비포트 캐스크 피니시",
+    "target": true
+   },
+   {
+    "line": 44,
+    "name": "글렌알라키(Glenallachie) 12년 모스카텔 캐스크 피니시",
+    "target": true
+   },
+   {
+    "line": 45,
+    "name": "글렌알라키(Glenallachie) 10년 스페니시 오크 피니시",
+    "target": true
+   },
+   {
+    "line": 46,
+    "name": "글렌알라키(Glenallachie) 15년",
+    "target": false
+   },
+   {
+    "line": 47,
+    "name": "글렌알라키(Glenallachie) 18년",
+    "target": false
+   },
+   {
+    "line": 48,
+    "name": "글렌알라키(Glenallachie) 18년 PX 펀천",
+    "target": true
+   },
+   {
+    "line": 49,
+    "name": "발렌타인 글렌버기(Glenburgie) 12년",
+    "target": false
+   },
+   {
+    "line": 50,
+    "name": "발렌타인 글렌버기(Glenburgie) 15년",
+    "target": false
+   },
+   {
+    "line": 51,
+    "name": "탐두(Tamdhu) 12년",
+    "target": false
+   },
+   {
+    "line": 52,
+    "name": "탐두(Tamdhu) 배치스트랭스 8",
+    "target": true
+   },
+   {
+    "line": 53,
+    "name": "탐두(Tamdhu) 15년",
+    "target": false
+   },
+   {
+    "line": 54,
+    "name": "탐두(Tamdhu) 18년",
+    "target": false
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Balvenie\",\n      \"age\": 14,\n      \"edition_tokens_en\": [\"Week\", \"of\", \"Peat\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 6,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Balvenie\",\n      \"age\": 15,\n      \"edition_tokens_en\": [\"Madeira\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Balvenie\",\n      \"age\": 18,\n      \"edition_tokens_en\": [\"Pedro\", \"Ximenez\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Glenlivet\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Double\", \"Oak\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 11,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Glenlivet\",\n      \"age\": 15,\n      \"edition_tokens_en\": [\"French\", \"Oak\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 26,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Macallan\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Sherry\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 28,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Macallan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Classic\", \"Cut\", \"2025\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 29,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Macallan\",\n      \"age\": 18,\n      \"edition_tokens_en\": [\"Double\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The Macallan\",\n      \"age\": 18,\n      \"edition_tokens_en\": [\"Sherry\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 32,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenfiddich\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Amontillado\", \"Sherry\", \"Finish\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 33,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenfiddich\",\n      \"age\": 14,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 36,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenfiddich\",\n      \"age\": 21,\n      \"edition_tokens_en\": [\"Gran\", \"Reserva\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 37,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Glenfiddich\",\n      \"age\": 23,\n      \"edition_tokens_en\": [\"Grand\", \"Cru\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 40,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The GlenAllachie\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\"Cask\", \"Strength\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 41,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The GlenAllachie\",\n      \"age\": 9,\n      \"edition_tokens_en\": [\"Cuvee\", \"Cask\", \"Finish\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 42,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The GlenAllachie\",\n      \"age\": 8,\n      \"edition_tokens_en\": [\"Scottish\", \"Oak\", \"Finish\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 43,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The GlenAllachie\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\"Ruby\", \"Port\", \"Cask\", \"Finish\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 44,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The GlenAllachie\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Moscatel\", \"Cask\", \"Finish\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 45,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The GlenAllachie\",\n      \"age\": 10,\n      \"edition_tokens_en\": [\"Spanish\", \"Oak\", \"Finish\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 48,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"The GlenAllachie\",\n      \"age\": 18,\n      \"edition_tokens_en\": [\"PX\", \"Puncheon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"PX\",\n          \"expansion\": \"Pedro Ximenez\"\n        }\n      ]\n    },\n    {\n      \"line\": 52,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Tamdhu\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Batch\", \"Strength\", \"8\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-28T09:36:06.424207+00:00",
+  "latency_ms": 48636,
+  "attempts": 1,
+  "input_tokens": 3118,
+  "output_tokens": 1958,
+  "thought_tokens": 2926
+ }
+}
