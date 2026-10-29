@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -43,6 +43,10 @@ class ImportFailedResponse(BaseModel):
     failure: ImportFailure = Field(description="Start a new upload; a failed import is not resumed")
 
 
+BoxCoordinate = Annotated[int, Field(ge=0, le=1000)]
+SourceBox = Annotated[list[BoxCoordinate], Field(min_length=4, max_length=4)]
+
+
 class ReviewOption(BaseModel):
     extractedOptionId: UUID
     optionOrder: int
@@ -81,6 +85,14 @@ class ReviewItem(BaseModel):
     extractedItemId: UUID
     itemOrder: int
     rawText: str = Field(description="The text block the item was read from")
+    sourceBox: SourceBox | None = Field(
+        description=(
+            "Where the line is on the photo: [x0, y0, x1, y1], each 0-1000 of the photo's width or height "
+            "(after EXIF rotation), left to right and top to bottom. The box around the OCR lines the name and "
+            "the prices were read from, for cropping the line out of `imageUrl`. Null when unknown: Gemini-only "
+            "or mock extraction, OCR fallback, or a line read from the photo alone"
+        )
+    )
     extractedLineType: LineType = Field(description="The AI's first classification; never changed by review")
     correctedLineType: LineType | None = Field(description="Set only when review changed the classification")
     effectiveLineType: LineType = Field(description="correctedLineType ?? extractedLineType; use for display")
