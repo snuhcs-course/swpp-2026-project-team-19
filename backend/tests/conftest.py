@@ -27,17 +27,22 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 @pytest.fixture(autouse=True)
 def mock_extractor(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
-    """Use the mock extractor even when .env selects gemini, so no test calls the real API.
+    """Use the mock extractor and no LLM matching layer even when .env selects gemini or turns the
+    layer on, so no test calls the real API.
 
     Tests that need other settings set them on top of this.
     """
-    from app.api.deps import get_menu_extractor
+    from app.api.deps import get_matching_llm_layer, get_menu_extractor
 
     monkeypatch.setenv("MENU_EXTRACTOR", "mock")
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    for name in ("MATCHING_LLM_ENABLED", "MATCHING_LLM_MAX_CALLS", "MATCHING_LLM_M3B_ENABLED"):
+        monkeypatch.delenv(name, raising=False)
     get_menu_extractor.cache_clear()
+    get_matching_llm_layer.cache_clear()
     yield
     get_menu_extractor.cache_clear()
+    get_matching_llm_layer.cache_clear()
 
 
 @pytest.fixture(autouse=True)

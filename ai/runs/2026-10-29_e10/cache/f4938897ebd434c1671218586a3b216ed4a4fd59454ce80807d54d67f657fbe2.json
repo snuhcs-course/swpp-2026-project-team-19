@@ -1,0 +1,28 @@
+{
+ "key": "f4938897ebd434c1671218586a3b216ed4a4fd59454ce80807d54d67f657fbe2",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "get_product",
+    "args": {
+     "product_id": "p1"
+    },
+    "sig": "EpELCo4LAWkUfRP8pV1uQAnjX+VOatLZ3X0HRTm83h6YH/1Q0PMHoDVu7lRRdaoP+bV1gWd2KtFoKKu1JS42sIolk8Py3xmv0xzcVm9/lSRoWBzVGkf6Y0pZoMyrxuIyG45lBO47pMDfvcV2Y2c8//aji6oKT718jp8N3TVTyjoyW/3nQZfZzBcNhJ3H0Z3/n9oHNIugBkDXnacBI2A48ruo48WX3rn6ty9YuYIqrpUrl8YLLvwEQdKHM95gFRDf48DICkykJWiLuuRjP1T10Ed/itX42rCYhmsY35KLdKuFm/AmhKnooYnuilA0ki+guxJ4OKAdrExDkkioFi5vDcBW9dMsuR3+B+xXwrKSjBstlUuWo6c8A051XZBGNUvBYsbMjLBtVloQnIR21vZqIEtpFnxqacYeeQGhE/p2NjFsdqT1H04nsStuiU1p3zSRJTRCEvgnONDqOysQLWPF9dEWtu0ON/vuCEP72tvI8bmNw1E4OnVlyK4TW5GehPHVqZlFo50yR4iTQhyMyhKfK91seYdlCeZZca/O929Of9IsJPosgEjHSLJ7RMnZRKyBY6WeGzjnLphWfo/7lJYGrRfxIgnNyWEdnK8/t6Rk7qN/qawSbUSwVSjqF1/Gu9wiFVdLewwp6JNTzwYE2XmLq/+R3XxOkyVfDECVGyMdz/Z/7wsvETBzXCqvfckzusfeRiQE+/048zVsjmU4Roj9bnON8TUm8+qEN0aEnOKvFf9oTKPbHtLeTnNX4/8vPZ5O1n3/pzedi04X4U9YnC7iMNKP56xl5xO4Xl+yoHUG5DSQAfTqU7+QWhKjJpVbKLEq49XChOjuNSXZgJbPo0S5PlmRGQxFGzL0jbmutt1pMxC0JH5BunpMwX2hcHErAdJG0BO7t3BWagy0sahYHUnXoJksoNFXB6Wtdb74IWq0/9yEPOb0NR/ZP2ihTdbgp8OnZT+iGeAmiLboPiSs7CUhj3jvCAjfoQxbffW1vmwcwFdDUCwzrYoclmKvZk7a2OwsKjmSc+fJDtAZCIhD+o3I+3AU69Cp4uoPHIRtryFElXOsfLtJXtbkEToyUxjGuOuBrBIWJ7Nz0MgPIO68Mde93bRWsmF0eWwTnF69muVCeECaeaqRFvQEC+6CGckUY+Gog3xWPh92EHVNxAZAAo8kVvWjvwkXc9yAoMAGzMa72kpyzoQ379dLiC03TWdRFnsbsWCdI+Rggdxn5bAjU58xTfLYHu0s4ak+2rAwYCpzcEz6fxYQmO8CODEbx9ROps6SEb87OWJbGteuYRFZneuMOt2A34dqFQLktUxZsmVq4bkIgbTiCNhkXA3Bh1GRehuSjsB5xxByANY+zBrT2fpmjEtsd4HUh56yRf5EiDsORCbEgm+8Tk272r0MtPQAeMO47HHjxxe29uF839b8SmgTODXJPRoiQCopVxQbNTNHF01CQ9JzZg1zKcz9cqvnOy00URCqPEpkRAi7zrLQtHsxV7BshbuUWdiS/piwBUcDDtnhzlBX0alfs2t260xNqiUbqzXNHDXNuYpHBHaKFjw16t55c+uMw5xYDuL7PMy8EfPJMTsOsYbwWH/TRCrjZ1FVfPjGftcRriZfFqCKYwVk7SrqmE956Yi/mw5dHMCfGBwTifL88akUhWVE/ItMhZLS1k198QmvNLni/uvyksic1oiw5DWi0jXRMAX0tdyuyXg8oLGfgRswywdCcGRerkPJG/Em2TDYqaFtlj3raz+eH5dV+z/16NRA1eYyxhBRz/weouynXBtU8p88eS8KGSIXAO4pIj+tYt9yxVFukmKYDqxlrLl54Nf9k8FYv/KAAWXleIu6MeL59FAIOkbf76444/GTE8dOc4+L5n0WVinFgm3Zlp24KnpEuxULo1kfyeapZjgw"
+   }
+  ],
+  "usage": {
+   "input_tokens": 3201,
+   "output_tokens": 19,
+   "thought_tokens": 474
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:51:17.363499+00:00",
+  "latency_ms": 8873,
+  "attempts": 1,
+  "turn": 2
+ }
+}

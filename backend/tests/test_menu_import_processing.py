@@ -13,8 +13,10 @@ from app.adapters.extraction import (
     load_fixture,
     parse_extraction_response,
 )
-from app.api.deps import get_menu_extractor
+from app.adapters.matching_llm import MatchingLLMError
+from app.api.deps import get_matching_llm_layer, get_menu_extractor
 from app.main import app
+from app.matching.llm_layer import LLMLayerConfig
 from app.models import (
     ExtractedItem,
     ImportMode,
@@ -27,6 +29,7 @@ from app.models import (
     PipelineStatus,
     ResolutionStatus,
 )
+from app.services import menu_import_processing
 from app.services.menu_import_processing import process_menu_import
 from scripts.seed_catalog import seed
 from tests.factories import make_bar, make_brand, make_product, publish_menu
@@ -395,3 +398,231 @@ def test_line_naming_two_products_is_stored_as_ambiguous(client, db_session, ima
         (1, buffalo.id, "Buffalo Trace", "S1"),
         (2, makers.id, "Maker's Mark", "S1"),
     ]
+
+
+# ---- I3: the LLM matching layer (M3) after S1–S3; the LLM is always a fake ----
+
+
+class FakeMatchingLLM:
+    """M3a answers come from `by_name` (menu line name -> translation); M3b always says "unsure".
+
+    `answer` replaces the M3a answer: an exception is raised, a str is returned as is.
+    """
+
+    def __init__(self, by_name=None, answer=None, on_call=None):
+        self.by_name = by_name or {}
+        self.answer = answer
+        self.on_call = on_call
+        self.payloads = []
+
+    def generate_json(self, prompt, payload, response_schema):
+        self.payloads.append(payload)
+        if self.on_call is not None:
+            self.on_call()
+        if "menu_line" in payload:
+            return json.dumps({"choice": "unsure", "reason": ""})
+        if isinstance(self.answer, Exception):
+            raise self.answer
+        if self.answer is not None:
+            return self.answer
+        items = [{"line": line["line"], **self.by_name[line["name"]]}
+                 for line in payload["lines"] if line["target"] and line["name"] in self.by_name]
+        return json.dumps({"items": items}, ensure_ascii=False)
+
+
+def translation(**fields):
+    return {"bottler_en": None, "distillery_en": None, "brand_en": None, "age": None, "edition_tokens_en": [],
+            "expansions": [], "kind": "whisky", **fields}
+
+
+CAOL_ILA_12 = translation(brand_en="Caol Ila", age=12)
+
+
+@pytest.fixture
+def caol_ila(db_session):
+    brand = make_brand(db_session, "Caol Ila")  # no Korean brand alias: S1–S3 leave "카올 일라 12" unmatched
+    return {
+        12: make_product(db_session, brand, "Caol Ila 12", aliases=("쿨일라 12년",), age_years=12),
+        18: make_product(db_session, brand, "Caol Ila 18", age_years=18),
+    }
+
+
+@pytest.fixture
+def use_llm_layer():
+    def use(llm, max_calls=30, use_m3b=False):
+        app.dependency_overrides[get_matching_llm_layer] = lambda: LLMLayerConfig(llm, max_calls, use_m3b)
+        return llm
+
+    yield use
+    app.dependency_overrides.pop(get_matching_llm_layer, None)
+
+
+def candidates_of(item):
+    return [(c.product_id, c.candidate_rank, c.method, c.score, c.evidence) for c in item.candidates]
+
+
+def test_llm_layer_is_off_by_default(client, db_session, image_storage, operator, caol_ila, menu_lines, monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "secret-test-key")
+    monkeypatch.setenv("MATCHING_LLM_ENABLED", "false")
+    assert get_matching_llm_layer() is None
+
+    def refuse(*args, **kwargs):
+        raise AssertionError("the LLM layer must not run while it is off")
+
+    monkeypatch.setattr(menu_import_processing, "M3Engine", refuse)
+    monkeypatch.setattr(menu_import_processing, "CatalogSnapshot", refuse)
+    menu_lines("Caol Ila 18", "카올 일라 12")
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    assert menu_import.status == ImportStatus.READY_FOR_REVIEW
+    exact, unknown = items_of(menu_import)
+    assert (exact.initial_resolution_status, unknown.initial_resolution_status) == (
+        ResolutionStatus.EXACT_MATCH, ResolutionStatus.UNMATCHED)
+    assert unknown.candidates == []
+
+
+def test_llm_candidates_are_ambiguous_and_never_selected(
+    client, db_session, image_storage, operator, caol_ila, use_extractor, use_llm_layer
+):
+    payload = {"items": [product_line(1, "Caol Ila 18"), product_line(2, "카올 일라 12"), product_line(3, "하이볼"),
+                         {**product_line(4, "x"), "productName": None}]}
+
+    class LinesExtractor(MockMenuExtractor):
+        def extract(self, image, content_type, filename):
+            return ExtractionResult(items=parse_extraction_response(payload), raw_output=payload)
+
+    use_extractor(LinesExtractor())
+    llm = use_llm_layer(FakeMatchingLLM({"카올 일라 12": CAOL_ILA_12, "하이볼": translation(kind="non_whisky")}))
+
+    import_id = upload(client, make_bar(db_session), operator)
+
+    menu_import = load_import(db_session, import_id)
+    assert menu_import.status == ImportStatus.READY_FOR_REVIEW
+    # One M3a request per photo: every line in order, the unconfirmed ones marked (a line without a name is left out).
+    assert llm.payloads == [{"lines": [{"line": 1, "name": "Caol Ila 18", "target": False},
+                                       {"line": 2, "name": "카올 일라 12", "target": True},
+                                       {"line": 3, "name": "하이볼", "target": True}]}]
+    exact, llm_line, non_whisky, nameless = items_of(menu_import)
+    assert [i.initial_resolution_status for i in (exact, llm_line, non_whisky, nameless)] == [
+        ResolutionStatus.EXACT_MATCH, ResolutionStatus.AMBIGUOUS, ResolutionStatus.UNMATCHED, ResolutionStatus.UNMATCHED]
+    assert candidates_of(llm_line) == [(caol_ila[12].id, 1, MatchMethod.LLM, Decimal("0.500000"), {
+        "rule": "M3a", "via": ["relookup", "tokens"], "englishName": "Caol Ila 12", "confirmRecommended": True})]
+    assert non_whisky.candidates == [] and nameless.candidates == []
+    # A candidate only: nothing is selected or published until the owner confirms it.
+    assert llm_line.selected_product_id is None and llm_line.review_status.value == "pending"
+    assert (MenuChangeType.ADD, llm_line.id, None) in changes_of(db_session, menu_import)
+
+    [image] = client.get(f"/api/menu-imports/{import_id}", headers=operator).json()["images"]
+    item = image["items"][1]
+    assert (item["initialResolutionStatus"], item["proposedProductId"]) == ("ambiguous", str(caol_ila[12].id))
+    [candidate] = item["candidates"]
+    assert (candidate["matchMethod"], candidate["score"], candidate["evidence"]["rule"]) == ("llm", 0.5, "M3a")
+    assert candidate["evidence"]["confirmRecommended"] is True
+
+
+def test_llm_candidates_come_before_the_rule_candidates(
+    client, db_session, image_storage, operator, glenfiddich, menu_lines, use_llm_layer
+):
+    sherry = make_product(db_session, glenfiddich[12].brand, "Glenfiddich 12 Sherry Cask", age_years=12,
+                          edition_name="Sherry Cask")
+    menu_lines("글렌피딕 12년 싱글몰트")  # S2: brand + age, two products of that age
+    use_llm_layer(FakeMatchingLLM({"글렌피딕 12년 싱글몰트": translation(brand_en="Glenfiddich", age=12)}))
+
+    [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
+
+    assert item.initial_resolution_status == ResolutionStatus.AMBIGUOUS
+    (llm_id, _, llm_method, _, llm_evidence), (rule_id, rank, rule_method, _, rule_evidence) = candidates_of(item)
+    assert (llm_id, llm_method, llm_evidence["rule"], llm_evidence["confirmRecommended"]) == (
+        glenfiddich[12].id, MatchMethod.LLM, "M3a", True)  # the LLM pick is one of the rule candidates
+    assert (rule_id, rank, rule_method, rule_evidence["rule"]) == (sherry.id, 2, MatchMethod.ALIAS, "S2")
+
+
+def test_call_cap_leaves_the_remaining_lines_with_their_rule_result(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_llm_layer
+):
+    menu_lines("카올 일라 12", "카올 일라 12")  # the same name twice on each photo
+    llm = use_llm_layer(FakeMatchingLLM({"카올 일라 12": CAOL_ILA_12}), max_calls=1)
+
+    items = items_of(load_import(
+        db_session, upload(client, make_bar(db_session), operator, filenames=("sample.jpg", "sample-2.jpg"))))
+
+    # One request (photo 1), whose lines list the name once; both of its items get the LLM candidate.
+    assert llm.payloads == [{"lines": [{"line": 1, "name": "카올 일라 12", "target": True}]}]
+    assert [[c.method for c in item.candidates] for item in items[:2]] == [[MatchMethod.LLM], [MatchMethod.LLM]]
+    assert [(item.initial_resolution_status, item.candidates) for item in items[2:]] == [
+        (ResolutionStatus.UNMATCHED, [])] * 2
+
+
+@pytest.mark.parametrize(
+    "answer", [MatchingLLMError("gave up"), RuntimeError("API down"), TimeoutError(), "not json", '{"items": "x"}']
+)
+def test_llm_failure_keeps_the_rule_results(
+    client, db_session, image_storage, operator, glenfiddich, menu_lines, use_llm_layer, answer
+):
+    menu_lines("글렌피딕 12년 싱글몰트", "글렌피딕 18년")
+    llm = use_llm_layer(FakeMatchingLLM(answer=answer))
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    assert len(llm.payloads) == 1 and menu_import.status == ImportStatus.READY_FOR_REVIEW
+    rule_line, unknown = items_of(menu_import)
+    assert rule_line.initial_resolution_status == ResolutionStatus.AMBIGUOUS
+    assert [(c.product_id, c.method, c.evidence["rule"]) for c in rule_line.candidates] == [
+        (glenfiddich[12].id, MatchMethod.ALIAS, "S2")]
+    assert (unknown.initial_resolution_status, unknown.candidates) == (ResolutionStatus.UNMATCHED, [])
+
+
+@pytest.mark.parametrize("broken", ["CatalogSnapshot", "M3Engine"])
+def test_bug_in_the_layer_keeps_the_rule_results(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_llm_layer, monkeypatch, caplog, broken
+):
+    def bug(*args, **kwargs):
+        raise KeyError("bug")
+
+    monkeypatch.setattr(menu_import_processing, broken, bug)
+    menu_lines("Caol Ila 18", "카올 일라 12")
+    use_llm_layer(FakeMatchingLLM({"카올 일라 12": CAOL_ILA_12}))
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    assert menu_import.status == ImportStatus.READY_FOR_REVIEW
+    assert [i.initial_resolution_status for i in items_of(menu_import)] == [
+        ResolutionStatus.EXACT_MATCH, ResolutionStatus.UNMATCHED]
+    assert "the LLM matching layer failed; keeping the rule results" in caplog.text
+
+
+def test_no_transaction_is_open_during_llm_calls(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_llm_layer
+):
+    in_transaction = []
+    menu_lines("카올 일라 12")
+    use_llm_layer(FakeMatchingLLM({"카올 일라 12": CAOL_ILA_12},
+                                  on_call=lambda: in_transaction.append(db_session.in_transaction())))
+
+    upload(client, make_bar(db_session), operator, filenames=("sample.jpg", "sample-2.jpg"))
+
+    assert in_transaction == [False, False]
+
+
+def test_no_call_when_every_line_is_confirmed(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_llm_layer
+):
+    menu_lines("Caol Ila 18", "쿨일라 12년")
+    llm = use_llm_layer(FakeMatchingLLM())
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    assert llm.payloads == []
+    assert {i.initial_resolution_status for i in items_of(menu_import)} == {ResolutionStatus.EXACT_MATCH}
+
+
+def test_m3b_runs_only_when_enabled(client, db_session, image_storage, operator, caol_ila, menu_lines, use_llm_layer):
+    menu_lines("꿀일라 시크릿")
+    secret = translation(brand_en="Caol Ila", edition_tokens_en=["Secret"])  # M3a finds nothing
+    llm = use_llm_layer(FakeMatchingLLM({"꿀일라 시크릿": secret}), use_m3b=True)
+
+    [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
+
+    assert ["lines" in p for p in llm.payloads] == [True, False]  # M3a, then M3b (which says "unsure")
+    assert (item.initial_resolution_status, item.candidates) == (ResolutionStatus.UNMATCHED, [])

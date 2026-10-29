@@ -1,0 +1,84 @@
+{
+ "key": "1a8c668376f92f9b9b89bc2d0f126091618b4390f7e896a4da4af2a9abe57c61",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "High Coast Cinco"
+    },
+    "sig": "EtEDCs4DAWkUfROnWMoWYze4VASq5YOgnfxYnNUyNgAooHYfZLCdP7voT6rwpR2S3TfK/BwZd//c8KnZie3Ce4qOOEDeGaM0yGc+pcq/Y1yxuvGk6MfmNpCidBk7Ygp7wjzXXHQrhDFn7jdzLUaAPP83kQu8gNa+xg80vU6s0tUgyhx9hlqkBJ46lbMAfEziFjqAfGw6450wgtY6GWWtF97Md9IoZPUFm8LHbgYxKl7GtdEnHI7nFM6l48D+UbWFCkxfHVL7EigaQV0kKEE2mZiKa7mhQ16CBO1gyPbtL+ufnXfrUBPJalhp6umIJo66CgN3IlIZ9L0jAyf9qJg5g88hTWzyUbOW2yC6mYEEt98Pu+h9fc3bJCdiriR/aFVxQLusX3H9R+SjOslfR5ZrKkyREv/z5yQtxpgj5J6XysXkYeg6ZQ6HJErVHD2QTRiUZ0ZBr3H0GHf0EBuIwajPNLpoWETf+kznsu/vsIHXgULoaWhcCBYOBWjtM5BklAzStIJELgzOQ2dMBGyhVZZiBTgQotl8tdCU2qLSVGALpyvhj9IPe4g7WRktkZBOEel/MBvLHZ+OzbJGBmtGnx2eeakfyB+jEglB4a13nWHP7ESAnlDN"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Starward Solera"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Kavalan Ex Bourbon Oak"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Michel Couvreur Unexpected"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Ki-Won Batch"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "M&H Single Cask"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Jack Daniel's Single Barrel"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Weller Special Reserve"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Wild Turkey Rare Breed"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 6759,
+   "output_tokens": 177,
+   "thought_tokens": 97
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:47:14.563601+00:00",
+  "latency_ms": 2810,
+  "attempts": 1,
+  "turn": 2
+ }
+}

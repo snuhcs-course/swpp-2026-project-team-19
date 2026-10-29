@@ -1,0 +1,35 @@
+{
+ "key": "a9787886328b2fbd6f75d37cf1b2c4e105f986d80120eb7258f14c6239baf5f5",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Knob Creek"
+    },
+    "sig": "EooECocEAWkUfRPjT+vdeaZOC7RinJbp1z39K2U32FPTj0yLhNxVYS2/KsEHwnkZva7oeH7OxcZ+afooWVzM10M+l2or1MId40pWqfTdRB5Z+m/HULzRef+z01/RndevqeGfwiBYrxaawnvMtpJhMArKzw3D/Gj+DD1ppFnbREjpeFnXvGq8Xh2CJ9T+DXIo10i2TVY25JXVNtPY6kBzdrgjy6/b+BNN1aNXtXYeisPra/17ziIZY2xB6garpNklR1FGpwSk/GHgbat8IoYf5yqOW3gELqgKZHdl/S8lRnCfC4WU3bYXS0ReVEHSmw+xjJZSBvg3rCxHadi7ZxUkbv9MtU6Vtb6Udm4A20AB8wVAl/I7GWRVK/7a25iIi08qyob5qwh5OTDwDQ7Jlwgu6foBd4J2Tx8GKPvviii8j5ccYX9zwCUCBrKvkBoetHWoMmtT0RxCxXRWb+mZqPie+izZzjMCfrFIWqRBiFPskeknNi6b3K4e0xlHilvMfG1IIbYyMGTX8aVIo3k9ADOXFNmmI+Rz/EG+pY+DJJhxcDXH5KZFFUkNN09MnQ4suXqMXf6PB/ZicjkJ8tCRsKQ9VJQZMQfsUQ+t6czqpg4PqxLvjA+fhSYXDmlR8hNXQGAgksYJ0KoBL2yXWBrt5MDscS+zNbpQzyEM1NXTJ4++RtdxKTxVK7Iv2KUGyUrb"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Yamazaki Smoky Batch"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 2124,
+   "output_tokens": 37,
+   "thought_tokens": 131
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:44:06.961068+00:00",
+  "latency_ms": 1738,
+  "attempts": 1,
+  "turn": 1
+ }
+}

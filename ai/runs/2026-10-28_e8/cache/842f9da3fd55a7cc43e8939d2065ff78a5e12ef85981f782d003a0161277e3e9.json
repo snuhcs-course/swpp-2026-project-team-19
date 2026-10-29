@@ -1,0 +1,160 @@
+{
+ "key": "842f9da3fd55a7cc43e8939d2065ff78a5e12ef85981f782d003a0161277e3e9",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "Yamazaki 12y (야마자키 12년)",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "Yamazaki Dr (야마자키 Dr)",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "Hakushu Dr (하쿠슈 Dr)",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "Hibiki (히비키)",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "Kavalan Original (카발란)",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "Kavalan Triple Sherry Cask",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "Kavalan Vinho Barrique",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "SANSIBAR 21y Batch4 (산시바)",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "SANSIBAR 21y",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "High Coast Sherry",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "High Coast Maria PX Sherry",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "High Coast Eva Beer Cask",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "Eld Vatten 8y (엘드바튼)",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "Eld Vatten 11y (브룩라디)",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "Eld Vatten 14y (벤네비스)",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "김과장 #2 (바베이도스 럼)",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "김과장 #3 (하이랜드 파크)",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "김과장 #4 (클라이넬리쉬)",
+    "target": true
+   },
+   {
+    "line": 19,
+    "name": "Hakushu 12y",
+    "target": false
+   },
+   {
+    "line": 20,
+    "name": "The Nectar 11y (글렌 오드)",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "The Nectar 12y (밀튼 더프)",
+    "target": true
+   },
+   {
+    "line": 22,
+    "name": "The Maltman Dailuaine 14y (달루인)",
+    "target": true
+   },
+   {
+    "line": 23,
+    "name": "The Maltman DeanSton 14y (딘스톤)",
+    "target": true
+   },
+   {
+    "line": 24,
+    "name": "The Maltman Campbeltown 10y",
+    "target": true
+   },
+   {
+    "line": 25,
+    "name": "The Maltman Master's Blend 34y",
+    "target": true
+   },
+   {
+    "line": 26,
+    "name": "Whisky Agency Bruichladdich 12y",
+    "target": true
+   },
+   {
+    "line": 27,
+    "name": "Whisky Agency Secret Islay 6y",
+    "target": true
+   },
+   {
+    "line": 28,
+    "name": "Signatory Speyside M Sherry",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Yamazaki\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Distiller's\", \"Reserve\"],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"Dr\",\n          \"expansion\": \"Distiller's Reserve\"\n        }\n      ]\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hibiki\",\n      \"age\": null,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kavalan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Original\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kavalan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Vinho\", \"Barrique\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": \"Sansibar\",\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": 21,\n      \"edition_tokens_en\": [\"Batch\", \"4\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": \"Sansibar\",\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": 21,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"High Coast\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Sherry\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 11,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"High Coast\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Maria\", \"PX\", \"Sherry\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"High Coast\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Eva\", \"Beer\", \"Cask\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": \"Eld Vatten\",\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": 8,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": \"Eld Vatten\",\n      \"distillery_en\": \"Bruichladdich\",\n      \"brand_en\": null,\n      \"age\": 11,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": \"Eld Vatten\",\n      \"distillery_en\": \"Ben Nevis\",\n      \"brand_en\": null,\n      \"age\": 14,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [\"#2\"],\n      \"kind\": \"non_whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": \"Highland Park\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [\"#3\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 18,\n      \"bottler_en\": null,\n      \"distillery_en\": \"Clynelish\",\n      \"brand_en\": null,\n      \"age\": null,\n      \"edition_tokens_en\": [\"#4\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": \"The Nectar\",\n      \"distillery_en\": \"Glen Ord\",\n      \"brand_en\": null,\n      \"age\": 11,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 21,\n      \"bottler_en\": \"The Nectar\",\n      \"distillery_en\": \"Miltonduff\",\n      \"brand_en\": null,\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 22,\n      \"bottler_en\": \"The Maltman\",\n      \"distillery_en\": \"Dailuaine\",\n      \"brand_en\": null,\n      \"age\": 14,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 23,\n      \"bottler_en\": \"The Maltman\",\n      \"distillery_en\": \"Deanston\",\n      \"brand_en\": null,\n      \"age\": 14,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 24,\n      \"bottler_en\": \"The Maltman\",\n      \"distillery_en\": null,\n      \"brand_en\": \"Campbeltown\",\n      \"age\": 10,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": \"The Maltman\",\n      \"distillery_en\": null,\n      \"brand_en\": \"Master's Blend\",\n      \"age\": 34,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 26,\n      \"bottler_en\": \"The Whisky Agency\",\n      \"distillery_en\": \"Bruichladdich\",\n      \"brand_en\": null,\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 27,\n      \"bottler_en\": \"The Whisky Agency\",\n      \"distillery_en\": null,\n      \"brand_en\": \"Secret Islay\",\n      \"age\": 6,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 28,\n      \"bottler_en\": \"Signatory Vintage\",\n      \"distillery_en\": null,\n      \"brand_en\": \"Speyside\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"M\", \"Sherry\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-28T09:44:06.717712+00:00",
+  "latency_ms": 6358,
+  "attempts": 1,
+  "input_tokens": 2065,
+  "output_tokens": 2093,
+  "thought_tokens": 104
+ }
+}

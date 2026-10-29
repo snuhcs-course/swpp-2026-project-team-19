@@ -1,0 +1,28 @@
+{
+ "key": "0984fce6fae99178b7b078db1774dfb0a5c5d83a09a88739be87670632d91789",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Nomad Outland Whisky"
+    },
+    "sig": "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"
+   }
+  ],
+  "usage": {
+   "input_tokens": 5192,
+   "output_tokens": 20,
+   "thought_tokens": 578
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:43:59.032528+00:00",
+  "latency_ms": 2810,
+  "attempts": 1,
+  "turn": 2
+ }
+}

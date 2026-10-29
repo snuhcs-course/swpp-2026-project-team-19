@@ -1,0 +1,468 @@
+{
+ "key": "dc2e702d2ec0fa46de0a5587c18e83d124a180e9b8f7ffb2997270f114b0f6e9",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "submit_answers",
+    "args": {
+     "answers": [
+      {
+       "edition_tokens_en": [
+        "The Original"
+       ],
+       "line": 1,
+       "brand_en": "Glenmorangie",
+       "sure": true,
+       "bottler_en": "",
+       "kind": "whisky",
+       "distillery_en": "Glenmorangie",
+       "age": 0,
+       "product_id": ""
+      },
+      {
+       "distillery_en": "Glenmorangie",
+       "edition_tokens_en": [
+        "Lasanta"
+       ],
+       "brand_en": "Glenmorangie",
+       "kind": "whisky",
+       "product_id": "p5",
+       "age": 0,
+       "sure": true,
+       "bottler_en": "",
+       "line": 2
+      },
+      {
+       "edition_tokens_en": [
+        "Nectar d'Or"
+       ],
+       "sure": true,
+       "product_id": "p3",
+       "age": 16,
+       "brand_en": "Glenmorangie",
+       "line": 4,
+       "distillery_en": "Glenmorangie",
+       "bottler_en": "",
+       "kind": "whisky"
+      },
+      {
+       "line": 5,
+       "bottler_en": "",
+       "sure": true,
+       "edition_tokens_en": [
+        "Calvados Cask Finish"
+       ],
+       "age": 12,
+       "kind": "whisky",
+       "product_id": "p1",
+       "distillery_en": "Glenmorangie",
+       "brand_en": "Glenmorangie"
+      },
+      {
+       "product_id": "",
+       "line": 6,
+       "sure": true,
+       "distillery_en": "Glenmorangie",
+       "age": 0,
+       "bottler_en": "",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "A Tale of Spice"
+       ],
+       "brand_en": "Glenmorangie"
+      },
+      {
+       "age": 0,
+       "kind": "whisky",
+       "brand_en": "Glenmorangie",
+       "product_id": "",
+       "sure": true,
+       "distillery_en": "Glenmorangie",
+       "line": 7,
+       "bottler_en": "",
+       "edition_tokens_en": [
+        "A Tale of Tokyo"
+       ]
+      },
+      {
+       "kind": "whisky",
+       "product_id": "",
+       "age": 18,
+       "brand_en": "Glenmorangie",
+       "edition_tokens_en": [
+        "Infinite"
+       ],
+       "line": 8,
+       "bottler_en": "",
+       "sure": true,
+       "distillery_en": "Glenmorangie"
+      },
+      {
+       "brand_en": "Balblair",
+       "bottler_en": "",
+       "kind": "whisky",
+       "age": 12,
+       "product_id": "",
+       "sure": true,
+       "edition_tokens_en": [],
+       "line": 10,
+       "distillery_en": "Balblair"
+      },
+      {
+       "product_id": "",
+       "sure": true,
+       "line": 11,
+       "brand_en": "Balblair",
+       "edition_tokens_en": [],
+       "bottler_en": "",
+       "age": 18,
+       "distillery_en": "Balblair",
+       "kind": "whisky"
+      },
+      {
+       "brand_en": "Glendronach",
+       "age": 0,
+       "bottler_en": "",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Traditionally Peated"
+       ],
+       "distillery_en": "Glendronach",
+       "product_id": "p30",
+       "line": 12,
+       "sure": true
+      },
+      {
+       "sure": true,
+       "age": 0,
+       "distillery_en": "Glendronach",
+       "line": 15,
+       "product_id": "p37",
+       "edition_tokens_en": [
+        "Ode to the Barley"
+       ],
+       "brand_en": "Glendronach",
+       "kind": "whisky",
+       "bottler_en": ""
+      },
+      {
+       "line": 21,
+       "distillery_en": "Loch Lomond",
+       "bottler_en": "",
+       "brand_en": "Loch Lomond",
+       "sure": true,
+       "product_id": "",
+       "kind": "whisky",
+       "edition_tokens_en": [],
+       "age": 14
+      },
+      {
+       "bottler_en": "",
+       "sure": true,
+       "edition_tokens_en": [
+        "Cask Strength"
+       ],
+       "line": 24,
+       "age": 0,
+       "brand_en": "Tomatin",
+       "product_id": "",
+       "distillery_en": "Tomatin",
+       "kind": "whisky"
+      },
+      {
+       "age": 14,
+       "line": 25,
+       "product_id": "",
+       "sure": true,
+       "distillery_en": "Tomatin",
+       "kind": "whisky",
+       "edition_tokens_en": [],
+       "bottler_en": "",
+       "brand_en": "Tomatin"
+      },
+      {
+       "age": 18,
+       "brand_en": "Tomatin",
+       "distillery_en": "Tomatin",
+       "sure": true,
+       "product_id": "",
+       "line": 26,
+       "edition_tokens_en": [],
+       "kind": "whisky",
+       "bottler_en": ""
+      },
+      {
+       "sure": true,
+       "brand_en": "Glenturret",
+       "age": 0,
+       "line": 27,
+       "bottler_en": "",
+       "edition_tokens_en": [
+        "Triple Wood"
+       ],
+       "kind": "whisky",
+       "product_id": "",
+       "distillery_en": "Glenturret"
+      },
+      {
+       "edition_tokens_en": [
+        "Peated"
+       ],
+       "bottler_en": "",
+       "line": 28,
+       "sure": true,
+       "age": 10,
+       "product_id": "",
+       "kind": "whisky",
+       "brand_en": "Glenturret",
+       "distillery_en": "Glenturret"
+      },
+      {
+       "sure": true,
+       "line": 29,
+       "brand_en": "Glenturret",
+       "bottler_en": "",
+       "distillery_en": "Glenturret",
+       "kind": "whisky",
+       "age": 12,
+       "product_id": "",
+       "edition_tokens_en": []
+      },
+      {
+       "line": 30,
+       "product_id": "",
+       "sure": true,
+       "kind": "whisky",
+       "bottler_en": "",
+       "distillery_en": "Glengarioch",
+       "edition_tokens_en": [],
+       "age": 15,
+       "brand_en": "Glengarioch"
+      },
+      {
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "1997",
+        "Batch 12",
+        "Cask Strength"
+       ],
+       "product_id": "",
+       "line": 31,
+       "brand_en": "Glengarioch",
+       "distillery_en": "Glengarioch",
+       "sure": true,
+       "age": 0,
+       "bottler_en": ""
+      },
+      {
+       "line": 35,
+       "bottler_en": "",
+       "brand_en": "Ardbeg",
+       "sure": true,
+       "distillery_en": "Ardbeg",
+       "product_id": "",
+       "kind": "whisky",
+       "age": 0,
+       "edition_tokens_en": [
+        "Smokiest"
+       ]
+      },
+      {
+       "distillery_en": "Ardbeg",
+       "bottler_en": "",
+       "kind": "whisky",
+       "age": 0,
+       "sure": true,
+       "product_id": "p71",
+       "brand_en": "Ardbeg",
+       "edition_tokens_en": [
+        "Uigeadail"
+       ],
+       "line": 36
+      },
+      {
+       "brand_en": "Ardbeg",
+       "age": 0,
+       "bottler_en": "",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Spectacular"
+       ],
+       "product_id": "p70",
+       "sure": true,
+       "distillery_en": "Ardbeg",
+       "line": 38
+      },
+      {
+       "product_id": "",
+       "brand_en": "Ardbeg",
+       "age": 14,
+       "kind": "whisky",
+       "distillery_en": "Ardbeg",
+       "edition_tokens_en": [
+        "Anthology"
+       ],
+       "sure": true,
+       "bottler_en": "",
+       "line": 39
+      },
+      {
+       "line": 40,
+       "brand_en": "Ardbeg",
+       "sure": true,
+       "edition_tokens_en": [
+        "Traigh Bhan"
+       ],
+       "bottler_en": "",
+       "kind": "whisky",
+       "distillery_en": "Ardbeg",
+       "age": 19,
+       "product_id": ""
+      },
+      {
+       "sure": true,
+       "edition_tokens_en": [
+        "Y2K"
+       ],
+       "age": 23,
+       "product_id": "",
+       "line": 41,
+       "brand_en": "Ardbeg",
+       "bottler_en": "",
+       "kind": "whisky",
+       "distillery_en": "Ardbeg"
+      },
+      {
+       "line": 44,
+       "brand_en": "Laphroaig",
+       "bottler_en": "",
+       "sure": true,
+       "kind": "whisky",
+       "distillery_en": "Laphroaig",
+       "product_id": "",
+       "edition_tokens_en": [
+        "Select"
+       ],
+       "age": 0
+      },
+      {
+       "bottler_en": "",
+       "line": 46,
+       "sure": true,
+       "distillery_en": "Laphroaig",
+       "product_id": "p76",
+       "age": 10,
+       "kind": "whisky",
+       "brand_en": "Laphroaig",
+       "edition_tokens_en": [
+        "Sherry Cask Finish"
+       ]
+      },
+      {
+       "bottler_en": "",
+       "edition_tokens_en": [],
+       "age": 18,
+       "kind": "whisky",
+       "product_id": "",
+       "brand_en": "Laphroaig",
+       "sure": true,
+       "distillery_en": "Laphroaig",
+       "line": 49
+      },
+      {
+       "distillery_en": "Laphroaig",
+       "line": 50,
+       "product_id": "",
+       "sure": true,
+       "age": 25,
+       "brand_en": "Laphroaig",
+       "edition_tokens_en": [
+        "Cask Strength"
+       ],
+       "kind": "whisky",
+       "bottler_en": ""
+      },
+      {
+       "sure": true,
+       "distillery_en": "Bowmore",
+       "edition_tokens_en": [],
+       "product_id": "",
+       "line": 51,
+       "brand_en": "Bowmore",
+       "age": 10,
+       "bottler_en": "",
+       "kind": "whisky"
+      },
+      {
+       "bottler_en": "",
+       "age": 18,
+       "sure": true,
+       "line": 55,
+       "brand_en": "Bowmore",
+       "product_id": "",
+       "edition_tokens_en": [
+        "Deep and Complex"
+       ],
+       "distillery_en": "Bowmore",
+       "kind": "whisky"
+      },
+      {
+       "line": 56,
+       "distillery_en": "Bowmore",
+       "bottler_en": "",
+       "sure": true,
+       "brand_en": "Bowmore",
+       "kind": "whisky",
+       "edition_tokens_en": [
+        "Sherry Oak"
+       ],
+       "product_id": "",
+       "age": 12
+      },
+      {
+       "sure": true,
+       "product_id": "",
+       "edition_tokens_en": [
+        "Sherry Oak"
+       ],
+       "line": 57,
+       "age": 15,
+       "distillery_en": "Bowmore",
+       "brand_en": "Bowmore",
+       "bottler_en": "",
+       "kind": "whisky"
+      },
+      {
+       "bottler_en": "",
+       "line": 58,
+       "distillery_en": "Bowmore",
+       "brand_en": "Bowmore",
+       "sure": true,
+       "kind": "whisky",
+       "product_id": "",
+       "edition_tokens_en": [
+        "Sherry Oak"
+       ],
+       "age": 18
+      }
+     ]
+    },
+    "sig": "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"
+   }
+  ],
+  "usage": {
+   "input_tokens": 12772,
+   "output_tokens": 2420,
+   "thought_tokens": 1018
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:46:09.638464+00:00",
+  "latency_ms": 8611,
+  "attempts": 1,
+  "turn": 2
+ }
+}

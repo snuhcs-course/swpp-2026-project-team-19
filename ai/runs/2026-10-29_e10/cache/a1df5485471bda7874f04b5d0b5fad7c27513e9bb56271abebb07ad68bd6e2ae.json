@@ -1,0 +1,53 @@
+{
+ "key": "a1df5485471bda7874f04b5d0b5fad7c27513e9bb56271abebb07ad68bd6e2ae",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "submit_answers",
+    "args": {
+     "answers": [
+      {
+       "line": 11,
+       "bottler_en": "",
+       "brand_en": "Knob Creek",
+       "distillery_en": "",
+       "kind": "whisky",
+       "age": 0,
+       "edition_tokens_en": [],
+       "product_id": "p1",
+       "sure": true
+      },
+      {
+       "product_id": "",
+       "line": 27,
+       "distillery_en": "",
+       "edition_tokens_en": [
+        "Smoky"
+       ],
+       "bottler_en": "",
+       "kind": "whisky",
+       "brand_en": "Yamazaki",
+       "age": 0,
+       "sure": false
+      }
+     ]
+    },
+    "sig": "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"
+   }
+  ],
+  "usage": {
+   "input_tokens": 2999,
+   "output_tokens": 138,
+   "thought_tokens": 513
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:44:17.712905+00:00",
+  "latency_ms": 2653,
+  "attempts": 1,
+  "turn": 3
+ }
+}

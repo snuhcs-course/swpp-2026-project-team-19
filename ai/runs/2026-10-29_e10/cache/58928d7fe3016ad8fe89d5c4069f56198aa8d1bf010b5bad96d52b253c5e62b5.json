@@ -1,0 +1,40 @@
+{
+ "key": "58928d7fe3016ad8fe89d5c4069f56198aa8d1bf010b5bad96d52b253c5e62b5",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "submit_answers",
+    "args": {
+     "answers": [
+      {
+       "bottler_en": "",
+       "sure": true,
+       "edition_tokens_en": [],
+       "line": 9,
+       "product_id": "p1",
+       "kind": "whisky",
+       "distillery_en": "Aultmore",
+       "age": 12,
+       "brand_en": "Aultmore"
+      }
+     ]
+    },
+    "sig": "Es4FCssFAWkUfROKYTl13hFg+kzd7uLqd+7EQBWpqC9HX2E6AkQbjnBkB4LTYZJy+0R0qViEAVvIuXCuKw5ELb+UHsGMnIJoNKIo2OUgELwKuXDKAvke6d3O+v3AIrtjpchyK4qs+ff4lJWRVvNXmGPlsP9iD/ANGvUzCSygy9qM46HGLXH8KULQJLQYlEf4UQemrPf9MLCOVm1obNWBQbS13PmGKsB4qxd+vFeSsvZpzgjl1UWOhF7I7bqrcKO5xcYYRCcNldxw+KcNbx49rin6Dav7fp2geWN4GQhD5iSMivX2yWaKj08303uOCL+r97agY9RDlTi2N+P4euvl9y9mSK8CqR4kuK1X12mYbM/6atgoCMPKnXnC8sAXpwaAKvYqqE7+o0FuHeqfVEPnEspri2uC0jn1YtWssQg7vBKq679CFESkleaxOMTIv+5MIYuzvEBE3iZvTgx5RjyNunxQixGKvJTSyRTdXaZi762wJNJeS0W2NstOijJpwGrBySpif2+H98ptgmlE2Xw9Cs+t0sGXP5BUcuq5qHIAkZyYFYsyzkil7nNpXGsVKq2zvq1fv9b2XCHTa8VCIYxDjp1U5RgOD8fAbDDnDS0/s50WtUxC60udkI9LRSU4Hz+cqJeT3lFF7rBDWV8hzYbNCxjOGYUlljizGXXvDCka1Yb+vTm/CVRMofPn3K0+D2GGIRN8VGF/1Fa/DwOR2hAEpslbLsNwIH6zOhdYkP52oc6gPZNMc681OUutiHaN0Xte0jff7lOc0gpQNdN1mFoWLo1DJRyxyBEJSiQ6To1seHMp8NGk/aFzrinKLTqdsVpT58/ofs1nw5f1YWBmdwGpufFqx+qVHOU+6QdBg6E2N7LLhhOL/CvWc8NB2sowqM7iSkNnnJHNhGHu09l7ZyUO1s6eum0O05KnYoleWKlaQ/EUiRGAzKfmQa2wHseyyY4S8w=="
+   }
+  ],
+  "usage": {
+   "input_tokens": 1986,
+   "output_tokens": 78,
+   "thought_tokens": 196
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:52:18.389044+00:00",
+  "latency_ms": 1930,
+  "attempts": 1,
+  "turn": 2
+ }
+}

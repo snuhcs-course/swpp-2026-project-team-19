@@ -1,5 +1,6 @@
 """Shared dependencies for adapters, chosen by environment variables. Tests override them."""
 
+import logging
 import os
 from collections.abc import Callable
 from datetime import datetime, timedelta
@@ -12,8 +13,12 @@ from botocore.config import Config
 from app.adapters.business_verification import BusinessVerifier
 from app.adapters.certificate_ocr import CertificateOcr
 from app.adapters.extraction import MenuExtractor, MockMenuExtractor
+from app.adapters.matching_llm import load_matching_llm_settings
 from app.adapters.storage import ImageStorage, LocalImageStorage, S3ImageStorage
+from app.matching.llm_layer import LLMLayerConfig
 from app.services.request_limits import DailyRequestLimiter, InMemoryDailyLimiter, utc_now
+
+logger = logging.getLogger(__name__)
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_IMAGE_STORAGE_DIR = BACKEND_DIR / "var" / "images"
@@ -73,6 +78,28 @@ def get_menu_extractor() -> MenuExtractor:
         except ExtractionConfigError as error:
             raise RuntimeError(f"{setting} is not configured: {error}") from error
     raise RuntimeError(f"Unsupported MENU_EXTRACTOR: {kind!r} (supported: mock, gemini)")
+
+
+@lru_cache(maxsize=1)
+def get_matching_llm_layer() -> LLMLayerConfig | None:
+    """The LLM matching layer for menu import, or None when it is off (the default).
+
+    MATCHING_LLM_ENABLED=true turns it on with GEMINI_API_KEY; MATCHING_LLM_MAX_CALLS caps the
+    model requests per import (default 30) and MATCHING_LLM_M3B_ENABLED=true adds M3b. Without
+    a key the layer stays off with a warning instead of stopping the server: imports then keep
+    the rule results, as they would after a failed call.
+    """
+    settings = load_matching_llm_settings()  # RuntimeError for an invalid cap stops the server
+    if not settings.enabled:
+        return None
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        logger.warning("MATCHING_LLM_ENABLED=true but GEMINI_API_KEY is not set; the LLM matching layer is off")
+        return None
+    # Imported here so a server with the layer off does not load the Gemini SDK for it.
+    from app.adapters.gemini_matching_llm import GeminiMatchingLLM
+
+    return LLMLayerConfig(llm=GeminiMatchingLLM(api_key), max_calls=settings.max_calls, use_m3b=settings.m3b_enabled)
 
 
 def get_certificate_ocr() -> CertificateOcr | None:

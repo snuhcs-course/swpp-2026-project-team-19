@@ -1,0 +1,195 @@
+{
+ "key": "b5bde6faf69863948fe9bab9416ebeaa9ad9f7d4c0767750cc6a159ce3294047",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "하이 코스트(High Coast) 신코 배치 2",
+    "target": false
+   },
+   {
+    "line": 2,
+    "name": "스타워드(Starward) 솔레라",
+    "target": false
+   },
+   {
+    "line": 3,
+    "name": "오마르(Omar) 버번",
+    "target": false
+   },
+   {
+    "line": 4,
+    "name": "오마르(Omar) 셰리",
+    "target": false
+   },
+   {
+    "line": 5,
+    "name": "카발란(Kavalan) 클래식",
+    "target": false
+   },
+   {
+    "line": 6,
+    "name": "카발란(Kavalan) 엑스 버번 오크",
+    "target": false
+   },
+   {
+    "line": 7,
+    "name": "카발란(Kavalan) 포트캐스크 피니시",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "카발란(Kavalan) 트리플 셰리",
+    "target": false
+   },
+   {
+    "line": 9,
+    "name": "카발란(Kavalan) 올로로소 셰리",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "카발란(Kavalan) 솔리스트 올로로소 셰리",
+    "target": false
+   },
+   {
+    "line": 11,
+    "name": "카발란(Kavalan) 솔리스트 포트",
+    "target": false
+   },
+   {
+    "line": 12,
+    "name": "카발란(Kavalan) 비노 바리끄",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "미셸쿠브어(Michel Couveur) 언익스펙티드 넘버3 CS",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "미셸쿠브어(Michel Couveur) 오버에이지드",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "미셸쿠브어(Michel Couveur) 오버에이지드 코리아 에디션",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "기원(Ki-Won) 배치 3 캐스크 스트랭스",
+    "target": false
+   },
+   {
+    "line": 17,
+    "name": "기원(Ki-Won) 배치 4 스모크",
+    "target": false
+   },
+   {
+    "line": 18,
+    "name": "기원(Ki-Won) 배치 4 피티드",
+    "target": false
+   },
+   {
+    "line": 19,
+    "name": "기원(Ki-Won) 배치 5 포트 캐스크 스트랭스",
+    "target": false
+   },
+   {
+    "line": 20,
+    "name": "기원(Ki-Won) 배치 7",
+    "target": false
+   },
+   {
+    "line": 21,
+    "name": "기원(Ki-Won) 시그니처",
+    "target": false
+   },
+   {
+    "line": 22,
+    "name": "기원(Ki-Won) 레드페퍼 캐스크",
+    "target": false
+   },
+   {
+    "line": 23,
+    "name": "밀크 앤 허니(M&H) 버번 싱글 캐스크",
+    "target": false
+   },
+   {
+    "line": 24,
+    "name": "밀크 앤 허니(M&H) PX 셰리 싱글 캐스크",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "잭다니엘(Jack Daniel) 넘버 7",
+    "target": true
+   },
+   {
+    "line": 26,
+    "name": "잭다니엘(Jack Daniel) 애플",
+    "target": true
+   },
+   {
+    "line": 27,
+    "name": "잭다니엘(Jack Daniel) 싱글 배럴 100 프루프",
+    "target": false
+   },
+   {
+    "line": 28,
+    "name": "버팔로 트레이스(Buffalo Trace) 버번",
+    "target": false
+   },
+   {
+    "line": 29,
+    "name": "버팔로 트레이스(Buffalo Trace) 웰러 스페셜 리저브",
+    "target": true
+   },
+   {
+    "line": 30,
+    "name": "버팔로 트레이스(Buffalo Trace) 웰러 12년",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "와일드 터키(Wild Turkey) 101 라이",
+    "target": false
+   },
+   {
+    "line": 32,
+    "name": "와일드 터키(Wild Turkey) 8년 버번",
+    "target": true
+   },
+   {
+    "line": 33,
+    "name": "와일드 터키(Wild Turkey) 레어브리드 버번",
+    "target": true
+   },
+   {
+    "line": 34,
+    "name": "와일드 터키(Wild Turkey) 레어브리드 라이",
+    "target": false
+   },
+   {
+    "line": 35,
+    "name": "와일드 터키(Wild Turkey) 12년 버번",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kavalan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Port\", \"Cask\", \"Finish\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kavalan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Oloroso\", \"Sherry\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kavalan\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Vinho\", \"Barrique\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Michel Couvreur\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Unexpected\", \"No.3\", \"CS\"],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"CS\",\n          \"expansion\": \"Cask Strength\"\n        }\n      ]\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Michel Couvreur\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Overaged\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Michel Couvreur\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Overaged\", \"Korea\", \"Edition\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Jack Daniel's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"No.7\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 26,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Jack Daniel's\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Apple\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 29,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"W.L. Weller\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Special\", \"Reserve\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"W.L. Weller\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 32,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Wild Turkey\",\n      \"age\": 8,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 33,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Wild Turkey\",\n      \"age\": null,\n      \"edition_tokens_en\": [\"Rare\", \"Breed\", \"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 35,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Wild Turkey\",\n      \"age\": 12,\n      \"edition_tokens_en\": [\"Bourbon\"],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-28T09:49:56.017646+00:00",
+  "latency_ms": 3432,
+  "attempts": 1,
+  "input_tokens": 2409,
+  "output_tokens": 1173,
+  "thought_tokens": 107
+ }
+}

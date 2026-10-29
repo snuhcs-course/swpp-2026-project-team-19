@@ -1,0 +1,80 @@
+{
+ "key": "80a34735346d5f6c5eab7ab32a230e2205faa16f3b030608ca2b02aabed17aad",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "submit_answers",
+    "args": {
+     "answers": [
+      {
+       "age": 5,
+       "kind": "whisky",
+       "brand_en": "Ardbeg",
+       "product_id": "p1",
+       "sure": true,
+       "bottler_en": "",
+       "distillery_en": "",
+       "edition_tokens_en": [
+        "Wee Beastie"
+       ],
+       "line": 3
+      },
+      {
+       "edition_tokens_en": [
+        "Cask Strength"
+       ],
+       "bottler_en": "",
+       "product_id": "p11",
+       "kind": "whisky",
+       "line": 11,
+       "brand_en": "Laphroaig",
+       "sure": true,
+       "age": 10,
+       "distillery_en": ""
+      },
+      {
+       "edition_tokens_en": [],
+       "line": 14,
+       "bottler_en": "",
+       "sure": true,
+       "brand_en": "Port Charlotte",
+       "product_id": "p21",
+       "age": 10,
+       "kind": "whisky",
+       "distillery_en": ""
+      },
+      {
+       "sure": true,
+       "line": 15,
+       "age": 0,
+       "bottler_en": "",
+       "kind": "whisky",
+       "product_id": "p31",
+       "distillery_en": "",
+       "brand_en": "Bruichladdich",
+       "edition_tokens_en": [
+        "The Classic Laddie",
+        "Scottish Barley"
+       ]
+      }
+     ]
+    },
+    "sig": "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"
+   }
+  ],
+  "usage": {
+   "input_tokens": 3428,
+   "output_tokens": 289,
+   "thought_tokens": 730
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:51:00.977406+00:00",
+  "latency_ms": 3323,
+  "attempts": 1,
+  "turn": 2
+ }
+}

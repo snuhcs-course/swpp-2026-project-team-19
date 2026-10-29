@@ -17,9 +17,9 @@ Catalog conditions
       test gold does not change the dev catalog.
 
 Outcome per line (glass/bottle rows of one line count once)
-  correct        exact_match to the gold product; for both: (one line, two products)
-                 a multi result with exactly the two gold products
-  partial        both: line, exact_match to only one of its two products
+  correct        exact_match to the gold product; for both: (one line, two or three
+                 products) a multi result with exactly the gold products
+  partial        both: line, a result naming only some of its products
   ambiguous_ok   ambiguous, gold among the candidates -> owner picks
   ambiguous_bad  ambiguous, gold not among the candidates
   unmatched      no candidate (correct outcome when gold is absent from the catalog)
@@ -138,7 +138,8 @@ def judge(gold: str, r, key_to_id: dict, in_catalog) -> str:
         named = {p.proposed_product_id for p in r.parts}
         if not named <= ids:
             return "false_merge"
-        return "correct" if both and len(ids) == 2 and named == ids else "partial"
+        # every gold product of the line is in the catalog and named (two or three products per line)
+        return "correct" if both and len(ids) == len(gold_refs(gold)) and named == ids else "partial"
     if status == "exact_match":
         if r.proposed_product_id not in ids:
             return "false_merge"

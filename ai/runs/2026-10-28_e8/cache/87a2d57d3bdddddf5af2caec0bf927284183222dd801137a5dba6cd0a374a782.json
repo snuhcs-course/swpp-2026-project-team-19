@@ -1,0 +1,225 @@
+{
+ "key": "87a2d57d3bdddddf5af2caec0bf927284183222dd801137a5dba6cd0a374a782",
+ "kind": "m3a",
+ "input": {
+  "lines": [
+   {
+    "line": 1,
+    "name": "산토리(Santory) 월드 위스키 아오",
+    "target": true
+   },
+   {
+    "line": 2,
+    "name": "산토리(Santory) 히비키 제페니즈 하모니",
+    "target": true
+   },
+   {
+    "line": 3,
+    "name": "산토리(Santory) 하쿠슈 DR",
+    "target": true
+   },
+   {
+    "line": 4,
+    "name": "산토리(Santory) 하쿠슈 12년",
+    "target": true
+   },
+   {
+    "line": 5,
+    "name": "산토리(Santory) 야마자키 DR",
+    "target": true
+   },
+   {
+    "line": 6,
+    "name": "산토리(Santory) 야마자키 12년",
+    "target": true
+   },
+   {
+    "line": 7,
+    "name": "닛카(Nikka) 프롬 더 배럴",
+    "target": true
+   },
+   {
+    "line": 8,
+    "name": "닛카(Nikka) 다케스루 퓨어몰트",
+    "target": true
+   },
+   {
+    "line": 9,
+    "name": "닛카(Nikka) 요이치 싱글몰트",
+    "target": true
+   },
+   {
+    "line": 10,
+    "name": "닛카(Nikka) 미아기쿄 싱글몰트",
+    "target": true
+   },
+   {
+    "line": 11,
+    "name": "나가하마(Nagahama) 더 세컨드 배치",
+    "target": true
+   },
+   {
+    "line": 12,
+    "name": "나가하마(Nagahama) PX 셰리",
+    "target": true
+   },
+   {
+    "line": 13,
+    "name": "나가하마(Nagahama) 피티드 PX 셰리",
+    "target": true
+   },
+   {
+    "line": 14,
+    "name": "마르스(Mars) 더 럭키캣 메이 앤 하나",
+    "target": true
+   },
+   {
+    "line": 15,
+    "name": "마르스(Mars) 더 럭키캣 하나 앤 초코",
+    "target": true
+   },
+   {
+    "line": 16,
+    "name": "마르스(Mars) 고마가타케 2023 에디션",
+    "target": true
+   },
+   {
+    "line": 17,
+    "name": "마르스(Mars) 고마가타케 2024 에디션",
+    "target": true
+   },
+   {
+    "line": 18,
+    "name": "마르스(Mars) 츠누키 2025 에디션",
+    "target": false
+   },
+   {
+    "line": 19,
+    "name": "기린(Kirin) 후지산 로크 시그니처 블랜드",
+    "target": true
+   },
+   {
+    "line": 20,
+    "name": "카노스케(Kanosuke) 싱글몰트",
+    "target": true
+   },
+   {
+    "line": 21,
+    "name": "카노스케(Kanosuke) 히오키 팟스틸",
+    "target": true
+   },
+   {
+    "line": 22,
+    "name": "카노스케(Kanosuke) 더블 디스틸러리",
+    "target": true
+   },
+   {
+    "line": 23,
+    "name": "부쉬밀(Bushmill) 블랙 부쉬",
+    "target": true
+   },
+   {
+    "line": 24,
+    "name": "부쉬밀(Bushmill) 10년",
+    "target": false
+   },
+   {
+    "line": 25,
+    "name": "부쉬밀(Bushmill) 12년",
+    "target": true
+   },
+   {
+    "line": 26,
+    "name": "레드 브레스트(Red Breast) 12년",
+    "target": false
+   },
+   {
+    "line": 27,
+    "name": "네터잭(Natterjack) 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 28,
+    "name": "암룻(Amrut) 인디안",
+    "target": true
+   },
+   {
+    "line": 29,
+    "name": "암룻(Amrut) 피티드 인디안",
+    "target": true
+   },
+   {
+    "line": 30,
+    "name": "암룻(Amrut) 퓨젼",
+    "target": true
+   },
+   {
+    "line": 31,
+    "name": "암룻(Amrut) 인디안 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 32,
+    "name": "암룻(Amrut) 피티드 인디안 캐스크 스트랭스",
+    "target": true
+   },
+   {
+    "line": 33,
+    "name": "암룻(Amrut) 나랑기",
+    "target": true
+   },
+   {
+    "line": 34,
+    "name": "암룻(Amrut) 인터미디에이트 셰리",
+    "target": true
+   },
+   {
+    "line": 35,
+    "name": "암룻(Amrut) 포토노바",
+    "target": true
+   },
+   {
+    "line": 36,
+    "name": "폴존(Paul John) 클래식",
+    "target": true
+   },
+   {
+    "line": 37,
+    "name": "폴존(Paul John) 피티드",
+    "target": false
+   },
+   {
+    "line": 38,
+    "name": "폴존(Paul John) 올로로소 셰리",
+    "target": true
+   },
+   {
+    "line": 39,
+    "name": "폴존(Paul John) PX 셰리",
+    "target": true
+   },
+   {
+    "line": 40,
+    "name": "폴존(Paul John) 라크리마",
+    "target": true
+   },
+   {
+    "line": 41,
+    "name": "폴존(Paul John) 리데레",
+    "target": true
+   }
+  ]
+ },
+ "output_text": "{\n  \"items\": [\n    {\n      \"line\": 1,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Suntory\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"World\",\n        \"Whisky\",\n        \"Ao\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 2,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hibiki\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Japanese\",\n        \"Harmony\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 3,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hakushu\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"DR\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"DR\",\n          \"expansion\": \"Distiller's Reserve\"\n        }\n      ]\n    },\n    {\n      \"line\": 4,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Hakushu\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 5,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Yamazaki\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"DR\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": [\n        {\n          \"token\": \"DR\",\n          \"expansion\": \"Distiller's Reserve\"\n        }\n      ]\n    },\n    {\n      \"line\": 6,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Yamazaki\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 7,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Nikka\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"From\",\n        \"The\",\n        \"Barrel\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 8,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Nikka\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Taketsuru\",\n        \"Pure\",\n        \"Malt\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 9,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Yoichi\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Single\",\n        \"Malt\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 10,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Miyagikyo\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Single\",\n        \"Malt\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 11,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Nagahama\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"The\",\n        \"Second\",\n        \"Batch\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 12,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Nagahama\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"PX\",\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 13,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Nagahama\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Peated\",\n        \"PX\",\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 14,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Mars\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"The\",\n        \"Lucky\",\n        \"Cat\",\n        \"May\",\n        \"and\",\n        \"Hana\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 15,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Mars\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"The\",\n        \"Lucky\",\n        \"Cat\",\n        \"Hana\",\n        \"and\",\n        \"Choco\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 16,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Mars\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Komagatake\",\n        \"2023\",\n        \"Edition\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 17,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Mars\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Komagatake\",\n        \"2024\",\n        \"Edition\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 19,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kirin\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Fuji\",\n        \"Sanroku\",\n        \"Signature\",\n        \"Blend\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 20,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kanosuke\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Single\",\n        \"Malt\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 21,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kanosuke\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Hioki\",\n        \"Pot\",\n        \"Still\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 22,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Kanosuke\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Double\",\n        \"Distillery\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 23,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bushmills\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Black\",\n        \"Bush\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 25,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Bushmills\",\n      \"age\": 12,\n      \"edition_tokens_en\": [],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 27,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Natterjack\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Cask\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 28,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Amrut\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Indian\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 29,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Amrut\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Peated\",\n        \"Indian\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 30,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Amrut\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Fusion\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 31,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Amrut\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Indian\",\n        \"Cask\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 32,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Amrut\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Peated\",\n        \"Indian\",\n        \"Cask\",\n        \"Strength\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 33,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Amrut\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Naarangi\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 34,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Amrut\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Intermediate\",\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 35,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Amrut\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Portonova\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 36,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Paul John\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Classic\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 38,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Paul John\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Oloroso\",\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 39,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Paul John\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"PX\",\n        \"Sherry\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 40,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Paul John\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Lacara\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    },\n    {\n      \"line\": 41,\n      \"bottler_en\": null,\n      \"distillery_en\": null,\n      \"brand_en\": \"Paul John\",\n      \"age\": null,\n      \"edition_tokens_en\": [\n        \"Ridere\"\n      ],\n      \"kind\": \"whisky\",\n      \"expansions\": []\n    }\n  ]\n}",
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "prompt_sha256": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+  "started_at": "2026-10-28T09:41:58.113582+00:00",
+  "latency_ms": 9834,
+  "attempts": 1,
+  "input_tokens": 2544,
+  "output_tokens": 3580,
+  "thought_tokens": 130
+ }
+}

@@ -1,0 +1,42 @@
+{
+ "key": "c87f3b7de9b91f9688372bc6b7a43179788d8f13398499c372877d90ca8dcaee",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Old Parr 12"
+    },
+    "sig": "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"
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Kirin Fuji Single Grain"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Kirin Fuji Single Blended"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 4584,
+   "output_tokens": 61,
+   "thought_tokens": 588
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:50:43.363404+00:00",
+  "latency_ms": 4984,
+  "attempts": 1,
+  "turn": 2
+ }
+}

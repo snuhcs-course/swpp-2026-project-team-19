@@ -1,0 +1,105 @@
+{
+ "key": "f6e554fbfad3115ad1d8fcaafb286866ebafa52d37ce6dd6d2750584ce796274",
+ "kind": "tools",
+ "output": {
+  "calls": [
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Yamazaki Distiller's Reserve"
+    },
+    "sig": "EtYDCtMDAWkUfROXcehnypc7UVd2jTKtgwOFnbeVTgMFgTRJ7d0oLKt5ZEjo73FiIAMz0D2iv79lLGMRtvbzquJywVl7GDR6iL2OAeED9MZscLxtzFOY0/u+uZDbm0A+6AJz67jVW1sP/LnG6fHqO+dZY2lLtjR6FV2WQEBWWFUsMxKOD6xzpMnl6Ckn0qX5WXHLtg8UbUDFyr4K7dj9OAaDzvjKpt+/6pfETEmq6izltoERc79QUWfXPVt8UNq+kuFIBEyfedMijuTJxbtzr11ffIn2STJYtYKazb7S6G6VxJ2YN0V1O3fe2b4Yq2POTzwItnzJ2YhrlpvAkqZmKzMFpE8mcwkrLmPm2dkc38CxoQMJGpE4kp8/z+s0gwoce04HnvMgPdWNt0usDqvCzePxGIqhIa+egeVhDeZCF6vE4Rowr5RIOzj+F6n0xWk/lEu+NJ2gtv+runZgsagkuYfUtzeBwDpva9QhWd5wv+hbugjq+dm46W5+5kLpHHYxNNjKvQXqK5GFt8ScNRXCc7q/UggnUgLUS+MZ+TmJrpudQNp76AP6DBCWEN+DyPFIL7exTDSo5qJzjFPQ/T1O6roLP6njS/yaYph3SlI+JKpw3KzlH+GBQF8="
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Hibiki Japanese Harmony"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Kavalan Classic"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Kavalan Vinho Barrique"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Sansibar 21y"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "High Coast Sherry"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Eld Vatten"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "김과장"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "The Nectar"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Whisky Agency Bruichladdich"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Whisky Agency Secret Islay"
+    },
+    "sig": null
+   },
+   {
+    "name": "search_catalog",
+    "args": {
+     "query": "Signatory Speyside M Sherry"
+    },
+    "sig": null
+   }
+  ],
+  "usage": {
+   "input_tokens": 2215,
+   "output_tokens": 241,
+   "thought_tokens": 98
+  }
+ },
+ "meta": {
+  "model": "gemini-3.1-flash-lite",
+  "thinking_level": "low",
+  "started_at": "2026-10-29T05:55:05.804631+00:00",
+  "latency_ms": 2336,
+  "attempts": 1,
+  "turn": 1
+ }
+}
