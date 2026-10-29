@@ -254,6 +254,10 @@ BAD_NUMBER = ("businessRegistrationNumber", "INVALID_BUSINESS_NUMBER")
         pytest.param({"businessRegistrationNumber": "1234567890"}, BAD_NUMBER, id="check digit"),
         pytest.param({"businessRegistrationNumber": "12345"}, BAD_NUMBER, id="too short"),
         pytest.param({"openingDate": "2020-3-2"}, ("openingDate", "DATE_FROM_DATETIME_PARSING"), id="date format"),
+        pytest.param(
+            {"openingDate": "2020-03-02T00:00:00"}, ("openingDate", "DATE_FROM_DATETIME_PARSING"), id="datetime"
+        ),
+        pytest.param({"openingDate": "2020-02-30"}, ("openingDate", "DATE_FROM_DATETIME_PARSING"), id="no such day"),
         pytest.param({"openingDate": 1583107200}, ("openingDate", "DATE_TYPE"), id="date as a number"),
         pytest.param({"representativeName": "   "}, ("representativeName", "STRING_TOO_SHORT"), id="blank name"),
         pytest.param({"representativeName": "가" * 101}, ("representativeName", "STRING_TOO_LONG"), id="long name"),
@@ -358,6 +362,35 @@ def test_others_and_finished_applications_do_not_block(client, db_session, auth,
     make_application(db_session, applicant, bar, status=OwnerApplicationStatus.CANCELED)
 
     assert apply(client, auth, existing_bar_body(bar)).status_code == 201
+
+
+def test_no_transaction_is_open_while_nts_answers(client, db_session, auth, verifier, limiter):
+    open_during_call = []
+    verifier.during_call = lambda: open_during_call.append(db_session.in_transaction())
+
+    assert apply(client, auth, existing_bar_body(make_bar(db_session))).status_code == 201
+    assert open_during_call == [False]
+
+
+def test_the_bar_is_checked_again_after_nts_answers(client, db_session, auth, verifier, limiter):
+    bar = make_bar(db_session)
+
+    def deactivate():
+        bar.status = BarStatus.INACTIVE
+        db_session.flush()
+
+    verifier.during_call = deactivate
+
+    assert error_of(apply(client, auth, existing_bar_body(bar))) == (404, "BAR_NOT_FOUND")
+    assert application_count(db_session) == 0
+
+
+def test_an_owner_approved_while_nts_answers_blocks_the_claim(client, db_session, auth, verifier, limiter):
+    bar = make_bar(db_session)
+    operator = make_user(db_session, "operator-subject", user_type=UserType.OPERATOR)
+    verifier.during_call = lambda: make_owner(db_session, make_user(db_session, OTHER_SUBJECT), bar, operator)
+
+    assert error_of(apply(client, auth, existing_bar_body(bar))) == (409, "BAR_OWNER_EXISTS")
 
 
 def test_a_concurrent_duplicate_is_caught_by_the_database(client, db_session, auth, applicant, verifier, limiter):
@@ -473,13 +506,12 @@ def test_a_temporary_operator_reads_any_application(client, db_session, token_fo
     assert response.status_code == 200
 
 
-def test_other_integrity_errors_are_not_reported_as_duplicates(client, db_session, auth, verifier, limiter):
-    bar = make_bar(db_session)
-    # The bar disappears while NTS answers, so the insert breaks its foreign key, not a pending index.
-    verifier.during_call = lambda: (db_session.delete(bar), db_session.flush())
+def test_other_integrity_errors_are_not_reported_as_duplicates(client, db_session, auth, applicant, verifier, limiter):
+    # The applicant disappears while NTS answers, so the insert breaks a foreign key, not a pending index.
+    verifier.during_call = lambda: (db_session.delete(applicant), db_session.flush())
 
     with pytest.raises(IntegrityError):
-        apply(client, auth, existing_bar_body(bar))
+        apply(client, auth, new_bar_body())
 
 
 # ---- cancel (3.11.5) ----

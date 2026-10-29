@@ -5,6 +5,7 @@ The request is one of two shapes picked by `applicationType`; a field of the oth
 rejected (`EXTRA_FORBIDDEN`), e.g. `proposedBar` on an `existing_bar` application.
 """
 
+import re
 from datetime import date
 from typing import Literal
 from uuid import UUID
@@ -15,6 +16,8 @@ from pydantic_core import PydanticCustomError
 from app.core.business_number import normalize_business_number
 from app.core.errors import register_union_tags
 from app.schemas.common import UtcDateTime
+
+DATE_TEXT = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 
 ApplicationType = Literal["existing_bar", "new_bar"]
 ApplicationStatus = Literal["pending", "approved", "rejected", "canceled"]
@@ -53,9 +56,12 @@ class _ApplicationInput(_Strict):
     @field_validator("openingDate", mode="before")
     @classmethod
     def _date_text(cls, value: object) -> object:
-        # Only `YYYY-MM-DD` text; Pydantic would otherwise read a number as a Unix timestamp.
+        # Only `YYYY-MM-DD` text: Pydantic would otherwise read a number as a Unix timestamp and accept
+        # a midnight datetime such as "2020-03-02T00:00:00". A day that does not exist still fails below.
         if not isinstance(value, str):
             raise PydanticCustomError("date_type", "Input should be a valid date in YYYY-MM-DD format")
+        if not DATE_TEXT.fullmatch(value):
+            raise PydanticCustomError("date_from_datetime_parsing", "Input should be a valid date in YYYY-MM-DD format")
         return value
 
     @field_validator("applicantNote")

@@ -63,19 +63,21 @@ def submit_application(
     applicant = _caller(session, principal)
     if applicant is None:
         raise user_not_found()
-
-    bar_id = None
-    if isinstance(request, ExistingBarApplicationInput):
-        bar = _active_bar(session, request.barId)
-        if session.scalar(select(BarOwner.id).where(BarOwner.bar_id == bar.id, BarOwner.revoked_at.is_(None))):
-            raise ApiError(409, "BAR_OWNER_EXISTS", "이미 업주가 등록된 업장입니다.")
-        bar_id = bar.id
-    if (existing := _pending_duplicate(session, applicant.id, request, bar_id)) is not None:
+    applicant_id = applicant.id
+    bar_id = _claimable_bar_id(session, request)
+    if (existing := _pending_duplicate(session, applicant_id, request, bar_id)) is not None:
         raise _application_exists(existing)
 
-    result, business_status = _check_business(principal, request, verifier, limiter, now)
+    result, business_status = BusinessVerificationResult.UNAVAILABLE, None
+    if verifier is not None:
+        # End the read transaction so the connection goes back to the pool while NTS answers (up to
+        # two 5 s tries). The bar or its owner may change meanwhile, so they are checked again; a
+        # duplicate application created meanwhile is caught by the partial unique index below.
+        session.commit()
+        result, business_status = _check_business(principal, request, verifier, limiter, now)
+        _claimable_bar_id(session, request)
     application = BarOwnerApplication(
-        applicant_user_id=applicant.id,
+        applicant_user_id=applicant_id,
         application_type=OwnerApplicationType(request.applicationType),
         bar_id=bar_id,
         business_registration_number=request.businessRegistrationNumber,
@@ -97,7 +99,7 @@ def submit_application(
     except IntegrityError:
         # A concurrent request created the same pending application after the check above. The
         # NTS check stays counted, as the spec says.
-        existing = _pending_duplicate(session, applicant.id, request, bar_id)
+        existing = _pending_duplicate(session, applicant_id, request, bar_id)
         if existing is None:
             raise
         raise _application_exists(existing) from None
@@ -230,6 +232,16 @@ def _active_bar(session: Session, bar_id: str) -> Bar:
     return bar
 
 
+def _claimable_bar_id(session: Session, request: OwnerApplicationInput) -> UUID | None:
+    """The claimed bar of an existing_bar application, if it is active and has no current owner."""
+    if not isinstance(request, ExistingBarApplicationInput):
+        return None
+    bar = _active_bar(session, request.barId)
+    if session.scalar(select(BarOwner.id).where(BarOwner.bar_id == bar.id, BarOwner.revoked_at.is_(None))):
+        raise ApiError(409, "BAR_OWNER_EXISTS", "이미 업주가 등록된 업장입니다.")
+    return bar.id
+
+
 def _pending_duplicate(
     session: Session, applicant_id: UUID, request: OwnerApplicationInput, bar_id: UUID | None
 ) -> BarOwnerApplication | None:
@@ -258,15 +270,13 @@ def _application_exists(existing: BarOwnerApplication) -> ApiError:
 def _check_business(
     principal: Principal,
     request: OwnerApplicationInput,
-    verifier: BusinessVerifier | None,
+    verifier: BusinessVerifier,
     limiter: DailyRequestLimiter,
     now: datetime,
 ) -> tuple[BusinessVerificationResult, BusinessStatus | None]:
-    """The NTS check of spec 3.11.2: counted against today's limit only when NTS is actually called."""
-    if verifier is None:
-        return BusinessVerificationResult.UNAVAILABLE, None
+    """The NTS check of spec 3.11.2, counted against today's limit. Without a verifier nothing is
+    called or counted, and the caller stores `unavailable`."""
     acquire_or_raise(limiter, principal.subject, BUSINESS_VERIFICATION, now)
-    # Nothing is written before the call, so the open transaction holds no locks while waiting.
     try:
         check = verifier.verify(request.businessRegistrationNumber, request.representativeName, request.openingDate)
     except BusinessVerificationUnavailable:
