@@ -193,8 +193,9 @@ fun OwnerOnboardingScreen(
             draft.representativeName.trim().length in 1..100&&validOpeningDate(draft.openingDateIso)
         RegPage.BARNAME->draft.proposedBarName.trim().length in 1..150&&exactMatches.isEmpty()
         RegPage.BARPHOTO->draft.applicantGallery.isNotEmpty()
-        RegPage.ADDRESS->listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
-            .filter{it.isNotBlank()}.joinToString(" ").trim().length in 1..500
+        RegPage.ADDRESS->draft.proposedBarAddress.isNotBlank() &&
+            listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
+                .filter{it.isNotBlank()}.joinToString(" ").trim().length in 1..500
         RegPage.BARPHONE->draft.storePhone.isNotBlank()&&validOwnerPhone(draft.storePhone)
         RegPage.MENUS->draft.initialMenuPhotos.isNotEmpty()
         RegPage.CONTACT->validContact
