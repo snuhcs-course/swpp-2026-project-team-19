@@ -50,6 +50,10 @@ Sources: final Owner HTML (2026-10-30), `BottleMap_Owner_Backend_API_Contract_Ga
   `MockOwnerApplication.businessNumberDigits` (Android-local ONLY; do not reinterpret this as an
   approved Backend DTO field). The stored number is sensitive; exclude from backups and do
   not use real applicant information in demo fixtures.
+- Existing-bar claims use their selected `existingBarId` and derive their display name
+  from the already-registered bar. Only NEW_BAR registration requires a new proposed name.
+- Locally published menu and serving-option IDs skip any existing manual-entry IDs;
+  publishing cannot create a second barMenuItemId or optionId already in the snapshot.
 - Test fixture application IDs may collide with the local sequence. Mock submission searches
   for the next unused `local-application-N` and advances the stored sequence atomically.
 - Custom operating exceptions require valid 0–1439 open/close minutes; a same-serving product

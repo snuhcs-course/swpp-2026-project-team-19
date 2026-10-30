@@ -409,6 +409,79 @@ class LocalOwnerMockRepositoryTest {
         ))
     }
 
+
+    @Test fun existingBarClaimDoesNotRequireNewProposedBarName() {
+        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r = repo(store)
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            kind = MockApplicationKind.EXISTING_BAR,
+            existingBarId = "fixture-bar",
+            proposedBarName = "",
+        ))
+        val id = r.submitRegistrationDraftForFixture()
+        val application = ready(repo(store)).applications.single()
+        assertEquals(id, application.applicationId)
+        assertEquals("fixture-bar", application.barId)
+        assertEquals("테스트 매장", application.proposedBarName)
+        assertEquals(1, ready(r).bars.size)
+        r.approveForFixture(id, ready(r).bars.single())
+        assertEquals(1, ready(r).bars.size)
+    }
+
+    @Test fun newBarRequiresNameAndExistingClaimRequiresValidBar() {
+        val r = repo()
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            kind = MockApplicationKind.NEW_BAR,
+            proposedBarName = " "
+        ))
+        rejects { r.submitRegistrationDraftForFixture() }
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            kind = MockApplicationKind.EXISTING_BAR,
+            existingBarId = "missing-bar"
+        ))
+        rejects { r.submitRegistrationDraftForFixture() }
+        assertTrue(ready(r).applications.isEmpty())
+    }
+
+    @Test fun photoPublishSkipsManualMenuAndServingOptionIds() {
+        val r = repo()
+        catalog(r)
+        val fixture = OwnerMockFixtures.imageFixtures(mapOf(
+            "content://image-for-16" to listOf(MockExtractedLine(
+                "line", "Bottle 16", MockLineKind.PRODUCT,
+                options = listOf(serving("from-photo", 30, 17000))
+            ))
+        ))
+        val id = r.startPhotoImport(
+            "fixture-bar", listOf("content://image-for-16"), fixture
+        )
+        val nextId = ready(r).nextLocalId
+        // Exactly the IDs that naive publish would generate from the nextLocalId
+        // and its immediate successor are occupied by a manually added product.
+        val manualMenuId = "local-menu-$nextId"
+        val manualOptionId = "local-serving-${nextId + 2}"
+        r.saveMenuItem(MockBarMenuItem(
+            manualMenuId, "fixture-bar", "product-12",
+            listOf(serving(manualOptionId, 30, 12000))
+        ))
+        val lineId = ready(r).imports.single().images.single().lines.single().extractedItemId
+        r.decideLine(id, lineId, 1,
+            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT, "product-16"))
+        assertEquals(1, r.publishAddOnly(id, 1))
+        val items = ready(r).menuItems
+        assertEquals(2, items.size)
+        assertEquals(2, items.map { it.barMenuItemId }.distinct().size)
+        assertEquals(2, items.flatMap { it.options }.map { it.optionId }.distinct().size)
+        val addedMenu = items.single { it.productId == "product-16" }
+        assertTrue(addedMenu.barMenuItemId != manualMenuId)
+        assertTrue(addedMenu.options.single().optionId != manualOptionId)
+        r.setSoldOut(addedMenu.barMenuItemId, true)
+        assertEquals(false, ready(r).menuItems.single { it.productId == "product-12" }.soldOut)
+        assertEquals(true, ready(r).menuItems.single { it.productId == "product-16" }.soldOut)
+        r.deleteMenuItem(addedMenu.barMenuItemId)
+        assertEquals(manualMenuId, ready(r).menuItems.single().barMenuItemId)
+    }
+
     @Test fun failedWriteDoesNotExposeUnpersistedMutation() {
         val store = object : MockOwnerStateStore {
             override fun read() = OwnerMockFixtures.registeredBar()

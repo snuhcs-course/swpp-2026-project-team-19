@@ -94,9 +94,14 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
     /** Simulates submission only; no business validation or real operator approval. */
     override fun submitRegistrationDraftForFixture(): String = change { s ->
         val draft = requireNotNull(s.registrationDraft) { "No registration draft" }
-        require(draft.proposedBarName.isNotBlank())
-        require(draft.kind != MockApplicationKind.EXISTING_BAR ||
-            s.bars.any { it.barId == draft.existingBarId })
+        val existingBar = if (draft.kind == MockApplicationKind.EXISTING_BAR) {
+            requireNotNull(s.bars.firstOrNull { it.barId == draft.existingBarId }) {
+                "Existing bar must be selected for a claim"
+            }
+        } else {
+            require(draft.proposedBarName.isNotBlank()) { "New bar name is required" }
+            null
+        }
         // External test fixtures may already use local-application-N IDs. Reserve an
         // unused ID instead of trusting nextLocalId from a pre-seeded snapshot.
         var generatedId = s.nextLocalId
@@ -107,8 +112,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         val application = MockOwnerApplication(
             applicationId = id, kind = draft.kind,
             status = MockApplicationStatus.PENDING,
-            proposedBarName = draft.proposedBarName,
-            barId = draft.existingBarId,
+            // A claim references the selected bar; no proposedBar name is required by API 3.11.2.
+            proposedBarName = existingBar?.name ?: draft.proposedBarName,
+            barId = existingBar?.barId,
             representativeName = draft.representativeName.ifBlank { null },
             businessNumberDigits = draft.businessNumberDigits.filter(Char::isDigit).ifBlank { null },
             openingDateIso = draft.openingDateIso.ifBlank { null },
@@ -321,6 +327,19 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         val grouped = allLines.filter { it.decision?.kind == MockDecisionKind.SELECT_PRODUCT }
             .groupBy { requireNotNull(it.decision?.productId) }
         var index = s.nextLocalId
+        // Manual entries may use local-* IDs without advancing the import counter.
+        // Reserve against all existing IDs AND those already generated in this publish.
+        val usedMenuIds = s.menuItems.mapTo(mutableSetOf()) { it.barMenuItemId }
+        val usedOptionIds = s.menuItems.flatMapTo(mutableSetOf()) { item ->
+            item.options.map { it.optionId }
+        }
+        fun reserveUnusedLocalId(prefix: String, taken: MutableSet<String>): String {
+            var candidate: String
+            do {
+                candidate = "$prefix${index++}"
+            } while (!taken.add(candidate))
+            return candidate
+        }
         val added = grouped.mapNotNull { (productId, lines) ->
             if (s.menuItems.any { it.barId == job.barId && it.productId == productId }) return@mapNotNull null
             val options = lines.flatMap { it.decision?.correctedOptions ?: it.options }
@@ -335,11 +354,11 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 "Conflicting extracted price or discount for same serving option; review before publish"
             }
             MockBarMenuItem(
-                barMenuItemId = "local-menu-${index++}",
+                barMenuItemId = reserveUnusedLocalId("local-menu-", usedMenuIds),
                 barId = job.barId,
                 productId = productId,
                 options = byKey.values.map { opts ->
-                    opts.first().copy(optionId = "local-serving-${index++}")
+                    opts.first().copy(optionId = reserveUnusedLocalId("local-serving-", usedOptionIds))
                 },
             )
         }
