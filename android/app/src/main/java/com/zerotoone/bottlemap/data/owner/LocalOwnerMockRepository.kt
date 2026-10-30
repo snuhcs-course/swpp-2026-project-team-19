@@ -29,6 +29,7 @@ interface OwnerMockRepository {
     fun submitRegistrationDraftForFixture(): String
     fun approveForFixture(applicationId: String, bar: MockBar)
     fun closeApplicationForFixture(applicationId: String, status: MockApplicationStatus)
+    fun dismissRejectedForFixture(applicationId: String)
     fun saveBar(bar: MockBar)
     fun selectBar(barId: String)
     fun saveBrand(brand: MockBrand)
@@ -113,6 +114,13 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(draft.proposedBarAddress.isNotBlank()) { "New bar address is required" }
             null
         }
+        require(s.applications.none {
+            it.status == MockApplicationStatus.PENDING &&
+                (if (draft.kind == MockApplicationKind.EXISTING_BAR)
+                    it.kind == MockApplicationKind.EXISTING_BAR && it.barId == draft.existingBarId
+                else it.kind == MockApplicationKind.NEW_BAR &&
+                    it.proposedBarName.trim().equals(draft.proposedBarName.trim(), ignoreCase = true))
+        }) { "Already have a pending application for this bar" }
         // External test fixtures may already use local-application-N IDs. Reserve an
         // unused ID instead of trusting nextLocalId from a pre-seeded snapshot.
         var generatedId = s.nextLocalId
@@ -126,7 +134,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             // A claim references the selected bar; no proposedBar name is required by API 3.11.2.
             proposedBarName = existingBar?.name ?: draft.proposedBarName,
             barId = existingBar?.barId,
-            proposedBarAddress = if (existingBar == null) draft.proposedBarAddress.trim() else null,
+            proposedBarAddress = if (existingBar == null)
+                listOf(draft.proposedBarAddress, draft.proposedBarAddressDetail).filter { it.isNotBlank() }
+                    .joinToString(" ").trim() else null,
             representativeName = draft.representativeName.ifBlank { null },
             businessNumberDigits = draft.businessNumberDigits.filter(Char::isDigit).ifBlank { null },
             openingDateIso = draft.openingDateIso.ifBlank { null },
@@ -172,7 +182,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 applications = approved,
                 bars = if (s.bars.none { it.barId == bar.barId }) s.bars + bar else s.bars,
                 existingBarCandidates = s.existingBarCandidates.filterNot { it.barId == bar.barId },
-                selectedBarId = s.selectedBarId ?: bar.barId,
+                selectedBarId = bar.barId,
             ) to Unit
         }
     }
@@ -183,8 +193,19 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(s.applications.any { it.applicationId == applicationId &&
                 it.status == MockApplicationStatus.PENDING })
             s.copy(applications = s.applications.map {
-                if (it.applicationId == applicationId) it.copy(status = status) else it
+                if (it.applicationId == applicationId) it.copy(status = status,
+                    rejectionReason = if (status == MockApplicationStatus.REJECTED)
+                        "Mock 운영팀: 매장 정보를 다시 확인해 주세요." else it.rejectionReason) else it
             }) to Unit
+        }
+    }
+
+    /** Hides a rejected card in this device's Mock list without deleting audit history. */
+    override fun dismissRejectedForFixture(applicationId: String) {
+        change { s ->
+            require(s.applications.any { it.applicationId == applicationId &&
+                it.status == MockApplicationStatus.REJECTED })
+            s.copy(dismissedApplicationIds = s.dismissedApplicationIds + applicationId) to Unit
         }
     }
 

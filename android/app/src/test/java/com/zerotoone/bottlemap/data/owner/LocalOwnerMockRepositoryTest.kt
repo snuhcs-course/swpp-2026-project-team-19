@@ -737,6 +737,51 @@ class LocalOwnerMockRepositoryTest {
         ))).openSingleBarManager())
     }
 
+    @Test fun v4AddressDetailAndPhoneArePreservedOnSubmit() {
+        val r = repo(InMemoryMockOwnerStateStore())
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            proposedBarName = "V4 Test", proposedBarAddress = "서울 관악구 봉천로",
+            proposedBarAddressDetail = "2층", businessNumberDigits = "1234567891",
+            representativeName = "김민준", openingDateIso = "2019-05-14",
+            storePhone = "025551234", contactPhone = "01012345678"
+        ))
+        val id = r.submitRegistrationDraftForFixture()
+        val application = ready(r).applications.single { it.applicationId == id }
+        assertEquals("서울 관악구 봉천로 2층", application.proposedBarAddress)
+        assertEquals("025551234", application.storePhone)
+        assertEquals("01012345678", application.contactPhone)
+        assertEquals(MockApplicationStatus.PENDING, application.status)
+        assertTrue(ready(r).menuItems.isEmpty())
+    }
+
+    @Test fun v4DuplicatePendingSubmissionBlockedEvenWithFreshDraft() {
+        val r = repo(InMemoryMockOwnerStateStore())
+        val draft = MockRegistrationDraft(
+            proposedBarName = "Duplicate Pending Bar", proposedBarAddress = "Mock Address"
+        )
+        r.saveRegistrationDraft(draft)
+        r.submitRegistrationDraftForFixture()
+        r.saveRegistrationDraft(draft)
+        rejects { r.submitRegistrationDraftForFixture() }
+        assertEquals(1, ready(r).applications.count { it.status == MockApplicationStatus.PENDING })
+    }
+
+    @Test fun v4RejectedCardCanBeDismissedWithoutDeletingHistory() {
+        val store = InMemoryMockOwnerStateStore()
+        val r = repo(store)
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            proposedBarName = "Rejected Bar", proposedBarAddress = "Mock Address"
+        ))
+        val id = r.submitRegistrationDraftForFixture()
+        r.closeApplicationForFixture(id, MockApplicationStatus.REJECTED)
+        assertTrue(ready(r).applications.single().rejectionReason!!.isNotBlank())
+        r.dismissRejectedForFixture(id)
+        val restored = ready(repo(store))
+        assertTrue(id in restored.dismissedApplicationIds)
+        assertEquals(MockApplicationStatus.REJECTED, restored.applications.single().status)
+        rejects { r.dismissRejectedForFixture("unknown") }
+    }
+
     @Test fun failedWriteDoesNotExposeUnpersistedMutation() {
         val store = object : MockOwnerStateStore {
             override fun read() = OwnerMockFixtures.registeredBar()

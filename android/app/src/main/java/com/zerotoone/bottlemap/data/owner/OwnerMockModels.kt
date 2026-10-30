@@ -14,6 +14,7 @@ data class MockOwnerSnapshot(
     val menuItems: List<MockBarMenuItem> = emptyList(),
     val imports: List<MockMenuImport> = emptyList(),
     val selectedBarId: String? = null,
+    val dismissedApplicationIds: Set<String> = emptySet(), // local-only hidden rejected cards
     val existingBarCandidates: List<MockBar> = emptyList(), // Local-only discovery fixtures, not owned bars
     val nextLocalId: Long = 1L,
 )
@@ -46,6 +47,7 @@ data class MockRegistrationDraft(
     val existingBarId: String? = null,
     val proposedBarName: String = "",
     val proposedBarAddress: String = "", // 3.11.2 required for new_bar; local-only draft
+    val proposedBarAddressDetail: String = "", // Mock-only optional address line
     val businessNumberDigits: String = "",
     val representativeName: String = "",
     val openingDateIso: String = "",
@@ -72,6 +74,7 @@ data class MockOwnerApplication(
     val openingDateIso: String? = null,
     val contactPhone: String? = null,
     val storePhone: String? = null, // local-only public phone
+    val rejectionReason: String? = null, // Mock-only operator fixture reason
     val submittedAtEpochMs: Long = 0L,
     val registrationPhotos: List<MockPhoto> = emptyList(), // C05 unagreed
 )

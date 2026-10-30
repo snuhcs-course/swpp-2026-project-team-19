@@ -1,41 +1,69 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import android.content.Context
+import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import android.graphics.BitmapFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.ui.common.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
-/** I3-P14 local-only registration. Latest ACTION_FIRST v4 HTML was not supplied to
- * this runtime: labels/layout below follow the explicit prompt, not unverified HTML. */
-private enum class FormStep { METHOD, CERTIFICATE, BIZ, BAR, VERIFICATION, PHOTOS, PHONE, MENU, CONTACT, REVIEW, SUBMITTED }
-
-internal fun ownerPhoneDigits(v: String): String = v.filter(Char::isDigit).take(12)
-internal fun validOwnerPhone(value: String): Boolean =
-    value.isBlank() || (value.filter(Char::isDigit).length in 8..12)
-
+/** ACTION_FIRST v4 mock form; no real OCR, NTS, operator approval or upload API. */
+private enum class RegPage {
+    HOME, INTRO, METHOD, READING, BN, REP, DATE, BIZCHECK, VERIFYING, VERIFIED,
+    BARNAME, BARPHOTO, ADDRESS, BARPHONE, MENUS, CONTACT, REVIEW, DONE, VIEW_APPLICATION
+}
+private enum class VerifyFixture { MATCHED, FAILED, UNAVAILABLE, LIMITED }
+private fun regStage(page: RegPage): Int = when(page) {
+    RegPage.METHOD, RegPage.READING, RegPage.BN, RegPage.REP, RegPage.DATE,
+    RegPage.BIZCHECK, RegPage.VERIFYING, RegPage.VERIFIED -> 1
+    RegPage.BARNAME, RegPage.BARPHOTO, RegPage.ADDRESS, RegPage.BARPHONE -> 2
+    RegPage.MENUS -> 3
+    RegPage.CONTACT, RegPage.REVIEW -> 4
+    else -> 0
+}
+private fun bnFormat(s:String):String {
+    val n=ownerBusinessDigits(s)
+    return when {
+        n.length<=3 -> n
+        n.length<=5 -> n.take(3)+"-"+n.drop(3)
+        else -> n.take(3)+"-"+n.substring(3,5)+"-"+n.drop(5)
+    }
+}
+private fun dateInput(raw:String):String {
+    val n=raw.filter(Char::isDigit).take(8)
+    return when {
+        n.length<=4 -> n
+        n.length<=6 -> n.take(4)+"-"+n.drop(4)
+        else -> n.take(4)+"-"+n.substring(4,6)+"-"+n.drop(6)
+    }
+}
 @Composable
 fun OwnerOnboardingScreen(
     viewModel: OwnerMockViewModel,
@@ -52,290 +80,570 @@ fun OwnerOnboardingScreen(
         is MockOwnerLoadState.Empty -> s.snapshot
         else -> null
     }
-    val context=LocalContext.current
-    var step by rememberSaveable { mutableStateOf(if(startRegistration)FormStep.CERTIFICATE else FormStep.METHOD) }
+    val draft=snapshot?.registrationDraft ?: MockRegistrationDraft()
+    val bars=snapshot?.bars.orEmpty()
+    val candidates=snapshot?.existingBarCandidates.orEmpty()
+    val ctx=LocalContext.current
+    var screen by rememberSaveable { mutableStateOf(if(startRegistration)RegPage.INTRO else RegPage.HOME) }
+    var history by rememberSaveable { mutableStateOf(listOf<String>()) }
+    var inputMethod by rememberSaveable { mutableStateOf("manual") }
+    var verify by rememberSaveable { mutableStateOf(VerifyFixture.MATCHED) }
+    var showCertificateSheet by remember { mutableStateOf(false) }
+    var showAddressSheet by remember { mutableStateOf(false) }
+    var cancelId by remember { mutableStateOf<String?>(null) }
+    var dismissId by remember { mutableStateOf<String?>(null) }
+    var activeApplicationId by rememberSaveable { mutableStateOf<String?>(null) }
+    var editingReview by rememberSaveable { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
 
-    var noShopPhone by rememberSaveable { mutableStateOf(false) }
-    var selectedBarId by rememberSaveable { mutableStateOf<String?>(null) }
-    val draft = snapshot?.registrationDraft ?: MockRegistrationDraft()
-    val certificateUri = draft.certificatePhoto?.uri
-    // Persisted form fields survive process restart. Reopen the unfinished draft
-    // instead of forcing registration mode selection (which would clear it).
-    LaunchedEffect(snapshot?.registrationDraft != null, startRegistration) {
-        if (!startRegistration && snapshot?.registrationDraft != null && step == FormStep.METHOD) {
-            step = if(draft.businessNumberDigits.isNotBlank()) FormStep.BAR else FormStep.BIZ
+    fun save(value:MockRegistrationDraft){ viewModel.saveRegistrationDraft(value);error=null }
+    fun go(target:RegPage){ history=history+screen.name;screen=target;error=null }
+    fun back() {
+        if(history.isEmpty())onBack()
+        else { screen=RegPage.valueOf(history.last());history=history.dropLast(1) }
+        error=null
+    }
+    fun forward(target:RegPage) {
+        if(editingReview) { editingReview=false;go(RegPage.REVIEW) } else go(target)
+    }
+    fun edit(target:RegPage){ editingReview=true;go(target) }
+    BackHandler(enabled=screen!=RegPage.HOME && screen!=RegPage.DONE) { back() }
+
+    val certificatePicker=rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()){ uri ->
+        if(uri!=null){
+            persistSelectedUri(ctx,uri)
+            inputMethod="photo"
+            save(draft.copy(certificatePhoto=MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.REGISTRATION_ATTACHMENT)))
+            go(RegPage.READING)
         }
     }
-    fun save(newDraft: MockRegistrationDraft) { viewModel.saveRegistrationDraft(newDraft);error=null }
-    fun next() { error=null;step=FormStep.entries.getOrElse(step.ordinal+1){FormStep.REVIEW} }
-    fun goBack() {
-        error=null
-        if (step == FormStep.METHOD || (startRegistration && step == FormStep.CERTIFICATE)) onBack()
-        else step=FormStep.entries[(step.ordinal - 1).coerceAtLeast(0)]
-    }
-    BackHandler(enabled=step != FormStep.METHOD) { goBack() }
-    val pickCertificate=rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if(uri!=null) { persistUri(context,uri); save(draft.copy(certificatePhoto=MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.REGISTRATION_ATTACHMENT))) }
-    }
-    val pickCover=rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if(uri!=null) {
-            persistUri(context,uri)
+    val coverPicker=rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()){ uri ->
+        if(uri!=null){
+            persistSelectedUri(ctx,uri)
             save(draft.copy(applicantGallery=listOf(MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.BAR_GALLERY))))
         }
     }
-    val pickMenu=rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(15)) { uris ->
-        uris.forEach { persistUri(context,it) }
-        if(uris.isNotEmpty()) save(draft.copy(initialMenuPhotos=uris.map {
-            MockPhoto(UUID.randomUUID().toString(),it.toString(),MockPhotoKind.MENU_CAPTURE)
-        }))
+    val menuPicker=rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(15)){ uris ->
+        val old=draft.initialMenuPhotos
+        val oldUris=old.map{it.uri}.toSet()
+        val added=uris.distinctBy{it.toString()}.filterNot{it.toString() in oldUris}
+            .take((15-old.size).coerceAtLeast(0)).map{
+                persistSelectedUri(ctx,it)
+                MockPhoto(UUID.randomUUID().toString(),it.toString(),MockPhotoKind.MENU_CAPTURE)
+            }
+        if(added.isNotEmpty())save(draft.copy(initialMenuPhotos=old+added))
     }
-    val bars=snapshot?.bars.orEmpty()
-    val candidates=snapshot?.existingBarCandidates.orEmpty()
-    val apps=snapshot?.applications.orEmpty()
-    val pending=apps.lastOrNull { it.status==MockApplicationStatus.PENDING }
-    val rejected=apps.lastOrNull { it.status==MockApplicationStatus.REJECTED }
-    val canceled=apps.lastOrNull { it.status==MockApplicationStatus.CANCELED }
-    val approved=apps.lastOrNull { it.status==MockApplicationStatus.APPROVED }
-    Column(Modifier.fillMaxSize()) {
-        OwnerHeader("내 매장 관리",::goBack)
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).imePadding().navigationBarsPadding().padding(20.dp),
-            verticalArrangement=Arrangement.spacedBy(14.dp)) {
-            OwnerStatusLabel("Mock 시연 전용 · 실제 개인/사업자 정보 입력 금지",OwnerStatusTone.ATTENTION)
-            when {
-                state is MockOwnerLoadState.Loading -> OwnerLoading("Mock 정보 불러오는 중")
-                state is MockOwnerLoadState.Error -> {
-                    Text((state as MockOwnerLoadState.Error).message)
+
+    LaunchedEffect(screen) {
+        if(screen==RegPage.READING){
+            delay(400)
+            // Explicit deterministic DEMO fixture; never claim results were derived from the photo.
+            val current=(viewModel.state.value as? MockOwnerLoadState.Ready)?.snapshot?.registrationDraft
+                ?: (viewModel.state.value as? MockOwnerLoadState.Empty)?.snapshot?.registrationDraft
+                ?: draft
+            save(current.copy(businessNumberDigits="1234567891",representativeName="김민준",
+                openingDateIso="2019-05-14",proposedBarName="몰트 앤 무드"))
+            go(RegPage.BIZCHECK)
+        } else if(screen==RegPage.VERIFYING){
+            delay(350);go(RegPage.VERIFIED)
+        }
+    }
+    LaunchedEffect(snapshot?.registrationDraft!=null,startRegistration) {
+        if(!startRegistration && snapshot?.registrationDraft!=null && screen==RegPage.HOME){
+            screen=when{
+                draft.initialMenuPhotos.isNotEmpty()->RegPage.CONTACT
+                draft.applicantGallery.isNotEmpty()->RegPage.ADDRESS
+                draft.businessNumberDigits.isNotBlank()->RegPage.BIZCHECK
+                else->RegPage.METHOD
+            }
+        }
+    }
+
+    val exactMatches=candidates.filter{
+        draft.proposedBarName.isNotBlank() &&
+            it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
+    }
+    val validContact=draft.contactPhone.isNotBlank()&&validOwnerPhone(draft.contactPhone)
+    val stage=regStage(screen)
+    val cta=when(screen){
+        RegPage.INTRO->"시작하기"
+        RegPage.BN,RegPage.REP,RegPage.DATE,RegPage.VERIFIED,
+        RegPage.BARNAME,RegPage.BARPHOTO,RegPage.ADDRESS,RegPage.BARPHONE,
+        RegPage.MENUS,RegPage.CONTACT->"다음"
+        RegPage.BIZCHECK->"사업자 정보 확인 (Mock)"
+        RegPage.REVIEW->"신청하기 (Mock)"
+        RegPage.DONE->"확인"
+        else->null
+    }
+    val enabled=!busy&&when(screen){
+        RegPage.BN->validBusinessRegistrationNumber(draft.businessNumberDigits)
+        RegPage.REP->draft.representativeName.trim().length in 1..100
+        RegPage.DATE->validOpeningDate(draft.openingDateIso)
+        RegPage.BIZCHECK->validBusinessRegistrationNumber(draft.businessNumberDigits)&&
+            draft.representativeName.trim().length in 1..100&&validOpeningDate(draft.openingDateIso)
+        RegPage.BARNAME->draft.proposedBarName.trim().length in 1..150&&exactMatches.isEmpty()
+        RegPage.BARPHOTO->draft.applicantGallery.isNotEmpty()
+        RegPage.ADDRESS->listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
+            .filter{it.isNotBlank()}.joinToString(" ").trim().length in 1..500
+        RegPage.BARPHONE->draft.storePhone.isNotBlank()&&validOwnerPhone(draft.storePhone)
+        RegPage.MENUS->draft.initialMenuPhotos.isNotEmpty()
+        RegPage.CONTACT->validContact
+        RegPage.REVIEW->validContact&&draft.initialMenuPhotos.isNotEmpty()&&
+            validBusinessRegistrationNumber(draft.businessNumberDigits)
+        else->true
+    }
+    fun primaryAction(){
+        when(screen){
+            RegPage.INTRO->go(RegPage.METHOD)
+            RegPage.BN->forward(RegPage.REP)
+            RegPage.REP->forward(RegPage.DATE)
+            RegPage.DATE->forward(RegPage.BIZCHECK)
+            RegPage.BIZCHECK->go(RegPage.VERIFYING)
+            RegPage.VERIFIED->when(verify){
+                VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->forward(RegPage.BARNAME)
+                VerifyFixture.FAILED->go(RegPage.BIZCHECK)
+                VerifyFixture.LIMITED->{history=emptyList();screen=RegPage.HOME}
+            }
+            RegPage.BARNAME->forward(RegPage.BARPHOTO)
+            RegPage.BARPHOTO->forward(RegPage.ADDRESS)
+            RegPage.ADDRESS->forward(RegPage.BARPHONE)
+            RegPage.BARPHONE->forward(RegPage.MENUS)
+            RegPage.MENUS->forward(RegPage.CONTACT)
+            RegPage.CONTACT->forward(RegPage.REVIEW)
+            RegPage.REVIEW->{
+                if(!busy){
+                    busy=true
+                    try{viewModel.submitRegistrationDraftForFixture();history=emptyList();screen=RegPage.DONE}
+                    catch(e:Exception){error=e.message}
+                    finally{busy=false}
+                }
+            }
+            RegPage.DONE->onBack()
+            else->Unit
+        }
+    }
+
+    if(cancelId!=null)AlertDialog(onDismissRequest={cancelId=null},
+        title={Text("신청을 취소할까요?")},
+        text={Text("취소하면 처음부터 다시 신청해야 해요.")},
+        confirmButton={TextButton(onClick={
+            cancelId?.let{viewModel.closeApplicationForFixture(it,MockApplicationStatus.CANCELED)}
+            cancelId=null
+        }){Text("취소하기")}},
+        dismissButton={TextButton(onClick={cancelId=null}){Text("닫기")}})
+    if(dismissId!=null)AlertDialog(onDismissRequest={dismissId=null},
+        title={Text("이 신청을 지울까요?")},
+        text={Text("목록에서만 숨기고 Mock 신청 이력은 보존해요.")},
+        confirmButton={TextButton(onClick={
+            dismissId?.let{viewModel.dismissRejectedForFixture(it)}
+            dismissId=null
+        }){Text("지우기")}},
+        dismissButton={TextButton(onClick={dismissId=null}){Text("닫기")}})
+    if(showCertificateSheet)AlertDialog(onDismissRequest={showCertificateSheet=false},
+        title={Text("사업자등록증 사진")},
+        text={Text("네 모서리와 글자가 잘 보이게 선택해 주세요. 실제 OCR은 실행하지 않습니다.")},
+        confirmButton={TextButton(onClick={
+            showCertificateSheet=false
+            certificatePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }){Text("앨범에서 고르기")}},
+        dismissButton={TextButton(onClick={showCertificateSheet=false}){Text("닫기")}})
+    if(showAddressSheet)AlertDialog(onDismissRequest={showAddressSheet=false},
+        title={Text("주소 검색 · Mock 예시")},
+        text={
+            Column {
+                listOf("서울특별시 관악구 봉천로 12길 8",
+                    "서울특별시 관악구 봉천로 12길 10").forEach{ addr->
+                    TextButton(onClick={
+                        save(draft.copy(proposedBarAddress=addr))
+                        showAddressSheet=false
+                    }){Text(addr)}
+                }
+                Text("실제 주소 검색 API는 연결되지 않았습니다.")
+            }
+        },
+        confirmButton={TextButton(onClick={showAddressSheet=false}){Text("닫기")}})
+
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).imePadding()) {
+        if(screen!=RegPage.DONE)OwnerHeader(
+            if(screen==RegPage.HOME||screen==RegPage.VIEW_APPLICATION)"내 매장 관리" else "",
+            if(screen==RegPage.HOME)onBack else ::back)
+        if(stage!=0){
+            Row(Modifier.fillMaxWidth().padding(horizontal=20.dp),
+                horizontalArrangement=Arrangement.spacedBy(4.dp)){
+                repeat(4){ index ->
+                    Box(Modifier.weight(1f).height(3.dp).background(
+                        if(index<stage)MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outlineVariant,RoundedCornerShape(3.dp)))
+                }
+            }
+            Text(stage.toString()+"/4 "+listOf("사업자 정보","매장 정보","메뉴판","확인")[stage-1],
+                modifier=Modifier.padding(start=20.dp,top=8.dp),
+                style=MaterialTheme.typography.labelSmall,
+                color=MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())
+            .padding(horizontal=20.dp,vertical=12.dp),
+            verticalArrangement=Arrangement.spacedBy(16.dp)) {
+            when(val s=state){
+                MockOwnerLoadState.Loading -> OwnerLoading("Mock 저장소 불러오는 중")
+                is MockOwnerLoadState.Error -> {
+                    Text(s.message,color=MaterialTheme.colorScheme.error)
                     OwnerActionButton("다시 시도",viewModel::retry)
                 }
-                pending!=null && step!=FormStep.SUBMITTED -> {
-                    OwnerStatusLabel("신청 중",OwnerStatusTone.ATTENTION)
-                    Text("운영팀 승인 전에는 매장 메뉴가 공개되지 않습니다.")
-                    Text(pending.proposedBarName)
-                    OwnerActionButton("신청 취소 (Mock)",{
-                        viewModel.closeApplicationForFixture(pending.applicationId,MockApplicationStatus.CANCELED)
-                        step=FormStep.METHOD
-                    },Modifier.fillMaxWidth(),secondary=true)
-                    if(BuildConfigDebug()) OwnerActionButton("테스트: 거절 처리 (Mock)", {
-                        viewModel.closeApplicationForFixture(pending.applicationId,MockApplicationStatus.REJECTED)
-                    },Modifier.fillMaxWidth(),secondary=true)
-                    if(BuildConfigDebug()) OwnerActionButton("테스트: 승인 처리 (Mock)", {
-                        val id=pending.barId?:"mock-bar-${pending.applicationId}"
-                        val existing=(bars+candidates).firstOrNull { it.barId==id }
-                        val newBar=existing?:MockBar(id,pending.proposedBarName,pending.proposedBarAddress?:"테스트 주소",
-                            phone=pending.storePhone,
-                            gallery=pending.registrationPhotos.filter { it.kind==MockPhotoKind.BAR_GALLERY })
-                        viewModel.approveForFixture(pending.applicationId,newBar)
-                        val uris=pending.registrationPhotos.filter { it.kind==MockPhotoKind.MENU_CAPTURE }.map{it.uri}
-                        if(uris.isNotEmpty()) viewModel.importPhotos(id,uris,OwnerMockFixtures.imageFixtures(emptyMap()))
-                    },Modifier.fillMaxWidth())
-                }
-                step==FormStep.METHOD && bars.isNotEmpty() && pending==null -> {
-                    if(bars.size==1) {
-                        OwnerStatusLabel(if(snapshot!!.menuItems.any { it.barId==bars.first().barId }) "정상 영업" else "메뉴 확인 필요")
-                        Text(bars.first().name,style=MaterialTheme.typography.headlineSmall)
-                        OwnerActionButton("매장 관리",onManagerPreview,Modifier.fillMaxWidth())
-                        OwnerActionButton("최초 검수",onFirstReview,Modifier.fillMaxWidth(),secondary=true)
-                    }else{
-                        Text("관리 매장 ${bars.size}개",style=MaterialTheme.typography.titleLarge)
-                        bars.forEach { bar -> OwnerMenuRow(bar.name,bar.address,{
-                            viewModel.selectBar(bar.barId);onManagerPreview()
-                        },trailing="관리") }
-                    }
-                    OwnerActionButton("매장 추가", { step=FormStep.METHOD; selectedBarId=null; next() },Modifier.fillMaxWidth(),secondary=true)
-                }
-                else -> {
-                    if((rejected!=null || canceled!=null) && step==FormStep.METHOD) {
-                        OwnerStatusLabel(if(rejected!=null)"신청 거절" else "신청 취소",OwnerStatusTone.ERROR)
-                        Text("새로운 신청을 시작할 수 있습니다.")
-                    }
-                    when(step) {
-                        FormStep.METHOD -> {
-                            Text("매장 사장님이신가요?",style=MaterialTheme.typography.headlineSmall)
-                            OwnerActionButton("내 매장 등록하기",{next()},Modifier.fillMaxWidth())
-                        }
-                        FormStep.CERTIFICATE -> {
-                            Text("등록 방식을 선택해주세요",style=MaterialTheme.typography.titleLarge)
-                            OwnerActionButton("신규 매장 등록",{
-                                save(MockRegistrationDraft(kind=MockApplicationKind.NEW_BAR));next()
-                            },Modifier.fillMaxWidth())
-                            OwnerActionButton("이미 등록된 매장 신청",{
-                                save(MockRegistrationDraft(kind=MockApplicationKind.EXISTING_BAR));next()
-                            },Modifier.fillMaxWidth(),secondary=true)
-                        }
-                        FormStep.BIZ -> {
-                            if(draft.kind==MockApplicationKind.EXISTING_BAR) {
-                                Text("신청할 기존 매장 선택",style=MaterialTheme.typography.titleLarge)
-                                if(candidates.isEmpty()) {
-                                    Text("검색 API가 연결되지 않아 Mock 기존 매장이 없습니다.")
-                                    if(BuildConfigDebug()) OwnerActionButton("테스트 기존 매장 만들기 (Mock)", {
-                                        viewModel.seedExistingCandidateForFixture(
-                                            MockBar("fixture-existing-bar", "테스트 등록 매장", "테스트 주소")
-                                        )
-                                    },Modifier.fillMaxWidth(),secondary=true)
-                                }
-                                candidates.forEach { bar -> OwnerMenuRow(bar.name,bar.address,{
-                                    selectedBarId=bar.barId;save(draft.copy(existingBarId=bar.barId));next()
-                                }) }
-                            } else {
-                                Text("사업자등록증 선택",style=MaterialTheme.typography.titleLarge)
-                                OwnerActionButton("갤러리에서 등록증 선택",{
-                                    pickCertificate.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                                })
-                                Text(certificateUri ?: "선택한 사진 없음")
-                                draft.certificatePhoto?.let { PickerThumbnail(it.uri) }
-                                OwnerActionButton("Mock OCR 샘플 채우기",{
-                                    // Explicit fixed DEMO fixture, not image-derived OCR.
-                                    save(draft.copy(
-                                        businessNumberDigits="1234567890",
-                                        representativeName="테스트 대표",
-                                        openingDateIso="2024-01-01",
-                                    ))
-                                    next()
-                                },enabled=certificateUri!=null)
-                                OwnerActionButton("직접 입력",{next()},secondary=true)
-                                Text("사업자등록증 AI 인식은 실행하지 않습니다. 아래 정보는 직접 확인·수정합니다.",
-                                    style=MaterialTheme.typography.bodySmall)
+                else -> when(screen){
+                    RegPage.HOME -> {
+                        OwnerRegistrationDashboard(
+                            snapshot=requireNotNull(snapshot), debug=com.zerotoone.bottlemap.BuildConfig.DEBUG,
+                            onRegister={
+                                save(MockRegistrationDraft());go(RegPage.INTRO)
+                            },
+                            onManage={ bar ->
+                                viewModel.selectBar(bar.barId)
+                                if(snapshot.hasPublishedInitialReview(bar.barId))onManagerPreview()
+                                else onFirstReview()
+                            },
+                            onViewApplication={ id ->
+                                activeApplicationId=id;go(RegPage.VIEW_APPLICATION)
+                            },
+                            onCancel={id->cancelId=id},
+                            onDismiss={id->dismissId=id},
+                            onReapply={app->
+                                save(MockRegistrationDraft(proposedBarName=app.proposedBarName,
+                                    proposedBarAddress=app.proposedBarAddress.orEmpty()))
+                                go(RegPage.INTRO)
+                            },
+                            onReject={id->viewModel.closeApplicationForFixture(id,MockApplicationStatus.REJECTED)},
+                            onApprove={app->
+                                try{
+                                    val barId=app.barId?:"mock-bar-"+app.applicationId
+                                    val bar=(bars+candidates).firstOrNull{it.barId==barId}
+                                        ?:MockBar(barId,app.proposedBarName,app.proposedBarAddress?:"Mock 주소",
+                                            phone=app.storePhone,
+                                            gallery=app.registrationPhotos.filter{it.kind==MockPhotoKind.BAR_GALLERY})
+                                    viewModel.approveForFixture(app.applicationId,bar)
+                                    val uris=app.registrationPhotos.filter{it.kind==MockPhotoKind.MENU_CAPTURE}.map{it.uri}
+                                    if(uris.isNotEmpty())viewModel.importPhotos(barId,uris,OwnerMockFixtures.imageFixtures(emptyMap()))
+                                }catch(e:Exception){error=e.message}
                             }
-                        }
-                        FormStep.BAR -> {
-                            Text("사업자 정보 확인 및 수정",style=MaterialTheme.typography.titleLarge)
-                            Input("사업자등록번호",draft.businessNumberDigits,{save(draft.copy(businessNumberDigits=ownerPhoneDigits(it).take(10)))},KeyboardType.Number)
-                            Input("대표자명",draft.representativeName,{save(draft.copy(representativeName=it))})
-                            Input("개업일 (YYYY-MM-DD)",draft.openingDateIso,{save(draft.copy(openingDateIso=it))},KeyboardType.Number)
-                            OwnerActionButton("샘플 정보 채우기 (Mock)", {
-                                save(draft.copy(businessNumberDigits="1234567890", representativeName="테스트 대표",openingDateIso="2024-01-01"))
-                            },Modifier.fillMaxWidth(),secondary=true)
-                            OwnerActionButton("다음",{
-                                if(draft.businessNumberDigits.length!=10 || draft.representativeName.isBlank() ||
-                                   !Regex("\\d{4}-\\d{2}-\\d{2}").matches(draft.openingDateIso)) error="사업자 정보를 확인해주세요."
-                                else next()
-                            },Modifier.fillMaxWidth())
-                        }
-                        FormStep.VERIFICATION -> {
-                            Text("사업자 정보 확인 결과",style=MaterialTheme.typography.titleLarge)
-                            OwnerStatusLabel("Mock 검증 · 실제 조회 없음",OwnerStatusTone.ATTENTION)
-                            Text("등록번호 ${draft.businessNumberDigits} · 대표자 ${draft.representativeName}")
-                            Text("공공데이터 인증과 사업자등록증 OCR은 아직 연결되지 않았습니다. " +
-                                "입력 정보가 실제로 유효한지 검증하지 않습니다.")
-                            OwnerActionButton("정보 확인 완료 · 계속",::next,Modifier.fillMaxWidth())
-                        }
-                        FormStep.PHOTOS -> {
-                            Text("매장 정보",style=MaterialTheme.typography.titleLarge)
-                            if(draft.kind==MockApplicationKind.NEW_BAR){
-                                Input("매장명",draft.proposedBarName,{save(draft.copy(proposedBarName=it))})
-                                Input("주소",draft.proposedBarAddress,{save(draft.copy(proposedBarAddress=it))})
-                            }else Text("기존 매장: ${(bars+candidates).firstOrNull{it.barId==draft.existingBarId}?.name?:"선택 필요"}")
-                            OwnerActionButton("다음",{
-                                if(draft.kind==MockApplicationKind.NEW_BAR &&
-                                    (draft.proposedBarName.isBlank()||draft.proposedBarAddress.isBlank())) error="매장명과 주소를 입력해주세요."
-                                else next()
-                            },Modifier.fillMaxWidth())
-                        }
-                        FormStep.PHONE -> {
-                            Text("대표 매장 사진",style=MaterialTheme.typography.titleLarge)
-                            OwnerActionButton("갤러리에서 대표 사진 선택",{
-                                pickCover.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                            })
-                            draft.applicantGallery.forEach { PickerThumbnail(it.uri) }
-                            OwnerActionButton("다음", ::next,Modifier.fillMaxWidth(),enabled=draft.applicantGallery.isNotEmpty())
-                        }
-                        FormStep.MENU -> {
-                            Text("매장 전화번호",style=MaterialTheme.typography.titleLarge)
-                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
-                                Text("손님에게 보여요",style=MaterialTheme.typography.bodySmall)
-                                TextButton(onClick={noShopPhone=!noShopPhone; if(noShopPhone)save(draft.copy(storePhone=""))}){
-                                    Text(if(noShopPhone)"전화번호 입력하기" else "가게 전화가 없어요")
-                                }
-                            }
-                            if(!noShopPhone) Input("매장 전화번호",draft.storePhone,{save(draft.copy(storePhone=ownerPhoneDigits(it)))},KeyboardType.Phone)
-                            OwnerActionButton("다음",{
-                                if(!validOwnerPhone(draft.storePhone))error="전화번호를 확인해주세요."
-                                else next()
-                            },Modifier.fillMaxWidth())
-                        }
-                        FormStep.CONTACT -> {
-                            Text("메뉴판 사진",style=MaterialTheme.typography.titleLarge)
-                            OwnerActionButton("Photo Picker로 사진 선택",{
-                                pickMenu.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                            },Modifier.fillMaxWidth())
-                            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                                horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                                draft.initialMenuPhotos.forEachIndexed { i,photo ->
-                                    Column { Text("${i+1}번 사진"); PickerThumbnail(photo.uri) }
-                                }
-                            }
-                            Text("사진별 선택 순서는 유지됩니다. AI 분석은 승인 후 다음 단계에서 진행합니다.")
-                            OwnerActionButton("다음",::next,Modifier.fillMaxWidth(),enabled=draft.initialMenuPhotos.isNotEmpty())
-                        }
-                        FormStep.REVIEW -> {
-                            Text("연락받을 번호",style=MaterialTheme.typography.titleLarge)
-                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
-                                Text("운영팀만 봐요",style=MaterialTheme.typography.bodySmall)
-                                TextButton(onClick={save(draft.copy(contactPhone=draft.storePhone))}){Text("매장 번호와 같아요")}
-                            }
-                            Input("연락받을 번호",draft.contactPhone,{save(draft.copy(contactPhone=ownerPhoneDigits(it)))},KeyboardType.Phone)
-                            OwnerActionButton("신청 내용 확인",{
-                                if(draft.contactPhone.isBlank()||!validOwnerPhone(draft.contactPhone)) error="연락받을 번호를 입력해주세요."
-                                else step=FormStep.SUBMITTED
-                            },Modifier.fillMaxWidth())
-                        }
-                        FormStep.SUBMITTED -> {
-                            Text("신청 내용 확인",style=MaterialTheme.typography.titleLarge)
-                            Text("매장: ${draft.proposedBarName.ifBlank { bars.firstOrNull{it.barId==draft.existingBarId}?.name.orEmpty() }}")
-                            Text("연락받을 번호: ${draft.contactPhone}")
-                            Text("등록 사진: ${draft.applicantGallery.size}장 · 메뉴판: ${draft.initialMenuPhotos.size}장")
-                            if(busy) CircularProgressIndicator()
-                            OwnerActionButton("신청 제출 (Mock)",{
-                                if(!busy && snapshot?.applications?.none { it.status==MockApplicationStatus.PENDING }==true){
-                                    busy=true
-                                    try { viewModel.submitRegistrationDraftForFixture();step=FormStep.METHOD }
-                                    catch(e:Exception){error=e.message}
-                                    finally {busy=false}
-                                }
-                            },Modifier.fillMaxWidth(),enabled=!busy)
-                        }
-                    }
-                    if(step==FormStep.METHOD) {
-                        if(onComponents!=null) OwnerActionButton("공통 컴포넌트 점검", onComponents,
+                        )
+                        if(onComponents!=null)OwnerActionButton("공통 컴포넌트 점검",onComponents,
                             Modifier.fillMaxWidth(),secondary=true)
-                        if(onLegacyDebugUpload!=null) OwnerActionButton("개발자 도구 · 기존 메뉴 업로드 테스트",
+                        if(onLegacyDebugUpload!=null)OwnerActionButton("개발자 도구 · 기존 메뉴 업로드 테스트",
                             onLegacyDebugUpload,Modifier.fillMaxWidth(),secondary=true)
                     }
-                    if(step!=FormStep.METHOD) {
-                        OwnerActionButton("이전",::goBack,
-                            Modifier.fillMaxWidth(),secondary=true)
+                    RegPage.INTRO -> {
+                        OwnerV4Question("매장 등록은\n이렇게 진행돼요",
+                            "중간에 멈춰도 입력한 내용은 기기에 남아 있어요.")
+                        listOf("1  사업자 정보 확인","2  매장 정보 입력",
+                            "3  메뉴판 사진 올리기 (최대 15장)","4  운영팀 승인").forEach{OwnerV4Panel(it)}
+                        OwnerV4Panel("미리 준비해 주세요 · 사업자등록증, 가게 사진 1장, 메뉴판 사진")
+                    }
+                    RegPage.METHOD -> {
+                        OwnerV4Question("사업자등록증으로\n한 번에 채울까요?",
+                            "사진을 선택하면 Mock OCR 샘플로 채워요. 실제 사진 인식은 하지 않습니다.")
+                        OwnerActionButton("사진으로 채우기 (Mock)",{showCertificateSheet=true},
+                            Modifier.fillMaxWidth())
+                        OwnerActionButton("직접 입력하기",{
+                            inputMethod="manual";go(RegPage.BN)
+                        },Modifier.fillMaxWidth(),secondary=true)
+                    }
+                    RegPage.READING -> {
+                        OwnerLoading("사업자등록증 읽는 중 · Mock")
+                        Text("미리 준비한 예시 데이터입니다. 실제 OCR 결과가 아닙니다.")
+                    }
+                    RegPage.BN -> {
+                        OwnerV4Question("사업자등록번호를\n알려주세요")
+                        OwnerV4Input("사업자등록번호",bnFormat(draft.businessNumberDigits),
+                            {save(draft.copy(businessNumberDigits=ownerBusinessDigits(it)))},
+                            KeyboardType.Number,"000-00-00000")
+                        Text("숫자 10자리. 마지막 자리 검증번호를 확인합니다.",
+                            style=MaterialTheme.typography.bodySmall)
+                        if(draft.businessNumberDigits.length==10 &&
+                            !validBusinessRegistrationNumber(draft.businessNumberDigits))
+                            Text("번호를 다시 확인해 주세요.",color=MaterialTheme.colorScheme.error)
+                    }
+                    RegPage.REP -> {
+                        OwnerV4Question("대표자 성명을\n알려주세요","사업자등록증에 적힌 이름 그대로 입력해 주세요.")
+                        OwnerV4Input("대표자 성명",draft.representativeName,{
+                            save(draft.copy(representativeName=it.take(100)))
+                        },placeholder="홍길동")
+                        OwnerV4Previous("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
+                    }
+                    RegPage.DATE -> {
+                        OwnerV4Question("개업일을\n알려주세요","사업자등록증의 개업연월일이에요.")
+                        OwnerV4Input("개업일",draft.openingDateIso.replace("-","."),{
+                            save(draft.copy(openingDateIso=dateInput(it)))
+                        },KeyboardType.Number,"YYYY.MM.DD")
+                        if(draft.openingDateIso.length==10 && !validOpeningDate(draft.openingDateIso))
+                            Text("잘못된 날짜이거나 오늘 이후 날짜예요.",color=MaterialTheme.colorScheme.error)
+                        OwnerV4Previous("대표자 성명",draft.representativeName){go(RegPage.REP)}
+                        OwnerV4Previous("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
+                    }
+                    RegPage.BIZCHECK -> {
+                        OwnerV4Question(
+                            if(inputMethod=="photo")"읽은 내용이\n맞는지 확인해 주세요"
+                            else "이 정보로\n확인할게요",
+                            "직접 확인·수정해 주세요. 실제 국세청 조회는 실행하지 않습니다.")
+                        OwnerV4Summary("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
+                        OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
+                        OwnerV4Summary("개업일",draft.openingDateIso.replace("-",".")){go(RegPage.DATE)}
+                        if(com.zerotoone.bottlemap.BuildConfig.DEBUG){
+                            Text("Mock 확인 결과 선택",style=MaterialTheme.typography.labelLarge)
+                            Row(Modifier.horizontalScroll(rememberScrollState())){
+                                VerifyFixture.entries.forEach{ kind ->
+                                    TextButton(onClick={verify=kind}){
+                                        Text(when(kind){
+                                            VerifyFixture.MATCHED->"일치"
+                                            VerifyFixture.FAILED->"불일치"
+                                            VerifyFixture.UNAVAILABLE->"확인 불가"
+                                            VerifyFixture.LIMITED->"횟수 초과"
+                                        })
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    RegPage.VERIFYING -> {
+                        OwnerLoading("사업자 정보 확인 중 · Mock")
+                        Text("국세청 API는 호출하지 않습니다.")
+                    }
+                    RegPage.VERIFIED -> {
+                        OwnerStatusLabel("Mock 시뮬레이션 · 실제 인증 아님",OwnerStatusTone.ATTENTION)
+                        when(verify){
+                            VerifyFixture.MATCHED->OwnerV4Question("사업자 정보가\n확인됐어요 (Mock)",
+                                "이제 매장 정보를 알려주세요.")
+                            VerifyFixture.FAILED->OwnerV4Question("사업자 정보가\n맞지 않아요 (Mock)",
+                                "사업자등록번호, 대표자 성명, 개업일을 다시 확인해 주세요.")
+                            VerifyFixture.UNAVAILABLE->OwnerV4Question("지금은 확인이\n어려워요 (Mock)",
+                                "운영팀이 나중에 다시 확인할 수 있어요.")
+                            VerifyFixture.LIMITED->OwnerV4Question("확인 횟수를\n모두 썼어요 (Mock)",
+                                "Mock 응답 시나리오예요. 입력한 내용은 저장됩니다.")
+                        }
+                    }
+
+                    RegPage.BARNAME -> {
+                        OwnerV4Question("매장 이름을\n알려주세요",
+                            "손님에게 보이는 이름이에요. 간판 이름으로 적어 주세요.")
+                        OwnerV4Input("매장 이름",draft.proposedBarName,{
+                            save(draft.copy(proposedBarName=it.take(150)))
+                        },placeholder="예: 몰트 앤 무드")
+                        exactMatches.forEach{ candidate ->
+                            OwnerV4Panel("BottleMap에 이미 등록된 매장\n"+candidate.name+"\n"+candidate.address)
+                            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                                TextButton(onClick={
+                                    save(draft.copy(kind=MockApplicationKind.EXISTING_BAR,
+                                        existingBarId=candidate.barId,proposedBarName=candidate.name))
+                                    go(RegPage.MENUS) // Existing bar already has cover, address and public phone.
+                                }){Text("우리 매장예요")}
+                                TextButton(onClick={
+                                    save(draft.copy(kind=MockApplicationKind.NEW_BAR,existingBarId=null))
+                                    go(RegPage.BARPHOTO)
+                                }){Text("아니에요")}
+                            }
+                        }
+                        if(com.zerotoone.bottlemap.BuildConfig.DEBUG&&candidates.isEmpty())
+                            TextButton(onClick={
+                                viewModel.seedExistingCandidateForFixture(MockBar("fixture-v4-bar",
+                                    draft.proposedBarName.ifBlank{"몰트 앤 무드"},
+                                    "서울특별시 관악구 봉천로 12길 8"))
+                            }){Text("테스트: 같은 이름의 기존 매장 준비 (Mock)")}
+                    }
+                    RegPage.BARPHOTO -> {
+                        OwnerV4Question("매장 사진을\n올려 주세요",
+                            "갤러리에서 선택한 사진이 대표 사진으로 지정돼요.")
+                        val cover=draft.applicantGallery.firstOrNull()
+                        if(cover!=null)OwnerV4Thumbnail(cover.uri,Modifier.fillMaxWidth().height(230.dp))
+                        OwnerActionButton(if(cover==null)"사진 올리기" else "사진 바꾸기",{
+                            coverPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        },Modifier.fillMaxWidth(),secondary=true)
+                        Text("간판·입구·매장 안쪽이 보이는 사진을 선택해 주세요.",
+                            style=MaterialTheme.typography.bodySmall)
+                    }
+                    RegPage.ADDRESS -> {
+                        OwnerV4Question("매장 주소를\n알려주세요",
+                            "손님이 지도에서 찾을 수 있게 정확히 입력해 주세요.")
+                        OwnerV4Input("주소",draft.proposedBarAddress,{
+                            save(draft.copy(proposedBarAddress=it))
+                        },placeholder="도로명, 건물명으로 검색")
+                        TextButton(onClick={showAddressSheet=true}){Text("주소 검색 결과 예시 (Mock)")}
+                        OwnerV4Input("상세 주소",draft.proposedBarAddressDetail,{
+                            save(draft.copy(proposedBarAddressDetail=it))
+                        },placeholder="예: 2층")
+                    }
+                    RegPage.BARPHONE -> {
+                        OwnerV4Question("매장 전화번호를\n알려주세요",
+                            "예약이나 문의 전화를 받을 가게 번호예요.")
+                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+                            verticalAlignment=Alignment.CenterVertically){
+                            OwnerStatusLabel("손님에게 보여요")
+                            TextButton(onClick={
+                                save(draft.copy(storePhone=""));forward(RegPage.MENUS)
+                            }){Text("가게 전화가 없어요",style=MaterialTheme.typography.labelSmall)}
+                        }
+                        OwnerV4Input("매장 전화번호",formatOwnerPhone(draft.storePhone),{
+                            save(draft.copy(storePhone=ownerPhoneDigits(it)))
+                        },KeyboardType.Phone,"02-000-0000")
+                        Text("지역번호나 0507 안심번호도 넣을 수 있어요.",
+                            style=MaterialTheme.typography.bodySmall)
+                    }
+                    RegPage.MENUS -> {
+                        OwnerV4Question("메뉴판 사진을\n올려 주세요",
+                            "AI 분석은 아직 실행하지 않으며 선택한 사진 참조와 순서를 보존해요.")
+                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                            draft.initialMenuPhotos.forEachIndexed{ index,photo ->
+                                Column(verticalArrangement=Arrangement.spacedBy(4.dp)){
+                                    OwnerV4Thumbnail(photo.uri,Modifier.size(width=106.dp,height=142.dp))
+                                    Text((index+1).toString()+"번 사진",style=MaterialTheme.typography.labelSmall)
+                                    TextButton(onClick={
+                                        save(draft.copy(initialMenuPhotos=draft.initialMenuPhotos
+                                            .filterIndexed{ i,_->i!=index }))
+                                    }){Text("사진 빼기")}
+                                }
+                            }
+                        }
+                        if(draft.initialMenuPhotos.size<15)
+                            OwnerActionButton("사진 추가",{
+                                menuPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            },Modifier.fillMaxWidth(),secondary=true)
+                        Text("메뉴판 순서대로 올려 주세요     "+draft.initialMenuPhotos.size+"/15")
+                        Text("한 장에 한 면씩, 글자와 가격이 잘리지 않게 촬영해 주세요.",
+                            style=MaterialTheme.typography.bodySmall)
+                    }
+                    RegPage.CONTACT -> {
+                        OwnerV4Question("연락받을 번호를\n알려주세요",
+                            "승인 전에 운영팀이 확인 연락을 드릴 수 있어요.")
+                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+                            verticalAlignment=Alignment.CenterVertically){
+                            OwnerStatusLabel("운영팀만 봐요")
+                            if(draft.storePhone.isNotBlank()&&draft.contactPhone!=draft.storePhone)
+                                TextButton(onClick={save(draft.copy(contactPhone=draft.storePhone))}){
+                                    Text("매장 번호와 같아요",style=MaterialTheme.typography.labelSmall)
+                                }
+                        }
+                        OwnerV4Input("연락받을 번호",formatOwnerPhone(draft.contactPhone),{
+                            save(draft.copy(contactPhone=ownerPhoneDigits(it)))
+                        },KeyboardType.Phone,"010-0000-0000")
+                    }
+                    RegPage.REVIEW -> {
+                        OwnerV4Question("이렇게\n신청할게요","한 번 더 확인하고 신청해 주세요.")
+                        OwnerStatusLabel("Mock 정보 확인 · 실제 국세청 인증 아님",
+                            OwnerStatusTone.ATTENTION)
+                        Text("사업자 정보",style=MaterialTheme.typography.titleMedium)
+                        OwnerV4Summary("등록번호",bnFormat(draft.businessNumberDigits),null)
+                        OwnerV4Summary("대표자",draft.representativeName,null)
+                        OwnerV4Summary("개업일",draft.openingDateIso.replace("-","."),null)
+                        Text("매장 정보",style=MaterialTheme.typography.titleMedium)
+                        OwnerV4Summary("이름",draft.proposedBarName){edit(RegPage.BARNAME)}
+                        if(draft.kind==MockApplicationKind.NEW_BAR){
+                            OwnerV4Summary("대표 사진",draft.applicantGallery.size.toString()+"장"){edit(RegPage.BARPHOTO)}
+                            OwnerV4Summary("주소",listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
+                                .filter{it.isNotBlank()}.joinToString(" ")){edit(RegPage.ADDRESS)}
+                            OwnerV4Summary("매장 전화",draft.storePhone.ifBlank{"없음"}){edit(RegPage.BARPHONE)}
+                        }
+                        OwnerV4Summary("메뉴판",draft.initialMenuPhotos.size.toString()+"장"){edit(RegPage.MENUS)}
+                        OwnerV4Summary("연락처",formatOwnerPhone(draft.contactPhone)){edit(RegPage.CONTACT)}
+                        OwnerV4Panel("운영팀 승인 전에는 매장과 메뉴가 손님에게 보이지 않아요.")
+                    }
+                    RegPage.DONE -> {
+                        Spacer(Modifier.height(80.dp))
+                        OwnerV4Question("신청을 마쳤어요",
+                            "운영팀이 실제 매장인지 확인한 뒤 승인해요. "+
+                                "진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
+                        OwnerStatusLabel("Mock 신청 완료 · 실제 서버 제출 아님")
+                    }
+                    RegPage.VIEW_APPLICATION -> {
+                        OwnerV4Question("신청한 내용",
+                            "검토 중인 신청은 수정할 수 없어요.")
+                        val application=snapshot?.applications?.firstOrNull{
+                            it.applicationId==activeApplicationId
+                        }
+                        if(application==null)Text("신청을 찾지 못했어요.")
+                        else{
+                            OwnerV4Summary("매장명",application.proposedBarName,null)
+                            OwnerV4Summary("등록번호",application.businessNumberDigits.orEmpty(),null)
+                            OwnerV4Summary("대표자",application.representativeName.orEmpty(),null)
+                            OwnerV4Summary("개업일",application.openingDateIso.orEmpty(),null)
+                            if(application.kind==MockApplicationKind.NEW_BAR){
+                                OwnerV4Summary("주소",application.proposedBarAddress.orEmpty(),null)
+                                OwnerV4Summary("매장 전화",application.storePhone?:"없음",null)
+                            }
+                            OwnerV4Summary("메뉴판",application.registrationPhotos.count{
+                                it.kind==MockPhotoKind.MENU_CAPTURE
+                            }.toString()+"장",null)
+                            OwnerV4Summary("연락처",application.contactPhone.orEmpty(),null)
+                        }
                     }
                 }
             }
             error?.let{Text(it,color=MaterialTheme.colorScheme.error)}
         }
-    }
-}
-@Composable private fun Input(label:String,value:String,change:(String)->Unit,type:KeyboardType=KeyboardType.Text){
-    OutlinedTextField(value=value,onValueChange=change,label={Text(label)},modifier=Modifier.fillMaxWidth(),
-        keyboardOptions=KeyboardOptions(keyboardType=type),singleLine=true)
-}
-private fun persistUri(context:Context,uri:Uri){
-    try { context.contentResolver.takePersistableUriPermission(uri,android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) }
-    catch (_:SecurityException){ /* platform picker may grant temporary URI only */ }
-}
-private fun BuildConfigDebug()=com.zerotoone.bottlemap.BuildConfig.DEBUG
-
-/** Loads only a downsampled thumbnail; never decodes a full-resolution camera image on UI. */
-@Composable private fun PickerThumbnail(uri:String) {
-    val ctx=LocalContext.current
-    val image by produceState<androidx.compose.ui.graphics.ImageBitmap?>(initialValue=null,uri) {
-        value=withContext(Dispatchers.IO) {
-            try {
-                ctx.contentResolver.openInputStream(Uri.parse(uri))?.use { input ->
-                    BitmapFactory.decodeStream(input,null,BitmapFactory.Options().apply { inSampleSize=8 })?.asImageBitmap()
-                }
-            }catch (_:Exception){null}
+        if(cta!=null&&state !is MockOwnerLoadState.Error){
+            Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal=20.dp,vertical=12.dp)){
+                OwnerActionButton(cta,::primaryAction,Modifier.fillMaxWidth(),enabled=enabled)
+            }
         }
     }
-    if(image!=null) Image(bitmap=image!!, contentDescription="선택한 사진",
-        modifier=Modifier.size(120.dp),contentScale=ContentScale.Crop)
-    else Text("선택한 사진 · 미리보기 불가",style=MaterialTheme.typography.bodySmall)
+}
+
+@Composable private fun OwnerV4Question(title:String,subtitle:String?=null){
+    Text(title,style=MaterialTheme.typography.headlineSmall,
+        color=MaterialTheme.colorScheme.onBackground)
+    if(!subtitle.isNullOrBlank())Text(subtitle,style=MaterialTheme.typography.bodyMedium,
+        color=MaterialTheme.colorScheme.onSurfaceVariant)
+}
+@Composable private fun OwnerV4Panel(value:String){
+    Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface,RoundedCornerShape(16.dp))
+        .padding(16.dp)){Text(value,style=MaterialTheme.typography.bodyMedium)}
+}
+@Composable private fun OwnerV4Previous(label:String,value:String,action:()->Unit){
+    Column(Modifier.fillMaxWidth().clickable(onClick=action).padding(vertical=8.dp)){
+        Text(label,style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value,style=MaterialTheme.typography.bodyLarge)
+    }
+}
+@Composable private fun OwnerV4Summary(label:String,value:String,edit:(()->Unit)?){
+    Row(Modifier.fillMaxWidth().padding(vertical=8.dp),
+        horizontalArrangement=Arrangement.spacedBy(8.dp),
+        verticalAlignment=Alignment.CenterVertically){
+        Text(label,modifier=Modifier.width(88.dp),
+            color=MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value,modifier=Modifier.weight(1f),style=MaterialTheme.typography.bodyMedium)
+        if(edit!=null)TextButton(onClick=edit){Text("수정")}
+    }
+    HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
+}
+@Composable private fun OwnerV4Input(label:String,value:String,change:(String)->Unit,
+    keyboard:KeyboardType=KeyboardType.Text,placeholder:String=""){
+    OutlinedTextField(value=value,onValueChange=change,label={Text(label)},
+        placeholder={Text(placeholder)},singleLine=true,
+        keyboardOptions=KeyboardOptions(keyboardType=keyboard),
+        modifier=Modifier.fillMaxWidth())
+}
+private fun persistSelectedUri(context:Context,uri:Uri){
+    try{
+        context.contentResolver.takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }catch(_:SecurityException){/* The picker may grant temporary URI only. */}
+}
+/** Downsample before decode; never decode a full-resolution camera image on main thread. */
+@Composable private fun OwnerV4Thumbnail(uri:String,modifier:Modifier){
+    val ctx=LocalContext.current
+    val image by produceState<androidx.compose.ui.graphics.ImageBitmap?>(null,uri){
+        value=withContext(Dispatchers.IO){
+            try{
+                ctx.contentResolver.openInputStream(Uri.parse(uri))?.use{
+                    BitmapFactory.decodeStream(it,null,BitmapFactory.Options().apply{
+                        inSampleSize=8
+                    })?.asImageBitmap()
+                }
+            }catch(_:Exception){null}
+        }
+    }
+    if(image!=null)Image(bitmap=image!!,contentDescription="선택한 사진",
+        modifier=modifier,contentScale=ContentScale.Crop)
+    else Box(modifier.background(MaterialTheme.colorScheme.surface,RoundedCornerShape(12.dp)),
+        contentAlignment=Alignment.Center){
+        Text("사진 미리보기 불가",style=MaterialTheme.typography.labelSmall)
+    }
 }
