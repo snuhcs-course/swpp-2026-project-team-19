@@ -177,7 +177,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
 
     override fun saveBar(bar: MockBar) {
         require(bar.barId.isNotBlank() && bar.name.isNotBlank())
-        require(bar.address.trim().length in 1..500) { "Bar address must be 1..500 characters" }
+        // Validate and persist the same normalized value (current API spec §3.5).
+        val normalizedAddress = bar.address.trim()
+        require(normalizedAddress.length in 1..500) { "Bar address must be 1..500 characters" }
         require(bar.tags.size <= 5 && bar.tags.distinct().size == bar.tags.size)
         require(bar.defaultPourMl == null || bar.defaultPourMl > 0)
         require((bar.latitude == null) == (bar.longitude == null))
@@ -194,7 +196,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
         change { s ->
             require(s.bars.any { it.barId == bar.barId }) { "Unknown bar; use approved fixture for new bar" }
-            s.copy(bars = s.bars.map { if (it.barId == bar.barId) bar else it }) to Unit
+            s.copy(bars = s.bars.map {
+                if (it.barId == bar.barId) bar.copy(address = normalizedAddress) else it
+            }) to Unit
         }
     }
 

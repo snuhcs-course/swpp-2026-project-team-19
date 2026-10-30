@@ -552,6 +552,26 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(500, r.preview(original.barId, 0)!!.bar.address.length)
     }
 
+    @Test fun savingBarPersistsExactlyTheTrimmedAddressThatPassedValidation() {
+        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val repository = repo(store)
+        val original = ready(repository).bars.single()
+        // A 500-character address padded with spaces must be stored as 500 characters.
+        val padded = "  " + "x".repeat(500) + "  "
+        repository.saveBar(original.copy(address = padded))
+        val persisted = ready(repo(store)).bars.single().address
+        assertEquals("x".repeat(500), persisted)
+        assertEquals(500, persisted.length)
+        assertEquals(persisted, repository.preview(original.barId, 0)!!.bar.address)
+
+        repository.saveBar(original.copy(address = "  Sample Road 12   "))
+        assertEquals("Sample Road 12", ready(repo(store)).bars.single().address)
+        assertEquals("Sample Road 12", repository.preview(original.barId, 0)!!.bar.address)
+
+        rejects { repository.saveBar(original.copy(address = "  " + "x".repeat(501) + "  ")) }
+        assertEquals("Sample Road 12", ready(repo(store)).bars.single().address)
+    }
+
     @Test fun mockOptionsRejectServingVolumeAboveCurrentReviewContractLimit() {
         val r = repo()
         catalog(r)
