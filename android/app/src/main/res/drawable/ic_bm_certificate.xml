@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BottleMap icon "certificate" (docs/android_icons.md). Draw it with BmIcon (ui/common/BmIcon.kt).
+     "skeleton": the 1.5 outline (style A). "accent": the shape filled only when selected (style B);
+     transparent here, BmIcon colours it from MaterialTheme.colorScheme.primary at runtime. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:name="accent"
+        android:fillColor="#00000000"
+        android:pathData="M13.25 12.5 A2.75 2.75 0 1 1 18.75 12.5 A2.75 2.75 0 1 1 13.25 12.5 Z" />
+    <path
+        android:name="skeleton"
+        android:fillColor="#00000000"
+        android:strokeColor="@color/bm_icon_line"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M13.75 18 H4.75 A2 2 0 0 1 2.75 16 V5 A2 2 0 0 1 4.75 3 H19.25 A2 2 0 0 1 21.25 5 V16 A2 2 0 0 1 19.25 18 H18.25 M6 7 H18 M6 10.5 H11.5 M6 14 H10 M13.25 12.5 A2.75 2.75 0 1 1 18.75 12.5 A2.75 2.75 0 1 1 13.25 12.5 Z M14.5 14.8 V21 L16 19.75 L17.5 21 V14.8" />
+</vector>
