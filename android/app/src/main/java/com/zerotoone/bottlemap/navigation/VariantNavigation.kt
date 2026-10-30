@@ -16,7 +16,7 @@ import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerComponentGallery
-import com.zerotoone.bottlemap.ui.owner.OwnerEntryScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 
 /** One Android artifact: everyone starts in Customer, with Owner accessible from My Page. */
@@ -25,18 +25,11 @@ internal const val variantStartDestination = "customer"
 internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
-            val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                OwnerMockRuntime.repository(LocalContext.current)))
-            val mockState = data.state.collectAsStateWithLifecycle().value
-            OwnerEntryScreen(
-                mockState = mockState,
-                onRetry = data::retry,
+            OwnerOnboardingScreen(
+                repository = OwnerMockRuntime.repository(LocalContext.current),
                 onBack = { navController.popBackStack() },
-                onOpenGroup = { group -> navController.navigate(OwnerRoutes.groupStart(group)) },
-                onComponents = { navController.navigate(OwnerRoutes.COMPONENTS) },
-                onOpenLegacyUpload = OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
-                    { navController.navigate(route) }
-                },
+                onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
+                onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
             )
         }
         composable(OwnerRoutes.COMPONENTS) {

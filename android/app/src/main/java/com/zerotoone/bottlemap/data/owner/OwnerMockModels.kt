@@ -49,6 +49,8 @@ data class MockRegistrationDraft(
     val representativeName: String = "",
     val openingDateIso: String = "",
     val contactPhone: String = "",
+    val storePhone: String = "", // local-only public shop phone
+    val certificatePhoto: MockPhoto? = null, // Mock-only stored reference to registration certificate
     val applicantGallery: List<MockPhoto> = emptyList(),
     val initialMenuPhotos: List<MockPhoto> = emptyList(),
 )
@@ -68,6 +70,7 @@ data class MockOwnerApplication(
     val businessNumberDigits: String? = null,
     val openingDateIso: String? = null,
     val contactPhone: String? = null,
+    val storePhone: String? = null, // local-only public phone
     val submittedAtEpochMs: Long = 0L,
     val registrationPhotos: List<MockPhoto> = emptyList(), // C05 unagreed
 )

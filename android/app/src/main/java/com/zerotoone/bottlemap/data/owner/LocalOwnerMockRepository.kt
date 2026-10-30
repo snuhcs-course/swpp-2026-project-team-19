@@ -121,7 +121,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             businessNumberDigits = draft.businessNumberDigits.filter(Char::isDigit).ifBlank { null },
             openingDateIso = draft.openingDateIso.ifBlank { null },
             contactPhone = draft.contactPhone.ifBlank { null },
-            registrationPhotos = draft.applicantGallery + draft.initialMenuPhotos,
+            storePhone = draft.storePhone.ifBlank { null },
+            registrationPhotos = listOfNotNull(draft.certificatePhoto) + draft.applicantGallery + draft.initialMenuPhotos,
         )
         s.copy(
             applications = s.applications + application,
