@@ -6,6 +6,7 @@ import com.zerotoone.bottlemap.data.owner.MockBar
 import com.zerotoone.bottlemap.data.owner.MockBarMenuItem
 import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
 import com.zerotoone.bottlemap.data.owner.MockOwnerApplication
+import com.zerotoone.bottlemap.data.owner.MockApplicationStatus
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.MockPhotoExtractionSource
 import com.zerotoone.bottlemap.data.owner.MockPreview
@@ -21,11 +22,14 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     val state: StateFlow<MockOwnerLoadState> = repository.state
     fun retry() = repository.retryLoad()
     fun register(application: MockOwnerApplication) = repository.registerApplication(application)
+    fun closeApplicationForFixture(id: String, status: MockApplicationStatus) = repository.closeApplicationForFixture(id, status)
     fun saveBar(bar: MockBar) = repository.saveBar(bar)
     fun selectBar(barId: String) = repository.selectBar(barId)
     fun saveProduct(product: MockCatalogProduct) = repository.saveCatalogProduct(product)
     fun saveMenuItem(item: MockBarMenuItem) = repository.saveMenuItem(item)
     fun setSoldOut(itemId: String, soldOut: Boolean) = repository.setSoldOut(itemId, soldOut)
+    fun deleteMenuItem(id: String) = repository.deleteMenuItem(id)
+    fun clearMenuForBar(barId: String) = repository.clearMenuForBar(barId)
     fun importPhotos(barId: String, uris: List<String>, source: MockPhotoExtractionSource): String =
         repository.startPhotoImport(barId, uris, source)
     fun review(importId: String, lineId: String, version: Int, decision: MockReviewDecision) =

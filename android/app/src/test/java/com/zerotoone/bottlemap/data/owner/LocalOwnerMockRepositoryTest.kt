@@ -178,6 +178,39 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(MockImportStatus.READY_FOR_REVIEW, ready(r).imports.single().status)
     }
 
+    @Test fun cancelAndRejectApplicationStaySeparateFromApproval() {
+        val r = repo(InMemoryMockOwnerStateStore())
+        r.registerApplication(MockOwnerApplication("a", MockApplicationKind.NEW_BAR,
+            MockApplicationStatus.PENDING, "A"))
+        r.closeApplicationForFixture("a", MockApplicationStatus.REJECTED)
+        assertEquals(MockApplicationStatus.REJECTED, ready(r).applications.single().status)
+        rejects { r.closeApplicationForFixture("a", MockApplicationStatus.CANCELED) }
+        assertTrue(ready(r).bars.isEmpty())
+    }
+
+    @Test fun deleteAndClearMenuAreVisibleImmediatelyInCustomerPreview() {
+        val r = repo()
+        catalog(r)
+        r.saveMenuItem(MockBarMenuItem("one", "fixture-bar", "product-12",
+            listOf(serving("one-option", 15, 7000))))
+        r.saveMenuItem(MockBarMenuItem("two", "fixture-bar", "product-16",
+            listOf(serving("two-option", 30, 16000))))
+        r.deleteMenuItem("one")
+        assertEquals(1, r.preview("fixture-bar", 0)!!.visibleMenu.size)
+        r.clearMenuForBar("fixture-bar")
+        assertTrue(ready(r).menuItems.isEmpty())
+        assertTrue(r.preview("fixture-bar", 0)!!.visibleMenu.isEmpty())
+    }
+
+    @Test fun existingBarApplicationUsesExistingBarId() {
+        val r = repo()
+        r.registerApplication(MockOwnerApplication("claim", MockApplicationKind.EXISTING_BAR,
+            MockApplicationStatus.PENDING, "테스트 매장", barId = "fixture-bar"))
+        r.approveForFixture("claim", MockBar("fixture-bar", "테스트 매장", "테스트 주소"))
+        assertEquals(1, ready(r).bars.size)
+        assertEquals(MockApplicationStatus.APPROVED, ready(r).applications.single().status)
+    }
+
     @Test fun failedWriteDoesNotExposeUnpersistedMutation() {
         val store = object : MockOwnerStateStore {
             override fun read() = OwnerMockFixtures.registeredBar()

@@ -25,12 +25,15 @@ interface OwnerMockRepository {
     fun retryLoad()
     fun registerApplication(application: MockOwnerApplication)
     fun approveForFixture(applicationId: String, bar: MockBar)
+    fun closeApplicationForFixture(applicationId: String, status: MockApplicationStatus)
     fun saveBar(bar: MockBar)
     fun selectBar(barId: String)
     fun saveBrand(brand: MockBrand)
     fun saveCatalogProduct(product: MockCatalogProduct)
     fun saveMenuItem(item: MockBarMenuItem)
     fun setSoldOut(barMenuItemId: String, value: Boolean)
+    fun deleteMenuItem(barMenuItemId: String)
+    fun clearMenuForBar(barId: String)
     fun startPhotoImport(barId: String, selectedUris: List<String>, fixture: MockPhotoExtractionSource): String
     fun decideLine(importId: String, extractedItemId: String, expectedVersion: Int, decision: MockReviewDecision)
     fun publishAddOnly(importId: String, expectedVersion: Int): Int
@@ -84,16 +87,31 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             val a = s.applications.firstOrNull { it.applicationId == applicationId }
                 ?: error("Unknown mock application")
             require(a.status == MockApplicationStatus.PENDING)
-            require(s.bars.none { it.barId == bar.barId })
+            if (a.kind == MockApplicationKind.NEW_BAR) {
+                require(s.bars.none { it.barId == bar.barId })
+            } else {
+                require(s.bars.any { it.barId == bar.barId }) { "Existing bar must already exist" }
+            }
             val approved = s.applications.map {
                 if (it.applicationId == applicationId)
                     it.copy(status = MockApplicationStatus.APPROVED, barId = bar.barId) else it
             }
             s.copy(
                 applications = approved,
-                bars = s.bars + bar,
+                bars = if (a.kind == MockApplicationKind.NEW_BAR) s.bars + bar else s.bars,
                 selectedBarId = s.selectedBarId ?: bar.barId,
             ) to Unit
+        }
+    }
+
+    override fun closeApplicationForFixture(applicationId: String, status: MockApplicationStatus) {
+        require(status in listOf(MockApplicationStatus.REJECTED, MockApplicationStatus.CANCELED))
+        change { s ->
+            require(s.applications.any { it.applicationId == applicationId &&
+                it.status == MockApplicationStatus.PENDING })
+            s.copy(applications = s.applications.map {
+                if (it.applicationId == applicationId) it.copy(status = status) else it
+            }) to Unit
         }
     }
 
@@ -153,6 +171,10 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 it.barId == item.barId && it.productId == item.productId &&
                     it.barMenuItemId != item.barMenuItemId
             }) { "Same canonical product already in bar menu; add a serving option" }
+            require(s.menuItems.none { existing ->
+                existing.barMenuItemId != item.barMenuItemId &&
+                    existing.options.any { option -> item.options.any { it.optionId == option.optionId } }
+            }) { "Serving option ID is already used in another menu row" }
             require(s.menuItems.none { it.barMenuItemId == item.barMenuItemId &&
                 (it.barId != item.barId || it.productId != item.productId) })
             s.copy(menuItems = s.menuItems.filterNot { it.barMenuItemId == item.barMenuItemId } + item) to Unit
@@ -165,6 +187,20 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             s.copy(menuItems = s.menuItems.map {
                 if (it.barMenuItemId == barMenuItemId) it.copy(soldOut = value) else it
             }) to Unit
+        }
+    }
+
+    override fun deleteMenuItem(barMenuItemId: String) {
+        change { s ->
+            require(s.menuItems.any { it.barMenuItemId == barMenuItemId })
+            s.copy(menuItems = s.menuItems.filterNot { it.barMenuItemId == barMenuItemId }) to Unit
+        }
+    }
+
+    override fun clearMenuForBar(barId: String) {
+        change { s ->
+            require(s.bars.any { it.barId == barId })
+            s.copy(menuItems = s.menuItems.filterNot { it.barId == barId }) to Unit
         }
     }
 
