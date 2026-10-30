@@ -1,0 +1,277 @@
+package com.zerotoone.bottlemap.data.owner
+
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+/** Persistence boundary. Production API adapter must be implemented only after contract agreement. */
+interface MockOwnerStateStore {
+    fun read(): MockOwnerSnapshot?
+    fun write(snapshot: MockOwnerSnapshot)
+}
+class InMemoryMockOwnerStateStore(initial: MockOwnerSnapshot? = null) : MockOwnerStateStore {
+    var stored: MockOwnerSnapshot? = initial
+        private set
+    override fun read() = stored
+    override fun write(snapshot: MockOwnerSnapshot) { stored = snapshot }
+}
+
+/**
+ * Local-only Mock business operations: never call Retrofit. Both Owner and mock Customer
+ * preview observe this same StateFlow. A successful mutation is persisted BEFORE publication.
+ */
+interface OwnerMockRepository {
+    val state: StateFlow<MockOwnerLoadState>
+    fun retryLoad()
+    fun registerApplication(application: MockOwnerApplication)
+    fun approveForFixture(applicationId: String, bar: MockBar)
+    fun saveBar(bar: MockBar)
+    fun selectBar(barId: String)
+    fun saveBrand(brand: MockBrand)
+    fun saveCatalogProduct(product: MockCatalogProduct)
+    fun saveMenuItem(item: MockBarMenuItem)
+    fun setSoldOut(barMenuItemId: String, value: Boolean)
+    fun startPhotoImport(barId: String, selectedUris: List<String>, fixture: MockPhotoExtractionSource): String
+    fun decideLine(importId: String, extractedItemId: String, expectedVersion: Int, decision: MockReviewDecision)
+    fun publishAddOnly(importId: String, expectedVersion: Int): Int
+    fun preview(barId: String, nowEpochMs: Long): MockPreview?
+}
+
+class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMockRepository {
+    private val lock = Any()
+    private val current = MutableStateFlow<MockOwnerLoadState>(MockOwnerLoadState.Loading)
+    override val state: StateFlow<MockOwnerLoadState> = current.asStateFlow()
+    init { retryLoad() }
+
+    override fun retryLoad() = synchronized(lock) {
+        current.value = MockOwnerLoadState.Loading
+        current.value = try {
+            (store.read() ?: MockOwnerSnapshot()).asLoadState()
+        } catch (e: Exception) {
+            MockOwnerLoadState.Error(e.message ?: "Mock 저장소를 읽지 못했습니다.")
+        }
+    }
+
+    private fun snapshot(): MockOwnerSnapshot = when (val value = current.value) {
+        is MockOwnerLoadState.Ready -> value.snapshot
+        is MockOwnerLoadState.Empty -> value.snapshot
+        is MockOwnerLoadState.Error -> error("Mock 저장소 오류: ${value.message}. retryLoad 먼저 호출")
+        MockOwnerLoadState.Loading -> error("Mock 저장소 로딩 중")
+    }
+
+    private fun <R> change(transform: (MockOwnerSnapshot) -> Pair<MockOwnerSnapshot, R>): R =
+        synchronized(lock) {
+            val (next, result) = transform(snapshot())
+            store.write(next) // If this throws, don't display unpersisted state.
+            current.value = next.asLoadState()
+            result
+        }
+
+    override fun registerApplication(application: MockOwnerApplication) {
+        require(application.status == MockApplicationStatus.PENDING)
+        change { s ->
+            require(s.applications.none { it.applicationId == application.applicationId })
+            s.copy(applications = s.applications + application) to Unit
+        }
+    }
+
+    /**
+     * TEST FIXTURE ONLY. Actual owner approval belongs to an operator API, NOT to Owner UI.
+     * Do not bind this method to any owner approval button.
+     */
+    override fun approveForFixture(applicationId: String, bar: MockBar) {
+        change { s ->
+            val a = s.applications.firstOrNull { it.applicationId == applicationId }
+                ?: error("Unknown mock application")
+            require(a.status == MockApplicationStatus.PENDING)
+            require(s.bars.none { it.barId == bar.barId })
+            val approved = s.applications.map {
+                if (it.applicationId == applicationId)
+                    it.copy(status = MockApplicationStatus.APPROVED, barId = bar.barId) else it
+            }
+            s.copy(
+                applications = approved,
+                bars = s.bars + bar,
+                selectedBarId = s.selectedBarId ?: bar.barId,
+            ) to Unit
+        }
+    }
+
+    override fun saveBar(bar: MockBar) {
+        require(bar.barId.isNotBlank() && bar.name.isNotBlank())
+        require(bar.tags.size <= 5 && bar.tags.distinct().size == bar.tags.size)
+        require(bar.defaultPourMl == null || bar.defaultPourMl > 0)
+        require(bar.weeklyHours.map { it.isoDayOfWeek }.distinct().size == bar.weeklyHours.size)
+        require(bar.weeklyHours.all {
+            it.isoDayOfWeek in 1..7 &&
+                (it.closed || (it.openMinutes != null && it.openMinutes in 0..1439 &&
+                    it.closeMinutes != null && it.closeMinutes in 0..1439))
+        })
+        require(bar.exceptions.all { it.fromEpochDay <= it.toEpochDay })
+        change { s ->
+            require(s.bars.any { it.barId == bar.barId }) { "Unknown bar; use approved fixture for new bar" }
+            s.copy(bars = s.bars.map { if (it.barId == bar.barId) bar else it }) to Unit
+        }
+    }
+
+    override fun selectBar(barId: String) {
+        change { s ->
+            require(s.bars.any { it.barId == barId })
+            s.copy(selectedBarId = barId) to Unit
+        }
+    }
+
+    override fun saveBrand(brand: MockBrand) {
+        require(brand.brandId.isNotBlank() && brand.name.isNotBlank())
+        change { s ->
+            s.copy(brands = s.brands.filterNot { it.brandId == brand.brandId } + brand) to Unit
+        }
+    }
+
+    override fun saveCatalogProduct(product: MockCatalogProduct) {
+        require(product.productId.isNotBlank() && product.displayName.isNotBlank())
+        change { s ->
+            require(s.brands.any { it.brandId == product.brandId }) { "Unknown brand ID" }
+            s.copy(products = s.products.filterNot { it.productId == product.productId } + product) to Unit
+        }
+    }
+
+    override fun saveMenuItem(item: MockBarMenuItem) {
+        require(item.barMenuItemId.isNotBlank())
+        require(item.options.isNotEmpty())
+        require(item.options.distinctBy { it.identityKey() }.size == item.options.size) { "Duplicate serving option" }
+        require(item.options.map { it.optionId }.distinct().size == item.options.size)
+        require(item.options.all { option ->
+            option.priceKrw > 0 && (option.pourMl == null || option.pourMl > 0) &&
+                (option.discount == null || (option.discount.discountedPriceKrw in 1..option.priceKrw &&
+                    option.discount.startAtEpochMs < option.discount.endAtEpochMs))
+        })
+        change { s ->
+            require(s.bars.any { it.barId == item.barId })
+            require(s.products.any { it.productId == item.productId }) { "Unknown catalog product" }
+            require(s.menuItems.none {
+                it.barId == item.barId && it.productId == item.productId &&
+                    it.barMenuItemId != item.barMenuItemId
+            }) { "Same canonical product already in bar menu; add a serving option" }
+            require(s.menuItems.none { it.barMenuItemId == item.barMenuItemId &&
+                (it.barId != item.barId || it.productId != item.productId) })
+            s.copy(menuItems = s.menuItems.filterNot { it.barMenuItemId == item.barMenuItemId } + item) to Unit
+        }
+    }
+
+    override fun setSoldOut(barMenuItemId: String, value: Boolean) {
+        change { s ->
+            require(s.menuItems.any { it.barMenuItemId == barMenuItemId })
+            s.copy(menuItems = s.menuItems.map {
+                if (it.barMenuItemId == barMenuItemId) it.copy(soldOut = value) else it
+            }) to Unit
+        }
+    }
+
+    override fun startPhotoImport(
+        barId: String, selectedUris: List<String>, fixture: MockPhotoExtractionSource,
+    ): String {
+        require(selectedUris.isNotEmpty() && selectedUris.all { it.isNotBlank() })
+        require(selectedUris.distinct().size == selectedUris.size)
+        return change { s ->
+            require(s.bars.any { it.barId == barId })
+            require(s.imports.none { it.barId == barId &&
+                it.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW) })
+            val id = "local-import-${s.nextLocalId}"
+            // Each selected image gets its OWN extraction lines and candidate IDs.
+            var sequence = s.nextLocalId + 1
+            val images = selectedUris.mapIndexed { index, uri ->
+                val sourceLines = fixture.linesFor(uri)
+                val lines = sourceLines.map { line ->
+                    val newLineId = "local-line-${sequence++}"
+                    line.copy(
+                        extractedItemId = newLineId,
+                        decision = null,
+                        options = line.options.map { it.copy(optionId = "local-option-${sequence++}") },
+                    )
+                }
+                MockPhotoExtraction("local-image-${sequence++}", uri, index + 1, lines)
+            }
+            val job = MockMenuImport(id, barId, MockImportStatus.READY_FOR_REVIEW, 1, images)
+            s.copy(imports = s.imports + job, nextLocalId = sequence) to id
+        }
+    }
+
+    override fun decideLine(
+        importId: String, extractedItemId: String, expectedVersion: Int, decision: MockReviewDecision,
+    ) {
+        change { s ->
+            val job = s.imports.firstOrNull { it.menuImportId == importId } ?: error("Unknown import")
+            require(job.status == MockImportStatus.READY_FOR_REVIEW)
+            require(job.reviewVersion == expectedVersion) { "REVIEW_OUTDATED" }
+            require(job.images.any { image -> image.lines.any { it.extractedItemId == extractedItemId } })
+            if (decision.kind == MockDecisionKind.SELECT_PRODUCT) {
+                require(decision.productId != null && s.products.any { it.productId == decision.productId })
+                require(decision.correctedOptions == null ||
+                    (decision.correctedOptions.isNotEmpty() &&
+                        decision.correctedOptions.map { it.identityKey() }.distinct().size == decision.correctedOptions.size &&
+                        decision.correctedOptions.all { it.priceKrw > 0 && (it.pourMl == null || it.pourMl > 0) }))
+            } else require(decision.productId == null && decision.correctedOptions == null)
+            val updated = job.copy(images = job.images.map { image ->
+                image.copy(lines = image.lines.map { line ->
+                    if (line.extractedItemId == extractedItemId) line.copy(decision = decision) else line
+                })
+            })
+            s.copy(imports = s.imports.map { if (it.menuImportId == importId) updated else it }) to Unit
+        }
+    }
+
+    /** Only new canonical products are added. Existing menu options and prices are untouched. */
+    override fun publishAddOnly(importId: String, expectedVersion: Int): Int = change { s ->
+        val job = s.imports.firstOrNull { it.menuImportId == importId } ?: error("Unknown import")
+        require(job.status == MockImportStatus.READY_FOR_REVIEW)
+        require(job.reviewVersion == expectedVersion) { "REVIEW_OUTDATED" }
+        val allLines = job.images.flatMap { it.lines }
+        require(allLines.all { it.decision != null }) { "Review required for every extracted line" }
+        val grouped = allLines.filter { it.decision?.kind == MockDecisionKind.SELECT_PRODUCT }
+            .groupBy { requireNotNull(it.decision?.productId) }
+        var index = s.nextLocalId
+        val added = grouped.mapNotNull { (productId, lines) ->
+            if (s.menuItems.any { it.barId == job.barId && it.productId == productId }) return@mapNotNull null
+            val options = lines.flatMap { it.decision?.correctedOptions ?: it.options }
+            require(options.isNotEmpty()) { "Product needs at least one priced option" }
+            require(options.all { it.priceKrw > 0 })
+            val byKey = options.groupBy { it.identityKey() }
+            require(byKey.values.all { opts -> opts.map { it.priceKrw }.distinct().size == 1 }) {
+                "Conflicting extracted prices for same serving option; review before publish"
+            }
+            MockBarMenuItem(
+                barMenuItemId = "local-menu-${index++}",
+                barId = job.barId,
+                productId = productId,
+                options = byKey.values.map { opts ->
+                    opts.first().copy(optionId = "local-serving-${index++}")
+                },
+            )
+        }
+        val applied = job.copy(status = MockImportStatus.APPLIED)
+        s.copy(
+            menuItems = s.menuItems + added,
+            imports = s.imports.map { if (it.menuImportId == importId) applied else it },
+            nextLocalId = index,
+        ) to added.size
+    }
+
+    override fun preview(barId: String, nowEpochMs: Long): MockPreview? = synchronized(lock) {
+        val s = snapshot()
+        val bar = s.bars.firstOrNull { it.barId == barId } ?: return@synchronized null
+        val visible = s.menuItems.filter { it.barId == barId && !it.soldOut }
+        MockPreview(bar, visible, s.products.filter { p -> visible.any { it.productId == p.productId } }, nowEpochMs)
+    }
+}
+
+/** Explicit fixtures: initial installation is always Empty, not a fabricated registered bar. */
+object OwnerMockFixtures {
+    fun empty() = MockOwnerSnapshot()
+    fun registeredBar(): MockOwnerSnapshot {
+        val bar = MockBar(barId = "fixture-bar", name = "테스트 매장", address = "테스트 주소")
+        return MockOwnerSnapshot(bars = listOf(bar), selectedBarId = bar.barId)
+    }
+    fun imageFixtures(byUri: Map<String, List<MockExtractedLine>>): MockPhotoExtractionSource =
+        MockPhotoExtractionSource { uri -> byUri[uri].orEmpty() }
+}

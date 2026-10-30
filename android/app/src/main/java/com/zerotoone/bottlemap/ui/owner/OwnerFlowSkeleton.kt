@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.navigation.OwnerFlowGroup
 import com.zerotoone.bottlemap.navigation.OwnerPage
 import com.zerotoone.bottlemap.ui.common.OwnerActionButton
@@ -42,6 +43,8 @@ import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
  */
 @Composable
 fun OwnerEntryScreen(
+    mockState: MockOwnerLoadState,
+    onRetry: () -> Unit,
     onBack: () -> Unit,
     onOpenGroup: (OwnerFlowGroup) -> Unit,
     onComponents: () -> Unit,
@@ -54,6 +57,7 @@ fun OwnerEntryScreen(
             verticalArrangement = Arrangement.spacedBy(BottleMapSpacing.md),
         ) {
             OwnerStatusLabel("화면 연결 단계 · 실제 기능 미완성", OwnerStatusTone.ATTENTION)
+            OwnerMockStateLine(mockState, onRetry)
             Text("Owner 화면 구조 미리보기", style = MaterialTheme.typography.headlineSmall)
             Text(
                 "현재는 화면 이동과 공통 컴포넌트만 연결되어 있습니다. 매장 조회, 신청, 저장, OCR, AI 검수, 게시는 동작하지 않습니다.",
@@ -82,6 +86,7 @@ fun OwnerEntryScreen(
 @Composable
 fun OwnerSkeletonScreen(
     page: OwnerPage,
+    mockState: MockOwnerLoadState,
     onBack: () -> Unit,
     onNavigate: (OwnerPage) -> Unit,
     onHome: () -> Unit,
@@ -94,6 +99,7 @@ fun OwnerSkeletonScreen(
             verticalArrangement = Arrangement.spacedBy(BottleMapSpacing.md),
         ) {
             OwnerStatusLabel("미구현 · 이동 골격만 제공", OwnerStatusTone.ATTENTION)
+            OwnerMockStateLine(mockState)
             Text(page.group.title, style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary)
             Text(page.title, style = MaterialTheme.typography.headlineSmall)
@@ -190,4 +196,26 @@ fun OwnerComponentGallery(onBack: () -> Unit) {
         onConfirm = { showConfirm = false },
         onDismiss = { showConfirm = false },
     )
+}
+
+/** Minimal debug readout; all Owner shells observe the same persisted repository. */
+@Composable
+private fun OwnerMockStateLine(state: MockOwnerLoadState, onRetry: (() -> Unit)? = null) {
+    when (state) {
+        MockOwnerLoadState.Loading -> OwnerLoading("로컬 Mock 상태 불러오는 중")
+        is MockOwnerLoadState.Empty -> Text(
+            "Mock 데이터: 매장 0개 · 메뉴 0개 (초기 상태)",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        is MockOwnerLoadState.Ready -> Text(
+            "Mock 데이터: 매장 ${state.snapshot.bars.size}개 · 메뉴 ${state.snapshot.menuItems.size}개",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        is MockOwnerLoadState.Error -> {
+            Text("Mock 데이터 오류: ${state.message}", color = MaterialTheme.colorScheme.error)
+            if (onRetry != null) OwnerActionButton("다시 시도", onRetry, secondary = true)
+        }
+    }
 }

@@ -2,12 +2,14 @@ package com.zerotoone.bottlemap.navigation
 
 import com.zerotoone.bottlemap.BuildConfig
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
-class DeveloperFlavorTest {
-    @Test fun developerPreservesOwnerSelectionRoute() {
-        assertEquals("mode-selection", variantStartDestination)
-        assertTrue(BuildConfig.DEVELOPER_BUILD)
+/** Regression for the removed developer/customer flavor split. */
+class UnifiedBuildRegressionTest {
+    @Test fun unifiedBuildStartsInCustomerWithoutModeSelection() {
+        assertEquals("customer", variantStartDestination)
+        assertFalse(variantStartDestination == "mode-selection")
+        assertEquals("com.zerotoone.bottlemap", BuildConfig.APPLICATION_ID)
     }
 }

@@ -1,6 +1,11 @@
 package com.zerotoone.bottlemap.navigation
 
 import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zerotoone.bottlemap.data.owner.OwnerMockRuntime
+import com.zerotoone.bottlemap.ui.owner.OwnerMockViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -20,7 +25,12 @@ internal const val variantStartDestination = "customer"
 internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
+            val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
+                OwnerMockRuntime.repository(LocalContext.current)))
+            val mockState = data.state.collectAsStateWithLifecycle().value
             OwnerEntryScreen(
+                mockState = mockState,
+                onRetry = data::retry,
                 onBack = { navController.popBackStack() },
                 onOpenGroup = { group -> navController.navigate(OwnerRoutes.groupStart(group)) },
                 onComponents = { navController.navigate(OwnerRoutes.COMPONENTS) },
@@ -31,8 +41,12 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
         }
         OwnerPage.entries.forEach { page ->
             composable(page.route) {
+                val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
+                    OwnerMockRuntime.repository(LocalContext.current)))
+                val mockState = data.state.collectAsStateWithLifecycle().value
                 OwnerSkeletonScreen(
                     page = page,
+                    mockState = mockState,
                     onBack = { navController.popBackStack() },
                     onNavigate = { next -> navController.navigate(next.route) },
                     onHome = {
