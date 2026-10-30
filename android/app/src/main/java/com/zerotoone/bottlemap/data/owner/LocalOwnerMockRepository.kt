@@ -45,7 +45,7 @@ interface OwnerMockRepository {
 /** Local-only serving option invariants shared by direct entry, review, and publish. */
 internal fun validMockMenuOption(option: MockMenuOption): Boolean =
     option.priceKrw > 0 &&
-        (option.pourMl == null || option.pourMl > 0) &&
+        (option.pourMl == null || option.pourMl in 1..32767) &&
         (option.discount == null ||
             (option.discount.discountedPriceKrw in 1..option.priceKrw &&
                 option.discount.startAtEpochMs < option.discount.endAtEpochMs))
@@ -177,6 +177,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
 
     override fun saveBar(bar: MockBar) {
         require(bar.barId.isNotBlank() && bar.name.isNotBlank())
+        require(bar.address.trim().length in 1..500) { "Bar address must be 1..500 characters" }
         require(bar.tags.size <= 5 && bar.tags.distinct().size == bar.tags.size)
         require(bar.defaultPourMl == null || bar.defaultPourMl > 0)
         require((bar.latitude == null) == (bar.longitude == null))
@@ -275,9 +276,15 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(s.bars.any { it.barId == barId })
             require(s.imports.none { it.barId == barId &&
                 it.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW) })
-            val id = "local-import-${s.nextLocalId}"
+            // Fixture/restored snapshots may contain imports without advancing the local
+            // sequence. Reserve a unique job ID before creating any image/line IDs.
+            var reserved = s.nextLocalId
+            while (s.imports.any { it.menuImportId == "local-import-$reserved" }) {
+                reserved++
+            }
+            val id = "local-import-$reserved"
             // Each selected image gets its OWN extraction lines and candidate IDs.
-            var sequence = s.nextLocalId + 1
+            var sequence = reserved + 1
             val images = selectedUris.mapIndexed { index, uri ->
                 val sourceLines = fixture.linesFor(uri)
                 val lines = sourceLines.map { line ->

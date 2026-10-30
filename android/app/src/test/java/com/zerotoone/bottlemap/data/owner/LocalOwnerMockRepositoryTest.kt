@@ -506,6 +506,105 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(manualMenuId, ready(r).menuItems.single().barMenuItemId)
     }
 
+
+    @Test fun preseededImportIdCannotBeReusedByAnotherBar() {
+        val preexisting = MockMenuImport(
+            menuImportId = "local-import-1",
+            barId = "fixture-bar",
+            status = MockImportStatus.APPLIED,
+            reviewVersion = 1,
+            images = emptyList(),
+        )
+        val snapshot = OwnerMockFixtures.registeredBar().copy(
+            bars = OwnerMockFixtures.registeredBar().bars +
+                MockBar("second-bar", "Second Test Bar", "Second test address"),
+            imports = listOf(preexisting),
+            nextLocalId = 1L,
+        )
+        val store = InMemoryMockOwnerStateStore(snapshot)
+        val r = repo(store)
+        val fixture = OwnerMockFixtures.imageFixtures(mapOf(
+            "content://second-bar/photo" to listOf(MockExtractedLine(
+                "sample", "Bottle 12", MockLineKind.PRODUCT,
+                options = listOf(serving("unassigned", 30, 12000))
+            ))
+        ))
+        val newId = r.startPhotoImport("second-bar", listOf("content://second-bar/photo"), fixture)
+        assertEquals("local-import-2", newId)
+        assertEquals(2, ready(r).imports.map { it.menuImportId }.distinct().size)
+        assertEquals("fixture-bar", ready(r).imports.first().barId)
+        val restored = repo(store)
+        val job = ready(restored).imports.single { it.menuImportId == newId }
+        assertEquals("second-bar", job.barId)
+        assertEquals(MockImportStatus.READY_FOR_REVIEW, job.status)
+        assertEquals(1, job.images.single().lines.size)
+        assertTrue(ready(restored).nextLocalId > 2)
+    }
+
+    @Test fun savingBarRejectsBlankAndTooLongAddressesWithoutChangingPreview() {
+        val r = repo()
+        val original = ready(r).bars.single()
+        for (bad in listOf("", "  ", "x".repeat(501))) {
+            rejects { r.saveBar(original.copy(address = bad)) }
+        }
+        assertEquals(original.address, r.preview(original.barId, 0)!!.bar.address)
+        r.saveBar(original.copy(address = "x".repeat(500)))
+        assertEquals(500, r.preview(original.barId, 0)!!.bar.address.length)
+    }
+
+    @Test fun mockOptionsRejectServingVolumeAboveCurrentReviewContractLimit() {
+        val r = repo()
+        catalog(r)
+        for (volume in listOf(-1, 0, 32768, 50000)) {
+            rejects {
+                r.saveMenuItem(MockBarMenuItem(
+                    "menu-invalid", "fixture-bar", "product-12",
+                    listOf(serving("option-invalid", volume, 10000))
+                ))
+            }
+        }
+        val source = OwnerMockFixtures.imageFixtures(mapOf(
+            "content://test/volume" to listOf(MockExtractedLine(
+                "source", "Bottle 12 30ml", MockLineKind.PRODUCT,
+                options = listOf(serving("source", 30, 10000))
+            ))
+        ))
+        val id = r.startPhotoImport("fixture-bar", listOf("content://test/volume"), source)
+        val line = ready(r).imports.single().images.single().lines.single().extractedItemId
+        rejects {
+            r.decideLine(id, line, 1, MockReviewDecision(
+                MockDecisionKind.SELECT_PRODUCT, "product-12",
+                correctedOptions = listOf(serving("corrected", 50000, 10000))
+            ))
+        }
+        assertEquals(null, ready(r).imports.single().images.single().lines.single().decision)
+        r.decideLine(id, line, 1, MockReviewDecision(
+            MockDecisionKind.SELECT_PRODUCT, "product-12",
+            correctedOptions = listOf(serving("corrected", 32767, 10000))
+        ))
+        assertEquals(1, r.publishAddOnly(id, 1))
+        assertEquals(32767, ready(r).menuItems.single().options.single().pourMl)
+    }
+
+    @Test fun uncorrectedInvalidExtractedVolumeCannotBePublished() {
+        val r = repo()
+        catalog(r)
+        val source = OwnerMockFixtures.imageFixtures(mapOf(
+            "content://test/invalid-raw-volume" to listOf(MockExtractedLine(
+                "raw", "Bottle 12 50000ml", MockLineKind.PRODUCT,
+                options = listOf(serving("raw", 50000, 10000))
+            ))
+        ))
+        val id = r.startPhotoImport(
+            "fixture-bar", listOf("content://test/invalid-raw-volume"), source
+        )
+        val line = ready(r).imports.single().images.single().lines.single().extractedItemId
+        r.decideLine(id, line, 1, MockReviewDecision(MockDecisionKind.SELECT_PRODUCT, "product-12"))
+        rejects { r.publishAddOnly(id, 1) }
+        assertTrue(ready(r).menuItems.isEmpty())
+        assertEquals(MockImportStatus.READY_FOR_REVIEW, ready(r).imports.single().status)
+    }
+
     @Test fun failedWriteDoesNotExposeUnpersistedMutation() {
         val store = object : MockOwnerStateStore {
             override fun read() = OwnerMockFixtures.registeredBar()

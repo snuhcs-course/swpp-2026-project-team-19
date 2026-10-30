@@ -58,6 +58,11 @@ Sources: final Owner HTML (2026-10-30), `BottleMap_Owner_Backend_API_Contract_Ga
   from the already-registered bar. Only NEW_BAR registration requires a new proposed name.
 - Locally published menu and serving-option IDs skip any existing manual-entry IDs;
   publishing cannot create a second barMenuItemId or optionId already in the snapshot.
+- Mock photo-import IDs are allocated against all existing import IDs, including restored
+  and fixture jobs that did not advance the local counter. Import IDs must be unique across bars.
+- `saveBar` checks that a trimmed address has 1–500 characters (existing API §3.5).
+  `validMockMenuOption` enforces the existing corrected pour bound 1–32767 ml (§8.1),
+  applied consistently during manual entry, review correction, and mock publish.
 - Test fixture application IDs may collide with the local sequence. Mock submission searches
   for the next unused `local-application-N` and advances the stored sequence atomically.
 - Custom operating exceptions require valid 0–1439 open/close minutes; a same-serving product
