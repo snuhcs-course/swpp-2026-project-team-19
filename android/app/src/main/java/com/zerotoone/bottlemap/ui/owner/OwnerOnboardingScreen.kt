@@ -107,7 +107,7 @@ fun OwnerOnboardingScreen(
                 state is MockOwnerLoadState.Loading -> OwnerLoading("Mock 정보 불러오는 중")
                 state is MockOwnerLoadState.Error -> {
                     Text((state as MockOwnerLoadState.Error).message)
-                    OwnerActionButton("다시 시도",repository::retryLoad)
+                    OwnerActionButton("다시 시도",viewModel::retry)
                 }
                 pending!=null && step!=FormStep.SUBMITTED -> {
                     OwnerStatusLabel("신청 중",OwnerStatusTone.ATTENTION)
