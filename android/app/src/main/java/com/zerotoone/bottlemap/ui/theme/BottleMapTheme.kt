@@ -1,18 +1,18 @@
 package com.zerotoone.bottlemap.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontFamily
 
+/** Dark-first Cocoa Charcoal. Font binaries are not yet in the design branch. */
 @Composable
-fun BottleMapTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
+fun BottleMapTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = if (darkTheme) darkColorScheme() else lightColorScheme(),
+        colorScheme = BottleMapDarkColorScheme,
+        typography = bottleMapTypography(
+            fontFamily = FontFamily.SansSerif,
+            headingFontFamily = FontFamily.Serif,
+        ),
         content = content,
     )
 }

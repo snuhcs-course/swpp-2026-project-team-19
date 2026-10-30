@@ -33,6 +33,7 @@ fun AccountScreen(
     onOpenLogin: () -> Unit,
     onLogout: () -> Unit,
     onRetryAccount: () -> Unit,
+    onOpenOwner: () -> Unit = {},
 ) {
     I2CustomerSearchTheme {
         Column(
@@ -109,6 +110,9 @@ fun AccountScreen(
                             Text("Guest로 계속")
                         }
                     }
+                }
+                OutlinedButton(onClick = onOpenOwner, modifier = Modifier.fillMaxWidth()) {
+                    Text("매장 사장님 · Owner 화면 보기")
                 }
                 Text(
                     "위스키 검색·바 상세·지도는 로그인 없이 이용할 수 있습니다.",
