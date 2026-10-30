@@ -38,19 +38,7 @@ android {
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", stringBuildConfigValue(googleWebClientId))
     }
 
-    // A12/A13: compile Owner implementation only for developer variants.
-    flavorDimensions += "distribution"
-    productFlavors {
-        create("customer") {
-            dimension = "distribution"
-            buildConfigField("boolean", "DEVELOPER_BUILD", "false")
-        }
-        create("developer") {
-            dimension = "distribution"
-            buildConfigField("boolean", "DEVELOPER_BUILD", "true")
-        }
-    }
-
+    // One APK for customer and owner flows.
     buildTypes {
         debug {
             buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
@@ -78,7 +66,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    add("developerImplementation", libs.androidx.exifinterface)
+    implementation(libs.androidx.exifinterface)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
