@@ -7,6 +7,7 @@ import com.zerotoone.bottlemap.data.owner.MockBarMenuItem
 import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
 import com.zerotoone.bottlemap.data.owner.MockOwnerApplication
 import com.zerotoone.bottlemap.data.owner.MockApplicationStatus
+import com.zerotoone.bottlemap.data.owner.MockRegistrationDraft
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.MockPhotoExtractionSource
 import com.zerotoone.bottlemap.data.owner.MockPreview
@@ -22,6 +23,8 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     val state: StateFlow<MockOwnerLoadState> = repository.state
     fun retry() = repository.retryLoad()
     fun register(application: MockOwnerApplication) = repository.registerApplication(application)
+    fun saveRegistrationDraft(draft: MockRegistrationDraft?) = repository.saveRegistrationDraft(draft)
+    fun submitRegistrationDraftForFixture() = repository.submitRegistrationDraftForFixture()
     fun closeApplicationForFixture(id: String, status: MockApplicationStatus) = repository.closeApplicationForFixture(id, status)
     fun saveBar(bar: MockBar) = repository.saveBar(bar)
     fun selectBar(barId: String) = repository.selectBar(barId)

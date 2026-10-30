@@ -8,6 +8,7 @@ package com.zerotoone.bottlemap.data.owner
 data class MockOwnerSnapshot(
     val bars: List<MockBar> = emptyList(),
     val applications: List<MockOwnerApplication> = emptyList(),
+    val registrationDraft: MockRegistrationDraft? = null,
     val brands: List<MockBrand> = emptyList(),
     val products: List<MockCatalogProduct> = emptyList(),
     val menuItems: List<MockBarMenuItem> = emptyList(),
@@ -21,6 +22,8 @@ data class MockBar(
     val name: String,
     val address: String,
     val phone: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     val description: String? = null, // C38 unagreed
     val gallery: List<MockPhoto> = emptyList(), // C39 unagreed; first = cover in mock
     val tags: List<String> = emptyList(), // C40 unagreed
@@ -33,6 +36,22 @@ data class MockBar(
 enum class MockPhotoKind { BAR_GALLERY, MENU_CAPTURE, REGISTRATION_ATTACHMENT }
 data class MockPhoto(val photoId: String, val uri: String, val kind: MockPhotoKind)
 
+/**
+ * Local form draft only. These fields must never be sent to an unagreed API.
+ * App-private Mock preferences are NOT suitable for real applicant PII.
+ */
+data class MockRegistrationDraft(
+    val kind: MockApplicationKind = MockApplicationKind.NEW_BAR,
+    val existingBarId: String? = null,
+    val proposedBarName: String = "",
+    val businessNumberDigits: String = "",
+    val representativeName: String = "",
+    val openingDateIso: String = "",
+    val contactPhone: String = "",
+    val applicantGallery: List<MockPhoto> = emptyList(),
+    val initialMenuPhotos: List<MockPhoto> = emptyList(),
+)
+
 enum class MockApplicationStatus { PENDING, APPROVED, REJECTED, CANCELED }
 enum class MockApplicationKind { NEW_BAR, EXISTING_BAR }
 data class MockOwnerApplication(
@@ -42,8 +61,10 @@ data class MockOwnerApplication(
     val proposedBarName: String,
     val barId: String? = null,
     val representativeName: String? = null,
+    val openingDateIso: String? = null,
+    val contactPhone: String? = null,
     val submittedAtEpochMs: Long = 0L,
-    val attachmentPhotoIds: List<String> = emptyList(), // C05 unagreed
+    val registrationPhotos: List<MockPhoto> = emptyList(), // C05 unagreed
 )
 
 /** Product ID is a catalog identity, never a menu row ID. */
@@ -163,5 +184,5 @@ sealed interface MockOwnerLoadState {
 }
 
 fun MockOwnerSnapshot.asLoadState(): MockOwnerLoadState =
-    if (bars.isEmpty() && applications.isEmpty() && imports.isEmpty())
+    if (bars.isEmpty() && applications.isEmpty() && imports.isEmpty() && registrationDraft == null)
         MockOwnerLoadState.Empty(this) else MockOwnerLoadState.Ready(this)

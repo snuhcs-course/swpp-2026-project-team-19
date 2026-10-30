@@ -178,6 +178,27 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(MockImportStatus.READY_FOR_REVIEW, ready(r).imports.single().status)
     }
 
+    @Test fun unfinishedRegistrationDraftSurvivesRestartAndSubmittedClaimIsSeparate() {
+        val store = InMemoryMockOwnerStateStore()
+        val first = repo(store)
+        val draft = MockRegistrationDraft(
+            proposedBarName = "Mock Demo Bar",
+            representativeName = "Test Only",
+            applicantGallery = listOf(MockPhoto("cover", "content://mock/cover", MockPhotoKind.REGISTRATION_ATTACHMENT)),
+            initialMenuPhotos = listOf(MockPhoto("menu-pic", "content://mock/menu", MockPhotoKind.MENU_CAPTURE)),
+        )
+        first.saveRegistrationDraft(draft)
+        val restored = repo(store)
+        assertEquals(draft, ready(restored).registrationDraft)
+        val applicationId = restored.submitRegistrationDraftForFixture()
+        val snap = ready(restored)
+        assertTrue(applicationId.startsWith("local-application-"))
+        assertEquals(null, snap.registrationDraft)
+        assertEquals(MockApplicationStatus.PENDING, snap.applications.single().status)
+        assertEquals(2, snap.applications.single().registrationPhotos.size)
+        assertTrue(snap.bars.isEmpty()) // approval is not simulated automatically
+    }
+
     @Test fun cancelAndRejectApplicationStaySeparateFromApproval() {
         val r = repo(InMemoryMockOwnerStateStore())
         r.registerApplication(MockOwnerApplication("a", MockApplicationKind.NEW_BAR,

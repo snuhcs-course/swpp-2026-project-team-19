@@ -24,6 +24,8 @@ interface OwnerMockRepository {
     val state: StateFlow<MockOwnerLoadState>
     fun retryLoad()
     fun registerApplication(application: MockOwnerApplication)
+    fun saveRegistrationDraft(draft: MockRegistrationDraft?)
+    fun submitRegistrationDraftForFixture(): String
     fun approveForFixture(applicationId: String, bar: MockBar)
     fun closeApplicationForFixture(applicationId: String, status: MockApplicationStatus)
     fun saveBar(bar: MockBar)
@@ -70,6 +72,34 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             result
         }
 
+    override fun saveRegistrationDraft(draft: MockRegistrationDraft?) {
+        change { s -> s.copy(registrationDraft = draft) to Unit }
+    }
+
+    /** Simulates submission only; no business validation or real operator approval. */
+    override fun submitRegistrationDraftForFixture(): String = change { s ->
+        val draft = requireNotNull(s.registrationDraft) { "No registration draft" }
+        require(draft.proposedBarName.isNotBlank())
+        require(draft.kind != MockApplicationKind.EXISTING_BAR ||
+            s.bars.any { it.barId == draft.existingBarId })
+        val id = "local-application-${s.nextLocalId}"
+        val application = MockOwnerApplication(
+            applicationId = id, kind = draft.kind,
+            status = MockApplicationStatus.PENDING,
+            proposedBarName = draft.proposedBarName,
+            barId = draft.existingBarId,
+            representativeName = draft.representativeName.ifBlank { null },
+            openingDateIso = draft.openingDateIso.ifBlank { null },
+            contactPhone = draft.contactPhone.ifBlank { null },
+            registrationPhotos = draft.applicantGallery + draft.initialMenuPhotos,
+        )
+        s.copy(
+            applications = s.applications + application,
+            registrationDraft = null,
+            nextLocalId = s.nextLocalId + 1,
+        ) to id
+    }
+
     override fun registerApplication(application: MockOwnerApplication) {
         require(application.status == MockApplicationStatus.PENDING)
         change { s ->
@@ -90,7 +120,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             if (a.kind == MockApplicationKind.NEW_BAR) {
                 require(s.bars.none { it.barId == bar.barId })
             } else {
-                require(s.bars.any { it.barId == bar.barId }) { "Existing bar must already exist" }
+                require(s.bars.any { it.barId == bar.barId } && a.barId == bar.barId) { "Existing bar ID does not match claim" }
             }
             val approved = s.applications.map {
                 if (it.applicationId == applicationId)
@@ -119,6 +149,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(bar.barId.isNotBlank() && bar.name.isNotBlank())
         require(bar.tags.size <= 5 && bar.tags.distinct().size == bar.tags.size)
         require(bar.defaultPourMl == null || bar.defaultPourMl > 0)
+        require((bar.latitude == null) == (bar.longitude == null))
+        require(bar.latitude == null || (bar.latitude in -90.0..90.0 &&
+            bar.longitude != null && bar.longitude in -180.0..180.0))
         require(bar.weeklyHours.map { it.isoDayOfWeek }.distinct().size == bar.weeklyHours.size)
         require(bar.weeklyHours.all {
             it.isoDayOfWeek in 1..7 &&

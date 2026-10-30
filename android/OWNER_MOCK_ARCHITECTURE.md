@@ -40,9 +40,10 @@ Sources: final Owner HTML (2026-10-30), `BottleMap_Owner_Backend_API_Contract_Ga
   while Owner retains the row; menu data is never copied into a separate preview fixture.
 - `MockBar.gallery/tags/weeklyHours/exceptions/description/defaultPourMl/lastVerifiedAtEpochMs`
   are **unagreed local UX fields**. Tags max five; 1–7 day/time and date intervals validated.
+- A registration form is a persisted `MockRegistrationDraft`, separate from submitted applications. `submitRegistrationDraftForFixture` creates a local pending application, not a real server submission.
 - Registration applications and ownership fixture approval are separate; `approveForFixture`
   is a TEST DRIVER ONLY, not an Owner screen action and not an operator API substitute.
-- Initial snapshot is empty: 0 bars, applications, menu entries, products and imports. Explicit
+- Initial snapshot is empty: 0 bars, applications, drafts, menu entries, products and imports. Explicit
   `OwnerMockFixtures.registeredBar()` is only used in tests and never seeded on app launch.
 
 ## Photo-specific import and add-only review (local simulation)
