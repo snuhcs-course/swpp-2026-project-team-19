@@ -91,6 +91,11 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     onFirstReview = if (page == OwnerPage.MGR_HOME) {
                         { navController.navigate(OwnerPage.PHOTO_START.route) }
                     } else null,
+                    onLegacyDebugUpload = if (page == OwnerPage.MGR_HOME) {
+                        OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
+                            { navController.navigate(route) }
+                        }
+                    } else null,
                 )
             }
         }

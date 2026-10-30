@@ -104,6 +104,7 @@ fun OwnerSkeletonScreen(
     onHome: () -> Unit,
     onAddBar: (() -> Unit)? = null,
     onFirstReview: (() -> Unit)? = null,
+    onLegacyDebugUpload: (() -> Unit)? = null,
 ) {
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         OwnerHeader(page.title, onBack)
@@ -144,6 +145,10 @@ fun OwnerSkeletonScreen(
                 }
                 if (onAddBar != null) OwnerActionButton(
                     "매장 추가", onAddBar, Modifier.fillMaxWidth(), secondary = true
+                )
+                if (onLegacyDebugUpload != null) OwnerActionButton(
+                    "개발자 도구 · 기존 메뉴 업로드 테스트", onLegacyDebugUpload,
+                    Modifier.fillMaxWidth(), secondary = true
                 )
                 Text("매장 관리 하위 화면 (Navigation 미리보기)", style = MaterialTheme.typography.titleLarge)
                 listOf(
