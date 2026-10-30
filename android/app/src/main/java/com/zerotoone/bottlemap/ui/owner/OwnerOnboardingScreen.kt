@@ -61,6 +61,13 @@ fun OwnerOnboardingScreen(
     var selectedBarId by rememberSaveable { mutableStateOf<String?>(null) }
     val draft = snapshot?.registrationDraft ?: MockRegistrationDraft()
     val certificateUri = draft.certificatePhoto?.uri
+    // Persisted form fields survive process restart. Reopen the unfinished draft
+    // instead of forcing registration mode selection (which would clear it).
+    LaunchedEffect(snapshot?.registrationDraft != null, startRegistration) {
+        if (!startRegistration && snapshot?.registrationDraft != null && step == FormStep.METHOD) {
+            step = if(draft.businessNumberDigits.isNotBlank()) FormStep.BAR else FormStep.BIZ
+        }
+    }
     fun save(newDraft: MockRegistrationDraft) { repository.saveRegistrationDraft(newDraft);error=null }
     fun next() { error=null;step=FormStep.entries.getOrElse(step.ordinal+1){FormStep.REVIEW} }
     fun goBack() {
@@ -242,7 +249,7 @@ fun OwnerOnboardingScreen(
                                     Text(if(noShopPhone)"전화번호 입력하기" else "가게 전화가 없어요")
                                 }
                             }
-                            if(!noShopPhone) Input("매장 전화번호",draft.storePhone,{save(draft.copy(storePhone=digits(it)))},KeyboardType.Phone)
+                            if(!noShopPhone) Input("매장 전화번호",draft.storePhone,{save(draft.copy(storePhone=ownerPhoneDigits(it)))},KeyboardType.Phone)
                             OwnerActionButton("다음",{
                                 if(!validOwnerPhone(draft.storePhone))error="전화번호를 확인해주세요."
                                 else next()
@@ -268,9 +275,9 @@ fun OwnerOnboardingScreen(
                                 Text("운영팀만 봐요",style=MaterialTheme.typography.bodySmall)
                                 TextButton(onClick={save(draft.copy(contactPhone=draft.storePhone))}){Text("매장 번호와 같아요")}
                             }
-                            Input("연락받을 번호",draft.contactPhone,{save(draft.copy(contactPhone=digits(it)))},KeyboardType.Phone)
+                            Input("연락받을 번호",draft.contactPhone,{save(draft.copy(contactPhone=ownerPhoneDigits(it)))},KeyboardType.Phone)
                             OwnerActionButton("신청 내용 확인",{
-                                if(draft.contactPhone.isBlank()||!acceptablePhone(draft.contactPhone)) error="연락받을 번호를 입력해주세요."
+                                if(draft.contactPhone.isBlank()||!validOwnerPhone(draft.contactPhone)) error="연락받을 번호를 입력해주세요."
                                 else step=FormStep.SUBMITTED
                             },Modifier.fillMaxWidth())
                         }
