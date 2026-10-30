@@ -95,6 +95,7 @@ fun OwnerOnboardingScreen(
         OwnerHeader("내 매장 관리",::goBack)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).imePadding().navigationBarsPadding().padding(20.dp),
             verticalArrangement=Arrangement.spacedBy(14.dp)) {
+            OwnerStatusLabel("Mock 시연 전용 · 실제 개인/사업자 정보 입력 금지",OwnerStatusTone.ATTENTION)
             when {
                 state is MockOwnerLoadState.Loading -> OwnerLoading("Mock 정보 불러오는 중")
                 state is MockOwnerLoadState.Error -> {
@@ -177,9 +178,13 @@ fun OwnerOnboardingScreen(
                                 })
                                 Text(certificateUri ?: "선택한 사진 없음")
                                 draft.certificatePhoto?.let { PickerThumbnail(it.uri) }
-                                OwnerActionButton("Mock OCR 결과 확인",{
-                                    // No real OCR. User must verify/correct every field.
-                                    error="Mock OCR입니다. 실제 사업자 정보를 인식하지 않습니다."
+                                OwnerActionButton("Mock OCR 샘플 채우기",{
+                                    // Explicit fixed DEMO fixture, not image-derived OCR.
+                                    save(draft.copy(
+                                        businessNumberDigits="1234567890",
+                                        representativeName="테스트 대표",
+                                        openingDateIso="2024-01-01",
+                                    ))
                                     next()
                                 },enabled=certificateUri!=null)
                                 OwnerActionButton("직접 입력",{next()},secondary=true)
