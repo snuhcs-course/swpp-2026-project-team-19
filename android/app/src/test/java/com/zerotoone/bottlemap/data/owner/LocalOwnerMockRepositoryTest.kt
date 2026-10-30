@@ -183,6 +183,7 @@ class LocalOwnerMockRepositoryTest {
         val first = repo(store)
         val draft = MockRegistrationDraft(
             proposedBarName = "Mock Demo Bar",
+            proposedBarAddress = "테스트 주소",
             representativeName = "Test Only",
             applicantGallery = listOf(MockPhoto("cover", "content://mock/cover", MockPhotoKind.REGISTRATION_ATTACHMENT)),
             initialMenuPhotos = listOf(MockPhoto("menu-pic", "content://mock/menu", MockPhotoKind.MENU_CAPTURE)),
@@ -295,7 +296,7 @@ class LocalOwnerMockRepositoryTest {
         val store = InMemoryMockOwnerStateStore()
         val r = repo(store)
         r.saveRegistrationDraft(MockRegistrationDraft(
-            proposedBarName = "Mock Bar", businessNumberDigits = " 123-45-67890 "
+            proposedBarName = "Mock Bar", proposedBarAddress = "Sample Road 12", businessNumberDigits = " 123-45-67890 "
         ))
         val id = r.submitRegistrationDraftForFixture()
         assertEquals("local-application-1", id)
@@ -311,7 +312,7 @@ class LocalOwnerMockRepositoryTest {
             MockApplicationKind.NEW_BAR, MockApplicationStatus.PENDING, "Old application 1"))
         r.registerApplication(MockOwnerApplication("local-application-2",
             MockApplicationKind.NEW_BAR, MockApplicationStatus.PENDING, "Old application 2"))
-        r.saveRegistrationDraft(MockRegistrationDraft(proposedBarName = "New application"))
+        r.saveRegistrationDraft(MockRegistrationDraft(proposedBarName = "New application", proposedBarAddress = "Sample Road 21"))
         val id = r.submitRegistrationDraftForFixture()
         assertEquals("local-application-3", id)
         assertEquals(3, ready(r).applications.map { it.applicationId }.distinct().size)
@@ -410,6 +411,23 @@ class LocalOwnerMockRepositoryTest {
     }
 
 
+    @Test fun newBarAddressSurvivesDraftAndSubmissionRestoration() {
+        val store = InMemoryMockOwnerStateStore()
+        val r = repo(store)
+        val draft = MockRegistrationDraft(
+            kind = MockApplicationKind.NEW_BAR,
+            proposedBarName = "New Mock Bar",
+            proposedBarAddress = "  Sample Road 33  ",
+        )
+        r.saveRegistrationDraft(draft)
+        assertEquals(draft, ready(repo(store)).registrationDraft)
+        r.submitRegistrationDraftForFixture()
+        val submitted = ready(repo(store)).applications.single()
+        assertEquals("Sample Road 33", submitted.proposedBarAddress)
+        assertEquals("New Mock Bar", submitted.proposedBarName)
+        assertEquals(null, submitted.barId)
+    }
+
     @Test fun existingBarClaimDoesNotRequireNewProposedBarName() {
         val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
         val r = repo(store)
@@ -423,6 +441,7 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(id, application.applicationId)
         assertEquals("fixture-bar", application.barId)
         assertEquals("테스트 매장", application.proposedBarName)
+        assertEquals(null, application.proposedBarAddress)
         assertEquals(1, ready(r).bars.size)
         r.approveForFixture(id, ready(r).bars.single())
         assertEquals(1, ready(r).bars.size)
@@ -433,6 +452,11 @@ class LocalOwnerMockRepositoryTest {
         r.saveRegistrationDraft(MockRegistrationDraft(
             kind = MockApplicationKind.NEW_BAR,
             proposedBarName = " "
+        ))
+        rejects { r.submitRegistrationDraftForFixture() }
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            kind = MockApplicationKind.NEW_BAR,
+            proposedBarName = "New Bar Without Address",
         ))
         rejects { r.submitRegistrationDraftForFixture() }
         r.saveRegistrationDraft(MockRegistrationDraft(

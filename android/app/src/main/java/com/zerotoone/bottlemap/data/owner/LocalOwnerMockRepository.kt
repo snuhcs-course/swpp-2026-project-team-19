@@ -100,6 +100,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             }
         } else {
             require(draft.proposedBarName.isNotBlank()) { "New bar name is required" }
+            require(draft.proposedBarAddress.isNotBlank()) { "New bar address is required" }
             null
         }
         // External test fixtures may already use local-application-N IDs. Reserve an
@@ -115,6 +116,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             // A claim references the selected bar; no proposedBar name is required by API 3.11.2.
             proposedBarName = existingBar?.name ?: draft.proposedBarName,
             barId = existingBar?.barId,
+            proposedBarAddress = if (existingBar == null) draft.proposedBarAddress.trim() else null,
             representativeName = draft.representativeName.ifBlank { null },
             businessNumberDigits = draft.businessNumberDigits.filter(Char::isDigit).ifBlank { null },
             openingDateIso = draft.openingDateIso.ifBlank { null },

@@ -46,6 +46,10 @@ Sources: final Owner HTML (2026-10-30), `BottleMap_Owner_Backend_API_Contract_Ga
 - `MockBar.gallery/tags/weeklyHours/exceptions/description/defaultPourMl/lastVerifiedAtEpochMs`
   are **unagreed local UX fields**. Tags max five; 1–7 day/time and date intervals validated.
 - A registration form is a persisted `MockRegistrationDraft`, separate from submitted applications. `submitRegistrationDraftForFixture` creates a local pending application, not a real server submission.
+- New-bar drafts and submitted applications persist the proposed-bar address required by
+  existing spec §3.11.2. Only NEW_BAR requires a nonblank name and address in local fixture
+  submission; an EXISTING_BAR claim references an existing bar without proposedBar. These
+  fields are local Mock models, NOT newly agreed backend request DTO fields.
 - Mock submission preserves the normalized business registration number in
   `MockOwnerApplication.businessNumberDigits` (Android-local ONLY; do not reinterpret this as an
   approved Backend DTO field). The stored number is sensitive; exclude from backups and do

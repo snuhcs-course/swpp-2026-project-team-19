@@ -48,6 +48,7 @@ fun OwnerEntryScreen(
     onBack: () -> Unit,
     onOpenGroup: (OwnerFlowGroup) -> Unit,
     onComponents: () -> Unit,
+    onOpenLegacyUpload: (() -> Unit)? = null, // Only supplied for Debug navigation
 ) {
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         OwnerHeader("매장 사장님", onBack)
@@ -79,6 +80,15 @@ fun OwnerEntryScreen(
                 onClick = onComponents,
                 trailing = "보기",
             )
+            if (onOpenLegacyUpload != null) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                OwnerMenuRow(
+                    title = "개발자 도구 · 기존 메뉴 업로드 테스트",
+                    subtitle = "Debug 전용 · 임시 Operator 인증의 과거 통합 테스트 화면",
+                    onClick = onOpenLegacyUpload,
+                    trailing = "테스트",
+                )
+            }
         }
     }
 }

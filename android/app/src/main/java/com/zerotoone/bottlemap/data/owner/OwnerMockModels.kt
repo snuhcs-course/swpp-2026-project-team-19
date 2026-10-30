@@ -44,6 +44,7 @@ data class MockRegistrationDraft(
     val kind: MockApplicationKind = MockApplicationKind.NEW_BAR,
     val existingBarId: String? = null,
     val proposedBarName: String = "",
+    val proposedBarAddress: String = "", // 3.11.2 required for new_bar; local-only draft
     val businessNumberDigits: String = "",
     val representativeName: String = "",
     val openingDateIso: String = "",
@@ -60,6 +61,7 @@ data class MockOwnerApplication(
     val status: MockApplicationStatus,
     val proposedBarName: String,
     val barId: String? = null,
+    val proposedBarAddress: String? = null, // new_bar only; null for existing_bar
     val representativeName: String? = null,
     // Mock-only application snapshot: preserve the submitted registration number,
     // NOT a newly agreed Backend field. Never store production applicant PII here.

@@ -16,6 +16,12 @@ class OwnerNavigationContractTest {
         assertTrue(pages.all { it.route.startsWith("owner/ux/") && it.title.isNotBlank() })
     }
 
+    @Test fun legacyMenuUploadIsAccessibleOnlyFromDebugOwnerEntry() {
+        assertEquals(OwnerRoutes.LEGACY_UPLOAD, OwnerRoutes.legacyDebugEntryRoute(true))
+        assertEquals(null, OwnerRoutes.legacyDebugEntryRoute(false))
+        assertEquals("customer", variantStartDestination)
+    }
+
     @Test fun groupedRoutesIncludeHoursTagsPhotosAndReview() {
         OwnerFlowGroup.entries.forEach { group ->
             val first = OwnerPage.entries.first { it.group == group }

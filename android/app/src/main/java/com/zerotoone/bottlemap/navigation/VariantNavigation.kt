@@ -34,6 +34,9 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 onBack = { navController.popBackStack() },
                 onOpenGroup = { group -> navController.navigate(OwnerRoutes.groupStart(group)) },
                 onComponents = { navController.navigate(OwnerRoutes.COMPONENTS) },
+                onOpenLegacyUpload = OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
+                    { navController.navigate(route) }
+                },
             )
         }
         composable(OwnerRoutes.COMPONENTS) {
