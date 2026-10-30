@@ -101,6 +101,8 @@ fun OwnerSkeletonScreen(
     onBack: () -> Unit,
     onNavigate: (OwnerPage) -> Unit,
     onHome: () -> Unit,
+    onAddBar: (() -> Unit)? = null,
+    onFirstReview: (() -> Unit)? = null,
 ) {
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         OwnerHeader(page.title, onBack)
@@ -121,12 +123,52 @@ fun OwnerSkeletonScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (page == OwnerPage.MGR_HOME) {
+                val snap = when (mockState) {
+                    is MockOwnerLoadState.Ready -> mockState.snapshot
+                    is MockOwnerLoadState.Empty -> mockState.snapshot
+                    else -> null
+                }
+                val bar = snap?.bars?.firstOrNull { it.barId == snap.selectedBarId }
+                    ?: snap?.bars?.firstOrNull()
+                if (bar != null) {
+                    Text(bar.name, style = MaterialTheme.typography.headlineSmall)
+                    val posted = snap?.menuItems.orEmpty().any { it.barId == bar.barId }
+                    OwnerStatusLabel(
+                        if (posted) "정상 영업 · Mock 게시 메뉴 있음" else "메뉴 확인 필요 · 아직 공개 전",
+                        if (posted) OwnerStatusTone.SUCCESS else OwnerStatusTone.ATTENTION,
+                    )
+                    if (!posted && onFirstReview != null) OwnerActionButton(
+                        "최초 메뉴 검수로", onFirstReview, Modifier.fillMaxWidth()
+                    )
+                }
+                if (onAddBar != null) OwnerActionButton(
+                    "매장 추가", onAddBar, Modifier.fillMaxWidth(), secondary = true
+                )
                 Text("매장 관리 하위 화면 (Navigation 미리보기)", style = MaterialTheme.typography.titleLarge)
                 listOf(
                     OwnerPage.MGR_INFO, OwnerPage.MGR_STATUS, OwnerPage.MGR_PHOTOS,
                     OwnerPage.MGR_MENU, OwnerPage.MGR_PHOTO, OwnerPage.MGR_PREVIEW,
                 ).forEach { destination ->
                     OwnerMenuRow(destination.title, "아직 기능 미구현", onClick = { onNavigate(destination) })
+                }
+            }
+            if (page == OwnerPage.PHOTO_START) {
+                val snap = when (mockState) {
+                    is MockOwnerLoadState.Ready -> mockState.snapshot
+                    is MockOwnerLoadState.Empty -> mockState.snapshot
+                    else -> null
+                }
+                val selected = snap?.selectedBarId ?: snap?.bars?.firstOrNull()?.barId
+                val job = snap?.imports?.lastOrNull { it.barId == selected }
+                if (job == null) {
+                    OwnerStatusLabel("초기 메뉴판 사진 없음", OwnerStatusTone.ATTENTION)
+                    Text("승인된 매장의 메뉴판 사진이 없습니다. 메뉴 등록은 다음 단계에서 구현합니다.")
+                } else {
+                    OwnerStatusLabel("메뉴 확인 필요 · 사진 ${job.images.size}장",OwnerStatusTone.ATTENTION)
+                    job.images.forEach { image ->
+                        Text("${image.imageOrder}번 메뉴판 사진: ${image.sourceUri.takeLast(64)}")
+                    }
+                    Text("사진 참조·순서는 보존되었습니다. 실제 AI 인식·검수·게시는 아직 미구현입니다.")
                 }
             }
             if (page == OwnerPage.MGR_INFO) {

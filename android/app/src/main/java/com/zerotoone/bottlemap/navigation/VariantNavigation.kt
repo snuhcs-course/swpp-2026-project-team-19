@@ -1,6 +1,9 @@
 package com.zerotoone.bottlemap.navigation
 
 import android.net.Uri
+import androidx.compose.runtime.LaunchedEffect
+import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
+import com.zerotoone.bottlemap.data.owner.openSingleBarManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -25,11 +28,40 @@ internal const val variantStartDestination = "customer"
 internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
+            val repository = OwnerMockRuntime.repository(LocalContext.current)
+            val mockState = repository.state.collectAsStateWithLifecycle().value
+            val snapshot = when (mockState) {
+                is MockOwnerLoadState.Ready -> mockState.snapshot
+                is MockOwnerLoadState.Empty -> mockState.snapshot
+                else -> null
+            }
+            val directManager = snapshot?.openSingleBarManager() == true
+            LaunchedEffect(directManager) {
+                if (directManager) {
+                    navController.navigate(OwnerPage.MGR_HOME.route) {
+                        popUpTo(OwnerRoutes.ENTRY) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
+            if (!directManager) OwnerOnboardingScreen(
+                repository = repository,
+                onBack = { navController.popBackStack() },
+                onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
+                onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
+                onComponents = { navController.navigate(OwnerRoutes.COMPONENTS) },
+                onLegacyDebugUpload = OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
+                    { navController.navigate(route) }
+                },
+            )
+        }
+        composable(OwnerRoutes.ADD_BAR) {
             OwnerOnboardingScreen(
                 repository = OwnerMockRuntime.repository(LocalContext.current),
                 onBack = { navController.popBackStack() },
                 onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
+                startRegistration = true,
             )
         }
         composable(OwnerRoutes.COMPONENTS) {
@@ -47,8 +79,16 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     onBack = { navController.popBackStack() },
                     onNavigate = { next -> navController.navigate(next.route) },
                     onHome = {
-                        navController.popBackStack(OwnerRoutes.ENTRY, inclusive = false)
+                        if (!navController.popBackStack(OwnerRoutes.ENTRY, inclusive = false)) {
+                            navController.popBackStack(OwnerRoutes.GRAPH, inclusive = true)
+                        }
                     },
+                    onAddBar = if (page == OwnerPage.MGR_HOME) {
+                        { navController.navigate(OwnerRoutes.ADD_BAR) }
+                    } else null,
+                    onFirstReview = if (page == OwnerPage.MGR_HOME) {
+                        { navController.navigate(OwnerPage.PHOTO_START.route) }
+                    } else null,
                 )
             }
         }

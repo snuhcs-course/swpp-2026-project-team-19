@@ -625,6 +625,93 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(MockImportStatus.READY_FOR_REVIEW, ready(r).imports.single().status)
     }
 
+
+    @Test fun emptyAppOnboardingRetainsPhonesAndPhotoOrderAcrossRepositoryRecreation() {
+        val store = InMemoryMockOwnerStateStore()
+        val first = repo(store)
+        assertTrue(first.state.value is MockOwnerLoadState.Empty)
+        val certificate = MockPhoto("certificate", "content://test/certificate", MockPhotoKind.REGISTRATION_ATTACHMENT)
+        val cover = MockPhoto("cover", "content://test/cover", MockPhotoKind.BAR_GALLERY)
+        val menu1 = MockPhoto("menu-1", "content://test/menu1", MockPhotoKind.MENU_CAPTURE)
+        val menu2 = MockPhoto("menu-2", "content://test/menu2", MockPhotoKind.MENU_CAPTURE)
+        val draft = MockRegistrationDraft(
+            proposedBarName = "등록 테스트", proposedBarAddress = "서울시 테스트",
+            businessNumberDigits = "1234567890", representativeName = "테스트 대표",
+            openingDateIso = "2024-01-01", certificatePhoto = certificate,
+            storePhone = "050712345678", contactPhone = "0212345678",
+            applicantGallery = listOf(cover), initialMenuPhotos = listOf(menu1, menu2),
+        )
+        first.saveRegistrationDraft(draft)
+        val restored = repo(store)
+        assertEquals(draft, ready(restored).registrationDraft)
+        val id = restored.submitRegistrationDraftForFixture()
+        val application = ready(repo(store)).applications.single()
+        assertEquals(id, application.applicationId)
+        assertEquals(MockApplicationStatus.PENDING, application.status)
+        assertEquals("050712345678", application.storePhone)
+        assertEquals("0212345678", application.contactPhone)
+        assertEquals(listOf(certificate, cover, menu1, menu2), application.registrationPhotos)
+        assertTrue(ready(restored).bars.isEmpty())
+        assertTrue(ready(restored).menuItems.isEmpty())
+        assertEquals(null, restored.preview("mock-bar", 0))
+        rejects { restored.submitRegistrationDraftForFixture() } // cannot submit the same draft twice
+    }
+
+    @Test fun approvalPreservesPhotosWithoutPublishingMenuUntilManualReview() {
+        val store = InMemoryMockOwnerStateStore()
+        val repository = repo(store)
+        repository.saveRegistrationDraft(MockRegistrationDraft(
+            proposedBarName = "Test Owner Bar", proposedBarAddress = "Test Road",
+            initialMenuPhotos = listOf(
+                MockPhoto("a", "content://test/menuA", MockPhotoKind.MENU_CAPTURE),
+                MockPhoto("b", "content://test/menuB", MockPhotoKind.MENU_CAPTURE),
+            )
+        ))
+        val appId = repository.submitRegistrationDraftForFixture()
+        val application = ready(repository).applications.single()
+        val bar = MockBar("bar-approved", application.proposedBarName, application.proposedBarAddress!!)
+        repository.approveForFixture(appId, bar)
+        val urls = application.registrationPhotos
+            .filter { it.kind == MockPhotoKind.MENU_CAPTURE }.map { it.uri }
+        val importId = repository.startPhotoImport(bar.barId, urls, OwnerMockFixtures.imageFixtures(emptyMap()))
+        val restored = repo(store)
+        val snapshot = ready(restored)
+        assertEquals(MockApplicationStatus.APPROVED, snapshot.applications.single().status)
+        assertEquals(bar.barId, snapshot.selectedBarId)
+        assertEquals(listOf("content://test/menuA", "content://test/menuB"),
+            snapshot.imports.single { it.menuImportId == importId }.images.map { it.sourceUri })
+        assertEquals(MockImportStatus.READY_FOR_REVIEW, snapshot.imports.single().status)
+        assertTrue(restored.preview(bar.barId, 0)!!.visibleMenu.isEmpty())
+        assertTrue(snapshot.menuItems.isEmpty())
+    }
+
+    @Test fun canceledAndRejectedMockApplicationsNeverCreatePublicBars() {
+        for(status in listOf(MockApplicationStatus.CANCELED, MockApplicationStatus.REJECTED)) {
+            val subject = repo(InMemoryMockOwnerStateStore())
+            subject.saveRegistrationDraft(MockRegistrationDraft(
+                proposedBarName = "Bar", proposedBarAddress = "Address"
+            ))
+            val id = subject.submitRegistrationDraftForFixture()
+            subject.closeApplicationForFixture(id, status)
+            assertEquals(status, ready(subject).applications.single().status)
+            assertTrue(ready(subject).bars.isEmpty())
+            assertTrue(ready(subject).menuItems.isEmpty())
+        }
+    }
+
+    @Test fun singleBarRoutingRequiresExactlyOneBarWithoutPendingOrActiveDraft() {
+        val empty = MockOwnerSnapshot()
+        assertFalse(empty.openSingleBarManager())
+        val single = OwnerMockFixtures.registeredBar()
+        assertTrue(single.openSingleBarManager())
+        assertFalse(single.copy(bars = single.bars + MockBar("b2", "B", "Address B")).openSingleBarManager())
+        assertFalse(single.copy(registrationDraft = MockRegistrationDraft()).openSingleBarManager())
+        assertFalse(single.copy(applications = listOf(MockOwnerApplication(
+            "pending-1", MockApplicationKind.EXISTING_BAR,
+            MockApplicationStatus.PENDING, "Test", barId = "fixture-bar"
+        ))).openSingleBarManager())
+    }
+
     @Test fun failedWriteDoesNotExposeUnpersistedMutation() {
         val store = object : MockOwnerStateStore {
             override fun read() = OwnerMockFixtures.registeredBar()

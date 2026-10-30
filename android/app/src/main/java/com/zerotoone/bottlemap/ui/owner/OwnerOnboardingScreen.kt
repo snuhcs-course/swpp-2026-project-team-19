@@ -6,6 +6,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import android.graphics.BitmapFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -34,6 +41,9 @@ fun OwnerOnboardingScreen(
     onBack: () -> Unit,
     onFirstReview: () -> Unit,
     onManagerPreview: () -> Unit,
+    startRegistration: Boolean = false,
+    onComponents: (() -> Unit)? = null,
+    onLegacyDebugUpload: (() -> Unit)? = null,
 ) {
     val state by repository.state.collectAsState()
     val snapshot = when(val s=state) {
@@ -42,7 +52,7 @@ fun OwnerOnboardingScreen(
         else -> null
     }
     val context=LocalContext.current
-    var step by rememberSaveable { mutableStateOf(FormStep.METHOD) }
+    var step by rememberSaveable { mutableStateOf(if(startRegistration)FormStep.CERTIFICATE else FormStep.METHOD) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
 
@@ -83,12 +93,6 @@ fun OwnerOnboardingScreen(
                     Text((state as MockOwnerLoadState.Error).message)
                     OwnerActionButton("다시 시도",repository::retryLoad)
                 }
-                approved!=null && step!=FormStep.METHOD && step!=FormStep.SUBMITTED -> {
-                    Text("승인되었습니다. 메뉴 확인이 필요해요.",style=MaterialTheme.typography.titleLarge)
-                    OwnerStatusLabel("메뉴 확인 필요",OwnerStatusTone.ATTENTION)
-                    OwnerActionButton("최초 메뉴 검수 시작",onFirstReview,Modifier.fillMaxWidth())
-                    OwnerActionButton("매장 관리 보기",onManagerPreview,Modifier.fillMaxWidth(),secondary=true)
-                }
                 pending!=null && step!=FormStep.SUBMITTED -> {
                     OwnerStatusLabel("신청 중",OwnerStatusTone.ATTENTION)
                     Text("운영팀 승인 전에는 매장 메뉴가 공개되지 않습니다.")
@@ -96,6 +100,9 @@ fun OwnerOnboardingScreen(
                     OwnerActionButton("신청 취소 (Mock)",{
                         repository.closeApplicationForFixture(pending.applicationId,MockApplicationStatus.CANCELED)
                         step=FormStep.METHOD
+                    },Modifier.fillMaxWidth(),secondary=true)
+                    if(BuildConfigDebug()) OwnerActionButton("테스트: 거절 처리 (Mock)", {
+                        repository.closeApplicationForFixture(pending.applicationId,MockApplicationStatus.REJECTED)
                     },Modifier.fillMaxWidth(),secondary=true)
                     if(BuildConfigDebug()) OwnerActionButton("테스트: 승인 처리 (Mock)", {
                         val id=pending.barId?:"mock-bar-${pending.applicationId}"
@@ -154,12 +161,15 @@ fun OwnerOnboardingScreen(
                                     pickCertificate.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                                 })
                                 Text(certificateUri ?: "선택한 사진 없음")
+                                draft.certificatePhoto?.let { PickerThumbnail(it.uri) }
                                 OwnerActionButton("Mock OCR 결과 확인",{
                                     // No real OCR. User must verify/correct every field.
                                     error="Mock OCR입니다. 실제 사업자 정보를 인식하지 않습니다."
                                     next()
                                 },enabled=certificateUri!=null)
                                 OwnerActionButton("직접 입력",{next()},secondary=true)
+                                Text("사업자등록증 AI 인식은 실행하지 않습니다. 아래 정보는 직접 확인·수정합니다.",
+                                    style=MaterialTheme.typography.bodySmall)
                             }
                         }
                         FormStep.BAR -> {
@@ -167,6 +177,9 @@ fun OwnerOnboardingScreen(
                             Input("사업자등록번호",draft.businessNumberDigits,{save(draft.copy(businessNumberDigits=digits(it)))},KeyboardType.Number)
                             Input("대표자명",draft.representativeName,{save(draft.copy(representativeName=it))})
                             Input("개업일 (YYYY-MM-DD)",draft.openingDateIso,{save(draft.copy(openingDateIso=it))},KeyboardType.Number)
+                            OwnerActionButton("샘플 정보 채우기 (Mock)", {
+                                save(draft.copy(businessNumberDigits="1234567890", representativeName="테스트 대표",openingDateIso="2024-01-01"))
+                            },Modifier.fillMaxWidth(),secondary=true)
                             OwnerActionButton("다음",{
                                 if(draft.businessNumberDigits.length!=10 || draft.representativeName.isBlank() ||
                                    !Regex("\\d{4}-\\d{2}-\\d{2}").matches(draft.openingDateIso)) error="사업자 정보를 확인해주세요."
@@ -190,7 +203,7 @@ fun OwnerOnboardingScreen(
                             OwnerActionButton("갤러리에서 대표 사진 선택",{
                                 pickCover.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                             })
-                            draft.applicantGallery.forEach { Text("대표 사진: ${it.uri.takeLast(45)}") }
+                            draft.applicantGallery.forEach { PickerThumbnail(it.uri) }
                             OwnerActionButton("다음", ::next,Modifier.fillMaxWidth(),enabled=draft.applicantGallery.isNotEmpty())
                         }
                         FormStep.MENU -> {
@@ -212,7 +225,12 @@ fun OwnerOnboardingScreen(
                             OwnerActionButton("Photo Picker로 사진 선택",{
                                 pickMenu.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                             },Modifier.fillMaxWidth())
-                            draft.initialMenuPhotos.forEachIndexed { i,photo -> Text("${i+1}. ${photo.uri.takeLast(50)}") }
+                            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                draft.initialMenuPhotos.forEachIndexed { i,photo ->
+                                    Column { Text("${i+1}번 사진"); PickerThumbnail(photo.uri) }
+                                }
+                            }
                             Text("사진별 선택 순서는 유지됩니다. AI 분석은 승인 후 다음 단계에서 진행합니다.")
                             OwnerActionButton("다음",::next,Modifier.fillMaxWidth(),enabled=draft.initialMenuPhotos.isNotEmpty())
                         }
@@ -244,6 +262,12 @@ fun OwnerOnboardingScreen(
                             },Modifier.fillMaxWidth(),enabled=!busy)
                         }
                     }
+                    if(step==FormStep.METHOD) {
+                        if(onComponents!=null) OwnerActionButton("공통 컴포넌트 점검", onComponents,
+                            Modifier.fillMaxWidth(),secondary=true)
+                        if(onLegacyDebugUpload!=null) OwnerActionButton("개발자 도구 · 기존 메뉴 업로드 테스트",
+                            onLegacyDebugUpload,Modifier.fillMaxWidth(),secondary=true)
+                    }
                     if(step!=FormStep.METHOD) {
                         OwnerActionButton("이전",{if(step.ordinal>0)step=FormStep.entries[step.ordinal-1] else onBack()},
                             Modifier.fillMaxWidth(),secondary=true)
@@ -263,3 +287,20 @@ private fun persistUri(context:Context,uri:Uri){
     catch (_:SecurityException){ /* platform picker may grant temporary URI only */ }
 }
 private fun BuildConfigDebug()=com.zerotoone.bottlemap.BuildConfig.DEBUG
+
+/** Loads only a downsampled thumbnail; never decodes a full-resolution camera image on UI. */
+@Composable private fun PickerThumbnail(uri:String) {
+    val ctx=LocalContext.current
+    val image by produceState<androidx.compose.ui.graphics.ImageBitmap?>(initialValue=null,uri) {
+        value=withContext(Dispatchers.IO) {
+            try {
+                ctx.contentResolver.openInputStream(Uri.parse(uri))?.use { input ->
+                    BitmapFactory.decodeStream(input,null,BitmapFactory.Options().apply { inSampleSize=8 })?.asImageBitmap()
+                }
+            }catch (_:Exception){null}
+        }
+    }
+    if(image!=null) Image(bitmap=image!!, contentDescription="선택한 사진",
+        modifier=Modifier.size(120.dp),contentScale=ContentScale.Crop)
+    else Text("선택한 사진 · 미리보기 불가",style=MaterialTheme.typography.bodySmall)
+}

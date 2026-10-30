@@ -194,3 +194,8 @@ sealed interface MockOwnerLoadState {
 fun MockOwnerSnapshot.asLoadState(): MockOwnerLoadState =
     if (bars.isEmpty() && applications.isEmpty() && imports.isEmpty() && registrationDraft == null)
         MockOwnerLoadState.Empty(this) else MockOwnerLoadState.Ready(this)
+
+/** Entry routing is a local Owner UI policy; no server status is inferred. */
+fun MockOwnerSnapshot.openSingleBarManager(): Boolean =
+    bars.size == 1 && registrationDraft == null &&
+        applications.none { it.status == MockApplicationStatus.PENDING }
