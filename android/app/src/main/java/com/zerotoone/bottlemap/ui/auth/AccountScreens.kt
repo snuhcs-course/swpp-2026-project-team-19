@@ -48,6 +48,8 @@ fun AccountScreen(
         is MockOwnerLoadState.Empty -> current.snapshot
         else -> null
     }
+    // v4: guest must use existing Google sign-in before entering Owner UI.
+    val openOwnerFromAccount = if (state is AuthUiState.SignedIn) onOpenOwner else onOpenLogin
     val hasOwnerArea = owned?.let { snapshot ->
         snapshot.bars.isNotEmpty() || snapshot.applications.any { app ->
             app.applicationId !in snapshot.dismissedApplicationIds &&
@@ -131,11 +133,11 @@ fun AccountScreen(
                     }
                 }
                 if (hasOwnerArea) {
-                    OutlinedButton(onClick = onOpenOwner, modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(onClick = openOwnerFromAccount, modifier = Modifier.fillMaxWidth()) {
                         Text("내 매장 관리")
                     }
                 } else {
-                    TextButton(onClick = onOpenOwner, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(onClick = openOwnerFromAccount, modifier = Modifier.fillMaxWidth()) {
                         Text("매장 사장님이신가요?  매장 등록하기")
                     }
                 }

@@ -160,6 +160,15 @@ fun OwnerOnboardingScreen(
         }
     }
 
+    LaunchedEffect(snapshot?.bars?.size,snapshot?.applications?.size,startRegistration) {
+        if(!startRegistration && snapshot!=null &&
+            snapshot.bars.isEmpty() && snapshot.applications.isEmpty() &&
+            snapshot.registrationDraft==null && screen==RegPage.HOME){
+            // HTML v4: no redundant entry page before the registration introduction.
+            screen=RegPage.INTRO
+        }
+    }
+
     val exactMatches=candidates.filter{
         draft.proposedBarName.isNotBlank() &&
             it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
@@ -309,7 +318,8 @@ fun OwnerOnboardingScreen(
                             onCancel={id->cancelId=id},
                             onDismiss={id->dismissId=id},
                             onReapply={app->
-                                save(MockRegistrationDraft(proposedBarName=app.proposedBarName,
+                                save(MockRegistrationDraft(kind=app.kind,existingBarId=app.barId,
+                                    proposedBarName=app.proposedBarName,
                                     proposedBarAddress=app.proposedBarAddress.orEmpty()))
                                 go(RegPage.INTRO)
                             },

@@ -81,8 +81,10 @@ from actual Owner actions and remain non-production.
 - AI extraction, corrections, review decisions and publication are next-stage UI work.
   The first-review destination is a clearly labeled placeholder with preserved photo
   references. No menu becomes publicly available just by submitting or approving.
-- Real app authentication integration has not been changed; customer search/map/login
-  routes remain untouched.
+- My Page's Owner entry now follows the v4 guest rule: guests first open the
+  existing Google sign-in flow; signed-in users enter Owner. This is UI routing,
+  not Backend Owner authorization. Customer Guest search/map/login remain intact.
+  The Mock Owner repository itself is not scoped by server identity (not a security boundary).
 - Android Photo Picker supports album selection; the v4 "바로 찍기" camera sheet
   action is still out of scope (requires camera lifecycle/permission work).
   v4 address search is demo-only two canned examples; external postal search
@@ -98,6 +100,7 @@ from actual Owner actions and remain non-production.
 
 Manual Galaxy S23 checklist:
 - App launch still opens Customer search, no role selector; search/map/login unaffected.
+- Guest taps the Owner CTA -> existing Google sign-in screen; signed-in user -> Owner.
 - 0 stores: onboarding; 1 store: direct management; 2+ stores: correct list and selection.
 - New/existing registration, Mock business info verification, input restoration via Back.
 - Android Photo Picker: certificate, representative cover, ordered menu images;
