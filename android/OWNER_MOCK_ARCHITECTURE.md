@@ -46,6 +46,16 @@ Sources: final Owner HTML (2026-10-30), `BottleMap_Owner_Backend_API_Contract_Ga
 - `MockBar.gallery/tags/weeklyHours/exceptions/description/defaultPourMl/lastVerifiedAtEpochMs`
   are **unagreed local UX fields**. Tags max five; 1–7 day/time and date intervals validated.
 - A registration form is a persisted `MockRegistrationDraft`, separate from submitted applications. `submitRegistrationDraftForFixture` creates a local pending application, not a real server submission.
+- Mock submission preserves the normalized business registration number in
+  `MockOwnerApplication.businessNumberDigits` (Android-local ONLY; do not reinterpret this as an
+  approved Backend DTO field). The stored number is sensitive; exclude from backups and do
+  not use real applicant information in demo fixtures.
+- Test fixture application IDs may collide with the local sequence. Mock submission searches
+  for the next unused `local-application-N` and advances the stored sequence atomically.
+- Custom operating exceptions require valid 0–1439 open/close minutes; a same-serving product
+  detected in multiple photos cannot publish if list price **or discount terms** conflict.
+- Direct menu entry rejects empty serving-option IDs; `OwnerMockViewModel.saveBrand()` is
+  available before the first `saveProduct()`.
 - Registration applications and ownership fixture approval are separate; `approveForFixture`
   is a TEST DRIVER ONLY, not an Owner screen action and not an operator API substitute.
 - Initial snapshot is empty: 0 bars, applications, drafts, menu entries, products and imports. Explicit

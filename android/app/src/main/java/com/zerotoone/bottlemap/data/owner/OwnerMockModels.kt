@@ -61,6 +61,9 @@ data class MockOwnerApplication(
     val proposedBarName: String,
     val barId: String? = null,
     val representativeName: String? = null,
+    // Mock-only application snapshot: preserve the submitted registration number,
+    // NOT a newly agreed Backend field. Never store production applicant PII here.
+    val businessNumberDigits: String? = null,
     val openingDateIso: String? = null,
     val contactPhone: String? = null,
     val submittedAtEpochMs: Long = 0L,

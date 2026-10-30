@@ -50,6 +50,13 @@ internal fun validMockMenuOption(option: MockMenuOption): Boolean =
             (option.discount.discountedPriceKrw in 1..option.priceKrw &&
                 option.discount.startAtEpochMs < option.discount.endAtEpochMs))
 
+/** Local-only hours invariant; CUSTOM_HOURS must have valid start and end minutes. */
+internal fun validMockOperatingException(exception: MockOperatingException): Boolean =
+    exception.fromEpochDay <= exception.toEpochDay &&
+        (exception.kind != MockExceptionKind.CUSTOM_HOURS ||
+            (exception.openMinutes != null && exception.openMinutes in 0..1439 &&
+                exception.closeMinutes != null && exception.closeMinutes in 0..1439))
+
 class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMockRepository {
     private val lock = Any()
     private val current = MutableStateFlow<MockOwnerLoadState>(MockOwnerLoadState.Loading)
@@ -90,13 +97,20 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(draft.proposedBarName.isNotBlank())
         require(draft.kind != MockApplicationKind.EXISTING_BAR ||
             s.bars.any { it.barId == draft.existingBarId })
-        val id = "local-application-${s.nextLocalId}"
+        // External test fixtures may already use local-application-N IDs. Reserve an
+        // unused ID instead of trusting nextLocalId from a pre-seeded snapshot.
+        var generatedId = s.nextLocalId
+        while (s.applications.any { it.applicationId == "local-application-$generatedId" }) {
+            generatedId++
+        }
+        val id = "local-application-$generatedId"
         val application = MockOwnerApplication(
             applicationId = id, kind = draft.kind,
             status = MockApplicationStatus.PENDING,
             proposedBarName = draft.proposedBarName,
             barId = draft.existingBarId,
             representativeName = draft.representativeName.ifBlank { null },
+            businessNumberDigits = draft.businessNumberDigits.filter(Char::isDigit).ifBlank { null },
             openingDateIso = draft.openingDateIso.ifBlank { null },
             contactPhone = draft.contactPhone.ifBlank { null },
             registrationPhotos = draft.applicantGallery + draft.initialMenuPhotos,
@@ -104,7 +118,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         s.copy(
             applications = s.applications + application,
             registrationDraft = null,
-            nextLocalId = s.nextLocalId + 1,
+            nextLocalId = generatedId + 1,
         ) to id
     }
 
@@ -166,7 +180,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 (it.closed || (it.openMinutes != null && it.openMinutes in 0..1439 &&
                     it.closeMinutes != null && it.closeMinutes in 0..1439))
         })
-        require(bar.exceptions.all { it.fromEpochDay <= it.toEpochDay })
+        require(bar.exceptions.all(::validMockOperatingException)) {
+            "Invalid local operating exception dates or times"
+        }
         change { s ->
             require(s.bars.any { it.barId == bar.barId }) { "Unknown bar; use approved fixture for new bar" }
             s.copy(bars = s.bars.map { if (it.barId == bar.barId) bar else it }) to Unit
@@ -198,6 +214,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
     override fun saveMenuItem(item: MockBarMenuItem) {
         require(item.barMenuItemId.isNotBlank())
         require(item.options.isNotEmpty())
+        require(item.options.all { it.optionId.isNotBlank() }) { "Serving option ID must not be blank" }
         require(item.options.distinctBy { it.identityKey() }.size == item.options.size) { "Duplicate serving option" }
         require(item.options.map { it.optionId }.distinct().size == item.options.size)
         require(item.options.all(::validMockMenuOption))
@@ -310,8 +327,12 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(options.isNotEmpty()) { "Product needs at least one priced option" }
             require(options.all(::validMockMenuOption)) { "Invalid serving price or discount" }
             val byKey = options.groupBy { it.identityKey() }
-            require(byKey.values.all { opts -> opts.map { it.priceKrw }.distinct().size == 1 }) {
-                "Conflicting extracted prices for same serving option; review before publish"
+            // Same serving + list price can still have incompatible discounts. Never
+            // choose the first photo silently; the owner must resolve these terms.
+            require(byKey.values.all { opts ->
+                opts.map { it.priceKrw to it.discount }.distinct().size == 1
+            }) {
+                "Conflicting extracted price or discount for same serving option; review before publish"
             }
             MockBarMenuItem(
                 barMenuItemId = "local-menu-${index++}",

@@ -290,6 +290,125 @@ class LocalOwnerMockRepositoryTest {
         assertTrue(ready(r).menuItems.isEmpty())
     }
 
+
+    @Test fun registrationDraftPreservesNormalizedBusinessNumberAcrossSubmissionAndRestart() {
+        val store = InMemoryMockOwnerStateStore()
+        val r = repo(store)
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            proposedBarName = "Mock Bar", businessNumberDigits = " 123-45-67890 "
+        ))
+        val id = r.submitRegistrationDraftForFixture()
+        assertEquals("local-application-1", id)
+        val restored = repo(store)
+        assertEquals("1234567890", ready(restored).applications.single().businessNumberDigits)
+        assertEquals(null, ready(restored).registrationDraft)
+    }
+
+    @Test fun generatedApplicationIdDoesNotCollideWithPreviouslyRegisteredFixtures() {
+        val store = InMemoryMockOwnerStateStore()
+        val r = repo(store)
+        r.registerApplication(MockOwnerApplication("local-application-1",
+            MockApplicationKind.NEW_BAR, MockApplicationStatus.PENDING, "Old application 1"))
+        r.registerApplication(MockOwnerApplication("local-application-2",
+            MockApplicationKind.NEW_BAR, MockApplicationStatus.PENDING, "Old application 2"))
+        r.saveRegistrationDraft(MockRegistrationDraft(proposedBarName = "New application"))
+        val id = r.submitRegistrationDraftForFixture()
+        assertEquals("local-application-3", id)
+        assertEquals(3, ready(r).applications.map { it.applicationId }.distinct().size)
+        assertEquals(4L, ready(r).nextLocalId)
+        r.closeApplicationForFixture(id, MockApplicationStatus.CANCELED)
+        val restored = ready(repo(store))
+        assertEquals(MockApplicationStatus.PENDING,
+            restored.applications.first { it.applicationId == "local-application-1" }.status)
+        assertEquals(MockApplicationStatus.PENDING,
+            restored.applications.first { it.applicationId == "local-application-2" }.status)
+        assertEquals(MockApplicationStatus.CANCELED,
+            restored.applications.first { it.applicationId == id }.status)
+    }
+
+    @Test fun invalidCustomOperatingExceptionHoursAreRejectedAndValidHoursPersist() {
+        val r = repo()
+        val bar = ready(r).bars.single()
+        val base = MockOperatingException(
+            "temporary", MockExceptionKind.CUSTOM_HOURS, 100L, 100L,
+            openMinutes = 1080, closeMinutes = 1380,
+        )
+        for (invalid in listOf(
+            base.copy(openMinutes = null),
+            base.copy(closeMinutes = null),
+            base.copy(openMinutes = -1),
+            base.copy(closeMinutes = 1500),
+            base.copy(fromEpochDay = 101),
+        )) {
+            rejects { r.saveBar(bar.copy(exceptions = listOf(invalid))) }
+        }
+        assertTrue(ready(r).bars.single().exceptions.isEmpty())
+        r.saveBar(bar.copy(exceptions = listOf(
+            base, MockOperatingException("vacation", MockExceptionKind.VACATION, 110L, 114L)
+        )))
+        val stored = ready(r).bars.single().exceptions
+        assertEquals(2, stored.size)
+        assertEquals(1080, stored.first().openMinutes)
+    }
+
+    @Test fun directMenuEntryRejectsBlankOptionId() {
+        val r = repo()
+        catalog(r)
+        rejects {
+            r.saveMenuItem(MockBarMenuItem("menu-blank", "fixture-bar", "product-12",
+                listOf(serving("", 30, 12000))))
+        }
+        assertTrue(ready(r).menuItems.isEmpty())
+        r.saveMenuItem(MockBarMenuItem("menu-good", "fixture-bar", "product-12",
+            listOf(serving("option-30", 30, 12000))))
+        assertEquals("option-30", ready(r).menuItems.single().options.single().optionId)
+    }
+
+    @Test fun identicalServingListPriceWithConflictingDiscountsRequiresReview() {
+        val r = repo()
+        catalog(r)
+        val fixture = OwnerMockFixtures.imageFixtures(mapOf(
+            "content://photoA" to listOf(MockExtractedLine(
+                "a", "Bottle 12 30ml", MockLineKind.PRODUCT,
+                options = listOf(serving("a", 30, 10000).copy(
+                    discount = MockDiscount(8000, 100, 200))))),
+            "content://photoB" to listOf(MockExtractedLine(
+                "b", "Bottle 12 30ml", MockLineKind.PRODUCT,
+                options = listOf(serving("b", 30, 10000).copy(
+                    discount = MockDiscount(7000, 100, 200))))),
+        ))
+        val id = r.startPhotoImport("fixture-bar", listOf("content://photoA", "content://photoB"), fixture)
+        ready(r).imports.single().images.flatMap { it.lines }.forEach { line ->
+            r.decideLine(id, line.extractedItemId, 1,
+                MockReviewDecision(MockDecisionKind.SELECT_PRODUCT, "product-12"))
+        }
+        rejects { r.publishAddOnly(id, 1) }
+        assertTrue(ready(r).menuItems.isEmpty())
+        assertEquals(MockImportStatus.READY_FOR_REVIEW, ready(r).imports.single().status)
+    }
+
+    @Test fun identicalServingPriceAndDiscountAcrossPhotosDeduplicatesDeterministically() {
+        val r = repo()
+        catalog(r)
+        val identicalDiscount = MockDiscount(8000, 100, 200)
+        val fixture = OwnerMockFixtures.imageFixtures(mapOf(
+            "content://photoA" to listOf(MockExtractedLine("a", "Whisky 12", MockLineKind.PRODUCT,
+                options = listOf(serving("a", 30, 10000).copy(discount = identicalDiscount)))),
+            "content://photoB" to listOf(MockExtractedLine("b", "Whisky 12", MockLineKind.PRODUCT,
+                options = listOf(serving("b", 30, 10000).copy(discount = identicalDiscount)))),
+        ))
+        val id = r.startPhotoImport("fixture-bar", listOf("content://photoA", "content://photoB"), fixture)
+        ready(r).imports.single().images.flatMap { it.lines }.forEach { line ->
+            r.decideLine(id, line.extractedItemId, 1,
+                MockReviewDecision(MockDecisionKind.SELECT_PRODUCT, "product-12"))
+        }
+        assertEquals(1, r.publishAddOnly(id, 1))
+        assertEquals(1, ready(r).menuItems.single().options.size)
+        assertEquals(8000, r.preview("fixture-bar", 150)!!.displayedPrice(
+            ready(r).menuItems.single().options.single()
+        ))
+    }
+
     @Test fun failedWriteDoesNotExposeUnpersistedMutation() {
         val store = object : MockOwnerStateStore {
             override fun read() = OwnerMockFixtures.registeredBar()
