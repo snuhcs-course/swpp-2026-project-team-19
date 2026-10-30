@@ -23,6 +23,11 @@ Sources: final Owner HTML (2026-10-30), `BottleMap_Owner_Backend_API_Contract_Ga
   menus, per-photo extraction lines, review decisions and import status persist.
   Real photo picker URI permissions must additionally be persisted by the future actual screen.
   App uninstall / Clear Storage resets the Mock; backup/restore and cross-device sync are not promised.
+- **Backup protection (Codex P1):** `owner_mock_state_v1.xml` is excluded from Android
+  cloud backup and device-to-device transfer via both `res/xml/developer_camera_backup_rules.xml`
+  (pre-Android 12) and `res/xml/developer_camera_data_extraction_rules.xml` (Android 12+).
+  Existing camera-capture exclusions remain intact. Any preference filename change must update
+  both exclusions and the JVM backup-rule regression test. This does not encrypt local data.
 - **No production personal data**: local mock storage is neither encrypted nor server-backed.
   Do not use real applicant business numbers/representative data in testing. Images are URI references,
   not image bytes. Never log sensitive registration data.
@@ -96,7 +101,9 @@ Do not invent HTTP endpoints or DTO fields. When Backend contracts are approved:
 `LocalOwnerMockRepositoryTest`: empty load, read error and retry, fixture registration and
 persistence recovery, canonical product vs serving option uniqueness, stock/discount preview,
 photo-specific extraction, stale version, review persistence, successful add-only publication,
-duplicate conflict rollback and persisted-write failure. Navigation tests assert Customer initial
+duplicate conflict rollback, corrected serving discount invariants, and persisted-write failure.
+Time wheel tests cover sequential hour/minute changes. Backup tests ensure Cloud Backup and
+device transfer exclusions for the Mock preferences. Navigation tests assert Customer initial
 screen and Owner group routes. Actual physical-device and backend verification remain separate.
 
 Use `./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug`.

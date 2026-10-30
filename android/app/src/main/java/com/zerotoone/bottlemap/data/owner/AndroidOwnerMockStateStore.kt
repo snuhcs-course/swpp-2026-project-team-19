@@ -11,9 +11,12 @@ import com.zerotoone.bottlemap.network.ApiClient
  * in fixture data. Photo URIs are references, not copied image bytes. Actual picker
  * permissions must be persisted separately by the future screen implementation.
  */
+// The full-backup and data-extraction rules must exclude this preference filename + ".xml".
+internal const val OWNER_MOCK_PREFERENCES_NAME = "owner_mock_state_v1"
+
 class AndroidOwnerMockStateStore(context: Context) : MockOwnerStateStore {
     private val preferences = context.applicationContext.getSharedPreferences(
-        "owner_mock_state_v1", Context.MODE_PRIVATE,
+        OWNER_MOCK_PREFERENCES_NAME, Context.MODE_PRIVATE,
     )
     private val adapter = ApiClient.moshi.adapter(MockOwnerSnapshot::class.java)
 

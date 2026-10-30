@@ -2,4 +2,6 @@
 <full-backup-content>
     <!-- Temporary captured menu pages are local-only; do not put them in cloud backups. -->
     <exclude domain="file" path="owner-menu-captures/" />
+    <!-- Mock registration drafts may hold contact data and must never be backed up. -->
+    <exclude domain="sharedpref" path="owner_mock_state_v1.xml" />
 </full-backup-content>

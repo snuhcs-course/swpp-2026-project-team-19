@@ -31,6 +31,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -180,6 +182,20 @@ fun OwnerConfirmationDialog(
 internal fun validOwnerTime(hour: Int, minute: Int): Boolean =
     hour in 0..23 && minute in 0..55 && minute % 5 == 0
 
+/** Merge a scroll selection with the latest parent state, preserving the other wheel. */
+internal fun changedOwnerTime(
+    currentHour: Int,
+    currentMinute: Int,
+    selectedHour: Int? = null,
+    selectedMinute: Int? = null,
+): Pair<Int, Int>? {
+    val nextHour = selectedHour ?: currentHour
+    val nextMinute = selectedMinute ?: currentMinute
+    return if (validOwnerTime(nextHour, nextMinute) &&
+        (nextHour != currentHour || nextMinute != currentMinute)
+    ) nextHour to nextMinute else null
+}
+
 /**
  * Scrollable hour/minute wheels (5-minute increments). Selection is UI-only until the parent
  * persists a confirmed schedule. No automated save when a wheel is scrolled.
@@ -193,14 +209,20 @@ fun OwnerTimeWheel(
 ) {
     val hourState = rememberLazyListState(initialFirstVisibleItemIndex = hour.coerceIn(0, 23))
     val minuteState = rememberLazyListState(initialFirstVisibleItemIndex = (minute / 5).coerceIn(0, 11))
+    // The effects survive recomposition: read the current companion value and callback.
+    val latestHour by rememberUpdatedState(hour)
+    val latestMinute by rememberUpdatedState(minute)
+    val latestOnTimeChange by rememberUpdatedState(onTimeChange)
     LaunchedEffect(hourState) {
         snapshotFlow { hourState.firstVisibleItemIndex }.collect { selected ->
-            if (selected != hour && validOwnerTime(selected, minute)) onTimeChange(selected, minute)
+            changedOwnerTime(latestHour, latestMinute, selectedHour = selected)
+                ?.let { (h, m) -> latestOnTimeChange(h, m) }
         }
     }
     LaunchedEffect(minuteState) {
         snapshotFlow { minuteState.firstVisibleItemIndex * 5 }.collect { selected ->
-            if (selected != minute && validOwnerTime(hour, selected)) onTimeChange(hour, selected)
+            changedOwnerTime(latestHour, latestMinute, selectedMinute = selected)
+                ?.let { (h, m) -> latestOnTimeChange(h, m) }
         }
     }
     Row(
@@ -222,7 +244,14 @@ fun OwnerTimeWheel(
                         style = if (selected) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
                         color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.fillMaxWidth()
-                            .clickable { if (part == 0) onTimeChange(value, minute) else onTimeChange(hour, value) }
+                            .clickable {
+                                val next = if (part == 0) {
+                                    changedOwnerTime(hour, minute, selectedHour = value)
+                                } else {
+                                    changedOwnerTime(hour, minute, selectedMinute = value)
+                                }
+                                next?.let { (h, m) -> onTimeChange(h, m) }
+                            }
                             .padding(BottleMapSpacing.xs),
                     )
                 }

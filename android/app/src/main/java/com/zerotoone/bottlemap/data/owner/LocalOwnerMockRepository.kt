@@ -42,6 +42,14 @@ interface OwnerMockRepository {
     fun preview(barId: String, nowEpochMs: Long): MockPreview?
 }
 
+/** Local-only serving option invariants shared by direct entry, review, and publish. */
+internal fun validMockMenuOption(option: MockMenuOption): Boolean =
+    option.priceKrw > 0 &&
+        (option.pourMl == null || option.pourMl > 0) &&
+        (option.discount == null ||
+            (option.discount.discountedPriceKrw in 1..option.priceKrw &&
+                option.discount.startAtEpochMs < option.discount.endAtEpochMs))
+
 class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMockRepository {
     private val lock = Any()
     private val current = MutableStateFlow<MockOwnerLoadState>(MockOwnerLoadState.Loading)
@@ -192,11 +200,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(item.options.isNotEmpty())
         require(item.options.distinctBy { it.identityKey() }.size == item.options.size) { "Duplicate serving option" }
         require(item.options.map { it.optionId }.distinct().size == item.options.size)
-        require(item.options.all { option ->
-            option.priceKrw > 0 && (option.pourMl == null || option.pourMl > 0) &&
-                (option.discount == null || (option.discount.discountedPriceKrw in 1..option.priceKrw &&
-                    option.discount.startAtEpochMs < option.discount.endAtEpochMs))
-        })
+        require(item.options.all(::validMockMenuOption))
         change { s ->
             require(s.bars.any { it.barId == item.barId })
             require(s.products.any { it.productId == item.productId }) { "Unknown catalog product" }
@@ -279,7 +283,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 require(decision.correctedOptions == null ||
                     (decision.correctedOptions.isNotEmpty() &&
                         decision.correctedOptions.map { it.identityKey() }.distinct().size == decision.correctedOptions.size &&
-                        decision.correctedOptions.all { it.priceKrw > 0 && (it.pourMl == null || it.pourMl > 0) }))
+                        decision.correctedOptions.all(::validMockMenuOption)))
             } else require(decision.productId == null && decision.correctedOptions == null)
             val updated = job.copy(images = job.images.map { image ->
                 image.copy(lines = image.lines.map { line ->
@@ -304,7 +308,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             if (s.menuItems.any { it.barId == job.barId && it.productId == productId }) return@mapNotNull null
             val options = lines.flatMap { it.decision?.correctedOptions ?: it.options }
             require(options.isNotEmpty()) { "Product needs at least one priced option" }
-            require(options.all { it.priceKrw > 0 })
+            require(options.all(::validMockMenuOption)) { "Invalid serving price or discount" }
             val byKey = options.groupBy { it.identityKey() }
             require(byKey.values.all { opts -> opts.map { it.priceKrw }.distinct().size == 1 }) {
                 "Conflicting extracted prices for same serving option; review before publish"

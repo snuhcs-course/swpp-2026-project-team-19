@@ -47,6 +47,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 OwnerSkeletonScreen(
                     page = page,
                     mockState = mockState,
+                    onRetry = data::retry,
                     onBack = { navController.popBackStack() },
                     onNavigate = { next -> navController.navigate(next.route) },
                     onHome = {

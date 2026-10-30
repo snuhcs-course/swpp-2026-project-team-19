@@ -87,6 +87,7 @@ fun OwnerEntryScreen(
 fun OwnerSkeletonScreen(
     page: OwnerPage,
     mockState: MockOwnerLoadState,
+    onRetry: () -> Unit,
     onBack: () -> Unit,
     onNavigate: (OwnerPage) -> Unit,
     onHome: () -> Unit,
@@ -99,7 +100,7 @@ fun OwnerSkeletonScreen(
             verticalArrangement = Arrangement.spacedBy(BottleMapSpacing.md),
         ) {
             OwnerStatusLabel("미구현 · 이동 골격만 제공", OwnerStatusTone.ATTENTION)
-            OwnerMockStateLine(mockState)
+            OwnerMockStateLine(mockState, onRetry)
             Text(page.group.title, style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary)
             Text(page.title, style = MaterialTheme.typography.headlineSmall)

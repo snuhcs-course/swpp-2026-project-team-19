@@ -232,6 +232,64 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(MockApplicationStatus.APPROVED, ready(r).applications.single().status)
     }
 
+
+    @Test fun invalidDiscountCannotBeStoredViaCorrectedReviewOptions() {
+        val r = repo()
+        catalog(r)
+        val source = OwnerMockFixtures.imageFixtures(mapOf(
+            "content://discount" to listOf(MockExtractedLine(
+                "extracted", "Whisky 12 30ml", MockLineKind.PRODUCT,
+                options = listOf(serving("original", 30, 10000))
+            ))
+        ))
+        val id = r.startPhotoImport("fixture-bar", listOf("content://discount"), source)
+        val lineId = ready(r).imports.single().images.single().lines.single().extractedItemId
+        for (discount in listOf(
+            MockDiscount(20000, 100, 300), // discount above list price
+            MockDiscount(8000, 300, 100),  // reversed interval
+            MockDiscount(8000, 100, 100),  // zero-length interval
+        )) {
+            rejects {
+                r.decideLine(id, lineId, 1, MockReviewDecision(
+                    MockDecisionKind.SELECT_PRODUCT, "product-12",
+                    listOf(serving("corrected", 30, 10000).copy(discount = discount))
+                ))
+            }
+        }
+        assertEquals(null, ready(r).imports.single().images.single().lines.single().decision)
+        assertTrue(ready(r).menuItems.isEmpty())
+
+        val valid = serving("corrected", 30, 10000).copy(
+            discount = MockDiscount(8000, 100, 300)
+        )
+        r.decideLine(id, lineId, 1, MockReviewDecision(
+            MockDecisionKind.SELECT_PRODUCT, "product-12", listOf(valid)
+        ))
+        assertEquals(1, r.publishAddOnly(id, 1))
+        val published = ready(r).menuItems.single().options.single()
+        assertEquals(8000, r.preview("fixture-bar", 200)!!.displayedPrice(published))
+        assertEquals(10000, r.preview("fixture-bar", 300)!!.displayedPrice(published))
+    }
+
+    @Test fun invalidExtractedOptionCannotBypassPublishValidation() {
+        val r = repo()
+        catalog(r)
+        val source = OwnerMockFixtures.imageFixtures(mapOf(
+            "content://bad-option" to listOf(MockExtractedLine(
+                "extracted", "Whisky 12", MockLineKind.PRODUCT,
+                options = listOf(serving("original", 30, 10000).copy(
+                    discount = MockDiscount(20000, 100, 300)
+                ))
+            ))
+        ))
+        val id = r.startPhotoImport("fixture-bar", listOf("content://bad-option"), source)
+        val lineId = ready(r).imports.single().images.single().lines.single().extractedItemId
+        r.decideLine(id, lineId, 1, MockReviewDecision(MockDecisionKind.SELECT_PRODUCT, "product-12"))
+        rejects { r.publishAddOnly(id, 1) }
+        assertEquals(MockImportStatus.READY_FOR_REVIEW, ready(r).imports.single().status)
+        assertTrue(ready(r).menuItems.isEmpty())
+    }
+
     @Test fun failedWriteDoesNotExposeUnpersistedMutation() {
         val store = object : MockOwnerStateStore {
             override fun read() = OwnerMockFixtures.registeredBar()
