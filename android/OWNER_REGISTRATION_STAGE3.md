@@ -5,23 +5,35 @@
 This implementation is on the single Customer+Owner APK and reuses `OwnerMockRepository`,
 `OwnerMockSnapshot`, `OwnerPage`, shared Compose primitives and Cocoa Charcoal tokens.
 
-**Source limitation:** `BottleMap_owner_flow_ACTION_FIRST_v4.html` was referenced by the
-request but was not mounted in this chat, indexed Project files, connected Google Drive
-search or the GitHub repository. The flow follows the explicit user requirements here,
-**not an asserted pixel-perfect v4 match**. In particular, screen order/copy and any
-additional v4 controls must be visually checked against the real attachment.
+**Source verified:** `BottleMap_owner_flow_ACTION_FIRST_v4.html` was attached
+during the follow-up and inspected (registration `SCREENS`, `R.*` screens,
+`ACT` event transitions, CSS tokens and per-screen API notes). Its registration
+flow is authoritative over previous FINAL/v1–v3 drafts. This PR adjusts the
+individual business-info screens, existing-bar recognition after name entry,
+4-stage progress, pending/rejected application cards, readonly application detail,
+menu-photo add/remove, and completion screen to match the v4 decisions.
+The embedded manager / initial photo-review v10 flow remains for later stages;
+pixel-perfect Galaxy S23 comparisons have **not** yet been run.
 
 ## UI steps implemented (local Mock only)
 
 - Customer My Page -> Owner entry: 0 bars -> registration entry; 1 bar without pending
   claim or draft -> management home; multiple bars -> selectable list. From management,
   the Owner can start another application.
-- New bar and existing bar ownership claim. Existing claim references an explicitly
-  seeded Mock `existingBarId`, **not an owned bar**. `existingBarCandidates` are local
-  public-discovery fixtures; they do not count toward the 0/1/N managed-bar routing.
-  Debug has a labeled test-candidate seed control if no candidates exist. Approved
-  claims move the selected candidate into the owned `bars` list. No search API exists
-  for this demo and no fixture is seeded on fresh app launch.
+- The v4 registration flow chooses **photo Mock OCR vs manual entry** first,
+  then business number -> representative -> opening date -> combined check ->
+  Mock verification result -> bar name. At the bar-name step, equal-name candidates
+  can be marked "우리 매장예요" (existing-bar claim), skipping photo/address/shop-phone.
+  Candidates remain separate from owned bars and are Debug-fixture-only until search
+  contract integration. New bars continue through photo -> address -> shop phone.
+- Business-number check digit and date validation run locally; they are not
+  business-identity/NTS verification. Four outcome screens (match, mismatch,
+  unavailable, rate-limited) are Debug Mock scenarios, not API responses.
+- The 4-stage progress indicator, one-question-per-screen layout, review details,
+  completion state, and managed-store/application cards now follow v4.
+  Pending cards provide view-only application details and a cancellation dialog.
+  Rejected cards show a local Mock reason, reapply action and confirmed local-only
+  dismissal. Local hidden IDs do not delete underlying applications.
 - Pick a business certificate using the Android Photo Picker, retain its URI as
   `certificatePhoto`, and then manually enter/verify a business number, representative
   and opening date. A clearly labeled **Mock sample fill** is available. **No OCR** or
@@ -61,7 +73,9 @@ from actual Owner actions and remain non-production.
 
 ## Follow-up contract gaps / not done
 
-- Full v4 visual fidelity cannot be checked until the exact HTML is supplied.
+- Pixel-perfect v4 visual fidelity has not been verified on a Galaxy S23;
+  visual tokens are reused from existing design system. HTML-embedded manager v10
+  and subsequent AI-review designs are outside this registration-stage scope.
 - Backend approval/rejection, operator review, initial photo uploads, public-data/OCR
   results, permission/ownership and real bar API calls are **not connected**.
 - AI extraction, corrections, review decisions and publication are next-stage UI work.
@@ -69,6 +83,10 @@ from actual Owner actions and remain non-production.
   references. No menu becomes publicly available just by submitting or approving.
 - Real app authentication integration has not been changed; customer search/map/login
   routes remain untouched.
+- Android Photo Picker supports album selection; the v4 "바로 찍기" camera sheet
+  action is still out of scope (requires camera lifecycle/permission work).
+  v4 address search is demo-only two canned examples; external postal search
+  provider is unagreed and not integrated.
 - Android Photo Picker is used instead of custom gallery/camera permission requests.
   Persisted URI permissions and process-death behavior require physical Galaxy S23 QA.
 

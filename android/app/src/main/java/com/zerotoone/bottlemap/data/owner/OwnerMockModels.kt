@@ -202,7 +202,8 @@ fun MockOwnerSnapshot.asLoadState(): MockOwnerLoadState =
 /** Entry routing is a local Owner UI policy; no server status is inferred. */
 fun MockOwnerSnapshot.openSingleBarManager(): Boolean =
     bars.size == 1 && registrationDraft == null &&
-        applications.none { it.status == MockApplicationStatus.PENDING }
+        applications.none { it.applicationId !in dismissedApplicationIds &&
+            it.status in listOf(MockApplicationStatus.PENDING, MockApplicationStatus.REJECTED) }
 
 /** Local display readiness; never maps directly to Backend active/inactive. */
 fun MockOwnerSnapshot.hasPublishedInitialReview(barId: String): Boolean =

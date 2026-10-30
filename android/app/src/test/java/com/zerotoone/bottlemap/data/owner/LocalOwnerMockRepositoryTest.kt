@@ -782,6 +782,17 @@ class LocalOwnerMockRepositoryTest {
         rejects { r.dismissRejectedForFixture("unknown") }
     }
 
+    @Test fun v4VisibleRejectedApplicationPreventsSingleBarDirectRedirect() {
+        val bar = OwnerMockFixtures.registeredBar()
+        val rejected = MockOwnerApplication(
+            "rejected-v4", MockApplicationKind.NEW_BAR, MockApplicationStatus.REJECTED,
+            "Rejected applicant"
+        )
+        val both = bar.copy(applications = listOf(rejected))
+        assertFalse(both.openSingleBarManager())
+        assertTrue(both.copy(dismissedApplicationIds = setOf("rejected-v4")).openSingleBarManager())
+    }
+
     @Test fun failedWriteDoesNotExposeUnpersistedMutation() {
         val store = object : MockOwnerStateStore {
             override fun read() = OwnerMockFixtures.registeredBar()
