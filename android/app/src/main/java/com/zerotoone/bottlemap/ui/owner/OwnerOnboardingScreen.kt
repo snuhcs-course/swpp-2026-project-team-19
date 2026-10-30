@@ -38,7 +38,7 @@ internal fun validOwnerPhone(value: String): Boolean =
 
 @Composable
 fun OwnerOnboardingScreen(
-    repository: OwnerMockRepository,
+    viewModel: OwnerMockViewModel,
     onBack: () -> Unit,
     onFirstReview: () -> Unit,
     onManagerPreview: () -> Unit,
@@ -46,7 +46,7 @@ fun OwnerOnboardingScreen(
     onComponents: (() -> Unit)? = null,
     onLegacyDebugUpload: (() -> Unit)? = null,
 ) {
-    val state by repository.state.collectAsState()
+    val state by viewModel.state.collectAsState()
     val snapshot = when(val s=state) {
         is MockOwnerLoadState.Ready -> s.snapshot
         is MockOwnerLoadState.Empty -> s.snapshot
@@ -68,7 +68,7 @@ fun OwnerOnboardingScreen(
             step = if(draft.businessNumberDigits.isNotBlank()) FormStep.BAR else FormStep.BIZ
         }
     }
-    fun save(newDraft: MockRegistrationDraft) { repository.saveRegistrationDraft(newDraft);error=null }
+    fun save(newDraft: MockRegistrationDraft) { viewModel.saveRegistrationDraft(newDraft);error=null }
     fun next() { error=null;step=FormStep.entries.getOrElse(step.ordinal+1){FormStep.REVIEW} }
     fun goBack() {
         error=null
@@ -114,11 +114,11 @@ fun OwnerOnboardingScreen(
                     Text("운영팀 승인 전에는 매장 메뉴가 공개되지 않습니다.")
                     Text(pending.proposedBarName)
                     OwnerActionButton("신청 취소 (Mock)",{
-                        repository.closeApplicationForFixture(pending.applicationId,MockApplicationStatus.CANCELED)
+                        viewModel.closeApplicationForFixture(pending.applicationId,MockApplicationStatus.CANCELED)
                         step=FormStep.METHOD
                     },Modifier.fillMaxWidth(),secondary=true)
                     if(BuildConfigDebug()) OwnerActionButton("테스트: 거절 처리 (Mock)", {
-                        repository.closeApplicationForFixture(pending.applicationId,MockApplicationStatus.REJECTED)
+                        viewModel.closeApplicationForFixture(pending.applicationId,MockApplicationStatus.REJECTED)
                     },Modifier.fillMaxWidth(),secondary=true)
                     if(BuildConfigDebug()) OwnerActionButton("테스트: 승인 처리 (Mock)", {
                         val id=pending.barId?:"mock-bar-${pending.applicationId}"
@@ -126,9 +126,9 @@ fun OwnerOnboardingScreen(
                         val newBar=existing?:MockBar(id,pending.proposedBarName,pending.proposedBarAddress?:"테스트 주소",
                             phone=pending.storePhone,
                             gallery=pending.registrationPhotos.filter { it.kind==MockPhotoKind.BAR_GALLERY })
-                        repository.approveForFixture(pending.applicationId,newBar)
+                        viewModel.approveForFixture(pending.applicationId,newBar)
                         val uris=pending.registrationPhotos.filter { it.kind==MockPhotoKind.MENU_CAPTURE }.map{it.uri}
-                        if(uris.isNotEmpty()) repository.startPhotoImport(id,uris,OwnerMockFixtures.imageFixtures(emptyMap()))
+                        if(uris.isNotEmpty()) viewModel.importPhotos(id,uris,OwnerMockFixtures.imageFixtures(emptyMap()))
                     },Modifier.fillMaxWidth())
                 }
                 step==FormStep.METHOD && bars.isNotEmpty() && pending==null -> {
@@ -140,7 +140,7 @@ fun OwnerOnboardingScreen(
                     }else{
                         Text("관리 매장 ${bars.size}개",style=MaterialTheme.typography.titleLarge)
                         bars.forEach { bar -> OwnerMenuRow(bar.name,bar.address,{
-                            repository.selectBar(bar.barId);onManagerPreview()
+                            viewModel.selectBar(bar.barId);onManagerPreview()
                         },trailing="관리") }
                     }
                     OwnerActionButton("매장 추가", { step=FormStep.METHOD; selectedBarId=null; next() },Modifier.fillMaxWidth(),secondary=true)
@@ -170,7 +170,7 @@ fun OwnerOnboardingScreen(
                                 if(candidates.isEmpty()) {
                                     Text("검색 API가 연결되지 않아 Mock 기존 매장이 없습니다.")
                                     if(BuildConfigDebug()) OwnerActionButton("테스트 기존 매장 만들기 (Mock)", {
-                                        repository.seedExistingCandidateForFixture(
+                                        viewModel.seedExistingCandidateForFixture(
                                             MockBar("fixture-existing-bar", "테스트 등록 매장", "테스트 주소")
                                         )
                                     },Modifier.fillMaxWidth(),secondary=true)
@@ -290,7 +290,7 @@ fun OwnerOnboardingScreen(
                             OwnerActionButton("신청 제출 (Mock)",{
                                 if(!busy && snapshot?.applications?.none { it.status==MockApplicationStatus.PENDING }==true){
                                     busy=true
-                                    try { repository.submitRegistrationDraftForFixture();step=FormStep.METHOD }
+                                    try { viewModel.submitRegistrationDraftForFixture();step=FormStep.METHOD }
                                     catch(e:Exception){error=e.message}
                                     finally {busy=false}
                                 }

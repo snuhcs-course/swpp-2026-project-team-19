@@ -25,6 +25,8 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun retry() = repository.retryLoad()
     fun register(application: MockOwnerApplication) = repository.registerApplication(application)
     fun saveRegistrationDraft(draft: MockRegistrationDraft?) = repository.saveRegistrationDraft(draft)
+    fun approveForFixture(id: String, bar: MockBar) = repository.approveForFixture(id, bar)
+    fun seedExistingCandidateForFixture(bar: MockBar) = repository.seedExistingCandidateForFixture(bar)
     fun submitRegistrationDraftForFixture() = repository.submitRegistrationDraftForFixture()
     fun closeApplicationForFixture(id: String, status: MockApplicationStatus) = repository.closeApplicationForFixture(id, status)
     fun saveBar(bar: MockBar) = repository.saveBar(bar)

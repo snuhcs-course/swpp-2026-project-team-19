@@ -41,4 +41,29 @@ class OwnerMockViewModelTest {
         assertEquals("brand-a", snapshot.products.single().brandId)
         assertTrue(snapshot.bars.isEmpty())
     }
+
+    @Test fun vmUsesInjectedRepositoryForExistingBarOwnershipFixture() {
+        val store = InMemoryMockOwnerStateStore()
+        val repository = LocalOwnerMockRepository(store)
+        val vm = OwnerMockViewModel(repository)
+        vm.seedExistingCandidateForFixture(
+            MockBar("candidate-bar", "Mock Candidate", "Mock Address")
+        )
+        vm.saveRegistrationDraft(com.zerotoone.bottlemap.data.owner.MockRegistrationDraft(
+            kind = com.zerotoone.bottlemap.data.owner.MockApplicationKind.EXISTING_BAR,
+            existingBarId = "candidate-bar"
+        ))
+        val id = vm.submitRegistrationDraftForFixture()
+        val staged = when(val s=vm.state.value) {
+            is MockOwnerLoadState.Ready -> s.snapshot
+            else -> error("Expected ready")
+        }
+        assertTrue(staged.bars.isEmpty())
+        vm.approveForFixture(id, staged.existingBarCandidates.single())
+        val confirmed = when(val s=OwnerMockViewModel(LocalOwnerMockRepository(store)).state.value) {
+            is MockOwnerLoadState.Ready -> s.snapshot
+            else -> error("Expected ready")
+        }
+        assertEquals("candidate-bar", confirmed.bars.single().barId)
+    }
 }

@@ -28,8 +28,9 @@ internal const val variantStartDestination = "customer"
 internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
-            val repository = OwnerMockRuntime.repository(LocalContext.current)
-            val mockState = repository.state.collectAsStateWithLifecycle().value
+            val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
+                OwnerMockRuntime.repository(LocalContext.current)))
+            val mockState = ownerViewModel.state.collectAsStateWithLifecycle().value
             val snapshot = when (mockState) {
                 is MockOwnerLoadState.Ready -> mockState.snapshot
                 is MockOwnerLoadState.Empty -> mockState.snapshot
@@ -45,7 +46,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 }
             }
             if (!directManager) OwnerOnboardingScreen(
-                repository = repository,
+                viewModel = ownerViewModel,
                 onBack = { navController.popBackStack() },
                 onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
@@ -57,7 +58,8 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
         }
         composable(OwnerRoutes.ADD_BAR) {
             OwnerOnboardingScreen(
-                repository = OwnerMockRuntime.repository(LocalContext.current),
+                viewModel = viewModel(factory = OwnerMockViewModel.Factory(
+                    OwnerMockRuntime.repository(LocalContext.current))),
                 onBack = { navController.popBackStack() },
                 onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
