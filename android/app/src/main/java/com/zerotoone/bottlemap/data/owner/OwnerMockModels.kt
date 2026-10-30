@@ -200,3 +200,8 @@ fun MockOwnerSnapshot.asLoadState(): MockOwnerLoadState =
 fun MockOwnerSnapshot.openSingleBarManager(): Boolean =
     bars.size == 1 && registrationDraft == null &&
         applications.none { it.status == MockApplicationStatus.PENDING }
+
+/** Local display readiness; never maps directly to Backend active/inactive. */
+fun MockOwnerSnapshot.hasPublishedInitialReview(barId: String): Boolean =
+    imports.any { it.barId == barId && it.status == MockImportStatus.APPLIED } &&
+        menuItems.any { it.barId == barId }

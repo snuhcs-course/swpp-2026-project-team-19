@@ -22,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
+import com.zerotoone.bottlemap.data.owner.hasPublishedInitialReview
 import com.zerotoone.bottlemap.navigation.OwnerFlowGroup
 import com.zerotoone.bottlemap.navigation.OwnerPage
 import com.zerotoone.bottlemap.ui.common.OwnerActionButton
@@ -132,7 +133,7 @@ fun OwnerSkeletonScreen(
                     ?: snap?.bars?.firstOrNull()
                 if (bar != null) {
                     Text(bar.name, style = MaterialTheme.typography.headlineSmall)
-                    val posted = snap?.menuItems.orEmpty().any { it.barId == bar.barId }
+                    val posted = snap?.hasPublishedInitialReview(bar.barId) == true
                     OwnerStatusLabel(
                         if (posted) "정상 영업 · Mock 게시 메뉴 있음" else "메뉴 확인 필요 · 아직 공개 전",
                         if (posted) OwnerStatusTone.SUCCESS else OwnerStatusTone.ATTENTION,

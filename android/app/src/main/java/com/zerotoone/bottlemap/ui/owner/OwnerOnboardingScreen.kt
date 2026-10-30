@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.ui.owner
 
 import android.content.Context
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,10 +30,10 @@ import java.util.UUID
 
 /** I3-P14 local-only registration. Latest ACTION_FIRST v4 HTML was not supplied to
  * this runtime: labels/layout below follow the explicit prompt, not unverified HTML. */
-private enum class FormStep { METHOD, CERTIFICATE, BIZ, BAR, PHOTOS, PHONE, MENU, CONTACT, REVIEW, SUBMITTED }
+private enum class FormStep { METHOD, CERTIFICATE, BIZ, BAR, VERIFICATION, PHOTOS, PHONE, MENU, CONTACT, REVIEW, SUBMITTED }
 
-private fun digits(v: String): String = v.filter(Char::isDigit).take(20)
-private fun acceptablePhone(value: String): Boolean =
+internal fun ownerPhoneDigits(v: String): String = v.filter(Char::isDigit).take(12)
+internal fun validOwnerPhone(value: String): Boolean =
     value.isBlank() || (value.filter(Char::isDigit).length in 8..12)
 
 @Composable
@@ -62,6 +63,12 @@ fun OwnerOnboardingScreen(
     val certificateUri = draft.certificatePhoto?.uri
     fun save(newDraft: MockRegistrationDraft) { repository.saveRegistrationDraft(newDraft);error=null }
     fun next() { error=null;step=FormStep.entries.getOrElse(step.ordinal+1){FormStep.REVIEW} }
+    fun goBack() {
+        error=null
+        if (step == FormStep.METHOD || (startRegistration && step == FormStep.CERTIFICATE)) onBack()
+        else step=FormStep.entries[(step.ordinal - 1).coerceAtLeast(0)]
+    }
+    BackHandler(enabled=step != FormStep.METHOD) { goBack() }
     val pickCertificate=rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if(uri!=null) { persistUri(context,uri); save(draft.copy(certificatePhoto=MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.REGISTRATION_ATTACHMENT))) }
     }
@@ -85,7 +92,7 @@ fun OwnerOnboardingScreen(
     val canceled=apps.lastOrNull { it.status==MockApplicationStatus.CANCELED }
     val approved=apps.lastOrNull { it.status==MockApplicationStatus.APPROVED }
     Column(Modifier.fillMaxSize()) {
-        OwnerHeader("내 매장 관리",onBack)
+        OwnerHeader("내 매장 관리",::goBack)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).imePadding().navigationBarsPadding().padding(20.dp),
             verticalArrangement=Arrangement.spacedBy(14.dp)) {
             when {
@@ -182,7 +189,7 @@ fun OwnerOnboardingScreen(
                         }
                         FormStep.BAR -> {
                             Text("사업자 정보 확인 및 수정",style=MaterialTheme.typography.titleLarge)
-                            Input("사업자등록번호",draft.businessNumberDigits,{save(draft.copy(businessNumberDigits=digits(it)))},KeyboardType.Number)
+                            Input("사업자등록번호",draft.businessNumberDigits,{save(draft.copy(businessNumberDigits=ownerPhoneDigits(it).take(10)))},KeyboardType.Number)
                             Input("대표자명",draft.representativeName,{save(draft.copy(representativeName=it))})
                             Input("개업일 (YYYY-MM-DD)",draft.openingDateIso,{save(draft.copy(openingDateIso=it))},KeyboardType.Number)
                             OwnerActionButton("샘플 정보 채우기 (Mock)", {
@@ -193,6 +200,14 @@ fun OwnerOnboardingScreen(
                                    !Regex("\\d{4}-\\d{2}-\\d{2}").matches(draft.openingDateIso)) error="사업자 정보를 확인해주세요."
                                 else next()
                             },Modifier.fillMaxWidth())
+                        }
+                        FormStep.VERIFICATION -> {
+                            Text("사업자 정보 확인 결과",style=MaterialTheme.typography.titleLarge)
+                            OwnerStatusLabel("Mock 검증 · 실제 조회 없음",OwnerStatusTone.ATTENTION)
+                            Text("등록번호 ${draft.businessNumberDigits} · 대표자 ${draft.representativeName}")
+                            Text("공공데이터 인증과 사업자등록증 OCR은 아직 연결되지 않았습니다. " +
+                                "입력 정보가 실제로 유효한지 검증하지 않습니다.")
+                            OwnerActionButton("정보 확인 완료 · 계속",::next,Modifier.fillMaxWidth())
                         }
                         FormStep.PHOTOS -> {
                             Text("매장 정보",style=MaterialTheme.typography.titleLarge)
@@ -224,7 +239,7 @@ fun OwnerOnboardingScreen(
                             }
                             if(!noShopPhone) Input("매장 전화번호",draft.storePhone,{save(draft.copy(storePhone=digits(it)))},KeyboardType.Phone)
                             OwnerActionButton("다음",{
-                                if(!acceptablePhone(draft.storePhone))error="전화번호를 확인해주세요."
+                                if(!validOwnerPhone(draft.storePhone))error="전화번호를 확인해주세요."
                                 else next()
                             },Modifier.fillMaxWidth())
                         }
@@ -277,7 +292,7 @@ fun OwnerOnboardingScreen(
                             onLegacyDebugUpload,Modifier.fillMaxWidth(),secondary=true)
                     }
                     if(step!=FormStep.METHOD) {
-                        OwnerActionButton("이전",{if(step.ordinal>0)step=FormStep.entries[step.ordinal-1] else onBack()},
+                        OwnerActionButton("이전",::goBack,
                             Modifier.fillMaxWidth(),secondary=true)
                     }
                 }

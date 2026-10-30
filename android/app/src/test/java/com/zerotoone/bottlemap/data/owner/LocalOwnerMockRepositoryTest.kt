@@ -145,6 +145,7 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(12000, updated.menuItems.first { it.productId == "product-12" }.options.single().priceKrw)
         assertEquals(16000, updated.menuItems.first { it.productId == "product-16" }.options.single().priceKrw)
         assertEquals(2, second.preview("fixture-bar", 250)!!.visibleMenu.size)
+        assertTrue(ready(second).hasPublishedInitialReview("fixture-bar"))
         rejects { second.publishAddOnly(id, job.reviewVersion) }
     }
 
@@ -683,6 +684,7 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(MockImportStatus.READY_FOR_REVIEW, snapshot.imports.single().status)
         assertTrue(restored.preview(bar.barId, 0)!!.visibleMenu.isEmpty())
         assertTrue(snapshot.menuItems.isEmpty())
+        assertFalse(snapshot.hasPublishedInitialReview(bar.barId))
     }
 
     @Test fun canceledAndRejectedMockApplicationsNeverCreatePublicBars() {
