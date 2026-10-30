@@ -754,6 +754,20 @@ class LocalOwnerMockRepositoryTest {
         assertTrue(ready(r).menuItems.isEmpty())
     }
 
+    @Test fun v4SubmissionRejectsCombinedAddressLongerThanApiLimit() {
+        val r = repo(InMemoryMockOwnerStateStore())
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            proposedBarName = "Long address",
+            proposedBarAddress = "x".repeat(499),
+            proposedBarAddressDetail = "2층"
+        ))
+        rejects { r.submitRegistrationDraftForFixture() }
+        assertTrue(ready(r).applications.isEmpty())
+        assertTrue(ready(r).registrationDraft != null)
+        r.saveRegistrationDraft(ready(r).registrationDraft!!.copy(proposedBarAddressDetail = ""))
+        assertTrue(r.submitRegistrationDraftForFixture().isNotBlank())
+    }
+
     @Test fun v4DuplicatePendingSubmissionBlockedEvenWithFreshDraft() {
         val r = repo(InMemoryMockOwnerStateStore())
         val draft = MockRegistrationDraft(

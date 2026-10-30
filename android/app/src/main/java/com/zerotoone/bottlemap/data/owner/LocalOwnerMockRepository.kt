@@ -112,6 +112,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         } else {
             require(draft.proposedBarName.isNotBlank()) { "New bar name is required" }
             require(draft.proposedBarAddress.isNotBlank()) { "New bar address is required" }
+            val addressLength=listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
+                .filter{it.isNotBlank()}.joinToString(" ").trim().length
+            require(addressLength in 1..500) { "New bar address must have 1..500 characters" }
             null
         }
         require(s.applications.none {
