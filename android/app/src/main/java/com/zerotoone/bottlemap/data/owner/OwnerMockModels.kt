@@ -14,6 +14,7 @@ data class MockOwnerSnapshot(
     val menuItems: List<MockBarMenuItem> = emptyList(),
     val imports: List<MockMenuImport> = emptyList(),
     val selectedBarId: String? = null,
+    val existingBarCandidates: List<MockBar> = emptyList(), // Local-only discovery fixtures, not owned bars
     val nextLocalId: Long = 1L,
 )
 

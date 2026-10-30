@@ -699,6 +699,29 @@ class LocalOwnerMockRepositoryTest {
         }
     }
 
+    @Test fun previouslyRegisteredPublicCandidateIsNotOwnedUntilApproval() {
+        val store = InMemoryMockOwnerStateStore()
+        val repository = repo(store)
+        repository.seedExistingCandidateForFixture(MockBar("public-bar", "Known Public Bar", "Public Street"))
+        val before = ready(repository)
+        assertTrue(before.bars.isEmpty())
+        assertFalse(before.openSingleBarManager())
+        repository.saveRegistrationDraft(MockRegistrationDraft(
+            kind = MockApplicationKind.EXISTING_BAR, existingBarId = "public-bar",
+            representativeName = "Test Owner", businessNumberDigits = "1234567890"
+        ))
+        val appId = repository.submitRegistrationDraftForFixture()
+        val waiting = ready(repository)
+        assertEquals("public-bar", waiting.applications.single().barId)
+        assertTrue(waiting.bars.isEmpty())
+        repository.approveForFixture(appId,waiting.existingBarCandidates.single())
+        val approved = ready(repo(store))
+        assertEquals(1, approved.bars.size)
+        assertTrue(approved.existingBarCandidates.isEmpty())
+        assertTrue(approved.openSingleBarManager())
+        assertTrue(approved.menuItems.isEmpty())
+    }
+
     @Test fun singleBarRoutingRequiresExactlyOneBarWithoutPendingOrActiveDraft() {
         val empty = MockOwnerSnapshot()
         assertFalse(empty.openSingleBarManager())

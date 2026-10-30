@@ -78,6 +78,7 @@ fun OwnerOnboardingScreen(
         }))
     }
     val bars=snapshot?.bars.orEmpty()
+    val candidates=snapshot?.existingBarCandidates.orEmpty()
     val apps=snapshot?.applications.orEmpty()
     val pending=apps.lastOrNull { it.status==MockApplicationStatus.PENDING }
     val rejected=apps.lastOrNull { it.status==MockApplicationStatus.REJECTED }
@@ -106,7 +107,7 @@ fun OwnerOnboardingScreen(
                     },Modifier.fillMaxWidth(),secondary=true)
                     if(BuildConfigDebug()) OwnerActionButton("테스트: 승인 처리 (Mock)", {
                         val id=pending.barId?:"mock-bar-${pending.applicationId}"
-                        val existing=bars.firstOrNull { it.barId==id }
+                        val existing=(bars+candidates).firstOrNull { it.barId==id }
                         val newBar=existing?:MockBar(id,pending.proposedBarName,pending.proposedBarAddress?:"테스트 주소",
                             phone=pending.storePhone,
                             gallery=pending.registrationPhotos.filter { it.kind==MockPhotoKind.BAR_GALLERY })
@@ -151,8 +152,15 @@ fun OwnerOnboardingScreen(
                         FormStep.BIZ -> {
                             if(draft.kind==MockApplicationKind.EXISTING_BAR) {
                                 Text("신청할 기존 매장 선택",style=MaterialTheme.typography.titleLarge)
-                                if(bars.isEmpty()) Text("Mock 목록에 매장이 없습니다. 신규 매장 등록을 이용해주세요.")
-                                bars.forEach { bar -> OwnerMenuRow(bar.name,bar.address,{
+                                if(candidates.isEmpty()) {
+                                    Text("검색 API가 연결되지 않아 Mock 기존 매장이 없습니다.")
+                                    if(BuildConfigDebug()) OwnerActionButton("테스트 기존 매장 만들기 (Mock)", {
+                                        repository.seedExistingCandidateForFixture(
+                                            MockBar("fixture-existing-bar", "테스트 등록 매장", "테스트 주소")
+                                        )
+                                    },Modifier.fillMaxWidth(),secondary=true)
+                                }
+                                candidates.forEach { bar -> OwnerMenuRow(bar.name,bar.address,{
                                     selectedBarId=bar.barId;save(draft.copy(existingBarId=bar.barId));next()
                                 }) }
                             } else {
@@ -191,7 +199,7 @@ fun OwnerOnboardingScreen(
                             if(draft.kind==MockApplicationKind.NEW_BAR){
                                 Input("매장명",draft.proposedBarName,{save(draft.copy(proposedBarName=it))})
                                 Input("주소",draft.proposedBarAddress,{save(draft.copy(proposedBarAddress=it))})
-                            }else Text("기존 매장: ${bars.firstOrNull{it.barId==draft.existingBarId}?.name?:"선택 필요"}")
+                            }else Text("기존 매장: ${(bars+candidates).firstOrNull{it.barId==draft.existingBarId}?.name?:"선택 필요"}")
                             OwnerActionButton("다음",{
                                 if(draft.kind==MockApplicationKind.NEW_BAR &&
                                     (draft.proposedBarName.isBlank()||draft.proposedBarAddress.isBlank())) error="매장명과 주소를 입력해주세요."

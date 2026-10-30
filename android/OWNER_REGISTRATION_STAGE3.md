@@ -16,8 +16,12 @@ additional v4 controls must be visually checked against the real attachment.
 - Customer My Page -> Owner entry: 0 bars -> registration entry; 1 bar without pending
   claim or draft -> management home; multiple bars -> selectable list. From management,
   the Owner can start another application.
-- New bar and existing bar ownership claim. Existing claim references a Mock
-  `existingBarId`; users cannot select an unseeded existing bar.
+- New bar and existing bar ownership claim. Existing claim references an explicitly
+  seeded Mock `existingBarId`, **not an owned bar**. `existingBarCandidates` are local
+  public-discovery fixtures; they do not count toward the 0/1/N managed-bar routing.
+  Debug has a labeled test-candidate seed control if no candidates exist. Approved
+  claims move the selected candidate into the owned `bars` list. No search API exists
+  for this demo and no fixture is seeded on fresh app launch.
 - Pick a business certificate using the Android Photo Picker, retain its URI as
   `certificatePhoto`, and then manually enter/verify a business number, representative
   and opening date. A clearly labeled **Mock sample fill** is available. **No OCR** or

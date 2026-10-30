@@ -25,6 +25,7 @@ interface OwnerMockRepository {
     fun retryLoad()
     fun registerApplication(application: MockOwnerApplication)
     fun saveRegistrationDraft(draft: MockRegistrationDraft?)
+    fun seedExistingCandidateForFixture(bar: MockBar)
     fun submitRegistrationDraftForFixture(): String
     fun approveForFixture(applicationId: String, bar: MockBar)
     fun closeApplicationForFixture(applicationId: String, status: MockApplicationStatus)
@@ -87,6 +88,15 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             result
         }
 
+    /** Debug/demo only; public bar search API has not been connected. */
+    override fun seedExistingCandidateForFixture(bar: MockBar) {
+        require(bar.barId.isNotBlank() && bar.name.isNotBlank() && bar.address.isNotBlank())
+        change { s ->
+            require(s.bars.none { it.barId == bar.barId })
+            s.copy(existingBarCandidates = s.existingBarCandidates.filterNot { it.barId == bar.barId } + bar) to Unit
+        }
+    }
+
     override fun saveRegistrationDraft(draft: MockRegistrationDraft?) {
         change { s -> s.copy(registrationDraft = draft) to Unit }
     }
@@ -95,7 +105,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
     override fun submitRegistrationDraftForFixture(): String = change { s ->
         val draft = requireNotNull(s.registrationDraft) { "No registration draft" }
         val existingBar = if (draft.kind == MockApplicationKind.EXISTING_BAR) {
-            requireNotNull(s.bars.firstOrNull { it.barId == draft.existingBarId }) {
+            requireNotNull((s.bars + s.existingBarCandidates).firstOrNull { it.barId == draft.existingBarId }) {
                 "Existing bar must be selected for a claim"
             }
         } else {
@@ -151,7 +161,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             if (a.kind == MockApplicationKind.NEW_BAR) {
                 require(s.bars.none { it.barId == bar.barId })
             } else {
-                require(s.bars.any { it.barId == bar.barId } && a.barId == bar.barId) { "Existing bar ID does not match claim" }
+                require((s.bars + s.existingBarCandidates).any { it.barId == bar.barId } &&
+                    a.barId == bar.barId) { "Existing bar ID does not match claim" }
             }
             val approved = s.applications.map {
                 if (it.applicationId == applicationId)
@@ -159,7 +170,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             }
             s.copy(
                 applications = approved,
-                bars = if (a.kind == MockApplicationKind.NEW_BAR) s.bars + bar else s.bars,
+                bars = if (s.bars.none { it.barId == bar.barId }) s.bars + bar else s.bars,
+                existingBarCandidates = s.existingBarCandidates.filterNot { it.barId == bar.barId },
                 selectedBarId = s.selectedBarId ?: bar.barId,
             ) to Unit
         }
