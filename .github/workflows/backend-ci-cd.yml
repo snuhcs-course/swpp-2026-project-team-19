@@ -67,7 +67,31 @@ jobs:
         run: uv sync --frozen
 
       - name: Run tests with coverage
-        run: uv run --no-sync pytest --cov --cov-report=term --cov-report=xml
+        # -rs lists skip reasons in the log; strict xfail makes a passing xfail test fail.
+        run: >-
+          uv run --no-sync pytest -rs -o xfail_strict=true
+          --cov --cov-report=term --cov-report=xml --junitxml=junit.xml
+
+      - name: Collect the test lists of the PR and its base
+        # Only to list removed tests in the summary; a collection that fails just skips the comparison.
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_DIR: ${{ runner.temp }}/base
+        run: |
+          uv run --no-sync pytest --collect-only -q -p no:cacheprovider > head-tests.txt || rm -f head-tests.txt
+          if git fetch --quiet --depth=1 origin "$BASE_SHA" && git worktree add --quiet --detach "$BASE_DIR" "$BASE_SHA"; then
+            # The base's tests run with this PR's environment; only their IDs are needed.
+            (cd "$BASE_DIR/backend" && "$GITHUB_WORKSPACE/backend/.venv/bin/python" -m pytest --collect-only -q -p no:cacheprovider) \
+              > base-tests.txt || rm -f base-tests.txt
+          fi
+
+      - name: Check test count, skips and removed tests
+        # Fails when tests were deleted or skipped without being listed in backend/ci/test_policy.json.
+        if: ${{ !cancelled() }}
+        run: >-
+          uv run --no-sync python ci/check_test_report.py junit.xml --summary "$GITHUB_STEP_SUMMARY"
+          ${{ github.event_name == 'pull_request' && '--base-tests base-tests.txt --head-tests head-tests.txt' || '' }}
 
       - name: Write coverage summary
         if: ${{ !cancelled() }}
@@ -82,7 +106,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: backend-coverage
-          path: backend/coverage.xml
+          path: |
+            backend/coverage.xml
+            backend/junit.xml
           if-no-files-found: ignore
 
   deploy:
