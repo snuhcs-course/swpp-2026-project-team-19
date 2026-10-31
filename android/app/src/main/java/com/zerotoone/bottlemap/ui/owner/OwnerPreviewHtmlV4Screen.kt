@@ -179,6 +179,11 @@ fun OwnerPreviewHtmlV4Screen(
                 bar.description?.takeIf { it.isNotBlank() }?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall)
                 }
+                bar.defaultPourMl?.let {
+                    Text("기본 잔 용량 " + it + "ml",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 if (bar.tags.isNotEmpty()) {
                     Text(bar.tags.take(5).joinToString("  ·  "),
                         style = MaterialTheme.typography.bodySmall,
