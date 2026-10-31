@@ -28,7 +28,7 @@ import com.zerotoone.bottlemap.ui.owner.OwnerInfoHtmlV4Screen
 import com.zerotoone.bottlemap.ui.owner.OwnerPhotoHtmlV4Screen
 import com.zerotoone.bottlemap.ui.owner.OwnerBarTagsEditorScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerBarHoursEditorScreen
-import com.zerotoone.bottlemap.ui.owner.OwnerBarCustomerPreviewScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerPreviewHtmlV4Screen
 import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 
 /** One Android artifact: everyone starts in Customer, with Owner accessible from My Page. */
@@ -118,15 +118,13 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         state = mockState, viewModel = data,
                         onBack = { navController.popBackStack() },
                     )
-                    OwnerPage.MGR_TAGS -> OwnerBarTagsEditorScreen(
+                    // Legacy UX jump destinations share the one HTML-v4 info form.
+                    OwnerPage.MGR_TAGS, OwnerPage.MGR_HOURS -> OwnerInfoHtmlV4Screen(
                         state = mockState, viewModel = data,
                         onBack = { navController.popBackStack() },
+                        onPhotos = { navController.navigate(OwnerPage.MGR_PHOTOS.route) },
                     )
-                    OwnerPage.MGR_HOURS -> OwnerBarHoursEditorScreen(
-                        state = mockState, viewModel = data,
-                        onBack = { navController.popBackStack() },
-                    )
-                    OwnerPage.MGR_PREVIEW -> OwnerBarCustomerPreviewScreen(
+                    OwnerPage.MGR_PREVIEW -> OwnerPreviewHtmlV4Screen(
                         state = mockState, viewModel = data,
                         onBack = { navController.popBackStack() },
                     )
