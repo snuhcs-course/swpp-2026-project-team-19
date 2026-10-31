@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
@@ -205,24 +207,30 @@ fun OwnerInfoHtmlV4Screen(
                     val setting = weekly.firstOrNull { it.isoDayOfWeek == day }
                     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(
-                            Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                            Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(3.dp),
                         ) {
                             Text(dayName, style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold, modifier = Modifier.width(19.dp))
+                                fontWeight = FontWeight.Bold, modifier = Modifier.width(24.dp))
                             Checkbox(checked = setting?.closed == true,
                                 modifier = Modifier.size(36.dp),
                                 onCheckedChange = { checked ->
-                                    if (checked) {
-                                        setDay(day, MockWeeklyHours(day, closed = true))
-                                    } else {
-                                        setDay(day, null) // HTML: unchecked+unset = no regular hours
-                                    }
+                                    if (checked) setDay(day, MockWeeklyHours(day, closed = true))
+                                    else setDay(day, null)
                                     error = null
                                 })
                             Text("휴무", style = MaterialTheme.typography.labelSmall)
-                            Spacer(Modifier.weight(1f))
-                            if (setting?.closed != true) {
+                        }
+                        // On small Android displays, controls are on their own
+                        // line so the hours wheel and "익일" checkbox never clip.
+                        if (setting?.closed != true) {
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                            ) {
+                                Spacer(Modifier.width(60.dp))
                                 listOf("open", "close").forEachIndexed { partIndex, part ->
                                     if (partIndex == 1) Text("–")
                                     OutlinedButton(
@@ -240,12 +248,10 @@ fun OwnerInfoHtmlV4Screen(
                                     ) {
                                         Text(shortTime(if (part == "open") setting?.openMinutes
                                             else setting?.closeMinutes),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            maxLines = 1)
+                                            style = MaterialTheme.typography.labelSmall, maxLines = 1)
                                     }
                                 }
-                                Checkbox(
-                                    checked = setting?.closesNextDay == true,
+                                Checkbox(checked = setting?.closesNextDay == true,
                                     modifier = Modifier.size(30.dp),
                                     onCheckedChange = { checked ->
                                         val old = setting ?: MockWeeklyHours(day, closed = false)
@@ -300,12 +306,14 @@ fun OwnerInfoHtmlV4Screen(
                         verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         selectedTags.forEach { tag ->
                             OutlinedButton(
+                                modifier = Modifier.widthIn(max = 250.dp),
                                 onClick = {
                                     selectedTags = selectedTags.filterNot { it == tag }
                                     error = null
                                 },
                                 contentPadding = PaddingValues(horizontal = 9.dp, vertical = 2.dp),
-                            ) { Text(tag + " ×", style = MaterialTheme.typography.labelSmall) }
+                            ) { Text(tag + " ×", style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 2, overflow = TextOverflow.Ellipsis) }
                         }
                     }
                 }
@@ -322,6 +330,7 @@ fun OwnerInfoHtmlV4Screen(
                     verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     candidates.forEach { candidate ->
                         OutlinedButton(
+                            modifier = Modifier.widthIn(max = 250.dp),
                             onClick = {
                                 val next = toggleBarTag(selectedTags, candidate)
                                 if (next == null) error = "태그는 최대 5개까지 등록할 수 있어요."
@@ -329,11 +338,13 @@ fun OwnerInfoHtmlV4Screen(
                             },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
                         ) {
-                            Text(candidate + " ＋", style = MaterialTheme.typography.labelSmall)
+                            Text(candidate + " ＋", style = MaterialTheme.typography.labelSmall,
+                                maxLines = 2, overflow = TextOverflow.Ellipsis)
                         }
                     }
                     if (canCreate) {
                         OutlinedButton(
+                            modifier = Modifier.widthIn(max = 250.dp),
                             onClick = {
                                 val next = toggleBarTag(selectedTags, query)
                                 if (next == null) error = "태그는 최대 5개까지 등록할 수 있어요."
