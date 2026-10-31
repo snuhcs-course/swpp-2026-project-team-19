@@ -18,6 +18,7 @@
 /backend/junit.xml
 /backend/base-tests.txt
 /backend/head-tests.txt
+/backend/test-report.md
 /backend/var/
 /_ref/
 
