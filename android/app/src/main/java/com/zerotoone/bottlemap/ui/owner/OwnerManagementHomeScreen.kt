@@ -141,7 +141,7 @@ fun OwnerManagementHomeScreen(
 ) {
     val selected = activeBar(state)
     var error by rememberSaveable { mutableStateOf<String?>(null) }
-    val now = System.currentTimeMillis()
+    val now = rememberOwnerNow()
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         OwnerHeader("매장 관리", onBack)
         Column(
