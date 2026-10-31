@@ -170,7 +170,7 @@ fun OwnerManagementHomeScreen(
                                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                             OwnerManagerIcon(BmIconId.UPDATED)
                                             Text(
-                                                if (exception?.kind == MockExceptionKind.VACATION) "임시 휴업" else homeExceptionHeading(exception),
+                                                if (exception?.kind == MockExceptionKind.VACATION) "임시 휴무" else homeExceptionHeading(exception),
                                                 modifier = Modifier.weight(1f),
                                                 style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = FontWeight.Bold,
@@ -185,8 +185,8 @@ fun OwnerManagementHomeScreen(
                                                         } catch (e: Exception) { error = e.message }
                                                     },
                                                     contentPadding = PaddingValues(0.dp),
-                                                    modifier = Modifier.size(36.dp)
-                                                ) { Text("×", fontSize = 29.sp, color = MaterialTheme.colorScheme.error) }
+                                                    modifier = Modifier.size(40.dp)
+                                                ) { Text("×", fontSize = 31.sp, color = MaterialTheme.colorScheme.error) }
                                             }
                                         }
                                         if (exception?.kind == MockExceptionKind.VACATION) {
