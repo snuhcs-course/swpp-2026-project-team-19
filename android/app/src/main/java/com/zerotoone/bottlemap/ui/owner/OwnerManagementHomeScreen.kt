@@ -482,6 +482,8 @@ fun OwnerOperatingQuickScreen(
                         fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 5.dp))
                     OwnerVacationCalendar(
                         today = today, startDay = startDay, endDay = endDay,
+                        selectedTarget = dateTarget,
+                        onSelectTarget = { dateTarget = it },
                         onPick = { picked ->
                             val updated = updateQuickVacationDates(
                                 startDay, endDay, picked, dateTarget
@@ -497,35 +499,7 @@ fun OwnerOperatingQuickScreen(
                             }
                         }
                     )
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(Modifier.padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf(
-                                Triple("start", "시작", startDay),
-                                Triple("end", "종료", endDay)
-                            ).forEach { (target, label, date) ->
-                                Surface(
-                                    modifier = Modifier.weight(1f).clickable { dateTarget = target },
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = MaterialTheme.colorScheme.surface
-                                ) {
-                                    Text(
-                                        label + " " + if (date == Long.MIN_VALUE) "선택" else
-                                            LocalDate.ofEpochDay(date).format(
-                                                DateTimeFormatter.ofPattern("yyyy.MM.dd")
-                                            ),
-                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 12.dp),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        maxLines = 1
-                                    )
-                                }
-                            }
-                        }
-                    }
+
                 }
                 if (choice.isNotEmpty()) {
                     Text("고객 안내 (선택)", style = MaterialTheme.typography.labelLarge,
