@@ -74,6 +74,30 @@ class OwnerOnboardingValidationTest {
         assertEquals("MENUS", registrationHistoryFor("CONTACT", draft.kind).last())
     }
 
+    @Test fun changingClaimedBarNameClearsStaleExistingBarSelection() {
+        val original = com.zerotoone.bottlemap.data.owner.MockRegistrationDraft(
+            kind = com.zerotoone.bottlemap.data.owner.MockApplicationKind.EXISTING_BAR,
+            existingBarId = "candidate-1",
+            proposedBarName = "기존 매장"
+        )
+        val edited = updatedBarNameDraft(original, "새 매장")
+        assertEquals(com.zerotoone.bottlemap.data.owner.MockApplicationKind.NEW_BAR, edited.kind)
+        assertEquals(null, edited.existingBarId)
+        assertEquals("새 매장", edited.proposedBarName)
+        assertEquals("candidate-1", original.existingBarId)
+    }
+
+    @Test fun unchangedClaimedBarNameStillReferencesChosenCandidate() {
+        val original = com.zerotoone.bottlemap.data.owner.MockRegistrationDraft(
+            kind = com.zerotoone.bottlemap.data.owner.MockApplicationKind.EXISTING_BAR,
+            existingBarId = "candidate-1",
+            proposedBarName = "기존 매장"
+        )
+        val edited = updatedBarNameDraft(original, " 기존 매장 ")
+        assertEquals(com.zerotoone.bottlemap.data.owner.MockApplicationKind.EXISTING_BAR, edited.kind)
+        assertEquals("candidate-1", edited.existingBarId)
+    }
+
     @Test fun existingBarPhotoStepBackReturnsToName() {
         val kind = com.zerotoone.bottlemap.data.owner.MockApplicationKind.EXISTING_BAR
         assertEquals("BARNAME", registrationHistoryFor("MENUS", kind).last())
