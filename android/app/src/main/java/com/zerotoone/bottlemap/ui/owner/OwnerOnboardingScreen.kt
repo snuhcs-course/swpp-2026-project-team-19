@@ -97,11 +97,33 @@ fun OwnerOnboardingScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
 
+    fun latestDraft(): MockRegistrationDraft? = when(val now=viewModel.state.value) {
+        is MockOwnerLoadState.Ready -> now.snapshot.registrationDraft
+        is MockOwnerLoadState.Empty -> now.snapshot.registrationDraft
+        else -> null
+    }
     fun save(value:MockRegistrationDraft){ viewModel.saveRegistrationDraft(value);error=null }
-    fun go(target:RegPage){ history=history+screen.name;screen=target;error=null }
+    fun checkpoint(target:RegPage){
+        if(!registrationCheckpointable(target.name))return
+        val current=latestDraft() ?: if(target==RegPage.METHOD) MockRegistrationDraft() else return
+        if(current.resumePageKey!=target.name)
+            viewModel.saveRegistrationDraft(current.copy(resumePageKey=target.name))
+    }
+    fun go(target:RegPage){
+        checkpoint(target)
+        history=history+screen.name
+        screen=target
+        error=null
+    }
     fun back() {
-        if(history.isEmpty())onBack()
-        else { screen=RegPage.valueOf(history.last());history=history.dropLast(1) }
+        val stack=if(history.isEmpty() && registrationCheckpointable(screen.name))
+            registrationHistoryFor(screen.name,draft.kind) else history
+        if(stack.isEmpty())onBack()
+        else {
+            screen=RegPage.valueOf(stack.last())
+            history=stack.dropLast(1)
+            checkpoint(screen)
+        }
         error=null
     }
     fun forward(target:RegPage) {
@@ -114,25 +136,26 @@ fun OwnerOnboardingScreen(
         if(uri!=null){
             persistSelectedUri(ctx,uri)
             inputMethod="photo"
-            save(draft.copy(certificatePhoto=MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.REGISTRATION_ATTACHMENT)))
+            save((latestDraft()?:draft).copy(certificatePhoto=MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.REGISTRATION_ATTACHMENT)))
             go(RegPage.READING)
         }
     }
     val coverPicker=rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()){ uri ->
         if(uri!=null){
             persistSelectedUri(ctx,uri)
-            save(draft.copy(applicantGallery=listOf(MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.BAR_GALLERY))))
+            save((latestDraft()?:draft).copy(applicantGallery=listOf(MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.BAR_GALLERY))))
         }
     }
     val menuPicker=rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(15)){ uris ->
-        val old=draft.initialMenuPhotos
+        val latest=latestDraft()?:draft
+        val old=latest.initialMenuPhotos
         val oldUris=old.map{it.uri}.toSet()
         val added=uris.distinctBy{it.toString()}.filterNot{it.toString() in oldUris}
             .take((15-old.size).coerceAtLeast(0)).map{
                 persistSelectedUri(ctx,it)
                 MockPhoto(UUID.randomUUID().toString(),it.toString(),MockPhotoKind.MENU_CAPTURE)
             }
-        if(added.isNotEmpty())save(draft.copy(initialMenuPhotos=old+added))
+        if(added.isNotEmpty())save(latest.copy(initialMenuPhotos=old+added))
     }
 
     LaunchedEffect(screen) {
@@ -150,13 +173,14 @@ fun OwnerOnboardingScreen(
         }
     }
     LaunchedEffect(snapshot?.registrationDraft!=null,startRegistration) {
-        if(!startRegistration && snapshot?.registrationDraft!=null && screen==RegPage.HOME){
-            screen=when{
-                draft.initialMenuPhotos.isNotEmpty()->RegPage.CONTACT
-                draft.applicantGallery.isNotEmpty()->RegPage.ADDRESS
-                draft.businessNumberDigits.isNotBlank()->RegPage.BIZCHECK
-                else->RegPage.METHOD
-            }
+        // Explicit local checkpoint outranks field-derived migration heuristics.
+        // A newly launched process has an empty rememberSaveable history; rebuild it
+        // so system Back and the header Back stay inside registration.
+        if(snapshot?.registrationDraft!=null &&
+            (screen==RegPage.HOME || (startRegistration && screen==RegPage.INTRO))){
+            val target=registrationResumePage(draft)
+            screen=RegPage.valueOf(target)
+            history=registrationHistoryFor(target,draft.kind)
         }
     }
 
@@ -528,10 +552,12 @@ fun OwnerOnboardingScreen(
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                             verticalAlignment=Alignment.CenterVertically){
                             OwnerStatusLabel("운영팀만 봐요")
-                            if(draft.storePhone.isNotBlank()&&draft.contactPhone!=draft.storePhone)
-                                TextButton(onClick={save(draft.copy(contactPhone=draft.storePhone))}){
-                                    Text("매장 번호와 같아요",style=MaterialTheme.typography.labelSmall)
-                                }
+                            TextButton(
+                                onClick={save(draft.copy(contactPhone=draft.storePhone))},
+                                enabled=canCopyShopPhone(draft.storePhone)
+                            ){
+                                Text("매장 번호와 같아요",style=MaterialTheme.typography.labelSmall)
+                            }
                         }
                         OwnerV4Input("연락받을 번호",formatOwnerPhone(draft.contactPhone),{
                             save(draft.copy(contactPhone=ownerPhoneDigits(it)))

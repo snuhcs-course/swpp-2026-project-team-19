@@ -56,6 +56,7 @@ data class MockRegistrationDraft(
     val certificatePhoto: MockPhoto? = null, // Mock-only stored reference to registration certificate
     val applicantGallery: List<MockPhoto> = emptyList(),
     val initialMenuPhotos: List<MockPhoto> = emptyList(),
+    val resumePageKey: String? = null, // Local UI checkpoint; no Backend field
 )
 
 enum class MockApplicationStatus { PENDING, APPROVED, REJECTED, CANCELED }

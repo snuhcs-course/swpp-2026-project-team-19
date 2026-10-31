@@ -92,6 +92,28 @@ from actual Owner actions and remain non-production.
 - Android Photo Picker is used instead of custom gallery/camera permission requests.
   Persisted URI permissions and process-death behavior require physical Galaxy S23 QA.
 
+## Galaxy S23 post-test corrections: persisted registration progress and phone copy
+
+- First real-device run reported that selected menu photo URIs/order were saved but
+  after force-stop/reopen the UI jumped from \`MENUS\` to \`CONTACT\`, and header Back
+  returned to My Page. Root cause: the old process-restart field heuristic mapped
+  nonempty initial menu photos directly to CONTACT, without reconstructing the in-form
+  Back history.
+- The local-only \`MockRegistrationDraft.resumePageKey\` checkpoint now persists the
+  *visible registration step* alongside existing fields, without any API field.
+  Advancing, navigating back and editing review checkpoint stable screens. Fresh-process
+  restoration uses the checkpoint, rebuilds form navigation history, and supports
+  pre-migration drafts: photos present but no checkpoint resume at MENUS.
+  Photo selections/removals preserve checkpoint and selected order.
+- On contact screen, \`매장 번호와 같아요\` stays in the same location. Its enabled
+  state is determined only by whether a valid shop phone exists; the user's current
+  private contact value does not hide the affordance. Without a shop phone, it is
+  visible but disabled, and private contact remains independently editable.
+- JVM tests cover restart persisted checkpoint, legacy migration, new/claimed-bar
+  Back predecessor, photo list mutation, and 02/0507 copy availability. Actual
+  force-stop / Photo Picker / 320dp / IME behavior remains for Galaxy S23 rerun.
+- No real applicant data should be entered in unencrypted local Mock state.
+
 ## CI and manual verification
 
 ```powershell

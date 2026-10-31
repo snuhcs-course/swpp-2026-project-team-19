@@ -737,6 +737,30 @@ class LocalOwnerMockRepositoryTest {
         ))).openSingleBarManager())
     }
 
+    @Test fun registrationResumeCheckpointAndMenuOrderSurviveRepositoryRestart() {
+        val store = InMemoryMockOwnerStateStore()
+        val owner = repo(store)
+        val draft = MockRegistrationDraft(
+            proposedBarName = "Sample", storePhone = "0212345678",
+            resumePageKey = "MENUS",
+            initialMenuPhotos = listOf(
+                MockPhoto("p1", "content://picker/a", MockPhotoKind.MENU_CAPTURE),
+                MockPhoto("p2", "content://picker/b", MockPhotoKind.MENU_CAPTURE)
+            )
+        )
+        owner.saveRegistrationDraft(draft)
+        val reopened = ready(repo(store)).registrationDraft!!
+        assertEquals("MENUS", reopened.resumePageKey)
+        assertEquals(listOf("content://picker/a", "content://picker/b"),
+            reopened.initialMenuPhotos.map { it.uri })
+        // Picker appends/removes by copying the same persisted draft; no step reset.
+        owner.saveRegistrationDraft(reopened.copy(initialMenuPhotos =
+            reopened.initialMenuPhotos.drop(1)))
+        val afterRemove = ready(repo(store)).registrationDraft!!
+        assertEquals("MENUS", afterRemove.resumePageKey)
+        assertEquals(listOf("content://picker/b"), afterRemove.initialMenuPhotos.map { it.uri })
+    }
+
     @Test fun v4AddressDetailAndPhoneArePreservedOnSubmit() {
         val r = repo(InMemoryMockOwnerStateStore())
         r.saveRegistrationDraft(MockRegistrationDraft(

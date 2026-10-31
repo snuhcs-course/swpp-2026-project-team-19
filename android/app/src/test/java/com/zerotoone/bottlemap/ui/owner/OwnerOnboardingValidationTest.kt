@@ -37,6 +37,56 @@ class OwnerOnboardingValidationTest {
         assertEquals("0507-1234-5678", formatOwnerPhone("050712345678"))
     }
 
+    @Test fun resumedMenuPhotoStepRebuildsBackPathForNewBar() {
+        val menu = com.zerotoone.bottlemap.data.owner.MockPhoto(
+            "photo-1", "content://picker/photo1",
+            com.zerotoone.bottlemap.data.owner.MockPhotoKind.MENU_CAPTURE
+        )
+        val draft = com.zerotoone.bottlemap.data.owner.MockRegistrationDraft(
+            proposedBarName = "Test", storePhone = "0212345678",
+            initialMenuPhotos = listOf(menu), resumePageKey = "MENUS"
+        )
+        assertEquals("MENUS", registrationResumePage(draft))
+        assertEquals("BARPHONE", registrationHistoryFor("MENUS", draft.kind).last())
+        assertEquals("ADDRESS", registrationHistoryFor("BARPHONE", draft.kind).last())
+    }
+
+    @Test fun migratedDraftWithPhotosDoesNotJumpToContact() {
+        val photo = com.zerotoone.bottlemap.data.owner.MockPhoto(
+            "a", "content://picker/a",
+            com.zerotoone.bottlemap.data.owner.MockPhotoKind.MENU_CAPTURE
+        )
+        val legacy = com.zerotoone.bottlemap.data.owner.MockRegistrationDraft(
+            initialMenuPhotos = listOf(photo), resumePageKey = null
+        )
+        assertEquals("MENUS", registrationResumePage(legacy))
+    }
+
+    @Test fun completedMenuPhotoPageResumesAtContactWhenExplicitlySaved() {
+        val draft = com.zerotoone.bottlemap.data.owner.MockRegistrationDraft(
+            resumePageKey = "CONTACT",
+            initialMenuPhotos = listOf(com.zerotoone.bottlemap.data.owner.MockPhoto(
+                "p", "content://picker/p",
+                com.zerotoone.bottlemap.data.owner.MockPhotoKind.MENU_CAPTURE
+            ))
+        )
+        assertEquals("CONTACT", registrationResumePage(draft))
+        assertEquals("MENUS", registrationHistoryFor("CONTACT", draft.kind).last())
+    }
+
+    @Test fun existingBarPhotoStepBackReturnsToName() {
+        val kind = com.zerotoone.bottlemap.data.owner.MockApplicationKind.EXISTING_BAR
+        assertEquals("BARNAME", registrationHistoryFor("MENUS", kind).last())
+    }
+
+    @Test fun copyShopPhoneActionIsIndependentOfExistingPrivateNumber() {
+        assertTrue(canCopyShopPhone("02-1234-5678"))
+        assertTrue(canCopyShopPhone("0507-1234-5678"))
+        assertFalse(canCopyShopPhone(""))
+        assertFalse(canCopyShopPhone("112"))
+        // UI keeps the button visible even when the copied value is already equal.
+    }
+
     @Test fun phoneFormattingDoesNotPreventIndependentContactInput() {
         assertEquals("0212345678", ownerPhoneDigits("02-1234-5678"))
         assertEquals("050712345678", ownerPhoneDigits("0507-1234-5678"))
