@@ -1,6 +1,30 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.DayOfWeek
+import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -72,23 +96,30 @@ private fun OwnerQuickCard(
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(
-            Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 12.dp),
+            Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 OwnerManagerIcon(icon)
-                Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold, maxLines = 1)
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    footer, style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
-                )
-                Text("›", style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            OwnerManagerFooter(footer, onClick)
         }
+    }
+}
+
+@Composable
+private fun OwnerManagerFooter(label: String, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().height(36.dp).clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+        Text("›", style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -148,7 +179,8 @@ fun OwnerManagementHomeScreen(
                         }
                     }
                     BoxWithConstraints(Modifier.fillMaxWidth()) {
-                        val equalHeight = 158.dp
+                        // Compact cards with a shared height; never force an unnecessary square.
+                        val equalHeight = if (androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.25f) 152.dp else 130.dp
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(9.dp)
@@ -163,71 +195,73 @@ fun OwnerManagementHomeScreen(
                                 color = MaterialTheme.colorScheme.surface
                             ) {
                                 Column(
-                                    Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 12.dp),
+                                    Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 10.dp),
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                        Row(
+                                            Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
                                             OwnerManagerIcon(BmIconId.UPDATED)
+                                            // All status labels share one compact single-line font size.
                                             Text(
-                                                if (exception?.kind == MockExceptionKind.VACATION) "임시 휴무" else homeExceptionHeading(exception),
+                                                if (exception?.kind == MockExceptionKind.VACATION) "임시 휴무"
+                                                else homeExceptionHeading(exception),
                                                 modifier = Modifier.weight(1f),
-                                                style = MaterialTheme.typography.titleMedium,
+                                                fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                softWrap = true
+                                                maxLines = 1
                                             )
                                             if (exception != null) {
-                                                TextButton(
-                                                    onClick = {
-                                                        try {
-                                                            viewModel.cancelOperatingException(bar.barId, exception.exceptionId)
-                                                            error = null
-                                                        } catch (e: Exception) { error = e.message }
-                                                    },
-                                                    contentPadding = PaddingValues(0.dp),
-                                                    modifier = Modifier.size(40.dp)
-                                                ) { Text("×", fontSize = 31.sp, color = MaterialTheme.colorScheme.error) }
+                                                Text(
+                                                    "×", fontSize = 29.sp,
+                                                    color = MaterialTheme.colorScheme.error,
+                                                    modifier = Modifier.width(22.dp)
+                                                        .clickable {
+                                                            try {
+                                                                viewModel.cancelOperatingException(bar.barId, exception.exceptionId)
+                                                                error = null
+                                                            } catch (e: Exception) { error = e.message }
+                                                        },
+                                                    textAlign = TextAlign.Center
+                                                )
                                             }
                                         }
-                                        if (exception?.kind == MockExceptionKind.VACATION) {
-                                            Text("${ownerDate(exception.fromEpochDay)} ~ ${ownerDate(exception.toEpochDay)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Normal, maxLines = 1)
-                                        }
-                                        if (exception?.kind == MockExceptionKind.CUSTOM_HOURS) {
-                                            Text(
+                                        val statusDetail = when (exception?.kind) {
+                                            MockExceptionKind.VACATION ->
+                                                "${ownerDate(exception.fromEpochDay)} ~ ${ownerDate(exception.toEpochDay)}"
+                                            MockExceptionKind.CUSTOM_HOURS ->
                                                 "%02d:%02d ~ %s%02d:%02d".format(
                                                     (exception.openMinutes ?: 0) / 60,
                                                     (exception.openMinutes ?: 0) % 60,
                                                     if (exception.closesNextDay) "익일 " else "",
                                                     (exception.closeMinutes ?: 0) / 60,
                                                     (exception.closeMinutes ?: 0) % 60
-                                                ),
-                                                style = MaterialTheme.typography.labelSmall,
+                                                )
+                                            else -> null
+                                        }
+                                        if (statusDetail != null) {
+                                            Text(statusDetail,
+                                                modifier = Modifier.padding(start = 36.dp),
+                                                fontSize = 11.sp, fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                softWrap = true
+                                                maxLines = 1
                                             )
                                         }
                                     }
-                                    Row(
-                                        Modifier.fillMaxWidth().clickable(onClick = onStatus)
-                                            .defaultMinSize(minHeight = 40.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text("영업 상태 변경", modifier = Modifier.weight(1f),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        Text("›", style = MaterialTheme.typography.headlineMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    }
+                                    OwnerManagerFooter("영업 상태 변경", onStatus)
                                 }
                             }
                         }
                     }
                     Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surface) {
-                        Column(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 6.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Column(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 5.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(
                                 Modifier.fillMaxWidth().clickable(onClick = onMenu)
-                                    .defaultMinSize(minHeight = 46.dp),
+                                    .defaultMinSize(minHeight = 43.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(9.dp)
                             ) {
@@ -257,16 +291,27 @@ fun OwnerManagementHomeScreen(
                                         viewModel.confirmMenuInformation(bar.barId, System.currentTimeMillis())
                                         error = null
                                     } catch (e: Exception) { error = e.message }
-                                }, modifier = Modifier.height(34.dp), contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)) {
-                                    Text("지금도 맞아요", style = MaterialTheme.typography.labelSmall)
+                                }, modifier = Modifier.height(30.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                    contentPadding = PaddingValues(horizontal = 9.dp, vertical = 0.dp)) {
+                                    Text("지금도 맞아요", style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary)
                                 }
                             }
-                            LinearProgressIndicator(
-                                progress = { freshness / 100f },
-                                modifier = Modifier.fillMaxWidth().height(5.dp),
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
+                            // Material3's stop indicator can show a dot at the right even for 0%.
+                            // Draw from x=0 to guarantee a strictly left-to-right fill.
+                            val gaugeFraction = (freshness / 100f).coerceIn(0f, 1f)
+                            val gaugeTrack = MaterialTheme.colorScheme.surfaceVariant
+                            val gaugeFill = MaterialTheme.colorScheme.primary
+                            Canvas(Modifier.fillMaxWidth().height(5.dp)) {
+                                drawRoundRect(gaugeTrack, cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.height / 2f))
+                                if (gaugeFraction > 0f) {
+                                    drawRoundRect(gaugeFill,
+                                        size = androidx.compose.ui.geometry.Size(size.width * gaugeFraction, size.height),
+                                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.height / 2f))
+                                }
+                            }
+                            Spacer(Modifier.height(5.dp))
                             Text("마지막 메뉴 게시 ${ownerDisplayDate(bar.lastMenuPublishedAtEpochMs)} · " +
                                     "판매 정보 확인 ${ownerDisplayDate(bar.lastVerifiedAtEpochMs)}",
                                 style = MaterialTheme.typography.labelSmall,
