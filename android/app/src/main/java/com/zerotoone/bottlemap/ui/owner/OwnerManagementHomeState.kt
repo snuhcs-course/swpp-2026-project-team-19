@@ -54,8 +54,8 @@ internal fun homeOperatingState(bar: MockBar, atEpochMs: Long): String {
         else regular?.takeUnless { it.closed }?.openMinutes
     val close = if (exception?.kind == MockExceptionKind.CUSTOM_HOURS) exception.closeMinutes
         else regular?.takeUnless { it.closed }?.closeMinutes
-    val endsNextDay = exception?.kind != MockExceptionKind.CUSTOM_HOURS &&
-        regular?.closesNextDay == true
+    val endsNextDay = if (exception?.kind == MockExceptionKind.CUSTOM_HOURS)
+        exception.closesNextDay else regular?.closesNextDay == true
     if (open == null || close == null) {
         return if (overnight) "영업 중" else if (bar.weeklyHours.isEmpty()) "영업시간 정보 없음" else "영업 종료"
     }
