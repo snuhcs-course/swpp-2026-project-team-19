@@ -92,11 +92,26 @@ class OwnerManagementHomeStateTest {
             updateQuickVacationDates(21000L, 21005L, 21006L, "start"))
     }
 
+    @Test fun applyDateIsCalculatedAtTapTimeAcrossSeoulMidnight() {
+        val before = day.atTime(23, 59).atZone(ownerSeoulZone).toInstant().toEpochMilli()
+        val after = day.plusDays(1).atTime(0, 1)
+            .atZone(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals(day.toEpochDay(), ownerQuickApplyDay(before))
+        assertEquals(day.plusDays(1).toEpochDay(), ownerQuickApplyDay(after))
+        assertTrue(validQuickVacationAtApply(day.toEpochDay(), day.plusDays(2).toEpochDay(),
+            ownerQuickApplyDay(before)))
+        assertFalse(validQuickVacationAtApply(day.toEpochDay(), day.plusDays(2).toEpochDay(),
+            ownerQuickApplyDay(after)))
+    }
+
     @Test fun activeMenuJobTakesPrecedenceOverPriorPublishedJob() {
         val applied = MockMenuImport("applied", "bar", MockImportStatus.APPLIED, 1, emptyList())
         val processing = MockMenuImport("new", "bar", MockImportStatus.PROCESSING, 1, emptyList())
         assertEquals(processing, latestOwnerImport(listOf(applied, processing), "bar"))
         assertEquals(applied, latestOwnerImport(listOf(applied), "bar"))
+        val failed = MockMenuImport("old-failed", "bar", MockImportStatus.FAILED, 1, emptyList())
+        assertEquals(applied, latestOwnerImport(listOf(failed, applied), "bar"))
+        assertEquals(processing, latestOwnerImport(listOf(failed, applied, processing), "bar"))
         assertEquals("AI 분석 중", ownerJobTitle(MockImportStatus.PROCESSING))
         assertEquals("메뉴판 확인 준비 완료", ownerJobTitle(MockImportStatus.READY_FOR_REVIEW))
         assertEquals("메뉴판 분석 실패", ownerJobTitle(MockImportStatus.FAILED))
