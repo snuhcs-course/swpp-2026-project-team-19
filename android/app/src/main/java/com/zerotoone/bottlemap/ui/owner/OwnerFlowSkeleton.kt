@@ -187,7 +187,8 @@ fun OwnerSkeletonScreen(
                     OwnerMenuRow(destination.title, "아직 기능 미구현", onClick = { onNavigate(destination) })
                 }
             }
-            page.next()?.let { next ->
+            // ACTION_FIRST v4: Customer preview is a manager-home header action only.
+            page.next()?.takeUnless { it == OwnerPage.MGR_PREVIEW }?.let { next ->
                 OwnerActionButton("다음 화면: ${next.title}", onClick = { onNavigate(next) }, modifier = Modifier.fillMaxWidth())
             }
             OwnerActionButton("Owner 화면 목록으로", onClick = onHome, secondary = true, modifier = Modifier.fillMaxWidth())
