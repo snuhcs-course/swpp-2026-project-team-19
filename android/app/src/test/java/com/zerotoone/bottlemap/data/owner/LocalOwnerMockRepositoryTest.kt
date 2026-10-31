@@ -70,6 +70,50 @@ class LocalOwnerMockRepositoryTest {
             hours.copy(exceptionId = "invalid", openMinutes = 1500)) }
     }
 
+    @Test fun cancellingCurrentQuickStatusNeverRestoresPreviouslySelectedQuickStatus() {
+        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r = repo(store)
+        val today = 20758L
+        val earlierVacation = MockOperatingException(
+            "quick-old-vacation", MockExceptionKind.VACATION, today + 2, today + 5
+        )
+        val currentClosed = MockOperatingException(
+            "quick-current-closed", MockExceptionKind.CLOSED_TODAY, today, today
+        )
+
+        // Different date ranges used to leave the earlier vacation behind.
+        r.applyOperatingException("fixture-bar", earlierVacation)
+        r.applyOperatingException("fixture-bar", currentClosed)
+        assertEquals(listOf(currentClosed), ready(repo(store)).bars.single().exceptions)
+
+        r.cancelOperatingException("fixture-bar", currentClosed.exceptionId)
+        assertTrue(ready(repo(store)).bars.single().exceptions.isEmpty())
+
+        // Migration-safe: previously persisted overlapping/non-overlapping quick
+        // entries from old APKs must not resurface when the current one is canceled.
+        val stale = ready(r).bars.single().copy(
+            exceptions = listOf(earlierVacation, currentClosed)
+        )
+        r.saveBar(stale)
+        r.cancelOperatingException("fixture-bar", currentClosed.exceptionId)
+        assertTrue(ready(repo(store)).bars.single().exceptions.isEmpty())
+    }
+
+    @Test fun cancellingQuickStatusPreservesUnrelatedNonQuickFutureSchedule() {
+        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r = repo(store)
+        val thirdPartyFuture = MockOperatingException(
+            "external-schedule", MockExceptionKind.VACATION, 20790L, 20795L
+        )
+        r.saveBar(ready(r).bars.single().copy(exceptions = listOf(thirdPartyFuture)))
+        val quick = MockOperatingException(
+            "quick-today", MockExceptionKind.CLOSED_TODAY, 20758L, 20758L
+        )
+        r.applyOperatingException("fixture-bar", quick)
+        r.cancelOperatingException("fixture-bar", quick.exceptionId)
+        assertEquals(listOf(thirdPartyFuture), ready(repo(store)).bars.single().exceptions)
+    }
+
     @Test fun managerQuickVacationPersistsDateRangeAcrossReload() {
         val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
         val r = repo(store)
