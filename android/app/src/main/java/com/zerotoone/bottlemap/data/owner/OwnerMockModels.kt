@@ -138,6 +138,7 @@ data class MockOperatingException(
     val note: String? = null,
     val openMinutes: Int? = null,
     val closeMinutes: Int? = null,
+    val closesNextDay: Boolean = false, // local-only overnight temporary hours
 )
 
 enum class MockImportStatus { PROCESSING, READY_FOR_REVIEW, FAILED, APPLIED }
