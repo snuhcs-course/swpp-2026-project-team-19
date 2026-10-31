@@ -185,7 +185,7 @@ fun OwnerSkeletonScreen(
                     else -> null
                 }
                 val barId = snap?.selectedBarId ?: snap?.bars?.firstOrNull()?.barId
-                val job = barId?.let { latestOwnerImport(snap.imports, it) }
+                val job = if (snap != null && barId != null) latestOwnerImport(snap.imports, barId) else null
                 if (job != null) {
                     OwnerStatusLabel(ownerJobTitle(job.status),
                         if (job.status == MockImportStatus.FAILED) OwnerStatusTone.ERROR
