@@ -399,7 +399,7 @@ fun OwnerOperatingQuickScreen(
                                         note = note.trim().ifBlank { null },
                                         openMinutes = if (choice == "hours") startHour * 60 + startMinute else null,
                                         closeMinutes = if (choice == "hours") endHour * 60 + endMinute else null,
-                                        closesNextDay = false
+                                        closesNextDay = if (choice == "hours") nextDay else false
                                     )
                                 )
                                 error = null
