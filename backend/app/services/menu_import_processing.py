@@ -74,7 +74,15 @@ def start_processing(
     extractor: MenuExtractor,
     llm_layer: LLMLayerConfig | None = None,
 ) -> None:
-    """Called after the import rows are committed, so the job never sees uncommitted rows."""
+    """Called after the import rows are committed, so the job never sees uncommitted rows.
+
+    The import can be canceled once it is committed, so the row is locked and processing starts
+    only while it is still `uploaded`.
+    """
+    session.refresh(menu_import, with_for_update=True)
+    if menu_import.status != ImportStatus.UPLOADED:
+        session.commit()
+        return
     menu_import.status = ImportStatus.PROCESSING
     session.commit()
     background_tasks.add_task(

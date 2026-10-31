@@ -6,6 +6,7 @@ from datetime import timezone
 from uuid import uuid4
 
 import pytest
+from fastapi import BackgroundTasks
 from sqlalchemy import func, select
 
 from app.adapters.extraction import ExtractionError, MockMenuExtractor
@@ -22,7 +23,7 @@ from app.models import (
 )
 from app.services import menu_import_processing
 from app.services.menu_import_cancel import cancel_menu_import
-from app.services.menu_import_processing import process_menu_import
+from app.services.menu_import_processing import process_menu_import, start_processing
 from app.services.menu_import_upload import ImageUpload, create_menu_import
 from tests.factories import make_bar
 
@@ -303,3 +304,19 @@ def test_an_import_canceled_before_processing_is_not_processed(db_session, facto
     process_menu_import(factory, image_storage, MockMenuExtractor(), menu_import.id)
 
     assert run_statuses(db_session, menu_import) == [PipelineStatus.QUEUED] * 2
+
+
+def test_a_cancel_before_processing_starts_is_kept(db_session, factory, image_storage):
+    # Canceled after the upload committed the import but before the request started processing it.
+    menu_import = new_import(db_session, image_storage)
+    cancel_menu_import(db_session, str(menu_import.id))
+    db_session.expire_all()
+    tasks = BackgroundTasks()
+
+    start_processing(
+        db_session, tasks, menu_import, session_factory=factory, storage=image_storage, extractor=MockMenuExtractor()
+    )
+
+    assert tasks.tasks == []
+    db_session.expire_all()
+    assert db_session.get(MenuImport, menu_import.id).status == ImportStatus.CANCELED
