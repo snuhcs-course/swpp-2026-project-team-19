@@ -8,6 +8,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -22,7 +33,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -62,20 +72,20 @@ private fun OwnerQuickCard(
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(
-            Modifier.fillMaxSize().padding(horizontal = 11.dp, vertical = 13.dp),
+            Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OwnerManagerIcon(icon)
-                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
-            Row(verticalAlignment = Alignment.Bottom) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    footer, style = MaterialTheme.typography.labelSmall,
+                    footer, style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f)
                 )
-                Text("›", style = MaterialTheme.typography.titleLarge,
+                Text("›", style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
@@ -138,8 +148,7 @@ fun OwnerManagementHomeScreen(
                         }
                     }
                     BoxWithConstraints(Modifier.fillMaxWidth()) {
-                        val scale = LocalDensity.current.fontScale
-                        val equalHeight = maxOf(180.dp, (maxWidth - 9.dp) / 2f, (170f * scale).dp)
+                        val equalHeight = 158.dp
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(9.dp)
@@ -154,17 +163,16 @@ fun OwnerManagementHomeScreen(
                                 color = MaterialTheme.colorScheme.surface
                             ) {
                                 Column(
-                                    Modifier.fillMaxSize().padding(horizontal = 11.dp, vertical = 13.dp),
+                                    Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 12.dp),
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                                        Row(verticalAlignment = Alignment.Top) {
+                                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                             OwnerManagerIcon(BmIconId.UPDATED)
-                                            Spacer(Modifier.width(5.dp))
                                             Text(
-                                                homeExceptionHeading(exception),
+                                                if (exception?.kind == MockExceptionKind.VACATION) "임시 휴업" else homeExceptionHeading(exception),
                                                 modifier = Modifier.weight(1f),
-                                                style = MaterialTheme.typography.labelMedium,
+                                                style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = FontWeight.Bold,
                                                 softWrap = true
                                             )
@@ -177,15 +185,13 @@ fun OwnerManagementHomeScreen(
                                                         } catch (e: Exception) { error = e.message }
                                                     },
                                                     contentPadding = PaddingValues(0.dp),
-                                                    modifier = Modifier.size(30.dp)
-                                                ) { Text("×", color = MaterialTheme.colorScheme.error) }
+                                                    modifier = Modifier.size(36.dp)
+                                                ) { Text("×", fontSize = 29.sp, color = MaterialTheme.colorScheme.error) }
                                             }
                                         }
-                                        Text(
-                                            homeOperatingState(bar, now),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+                                        if (exception?.kind == MockExceptionKind.VACATION) {
+                                            Text("${ownerDate(exception.fromEpochDay)} ~ ${ownerDate(exception.toEpochDay)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Normal, maxLines = 1)
+                                        }
                                         if (exception?.kind == MockExceptionKind.CUSTOM_HOURS) {
                                             Text(
                                                 "%02d:%02d ~ %s%02d:%02d".format(
@@ -207,9 +213,9 @@ fun OwnerManagementHomeScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text("영업 상태 변경", modifier = Modifier.weight(1f),
-                                            style = MaterialTheme.typography.labelSmall,
+                                            style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        Text("›", style = MaterialTheme.typography.titleLarge,
+                                        Text("›", style = MaterialTheme.typography.headlineMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 }
@@ -217,11 +223,11 @@ fun OwnerManagementHomeScreen(
                         }
                     }
                     Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surface) {
-                        Column(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                        Column(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 6.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Row(
                                 Modifier.fillMaxWidth().clickable(onClick = onMenu)
-                                    .defaultMinSize(minHeight = 54.dp),
+                                    .defaultMinSize(minHeight = 46.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(9.dp)
                             ) {
@@ -240,16 +246,18 @@ fun OwnerManagementHomeScreen(
                                 Text("›", style = MaterialTheme.typography.titleLarge)
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("메뉴 확인 ${ageDays?.let { "${it}일 경과" } ?: "미확인"}",
-                                    modifier = Modifier.weight(1f),
-                                    style = MaterialTheme.typography.labelSmall,
+                                Text(buildAnnotatedString {
+                                    append("메뉴 확인 ")
+                                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) { append(ageDays?.toString() ?: "-") }
+                                    append(if (ageDays == null) " 미확인" else "일 경과")
+                                }, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 OutlinedButton(onClick = {
                                     try {
                                         viewModel.confirmMenuInformation(bar.barId, System.currentTimeMillis())
                                         error = null
                                     } catch (e: Exception) { error = e.message }
-                                }, contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)) {
+                                }, modifier = Modifier.height(34.dp), contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)) {
                                     Text("지금도 맞아요", style = MaterialTheme.typography.labelSmall)
                                 }
                             }
@@ -339,7 +347,7 @@ fun OwnerOperatingQuickScreen(
                     Triple("range", "기간 임시 휴업", BmIconId.UPDATED)
                 ).forEach { (key, label, icon) ->
                     Surface(
-                        modifier = Modifier.fillMaxWidth().clickable { choice = key; error = null },
+                        modifier = Modifier.fillMaxWidth().clickable { choice = key; error = null; if (key == "range") dateTarget = "start" else dateTarget = "" },
                         shape = RoundedCornerShape(10.dp),
                         color = if (choice == key) MaterialTheme.colorScheme.surfaceVariant
                             else MaterialTheme.colorScheme.surface
@@ -379,11 +387,53 @@ fun OwnerOperatingQuickScreen(
                         }
                     }
                     if (choice == "range") {
-                        OutlinedButton(onClick = { dateTarget = "start" }, modifier = Modifier.fillMaxWidth()) {
-                            Text("시작 ${if (startDay == Long.MIN_VALUE) "선택" else ownerDate(startDay)}")
+                        if (dateTarget.isNotEmpty()) {
+                            key(dateTarget) {
+                                val calendar = rememberDatePickerState()
+                                DatePicker(state = calendar, modifier = Modifier.fillMaxWidth())
+                                LaunchedEffect(calendar.selectedDateMillis) {
+                                    calendar.selectedDateMillis?.let { millis ->
+                                        val day = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate().toEpochDay()
+                                        if (day < today) {
+                                            error = "과거 날짜는 선택할 수 없어요."
+                                        } else if (dateTarget == "start") {
+                                            startDay = day
+                                            if (endDay < day) endDay = Long.MIN_VALUE
+                                            dateTarget = "end"
+                                            error = null
+                                        } else if (day < startDay) {
+                                            error = "종료일은 시작일 이후여야 해요."
+                                        } else {
+                                            endDay = day
+                                            dateTarget = ""
+                                            error = null
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        OutlinedButton(onClick = { dateTarget = "end" }, modifier = Modifier.fillMaxWidth()) {
-                            Text("종료 ${if (endDay == Long.MIN_VALUE) "선택" else ownerDate(endDay)}")
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            tonalElevation = 1.dp
+                        ) {
+                            Row(
+                                Modifier.fillMaxWidth().padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = { dateTarget = "start" },
+                                    modifier = Modifier.weight(1f),
+                                    contentPadding = PaddingValues(horizontal = 4.dp)
+                                ) { Text(if (startDay == Long.MIN_VALUE) "시작 일자" else ownerDate(startDay), maxLines = 1) }
+                                Text("~", style = MaterialTheme.typography.titleMedium)
+                                OutlinedButton(
+                                    onClick = { dateTarget = if (startDay == Long.MIN_VALUE) "start" else "end" },
+                                    modifier = Modifier.weight(1f),
+                                    contentPadding = PaddingValues(horizontal = 4.dp)
+                                ) { Text(if (endDay == Long.MIN_VALUE) "종료 일자" else ownerDate(endDay), maxLines = 1) }
+                            }
                         }
                     }
                     OwnerTextInput(
@@ -430,16 +480,6 @@ fun OwnerOperatingQuickScreen(
             }
         }
     }
-    OwnerCalendarDialog(
-        visible = dateTarget.isNotEmpty(),
-        onDismiss = { dateTarget = "" },
-        onSelectDateUtcMillis = { value ->
-            val day = Instant.ofEpochMilli(value).atZone(ZoneOffset.UTC).toLocalDate().toEpochDay()
-            if (day < today) error = "과거 날짜는 선택할 수 없어요."
-            else if (dateTarget == "start") { startDay = day; if (endDay < day) endDay = day }
-            else endDay = day
-        }
-    )
 }
 
 @Composable
