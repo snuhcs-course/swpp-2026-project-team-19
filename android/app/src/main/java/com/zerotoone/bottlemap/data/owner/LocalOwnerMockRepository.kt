@@ -252,6 +252,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(confirmedAtEpochMs >= 0L)
         change { s ->
             require(s.bars.any { it.barId == barId })
+            require(s.menuItems.any { it.barId == barId }) {
+                "게시된 메뉴가 있어야 판매 정보를 확인할 수 있어요."
+            }
             s.copy(bars = s.bars.map { bar ->
                 if (bar.barId == barId) bar.copy(lastVerifiedAtEpochMs = confirmedAtEpochMs)
                 else bar
@@ -268,13 +271,13 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 if (bar.barId != barId) bar else bar.copy(
                     // The management-home quick action is one current selection, not
                     // a stack of hidden states to restore after the user presses X.
-                    // Keep unrelated non-quick fixture/scheduled exceptions.
+                    // Retain non-quick schedules even when dates overlap:
+                    // the newer quick override wins by list order and cancelling it
+                    // restores the untouched underlying schedule.
                     exceptions = bar.exceptions.filterNot {
                         it.exceptionId == exception.exceptionId ||
                             (exception.exceptionId.startsWith("quick-") &&
-                                it.exceptionId.startsWith("quick-")) ||
-                            (it.fromEpochDay <= exception.toEpochDay &&
-                                exception.fromEpochDay <= it.toEpochDay)
+                                it.exceptionId.startsWith("quick-"))
                     } + exception
                 )
             }) to Unit
