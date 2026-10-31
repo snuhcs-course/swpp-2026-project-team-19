@@ -482,8 +482,7 @@ fun OwnerOnboardingScreen(
                             "손님에게 보이는 이름이에요. 간판 이름으로 적어 주세요.")
                         OwnerV4Input("매장 이름",draft.proposedBarName,{
                             val edited=updatedBarNameDraft(draft,it)
-                            if(editingReview && draft.kind==MockApplicationKind.EXISTING_BAR &&
-                                edited.kind==MockApplicationKind.NEW_BAR) {
+                            if(needsNewBarDetailsAfterClaimEdit(editingReview,draft.kind,edited.kind)) {
                                 // Changing from a claim to a new bar requires its photo/address/phone steps.
                                 editingReview=false
                                 history=registrationHistoryFor(RegPage.BARNAME.name,edited.kind)
@@ -499,6 +498,12 @@ fun OwnerOnboardingScreen(
                                     go(RegPage.MENUS) // Existing bar already has cover, address and public phone.
                                 }){Text("우리 매장예요")}
                                 TextButton(onClick={
+                                    if(needsNewBarDetailsAfterClaimEdit(
+                                            editingReview,draft.kind,MockApplicationKind.NEW_BAR)) {
+                                        editingReview=false
+                                        history=registrationHistoryFor(
+                                            RegPage.BARNAME.name,MockApplicationKind.NEW_BAR)
+                                    }
                                     save(draft.copy(kind=MockApplicationKind.NEW_BAR,existingBarId=null))
                                     go(RegPage.BARPHOTO)
                                 }){Text("아니에요")}
@@ -506,7 +511,7 @@ fun OwnerOnboardingScreen(
                         }
                         if(com.zerotoone.bottlemap.BuildConfig.DEBUG&&candidates.isEmpty())
                             TextButton(onClick={
-                                viewModel.seedExistingCandidateForFixture(MockBar("fixture-v4-bar",
+                                viewModel.seedExistingCandidateForFixture(MockBar(newDebugCandidateId(),
                                     draft.proposedBarName.ifBlank{"몰트 앤 무드"},
                                     "서울특별시 관악구 봉천로 12길 8"))
                             }){Text("테스트: 같은 이름의 기존 매장 준비 (Mock)")}
