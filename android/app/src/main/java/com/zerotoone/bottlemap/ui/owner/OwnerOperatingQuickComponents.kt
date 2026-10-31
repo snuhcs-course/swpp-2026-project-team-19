@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -144,6 +145,8 @@ internal fun OwnerVacationCalendar(
     today: Long,
     startDay: Long,
     endDay: Long,
+    selectedTarget: String,
+    onSelectTarget: (String) -> Unit,
     onPick: (Long) -> Unit
 ) {
     var visibleMonth by rememberSaveable {
@@ -219,6 +222,35 @@ internal fun OwnerVacationCalendar(
                                 }
                             }
                         }
+                    }
+                }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Row(Modifier.fillMaxWidth().padding(top = 5.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    Triple("start", "시작", startDay),
+                    Triple("end", "종료", endDay)
+                ).forEach { (target, label, date) ->
+                    Surface(
+                        modifier = Modifier.weight(1f).clickable { onSelectTarget(target) },
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (selectedTarget == target)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        else MaterialTheme.colorScheme.surface,
+                        border = if (selectedTarget == target)
+                            BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                        else null
+                    ) {
+                        Text(
+                            label + " " + (if (date == Long.MIN_VALUE) "선택"
+                                else LocalDate.ofEpochDay(date)
+                                    .format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))),
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 12.dp),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
                     }
                 }
             }
