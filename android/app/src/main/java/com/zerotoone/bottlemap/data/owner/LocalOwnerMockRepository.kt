@@ -31,6 +31,9 @@ interface OwnerMockRepository {
     fun closeApplicationForFixture(applicationId: String, status: MockApplicationStatus)
     fun dismissRejectedForFixture(applicationId: String)
     fun saveBar(bar: MockBar)
+    fun confirmMenuInformation(barId: String, confirmedAtEpochMs: Long)
+    fun applyOperatingException(barId: String, exception: MockOperatingException)
+    fun cancelOperatingException(barId: String, exceptionId: String)
     fun selectBar(barId: String)
     fun saveBrand(brand: MockBrand)
     fun saveCatalogProduct(product: MockCatalogProduct)
@@ -241,6 +244,50 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
     }
 
+    /** Quick actions are saved atomically into the same persisted owner snapshot. */
+    override fun confirmMenuInformation(barId: String, confirmedAtEpochMs: Long) {
+        require(confirmedAtEpochMs >= 0L)
+        change { s ->
+            require(s.bars.any { it.barId == barId })
+            s.copy(bars = s.bars.map { bar ->
+                if (bar.barId == barId) bar.copy(lastVerifiedAtEpochMs = confirmedAtEpochMs)
+                else bar
+            }) to Unit
+        }
+    }
+
+    override fun applyOperatingException(barId: String, exception: MockOperatingException) {
+        require(validMockOperatingException(exception))
+        require(exception.exceptionId.isNotBlank())
+        change { s ->
+            require(s.bars.any { it.barId == barId })
+            s.copy(bars = s.bars.map { bar ->
+                if (bar.barId != barId) bar else bar.copy(
+                    // One active quick override per bar; preserve unrelated future exceptions.
+                    exceptions = bar.exceptions.filterNot {
+                        it.exceptionId == exception.exceptionId ||
+                            (it.fromEpochDay <= exception.toEpochDay &&
+                                exception.fromEpochDay <= it.toEpochDay)
+                    } + exception
+                )
+            }) to Unit
+        }
+    }
+
+    override fun cancelOperatingException(barId: String, exceptionId: String) {
+        change { s ->
+            require(s.bars.any { it.barId == barId })
+            require(s.bars.first { it.barId == barId }.exceptions.any {
+                it.exceptionId == exceptionId
+            })
+            s.copy(bars = s.bars.map { bar ->
+                if (bar.barId == barId) bar.copy(exceptions = bar.exceptions.filterNot {
+                    it.exceptionId == exceptionId
+                }) else bar
+            }) to Unit
+        }
+    }
+
     override fun selectBar(barId: String) {
         change { s ->
             require(s.bars.any { it.barId == barId })
@@ -418,6 +465,11 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         s.copy(
             menuItems = s.menuItems + added,
             imports = s.imports.map { if (it.menuImportId == importId) applied else it },
+            bars = s.bars.map { bar ->
+                if (bar.barId == job.barId) bar.copy(
+                    lastMenuPublishedAtEpochMs = System.currentTimeMillis()
+                ) else bar
+            },
             nextLocalId = index,
         ) to added.size
     }
