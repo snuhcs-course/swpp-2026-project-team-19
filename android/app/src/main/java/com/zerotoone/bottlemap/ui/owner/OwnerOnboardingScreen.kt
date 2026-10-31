@@ -115,11 +115,19 @@ fun OwnerOnboardingScreen(
         screen=target
         error=null
     }
+    fun showDashboard() {
+        // Keep the registration draft/checkpoint intact while managing an owned bar.
+        screen=RegPage.HOME
+        history=emptyList()
+        editingReview=false
+        error=null
+    }
     fun back() {
         val stack=if(history.isEmpty() && registrationCheckpointable(screen.name))
             registrationHistoryFor(screen.name,draft.kind) else history
-        if(stack.isEmpty())onBack()
-        else {
+        if(stack.isEmpty()) {
+            if(bars.isNotEmpty())showDashboard() else onBack()
+        } else {
             screen=RegPage.valueOf(stack.last())
             history=stack.dropLast(1)
             checkpoint(screen)
@@ -319,6 +327,10 @@ fun OwnerOnboardingScreen(
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())
             .padding(horizontal=20.dp,vertical=12.dp),
             verticalArrangement=Arrangement.spacedBy(16.dp)) {
+            if(bars.isNotEmpty() && screen!=RegPage.HOME && screen!=RegPage.DONE &&
+                screen!=RegPage.VIEW_APPLICATION) {
+                TextButton(onClick=::showDashboard) { Text("내 매장 목록으로 돌아가기") }
+            }
             when(val s=state){
                 MockOwnerLoadState.Loading -> OwnerLoading("Mock 저장소 불러오는 중")
                 is MockOwnerLoadState.Error -> {
@@ -330,7 +342,15 @@ fun OwnerOnboardingScreen(
                         OwnerRegistrationDashboard(
                             snapshot=requireNotNull(snapshot), debug=com.zerotoone.bottlemap.BuildConfig.DEBUG,
                             onRegister={
-                                save(MockRegistrationDraft());go(RegPage.INTRO)
+                                val saved=snapshot.registrationDraft
+                                if(saved!=null) {
+                                    val target=RegPage.valueOf(registrationResumePage(saved))
+                                    history=registrationHistoryFor(target,saved.kind)
+                                    screen=target
+                                    error=null
+                                } else {
+                                    save(MockRegistrationDraft());go(RegPage.INTRO)
+                                }
                             },
                             onManage={ bar ->
                                 viewModel.selectBar(bar.barId)
@@ -461,7 +481,7 @@ fun OwnerOnboardingScreen(
                         OwnerV4Question("매장 이름을\n알려주세요",
                             "손님에게 보이는 이름이에요. 간판 이름으로 적어 주세요.")
                         OwnerV4Input("매장 이름",draft.proposedBarName,{
-                            save(draft.copy(proposedBarName=it.take(150)))
+                            save(updatedBarNameDraft(draft,it))
                         },placeholder="예: 몰트 앤 무드")
                         exactMatches.forEach{ candidate ->
                             OwnerV4Panel("BottleMap에 이미 등록된 매장\n"+candidate.name+"\n"+candidate.address)
