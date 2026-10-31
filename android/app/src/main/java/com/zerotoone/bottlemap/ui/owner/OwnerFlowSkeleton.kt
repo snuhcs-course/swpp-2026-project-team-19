@@ -22,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
+import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.data.owner.hasPublishedInitialReview
 import com.zerotoone.bottlemap.navigation.OwnerFlowGroup
 import com.zerotoone.bottlemap.navigation.OwnerPage
@@ -177,6 +178,24 @@ fun OwnerSkeletonScreen(
                     Text("사진 참조·순서는 보존되었습니다. 실제 AI 인식·검수·게시는 아직 미구현입니다.")
                 }
             }
+            if (page == OwnerPage.MGR_JOB || page == OwnerPage.MGR_REVIEW) {
+                val snap = when (mockState) {
+                    is MockOwnerLoadState.Ready -> mockState.snapshot
+                    is MockOwnerLoadState.Empty -> mockState.snapshot
+                    else -> null
+                }
+                val barId = snap?.selectedBarId ?: snap?.bars?.firstOrNull()?.barId
+                val job = if (snap != null && barId != null) latestOwnerImport(snap.imports, barId) else null
+                if (job != null) {
+                    OwnerStatusLabel(ownerJobTitle(job.status),
+                        if (job.status == MockImportStatus.FAILED) OwnerStatusTone.ERROR
+                        else OwnerStatusTone.ATTENTION)
+                    Text("연결된 메뉴판 사진 ${job.images.size}장 · Mock 작업 ID ${job.menuImportId}")
+                    Text("현재 작업의 상태를 이어서 표시합니다. 실제 AI 검수 및 재시도 처리는 다음 단계에서 구현합니다.")
+                } else {
+                    Text("진행 중인 메뉴판 작업이 없어요.")
+                }
+            }
             if (page == OwnerPage.MGR_INFO) {
                 listOf(OwnerPage.MGR_PHOTOS, OwnerPage.MGR_HOURS, OwnerPage.MGR_TAGS).forEach { destination ->
                     OwnerMenuRow(destination.title, "아직 기능 미구현", onClick = { onNavigate(destination) })
@@ -187,7 +206,8 @@ fun OwnerSkeletonScreen(
                     OwnerMenuRow(destination.title, "아직 기능 미구현", onClick = { onNavigate(destination) })
                 }
             }
-            page.next()?.let { next ->
+            // ACTION_FIRST v4: Customer preview is a manager-home header action only.
+            page.next()?.takeUnless { it == OwnerPage.MGR_PREVIEW }?.let { next ->
                 OwnerActionButton("다음 화면: ${next.title}", onClick = { onNavigate(next) }, modifier = Modifier.fillMaxWidth())
             }
             OwnerActionButton("Owner 화면 목록으로", onClick = onHome, secondary = true, modifier = Modifier.fillMaxWidth())

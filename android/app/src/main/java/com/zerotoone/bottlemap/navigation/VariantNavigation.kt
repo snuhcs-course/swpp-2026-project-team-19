@@ -20,6 +20,10 @@ import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerComponentGallery
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerOperatingQuickScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerMenuQuickEntryScreen
+import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 
 /** One Android artifact: everyone starts in Customer, with Owner accessible from My Page. */
@@ -74,29 +78,57 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                     OwnerMockRuntime.repository(LocalContext.current)))
                 val mockState = data.state.collectAsStateWithLifecycle().value
-                OwnerSkeletonScreen(
-                    page = page,
-                    mockState = mockState,
-                    onRetry = data::retry,
-                    onBack = { navController.popBackStack() },
-                    onNavigate = { next -> navController.navigate(next.route) },
-                    onHome = {
-                        if (!navController.popBackStack(OwnerRoutes.ENTRY, inclusive = false)) {
-                            navController.popBackStack(OwnerRoutes.GRAPH, inclusive = true)
-                        }
-                    },
-                    onAddBar = if (page == OwnerPage.MGR_HOME) {
-                        { navController.navigate(OwnerRoutes.ADD_BAR) }
-                    } else null,
-                    onFirstReview = if (page == OwnerPage.MGR_HOME) {
-                        { navController.navigate(OwnerPage.PHOTO_START.route) }
-                    } else null,
-                    onLegacyDebugUpload = if (page == OwnerPage.MGR_HOME) {
-                        OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
-                            { navController.navigate(route) }
-                        }
-                    } else null,
-                )
+                when (page) {
+                    OwnerPage.MGR_HOME -> OwnerManagementHomeScreen(
+                        state = mockState,
+                        viewModel = data,
+                        onRetry = data::retry,
+                        onBack = { navController.popBackStack() },
+                        onPreview = { navController.navigate(OwnerPage.MGR_PREVIEW.route) },
+                        onInfo = { navController.navigate(OwnerPage.MGR_INFO.route) },
+                        onStatus = { navController.navigate(OwnerPage.MGR_STATUS.route) },
+                        onMenu = { navController.navigate(OwnerPage.MGR_MENU.route) },
+                        onJob = { status ->
+                            navController.navigate(
+                                if (status == MockImportStatus.READY_FOR_REVIEW)
+                                    OwnerPage.MGR_REVIEW.route
+                                else if (status == MockImportStatus.APPLIED)
+                                    OwnerPage.MGR_MENU.route
+                                else OwnerPage.MGR_JOB.route
+                            )
+                        },
+                    )
+                    OwnerPage.MGR_STATUS -> OwnerOperatingQuickScreen(
+                        state = mockState,
+                        viewModel = data,
+                        onBack = { navController.popBackStack() },
+                    )
+                    OwnerPage.MGR_MENU -> OwnerMenuQuickEntryScreen(
+                        state = mockState,
+                        onRetry = data::retry,
+                        onBack = { navController.popBackStack() },
+                        onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
+                        onExistingJob = { status ->
+                            navController.navigate(
+                                if (status == MockImportStatus.READY_FOR_REVIEW)
+                                    OwnerPage.MGR_REVIEW.route else OwnerPage.MGR_JOB.route
+                            )
+                        },
+                    )
+                    else -> OwnerSkeletonScreen(
+                        page = page,
+                        mockState = mockState,
+                        onRetry = data::retry,
+                        onBack = { navController.popBackStack() },
+                        onNavigate = { next -> navController.navigate(next.route) },
+                        onHome = {
+                            if (!navController.popBackStack(OwnerRoutes.ENTRY, inclusive = false)) {
+                                navController.popBackStack(OwnerRoutes.GRAPH, inclusive = true)
+                            }
+                        },
+                        onLegacyDebugUpload = null,
+                    )
+                }
             }
         }
 

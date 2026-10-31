@@ -37,6 +37,63 @@ class LocalOwnerMockRepositoryTest {
         assertTrue("Expected invalid mock operation to fail", failed)
     }
 
+    @Test fun managerMenuConfirmationPersistsWithoutChangingPublicationTimestamp() {
+        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r = repo(store)
+        assertEquals(null, ready(r).bars.single().lastVerifiedAtEpochMs)
+        assertEquals(null, ready(r).bars.single().lastMenuPublishedAtEpochMs)
+        r.confirmMenuInformation("fixture-bar", 1_800_000_000_000L)
+        val again = ready(repo(store)).bars.single()
+        assertEquals(1_800_000_000_000L, again.lastVerifiedAtEpochMs)
+        assertEquals(null, again.lastMenuPublishedAtEpochMs)
+        r.confirmMenuInformation("fixture-bar", 1_800_086_400_000L)
+        assertEquals(1_800_086_400_000L, ready(repo(store)).bars.single().lastVerifiedAtEpochMs)
+        rejects { r.confirmMenuInformation("missing-bar", 12L) }
+    }
+
+    @Test fun managerQuickOperatingExceptionsPersistAndCanBeCancelled() {
+        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r = repo(store)
+        val off = MockOperatingException("off", MockExceptionKind.CLOSED_TODAY, 20757L, 20757L)
+        r.applyOperatingException("fixture-bar", off)
+        assertEquals(listOf(off), ready(repo(store)).bars.single().exceptions)
+        val hours = MockOperatingException(
+            "hours", MockExceptionKind.CUSTOM_HOURS, 20757L, 20757L,
+            openMinutes = 18 * 60, closeMinutes = 2 * 60, closesNextDay = true
+        )
+        r.applyOperatingException("fixture-bar", hours)
+        assertEquals(listOf(hours), ready(repo(store)).bars.single().exceptions)
+        r.cancelOperatingException("fixture-bar", "hours")
+        assertTrue(ready(repo(store)).bars.single().exceptions.isEmpty())
+        rejects { r.cancelOperatingException("fixture-bar", "missing") }
+        rejects { r.applyOperatingException("fixture-bar",
+            hours.copy(exceptionId = "invalid", openMinutes = 1500)) }
+    }
+
+    @Test fun managerQuickVacationPersistsDateRangeAcrossReload() {
+        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r = repo(store)
+        val vacation = MockOperatingException(
+            "vacation", MockExceptionKind.VACATION, 20757L, 20762L, note = "일정"
+        )
+        r.applyOperatingException("fixture-bar", vacation)
+        assertEquals(vacation, ready(repo(store)).bars.single().exceptions.single())
+    }
+
+    @Test fun publishTimestampRemainsDistinctFromOwnerConfirmation() {
+        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r = repo(store)
+        r.confirmMenuInformation("fixture-bar", 1_700_000_000_000L)
+        val jobId = r.startPhotoImport("fixture-bar", listOf("content://test/empty"),
+            OwnerMockFixtures.imageFixtures(emptyMap()))
+        val version = ready(r).imports.single().reviewVersion
+        assertEquals(0, r.publishAddOnly(jobId, version))
+        val bar = ready(repo(store)).bars.single()
+        assertEquals(1_700_000_000_000L, bar.lastVerifiedAtEpochMs)
+        assertNotNull(bar.lastMenuPublishedAtEpochMs)
+        assertTrue(bar.lastMenuPublishedAtEpochMs!! > bar.lastVerifiedAtEpochMs!!)
+    }
+
     @Test fun emptyDefaultAndRetryOfStorageErrorAreExplicit() {
         val empty = repo(InMemoryMockOwnerStateStore())
         assertTrue(empty.state.value is MockOwnerLoadState.Empty)
