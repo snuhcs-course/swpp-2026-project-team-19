@@ -79,6 +79,19 @@ class OwnerManagementHomeStateTest {
         assertEquals("11.05", ownerDate(novemberFifth.toEpochDay()))
     }
 
+    @Test fun vacationCalendarSelectsStartThenEndWithoutChangingRepository() {
+        val unset = Long.MIN_VALUE
+        val first = updateQuickVacationDates(unset, unset, 21000L, "start")
+        assertEquals(21000L to unset, first)
+        val second = updateQuickVacationDates(first!!.first, first.second, 21005L, "end")
+        assertEquals(21000L to 21005L, second)
+        assertEquals(null, updateQuickVacationDates(21000L, 21005L, 20999L, "end"))
+        assertEquals(21001L to 21005L,
+            updateQuickVacationDates(21000L, 21005L, 21001L, "start"))
+        assertEquals(21006L to unset,
+            updateQuickVacationDates(21000L, 21005L, 21006L, "start"))
+    }
+
     @Test fun activeMenuJobTakesPrecedenceOverPriorPublishedJob() {
         val applied = MockMenuImport("applied", "bar", MockImportStatus.APPLIED, 1, emptyList())
         val processing = MockMenuImport("new", "bar", MockImportStatus.PROCESSING, 1, emptyList())
