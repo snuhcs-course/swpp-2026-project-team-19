@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
 MAX_IMAGES = 15
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
 MAX_TOTAL_BYTES = 60 * 1024 * 1024
+# The original_filename columns are varchar(255); the name is only kept for reference, so a longer one is cut.
+MAX_FILENAME_LENGTH = 255
 UNFINISHED_STATUSES = (ImportStatus.UPLOADED, ImportStatus.PROCESSING, ImportStatus.READY_FOR_REVIEW)
 # Declared types that say nothing about the format, so only the detected type counts.
 _GENERIC_CONTENT_TYPES = {None, "", "application/octet-stream"}
@@ -129,7 +131,8 @@ def check_images(uploads: list[ImageUpload]) -> list[CheckedImage]:
                 "JPEG, PNG 사진만 올릴 수 있습니다.",
                 details={"imageOrder": order, "filename": upload.filename, "contentType": upload.content_type},
             )
-        checked.append(CheckedImage(upload.filename, data, detected[0], detected[1]))
+        filename = upload.filename[:MAX_FILENAME_LENGTH] if upload.filename is not None else None
+        checked.append(CheckedImage(filename, data, detected[0], detected[1]))
     return checked
 
 

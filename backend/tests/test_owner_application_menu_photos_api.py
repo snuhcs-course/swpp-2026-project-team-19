@@ -276,6 +276,16 @@ def test_fifteen_photos_are_accepted(client, db_session, storage, auth, pending)
     assert [photo["imageOrder"] for photo in response.json()["menuPhotos"]] == list(range(1, 16))
 
 
+def test_a_long_file_name_is_cut_to_fit(client, db_session, storage, auth, pending):
+    long_name = "메" * 300 + ".jpg"
+
+    response = put_photos(client, auth, pending.id, images=[(long_name, JPEG, "image/jpeg")])
+
+    assert response.status_code == 200, response.text
+    [row] = photo_rows(db_session, pending)
+    assert row.original_filename == long_name[:255]
+
+
 # ---- photos in the other application responses ----
 
 
