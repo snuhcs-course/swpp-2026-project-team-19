@@ -60,7 +60,10 @@ internal fun validMockOperatingException(exception: MockOperatingException): Boo
     exception.fromEpochDay <= exception.toEpochDay &&
         (exception.kind != MockExceptionKind.CUSTOM_HOURS ||
             (exception.openMinutes != null && exception.openMinutes in 0..1439 &&
-                exception.closeMinutes != null && exception.closeMinutes in 0..1439))
+                exception.closeMinutes != null && exception.closeMinutes in 0..1439 &&
+                if (exception.closesNextDay)
+                    exception.closeMinutes <= exception.openMinutes
+                else exception.closeMinutes > exception.openMinutes))
 
 class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMockRepository {
     private val lock = Any()
