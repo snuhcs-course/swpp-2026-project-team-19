@@ -31,6 +31,9 @@ interface OwnerMockRepository {
     fun closeApplicationForFixture(applicationId: String, status: MockApplicationStatus)
     fun dismissRejectedForFixture(applicationId: String)
     fun saveBar(bar: MockBar)
+    fun confirmMenuInformation(barId: String, confirmedAtEpochMs: Long)
+    fun applyOperatingException(barId: String, exception: MockOperatingException)
+    fun cancelOperatingException(barId: String, exceptionId: String)
     fun selectBar(barId: String)
     fun saveBrand(brand: MockBrand)
     fun saveCatalogProduct(product: MockCatalogProduct)
@@ -57,7 +60,10 @@ internal fun validMockOperatingException(exception: MockOperatingException): Boo
     exception.fromEpochDay <= exception.toEpochDay &&
         (exception.kind != MockExceptionKind.CUSTOM_HOURS ||
             (exception.openMinutes != null && exception.openMinutes in 0..1439 &&
-                exception.closeMinutes != null && exception.closeMinutes in 0..1439))
+                exception.closeMinutes != null && exception.closeMinutes in 0..1439 &&
+                if (exception.closesNextDay)
+                    exception.closeMinutes <= exception.openMinutes
+                else exception.closeMinutes > exception.openMinutes))
 
 class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMockRepository {
     private val lock = Any()
@@ -241,6 +247,58 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
     }
 
+    /** Quick actions are saved atomically into the same persisted owner snapshot. */
+    override fun confirmMenuInformation(barId: String, confirmedAtEpochMs: Long) {
+        require(confirmedAtEpochMs >= 0L)
+        change { s ->
+            require(s.bars.any { it.barId == barId })
+            require(s.menuItems.any { it.barId == barId }) {
+                "게시된 메뉴가 있어야 판매 정보를 확인할 수 있어요."
+            }
+            s.copy(bars = s.bars.map { bar ->
+                if (bar.barId == barId) bar.copy(lastVerifiedAtEpochMs = confirmedAtEpochMs)
+                else bar
+            }) to Unit
+        }
+    }
+
+    override fun applyOperatingException(barId: String, exception: MockOperatingException) {
+        require(validMockOperatingException(exception))
+        require(exception.exceptionId.isNotBlank())
+        change { s ->
+            require(s.bars.any { it.barId == barId })
+            s.copy(bars = s.bars.map { bar ->
+                if (bar.barId != barId) bar else bar.copy(
+                    // The management-home quick action is one current selection, not
+                    // a stack of hidden states to restore after the user presses X.
+                    // Retain non-quick schedules even when dates overlap:
+                    // the newer quick override wins by list order and cancelling it
+                    // restores the untouched underlying schedule.
+                    exceptions = bar.exceptions.filterNot {
+                        it.exceptionId == exception.exceptionId ||
+                            (exception.exceptionId.startsWith("quick-") &&
+                                it.exceptionId.startsWith("quick-"))
+                    } + exception
+                )
+            }) to Unit
+        }
+    }
+
+    override fun cancelOperatingException(barId: String, exceptionId: String) {
+        change { s ->
+            require(s.bars.any { it.barId == barId })
+            require(s.bars.first { it.barId == barId }.exceptions.any {
+                it.exceptionId == exceptionId
+            })
+            s.copy(bars = s.bars.map { bar ->
+                if (bar.barId == barId) bar.copy(exceptions = bar.exceptions.filterNot {
+                    it.exceptionId == exceptionId ||
+                        (exceptionId.startsWith("quick-") && it.exceptionId.startsWith("quick-"))
+                }) else bar
+            }) to Unit
+        }
+    }
+
     override fun selectBar(barId: String) {
         change { s ->
             require(s.bars.any { it.barId == barId })
@@ -418,6 +476,11 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         s.copy(
             menuItems = s.menuItems + added,
             imports = s.imports.map { if (it.menuImportId == importId) applied else it },
+            bars = s.bars.map { bar ->
+                if (bar.barId == job.barId) bar.copy(
+                    lastMenuPublishedAtEpochMs = System.currentTimeMillis()
+                ) else bar
+            },
             nextLocalId = index,
         ) to added.size
     }
