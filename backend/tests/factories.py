@@ -11,6 +11,7 @@ from app.models import (
     BarMenuItem,
     BarOwner,
     BarOwnerApplication,
+    BarOwnerApplicationMenuImage,
     BarStatus,
     Brand,
     BrandAlias,
@@ -180,6 +181,21 @@ def make_application(
     session.add(application)
     session.flush()
     return application
+
+
+def make_application_menu_image(
+    session: Session, application: BarOwnerApplication, image_order: int = 1
+) -> BarOwnerApplicationMenuImage:
+    """A menu photo row of `application`; no file is stored."""
+    image = BarOwnerApplicationMenuImage(
+        application_id=application.id,
+        storage_key=f"owner-applications/{application.id}/{image_order}.jpg",
+        image_order=image_order,
+        content_sha256="0" * 64,
+    )
+    session.add(image)
+    session.flush()
+    return image
 
 
 def make_owner(session: Session, user: User, bar: Bar, reviewer: User) -> BarOwner:

@@ -25,6 +25,7 @@ from app.models.menu_import import (
 from app.models.owner import (
     BarOwner,
     BarOwnerApplication,
+    BarOwnerApplicationMenuImage,
     BusinessStatus,
     BusinessVerificationResult,
     OwnerApplicationStatus,
@@ -37,6 +38,7 @@ __all__ = [
     "BarMenuItem",
     "BarOwner",
     "BarOwnerApplication",
+    "BarOwnerApplicationMenuImage",
     "BarStatus",
     "Brand",
     "BrandAlias",
