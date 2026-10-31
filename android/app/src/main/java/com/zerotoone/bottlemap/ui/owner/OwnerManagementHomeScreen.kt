@@ -176,7 +176,7 @@ fun OwnerManagementHomeScreen(
                             Text("미리보기", style = MaterialTheme.typography.labelSmall)
                         }
                     }
-                    BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    Box(Modifier.fillMaxWidth()) {
                         // Compact cards with a shared height; never force an unnecessary square.
                         val equalHeight = if (androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.25f) 152.dp else 130.dp
                         Row(
