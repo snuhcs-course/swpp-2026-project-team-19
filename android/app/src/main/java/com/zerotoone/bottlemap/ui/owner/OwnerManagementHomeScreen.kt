@@ -445,6 +445,7 @@ fun OwnerOperatingQuickScreen(
 @Composable
 fun OwnerMenuQuickEntryScreen(
     state: MockOwnerLoadState,
+    onRetry: () -> Unit,
     onBack: () -> Unit,
     onNewPhoto: () -> Unit,
     onExistingJob: (MockImportStatus) -> Unit
@@ -457,7 +458,12 @@ fun OwnerMenuQuickEntryScreen(
                 .padding(BottleMapSpacing.screenHorizontal),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (selected == null) {
+            if (state == MockOwnerLoadState.Loading) {
+                OwnerLoading("메뉴 정보 불러오는 중")
+            } else if (state is MockOwnerLoadState.Error) {
+                Text(state.message, color = MaterialTheme.colorScheme.error)
+                OwnerActionButton("다시 시도", onRetry)
+            } else if (selected == null) {
                 Text("관리할 매장이 없어요.")
             } else {
                 val (snapshot, bar) = selected
