@@ -1,5 +1,18 @@
 # I3 Owner Flow Stage 5 — editable bar information (Android Mock)
 
+## ACTION_FIRST_v4 source reconciliation (2026-11-01)
+
+- **Exact source inspected**: Google Drive `BottleMap_owner_flow_ACTION_FIRST_v4.html`, original Drive file ID `1rJh9r2Lkt8AHKHCQTBhMnTjd3dgitszj` (HTML, 360,007 bytes per Drive metadata; read using Drive connector). Management UI is the embedded `MANAGER_DOCUMENT`, not the outer registration sample.
+- This **supersedes** the previous "HTML unavailable" note below, which describes the first PR draft only.
+- **Single-screen info form** (`OwnerInfoHtmlV4Screen.kt`): basic fields, inline seven-day regular schedule, inline tag search and selection; one Save applies the draft atomically via existing `saveBar()`. Back (toolbar and system) discards the uncommitted form without a dialog. Tag suggestions include the nine HTML demo tags and saved Mock bar tags. The HTML specifies a 100-character intro, 3-digit pour entry, a Mon-to-Tue–Fri copy action, and separate 5-minute wheel selection for opening/closing with an explicit "익일" checkbox.
+- **Separate 2-column photo editor** (`OwnerPhotoHtmlV4Screen.kt`): gallery-add button in header, tap photo -> contextual cover/remove menu, centered delete confirmation, left/right arrows only for non-cover slots, and Done button. Each action **commits immediately**, no separate photo Save. The last image cannot be removed (HTML's `confirmRemoveStorePhoto` behavior); a new/empty mock bar can still display 0 photos. No drag arrangement and no gallery-last add tile.
+- Stored photo refs are the original picked URI. Editor thumbnails use `ContentScale.Fit` inside clipped tiles (HTML's `object-fit:contain`); home thumbnails crop; customer full-screen image also fits without cropping.
+- **Status/overnight**: corrected owner status projection so today's overnight opening does not falsely mark the bar open this morning if yesterday's shift was closed. Temporary exceptions remain distinct from regular schedule, with expiry calculated against Asia/Seoul time.
+- **Intentional divergence**: HTML's mock photo picker simply appends an example label, but Android uses actual `PickVisualMedia()` + persisted content URI where possible. The HTML's unimplemented map mock is represented by an explanatory placeholder; no geocoding API invented.
+- **Unresolved contract**: production customer detail remains API-backed, not synchronized with local Mock. Tag catalog is Mock-only (no server vocabulary). No production schema changes.
+- **Verification**: unit tests cover v4 cover-protected arrows, Mon-to-weekday copy, intro capacity and pour bounds, overnight time shift/temporary expiry. Compose UI tests updated for immediate photo Done and silent discard-on-back. Review actual emulator/Galaxy S23 results in GitHub Actions before merge.
+
+
 ## Scope and source
 
 - Work branch: `feature/i3-p42-owner-bar-info-editor`; Schedule item **I3 P42** (`Started`).
