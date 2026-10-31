@@ -63,8 +63,9 @@ OPERATOR_ONLY = [
     Route("get", "/api/catalog/products", {"params": {"query": "glen"}}, (200, None)),
 ]
 # Any signed-in user, with or without a users row; tested in test_users_api.py, test_auth_api.py,
-# test_business_certificate_api.py, test_my_bars_api.py and test_owner_applications_api.py (which also covers the
-# applicant-or-operator rule of GET /api/owner-applications/{applicationId}).
+# test_business_certificate_api.py, test_my_bars_api.py, test_owner_applications_api.py (which also covers the
+# applicant-or-operator rule of GET /api/owner-applications/{applicationId}) and
+# test_owner_application_menu_photos_api.py.
 SIGNED_IN = {
     ("get", "/api/me"),
     ("post", "/api/owner-applications/business-certificate-ocr"),
@@ -72,6 +73,7 @@ SIGNED_IN = {
     ("get", "/api/me/owner-applications"),
     ("get", "/api/owner-applications/{applicationId}"),
     ("post", "/api/owner-applications/{applicationId}/cancel"),
+    ("put", "/api/owner-applications/{applicationId}/menu-photos"),
     ("get", "/api/me/bars"),
 }
 # No token needed; tested in test_search_api.py, test_nearby_bars_api.py, test_map_bars_api.py,

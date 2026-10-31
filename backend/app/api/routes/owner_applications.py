@@ -2,11 +2,12 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Path, Response, status
+from fastapi import APIRouter, Body, Depends, File, Path, Response, status
 from sqlalchemy.orm import Session
 
 from app.adapters.business_verification import BusinessVerifier
-from app.api.deps import get_business_verifier, get_clock, get_request_limiter
+from app.api.deps import get_business_verifier, get_clock, get_image_links, get_request_limiter
+from app.api.routes.menu_imports import UploadedImage
 from app.core.security import Principal, get_current_user, user_type_of
 from app.db.session import get_session
 from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
@@ -20,8 +21,12 @@ from app.services.owner_applications import (
     cancel_application,
     get_application,
     list_my_applications,
+    replace_menu_photos,
     submit_application,
 )
+from app.services import menu_import_upload as upload
+from app.services.image_links import ImageLinks
+from app.services.menu_import_upload import ImageUpload
 from app.services.request_limits import DAILY_LIMIT, DailyRequestLimiter
 
 router = APIRouter(prefix="/api", tags=["owner applications"])
@@ -78,11 +83,12 @@ def create_owner_application(
     verifier: BusinessVerifier | None = Depends(get_business_verifier),
     limiter: DailyRequestLimiter = Depends(get_request_limiter),
     clock: Callable[[], datetime] = Depends(get_clock),
+    links: ImageLinks = Depends(get_image_links),
 ) -> OwnerApplicationResponse:
     application = submit_application(session, principal, request, verifier=verifier, limiter=limiter, now=clock())
     response.headers["Location"] = f"/api/owner-applications/{application.id}"
     operator = user_type_of(principal, session) == "operator"
-    return application_responses(session, [application], show_verification=operator)[0]
+    return application_responses(session, [application], links, show_verification=operator)[0]
 
 
 @router.get(
@@ -99,8 +105,9 @@ def create_owner_application(
 def read_my_owner_applications(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
+    links: ImageLinks = Depends(get_image_links),
 ) -> OwnerApplicationListResponse:
-    return OwnerApplicationListResponse(items=list_my_applications(session, principal))
+    return OwnerApplicationListResponse(items=list_my_applications(session, principal, links))
 
 
 @router.get(
@@ -124,8 +131,9 @@ def read_owner_application(
     application_id: Annotated[str, Path(alias="applicationId", description="Application id (UUID)")],
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
+    links: ImageLinks = Depends(get_image_links),
 ) -> OwnerApplicationResponse:
-    return get_application(session, principal, application_id)
+    return get_application(session, principal, application_id, links)
 
 
 @router.post(
@@ -135,6 +143,7 @@ def read_owner_application(
     description=(
         "The applicant only; an operator may cancel only their own applications too. No request body. "
         "A `pending` application becomes `canceled`, a final status; the applicant may apply again. "
+        "Its menu photos are deleted. "
         "`businessVerification` is null unless the caller is an operator."
     ),
     responses=error_responses(
@@ -151,5 +160,43 @@ def cancel_owner_application(
     application_id: Annotated[str, Path(alias="applicationId", description="Application id (UUID)")],
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
+    links: ImageLinks = Depends(get_image_links),
 ) -> OwnerApplicationResponse:
-    return cancel_application(session, principal, application_id)
+    return cancel_application(session, principal, application_id, links)
+
+
+@router.put(
+    "/owner-applications/{applicationId}/menu-photos",
+    response_model=OwnerApplicationResponse,
+    summary="Replace the menu photos of my pending owner application",
+    description=(
+        "The applicant only, while the application is `pending`. Each call replaces all of the "
+        "application's menu photos with the ones sent, in display order; retrying the same request gives "
+        "the same result. On approval the photos become the bar's first menu import and extraction starts; "
+        "rejecting or canceling deletes them.\n\n"
+        f"- Up to {upload.MAX_IMAGES} JPEG or PNG photos, {upload.MAX_IMAGE_BYTES // 2**20} MB each and "
+        f"{upload.MAX_TOTAL_BYTES // 2**20} MB in total, checked like `POST /api/bars/{{barId}}/menu-imports`.\n"
+        "- `menuPhotos` in the response has short-lived URLs; fetch the application again when they expire."
+    ),
+    responses=error_responses(
+        _UNAUTHENTICATED,
+        (
+            404,
+            "`OWNER_APPLICATION_NOT_FOUND`: no such application, someone else's, or `applicationId` is not a UUID.",
+        ),
+        (409, "`INVALID_APPLICATION_STATE`: the application is not `pending`; `details.status` is its status."),
+        (413, "`UPLOAD_TOO_LARGE`: too many photos, or a photo or the total is too large; limits in `details`."),
+        (415, "`UNSUPPORTED_IMAGE_TYPE`: not JPEG or PNG (HEIC included); `details.imageOrder` names the photo."),
+        (422, "`VALIDATION_FAILED`: `images` `MISSING`."),
+        AUTH_UNAVAILABLE,
+    ),
+)
+def put_owner_application_menu_photos(
+    application_id: Annotated[str, Path(alias="applicationId", description="Application id (UUID)")],
+    images: Annotated[list[UploadedImage], File(description="Menu photos in display order")],
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    links: ImageLinks = Depends(get_image_links),
+) -> OwnerApplicationResponse:
+    uploads = [ImageUpload(image.filename, image.content_type, image.file) for image in images]
+    return replace_menu_photos(session, principal, application_id, uploads, links)

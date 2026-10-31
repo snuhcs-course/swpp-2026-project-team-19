@@ -32,9 +32,9 @@ from app.services.bar_menu import bar_not_found
 
 logger = logging.getLogger(__name__)
 
-MAX_IMAGES = 5
+MAX_IMAGES = 15
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
-MAX_TOTAL_BYTES = 30 * 1024 * 1024
+MAX_TOTAL_BYTES = 60 * 1024 * 1024
 UNFINISHED_STATUSES = (ImportStatus.UPLOADED, ImportStatus.PROCESSING, ImportStatus.READY_FOR_REVIEW)
 # Declared types that say nothing about the format, so only the detected type counts.
 _GENERIC_CONTENT_TYPES = {None, "", "application/octet-stream"}
@@ -48,7 +48,7 @@ class ImageUpload:
 
 
 @dataclass
-class _CheckedImage:
+class CheckedImage:
     filename: str | None
     data: bytes
     extension: str
@@ -101,7 +101,9 @@ def _too_large(message: str) -> ApiError:
     return ApiError(413, "UPLOAD_TOO_LARGE", message, details=details)
 
 
-def _check_images(uploads: list[ImageUpload]) -> list[_CheckedImage]:
+def check_images(uploads: list[ImageUpload]) -> list[CheckedImage]:
+    """Read and check photos against the limits of spec 4.1. Shared with owner application menu photos
+    (spec 3.11.15), which follow the same limits."""
     if len(uploads) > MAX_IMAGES:
         raise _too_large(f"사진은 최대 {MAX_IMAGES}장까지 올릴 수 있습니다.")
     checked = []
@@ -122,7 +124,7 @@ def _check_images(uploads: list[ImageUpload]) -> list[_CheckedImage]:
                 "JPEG, PNG 사진만 올릴 수 있습니다.",
                 details={"imageOrder": order, "filename": upload.filename, "contentType": upload.content_type},
             )
-        checked.append(_CheckedImage(upload.filename, data, detected[0], detected[1]))
+        checked.append(CheckedImage(upload.filename, data, detected[0], detected[1]))
     return checked
 
 
@@ -164,7 +166,7 @@ def create_menu_import(
     # The API sends null, not an empty string, for "no value".
     if owner_note is not None:
         owner_note = owner_note.strip() or None
-    images = _check_images(uploads)
+    images = check_images(uploads)
     fingerprint = request_fingerprint(bar.id, mode, owner_note, [image.data for image in images])
 
     existing = _find_by_key(session, idempotency_key)

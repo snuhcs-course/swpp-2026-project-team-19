@@ -109,6 +109,12 @@ class BusinessVerification(BaseModel):
     checkedAt: UtcDateTime = Field(description="When `result` was obtained")
 
 
+class ApplicationMenuPhoto(BaseModel):
+    imageOrder: int = Field(description="1-based display order")
+    imageUrl: str = Field(description="Short-lived signed URL; fetch the application again when it expires")
+    imageUrlExpiresAt: UtcDateTime | None = Field(description="Null when the URL does not expire (local storage)")
+
+
 class OwnerApplicationResponse(BaseModel):
     applicationId: UUID
     applicationType: ApplicationType
@@ -129,6 +135,9 @@ class OwnerApplicationResponse(BaseModel):
     )
     contactPhone: str
     applicantNote: str | None
+    menuPhotos: list[ApplicationMenuPhoto] = Field(
+        description="Menu photos in order (spec 3.11.15); empty when none were uploaded or after rejection or cancel"
+    )
     rejectionReason: str | None = Field(description="Only when rejected")
     reviewedAt: UtcDateTime | None = Field(description="When approved or rejected")
     createdAt: UtcDateTime
