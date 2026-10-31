@@ -98,7 +98,7 @@ GET 주변 업장 조회 (위치 + 반경)
 | `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
 | `POST /api/owner-applications`, `GET /api/me/owner-applications`, `POST /api/owner-applications/business-certificate-ocr` | | O | O | O |
 | `GET /api/owner-applications/{applicationId}` | | 본인 신청만 | 본인 신청만 | O |
-| `POST /api/owner-applications/{applicationId}/cancel` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
+| `POST /api/owner-applications/{applicationId}/cancel`, `PUT /api/owner-applications/{applicationId}/menu-photos` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
 | `GET /api/owner-applications`, `POST .../approve`, `POST .../reject`, `POST .../verify-business` | | | | O |
 | `DELETE /api/bars/{barId}/owner` | | | | O |
 | `GET /api/bars`, `POST /api/bars` | | | | O |
@@ -213,6 +213,7 @@ ignore
 | `GET` | `/api/me/owner-applications` | 내 업주 신청 목록 |
 | `GET` | `/api/owner-applications/{applicationId}` | 업주 신청 상세 |
 | `POST` | `/api/owner-applications/{applicationId}/cancel` | 업주 신청 취소 |
+| `PUT` | `/api/owner-applications/{applicationId}/menu-photos` | 업주 신청의 메뉴판 사진 올리기 (전체 교체) |
 | `GET` | `/api/owner-applications` | operator의 업주 신청 목록 |
 | `POST` | `/api/owner-applications/{applicationId}/approve` | 업주 신청 승인 |
 | `POST` | `/api/owner-applications/{applicationId}/reject` | 업주 신청 거절 |
@@ -307,7 +308,7 @@ POST /api/auth/temp-login
 - 클라이언트 요청이나 token claim(`user_metadata` 포함)으로 `userType`을 바꿀 수 없다. 권한은 매 요청 BottleMap DB의 `users.user_type`에서 읽는다.
 - `operator` 전환은 이후 별도 기능으로 정의하며 이 문서의 범위가 아니다. 그전까지 로컬에서 operator API를 시험할 때는 임시 로그인과 `TEMP_AUTH_USER_TYPE=operator`를 사용한다. 배포 서버에서는 백엔드 담당자가 DB의 `users.user_type`을 직접 고쳐야만 operator 역할이 부여되며, 바꾼 역할은 해당 사용자의 다음 요청부터 반영된다.
 - 업주는 `userType`이 아니라 업장별 관계다. 신청과 승인은 3.11, 권한은 2.2를 따른다.
-- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`는 `404 USER_NOT_FOUND`다(3.3, 3.11.2).
+- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`, 그리고 임시 로그인 operator의 업주 신청 승인·거절은 `404 USER_NOT_FOUND`다(3.3, 3.11.2, 3.11.7).
 
 #### 3.1.5 인증 오류와 프론트엔드 처리
 
@@ -1061,6 +1062,7 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 - 한 업장에는 현재 업주가 최대 한 명이다. 한 사용자는 여러 업장의 업주가 될 수 있다.
 - 신청은 두 종류다. `existing_bar`는 이미 등록된 업장의 업주 신청이고, `new_bar`는 아직 없는 업장을 등록하면서 업주가 되는 신청이다.
 - 신청자는 사업자등록번호, 대표자명, 개업일자와 연락처를 제출한다. 사업자등록증 사진을 올리면 앞의 세 값을 읽어 입력란을 미리 채울 수 있다(3.11.12).
+- 신청을 만든 뒤 메뉴판 사진을 올린다(3.11.15). 승인하면 백엔드가 이 사진으로 메뉴 등록 작업을 만들어 AI 분석을 미리 시작하므로, 업주는 처음 업장 관리에 들어갔을 때 바로 검수할 수 있다(3.11.7).
 - 백엔드는 신청을 받을 때 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자가 서로 맞는지 1차 검증한다(3.11.2). 맞지 않으면 신청을 만들지 않고 신청자가 입력을 고치게 한다. 검증 서비스에 연결하지 못하면 신청은 받고 결과를 `unavailable`로 남긴다.
 - 외부 API를 부르는 두 요청은 사용자마다 하루 5회로 제한한다: 신청할 때의 국세청 진위확인(3.11.2)과 사업자등록증 OCR(3.11.12). 남의 사업자등록번호로 대표자명과 개업일자를 맞춰 보는 시도와 외부 API 호출 한도 소진을 막기 위해서다. 규칙은 3.11.14에 있다.
 - operator는 웹 대시보드에서 신청과 검증 결과를 보고, 실제 매장이 있는지 확인한 뒤 승인하거나 거절한다.
@@ -1075,6 +1077,7 @@ POST /api/owner-applications/business-certificate-ocr
                                              (선택. 사업자등록증 사진으로 입력란 채우기, 3.11.12)
 POST /api/owner-applications                 → 1차 검증 후 pending
                                                (정보가 맞지 않으면 422, 입력을 고쳐 다시 신청)
+PUT /api/owner-applications/{id}/menu-photos → 메뉴판 사진 저장 (pending일 때 전체 교체, 3.11.15)
 GET /api/me/owner-applications               → 상태 확인
 POST /api/owner-applications/{id}/cancel     → canceled (pending일 때만)
 
@@ -1084,10 +1087,12 @@ POST /api/owner-applications/{id}/verify-business
                                              (검증 결과가 unavailable이면 다시 검증, 3.11.13)
 실제 매장이 있는지 확인
 POST /api/owner-applications/{id}/approve    → approved, 업주 관계 생성 (new_bar는 업장도 생성)
-POST /api/owner-applications/{id}/reject     → rejected
+                                               신청 메뉴판 사진이 있으면 메뉴 등록 작업을 만들고 AI 분석 시작
+POST /api/owner-applications/{id}/reject     → rejected, 신청 메뉴판 사진 삭제
 
 [승인 후 업주]
 GET /api/me/bars                             → 내가 관리하는 업장
+GET /api/bars/{barId}                        → activeMenuImport가 있으면 그 작업의 검수로 이동 (5장)
 업장 정보 수정(3.7), 메뉴 등록·검수·반영(3.8, 4~8장)
 ```
 
@@ -1152,6 +1157,13 @@ closed      폐업자
   },
   "contactPhone": "010-1234-5678",
   "applicantNote": "대표 본인입니다",
+  "menuPhotos": [
+    {
+      "imageOrder": 1,
+      "imageUrl": "https://storage.example.com/signed/owner-application-menu-1.jpg",
+      "imageUrlExpiresAt": "2026-10-14T03:15:00Z"
+    }
+  ],
   "rejectionReason": null,
   "reviewedAt": null,
   "createdAt": "2026-10-14T03:00:00Z",
@@ -1181,6 +1193,10 @@ closed      폐업자
 | `businessVerification.checkedAt` | RFC 3339 문자열 | 아니오 | `result`를 얻은 시각. 신청할 때 `unavailable`이 되었으면 그 시도 시각이다. 다시 검증(3.11.13)이 실패하면 `result`와 함께 바뀌지 않는다 |
 | `contactPhone` | 문자열 | 아니오 | 운영자가 확인을 위해 연락할 번호 |
 | `applicantNote` | 문자열 | 예 | 신청자 메모 |
+| `menuPhotos` | 배열 | 아니오 | 신청에 올린 메뉴판 사진(3.11.15). `imageOrder` 순서이며, 올리지 않았거나 거절·취소로 삭제되었으면 `[]` |
+| `menuPhotos[].imageOrder` | 정수 | 아니오 | 1부터 시작하는 순서 |
+| `menuPhotos[].imageUrl` | 문자열 | 아니오 | 짧은 만료 시간을 가진 서명 URL. 신청자 본인과 operator만 받는다. 만료되었거나 이미지 로딩이 `403`으로 실패하면 신청 상세(3.11.4)를 다시 조회해 새 URL을 받는다 |
+| `menuPhotos[].imageUrlExpiresAt` | RFC 3339 문자열 | 예 | `imageUrl` 만료 시각. 만료되지 않는 URL(로컬 저장소)이면 `null` |
 | `rejectionReason` | 문자열 | 예 | `rejected`일 때만 값이 있다 |
 | `reviewedAt` | RFC 3339 문자열 | 예 | 승인 또는 거절 시각. 그 전에는 `null` |
 | `createdAt`, `updatedAt` | RFC 3339 문자열 | 아니오 | |
@@ -1303,7 +1319,7 @@ POST /api/owner-applications/{applicationId}/cancel
 Authorization: Bearer <access-token>
 ```
 
-신청자 본인만 호출할 수 있다. 요청 본문은 없다. `pending`이면 `canceled`로 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다.
+신청자 본인만 호출할 수 있다. 요청 본문은 없다. `pending`이면 `canceled`로 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다. 신청의 메뉴판 사진(3.11.15)은 삭제되므로 응답의 `menuPhotos`는 `[]`다.
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
@@ -1374,12 +1390,24 @@ operator만 호출할 수 있다. 사업자등록 정보 검증 결과가 `match
 
 - `existing_bar`: 업장 행을 잠그고 현재 업주가 없는지 다시 확인한 뒤 업주 관계를 만든다. 신청 뒤 업장이 비활성화되었어도 승인할 수 있다.
 - `new_bar`: `bar`로 `status = active`인 업장을 만들고 업주 관계를 만든다. 만든 업장은 응답의 `bar`에 담긴다. 메뉴가 없으므로 상품 검색에는 메뉴를 반영한 뒤부터 나온다.
+- 공통: 신청에 메뉴판 사진(3.11.15)이 있고 업장에 미완료 메뉴 등록 작업(4.3)이 없으면, 같은 트랜잭션에서 그 사진들로 메뉴 등록 작업을 만든다. 사진 순서가 `imageOrder`이고, `mode`는 업장에 현재 메뉴판이 없으면 `full_replace`, 있으면 `partial_update`이며, `ownerNote`는 `null`이다. 트랜잭션을 커밋한 뒤 4장의 업로드와 같은 AI 처리를 시작한다. 검수에서 확정하기 전에는 메뉴가 게시되지 않는다(8장).
+- 사진이 없거나 업장에 이미 미완료 작업이 있으면 작업을 만들지 않고 승인만 한다. 미완료 작업은 operator가 업장에 먼저 올린 작업이나 해제된 이전 업주의 작업처럼 드문 경우에만 있으며, 새 업주가 그 작업을 이어서 처리하거나 취소(5.7)한 뒤 다시 올린다.
 
-`200 OK`, 본문은 `OwnerApplication`(`status = approved`)이다. 신청자는 다음 요청부터 업주 권한을 가진다.
+`200 OK`, 본문은 `OwnerApplication`(`status = approved`)이다. 신청자는 다음 요청부터 업주 권한을 가진다. 응답에는 만든 작업이 들어 있지 않다. 업주 화면은 업장 상세(3.6)의 `activeMenuImport`로 작업을 찾아 처리 상태나 검수(5장)를 보여 준다. AI 처리가 실패하면 작업은 `failed`가 되며, 업주가 사진을 다시 올린다(4장).
+
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다.
+
+1. 호출자가 operator인지 (`403 FORBIDDEN`, 2.2)
+2. 요청 형식과 `bar` 필드 규칙 (`422 VALIDATION_FAILED`)
+3. 호출자의 `users` 행 (`404 USER_NOT_FOUND`). 승인한 operator를 기록해야 하기 때문이다. `users` 행이 없는 operator는 임시 로그인(3.1.3)으로만 생기며, `GET /api/me`를 먼저 호출하면 된다
+4. 신청 (`404 OWNER_APPLICATION_NOT_FOUND`)과 상태 (`409 INVALID_APPLICATION_STATE`)
+5. 신청 종류에 맞는 본문 (`422 VALIDATION_FAILED`, `bar` 없음은 `MISSING`, `existing_bar`에 `bar`는 `EXTRA_FORBIDDEN`)
+6. 업장의 현재 업주 (`409 BAR_OWNER_EXISTS`)
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `404` | `USER_NOT_FOUND` | 호출한 operator의 `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없음 | 신청 목록 재조회 |
 | `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회 |
 | `409` | `BAR_OWNER_EXISTS` | 업장에 이미 현재 업주가 있음. 같은 업장의 다른 신청이 먼저 승인된 경우 | 이 신청은 거절 처리 |
@@ -1399,7 +1427,7 @@ Content-Type: application/json
 }
 ```
 
-operator만 호출할 수 있다. `reason`은 필수이며 앞뒤 공백을 지운 뒤 1~500자다. 신청자에게 그대로 보여 준다. 사업자등록 정보 검증 결과와 관계없이 거절할 수 있다. `200 OK`, 본문은 `OwnerApplication`(`status = rejected`)이다. 오류는 3.11.7의 `403`, `404`, `409 INVALID_APPLICATION_STATE`와 같고, `422 VALIDATION_FAILED`는 `reason`이 없거나(`MISSING`), 공백뿐이거나(`BLANK`), 500자를 넘을 때(`STRING_TOO_LONG`)다.
+operator만 호출할 수 있다. `reason`은 필수이며 앞뒤 공백을 지운 뒤 1~500자다. 신청자에게 그대로 보여 준다. 사업자등록 정보 검증 결과와 관계없이 거절할 수 있다. 신청의 메뉴판 사진(3.11.15)은 삭제한다. `200 OK`, 본문은 `OwnerApplication`(`status = rejected`, `menuPhotos = []`)이다. 오류는 3.11.7의 `403`, `404`(`USER_NOT_FOUND` 포함), `409 INVALID_APPLICATION_STATE`와 같고, `422 VALIDATION_FAILED`는 `reason`이 없거나(`MISSING`), 공백뿐이거나(`BLANK`), 500자를 넘을 때(`STRING_TOO_LONG`)다.
 
 #### 3.11.9 내가 관리하는 업장 목록
 
@@ -1600,6 +1628,47 @@ operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 �
 ```
 
 - 횟수는 서버 메모리에 저장한다. 서버가 재시작되면 횟수가 초기화되며, 이 한계는 받아들인다. API 프로세스가 하나(worker 1개)일 때만 한도가 정확하다.
+
+#### 3.11.15 업주 신청 메뉴판 사진
+
+```http
+PUT /api/owner-applications/{applicationId}/menu-photos
+Authorization: Bearer <access-token>
+Content-Type: multipart/form-data
+```
+
+신청자 본인만 호출할 수 있다. 업주 신청(3.11.2)이 `201`로 만들어진 뒤 그 신청의 메뉴판 사진을 저장한다. 사진은 승인할 때 메뉴 등록 작업의 사진이 되어 AI 분석에 쓰이고(3.11.7), operator가 실제 매장인지 확인할 때도 본다.
+
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `images` | 이미지 파일 배열 | 예 | 표시 순서대로 전송한 메뉴판 사진. 배열 순서가 `imageOrder`가 된다 |
+
+- 호출할 때마다 신청의 사진 전체를 이번 요청의 사진으로 바꾼다. 같은 요청을 다시 보내도 결과가 같으므로 `Idempotency-Key`는 받지 않는다. 사진을 추가하거나 순서를 바꾸려면 전체 목록을 다시 보낸다.
+- `pending`일 때만 올릴 수 있다. 승인·거절·취소와 동시에 들어오면 신청 행을 잠가 둘 중 하나만 성공한다.
+- 업로드 제한과 형식 판별은 메뉴 등록 요청(4.1)과 같다: JPEG·PNG, 최대 15장, 사진당 10MB, 전체 60MB.
+- 백엔드는 사진을 메뉴 등록 사진과 같은 비공개 저장소에 둔다. 공개 API에는 나오지 않으며 신청자 본인과 operator만 `menuPhotos`(3.11.1)의 서명 URL로 볼 수 있다.
+- 신청이 거절되거나 취소되면 사진을 삭제한다(3.11.5, 3.11.8). 승인되면 메뉴 등록 작업의 사진으로 남는다.
+- 신청할 때 사진을 꼭 올려야 하는 것은 아니다. 사진 없이 승인된 업주는 승인 뒤 4장으로 메뉴를 올린다.
+
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다.
+
+1. 요청 형식 (`422 VALIDATION_FAILED`, `images` 없음은 `MISSING`)
+2. 신청과 신청자 (`404 OWNER_APPLICATION_NOT_FOUND`)
+3. 신청 상태 (`409 INVALID_APPLICATION_STATE`)
+4. 사진 (4.1과 같다): 개수를 확인하고(`413 UPLOAD_TOO_LARGE`), 사진을 순서대로 읽으며 크기(`413`)와 형식(`415 UNSUPPORTED_IMAGE_TYPE`)을 확인한다
+
+`200 OK`, 본문은 `OwnerApplication`(3.11.1)이며 `menuPhotos`에 저장한 사진이 들어 있다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없거나, 본인의 신청이 아니거나, `applicationId`가 UUID 형식이 아님 | 신청 목록 재조회 |
+| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회. 승인되었으면 사진은 4장으로 올린다 |
+| `413` | `UPLOAD_TOO_LARGE` | 4.4와 같다 | 사진 수를 줄이거나 다시 압축 |
+| `415` | `UNSUPPORTED_IMAGE_TYPE` | 4.4와 같다 | 해당 사진을 JPEG로 바꿔 다시 올림 |
+| `422` | `VALIDATION_FAILED` | `images`가 없음 | `fieldErrors` 표시 |
+
+신청은 만들어졌지만 사진 업로드가 실패하면, 프론트엔드는 신청을 다시 만들지 않고 같은 `applicationId`로 이 API만 다시 호출한다. 다시 신청하면 `409 OWNER_APPLICATION_EXISTS`(3.11.2)가 되며 `details.applicationId`로 기존 신청을 찾을 수 있다.
 
 ### 3.12 내 주변 업장 조회
 
@@ -1823,10 +1892,12 @@ MVP 업로드 제한:
 
 ```text
 허용 형식       JPEG, PNG
-사진 최대 개수  5장
+사진 최대 개수  15장
 사진당 최대 크기 10MB
-전체 최대 크기  30MB
+전체 최대 크기  60MB
 ```
+
+업주 신청의 메뉴판 사진(3.11.15)에도 같은 제한을 쓴다. 안드로이드 앱은 전체 크기가 넘으면 사진을 다시 압축해 올린다. 사진이 많을수록 AI 처리가 오래 걸린다(사진을 한 장씩 차례로 처리한다).
 
 파일 형식은 확장자가 아니라 파일 내용으로 판별하며, 선언한 MIME 형식과 다르면 거절한다(`415 UNSUPPORTED_IMAGE_TYPE`). AI 추출 모듈이 JPEG와 PNG만 모델에 보내므로 HEIC 같은 다른 형식은 받지 않는다. 안드로이드 앱은 다른 형식의 사진을 JPEG로 바꿔 올린다.
 
@@ -2566,7 +2637,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `404` | `OWNER_APPLICATION_NOT_FOUND` | 업주 신청이 없거나 조회 권한이 없음 (3.11) | 신청 목록 재조회 |
 | `404` | `BAR_OWNER_NOT_FOUND` | 업주 해제 대상 업장에 현재 업주가 없음 (3.11.10) | 업장 상세 재조회 |
 | `404` | `MENU_IMPORT_NOT_FOUND` | 등록 작업이 없음 | 작업 목록 이동 |
-| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me` 또는 `POST /api/owner-applications` 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
+| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인·거절(3.11.7, 3.11.8) 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
 | `405` | `METHOD_NOT_ALLOWED` | 경로는 있지만 허용하지 않는 HTTP 메서드 | 요청 메서드 확인 |
 | `409` | `BAR_OWNER_EXISTS` | 이미 현재 업주가 있는 업장에 신청 또는 승인 (3.11) | 안내. operator는 해당 신청을 거절 |
@@ -2656,7 +2727,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 |---|---|---|
 | 기기가 오프라인이거나, 연결·응답 시간이 초과됨 | 응답 없음 | 네트워크 연결 확인 안내와 재시도 |
 | API 프로세스가 멈췄거나 다시 시작하는 중 | 프록시(Caddy)의 `502` 또는 `504`. 본문이 비어 있거나 JSON이 아니다 | 서버 오류로 보고 잠시 후 재시도 안내 |
-| 요청 본문이 프록시 한도(35MB)를 넘음 | 프록시의 `413`. JSON이 아니다 | `413 UPLOAD_TOO_LARGE`(4.4)와 같게 사진 수나 크기를 줄이도록 안내. 정상적인 업로드는 API의 한도(전체 30MB)에 먼저 걸린다 |
+| 요청 본문이 프록시 한도(65MB)를 넘음 | 프록시의 `413`. JSON이 아니다 | `413 UPLOAD_TOO_LARGE`(4.4)와 같게 사진 수나 크기를 줄이도록 안내. 정상적인 업로드는 API의 한도(전체 60MB)에 먼저 걸린다 |
 | 응답 본문이 기대한 JSON이 아님 | `2xx`이지만 해석할 수 없는 본문 | 네트워크 오류가 아니라 서버 응답 오류로 보고 재시도 안내 |
 
 서버 오류 문구에는 서버가 보낸 원문이나 HTTP 상태 번호를 그대로 노출하지 않는다.

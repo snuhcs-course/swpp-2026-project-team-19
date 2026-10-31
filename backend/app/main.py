@@ -1,3 +1,5 @@
+import logging
+import threading
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -10,6 +12,38 @@ from app.core.auth_config import load_supabase_auth_settings
 from app.core.errors import register_error_handlers
 from app.core.security import warn_if_temporary_login_is_on
 from app.core.version import get_version
+from app.db.session import get_session_factory
+from app.services.menu_import_processing import find_unfinished_imports, recover_imports
+
+logger = logging.getLogger(__name__)
+
+
+def recover_unfinished_imports() -> threading.Thread | None:
+    """Resume the menu imports a restart interrupted, in a background thread (see
+    app.services.menu_import_processing). The imports are looked up before the server takes
+    requests; a database that cannot be reached is logged and does not stop the server."""
+    session_factory = get_session_factory()
+    try:
+        import_ids = find_unfinished_imports(session_factory)
+    except Exception:
+        logger.exception("Could not look for menu imports to recover")
+        return None
+    if not import_ids:
+        return None
+    # A warning so it reaches the service log, which shows no INFO records from the app.
+    logger.warning(
+        "Recovering %d menu imports interrupted by a restart: %s", len(import_ids), ", ".join(map(str, import_ids))
+    )
+    thread = threading.Thread(
+        target=recover_imports,
+        args=(import_ids, session_factory, get_image_storage(), get_menu_extractor()),
+        kwargs={"llm_layer": get_matching_llm_layer()},
+        name="menu-import-recovery",
+        # A restart during recovery leaves the imports unfinished, and the next start resumes them.
+        daemon=True,
+    )
+    thread.start()
+    return thread
 
 
 @asynccontextmanager
@@ -27,6 +61,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     warn_if_temporary_login_is_on()
     # Pin the reported version to the code this process loaded.
     get_version()
+    recover_unfinished_imports()
     yield
 
 

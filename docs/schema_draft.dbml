@@ -212,6 +212,30 @@ Table bar_owner_applications {
   with a new row. Business registration numbers, representative names, opening dates and contact
   phones are visible only to the applicant and operators; the applicant sees only business_status
   of the check result. Certificate photos read by OCR are not stored.
+  The applicant may attach menu photos (bar_owner_application_menu_images). On approval, if there are
+  photos and the bar has no unfinished menu import, the same transaction creates a menu import from them
+  and AI processing starts after the commit.
+  '''
+}
+
+Table bar_owner_application_menu_images {
+  id uuid [pk]
+  application_id uuid [not null, ref: > bar_owner_applications.id]
+  storage_key varchar(500) [not null]
+  original_filename varchar(255)
+  image_order smallint [not null]
+  content_sha256 char(64) [not null, note: 'SHA-256 of the original bytes; used for the request_fingerprint of the menu import created on approval']
+  uploaded_at timestamptz [not null]
+
+  indexes {
+    (application_id, image_order) [unique]
+  }
+
+  Note: '''
+  Menu photos an applicant attached to an owner application, uploaded only while it is pending.
+  Each upload replaces the whole set. Rejecting or canceling the application deletes the rows and the
+  stored files. Approving keeps them, and the menu_images of the menu import created on approval point
+  to the same storage keys, so those files are never deleted after approval.
   '''
 }
 
@@ -334,6 +358,7 @@ Table menu_imports {
   review_version integer [not null, default: 0, note: 'Incremented whenever the consolidated review payload is regenerated']
   owner_note text
   review_confirmed_at timestamptz
+  recovery_count smallint [not null, default: 0, note: 'Times processing was resumed after a server restart; past 3 the import fails instead (CHECK >= 0)']
   created_at timestamptz [not null]
   completed_at timestamptz
 
@@ -698,6 +723,7 @@ TableGroup "Accounts and Bars" {
   users
   bars
   bar_owner_applications
+  bar_owner_application_menu_images
   bar_owners
 }
 

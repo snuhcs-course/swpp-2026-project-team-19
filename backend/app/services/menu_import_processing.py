@@ -9,6 +9,12 @@ Matching runs the rule stages S1–S3 and, when the LLM matching layer is config
 (MATCHING_LLM_ENABLED, see `app.api.deps.get_matching_llm_layer`), the M3 layer on the lines
 they did not confirm. The layer only adds candidates: its lines are ambiguous, and any
 failure in it leaves the rule results as they were.
+
+Processing runs inside the API process, so a restart stops it. At start-up the unfinished
+imports (`uploaded`, `processing`) are resumed: an image's items are committed together with
+its run's `succeeded`, so a `running` run left behind stored nothing and is queued again, and
+matching writes nothing until its final commit. An import is resumed at most MAX_RECOVERIES
+times, so an image that crashes the process cannot make it restart forever.
 """
 
 import logging
@@ -19,6 +25,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from fastapi import BackgroundTasks
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.adapters.extraction import ExtractedItemData, ExtractionError, MenuExtractor
@@ -44,6 +51,9 @@ from app.services.menu_import_upload import detect_image_type
 logger = logging.getLogger(__name__)
 
 SessionFactory = Callable[[], AbstractContextManager[Session]]
+
+MAX_RECOVERIES = 3
+_RESUMABLE = (ImportStatus.UPLOADED, ImportStatus.PROCESSING)
 
 
 def _now() -> datetime:
@@ -97,6 +107,74 @@ def process_menu_import(
                 menu_import.status = ImportStatus.FAILED
                 menu_import.completed_at = _now()
                 session.commit()
+
+
+def find_unfinished_imports(session_factory: SessionFactory) -> list[UUID]:
+    """Imports a restart left `uploaded` or `processing`, oldest first.
+
+    Call it before the server takes requests: the API runs as one process, so at that point nothing
+    in it is processing, and an upload made after it cannot be mistaken for an interrupted one.
+    """
+    with session_factory() as session:
+        return list(
+            session.scalars(
+                select(MenuImport.id).where(MenuImport.status.in_(_RESUMABLE)).order_by(MenuImport.created_at)
+            )
+        )
+
+
+def recover_imports(
+    import_ids: list[UUID],
+    session_factory: SessionFactory,
+    storage: ImageStorage,
+    extractor: MenuExtractor,
+    *,
+    llm_layer: LLMLayerConfig | None = None,
+) -> None:
+    """Resume the given interrupted imports one by one; one that cannot be resumed does not stop the rest."""
+    for import_id in import_ids:
+        try:
+            if _prepare_resume(session_factory, import_id):
+                process_menu_import(session_factory, storage, extractor, import_id, llm_layer=llm_layer)
+        except Exception:
+            logger.exception("Menu import %s could not be recovered", import_id)
+
+
+def _prepare_resume(session_factory: SessionFactory, import_id: UUID) -> bool:
+    """Queue the interrupted run again and count the recovery, or fail the import past the limit.
+    Returns whether to process it now."""
+    with session_factory() as session:
+        menu_import = session.get(MenuImport, import_id, with_for_update=True)
+        if menu_import is None or menu_import.status not in _RESUMABLE:
+            # No longer unfinished since it was found.
+            return False
+        interrupted = [
+            image.extraction_run
+            for image in menu_import.images
+            if image.extraction_run is not None and image.extraction_run.status == PipelineStatus.RUNNING
+        ]
+        if menu_import.recovery_count >= MAX_RECOVERIES:
+            now = _now()
+            # A run interrupted again points at the image; without one the import fails as a whole.
+            for run in interrupted:
+                run.status = PipelineStatus.FAILED
+                run.raw_output = {"error": "Interrupted", "message": "The server restarted during extraction"}
+                run.completed_at = now
+            menu_import.status = ImportStatus.FAILED
+            menu_import.completed_at = now
+            session.commit()
+            logger.warning("Menu import %s failed after %d recoveries", import_id, MAX_RECOVERIES)
+            return False
+        menu_import.recovery_count += 1
+        for run in interrupted:
+            run.status = PipelineStatus.QUEUED
+            run.started_at = None
+        menu_import.status = ImportStatus.PROCESSING
+        session.commit()
+        logger.info(
+            "Resuming menu import %s (recovery %d of %d)", import_id, menu_import.recovery_count, MAX_RECOVERIES
+        )
+        return True
 
 
 def _extract_all(session: Session, storage: ImageStorage, extractor: MenuExtractor, menu_import: MenuImport) -> bool:

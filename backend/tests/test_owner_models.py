@@ -1,4 +1,4 @@
-"""The bar owner tables enforce the rules of docs/schema_guide.md 5.3 and 5.4 in the database."""
+"""The bar owner tables enforce the rules of docs/schema_guide.md 5.3 to 5.5 in the database."""
 
 from datetime import datetime, timezone
 
@@ -15,7 +15,7 @@ from app.models import (
     OwnerApplicationStatus,
     OwnerApplicationType,
 )
-from tests.factories import make_application, make_bar, make_owner, make_user
+from tests.factories import make_application, make_application_menu_image, make_bar, make_owner, make_user
 
 NOW = datetime(2026, 10, 28, 3, tzinfo=timezone.utc)
 
@@ -164,3 +164,15 @@ def test_an_application_grants_ownership_once(db_session):
 
     with pytest.raises(IntegrityError):
         db_session.flush()
+
+
+def test_application_menu_images_keep_one_row_per_order(db_session):
+    application = make_application(db_session, make_user(db_session))
+    image = make_application_menu_image(db_session, application)
+    make_application_menu_image(db_session, application, image_order=2)
+    make_application_menu_image(db_session, make_application(db_session, make_user(db_session, "other-subject")))
+    db_session.refresh(image)
+
+    assert image.uploaded_at is not None
+    with pytest.raises(IntegrityError):
+        make_application_menu_image(db_session, application)

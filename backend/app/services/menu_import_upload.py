@@ -32,9 +32,11 @@ from app.services.bar_menu import bar_not_found
 
 logger = logging.getLogger(__name__)
 
-MAX_IMAGES = 5
+MAX_IMAGES = 15
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
-MAX_TOTAL_BYTES = 30 * 1024 * 1024
+MAX_TOTAL_BYTES = 60 * 1024 * 1024
+# The original_filename columns are varchar(255); the name is only kept for reference, so a longer one is cut.
+MAX_FILENAME_LENGTH = 255
 UNFINISHED_STATUSES = (ImportStatus.UPLOADED, ImportStatus.PROCESSING, ImportStatus.READY_FOR_REVIEW)
 # Declared types that say nothing about the format, so only the detected type counts.
 _GENERIC_CONTENT_TYPES = {None, "", "application/octet-stream"}
@@ -48,7 +50,7 @@ class ImageUpload:
 
 
 @dataclass
-class _CheckedImage:
+class CheckedImage:
     filename: str | None
     data: bytes
     extension: str
@@ -86,11 +88,16 @@ def request_fingerprint(bar_id: UUID, mode: ImportMode, owner_note: str | None, 
     Values that differ between retries of the same request (multipart boundary, file names,
     upload time) are left out.
     """
+    return fingerprint_from_hashes(bar_id, mode, owner_note, [hashlib.sha256(data).hexdigest() for data in images])
+
+
+def fingerprint_from_hashes(bar_id: UUID, mode: ImportMode, owner_note: str | None, image_hashes: list[str]) -> str:
+    """`request_fingerprint` from the images' SHA-256 hex digests, for photos already stored."""
     canonical = {
         "barId": str(bar_id),
         "mode": mode.value,
         "ownerNote": owner_note,
-        "images": [hashlib.sha256(data).hexdigest() for data in images],
+        "images": image_hashes,
     }
     encoded = json.dumps(canonical, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
@@ -101,7 +108,9 @@ def _too_large(message: str) -> ApiError:
     return ApiError(413, "UPLOAD_TOO_LARGE", message, details=details)
 
 
-def _check_images(uploads: list[ImageUpload]) -> list[_CheckedImage]:
+def check_images(uploads: list[ImageUpload]) -> list[CheckedImage]:
+    """Read and check photos against the limits of spec 4.1. Shared with owner application menu photos
+    (spec 3.11.15), which follow the same limits."""
     if len(uploads) > MAX_IMAGES:
         raise _too_large(f"사진은 최대 {MAX_IMAGES}장까지 올릴 수 있습니다.")
     checked = []
@@ -122,8 +131,31 @@ def _check_images(uploads: list[ImageUpload]) -> list[_CheckedImage]:
                 "JPEG, PNG 사진만 올릴 수 있습니다.",
                 details={"imageOrder": order, "filename": upload.filename, "contentType": upload.content_type},
             )
-        checked.append(_CheckedImage(upload.filename, data, detected[0], detected[1]))
+        filename = upload.filename[:MAX_FILENAME_LENGTH] if upload.filename is not None else None
+        checked.append(CheckedImage(filename, data, detected[0], detected[1]))
     return checked
+
+
+def add_images(
+    session: Session, menu_import_id: UUID, images: list[tuple[str, str | None]], extractor: MenuExtractor
+) -> None:
+    """Add the import's image rows, (storage key, original file name) in display order, each with a
+    queued extraction run for `extractor`."""
+    for order, (key, filename) in enumerate(images, start=1):
+        menu_image = MenuImage(
+            menu_import_id=menu_import_id, storage_key=key, original_filename=filename, image_order=order
+        )
+        session.add(menu_image)
+        session.flush()
+        session.add(
+            ExtractionRun(
+                menu_image_id=menu_image.id,
+                approach=extractor.approach,
+                provider=extractor.provider,
+                model_name=extractor.model_name,
+                pipeline_version=extractor.pipeline_version,
+            )
+        )
 
 
 def _replay_or_reject(existing: MenuImport, fingerprint: str) -> MenuImport:
@@ -164,7 +196,7 @@ def create_menu_import(
     # The API sends null, not an empty string, for "no value".
     if owner_note is not None:
         owner_note = owner_note.strip() or None
-    images = _check_images(uploads)
+    images = check_images(uploads)
     fingerprint = request_fingerprint(bar.id, mode, owner_note, [image.data for image in images])
 
     existing = _find_by_key(session, idempotency_key)
@@ -205,21 +237,7 @@ def create_menu_import(
             owner_note=owner_note,
         )
         session.add(menu_import)
-        for order, (key, image) in enumerate(zip(keys, images), start=1):
-            menu_image = MenuImage(
-                menu_import_id=import_id, storage_key=key, original_filename=image.filename, image_order=order
-            )
-            session.add(menu_image)
-            session.flush()
-            session.add(
-                ExtractionRun(
-                    menu_image_id=menu_image.id,
-                    approach=extractor.approach,
-                    provider=extractor.provider,
-                    model_name=extractor.model_name,
-                    pipeline_version=extractor.pipeline_version,
-                )
-            )
+        add_images(session, import_id, [(key, image.filename) for key, image in zip(keys, images)], extractor)
         session.commit()
     except Exception as error:
         # Storage and the database share no transaction: undo the stored images by hand.

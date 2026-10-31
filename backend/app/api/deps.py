@@ -9,6 +9,7 @@ from pathlib import Path
 
 import boto3
 from botocore.config import Config
+from fastapi import Depends, Request
 
 from app.adapters.business_verification import BusinessVerifier
 from app.adapters.certificate_ocr import CertificateOcr
@@ -16,6 +17,7 @@ from app.adapters.extraction import MenuExtractor, MockMenuExtractor
 from app.adapters.matching_llm import load_matching_llm_settings
 from app.adapters.storage import ImageStorage, LocalImageStorage, S3ImageStorage
 from app.matching.llm_layer import LLMLayerConfig
+from app.services.image_links import ImageLinks
 from app.services.request_limits import DailyRequestLimiter, InMemoryDailyLimiter, utc_now
 
 logger = logging.getLogger(__name__)
@@ -52,6 +54,11 @@ def get_image_storage() -> ImageStorage:
         ttl = timedelta(seconds=int(os.getenv("S3_URL_TTL_SECONDS", "900")))
         return S3ImageStorage(client, bucket, url_ttl=ttl)
     raise RuntimeError(f"Unsupported IMAGE_STORAGE: {kind!r} (supported: local, s3)")
+
+
+def get_image_links(request: Request, storage: ImageStorage = Depends(get_image_storage)) -> ImageLinks:
+    """Viewing URLs for stored photos, joined with this request's base URL for local storage."""
+    return ImageLinks(storage, str(request.base_url))
 
 
 @lru_cache(maxsize=1)

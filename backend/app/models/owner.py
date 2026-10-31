@@ -1,7 +1,7 @@
 """Bar owners: a user's application to own a bar, and the ownership an operator grants (spec 3.11).
 
 Ownership is a user-to-bar relationship, not a user type. The tables follow docs/schema_draft.dbml;
-the CHECK constraints and partial unique indexes below are the rules of docs/schema_guide.md 5.3 and 5.4.
+the CHECK constraints and unique indexes below are the rules of docs/schema_guide.md 5.3 to 5.5.
 """
 
 from datetime import date, datetime
@@ -16,7 +16,9 @@ from sqlalchemy import (
     Enum as SQLAlchemyEnum,
     ForeignKey,
     Index,
+    SmallInteger,
     String,
+    UniqueConstraint,
     func,
     text,
 )
@@ -182,4 +184,30 @@ class BarOwner(Base):
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     revoked_by_user_id: Mapped[UUID | None] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
+
+
+class BarOwnerApplicationMenuImage(Base):
+    """A menu photo attached to a pending application. Stores the object-storage key, never the bytes.
+
+    Approving the application turns the photos into the first menu import's images, which point to the
+    same storage keys; rejecting or canceling it deletes the rows and the files.
+    """
+
+    __tablename__ = "bar_owner_application_menu_images"
+    __table_args__ = (
+        UniqueConstraint("application_id", "image_order", name="uq_bar_owner_application_menu_images_image_order"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    application_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("bar_owner_applications.id"), nullable=False
+    )
+    storage_key: Mapped[str] = mapped_column(String(500), nullable=False)
+    original_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    image_order: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    # Lets the import created on approval compute its request fingerprint without reading the files.
+    content_sha256: Mapped[str] = mapped_column(CHAR(64), nullable=False)
+    uploaded_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )

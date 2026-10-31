@@ -164,6 +164,16 @@ def test_customer_is_forbidden_and_anonymous_is_unauthenticated(client, image_st
     assert upload(client, bar.id, {}).json()["error"]["code"] == "UNAUTHENTICATED"
 
 
+def test_a_long_file_name_is_cut_to_fit(client, db_session, image_storage, operator, bar):
+    long_name = "p" * 300 + ".jpg"
+
+    response = upload(client, bar.id, operator, images=[(long_name, JPEG, "image/jpeg")])
+
+    assert response.status_code == 202, response.text
+    menu_import = db_session.get(MenuImport, response.json()["menuImportId"])
+    assert menu_import.images[0].original_filename == long_name[:255]
+
+
 def test_too_many_images(client, db_session, image_storage, operator, bar):
     images = [(f"p{n}.jpg", JPEG, "image/jpeg") for n in range(menu_import_upload.MAX_IMAGES + 1)]
 
