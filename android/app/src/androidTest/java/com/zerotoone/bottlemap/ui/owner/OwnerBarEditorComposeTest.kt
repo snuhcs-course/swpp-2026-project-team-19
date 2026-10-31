@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -68,7 +69,7 @@ class OwnerBarEditorComposeTest {
         val initial = vm.preview("fixture-bar", 0)!!.bar.name
         compose.onNodeWithTag("owner-info-name").performTextClearance()
         compose.onNodeWithTag("owner-info-name").performTextInput("임시 텍스트")
-        compose.onNodeWithText("뒤로가기", useUnmergedTree = true).performClick()
+        compose.onNodeWithContentDescription("뒤로가기").performClick()
         compose.onNodeWithText("저장하지 않고 나가기").assertIsDisplayed().performClick()
         compose.runOnIdle {
             assertEquals(initial, vm.preview("fixture-bar", 0)!!.bar.name)
