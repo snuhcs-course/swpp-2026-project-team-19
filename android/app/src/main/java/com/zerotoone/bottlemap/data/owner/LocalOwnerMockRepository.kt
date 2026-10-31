@@ -266,9 +266,13 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(s.bars.any { it.barId == barId })
             s.copy(bars = s.bars.map { bar ->
                 if (bar.barId != barId) bar else bar.copy(
-                    // One active quick override per bar; preserve unrelated future exceptions.
+                    // The management-home quick action is one current selection, not
+                    // a stack of hidden states to restore after the user presses X.
+                    // Keep unrelated non-quick fixture/scheduled exceptions.
                     exceptions = bar.exceptions.filterNot {
                         it.exceptionId == exception.exceptionId ||
+                            (exception.exceptionId.startsWith("quick-") &&
+                                it.exceptionId.startsWith("quick-")) ||
                             (it.fromEpochDay <= exception.toEpochDay &&
                                 exception.fromEpochDay <= it.toEpochDay)
                     } + exception
@@ -285,7 +289,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             })
             s.copy(bars = s.bars.map { bar ->
                 if (bar.barId == barId) bar.copy(exceptions = bar.exceptions.filterNot {
-                    it.exceptionId == exceptionId
+                    it.exceptionId == exceptionId ||
+                        (exceptionId.startsWith("quick-") && it.exceptionId.startsWith("quick-"))
                 }) else bar
             }) to Unit
         }
