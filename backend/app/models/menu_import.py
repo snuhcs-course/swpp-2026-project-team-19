@@ -11,6 +11,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import (
     JSON,
+    CheckConstraint,
     DateTime,
     Enum as SQLAlchemyEnum,
     ForeignKey,
@@ -110,6 +111,7 @@ class MenuImport(Base):
     __table_args__ = (
         Index("ix_menu_imports_bar_id_created_at", "bar_id", "created_at"),
         Index("ix_menu_imports_bar_id_status", "bar_id", "status"),
+        CheckConstraint("recovery_count >= 0", name="ck_menu_imports_recovery_count"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
@@ -128,6 +130,8 @@ class MenuImport(Base):
     review_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default=text("0"))
     owner_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     review_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # How many times processing was resumed after a server restart; past the limit the import fails.
+    recovery_count: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0, server_default=text("0"))
     created_at: Mapped[datetime] = _now_column()
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 

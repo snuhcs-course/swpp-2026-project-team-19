@@ -358,6 +358,7 @@ Table menu_imports {
   review_version integer [not null, default: 0, note: 'Incremented whenever the consolidated review payload is regenerated']
   owner_note text
   review_confirmed_at timestamptz
+  recovery_count smallint [not null, default: 0, note: 'Times processing was resumed after a server restart; past 3 the import fails instead (CHECK >= 0)']
   created_at timestamptz [not null]
   completed_at timestamptz
 

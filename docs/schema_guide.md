@@ -497,6 +497,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `review_version` | `integer`, NOT NULL, 기본 `0` | `3` | 통합 검수 응답을 다시 생성할 때 증가한다. 운영자가 본 버전과 제출 시점의 버전을 비교해 오래된 화면에서의 반영을 막는다. |
 | `owner_note` | `text`, nullable | `업장 허가 후 9월 메뉴 촬영` | 업장 허가 출처 특이사항 등의 운영 메모다. 현재 이름은 향후 업주 흐름을 고려한 표현이다. |
 | `review_confirmed_at` | `timestamptz`, nullable | `2026-09-28T04:30:00Z` | 항목·옵션·상품 매칭·신규 등록 제안·메뉴 diff를 한 번에 최종 승인한 시점이다. |
+| `recovery_count` | `smallint`, NOT NULL, 기본 `0` | `1` | 서버 재시작으로 끊긴 처리를 이어서 처리한 횟수다. 3번을 넘으면 더 이어서 처리하지 않고 `failed`로 바꾼다. 특정 사진 때문에 재시작이 반복되는 것을 막는다. 0 이상이어야 한다(CHECK). |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:40:00Z` | 등록 작업 시작 시점이다. |
 | `completed_at` | `timestamptz`, nullable | `2026-09-28T04:31:00Z` | 작업이 최종 상태(`applied`, `failed`, `canceled`)가 된 시점이다. 진행 중이면 null이다. |
 

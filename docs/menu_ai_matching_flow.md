@@ -374,6 +374,17 @@ extraction_runs.completed_at = 현재 시각
 
 모든 이미지의 실행, 항목 역할 분류, 상품 후보 생성과 임시 diff 생성이 성공하면 `menu_imports.status`를 `ready_for_review`로 변경한다.
 
+#### 3.7.1 서버 재시작 뒤 이어서 처리
+
+현재 AI 처리는 API 프로세스 안의 백그라운드 작업이라, 배포나 장애로 프로세스가 다시 시작되면 처리가 끊긴다. 서버는 시작할 때 요청을 받기 전에 `uploaded` 또는 `processing` 상태로 남은 작업을 찾아, 별도 스레드에서 오래된 작업부터 이어서 처리한다. API 프로세스는 하나라는 전제이므로, 시작 시점에 남아 있는 미완료 작업은 모두 끊긴 작업이다.
+
+끊긴 작업을 이어서 처리해도 안전한 이유는 다음과 같다.
+
+- 사진 한 장의 `extracted_items`와 `extracted_options`는 그 실행이 `succeeded`가 되는 커밋에 함께 저장된다. 끊긴 순간 `running`이던 실행에는 저장된 항목이 없으므로 `queued`로 되돌려 다시 추출하고, 이미 `succeeded`인 사진은 다시 추출하지 않는다.
+- 상품 후보, 임시 diff와 `ready_for_review`는 마지막에 한 번에 커밋된다. 매칭 도중 끊기면 아무것도 저장되지 않았으므로 매칭부터 다시 한다.
+
+이어서 처리할 때마다 `menu_imports.recovery_count`를 1 올린다. 특정 사진이 프로세스를 죽여 재시작이 반복되는 것을 막기 위해, 이미 3번 이어서 처리한 작업은 다시 처리하지 않고 `failed`로 바꾼다. 이때 `running`으로 끊긴 실행이 있으면 그 실행을 `failed`로 바꾸므로 API는 `IMAGE_EXTRACTION_FAILED`를 반환하고, 없으면 `PROCESSING_FAILED`를 반환한다(API 명세 5.3).
+
 ### 3.8 프론트엔드 상태 조회
 
 프론트엔드는 응답받은 `statusUrl`로 처리 상태를 조회한다. 조회 간격은 서버가 응답에 담아 주는 `pollAfterMs`(현재 3초)를 따른다. 응답 형식은 API 명세 5장을 기준으로 한다.

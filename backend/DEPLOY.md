@@ -221,6 +221,7 @@ The seed upserts by id: rows in the seed overwrite changes made to the same rows
 
 - **Logs:** `journalctl -u bottlemap-api -f` (API), `journalctl -u caddy -f` (HTTPS, proxy).
 - **Settings:** edit `backend/.env`, then `sudo systemctl restart bottlemap-api`.
+- **Restarts during menu processing:** menu photo processing runs inside the API process, so a restart (a deployment included) stops it. At start-up the service resumes the unfinished imports and logs `Recovering N menu imports interrupted by a restart`; an import resumed 3 times fails instead and logs `failed after 3 recoveries` (`journalctl -u bottlemap-api | grep -i "recover"`). The owner then uploads the photos again. Keep a single API process (no `--workers`): the recovery assumes nothing else is processing at start-up.
 - **Catalog changes:** load them with the Seed catalog workflow ([Loading the catalog seed](#loading-the-catalog-seed)).
 - **Real extraction:** set `MENU_EXTRACTOR=gemini` and `GEMINI_API_KEY` (a paid-tier key, so uploaded menu photos are not used for training) and restart. The settings are checked at start-up.
 - **Google login (Supabase):** `SUPABASE_URL` in `.env`, then restart. If a real Google token gets `503`, check that `SUPABASE_URL` is set and look for `signing keys are unavailable` in `journalctl -u bottlemap-api`. A Free-plan Supabase project is paused after about a week without activity, and then every signed-in request gets `503`; check the project in the Supabase dashboard before a demo.
