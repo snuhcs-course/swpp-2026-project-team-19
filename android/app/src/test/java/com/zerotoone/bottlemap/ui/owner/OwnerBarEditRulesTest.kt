@@ -19,8 +19,10 @@ class OwnerBarEditRulesTest {
         assertNotNull(barInfoError("A", "", "", "", ""))
         assertNotNull(barInfoError("A", "", "서울", "1234X", ""))
         assertNotNull(barInfoError("A", "", "서울", "", "0"))
-        assertNotNull(barInfoError("A", "x".repeat(161), "서울", "", ""))
+        assertNotNull(barInfoError("A", "x".repeat(101), "서울", "", ""))
         assertNull(barInfoError("A", "소개", "서울", "02-1234-5678", "30"))
+        assertNotNull(barInfoError("A", "소개", "서울", "", "1000"))
+        assertNull(barInfoError("A".repeat(150), "소개", "서울", "", ""))
         val photo = MockPhoto("p1", "content://bar/cover", MockPhotoKind.BAR_GALLERY)
         val updated = withBarInfo(
             bar.copy(gallery = listOf(photo), tags = listOf("몰트")),
@@ -52,6 +54,31 @@ class OwnerBarEditRulesTest {
         assertEquals(five.filterNot { it == "몰트" }, toggleBarTag(five, " 몰트 "))
         assertEquals(listOf("싱글몰트"), toggleBarTag(emptyList(), " 싱글몰트 "))
         assertTrue(toggleBarTag(listOf("몰트"), "몰트")!!.isEmpty())
+    }
+
+    @Test fun htmlV4PhotoArrowsProtectCoverAndChangeSecondaryOrder() {
+        val images = (1..3).map {
+            MockPhoto("p" + it, "content://photo/" + it, MockPhotoKind.BAR_GALLERY)
+        }
+        assertEquals(images, moveSecondaryBarPhoto(images, 0, 1))
+        assertEquals(images, moveSecondaryBarPhoto(images, 1, -1))
+        assertEquals(listOf("p1", "p3", "p2"),
+            moveSecondaryBarPhoto(images, 1, 1).map { it.photoId })
+        assertEquals(listOf("p3", "p1", "p2"),
+            makeCoverPhoto(images, 2).map { it.photoId })
+    }
+
+    @Test fun htmlV4MondayCopyAppliesOnlyTuesdayToFridayAndKeepsWeekend() {
+        val monday = MockWeeklyHours(1, closed = false,
+            openMinutes = 18 * 60, closeMinutes = 60, closesNextDay = true)
+        val saturday = MockWeeklyHours(6, closed = true)
+        val copied = copyMondayToWeekdays(listOf(monday, saturday))
+        assertEquals(listOf(1, 2, 3, 4, 5, 6), copied.map { it.isoDayOfWeek })
+        assertTrue(copied.filter { it.isoDayOfWeek in 2..5 }
+            .all { it.openMinutes == 18 * 60 && it.closeMinutes == 60 && it.closesNextDay })
+        assertEquals(saturday, copied.last())
+        val unset = copyMondayToWeekdays(listOf(saturday))
+        assertEquals(listOf(saturday), unset)
     }
 
     @Test fun weeklyHourValidationSeparatesUnsetClosedRegularAndOvernight() {
