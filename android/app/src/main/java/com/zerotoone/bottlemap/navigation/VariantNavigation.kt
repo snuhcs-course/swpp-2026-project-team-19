@@ -24,8 +24,8 @@ import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerOperatingQuickScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuQuickEntryScreen
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
-import com.zerotoone.bottlemap.ui.owner.OwnerBarInfoEditorScreen
-import com.zerotoone.bottlemap.ui.owner.OwnerBarPhotoEditorScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerInfoHtmlV4Screen
+import com.zerotoone.bottlemap.ui.owner.OwnerPhotoHtmlV4Screen
 import com.zerotoone.bottlemap.ui.owner.OwnerBarTagsEditorScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerBarHoursEditorScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerBarCustomerPreviewScreen
@@ -109,15 +109,12 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         viewModel = data,
                         onBack = { navController.popBackStack() },
                     )
-                    OwnerPage.MGR_INFO -> OwnerBarInfoEditorScreen(
+                    OwnerPage.MGR_INFO -> OwnerInfoHtmlV4Screen(
                         state = mockState, viewModel = data,
                         onBack = { navController.popBackStack() },
                         onPhotos = { navController.navigate(OwnerPage.MGR_PHOTOS.route) },
-                        onTags = { navController.navigate(OwnerPage.MGR_TAGS.route) },
-                        onHours = { navController.navigate(OwnerPage.MGR_HOURS.route) },
-                        onStatus = { navController.navigate(OwnerPage.MGR_STATUS.route) },
                     )
-                    OwnerPage.MGR_PHOTOS -> OwnerBarPhotoEditorScreen(
+                    OwnerPage.MGR_PHOTOS -> OwnerPhotoHtmlV4Screen(
                         state = mockState, viewModel = data,
                         onBack = { navController.popBackStack() },
                     )
