@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -36,10 +35,9 @@ class OwnerBarEditorComposeTest {
         var exits = 0
         compose.setContent {
             MaterialTheme {
-                OwnerBarInfoEditorScreen(
+                OwnerInfoHtmlV4Screen(
                     state = vm.state.collectAsState().value, viewModel = vm,
-                    onBack = { exits++ }, onPhotos = {}, onTags = {},
-                    onHours = {}, onStatus = {}
+                    onBack = { exits++ }, onPhotos = {}
                 )
             }
         }
@@ -56,15 +54,15 @@ class OwnerBarEditorComposeTest {
         }
     }
 
-    @Test fun unsavedBackShowsDiscardPromptWithoutMutatingSharedPreview() {
+    @Test fun unsavedBackDiscardsDraftWithoutMutatingSharedPreview() {
         val repository = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         val vm = OwnerMockViewModel(repository)
         var exited = false
         compose.setContent {
             MaterialTheme {
-                OwnerBarInfoEditorScreen(
+                OwnerInfoHtmlV4Screen(
                     vm.state.collectAsState().value, vm, onBack = { exited = true },
-                    onPhotos = {}, onTags = {}, onHours = {}, onStatus = {}
+                    onPhotos = {}
                 )
             }
         }
@@ -72,22 +70,23 @@ class OwnerBarEditorComposeTest {
         compose.onNodeWithTag("owner-info-name").performTextClearance()
         compose.onNodeWithTag("owner-info-name").performTextInput("임시 텍스트")
         compose.onNodeWithContentDescription("뒤로가기").performClick()
-        compose.onNodeWithText("저장하지 않고 나가기").assertIsDisplayed().performClick()
+        // HTML goes straight back: the info draft was not submitted.
         compose.runOnIdle {
             assertEquals(initial, vm.preview("fixture-bar", 0)!!.bar.name)
             assertEquals(true, exited)
         }
     }
 
-    @Test fun photoAndTagEditorsOfferExplicitSaveActions() {
+    @Test fun photoEditorUsesImmediateActionsAndDoneButton() {
         val vm = OwnerMockViewModel(
             LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         )
         compose.setContent {
             MaterialTheme {
-                OwnerBarPhotoEditorScreen(vm.state.collectAsState().value, vm, onBack = {})
+                OwnerPhotoHtmlV4Screen(vm.state.collectAsState().value, vm, onBack = {})
             }
         }
-        compose.onNodeWithTag("owner-photo-save").assertExists()
+        compose.onNodeWithTag("owner-photo-add").assertExists()
+        compose.onNodeWithTag("owner-photo-done").assertExists()
     }
 }
