@@ -88,6 +88,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onInfo = { navController.navigate(OwnerPage.MGR_INFO.route) },
                         onStatus = { navController.navigate(OwnerPage.MGR_STATUS.route) },
                         onMenu = { navController.navigate(OwnerPage.MGR_MENU.route) },
+                        onAddBar = { navController.navigate(OwnerRoutes.ADD_BAR) },
                         onJob = { status ->
                             navController.navigate(
                                 if (status == MockImportStatus.READY_FOR_REVIEW)
