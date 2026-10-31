@@ -45,5 +45,20 @@ internal fun registrationHistoryFor(page: String, kind: MockApplicationKind): Li
     return if (index <= 0) emptyList() else path.take(index)
 }
 
-/** The copy affordance stays in place even if no shop phone can be copied yet. */
+/**
+ * Name edits after selecting an existing candidate must not preserve a stale bar ID.
+ * This is a local UI draft transition, not a backend request mapping.
+ */
+internal fun updatedBarNameDraft(draft: MockRegistrationDraft, rawName: String): MockRegistrationDraft {
+    val name = rawName.take(150)
+    val changedSelectedBar = draft.kind == MockApplicationKind.EXISTING_BAR &&
+        !draft.proposedBarName.trim().equals(name.trim(), ignoreCase = true)
+    return if (changedSelectedBar) {
+        draft.copy(proposedBarName = name, kind = MockApplicationKind.NEW_BAR, existingBarId = null)
+    } else {
+        draft.copy(proposedBarName = name)
+    }
+}
+
+/** Whether the existing shop number can be copied into the private contact field. */
 internal fun canCopyShopPhone(phone: String): Boolean = phone.isNotBlank() && validOwnerPhone(phone)
