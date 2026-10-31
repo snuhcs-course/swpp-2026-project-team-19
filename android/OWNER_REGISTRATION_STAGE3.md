@@ -105,14 +105,37 @@ from actual Owner actions and remain non-production.
   restoration uses the checkpoint, rebuilds form navigation history, and supports
   pre-migration drafts: photos present but no checkpoint resume at MENUS.
   Photo selections/removals preserve checkpoint and selected order.
-- On contact screen, \`매장 번호와 같아요\` stays in the same location. Its enabled
-  state is determined only by whether a valid shop phone exists; the user's current
-  private contact value does not hide the affordance. Without a shop phone, it is
-  visible but disabled, and private contact remains independently editable.
+- On contact screen, `매장 번호와 같아요` appears only when a shop phone exists.
+  Valid shop numbers can be copied; an invalid nonempty number disables copying.
+  After `가게 전화가 없어요`, the action is hidden while the private contact
+  remains independently editable.
 - JVM tests cover restart persisted checkpoint, legacy migration, new/claimed-bar
   Back predecessor, photo list mutation, and 02/0507 copy availability. Actual
   force-stop / Photo Picker / 320dp / IME behavior remains for Galaxy S23 rerun.
 - No real applicant data should be entered in unencrypted local Mock state.
+
+## PR #82 Codex review follow-up (2026-10-31)
+
+- Editing the name after selecting an existing-bar candidate clears the old
+  `EXISTING_BAR` selection and candidate ID if the chosen name changes.
+- Pending new-bar duplicates follow API contract §3.11.2: compare the normalized
+  business registration number, not the display name.
+- Existing owners can return to the Owner dashboard at any registration step
+  without clearing their saved add-bar draft. Returning to registration resumes
+  the saved step rather than resetting the draft.
+- New JVM regressions cover stale bar IDs, name changes, duplicate business
+  numbers, same-name distinct businesses, and owned-bar draft persistence.
+- Authentication/permission findings require a human review checkpoint:
+  AccountScreen gates Owner entry on `SignedIn`, and AuthViewModel invalidates
+  identity immediately on logout. The local Mock snapshot is not scoped to a
+  particular Google account, does not grant backend permissions, and must not
+  hold real applicant personal information. Review logout/account switching
+  before treating the prototype as production owner authorization.
+
+Galaxy S23 user verification passed all seven follow-up scenarios on the prior
+QA-fix build. The small subsequent hide-copy-action change was explicitly exempted
+from a separate device test. These Codex follow-up changes have not been
+reverified on a physical device; CI and JVM verification are tracked separately.
 
 ## CI and manual verification
 
