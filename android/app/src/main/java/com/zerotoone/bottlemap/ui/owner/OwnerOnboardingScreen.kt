@@ -345,7 +345,7 @@ fun OwnerOnboardingScreen(
                                 val saved=snapshot?.registrationDraft
                                 if(saved!=null) {
                                     val target=RegPage.valueOf(registrationResumePage(saved))
-                                    history=registrationHistoryFor(target,saved.kind)
+                                    history=registrationHistoryFor(target.name,saved.kind)
                                     screen=target
                                     error=null
                                 } else {
