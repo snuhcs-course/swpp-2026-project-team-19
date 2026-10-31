@@ -481,7 +481,14 @@ fun OwnerOnboardingScreen(
                         OwnerV4Question("매장 이름을\n알려주세요",
                             "손님에게 보이는 이름이에요. 간판 이름으로 적어 주세요.")
                         OwnerV4Input("매장 이름",draft.proposedBarName,{
-                            save(updatedBarNameDraft(draft,it))
+                            val edited=updatedBarNameDraft(draft,it)
+                            if(editingReview && draft.kind==MockApplicationKind.EXISTING_BAR &&
+                                edited.kind==MockApplicationKind.NEW_BAR) {
+                                // Changing from a claim to a new bar requires its photo/address/phone steps.
+                                editingReview=false
+                                history=registrationHistoryFor(RegPage.BARNAME.name,edited.kind)
+                            }
+                            save(edited)
                         },placeholder="예: 몰트 앤 무드")
                         exactMatches.forEach{ candidate ->
                             OwnerV4Panel("BottleMap에 이미 등록된 매장\n"+candidate.name+"\n"+candidate.address)
