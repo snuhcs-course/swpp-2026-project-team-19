@@ -14,6 +14,8 @@ data class MockOwnerSnapshot(
     val menuItems: List<MockBarMenuItem> = emptyList(),
     val imports: List<MockMenuImport> = emptyList(),
     val selectedBarId: String? = null,
+    val dismissedApplicationIds: Set<String> = emptySet(), // local-only hidden rejected cards
+    val existingBarCandidates: List<MockBar> = emptyList(), // Local-only discovery fixtures, not owned bars
     val nextLocalId: Long = 1L,
 )
 
@@ -45,12 +47,16 @@ data class MockRegistrationDraft(
     val existingBarId: String? = null,
     val proposedBarName: String = "",
     val proposedBarAddress: String = "", // 3.11.2 required for new_bar; local-only draft
+    val proposedBarAddressDetail: String = "", // Mock-only optional address line
     val businessNumberDigits: String = "",
     val representativeName: String = "",
     val openingDateIso: String = "",
     val contactPhone: String = "",
+    val storePhone: String = "", // local-only public shop phone
+    val certificatePhoto: MockPhoto? = null, // Mock-only stored reference to registration certificate
     val applicantGallery: List<MockPhoto> = emptyList(),
     val initialMenuPhotos: List<MockPhoto> = emptyList(),
+    val resumePageKey: String? = null, // Local UI checkpoint; no Backend field
 )
 
 enum class MockApplicationStatus { PENDING, APPROVED, REJECTED, CANCELED }
@@ -68,6 +74,8 @@ data class MockOwnerApplication(
     val businessNumberDigits: String? = null,
     val openingDateIso: String? = null,
     val contactPhone: String? = null,
+    val storePhone: String? = null, // local-only public phone
+    val rejectionReason: String? = null, // Mock-only operator fixture reason
     val submittedAtEpochMs: Long = 0L,
     val registrationPhotos: List<MockPhoto> = emptyList(), // C05 unagreed
 )
@@ -191,3 +199,14 @@ sealed interface MockOwnerLoadState {
 fun MockOwnerSnapshot.asLoadState(): MockOwnerLoadState =
     if (bars.isEmpty() && applications.isEmpty() && imports.isEmpty() && registrationDraft == null)
         MockOwnerLoadState.Empty(this) else MockOwnerLoadState.Ready(this)
+
+/** Entry routing is a local Owner UI policy; no server status is inferred. */
+fun MockOwnerSnapshot.openSingleBarManager(): Boolean =
+    bars.size == 1 && registrationDraft == null &&
+        applications.none { it.applicationId !in dismissedApplicationIds &&
+            it.status in listOf(MockApplicationStatus.PENDING, MockApplicationStatus.REJECTED) }
+
+/** Local display readiness; never maps directly to Backend active/inactive. */
+fun MockOwnerSnapshot.hasPublishedInitialReview(barId: String): Boolean =
+    imports.any { it.barId == barId && it.status == MockImportStatus.APPLIED } &&
+        menuItems.any { it.barId == barId }

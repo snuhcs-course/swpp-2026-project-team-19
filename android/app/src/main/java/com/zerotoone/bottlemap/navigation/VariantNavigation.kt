@@ -1,6 +1,9 @@
 package com.zerotoone.bottlemap.navigation
 
 import android.net.Uri
+import androidx.compose.runtime.LaunchedEffect
+import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
+import com.zerotoone.bottlemap.data.owner.openSingleBarManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -16,7 +19,7 @@ import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerComponentGallery
-import com.zerotoone.bottlemap.ui.owner.OwnerEntryScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 
 /** One Android artifact: everyone starts in Customer, with Owner accessible from My Page. */
@@ -25,18 +28,42 @@ internal const val variantStartDestination = "customer"
 internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
-            val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
+            val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                 OwnerMockRuntime.repository(LocalContext.current)))
-            val mockState = data.state.collectAsStateWithLifecycle().value
-            OwnerEntryScreen(
-                mockState = mockState,
-                onRetry = data::retry,
+            val mockState = ownerViewModel.state.collectAsStateWithLifecycle().value
+            val snapshot = when (mockState) {
+                is MockOwnerLoadState.Ready -> mockState.snapshot
+                is MockOwnerLoadState.Empty -> mockState.snapshot
+                else -> null
+            }
+            val directManager = snapshot?.openSingleBarManager() == true
+            LaunchedEffect(directManager) {
+                if (directManager) {
+                    navController.navigate(OwnerPage.MGR_HOME.route) {
+                        popUpTo(OwnerRoutes.ENTRY) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
+            if (!directManager) OwnerOnboardingScreen(
+                viewModel = ownerViewModel,
                 onBack = { navController.popBackStack() },
-                onOpenGroup = { group -> navController.navigate(OwnerRoutes.groupStart(group)) },
+                onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
+                onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 onComponents = { navController.navigate(OwnerRoutes.COMPONENTS) },
-                onOpenLegacyUpload = OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
+                onLegacyDebugUpload = OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
                     { navController.navigate(route) }
                 },
+            )
+        }
+        composable(OwnerRoutes.ADD_BAR) {
+            OwnerOnboardingScreen(
+                viewModel = viewModel(factory = OwnerMockViewModel.Factory(
+                    OwnerMockRuntime.repository(LocalContext.current))),
+                onBack = { navController.popBackStack() },
+                onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
+                onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
+                startRegistration = true,
             )
         }
         composable(OwnerRoutes.COMPONENTS) {
@@ -54,8 +81,21 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     onBack = { navController.popBackStack() },
                     onNavigate = { next -> navController.navigate(next.route) },
                     onHome = {
-                        navController.popBackStack(OwnerRoutes.ENTRY, inclusive = false)
+                        if (!navController.popBackStack(OwnerRoutes.ENTRY, inclusive = false)) {
+                            navController.popBackStack(OwnerRoutes.GRAPH, inclusive = true)
+                        }
                     },
+                    onAddBar = if (page == OwnerPage.MGR_HOME) {
+                        { navController.navigate(OwnerRoutes.ADD_BAR) }
+                    } else null,
+                    onFirstReview = if (page == OwnerPage.MGR_HOME) {
+                        { navController.navigate(OwnerPage.PHOTO_START.route) }
+                    } else null,
+                    onLegacyDebugUpload = if (page == OwnerPage.MGR_HOME) {
+                        OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
+                            { navController.navigate(route) }
+                        }
+                    } else null,
                 )
             }
         }

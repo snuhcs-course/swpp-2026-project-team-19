@@ -82,6 +82,7 @@ enum class OwnerPage(val group: OwnerFlowGroup, val htmlId: String, val title: S
 object OwnerRoutes {
     const val GRAPH = "owner"
     const val ENTRY = "owner/entry"
+    const val ADD_BAR = "owner/add-bar"
     const val COMPONENTS = "owner/components"
     const val LEGACY_UPLOAD = "owner/menu-upload"
     const val LEGACY_REVIEW = "owner/extraction-review/{menuImportId}"
