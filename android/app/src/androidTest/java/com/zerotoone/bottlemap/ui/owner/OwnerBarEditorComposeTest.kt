@@ -77,6 +77,48 @@ class OwnerBarEditorComposeTest {
         }
     }
 
+    @Test fun inlineTagSelectionOnlyReachesCustomerAfterFormSave() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        compose.setContent {
+            MaterialTheme {
+                OwnerInfoHtmlV4Screen(
+                    vm.state.collectAsState().value, vm,
+                    onBack = {}, onPhotos = {})
+            }
+        }
+        val before = vm.preview("fixture-bar", 0)!!.bar.tags
+        compose.onNodeWithTag("owner-tag-search").performTextInput("혼술바")
+        compose.runOnIdle { assertEquals(before, vm.preview("fixture-bar", 0)!!.bar.tags) }
+        compose.onNodeWithText("혼술바 ＋").performClick()
+        compose.onNodeWithTag("owner-info-save").performClick()
+        compose.runOnIdle {
+            assertEquals(true, vm.preview("fixture-bar", 0)!!.bar.tags.contains("혼술바"))
+        }
+    }
+
+    @Test fun selectingCoverInTwoColumnGridImmediatelyUpdatesSharedPreview() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        val old = vm.preview("fixture-bar", 0)!!.bar
+        val first = com.zerotoone.bottlemap.data.owner.MockPhoto(
+            "first", "content://mock/first",
+            com.zerotoone.bottlemap.data.owner.MockPhotoKind.BAR_GALLERY)
+        val second = first.copy(photoId = "second", uri = "content://mock/second")
+        vm.saveBar(old.copy(gallery = listOf(first, second)))
+        compose.setContent {
+            MaterialTheme {
+                OwnerPhotoHtmlV4Screen(
+                    vm.state.collectAsState().value, vm, onBack = {})
+            }
+        }
+        compose.onNodeWithTag("owner-photo-tile-1").performClick()
+        compose.onNodeWithText("대표 사진 등록").performClick()
+        compose.runOnIdle {
+            assertEquals("second", vm.preview("fixture-bar", 0)!!.bar.gallery.first().photoId)
+        }
+    }
+
     @Test fun photoEditorUsesImmediateActionsAndDoneButton() {
         val vm = OwnerMockViewModel(
             LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
