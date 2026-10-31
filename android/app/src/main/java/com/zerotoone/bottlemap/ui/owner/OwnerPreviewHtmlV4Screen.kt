@@ -67,7 +67,7 @@ fun OwnerPreviewHtmlV4Screen(
     var menuSearch by rememberSaveable { mutableStateOf("") }
     var drag by remember { mutableFloatStateOf(0f) }
     val clipboard = LocalClipboardManager.current
-    val now = System.currentTimeMillis()
+    val now = rememberOwnerNow()
     val activeException = bar?.let { homeOperatingException(it, now) }?.takeIf {
         ownerToday(now).toEpochDay() in it.fromEpochDay..it.toEpochDay ||
             (it.kind == MockExceptionKind.CUSTOM_HOURS && it.closesNextDay &&
