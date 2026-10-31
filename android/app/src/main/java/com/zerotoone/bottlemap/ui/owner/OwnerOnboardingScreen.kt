@@ -342,7 +342,7 @@ fun OwnerOnboardingScreen(
                         OwnerRegistrationDashboard(
                             snapshot=requireNotNull(snapshot), debug=com.zerotoone.bottlemap.BuildConfig.DEBUG,
                             onRegister={
-                                val saved=snapshot.registrationDraft
+                                val saved=snapshot?.registrationDraft
                                 if(saved!=null) {
                                     val target=RegPage.valueOf(registrationResumePage(saved))
                                     history=registrationHistoryFor(target,saved.kind)
