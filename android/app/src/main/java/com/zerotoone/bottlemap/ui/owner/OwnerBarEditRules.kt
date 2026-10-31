@@ -11,13 +11,13 @@ import com.zerotoone.bottlemap.data.owner.MockWeeklyHours
 internal fun barInfoError(
     name: String, description: String, address: String, phone: String, pourMl: String
 ): String? = when {
-    name.trim().length !in 1..100 -> "매장명은 1~100자로 입력해 주세요."
-    description.length > 160 -> "한 줄 소개는 160자 이하여야 해요."
+    name.trim().length !in 1..150 -> "매장명은 1~150자로 입력해 주세요."
+    description.length > 100 -> "한 줄 소개는 100자 이하여야 해요."
     address.trim().length !in 1..500 -> "주소는 1~500자로 입력해 주세요."
-    phone.isNotBlank() && !phone.matches(Regex("^[+0-9() .-]{8,20}$")) ->
+    phone.length > 30 || (phone.isNotBlank() && !phone.matches(Regex("^[+0-9() .-]{1,30}$"))) ->
         "전화번호는 숫자와 전화번호 기호만 입력해 주세요."
-    pourMl.isNotBlank() && (pourMl.toIntOrNull() == null || pourMl.toInt() !in 1..1000) ->
-        "기본 잔 용량은 1~1000ml 사이로 입력해 주세요."
+    pourMl.isNotBlank() && (pourMl.toIntOrNull() == null || pourMl.toInt() !in 1..999) ->
+        "기본 잔 용량은 1~999ml 사이로 입력해 주세요."
     else -> null
 }
 
@@ -73,4 +73,22 @@ internal fun weeklyHoursError(hours: List<MockWeeklyHours>): String? = when {
 internal fun withWeeklyHours(bar: MockBar, hours: List<MockWeeklyHours>): MockBar {
     require(weeklyHoursError(hours) == null)
     return bar.copy(weeklyHours = hours.sortedBy { it.isoDayOfWeek })
+}
+
+/**
+ * ACTION_FIRST_v4 photo editor protects the first (cover) position from arrow
+ * movement. Cover assignment is the only operation that can move a non-cover
+ * photo into the first position.
+ */
+internal fun moveSecondaryBarPhoto(
+    photos: List<MockPhoto>, index: Int, offset: Int,
+): List<MockPhoto> = if (index <= 0 || index + offset <= 0)
+    photos else moveBarPhoto(photos, index, offset)
+
+/** HTML's "평일에 복사" applies Monday to Tue-Fri only. */
+internal fun copyMondayToWeekdays(hours: List<MockWeeklyHours>): List<MockWeeklyHours> {
+    val monday = hours.firstOrNull { it.isoDayOfWeek == 1 }
+    return (hours.filterNot { it.isoDayOfWeek in 2..5 } +
+        (2..5).mapNotNull { monday?.copy(isoDayOfWeek = it) })
+        .sortedBy { it.isoDayOfWeek }
 }
