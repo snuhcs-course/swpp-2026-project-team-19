@@ -32,7 +32,8 @@ data class MockBar(
     val weeklyHours: List<MockWeeklyHours> = emptyList(), // C41 unagreed
     val exceptions: List<MockOperatingException> = emptyList(), // C42 unagreed
     val defaultPourMl: Int? = null, // R16 unagreed
-    val lastVerifiedAtEpochMs: Long? = null, // C11 unagreed
+    val lastVerifiedAtEpochMs: Long? = null, // Owner confirmed the currently sold menu
+    val lastMenuPublishedAtEpochMs: Long? = null, // Independent from owner verification; local Mock only
 )
 
 enum class MockPhotoKind { BAR_GALLERY, MENU_CAPTURE, REGISTRATION_ATTACHMENT }
