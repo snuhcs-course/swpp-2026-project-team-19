@@ -552,11 +552,13 @@ fun OwnerOnboardingScreen(
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                             verticalAlignment=Alignment.CenterVertically){
                             OwnerStatusLabel("운영팀만 봐요")
-                            TextButton(
-                                onClick={save(draft.copy(contactPhone=draft.storePhone))},
-                                enabled=canCopyShopPhone(draft.storePhone)
-                            ){
-                                Text("매장 번호와 같아요",style=MaterialTheme.typography.labelSmall)
+                            if (draft.storePhone.isNotBlank()) {
+                                TextButton(
+                                    onClick={save(draft.copy(contactPhone=draft.storePhone))},
+                                    enabled=canCopyShopPhone(draft.storePhone)
+                                ){
+                                    Text("매장 번호와 같아요",style=MaterialTheme.typography.labelSmall)
+                                }
                             }
                         }
                         OwnerV4Input("연락받을 번호",formatOwnerPhone(draft.contactPhone),{
