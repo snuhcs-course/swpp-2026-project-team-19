@@ -98,6 +98,26 @@ class OwnerOnboardingValidationTest {
         assertEquals("candidate-1", edited.existingBarId)
     }
 
+    @Test fun rejectingClaimDuringReviewMustVisitNewBarDetails() {
+        val existing = com.zerotoone.bottlemap.data.owner.MockApplicationKind.EXISTING_BAR
+        val newBar = com.zerotoone.bottlemap.data.owner.MockApplicationKind.NEW_BAR
+        assertTrue(needsNewBarDetailsAfterClaimEdit(true, existing, newBar))
+        assertFalse(needsNewBarDetailsAfterClaimEdit(false, existing, newBar))
+        assertFalse(needsNewBarDetailsAfterClaimEdit(true, newBar, newBar))
+        val backHistory = registrationHistoryFor("BARNAME", newBar) + "BARNAME"
+        assertEquals("BARNAME", backHistory.last()) // BARPHOTO Back does not jump to REVIEW.
+        assertEquals("BARPHOTO", registrationHistoryFor("ADDRESS", newBar).last())
+        assertEquals("ADDRESS", registrationHistoryFor("BARPHONE", newBar).last())
+    }
+
+    @Test fun debugCandidatesReceiveDifferentIdsAcrossRegistrations() {
+        val first = newDebugCandidateId()
+        val second = newDebugCandidateId()
+        assertTrue(first.startsWith("fixture-v4-bar-"))
+        assertTrue(second.startsWith("fixture-v4-bar-"))
+        assertFalse(first == second)
+    }
+
     @Test fun existingBarPhotoStepBackReturnsToName() {
         val kind = com.zerotoone.bottlemap.data.owner.MockApplicationKind.EXISTING_BAR
         assertEquals("BARNAME", registrationHistoryFor("MENUS", kind).last())
