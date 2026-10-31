@@ -737,6 +737,27 @@ class LocalOwnerMockRepositoryTest {
         ))).openSingleBarManager())
     }
 
+    @Test fun aNewDebugCandidateCanBeSeededAfterApprovingPreviousCandidate() {
+        val r = repo(InMemoryMockOwnerStateStore())
+        val id1 = com.zerotoone.bottlemap.ui.owner.newDebugCandidateId()
+        val first = MockBar(id1, "첫 후보", "서울시 테스트 주소")
+        r.seedExistingCandidateForFixture(first)
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            kind = MockApplicationKind.EXISTING_BAR,
+            existingBarId = first.barId,
+            businessNumberDigits = "1234567891",
+        ))
+        val applicationId = r.submitRegistrationDraftForFixture()
+        r.approveForFixture(applicationId, first)
+        assertTrue(ready(r).existingBarCandidates.isEmpty())
+
+        val id2 = com.zerotoone.bottlemap.ui.owner.newDebugCandidateId()
+        assertFalse(id1 == id2)
+        r.seedExistingCandidateForFixture(MockBar(id2, "두번째 후보", "서울시 다른 주소"))
+        assertEquals(listOf(id1), ready(r).bars.map { it.barId })
+        assertEquals(listOf(id2), ready(r).existingBarCandidates.map { it.barId })
+    }
+
     @Test fun registrationResumeCheckpointAndMenuOrderSurviveRepositoryRestart() {
         val store = InMemoryMockOwnerStateStore()
         val owner = repo(store)
