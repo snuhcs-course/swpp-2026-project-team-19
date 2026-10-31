@@ -27,6 +27,7 @@ from app.schemas.menu_import import (
     ChangeBefore,
     ChangeBeforeOption,
     ImportAppliedResponse,
+    ImportCanceledResponse,
     ImportFailedResponse,
     ImportFailure,
     ImportProcessingResponse,
@@ -47,6 +48,12 @@ POLL_AFTER_MS = 3000
 def menu_import_not_found(menu_import_id: str) -> ApiError:
     return ApiError(
         404, "MENU_IMPORT_NOT_FOUND", "메뉴 등록 작업을 찾을 수 없습니다.", details={"menuImportId": menu_import_id}
+    )
+
+
+def canceled_response(menu_import: MenuImport) -> ImportCanceledResponse:
+    return ImportCanceledResponse(
+        menuImportId=menu_import.id, barId=menu_import.bar_id, status="canceled", canceledAt=menu_import.completed_at
     )
 
 
@@ -292,4 +299,6 @@ def get_menu_import_status(
             appliedAt=menu_import.review_confirmed_at,
             menuBoardId=board_id,
         )
+    if status == ImportStatus.CANCELED:
+        return canceled_response(menu_import)
     return _review(session, menu_import, storage, base_url)

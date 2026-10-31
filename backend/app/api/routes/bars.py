@@ -62,7 +62,7 @@ def read_bars(
     summary="A bar's menu imports",
     description=(
         "Operator only. Newest first, to return to an unfinished import after closing the app and to "
-        "look back at applied or failed ones. Open one with `GET /api/menu-imports/{menuImportId}`.\n\n"
+        "look back at applied, failed or canceled ones. Open one with `GET /api/menu-imports/{menuImportId}`.\n\n"
         "`status=active` means unfinished: `uploaded`, `processing` and `ready_for_review`. "
         "Imports of inactive bars are listed too.\n\n" + _PAGING
     ),
@@ -80,7 +80,7 @@ def read_bar_menu_imports(
     bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
     status: Annotated[
         ImportStatusFilter,
-        Query(description="`active`, `uploaded`, `processing`, `ready_for_review`, `applied`, `failed` or `all`"),
+        Query(description="`active`, `uploaded`, `processing`, `ready_for_review`, `applied`, `failed`, `canceled` or `all`"),
     ] = "all",
     limit: Limit = 20,
     cursor: Cursor = None,

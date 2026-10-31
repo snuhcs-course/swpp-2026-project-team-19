@@ -165,7 +165,16 @@ class ImportAppliedResponse(BaseModel):
     menuBoardId: UUID | None
 
 
-MenuImportStatusResponse = ImportProcessingResponse | ImportFailedResponse | ImportReviewResponse | ImportAppliedResponse
+class ImportCanceledResponse(BaseModel):
+    menuImportId: UUID
+    barId: UUID
+    status: Literal["canceled"]
+    canceledAt: UtcDateTime
+
+
+MenuImportStatusResponse = (
+    ImportProcessingResponse | ImportFailedResponse | ImportReviewResponse | ImportAppliedResponse | ImportCanceledResponse
+)
 
 
 class MenuImportListItem(BaseModel):
@@ -176,7 +185,7 @@ class MenuImportListItem(BaseModel):
     reviewVersion: int = Field(description="0 until the first review data is ready")
     ownerNote: str | None
     createdAt: UtcDateTime
-    completedAt: UtcDateTime | None = Field(description="When it was applied or failed; null while unfinished")
+    completedAt: UtcDateTime | None = Field(description="When it was applied, failed or canceled; null while unfinished")
 
 
 class MenuImportListResponse(BaseModel):

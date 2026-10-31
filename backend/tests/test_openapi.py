@@ -92,7 +92,13 @@ def test_menu_import_status_documents_every_response_shape(schema):
     success = schema["paths"]["/api/menu-imports/{menuImportId}"]["get"]["responses"]["200"]
     refs = {variant["$ref"].rsplit("/", 1)[-1] for variant in success["content"]["application/json"]["schema"]["anyOf"]}
 
-    assert refs == {"ImportProcessingResponse", "ImportFailedResponse", "ImportReviewResponse", "ImportAppliedResponse"}
+    assert refs == {
+        "ImportProcessingResponse",
+        "ImportFailedResponse",
+        "ImportReviewResponse",
+        "ImportAppliedResponse",
+        "ImportCanceledResponse",
+    }
 
 
 def test_upload_images_render_as_file_pickers(schema):

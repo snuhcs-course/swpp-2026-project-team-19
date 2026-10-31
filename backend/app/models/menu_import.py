@@ -37,6 +37,7 @@ class ImportStatus(str, Enum):
     READY_FOR_REVIEW = "ready_for_review"
     APPLIED = "applied"
     FAILED = "failed"
+    CANCELED = "canceled"
 
 
 class ImportMode(str, Enum):

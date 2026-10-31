@@ -1,5 +1,5 @@
 {
   "_comment": "Read by backend/ci/check_test_report.py in Backend CI. min_tests and allowed_skips guard against tests being deleted or skipped; change them only in a PR that says why. CI runs every test (full checkout, test database), so no skip is expected.",
-  "min_tests": 1292,
+  "min_tests": 1424,
   "allowed_skips": {}
 }

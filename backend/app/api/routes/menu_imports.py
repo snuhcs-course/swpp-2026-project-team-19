@@ -12,9 +12,10 @@ from app.db.session import get_serializable_session_factory, get_session, get_se
 from app.matching.llm_layer import LLMLayerConfig
 from app.models import ImportMode
 from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
-from app.schemas.menu_import import MenuImportAcceptedResponse, MenuImportStatusResponse
+from app.schemas.menu_import import ImportCanceledResponse, MenuImportAcceptedResponse, MenuImportStatusResponse
 from app.schemas.menu_review import ReviewAndApplyRequest, ReviewAppliedResponse
 from app.services import menu_import_upload as upload
+from app.services.menu_import_cancel import cancel_menu_import
 from app.services.menu_import_processing import SessionFactory, start_processing
 from app.services.menu_import_review import POLL_AFTER_MS, get_menu_import_status
 from app.services.menu_import_upload import ImageUpload, create_menu_import
@@ -42,7 +43,8 @@ UploadedImage = Annotated[UploadFile, WithJsonSchema({"type": "string", "format"
         "- `Idempotency-Key`: retrying with the same key and the same content returns the existing import "
         "(still `202`); the same key with different content is `409 IDEMPOTENCY_KEY_REUSED`. "
         "The content is the bar, mode, owner note, and the bytes of each photo in order.\n"
-        "- A bar can have only one unfinished import (`uploaded`, `processing`, `ready_for_review`).\n"
+        "- A bar can have only one unfinished import (`uploaded`, `processing`, `ready_for_review`); "
+        "cancel it to upload again.\n"
         "- An empty `ownerNote` is stored as null."
     ),
     responses=error_responses(
@@ -122,7 +124,8 @@ def upload_menu_import(
         "- `ready_for_review`: everything the review screen needs in one response: images with URLs, "
         "every extracted item (non-products too) with options, candidates and `proposedProductId`, "
         "and the draft `proposedChanges` against the current menu. Stop polling.\n"
-        "- `applied`: when it was applied and the resulting menu board.\n\n"
+        "- `applied`: when it was applied and the resulting menu board.\n"
+        "- `canceled`: when it was canceled. Stop polling.\n\n"
         "Proposed products and changes are suggestions; nothing is published until the review is submitted."
     ),
     responses=error_responses(
@@ -203,3 +206,31 @@ def submit_menu_review(
     _operator: Principal = Depends(require_operator),
 ) -> ReviewAppliedResponse:
     return review_and_apply(session_factory, menu_import_id, body)
+
+
+@router.post(
+    "/menu-imports/{menuImportId}/cancel",
+    response_model=ImportCanceledResponse,
+    summary="Cancel an unfinished import",
+    description=(
+        "Operator only. Ends an `uploaded`, `processing` or `ready_for_review` import without applying it, "
+        "so the bar can take a new upload. The menu board and the catalog do not change, and the photos "
+        "and AI records are kept. Processing still running stores nothing more, and the import stays "
+        "`canceled`. No request body.\n\n"
+        "Canceling a canceled import returns the same response, so a retry is safe. If it races with "
+        "`review-and-apply`, the first to lock the import wins and the other gets `409`."
+    ),
+    responses=error_responses(
+        (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+        (403, "`FORBIDDEN`: the caller is not an operator."),
+        AUTH_UNAVAILABLE,
+        (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
+        (409, "`INVALID_IMPORT_STATE`: the import is `applied` or `failed`; `details.status` is the current status."),
+    ),
+)
+def cancel_import(
+    menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
+    session: Session = Depends(get_session),
+    _operator: Principal = Depends(require_operator),
+) -> ImportCanceledResponse:
+    return cancel_menu_import(session, menu_import_id)
