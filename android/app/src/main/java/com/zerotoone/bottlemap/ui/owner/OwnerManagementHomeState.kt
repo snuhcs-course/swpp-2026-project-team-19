@@ -23,7 +23,14 @@ internal fun ownerDate(epochDay: Long): String =
 
 internal fun homeOperatingException(bar: MockBar, atEpochMs: Long): MockOperatingException? {
     val day = ownerToday(atEpochMs).toEpochDay()
+    val now = Instant.ofEpochMilli(atEpochMs).atZone(ownerSeoulZone)
+    val minute = now.hour * 60 + now.minute
     return bar.exceptions.lastOrNull { day in it.fromEpochDay..it.toEpochDay }
+        ?: bar.exceptions.lastOrNull {
+            it.kind == MockExceptionKind.CUSTOM_HOURS && it.closesNextDay &&
+                it.toEpochDay == day - 1 && it.closeMinutes != null &&
+                minute < it.closeMinutes
+        }
         ?: bar.exceptions.filter {
             it.kind == MockExceptionKind.VACATION && it.fromEpochDay > day
         }.minByOrNull { it.fromEpochDay }
@@ -39,7 +46,11 @@ internal fun homeExceptionHeading(exception: MockOperatingException?): String = 
 internal fun homeOperatingState(bar: MockBar, atEpochMs: Long): String {
     val now = Instant.ofEpochMilli(atEpochMs).atZone(ownerSeoulZone)
     val day = now.toLocalDate().toEpochDay()
-    val exception = bar.exceptions.lastOrNull { day in it.fromEpochDay..it.toEpochDay }
+    val exception = homeOperatingException(bar, atEpochMs)?.takeIf {
+        (day in it.fromEpochDay..it.toEpochDay) ||
+            (it.kind == MockExceptionKind.CUSTOM_HOURS && it.closesNextDay &&
+                it.toEpochDay == day - 1)
+    }
     if (exception?.kind == MockExceptionKind.CLOSED_TODAY ||
         exception?.kind == MockExceptionKind.VACATION) return "임시 휴무"
     val todayMinute = now.hour * 60 + now.minute
