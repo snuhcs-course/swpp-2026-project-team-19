@@ -13,7 +13,7 @@ import java.time.temporal.ChronoUnit
 
 /** Pure projections from the shared Mock snapshot; never a second store of Owner data. */
 internal val ownerSeoulZone: ZoneId = ZoneId.of("Asia/Seoul")
-private val ownerDateFormat = DateTimeFormatter.ofPattern("M.d")
+private val ownerDateFormat = DateTimeFormatter.ofPattern("MM.dd")
 
 internal fun ownerToday(atEpochMs: Long): LocalDate =
     Instant.ofEpochMilli(atEpochMs).atZone(ownerSeoulZone).toLocalDate()
@@ -96,10 +96,10 @@ internal fun ownerJobDescription(status: MockImportStatus): String = when (statu
 
 internal fun ownerMenuFreshness(bar: MockBar, atEpochMs: Long): Pair<Long?, Int> {
     val mostRecent = listOfNotNull(bar.lastMenuPublishedAtEpochMs, bar.lastVerifiedAtEpochMs)
-        .maxOrNull() ?: return null to 100
+        .maxOrNull() ?: return null to 0
     val elapsed = ChronoUnit.DAYS.between(ownerToday(mostRecent), ownerToday(atEpochMs))
         .coerceAtLeast(0)
-    return elapsed to (elapsed.coerceAtMost(45) * 100 / 45).toInt()
+    return elapsed to (100 - elapsed.coerceAtMost(45) * 100 / 45).toInt()
 }
 
 internal fun ownerDisplayDate(epochMs: Long?): String = epochMs?.let {
