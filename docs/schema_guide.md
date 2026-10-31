@@ -62,13 +62,15 @@
 
 1. 로그인한 사용자가 업주 신청을 낸다. 기존 업장이면 `bar_id`를, 새 업장이면 업장명·주소·전화번호를 적고, 사업자등록번호, 대표자명, 개업일자와 연락처를 함께 적는다. 사업자등록증 사진을 올리면 OCR로 읽은 값이 입력란에 미리 채워진다. 사진은 저장하지 않는다.
 2. 백엔드가 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자를 1차 검증한다. 맞지 않으면 행을 만들지 않고 신청자가 입력을 고친다. 맞으면 `business_verification_result = matched`와 사업자 상태를, 검증 서비스에 연결하지 못하면 `unavailable`을 저장하고 `bar_owner_applications`에 `pending`으로 저장한다.
-3. 운영자가 웹 대시보드에서 대기 중인 신청과 검증 결과를 보고, 실제 매장이 있는지 확인한다. `unavailable`이면 다시 검증한다.
-4. 승인하면 같은 트랜잭션에서 다음을 처리한다.
+3. 신청자가 메뉴판 사진을 올린다. 사진은 객체 저장소에, 위치는 `bar_owner_application_menu_images`에 저장한다. `pending`인 동안 다시 올리면 전체를 교체한다.
+4. 운영자가 웹 대시보드에서 대기 중인 신청과 검증 결과, 메뉴판 사진을 보고 실제 매장이 있는지 확인한다. `unavailable`이면 다시 검증한다.
+5. 승인하면 같은 트랜잭션에서 다음을 처리한다.
    - 기존 업장: 현재 업주가 없는지 다시 확인하고 `bar_owners` 행을 만든다.
    - 새 업장: 운영자가 확인한 업장 정보(좌표 포함)로 `bars` 행을 만들고, 신청의 `bar_id`에 저장한 뒤 `bar_owners` 행을 만든다.
-5. 거절하면 사유를 `rejection_reason`에 남긴다. 신청자는 대기 중인 신청을 직접 취소할 수 있다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
-6. 승인된 업주는 자기 업장의 정보 수정과 메뉴 등록·검수·반영을 할 수 있다. 권한은 매 요청 `bar_owners`에서 확인하므로 승인이나 해제가 다음 요청부터 반영된다.
-7. 운영자는 업주 관계를 해제할 수 있다. 행을 지우지 않고 `revoked_at`을 기록한다.
+   - 신청 메뉴판 사진이 있고 업장에 미완료 메뉴 등록 작업이 없으면, 그 사진으로 `menu_imports`와 `menu_images`를 만든다(8.1). 커밋한 뒤 AI 처리를 시작하므로 업주가 처음 들어왔을 때 검수가 준비되어 있다.
+6. 거절하면 사유를 `rejection_reason`에 남긴다. 신청자는 대기 중인 신청을 직접 취소할 수 있다. 거절되거나 취소되면 신청 메뉴판 사진의 행과 파일을 삭제한다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
+7. 승인된 업주는 자기 업장의 정보 수정과 메뉴 등록·검수·반영을 할 수 있다. 권한은 매 요청 `bar_owners`에서 확인하므로 승인이나 해제가 다음 요청부터 반영된다.
+8. 운영자는 업주 관계를 해제할 수 있다. 행을 지우지 않고 `revoked_at`을 기록한다.
 
 구체적인 요청·응답 형식은 API 명세의 업주 신청과 승인 절을 따른다.
 
@@ -300,7 +302,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 - `business_registration_number`는 숫자 10자리다. 검증번호(마지막 자리) 계산은 API가 확인한다.
 - `business_status`는 `business_verification_result = matched`일 때만 값이 있을 수 있다.
 - 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자와 운영자에게만 보여 주며 공개 API에 포함하지 않고 로그에도 남기지 않는다. 검증 결과 중 신청자에게는 `business_status`만 보여 준다. 실제 값은 저장소에 커밋하지 않는다.
-- 사업자등록증 사진과 OCR로 읽은 값은 저장하지 않는다. 신청자가 확인한 값만 신청으로 저장된다.
+- 사업자등록증 사진과 OCR로 읽은 값은 저장하지 않는다. 신청자가 확인한 값만 신청으로 저장된다. 메뉴판 사진은 5.5에 따로 저장한다.
 
 ### 5.4 bar_owners
 
@@ -319,6 +321,30 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 **핵심 제약:** 한 업장에는 현재 업주(`revoked_at`이 `null`인 행)가 최대 한 명이다. PostgreSQL 부분 unique 인덱스(`bar_id` WHERE `revoked_at IS NULL`)와 승인 시 업장 행 잠금으로 보장한다. 해제는 행을 지우지 않고 `revoked_at`을 기록해 이력을 남기며, `revoked_at`과 `revoked_by_user_id`는 함께 값이 있거나 함께 `null`이다. 업주가 되어도 `users.user_type`은 바뀌지 않는다.
 
 **필요한 이유:** 업주 권한은 업장마다 다르므로 전역 `user_type`으로 표현할 수 없다. 신청과 관계를 나누면 신청 이력(증빙, 거절 사유)과 현재 권한을 따로 관리할 수 있고, 권한 검사는 작은 관계 테이블만 조회하면 된다.
+
+### 5.5 bar_owner_application_menu_images
+
+**역할:** 업주 신청에 첨부한 메뉴판 사진의 저장소 위치를 저장한다. 승인할 때 이 사진으로 첫 메뉴 등록 작업을 만든다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 신청 사진 ID | |
+| `application_id` | `uuid`, NOT NULL, FK → `bar_owner_applications.id` | 신청 ID | 어느 신청의 사진인지 나타낸다. |
+| `storage_key` | `varchar(500)`, NOT NULL | `owner-applications/cccc.../page-1.jpg` | `menu_images`처럼 바이너리 대신 객체 저장소 위치를 저장한다. |
+| `original_filename` | `varchar(255)`, nullable | `IMG_20261030_190112.jpg` | 업로드 당시 파일명이다. |
+| `image_order` | `smallint`, NOT NULL | `1` | 여러 장 메뉴판의 순서다. 승인으로 만든 작업의 `menu_images.image_order`가 된다. |
+| `content_sha256` | `char(64)`, NOT NULL | SHA-256 16진수 문자열 | 원본 바이트의 SHA-256이다. 승인으로 만든 작업의 `request_fingerprint`(8.1)를 사진을 다시 읽지 않고 계산하기 위해 저장한다. |
+| `uploaded_at` | `timestamptz`, NOT NULL | `2026-10-30T10:01:00Z` | 업로드 시각이다. |
+
+**핵심 제약:**
+
+- 한 신청 안에서 `image_order`가 중복되지 않는다(unique).
+- 신청이 `pending`일 때만 행을 만들거나 바꾼다. 업로드할 때마다 전체를 교체하며, 교체된 행과 파일은 삭제한다. 업로드는 신청 행을 잠가 승인·거절·취소와 동시에 처리되지 않게 한다.
+- 신청이 거절되거나 취소되면 행과 파일을 삭제한다. 업주가 되지 않은 사람의 사진을 남기지 않기 위해서다. 파일 삭제는 DB 커밋 뒤에 하며, 실패하면 로그만 남긴다.
+- 승인되면 행을 지우지 않는다. 승인으로 만든 작업의 `menu_images`가 같은 `storage_key`를 가리키므로, 승인 뒤에는 파일을 지우지 않는다.
+- 사진은 신청자와 운영자에게만 서명 URL로 보여 주며 공개 API에 포함하지 않는다.
+
+**필요한 이유:** 새 업장 신청은 승인 전까지 업장이 없어 `menu_imports`(`bar_id` NOT NULL)를 만들 수 없다. 그래서 승인 전 사진은 신청에 묶어 두고, 승인할 때 업장이 정해지면 작업으로 옮긴다.
 
 ## 6 Product Catalog
 
@@ -477,6 +503,8 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 **필요한 이유:** 이미지 한 장이나 추출 항목 하나만으로는 전체 교체 일부 수정 최종 승인 상태를 표현할 수 없으므로 작업 단위가 필요하다.
 
 프론트엔드는 메뉴 등록을 시작할 때마다 새로운 `idempotency_key`를 생성해 요청 헤더로 보낸다. 백엔드는 `barId`, `mode`, `ownerNote`, 이미지 순서, 각 이미지 원본 바이트의 SHA-256을 안정적인 형식으로 조합하고 다시 SHA-256을 적용해 `request_fingerprint`를 계산한다. multipart boundary, 임시 URL, 업로드 시각처럼 재시도마다 달라질 수 있는 값은 계산에서 제외한다.
+
+업주 신청 승인으로 만든 작업(3.4)은 `idempotency_key = owner-application:<신청 ID>`로 저장한다. 신청 하나는 한 번만 승인되므로 키가 겹치지 않는다. `request_fingerprint`는 같은 공식으로 계산하되 `ownerNote`는 `null`이고, 이미지 해시는 `bar_owner_application_menu_images.content_sha256`을 쓴다. `menu_images`는 신청 사진과 같은 `storage_key`, `original_filename`, `image_order`로 만든다.
 
 같은 키가 다시 들어오면 새 요청의 fingerprint를 기존 행과 비교한다. fingerprint도 같으면 새 `menu_imports`, `menu_images`, `extraction_runs`를 만들지 않고 기존 작업을 반환한다. fingerprint가 다르면 프론트엔드가 하나의 키를 서로 다른 요청에 재사용한 것이므로 `409 Conflict`로 거부한다. 다른 키에 같은 fingerprint가 들어온 경우에는 별개의 명시적 등록 요청으로 허용한다.
 
@@ -734,6 +762,7 @@ A와 C는 사진에 없어도 remove 후보가 되지 않으며 현재 메뉴판
 | `users` | `bar_owner_applications` | 1:N | 한 사용자가 여러 업주 신청을 낼 수 있다. |
 | `bars` | `bar_owner_applications` | 1:N | 한 업장에 여러 사용자가 신청할 수 있다. 새 업장 신청은 승인 전까지 업장이 없다. |
 | `bar_owner_applications` | `bar_owners` | 1:0..1 | 승인된 신청 하나가 업주 관계 하나를 만든다. |
+| `bar_owner_applications` | `bar_owner_application_menu_images` | 1:N | 한 신청에 메뉴판 사진 여러 장을 첨부할 수 있다. 승인하면 첫 메뉴 등록 작업의 사진이 된다. |
 | `bars` + `users` | `bar_owners` | N:M 해소 | 한 사용자는 여러 업장의 업주가 될 수 있고, 한 업장에는 현재 업주가 최대 한 명이다. |
 | `bars` | `menu_imports` | 1:N | 한 업장에 여러 메뉴 등록 작업이 누적된다. |
 | `menu_imports` | `menu_images` | 1:N | 한 번의 등록에 여러 사진을 올릴 수 있다. |
@@ -773,6 +802,7 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 한 사용자는 같은 업장에 `status = pending`인 `existing_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending' AND application_type = 'existing_bar'`)로 보장한다.
 - 한 사용자는 같은 사업자등록번호로 `status = pending`인 `new_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `business_registration_number` WHERE `status = 'pending' AND application_type = 'new_bar'`)로 보장한다.
 - `bar_owner_applications.business_registration_number`는 숫자 10자리여야 한다.
+- 한 신청의 `bar_owner_application_menu_images`에서 `image_order`가 중복되지 않아야 한다. unique 인덱스(`application_id`, `image_order`)로 보장한다.
 - 외래키 삭제 정책은 이력 보존을 우선해 핵심 사용자 업장 상품 이미지에 `RESTRICT` 또는 soft delete를 검토한다.
 
 > **현재 구현과의 차이 (수정 예정):** 지금 Alembic 마이그레이션에는 업장 좌표 범위(`ck_bars_latitude_range`, `ck_bars_longitude_range`)를 제외한 위의 `CHECK` 제약과 부분 unique 인덱스가 없다. 그동안은 백엔드가 다음처럼 규칙을 지킨다. 위 제약을 추가하는 마이그레이션을 만들 예정이며, 그 전에 기존 데이터가 규칙을 어기지 않는지 확인한다.
