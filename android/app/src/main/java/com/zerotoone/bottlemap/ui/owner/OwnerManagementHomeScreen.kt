@@ -45,6 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -350,7 +353,6 @@ fun OwnerManagementHomeScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OwnerOperatingQuickScreen(
     state: MockOwnerLoadState,
@@ -364,18 +366,18 @@ fun OwnerOperatingQuickScreen(
     var startMinute by rememberSaveable { mutableIntStateOf(0) }
     var endHour by rememberSaveable { mutableIntStateOf(21) }
     var endMinute by rememberSaveable { mutableIntStateOf(30) }
-    var nextDay by rememberSaveable { mutableStateOf(false) }
     var openWheel by rememberSaveable { mutableStateOf("") }
     var startDay by rememberSaveable { mutableLongStateOf(Long.MIN_VALUE) }
     var endDay by rememberSaveable { mutableLongStateOf(Long.MIN_VALUE) }
-    var dateTarget by rememberSaveable { mutableStateOf("") }
+    var dateTarget by rememberSaveable { mutableStateOf("start") }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val today = ownerToday(System.currentTimeMillis()).toEpochDay()
+
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         OwnerHeader("영업 상태 변경", onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(BottleMapSpacing.screenHorizontal),
+                .padding(horizontal = BottleMapSpacing.screenHorizontal, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (state == MockOwnerLoadState.Loading) {
@@ -391,101 +393,150 @@ fun OwnerOperatingQuickScreen(
                     Triple("off", "오늘 휴무", BmIconId.ERROR),
                     Triple("hours", "오늘만 영업시간 변경", BmIconId.UPDATED),
                     Triple("range", "기간 임시 휴업", BmIconId.UPDATED)
-                ).forEach { (key, label, icon) ->
+                ).forEach { (option, label, icon) ->
                     Surface(
-                        modifier = Modifier.fillMaxWidth().clickable { choice = key; error = null; if (key == "range") dateTarget = "start" else dateTarget = "" },
+                        modifier = Modifier.fillMaxWidth().clickable {
+                            choice = option
+                            openWheel = ""
+                            error = null
+                            if (option == "range") {
+                                dateTarget = if (startDay == Long.MIN_VALUE) "start" else "end"
+                            }
+                        },
                         shape = RoundedCornerShape(10.dp),
-                        color = if (choice == key) MaterialTheme.colorScheme.surfaceVariant
-                            else MaterialTheme.colorScheme.surface
+                        color = if (choice == option)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                        else MaterialTheme.colorScheme.surface,
+                        border = if (choice == option)
+                            BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                        else null
                     ) {
-                        Row(Modifier.defaultMinSize(minHeight = 54.dp).padding(12.dp),
+                        Row(
+                            Modifier.fillMaxWidth().defaultMinSize(minHeight = 60.dp)
+                                .padding(horizontal = 13.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            BmIcon(icon, null, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
-                            Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
-                            Text("›")
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            BmIcon(icon, null, Modifier.size(23.dp), tint = MaterialTheme.colorScheme.primary)
+                            Text(label, modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold)
+                            Text("›", style = MaterialTheme.typography.titleMedium)
+                        }
+                    }
+                }
+                if (choice == "hours") {
+                    Text("오늘 영업시간", style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 5.dp))
+                    listOf("open" to "영업 시작", "close" to "영업 종료").forEach { (target, label) ->
+                        Row(
+                            Modifier.fillMaxWidth().height(64.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(label, style = MaterialTheme.typography.bodyMedium)
+                            Surface(
+                                modifier = Modifier.clickable {
+                                    openWheel = if (openWheel == target) "" else target
+                                },
+                                shape = RoundedCornerShape(9.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                            ) {
+                                Row(Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                                    Text(
+                                        if (target == "open")
+                                            "%02d:%02d".format(startHour, startMinute)
+                                        else "%02d:%02d".format(endHour, endMinute),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    OwnerClockIcon()
+                                }
+                            }
+                        }
+                        if (openWheel == target) {
+                            key(target) {
+                                OwnerQuickTimeWheel(
+                                    hour = if (target == "open") startHour else endHour,
+                                    minute = if (target == "open") startMinute else endMinute,
+                                    onConfirm = { hour, minute ->
+                                        if (target == "open") {
+                                            startHour = hour
+                                            startMinute = minute
+                                        } else {
+                                            endHour = hour
+                                            endMinute = minute
+                                        }
+                                        openWheel = ""
+                                    }
+                                )
+                            }
+                        }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    }
+                }
+                if (choice == "range") {
+                    Text("임시 휴업 기간", style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 5.dp))
+                    OwnerVacationCalendar(
+                        today = today, startDay = startDay, endDay = endDay,
+                        onPick = { picked ->
+                            val updated = updateQuickVacationDates(
+                                startDay, endDay, picked, dateTarget
+                            )
+                            if (updated == null) {
+                                error = "종료일은 시작일 이후여야 해요."
+                            } else {
+                                startDay = updated.first
+                                endDay = updated.second
+                                // Unlike a modal, the month stays visible after both selections.
+                                dateTarget = if (dateTarget == "start") "end" else "start"
+                                error = null
+                            }
+                        }
+                    )
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(Modifier.padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(
+                                Triple("start", "시작", startDay),
+                                Triple("end", "종료", endDay)
+                            ).forEach { (target, label, date) ->
+                                Surface(
+                                    modifier = Modifier.weight(1f).clickable { dateTarget = target },
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = MaterialTheme.colorScheme.surface
+                                ) {
+                                    Text(
+                                        label + " " + if (date == Long.MIN_VALUE) "선택" else
+                                            LocalDate.ofEpochDay(date).format(
+                                                DateTimeFormatter.ofPattern("yyyy.MM.dd")
+                                            ),
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 12.dp),
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
                         }
                     }
                 }
                 if (choice.isNotEmpty()) {
-                    if (choice == "hours") {
-                        listOf("open" to "영업 시작", "close" to "영업 종료").forEach { (key, label) ->
-                            TextButton(onClick = { openWheel = if (openWheel == key) "" else key }) {
-                                Text(
-                                    "$label: " + (if (key == "open")
-                                        "%02d:%02d".format(startHour, startMinute)
-                                    else "%02d:%02d".format(endHour, endMinute))
-                                )
-                            }
-                            if (openWheel == key) {
-                                OwnerTimeWheel(
-                                    hour = if (key == "open") startHour else endHour,
-                                    minute = if (key == "open") startMinute else endMinute,
-                                    onTimeChange = { hour, minute ->
-                                        if (key == "open") { startHour = hour; startMinute = minute }
-                                        else { endHour = hour; endMinute = minute }
-                                    }
-                                )
-                            }
-                        }
-                        TextButton(onClick = { nextDay = !nextDay }) {
-                            Text(if (nextDay) "영업 종료: 다음 날 새벽 ✓" else "영업 종료: 오늘 · 다음 날로 변경")
-                        }
-                    }
-                    if (choice == "range") {
-                        if (dateTarget.isNotEmpty()) {
-                            key(dateTarget) {
-                                val calendar = rememberDatePickerState()
-                                DatePicker(state = calendar, modifier = Modifier.fillMaxWidth())
-                                LaunchedEffect(calendar.selectedDateMillis) {
-                                    calendar.selectedDateMillis?.let { millis ->
-                                        val day = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate().toEpochDay()
-                                        if (day < today) {
-                                            error = "과거 날짜는 선택할 수 없어요."
-                                        } else if (dateTarget == "start") {
-                                            startDay = day
-                                            if (endDay < day) endDay = Long.MIN_VALUE
-                                            dateTarget = "end"
-                                            error = null
-                                        } else if (day < startDay) {
-                                            error = "종료일은 시작일 이후여야 해요."
-                                        } else {
-                                            endDay = day
-                                            dateTarget = ""
-                                            error = null
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surface,
-                            tonalElevation = 1.dp
-                        ) {
-                            Row(
-                                Modifier.fillMaxWidth().padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                OutlinedButton(
-                                    onClick = { dateTarget = "start" },
-                                    modifier = Modifier.weight(1f),
-                                    contentPadding = PaddingValues(horizontal = 4.dp)
-                                ) { Text(if (startDay == Long.MIN_VALUE) "시작 일자" else ownerDate(startDay), maxLines = 1) }
-                                Text("~", style = MaterialTheme.typography.titleMedium)
-                                OutlinedButton(
-                                    onClick = { dateTarget = if (startDay == Long.MIN_VALUE) "start" else "end" },
-                                    modifier = Modifier.weight(1f),
-                                    contentPadding = PaddingValues(horizontal = 4.dp)
-                                ) { Text(if (endDay == Long.MIN_VALUE) "종료 일자" else ownerDate(endDay), maxLines = 1) }
-                            }
-                        }
-                    }
-                    OwnerTextInput(
-                        label = "고객 안내 (선택)", value = note,
+                    Text("고객 안내 (선택)", style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold)
+                    OutlinedTextField(
+                        value = note,
                         onValueChange = { note = it.take(80) },
-                        placeholder = "예: 내부 사정으로 조기 마감합니다"
+                        placeholder = { Text("예: 내부 사정으로 조기 마감합니다") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(9.dp),
+                        singleLine = true
                     )
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                     OwnerActionButton(
@@ -495,8 +546,7 @@ fun OwnerOperatingQuickScreen(
                             else -> "휴업 적용"
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = choice != "range" ||
-                            (startDay >= today && endDay >= startDay),
+                        enabled = choice != "range" || (startDay >= today && endDay >= startDay),
                         onClick = {
                             try {
                                 val kind = when (choice) {
@@ -505,6 +555,11 @@ fun OwnerOperatingQuickScreen(
                                     else -> MockExceptionKind.VACATION
                                 }
                                 require(choice != "range" || (startDay >= today && endDay >= startDay))
+                                val openMinutes = startHour * 60 + startMinute
+                                val closeMinutes = endHour * 60 + endMinute
+                                require(choice != "hours" || openMinutes != closeMinutes) {
+                                    "영업 시작과 종료 시각이 같을 수 없어요."
+                                }
                                 viewModel.applyOperatingException(
                                     bar.barId, MockOperatingException(
                                         exceptionId = "quick-" + UUID.randomUUID().toString(),
@@ -512,14 +567,16 @@ fun OwnerOperatingQuickScreen(
                                         fromEpochDay = if (choice == "range") startDay else today,
                                         toEpochDay = if (choice == "range") endDay else today,
                                         note = note.trim().ifBlank { null },
-                                        openMinutes = if (choice == "hours") startHour * 60 + startMinute else null,
-                                        closeMinutes = if (choice == "hours") endHour * 60 + endMinute else null,
-                                        closesNextDay = if (choice == "hours") nextDay else false
+                                        openMinutes = if (choice == "hours") openMinutes else null,
+                                        closeMinutes = if (choice == "hours") closeMinutes else null,
+                                        closesNextDay = choice == "hours" && closeMinutes < openMinutes
                                     )
                                 )
                                 error = null
                                 onBack()
-                            } catch (e: Exception) { error = e.message ?: "일정을 저장하지 못했어요." }
+                            } catch (e: Exception) {
+                                error = e.message ?: "일정을 저장하지 못했어요."
+                            }
                         }
                     )
                 }
