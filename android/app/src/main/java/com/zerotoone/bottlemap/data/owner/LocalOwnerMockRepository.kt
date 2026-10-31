@@ -117,13 +117,15 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(addressLength in 1..500) { "New bar address must have 1..500 characters" }
             null
         }
+        val normalizedBusinessNumber = draft.businessNumberDigits.filter(Char::isDigit)
         require(s.applications.none {
             it.status == MockApplicationStatus.PENDING &&
                 (if (draft.kind == MockApplicationKind.EXISTING_BAR)
                     it.kind == MockApplicationKind.EXISTING_BAR && it.barId == draft.existingBarId
                 else it.kind == MockApplicationKind.NEW_BAR &&
-                    it.proposedBarName.trim().equals(draft.proposedBarName.trim(), ignoreCase = true))
-        }) { "Already have a pending application for this bar" }
+                    normalizedBusinessNumber.isNotEmpty() &&
+                    it.businessNumberDigits?.filter(Char::isDigit) == normalizedBusinessNumber)
+        }) { "Already have a pending application for this bar or business number" }
         // External test fixtures may already use local-application-N IDs. Reserve an
         // unused ID instead of trusting nextLocalId from a pre-seeded snapshot.
         var generatedId = s.nextLocalId
