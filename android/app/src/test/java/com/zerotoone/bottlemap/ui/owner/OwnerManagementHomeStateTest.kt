@@ -58,15 +58,25 @@ class OwnerManagementHomeStateTest {
     @Test fun menuFreshnessUsesLatestOfPublishedAndVerifiedButKeepsThemIndependent() {
         val withoutTimes = MockBar("bar", "Test", "Address")
         assertEquals(null, ownerMenuFreshness(withoutTimes, time(20)).first)
-        assertEquals(100, ownerMenuFreshness(withoutTimes, time(20)).second)
+        assertEquals(0, ownerMenuFreshness(withoutTimes, time(20)).second)
         val postedAt = day.minusDays(20).atStartOfDay(ownerSeoulZone).toInstant().toEpochMilli()
         val checkedAt = day.minusDays(3).atStartOfDay(ownerSeoulZone).toInstant().toEpochMilli()
         val bar = withoutTimes.copy(
             lastMenuPublishedAtEpochMs = postedAt, lastVerifiedAtEpochMs = checkedAt)
         assertEquals(3L, ownerMenuFreshness(bar, time(20)).first)
-        assertEquals(6, ownerMenuFreshness(bar, time(20)).second)
+        assertEquals(94, ownerMenuFreshness(bar, time(20)).second)
         assertEquals("10.11", ownerDisplayDate(postedAt))
         assertEquals("10.28", ownerDisplayDate(checkedAt))
+    }
+
+    @Test fun freshnessStartsFullAndDropsFromLeftToRightOverTime() {
+        val confirmed = day.atStartOfDay(ownerSeoulZone).toInstant().toEpochMilli()
+        val bar = MockBar("bar", "Test", "Address", lastVerifiedAtEpochMs = confirmed)
+        assertEquals(100, ownerMenuFreshness(bar, time(20)).second)
+        val later = day.plusDays(45).atStartOfDay(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals(0, ownerMenuFreshness(bar, later).second)
+        val novemberFifth = LocalDate.of(2026, 11, 5)
+        assertEquals("11.05", ownerDate(novemberFifth.toEpochDay()))
     }
 
     @Test fun activeMenuJobTakesPrecedenceOverPriorPublishedJob() {
