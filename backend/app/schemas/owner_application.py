@@ -1,5 +1,5 @@
-"""Owner applications (API spec, section 3.11): the request of POST /api/owner-applications and the
-`OwnerApplication` response every application API returns.
+"""Owner applications (API spec, section 3.11): the requests of applying, approving and rejecting,
+and the `OwnerApplication` response every application API returns.
 
 The request is one of two shapes picked by `applicationType`; a field of the other shape is
 rejected (`EXTRA_FORBIDDEN`), e.g. `proposedBar` on an `existing_bar` application.
@@ -81,6 +81,38 @@ class NewBarApplicationInput(_ApplicationInput):
     proposedBar: ProposedBarInput
 
 
+class BarInput(_Strict):
+    """A bar's details as an operator confirms them; the field rules of spec 3.5, 3.7 and 3.11.7."""
+
+    name: str = Field(min_length=1, max_length=150)
+    address: str = Field(min_length=1, max_length=500, description="Display address with floor or unit")
+    latitude: float = Field(ge=-90, le=90, description="Stored to 6 decimal places")
+    longitude: float = Field(ge=-180, le=180, description="Stored to 6 decimal places")
+    phone: str | None = Field(default=None, max_length=30, description="Blank is stored as null")
+
+    @field_validator("phone")
+    @classmethod
+    def _blank_phone(cls, value: str | None) -> str | None:
+        return value or None
+
+
+class ApproveInput(_Strict):
+    bar: BarInput | None = Field(
+        default=None, description="new_bar only: the confirmed bar, prefilled from `proposedBar` with coordinates added"
+    )
+
+
+class RejectInput(_Strict):
+    reason: str = Field(max_length=500, description="Shown to the applicant as it is")
+
+    @field_validator("reason")
+    @classmethod
+    def _not_blank(cls, value: str) -> str:
+        if not value:
+            raise PydanticCustomError("blank", "거절 사유를 입력해 주세요.")
+        return value
+
+
 # The route declares the discriminator on Body(): FastAPI drops one set inside an Annotated union here.
 OwnerApplicationInput = ExistingBarApplicationInput | NewBarApplicationInput
 register_union_tags("existing_bar", "new_bar")
@@ -146,3 +178,10 @@ class OwnerApplicationResponse(BaseModel):
 
 class OwnerApplicationListResponse(BaseModel):
     items: list[OwnerApplicationResponse] = Field(description="Newest first")
+
+
+class OwnerApplicationPage(BaseModel):
+    items: list[OwnerApplicationResponse] = Field(
+        description="Oldest first for `status=pending` (processing order), newest first otherwise"
+    )
+    nextCursor: str | None = Field(description="Pass as `cursor` with the same filters; null on the last page")

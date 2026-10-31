@@ -29,6 +29,8 @@ class Route:
     # Keyword arguments for TestClient.request, so the request is valid apart from the caller.
     request: dict[str, Any]
     allowed: tuple[int, str | None]  # what an operator gets: status and error code (None for success)
+    # What a temporary-login operator, who has no users row, gets instead, when it differs.
+    allowed_without_users_row: tuple[int, str | None] | None = None
 
     @property
     def id(self) -> str:
@@ -36,7 +38,7 @@ class Route:
 
     @property
     def url(self) -> str:
-        return self.path.format(barId=MISSING_ID, menuImportId=MISSING_ID)
+        return self.path.format(barId=MISSING_ID, menuImportId=MISSING_ID, applicationId=MISSING_ID)
 
 
 OPERATOR_ONLY = [
@@ -61,6 +63,21 @@ OPERATOR_ONLY = [
     ),
     Route("get", "/api/catalog/brands", {"params": {"query": "glen"}}, (200, None)),
     Route("get", "/api/catalog/products", {"params": {"query": "glen"}}, (200, None)),
+    Route("get", "/api/owner-applications", {}, (200, None)),
+    Route(
+        "post",
+        "/api/owner-applications/{applicationId}/approve",
+        {},
+        (404, "OWNER_APPLICATION_NOT_FOUND"),
+        (404, "USER_NOT_FOUND"),
+    ),
+    Route(
+        "post",
+        "/api/owner-applications/{applicationId}/reject",
+        {"json": {"reason": "확인할 수 없습니다."}},
+        (404, "OWNER_APPLICATION_NOT_FOUND"),
+        (404, "USER_NOT_FOUND"),
+    ),
 ]
 # Any signed-in user, with or without a users row; tested in test_users_api.py, test_auth_api.py,
 # test_business_certificate_api.py, test_my_bars_api.py, test_owner_applications_api.py (which also covers the
@@ -152,12 +169,15 @@ def test_non_operator_is_forbidden(client, token_for, supabase, db_session, rout
     assert outcome(call(client, route, token)) == (403, "FORBIDDEN")
 
 
-@pytest.mark.parametrize("caller", OPERATORS.values(), ids=OPERATORS.keys())
+@pytest.mark.parametrize("caller", OPERATORS.keys())
 @pytest.mark.parametrize("route", OPERATOR_ONLY, ids=lambda route: route.id)
 def test_operator_is_allowed(client, token_for, supabase, db_session, route, caller):
-    token = caller(token_for, supabase, db_session)
+    token = OPERATORS[caller](token_for, supabase, db_session)
+    expected = route.allowed
+    if caller == "temporary operator" and route.allowed_without_users_row is not None:
+        expected = route.allowed_without_users_row
 
-    assert outcome(call(client, route, token)) == route.allowed
+    assert outcome(call(client, route, token)) == expected
 
 
 def test_every_api_route_is_classified():

@@ -284,7 +284,8 @@ def test_my_list_and_the_detail_show_the_photos(client, db_session, storage, aut
     make_application_menu_image(db_session, pending, image_order=1)
     without = make_application(db_session, applicant, make_bar(db_session))
 
-    listed = {item["applicationId"]: item for item in client.get("/api/me/owner-applications", headers=auth).json()["items"]}
+    items = client.get("/api/me/owner-applications", headers=auth).json()["items"]
+    listed = {item["applicationId"]: item for item in items}
     detail = client.get(f"/api/owner-applications/{pending.id}", headers=auth).json()
 
     assert [photo["imageOrder"] for photo in listed[str(pending.id)]["menuPhotos"]] == [1, 2]
