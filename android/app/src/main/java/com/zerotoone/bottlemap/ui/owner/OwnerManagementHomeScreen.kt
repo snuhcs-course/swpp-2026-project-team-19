@@ -305,6 +305,7 @@ fun OwnerManagementHomeScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OwnerOperatingQuickScreen(
     state: MockOwnerLoadState,
