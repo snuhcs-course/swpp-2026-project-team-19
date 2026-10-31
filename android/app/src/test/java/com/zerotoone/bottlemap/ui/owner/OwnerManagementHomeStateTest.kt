@@ -42,6 +42,19 @@ class OwnerManagementHomeStateTest {
         assertEquals("오늘 영업시간 변경", homeExceptionHeading(custom))
     }
 
+    @Test fun yesterdayTemporaryOvernightHoursRemainVisibleAfterMidnight() {
+        val yesterday = day.minusDays(1)
+        val hours = MockOperatingException(
+            "overnight", MockExceptionKind.CUSTOM_HOURS,
+            yesterday.toEpochDay(), yesterday.toEpochDay(),
+            openMinutes = 19 * 60, closeMinutes = 2 * 60, closesNextDay = true
+        )
+        val bar = MockBar("bar", "테스트", "서울", exceptions = listOf(hours))
+        assertEquals(hours, homeOperatingException(bar, time(1)))
+        assertEquals("영업 중", homeOperatingState(bar, time(1)))
+        assertNull(homeOperatingException(bar, time(3)))
+    }
+
     @Test fun menuFreshnessUsesLatestOfPublishedAndVerifiedButKeepsThemIndependent() {
         val withoutTimes = MockBar("bar", "Test", "Address")
         assertEquals(null, ownerMenuFreshness(withoutTimes, time(20)).first)
