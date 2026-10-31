@@ -47,11 +47,19 @@ internal fun OwnerRegistrationDashboard(
                 RoundedCornerShape(16.dp)).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(bar.name, style = MaterialTheme.typography.titleLarge)
-                OwnerStatusLabel(
-                    if (snapshot.hasPublishedInitialReview(bar.barId)) "정상 영업" else "메뉴 확인 필요",
-                    if (snapshot.hasPublishedInitialReview(bar.barId)) OwnerStatusTone.SUCCESS
-                    else OwnerStatusTone.ATTENTION
-                )
+                // Same persisted bar exception and weekly schedule as management home.
+                val now = System.currentTimeMillis()
+                val temporary = homeOperatingException(bar, now)
+                val operatingLabel = when {
+                    temporary != null -> homeExceptionHeading(temporary)
+                    bar.weeklyHours.isEmpty() -> "정규 영업시간 미설정"
+                    else -> homeOperatingState(bar, now)
+                }
+                OwnerStatusLabel(operatingLabel,
+                    if (temporary != null) OwnerStatusTone.ATTENTION else OwnerStatusTone.SUCCESS)
+                if (!snapshot.hasPublishedInitialReview(bar.barId)) {
+                    OwnerStatusLabel("메뉴 확인 필요", OwnerStatusTone.ATTENTION)
+                }
                 Text(bar.address, style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OwnerActionButton("매장 관리하기", { onManage(bar) }, Modifier.fillMaxWidth())
