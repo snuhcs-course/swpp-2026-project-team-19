@@ -186,6 +186,20 @@ fun OwnerManagementHomeScreen(
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
+                                        if (exception?.kind == MockExceptionKind.CUSTOM_HOURS) {
+                                            Text(
+                                                "%02d:%02d ~ %s%02d:%02d".format(
+                                                    (exception.openMinutes ?: 0) / 60,
+                                                    (exception.openMinutes ?: 0) % 60,
+                                                    if (exception.closesNextDay) "익일 " else "",
+                                                    (exception.closeMinutes ?: 0) / 60,
+                                                    (exception.closeMinutes ?: 0) % 60
+                                                ),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                softWrap = true
+                                            )
+                                        }
                                     }
                                     Row(
                                         Modifier.fillMaxWidth().clickable(onClick = onStatus)
@@ -310,7 +324,12 @@ fun OwnerOperatingQuickScreen(
                 .padding(BottleMapSpacing.screenHorizontal),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (selected == null) {
+            if (state == MockOwnerLoadState.Loading) {
+                OwnerLoading("영업 상태 불러오는 중")
+            } else if (state is MockOwnerLoadState.Error) {
+                Text(state.message, color = MaterialTheme.colorScheme.error)
+                OwnerActionButton("다시 시도", viewModel::retry)
+            } else if (selected == null) {
                 Text("관리할 매장이 없어요.")
             } else {
                 val bar = selected.second
@@ -450,17 +469,17 @@ fun OwnerMenuQuickEntryScreen(
                 when (job?.status) {
                     MockImportStatus.PROCESSING -> {
                         OwnerStatusLabel("AI 분석 중 · 등록 불가", OwnerStatusTone.ATTENTION)
-                        OwnerActionButton("작업 확인하기", { onExistingJob(job.status) },
+                        OwnerActionButton("작업 확인하기", { onExistingJob(MockImportStatus.PROCESSING) },
                             Modifier.fillMaxWidth(), secondary = true)
                     }
                     MockImportStatus.READY_FOR_REVIEW -> {
                         OwnerStatusLabel("메뉴판 확인 준비 완료", OwnerStatusTone.ATTENTION)
-                        OwnerActionButton("추가할 메뉴 확인하기", { onExistingJob(job.status) },
+                        OwnerActionButton("추가할 메뉴 확인하기", { onExistingJob(MockImportStatus.READY_FOR_REVIEW) },
                             Modifier.fillMaxWidth(), secondary = true)
                     }
                     MockImportStatus.FAILED -> {
                         OwnerStatusLabel("메뉴판 분석 실패", OwnerStatusTone.ERROR)
-                        OwnerActionButton("작업 확인하기", { onExistingJob(job.status) },
+                        OwnerActionButton("작업 확인하기", { onExistingJob(MockImportStatus.FAILED) },
                             Modifier.fillMaxWidth(), secondary = true)
                     }
                     else -> OwnerActionButton(
