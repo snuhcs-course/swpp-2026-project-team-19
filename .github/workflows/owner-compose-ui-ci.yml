@@ -1,0 +1,52 @@
+name: Owner Compose UI CI
+
+on:
+  pull_request:
+    paths:
+      - 'android/**'
+      - '.github/workflows/owner-compose-ui-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: owner-compose-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  owner-compose-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - name: Enable KVM access
+        run: |
+          sudo chmod 666 /dev/kvm
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - uses: gradle/actions/setup-gradle@v5
+      - name: Run Owner Compose instrumentation on API 35 emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          emulator-boot-timeout: 600
+          script: ./gradlew :app:connectedDebugAndroidTest --no-daemon
+      - name: Upload Compose instrumentation results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: owner-compose-instrumentation-reports
+          path: |
+            android/app/build/outputs/androidTest-results/**
+            android/app/build/reports/androidTests/**
+          if-no-files-found: ignore
