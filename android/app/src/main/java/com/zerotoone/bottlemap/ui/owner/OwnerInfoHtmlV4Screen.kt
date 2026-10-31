@@ -230,7 +230,7 @@ fun OwnerInfoHtmlV4Screen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(7.dp),
                             ) {
-                                Spacer(Modifier.width(60.dp))
+                                Spacer(Modifier.width(15.dp))
                                 listOf("open", "close").forEachIndexed { partIndex, part ->
                                     if (partIndex == 1) Text("–")
                                     OutlinedButton(
