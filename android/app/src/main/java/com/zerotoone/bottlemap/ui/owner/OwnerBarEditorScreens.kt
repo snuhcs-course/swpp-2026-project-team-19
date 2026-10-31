@@ -223,7 +223,6 @@ fun OwnerBarPhotoEditorScreen(
     val photos = draft.map(::decodePhoto)
     var expandedId by rememberSaveable { mutableStateOf<String?>(null) }
     var deleteId by rememberSaveable { mutableStateOf<String?>(null) }
-    var openUri by rememberSaveable { mutableStateOf<String?>(null) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var discard by rememberSaveable { mutableStateOf(false) }
     val dirty = bar != null && photos != bar.gallery
@@ -263,17 +262,6 @@ fun OwnerBarPhotoEditorScreen(
             dismissButton = { TextButton(onClick = { deleteId = null }) { Text("취소") } }
         )
     }
-    openUri?.let { uri ->
-        Dialog(onDismissRequest = { openUri = null }) {
-            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(Modifier.fillMaxWidth().heightIn(max = 540.dp).height(360.dp)
-                    .clip(RoundedCornerShape(12.dp))) {
-                    OwnerStoredPhoto(uri, Modifier.fillMaxSize())
-                }
-                TextButton(onClick = { openUri = null }) { Text("닫기") }
-            }
-        }
-    }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         OwnerHeader("매장 사진 편집", ::back)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -293,7 +281,7 @@ fun OwnerBarPhotoEditorScreen(
                                 Box(Modifier.fillMaxWidth().height(146.dp)
                                     .clip(RoundedCornerShape(9.dp))) {
                                     OwnerStoredPhoto(photo.uri,
-                                        Modifier.fillMaxSize().clickable { openUri = photo.uri })
+                                        Modifier.fillMaxSize().clickable { expandedId = photo.photoId })
                                 }
                                 Text(if (index == 0) "대표 사진" else "사진 " + (index + 1),
                                     style = MaterialTheme.typography.labelLarge)
