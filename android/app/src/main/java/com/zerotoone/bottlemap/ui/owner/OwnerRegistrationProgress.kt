@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.ui.owner
 
 import com.zerotoone.bottlemap.data.owner.MockApplicationKind
 import com.zerotoone.bottlemap.data.owner.MockRegistrationDraft
+import java.util.UUID
 
 /** Stable mock-only registration navigation checkpoint; never part of a Backend DTO. */
 private val registrationCommon = listOf(
@@ -59,6 +60,17 @@ internal fun updatedBarNameDraft(draft: MockRegistrationDraft, rawName: String):
         draft.copy(proposedBarName = name)
     }
 }
+
+/** When a claim becomes a new-bar application during review, collect all new-bar details. */
+internal fun needsNewBarDetailsAfterClaimEdit(
+    editingReview: Boolean,
+    previousKind: MockApplicationKind,
+    nextKind: MockApplicationKind,
+): Boolean = editingReview && previousKind == MockApplicationKind.EXISTING_BAR &&
+    nextKind == MockApplicationKind.NEW_BAR
+
+/** Each Debug candidate must have a unique ID, including after earlier candidates were approved. */
+internal fun newDebugCandidateId(): String = "fixture-v4-bar-" + UUID.randomUUID()
 
 /** Whether the existing shop number can be copied into the private contact field. */
 internal fun canCopyShopPhone(phone: String): Boolean = phone.isNotBlank() && validOwnerPhone(phone)
