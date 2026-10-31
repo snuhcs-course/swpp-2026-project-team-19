@@ -58,6 +58,8 @@ uv run --env-file .env alembic upgrade head
 
 Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) is set in `backend/.env`; a run with skipped database tests also drops below the coverage threshold. Tests always use the mock menu extractor and must never call the Gemini API or Supabase: auth tests sign their own tokens and serve the public keys from memory (the `supabase` fixture in `backend/tests/conftest.py`).
 
+Backend CI also fails when fewer tests ran than `min_tests` or a test was skipped that `allowed_skips` does not list (`backend/ci/test_policy.json`), and on a PR its report, posted as a PR comment, lists the tests the base has but the PR does not. To remove a test that is no longer needed, lower `min_tests` (or add the skip with a reason) in the same PR and say why in the PR description.
+
 ## API conventions (both sides)
 
 - JSON field names are `camelCase`. IDs are UUID strings, times are UTC RFC 3339 strings, prices are integer KRW, and a missing value is `null`, not an empty string.
