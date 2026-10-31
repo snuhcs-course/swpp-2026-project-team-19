@@ -49,7 +49,7 @@ class OwnerBarEditRulesTest {
         val five = listOf("바", "몰트", "싱글몰트", "칵테일", "하이볼")
         assertNull(toggleBarTag(five, "추가"))
         assertNull(toggleBarTag(emptyList(), "한".repeat(25)))
-        assertEquals(five.drop(1), toggleBarTag(five, " 몰트 "))
+        assertEquals(five.filterNot { it == "몰트" }, toggleBarTag(five, " 몰트 "))
         assertEquals(listOf("싱글몰트"), toggleBarTag(emptyList(), " 싱글몰트 "))
         assertTrue(toggleBarTag(listOf("몰트"), "몰트")!!.isEmpty())
     }
