@@ -105,6 +105,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     )
                     OwnerPage.MGR_MENU -> OwnerMenuQuickEntryScreen(
                         state = mockState,
+                        onRetry = data::retry,
                         onBack = { navController.popBackStack() },
                         onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
                         onExistingJob = { status ->
