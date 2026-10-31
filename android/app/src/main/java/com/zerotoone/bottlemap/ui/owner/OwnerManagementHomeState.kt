@@ -61,18 +61,27 @@ internal fun homeOperatingState(bar: MockBar, atEpochMs: Long): String {
         previousShift.closesNextDay && previousShift.closeMinutes != null &&
         todayMinute < previousShift.closeMinutes
     val regular = bar.weeklyHours.firstOrNull { it.isoDayOfWeek == today }
-    val open = if (exception?.kind == MockExceptionKind.CUSTOM_HOURS) exception.openMinutes
-        else regular?.takeUnless { it.closed }?.openMinutes
-    val close = if (exception?.kind == MockExceptionKind.CUSTOM_HOURS) exception.closeMinutes
-        else regular?.takeUnless { it.closed }?.closeMinutes
-    val endsNextDay = if (exception?.kind == MockExceptionKind.CUSTOM_HOURS)
-        exception.closesNextDay else regular?.closesNextDay == true
-    if (open == null || close == null) {
-        return if (overnight) "영업 중" else if (bar.weeklyHours.isEmpty()) "영업시간 정보 없음" else "영업 종료"
+    // A shift starting *today* cannot make the bar open this morning.
+    // Yesterday's overnight shift is evaluated separately.
+    val previousTemporary = exception?.takeIf {
+        it.kind == MockExceptionKind.CUSTOM_HOURS &&
+            it.fromEpochDay == day - 1 && it.closesNextDay
     }
-    val currentlyOpen = if (endsNextDay || close <= open)
-        todayMinute >= open || todayMinute < close
-    else todayMinute in open until close
+    if (previousTemporary?.closeMinutes != null &&
+        todayMinute < previousTemporary.closeMinutes) return "영업 중"
+
+    val todayTemporary = exception?.takeIf {
+        it.kind == MockExceptionKind.CUSTOM_HOURS && it.fromEpochDay == day
+    }
+    val open = todayTemporary?.openMinutes ?: regular?.takeUnless { it.closed }?.openMinutes
+    val close = todayTemporary?.closeMinutes ?: regular?.takeUnless { it.closed }?.closeMinutes
+    val endsNextDay = todayTemporary?.closesNextDay ?: (regular?.closesNextDay == true)
+    if (open == null || close == null) {
+        return if (overnight) "영업 중"
+        else if (bar.weeklyHours.isEmpty()) "영업시간 정보 없음" else "영업 종료"
+    }
+    val currentlyOpen = if (endsNextDay) todayMinute >= open
+        else todayMinute in open until close
     return if (overnight || currentlyOpen) "영업 중" else "영업 종료"
 }
 
