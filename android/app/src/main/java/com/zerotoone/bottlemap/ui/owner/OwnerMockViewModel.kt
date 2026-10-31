@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.zerotoone.bottlemap.data.owner.MockBar
+import com.zerotoone.bottlemap.data.owner.MockOperatingException
 import com.zerotoone.bottlemap.data.owner.MockBrand
 import com.zerotoone.bottlemap.data.owner.MockBarMenuItem
 import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
@@ -31,6 +32,9 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun closeApplicationForFixture(id: String, status: MockApplicationStatus) = repository.closeApplicationForFixture(id, status)
     fun dismissRejectedForFixture(id: String) = repository.dismissRejectedForFixture(id)
     fun saveBar(bar: MockBar) = repository.saveBar(bar)
+    fun confirmMenuInformation(barId: String, atEpochMs: Long) = repository.confirmMenuInformation(barId, atEpochMs)
+    fun applyOperatingException(barId: String, exception: MockOperatingException) = repository.applyOperatingException(barId, exception)
+    fun cancelOperatingException(barId: String, exceptionId: String) = repository.cancelOperatingException(barId, exceptionId)
     fun selectBar(barId: String) = repository.selectBar(barId)
     fun saveBrand(brand: MockBrand) = repository.saveBrand(brand)
     fun saveProduct(product: MockCatalogProduct) = repository.saveCatalogProduct(product)
