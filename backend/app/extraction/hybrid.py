@@ -7,7 +7,7 @@ EXTRACTION_THINKING_LEVEL), as for the Gemini-only extractor.
 
 Returns the flow v2 4.3 items (same conversion as extract_menu) and a meta that keeps the
 OCR line table with boxes and, per item, its source lines and their union box, so a review
-screen can crop the menu line from the photo (no DB column for it yet: ai/docs/p35_backend_notes.md).
+screen can crop the menu line from the photo (the review API returns the box as `sourceBox`).
 """
 
 import hashlib
