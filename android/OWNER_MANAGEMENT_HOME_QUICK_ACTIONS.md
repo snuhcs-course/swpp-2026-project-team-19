@@ -24,21 +24,45 @@
 - GitHub Actions: Android Debug APK, unit tests and lint; AI CI (results to be recorded in PR).
 - No local Android emulator or USB device verification is claimed by the automation.
 
-## Galaxy S23 manual QA — user reported 7/7 PASS; detailed visual polish remains pending
+## Galaxy S23 device QA — reported PASS (2026-10-31)
 
-Install without resetting app data:
+The user reported the following **seven feature-level scenarios PASS** on the manager-home implementation. These are physical Galaxy S23 observations, not automated assertions:
+
+- [x] Newly approved/existing bar management home shows the bar name, header preview, and two aligned cards.
+- [x] Today closed and one-day custom hours survive leaving/reopening the screen and can be cancelled.
+- [x] Temporary vacation date ranges appear without clipping.
+- [x] The owner menu confirmation date persists on reopening and does not overwrite the menu publish date.
+- [x] Menu job status and entry route agree.
+- [x] System Back, small portrait and large fonts do not overlap the tested components.
+- [x] Customer search, map and Google sign-in have no observed regressions.
+
+**UI acceptance remains open:** precise text positions, text sizes, horizontal/vertical spacing and latest-info gauge need refinement. At the time of this QA the gauge was inverted: `ownerMenuFreshness()` returns 0% immediately after confirmation and 100% at 45 days old. It should represent freshness (100% just confirmed, decreasing toward 0% over 45 days) with a left-to-right progress fill. This code fix and subsequent device recheck are **not completed**. Do not conflate 7/7 functionality PASS with pixel-perfect visual approval.
+
+### Standard device install sequence (repo root, Windows PowerShell)
 
 ```powershell
+git fetch origin
+git switch feature/i3-owner-management-home-quick-actions
+git pull --ff-only
 .\gradlew.bat :app:installDebug "-PBOTTLEMAP_API_BASE_URL=https://bottlemap.o-r.kr/"
 ```
 
-1. Approved new and existing Mock bars show the same management home; selected bar name, top-only preview action, two equal-height cards and menu card.
-2. At 320dp portrait and enlarged system fonts, the two tiles remain aligned and a 3-line vacation date range and cancel control do not overlap.
-3. Apply today closed; reopen app and confirm today's status and cancellation. Cancel and verify the regular state is restored.
-4. Apply custom hours, including next-day closing; reopen and verify the times and return navigation. Test invalid times do not silently apply.
-5. Apply a future date range; reopen and verify start/end, pending label, and cancellation without changing unrelated schedules.
-6. Tap **지금도 맞아요**; confirm menu freshness/verification date changes and survives force-stop; last published date must **not** change.
-7. With Mock `PROCESSING`, `READY_FOR_REVIEW`, `FAILED` and `APPLIED` import states, confirm the correct status label and job continuation destination. Processing disables new image registration.
-8. Navigate home → information placeholder, status, menu, preview and back; verify system Back/gesture and Customer search/map/login unaffected.
+Do not clear application data or uninstall before testing saved data/draft restoration.
+
+### Copy-and-return QA template for future revisions
+
+Use a plain-text/Markdown block with the checks for **that revision**; the tester replaces `[ ]` with `[x]` or adds a FAIL note:
+
+```text
+[Owner manager-home device QA — revision SHA: __________]
+Device: Galaxy S23 / small portrait or font scale: __________
+[ ] Freshly confirmed menu fills from left to right and shows full latest-info gauge.
+[ ] Older menu confirmation produces a smaller filled area, not larger.
+[ ] Text positions/sizes match ACTION_FIRST v4 layout.
+[ ] Cards, 3-line vacation date and cancel button preserve spacing and alignment.
+[ ] Screen exit/reentry and process restart retain confirmed/menu dates.
+[ ] Customer search/map, system Back and Google sign-in unaffected.
+Defects / screenshots: __________
+```
 
 **Limitations**: manager info edit, manual menu edit, production calendar schedules/permissions, actual OCR/AI import and publish are out of scope. Do not enter real applicant PII in app-private unencrypted Mock state.
