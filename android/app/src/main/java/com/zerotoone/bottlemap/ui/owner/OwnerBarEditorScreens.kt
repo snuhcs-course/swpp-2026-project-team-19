@@ -50,7 +50,9 @@ private fun selectedOwnerBar(state: MockOwnerLoadState): Pair<MockOwnerSnapshot,
 
 /** Render only the contents of a saved URI, keeping the original reference for full-screen display. */
 @Composable
-internal fun OwnerStoredPhoto(uri: String, modifier: Modifier = Modifier) {
+internal fun OwnerStoredPhoto(
+    uri: String, modifier: Modifier = Modifier, scale: ContentScale = ContentScale.Crop
+) {
     val context = LocalContext.current
     val decoded by produceState<ImageBitmap?>(initialValue = null, uri) {
         value = withContext(Dispatchers.IO) {
@@ -75,7 +77,7 @@ internal fun OwnerStoredPhoto(uri: String, modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center) {
         if (decoded != null) {
             Image(bitmap = requireNotNull(decoded), contentDescription = "매장 사진",
-                modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                modifier = Modifier.fillMaxSize(), contentScale = scale)
         } else {
             Text("사진을 불러올 수 없어요", style = MaterialTheme.typography.labelSmall)
         }
@@ -595,7 +597,7 @@ fun OwnerBarCustomerPreviewScreen(
         Dialog(onDismissRequest = { fullPhoto = null }) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(Modifier.fillMaxWidth().height(400.dp).clip(RoundedCornerShape(12.dp))) {
-                    OwnerStoredPhoto(requireNotNull(fullPhoto), Modifier.fillMaxSize())
+                    OwnerStoredPhoto(requireNotNull(fullPhoto), Modifier.fillMaxSize(), ContentScale.Fit)
                 }
                 TextButton(onClick = { fullPhoto = null }) { Text("닫기") }
             }
