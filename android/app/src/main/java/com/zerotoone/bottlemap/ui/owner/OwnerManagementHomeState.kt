@@ -77,8 +77,9 @@ internal fun homeOperatingState(bar: MockBar, atEpochMs: Long): String {
 }
 
 internal fun latestOwnerImport(jobs: List<MockMenuImport>, barId: String): MockMenuImport? =
-    jobs.lastOrNull { it.barId == barId && it.status != MockImportStatus.APPLIED }
-        ?: jobs.lastOrNull { it.barId == barId }
+    // Import jobs are appended when created; recovery must not resurrect an older failure
+    // after a newer job has already been published.
+    jobs.lastOrNull { it.barId == barId }
 
 internal fun ownerJobTitle(status: MockImportStatus): String = when (status) {
     MockImportStatus.PROCESSING -> "AI 분석 중"
@@ -101,6 +102,13 @@ internal fun ownerMenuFreshness(bar: MockBar, atEpochMs: Long): Pair<Long?, Int>
         .coerceAtLeast(0)
     return elapsed to (100 - elapsed.coerceAtMost(45) * 100 / 45).toInt()
 }
+
+/** Resolve the actual day at Apply time, not the day captured on screen entry. */
+internal fun ownerQuickApplyDay(nowEpochMs: Long): Long =
+    ownerToday(nowEpochMs).toEpochDay()
+
+internal fun validQuickVacationAtApply(startDay: Long, endDay: Long, today: Long): Boolean =
+    startDay >= today && endDay >= startDay
 
 internal fun ownerDisplayDate(epochMs: Long?): String = epochMs?.let {
     ownerToday(it).format(ownerDateFormat)
