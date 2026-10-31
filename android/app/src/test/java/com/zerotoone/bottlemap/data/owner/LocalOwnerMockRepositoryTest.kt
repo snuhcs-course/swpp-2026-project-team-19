@@ -817,7 +817,7 @@ class LocalOwnerMockRepositoryTest {
         r.saveRegistrationDraft(first)
         r.submitRegistrationDraftForFixture()
         r.saveRegistrationDraft(first.copy(
-            proposedBarAddress = "Second Address", businessNumberDigits = "2345678910"
+            proposedBarAddress = "Second Address", businessNumberDigits = "2345678919"
         ))
         r.submitRegistrationDraftForFixture()
         assertEquals(2, ready(r).applications.count { it.status == MockApplicationStatus.PENDING })
