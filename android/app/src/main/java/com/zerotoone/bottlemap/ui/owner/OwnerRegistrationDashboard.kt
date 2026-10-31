@@ -26,6 +26,7 @@ internal fun OwnerRegistrationDashboard(
     onReject: (String) -> Unit,
     onApprove: (MockOwnerApplication) -> Unit,
 ) {
+    val now = rememberOwnerNow()
     val bars = snapshot.bars
     val applications = snapshot.applications
         .filterNot { it.applicationId in snapshot.dismissedApplicationIds }
@@ -48,7 +49,6 @@ internal fun OwnerRegistrationDashboard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(bar.name, style = MaterialTheme.typography.titleLarge)
                 // Same persisted bar exception and weekly schedule as management home.
-                val now = System.currentTimeMillis()
                 val temporary = homeOperatingException(bar, now)
                 // Match the home-card headline; keep current open/closed as separate detail.
                 val operatingLabel = if (temporary?.kind == MockExceptionKind.VACATION)
