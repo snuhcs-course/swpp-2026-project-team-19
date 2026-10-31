@@ -24,6 +24,11 @@ import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerOperatingQuickScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuQuickEntryScreen
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
+import com.zerotoone.bottlemap.ui.owner.OwnerBarInfoEditorScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerBarPhotoEditorScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerBarTagsEditorScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerBarHoursEditorScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerBarCustomerPreviewScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 
 /** One Android artifact: everyone starts in Customer, with Owner accessible from My Page. */
@@ -102,6 +107,30 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     OwnerPage.MGR_STATUS -> OwnerOperatingQuickScreen(
                         state = mockState,
                         viewModel = data,
+                        onBack = { navController.popBackStack() },
+                    )
+                    OwnerPage.MGR_INFO -> OwnerBarInfoEditorScreen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.popBackStack() },
+                        onPhotos = { navController.navigate(OwnerPage.MGR_PHOTOS.route) },
+                        onTags = { navController.navigate(OwnerPage.MGR_TAGS.route) },
+                        onHours = { navController.navigate(OwnerPage.MGR_HOURS.route) },
+                        onStatus = { navController.navigate(OwnerPage.MGR_STATUS.route) },
+                    )
+                    OwnerPage.MGR_PHOTOS -> OwnerBarPhotoEditorScreen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.popBackStack() },
+                    )
+                    OwnerPage.MGR_TAGS -> OwnerBarTagsEditorScreen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.popBackStack() },
+                    )
+                    OwnerPage.MGR_HOURS -> OwnerBarHoursEditorScreen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.popBackStack() },
+                    )
+                    OwnerPage.MGR_PREVIEW -> OwnerBarCustomerPreviewScreen(
+                        state = mockState, viewModel = data,
                         onBack = { navController.popBackStack() },
                     )
                     OwnerPage.MGR_MENU -> OwnerMenuQuickEntryScreen(
