@@ -66,6 +66,9 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.util.UUID
 
+// Same typography for both management-card headings and every operating-status variant.
+private val ownerHomeCardTitleSize = 16.sp
+
 private fun activeBar(state: MockOwnerLoadState): Pair<MockOwnerSnapshot, MockBar>? {
     val snapshot = when (state) {
         is MockOwnerLoadState.Ready -> state.snapshot
@@ -101,7 +104,8 @@ private fun OwnerQuickCard(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 OwnerManagerIcon(icon)
                 Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold, maxLines = 1)
+                    fontSize = ownerHomeCardTitleSize,
+                    fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
             }
             OwnerManagerFooter(footer, onClick)
         }
@@ -212,7 +216,8 @@ fun OwnerManagementHomeScreen(
                                                     if (exception?.kind == MockExceptionKind.VACATION) "임시 휴무"
                                                     else homeExceptionHeading(exception),
                                                     modifier = Modifier.align(Alignment.CenterStart),
-                                                    fontSize = 13.sp,
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    fontSize = ownerHomeCardTitleSize,
                                                     fontWeight = FontWeight.Bold,
                                                     maxLines = 1,
                                                     softWrap = false,
