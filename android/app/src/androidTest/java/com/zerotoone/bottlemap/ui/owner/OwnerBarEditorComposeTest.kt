@@ -2,6 +2,8 @@ package com.zerotoone.bottlemap.ui.owner
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -35,7 +37,7 @@ class OwnerBarEditorComposeTest {
         compose.setContent {
             MaterialTheme {
                 OwnerBarInfoEditorScreen(
-                    state = vm.state.value, viewModel = vm,
+                    state = vm.state.collectAsState().value, viewModel = vm,
                     onBack = { exits++ }, onPhotos = {}, onTags = {},
                     onHours = {}, onStatus = {}
                 )
@@ -61,7 +63,7 @@ class OwnerBarEditorComposeTest {
         compose.setContent {
             MaterialTheme {
                 OwnerBarInfoEditorScreen(
-                    vm.state.value, vm, onBack = { exited = true },
+                    vm.state.collectAsState().value, vm, onBack = { exited = true },
                     onPhotos = {}, onTags = {}, onHours = {}, onStatus = {}
                 )
             }
@@ -83,7 +85,7 @@ class OwnerBarEditorComposeTest {
         )
         compose.setContent {
             MaterialTheme {
-                OwnerBarPhotoEditorScreen(vm.state.value, vm, onBack = {})
+                OwnerBarPhotoEditorScreen(vm.state.collectAsState().value, vm, onBack = {})
             }
         }
         compose.onNodeWithTag("owner-photo-save").assertExists()
