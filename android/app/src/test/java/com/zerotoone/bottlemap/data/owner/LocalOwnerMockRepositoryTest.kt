@@ -795,13 +795,45 @@ class LocalOwnerMockRepositoryTest {
     @Test fun v4DuplicatePendingSubmissionBlockedEvenWithFreshDraft() {
         val r = repo(InMemoryMockOwnerStateStore())
         val draft = MockRegistrationDraft(
-            proposedBarName = "Duplicate Pending Bar", proposedBarAddress = "Mock Address"
+            proposedBarName = "Duplicate Pending Bar", proposedBarAddress = "Mock Address",
+            businessNumberDigits = "123-45-67891"
         )
         r.saveRegistrationDraft(draft)
         r.submitRegistrationDraftForFixture()
-        r.saveRegistrationDraft(draft)
+        r.saveRegistrationDraft(draft.copy(
+            proposedBarName = "Same Business, Different Name",
+            businessNumberDigits = "1234567891"
+        ))
         rejects { r.submitRegistrationDraftForFixture() }
         assertEquals(1, ready(r).applications.count { it.status == MockApplicationStatus.PENDING })
+    }
+
+    @Test fun newBarApplicationsWithDifferentBusinessNumbersMayShareName() {
+        val r = repo(InMemoryMockOwnerStateStore())
+        val first = MockRegistrationDraft(
+            proposedBarName = "Shared Name", proposedBarAddress = "First Address",
+            businessNumberDigits = "1234567891"
+        )
+        r.saveRegistrationDraft(first)
+        r.submitRegistrationDraftForFixture()
+        r.saveRegistrationDraft(first.copy(
+            proposedBarAddress = "Second Address", businessNumberDigits = "2345678910"
+        ))
+        r.submitRegistrationDraftForFixture()
+        assertEquals(2, ready(r).applications.count { it.status == MockApplicationStatus.PENDING })
+    }
+
+    @Test fun ownedBarAndNewRegistrationDraftRemainInSnapshotTogether() {
+        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r = repo(store)
+        val pendingDraft = MockRegistrationDraft(
+            proposedBarName = "New Bar", businessNumberDigits = "1234567891",
+            resumePageKey = "MENUS"
+        )
+        r.saveRegistrationDraft(pendingDraft)
+        val restored = ready(repo(store))
+        assertEquals(1, restored.bars.size)
+        assertEquals(pendingDraft, restored.registrationDraft)
     }
 
     @Test fun v4RejectedCardCanBeDismissedWithoutDeletingHistory() {
