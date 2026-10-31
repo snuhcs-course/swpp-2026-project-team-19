@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -203,28 +204,36 @@ fun OwnerManagementHomeScreen(
                                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
                                             OwnerManagerIcon(BmIconId.UPDATED)
-                                            // All status labels share one compact single-line font size.
-                                            Text(
-                                                if (exception?.kind == MockExceptionKind.VACATION) "임시 휴무"
-                                                else homeExceptionHeading(exception),
-                                                modifier = Modifier.weight(1f),
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                maxLines = 1
-                                            )
-                                            if (exception != null) {
+                                            // One shared heading size for normal, closed, custom hours,
+                                            // and vacation. The cancel control overlays the far right
+                                            // instead of shrinking the title to 10sp.
+                                            Box(Modifier.weight(1f).heightIn(min = 36.dp)) {
                                                 Text(
-                                                    "×", fontSize = 29.sp,
-                                                    color = MaterialTheme.colorScheme.error,
-                                                    modifier = Modifier.width(22.dp)
-                                                        .clickable {
-                                                            try {
-                                                                viewModel.cancelOperatingException(bar.barId, exception.exceptionId)
-                                                                error = null
-                                                            } catch (e: Exception) { error = e.message }
-                                                        },
-                                                    textAlign = TextAlign.Center
+                                                    if (exception?.kind == MockExceptionKind.VACATION) "임시 휴무"
+                                                    else homeExceptionHeading(exception),
+                                                    modifier = Modifier.align(Alignment.CenterStart),
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1,
+                                                    softWrap = false,
+                                                    overflow = TextOverflow.Visible
                                                 )
+                                                if (exception != null) {
+                                                    Box(
+                                                        Modifier.align(Alignment.CenterEnd)
+                                                            .offset(x = 8.dp).size(36.dp)
+                                                            .clickable {
+                                                                try {
+                                                                    viewModel.cancelOperatingException(bar.barId, exception.exceptionId)
+                                                                    error = null
+                                                                } catch (e: Exception) { error = e.message }
+                                                            },
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Text("×", fontSize = 29.sp,
+                                                            color = MaterialTheme.colorScheme.error)
+                                                    }
+                                                }
                                             }
                                         }
                                         val statusDetail = when (exception?.kind) {
@@ -243,7 +252,7 @@ fun OwnerManagementHomeScreen(
                                         if (statusDetail != null) {
                                             Text(statusDetail,
                                                 modifier = Modifier.padding(start = 36.dp),
-                                                fontSize = 11.sp, fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp, fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 maxLines = 1
                                             )
@@ -259,7 +268,7 @@ fun OwnerManagementHomeScreen(
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(
                                 Modifier.fillMaxWidth().clickable(onClick = onMenu)
-                                    .defaultMinSize(minHeight = 43.dp),
+                                    .defaultMinSize(minHeight = 40.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(9.dp)
                             ) {
@@ -284,18 +293,34 @@ fun OwnerManagementHomeScreen(
                                     append(if (ageDays == null) " 미확인" else "일 경과")
                                 }, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                OutlinedButton(onClick = {
-                                    try {
-                                        viewModel.confirmMenuInformation(bar.barId, System.currentTimeMillis())
-                                        error = null
-                                    } catch (e: Exception) { error = e.message }
-                                }, modifier = Modifier.height(30.dp),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                                    contentPadding = PaddingValues(horizontal = 9.dp, vertical = 0.dp)) {
-                                    Text("지금도 맞아요", style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.primary)
+                                // A short visual pill inside an independently sized hit area
+                                // prevents the border from appearing to touch the gauge.
+                                Box(
+                                    Modifier.height(42.dp)
+                                        .clickable {
+                                            try {
+                                                viewModel.confirmMenuInformation(bar.barId, System.currentTimeMillis())
+                                                error = null
+                                            } catch (e: Exception) { error = e.message }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(
+                                        Modifier.height(26.dp)
+                                            .border(
+                                                BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                                RoundedCornerShape(50)
+                                            )
+                                            .padding(horizontal = 11.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("지금도 맞아요",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary)
+                                    }
                                 }
                             }
+                            Spacer(Modifier.height(4.dp))
                             // Material3's stop indicator can show a dot at the right even for 0%.
                             // Draw from x=0 to guarantee a strictly left-to-right fill.
                             val gaugeFraction = (freshness / 100f).coerceIn(0f, 1f)
