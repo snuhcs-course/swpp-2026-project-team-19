@@ -63,10 +63,10 @@ class OwnerManagementHomeStateTest {
         val bar = MockBar("b", "바", "서울", weeklyHours = listOf(currentDay, fridayClosed))
         assertEquals("영업 종료", homeOperatingState(bar, time(1)))
         assertEquals("영업 중", homeOperatingState(bar, time(19)))
-        val nextMorning = day.plusDays(1).atTime(1).atZone(ownerSeoulZone)
+        val nextMorning = day.plusDays(1).atTime(1, 0).atZone(ownerSeoulZone)
             .toInstant().toEpochMilli()
         assertEquals("영업 중", homeOperatingState(bar, nextMorning))
-        val afterClose = day.plusDays(1).atTime(3).atZone(ownerSeoulZone)
+        val afterClose = day.plusDays(1).atTime(3, 0).atZone(ownerSeoulZone)
             .toInstant().toEpochMilli()
         assertEquals("영업 종료", homeOperatingState(bar, afterClose))
     }
