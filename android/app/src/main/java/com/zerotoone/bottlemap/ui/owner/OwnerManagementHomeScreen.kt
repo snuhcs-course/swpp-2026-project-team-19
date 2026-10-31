@@ -136,6 +136,7 @@ fun OwnerManagementHomeScreen(
     onInfo: () -> Unit,
     onStatus: () -> Unit,
     onMenu: () -> Unit,
+    onAddBar: () -> Unit,
     onJob: (MockImportStatus) -> Unit,
 ) {
     val selected = activeBar(state)
@@ -162,7 +163,9 @@ fun OwnerManagementHomeScreen(
                     val (snapshot, bar) = selected
                     val exception = homeOperatingException(bar, now)
                     val job = latestOwnerImport(snapshot.imports, bar.barId)
-                    val (ageDays, freshness) = ownerMenuFreshness(bar, now)
+                    val hasPublishedMenu = snapshot.menuItems.any { it.barId == bar.barId }
+                    val (ageDays, freshness) = if (hasPublishedMenu)
+                        ownerMenuFreshness(bar, now) else null to 0
                     Row(
                         Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -302,7 +305,7 @@ fun OwnerManagementHomeScreen(
                                 // prevents the border from appearing to touch the gauge.
                                 Box(
                                     Modifier.height(42.dp)
-                                        .clickable {
+                                        .clickable(enabled = hasPublishedMenu) {
                                             try {
                                                 viewModel.confirmMenuInformation(bar.barId, System.currentTimeMillis())
                                                 error = null
@@ -313,7 +316,11 @@ fun OwnerManagementHomeScreen(
                                     Box(
                                         Modifier.height(26.dp)
                                             .border(
-                                                BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                                BorderStroke(
+                                                    1.dp,
+                                                    if (hasPublishedMenu) MaterialTheme.colorScheme.primary
+                                                    else MaterialTheme.colorScheme.outlineVariant
+                                                ),
                                                 RoundedCornerShape(50)
                                             )
                                             .padding(horizontal = 11.dp),
@@ -321,7 +328,8 @@ fun OwnerManagementHomeScreen(
                                     ) {
                                         Text("지금도 맞아요",
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.primary)
+                                            color = if (hasPublishedMenu) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 }
                             }
@@ -371,6 +379,14 @@ fun OwnerManagementHomeScreen(
                             }
                         }
                     }
+                    // Single-bar owners skip the entry/dashboard screen. Keep a direct
+                    // path back to the existing self-registration introduction.
+                    OwnerActionButton(
+                        "다른 매장 등록하기",
+                        onAddBar,
+                        Modifier.fillMaxWidth(),
+                        secondary = true
+                    )
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 }
             }
@@ -545,15 +561,18 @@ fun OwnerOperatingQuickScreen(
                             else -> "휴업 적용"
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = choice != "range" || (startDay >= today && endDay >= startDay),
+                        enabled = choice != "range" || validQuickVacationAtApply(startDay, endDay, today),
                         onClick = {
                             try {
+                                val applyDay = ownerQuickApplyDay(System.currentTimeMillis())
                                 val kind = when (choice) {
                                     "off" -> MockExceptionKind.CLOSED_TODAY
                                     "hours" -> MockExceptionKind.CUSTOM_HOURS
                                     else -> MockExceptionKind.VACATION
                                 }
-                                require(choice != "range" || (startDay >= today && endDay >= startDay))
+                                require(choice != "range" || validQuickVacationAtApply(startDay, endDay, applyDay)) {
+                                    "시작일과 종료일을 다시 확인해 주세요."
+                                }
                                 val openMinutes = startHour * 60 + startMinute
                                 val closeMinutes = endHour * 60 + endMinute
                                 require(choice != "hours" || openMinutes != closeMinutes) {
@@ -563,8 +582,8 @@ fun OwnerOperatingQuickScreen(
                                     bar.barId, MockOperatingException(
                                         exceptionId = "quick-" + UUID.randomUUID().toString(),
                                         kind = kind,
-                                        fromEpochDay = if (choice == "range") startDay else today,
-                                        toEpochDay = if (choice == "range") endDay else today,
+                                        fromEpochDay = if (choice == "range") startDay else applyDay,
+                                        toEpochDay = if (choice == "range") endDay else applyDay,
                                         note = note.trim().ifBlank { null },
                                         openMinutes = if (choice == "hours") openMinutes else null,
                                         closeMinutes = if (choice == "hours") closeMinutes else null,
