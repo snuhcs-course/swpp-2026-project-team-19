@@ -24,7 +24,7 @@
 - GitHub Actions: Android Debug APK, unit tests and lint; AI CI (results to be recorded in PR).
 - No local Android emulator or USB device verification is claimed by the automation.
 
-## Galaxy S23 manual QA (to be performed by user)
+## Galaxy S23 manual QA — user reported 7/7 PASS; detailed visual polish remains pending
 
 Install without resetting app data:
 
