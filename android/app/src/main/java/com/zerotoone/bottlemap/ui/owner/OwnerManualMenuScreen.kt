@@ -10,6 +10,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -124,6 +126,7 @@ internal fun OwnerManualMenuScreen(
     var brandName by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var category by rememberSaveable(bar?.barId) { mutableStateOf("위스키") }
     var alcoholKind by rememberSaveable(bar?.barId) { mutableStateOf("") }
+    var categoryMenuExpanded by rememberSaveable(bar?.barId) { mutableStateOf(false) }
     var optionText by rememberSaveable(bar?.barId) {
         mutableStateOf(encodedOptions(listOf(freshOption())))
     }
@@ -383,22 +386,36 @@ internal fun OwnerManualMenuScreen(
                     if (editId == null && linkedId == null)
                         V4FormField("브랜드", brandName, { brandName = it },
                             placeholder = "브랜드 이름")
-                    Text("종류", color = V4Color.text)
-                    MANUAL_MENU_CATEGORIES.forEach { cat ->
-                        Row(Modifier.fillMaxWidth().clickable {
-                            if (cat != category) {
-                                category = cat; linkedId = null; rejectedId = null
-                                if (cat != "위스키") setOptions(draftOptions.take(1))
+                    Text("종류", color = V4Color.text, fontSize = 13.sp)
+                    Box(Modifier.fillMaxWidth()) {
+                        Row(Modifier.fillMaxWidth().height(43.dp)
+                            .background(V4Color.elevated, RoundedCornerShape(9.dp))
+                            .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
+                            .clickable { categoryMenuExpanded = true }
+                            .padding(horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            Text(category, color = V4Color.text, modifier = Modifier.weight(1f),
+                                fontSize = 14.sp)
+                            Text("⌄", color = V4Color.primary, fontSize = 16.sp)
+                        }
+                        DropdownMenu(expanded = categoryMenuExpanded,
+                            onDismissRequest = { categoryMenuExpanded = false }) {
+                            MANUAL_MENU_CATEGORIES.forEach { cat ->
+                                DropdownMenuItem(text = { Text(cat) }, onClick = {
+                                    categoryMenuExpanded = false
+                                    if (cat != category) {
+                                        category = cat; linkedId = null; rejectedId = null
+                                        if (cat != "위스키")
+                                            setOptions(draftOptions.take(1))
+                                    }
+                                })
                             }
-                        }.padding(vertical = 4.dp)) {
-                            Text(if (cat == category) "◉  " else "○  ", color = V4Color.primary)
-                            Text(cat, color = V4Color.text)
                         }
                     }
                     if (category == "기타 주류")
                         V4FormField("주류 종류", alcoholKind, { alcoholKind = it.take(60) },
                             placeholder = "예: 하이볼, 맥주")
-                    Text(if (category == "위스키") "용량별 가격" else "판매 가격 (원)",
+                    if (category == "위스키") Text("용량별 가격",
                         color = V4Color.text, fontWeight = FontWeight.Bold)
                     (if (category == "위스키") draftOptions else draftOptions.take(1))
                         .forEachIndexed { i, d ->
@@ -423,7 +440,8 @@ internal fun OwnerManualMenuScreen(
                                     }, keyboardType = KeyboardType.Number,
                                         testTag = "manual-menu-ml-" + i)
                                 }
-                                V4FormField("가격 (원)", d.price, { v ->
+                                V4FormField(if (category == "위스키") "가격 (원)"
+                                    else "판매 가격 (원)", d.price, { v ->
                                     changeOption(i) { it.copy(price = v.filter(Char::isDigit)) }
                                 }, keyboardType = KeyboardType.Number,
                                     testTag = "manual-menu-price-" + i)
