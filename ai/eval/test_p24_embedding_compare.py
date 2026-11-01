@@ -107,6 +107,34 @@ def test_tfidf_ranks_the_closest_spelling_first():
     assert tf.embed(["%%%"]) == [{}]  # no known n-gram: an empty vector, similarity 0
 
 
+class RecordingTfidf(p24.CharTfidf):
+    def __init__(self, calls=None):
+        super().__init__()
+        self.calls = [] if calls is None else calls
+
+    def fitted(self, docs):
+        self.calls.append(list(docs))
+        return super().fitted(docs)
+
+
+def test_tfidf_is_fitted_per_bar_index_so_a_bars_own_spellings_never_weigh_in(be):
+    tf = RecordingTfidf()
+    result = p24.evaluate(tf, be, SEED, PHOTOS)
+    catalogs = p24.build_catalogs(p24.RawBackend(be), SEED, ["바A", "바B"])
+    expected = {(v, d, bar): [t for t, _ in p24.doc_entries(catalogs[v][bar].catalog, d)]
+                for v in p24.CATALOG_VARIANTS for d in p24.DOCSETS for bar in ("바A", "바B")}
+    assert sorted(map(tuple, tf.calls)) == sorted(map(tuple, expected.values()))
+    # 바A's own menu spelling is an alias only in 바B's catalog: no alias fit for 바A sees it (brand_age
+    # builds the same string from brand + age, so that doc set is not the leak this guards against)
+    a_fits = [docs for key, docs in expected.items() if key[2] == "바A" and key[1] == "aliases"]
+    assert a_fits and all("글렌피딕 12년" not in docs for docs in a_fits)
+    assert any("글렌피딕 12년" in docs for key, docs in expected.items() if key[2] == "바B" and key[1] == "aliases")
+    assert result["fit"] == "per bar index"
+    for c in result["catalogs"].values():
+        assert all(pol["invariants"]["holds"] for pol in c["policies"].values())
+        assert all(len(row) == 4 for row in c["unmatched_top"])
+
+
 def test_dense_similarity_handles_empty_inputs():
     assert p24.dense_similarity([], [[1.0]]) == []
     assert p24.dense_similarity([[1.0]], []) == [[]]
@@ -316,15 +344,24 @@ def test_cached_llm_factory_reads_only_the_cache(tmp_path):
     assert llm.cache_only and llm.inner is None and llm.seed_dirs == [p24.E8_CACHE]
 
 
-def test_floor_sweep_keeps_the_useful_lines_and_counts_the_rest():
-    top = [[0.9, "known", 1], [0.8, "known", 3], [0.7, "absent", None], [0.6, "known", 2], [0.5, "known", None],
-           [0.4, "unknown", None]]
+def test_floor_sweep_keeps_a_line_only_when_its_gold_candidate_reaches_the_floor():
+    # [rank-1 similarity, kind, gold rank, gold similarity]
+    top = [[0.9, "known", 1, 0.9], [0.8, "known", 3, 0.62], [0.7, "absent", None, None], [0.6, "known", 2, 0.55],
+           [0.5, "known", None, None], [0.4, "unknown", None, None]]
     sweep = {p["keep_useful"]: p for p in p24.floor_sweep(top, k=5, keep=(1.0, 0.6))}
-    assert sweep[1.0] == {"keep_useful": 1.0, "floor": 0.6, "useful_kept": 3, "useful": 3,
+    # the lowest gold similarity is 0.55, not the rank-1 0.6 of that line
+    assert sweep[1.0] == {"keep_useful": 1.0, "floor": 0.55, "useful_kept": 3, "useful": 3,
                           "known_gold_not_in_top_k_kept": 0, "absent_or_unknown_kept": 1, "absent_or_unknown": 2}
-    assert sweep[0.6]["floor"] == 0.8 and sweep[0.6]["absent_or_unknown_kept"] == 0
+    # floor 0.62: the 0.8 line still gets candidates, and its gold (0.62) survives; the 0.6 line's gold
+    # (0.55) does not, although a rank-1 floor test would have said the 0.8 line keeps a useful candidate either way
+    assert sweep[0.6]["floor"] == 0.62 and sweep[0.6]["useful_kept"] == 2
+    assert sweep[0.6]["absent_or_unknown_kept"] == 1
+    # a rank-1 score above the floor is not enough when the gold candidate is below it
+    one = p24.floor_sweep([[0.95, "known", 2, 0.5], [0.9, "known", 1, 0.9]], keep=(0.5,))[0]
+    assert one["floor"] == 0.9 and one["useful_kept"] == 1
     assert p24.floor_sweep(None) is None
-    assert p24.floor_sweep([[0.3, "absent", None]])[0]["floor"] is None
+    assert p24.floor_sweep([[0.3, "absent", None, None]])[0]["floor"] is None
+    assert p24.floor_sweep([[0.9, "known", 1]]) is None  # a run before the gold similarity was recorded
 
 
 def test_rerank_orders_an_ambiguous_line_by_embedding_without_confirming(types):
@@ -351,3 +388,21 @@ def test_rerank_only_reorders_without_adding(types):
     assert [x.product_id for x in p24.apply_policy(one, ranking(c, a), pol, "f", types).candidates] == [a]
     none = types.ResolutionResult(status="unmatched")
     assert len(p24.apply_policy(none, ranking(c, b, a), pol, "f", types).candidates) == 3  # k=5 for unmatched
+
+
+def test_provenance_records_the_commit_uncommitted_changes_and_harness_hashes():
+    prov = p24.provenance()
+    assert set(prov) == {"commit", "uncommitted_changes", "checked_paths", "harness_sha256"}
+    assert set(prov["harness_sha256"]) == {"ai/eval/p24_embedding_compare.py", "ai/eval/i3_match_eval.py"}
+    assert prov["harness_sha256"]["ai/eval/p24_embedding_compare.py"] == h.sha256_file(p24.Path(p24.__file__))
+
+
+@pytest.mark.parametrize("changes", [[" M ai/eval/p24_embedding_compare.py"], None])
+def test_run_refuses_uncommitted_or_unknown_state_unless_allowed(monkeypatch, tmp_path, changes):
+    monkeypatch.setattr(p24, "provenance", lambda: {"commit": "abc", "uncommitted_changes": changes})
+    monkeypatch.setattr(p24.h, "Backend", lambda repo: (_ for _ in ()).throw(AssertionError("ran")))
+    with pytest.raises(SystemExit) as stop:
+        p24.main(["run", "--model", "tfidf", "--out", str(tmp_path)])
+    assert "ran" not in str(stop.value) and not list(tmp_path.iterdir())
+    with pytest.raises(AssertionError, match="ran"):  # --allow-dirty goes on to the run
+        p24.main(["run", "--model", "tfidf", "--allow-dirty", "--out", str(tmp_path)])

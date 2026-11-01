@@ -86,7 +86,12 @@ MODELS = {
 # ---- embedders ----------------------------------------------------------------------------
 
 class Embedder(Protocol):
-    """Text -> vector. `fit` sees the catalog texts first (TF-IDF needs them; models ignore it)."""
+    """Text -> vector. `fit` sees the catalog texts first (TF-IDF needs them; models ignore it).
+
+    An embedder with `fit_per_index = True` (TF-IDF) is fitted on the texts of one bar's index only,
+    through `fitted(docs)`, so the weights never see another bar's catalog texts: a bar's held-out
+    menu spellings are aliases in the other bars' catalogs, and a pooled fit would let them into its
+    own weights. Models are fixed, so they embed every text once and share the vectors."""
 
     name: str
 
@@ -120,6 +125,7 @@ class CharTfidf:
     catalog texts; sublinear tf, smooth idf, cosine. The baseline: no model, no download."""
 
     name = "tfidf"
+    fit_per_index = True
 
     def __init__(self, n_min: int = 1, n_max: int = 3):
         self.n_min, self.n_max = n_min, n_max
@@ -135,6 +141,12 @@ class CharTfidf:
             df.update(set(self.grams(d)))
         n = len(docs)
         self.idf = {g: math.log((1 + n) / (1 + c)) + 1 for g, c in df.items()}
+
+    def fitted(self, docs: Sequence[str]) -> "CharTfidf":
+        """A new instance fitted on `docs` only (one bar's index)."""
+        other = CharTfidf(self.n_min, self.n_max)
+        other.fit(docs)
+        return other
 
     def embed(self, texts: Sequence[str]) -> list[dict[str, float]]:
         out = []
@@ -427,22 +439,51 @@ def evaluate(embedder: Embedder, be, seed: dict, photos: list, *, variants=CATAL
         return [h.score_line(be, p, n, g, resolved[(p.photo_id, n)], base[v][(p.photo_id, n)], catalogs[v][p.bar],
                              True, bool(targets and n in targets[p.photo_id])) for p in photos for n, g in p.lines]
 
-    # embed every text once
     entries = {(v, d, bar): doc_entries(catalogs[v][bar].catalog, d) for v in variants for d in docsets for bar in bars}
     doc_texts = list(dict.fromkeys(t for es in entries.values() for t, _ in es))
     queries = list(dict.fromkeys(n for p in photos for n, _ in p.lines))
-    t0 = time.perf_counter()
-    embedder.fit(doc_texts)
-    doc_vecs = embedder.embed(doc_texts)
-    t_docs = time.perf_counter() - t0
-    t0 = time.perf_counter()
-    q_vecs = embedder.embed(queries)
-    t_queries = time.perf_counter() - t0
-    doc_index = {t: i for i, t in enumerate(doc_texts)}
-    q_index = {t: i for i, t in enumerate(queries)}
+    per_index = getattr(embedder, "fit_per_index", False)
+    t_docs = t_queries = 0.0
 
     def pick(vecs, idx):
         return vecs[idx] if not isinstance(vecs, list) else [vecs[i] for i in idx]
+
+    if per_index:
+        # one fit per bar index (see Embedder); the vectors of a text depend on the index it is in
+        fitted: dict[tuple[str, str, str], Embedder] = {}
+        index_vecs: dict[tuple[str, str, str], list] = {}
+        t0 = time.perf_counter()
+        for key, es in entries.items():
+            texts = [t for t, _ in es]
+            fitted[key] = embedder.fitted(texts)
+            index_vecs[key] = fitted[key].embed(texts)
+        t_docs = time.perf_counter() - t0
+        embedder.fit(doc_texts)  # only so `fit` is still called once with every text (reported as doc_texts)
+    else:
+        t0 = time.perf_counter()
+        embedder.fit(doc_texts)
+        doc_vecs = embedder.embed(doc_texts)
+        t_docs = time.perf_counter() - t0
+        t0 = time.perf_counter()
+        q_vecs = embedder.embed(queries)
+        t_queries = time.perf_counter() - t0
+        doc_index = {t: i for i, t in enumerate(doc_texts)}
+        q_index = {t: i for i, t in enumerate(queries)}
+
+    def index_of(key):
+        """(embedder for the queries of this index, its doc vectors)."""
+        if per_index:
+            return fitted[key], index_vecs[key]
+        return embedder, pick(doc_vecs, [doc_index[t] for t, _ in entries[key]])
+
+    def query_vecs(key, names):
+        nonlocal t_queries
+        if per_index:
+            t0 = time.perf_counter()
+            vecs = fitted[key].embed(names)
+            t_queries += time.perf_counter() - t0
+            return vecs
+        return pick(q_vecs, [q_index[n] for n in names])
 
     rankings: dict[tuple[str, str], dict] = {}
     for v in variants:
@@ -455,13 +496,14 @@ def evaluate(embedder: Embedder, be, seed: dict, photos: list, *, variants=CATAL
                 names = list(dict.fromkeys(names))
                 if not names:
                     continue
-                sims = embedder.similarity(pick(q_vecs, [q_index[n] for n in names]),
-                                           pick(doc_vecs, [doc_index[t] for t, _ in es]))
+                emb, docs = index_of((v, d, bar))
+                sims = emb.similarity(query_vecs((v, d, bar), names), docs)
                 for n, row in zip(names, sims):
                     out[(bar, n)] = rank_products(row, es)
             rankings[(v, d)] = out
 
     result = {"embedder": embedder.name, "doc_texts": len(doc_texts), "queries": len(queries),
+              "fit": "per bar index" if per_index else "none (fixed model)",
               "embed_seconds": {"catalog_texts": round(t_docs, 3), "line_names": round(t_queries, 3)},
               "index_size": {d: {bar: len(entries[("service" if "service" in variants else variants[0], d, bar)])
                                  for bar in bars} for d in docsets},
@@ -510,10 +552,16 @@ def evaluate(embedder: Embedder, be, seed: dict, photos: list, *, variants=CATAL
         vres["cr_calibration"] = calibrate(
             [(rankings[(v, cr_docset)].get((p.bar, n), []), kind, gold) for p, n, b, kind, gold in lines
              if b.status == "unmatched"]) if cr_docset in docsets else None
-        # per line rules leave unmatched: [rank-1 similarity, kind, rank of the gold or None] (floor sweep)
+        # per line rules leave unmatched (floor sweep): [rank-1 similarity, kind, rank of the best gold
+        # candidate or None, that candidate's similarity or None]. A floor keeps the gold candidate only
+        # when its own similarity reaches it, so the sweep needs the gold's score, not rank 1's.
+        def top_row(rk, kind, gold):
+            hit = next(((i, sc) for i, (pid, sc, _) in enumerate(rk, 1) if pid in gold), None)
+            return [round(float(rk[0][1]), 4), kind, hit[0] if hit else None,
+                    round(float(hit[1]), 4) if hit else None]
+
         vres["unmatched_top"] = [
-            [round(float(rk[0][1]), 4), kind, next((i for i, (pid, _, _) in enumerate(rk, 1) if pid in gold), None)]
-            for p, n, b, kind, gold in lines if b.status == "unmatched"
+            top_row(rk, kind, gold) for p, n, b, kind, gold in lines if b.status == "unmatched"
             for rk in [rankings[(v, cr_docset)].get((p.bar, n), [])] if rk] if cr_docset in docsets else None
         result["catalogs"][v] = vres
 
@@ -525,15 +573,16 @@ def evaluate(embedder: Embedder, be, seed: dict, photos: list, *, variants=CATAL
     # latency per menu photo: embed the photo's lines and rank them against the bar index
     if latency_docset in docsets:
         v = "service" if "service" in variants else variants[0]
-        mats = {bar: pick(doc_vecs, [doc_index[t] for t, _ in entries[(v, latency_docset, bar)]]) for bar in bars}
+        idx = {bar: index_of((v, latency_docset, bar)) for bar in bars}
         per_photo = []
         embedder.embed([photos[0].lines[0][0]] if photos and photos[0].lines else ["warm up"])
         for p in photos:
             names = [n for n, _ in p.lines]
             if not names:
                 continue
+            emb, docs = idx[p.bar]
             t0 = time.perf_counter()
-            sims = embedder.similarity(embedder.embed(names), mats[p.bar])
+            sims = emb.similarity(emb.embed(names), docs)
             for row in sims:
                 rank_products(row, entries[(v, latency_docset, p.bar)])
             per_photo.append((time.perf_counter() - t0) * 1000)
@@ -663,7 +712,37 @@ def model_info(name: str, models_root: Path | None) -> dict:
             "onnx_file": f"onnx/{onnx_file}", "files_mb": round(size, 1)}
 
 
+# What a run reads besides its recorded inputs: the harness, the matching code it runs, the catalog and
+# the gold/labels. A run records their uncommitted changes and refuses to start with any unless
+# --allow-dirty, so a committed result can be rerun from the commit it names.
+PROVENANCE_PATHS = ("ai/eval", "ai/catalog", "eval", "backend/app/matching", "backend/app/adapters/matching_llm.py")
+
+
+def provenance(repo: Path = REPO_ROOT) -> dict:
+    import subprocess
+
+    def git(*cmd: str) -> str | None:
+        try:
+            return subprocess.run(["git", "-C", str(repo), *cmd], capture_output=True, text=True, check=True,
+                                  timeout=30).stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            return None
+
+    status = git("status", "--porcelain", "--untracked-files=no", "--", *PROVENANCE_PATHS)
+    harness = [Path(__file__).resolve(), Path(h.__file__).resolve()]
+    return {"commit": git("rev-parse", "HEAD") or h.git_head(repo),
+            "uncommitted_changes": None if status is None else [line for line in status.splitlines() if line],
+            "checked_paths": list(PROVENANCE_PATHS),
+            "harness_sha256": {f.relative_to(repo.resolve()).as_posix(): h.sha256_file(f) for f in harness}}
+
+
 def cmd_run(args) -> dict:
+    prov = provenance()
+    if prov["uncommitted_changes"] is None and not args.allow_dirty:
+        raise SystemExit("cannot read git status; commit the harness and rerun, or pass --allow-dirty")
+    if prov["uncommitted_changes"] and not args.allow_dirty:
+        raise SystemExit("uncommitted changes in the harness or its inputs (the result could not be rerun from "
+                         "its commit):\n  " + "\n  ".join(prov["uncommitted_changes"]) + "\ncommit them or pass --allow-dirty")
     be = h.Backend(REPO_ROOT)
     seed = json.loads(CATALOG_FILE.read_text(encoding="utf-8"))
     photos, _ = h.dev_photos()  # the 5 dev bars; refuses any I3 file
@@ -682,7 +761,7 @@ def cmd_run(args) -> dict:
         "catalog_file": CATALOG_FILE.name, "catalog_file_sha256": h.sha256_file(CATALOG_FILE),
         "gold_sha256": {g: h.sha256_file(REPO_ROOT / g) for g in sorted(set(h.DEV_GOLD.values()))},
         "labels_sha256": {g: h.sha256_file(REPO_ROOT / g) for g in sorted(set(h.DEV_LABELS.values()))},
-        "repo_head": h.git_head(REPO_ROOT), "photos": len(photos), "lines": sum(len(p.lines) for p in photos),
+        "repo_head": prov["commit"], "provenance": prov, "photos": len(photos), "lines": sum(len(p.lines) for p in photos),
         "load_seconds": round(load_s, 3),
         "memory_mb": {"rss_before_model": rss0, "model_load_delta": round(rss1 - rss0, 1) if rss0 else None,
                       "rss_after_run": rss2, "peak_rss": peak_rss_mb()},
@@ -722,20 +801,29 @@ def cmd_summary(args) -> dict:
 
 
 def floor_sweep(top: list | None, k: int = 5, keep=(1.0, 0.95, 0.9, 0.8)) -> list[dict] | None:
-    """Similarity floors for the lines rules leave unmatched: the floor that still gives candidates to
-    `keep` of the known lines whose gold is in the top k, and what else gets candidates at that floor."""
-    if top is None:
+    """Similarity floors for the lines rules leave unmatched: the floor that still keeps the gold
+    candidate of `keep` of the known lines whose gold is in the top k, and what else gets candidates
+    at that floor. A floor drops every candidate below it, so the gold candidate survives only when its
+    own similarity reaches the floor (its rank among the survivors can only improve); the rank-1
+    similarity says whether a line gets any candidate. Rows are [rank-1 similarity, kind, gold rank,
+    gold similarity]; rows without the gold similarity (runs before it was recorded) give None."""
+    if top is None or any(len(row) < 4 for row in top):
         return None
-    useful = sorted((s for s, kind, rank in top if kind == "known" and rank is not None and rank <= k), reverse=True)
+    useful = sorted((g for _, kind, rank, g in top if kind == "known" and rank is not None and rank <= k),
+                    reverse=True)
     out = []
     for share in keep:
         floor = useful[max(0, math.ceil(share * len(useful)) - 1)] if useful else None
-        kept = [(kind, rank) for s, kind, rank in top if floor is None or s >= floor]
-        out.append({"keep_useful": share, "floor": floor, "useful_kept": sum(
-            kind == "known" and rank is not None and rank <= k for kind, rank in kept), "useful": len(useful),
-            "known_gold_not_in_top_k_kept": sum(kind == "known" and (rank is None or rank > k) for kind, rank in kept),
-            "absent_or_unknown_kept": sum(kind != "known" for kind, _ in kept),
-            "absent_or_unknown": sum(kind != "known" for _, kind, _ in top)})
+        kept = [row for row in top if floor is None or row[0] >= floor]
+        out.append({
+            "keep_useful": share, "floor": floor,
+            "useful_kept": sum(kind == "known" and rank is not None and rank <= k and (floor is None or g >= floor)
+                               for _, kind, rank, g in top),
+            "useful": len(useful),
+            "known_gold_not_in_top_k_kept": sum(kind == "known" and (rank is None or rank > k)
+                                                for _, kind, rank, _ in kept),
+            "absent_or_unknown_kept": sum(kind != "known" for _, kind, _, _ in kept),
+            "absent_or_unknown": sum(kind != "known" for _, kind, _, _ in top)})
     return out
 
 
@@ -774,6 +862,8 @@ def main(argv=None):
     run.add_argument("--models-root", type=Path, help="folder with one <owner>--<name> ONNX snapshot per model")
     run.add_argument("--threads", type=int, default=2, help="onnxruntime intra-op threads (2 vCPU server)")
     run.add_argument("--no-llm", action="store_true", help="skip the M3a combinations")
+    run.add_argument("--allow-dirty", action="store_true",
+                     help="run with uncommitted changes in the harness or its inputs (recorded in provenance)")
     run.add_argument("--out", type=Path, required=True)
     summ = sub.add_parser("summary", help="merge model_*.json into summary.json and print tables")
     summ.add_argument("--out", type=Path, required=True)
