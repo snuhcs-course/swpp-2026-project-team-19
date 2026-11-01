@@ -148,6 +148,30 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithText("할인 · 5000원").assertExists()
     }
 
+    @Test fun scheduledDiscountIsVisibleInCustomerMenuBeforeItStarts() {
+        val repo = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val now = System.currentTimeMillis()
+        repo.saveBrand(MockBrand("brand-scheduled", "라가불린"))
+        repo.saveCatalogProduct(MockCatalogProduct(
+            "product-scheduled", "brand-scheduled", "라가불린 10년"))
+        repo.saveMenuItem(MockBarMenuItem("scheduled", "fixture-bar", "product-scheduled",
+            listOf(MockMenuOption("scheduled30", pourMl = 30, priceKrw = 10000,
+                discount = MockDiscount(5000,
+                    now + 86_400_000L, now + 259_200_000L)))))
+        val preview = repo.preview("fixture-bar", now)!!
+        compose.setContent {
+            MaterialTheme {
+                OwnerPreviewV4Menu(preview.bar, preview,
+                    listOf(MockBrand("brand-scheduled", "라가불린")), now)
+            }
+        }
+        compose.onNodeWithText("할인").assertExists()
+        // The price is discounted only after the scheduled start.
+        compose.onNodeWithText("10,000원").assertExists()
+        compose.onNodeWithText("5,000원").assertDoesNotExist()
+    }
+
     @Test fun customerSharesPriceDesignWithoutOwnerStockBadgesOrSoldOutProducts() {
         val repo = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
