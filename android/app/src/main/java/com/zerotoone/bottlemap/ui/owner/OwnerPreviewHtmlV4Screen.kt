@@ -324,7 +324,7 @@ fun OwnerPreviewHtmlV4Screen(
                             Row(Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(9.dp),
                                 verticalAlignment = Alignment.CenterVertically) {
-                                V4PreviewGlyph("location", Modifier.size(17.dp))
+                                V4PreviewGlyph("location", Modifier.size(17.dp), accent = true)
                                 Text(bar.address, color = V4Color.text, fontSize = 12.sp,
                                     modifier = Modifier.weight(1f))
                                 V4PreviewCopy("복사", { clipboard.setText(AnnotatedString(bar.address)) })
@@ -337,7 +337,7 @@ fun OwnerPreviewHtmlV4Screen(
                             .padding(horizontal = 14.dp, vertical = 12.dp),
                             horizontalArrangement = Arrangement.spacedBy(9.dp),
                             verticalAlignment = Alignment.CenterVertically) {
-                            V4PreviewGlyph("phone", Modifier.size(17.dp))
+                            V4PreviewGlyph("phone", Modifier.size(17.dp), accent = true)
                             Text(bar.phone ?: "전화번호 정보 없음",
                                 color = V4Color.text, fontSize = 12.sp,
                                 modifier = Modifier.weight(1f))
@@ -387,9 +387,10 @@ private fun V4PreviewCopy(label: String, onClick: () -> Unit, enabled: Boolean =
 
 /** Matching line-art glyphs for HTML-v4. The supplied brand-logo ZIP has no map/phone icons. */
 @Composable
-private fun V4PreviewGlyph(kind: String, modifier: Modifier = Modifier) {
+private fun V4PreviewGlyph(kind: String, modifier: Modifier = Modifier, accent: Boolean = false) {
     Canvas(modifier) {
         val u = size.minDimension / 24f
+        val tint = if (accent) V4Color.primary else V4Color.sub
         val path = Path()
         if (kind == "location") {
             path.moveTo(12*u, 22*u)
@@ -397,27 +398,23 @@ private fun V4PreviewGlyph(kind: String, modifier: Modifier = Modifier) {
             path.cubicTo(4*u, 4*u, 7*u, 2*u, 12*u, 2*u)
             path.cubicTo(17*u, 2*u, 20*u, 4*u, 20*u, 9*u)
             path.cubicTo(20*u, 13*u, 15*u, 18*u, 12*u, 22*u)
-            drawPath(path, V4Color.sub, style = Stroke(
+            drawPath(path, tint, style = Stroke(
                 width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
-            drawCircle(V4Color.sub, radius = 2.5*u, center = Offset(12*u, 9*u),
+            drawCircle(tint, radius = 2.5*u, center = Offset(12*u, 9*u),
                 style = Stroke(width = 1.8.dp.toPx()))
         } else {
-            path.moveTo(5*u, 2.5f*u)
-            path.cubicTo(3*u, 2*u, 2*u, 3*u, 2.5f*u, 6*u)
-            path.cubicTo(4.5f*u, 14*u, 10*u, 19.5f*u, 18*u, 21.5f*u)
-            path.cubicTo(21*u, 22*u, 22*u, 21*u, 22*u, 19*u)
-            path.lineTo(22*u, 17*u)
-            path.cubicTo(22*u, 16*u, 21.5f*u, 15.5f*u, 20*u, 15*u)
-            path.lineTo(17.5f*u, 14.3f*u)
-            path.cubicTo(16.8f*u, 14*u, 16*u, 14.2f*u, 15.5f*u, 14.8f*u)
-            path.lineTo(14*u, 16.2f*u)
-            path.cubicTo(11*u, 15*u, 9*u, 13*u, 7.8f*u, 10*u)
-            path.lineTo(9.2f*u, 8.5f*u)
-            path.cubicTo(9.8f*u, 8*u, 10*u, 7.2f*u, 9.7f*u, 6.5f*u)
-            path.lineTo(9*u, 4*u)
-            path.cubicTo(8.6f*u, 2.8f*u, 8*u, 2.5f*u, 7*u, 2.5f*u)
+            // Curves reproduce the handset from HTML's BM_PATHS.phone.
+            path.moveTo(5*u, 4.5f*u)
+            path.lineTo(8.5f*u, 8*u)
+            path.lineTo(6.8f*u, 10*u)
+            path.cubicTo(8.4f*u, 13.6f*u, 10.4f*u, 15.6f*u, 14*u, 17.2f*u)
+            path.lineTo(16*u, 15.5f*u)
+            path.lineTo(19.5f*u, 19*u)
+            path.cubicTo(20.6f*u, 20.3f*u, 19.1f*u, 21.7f*u, 17.5f*u, 21*u)
+            path.cubicTo(10*u, 20*u, 4*u, 14*u, 3*u, 6.5f*u)
+            path.cubicTo(2.7f*u, 4.7f*u, 3.5f*u, 3.8f*u, 5*u, 4.5f*u)
             path.close()
-            drawPath(path, V4Color.sub, style = Stroke(
+            drawPath(path, tint, style = Stroke(
                 width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
         }
     }
