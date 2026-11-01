@@ -150,7 +150,8 @@ fun OwnerPreviewHtmlV4Screen(
             } else {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(bar.name, color = V4Color.text, fontSize = 22.sp,
+                    Text(bar.name, color = V4Color.text,
+                        fontSize = MaterialTheme.typography.headlineSmall.fontSize,
                         fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
                         modifier = Modifier.weight(1f))
                     OutlinedButton(
