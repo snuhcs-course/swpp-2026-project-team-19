@@ -2,7 +2,6 @@ package com.zerotoone.bottlemap.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
@@ -45,7 +44,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
                 CompositionLocalProvider(
-                    LocalIndication provides null,
                     LocalRippleConfiguration provides null,
                 ) {
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
@@ -79,7 +77,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
         }
         composable(OwnerRoutes.ADD_BAR) {
                 CompositionLocalProvider(
-                    LocalIndication provides null,
                     LocalRippleConfiguration provides null,
                 ) {
             OwnerOnboardingScreen(
@@ -94,7 +91,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
         }
         composable(OwnerRoutes.COMPONENTS) {
                 CompositionLocalProvider(
-                    LocalIndication provides null,
                     LocalRippleConfiguration provides null,
                 ) {
             OwnerComponentGallery(onBack = { navController.popBackStack() })
@@ -108,7 +104,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 // Owner-wide policy: no transient bright/ripple feedback on press.
                 // Stateful selected/checked indicators are intentionally preserved.
                 CompositionLocalProvider(
-                    LocalIndication provides null,
                     LocalRippleConfiguration provides null,
                 ) {
                 when (page) {
