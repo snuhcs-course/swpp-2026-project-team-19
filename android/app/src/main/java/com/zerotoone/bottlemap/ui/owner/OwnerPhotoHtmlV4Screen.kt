@@ -83,13 +83,15 @@ fun OwnerPhotoHtmlV4Screen(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null && bar != null) {
-            try {
-                context.contentResolver.takePersistableUriPermission(
-                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            } catch (_: SecurityException) {
-                // Some providers grant only transient access; do not claim durable access.
-            }
-            if (bar.gallery.none { it.uri == uri.toString() }) {
+            if (bar.gallery.size >= MAX_OWNER_BAR_GALLERY_PHOTOS) {
+                error = "매장 사진은 최대 15장까지 등록할 수 있어요."
+            } else if (canAddOwnerBarGalleryPhoto(bar.gallery, uri.toString())) {
+                try {
+                    context.contentResolver.takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                } catch (_: SecurityException) {
+                    // Some providers grant only transient access; do not claim durable access.
+                }
                 commit(bar.gallery + MockPhoto(
                     UUID.randomUUID().toString(), uri.toString(), MockPhotoKind.BAR_GALLERY))
             }
@@ -143,8 +145,13 @@ fun OwnerPhotoHtmlV4Screen(
                         Modifier.background(V4Color.elevated, RoundedCornerShape(10.dp))
                             .border(1.dp, V4Color.line, RoundedCornerShape(10.dp))
                             .clickable {
-                                picker.launch(PickVisualMediaRequest(
-                                    ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                if (bar.gallery.size >= MAX_OWNER_BAR_GALLERY_PHOTOS) {
+                                    error = "매장 사진은 최대 15장까지 등록할 수 있어요."
+                                } else {
+                                    error = null
+                                    picker.launch(PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                }
                             }
                             .testTag("owner-photo-add")
                             .padding(horizontal = 12.dp, vertical = 9.dp),
