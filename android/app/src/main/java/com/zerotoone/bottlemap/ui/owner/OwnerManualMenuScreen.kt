@@ -644,7 +644,8 @@ internal fun OwnerManualMenuScreen(
                     if (d != null) {
                         V4FormField("할인 가격 (원)", d.sale, { v ->
                             changeOption(saleOption) { it.copy(sale = ownerPriceInput(v)) }
-                        }, keyboardType = KeyboardType.Number)
+                        }, keyboardType = KeyboardType.Number,
+                            testTag = "manual-menu-discount-price")
                         ManualDateField("시작일", d.start) {
                             calendarTarget = if (calendarTarget == "start") null else "start"
                         }
