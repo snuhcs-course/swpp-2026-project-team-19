@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,11 +34,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.MockPhoto
@@ -112,7 +116,7 @@ fun OwnerPhotoHtmlV4Screen(
             },
         )
     }
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(Modifier.fillMaxSize().background(V4Color.background)) {
         OwnerHeader("사진 편집", onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -134,13 +138,21 @@ fun OwnerPhotoHtmlV4Screen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("매장 사진 편집", style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold)
-                    OutlinedButton(onClick = {
-                        picker.launch(PickVisualMediaRequest(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    }, modifier = Modifier.testTag("owner-photo-add")) {
-                        Text("＋ 갤러리에서 추가", style = MaterialTheme.typography.labelSmall)
+                    Text("매장 사진 편집", color = V4Color.text, fontSize = 24.sp,
+                        fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
+                    Box(
+                        Modifier.background(V4Color.elevated, RoundedCornerShape(10.dp))
+                            .border(1.dp, V4Color.line, RoundedCornerShape(10.dp))
+                            .clickable {
+                                picker.launch(PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            }
+                            .testTag("owner-photo-add")
+                            .padding(horizontal = 12.dp, vertical = 9.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("+ 갤러리에서 추가", color = V4Color.text, fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold)
                     }
                 }
                 if (bar.gallery.isEmpty()) {
@@ -154,7 +166,8 @@ fun OwnerPhotoHtmlV4Screen(
                             val index = rowIndex * 2 + column
                             Surface(
                                 modifier = Modifier.weight(1f),
-                                color = MaterialTheme.colorScheme.surface,
+                                color = V4Color.surface,
+                                border = androidx.compose.foundation.BorderStroke(1.dp, V4Color.line),
                                 shape = RoundedCornerShape(12.dp),
                             ) {
                                 Column(Modifier.padding(8.dp),
@@ -178,23 +191,33 @@ fun OwnerPhotoHtmlV4Screen(
                                                 .padding(4.dp),
                                                 style = MaterialTheme.typography.labelSmall)
                                         }
-                                        DropdownMenu(
-                                            expanded = menuPhotoId == photo.photoId,
-                                            onDismissRequest = { menuPhotoId = null },
-                                        ) {
-                                            DropdownMenuItem(
-                                                text = { Text("대표 사진 등록") },
-                                                onClick = {
-                                                    commit(makeCoverPhoto(bar.gallery, index))
-                                                },
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text("삭제하기") },
-                                                onClick = {
-                                                    menuPhotoId = null
-                                                    deletePhotoId = photo.photoId
-                                                },
-                                            )
+                                        if (menuPhotoId == photo.photoId) {
+                                            Column(
+                                                Modifier.align(Alignment.TopCenter).fillMaxWidth()
+                                                    .padding(horizontal = 1.dp, vertical = 8.dp)
+                                                    .background(V4Color.background, RoundedCornerShape(9.dp))
+                                                    .border(1.dp, V4Color.primary, RoundedCornerShape(9.dp))
+                                                    .padding(4.dp),
+                                            ) {
+                                                Box(Modifier.fillMaxWidth().height(40.dp)
+                                                    .clickable { commit(makeCoverPhoto(bar.gallery, index)) }
+                                                    .padding(horizontal = 10.dp),
+                                                    contentAlignment = Alignment.CenterStart) {
+                                                    Text("대표 사진 등록", fontSize = 12.sp,
+                                                        color = V4Color.text)
+                                                }
+                                                Spacer(Modifier.fillMaxWidth().height(1.dp)
+                                                    .background(V4Color.line))
+                                                Box(Modifier.fillMaxWidth().height(40.dp)
+                                                    .clickable {
+                                                        menuPhotoId = null
+                                                        deletePhotoId = photo.photoId
+                                                    }.padding(horizontal = 10.dp),
+                                                    contentAlignment = Alignment.CenterStart) {
+                                                    Text("삭제하기", fontSize = 12.sp,
+                                                        color = Color(0xFFFFB4AB))
+                                                }
+                                            }
                                         }
                                     }
                                     Row(
