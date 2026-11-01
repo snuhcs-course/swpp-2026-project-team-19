@@ -29,7 +29,8 @@ fun manualMenuMatches(
 ): Boolean {
     val term = query.trim()
     if (term.isEmpty()) return true
-    val candidates = listOfNotNull(product?.displayName, brandName, product?.category,
+    val candidates = listOfNotNull(item.displayNameOverride, product?.displayName,
+        brandName, product?.category,
         product?.otherAlcoholKind) + item.options.flatMap { o ->
         listOfNotNull(o.pourMl?.toString(), o.label, o.priceKrw.toString())
     }
