@@ -81,6 +81,29 @@ class OwnerManualMenuRulesTest {
         assertEquals(1, snapshot(r).products.size)
     }
 
+    @Test fun discountsEditsAndFullResetPropagateThroughSameCustomerPreview() {
+        val r = repo()
+        val discounted = MockMenuOption("pour30", pourMl = 30, priceKrw = 16000,
+            discount = MockDiscount(12000, 1000L, 3000L))
+        val bottle = option("bottle", null, 200000, bottle = true)
+        r.saveManualMenuItem(MockBarMenuItem("menu-10", "fixture-bar", ten.productId,
+            listOf(discounted, bottle)), ten, brand)
+        assertEquals(12000, r.preview("fixture-bar", 2000L)!!.visibleMenu.single()
+            .options.first().displayPrice(2000L))
+        assertEquals(16000, r.preview("fixture-bar", 3000L)!!.visibleMenu.single()
+            .options.first().displayPrice(3000L))
+        r.saveManualMenuItem(MockBarMenuItem("menu-10", "fixture-bar", ten.productId,
+            listOf(option("pour30", 30, 18000), bottle)))
+        assertEquals(18000, r.preview("fixture-bar", 2000L)!!.visibleMenu.single()
+            .options.first().priceKrw)
+        assertEquals(2, snapshot(r).menuItems.single().options.size)
+        r.clearMenuForBar("fixture-bar")
+        assertTrue(snapshot(r).menuItems.isEmpty())
+        assertTrue(r.preview("fixture-bar", 2000L)!!.visibleMenu.isEmpty())
+        // Reset clears a bar's listings, not the shared catalog product.
+        assertEquals(ten, snapshot(r).products.single())
+    }
+
     @Test fun searchingUsesBrandAndDisplayTextWithoutMergingDifferentAges() {
         val row10 = MockBarMenuItem("m10", "fixture-bar", ten.productId,
             listOf(option("opt10", 30, 16000)))
