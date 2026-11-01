@@ -85,19 +85,29 @@ def setup(tmp_path, monkeypatch):
                                              for f, pid in files.items()]}, ensure_ascii=False), encoding="utf-8")
     for f in ("901_a_01.png", "901_a_02.png"):
         write_cache(data, f, sha((photo_dir / f).read_bytes()))
+    monkeypatch.setattr(p30, "PHOTO_HASHES_SHA256", p30.sha256_text_file(hashes))  # pin the made-up hash file
     monkeypatch.setattr(p30.server_gemini, "sleep", lambda s: waits.append(s))
     waits = []
     return SimpleNamespace(data=data, photo_dir=photo_dir, hashes=hashes, out=tmp_path / "out", files=files,
                            waits=waits, tmp=tmp_path)
 
 
-def write_cache(data: Path, file: str, sent_sha256: str, latency_ms: int = 1234):
+def write_cache(data: Path, file: str, sent_sha256: str, latency_ms: int = 1234, **meta):
     path = data / "ocr_cache" / f"{Path(file).stem}__table-off.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps({"meta": {"source_image": file, "sent_sha256": sent_sha256, "table_detection": False,
-                                         "latency_ms": latency_ms, "attempts": 1, "started_at": "2026-10-28T00:00:00Z"},
+                                         "latency_ms": latency_ms, "attempts": 1, "started_at": "2026-10-28T00:00:00Z",
+                                         **meta},
                                 "response": CLOVA_SAMPLE}), encoding="utf-8")
     return path
+
+
+def write_sent_image(data: Path, name: str, image: Image.Image, quality: int = 90) -> str:
+    """The image ai/ocr/clova.py sent for a rotated photo (<data>/prepared/<stem>.jpg); returns its SHA-256."""
+    path = data / "prepared" / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(path, format="JPEG", quality=quality)
+    return sha(path.read_bytes())
 
 
 def secrets(**over):
@@ -221,14 +231,125 @@ def test_frozen_code_change_stops(setup, monkeypatch):
     assert code == p30.EXIT_PREFLIGHT and gemini.requests == []
 
 
-def test_ocr_cache_of_another_image_stops_but_reencoded_bytes_are_kept(setup):
-    write_cache(setup.data, "902_b_01.jpeg", "f" * 64)  # rotated photo: re-encoded bytes may differ
+def test_ocr_cache_of_another_image_stops(setup, capsys):
+    write_cache(setup.data, "901_a_01.png", "f" * 64)  # original bytes are sent: another image
+    code, gemini, clova = run(setup, "--runs", "1")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == [] and clova.requests == []
+    write_cache(setup.data, "901_a_01.png", sha((setup.photo_dir / "901_a_01.png").read_bytes()),
+                source_image="901_a_02.png")
+    code, gemini, _ = run(setup, "--runs", "1")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == []
+    assert "OCR cache is for '901_a_02.png'" in capsys.readouterr().out
+
+
+def test_reencoded_ocr_cache_without_provenance_stops(setup, capsys):
+    # rotated photo, other sent bytes, and nothing on disk to show which image they were
+    write_cache(setup.data, "902_b_01.jpeg", "f" * 64, sent_image="902_b_01.jpg")
+    code, gemini, clova = run(setup, "--runs", "1")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == [] and clova.requests == []
+    printed = capsys.readouterr().out
+    assert "not on disk to check" in printed and "delete ocr_cache/902_b_01__table-off.json" in printed
+
+
+def test_reencoded_ocr_cache_of_the_same_pixels_is_kept(setup):
+    upright = Image.new("RGB", (300, 400), "white")  # what the server sends after EXIF rotation
+    digest = write_sent_image(setup.data, "902_b_01.jpg", upright, quality=80)  # other encoder settings
+    write_cache(setup.data, "902_b_01.jpeg", digest, sent_image="902_b_01.jpg", resized=False)
     code, _, clova = run(setup, "--runs", "1")
     assert code == p30.EXIT_OK and clova.requests == []
-    assert records(setup.out)["902_b_01_r1.json"]["clova"]["image_check"].startswith("re-encoded")
-    write_cache(setup.data, "901_a_01.png", "f" * 64)  # original bytes are sent: another image
+    assert records(setup.out)["902_b_01_r1.json"]["clova"]["image_check"].startswith(
+        "re-encoded bytes differ; same pixels")
+
+
+@pytest.mark.parametrize("image, why", [
+    (Image.new("RGB", (300, 400), "black"), "mean pixel difference"),
+    (Image.new("RGB", (400, 300), "white"), "a different pixel size"),
+])
+def test_reencoded_ocr_cache_of_other_pixels_stops(setup, capsys, image, why):
+    digest = write_sent_image(setup.data, "902_b_01.jpg", image)
+    write_cache(setup.data, "902_b_01.jpeg", digest, sent_image="902_b_01.jpg", resized=False)
+    code, gemini, _ = run(setup, "--runs", "1")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == []
+    assert why in capsys.readouterr().out
+
+
+def test_reencoded_ocr_cache_whose_sent_image_changed_stops(setup, capsys):
+    write_sent_image(setup.data, "902_b_01.jpg", Image.new("RGB", (300, 400), "white"))
+    write_cache(setup.data, "902_b_01.jpeg", "f" * 64, sent_image="902_b_01.jpg", resized=False)
+    code, gemini, _ = run(setup, "--runs", "1")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == []
+    assert "no longer hashes to the cache's sent_sha256" in capsys.readouterr().out
+
+
+def test_reencoded_ocr_cache_made_by_this_runner_is_checked_by_source_sha256(setup):
+    photo = sha((setup.photo_dir / "902_b_01.jpeg").read_bytes())
+    write_cache(setup.data, "902_b_01.jpeg", "f" * 64, source_sha256=photo)
+    code, _, _ = run(setup, "--runs", "1")
+    assert code == p30.EXIT_OK
+    assert "source_sha256" in records(setup.out)["902_b_01_r1.json"]["clova"]["image_check"]
+    write_cache(setup.data, "902_b_01.jpeg", "f" * 64, source_sha256="0" * 64)
     code, gemini, _ = run(setup, "--runs", "2")
     assert code == p30.EXIT_PREFLIGHT and gemini.requests == []
+
+
+def test_runner_cache_records_the_source_photo(setup):
+    run(setup, "--runs", "1")
+    meta = json.loads((setup.data / "ocr_cache" / "902_b_01__table-off.json").read_text(encoding="utf-8"))["meta"]
+    assert meta["source_sha256"] == sha((setup.photo_dir / "902_b_01.jpeg").read_bytes())
+    assert p30.check_ocr_cache({"meta": meta, "response": CLOVA_SAMPLE},
+                               p30.verify_photos(setup.photo_dir, setup.hashes)[2], setup.data)["image_check"] == "same image"
+
+
+@pytest.mark.parametrize("change", ["edited", "other_file", "missing"])
+def test_hash_file_other_than_the_frozen_one_stops(setup, capsys, change):
+    if change == "edited":  # e.g. a photo dropped from the set: the rest would still verify
+        data = json.loads(setup.hashes.read_text(encoding="utf-8"))
+        data["photos"] = data["photos"][:2]
+        setup.hashes.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    elif change == "other_file":
+        other = setup.tmp / "other.json"
+        other.write_text(setup.hashes.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+        setup.hashes = other
+    else:
+        setup.hashes.unlink()
+    code, gemini, clova = run(setup, "--check")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == [] and clova.requests == []
+    assert "photo check failed" in capsys.readouterr().out
+
+
+def test_frozen_hash_file_in_the_repo_is_the_pinned_one():
+    assert p30.sha256_text_file(p30.PHOTO_HASHES) == p30.PHOTO_HASHES_SHA256
+    assert len(json.loads(p30.PHOTO_HASHES.read_text(encoding="utf-8"))["photos"]) == 33
+
+
+def test_scoring_code_change_stops_even_check(setup, monkeypatch, capsys):
+    assert p30.check_frozen_code(p30.REPO_ROOT)  # the checkout's score.py and e2e_match.py are the frozen ones
+    monkeypatch.setitem(p30.FROZEN_EVAL, "ai/eval/score.py", "0" * 64)
+    code, gemini, _ = run(setup, "--check")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == []
+    assert "frozen scoring files changed" in capsys.readouterr().out
+
+
+def test_clova_cap_counts_the_servers_retries(setup, monkeypatch):
+    monkeypatch.setattr(p30.server_clova, "sleep", lambda s: None)
+
+    class Flaky:
+        def __init__(self):
+            self.requests = 0
+
+        def post(self, url, json=None, headers=None):
+            self.requests += 1
+            return httpx.Response(503, json={"code": "busy"}) if self.requests == 1 else httpx.Response(200, json=CLOVA_SAMPLE)
+
+    flaky = Flaky()
+    code, gemini, _ = run(setup, "--runs", "1", "--max-clova-calls", "1", clova=flaky)
+    assert code == p30.EXIT_STOPPED and flaky.requests == 1  # the retry would be a second request
+    stopped = manifest(setup.out)["commands"][-1]
+    assert "CLOVA call cap 1 reached during the server's retries" in stopped["stopped"] and stopped["clova_calls"] == 1
+    assert not (setup.data / "ocr_cache" / "902_b_01__table-off.json").exists()
+    flaky = Flaky()
+    code, _, _ = run(setup, "--runs", "1", "--max-clova-calls", "2", clova=flaky)
+    assert code == p30.EXIT_OK and flaky.requests == 2 and manifest(setup.out)["commands"][-1]["clova_calls"] == 2
 
 
 def test_changed_ocr_cache_between_commands_stops(setup):

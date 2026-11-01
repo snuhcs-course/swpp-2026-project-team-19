@@ -7,7 +7,7 @@
 ## 0. 무엇을 돌리나
 
 - **추출기:** `ai/eval/p30_extract.py`. 배포 서버 코드 `backend/app/extraction/hybrid.py`의 `extract_menu_hybrid`를 **고치지 않고 그대로 불러** 33장 × r1–r3을 돌린다. 모델 `gemini-3.5-flash-lite`, thinking `medium`, 프롬프트 `hybrid-v1`(`hybrid_prompt_v1.md`, SHA-256 `b73f15d2…1ac50`), 재시도는 서버 정책(`call_with_retries`: 6번 시도, 시간 초과·HTTP 429/5xx에 5–60초 간격, 요청 300초·전체 330초). 모델·thinking은 `.env`의 `EXTRACTION_*`를 읽지 않고 동결 값으로 고정한다.
-- **API 호출 전에 멈추는 경우:** 추출 코드 파일 9개의 SHA-256이 동결 값과 다를 때(`5d49c8a` 기준, `clova.py`만 `1e149d4`: 사업자등록증용 `deadline_s` 경로만 추가되어 하이브리드 경로는 같음), 사진 33장 중 하나라도 `ai/eval/i3_photo_sha256.json`과 다르거나 빠졌을 때, `photo_map.json`이 해시 파일과 다를 때, OCR 캐시가 다른 사진으로 만든 것일 때. 이때 종료 코드는 2이고 API 호출은 0이다.
+- **API 호출 전에 멈추는 경우:** 추출 코드 파일 9개의 SHA-256이 동결 값과 다를 때(`5d49c8a` 기준, `clova.py`만 `1e149d4`: 사업자등록증용 `deadline_s` 경로만 추가되어 하이브리드 경로는 같음), 채점 코드 `ai/eval/score.py`(`15b1eff`: `5d49c8a` 로직 + `--set i3` 라벨 세트만 추가)·`ai/eval/e2e_match.py`(`5d49c8a`)의 SHA-256이 동결 값과 다를 때, 해시 파일 `ai/eval/i3_photo_sha256.json` 자체의 SHA-256이 동결 값(`305c4f0e…`, `15b1eff`)과 다를 때(`--hashes`로 다른 파일을 줘도 같다), 사진 33장 중 하나라도 해시 파일과 다르거나 빠졌을 때, `photo_map.json`이 해시 파일과 다를 때, OCR 캐시가 다른 사진으로 만든 것일 때. 이때 종료 코드는 2이고 API 호출은 0이다.
 - **키:** 레포 루트 `.env`의 `GEMINI_API_KEY`, `CLOVA_OCR_INVOKE_URL`, `CLOVA_OCR_SECRET`만 읽는다. 화면·기록·manifest에 쓰지 않고, 오류 문구에 들어 있으면 `***`로 지운 뒤 저장한다.
 
 ### CLOVA는 사진당 한 번 (r1–r3 공유)
@@ -16,7 +16,7 @@
 
 - 캐시: `<BOTTLEMAP_DATA_DIR>/ocr_cache/<파일 stem>__table-off.json` (`ai/ocr/clova.py` 형식, `label_ocr_check.py`가 읽는 그 파일). 캐시가 이미 있으면 CLOVA 호출은 0이다.
 - 캐시가 없는 사진만 서버 코드(`app.extraction.clova.call_ocr`, 표 인식 끔)로 **한 번** 부르고 같은 형식으로 캐시에 쓴다. r2·r3은 그 캐시를 쓴다.
-- 캐시 응답은 가짜 HTTP 클라이언트로 서버 함수에 넘긴다. 그래서 OCR 줄 표, 프롬프트, Gemini 요청은 서버 코드가 직접 만든다. 이 클라이언트는 서버가 보낼 이미지가 캐시를 만든 이미지와 같은지 확인한다(`sent_sha256`). 원본 바이트를 보내는 사진에서 다르면 멈춘다. EXIF 회전이나 8,000px 축소로 다시 인코딩되는 사진은 Pillow 버전에 따라 바이트가 달라질 수 있어, 다르면 기록만 하고 진행한다(원본 사진은 해시로 이미 확인함).
+- 캐시 응답은 가짜 HTTP 클라이언트로 서버 함수에 넘긴다. 그래서 OCR 줄 표, 프롬프트, Gemini 요청은 서버 코드가 직접 만든다. 이 클라이언트는 서버가 보낼 이미지가 캐시를 만든 이미지와 같은지 확인한다(`sent_sha256`). 원본 바이트를 보내는 사진에서 다르면 멈춘다. EXIF 회전이나 8,000px 축소로 다시 인코딩되는 사진은 Pillow 버전에 따라 바이트가 달라질 수 있어, 해시가 달라도 출처를 확인할 수 있을 때만 쓴다. 이 runner가 만든 캐시는 `source_sha256`이 확인된 사진의 해시와 같아야 한다. `ai/ocr/clova.py`가 만든 캐시는 그때 보낸 이미지(`<data>/prepared/` 또는 `prepared_ocr/`의 `sent_image`)가 아직 `sent_sha256`과 같고, 서버가 보낼 이미지와 크기가 같으며 픽셀 차이가 채널 평균 2 이하(0–255)여야 한다. 확인할 수 없으면 멈추고, 그 캐시 파일을 지우면 다음 명령이 CLOVA를 한 번 불러 새로 만든다.
 - 이유: 동결이 그렇게 정했고, 3회 반복으로 재려는 것은 Gemini 응답의 흔들림이다. OCR까지 매번 다시 부르면 회차 차이에 OCR 차이가 섞인다. I2 P47도 같은 방식이었다(`ai/runs/2026-10-17_p47/manifest.json`, `clova_calls: 0`). 서버는 업로드마다 CLOVA를 부르지만, 사진 한 장에 대한 OCR 결과는 서버에서도 한 번만 쓰인다.
 - 지연: 기록의 `clova.latency_ms`는 그 캐시를 만든 실제 호출 한 번의 지연이다(세 회차에 같은 값). `gemini.latency_ms`는 회차마다 성공한 시도의 지연이다(서버 `CallResult.latency_ms`, P47 기록의 `latency_ms`와 같은 값).
 
@@ -59,7 +59,7 @@ python ai/eval/p30_extract.py --out ai/runs/2026-10-30_p30/hybrid_i3 --runs 2 --
 python ai/eval/p30_extract.py --out ai/runs/2026-10-30_p30/hybrid_i3 --runs 3 --max-calls 45
 ```
 
-- `--max-calls`: 명령 하나의 Gemini 호출 상한(서버 재시도 포함). 회차당 33회 + 재시도 여유 12. 닿으면 그 사진을 쓰지 않고 멈춘다. CLOVA 상한은 `--max-clova-calls`(기본 33).
+- `--max-calls`: 명령 하나의 Gemini 호출 상한(서버 재시도 포함). 회차당 33회 + 재시도 여유 12. 닿으면 그 사진을 쓰지 않고 멈춘다. CLOVA 상한은 `--max-clova-calls`(기본 33)이고 서버 `call_ocr`의 재시도(최대 3번)도 HTTP 요청마다 하나씩 센다. 재시도 중에 닿으면 그 사진을 쓰지 않고 멈춘다.
 - 실행 폴더 이름은 첫날 날짜로 고정한다. 다른 날 이어서 돌려도 같은 `--out`을 쓴다.
 - 사진 사이 간격 4.5초(`--min-interval`, 분당 한도용). 구성과는 무관하다.
 
@@ -76,9 +76,10 @@ python ai/eval/p30_extract.py --out ai/runs/2026-10-30_p30/hybrid_i3 --runs 3 --
 
 ## 3. 채점: NFR-1·NFR-2
 
-**33장 × 3회 기록이 모두 있을 때만** 돌린다(`score.py`는 빠진 사진을 빈 출력으로 센다).
+**33장 × 3회 기록이 모두 있을 때만** 돌린다(`score.py`는 빠진 사진을 빈 출력으로 센다). 채점 바로 전에 `--check`를 다시 돌려 `score.py`·`e2e_match.py`가 동결 그대로인지 확인한다(`STOP: frozen scoring files changed`면 채점하지 않고 원인을 먼저 본다).
 
 ```
+python ai/eval/p30_extract.py --out ai/runs/2026-10-30_p30/hybrid_i3 --check
 python ai/eval/score.py --set i3 ai/runs/2026-10-30_p30/hybrid_i3
 ```
 

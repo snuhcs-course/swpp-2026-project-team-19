@@ -10,15 +10,19 @@ Configuration (frozen, not read from the environment): the deployed server's cod
 from this checkout and called unchanged: CLOVA OCR lines + the photo -> `gemini-3.5-flash-lite`,
 thinking medium, with the server's retry policy (`app.extraction.gemini.call_with_retries`:
 6 attempts, backoff 5-60 s on timeouts and HTTP 429/5xx, request 300 s, wall 330 s). Before
-anything else the frozen extraction files are checked against their SHA-256 (FROZEN_CODE) and
-every photo against ai/eval/i3_photo_sha256.json; any mismatch stops the command.
+anything else the frozen extraction files (FROZEN_CODE) and the scoring code (FROZEN_EVAL:
+score.py, e2e_match.py) are checked against their SHA-256, the photo hash file
+ai/eval/i3_photo_sha256.json against its frozen SHA-256, and every photo against that file; any
+mismatch stops the command.
 
 CLOVA OCR is called at most once per photo and shared by r1-r3. The freeze (1장 "사진 사용
 제한") lets the CLOVA cache for the labeling guideline's OCR check be made before P30 and says
 "P30 하이브리드 추출은 그 캐시를 그대로 쓴다". The cache is <data_dir>/ocr_cache/
 <stem>__table-off.json ({"meta", "response"}, the format of ai/ocr/clova.py that
 label_ocr_check.py reads). A photo without a cache gets one CLOVA call through the server's
-`call_ocr` (table detection off) and the response is cached the same way. The cached response
+`call_ocr` (table detection off) and the response is cached the same way; --max-clova-calls
+counts its HTTP requests, retries included. A cache whose image cannot be shown to be this photo
+stops the command (check_ocr_cache). The cached response
 is then handed to `extract_menu_hybrid` through a stand-in HTTP client, so the OCR line table,
 prompt and Gemini request are built by the server code itself. The stand-in checks that the
 image the server would send is the image the cache was made from. CLOVA latency in the records
@@ -53,6 +57,7 @@ import argparse
 import base64
 import copy
 import hashlib
+import io
 import json
 import math
 import os
@@ -66,6 +71,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
+
+import httpx
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "backend"))
@@ -97,8 +104,24 @@ FROZEN_CODE = {
     "backend/app/extraction/errors.py": "072d276d56d8f26fd44b8fba3882e754f10cf63d92fb77e029b2e5a486142a1c",
     "backend/app/extraction/clova.py": "ecb321607e56a1779bef6a2a2dc0c91be38d74ecac3ac0e56778f30863c2985c",
 }
+# The scoring and end-to-end line pairing code the freeze fixes (3장 "채점", 4.2 "종단 줄 맞추기"):
+# score.py as committed in the freeze (15b1eff: the 5d49c8a logic plus the `--set i3` label set
+# only) and e2e_match.py of 5d49c8a. Checked by every command, --check included, so a change on
+# main stops the run before extraction and `--check` right before scoring confirms them again.
+FROZEN_EVAL = {
+    "ai/eval/score.py": "c5a3a52b45d09d7b8730aef30c54789cc94558d4f16597e9f9a9b6038d966f7b",
+    "ai/eval/e2e_match.py": "865e6d18748e12cd18b55914aa8112830d94956557720184d4b55288194d90f5",
+}
 PHOTO_HASHES = REPO_ROOT / "ai" / "eval" / "i3_photo_sha256.json"
+# SHA-256 (CRLF read as LF) of ai/eval/i3_photo_sha256.json as frozen in 15b1eff (#69). The photo
+# set is defined by this file, so the file itself is pinned: an edited copy or another --hashes
+# file stops the command instead of redefining which photos are checked.
+PHOTO_HASHES_SHA256 = "305c4f0e7e9afd45de4b28426cdea980c18618a96da8d0f99e1bdbc0a29ff602"
 PHOTO_DIR = "eval_photos_i3"
+# Re-encoded OCR bytes (EXIF rotation, downscale) may differ by encoder version for the same photo.
+# Such a cache is kept only when its own image decodes to the same pixels as what the server would
+# send: same size and a mean absolute difference per channel at most this (0-255 scale).
+MAX_REENCODE_PIXEL_DIFF = 2.0
 MIME_TYPES = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"}
 ENV_KEYS = ("GEMINI_API_KEY", "CLOVA_OCR_INVOKE_URL", "CLOVA_OCR_SECRET")
 # The stand-in client answers any URL; the real invoke URL and secret are never handed to the replay.
@@ -205,7 +228,15 @@ class Photo:
 
 
 def verify_photos(photo_dir: Path, hashes_path: Path) -> list[Photo]:
-    """Every photo of the hash file, checked against it and photo_map.json. Raises Stop on any mismatch."""
+    """Every photo of the hash file, checked against it and photo_map.json. Raises Stop on any mismatch.
+
+    The hash file is checked first against PHOTO_HASHES_SHA256, so it cannot redefine the set."""
+    if not hashes_path.exists():
+        raise Stop(f"photo check failed: {hashes_path} not found")
+    digest = sha256_text_file(hashes_path)
+    if digest != PHOTO_HASHES_SHA256:
+        raise Stop(f"photo check failed (no API call made): {hashes_path.name} SHA-256 {digest[:12]}... "
+                   f"!= frozen {PHOTO_HASHES_SHA256[:12]}... (ai/eval/i3_photo_sha256.json of 15b1eff)")
     expected = json.loads(hashes_path.read_text(encoding="utf-8"))["photos"]
     map_path = photo_dir / "photo_map.json"
     if not map_path.exists():
@@ -252,10 +283,15 @@ def verify_photos(photo_dir: Path, hashes_path: Path) -> list[Photo]:
 
 
 def check_frozen_code(repo: Path) -> dict[str, str]:
+    """Frozen extraction files, prompt, and the scoring code (FROZEN_EVAL). Raises Stop on a change."""
     actual = {rel: sha256_text_file(repo / rel) for rel in FROZEN_CODE}
     diff = [rel for rel, digest in actual.items() if digest != FROZEN_CODE[rel]]
     if diff:
         raise Stop(f"frozen extraction files changed (no API call made): {', '.join(diff)}")
+    scoring = {rel: sha256_text_file(repo / rel) if (repo / rel).exists() else None for rel in FROZEN_EVAL}
+    diff = [rel for rel, digest in scoring.items() if digest != FROZEN_EVAL[rel]]
+    if diff:
+        raise Stop(f"frozen scoring files changed (no API call made): {', '.join(diff)}")
     prompt_sha = sha256_bytes(server_hybrid.load_prompt().encode("utf-8"))
     if server_hybrid.PROMPT_VERSION != PROMPT_VERSION or prompt_sha != PROMPT_SHA256:
         raise Stop(f"prompt {server_hybrid.PROMPT_VERSION} {prompt_sha[:12]}... is not the frozen {PROMPT_VERSION}")
@@ -282,13 +318,34 @@ def ocr_cache_path(data_dir: Path, photo: Photo) -> Path:
     return data_dir / "ocr_cache" / f"{photo.stem}__table-off.json"
 
 
-def check_ocr_cache(record: dict, photo: Photo) -> dict:
-    """Is the cache for the image the server sends? Raises Stop when it is for another image.
+def pixel_diff(a: bytes, b: bytes) -> float | None:
+    """Mean absolute difference per RGB channel (0-255), or None when the pixel sizes differ."""
+    from PIL import Image, ImageChops, ImageStat
 
-    The exact check needs the cache's `sent_sha256` (ai/ocr/clova.py writes it). When the server
-    sends the original file bytes, a different hash is a different image and stops the command.
-    When it sends re-encoded bytes (EXIF rotation, downscale), a PIL version change can alter the
-    bytes of the same photo, so a difference is recorded, not fatal (the photo itself is verified).
+    with Image.open(io.BytesIO(a)) as ia, Image.open(io.BytesIO(b)) as ib:
+        if ia.size != ib.size:
+            return None
+        diff = ImageChops.difference(ia.convert("RGB"), ib.convert("RGB"))
+        return statistics.mean(ImageStat.Stat(diff).mean)
+
+
+def regenerate_hint(photo: Photo, data_dir: Path) -> str:
+    return (f"; delete {ocr_cache_path(data_dir, photo).relative_to(data_dir)} to make a new cache "
+            "(one CLOVA call)")
+
+
+def check_ocr_cache(record: dict, photo: Photo, data_dir: Path) -> dict:
+    """Is the cache for the image the server sends? Raises Stop when it is for another image or
+    when that cannot be shown.
+
+    The exact check is the cache's `sent_sha256` against the bytes the server sends. When the
+    server sends the original file bytes, a different hash is a different image. When it sends
+    re-encoded bytes (EXIF rotation, downscale), an encoder version change can alter the bytes of
+    the same photo, so a different hash is kept only with provenance: a cache this runner made
+    records `source_sha256`, which must be the verified photo's; a cache from ai/ocr/clova.py
+    (freeze 1장) names the image it sent (`sent_image`, under <data_dir>/prepared or
+    prepared_ocr), which must still hash to `sent_sha256` and decode to the same pixels as what
+    the server would send (MAX_REENCODE_PIXEL_DIFF).
     """
     meta = record.get("meta") or {}
     if meta.get("table_detection") not in (None, False):
@@ -296,6 +353,11 @@ def check_ocr_cache(record: dict, photo: Photo) -> dict:
     result = server_clova.image_result(record.get("response") or {})
     if result.get("inferResult") != "SUCCESS":
         raise Stop(f"{photo.file}: OCR cache inferResult is {result.get('inferResult')!r}")
+    if meta.get("source_image") not in (None, photo.file):
+        raise Stop(f"{photo.file}: OCR cache is for {meta.get('source_image')!r}" + regenerate_hint(photo, data_dir))
+    if meta.get("source_sha256") not in (None, photo.sha256):
+        raise Stop(f"{photo.file}: OCR cache was made from another photo (source_sha256 differs)"
+                   + regenerate_hint(photo, data_dir))
     cached = meta.get("sent_sha256")
     if cached is None:
         return {"image_check": "unverified (cache has no sent_sha256)"}
@@ -303,7 +365,25 @@ def check_ocr_cache(record: dict, photo: Photo) -> dict:
         return {"image_check": "same image"}
     if not photo.reencoded:
         raise Stop(f"{photo.file}: OCR cache was made from another image (sent_sha256 differs)")
-    return {"image_check": "re-encoded bytes differ (same source photo); kept"}
+    if meta.get("source_sha256") == photo.sha256:
+        return {"image_check": "re-encoded bytes differ; cache made from the verified photo (source_sha256)"}
+    sent_name = meta.get("sent_image")
+    sent_path = data_dir / ("prepared_ocr" if meta.get("resized") else "prepared") / sent_name if sent_name else None
+    if sent_path is None or not sent_path.is_file():
+        raise Stop(f"{photo.file}: re-encoded OCR bytes differ and the cache's sent image is not on disk to "
+                   "check" + regenerate_hint(photo, data_dir))
+    sent_bytes = sent_path.read_bytes()
+    if sha256_bytes(sent_bytes) != cached:
+        raise Stop(f"{photo.file}: {sent_path.name} no longer hashes to the cache's sent_sha256"
+                   + regenerate_hint(photo, data_dir))
+    server_sent, _, _ = server_clova.ocr_image(photo.prepared, photo.prepared_mime)
+    diff = pixel_diff(sent_bytes, server_sent)
+    if diff is None or diff > MAX_REENCODE_PIXEL_DIFF:
+        what = "a different pixel size" if diff is None else f"mean pixel difference {diff:.2f}"
+        raise Stop(f"{photo.file}: the cache's sent image has {what} from what the server would send"
+                   + regenerate_hint(photo, data_dir))
+    return {"image_check": f"re-encoded bytes differ; same pixels as the cache's sent image "
+                           f"(mean difference {diff:.2f})"}
 
 
 class Budget:
@@ -316,18 +396,36 @@ class Budget:
         self.used += 1
 
 
+class CountedHttp:
+    """httpx stand-in in front of the client the server's call_ocr uses: every HTTP request, the
+    server's retries included, takes one from the CLOVA budget, so --max-clova-calls caps requests."""
+
+    def __init__(self, inner: Any, budget: Budget):
+        self.inner, self.budget = inner, budget
+
+    def post(self, url: str, **kwargs: Any) -> Any:
+        self.budget.take()  # CallCapReached is not an httpx error, so call_ocr does not retry it
+        return self.inner.post(url, **kwargs)
+
+
 def make_ocr_cache(photo: Photo, path: Path, settings: server_clova.ClovaSettings, client: Any,
                    budget: Budget, secrets: Secrets) -> dict:
-    """One real CLOVA call through the server's call_ocr; cached in the ai/ocr/clova.py format."""
-    try:
-        budget.take()
-    except CallCapReached as error:
-        raise Stop(str(error)) from None
+    """One CLOVA OCR through the server's call_ocr (its retries count against the budget too);
+    cached in the ai/ocr/clova.py format."""
+    if budget.used >= budget.limit:
+        raise Stop(f"{budget.what} call cap {budget.limit} reached")
     started_at = now()
+    own = client is None
+    inner = client if client is not None else httpx.Client(timeout=settings.timeout_s)
     try:
-        ocr = server_clova.call_ocr(settings, photo.prepared, photo.prepared_mime, client)
+        ocr = server_clova.call_ocr(settings, photo.prepared, photo.prepared_mime, CountedHttp(inner, budget))
+    except CallCapReached as error:
+        raise Stop(f"{error} during the server's retries for {photo.file}") from None
     except server_clova.ClovaOCRError as error:
         raise Stop(f"CLOVA OCR failed for {photo.file}: {secrets.redact(str(error))}") from None
+    finally:
+        if own:
+            inner.close()
     sent, _, sent_size = server_clova.ocr_image(photo.prepared, photo.prepared_mime)
     image = server_clova.image_result(ocr["response"])
     record = {"meta": {
@@ -503,6 +601,7 @@ def load_manifest(out: Path, config: dict, frozen: dict, photos: list[Photo]) ->
     if not path.exists():
         return {"task": "P30 extraction, I3 test set (33 photos x r1-r3)", "config": config, "frozen_code": frozen,
                 "frozen_code_reference": "5d49c8a (clova.py: 1e149d4, deadline_s path only)",
+                "frozen_eval": FROZEN_EVAL, "frozen_eval_reference": "score.py: 15b1eff, e2e_match.py: 5d49c8a",
                 "photo_hashes_file": "ai/eval/i3_photo_sha256.json",
                 "photo_hashes_file_sha256": None, "photos": inputs, "ocr_caches": {}, "commands": []}
     manifest = json.loads(path.read_text(encoding="utf-8"))
@@ -556,7 +655,7 @@ def run_command(args: argparse.Namespace, secrets: Secrets, clients: Clients | N
         for p in photos:
             path = ocr_cache_path(data_dir, p)
             if path.exists():
-                caches[p.file] = check_ocr_cache(json.loads(path.read_text(encoding="utf-8")), p)
+                caches[p.file] = check_ocr_cache(json.loads(path.read_text(encoding="utf-8")), p, data_dir)
     except Stop as stop:
         print(f"STOP: {stop}")
         return EXIT_PREFLIGHT
@@ -618,7 +717,7 @@ def run_command(args: argparse.Namespace, secrets: Secrets, clients: Clients | N
                         ocr_record = make_ocr_cache(photo, cache_path, clova_settings, clients.clova, clova_budget,
                                                     secrets)
                         command["clova_calls"] = clova_budget.used
-                        caches[photo.file] = check_ocr_cache(ocr_record, photo)
+                        caches[photo.file] = check_ocr_cache(ocr_record, photo, data_dir)
                         print(f"  CLOVA {photo.file}: {ocr_record['meta']['latency_ms']} ms -> {cache_path.name}")
                     clova = {**ocr_info(ocr_record, from_cache, cache_path), **caches[photo.file]}
                     known = manifest["ocr_caches"].setdefault(photo.file, clova["cache_sha256"])
@@ -705,11 +804,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--out", type=Path, required=True, help="run dir, e.g. ai/runs/2026-10-30_p30/hybrid_i3")
     ap.add_argument("--runs", type=int, nargs="+", default=[1, 2, 3], help="run numbers, in this order")
     ap.add_argument("--max-calls", type=int, default=45, help="Gemini API calls (attempts) per command")
-    ap.add_argument("--max-clova-calls", type=int, default=33, help="CLOVA calls per command (photos without cache)")
+    ap.add_argument("--max-clova-calls", type=int, default=33, help="CLOVA HTTP requests per command, the server's retries included (photos without cache)")
     ap.add_argument("--min-interval", type=float, default=4.5, help="seconds between photos' Gemini requests")
     ap.add_argument("--check", action="store_true", help="verify inputs and show what is left; no API call")
     ap.add_argument("--data-dir", type=Path, help="default: BOTTLEMAP_DATA_DIR (repo .env) as ai/extract/extract.py")
-    ap.add_argument("--hashes", type=Path, default=PHOTO_HASHES)
+    ap.add_argument("--hashes", type=Path, default=PHOTO_HASHES,
+                    help="photo hash file; must have the frozen SHA-256 (PHOTO_HASHES_SHA256)")
     ap.add_argument("--env-file", type=Path, default=REPO_ROOT / ".env")
     args = ap.parse_args(argv)
     if any(k < 1 for k in args.runs) or len(set(args.runs)) != len(args.runs):
