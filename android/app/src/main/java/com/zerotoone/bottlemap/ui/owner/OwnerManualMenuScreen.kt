@@ -5,6 +5,14 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,12 +22,22 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -33,7 +51,21 @@ import com.zerotoone.bottlemap.data.owner.*
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.UUID
+
+/** No press flash and dismiss IME on non-input taps. Focused BasicTextField still reopens the keyboard. */
+@Composable
+private fun Modifier.manualTap(onClick: () -> Unit): Modifier {
+    val focus = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    val interaction = remember { MutableInteractionSource() }
+    return this.clickable(interactionSource = interaction, indication = null) {
+        focus.clearFocus()
+        keyboard?.hide()
+        onClick()
+    }
+}
 
 private val ownerManualZone = ZoneId.of("Asia/Seoul")
 private fun manualId(prefix: String) = prefix + UUID.randomUUID().toString()
@@ -132,6 +164,8 @@ internal fun OwnerManualMenuScreen(
     }
     var saleOption by rememberSaveable(bar?.barId) { mutableStateOf(0) }
     var confirm by rememberSaveable { mutableStateOf<String?>(null) }
+    var calendarTarget by rememberSaveable { mutableStateOf<String?>(null) }
+    var promoOptionExpanded by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val draftOptions = decodedOptions(optionText)
     fun setOptions(v: List<DraftOption>) { optionText = encodedOptions(v) }
@@ -244,8 +278,13 @@ internal fun OwnerManualMenuScreen(
             dismissButton = { TextButton(onClick = { confirm = null }) { Text("취소") } }
         )
     }
-    Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        V4Toolbar(null, ::back)
+    Column(Modifier.fillMaxSize().background(V4Color.background)
+        .manualTap { }) {
+        V4Toolbar(when(screen) {
+            "list" -> "메뉴 관리"
+            "item" -> "메뉴 항목"
+            else -> null
+        }, ::back)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
             when {
@@ -258,28 +297,48 @@ internal fun OwnerManualMenuScreen(
                 bar == null -> Text("관리할 매장이 없어요.", color = V4Color.sub)
                 screen == "list" -> {
                     Text("메뉴 관리", color = V4Color.text, fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp)
+                        fontFamily = FontFamily.Serif, fontSize = 24.sp,
+                        modifier = Modifier.padding(bottom = 6.dp))
                     Text("최근 갱신 " + ownerDisplayDate(bar.lastMenuPublishedAtEpochMs),
                         color = V4Color.sub, fontSize = 12.sp)
-                    Text("사진으로 메뉴 추가", color = V4Color.text, fontWeight = FontWeight.Bold)
+                    Text("사진으로 메뉴 추가", color = V4Color.text,
+                        fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     val job = snapshot?.imports?.lastOrNull { it.barId == bar.barId }
-                    ManualButton(when(job?.status) {
-                        MockImportStatus.PROCESSING -> "AI 분석 중 · 작업 확인"
-                        MockImportStatus.READY_FOR_REVIEW -> "추가할 메뉴 확인하기"
-                        MockImportStatus.FAILED -> "메뉴판 분석 실패 · 작업 확인"
-                        else -> "메뉴판 사진으로 추가하기"
-                    }, {
-                        val status = job?.status
-                        if (status == MockImportStatus.PROCESSING ||
-                            status == MockImportStatus.READY_FOR_REVIEW ||
-                            status == MockImportStatus.FAILED)
-                            onExistingJob(status) else onNewPhoto()
-                    }, secondary = true)
+                    Row(Modifier.fillMaxWidth()
+                        .background(V4Color.surface, RoundedCornerShape(11.dp))
+                        .padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.Top) {
+                        BmIcon(BmIconId.REVIEW, null, Modifier.size(25.dp), V4Color.primary)
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(when(job?.status) {
+                                MockImportStatus.PROCESSING -> "메뉴판 분석 중"
+                                MockImportStatus.READY_FOR_REVIEW -> "추가할 메뉴 확인 준비됨"
+                                MockImportStatus.FAILED -> "메뉴판 분석 실패"
+                                else -> "메뉴판 사진으로 추가"
+                            }, color = V4Color.text, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Text("필요할 때 메뉴를 추가하고 확인하세요.",
+                                color = V4Color.sub, fontSize = 11.sp)
+                            ManualSmallButton(
+                                if (job?.status == MockImportStatus.READY_FOR_REVIEW) "추가할 메뉴 확인하기"
+                                else if (job?.status == MockImportStatus.PROCESSING ||
+                                    job?.status == MockImportStatus.FAILED) "작업 확인하기"
+                                else "메뉴판 사진으로 추가하기",
+                                onClick = {
+                                    val status = job?.status
+                                    if (status == MockImportStatus.PROCESSING ||
+                                        status == MockImportStatus.READY_FOR_REVIEW ||
+                                        status == MockImportStatus.FAILED) onExistingJob(status)
+                                    else onNewPhoto()
+                                })
+                        }
+                    }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically) {
-                        Text("현재 게시 메뉴", color = V4Color.text, fontWeight = FontWeight.Bold)
-                        Text("+ 직접 추가", Modifier.clickable { edit(null) }
-                            .testTag("manual-menu-add"), color = V4Color.primary)
+                        Text("현재 게시 메뉴", color = V4Color.text, fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp)
+                        Text("+ 직접 추가", Modifier.manualTap { edit(null) }
+                            .testTag("manual-menu-add"), color = V4Color.primary, fontSize = 12.sp)
                     }
                     V4SearchField(query, { query = it }, "manual-menu-search", "메뉴명·브랜드 검색")
                     val entries = items.map { item ->
@@ -289,9 +348,13 @@ internal fun OwnerManualMenuScreen(
                     val visible = entries.filter { (item, p, brand) ->
                         manualMenuMatches(item, p, brand, query)
                     }
-                    Text(if (query.isEmpty()) "전체 " + items.size + "개" else
-                        visible.size.toString() + "개 검색됨",
-                        color = V4Color.sub, fontSize = 11.sp)
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Text(if (query.isEmpty()) "전체 " + items.size + "개" else
+                            visible.size.toString() + "개 검색됨", color = V4Color.sub, fontSize = 11.sp)
+                        Text("메뉴를 선택해서 편집하세요", color = V4Color.sub, fontSize = 11.sp)
+                    }
                     if (visible.isEmpty()) Text(if (query.isEmpty()) "등록된 메뉴가 없어요."
                         else "검색 결과가 없어요.", color = V4Color.sub)
                     MANUAL_MENU_CATEGORIES.forEach { cat ->
@@ -300,43 +363,64 @@ internal fun OwnerManualMenuScreen(
                         }
                         if (rows.isNotEmpty()) {
                             val open = query.isNotBlank() || cat in openCategories
-                            Column(Modifier.fillMaxWidth().border(1.dp, V4Color.line,
-                                RoundedCornerShape(11.dp))
-                                .background(Color(0xFF292522), RoundedCornerShape(11.dp))) {
-                                Row(Modifier.fillMaxWidth().background(V4Color.elevated)
-                                    .clickable {
+                            Column(Modifier.fillMaxWidth()) {
+                                // Only the category header is a rounded surface; no outer rounded
+                                // container means no square corners behind the collapsed header.
+                                Row(Modifier.fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(V4Color.surface)
+                                    .manualTap {
                                         openCategories = if (open) openCategories - cat
                                             else openCategories + cat
-                                    }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    }.padding(horizontal = 12.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically) {
                                     Text(cat, Modifier.weight(1f), color = V4Color.text,
                                         fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                    Text(if (open) "⌃" else "⌄", color = V4Color.primary)
+                                    Text(if (open) "⌃" else "⌄", color = V4Color.sub)
                                 }
                                 if (open) {
                                     val groups = if (cat == "위스키") rows.groupBy { it.third }
                                         else mapOf("" to rows)
-                                    groups.forEach { (brand, grouped) ->
-                                        if (cat == "위스키")
-                                            Text(brand.ifBlank { "기타 브랜드" },
-                                                Modifier.padding(start = 11.dp, top = 12.dp, bottom = 5.dp),
-                                                color = V4Color.primary,
-                                                fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                        grouped.forEach { (item, product, brandLabel) ->
+                                    groups.entries.forEachIndexed { groupIndex, entry ->
+                                        if (cat == "위스키") {
+                                            Text(entry.key.ifBlank { "기타 브랜드" },
+                                                Modifier.padding(start = 4.dp, top = 18.dp, bottom = 8.dp),
+                                                color = V4Color.primary, fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold)
+                                        } else Spacer(Modifier.height(8.dp))
+                                        entry.value.forEachIndexed { index, (item, product, brandLabel) ->
                                             OwnerManualMenuRow(item, requireNotNull(product), brandLabel,
                                                 selectedId == item.barMenuItemId,
                                                 onSelect = { selectedId = if (selectedId == item.barMenuItemId)
                                                     null else item.barMenuItemId },
                                                 onEdit = { edit(item) },
                                                 onStock = { confirm = "stock:" + item.barMenuItemId })
+                                            if (index < entry.value.lastIndex)
+                                                HorizontalDivider(color = V4Color.line, thickness = 1.dp)
+                                        }
+                                        if (groupIndex < groups.size - 1) {
+                                            Spacer(Modifier.height(8.dp))
+                                            HorizontalDivider(color = V4Color.line, thickness = 2.dp)
                                         }
                                     }
                                 }
                             }
+                            Spacer(Modifier.height(8.dp))
                         }
                     }
-                    Text("⚠ 전체 메뉴 초기화", Modifier.clickable { confirm = "reset" }
-                        .testTag("manual-menu-reset").padding(vertical = 10.dp),
-                        color = Color(0xFFFFB4AB), fontSize = 12.sp)
+                    HorizontalDivider(color = V4Color.line, thickness = 1.dp)
+                    Box(Modifier.fillMaxWidth().height(43.dp)
+                        .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(8.dp))
+                        .manualTap { confirm = "reset" }
+                        .testTag("manual-menu-reset"), contentAlignment = Alignment.Center) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(9.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            BmIcon(BmIconId.ERROR, null, Modifier.size(17.dp),
+                                Color(0xFFFFB4AB))
+                            Text("전체 메뉴 초기화", color = Color(0xFFFFB4AB),
+                                fontSize = 12.sp)
+                        }
+                    }
                 }
                 screen == "item" -> {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
