@@ -33,6 +33,8 @@ class OwnerPreviewNavigationGuardTest {
 
     @Test fun staleManageClickCannotPopManagerOrSendUserBackToMyPage() {
         lateinit var nav: NavHostController
+        var nowMs = 0L
+        val cooldown = OwnerPreviewSwitchCooldown { nowMs }
         compose.setContent {
             nav = rememberNavController()
             NavHost(navController = nav, startDestination = "mypage") {
@@ -40,7 +42,7 @@ class OwnerPreviewNavigationGuardTest {
                 composable(OwnerPage.MGR_HOME.route) {
                     Column {
                         Text("MANAGEMENT_HOME")
-                        Button(onClick = { nav.openOwnerManagerPreviewSafely() },
+                        Button(onClick = { nav.openOwnerManagerPreviewSafely(cooldown) },
                             modifier = Modifier.testTag("go-preview")) {
                             Text("미리보기")
                         }
@@ -49,7 +51,7 @@ class OwnerPreviewNavigationGuardTest {
                 composable(OwnerPage.MGR_PREVIEW.route) {
                     Column {
                         Text("CUSTOMER_PREVIEW")
-                        Button(onClick = { nav.returnToOwnerManagerSafely() },
+                        Button(onClick = { nav.returnToOwnerManagerSafely(cooldown) },
                             modifier = Modifier.testTag("go-manage")) {
                             Text("관리")
                         }
@@ -62,16 +64,40 @@ class OwnerPreviewNavigationGuardTest {
         }
         compose.onNodeWithTag("go-preview").performClick()
         compose.onNodeWithText("CUSTOMER_PREVIEW").assertIsDisplayed()
+        // Returning too soon after entering preview is ignored.
         compose.onNodeWithTag("go-manage").performClick()
         compose.runOnIdle {
-            // This models a late second callback from the outgoing preview.
-            assertFalse(nav.returnToOwnerManagerSafely())
+            assertEquals(OwnerPage.MGR_PREVIEW.route, nav.currentDestination?.route)
+            nowMs = 499L
+        }
+        compose.onNodeWithTag("go-manage").performClick()
+        compose.runOnIdle {
+            assertEquals(OwnerPage.MGR_PREVIEW.route, nav.currentDestination?.route)
+            nowMs = 500L
+        }
+        compose.onNodeWithTag("go-manage").performClick()
+        compose.onNodeWithText("MANAGEMENT_HOME").assertIsDisplayed()
+        compose.runOnIdle {
+            // A stale callback from the preview must not pop the manager.
+            assertFalse(nav.returnToOwnerManagerSafely(cooldown))
             assertEquals(OwnerPage.MGR_HOME.route, nav.currentDestination?.route)
+        }
+
+        // The reverse direction also shares the 500-ms window.
+        compose.onNodeWithTag("go-preview").performClick()
+        compose.runOnIdle {
+            assertEquals(OwnerPage.MGR_HOME.route, nav.currentDestination?.route)
+            nowMs = 999L
+        }
+        compose.onNodeWithTag("go-preview").performClick()
+        compose.runOnIdle {
+            assertEquals(OwnerPage.MGR_HOME.route, nav.currentDestination?.route)
+            nowMs = 1000L
         }
         compose.onNodeWithTag("go-preview").performClick()
         compose.onNodeWithText("CUSTOMER_PREVIEW").assertIsDisplayed()
         compose.runOnIdle {
-            assertFalse(nav.openOwnerManagerPreviewSafely())
+            assertFalse(nav.openOwnerManagerPreviewSafely(cooldown))
             assertEquals(OwnerPage.MGR_PREVIEW.route, nav.currentDestination?.route)
         }
     }
