@@ -39,6 +39,10 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun saveBrand(brand: MockBrand) = repository.saveBrand(brand)
     fun saveProduct(product: MockCatalogProduct) = repository.saveCatalogProduct(product)
     fun saveMenuItem(item: MockBarMenuItem) = repository.saveMenuItem(item)
+    fun saveManualMenuItem(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct? = null,
+        newBrand: MockBrand? = null,
+    ) = repository.saveManualMenuItem(item, newProduct, newBrand)
     fun setSoldOut(itemId: String, soldOut: Boolean) = repository.setSoldOut(itemId, soldOut)
     fun deleteMenuItem(id: String) = repository.deleteMenuItem(id)
     fun clearMenuForBar(barId: String) = repository.clearMenuForBar(barId)
