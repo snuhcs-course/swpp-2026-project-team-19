@@ -44,6 +44,10 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
     val previewSwitchCooldown = OwnerPreviewSwitchCooldown()
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
+                CompositionLocalProvider(
+                    LocalIndication provides null,
+                    LocalRippleConfiguration provides null,
+                ) {
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                 OwnerMockRuntime.repository(LocalContext.current)))
             val mockState = ownerViewModel.state.collectAsStateWithLifecycle().value
@@ -71,8 +75,13 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     { navController.navigate(route) }
                 },
             )
+            }
         }
         composable(OwnerRoutes.ADD_BAR) {
+                CompositionLocalProvider(
+                    LocalIndication provides null,
+                    LocalRippleConfiguration provides null,
+                ) {
             OwnerOnboardingScreen(
                 viewModel = viewModel(factory = OwnerMockViewModel.Factory(
                     OwnerMockRuntime.repository(LocalContext.current))),
@@ -81,9 +90,15 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
             )
+            }
         }
         composable(OwnerRoutes.COMPONENTS) {
+                CompositionLocalProvider(
+                    LocalIndication provides null,
+                    LocalRippleConfiguration provides null,
+                ) {
             OwnerComponentGallery(onBack = { navController.popBackStack() })
+            }
         }
         OwnerPage.entries.forEach { page ->
             composable(page.route) {
