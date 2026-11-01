@@ -278,7 +278,7 @@ internal fun OwnerManualMenuScreen(
             } == true
             require(!sharedLocal || (sameCategory &&
                 alcoholKind.trim().takeIf { category == "기타 주류" && it.isNotEmpty() } ==
-                    persisted?.otherAlcoholKind?.takeIf { it.isNotBlank() })) {
+                    linked?.otherAlcoholKind?.takeIf { it.isNotBlank() })) {
                 "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
             }
             // Check the immutable catalog subtype for both new links and edits.
