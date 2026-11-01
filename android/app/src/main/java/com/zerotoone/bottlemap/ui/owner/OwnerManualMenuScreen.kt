@@ -8,10 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,7 +47,6 @@ import com.zerotoone.bottlemap.ui.common.BmIconId
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.UUID
 
 /** No press flash and dismiss IME on non-input taps. Focused BasicTextField still reopens the keyboard. */
@@ -98,14 +93,18 @@ private fun fromSaved(o: MockMenuOption) = DraftOption(
 )
 private fun toOption(d: DraftOption, whisky: Boolean): MockMenuOption {
     val price = d.price.toIntOrNull() ?: throw IllegalArgumentException("가격을 숫자로 입력해 주세요.")
-    require(price > 0) { "가격은 1원 이상이어야 해요." }
+    require(price in 1..MAX_OWNER_MENU_PRICE_KRW) {
+        "가격은 1원 이상, 1억 원 미만이어야 해요."
+    }
     val ml = if (whisky && !d.bottle) d.ml.toIntOrNull() else null
     if (whisky && !d.bottle) require(ml != null && ml > 0) {
         "용량을 입력하거나 Bottle 판매를 선택해 주세요."
     }
     val discount = if (d.sale.isEmpty()) null else {
         val salePrice = d.sale.toIntOrNull() ?: throw IllegalArgumentException("할인 가격 오류")
-        require(salePrice in 1..price) { "할인 가격은 원래 가격 이하여야 해요." }
+        require(salePrice in 1..price && salePrice <= MAX_OWNER_MENU_PRICE_KRW) {
+            "할인 가격은 1원 이상, 원래 가격 이하여야 해요."
+        }
         val start = runCatching { LocalDate.parse(d.start) }.getOrNull()
             ?: throw IllegalArgumentException("시작일은 YYYY-MM-DD 형식이에요.")
         val end = runCatching { LocalDate.parse(d.end) }.getOrNull()
@@ -195,21 +194,6 @@ internal fun OwnerManualMenuScreen(
         }
     }
     BackHandler(screen != "list") { back() }
-    if (calendarTarget != null && screen == "promo") {
-        val current = decodedOptions(optionText).getOrNull(saleOption)
-        val isStart = calendarTarget == "start"
-        ManualDatePicker(
-            if (isStart) current?.start.orEmpty() else current?.end.orEmpty(),
-            onDismiss = { calendarTarget = null },
-            onPick = { picked ->
-                changeOption(saleOption) {
-                    if (isStart) it.copy(start = picked) else it.copy(end = picked)
-                }
-                calendarTarget = null
-            }
-        )
-    }
-
 
     fun save() {
         if (bar == null) return
@@ -587,14 +571,14 @@ internal fun OwnerManualMenuScreen(
                                             keyboardType = KeyboardType.Number,
                                             testTag = "manual-menu-ml-" + i)
                                         V4FormField("가격 (원)", d.price, { v ->
-                                            changeOption(i) { it.copy(price = v.filter(Char::isDigit)) }
+                                            changeOption(i) { it.copy(price = ownerPriceInput(v)) }
                                         }, modifier = Modifier.weight(1f),
                                             keyboardType = KeyboardType.Number,
                                             testTag = "manual-menu-price-" + i)
                                     }
                                 } else {
                                     V4FormField("판매 가격 (원)", d.price, { v ->
-                                        changeOption(i) { it.copy(price = v.filter(Char::isDigit)) }
+                                        changeOption(i) { it.copy(price = ownerPriceInput(v)) }
                                     }, keyboardType = KeyboardType.Number,
                                         testTag = "manual-menu-price-" + i)
                                 }
@@ -659,10 +643,53 @@ internal fun OwnerManualMenuScreen(
                     val d = draftOptions.getOrNull(saleOption)
                     if (d != null) {
                         V4FormField("할인 가격 (원)", d.sale, { v ->
-                            changeOption(saleOption) { it.copy(sale = v.filter(Char::isDigit)) }
+                            changeOption(saleOption) { it.copy(sale = ownerPriceInput(v)) }
                         }, keyboardType = KeyboardType.Number)
-                        ManualDateField("시작일", d.start) { calendarTarget = "start" }
-                        ManualDateField("종료일", d.end) { calendarTarget = "end" }
+                        ManualDateField("시작일", d.start) {
+                            calendarTarget = if (calendarTarget == "start") null else "start"
+                        }
+                        ManualDateField("종료일", d.end) {
+                            calendarTarget = if (calendarTarget == "end") null else "end"
+                        }
+                        if (calendarTarget != null) {
+                            val startEpoch = runCatching {
+                                LocalDate.parse(d.start).toEpochDay()
+                            }.getOrDefault(Long.MIN_VALUE)
+                            val endEpoch = runCatching {
+                                LocalDate.parse(d.end).toEpochDay()
+                            }.getOrDefault(Long.MIN_VALUE)
+                            // Exactly the same calendar and range transition as
+                            // Owner's temporary business-closure period UI.
+                            androidx.compose.runtime.key(saleOption) {
+                                OwnerVacationCalendar(
+                                    today = LocalDate.now(ownerManualZone).toEpochDay(),
+                                    startDay = startEpoch, endDay = endEpoch,
+                                    selectedTarget = requireNotNull(calendarTarget),
+                                    onSelectTarget = { calendarTarget = it },
+                                    onPick = { picked ->
+                                        val chosenTarget = requireNotNull(calendarTarget)
+                                        val updated = updateQuickVacationDates(
+                                            startEpoch, endEpoch, picked, chosenTarget)
+                                        if (updated == null) {
+                                            error = "종료일은 시작일 이후여야 해요."
+                                        } else {
+                                            changeOption(saleOption) {
+                                                it.copy(
+                                                    start = updated.first.takeUnless { day ->
+                                                        day == Long.MIN_VALUE
+                                                    }?.let(LocalDate::ofEpochDay)?.toString().orEmpty(),
+                                                    end = updated.second.takeUnless { day ->
+                                                        day == Long.MIN_VALUE
+                                                    }?.let(LocalDate::ofEpochDay)?.toString().orEmpty(),
+                                                )
+                                            }
+                                            calendarTarget = if (chosenTarget == "start") "end" else "start"
+                                            error = null
+                                        }
+                                    }
+                                )
+                            }
+                        }
                         HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                         error?.let { Text(it, color = Color(0xFFFFB4AB)) }
                         ManualButton("할인 적용", {
@@ -738,27 +765,6 @@ private fun ManualDateField(label: String, isoDate: String, onClick: () -> Unit)
                     Offset(11.dp.toPx(), 5.dp.toPx()), strokeWidth = 1.5.dp.toPx())
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ManualDatePicker(
-    initialIso: String, onDismiss: () -> Unit, onPick: (String) -> Unit
-) {
-    val initial = runCatching { LocalDate.parse(initialIso) }.getOrNull()
-        ?: LocalDate.now(ownerManualZone)
-    val state = rememberDatePickerState(initialSelectedDateMillis =
-        initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-    DatePickerDialog(onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = {
-            state.selectedDateMillis?.let { epoch ->
-                onPick(Instant.ofEpochMilli(epoch)
-                    .atZone(ZoneOffset.UTC).toLocalDate().toString())
-            }
-        }) { Text("선택") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("취소") } }) {
-        DatePicker(state = state)
     }
 }
 
