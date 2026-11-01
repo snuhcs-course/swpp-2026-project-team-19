@@ -135,6 +135,7 @@ Home (search or bar-first map exploration)
 
 ### 5.2 Owner/operator task flow
 
+- Screen spec for the owner menu flow (photo upload, reading, line-by-line review, publish): `docs/owner_menu_flow_ux.md` (I3-P25).
 - Use Toss-like clearly named ordered steps for upload -> processing -> review -> publishing only according to team-accepted workflow. Do not show invented percentages for indeterminate OCR/AI work.
 - Keep Back/retry and restore inputs across Android lifecycle/configuration changes.
 - Owner screens may use denser operational data than customer Explore screens; do not force a one-question-one-screen rule on reviews.
