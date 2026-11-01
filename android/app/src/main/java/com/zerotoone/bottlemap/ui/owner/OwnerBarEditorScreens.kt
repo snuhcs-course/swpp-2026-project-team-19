@@ -1,7 +1,10 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -48,6 +51,32 @@ private fun selectedOwnerBar(state: MockOwnerLoadState): Pair<MockOwnerSnapshot,
     return snapshot to bar
 }
 
+/**
+ * Decode pixels are not automatically re-oriented by BitmapFactory.
+ * Apply all eight EXIF orientation variants once, before sharing the bitmap
+ * with the editor, cover, and customer preview.
+ */
+internal fun orientOwnerStoredBitmap(bitmap: Bitmap, orientation: Int): Bitmap {
+    val matrix = Matrix()
+    when (orientation) {
+        ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1f, 1f)
+        ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
+        ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.setScale(1f, -1f)
+        ExifInterface.ORIENTATION_TRANSPOSE -> {
+            matrix.setRotate(90f)
+            matrix.postScale(-1f, 1f)
+        }
+        ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
+        ExifInterface.ORIENTATION_TRANSVERSE -> {
+            matrix.setRotate(-90f)
+            matrix.postScale(-1f, 1f)
+        }
+        ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
+        else -> return bitmap
+    }
+    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+}
+
 /** Render only the contents of a saved URI, keeping the original reference for full-screen display. */
 @Composable
 internal fun OwnerStoredPhoto(
@@ -58,6 +87,13 @@ internal fun OwnerStoredPhoto(
         value = withContext(Dispatchers.IO) {
             try {
                 val resolver = context.contentResolver
+                val parsedUri = Uri.parse(uri)
+                val orientation = resolver.openInputStream(parsedUri)?.use { stream ->
+                    runCatching {
+                        ExifInterface(stream).getAttributeInt(
+                            ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+                    }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+                } ?: ExifInterface.ORIENTATION_NORMAL
                 val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                 resolver.openInputStream(Uri.parse(uri))?.use { BitmapFactory.decodeStream(it, null, bounds) }
                 val width = bounds.outWidth.coerceAtLeast(1)
@@ -65,8 +101,10 @@ internal fun OwnerStoredPhoto(
                 var sample = 1
                 while (width / sample > 1200 || height / sample > 1200) sample *= 2
                 val options = BitmapFactory.Options().apply { inSampleSize = sample }
-                resolver.openInputStream(Uri.parse(uri))?.use {
-                    BitmapFactory.decodeStream(it, null, options)?.asImageBitmap()
+                resolver.openInputStream(parsedUri)?.use { input ->
+                    BitmapFactory.decodeStream(input, null, options)?.let { decoded ->
+                        orientOwnerStoredBitmap(decoded, orientation).asImageBitmap()
+                    }
                 }
             } catch (_: Exception) {
                 null
