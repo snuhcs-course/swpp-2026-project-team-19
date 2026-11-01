@@ -154,7 +154,7 @@ private fun OwnerPreviewV4MenuRow(
             fontWeight = FontWeight.Bold, fontSize = 12.sp)
         Column(verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.End) {
-            item.options.take(3).forEach { option ->
+            item.options.forEach { option ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(option.pourMl?.toString()?.plus("ml") ?: option.label.orEmpty(),
                         color = V4Color.text, fontSize = 10.sp)
