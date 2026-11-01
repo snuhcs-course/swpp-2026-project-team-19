@@ -437,6 +437,14 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             }) { "판매 옵션 ID 중복" }
             // Canonical catalog records are immutable; local unverified menu products
             // may change their display name/type without changing their stable local ID.
+            // Other bars may reference the same local product. A direct repository
+            // caller must not silently rewrite its shared name/type metadata.
+            if (newProduct != null && newProduct != product &&
+                state.menuItems.any {
+                    it.barId != item.barId && it.productId == product.productId
+                }) {
+                require(false) { "다른 매장과 공유된 상품 정보는 변경할 수 없어요." }
+            }
             val finalProduct = if (newProduct != null &&
                 state.products.any { it.productId == product.productId }) {
                 require(!product.catalogMatched && newProduct.productId == product.productId) {
