@@ -1,5 +1,6 @@
 """Read side of a menu import: progress while processing, the failure, or the full review payload."""
 
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
@@ -113,12 +114,43 @@ def _candidate(candidate, products: dict[UUID, Product]) -> ReviewCandidate:
     )
 
 
-def _review_item(item: ExtractedItem, products: dict[UUID, Product]) -> ReviewItem:
+def _is_coordinate(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and 0 <= value <= 1000
+
+
+def source_boxes(raw_output: Any) -> dict[int, list[int]]:
+    """itemOrder -> line box [x0, y0, x1, y1] (0-1000 of the photo) from an extraction run's raw_output.
+
+    The hybrid extractor stores the box around each item's OCR name and price lines in
+    `raw_output.itemSources` (app/extraction/hybrid.py). Other runs (Gemini only, mock, OCR fallback)
+    have none. An entry of another shape, or a box with no area, is skipped: the box only helps the
+    review screen show the line, so a bad one is never an error.
+    """
+    sources = raw_output.get("itemSources") if isinstance(raw_output, dict) else None
+    if not isinstance(sources, list):
+        return {}
+    boxes: dict[int, list[int]] = {}
+    for source in sources:
+        if not isinstance(source, dict):
+            continue
+        order, box = source.get("itemOrder"), source.get("box")
+        if not isinstance(order, int) or isinstance(order, bool):
+            continue
+        if not (isinstance(box, list) and len(box) == 4 and all(_is_coordinate(v) for v in box)):
+            continue
+        if box[0] >= box[2] or box[1] >= box[3]:
+            continue
+        boxes[order] = list(box)
+    return boxes
+
+
+def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict[int, list[int]]) -> ReviewItem:
     effective = item.corrected_line_type or item.extracted_line_type
     return ReviewItem(
         extractedItemId=item.id,
         itemOrder=item.item_order,
         rawText=item.raw_text,
+        sourceBox=boxes.get(item.item_order),
         extractedLineType=item.extracted_line_type,
         correctedLineType=item.corrected_line_type,
         effectiveLineType=effective,
@@ -252,13 +284,14 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
     images = []
     for image in menu_import.images:
         url, expires_at = storage.url(image.storage_key)
+        boxes = source_boxes(image.extraction_run.raw_output)
         images.append(
             ReviewImage(
                 imageId=image.id,
                 imageOrder=image.image_order,
                 imageUrl=_absolute(url, base_url),
                 imageUrlExpiresAt=expires_at,
-                items=[_review_item(item, products) for item in image.extraction_run.items],
+                items=[_review_item(item, products, boxes) for item in image.extraction_run.items],
             )
         )
     return ImportReviewResponse(

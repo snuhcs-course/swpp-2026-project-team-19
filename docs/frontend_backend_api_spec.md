@@ -2064,6 +2064,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
           "extractedItemId": "10000000-0000-4000-8000-000000000007",
           "itemOrder": 7,
           "rawText": "딘스톤 12년 15ml 8.0 / 30ml 15.0",
+          "sourceBox": [62, 418, 931, 447],
           "extractedLineType": "product",
           "correctedLineType": null,
           "effectiveLineType": "product",
@@ -2158,6 +2159,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 응답 규칙:
 
 - `rawText`는 해당 항목의 OCR 원문 블록이다.
+- `sourceBox`는 이 항목이 사진의 어디에 있는지다. `[x0, y0, x1, y1]`이고, 각 값은 사진(EXIF 회전을 적용한 뒤)의 가로·세로를 0–1000으로 본 좌표다. x는 왼쪽→오른쪽, y는 위→아래다. 이름과 가격을 읽은 OCR 줄을 모두 감싸는 상자이므로, 검수 화면은 `imageUrl`에서 이 영역을 잘라 메뉴판의 그 줄을 보여 줄 수 있다. OCR+LLM(hybrid) 추출에서만 값이 있고, Gemini 단독·mock 추출, OCR 실패로 Gemini 단독으로 넘어간 사진, OCR 줄 없이 사진에서만 읽은 항목은 `null`이다. `null`이면 `rawText`로 줄을 보여 준다.
 - `imageUrl`은 짧은 만료 시간을 가진 서명 URL이다. `imageUrlExpiresAt`이 만료 시각이며, 만료되지 않는 URL(로컬 저장소)이면 `null`이다. 만료되었거나 이미지 로딩이 `403`으로 실패하면 프론트엔드는 같은 `GET /api/menu-imports/{menuImportId}`를 다시 호출해 새 URL을 받는다. 다시 호출해도 `reviewVersion`이 같으면 검수 데이터는 바뀌지 않으므로 사용자가 입력 중인 결정을 유지한다.
 - `extractedLineType`은 AI의 최초 분류이며 검수 후에도 변경되지 않는다.
 - `correctedLineType`은 운영자가 최초 분류를 바꾼 경우에만 값이 있고, 그대로 승인한 경우 `null`이다.
