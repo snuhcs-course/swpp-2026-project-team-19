@@ -820,4 +820,41 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun linkedOtherAlcoholCatalogPrefillsSubtypeAndRejectsMismatchedInput() {
+        val repository = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        repository.saveBrand(MockBrand("linked-kind-brand", "기타 브랜드"))
+        val product = MockCatalogProduct("linked-kind-product", "linked-kind-brand",
+            "공식 리큐르", category = "otherAlcohol", otherAlcoholKind = "리큐르")
+        repository.saveCatalogProduct(product)
+        val vm = OwnerMockViewModel(repository)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithText("위스키", substring = false).performClick()
+        compose.onNodeWithText("기타 주류", substring = false).performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextReplacement("공식 리큐르")
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithTag("manual-menu-alcohol-kind").assertTextEquals("리큐르")
+        compose.onNodeWithTag("manual-menu-price-0").performScrollTo()
+            .performTextReplacement("17000")
+        compose.onNodeWithTag("manual-menu-alcohol-kind").performTextReplacement("맥주")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.onNodeWithText("카탈로그 상품의 주류 종류는 변경할 수 없어요.").assertExists()
+        compose.runOnIdle {
+            val state = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(0, state.menuItems.size)
+            assertEquals("리큐르", state.products.single().otherAlcoholKind)
+        }
+        compose.onNodeWithTag("manual-menu-alcohol-kind").performTextReplacement("리큐르")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val state = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals("linked-kind-product", state.menuItems.single().productId)
+            assertEquals("리큐르", state.products.single().otherAlcoholKind)
+            assertEquals(1, state.products.size)
+        }
+    }
+
 }
