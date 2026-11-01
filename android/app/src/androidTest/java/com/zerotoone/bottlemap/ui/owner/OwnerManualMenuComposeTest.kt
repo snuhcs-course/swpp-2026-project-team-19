@@ -485,4 +485,59 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun uncheckingImportedBottleRequiresPourAndDoesNotOverwriteOriginal() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("bottle-brand", "브랜드"))
+        r.saveCatalogProduct(MockCatalogProduct("bottle-product", "bottle-brand", "병 상품"))
+        val saved = MockMenuOption("bottle-original", label = "병", pourMl = null, priceKrw = 22000)
+        r.saveMenuItem(MockBarMenuItem("bottle-row", "fixture-bar", "bottle-product", listOf(saved)))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-bottle-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithText("Bottle 판매").performScrollTo().performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.onNodeWithText("용량을 입력하거나 Bottle 판매를 선택해 주세요.").assertExists()
+        compose.runOnIdle {
+            assertEquals(saved, vm.preview("fixture-bar", 0L)!!.visibleMenu.single().options.single())
+        }
+        compose.onNodeWithTag("manual-menu-ml-0").performScrollTo().performTextReplacement("45")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val savedOption = vm.preview("fixture-bar", 0L)!!.visibleMenu.single().options.single()
+            assertEquals("bottle-original", savedOption.optionId)
+            assertEquals(45, savedOption.pourMl)
+            assertEquals(null, savedOption.label)
+        }
+    }
+
+    @Test fun localWhiskyToCocktailClearsHiddenWhiskyPour() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val product = MockCatalogProduct("local-unverified-whisky", "local-brand-type",
+            "시음 위스키", category = "whisky", catalogMatched = false)
+        r.saveManualMenuItem(MockBarMenuItem("local-type-row", "fixture-bar",
+            product.productId, listOf(MockMenuOption("one-serving", pourMl = 30, priceKrw = 11000))),
+            product, MockBrand(product.brandId, "브랜드"))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-local-type-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithText("위스키", substring = false).performClick()
+        compose.onNodeWithText("칵테일", substring = false).performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals("cocktail", snap.products.single().category)
+            assertEquals(null, snap.menuItems.single().options.single().pourMl)
+            assertEquals(null, snap.menuItems.single().options.single().label)
+            assertEquals("one-serving", snap.menuItems.single().options.single().optionId)
+        }
+    }
+
 }
