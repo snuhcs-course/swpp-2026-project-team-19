@@ -384,11 +384,23 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                     item.options.any { it.optionId == other.optionId }
                 }
             }) { "판매 옵션 ID 중복" }
-            val newBrands = if (newBrand != null &&
-                state.brands.none { it.brandId == newBrand.brandId })
-                state.brands + newBrand else state.brands
-            val newProducts = if (state.products.none { it.productId == product.productId })
-                state.products + product else state.products
+            // Canonical catalog records are immutable; local unverified menu products
+            // may change their display name/type without changing their stable local ID.
+            val finalProduct = if (newProduct != null &&
+                state.products.any { it.productId == product.productId }) {
+                require(!product.catalogMatched && newProduct.productId == product.productId) {
+                    "카탈로그 제품명은 직접 변경할 수 없어요."
+                }
+                newProduct
+            } else product
+            val newBrands = if (newBrand != null) {
+                val existingBrand = state.brands.firstOrNull { it.brandId == newBrand.brandId }
+                require(existingBrand == null || !product.catalogMatched ||
+                    existingBrand == newBrand) { "카탈로그 브랜드는 변경할 수 없어요." }
+                state.brands.filterNot { it.brandId == newBrand.brandId } + newBrand
+            } else state.brands
+            val newProducts = state.products.filterNot { it.productId == finalProduct.productId } +
+                finalProduct
             state.copy(
                 brands = newBrands, products = newProducts,
                 menuItems = state.menuItems.filterNot { it.barMenuItemId == item.barMenuItemId } + item,
