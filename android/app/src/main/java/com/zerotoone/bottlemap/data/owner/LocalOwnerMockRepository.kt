@@ -54,7 +54,7 @@ interface OwnerMockRepository {
 
 /** Local-only serving option invariants shared by direct entry, review, and publish. */
 internal fun validMockMenuOption(option: MockMenuOption): Boolean =
-    option.priceKrw in 1..MAX_OWNER_MENU_PRICE_KRW &&
+    option.priceKrw > 0 &&
         (option.pourMl == null || option.pourMl in 1..32767) &&
         (option.discount == null ||
             (option.discount.discountedPriceKrw in 1..option.priceKrw &&
@@ -361,9 +361,28 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             val product = state.products.firstOrNull { it.productId == item.productId }
                 ?: requireNotNull(newProduct) { "상품을 먼저 확인해 주세요." }
             require(product.productId == item.productId && product.displayName.isNotBlank())
-            require(manualMenuOptionError(item.options, product.category) == null) {
-                manualMenuOptionError(item.options, product.category) ?: "잘못된 가격 옵션"
-            }
+            // A locally unverified product may be re-categorized in this atomic write.
+            // Validate against its replacement rather than its previous stored category.
+            val proposedProduct = newProduct ?: product
+            require(proposedProduct.productId == item.productId)
+            // Photo-imported rows can predate the direct editor's three-option cap.
+            // Keep their original overflow untouched when editing the first three.
+            val oldRow = state.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
+            val legacyTail = oldRow?.options?.drop(MANUAL_MENU_MAX_OPTIONS).orEmpty()
+            val preservesLegacyTail = legacyTail.isNotEmpty() &&
+                item.options.size == oldRow!!.options.size &&
+                item.options.drop(MANUAL_MENU_MAX_OPTIONS) == legacyTail &&
+                item.options.take(MANUAL_MENU_MAX_OPTIONS).all { proposed ->
+                    oldRow.options.any { it.optionId == proposed.optionId }
+                }
+            val directOptions = if (preservesLegacyTail)
+                item.options.take(MANUAL_MENU_MAX_OPTIONS) else item.options
+            val error = manualMenuOptionError(directOptions, proposedProduct.category)
+            require(error == null) { error ?: "잘못된 가격 옵션" }
+            require(item.options.all { it.optionId.isNotBlank() } &&
+                item.options.map { it.optionId }.distinct().size == item.options.size &&
+                item.options.distinctBy { it.identityKey() }.size == item.options.size &&
+                item.options.all(::validMockMenuOption)) { "잘못된 저장 옵션입니다." }
             if (state.products.none { it.productId == product.productId }) {
                 require(newBrand != null && newBrand.brandId == product.brandId ||
                     state.brands.any { it.brandId == product.brandId }) { "Unknown brand" }
@@ -413,26 +432,43 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
     }
 
+    private fun updatedMenuTimestamp(bars: List<MockBar>, barId: String): List<MockBar> =
+        bars.map { bar ->
+            if (bar.barId == barId) bar.copy(lastMenuPublishedAtEpochMs = System.currentTimeMillis())
+            else bar
+        }
+
     override fun setSoldOut(barMenuItemId: String, value: Boolean) {
         change { s ->
-            require(s.menuItems.any { it.barMenuItemId == barMenuItemId })
-            s.copy(menuItems = s.menuItems.map {
-                if (it.barMenuItemId == barMenuItemId) it.copy(soldOut = value) else it
-            }) to Unit
+            val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
+                ?: error("Unknown menu item")
+            if (row.soldOut == value) s to Unit else s.copy(
+                menuItems = s.menuItems.map {
+                    if (it.barMenuItemId == barMenuItemId) it.copy(soldOut = value) else it
+                }, bars = updatedMenuTimestamp(s.bars, row.barId)
+            ) to Unit
         }
     }
 
     override fun deleteMenuItem(barMenuItemId: String) {
         change { s ->
-            require(s.menuItems.any { it.barMenuItemId == barMenuItemId })
-            s.copy(menuItems = s.menuItems.filterNot { it.barMenuItemId == barMenuItemId }) to Unit
+            val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
+                ?: error("Unknown menu item")
+            s.copy(
+                menuItems = s.menuItems.filterNot { it.barMenuItemId == barMenuItemId },
+                bars = updatedMenuTimestamp(s.bars, row.barId)
+            ) to Unit
         }
     }
 
     override fun clearMenuForBar(barId: String) {
         change { s ->
             require(s.bars.any { it.barId == barId })
-            s.copy(menuItems = s.menuItems.filterNot { it.barId == barId }) to Unit
+            val remaining = s.menuItems.filterNot { it.barId == barId }
+            if (remaining.size == s.menuItems.size) s to Unit else s.copy(
+                menuItems = remaining,
+                bars = updatedMenuTimestamp(s.bars, barId)
+            ) to Unit
         }
     }
 
