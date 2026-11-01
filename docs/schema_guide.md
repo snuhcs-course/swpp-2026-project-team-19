@@ -38,6 +38,7 @@
 6. 백엔드가 상위 상품 후보를 임시 선택해 현재 메뉴판과의 변경 초안을 `menu_import_changes`에 저장한다.
 7. 운영자 또는 업주가 한 화면에서 항목 역할, 상품명, 가격·용량 옵션, 상품 연결, 신규 카탈로그 제안, 메뉴 변경 초안을 통합 검수한다. 신규 상품은 기존 `brand_id`를 선택하거나 신규 브랜드의 대표 이름과 별칭을 직접 확정해야 한다.
 8. 최종 제출 시 백엔드가 모든 결정을 재검증하고 diff를 다시 계산한 뒤 `bar_menu_items`, `menu_board_entries`, `menu_entry_options`에 원자적으로 반영한다.
+9. 미완료 등록 작업이 없을 때 운영자나 업주는 사진 없이 현재 메뉴판의 항목 하나를 추가, 수정, 삭제하거나 메뉴판을 비울 수 있다(API 명세 3.14). 이 직접 편집은 `menu_imports`를 만들지 않고 `menu_boards.version`을 확인한 뒤 올린다. 직접 추가에서 카탈로그에 없는 상품은 같은 트랜잭션에서 `brands`, `products`, 별칭으로 만든다.
 
 ### 3.2 고객 검색
 
@@ -260,6 +261,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `latitude` | `decimal(9,6)`, NOT NULL, CHECK -90~90 | `37.478321` | WGS84 위도다. 지도 표시와 고객 위치와의 직선 거리 계산에 사용한다. |
 | `longitude` | `decimal(9,6)`, NOT NULL, CHECK -180~180 | `126.951234` | WGS84 경도다. 지도 표시와 고객 위치와의 직선 거리 계산에 사용한다. |
 | `phone` | `varchar(30)`, nullable | `02-1234-5678` | 업장 상세 정보로 제공할 수 있다. |
+| `default_pour_ml` | `smallint`, nullable, CHECK 1~999 | `30` | 업주가 정한 매장 기본 잔 용량이다. 메뉴 직접 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데만 쓴다. 백엔드가 게시 메뉴에 자동으로 적용하지 않으며, 바꿔도 이미 게시된 옵션은 바뀌지 않는다. |
 | `status` | `bar_status`, NOT NULL, 기본 `active` | `active` | 폐업 또는 서비스 제외 업장을 삭제하지 않고 비활성화한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:10:00Z` | 업장 등록 시점이다. |
 | `updated_at` | `timestamptz`, NOT NULL | `2026-09-28T04:10:00Z` | 주소 전화번호 등의 최종 변경 시점이다. |
@@ -356,10 +358,11 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 |---|---|---|---|
 | `id` | `uuid`, PK | 브랜드 Deanston의 ID | 상품이 브랜드명을 문자열로 반복하지 않고 같은 브랜드를 참조하게 한다. |
 | `canonical_name` | `varchar(120)`, NOT NULL, UNIQUE | `Deanston` | 운영자가 선택한 대표 브랜드명이다. 중복 브랜드 생성을 방지한다. |
+| `created_by_user_id` | `uuid`, nullable, FK → `users.id` | 브랜드를 만든 업주의 사용자 ID | 검수나 메뉴 직접 추가에서 브랜드를 만든 사용자다. 운영 대시보드에서 업주가 만든 카탈로그를 확인하는 데 쓴다. 시드로 넣은 브랜드는 null이다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:20:00Z` | 브랜드 등록 시점이다. |
 | `updated_at` | `timestamptz`, NOT NULL | `2026-09-28T03:20:00Z` | 대표명 등 최종 수정 시점이다. |
 
-**필요한 이유:** AI가 `Deanston`과 `딘스톤`을 같은 브랜드로 정규화한 뒤 연수 에디션을 비교하도록 만든다. MVP에서는 브랜드 최초 등록자를 별도로 추적하지 않는다.
+**필요한 이유:** AI가 `Deanston`과 `딘스톤`을 같은 브랜드로 정규화한 뒤 연수 에디션을 비교하도록 만든다.
 
 ### 6.2 brand_aliases
 
@@ -392,13 +395,14 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `edition_name` | `varchar(150)`, nullable | `Virgin Oak` | 같은 브랜드와 연수여도 다른 에디션을 구분한다. |
 | `abv` | `decimal(5,2)`, nullable | `46.30` | 상품 상세에 사용할 수 있는 도수다. MVP 병합의 핵심 키는 아니다. |
 | `is_active` | `boolean`, NOT NULL, 기본 true | `true` | 잘못 등록되거나 더 이상 사용할 수 없는 상품을 삭제하지 않고 비활성화한다. |
-| `created_from_extracted_item_id` | `uuid`, nullable, FK → `extracted_items.id` | 미등록 상품을 처음 발견한 추출 항목 ID | 메뉴 검수 중 새 상품 생성을 촉발한 원본 이미지와 AI 결과를 찾아가기 위한 출처다. 사전 등록하거나 운영자가 직접 추가한 상품은 null이다. |
+| `created_from_extracted_item_id` | `uuid`, nullable, FK → `extracted_items.id` | 미등록 상품을 처음 발견한 추출 항목 ID | 메뉴 검수 중 새 상품 생성을 촉발한 원본 이미지와 AI 결과를 찾아가기 위한 출처다. 사전 등록한 상품과 메뉴 직접 추가(API 명세 3.14.3)로 만든 상품은 null이다. |
+| `created_by_user_id` | `uuid`, nullable, FK → `users.id` | 상품을 만든 업주의 사용자 ID | 검수나 메뉴 직접 추가에서 상품을 만든 사용자다. 운영 대시보드에서 업주가 만든 상품을 골라 확인하는 데 쓴다. 시드로 넣은 상품은 null이다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:30:00Z` | 상품 등록 시점이다. |
 | `updated_at` | `timestamptz`, NOT NULL | `2026-09-28T03:35:00Z` | 상품 정보 최종 수정 시점이다. |
 
 **핵심 원칙:** 브랜드 연수 에디션이 충돌하면 자동 병합하지 않는다. `brand_id + age_years + edition_name`은 후보 생성에 사용하지만 강제 unique 키로 사용하지 않는다.
 
-`created_from_extracted_item_id`는 상품의 생성 출처를 나타내는 선택적 provenance 필드다. 예를 들어 AI가 메뉴 사진에서 기존 카탈로그에 없는 `Deanston Virgin Oak`를 추출하고 운영자가 검수 중 새 상품으로 등록하면, 그때의 `extracted_items.id`를 저장한다. 이 연결을 따라가면 원본 메뉴 이미지, 사용한 모델과 파이프라인, AI 원문, 운영자의 교정 결과를 확인할 수 있다. 이후 다른 메뉴에서 같은 상품이 다시 발견되더라도 이 값은 바꾸지 않으며, 모든 출현 기록을 모으는 용도로 사용하지 않는다. 상품 최초 등록자는 별도 컬럼으로 추적하지 않는다.
+`created_from_extracted_item_id`는 상품의 생성 출처를 나타내는 선택적 provenance 필드다. 예를 들어 AI가 메뉴 사진에서 기존 카탈로그에 없는 `Deanston Virgin Oak`를 추출하고 운영자가 검수 중 새 상품으로 등록하면, 그때의 `extracted_items.id`를 저장한다. 이 연결을 따라가면 원본 메뉴 이미지, 사용한 모델과 파이프라인, AI 원문, 운영자의 교정 결과를 확인할 수 있다. 이후 다른 메뉴에서 같은 상품이 다시 발견되더라도 이 값은 바꾸지 않으며, 모든 출현 기록을 모으는 용도로 사용하지 않는다. 상품을 처음 만든 사용자는 `created_by_user_id`에 남는다.
 
 ### 6.4 product_aliases
 
@@ -441,8 +445,9 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 |---|---|---|---|
 | `id` | `uuid`, PK | 현재 메뉴판 ID | 메뉴판 구성 항목들을 하나로 묶는다. |
 | `bar_id` | `uuid`, NOT NULL, UNIQUE, FK → `bars.id` | 관악 위스키 바 ID | 업장당 현재 메뉴판 하나를 보장한다. |
-| `last_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 마지막 일부 수정 작업 ID | 여러 부분 수정이 누적될 수 있으므로 가장 최근 반영 작업을 기록한다. |
-| `published_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 고객에게 보여줄 메뉴 최종 업데이트 날짜다. 검색 결과의 최신성 표시에 사용한다. |
+| `last_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 마지막 일부 수정 작업 ID | 여러 부분 수정이 누적될 수 있으므로 가장 최근 반영 작업을 기록한다. 메뉴 직접 편집은 이 값을 바꾸지 않는다. |
+| `version` | `integer`, NOT NULL, 기본 1 | `4` | 메뉴판 버전이다. 검수 반영과 직접 편집이 성공할 때마다 1씩 올린다. 직접 편집은 요청의 버전과 이 값이 다르면 거부해, 다른 사람의 변경을 덮어쓰지 않게 한다(API 명세 3.14.1). |
+| `published_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 고객에게 보여줄 메뉴 최종 업데이트 날짜다. 검수 반영과 직접 편집 모두 갱신한다. 검색 결과의 최신성 표시에 사용한다. |
 
 **필요한 이유:** 업장 메뉴 항목들의 현재 노출 묶음과 게시 메타데이터를 한 곳에서 관리한다.
 
@@ -469,7 +474,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 |---|---|---|---|
 | `id` | `uuid`, PK | 판매 옵션 ID | 같은 술의 여러 옵션을 개별 식별한다. |
 | `menu_board_entry_id` | `uuid`, NOT NULL, FK → `menu_board_entries.id` | Deanston 12 메뉴판 구성 ID | 어느 술의 판매 옵션인지 연결한다. |
-| `source_extracted_option_id` | `uuid`, nullable, FK → `extracted_options.id` | 30ml 가격을 추출한 옵션 ID | 어떤 AI 추출 옵션과 검수에서 게시 옵션이 만들어졌는지 추적한다. 수동 입력은 null일 수 있다. |
+| `source_extracted_option_id` | `uuid`, nullable, FK → `extracted_options.id` | 30ml 가격을 추출한 옵션 ID | 어떤 AI 추출 옵션과 검수에서 게시 옵션이 만들어졌는지 추적한다. 메뉴 직접 편집으로 입력한 옵션은 null이다. |
 | `option_label` | `varchar(100)`, nullable | `Large` | ml로 표현되지 않는 실제 메뉴의 옵션명을 보존한다. |
 | `pour_ml` | `smallint`, nullable | `30` | 제공 용량이다. 메뉴에 용량이 없으면 null이다. |
 | `price_krw` | `integer`, NOT NULL | `15000` | 고객 검색 결과에 표시할 원화 가격이다. |

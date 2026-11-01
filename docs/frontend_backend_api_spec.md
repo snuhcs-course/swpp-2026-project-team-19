@@ -2,7 +2,7 @@
 
 ## 1. 목적과 범위
 
-이 문서는 메뉴판 사진 등록부터 통합 검수와 현재 메뉴판 반영까지, 그리고 고객의 상품 검색, 주변·지도 업장 조회와 업장 메뉴 조회에서 프론트엔드와 백엔드가 주고받는 HTTP API를 정의한다.
+이 문서는 메뉴판 사진 등록부터 통합 검수와 현재 메뉴판 반영까지, 현재 메뉴판의 직접 편집, 그리고 고객의 상품 검색, 주변·지도 업장 조회와 업장 메뉴 조회에서 프론트엔드와 백엔드가 주고받는 HTTP API를 정의한다.
 
 포함 범위:
 
@@ -13,6 +13,7 @@
 - 추출 항목·옵션·상품 후보·임시 diff 통합 조회
 - 검수 중 브랜드와 상품 검색
 - 모든 검수 결정의 일괄 제출과 메뉴 반영
+- 현재 메뉴판 항목의 직접 추가, 수정, 삭제와 초기화
 - 고객의 상품 검색, 주변·지도 업장 조회와 업장 상세 메뉴 조회
 - 멱등성, 검수 버전 충돌과 공통 오류 응답
 
@@ -105,6 +106,7 @@ GET 주변 업장 조회 (위치 + 반경)
 | `GET /api/bars/{barId}` | | | O | O |
 | `PATCH /api/bars/{barId}` | | | O (`status` 제외) | O |
 | `GET /api/bars/{barId}/menu-imports`, `POST /api/bars/{barId}/menu-imports` | | | O | O |
+| `POST /api/bars/{barId}/menu/items`, `PUT .../menu/items/{barMenuItemId}`, `DELETE .../menu/items/{barMenuItemId}`, `POST /api/bars/{barId}/menu/reset` | | | O | O |
 | `GET /api/menu-imports/{menuImportId}`, `POST .../review-and-apply`, `POST .../cancel` | | | 해당 업장의 작업만 | O |
 | `GET /api/catalog/brands`, `GET /api/catalog/products` | | | 업장이 하나 이상이면 O | O |
 | `POST /api/auth/temp-login` | 임시 로그인이 켜진 서버에서만 O (3.1.3) | 같음 | 같음 | 같음 |
@@ -207,6 +209,10 @@ ignore
 | `GET` | `/api/catalog/products` | 검수 중 기존 상품 검색 |
 | `POST` | `/api/menu-imports/{menuImportId}/review-and-apply` | 전체 검수 결정 제출과 원자적 반영 |
 | `POST` | `/api/menu-imports/{menuImportId}/cancel` | 미완료 메뉴 등록 작업 취소 |
+| `POST` | `/api/bars/{barId}/menu/items` | 메뉴 항목 직접 추가 (필요하면 신규 상품 생성) |
+| `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}` | 메뉴 항목 직접 수정 |
+| `DELETE` | `/api/bars/{barId}/menu/items/{barMenuItemId}` | 메뉴 항목 직접 삭제 |
+| `POST` | `/api/bars/{barId}/menu/reset` | 메뉴판 초기화 |
 | `GET` | `/api/search/bar-names` | 업장 이름·주소 검색. 업주 신청과 고객 지도 검색용 (공개) |
 | `POST` | `/api/owner-applications/business-certificate-ocr` | 사업자등록증 사진에서 신청 항목 읽기 |
 | `POST` | `/api/owner-applications` | 업주 신청과 사업자등록 정보 1차 검증 |
@@ -221,7 +227,7 @@ ignore
 | `GET` | `/api/me/bars` | 내가 업주인 업장 목록 |
 | `DELETE` | `/api/bars/{barId}/owner` | 업주 해제 |
 
-별도의 신규 브랜드·상품 생성 API는 두지 않는다. 신규 카탈로그 데이터는 `review-and-apply` 요청 안에서 제안하고 최종 트랜잭션에서 생성한다.
+별도의 신규 브랜드·상품 생성 API는 두지 않는다. 신규 카탈로그 데이터는 `review-and-apply` 요청(8.5, 8.6)이나 메뉴 항목 직접 추가 요청(3.14.3) 안에서 제안하고, 그 요청의 트랜잭션에서 생성한다.
 
 ### 3.1 로그인과 토큰 검증
 
@@ -515,7 +521,7 @@ HTTP/1.1 201 Created
 Location: /api/bars/22222222-2222-4222-8222-222222222222
 ```
 
-응답 본문은 3.6과 같은 형식이다. 새 업장이므로 `status = active`, `activeMenuImport = null`, `currentMenu = null`, `owner = null`이다.
+응답 본문은 3.6과 같은 형식이다. 새 업장이므로 `status = active`, `defaultPourMl = null`, `activeMenuImport = null`, `currentMenu = null`, `owner = null`이다.
 
 이름·주소가 비슷한 업장이 있어도 생성을 막지 않으며, 응답에 경고도 담지 않는다. 프론트엔드는 생성 전에 3.4로 같은 업장이 있는지 확인하게 한다.
 
@@ -546,6 +552,7 @@ Authorization: Bearer <access-token>
   "latitude": 37.478321,
   "longitude": 126.951234,
   "phone": "02-000-0000",
+  "defaultPourMl": 30,
   "status": "active",
   "activeMenuImport": {
     "menuImportId": "77777777-7777-4777-8777-777777777777",
@@ -573,8 +580,9 @@ Authorization: Bearer <access-token>
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
 | `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
+| `defaultPourMl` | 정수 | 예 | 매장 기본 잔 용량(ml). 업주가 매장 정보에서 정한다(3.7). 메뉴 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데 쓴다(3.14.2). 서버가 메뉴에 자동으로 적용하지 않으며 고객 화면(3.9)에는 없다. 없으면 `null` |
 | `status` | `active` \| `inactive` | 아니오 | |
-| `activeMenuImport` | 객체 | 예 | 미완료 메뉴 등록 작업. 없으면 `null`. 3.4와 같다 |
+| `activeMenuImport` | 객체 | 예 | 미완료 메뉴 등록 작업. 없으면 `null`. 3.4와 같다. 있으면 메뉴 직접 편집을 할 수 없다(3.14.1) |
 | `activeMenuImport.menuImportId` | UUID 문자열 | 아니오 | `GET /api/menu-imports/{menuImportId}`로 이어서 진행한다 |
 | `activeMenuImport.status` | `uploaded` \| `processing` \| `ready_for_review` | 아니오 | |
 | `currentMenu` | 객체 | 예 | 현재 메뉴판 요약. 반영된 메뉴가 없으면 `null` |
@@ -616,6 +624,7 @@ operator와 해당 업장의 현재 업주가 호출할 수 있다. 바꿀 필�
 | `name`, `address` | operator, 업주 | `null`을 보낼 수 없다 |
 | `latitude`, `longitude` | operator, 업주 | 둘을 함께 보낸다. 하나만 보내면 `LAT_LNG_REQUIRED_TOGETHER` |
 | `phone` | operator, 업주 | `null`을 보내면 연락처를 지운다 |
+| `defaultPourMl` | operator, 업주 | 1~999 정수. `null`을 보내면 지운다. 바꿔도 이미 게시된 메뉴의 용량은 바뀌지 않는다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
 | `status` | operator만 | `active` 또는 `inactive`. 업주가 보내면 `403 FORBIDDEN` |
 
 - `address`를 바꿀 때는 `latitude`와 `longitude`도 함께 보낸다. 주소만 보내면 `422`이고 `fieldErrors[].code = COORDINATES_REQUIRED`다. 주소 없이 좌표만 바꿔 위치를 보정할 수는 있다.
@@ -697,12 +706,17 @@ GET /api/bars/{barId}/menu
   "longitude": 126.951234,
   "phone": "02-000-0000",
   "menuBoardId": "66666666-6666-4666-8666-666666666666",
+  "menuVersion": 4,
   "publishedAt": "2026-10-04T09:15:00Z",
   "items": [
     {
       "menuBoardEntryId": "88888888-8888-4888-8888-888888888881",
       "barMenuItemId": "99999999-9999-4999-8999-999999999991",
       "productId": "44444444-4444-4444-8444-444444444444",
+      "productName": "Glenfiddich 12",
+      "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd2",
+      "brandName": "Glenfiddich",
+      "category": "whisky",
       "displayName": "글렌피딕 12년",
       "sortOrder": 1,
       "options": [
@@ -726,6 +740,10 @@ GET /api/bars/{barId}/menu
       "menuBoardEntryId": "88888888-8888-4888-8888-888888888882",
       "barMenuItemId": "99999999-9999-4999-8999-999999999992",
       "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+      "productName": "Deanston 12",
+      "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
+      "brandName": "Deanston",
+      "category": "whisky",
       "displayName": "Deanston 12",
       "sortOrder": 2,
       "options": [
@@ -750,11 +768,15 @@ GET /api/bars/{barId}/menu
 | `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
 | `menuBoardId` | UUID 문자열 | 예 | 현재 메뉴판. 반영된 메뉴가 없으면 `null` |
-| `publishedAt` | RFC 3339 문자열 | 예 | 현재 메뉴판이 마지막으로 반영된 시각. 반영된 메뉴가 없으면 `null` |
+| `menuVersion` | 정수 | 예 | 메뉴판 버전. 검수 반영(8)이나 직접 편집(3.14)으로 메뉴판이 바뀔 때마다 1씩 오른다. 직접 편집 요청에 그대로 보낸다. 메뉴판이 없으면 `null` |
+| `publishedAt` | RFC 3339 문자열 | 예 | 현재 메뉴판이 검수 반영이나 직접 편집으로 마지막으로 바뀐 시각. 반영된 메뉴가 없으면 `null` |
 | `items` | 배열 | 아니오 | 현재 메뉴판의 상품 항목. 없으면 `[]` |
 | `items[].menuBoardEntryId` | UUID 문자열 | 아니오 | |
 | `items[].barMenuItemId` | UUID 문자열 | 아니오 | |
 | `items[].productId` | UUID 문자열 | 아니오 | 정규 상품 ID |
+| `items[].productName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`, 7.2의 `displayName`) |
+| `items[].brandId`, `items[].brandName` | UUID 문자열, 문자열 | 아니오 | 상품의 브랜드와 대표 브랜드명 |
+| `items[].category` | 문자열 | 아니오 | 상품 분류. 예: `whisky`. 프론트엔드는 이 값과 브랜드로 메뉴를 묶어 보여 줄 수 있다 |
 | `items[].displayName` | 문자열 | 아니오 | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`). 정규 상품명이 아니다 |
 | `items[].sortOrder` | 정수 | 아니오 | 메뉴판 표시 순서 |
 | `items[].options` | 배열 | 아니오 | 가격·용량 옵션. 최소 1개 |
@@ -766,13 +788,13 @@ GET /api/bars/{barId}/menu
 
 정렬 기준: `items`는 `sortOrder` 오름차순이고, 각 항목의 `options`도 `sortOrder` 오름차순이다. 프론트엔드는 받은 순서대로 표시한다.
 
-`items`에는 상품으로 확정되어 현재 메뉴판에 반영된 항목만 있다. 섹션 제목, 설명 등 비상품 줄은 포함하지 않는다. 검색 결과에서 진입한 경우 프론트엔드는 검색한 `productId`와 같은 항목을 강조해 표시할 수 있다.
+`items`에는 상품으로 확정되어 현재 메뉴판에 반영된 항목과 직접 추가한 항목만 있다. 섹션 제목, 설명 등 비상품 줄은 포함하지 않는다. 검색 결과에서 진입한 경우 프론트엔드는 검색한 `productId`와 같은 항목을 강조해 표시할 수 있다.
 
 #### 3.9.1 게시된 메뉴가 없을 때
 
 모두 `200 OK`이며 업장 기본 정보는 그대로 반환한다.
 
-반영된 메뉴가 한 번도 없으면 `menuBoardId`, `publishedAt`이 `null`이고 `items`가 `[]`다. 프론트엔드는 "등록된 메뉴가 없습니다"를 표시한다.
+반영된 메뉴가 한 번도 없으면 `menuBoardId`, `menuVersion`, `publishedAt`이 `null`이고 `items`가 `[]`다. 프론트엔드는 "등록된 메뉴가 없습니다"를 표시한다.
 
 ```json
 {
@@ -783,18 +805,19 @@ GET /api/bars/{barId}/menu
   "longitude": 126.951234,
   "phone": null,
   "menuBoardId": null,
+  "menuVersion": null,
   "publishedAt": null,
   "items": []
 }
 ```
 
-메뉴판은 있지만 검수에서 모든 항목을 내렸으면 `menuBoardId`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
+메뉴판은 있지만 검수에서 모든 항목을 내렸거나 직접 편집으로 모두 지웠으면(3.14.5, 3.14.6) `menuBoardId`, `menuVersion`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
 
 그 밖에 값이 없을 수 있는 필드는 `phone`, `options[].optionLabel`, `options[].pourMl`뿐이며 모두 `null`로 온다. 프론트엔드는 해당 표시만 생략한다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
 
 #### 3.9.2 메뉴 등록이 진행 중일 때
 
-이 API는 메뉴 등록 작업의 상태를 반영하지 않는다. 등록 작업이 처리 중(`uploaded`, `processing`)이거나 검수 대기(`ready_for_review`)이거나 실패(`failed`)여도 현재 게시된 메뉴를 그대로 반환하며, 진행 중이라는 표시도 하지 않는다. 고객은 검수를 마치고 `review-and-apply`로 반영된 메뉴만 본다. operator와 업주가 진행 중인 작업을 확인할 때는 3.6의 `activeMenuImport`를 사용한다.
+이 API는 메뉴 등록 작업의 상태를 반영하지 않는다. 등록 작업이 처리 중(`uploaded`, `processing`)이거나 검수 대기(`ready_for_review`)이거나 실패(`failed`)여도 현재 게시된 메뉴를 그대로 반환하며, 진행 중이라는 표시도 하지 않는다. 고객은 검수를 마치고 `review-and-apply`로 반영된 메뉴와 직접 편집(3.14)한 메뉴만 본다. operator와 업주가 진행 중인 작업을 확인할 때는 3.6의 `activeMenuImport`를 사용한다.
 
 #### 3.9.3 오류와 프론트엔드 처리
 
@@ -1448,6 +1471,7 @@ Authorization: Bearer <access-token>
       "latitude": 37.478321,
       "longitude": 126.951234,
       "phone": "02-000-0000",
+      "defaultPourMl": null,
       "status": "active",
       "activeMenuImport": null,
       "currentMenu": {
@@ -1856,6 +1880,184 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 - 빠진 값, 범위, 숫자 형식 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `BOUNDS_INVERTED`(남북 먼저), `BOUNDS_TOO_LARGE`(남북 먼저)를 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
 - 네트워크 오류와 `5xx`(`500 INTERNAL_ERROR`, 프록시의 `502`·`504` 포함)는 오류 상태와 재시도 버튼을 보여 준다(9.6).
 - 이 API는 `401`, `403`, `404`를 반환하지 않으며, 요청 수 제한(`429`)도 없다. 지도를 움직일 때마다 호출하므로 프론트엔드는 카메라 이동이 멈춘 뒤에 호출하고, 늦게 도착한 이전 영역의 응답은 버린다.
+
+### 3.14 메뉴 직접 편집
+
+메뉴판 사진 등록과 검수(이 문서의 4~8) 없이 현재 메뉴판의 항목 하나를 추가, 수정, 삭제하거나 메뉴판 전체를 비우는 API다. 검수 단계가 없으므로 요청이 성공하면 그 결과가 바로 게시되어 업장 메뉴(3.9)와 고객 검색(3.10)에 나온다.
+
+| 메서드 | 경로 | 용도 |
+|---|---|---|
+| `POST` | `/api/bars/{barId}/menu/items` | 항목 추가 (3.14.3) |
+| `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}` | 항목 수정 (3.14.4) |
+| `DELETE` | `/api/bars/{barId}/menu/items/{barMenuItemId}?menuVersion=<n>` | 항목 삭제 (3.14.5) |
+| `POST` | `/api/bars/{barId}/menu/reset` | 메뉴판 초기화 (3.14.6) |
+
+#### 3.14.1 공통 규칙
+
+- **권한**: operator와 해당 업장의 현재 업주가 호출할 수 있다(2.2). 비활성 업장은 메뉴를 바꾸지 않으며 `404 BAR_NOT_FOUND`다(4.4와 같다).
+- **항목 식별자**: 항목은 `barMenuItemId`로 가리킨다. 업장과 상품의 조합마다 하나이며 메뉴판에서 빠져도 바뀌지 않는다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀔 때마다(검수 반영과 직접 편집 모두) 새로 만들어질 수 있으므로 편집 요청에 쓰지 않는다.
+- **미완료 작업이 있을 때**: 업장에 미완료 메뉴 등록 작업(`uploaded`, `processing`, `ready_for_review`)이 있으면 추가, 수정, 삭제, 초기화는 모두 `409 ACTIVE_IMPORT_EXISTS`(`details.menuImportId`, `details.status`)다. 따라서 이 상황에서는 메뉴 편집이 불가능하고, 작업이 `applied`, `failed`, `canceled`가 되면 다시 편집할 수 있다. 검수 중에 메뉴판이 바뀌면 검수자가 오래된 메뉴판을 보고 결정하게 되기 때문이다. 이 규칙은 추가 전용 사진 등록을 정할 때 다시 검토한다.
+- **메뉴판 버전**: 모든 편집 요청은 3.9에서 받은 `menuVersion`을 보낸다. 메뉴판이 없으면 `null`이다. 서버의 현재 값과 다르면 아무것도 바꾸지 않고 `409 MENU_OUTDATED`(`details.submittedMenuVersion`, `details.currentMenuVersion`)다. 성공한 편집은 `menuVersion`을 1 올리고, 메뉴판이 없을 때의 첫 추가는 메뉴판을 만들고 `menuVersion = 1`이 된다. 검수 반영(8)도 `menuVersion`을 올린다.
+- **게시 시각**: 성공하면 `publishedAt`을 요청 시각으로 바꾼다. `menuBoardId`는 그대로다.
+- **응답**: 성공 응답의 본문은 3.9와 같은 형식(업장 정보와 메뉴 전체)이다. 추가는 `201 Created`, 나머지는 `200 OK`다. 프론트엔드는 이 응답으로 화면을 바꾸고 따로 다시 조회하지 않아도 된다.
+- **원자성**: 요청 하나는 하나의 트랜잭션이다. 신규 상품 생성(3.14.3)을 포함해 어느 단계에서든 실패하면 아무것도 바뀌지 않는다.
+- **등록 작업과의 동시 요청**: 서버는 미완료 작업을 확인하기 전에 메뉴 등록(4.1)과 신청 승인의 첫 등록 작업 생성(3.11.7)이 잠그는 것과 같은 업장 행을 잠근다. 그래서 편집과 새 등록 작업이 동시에 와도 하나가 끝난 뒤에 다른 하나가 처리된다. 편집이 먼저면 등록 작업은 바뀐 메뉴판을 기준으로 만들어지고, 등록 작업이 먼저면 편집은 `409 ACTIVE_IMPORT_EXISTS`다.
+- **재시도**: `Idempotency-Key`는 쓰지 않는다. 응답을 받지 못해 같은 요청을 다시 보내면, 앞 요청이 성공했다면 `menuVersion`이 이미 올라 `409 MENU_OUTDATED`를 받는다. 프론트엔드는 3.9를 다시 조회해 변경이 반영되었는지 확인한다.
+- **변경 기록**: 누가 언제 메뉴를 바꿨는지는 남기지 않는다. 메뉴 변경 이력은 운영 대시보드의 추가 기능으로 나중에 구현할 예정이다. 직접 추가로 만든 상품과 브랜드에는 만든 사용자를 기록한다(3.14.3).
+- **검사 순서**: 요청 형식(`422`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 미완료 작업(`409 ACTIVE_IMPORT_EXISTS`) → 메뉴판 버전(`409 MENU_OUTDATED`) → 각 API의 항목 확인과 업무 규칙. 형식 오류는 한 응답에 여러 개 올 수 있다.
+
+#### 3.14.2 옵션
+
+추가와 수정의 `options[]`는 항목의 용량과 가격 줄이다. 3.9의 `items[].options[]`와 같으며 배열 순서가 표시 순서(`sortOrder`)가 된다.
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `optionLabel` | 문자열 | 아니오 | 메뉴판의 `잔`, `병` 같은 표기. 앞뒤 공백을 지운 뒤 1~100자. 없거나 `null`이면 표기 없음 |
+| `pourMl` | 정수 | 아니오 | 용량(ml). 1~32767. 없거나 `null`이면 용량 없음 |
+| `priceKrw` | 정수 | 예 | 가격(원). 1~99,999,999 (1억 원 미만, 최대 8자리) |
+
+- 옵션은 1~3개다. 빈 배열이면 `fieldErrors[].code = TOO_SHORT`, 3개를 넘으면 `TOO_LONG`이다. 현재 메뉴판 UI의 표시 칸 크기에 맞춘 제한이다. 검수(8)로 이미 게시된 항목에 옵션이 4개 이상 있으면, 직접 수정하기 전에 옵션을 명시적으로 3개 이하로 정리해야 한다. 프론트엔드는 기존 옵션을 자동으로 잘라서 저장하지 않는다.
+- `optionLabel`과 `pourMl`이 모두 같은 옵션이 둘 이상이면 `DUPLICATE_OPTION_VALUES`다(8과 같다).
+- 서버는 `pourMl`을 받은 그대로 저장한다. 매장 기본 잔 용량(3.6의 `defaultPourMl`)을 서버가 채우지 않는다. 프론트엔드는 잔 옵션의 입력 칸을 `defaultPourMl`로 미리 채울 수 있다. 병 옵션에는 채우지 않는다.
+- 할인과 품절은 이 API에 없다.
+
+#### 3.14.3 항목 추가
+
+```http
+POST /api/bars/{barId}/menu/items
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+기존 상품을 추가할 때:
+
+```json
+{
+  "menuVersion": 4,
+  "productId": "44444444-4444-4444-8444-444444444444",
+  "displayName": "글렌피딕 12년",
+  "options": [
+    { "optionLabel": "잔", "pourMl": 30, "priceKrw": 17000 },
+    { "optionLabel": "병", "pourMl": null, "priceKrw": 160000 }
+  ]
+}
+```
+
+카탈로그에 없는 상품을 만들어 추가할 때:
+
+```json
+{
+  "menuVersion": 4,
+  "newProduct": {
+    "brand": { "type": "existing", "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1" },
+    "product": {
+      "category": "whisky",
+      "displayName": "Deanston Virgin Oak",
+      "ageYears": null,
+      "editionName": "Virgin Oak",
+      "abv": 46.3
+    },
+    "aliases": [
+      { "aliasText": "딘스톤 버진 오크", "languageCode": "ko", "isSearchable": true }
+    ]
+  },
+  "displayName": "딘스톤 버진 오크",
+  "options": [
+    { "optionLabel": null, "pourMl": 30, "priceKrw": 18000 }
+  ]
+}
+```
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `menuVersion` | 정수 | 예 (`null` 가능) | 3.14.1. 메뉴판이 없으면 `null` |
+| `productId` | UUID 문자열 | `productId`와 `newProduct` 중 하나 | 활성 상품. 없으면 `PRODUCT_NOT_FOUND`, 비활성이면 `PRODUCT_INACTIVE` |
+| `newProduct.brand` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `brand`와 같다. 없는 `brandId`는 `BRAND_NOT_FOUND` |
+| `newProduct.product` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `product`와 같다 |
+| `newProduct.aliases` | 배열 | 아니오 | 8.1 `create_product`의 `aliases`와 같다. 기본 `[]` |
+| `displayName` | 문자열 | 아니오 | 메뉴판에 보일 이름. 앞뒤 공백을 지운 뒤 1~200자. 없거나 `null`이면 상품의 `displayName` |
+| `options` | 배열 | 예 | 3.14.2 |
+
+- `productId`와 `newProduct`를 둘 다 보내거나 둘 다 빠뜨리면 `422`이고 `fieldErrors[].path = productId`, `code = EXACTLY_ONE_REQUIRED`다.
+- 같은 상품이 이미 현재 메뉴판에 있으면 `409 MENU_ITEM_EXISTS`(`details.barMenuItemId`)다. 한 상품은 메뉴판에 한 번만 있고, 용량이나 가격을 더하려면 그 항목을 수정한다(3.14.4).
+- 새 항목은 메뉴판의 맨 끝에 붙는다. 이 업장이 예전에 판매했던 상품이면 그때의 `barMenuItemId`를 다시 쓴다.
+- `newProduct`를 보내면 같은 트랜잭션 안에서 검수의 신규 생성(8.5, 8.6)과 같은 규칙으로 브랜드와 상품의 중복을 검사한다. 같은 브랜드나 상품이 있으면 아무것도 만들지 않고 `409 DUPLICATE_BRAND_FOUND` 또는 `409 DUPLICATE_PRODUCT_FOUND`다. `details`는 9.5와 같되 `extractedItemId`와 `reviewUrl`이 없다. 프론트엔드는 `details.existingProduct`(또는 `existingBrand`)를 보여 주고, 맞으면 그 `productId`(또는 `brandId`)로 다시 요청한다. `existingProduct.isActive = false`이면 그 상품으로는 추가할 수 없으므로(`PRODUCT_INACTIVE`) 다시 요청하지 않고, 상품 검색(7)에서 고르도록 안내한다(9.5).
+- 만든 상품과 브랜드에는 요청한 사용자를 기록한다. 만든 상품과 별칭은 바로 모든 업장의 고객 검색과 메뉴 매칭에 쓰인다.
+- 응답 본문에서 추가한 항목은 `productId`로 찾는다.
+
+#### 3.14.4 항목 수정
+
+```http
+PUT /api/bars/{barId}/menu/items/{barMenuItemId}
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "menuVersion": 5,
+  "displayName": "글렌피딕 12년",
+  "options": [
+    { "optionLabel": "잔", "pourMl": 30, "priceKrw": 18000 },
+    { "optionLabel": "병", "pourMl": null, "priceKrw": 170000 }
+  ]
+}
+```
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `menuVersion` | 정수 | 예 | 3.14.1 |
+| `displayName` | 문자열 | 예 | 앞뒤 공백을 지운 뒤 1~200자 |
+| `options` | 배열 | 예 | 3.14.2. 기존 옵션 전체를 이 배열로 바꾼다 |
+
+- `barMenuItemId`가 이 업장의 현재 메뉴판에 없거나 UUID 형식이 아니면 `404 MENU_ITEM_NOT_FOUND`(`details.barMenuItemId`)다.
+- 연결된 상품은 바꿀 수 없다. 다른 상품으로 바꾸려면 삭제한 뒤 추가한다.
+- 메뉴판에서의 위치는 그대로다.
+
+#### 3.14.5 항목 삭제
+
+```http
+DELETE /api/bars/{barId}/menu/items/{barMenuItemId}?menuVersion=5
+Authorization: Bearer <access-token>
+```
+
+- `menuVersion` 쿼리는 필수다(3.14.1). 요청 본문은 없다.
+- `barMenuItemId`가 이 업장의 현재 메뉴판에 없거나 UUID 형식이 아니면 `404 MENU_ITEM_NOT_FOUND`다.
+- 항목은 메뉴판에서만 빠진다. `barMenuItemId`는 남아 같은 상품을 다시 추가할 때 쓰인다.
+- 마지막 항목을 지워도 메뉴판은 남는다(3.9.1의 `items = []`).
+
+#### 3.14.6 메뉴판 초기화
+
+```http
+POST /api/bars/{barId}/menu/reset
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{ "menuVersion": 6 }
+```
+
+- 메뉴판의 항목을 모두 뺀다. 메뉴판은 남으므로 응답은 `menuBoardId`, `publishedAt`이 있고 `items = []`다(3.9.1). 고객 화면은 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
+- 메뉴판이 없으면(`menuVersion = null`) 아무것도 바꾸지 않고 `200 OK`다.
+- 되돌리는 API는 없다. 프론트엔드는 초기화 전에 확인을 받는다.
+
+#### 3.14.7 오류와 프론트엔드 처리
+
+프론트엔드는 오류를 기다리지 않고 편집을 미리 막는다. 메뉴 관리 화면에 들어올 때 3.6(또는 3.11.9)을 다시 불러와 `activeMenuImport`가 있으면 추가, 수정, 삭제, 초기화 버튼을 비활성화하고, 검수 중에는 메뉴를 고칠 수 없다는 안내와 함께 그 작업으로 가는 버튼을 보여 준다. 작업을 반영하거나 취소한 뒤 돌아오면 다시 불러와 편집을 푼다. 아래 `409 ACTIVE_IMPORT_EXISTS`는 화면에 보인 상태가 오래된 경우의 안전장치다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님, 비활성 업장 | 업장 목록으로 이동 |
+| `404` | `MENU_ITEM_NOT_FOUND` | 수정, 삭제할 항목이 현재 메뉴판에 없음 | 3.9를 다시 불러와 목록 갱신 |
+| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 메뉴 등록 작업이 있음. `details.menuImportId`, `details.status` | 3.6을 다시 불러와 편집을 막은 화면으로 전환 |
+| `409` | `MENU_OUTDATED` | 보낸 `menuVersion`이 현재 값과 다름. 다른 기기나 operator의 편집, 검수 반영, 성공한 요청의 재전송 | 3.9를 다시 불러오고, 입력 중이던 값은 유지한 채 다시 저장하게 함 |
+| `409` | `MENU_ITEM_EXISTS` | 추가하려는 상품이 이미 메뉴판에 있음. `details.barMenuItemId` | 그 항목의 수정 화면으로 안내 |
+| `409` | `DUPLICATE_BRAND_FOUND`, `DUPLICATE_PRODUCT_FOUND` | 신규 브랜드나 상품과 같은 것이 이미 있음 (3.14.3, 9.5) | 기존 브랜드나 상품을 보여 주고 고르게 함. `existingProduct.isActive = false`이면 상품 검색으로 안내 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
+| `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 같은 요청 재시도 |
 
 ## 4. 메뉴 등록 요청
 
@@ -2348,7 +2550,7 @@ Content-Type: application/json
 | `optionDecisions` | 아니오 | 고칠 옵션만 보낸다. 보내지 않은 옵션은 추출값 그대로 반영한다. 기본 `[]` |
 | `optionDecisions[].extractedOptionId` | 예 | 그 항목의 옵션 ID |
 | `optionDecisions[].correctedOptionLabel` | 아니오 | 1~100자. 없거나 `null`이면 추출값 유지 |
-| `optionDecisions[].correctedPriceKrw` | 아니오 | 1 이상 정수. 없거나 `null`이면 추출값 유지 |
+| `optionDecisions[].correctedPriceKrw` | 아니오 | 1~2,147,483,647 정수. 없거나 `null`이면 추출값 유지 |
 | `optionDecisions[].correctedPourMl` | 아니오 | 1~32767 정수. 없거나 `null`이면 추출값 유지 |
 
 `optionDecisions`의 필드는 "없음 또는 `null` = 고치지 않음"이다. 따라서 추출된 값을 지워 `null`로 만들 수는 없다. 가격이 없는 옵션은 게시하지 않으며, 게시할 상품에는 가격 있는 옵션이 최소 하나 있어야 한다(`NO_PRICED_OPTION`).
@@ -2575,6 +2777,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - 백엔드는 운영자가 제출한 결정으로 최종 변경을 계산해 반영한다. 다른 후보를 고르거나 가격을 고쳐서 임시 diff와 달라진 변경도 운영자의 결정이므로 그대로 반영한다.
 - 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다.
 - 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면(다른 작업이 먼저 게시된 경우 등) 반영하지 않는다. 백엔드는 임시 diff를 다시 만들고 `reviewVersion`을 올린 뒤 `REVIEW_OUTDATED`를 반환한다.
+- 반영에 성공하면 메뉴판 버전(3.9의 `menuVersion`)을 1 올린다. 미완료 작업이 있는 동안에는 메뉴 직접 편집(3.14)을 받지 않으므로, 검수 중에 직접 편집으로 메뉴판이 바뀌는 일은 없다.
 
 ### 8.8 성공 응답
 
@@ -2639,6 +2842,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `404` | `OWNER_APPLICATION_NOT_FOUND` | 업주 신청이 없거나 조회 권한이 없음 (3.11) | 신청 목록 재조회 |
 | `404` | `BAR_OWNER_NOT_FOUND` | 업주 해제 대상 업장에 현재 업주가 없음 (3.11.10) | 업장 상세 재조회 |
 | `404` | `MENU_IMPORT_NOT_FOUND` | 등록 작업이 없음 | 작업 목록 이동 |
+| `404` | `MENU_ITEM_NOT_FOUND` | 직접 수정, 삭제할 항목이 현재 메뉴판에 없음. `details.barMenuItemId` (3.14) | 메뉴 다시 조회 |
 | `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인·거절(3.11.7, 3.11.8) 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
 | `405` | `METHOD_NOT_ALLOWED` | 경로는 있지만 허용하지 않는 HTTP 메서드 | 요청 메서드 확인 |
@@ -2646,11 +2850,13 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `409` | `OWNER_APPLICATION_EXISTS` | 같은 업장, 또는 같은 사업자등록번호의 `new_bar`에 본인의 대기 중 신청이 있음 (3.11.2) | `details.applicationId`의 신청으로 이동 |
 | `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소·다시 검증 (3.11) | 신청 상세 재조회 |
 | `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 키에 다른 요청 내용 | 새 키로 명시적 재요청 |
-| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있음. `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 재업로드 |
+| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있는데 새 작업을 올리거나(4.4) 메뉴를 직접 편집함(3.14). `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 다시 요청 |
+| `409` | `MENU_OUTDATED` | 직접 편집 요청의 `menuVersion`이 현재 메뉴판 버전과 다름. `details.submittedMenuVersion`, `details.currentMenuVersion` (3.14) | 메뉴 다시 조회 후 다시 저장 |
+| `409` | `MENU_ITEM_EXISTS` | 직접 추가하려는 상품이 이미 현재 메뉴판에 있음. `details.barMenuItemId` (3.14.3) | 그 항목 수정으로 안내 |
 | `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가. 예: `ready_for_review`가 아닌 작업의 검수 제출, `applied`·`failed` 작업의 취소. `details.status`에 현재 상태 | 상태 재조회 |
 | `409` | `REVIEW_OUTDATED` | `reviewVersion` 불일치, 또는 검수 데이터를 만든 뒤 현재 메뉴판이 바뀜 | `details.reviewUrl`로 최신 검수 데이터 재조회 |
-| `409` | `DUPLICATE_BRAND_FOUND` | 신규 브랜드와 동일할 수 있는 브랜드 발견 | 기존 브랜드 선택 화면 표시 |
-| `409` | `DUPLICATE_PRODUCT_FOUND` | 신규 상품과 동일한 상품 발견, 또는 제출한 이름·별칭이 기존 상품의 별칭과 일치 | 기존 상품 선택 화면 표시. 다른 상품이면 겹치는 별칭을 빼고 다시 제출 |
+| `409` | `DUPLICATE_BRAND_FOUND` | 신규 브랜드와 동일할 수 있는 브랜드 발견 (검수 또는 직접 추가) | 기존 브랜드 선택 화면 표시 |
+| `409` | `DUPLICATE_PRODUCT_FOUND` | 신규 상품과 동일한 상품 발견, 또는 제출한 이름·별칭이 기존 상품의 별칭과 일치 | 기존 상품 선택 화면 표시. 다른 상품이면 겹치는 별칭을 빼고 다시 제출. `existingProduct.isActive = false`이면 상품 검색으로 안내 (9.5) |
 | `413` | `UPLOAD_TOO_LARGE` | 파일 개수 또는 크기 초과 | 이미지 축소 또는 개수 조정 |
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | 지원하지 않는 이미지 형식 | 지원 형식 안내 |
 | `422` | `VALIDATION_FAILED` | 필드 값이나 옵션 구성이 잘못됨 | `fieldErrors` 표시 |
@@ -2658,7 +2864,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `429` | `RATE_LIMITED` | 업주 신청의 진위확인 또는 사업자등록증 OCR을 오늘 5회 했음. `details.retryAfter`에 다음 초기화 시각 (3.11.14) | 내일 다시 시도 안내. OCR은 직접 입력 안내 |
 | `503` | `OCR_UNAVAILABLE` | 사업자등록증 사진을 읽는 OCR 설정이 없거나 호출 실패 (3.11.12) | 직접 입력 안내 |
 | `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | operator의 다시 검증에서 국세청 API에 연결하지 못함 (3.11.13) | 잠시 후 재시도 안내 |
-| `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 동일 검수 요청 재시도 |
+| `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 (검수 제출, 메뉴 직접 편집) | 잠시 후 같은 요청 재시도 |
 | `500` | `INTERNAL_ERROR` | 예상하지 못한 서버 오류(DB 연결 실패, 코드 오류 등). 모든 API에서 생길 수 있다. 원인은 응답에 담지 않고 서버 로그에만 남긴다 | 잠시 후 재시도 안내 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버의 인증 설정 누락 또는 오류, Supabase JWKS 조회 실패 (3.1.5) | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않음 |
 
@@ -2687,14 +2893,14 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
-- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`.
+- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`. `message`는 Pydantic의 영어 기본 문구다.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`.
 
 ### 9.4 검수 버전 충돌
 
 `REVIEW_OUTDATED`가 발생하면 최종 반영은 전부 롤백된다. 프론트엔드는 사용자의 로컬 입력을 즉시 버리지 말고 최신 검수 응답을 받은 뒤 항목 ID 기준으로 재적용 가능한 수정값을 보여줄 수 있다. 사용자는 바뀐 diff를 확인하고 다시 제출해야 한다.
 
-### 9.5 신규 상품 중복 발견
+### 9.5 신규 브랜드와 상품 중복 발견
 
 ```json
 {
@@ -2710,7 +2916,8 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
         "brandName": "Deanston",
         "category": "whisky",
         "ageYears": null,
-        "editionName": "Virgin Oak"
+        "editionName": "Virgin Oak",
+        "isActive": true
       },
       "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777777"
     },
@@ -2719,7 +2926,52 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 }
 ```
 
-이 경우 신규 상품은 생성되지 않고 `menuImport`는 `ready_for_review`를 유지한다.
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `extractedItemId` | UUID 문자열 | 아니오 | 중복이 난 검수 항목. 직접 추가(3.14.3)에는 없다 |
+| `existingProduct.productId`, `displayName`, `brandId`, `brandName`, `category` | 7.2와 같다 | 아니오 | 이미 있는 상품 |
+| `existingProduct.ageYears`, `editionName` | 7.2와 같다 | 예 | |
+| `existingProduct.isActive` | 불리언 | 아니오 | 활성 상품인지. `false`이면 그 상품을 고를 수 없다(`PRODUCT_INACTIVE`) |
+| `reviewUrl` | 문자열 | 아니오 | 검수 데이터 경로. 직접 추가에는 없다 |
+
+중복 검사는 비활성 상품도 대상으로 한다(같은 상품을 다시 만들지 않기 위해서다). 제출한 이름이나 별칭이 여러 상품에 걸리면 활성 상품을 먼저 돌려준다. 비활성 상품은 대부분 잘못 만들어져 정리된 중복이고, 실제 상품은 따로 활성 상태로 있기 때문이다.
+
+> **현재 구현과의 차이 (수정 예정):** 지금 백엔드는 걸린 상품 중 상품명 순으로 첫 번째를 돌려주므로, 활성 상품이 함께 걸려도 비활성 상품이 돌아올 수 있다. 메뉴 직접 편집을 구현할 때 활성 상품을 먼저 돌려주도록 고친다.
+
+프론트엔드 처리:
+
+- `isActive = true`: 기존 상품을 보여 주고, 맞으면 그 상품을 선택해(검수는 `select_existing_product`, 직접 추가는 `productId`) 다시 제출한다. 다른 상품이면 겹치는 별칭을 빼고 다시 제출한다.
+- `isActive = false`: 그 상품으로 다시 제출하지 않는다. 이미 정리된 상품과 이름이 겹친다고 안내하고 상품 검색(7)에서 고르게 한다. 검색에도 없으면 operator 문의를 안내한다(7.2).
+
+신규 브랜드가 기존 브랜드와 같으면 `409 DUPLICATE_BRAND_FOUND`다.
+
+```json
+{
+  "error": {
+    "code": "DUPLICATE_BRAND_FOUND",
+    "message": "같은 브랜드가 이미 등록되어 있습니다. 기존 브랜드를 선택해 주세요.",
+    "details": {
+      "extractedItemId": "10000000-0000-4000-8000-000000000009",
+      "existingBrand": {
+        "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
+        "canonicalName": "Deanston"
+      },
+      "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777777"
+    },
+    "fieldErrors": []
+  }
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `extractedItemId`, `reviewUrl` | | 아니오 | 상품 중복과 같다. 직접 추가에는 없다 |
+| `existingBrand.brandId` | UUID 문자열 | 아니오 | 이미 있는 브랜드 |
+| `existingBrand.canonicalName` | 문자열 | 아니오 | 대표 브랜드명 |
+
+프론트엔드는 기존 브랜드를 보여 주고, 맞으면 `brand`를 `{"type": "existing", "brandId": ...}`로 바꿔 다시 제출한다. 브랜드에는 비활성 상태가 없다.
+
+두 오류 모두 아무것도 만들지 않는다. 검수에서는 `menuImport`가 `ready_for_review`를 유지하고, 직접 추가에서는 메뉴판이 바뀌지 않는다.
 
 ### 9.6 API가 만들지 않은 오류
 
@@ -2773,4 +3025,6 @@ canceled
 - `review-and-apply` 성공 전에는 카탈로그와 현재 메뉴판이 변경되지 않는다.
 - 최종 요청에서 AI를 다시 호출하지 않는다.
 - 최종 요청은 부분 성공하지 않는다. 하나라도 실패하면 전체 롤백한다.
+- 메뉴 직접 편집(3.14)은 항목을 `barMenuItemId`로만 가리킨다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀌면 달라질 수 있다.
+- 메뉴 직접 편집 요청은 모두 조회한 `menuVersion`을 포함하며, 업장에 미완료 메뉴 등록 작업이 있으면 받지 않는다.
 - `summary`나 사용자 표시 문자열을 서버 검증 기준으로 사용하지 않는다.
