@@ -102,6 +102,55 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun activeDiscountShownInOwnerPriceAndEditorOptionHeader() {
+        val repo = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val now = System.currentTimeMillis()
+        repo.saveBrand(MockBrand("brand-l", "라가불린"))
+        repo.saveCatalogProduct(MockCatalogProduct("product-l", "brand-l", "라가불린 10년"))
+        repo.saveMenuItem(MockBarMenuItem("discounted", "fixture-bar", "product-l",
+            listOf(MockMenuOption("opt30", pourMl = 30, priceKrw = 10000,
+                discount = MockDiscount(5000, now - 100000L, now + 100000L)))))
+        val vm = OwnerMockViewModel(repo)
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("할인").assertExists()
+        compose.onNodeWithText("5,000원").assertExists()
+        compose.onNodeWithTag("manual-menu-row-discounted").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithText("할인 · 5000원").assertExists()
+    }
+
+    @Test fun customerSharesPriceDesignWithoutOwnerStockBadgesOrSoldOutProducts() {
+        val repo = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val now = System.currentTimeMillis()
+        repo.saveBrand(MockBrand("brand-l", "라가불린"))
+        repo.saveCatalogProduct(MockCatalogProduct("ten", "brand-l", "라가불린 10년"))
+        repo.saveCatalogProduct(MockCatalogProduct("sixteen", "brand-l", "라가불린 16년"))
+        repo.saveMenuItem(MockBarMenuItem("visible", "fixture-bar", "ten",
+            listOf(MockMenuOption("p30", pourMl = 30, priceKrw = 10000,
+                discount = MockDiscount(5000, now - 100000L, now + 100000L)))))
+        repo.saveMenuItem(MockBarMenuItem("sold", "fixture-bar", "sixteen",
+            listOf(MockMenuOption("p40", pourMl = 40, priceKrw = 15000)), soldOut = true))
+        val preview = repo.preview("fixture-bar", now)!!
+        assertEquals(1, preview.visibleMenu.size)
+        compose.setContent {
+            MaterialTheme {
+                OwnerPreviewV4Menu(preview.bar, preview,
+                    listOf(MockBrand("brand-l", "라가불린")), now)
+            }
+        }
+        compose.onNodeWithText("할인").assertExists()
+        compose.onNodeWithText("5,000원").assertExists()
+        compose.onNodeWithText("16년").assertDoesNotExist()
+        compose.onNodeWithText("판매 중").assertDoesNotExist()
+        compose.onNodeWithText("품절").assertDoesNotExist()
+    }
+
     @Test fun soldOutConfirmationRemovesCustomerOnlyAndKeepsOwnerMenu() {
         val vm = fixture()
         compose.setContent {
