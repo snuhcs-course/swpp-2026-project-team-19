@@ -108,7 +108,8 @@ private fun toOption(d: DraftOption, whisky: Boolean,
         "가격은 1원 이상, 1억 원 미만이어야 해요."
     }
     val ml = if (whisky && !d.bottle) d.ml.toIntOrNull() else null
-    if (whisky && !d.bottle) require(ml != null && ml in 1..32767) {
+    if (whisky && !d.bottle && !(original != null && original.pourMl == null && d.ml.isBlank()))
+        require(ml != null && ml in 1..32767) {
         "용량을 입력하거나 Bottle 판매를 선택해 주세요."
     }
     val discount = if (d.sale.isEmpty()) null else {
@@ -663,6 +664,18 @@ internal fun OwnerManualMenuScreen(
 
                             }
                         }
+                    val savedOverflow = items.firstOrNull { it.barMenuItemId == editId }
+                        ?.options?.drop(if (category == "위스키") MANUAL_MENU_MAX_OPTIONS else 1)
+                        .orEmpty()
+                    if (savedOverflow.isNotEmpty()) {
+                        Text("기존 추가 옵션 (${savedOverflow.size}개) · 원본 그대로 보존",
+                            color = V4Color.sub, fontSize = 12.sp)
+                        savedOverflow.forEach { original ->
+                            Text((original.pourMl?.let { "${it}ml" } ?: original.label ?: "용량 미표기") +
+                                " · %,d원".format(original.priceKrw),
+                                color = V4Color.sub, fontSize = 12.sp)
+                        }
+                    }
                     if (category == "위스키") {
                         if (draftOptions.size < MANUAL_MENU_MAX_OPTIONS)
                             Box(Modifier.fillMaxWidth().height(40.dp)
