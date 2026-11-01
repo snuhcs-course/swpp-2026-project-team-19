@@ -67,6 +67,7 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithTag("manual-menu-add").performClick()
         compose.onNodeWithTag("manual-menu-name").performTextInput("라가불린 10년")
         compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithTag("manual-menu-ml-0").performTextInput("30")
         compose.onNodeWithTag("manual-menu-price-0").performTextInput("15000")
         // Bottle checkbox and price option IDs are separate from the catalog ID.
         compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
@@ -89,6 +90,7 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithTag("manual-menu-add").performClick()
         compose.onNodeWithTag("manual-menu-name").performTextInput("라가불린 10년")
         compose.onNodeWithText("아니에요").performClick()
+        compose.onNodeWithTag("manual-menu-ml-0").performTextInput("30")
         compose.onNodeWithTag("manual-menu-price-0").performTextInput("12000")
         compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
         compose.runOnIdle {
