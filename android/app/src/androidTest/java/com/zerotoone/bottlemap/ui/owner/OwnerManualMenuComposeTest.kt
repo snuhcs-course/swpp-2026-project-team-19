@@ -930,6 +930,8 @@ class OwnerManualMenuComposeTest {
             assertEquals(true, snap.products.single().catalogMatched)
             assertEquals(15000, snap.menuItems.single().options.single().priceKrw)
         }
+        // Non-whisky categories are collapsed by default after saving.
+        compose.onNodeWithText("칵테일", substring = false).performScrollTo().performClick()
         compose.onNodeWithTag("manual-menu-row-" +
             (vm.state.value as MockOwnerLoadState.Ready).snapshot.menuItems.single().barMenuItemId)
             .performClick()
