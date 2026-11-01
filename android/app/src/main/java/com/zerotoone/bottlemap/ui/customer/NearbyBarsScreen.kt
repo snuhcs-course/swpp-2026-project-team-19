@@ -59,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -94,6 +95,7 @@ fun NearbyBarsScreen(
 ) {
     val context = LocalContext.current
     val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     val lifecycle = LocalLifecycleOwner.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val origin by viewModel.origin.collectAsStateWithLifecycle()
@@ -122,6 +124,7 @@ fun NearbyBarsScreen(
     fun searchPlaces() {
         listVisible = false
         placeResultsVisible = true
+        focusManager.clearFocus()
         keyboard?.hide()
         placeSearchViewModel.search(placeQuery)
     }
@@ -131,6 +134,7 @@ fun NearbyBarsScreen(
             listVisible = false
             placeResultsVisible = false
             placeQuery = ""
+            focusManager.clearFocus()
             keyboard?.hide()
         }
     }
