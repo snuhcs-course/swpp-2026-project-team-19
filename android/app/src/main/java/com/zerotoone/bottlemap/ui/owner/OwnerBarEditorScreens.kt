@@ -322,7 +322,7 @@ fun OwnerBarPhotoEditorScreen(
                                 Box(Modifier.fillMaxWidth().height(146.dp)
                                     .clip(RoundedCornerShape(9.dp))) {
                                     OwnerStoredPhoto(photo.uri,
-                                        Modifier.fillMaxSize().clickable { expandedId = photo.photoId })
+                                        Modifier.fillMaxSize().ownerQuietClick { expandedId = photo.photoId })
                                 }
                                 Text(if (index == 0) "대표 사진" else "사진 " + (index + 1),
                                     style = MaterialTheme.typography.labelLarge)
@@ -497,7 +497,7 @@ fun OwnerBarHoursEditorScreen(
                     weekdays.forEachIndexed { index, label ->
                         val day = index + 1
                         if (day != copyingDay) {
-                            Row(Modifier.fillMaxWidth().clickable {
+                            Row(Modifier.fillMaxWidth().ownerQuietClick {
                                 copyDays = if (day in copyDays) copyDays - day else copyDays + day
                             }, verticalAlignment = Alignment.CenterVertically) {
                                 Checkbox(checked = day in copyDays, onCheckedChange = {
@@ -653,7 +653,7 @@ fun OwnerBarCustomerPreviewScreen(
                         bar.gallery.forEach { photo ->
                             Box(Modifier.size(width = 240.dp, height = 180.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .clickable { fullPhoto = photo.uri }) {
+                                .ownerQuietClick { fullPhoto = photo.uri }) {
                                 OwnerStoredPhoto(photo.uri, Modifier.fillMaxSize())
                             }
                         }
