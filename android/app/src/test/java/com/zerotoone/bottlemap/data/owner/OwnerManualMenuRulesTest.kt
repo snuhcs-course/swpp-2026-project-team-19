@@ -304,7 +304,9 @@ class OwnerManualMenuRulesTest {
     }
 
     @Test fun removedCatalogProductKeepsMenuItemIdAfterDeleteResetAndStoreReload() {
-        val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val originalFixture = OwnerMockFixtures.registeredBar()
+        val store = InMemoryMockOwnerStateStore(originalFixture.copy(
+            bars = originalFixture.bars + MockBar("other-bar", "다른 매장", "서울")))
         val r = repo(store)
         r.saveManualMenuItem(MockBarMenuItem("original-row-id", "fixture-bar", ten.productId,
             listOf(option("o1", 30, 12000))), ten, brand)
@@ -323,7 +325,6 @@ class OwnerManualMenuRulesTest {
         reloaded.saveManualMenuItem(MockBarMenuItem("another-ui-id", "fixture-bar", ten.productId,
             listOf(option("o3", 60, 17000))))
         assertEquals("original-row-id", snapshot(reloaded).menuItems.single().barMenuItemId)
-        reloaded.saveBar(MockBar("other-bar", "다른 매장", "서울"))
         reloaded.saveManualMenuItem(MockBarMenuItem("other-bar-row", "other-bar", ten.productId,
             listOf(option("o4", 30, 18000))))
         assertEquals("other-bar-row",
