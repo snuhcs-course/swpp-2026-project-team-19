@@ -171,11 +171,7 @@ fun OwnerManagementHomeScreen(
                         Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            bar.name, modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
+                        V4BarName(bar.name, modifier = Modifier.weight(1f))
                         OutlinedButton(
                             onClick = onPreview,
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
@@ -318,9 +314,8 @@ fun OwnerManagementHomeScreen(
                                         Modifier.height(26.dp)
                                             .border(
                                                 BorderStroke(
-                                                    1.dp,
-                                                    if (hasPublishedMenu) MaterialTheme.colorScheme.primary
-                                                    else MaterialTheme.colorScheme.outlineVariant
+                                                    2.dp,
+                                                    MaterialTheme.colorScheme.primary
                                                 ),
                                                 RoundedCornerShape(50)
                                             )
@@ -330,8 +325,7 @@ fun OwnerManagementHomeScreen(
                                         Text("지금도 맞아요",
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Bold,
-                                            color = if (hasPublishedMenu) MaterialTheme.colorScheme.primary
-                                                else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            color = MaterialTheme.colorScheme.primary)
                                     }
                                 }
                             }
@@ -424,7 +418,7 @@ fun OwnerOperatingQuickScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text("영업 상태 변경", fontSize = 24.sp,
-                fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black,
                 color = V4Color.text, modifier = Modifier.padding(bottom = 6.dp))
             if (state == MockOwnerLoadState.Loading) {
                 OwnerLoading("영업 상태 불러오는 중")
