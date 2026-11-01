@@ -271,10 +271,11 @@ internal fun OwnerManualMenuScreen(
                 "메뉴 이름을 확인해 주세요."
             }
             val sameCategory = linked?.let { manualMenuCategoryLabel(it.category) } == category
-            val sharedLocal = linked?.catalogMatched == false &&
+            val sharedLocal = linked?.takeIf { !it.catalogMatched }?.let { product ->
                 snapshot?.menuItems.orEmpty().any {
-                    it.barId != bar.barId && it.productId == linked.productId
+                    it.barId != bar.barId && it.productId == product.productId
                 }
+            } == true
             require(!sharedLocal || (sameCategory &&
                 alcoholKind.trim().takeIf { category == "기타 주류" && it.isNotEmpty() } ==
                     persisted?.otherAlcoholKind?.takeIf { it.isNotBlank() })) {
@@ -291,7 +292,7 @@ internal fun OwnerManualMenuScreen(
             if (category == "기타 주류" && alcoholKind.isBlank()) {
                 // Existing catalog/photo entries may have no Mock-only subtype.
                 // Do not require one unless the owner is adding or changing the type.
-                require((old != null && sameCategory && persisted?.otherAlcoholKind.isNullOrBlank()) ||
+                require((linked != null && sameCategory && linked.otherAlcoholKind.isNullOrBlank()) ||
                     (linkedCatalog != null && linkedCatalog.otherAlcoholKind.isNullOrBlank())) {
                     "주류 종류를 입력해 주세요."
                 }
@@ -340,9 +341,12 @@ internal fun OwnerManualMenuScreen(
                 val existingLocal = products.firstOrNull { product ->
                     !product.catalogMatched && product.productId != rejectedId &&
                         manualMenuCategoryLabel(product.category) == category &&
-                        product.displayName.replace(" ", "").equals(
-                            name.replace(" ", ""), ignoreCase = true) &&
-                        existingBarProductMenu(items, bar.barId, product.productId) != null
+                        existingBarProductMenu(items, bar.barId, product.productId)?.let { row ->
+                            listOfNotNull(product.displayName, row.displayNameOverride).any {
+                                it.replace(" ", "").equals(
+                                    name.replace(" ", ""), ignoreCase = true)
+                            }
+                        } == true
                 }
                 require(existingLocal == null) {
                     "이미 등록한 상품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요."
