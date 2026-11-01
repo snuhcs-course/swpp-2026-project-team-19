@@ -273,8 +273,7 @@ internal fun OwnerManualMenuScreen(
                     persisted?.otherAlcoholKind?.takeIf { it.isNotBlank() })) {
                 "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
             }
-            // Match catalog subtypes on both create and edit.
-            // silently dropping a modified subtype from the editor.
+            // Check the immutable catalog subtype for both new links and edits.
             val linkedCatalog = if (old != null) persisted?.takeIf { it.catalogMatched }
                 else candidates.firstOrNull { it.productId == linkedId && it.catalogMatched }
             if (linkedCatalog != null && category == "기타 주류") {
