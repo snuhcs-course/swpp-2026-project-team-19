@@ -148,7 +148,7 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithText("할인 · 5000원").assertExists()
     }
 
-    @Test fun scheduledDiscountIsVisibleInCustomerMenuBeforeItStarts() {
+    @Test fun scheduledDiscountHiddenInCustomerMenuBeforeItStarts() {
         val repo = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         val now = System.currentTimeMillis()
@@ -166,8 +166,8 @@ class OwnerManualMenuComposeTest {
                     listOf(MockBrand("brand-scheduled", "라가불린")), now)
             }
         }
-        compose.onNodeWithText("할인").assertExists()
-        // The price is discounted only after the scheduled start.
+        compose.onNodeWithText("할인").assertDoesNotExist()
+        // Both the badge and discounted price appear only during the discount period.
         compose.onNodeWithText("10,000원").assertExists()
         compose.onNodeWithText("5,000원").assertDoesNotExist()
     }
