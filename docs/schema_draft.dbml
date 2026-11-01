@@ -663,8 +663,9 @@ Table bar_menu_items {
   Note: '''
   A row is one bar-specific menu item backed by a shared canonical product. It is not deleted merely
   because a later menu board omits it, and it can be reused if the product returns later.
-  Membership in the bar's current menu board is the single visibility rule: linked means visible;
-  unlinked means retained but not visible. No separate visibility status is stored.
+  Membership in the bar's current menu board decides whether the item is on the menu: linked means on the board;
+  unlinked means retained but not on the board. Customers see a linked item only while it is not sold out.
+  No separate visibility status is stored.
   Sold-out is stock state: a sold-out item stays on the board, but customers and search do not see it;
   only the owner and operators see it, marked as sold out.
   It lives here because bar_menu_items rows survive board rewrites, while board entries do not.

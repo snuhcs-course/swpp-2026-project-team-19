@@ -904,7 +904,7 @@ GET /api/bars/{barId}/menu
 
 메뉴판은 있지만 검수에서 모든 항목을 내렸거나 직접 편집으로 모두 지웠으면(3.14.5, 3.14.6), 또는 손님이 볼 때 모든 항목이 품절이면(3.14.8) `menuBoardId`, `menuVersion`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
 
-그 밖에 값이 없을 수 있는 필드는 `phone`, `description`, `operatingException`, `options[].optionLabel`, `options[].pourMl`뿐이며 모두 `null`로 온다. `tags`, `weeklyHours`, `photos`는 없으면 `[]`다. 프론트엔드는 해당 표시만 생략하고, 사진이 없으면 기본 이미지를 보여 준다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
+그 밖에 값이 없을 수 있는 필드는 `phone`, `description`, `operatingException`, `options[].optionLabel`, `options[].pourMl`, `options[].discount`뿐이며 모두 `null`로 온다. `tags`, `weeklyHours`, `photos`는 없으면 `[]`다. 프론트엔드는 해당 표시만 생략하고, 사진이 없으면 기본 이미지를 보여 준다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
 
 #### 3.9.2 메뉴 등록이 진행 중일 때
 
