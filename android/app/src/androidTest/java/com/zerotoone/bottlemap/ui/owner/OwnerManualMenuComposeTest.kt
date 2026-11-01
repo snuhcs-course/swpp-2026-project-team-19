@@ -452,4 +452,33 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun existingOtherAlcoholWithoutSubtypeCanSaveUnrelatedNameAndPriceEdit() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val product = MockCatalogProduct("product-other", "brand-other", "수제 주류",
+            category = "otherAlcohol", otherAlcoholKind = null)
+        val original = MockMenuOption("other-option", label = "병", pourMl = null,
+            priceKrw = 18000)
+        r.saveBrand(MockBrand("brand-other", "기타 브랜드"))
+        r.saveCatalogProduct(product)
+        r.saveMenuItem(MockBarMenuItem("menu-other", "fixture-bar", product.productId,
+            listOf(original)))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-menu-other").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-price-0").performScrollTo()
+            .performTextInput("1")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(null, snap.products.single().otherAlcoholKind)
+            assertEquals("otherAlcohol", snap.products.single().category)
+            assertEquals("병", snap.menuItems.single().options.single().label)
+            assertEquals(original.priceKrw, snap.menuItems.single().options.single().priceKrw)
+        }
+    }
+
 }
