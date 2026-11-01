@@ -58,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.ui.common.*
@@ -143,7 +144,7 @@ fun OwnerManagementHomeScreen(
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val now = rememberOwnerNow()
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        OwnerHeader("매장 관리", onBack)
+        V4Toolbar(null, onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(horizontal = BottleMapSpacing.screenHorizontal),
@@ -328,6 +329,7 @@ fun OwnerManagementHomeScreen(
                                     ) {
                                         Text("지금도 맞아요",
                                             style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
                                             color = if (hasPublishedMenu) MaterialTheme.colorScheme.primary
                                                 else MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
@@ -415,12 +417,15 @@ fun OwnerOperatingQuickScreen(
     val today = ownerToday(System.currentTimeMillis()).toEpochDay()
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        OwnerHeader("영업 상태 변경", onBack)
+        V4Toolbar(null, onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(horizontal = BottleMapSpacing.screenHorizontal, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            Text("영업 상태 변경", fontSize = 24.sp,
+                fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
+                color = V4Color.text, modifier = Modifier.padding(bottom = 6.dp))
             if (state == MockOwnerLoadState.Loading) {
                 OwnerLoading("영업 상태 불러오는 중")
             } else if (state is MockOwnerLoadState.Error) {
