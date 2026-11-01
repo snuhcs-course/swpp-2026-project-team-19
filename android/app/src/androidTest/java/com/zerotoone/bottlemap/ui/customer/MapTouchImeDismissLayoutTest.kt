@@ -4,7 +4,7 @@ import android.content.Context
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
-import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class MapTouchImeDismissLayoutTest {
     @Test fun nativeMapDownDismissesOnceAndPreservesChildGestureDelivery() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
         var dismissed = 0
         var childTouches = 0
         val layout = MapTouchImeDismissLayout(context) { dismissed++ }
@@ -24,6 +24,8 @@ class MapTouchImeDismissLayoutTest {
                 return true
             }
         }, FrameLayout.LayoutParams(200, 200))
+        val spec = View.MeasureSpec.makeMeasureSpec(200, View.MeasureSpec.EXACTLY)
+        layout.measure(spec, spec)
         layout.layout(0, 0, 200, 200)
         val down = MotionEvent.obtain(10L, 20L, MotionEvent.ACTION_DOWN, 50f, 50f, 0)
         val move = MotionEvent.obtain(10L, 35L, MotionEvent.ACTION_MOVE, 60f, 55f, 0)
