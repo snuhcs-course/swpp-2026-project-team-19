@@ -43,6 +43,16 @@ internal fun homeExceptionHeading(exception: MockOperatingException?): String = 
     null -> "정상 영업"
 }
 
+/** Registration headline must not claim a future vacation has already closed the bar. */
+internal fun registrationOperatingLabel(
+    exception: MockOperatingException?, atEpochMs: Long,
+): String = when {
+    exception?.kind == MockExceptionKind.VACATION ->
+        if (exception.fromEpochDay > ownerToday(atEpochMs).toEpochDay())
+            "임시 휴업 예정" else "임시 휴무"
+    else -> homeExceptionHeading(exception)
+}
+
 internal fun homeOperatingState(bar: MockBar, atEpochMs: Long): String {
     val now = Instant.ofEpochMilli(atEpochMs).atZone(ownerSeoulZone)
     val day = now.toLocalDate().toEpochDay()
@@ -65,13 +75,14 @@ internal fun homeOperatingState(bar: MockBar, atEpochMs: Long): String {
     // Yesterday's overnight shift is evaluated separately.
     val previousTemporary = exception?.takeIf {
         it.kind == MockExceptionKind.CUSTOM_HOURS &&
-            it.fromEpochDay == day - 1 && it.closesNextDay
+            (day - 1) in it.fromEpochDay..it.toEpochDay && it.closesNextDay
     }
     if (previousTemporary?.closeMinutes != null &&
         todayMinute < previousTemporary.closeMinutes) return "영업 중"
 
     val todayTemporary = exception?.takeIf {
-        it.kind == MockExceptionKind.CUSTOM_HOURS && it.fromEpochDay == day
+        it.kind == MockExceptionKind.CUSTOM_HOURS &&
+            day in it.fromEpochDay..it.toEpochDay
     }
     val open = todayTemporary?.openMinutes ?: regular?.takeUnless { it.closed }?.openMinutes
     val close = todayTemporary?.closeMinutes ?: regular?.takeUnless { it.closed }?.closeMinutes
