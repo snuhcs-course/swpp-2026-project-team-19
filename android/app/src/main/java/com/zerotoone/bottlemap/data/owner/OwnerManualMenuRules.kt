@@ -1,8 +1,8 @@
 package com.zerotoone.bottlemap.data.owner
 
-/** Owner Flow 6. Local-only policy: this is NOT a backend request or API contract. */
+/** Owner Flow 6 direct-editor limits; §3.14.2 now specifies at most three options. */
 const val MANUAL_MENU_MAX_OPTIONS = 3
-/** Mock UI input policy only; no unagreed Backend price field constraints. */
+/** Direct-editor input limit matches §3.14.2. Existing Mock photo imports remain untouched. */
 const val MAX_OWNER_MENU_PRICE_KRW = 99_999_999
 const val MAX_OWNER_MENU_PRICE_DIGITS = 8
 fun ownerPriceInput(raw: String): String = raw.filter(Char::isDigit)
