@@ -129,6 +129,28 @@ class OwnerBarEditorComposeTest {
         }
     }
 
+    @Test fun customerPreviewExpandsScheduleFromStatusArrowWithoutPourLabel() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        val saved = vm.preview("fixture-bar", 0)!!.bar.copy(
+            defaultPourMl = 45,
+            weeklyHours = listOf(com.zerotoone.bottlemap.data.owner.MockWeeklyHours(
+                1, false, openMinutes = 18 * 60, closeMinutes = 2 * 60,
+                closesNextDay = true))
+        )
+        vm.saveBar(saved)
+        compose.setContent {
+            MaterialTheme {
+                OwnerPreviewHtmlV4Screen(vm.state.collectAsState().value, vm, onBack = {})
+            }
+        }
+        compose.onNodeWithText("기본 잔 용량", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("영업시간", substring = false).assertDoesNotExist()
+        compose.onNodeWithTag("owner-preview-hours-toggle").performClick()
+        compose.onNodeWithText("18:00 – 익일 02:00", substring = true)
+            .assertIsDisplayed()
+    }
+
     @Test fun photoEditorUsesImmediateActionsAndDoneButton() {
         val vm = OwnerMockViewModel(
             LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
