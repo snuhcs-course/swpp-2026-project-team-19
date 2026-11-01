@@ -56,7 +56,7 @@ class OwnerBarEditorComposeTest {
         }
     }
 
-    @Test fun unsavedBackDiscardsDraftWithoutMutatingSharedPreview() {
+    @Test fun unsavedBackShowsConfirmationAndPreservesUntilExplicitDiscard() {
         val repository = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         val vm = OwnerMockViewModel(repository)
         var exited = false
@@ -72,7 +72,14 @@ class OwnerBarEditorComposeTest {
         compose.onNodeWithTag("owner-info-name").performTextClearance()
         compose.onNodeWithTag("owner-info-name").performTextInput("임시 텍스트")
         compose.onNodeWithContentDescription("뒤로가기").performClick()
-        // HTML goes straight back: the info draft was not submitted.
+        compose.onNodeWithText("변경을 취소할까요?").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(false, exited)
+            assertEquals(initial, vm.preview("fixture-bar", 0)!!.bar.name)
+        }
+        compose.onNodeWithText("계속 편집").performClick()
+        compose.onNodeWithContentDescription("뒤로가기").performClick()
+        compose.onNodeWithText("변경 취소").performClick()
         compose.runOnIdle {
             assertEquals(initial, vm.preview("fixture-bar", 0)!!.bar.name)
             assertEquals(true, exited)
