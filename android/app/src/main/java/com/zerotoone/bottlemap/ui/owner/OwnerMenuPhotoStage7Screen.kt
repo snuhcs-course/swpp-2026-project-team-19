@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -40,6 +42,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -118,6 +124,39 @@ private fun MenuPhotoSecondary(label: String, onClick: () -> Unit) {
         shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.outlinedButtonColors(
             contentColor = V4Color.text)) {
         Text(label, fontSize = 12.sp)
+    }
+}
+
+/**
+ * Draw the glass-and-liquid illustration from Action-first p82 with native
+ * vector primitives; do not ship a bitmap screenshot of the reference.
+ */
+@Composable
+private fun MenuPhotoProcessingIllustration() {
+    Canvas(Modifier.size(96.dp)) {
+        val w = size.width
+        val h = size.height
+        val fill = Path().apply {
+            moveTo(w * .24f, h * .54f)
+            quadraticBezierTo(w * .42f, h * .65f, w * .52f, h * .57f)
+            quadraticBezierTo(w * .66f, h * .50f, w * .81f, h * .56f)
+            lineTo(w * .77f, h * .83f)
+            quadraticBezierTo(w * .75f, h * .89f, w * .66f, h * .89f)
+            lineTo(w * .39f, h * .89f)
+            quadraticBezierTo(w * .29f, h * .88f, w * .28f, h * .81f)
+            close()
+        }
+        drawPath(fill, V4Color.primary)
+        val outline = Path().apply {
+            moveTo(w * .18f, h * .19f)
+            lineTo(w * .26f, h * .83f)
+            quadraticBezierTo(w * .27f, h * .91f, w * .38f, h * .91f)
+            lineTo(w * .67f, h * .91f)
+            quadraticBezierTo(w * .79f, h * .91f, w * .80f, h * .83f)
+            lineTo(w * .88f, h * .19f)
+        }
+        drawPath(outline, Color(0xFFD0C1B5), style = Stroke(
+            width = 5.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
     }
 }
 
@@ -230,7 +269,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
                     }
                 }
             }
-            Text("사진이나 용량·가격을 한 번 더 확인해 주세요.",
+            Text("새 메뉴만 추가 · 기존 메뉴와 가격 유지",
                 color = V4Color.sub, fontSize = 11.sp)
             Text("JPEG/PNG · 사진당 10MB · 전체 60MB",
                 color = V4Color.sub, fontSize = 11.sp)
@@ -316,12 +355,23 @@ internal fun OwnerMenuPhotoJobScreen(
             Spacer(Modifier.weight(1f))
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(when(job?.status) {
-                    MockImportStatus.FAILED -> "ⓘ"
-                    MockImportStatus.READY_FOR_REVIEW -> "✓"
-                    MockImportStatus.CANCELED -> "×"
-                    else -> "◡"
-                }, color = V4Color.primary, fontSize = 48.sp)
+                if (job?.status == MockImportStatus.PROCESSING ||
+                    job?.status == MockImportStatus.UPLOADED)
+                    MenuPhotoProcessingIllustration()
+                else {
+                    Box(Modifier.size(74.dp)
+                        .background(V4Color.surface, CircleShape),
+                        contentAlignment = Alignment.Center) {
+                        Text(when(job?.status) {
+                            MockImportStatus.FAILED -> "!"
+                            MockImportStatus.READY_FOR_REVIEW -> "✓"
+                            MockImportStatus.CANCELED -> "×"
+                            else -> "·"
+                        }, color = if (job?.status == MockImportStatus.FAILED)
+                            Color(0xFFFFADA3) else V4Color.primary,
+                            fontSize = 34.sp)
+                    }
+                }
                 Text(when(job?.status) {
                     MockImportStatus.FAILED -> "메뉴판을 읽지 못했어요"
                     MockImportStatus.READY_FOR_REVIEW -> "메뉴 확인을 준비했어요"
