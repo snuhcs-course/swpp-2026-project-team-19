@@ -375,7 +375,7 @@ internal fun OwnerManualMenuScreen(
     if (confirm != null) {
         val action = requireNotNull(confirm)
         val target = items.firstOrNull { it.barMenuItemId == action.removePrefix("stock:") }
-        AlertDialog(onDismissRequest = { confirm = null },
+        AlertDialog(onDismissRequest = { confirm = null; error = null },
             title = { Text(when(action) {
                 "delete" -> "메뉴를 삭제할까요?"
                 "reset" -> "전체 메뉴를 초기화할까요?"
@@ -398,7 +398,7 @@ internal fun OwnerManualMenuScreen(
             }) { Text(when(action) {
                 "delete" -> "삭제하기"; "reset" -> "초기화"; else -> "상태 변경"
             }) } },
-            dismissButton = { TextButton(onClick = { confirm = null }) { Text("취소") } }
+            dismissButton = { TextButton(onClick = { confirm = null; error = null }) { Text("취소") } }
         )
     }
     Column(Modifier.fillMaxSize().background(V4Color.background)
