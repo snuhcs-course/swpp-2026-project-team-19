@@ -277,8 +277,8 @@ internal fun OwnerManualMenuScreen(
             // silently dropping a modified subtype from the editor.
             if (old != null && persisted?.catalogMatched == true &&
                 category == "기타 주류") {
-                require(alcoholKind.trim().ifBlank { null } ==
-                    persisted.otherAlcoholKind?.trim()?.ifBlank { null }) {
+                require(alcoholKind.trim().takeIf { it.isNotBlank() } ==
+                    persisted.otherAlcoholKind?.trim()?.takeIf { it.isNotBlank() }) {
                     "카탈로그 상품의 주류 종류는 변경할 수 없어요."
                 }
             }
