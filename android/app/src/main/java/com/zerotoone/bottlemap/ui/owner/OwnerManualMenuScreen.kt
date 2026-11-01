@@ -91,7 +91,8 @@ private fun localDiscountEndDay(endAtEpochMs: Long): LocalDate {
         local.toLocalDate().minusDays(1) else local.toLocalDate()
 }
 private fun fromSaved(o: MockMenuOption) = DraftOption(
-    o.optionId, o.label == "Bottle", o.pourMl?.toString().orEmpty(), o.priceKrw.toString(),
+    o.optionId, o.pourMl == null && o.label?.trim()?.lowercase() in listOf("bottle", "병"),
+    o.pourMl?.toString().orEmpty(), o.priceKrw.toString(),
     o.discount?.discountedPriceKrw?.toString().orEmpty(),
     o.discount?.startAtEpochMs?.let {
         Instant.ofEpochMilli(it).atZone(ownerManualZone).toLocalDate().toString()
@@ -100,9 +101,10 @@ private fun fromSaved(o: MockMenuOption) = DraftOption(
     o.discount?.startAtEpochMs?.toString().orEmpty(),
     o.discount?.endAtEpochMs?.toString().orEmpty()
 )
-private fun toOption(d: DraftOption, whisky: Boolean): MockMenuOption {
+private fun toOption(d: DraftOption, whisky: Boolean,
+    original: MockMenuOption? = null): MockMenuOption {
     val price = d.price.toIntOrNull() ?: throw IllegalArgumentException("가격을 숫자로 입력해 주세요.")
-    require(price in 1..MAX_OWNER_MENU_PRICE_KRW) {
+    require(price in 1..MAX_OWNER_MENU_PRICE_KRW || original?.priceKrw == price) {
         "가격은 1원 이상, 1억 원 미만이어야 해요."
     }
     val ml = if (whisky && !d.bottle) d.ml.toIntOrNull() else null
@@ -131,7 +133,16 @@ private fun toOption(d: DraftOption, whisky: Boolean): MockMenuOption {
             start.atStartOfDay(ownerManualZone).toInstant().toEpochMilli(),
             end.plusDays(1).atStartOfDay(ownerManualZone).toInstant().toEpochMilli())
     }
-    return MockMenuOption(d.id, if (whisky && d.bottle) "Bottle" else null, ml, price, discount)
+    val keepOriginal = original != null && original.optionId == d.id &&
+        (if (whisky) {
+            if (d.bottle) original.pourMl == null &&
+                original.label?.trim()?.lowercase() in listOf("bottle", "병")
+            else original.pourMl?.toString().orEmpty() == d.ml &&
+                original.label?.trim()?.lowercase() !in listOf("bottle", "병")
+        } else true)
+    return MockMenuOption(d.id,
+        if (keepOriginal) original!!.label else if (whisky && d.bottle) "Bottle" else null,
+        if (keepOriginal) original!!.pourMl else ml, price, discount)
 }
 
 private val htmlCatalog = listOf(
@@ -187,6 +198,9 @@ internal fun OwnerManualMenuScreen(
     var promoOptionExpanded by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val draftOptions = decodedOptions(optionText)
+    val activeImport = snapshot?.imports?.lastOrNull { it.barId == bar?.barId &&
+        it.status in setOf(MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW) }
+    val editBlocked = activeImport != null
     fun setOptions(v: List<DraftOption>) { optionText = encodedOptions(v) }
     fun changeOption(index: Int, transform: (DraftOption) -> DraftOption) {
         setOptions(draftOptions.mapIndexed { i, d -> if (i == index) transform(d) else d })
@@ -227,6 +241,7 @@ internal fun OwnerManualMenuScreen(
     fun save() {
         if (bar == null) return
         try {
+            require(!editBlocked) { "메뉴 등록·검수 중에는 직접 편집할 수 없어요." }
             val name = itemName.trim()
             require(name.isNotEmpty() && name.length <= 80) { "메뉴 이름을 확인해 주세요." }
             if (category == "기타 주류") require(alcoholKind.trim().isNotEmpty()) {
@@ -236,9 +251,19 @@ internal fun OwnerManualMenuScreen(
             val old = items.firstOrNull { it.barMenuItemId == editId }
             val persisted = products.firstOrNull { it.productId == old?.productId }
             val sameCategory = persisted?.let { manualMenuCategoryLabel(it.category) } == category
+            val effectiveCategoryCode = if (category in MANUAL_MENU_CATEGORIES)
+                manualMenuCategoryCode(category) else {
+                require(sameCategory && persisted != null) { "지원하지 않는 종류로 변경할 수 없어요." }
+                persisted.category
+            }
+            require(old == null || old.options.size <= 10) { "기존 옵션이 10개를 초과해 저장할 수 없어요." }
+            require(old == null || sameCategory || old.options.size <= 1) {
+                "기존 용량 옵션을 삭제하지 않고 종류를 바꿀 수 없어요."
+            }
             val editedOptions = (if (whisky) draftOptions else draftOptions.take(1))
                 .mapIndexed { index, draft ->
-                    val parsed = toOption(draft, whisky)
+                    val parsed = toOption(draft, whisky,
+                        old?.options?.firstOrNull { it.optionId == draft.id })
                     // Preserve imported serving labels/identity when editing a
                     // single-price category without switching its category.
                     if (!whisky && sameCategory) {
@@ -247,7 +272,7 @@ internal fun OwnerManualMenuScreen(
                         } ?: parsed
                     } else parsed
                 }
-            manualMenuOptionError(editedOptions, manualMenuCategoryCode(category))?.let {
+            manualMenuOptionError(editedOptions, effectiveCategoryCode, old?.options.orEmpty())?.let {
                 throw IllegalArgumentException(it)
             }
             val editableLimit = if (whisky) MANUAL_MENU_MAX_OPTIONS else 1
@@ -267,12 +292,12 @@ internal fun OwnerManualMenuScreen(
                 else candidates.firstOrNull { it.productId == linkedId }
             val p = when {
                 linked != null && !linked.catalogMatched -> linked.copy(
-                    displayName = name, category = manualMenuCategoryCode(category),
+                    displayName = name, category = effectiveCategoryCode,
                     otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" })
                 linked != null -> linked
                 else -> MockCatalogProduct(
                     manualId("local-unverified-"), manualId("local-brand-"), name,
-                    category = manualMenuCategoryCode(category), catalogMatched = false,
+                    category = effectiveCategoryCode, catalogMatched = false,
                     otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" })
             }
             val duplicate = existingBarProductMenu(items, bar.barId, p.productId)
@@ -313,6 +338,7 @@ internal fun OwnerManualMenuScreen(
             }) },
             confirmButton = { TextButton(onClick = {
                 try {
+                    require(!editBlocked) { "메뉴 등록·검수 중에는 직접 편집할 수 없어요." }
                     when(action) {
                         "delete" -> editId?.let { viewModel.deleteMenuItem(it) }
                         "reset" -> bar?.barId?.let { viewModel.clearMenuForBar(it) }
@@ -352,7 +378,7 @@ internal fun OwnerManualMenuScreen(
                         color = V4Color.sub, fontSize = 12.sp)
                     Text("사진으로 메뉴 추가", color = V4Color.text,
                         fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    val job = snapshot?.imports?.lastOrNull { it.barId == bar.barId }
+                    val job = activeImport ?: snapshot?.imports?.lastOrNull { it.barId == bar.barId }
                     Row(Modifier.fillMaxWidth()
                         .background(V4Color.surface, RoundedCornerShape(11.dp))
                         .padding(12.dp),
@@ -382,11 +408,13 @@ internal fun OwnerManualMenuScreen(
                                 })
                         }
                     }
+                    if (editBlocked) Text("메뉴판 등록·검수 중에는 직접 편집할 수 없어요. 위 작업을 완료하거나 취소해 주세요.",
+                        color = V4Color.sub, fontSize = 12.sp)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically) {
                         Text("현재 게시 메뉴", color = V4Color.text, fontWeight = FontWeight.Bold,
                             fontSize = 16.sp)
-                        Text("+ 직접 추가", Modifier.manualTap { edit(null) }
+                        Text("+ 직접 추가", Modifier.manualTap { if (!editBlocked) edit(null) }
                             .testTag("manual-menu-add"), color = V4Color.primary, fontSize = 12.sp)
                     }
                     V4SearchField(query, { query = it }, "manual-menu-search", "메뉴명·브랜드 검색")
@@ -406,7 +434,10 @@ internal fun OwnerManualMenuScreen(
                     }
                     if (visible.isEmpty()) Text(if (query.isEmpty()) "등록된 메뉴가 없어요."
                         else "검색 결과가 없어요.", color = V4Color.sub)
-                    MANUAL_MENU_CATEGORIES.forEach { cat ->
+                    val shownCategories = MANUAL_MENU_CATEGORIES + visible.mapNotNull { (_, p, _) ->
+                        p?.let { manualMenuCategoryLabel(it.category) }
+                    }.distinct().filterNot { it in MANUAL_MENU_CATEGORIES }
+                    shownCategories.forEach { cat ->
                         val rows = visible.filter { (_, p, _) ->
                             p != null && manualMenuCategoryLabel(p.category) == cat
                         }
@@ -442,8 +473,8 @@ internal fun OwnerManualMenuScreen(
                                                 selectedId == item.barMenuItemId,
                                                 onSelect = { selectedId = if (selectedId == item.barMenuItemId)
                                                     null else item.barMenuItemId },
-                                                onEdit = { edit(item) },
-                                                onStock = { confirm = "stock:" + item.barMenuItemId })
+                                                onEdit = { if (!editBlocked) edit(item) },
+                                                onStock = { if (!editBlocked) confirm = "stock:" + item.barMenuItemId })
                                             if (index < entry.value.lastIndex)
                                                 HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                                         }
@@ -460,7 +491,7 @@ internal fun OwnerManualMenuScreen(
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     Box(Modifier.fillMaxWidth().height(43.dp)
                         .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(8.dp))
-                        .manualTap { confirm = "reset" }
+                        .manualTap { if (!editBlocked) confirm = "reset" }
                         .testTag("manual-menu-reset"), contentAlignment = Alignment.Center) {
                         Row(horizontalArrangement = Arrangement.spacedBy(9.dp),
                             verticalAlignment = Alignment.CenterVertically) {
@@ -544,8 +575,7 @@ internal fun OwnerManualMenuScreen(
                                         categoryMenuExpanded = false
                                         if (cat != category) {
                                             category = cat; linkedId = null; rejectedId = null
-                                            if (cat != "위스키")
-                                                setOptions(draftOptions.take(1))
+                                            // Preserve provisional drafts across category toggles.
                                         }
                                     }.padding(horizontal = 16.dp, vertical = 12.dp),
                                     color = V4Color.text, fontSize = 13.sp)
