@@ -56,6 +56,17 @@ class OwnerBarEditRulesTest {
         assertTrue(toggleBarTag(listOf("몰트"), "몰트")!!.isEmpty())
     }
 
+    @Test fun creatingTagDoesNotDeselectMatchingUnsavedDraftTag() {
+        val available = listOf("몰트", "위스키")
+        val draftSelected = listOf("수제 맥주", "몰트")
+        assertFalse(canCreateOwnerTagDraft("수제 맥주", available, draftSelected))
+        assertFalse(canCreateOwnerTagDraft(" 수제 맥주 ", available, draftSelected))
+        assertFalse(canCreateOwnerTagDraft("수제 맥주".uppercase(), available, draftSelected))
+        assertFalse(canCreateOwnerTagDraft("몰트", available, emptyList()))
+        assertFalse(canCreateOwnerTagDraft("  ", available, emptyList()))
+        assertTrue(canCreateOwnerTagDraft("새로운 태그", available, draftSelected))
+    }
+
     @Test fun htmlV4PhotoArrowsProtectCoverAndChangeSecondaryOrder() {
         val images = (1..3).map {
             MockPhoto("p" + it, "content://photo/" + it, MockPhotoKind.BAR_GALLERY)
