@@ -36,6 +36,18 @@ class OwnerBarEditRulesTest {
         assertEquals(listOf("몰트"), updated.tags)
     }
 
+    @Test fun photoGalleryStopsAtFifteenAndRejectsDuplicateUris() {
+        val existing = (1..14).map { i ->
+            MockPhoto("photo-$i", "content://owner/photo/$i", MockPhotoKind.BAR_GALLERY)
+        }
+        assertEquals(15, MAX_OWNER_BAR_GALLERY_PHOTOS)
+        assertTrue(canAddOwnerBarGalleryPhoto(existing, "content://owner/photo/15"))
+        assertFalse(canAddOwnerBarGalleryPhoto(existing, "content://owner/photo/1"))
+        assertFalse(canAddOwnerBarGalleryPhoto(
+            existing + MockPhoto("photo-15", "content://owner/photo/15",
+                MockPhotoKind.BAR_GALLERY), "content://owner/photo/16"))
+    }
+
     @Test fun photoOrderAndCoverAndZeroPhotos() {
         val photos = (1..3).map {
             MockPhoto("p$it", "content://photo/$it", MockPhotoKind.BAR_GALLERY)
