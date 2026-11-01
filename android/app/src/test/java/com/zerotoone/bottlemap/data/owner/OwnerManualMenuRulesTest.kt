@@ -243,4 +243,65 @@ class OwnerManualMenuRulesTest {
         assertEquals("16년", manualMenuShortName(sixteen, "라가불린"))
         assertNull(existingBarProductMenu(listOf(row10), "fixture-bar", sixteen.productId))
     }
+    @Test fun importedLocalizedServingLabelsAreValidAndRemainIntactOnUnrelatedEdit() {
+        val r = repo()
+        r.saveBrand(brand)
+        r.saveCatalogProduct(ten)
+        val imported = listOf(
+            MockMenuOption("ko-bottle", label = "병", pourMl = null, priceKrw = 100_000_000),
+            MockMenuOption("ko-glass", label = "잔", pourMl = 30, priceKrw = 17_000),
+            MockMenuOption("unspecified", label = null, pourMl = null, priceKrw = 25_000),
+        )
+        r.saveMenuItem(MockBarMenuItem("localized", "fixture-bar", ten.productId, imported))
+        assertNull(manualMenuOptionError(imported, "whisky", imported))
+        r.saveManualMenuItem(MockBarMenuItem("localized", "fixture-bar", ten.productId,
+            imported, displayNameOverride = "새 메뉴 이름"))
+        assertEquals(imported, snapshot(r).menuItems.single().options)
+        assertEquals("새 메뉴 이름", snapshot(r).menuItems.single().displayNameOverride)
+        rejects {
+            r.saveManualMenuItem(MockBarMenuItem("localized", "fixture-bar", ten.productId,
+                imported.toMutableList().also { it[0] = it[0].copy(priceKrw = 100_000_001) }))
+        }
+        assertEquals(imported, snapshot(r).menuItems.single().options)
+    }
+
+    @Test fun activePhotoReviewBlocksAllManualMutationPathsAndTerminalJobsUnlockThem() {
+        val existing = MockBarMenuItem("existing", "fixture-bar", ten.productId,
+            listOf(option("pour", 30, 13000)))
+        val base = OwnerMockFixtures.registeredBar().copy(
+            brands = listOf(brand), products = listOf(ten), menuItems = listOf(existing))
+        for (status in listOf(MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW)) {
+            val s = base.copy(imports = listOf(MockMenuImport("job-$status", "fixture-bar",
+                status, 1, emptyList())))
+            val r = repo(InMemoryMockOwnerStateStore(s))
+            rejects { r.saveManualMenuItem(existing.copy(displayNameOverride = "changed")) }
+            rejects { r.saveMenuItem(existing.copy(soldOut = true)) }
+            rejects { r.deleteMenuItem(existing.barMenuItemId) }
+            rejects { r.clearMenuForBar("fixture-bar") }
+            rejects { r.setSoldOut(existing.barMenuItemId, true) }
+            assertEquals(s, snapshot(r))
+            assertEquals(1, r.preview("fixture-bar", 0L)!!.visibleMenu.size)
+        }
+        for (status in listOf(MockImportStatus.FAILED, MockImportStatus.APPLIED)) {
+            val r = repo(InMemoryMockOwnerStateStore(base.copy(imports = listOf(
+                MockMenuImport("done-$status", "fixture-bar", status, 1, emptyList())))))
+            r.saveManualMenuItem(existing.copy(displayNameOverride = "allowed"))
+            assertEquals("allowed", snapshot(r).menuItems.single().displayNameOverride)
+        }
+    }
+
+    @Test fun elevenImportedOptionsCanBeReadButNotResavedWithoutExplicitReduction() {
+        val r = repo()
+        r.saveBrand(brand)
+        r.saveCatalogProduct(ten)
+        val imported = (1..11).map { option("existing-$it", it * 10, 1000 * it) }
+        r.saveMenuItem(MockBarMenuItem("many", "fixture-bar", ten.productId, imported))
+        assertEquals(11, r.preview("fixture-bar", 0L)!!.visibleMenu.single().options.size)
+        rejects {
+            r.saveManualMenuItem(MockBarMenuItem("many", "fixture-bar", ten.productId,
+                imported, displayNameOverride = "changed"))
+        }
+        assertEquals(imported, snapshot(r).menuItems.single().options)
+    }
+
 }
