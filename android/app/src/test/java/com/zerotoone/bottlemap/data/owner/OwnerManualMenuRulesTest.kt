@@ -104,6 +104,20 @@ class OwnerManualMenuRulesTest {
         assertEquals(ten, snapshot(r).products.single())
     }
 
+    @Test fun ownerMenuLabelOverrideRetainsCanonicalCatalogIdentityAndSearch() {
+        val r = repo()
+        r.saveManualMenuItem(MockBarMenuItem("m10", "fixture-bar", ten.productId,
+            listOf(option("small", 30, 16000)),
+            displayNameOverride = "라가불린 10년 · 시그니처"), newProduct = ten, newBrand = brand)
+        val snap = snapshot(r)
+        val row = snap.menuItems.single()
+        assertEquals(ten.productId, row.productId)
+        assertEquals("라가불린 10년 · 시그니처", row.displayNameOverride)
+        assertEquals("라가불린 10년", snap.products.single().displayName)
+        assertTrue(manualMenuMatches(row, ten, brand.name, "시그니처"))
+        assertEquals(row, r.preview("fixture-bar", 0L)!!.visibleMenu.single())
+    }
+
     @Test fun searchingUsesBrandAndDisplayTextWithoutMergingDifferentAges() {
         val row10 = MockBarMenuItem("m10", "fixture-bar", ten.productId,
             listOf(option("opt10", 30, 16000)))
