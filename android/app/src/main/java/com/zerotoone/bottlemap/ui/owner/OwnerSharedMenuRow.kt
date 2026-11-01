@@ -33,7 +33,9 @@ internal fun ownerOptionDiscountActive(option: MockMenuOption, atEpochMs: Long):
 // 27 badge + 3 + 35 volume + 3 + 71 price = 139dp.
 // 71dp leaves room for the largest permitted "99,999,999원" at 10sp;
 // 'Bottle' sits directly to its left without shifting the discount slot.
-internal val ownerMenuPriceSlotWidth = 139.dp
+// Discount badge remains in its fixed slot, while right-aligning volume beside price.
+// With 8-digit price limit the price still reserves enough width for 99,999,999원.
+internal val ownerMenuPriceSlotWidth = 129.dp
 
 @Composable
 internal fun OwnerMenuFlatRow(
@@ -121,14 +123,14 @@ internal fun OwnerMenuFlatRow(
 /** Discount badge is in a reserved leading slot: ml and right-edge prices never move. */
 @Composable
 internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut: Boolean = false) {
-    val active = ownerOptionDiscountActive(option, atEpochMs)
+    val configured = option.discount != null
     val textColor = if (soldOut) Color(0xFF999999) else V4Color.text
     val priceColor = if (soldOut) Color(0xFF999999) else V4Color.sub
     Row(Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp)) {
         Box(Modifier.width(27.dp), contentAlignment = Alignment.CenterEnd) {
-            if (active) Box(Modifier.background(
+            if (configured) Box(Modifier.background(
                 if (soldOut) Color(0xFF414141) else Color(0xFF4B3826),
                 RoundedCornerShape(3.dp))
                 .border(1.dp, if (soldOut) Color(0xFF666666) else Color(0xFF9C7A52),
@@ -139,7 +141,7 @@ internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut
             }
         }
         Text(option.pourMl?.toString()?.plus("ml") ?: option.label.orEmpty(),
-            modifier = Modifier.width(35.dp), color = textColor,
+            modifier = Modifier.width(30.dp), color = textColor,
             fontSize = 10.sp, maxLines = 1, textAlign = TextAlign.End)
         Text("%,d원".format(option.displayPrice(atEpochMs)),
             modifier = Modifier.weight(1f),
