@@ -23,6 +23,11 @@ class OwnerManagementHomeStateTest {
         assertEquals(vacation, homeOperatingException(bar, time(12)))
         assertTrue(homeExceptionHeading(vacation).contains("임시 휴업"))
         assertTrue(homeExceptionHeading(vacation).contains("\n"))
+        assertEquals("임시 휴업 예정", registrationOperatingLabel(vacation, time(12)))
+        val duringVacation = day.plusDays(3).atTime(12, 0)
+            .atZone(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals("임시 휴무", registrationOperatingLabel(vacation, duringVacation))
+        assertEquals("정상 영업", registrationOperatingLabel(null, time(12)))
         assertNull(homeOperatingException(bar, day.plusDays(8).atStartOfDay(ownerSeoulZone)
             .toInstant().toEpochMilli()))
     }
@@ -41,6 +46,27 @@ class OwnerManagementHomeStateTest {
         )
         assertEquals("영업 종료", homeOperatingState(bar.copy(exceptions = listOf(custom)), time(20)))
         assertEquals("오늘 영업시간 변경", homeExceptionHeading(custom))
+    }
+
+    @Test fun multiDayCustomHoursApplyEveryDayAndOvernightAfterFinalDay() {
+        val start = day.toEpochDay()
+        val schedule = MockOperatingException(
+            "multi-day", MockExceptionKind.CUSTOM_HOURS,
+            start, start + 2, openMinutes = 19 * 60, closeMinutes = 2 * 60,
+            closesNextDay = true
+        )
+        val bar = MockBar("b", "바", "서울", exceptions = listOf(schedule))
+        fun at(offset: Long, hour: Int): Long =
+            day.plusDays(offset).atTime(hour, 0)
+                .atZone(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals("영업 종료", homeOperatingState(bar, at(0, 12)))
+        assertEquals("영업 중", homeOperatingState(bar, at(0, 20)))
+        assertEquals("영업 중", homeOperatingState(bar, at(1, 1)))
+        assertEquals("영업 종료", homeOperatingState(bar, at(1, 12)))
+        assertEquals("영업 중", homeOperatingState(bar, at(1, 20)))
+        assertEquals("영업 중", homeOperatingState(bar, at(2, 20)))
+        assertEquals("영업 중", homeOperatingState(bar, at(3, 1)))
+        assertEquals("영업시간 정보 없음", homeOperatingState(bar, at(3, 3)))
     }
 
     @Test fun yesterdayTemporaryOvernightHoursRemainVisibleAfterMidnight() {
