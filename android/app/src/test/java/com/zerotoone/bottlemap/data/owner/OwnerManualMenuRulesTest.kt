@@ -98,7 +98,7 @@ class OwnerManualMenuRulesTest {
         r.saveBrand(MockBrand(product.brandId, "칵테일"))
         r.saveCatalogProduct(product)
         val options = (1..4).map {
-            MockMenuOption("import-cocktail-$it", priceKrw = 4000 * it)
+            MockMenuOption("import-cocktail-$it", label = "serving-$it", priceKrw = 4000 * it)
         }
         r.saveMenuItem(MockBarMenuItem("cocktail-menu", "fixture-bar", product.productId, options))
         val edited = listOf(options.first().copy(priceKrw = 6000)) + options.drop(1)
