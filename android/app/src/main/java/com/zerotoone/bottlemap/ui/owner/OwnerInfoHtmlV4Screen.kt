@@ -190,7 +190,7 @@ fun OwnerInfoHtmlV4Screen(
             verticalArrangement = Arrangement.spacedBy(13.dp),
         ) {
             Text("매장 정보 관리", fontSize = 24.sp, color = V4Color.text,
-                fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
                 lineHeight = 32.sp)
             if (bar == null) {
                 when (state) {
