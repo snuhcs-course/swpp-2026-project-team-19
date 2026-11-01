@@ -95,7 +95,7 @@ private fun OwnerQuickCard(
     modifier: Modifier, icon: BmIconId, title: String, footer: String, onClick: () -> Unit,
 ) {
     Surface(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier.ownerQuietClick(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surface
     ) {
@@ -117,7 +117,7 @@ private fun OwnerQuickCard(
 @Composable
 private fun OwnerManagerFooter(label: String, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().height(36.dp).clickable(onClick = onClick),
+        Modifier.fillMaxWidth().height(36.dp).ownerQuietClick(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
@@ -232,7 +232,7 @@ fun OwnerManagementHomeScreen(
                                                     Box(
                                                         Modifier.align(Alignment.CenterEnd)
                                                             .offset(x = 8.dp).size(36.dp)
-                                                            .clickable {
+                                                            .ownerQuietClick {
                                                                 try {
                                                                     viewModel.cancelOperatingException(bar.barId, exception.exceptionId)
                                                                     error = null
@@ -277,7 +277,7 @@ fun OwnerManagementHomeScreen(
                         Column(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 5.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(
-                                Modifier.fillMaxWidth().clickable(onClick = onMenu)
+                                Modifier.fillMaxWidth().ownerQuietClick(onClick = onMenu)
                                     .defaultMinSize(minHeight = 40.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(9.dp)
@@ -307,7 +307,7 @@ fun OwnerManagementHomeScreen(
                                 // prevents the border from appearing to touch the gauge.
                                 Box(
                                     Modifier.height(42.dp)
-                                        .clickable(enabled = hasPublishedMenu) {
+                                        .ownerQuietClick(enabled = hasPublishedMenu) {
                                             try {
                                                 viewModel.confirmMenuInformation(bar.barId, System.currentTimeMillis())
                                                 error = null
@@ -356,7 +356,7 @@ fun OwnerManagementHomeScreen(
                             if (job != null) {
                                 HorizontalDivider()
                                 Row(
-                                    Modifier.fillMaxWidth().clickable { onJob(job.status) }
+                                    Modifier.fillMaxWidth().ownerQuietClick { onJob(job.status) }
                                         .defaultMinSize(minHeight = 52.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -440,7 +440,7 @@ fun OwnerOperatingQuickScreen(
                     Triple("range", "기간 임시 휴업", BmIconId.UPDATED)
                 ).forEach { (option, label, icon) ->
                     Surface(
-                        modifier = Modifier.fillMaxWidth().clickable {
+                        modifier = Modifier.fillMaxWidth().ownerQuietClick {
                             choice = option
                             openWheel = ""
                             error = null
@@ -481,7 +481,7 @@ fun OwnerOperatingQuickScreen(
                         ) {
                             Text(label, style = MaterialTheme.typography.bodyMedium)
                             Surface(
-                                modifier = Modifier.clickable {
+                                modifier = Modifier.ownerQuietClick {
                                     openWheel = if (openWheel == target) "" else target
                                 },
                                 shape = RoundedCornerShape(9.dp),
