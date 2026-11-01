@@ -302,11 +302,7 @@ internal fun OwnerManualMenuScreen(
                 outsideKeyboard?.hide()
             })
         }) {
-        V4Toolbar(when(screen) {
-            "list" -> "메뉴 관리"
-            "item" -> "메뉴 항목"
-            else -> null
-        }, ::back)
+        V4Toolbar(null, ::back)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
             when {
@@ -546,8 +542,23 @@ internal fun OwnerManualMenuScreen(
                                 if (category == "위스키") {
                                     Row(Modifier.fillMaxWidth(), horizontalArrangement =
                                         Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                        Text((i+1).toString() + "번 옵션",
-                                            color = V4Color.sub, fontSize = 11.sp)
+                                        Row(verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(7.dp),
+                                            modifier = Modifier.weight(1f)) {
+                                            Text((i+1).toString() + "번 옵션",
+                                                color = V4Color.sub, fontSize = 11.sp)
+                                            if (d.sale.isNotBlank()) {
+                                                Text("할인 · " + d.sale + "원",
+                                                    color = Color(0xFFF7DFBF),
+                                                    fontSize = 10.sp,
+                                                    modifier = Modifier
+                                                        .background(Color(0xFF4B3826),
+                                                            RoundedCornerShape(4.dp))
+                                                        .border(1.dp, Color(0xFF9C7A52),
+                                                            RoundedCornerShape(4.dp))
+                                                        .padding(horizontal = 5.dp, vertical = 2.dp))
+                                            }
+                                        }
                                         if (draftOptions.size > 1) Text("제거",
                                             Modifier.manualTap {
                                                 setOptions(draftOptions.filterIndexed { j, _ -> j != i })
@@ -587,8 +598,7 @@ internal fun OwnerManualMenuScreen(
                                     }, keyboardType = KeyboardType.Number,
                                         testTag = "manual-menu-price-" + i)
                                 }
-                                if (d.sale.isNotBlank()) Text("할인 · " + d.sale + "원",
-                                    color = V4Color.primary, fontSize = 11.sp)
+
                             }
                         }
                     if (category == "위스키") {
@@ -772,104 +782,9 @@ private fun OwnerManualMenuRow(
     item: MockBarMenuItem, product: MockCatalogProduct, brand: String, selected: Boolean,
     onSelect: () -> Unit, onEdit: () -> Unit, onStock: () -> Unit
 ) {
-    // Product rows are flat menu lines, not separate bordered cards.
-    // Selected actions cover exactly the price region: height never changes.
-    Box(Modifier.fillMaxWidth().height(74.dp)
-        .background(V4Color.background)
-        .manualTap(onSelect).testTag("manual-menu-row-" + item.barMenuItemId)) {
-        Row(Modifier.fillMaxSize().padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-            Box(Modifier.size(width = 37.dp, height = 49.dp)
-                .background(Color(0xFF40352C), RoundedCornerShape(6.dp))
-                .border(1.dp, V4Color.line, RoundedCornerShape(6.dp)),
-                contentAlignment = Alignment.Center) {
-                Canvas(Modifier.size(width = 27.dp, height = 40.dp)) {
-                    val u = size.width / 27f
-                    drawRect(Color(0xFF967F58), Offset(10*u, 0f), Size(7*u, 7*u))
-                    drawRoundRect(Color(0xFF658C7A), Offset(4*u, 7*u), Size(19*u, 31*u),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(3*u))
-                    drawRect(Color(0xFFE1D2B5), Offset(6*u, 18*u), Size(15*u, 12*u))
-                }
-            }
-            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(manualMenuShortName(product.copy(
-                    displayName = item.displayNameOverride ?: product.displayName), brand),
-                    modifier = Modifier.weight(1f, fill = false),
-                    color = if (item.soldOut) V4Color.sub else V4Color.text,
-                    fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                    maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Box(Modifier.border(1.dp, if (item.soldOut) Color(0xFFA36A63)
-                    else V4Color.line, RoundedCornerShape(4.dp))
-                    .padding(horizontal = 3.dp, vertical = 1.dp),
-                    contentAlignment = Alignment.Center) {
-                    Text(if (item.soldOut) "품절" else "판매 중",
-                        fontSize = 9.sp, maxLines = 1,
-                        color = if (item.soldOut) Color(0xFFFFB4AB) else V4Color.sub)
-                }
-            }
-            // Reserve the same price column for every category, even without ml.
-            Column(Modifier.width(121.dp),
-                verticalArrangement = Arrangement.spacedBy(3.dp),
-                horizontalAlignment = Alignment.End) {
-                item.options.take(3).forEach { option ->
-                    val discount = option.discount
-                    val active = discount != null &&
-                        System.currentTimeMillis() >= discount.startAtEpochMs &&
-                        System.currentTimeMillis() < discount.endAtEpochMs
-                    Row(Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                        verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.width(25.dp), contentAlignment = Alignment.CenterEnd) {
-                            if (active) Text("할인", color = Color(0xFFF7DFBF),
-                                fontSize = 8.sp, maxLines = 1,
-                                modifier = Modifier
-                                    .background(Color(0xFF4B3826), RoundedCornerShape(3.dp))
-                                    .border(1.dp, Color(0xFF9C7A52), RoundedCornerShape(3.dp))
-                                    .padding(horizontal = 2.dp))
-                        }
-                        Text(option.pourMl?.toString()?.plus("ml") ?: option.label.orEmpty(),
-                            modifier = Modifier.width(33.dp),
-                            color = V4Color.text, fontSize = 10.sp,
-                            maxLines = 1, textAlign = TextAlign.Start)
-                        Text("%,d원".format(option.displayPrice(System.currentTimeMillis())),
-                            modifier = Modifier.weight(1f),
-                            color = V4Color.sub, fontSize = 10.sp,
-                            maxLines = 1, textAlign = TextAlign.End)
-                    }
-                }
-            }
-        }
-        if (selected) {
-            // Opaque overlay: covers EVERY price/volume glyph, while its background
-            // remains identical to the flat product row.
-            Row(Modifier.align(Alignment.CenterEnd)
-                .fillMaxHeight().width(128.dp)
-                .background(V4Color.background).padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                ManualRowAction("수정", BmIconId.REVIEW, onEdit,
-                    Modifier.weight(1f).testTag("manual-menu-row-edit"))
-                ManualRowAction(if (item.soldOut) "재개" else "품절",
-                    BmIconId.ERROR, onStock,
-                    Modifier.weight(1f).testTag("manual-menu-row-stock"))
-            }
-        }
-    }
-}
-
-@Composable
-private fun ManualRowAction(
-    text: String, icon: BmIconId, onClick: () -> Unit, modifier: Modifier = Modifier
-) {
-    Column(modifier.height(49.dp)
-        .background(V4Color.elevated, RoundedCornerShape(7.dp))
-        .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
-        .manualTap(onClick), horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
-        BmIcon(icon, null, Modifier.size(16.dp), tint = V4Color.sub)
-        Spacer(Modifier.height(2.dp))
-        Text(text, color = V4Color.text, fontSize = 10.sp)
-    }
+    OwnerMenuFlatRow(
+        item = item, product = product, brandName = brand,
+        nowEpochMs = System.currentTimeMillis(), showStatus = true,
+        selected = selected, onSelect = onSelect, onEdit = onEdit, onStock = onStock
+    )
 }
