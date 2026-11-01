@@ -78,6 +78,28 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun decliningSuggestionKeepsManualItemCatalogUnverified() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextInput("라가불린 10년")
+        compose.onNodeWithText("아니에요").performClick()
+        compose.onNodeWithTag("manual-menu-price-0").performTextInput("12000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            val product = snap.products.single()
+            assertEquals(false, product.catalogMatched)
+            assertEquals(true, product.productId.startsWith("local-unverified-"))
+            assertEquals(1, vm.preview("fixture-bar", 0L)!!.visibleMenu.size)
+        }
+    }
+
     @Test fun soldOutConfirmationRemovesCustomerOnlyAndKeepsOwnerMenu() {
         val vm = fixture()
         compose.setContent {
