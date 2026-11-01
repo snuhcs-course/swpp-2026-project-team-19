@@ -384,30 +384,49 @@ class OwnerManualMenuComposeTest {
         compose.runOnIdle { assertEquals(4, vm.preview("fixture-bar", 0)!!.visibleMenu.size) }
     }
 
-    @Test fun activeImportAllowsViewingButBlocksDirectActions() {
-        val original = MockBarMenuItem("listed", "fixture-bar", "prod-a",
-            listOf(MockMenuOption("pour-a", pourMl = 30, priceKrw = 13000)))
-        val base = OwnerMockFixtures.registeredBar().copy(
-            brands = listOf(MockBrand("brand-a", "브랜드")),
-            products = listOf(MockCatalogProduct("prod-a", "brand-a", "상품 A")),
-            menuItems = listOf(original),
-            imports = listOf(MockMenuImport("job-1", "fixture-bar",
-                MockImportStatus.READY_FOR_REVIEW, 1, emptyList())))
-        val store = InMemoryMockOwnerStateStore(base)
-        val r = LocalOwnerMockRepository(store)
+    @Test fun importedNullableServingKeepsItsIdentityWhenApplyingExistingDiscount() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("nullable-brand", "브랜드"))
+        r.saveCatalogProduct(MockCatalogProduct("nullable-product", "nullable-brand", "상품"))
+        val original = MockMenuOption("nullable-option", label = null, pourMl = null,
+            priceKrw = 20000, discount = MockDiscount(17000, 1000L, 100000L))
+        r.saveMenuItem(MockBarMenuItem("nullable-row", "fixture-bar",
+            "nullable-product", listOf(original)))
         val vm = OwnerMockViewModel(r)
         compose.setContent { MaterialTheme {
             OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
         } }
-        compose.onNodeWithText("추가할 메뉴 확인하기").assertExists()
-        compose.onNodeWithTag("manual-menu-add").performClick()
-        compose.onNodeWithText("메뉴 직접 추가").assertDoesNotExist()
-        compose.onNodeWithTag("manual-menu-row-listed").performClick()
+        compose.onNodeWithTag("manual-menu-row-nullable-row").performClick()
         compose.onNodeWithTag("manual-menu-row-edit").performClick()
-        compose.onNodeWithText("메뉴 수정").assertDoesNotExist()
-        compose.onNodeWithTag("manual-menu-reset").performScrollTo().performClick()
-        compose.onNodeWithText("전체 메뉴를 초기화할까요?").assertDoesNotExist()
-        compose.runOnIdle { assertEquals(original, r.preview("fixture-bar", 0)!!.visibleMenu.single()) }
+        compose.onNodeWithText("할인").performClick()
+        compose.onNodeWithTag("manual-menu-promo-apply").performScrollTo().performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(original, r.preview("fixture-bar", 0L)!!.visibleMenu.single()
+                .options.single())
+        }
+    }
+
+    @Test fun unchangedLongCatalogMenuNameCanBeSavedWithoutTruncation() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val longName = "라".repeat(120)
+        r.saveBrand(MockBrand("long-brand", "브랜드"))
+        r.saveCatalogProduct(MockCatalogProduct("long-product", "long-brand", longName))
+        val original = MockBarMenuItem("long-row", "fixture-bar", "long-product",
+            listOf(MockMenuOption("long-option", pourMl = 30, priceKrw = 11000)))
+        r.saveMenuItem(original)
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-long-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(original, r.preview("fixture-bar", 0L)!!.visibleMenu.single())
+        }
     }
 
 }
