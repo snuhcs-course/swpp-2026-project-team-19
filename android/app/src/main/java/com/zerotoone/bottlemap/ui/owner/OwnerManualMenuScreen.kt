@@ -178,8 +178,15 @@ internal fun OwnerManualMenuScreen(
     val items = snapshot?.menuItems?.filter { it.barId == bar?.barId }.orEmpty()
     val products = snapshot?.products.orEmpty()
     val brands = (snapshot?.brands.orEmpty() + htmlBrands).distinctBy { it.brandId }
-    val candidates = (products.filter { it.catalogMatched } + htmlCatalog)
-        .distinctBy { it.productId }
+    // A deleted local product retains its ID; offer it again only for this bar,
+    // via the same explicit "맞아요" confirmation as canonical catalog entries.
+    val deletedLocalCandidates = products.filter { product ->
+        !product.catalogMatched && bar != null &&
+            snapshot?.menuItemIdHistory?.containsKey("${bar.barId}|${product.productId}") == true &&
+            items.none { it.productId == product.productId }
+    }
+    val candidates = (products.filter { it.catalogMatched } + htmlCatalog +
+        deletedLocalCandidates).distinctBy { it.productId }
 
     val outsideFocus = LocalFocusManager.current
     val outsideKeyboard = LocalSoftwareKeyboardController.current
@@ -258,6 +265,15 @@ internal fun OwnerManualMenuScreen(
                 "메뉴 이름을 확인해 주세요."
             }
             val sameCategory = persisted?.let { manualMenuCategoryLabel(it.category) } == category
+            val sharedLocal = old != null && persisted?.catalogMatched == false &&
+                snapshot?.menuItems.orEmpty().any {
+                    it.barId != bar.barId && it.productId == persisted.productId
+                }
+            require(!sharedLocal || (sameCategory &&
+                alcoholKind.trim().takeIf { category == "기타 주류" } ==
+                    persisted?.otherAlcoholKind)) {
+                "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
+            }
             if (category == "기타 주류" && alcoholKind.isBlank()) {
                 // Existing catalog/photo entries may have no Mock-only subtype.
                 // Do not require one unless the owner is adding or changing the type.
@@ -306,31 +322,38 @@ internal fun OwnerManualMenuScreen(
             val linked = if (old != null) persisted
                 else candidates.firstOrNull { it.productId == linkedId }
             val p = when {
-                linked != null && !linked.catalogMatched -> linked.copy(
+                linked != null && !linked.catalogMatched -> if (sharedLocal) linked else linked.copy(
                     displayName = name, category = effectiveCategoryCode,
                     otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" })
                 linked != null -> linked
-                else -> MockCatalogProduct(
-                    manualId("local-unverified-"), manualId("local-brand-"), name,
-                    category = effectiveCategoryCode, catalogMatched = false,
-                    otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" })
+                else -> {
+                    val fallbackBrand = brandName.trim().ifEmpty {
+                        if (whisky) "기타 브랜드" else category
+                    }
+                    val reusedBrandId = snapshot?.brands?.firstOrNull {
+                        it.name.trim() == fallbackBrand
+                    }?.brandId ?: manualId("local-brand-")
+                    MockCatalogProduct(
+                        manualId("local-unverified-"), reusedBrandId, name,
+                        category = effectiveCategoryCode, catalogMatched = false,
+                        otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" })
+                }
             }
             val duplicate = existingBarProductMenu(items, bar.barId, p.productId)
             require(duplicate == null || duplicate.barMenuItemId == editId) {
                 "이미 등록한 상품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요."
             }
-            val brand = if (linked != null && linked.catalogMatched)
-                brands.firstOrNull { it.brandId == p.brandId }
-                else MockBrand(p.brandId, brandName.trim().ifEmpty {
+            val brand = brands.firstOrNull { it.brandId == p.brandId }
+                ?: MockBrand(p.brandId, brandName.trim().ifEmpty {
                     if (whisky) "기타 브랜드" else category
                 })
             viewModel.saveManualMenuItem(
                 MockBarMenuItem(old?.barMenuItemId ?: manualId("local-menu-"),
                     bar.barId, p.productId, options, soldOut = old?.soldOut ?: false,
-                    displayNameOverride = if (p.catalogMatched && name != p.displayName)
-                        name else null),
+                    displayNameOverride = if ((p.catalogMatched || sharedLocal) &&
+                        name != p.displayName) name else null),
                 if (products.none { it.productId == p.productId } ||
-                    (persisted != null && !persisted.catalogMatched)) p else null,
+                    (persisted != null && !persisted.catalogMatched && !sharedLocal)) p else null,
                 brand
             )
             screen = "list"; selectedId = null; editId = null; error = null
@@ -542,7 +565,7 @@ internal fun OwnerManualMenuScreen(
                                     itemName.trim().replace(" ", ""), ignoreCase = true) &&
                                 // Digitless catalog names must match exactly before
                                 // offering explicit canonical product confirmation.
-                                (itemName.any(Char::isDigit) ||
+                                ((p.catalogMatched && itemName.any(Char::isDigit)) ||
                                     p.displayName.replace(" ", "").equals(
                                         itemName.trim().replace(" ", ""), ignoreCase = true)) &&
                                 p.productId != rejectedId &&
