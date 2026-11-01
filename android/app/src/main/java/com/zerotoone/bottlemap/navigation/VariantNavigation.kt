@@ -89,7 +89,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         viewModel = data,
                         onRetry = data::retry,
                         onBack = { navController.popBackStack() },
-                        onPreview = { navController.navigate(OwnerPage.MGR_PREVIEW.route) },
+                        onPreview = { navController.openOwnerManagerPreviewSafely() },
                         onInfo = { navController.navigate(OwnerPage.MGR_INFO.route) },
                         onStatus = { navController.navigate(OwnerPage.MGR_STATUS.route) },
                         onMenu = { navController.navigate(OwnerPage.MGR_MENU.route) },
@@ -126,8 +126,8 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     )
                     OwnerPage.MGR_PREVIEW -> OwnerPreviewHtmlV4Screen(
                         state = mockState, viewModel = data,
-                        onBack = { navController.popBackStack() },
-                        onManage = { navController.popBackStack() },
+                        onBack = { navController.returnToOwnerManagerSafely() },
+                        onManage = { navController.returnToOwnerManagerSafely() },
                     )
                     OwnerPage.MGR_MENU -> OwnerMenuQuickEntryScreen(
                         state = mockState,
@@ -179,4 +179,21 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
             }
         }
     }
+}
+
+/**
+ * A fast click on "미리보기 -> 관리 -> 미리보기" can arrive while the outgoing
+ * Compose destination is still being drawn. Never use an unqualified popBackStack
+ * for that return action: a stale second click must not pop the manager itself.
+ */
+internal fun NavHostController.returnToOwnerManagerSafely(): Boolean {
+    if (currentDestination?.route != OwnerPage.MGR_PREVIEW.route) return false
+    return popBackStack(OwnerPage.MGR_HOME.route, inclusive = false)
+}
+
+/** Ignore duplicate/stale clicks unless the manager is the active destination. */
+internal fun NavHostController.openOwnerManagerPreviewSafely(): Boolean {
+    if (currentDestination?.route != OwnerPage.MGR_HOME.route) return false
+    navigate(OwnerPage.MGR_PREVIEW.route) { launchSingleTop = true }
+    return true
 }
