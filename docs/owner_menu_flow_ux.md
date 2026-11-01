@@ -6,7 +6,7 @@
 | 구현 | I3-P23 검수 화면, I3-P27 업로드·처리·게시 흐름 (남호진) |
 | 시안 | Claude Design 캔버스 "사장님 메뉴 등록 (P25)" — https://claude.ai/artifact/9VyzrvkQx42FxiX5bH14BU (재생 버튼으로 화면을 눌러 볼 수 있다. 공유받아야 열린다) |
 | 따르는 문서 | `DESIGN.md`(색·글꼴·크기·5.2 업주 흐름), `Tokens.kt`, `docs/android_icons.md`(`BmIcon`), `docs/frontend_backend_api_spec.md` 4~9장, `docs/menu_ai_matching_flow.md` |
-| 기준 코드 | `main` 9d77792 (#68 LLM 매칭 층 포함, `MATCHING_LLM_ENABLED`는 꺼짐), 검수 응답 `sourceBox`는 I3-P25 백엔드 PR |
+| 기준 코드 | `main` 2a70c0d (#68 LLM 매칭 층 포함, `MATCHING_LLM_ENABLED`는 꺼짐, #75 `GET /api/me/bars`, #83 v4 매장 관리 홈), 검수 응답 `sourceBox`는 I3-P25 백엔드 PR(#77) |
 
 이 문서는 화면과 동작의 명세이며 API 계약을 바꾸지 않는다. 계약에 없는 것은 10장에 "없을 때의 대체 동작"과 함께 적었다. 화면 배치·문구는 시안이 기준이고, 시안에 보이지 않는 규칙(분류, 버튼이 켜지는 조건, 오류, 상태 보존)은 이 문서가 기준이다. 둘이 다르면 이 문서를 따르고 박진우에게 알린다.
 
@@ -47,14 +47,14 @@
 
 | 화면 | API | 있음 |
 |---|---|---|
-| H0 내 바 | `GET /api/me/bars`(내 업장), `GET /api/bars/{barId}/menu`(게시된 메뉴, `publishedAt`), `GET /api/bars/{barId}/menu-imports`(최근 작업, `?status=active`로 진행 중 작업) | `me/bars`는 I3-P7에서 만드는 중. 나머지는 있음 |
+| H0 내 바 | `GET /api/me/bars`(내 업장, 명세 3.11.9), `GET /api/bars/{barId}/menu`(게시된 메뉴, `publishedAt`), `GET /api/bars/{barId}/menu-imports`(최근 작업, `?status=active`로 진행 중 작업) | 있음 |
 | U1 사진 고르기 | `POST /api/bars/{barId}/menu-imports` (multipart `mode`, `ownerNote`, `images`) | 있음 |
 | U2 읽는 중, U3 읽기 실패 | `GET /api/menu-imports/{id}` (`status = uploaded·processing·failed`) | 있음 |
 | S1~S6 검수 | `GET /api/menu-imports/{id}` (`status = ready_for_review`, 명세 5.4), `GET /api/catalog/products`, `GET /api/catalog/brands` | 있음 |
 | S7~S9 게시 | `POST /api/menu-imports/{id}/review-and-apply` (명세 8장) | 있음 |
-| 검수 그만두기 | `POST /api/menu-imports/{id}/cancel` (명세 5.7) | **없음**(10장) |
+| 검수 그만두기 | `POST /api/menu-imports/{id}/cancel` (명세 5.7) | 명세에만 있고 서버에 **없음**(10장 B3) |
 
-**권한:** 지금은 위 API가 모두 운영자(operator) 전용이다. 업장의 승인된 업주가 부를 수 있게 하는 일은 I3-P22(양해울)다. 그 전에는 운영자 계정으로 같은 흐름을 확인한다.
+**권한:** `me/bars`를 뺀 위 API는 지금 운영자(operator) 전용이다(서버 라우트 설명 "Operator only"). 업장의 승인된 업주가 부를 수 있게 하는 일은 I3-P22(양해울)다. 그 전에는 운영자 계정으로 같은 흐름을 확인한다.
 
 ### 2.2 검수 응답에서 쓰는 필드
 
@@ -121,8 +121,8 @@
   - 폭은 화면 폭에 맞추고 높이는 비율대로, 최소 48dp·최대 120dp. 모서리 `BottleMapRadii.small`(8dp).
   - 불러오는 중에는 같은 크기의 `surface` 칸, 실패하면 아래 종이 띠로 바꾼다.
   - 대체 텍스트: "메뉴판 {n}의 줄: {rawText}".
-- **`sourceBox`가 `null`이면(또는 사진을 못 불러오면): 종이 띠.** 배경 `#E7DDCB`(병 일러스트 팔레트의 `labelChoices[0]`), 글자 `#2A231D`, 명조 18sp Bold. `rawText`의 이름 부분, 점선, 옵션 글자(예: `시그나토리 쿨일라13 ········ 20,000`)를 한 줄에, 길면 줄바꿈.
-- 아래에 가격 줄: `20,000원` + `· 잔` 또는 `30ml`(가격 먼저, `DESIGN.md` 6.6). 가격이 `null`이면 가격 줄을 빼고 카드가 PRICE 단계를 묻는다. 오른쪽에 글자 버튼 "원본 사진 보기"(6.3).
+- **`sourceBox`가 `null`이면(또는 사진을 못 불러오면): 종이 띠.** 배경 `#E7DDCB`(병 일러스트 팔레트의 `labelChoices[0]`), 글자 `#2A231D`, Pretendard `bodyLarge`(16sp) SemiBold. 명조는 화면 제목에만 쓴다(`DESIGN.md` 글꼴 규칙, 9장 38). `rawText`의 이름 부분, 점선, 옵션 글자(예: `시그나토리 쿨일라13 ········ 20,000`)를 한 줄에, 길면 줄바꿈.
+- 아래에 가격 줄: `20,000원` + `· 잔` 또는 `30ml`(가격 먼저, `DESIGN.md` 6.6). 가격이 `null`이면 가격 줄을 빼고 카드가 PRICE 단계를 묻는다. 오른쪽에 글자 버튼 "원본 사진 보기"(6.3), 가격 줄 옆에 "가격·용량 고치기"(5.6 PRICE).
 
 ### 3.3 `ProductChoiceRow`와 상품 두 줄 표기
 
@@ -176,15 +176,17 @@
 
 ### 4.1 H0 내 바 (캔버스 "01 내 바")
 
+> 화면 배치는 최종 오너 v4 시안의 "매장 관리" 홈(`OwnerManagementHomeScreen`, #83)이 기준이다. 이 절에서는 메뉴 등록으로 들어가는 규칙(게시된 메뉴 수·갱신일, 최근 작업 상태, 진행 중 작업 이어서 하기)만 따른다. 아래 배치 설명은 v4 홈이 없을 때의 참고다.
+
 - 위: "사장님"(라벨) + 마이페이지(`ACCOUNT`). 업장 이름은 명조 24sp. 업장이 여럿이면 업장 고르기는 I3-P39 "내 바 관리"에서 정하고 이 화면은 고른 업장 하나를 보여 준다.
 - 게시된 메뉴 칸: `MANAGE_BAR` + "게시된 메뉴 {n}개"(`GET /api/bars/{barId}/menu`의 상품 수) + `UPDATED` "{M월 D일} 갱신"(`publishedAt`, 없으면 "아직 게시한 메뉴가 없어요") + "메뉴판 보기" 행.
 - 최근 작업: `GET /api/bars/{barId}/menu-imports` 최근 2개. 행 = 모드("메뉴판 전체 교체" / "일부 수정") + "{날짜} · 사진 {imageCount}장" + 상태("게시함" `applied`, "확인 중" `ready_for_review`, "읽는 중" `uploaded·processing`, "실패" `failed`, "취소" `canceled`). 진행 중 작업을 누르면 그 작업의 U2 또는 S1 요약으로 간다.
-- 주 버튼: `CAMERA` "메뉴판 사진 올리기" → U1. 진행 중 작업(`?status=active`)이 있으면 주 버튼은 "확인하던 메뉴판 이어서 하기"가 되고, 그 아래 글자 버튼 "새 사진 올리기"(10장 취소 API가 생기기 전에는 숨긴다).
+- 주 버튼: `CAMERA` "메뉴판 사진 올리기" → U1. 진행 중 작업(`?status=active`)이 있으면 주 버튼은 "확인하던 메뉴판 이어서 하기"가 되고, 그 아래 글자 버튼 "새 사진 올리기"(10장 취소 API가 생기기 전에는 숨긴다. 그동안 나가는 길은 4.5와 5.8의 "지금 메뉴 그대로 두고 끝내기").
 
 ### 4.2 U1 사진 고르기 ("02 사진 고르기")
 
 - `StepProgress` 1단계. 제목 "메뉴판 사진을 올려 주세요", 부제 "메뉴판 순서대로 5장까지 올릴 수 있어요."
-- 사진 칸: 3열 격자, 3:4 썸네일. 각 사진에 순서 번호(왼쪽 아래)와 빼기(오른쪽 위, 터치 44dp 이상, "{n}번 사진 빼기"). 마지막 칸은 "사진 추가"(`CAMERA`, "2 / 5"): 누르면 [카메라로 찍기] [앨범에서 고르기]. 5장이면 사라진다. 순서 바꾸기는 길게 눌러 끌기(이번 범위에서는 선택).
+- 사진 칸: 3열 격자, 3:4 썸네일. 각 사진에 순서 번호(왼쪽 아래)와 빼기(오른쪽 위, 터치 48dp 이상(보이는 원은 작아도 터치 영역은 48dp), "{n}번 사진 빼기"). 마지막 칸은 "사진 추가"(`CAMERA`, "2 / 5"): 누르면 [카메라로 찍기] [앨범에서 고르기]. 5장이면 사라진다. 순서 바꾸기는 길게 눌러 끌기(이번 범위에서는 선택).
 - 올리기 방식(라디오 두 줄, 필수, 기본값 "전체를 새로"):
   - "메뉴판 전체를 새로 올려요" / "사진에 없는 술은 내릴지 하나씩 물어볼게요." → `mode = full_replace`
   - "일부만 바꿔요" / "사진에 있는 술만 더하거나 가격을 바꿔요." → `mode = partial_update`
@@ -216,13 +218,19 @@
 ### 4.4 U3 읽기 실패 ("03-e 읽기 실패")
 
 - `StepProgress` 2단계를 실패 색으로. 가운데 `ERROR` 아이콘(64dp 원) + 제목 "메뉴판을 읽지 못했어요".
-- 설명: `failedImages > 0`이면 "사진 {total}장 중 {failed}장을 읽지 못했어요.", 아니면 "메뉴판을 처리하지 못했어요." 그다음 줄은 늘 "메뉴판이 화면에 꽉 차게, 흔들리지 않게 다시 찍어 주세요."
+- 설명은 `failure.code`로 나눈다(명세 5.3).
+  - `IMAGE_EXTRACTION_FAILED`(사진을 못 읽음, `failedImages ≥ 1`): "사진 {total}장 중 {failed}장을 읽지 못했어요." + "메뉴판이 화면에 꽉 차게, 흔들리지 않게 다시 찍어 주세요."
+  - `PROCESSING_FAILED`(사진이 아니라 서버 처리 문제, `failedImages`가 0일 수 있음): "메뉴판을 처리하지 못했어요." + "사진 문제는 아니에요. 같은 사진을 잠시 뒤 다시 올려 주세요." 다시 찍으라고 하지 않는다.
+  - 모르는 코드: `PROCESSING_FAILED`와 같은 문구.
 - 서버 `failure.message`는 고정 문구라 이유를 알려 주지 않는다. 어느 사진이 왜 실패했는지 지어내지 않는다.
-- 실패한 작업은 이어서 할 수 없다(명세 5.3). 주 버튼 "사진 다시 올리기" → U1(앞서 고른 사진이 기기에 남아 있으면 미리 채운다). 글자 버튼 "내 바로 돌아가기".
+- 실패한 작업은 이어서 할 수 없다(명세 5.3). 주 버튼 "사진 다시 올리기" → U1(앞서 고른 사진이 기기에 남아 있으면 미리 채운다. `PROCESSING_FAILED`면 같은 사진을 그대로 올릴 수 있게 미리 채운 것을 기본으로 둔다). 글자 버튼 "내 바로 돌아가기".
 
 ### 4.5 처리 뒤 빈 경우
 
-- 읽은 줄이 0개: "메뉴판에서 술을 찾지 못했어요" + `EMPTY` + [사진 다시 올리기]. `full_replace`면 게시하면 내릴 술만 남으므로 게시 버튼을 두지 않는다. (취소 API 전에는 이 작업이 진행 중으로 남는다. 10장)
+- 읽은 줄이 0개: "메뉴판에서 술을 찾지 못했어요" + `EMPTY`. 이 작업은 `ready_for_review`로 남아 있어서, 끝내지 않으면 새 업로드가 `409 ACTIVE_IMPORT_EXISTS`로 막힌다. 그래서 이 화면에는 반드시 나가는 길이 있어야 한다.
+  - 취소 API(10장 B3)가 있으면: 주 버튼 [이 작업 그만두고 사진 다시 올리기] → 확인 → `POST .../cancel` → U1.
+  - 취소 API가 없는 동안: 주 버튼 [지금 메뉴 그대로 두고 끝내기] → 확인 대화상자("지금 게시된 메뉴는 바뀌지 않아요. 메뉴 갱신일은 오늘로 바뀔 수 있어요.") → `review-and-apply`에 `itemDecisions = []`, 모든 `changeDecisions`(모두 `remove`)를 `ignore`로 보낸다. 명세 8.7상 현재 메뉴 항목은 `apply`한 `remove`로만 빠지므로 메뉴는 그대로이고 작업은 `applied`가 되어 새 업로드가 열린다. 성공하면 바로 U1로 간다(완료 화면 없음). 갱신일이 바뀌는지는 양해울 확인 필요(10장 B3).
+  - `full_replace`에서도 게시 버튼(내릴 술만 남은 게시)은 두지 않는다. 내릴지 묻는 카드도 만들지 않는다: 사진을 하나도 못 읽은 작업으로 메뉴 전체를 내리게 하지 않는다.
 - 카드가 0장(모두 자동이고 내릴 술도 없음): 요약을 건너뛰고 S8 "게시할까요?"로 가서 위에 "확인할 줄이 없어요. 모두 자동으로 찾았어요"를 보여 준다.
 
 ---
@@ -353,7 +361,11 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 | 숙성 연수 | `newProductDraft.ageYears`, 없으면 남은 글자 끝의 1~2자리 숫자(뒤에 `년`·`Y`·`yo`가 오거나 아무것도 없을 때만. `1호`, `1984`는 연수가 아님) | − / + (48dp 원) / "없음" |
 | 시리즈 (선택) | `newProductDraft.editionName`, 없으면 브랜드·증류소·연수를 뺀 나머지 글자 | 입력칸(48dp) |
 
-- 그 아래 `surfaceElevated` 칸 "등록될 이름": 병 M + 두 줄 표기(3.3). 그 아래 `bodySmall` "메뉴판 표기 ‘{extractedProductName}’도 검색어로 저장돼요."
+- 그 아래 `surfaceElevated` 칸 "등록될 이름": 병 M + 두 줄 표기(3.3).
+- **메뉴판 표기 저장**: 그 아래 체크 행(48dp, `Role.Checkbox`) "손님 검색어로도 저장 · ‘{extractedProductName}’" + 보조 "메뉴판 글자를 AI가 잘못 읽었을 수 있어요. 철자가 맞을 때만 켜 주세요." **처음엔 꺼져 있다.**
+  - 꺼져 있으면 그 표기를 `isSearchable = false`로 보낸다: 다음 메뉴판 사진에서 같은 표기를 찾는 데만 쓰고 손님 검색에는 쓰지 않는다(`docs/menu_ai_matching_flow.md` "반복되는 내부 OCR 표기"). 켜면 `isSearchable = true`.
+  - 표기가 등록될 이름이나 브랜드 이름과 정규화해서 같으면 행을 숨기고 별칭을 보내지 않는다(같은 글자를 두 번 저장하지 않는다).
+  - 업주가 "시리즈" 등 이름을 고쳤다고 메뉴판 표기를 바꾸지 않는다. 별칭은 메뉴판에 실제로 적힌 글자이고, 고친 이름은 `displayName`으로 간다.
 - **이름 조합**(카탈로그 관례, `ai/catalog/README.md` "독립 병입"): 독립 병입은 브랜드 = 병입사, `editionName` = 증류소(+ 시리즈), `displayName` = `{병입사} {증류소} {연수}` (예: `Signatory Vintage Caol Ila 13`). 일반 제품은 `displayName` = `{브랜드} {연수} {시리즈}`에서 빈 값을 뺀다.
 - **새 브랜드**: 브랜드 행이 "‘크래프트브로스’는 카탈로그에 없어요" 상태가 되고 [새 브랜드로 만들기] [브랜드 찾기]를 보여 준다. [새 브랜드로 만들기]를 눌러야 "영문 이름(선택)" 입력칸이 열리고 행이 정해진다. 정해지기 전에는 [이대로 등록]이 꺼져 있다. 영문 이름이 비면 `canonicalName`은 업주가 확인한 한글 표기다.
 - 버튼: [이대로 등록](주) / `SEARCH` [이미 있는 술이에요](보조 → S5) / "위스키가 아니에요".
@@ -364,7 +376,7 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 - `AUTO`인데 가격이 없는 줄은 PRICE 카드, 다른 카드에서는 상품을 고른 뒤 이어지는 단계다.
 - 본문: 병 M + "자동으로 찾은 술" + 상품. 옵션마다 입력칸("잔 · 30ml 가격", 숫자 키패드, 56dp, 오른쪽 "원"). 이미 가격이 있는 옵션은 입력칸 없이 보여 준다.
 - 하나 이상 입력하면 [저장](주) 켜짐. 1 이상 정수만(명세 8.1). 보조: "메뉴에서 빼기"(`reject`).
-- 이미 읽은 가격을 고치려면 가격 줄 옆 "가격 고치기"(글자 버튼)로 같은 입력을 연다. 모든 카드와 자동 목록 바꾸기 화면에 있다.
+- 이미 읽은 값을 고치려면 가격 줄 옆 "가격·용량 고치기"(글자 버튼)로 옵션 편집을 연다. 모든 카드와 자동 목록 바꾸기 화면에 있다. 옵션마다 세 칸: 이름(`잔`·`병`·`하프` 등, 1~100자), 용량(ml, 1~32767 정수, 숫자 키패드, 비우면 추출값 유지), 가격(1 이상 정수). 바꾼 칸만 `correctedOptionLabel`·`correctedPourMl`·`correctedPriceKrw`로 보낸다(명세 8.1). 추출값을 지워 `null`로 만들 수는 없으므로(명세 8.1) 용량을 지우는 동작은 두지 않는다.
 
 **NOT_MENU "메뉴에 올릴 위스키가 아닌 것 같아요"** (시안 없음: CONFIRM 틀에 상품 칸 없이)
 - 부제 "AI가 이 줄을 술 이름으로 확신하지 못했어요."
@@ -404,14 +416,21 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 - 숫자는 업주 결정에서 센다. "추가/가격 변경" 수는 서버가 최종 계산하므로(명세 8.7) 여기서 보여 주지 않고 완료 화면에서 서버 결과로 보여 준다.
 - **결정하지 않은 카드가 있으면(S7)** 단계는 "확인"에 머물고, 목록에 "아직 확인 안 한 줄 n개"(`primary` 글자), 게시하기는 꺼진다. 그 위 `surfaceElevated` 띠 "n개를 확인해야 게시할 수 있어요" + [이어서 확인 ›](다음 미결정 카드). 꺼진 버튼도 TalkBack이 이유를 읽는다.
 - "줄별로 다시 보기": 모든 줄(자동 포함)과 결정 요약. 누르면 해당 카드(자동은 바꾸기 화면)로 간다.
-- "검수 그만두기": 확인 대화상자 뒤 `POST .../cancel` → 기기 초안 삭제 → H0 내 바. 취소 API가 생기기 전에는 숨긴다(10장).
+- "검수 그만두기": 확인 대화상자 뒤 `POST .../cancel` → 기기 초안 삭제 → H0 내 바. 취소 API가 생기기 전에는 숨기고, 대신 "지금 메뉴 그대로 두고 끝내기"(4.5와 같은 요청: 모든 줄을 게시하지 않는 결정 = 상품 줄 `reject`, 그 밖 `confirm_non_product`, 모든 변경 `ignore`)를 둔다. 결정한 내용이 모두 사라진다는 확인을 받는다.
 - 개발용 빌드에서는 "보낼 요청 보기"로 7장 요청 JSON을 펼쳐 볼 수 있게 해도 좋다.
-- 10장 G7 대체 동작: `full_replace`이고 1순위가 아닌 상품을 고른 줄이 있으면, `GET /api/bars/{barId}/menu`의 현재 `productId`와 비교해 "‘{1순위 상품}’은 지금 메뉴에 남아 있어요" 안내를 이 화면에 보여 준다.
+- **10장 G7 (전체 교체에서 남는 옛 상품)**: `full_replace`이고 1순위가 아닌 상품을 고른 줄이 있으면, 그 줄의 1순위 상품이 (a) `GET /api/bars/{barId}/menu`의 현재 메뉴에 있고, (b) 이 검수의 어느 줄에도 연결되지 않았고, (c) 그 상품의 `remove` 변경이 없으면, 서버는 그 상품을 내리지 않는다(명세 8.7: 현재 메뉴 항목은 `apply`한 `remove`로만 빠진다). 안내만 하고 게시하게 두면 업주가 모르는 사이 옛 술이 남는다. 그래서:
+  - 그런 상품마다 S8에 "지금 메뉴에 남는 술" 칸을 둔다: 두 줄 표기 + "지금 메뉴 · {가격} {용량}" + "전체 교체지만 이 술은 내릴 수 없어서 메뉴에 남아요."
+  - 업주가 술마다 [남겨도 돼요]를 눌러야 게시하기가 켜진다(기본값 없음). 내리려면 [이 술로 되돌리기](그 줄의 결정을 1순위로 바꾸고 그 카드로 이동) 또는 게시하지 않고 운영자에게 문의한다. "내리기" 버튼은 서버가 그 `remove`를 만들 수 있을 때(10장 B4)까지 두지 않는다.
+  - `GET .../menu`를 불러오지 못하면 이 확인을 건너뛰지 않고 게시하기를 끈 채 "지금 메뉴를 불러오지 못했어요" + [다시 시도]를 보여 준다.
 
 ### 5.9 S8-1 게시 중, S9 완료, 게시 실패 ("13 게시 완료", "13-e 게시 실패")
 
 - 게시 중: 게시하기 버튼에 진행 표시 + "게시하는 중이에요". 다른 버튼과 뒤로를 막는다(뒤로는 "게시가 끝날 때까지 기다려 주세요" 알림). 퍼센트 없음.
-- 완료(S9, 명세 8.8 `result`): `StepProgress` 네 칸 모두 지남. `primaryContainer` 원 안에 `PUBLISH`(선택 상태 B) + "메뉴판을 게시했어요"(명조) + "이제 손님이 {업장 이름}의 술을 찾을 수 있어요." 결과 표: 새로 올린 술 `added`, 가격을 바꾼 술 `updated`, 내린 술 `removed`, 카탈로그에 새로 등록 "술 `createdProducts`개 · 브랜드 `createdBrands`개"(0인 행은 숨김). [메뉴판 보기](업장 메뉴) / "닫기"(H0 내 바). 기기의 검수 초안을 지운다.
+- 완료(S9, 명세 8.8 `result`): `StepProgress` 네 칸 모두 지남. `primaryContainer` 원 안에 `PUBLISH`(선택 상태 B) + "메뉴판을 게시했어요"(명조) + "이제 손님이 {업장 이름}의 술을 찾을 수 있어요." 결과 표: 새로 올린 술 `added`, 가격을 바꾼 술 `updated`, 내린 술 `removed`, 카탈로그에 새로 등록 "술 `createdProducts`개 · 브랜드 `createdBrands`개"(0인 행은 숨김). [메뉴판 보기](업장 메뉴) / "닫기"(H0 내 바).
+- 결과 숫자는 `review-and-apply` 성공 응답(명세 8.8)에만 있다. `GET /api/menu-imports/{id}`의 `applied` 응답(명세 5.5)에는 `appliedAt`·`menuBoardId`뿐이다. 그래서:
+  - 성공 응답을 받으면 `result`를 기기 초안에 먼저 저장하고(6.4) 완료 화면을 그린다. 초안은 완료 화면을 닫을 때 지운다.
+  - 응답을 잃었으면(시간 초과 등) 같은 요청을 다시 보낸다. 이미 반영된 작업은 같은 결과를 돌려준다(명세 8.8).
+  - 저장된 `result`가 없는 채로 `applied`를 만나면(다른 기기에서 게시, 앱 재설치, 폴링 중 `applied`) 결과 표를 빼고 "메뉴판을 게시했어요" + "{appliedAt 날짜} 게시" + [메뉴판 보기]만 보여 준다. 숫자를 지어내지 않는다.
 - 게시 실패: 위에 오류 띠(3.5), 아래는 S8 그대로, 주 버튼이 `RETRY` "다시 시도". 문구는 8장 표.
 
 ---
@@ -436,10 +455,10 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 
 ### 6.4 상태 보존 (회전, 프로세스 종료, 앱 재시작)
 
-- 저장 단위: `ReviewDraft(menuImportId, reviewVersion, itemDecisions: Map<extractedItemId, ItemDraft>, removeDecisions: Map<barMenuItemId, Boolean>, currentCardKey, undoStack)`.
+- 저장 단위: `ReviewDraft(menuImportId, reviewVersion, itemDecisions: Map<extractedItemId, ItemDraft>, removeDecisions: Map<barMenuItemId, Boolean>, keepStale: Set<productId>, currentCardKey, undoStack, appliedResult?)`. `keepStale`은 5.8 G7의 [남겨도 돼요], `appliedResult`는 5.9의 성공 응답 `result`.
 - 회전·설정 변경: `ViewModel`이 들고 있다.
 - 프로세스 종료: `SavedStateHandle`에 `menuImportId`, `currentCardKey`를 둔다. 결정 본문은 아래 파일 저장소에서 다시 읽는다.
-- 앱 재시작·나중에 하기: `MenuUploadRetryCache`처럼 앱 내부 저장소의 `ReviewDraftStore`(JSON 파일, 작업 ID별)에 결정할 때마다 저장한다. `applied`·`canceled`가 되면 지운다. 서버에는 중간 저장 API가 없다.
+- 앱 재시작·나중에 하기: `MenuUploadRetryCache`처럼 앱 내부 저장소의 `ReviewDraftStore`(JSON 파일, 작업 ID별)에 결정할 때마다 저장한다. `canceled`가 되면 지우고, `applied`면 완료 화면을 닫을 때 지운다(5.9). 서버에는 중간 저장 API가 없다.
 - 다시 열 때: 서버 응답의 `reviewVersion`이 초안과 같으면 그대로 복원하고 "확인하던 곳부터 이어서 할게요" 알림. 다르면 6.5.
 - 내리기 결정의 키는 `changeId`가 아니라 `barMenuItemId`다. `changeId`는 diff를 다시 만들 때마다 바뀐다(흐름 문서 13장).
 
@@ -471,14 +490,15 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 | 확인 권장에서 [맞아요] | `select_existing_product` | `product` | `productId` = 1순위 |
 | 고르기에서 후보 선택 | `select_existing_product` | `product` | `productId` = 고른 후보(1순위가 아니면 서버가 `manual`로 기록) |
 | 검색해서 선택 | `select_existing_product` | `product` | `productId` = 검색 결과(활성만) |
-| 새 술, 카탈로그 브랜드 | `create_product` | `product` | `brand: {type: "existing", brandId}`, `product: {category: "whisky", displayName, ageYears, editionName, abv: null}`, `aliases: [{aliasText: extractedProductName, languageCode: "ko", isSearchable: true}]` |
+| 새 술, 카탈로그 브랜드 | `create_product` | `product` | `brand: {type: "existing", brandId}`, `product: {category: "whisky", displayName, ageYears, editionName, abv: null}`, `aliases: [{aliasText: extractedProductName, languageCode: "ko", isSearchable: 업주가 "손님 검색어로도 저장"을 켰을 때만 true}]`(표기가 이름과 같으면 `aliases` 생략, 5.6) |
 | 새 술, 새 브랜드 ([새 브랜드로 만들기]를 누른 경우만) | `create_product` | `product` | `brand: {type: "new", canonicalName: 영문 이름 ?: 업주가 확인한 한글 표기, aliases: [{aliasText: 한글 표기, languageCode: "ko"}](영문 이름이 있을 때만)}`, `product`·`aliases`는 위와 같음 |
 | 위스키가 아니에요 (상품 줄) | `reject` | `product` | 없음 |
+| 지금 메뉴 그대로 두고 끝내기 (4.5, 5.8, 취소 API 전) | 상품 줄 `reject`, 그 밖 `confirm_non_product` | 줄의 `effectiveLineType` | 모든 `changeDecisions`는 `ignore` |
 | 메뉴에서 빼기 (`NOT_MENU`) | `confirm_non_product` | `unknown` | 없음 |
 | 메뉴에서 빼기 (가격 카드) | `reject` | `product` | 없음 |
 | 위스키예요 (`NOT_MENU`) → 검색·새 술 | 위의 `select_existing_product` / `create_product` | `product` | 위와 같음 |
 | 제목·설명 줄 (`NON_PRODUCT_AUTO`) | `confirm_non_product` | `effectiveLineType` | 없음 |
-| 가격 입력·고치기 (상품 결정과 함께) | 위 상품 결정 | `product` | `optionDecisions: [{extractedOptionId, correctedPriceKrw}]` 바뀐 옵션만 |
+| 가격·용량·옵션 이름 입력·고치기 (상품 결정과 함께) | 위 상품 결정 | `product` | `optionDecisions: [{extractedOptionId, correctedPriceKrw?, correctedPourMl?, correctedOptionLabel?}]` 바뀐 옵션의 바뀐 칸만 |
 
 - `correctedProductName`, `aliasesToAdd`는 보내지 않는다(11장 D3).
 - 이름 조합에서 빈 값은 빼고 앞뒤 공백을 지운다. `displayName` 1~200자, `editionName` 1~150자, `canonicalName` 1~120자(명세 8.1). 넘으면 카드에서 막는다.
@@ -495,14 +515,14 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
     {"extractedItemId": "…i13", "finalLineType": "product", "action": "create_product",
      "brand": {"type": "existing", "brandId": "…signatory-vintage"},
      "product": {"category": "whisky", "displayName": "Signatory Vintage Caol Ila 13", "ageYears": 13, "editionName": "Caol Ila", "abv": null},
-     "aliases": [{"aliasText": "시그나토리 쿨일라13", "languageCode": "ko", "isSearchable": true}]},
+     "aliases": [{"aliasText": "시그나토리 쿨일라13", "languageCode": "ko", "isSearchable": false}]},
     {"extractedItemId": "…i14", "finalLineType": "product", "action": "create_product",
      "brand": {"type": "new", "canonicalName": "Craft Bros", "aliases": [{"aliasText": "크래프트브로스", "languageCode": "ko"}]},
      "product": {"category": "whisky", "displayName": "Craft Bros 독수리 오형제 1호", "ageYears": null, "editionName": "독수리 오형제 1호", "abv": null},
      "aliases": [{"aliasText": "크래프트브로스 독수리 오형제 1호", "languageCode": "ko", "isSearchable": true}]},
     {"extractedItemId": "…i15", "finalLineType": "unknown", "action": "confirm_non_product"},
     {"extractedItemId": "…i16", "finalLineType": "product", "action": "select_existing_product", "productId": "…bookers",
-     "optionDecisions": [{"extractedOptionId": "…o16a", "correctedPriceKrw": 28000}]}
+     "optionDecisions": [{"extractedOptionId": "…o16a", "correctedPriceKrw": 28000, "correctedPourMl": 30}]}
   ],
   "changeDecisions": [
     {"changeId": "…c-add-i12", "decision": "ignore"},
@@ -511,6 +531,8 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
   ]
 }
 ```
+
+`…i13`은 "손님 검색어로도 저장"을 끈 줄(기본), `…i14`는 켠 줄이다.
 
 ### 7.3 `changeDecisions` 규칙
 
@@ -534,7 +556,7 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 | `502`/`504`/`500`/해석 불가 응답 | "잠시 후 다시 시도해 주세요" + [다시 시도] | 같은 요청 |
 | `503 TEMPORARY_WRITE_CONFLICT` | 같은 문구 | 1초 뒤 한 번 자동 재시도, 또 실패하면 [다시 시도] |
 | `409 REVIEW_OUTDATED` | "메뉴판이 바뀌어서 다시 확인이 필요해요" | `details.reviewUrl` 재조회 → 6.5 |
-| `409 DUPLICATE_PRODUCT_FOUND` | 해당 NEW 카드로 이동, "이미 등록된 술이 있어요" + `existingProduct` 두 줄 표기 + [이 술이에요] [다른 술이에요] | [이 술이에요] → `select_existing_product`. `isActive = false`면 꺼진 버튼 + "판매 중단 상품이라 연결할 수 없어요. 운영자에게 문의해 주세요". [다른 술이에요] → 이름을 고치게 한다 |
+| `409 DUPLICATE_PRODUCT_FOUND` | 해당 NEW 카드로 이동, "이미 등록된 술이 있어요" + `existingProduct` 두 줄 표기 + [이 술이에요] [다른 술이에요] | [이 술이에요] → `select_existing_product`. `isActive = false`면 꺼진 버튼 + "판매 중단 상품이라 연결할 수 없어요. 운영자에게 문의해 주세요". [다른 술이에요] → 그 줄의 메뉴판 표기 별칭을 빼고(겹친 것이 별칭일 수 있다, 명세 9.5 "겹치는 별칭을 빼고 다시 제출"), 이름을 고치게 한다. 같은 줄이 두 번째로 이 오류를 받으면 카드에 "이 이름도 이미 있는 술과 겹쳐요. 이미 있는 술에서 골라 주세요" + [이미 있는 술이에요](S5)를 주 버튼으로 둔다(같은 요청을 되풀이하지 않게) |
 | `409 DUPLICATE_BRAND_FOUND` | 해당 NEW 카드, "같은 브랜드가 이미 있어요" + `existingBrand.canonicalName` + [이 브랜드로] | 브랜드를 `existing`으로 바꾼다 |
 | `422 VALIDATION_FAILED` | `fieldErrors[].path`의 `itemDecisions[i]`를 카드로 바꿔 그 카드로 이동 | `NO_PRICED_OPTION` → 가격 단계, `PRODUCT_INACTIVE` → "판매 중단 상품" + 다시 고르기, `MISSING_*`/`UNKNOWN_*`/`DUPLICATE_*` → 앱 오류이므로 재조회 후 6.5 |
 | `409 INVALID_IMPORT_STATE` | `details.status`에 따라: `applied` → S9, `canceled` → "취소된 작업이에요", 그 밖 → 재조회 | |
@@ -557,7 +579,7 @@ ViewModel 단위 테스트는 시안 시나리오(오드비 메뉴판 2장, 16�
 3. 올리는 중 네트워크를 끊으면 오류 띠 + 다시 시도, 다시 시도는 같은 `Idempotency-Key`로 보낸다.
 4. `409 ACTIVE_IMPORT_EXISTS`면 [이어서 하기]로 그 작업이 열린다.
 5. 읽는 중 문구가 `completedImages`대로 바뀌고, 모두 읽었는데 `processing`이면 "후보를 정리하는 중이에요"다. 퍼센트가 없다.
-6. `failed`면 U3, 문구는 `failedImages` 수만 말하고 이유를 지어내지 않는다.
+6. `failed`면 U3. `IMAGE_EXTRACTION_FAILED`면 못 읽은 사진 수와 다시 찍기 안내, `PROCESSING_FAILED`(`failedImages = 0` 포함)면 다시 찍으라는 말 없이 "같은 사진을 잠시 뒤 다시 올려 주세요"다. 이유를 지어내지 않는다.
 7. 읽는 중 화면을 나갔다 들어와도 같은 작업이 이어진다.
 
 **분류 (P23)**
@@ -579,6 +601,7 @@ ViewModel 단위 테스트는 시안 시나리오(오드비 메뉴판 2장, 16�
 19. 요약의 숫자 합 = 전체 줄 수, "N줄" = 줄 카드 수. 0인 행은 숨는다.
 20. 카드 화면의 진행 표시는 `k / N`뿐이다.
 21. 카드가 0장이면 요약 없이 게시 전 화면으로 간다.
+21-1. 읽은 줄이 0개인 작업에는 나가는 길이 있다: 취소 API가 있으면 취소, 없으면 "지금 메뉴 그대로 두고 끝내기"(`itemDecisions = []`, 모든 변경 `ignore`). 그 뒤 새 업로드가 `ACTIVE_IMPORT_EXISTS` 없이 된다. 이 작업으로 내리기를 묻거나 메뉴를 비우는 게시는 없다.
 
 **결정과 게시**
 22. 미결정 카드가 하나라도 있으면 게시하기가 꺼져 있고 "n개를 확인해야 게시할 수 있어요"가 보인다. "모두 승인" 버튼은 어디에도 없다.
@@ -588,6 +611,10 @@ ViewModel 단위 테스트는 시안 시나리오(오드비 메뉴판 2장, 16�
 26. `remove`는 업주가 고른 대로 `apply`/`ignore`이며, 고르지 않으면 게시할 수 없다. 이 검수에서 연결한 상품의 `remove`는 묻지 않고 `ignore`다.
 27. 같은 상품을 두 줄에 연결하려 하면 경고가 뜬다.
 28. 1순위가 아닌 후보를 고르면 `productId`가 그 후보다.
+28-1. `full_replace`에서 28의 결과로 1순위 상품이 지금 메뉴에 남게 되면(5.8 G7), 그 술마다 [남겨도 돼요]를 누르기 전에는 게시하기가 꺼져 있다. 현재 메뉴를 못 불러오면 게시하기가 꺼져 있다.
+28-2. 새 술의 메뉴판 표기 별칭은 기본 `isSearchable = false`이고, 업주가 "손님 검색어로도 저장"을 켠 줄만 `true`다. 표기가 등록 이름과 같으면 별칭을 보내지 않는다.
+28-3. `DUPLICATE_PRODUCT_FOUND` 뒤 [다른 술이에요]로 다시 보내는 요청에는 그 줄의 메뉴판 표기 별칭이 없다. 같은 줄이 두 번째로 같은 오류를 받으면 "이미 있는 술에서 고르기"가 주 버튼이다.
+28-4. 옵션의 이름·용량·가격을 고칠 수 있고, 고친 칸만 `correctedOptionLabel`·`correctedPourMl`·`correctedPriceKrw`로 간다. 고치지 않은 칸은 요청에 없다.
 
 **되돌리기·이동·보존**
 29. 결정 뒤 [되돌리기]가 결정을 이전 값으로 돌리고 그 카드로 간다.
@@ -597,6 +624,7 @@ ViewModel 단위 테스트는 시안 시나리오(오드비 메뉴판 2장, 16�
 
 **상태와 오류**
 33. 게시 중 네트워크를 끊으면 오류 띠 + [다시 시도], 결정은 그대로, 다시 시도로 게시된다.
+33-1. 게시 성공 직후 앱을 종료했다 다시 열면 저장한 `result`로 완료 화면이 같은 숫자로 보인다. 저장한 `result` 없이 `applied`를 만나면 숫자 없는 완료 화면이다.
 34. `REVIEW_OUTDATED` → 재조회 후 남은 결정이 복원되고 바뀐 부분만 다시 묻는다.
 35. `DUPLICATE_PRODUCT_FOUND` → 해당 NEW 카드로 이동해 [이 술이에요]로 해결된다.
 36. 검색 결과의 판매 중단 상품은 고를 수 없다.
@@ -613,14 +641,16 @@ ViewModel 단위 테스트는 시안 시나리오(오드비 메뉴판 2장, 16�
 | # | 무엇 | 상태 | 없을 때 |
 |---|---|---|---|
 | B1 | 업주가 메뉴 등록·검수·카탈로그 검색 API를 부르는 권한 | I3-P22 (양해울) | 운영자 계정으로 확인 |
-| B2 | `GET /api/me/bars` | I3-P7 (양해울) | 개발용 빌드는 지금처럼 운영자 업장 목록 |
-| B3 | `POST /api/menu-imports/{id}/cancel` (명세 5.7) | 명세에만 있음. 박진우가 양해울과 이야기 중 | "검수 그만두기", "새 사진 올리기"를 숨긴다. 진행 중 작업이 있으면 업주는 그 작업을 이어서 하는 수밖에 없다 |
+| B2 | `GET /api/me/bars` | **있음**(#75, 명세 3.11.9) | — |
+| B3 | `POST /api/menu-imports/{id}/cancel` (명세 5.7) | 명세에만 있고 서버에 없음(양해울). **P27 출시 전에 필요**: 읽은 줄이 0개인 작업과 그만두고 싶은 작업에서 나가는 정상 경로다 | "검수 그만두기", "새 사진 올리기"를 숨기고 "지금 메뉴 그대로 두고 끝내기"(4.5, 5.8: 모든 줄을 게시하지 않고 모든 변경 `ignore`)로 작업을 끝낸다. 이 경로가 메뉴판을 새로 게시해 `publishedAt`(손님에게 보이는 갱신일)을 바꾸는지 양해울 확인 필요. 바꾼다면 취소 API를 먼저 만든다 |
+| B4 | 전체 교체에서 1순위가 아닌 상품을 고른 줄의 옛 1순위 상품 `remove` | 서버가 업주 결정으로 변경을 다시 계산할 때 `remove`를 만들지 않음(G7). 양해울과 정할 것: 제출 결정 기준으로 `remove`를 만들어 주거나, 다시 계산한 diff를 돌려주기(계약 변경) | 5.8 G7: 남는 술마다 [남겨도 돼요]를 받기 전에는 게시하지 않는다 |
 | G1 | 줄 좌표 `sourceBox` | I3-P25 백엔드 PR | 종이 띠(3.2) |
 | G2 | `newProductDraft`가 비어 있음 | I3-P30 뒤 매칭 쪽에서 채운다(박진우): 규칙 매칭이 찾은 브랜드·연수, LLM 번역의 병입사·증류소·브랜드·연수·에디션 | 5.6 NEW의 대체 규칙 |
 | G4 | 비위스키 판정 | G2와 함께: LLM 번역의 `kind` | 모든 상품 카드에 "위스키가 아니에요" |
 | G5 | 비위스키 상품 줄을 기록할 동작 | `reject` + `finalLineType = product`로 보낸다 | — |
 | G6 | 한 줄에 두 상품(`multiProduct`) | 한 항목에 상품 하나만 연결된다 | 하나만 고르게 하고 카드에 안내 |
-| G7 | 1순위가 아닌 상품을 고르면 기존 메뉴의 1순위 상품이 남음 | `full_replace` 임시 diff에 그 상품의 `remove`가 없다 | S8에 "지금 메뉴에 남아 있어요" 안내 |
+| G7 | 1순위가 아닌 상품을 고르면 기존 메뉴의 1순위 상품이 남음 | `full_replace` 임시 diff에 그 상품의 `remove`가 없다(B4) | S8에서 술마다 [남겨도 돼요]를 받아야 게시(5.8). 안내만 하고 게시하게 두지 않는다 |
+| G10 | `applied` 조회 응답에 결과 숫자 없음 | 명세 5.5에는 `appliedAt`, `menuBoardId`뿐 | 성공 응답의 `result`를 기기에 저장해 쓰고, 없으면 숫자 없는 완료 화면(5.9) |
 | G8 | 같은 상품을 두 줄에 연결하면 첫 줄만 게시 | 서버는 조용히 버린다 | 카드에서 미리 경고 |
 | G9 | 중복 오류의 `details` | 코드에는 `extractedItemId`, `existingBrand{brandId, canonicalName}`, `existingProduct.isActive`, `reviewUrl`이 있으나 명세 9.5에 없다 | 코드 기준으로 읽고, 없으면 재조회 |
 
@@ -642,6 +672,9 @@ Android DTO에는 계약에 있는 `proposedChanges[].before`가 빠져 있다. 
 | D8 | 중간 결정을 기기에만 저장 | 서버 중간 저장 API 없이 기기 저장 |
 | D9 | 서버 LLM 층(`MATCHING_LLM_ENABLED`)을 켜는 시점 | P23 병합과 9장 수용 기준 통과 뒤, I3-P32 결정에 따름 |
 | D10 | 병 일러스트 | 브랜드별 규칙이 정해질 때까지 모든 상품이 같은 중립 병(3.3) |
+| D11 | 새 술의 메뉴판 표기를 손님 검색어로 저장할지 | 기본은 저장하지 않음(`isSearchable = false`, 매칭에만). 업주가 철자를 확인하고 켠 경우만 검색어. OCR 오타가 손님 검색에 영구히 남지 않게 한다 |
+| D12 | 전체 교체에서 내릴 수 없는 옛 상품 | 술마다 업주가 "남겨도 돼요"를 고른 뒤에만 게시(B4 전까지) |
+| D13 | 취소 API 전의 나가는 길 | "지금 메뉴 그대로 두고 끝내기". 갱신일이 바뀌면 B3를 먼저(양해울 확인) |
 
 ---
 
@@ -668,11 +701,14 @@ sealed interface LocalDecision {
     data class SelectProduct(val productId: String, val source: Source /* AUTO, TOP, CANDIDATE, SEARCH */) : LocalDecision
     data class CreateProduct(val brand: BrandChoice /* Existing(brandId) | New(canonicalName, koAlias?) */,
                              val displayName: String, val ageYears: Int?, val editionName: String?,
-                             val menuSpelling: String) : LocalDecision
+                             val menuSpelling: String?,              // null: 보내지 않음(이름과 같음, 중복 오류 뒤 뺌)
+                             val menuSpellingSearchable: Boolean = false) : LocalDecision  // D11
     data object NotWhisky : LocalDecision        // reject, finalLineType = effectiveLineType
     data object NotMenuLine : LocalDecision      // confirm_non_product
 }
-data class ItemDraft(val decision: LocalDecision?, val priceFixes: Map<String, Int> = emptyMap())
+data class OptionFix(val label: String? = null, val pourMl: Int? = null, val priceKrw: Int? = null)  // null = 고치지 않음
+data class ItemDraft(val decision: LocalDecision?, val optionFixes: Map<String, OptionFix> = emptyMap(),
+                     val duplicateErrors: Int = 0)   // 8장 DUPLICATE_PRODUCT_FOUND 횟수
 ```
 
 ViewModel 상태(`StateFlow<ExtractionReviewUiState>`):
@@ -696,7 +732,7 @@ sealed interface ExtractionReviewUiState {
 }
 ```
 
-동작: `decide(cardKey, decision)`, `undo()`, `goTo(index)`, `next()`, `previous()`, `setRemove(barMenuItemId, remove: Boolean)`, `setPrice(itemId, optionId, krw)`, `search(query)`, `searchBrands(query)`, `submit()`, `retrySubmit()`, `cancelImport()`(B3 뒤), `reload()`.
+동작: `decide(cardKey, decision)`, `undo()`, `goTo(index)`, `next()`, `previous()`, `setRemove(barMenuItemId, remove: Boolean)`, `setOptionFix(itemId, optionId, fix)`, `keepStale(productId)`(5.8 G7), `search(query)`, `searchBrands(query)`, `submit()`, `retrySubmit()`, `endWithoutChanges()`(B3 전, 4.5·5.8), `cancelImport()`(B3 뒤), `reload()`.
 
 ### 12.3 네트워크·데이터 계층
 
@@ -708,7 +744,8 @@ sealed interface ExtractionReviewUiState {
 ### 12.4 단위 테스트 (최소)
 
 - `buildReviewCards`: 9장 8~16번.
-- `buildReviewRequest`: 모든 항목·변경 포함(23), 새 브랜드 경로(24), 비위스키(25), 내리기(26), 가격 수정 `optionDecisions`, 미결정이면 예외.
+- `buildReviewRequest`: 모든 항목·변경 포함(23), 새 브랜드 경로(24), 비위스키(25), 내리기(26), 메뉴판 표기 별칭 `isSearchable`·생략(28-2), 중복 오류 뒤 별칭 뺌(28-3), 옵션 수정은 바뀐 칸만(28-4), 끝내기 요청(21-1), 미결정이면 예외.
+- `staleTopProducts(dto, draft, currentMenu)`: 5.8 G7의 (a)~(c)와 [남겨도 돼요] 뒤 게시 가능(28-1).
 - `reconcile`: 같은 버전 복원, 항목 삭제, `remove` 재연결(6.5).
 - `cropRect`: 여유 포함, 사진 끝에서 자르기, 0–1000 좌표의 비율 변환.
 
