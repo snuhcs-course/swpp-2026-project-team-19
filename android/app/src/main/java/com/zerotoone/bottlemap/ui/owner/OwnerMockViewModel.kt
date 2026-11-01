@@ -12,6 +12,8 @@ import com.zerotoone.bottlemap.data.owner.MockApplicationStatus
 import com.zerotoone.bottlemap.data.owner.MockRegistrationDraft
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.MockPhotoExtractionSource
+import com.zerotoone.bottlemap.data.owner.MockPhoto
+import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.data.owner.MockPreview
 import com.zerotoone.bottlemap.data.owner.MockReviewDecision
 import com.zerotoone.bottlemap.data.owner.OwnerMockRepository
