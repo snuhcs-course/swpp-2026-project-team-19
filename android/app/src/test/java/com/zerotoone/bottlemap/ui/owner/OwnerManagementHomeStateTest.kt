@@ -205,17 +205,21 @@ class OwnerManagementHomeStateTest {
         val bar = withoutTimes.copy(
             lastMenuPublishedAtEpochMs = postedAt, lastVerifiedAtEpochMs = checkedAt)
         assertEquals(3L, ownerMenuFreshness(bar, time(20)).first)
-        assertEquals(94, ownerMenuFreshness(bar, time(20)).second)
+        assertEquals(10, ownerMenuFreshness(bar, time(20)).second)
         assertEquals("10.11", ownerDisplayDate(postedAt))
         assertEquals("10.28", ownerDisplayDate(checkedAt))
     }
 
-    @Test fun freshnessStartsFullAndDropsFromLeftToRightOverTime() {
+    @Test fun menuAgeGaugeStartsEmptyAndFillsFromLeftToRightByDay30() {
         val confirmed = day.atStartOfDay(ownerSeoulZone).toInstant().toEpochMilli()
         val bar = MockBar("bar", "Test", "Address", lastVerifiedAtEpochMs = confirmed)
-        assertEquals(100, ownerMenuFreshness(bar, time(20)).second)
+        assertEquals(0, ownerMenuFreshness(bar, time(20)).second)
+        val halfway = day.plusDays(15).atStartOfDay(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals(50, ownerMenuFreshness(bar, halfway).second)
+        val full = day.plusDays(30).atStartOfDay(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals(100, ownerMenuFreshness(bar, full).second)
         val later = day.plusDays(45).atStartOfDay(ownerSeoulZone).toInstant().toEpochMilli()
-        assertEquals(0, ownerMenuFreshness(bar, later).second)
+        assertEquals(100, ownerMenuFreshness(bar, later).second)
         val novemberFifth = LocalDate.of(2026, 11, 5)
         assertEquals("11.05", ownerDate(novemberFifth.toEpochDay()))
     }
