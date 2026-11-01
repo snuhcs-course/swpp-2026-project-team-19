@@ -66,6 +66,19 @@ private sealed interface NearbyMapStatus {
     data object Error : NearbyMapStatus
 }
 
+/**
+ * Observes native map down events even if an SDK child view consumes the gesture.
+ * Does not intercept or consume touches: native panning, pin clicks and zoom remain intact.
+ */
+internal class MapTouchImeDismissLayout(
+    context: android.content.Context, private val onDown: () -> Unit,
+) : FrameLayout(context) {
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) onDown()
+        return super.dispatchTouchEvent(event)
+    }
+}
+
 @Composable
 fun NearbyKakaoMap(
     origin: NearbyCoordinate,
@@ -227,13 +240,8 @@ fun NearbyKakaoMap(
                 // hierarchy. Observe ACTION_DOWN in the Android View parent without
                 // intercepting or consuming the gesture, preserving pan/zoom/markers.
                 AndroidView(factory = { context ->
-                    object : FrameLayout(context) {
-                        override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-                            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                                currentMapTouch.value.invoke()
-                            }
-                            return super.dispatchTouchEvent(event)
-                        }
+                    MapTouchImeDismissLayout(context) {
+                        currentMapTouch.value.invoke()
                     }.apply {
                         addView(view, FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.MATCH_PARENT,
