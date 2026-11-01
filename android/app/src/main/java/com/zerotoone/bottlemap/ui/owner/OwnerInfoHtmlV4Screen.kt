@@ -169,9 +169,11 @@ fun OwnerInfoHtmlV4Screen(
         .filterNot { candidate -> selectedTags.any { it.equals(candidate, ignoreCase = true) } }
         .filter { it.contains(query.trim(), ignoreCase = true) }
         .take(7)
-    val canCreate = query.trim().isNotEmpty() &&
-        (OWNER_HTML_V4_TAGS + selected?.first?.bars.orEmpty().flatMap { it.tags })
-            .none { it.equals(query.trim(), ignoreCase = true) }
+    val canCreate = canCreateOwnerTagDraft(
+        query,
+        OWNER_HTML_V4_TAGS + selected?.first?.bars.orEmpty().flatMap { it.tags },
+        selectedTags,
+    )
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val validation = barInfoError(name, intro, address, phone, pour)
