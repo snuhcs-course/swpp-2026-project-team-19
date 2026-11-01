@@ -184,7 +184,7 @@ fun OwnerPreviewHtmlV4Screen(
                     }
                 }
                 bar.description?.takeIf { it.isNotBlank() }?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall)
+                    Text(it, color = V4Color.sub, fontSize = 12.sp)
                 }
                 if (bar.tags.isNotEmpty()) {
                     FlowRow(Modifier.fillMaxWidth(),
@@ -239,27 +239,32 @@ fun OwnerPreviewHtmlV4Screen(
                 }
                 when (expanded) {
                     "hours" -> {
-                        val days = listOf("월", "화", "수", "목", "금", "토", "일")
-                        days.forEachIndexed { index, label ->
-                            val setting = bar.weeklyHours.firstOrNull {
-                                it.isoDayOfWeek == index + 1
-                            }
-                            Row(Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(label)
-                                Text(when {
-                                    setting == null -> "미설정"
-                                    setting.closed -> "휴무"
-                                    else -> {
-                                        val start = setting.openMinutes
-                                        val end = setting.closeMinutes
-                                        if (start == null || end == null) "미설정"
-                                        else "%02d:%02d – %s%02d:%02d".format(
-                                            start / 60, start % 60,
-                                            if (setting.closesNextDay) "익일 " else "",
-                                            end / 60, end % 60)
-                                    }
-                                })
+                        Column(Modifier.fillMaxWidth().background(V4Color.surface,
+                            RoundedCornerShape(9.dp)).padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            val days = listOf("월", "화", "수", "목", "금", "토", "일")
+                            days.forEachIndexed { index, label ->
+                                val setting = bar.weeklyHours.firstOrNull {
+                                    it.isoDayOfWeek == index + 1
+                                }
+                                Row(Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(label, color = V4Color.sub, fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold)
+                                    Text(when {
+                                        setting == null -> "미설정"
+                                        setting.closed -> "휴무"
+                                        else -> {
+                                            val start = setting.openMinutes
+                                            val end = setting.closeMinutes
+                                            if (start == null || end == null) "미설정"
+                                            else "%02d:%02d – %s%02d:%02d".format(
+                                                start / 60, start % 60,
+                                                if (setting.closesNextDay) "익일 " else "",
+                                                end / 60, end % 60)
+                                        }
+                                    }, color = V4Color.text, fontSize = 11.sp)
+                                }
                             }
                         }
                     }
