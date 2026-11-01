@@ -102,6 +102,27 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun discountedAndRegularOptionsKeepPriceRightEdgeAligned() {
+        val repo = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val now = System.currentTimeMillis()
+        repo.saveBrand(MockBrand("brand-l", "라가불린"))
+        repo.saveCatalogProduct(MockCatalogProduct("prod-l", "brand-l", "라가불린 10년"))
+        repo.saveMenuItem(MockBarMenuItem("menu-l", "fixture-bar", "prod-l",
+            listOf(MockMenuOption("pour30", pourMl = 30, priceKrw = 10000,
+                    discount = MockDiscount(5000, now - 100000L, now + 100000L)),
+                MockMenuOption("pour45", pourMl = 45, priceKrw = 20000))))
+        val vm = OwnerMockViewModel(repo)
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+            }
+        }
+        val discounted = compose.onNodeWithText("5,000원").fetchSemanticsNode().boundsInRoot.right
+        val normal = compose.onNodeWithText("20,000원").fetchSemanticsNode().boundsInRoot.right
+        assertEquals(normal, discounted, 1f)
+    }
+
     @Test fun activeDiscountShownInOwnerPriceAndEditorOptionHeader() {
         val repo = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
