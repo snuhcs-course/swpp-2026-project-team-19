@@ -540,4 +540,70 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun exactDigitlessCatalogItemIsExplicitlyConfirmedInsteadOfDuplicated() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("brand-cocktail", "바 칵테일"))
+        r.saveCatalogProduct(MockCatalogProduct("canonical-gin-tonic", "brand-cocktail",
+            "진토닉", category = "cocktail"))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithText("위스키", substring = false).performClick()
+        compose.onNodeWithText("칵테일", substring = false).performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextReplacement("진")
+        compose.onNodeWithText("“진토닉”이 맞나요?").assertDoesNotExist()
+        compose.onNodeWithTag("manual-menu-name").performTextReplacement("진토닉")
+        compose.onNodeWithText("“진토닉”이 맞나요?").assertExists()
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithTag("manual-menu-price-0").performScrollTo().performTextReplacement("14000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snap.menuItems.size)
+            assertEquals("canonical-gin-tonic", snap.menuItems.single().productId)
+            assertEquals(1, snap.products.size)
+        }
+    }
+
+    @Test fun switchingPromotionOptionDiscardsOnlyUnappliedPriceEdits() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("promo-brand", "라가불린"))
+        r.saveCatalogProduct(MockCatalogProduct("promo-product", "promo-brand", "위스키 12년"))
+        val now = System.currentTimeMillis()
+        val start = now - 86_400_000L
+        val end = now + 86_400_000L
+        val first = MockMenuOption("promo-first", pourMl = 30, priceKrw = 13000,
+            discount = MockDiscount(11000, start, end))
+        val second = MockMenuOption("promo-second", pourMl = 45, priceKrw = 25000,
+            discount = MockDiscount(21000, start, end))
+        r.saveMenuItem(MockBarMenuItem("promo-row", "fixture-bar", "promo-product",
+            listOf(first, second)))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-promo-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithText("할인").performClick()
+        // Edit first option but intentionally do not press Apply.
+        compose.onNodeWithTag("manual-menu-discount-price").performTextReplacement("8000")
+        compose.onNodeWithText("30ml · 13000원").performClick()
+        compose.onNodeWithText("45ml · 25000원").performClick()
+        compose.onNodeWithTag("manual-menu-discount-price").assertTextEquals("21000")
+        compose.onNodeWithTag("manual-menu-discount-price").performTextReplacement("19000")
+        compose.onNodeWithTag("manual-menu-promo-apply").performScrollTo().performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val saved = vm.preview("fixture-bar", now)!!.visibleMenu.single().options
+            assertEquals(first.discount, saved.first().discount)
+            assertEquals(19000, saved[1].discount!!.discountedPriceKrw)
+            assertEquals(start, saved[1].discount!!.startAtEpochMs)
+            assertEquals(end, saved[1].discount!!.endAtEpochMs)
+        }
+    }
+
 }
