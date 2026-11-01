@@ -32,6 +32,12 @@ internal fun withBarInfo(
     )
 }
 
+/** Bound the eager two-column gallery to prevent retaining dozens of decoded bitmaps. */
+internal const val MAX_OWNER_BAR_GALLERY_PHOTOS = 15
+
+internal fun canAddOwnerBarGalleryPhoto(photos: List<MockPhoto>, uri: String): Boolean =
+    photos.size < MAX_OWNER_BAR_GALLERY_PHOTOS && photos.none { it.uri == uri }
+
 internal fun moveBarPhoto(photos: List<MockPhoto>, index: Int, offset: Int): List<MockPhoto> {
     val target = index + offset
     if (index !in photos.indices || target !in photos.indices) return photos
