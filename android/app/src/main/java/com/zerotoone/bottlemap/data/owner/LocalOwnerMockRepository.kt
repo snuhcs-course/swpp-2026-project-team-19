@@ -335,6 +335,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(item.options.all(::validMockMenuOption))
         change { s ->
             require(s.bars.any { it.barId == item.barId })
+            requireNoActiveMenuImport(s, item.barId)
             require(s.products.any { it.productId == item.productId }) { "Unknown catalog product" }
             require(s.menuItems.none {
                 it.barId == item.barId && it.productId == item.productId &&
@@ -350,6 +351,13 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
     }
 
+    private fun requireNoActiveMenuImport(state: MockOwnerSnapshot, barId: String) {
+        require(state.imports.none { it.barId == barId &&
+            it.status in setOf(MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW) }) {
+            "메뉴판 등록·검수 중에는 직접 편집할 수 없어요. 진행 중인 작업을 완료해 주세요."
+        }
+    }
+
     override fun saveManualMenuItem(
         item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
     ) {
@@ -358,6 +366,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(item.options.map { it.optionId }.distinct().size == item.options.size)
         change { state ->
             require(state.bars.any { it.barId == item.barId }) { "Unknown bar" }
+            requireNoActiveMenuImport(state, item.barId)
             val product = state.products.firstOrNull { it.productId == item.productId }
                 ?: requireNotNull(newProduct) { "상품을 먼저 확인해 주세요." }
             require(product.productId == item.productId && product.displayName.isNotBlank())
@@ -370,6 +379,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             val oldRow = state.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
             val editableLimit = if (manualMenuCategoryLabel(proposedProduct.category) == "위스키")
                 MANUAL_MENU_MAX_OPTIONS else 1
+            require(oldRow == null || oldRow.options.size <= 10) {
+                "기존 옵션이 10개를 초과해 무손실 수정할 수 없어요."
+            }
             val legacyTail = oldRow?.options?.drop(editableLimit).orEmpty()
             val preservesLegacyTail = oldRow != null && legacyTail.isNotEmpty() &&
                 item.options.size == oldRow.options.size &&
@@ -379,7 +391,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 }
             val directOptions = if (preservesLegacyTail)
                 item.options.take(editableLimit) else item.options
-            val error = manualMenuOptionError(directOptions, proposedProduct.category)
+            val error = manualMenuOptionError(directOptions, proposedProduct.category,
+                oldRow?.options.orEmpty())
             require(error == null) { error ?: "잘못된 가격 옵션" }
             require(item.options.all { it.optionId.isNotBlank() } &&
                 item.options.map { it.optionId }.distinct().size == item.options.size &&
@@ -444,6 +457,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         change { s ->
             val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
                 ?: error("Unknown menu item")
+            requireNoActiveMenuImport(s, row.barId)
             if (row.soldOut == value) s to Unit else s.copy(
                 menuItems = s.menuItems.map {
                     if (it.barMenuItemId == barMenuItemId) it.copy(soldOut = value) else it
@@ -456,6 +470,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         change { s ->
             val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
                 ?: error("Unknown menu item")
+            requireNoActiveMenuImport(s, row.barId)
             s.copy(
                 menuItems = s.menuItems.filterNot { it.barMenuItemId == barMenuItemId },
                 bars = updatedMenuTimestamp(s.bars, row.barId)
@@ -466,6 +481,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
     override fun clearMenuForBar(barId: String) {
         change { s ->
             require(s.bars.any { it.barId == barId })
+            requireNoActiveMenuImport(s, barId)
             val remaining = s.menuItems.filterNot { it.barId == barId }
             if (remaining.size == s.menuItems.size) s to Unit else s.copy(
                 menuItems = remaining,
