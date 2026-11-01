@@ -1,5 +1,8 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import android.graphics.Bitmap
+import android.graphics.Color as AndroidColor
+import androidx.exifinterface.media.ExifInterface
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
@@ -270,6 +273,29 @@ class OwnerBarEditorComposeTest {
         compose.onNodeWithText("45ml").assertExists()
         compose.onNodeWithText("60ml").assertExists()
         compose.onNodeWithText("4,000원").assertExists()
+    }
+
+    @Test fun storedPhotoRendererAppliesExifRotateAndMirrorVariants() {
+        val pixels = Bitmap.createBitmap(2, 3, Bitmap.Config.ARGB_8888)
+        pixels.eraseColor(AndroidColor.WHITE)
+        pixels.setPixel(0, 0, AndroidColor.RED)
+        pixels.setPixel(1, 0, AndroidColor.GREEN)
+        pixels.setPixel(0, 2, AndroidColor.BLUE)
+        val upright = orientOwnerStoredBitmap(pixels, ExifInterface.ORIENTATION_NORMAL)
+        assertEquals(2, upright.width)
+        assertEquals(3, upright.height)
+        assertEquals(AndroidColor.RED, upright.getPixel(0, 0))
+        val rotated = orientOwnerStoredBitmap(pixels, ExifInterface.ORIENTATION_ROTATE_90)
+        assertEquals(3, rotated.width)
+        assertEquals(2, rotated.height)
+        assertEquals(AndroidColor.RED, rotated.getPixel(2, 0))
+        val mirrored = orientOwnerStoredBitmap(pixels, ExifInterface.ORIENTATION_FLIP_HORIZONTAL)
+        assertEquals(2, mirrored.width)
+        assertEquals(AndroidColor.RED, mirrored.getPixel(1, 0))
+        val transposed = orientOwnerStoredBitmap(pixels, ExifInterface.ORIENTATION_TRANSPOSE)
+        assertEquals(3, transposed.width)
+        assertEquals(2, transposed.height)
+        assertEquals(AndroidColor.RED, transposed.getPixel(0, 0))
     }
 
     @Test fun photoEditorUsesImmediateActionsAndDoneButton() {
