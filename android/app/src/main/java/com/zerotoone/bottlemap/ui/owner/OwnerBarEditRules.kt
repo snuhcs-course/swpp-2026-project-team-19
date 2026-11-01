@@ -87,7 +87,7 @@ internal fun moveSecondaryBarPhoto(
 
 /** HTML's "평일에 복사" applies Monday to Tue-Fri only. */
 internal fun copyMondayToWeekdays(hours: List<MockWeeklyHours>): List<MockWeeklyHours> {
-    val monday = hours.firstOrNull { it.isoDayOfWeek == 1 }
+    val monday = hours.firstOrNull { it.isoDayOfWeek == 1 } ?: return hours
     return (hours.filterNot { it.isoDayOfWeek in 2..5 } +
         (2..5).mapNotNull { monday?.copy(isoDayOfWeek = it) })
         .sortedBy { it.isoDayOfWeek }
