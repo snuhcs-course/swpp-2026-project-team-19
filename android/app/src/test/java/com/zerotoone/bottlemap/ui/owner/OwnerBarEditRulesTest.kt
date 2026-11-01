@@ -99,6 +99,27 @@ class OwnerBarEditRulesTest {
         assertEquals(existing, copyMondayToWeekdays(existing))
     }
 
+    @Test fun holidayToggleKeepsPreviouslyEnteredHoursInDraft() {
+        val prior = MockWeeklyHours(2, false, 19 * 60, 2 * 60, closesNextDay = true)
+        val closed = toggleWeeklyDayClosed(prior, 2, true)
+        assertEquals(true, closed?.closed)
+        assertEquals(prior.openMinutes, closed?.openMinutes)
+        assertEquals(prior.closeMinutes, closed?.closeMinutes)
+        assertEquals(prior.closesNextDay, closed?.closesNextDay)
+        assertEquals(prior, toggleWeeklyDayClosed(closed, 2, false))
+
+        // A weekday that was not configured before checking "휴무"
+        // returns to the unset state rather than inventing incomplete hours.
+        val unsetClosed = toggleWeeklyDayClosed(null, 3, true)
+        assertEquals(MockWeeklyHours(3, true), unsetClosed)
+        assertNull(toggleWeeklyDayClosed(unsetClosed, 3, false))
+
+        // Partially entered times must also survive a reversible checkbox.
+        val partial = MockWeeklyHours(4, false, openMinutes = 18 * 60)
+        assertEquals(partial,
+            toggleWeeklyDayClosed(toggleWeeklyDayClosed(partial, 4, true), 4, false))
+    }
+
     @Test fun weeklyHourValidationSeparatesUnsetClosedRegularAndOvernight() {
         val normal = MockWeeklyHours(1, false, 18 * 60, 23 * 60)
         val overnight = MockWeeklyHours(2, false, 18 * 60, 2 * 60, closesNextDay = true)
