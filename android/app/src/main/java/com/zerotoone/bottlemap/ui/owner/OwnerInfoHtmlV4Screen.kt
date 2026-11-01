@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -45,6 +46,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
@@ -168,14 +172,22 @@ fun OwnerInfoHtmlV4Screen(
     val canCreate = query.trim().isNotEmpty() &&
         (OWNER_HTML_V4_TAGS + selected?.first?.bars.orEmpty().flatMap { it.tags })
             .none { it.equals(query.trim(), ignoreCase = true) }
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
     val validation = barInfoError(name, intro, address, phone, pour)
         ?: weeklyHoursError(weekly)
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        V4Toolbar("매장 정보 관리", ::requestExit)
+        V4Toolbar(null, ::requestExit)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                        keyboard?.hide()
+                    })
+                }
                 .padding(horizontal = 20.dp, vertical = 21.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(13.dp),
         ) {
             Text("매장 정보 관리", fontSize = 24.sp, color = V4Color.text,
                 fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
@@ -194,7 +206,8 @@ fun OwnerInfoHtmlV4Screen(
                     verticalAlignment = Alignment.CenterVertically) {
                     Text("매장 사진", fontSize = 16.sp, color = V4Color.text,
                         fontWeight = FontWeight.Bold)
-                    TextButton(onClick = onPhotos) { Text("편집 ›", color = V4Color.primary, fontSize = 12.sp) }
+                    TextButton(onClick = onPhotos) { Text("편집 ›", color = V4Color.primary, fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold) }
                 }
                 if (bar.gallery.isEmpty()) {
                     Text("등록된 사진이 없습니다.", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -247,7 +260,8 @@ fun OwnerInfoHtmlV4Screen(
                     TextButton(onClick = {
                         storedHours = copyMondayToWeekdays(weekly).map(::encodeWeekday)
                         error = null
-                    }) { Text("평일에 복사", color = V4Color.primary, fontSize = 12.sp) }
+                    }) { Text("평일에 복사", color = V4Color.primary, fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold) }
                 }
 
                 WEEKDAY.forEachIndexed { index, dayName ->
@@ -320,8 +334,6 @@ fun OwnerInfoHtmlV4Screen(
                         Spacer(Modifier.fillMaxWidth().height(1.dp).background(V4Color.line))
                     }
                 }
-                Spacer(Modifier.height(2.dp))
-                Spacer(Modifier.fillMaxWidth().height(1.dp).background(V4Color.line))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("매장 태그", color = V4Color.text, fontSize = 16.sp,
                         fontWeight = FontWeight.Bold)
