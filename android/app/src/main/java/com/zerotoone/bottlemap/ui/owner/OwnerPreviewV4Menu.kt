@@ -39,6 +39,8 @@ internal fun ownerV4Category(category: String): String = when (category.lowercas
     "whisky", "whiskey" -> "위스키"
     "brandy" -> "브랜디"
     "cocktail" -> "칵테일"
+    "snack" -> "안주"
+    "otheralcohol" -> "기타 주류"
     "gin" -> "진"
     "rum" -> "럼"
     "wine" -> "와인"
@@ -111,7 +113,7 @@ internal fun OwnerPreviewV4Menu(
                                 color = V4Color.primary)
                         }
                         products.forEach { (item, product) ->
-                            OwnerPreviewV4MenuRow(item, product, nowEpochMs)
+                            OwnerPreviewV4MenuRow(item, product, nowEpochMs, brandName)
                         }
                     }
                 }
@@ -122,7 +124,8 @@ internal fun OwnerPreviewV4Menu(
 
 @Composable
 private fun OwnerPreviewV4MenuRow(
-    item: MockBarMenuItem, product: MockCatalogProduct?, nowEpochMs: Long
+    item: MockBarMenuItem, product: MockCatalogProduct?, nowEpochMs: Long,
+    brandName: String
 ) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 4.dp)
         .background(V4Color.surface, RoundedCornerShape(9.dp))
@@ -149,13 +152,26 @@ private fun OwnerPreviewV4MenuRow(
                     size = Size(8f * unit, 2f * unit))
             }
         }
-        Text(product?.displayName ?: "상품 정보 없음",
+        Text(product?.let {
+                if (ownerV4Category(it.category) == "위스키") {
+                    val rest = it.displayName.removePrefix(brandName).trim()
+                    if (rest.isNotBlank() && it.displayName.startsWith(brandName)) rest
+                    else it.displayName
+                } else it.displayName
+            } ?: "상품 정보 없음",
             modifier = Modifier.weight(1f), color = V4Color.text,
             fontWeight = FontWeight.Bold, fontSize = 12.sp)
         Column(verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.End) {
             item.options.forEach { option ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    val discounted = option.discount?.let {
+                        nowEpochMs >= it.startAtEpochMs && nowEpochMs < it.endAtEpochMs
+                    } == true
+                    if (discounted) Text("할인", color = V4Color.primary, fontSize = 9.sp,
+                        modifier = Modifier.border(1.dp, V4Color.primary,
+                            RoundedCornerShape(4.dp)).padding(horizontal = 3.dp))
                     Text(option.pourMl?.toString()?.plus("ml") ?: option.label.orEmpty(),
                         color = V4Color.text, fontSize = 10.sp)
                     Text("%,d원".format(option.displayPrice(nowEpochMs)),
