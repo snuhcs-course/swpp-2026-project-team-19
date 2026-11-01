@@ -18,6 +18,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zerotoone.bottlemap.data.owner.InMemoryMockOwnerStateStore
 import com.zerotoone.bottlemap.data.owner.LocalOwnerMockRepository
 import com.zerotoone.bottlemap.data.owner.OwnerMockFixtures
+import com.zerotoone.bottlemap.data.owner.MockExceptionKind
+import com.zerotoone.bottlemap.data.owner.MockOperatingException
+import com.zerotoone.bottlemap.data.owner.MockPhoto
+import com.zerotoone.bottlemap.data.owner.MockPhotoKind
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -171,6 +175,54 @@ class OwnerBarEditorComposeTest {
         compose.onNodeWithText("02-1234-5678").assertIsDisplayed()
         compose.onNodeWithTag("owner-preview-manage").performClick()
         compose.runOnIdle { assertEquals(1, manageCount) }
+    }
+
+    @Test fun customerStatusNoteAppearsAboveLabelOnlyWhenRequested() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        val today = ownerToday(System.currentTimeMillis()).toEpochDay()
+        val initial = vm.preview("fixture-bar", 0)!!.bar
+        vm.saveBar(initial.copy(exceptions = listOf(
+            MockOperatingException(
+                "qa-tooltip", MockExceptionKind.CLOSED_TODAY, today, today,
+                note = "내부 사정",
+            )
+        )))
+        compose.setContent {
+            MaterialTheme {
+                OwnerPreviewHtmlV4Screen(vm.state.collectAsState().value, vm, onBack = {})
+            }
+        }
+        compose.onNodeWithText("내부 사정").assertDoesNotExist()
+        compose.onNodeWithTag("owner-preview-status-label").performClick()
+        compose.onNodeWithTag("owner-preview-status-note").assertIsDisplayed()
+        compose.onNodeWithText("내부 사정").assertIsDisplayed()
+        compose.onNodeWithTag("owner-preview-status-label").performClick()
+        compose.onNodeWithText("내부 사정").assertDoesNotExist()
+    }
+
+    @Test fun photoPopupCoversImageAndCloseDoesNotAlterSavedGallery() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        val original = vm.preview("fixture-bar", 0)!!.bar
+        val first = MockPhoto("first-photo", "content://mock/first", MockPhotoKind.BAR_GALLERY)
+        val second = MockPhoto("second-photo", "content://mock/second", MockPhotoKind.BAR_GALLERY)
+        vm.saveBar(original.copy(gallery = listOf(first, second)))
+        compose.setContent {
+            MaterialTheme {
+                OwnerPhotoHtmlV4Screen(vm.state.collectAsState().value, vm, onBack = {})
+            }
+        }
+        compose.onNodeWithTag("owner-photo-tile-1").performClick()
+        compose.onNodeWithTag("owner-photo-action-panel").assertIsDisplayed()
+        compose.onNodeWithText("대표 사진 등록").assertIsDisplayed()
+        compose.onNodeWithText("삭제하기").assertIsDisplayed()
+        compose.onNodeWithText("닫기").performClick()
+        compose.onNodeWithTag("owner-photo-action-panel").assertDoesNotExist()
+        compose.runOnIdle {
+            assertEquals(listOf(first, second),
+                vm.preview("fixture-bar", 0)!!.bar.gallery)
+        }
     }
 
     @Test fun photoEditorUsesImmediateActionsAndDoneButton() {
