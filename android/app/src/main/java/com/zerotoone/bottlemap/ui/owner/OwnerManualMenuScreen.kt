@@ -286,7 +286,8 @@ internal fun OwnerManualMenuScreen(
             if (category == "기타 주류" && alcoholKind.isBlank()) {
                 // Existing catalog/photo entries may have no Mock-only subtype.
                 // Do not require one unless the owner is adding or changing the type.
-                require(old != null && sameCategory && persisted?.otherAlcoholKind.isNullOrBlank()) {
+                require((old != null && sameCategory && persisted?.otherAlcoholKind.isNullOrBlank()) ||
+                    (linkedCatalog != null && linkedCatalog.otherAlcoholKind.isNullOrBlank())) {
                     "주류 종류를 입력해 주세요."
                 }
             }
