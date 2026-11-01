@@ -52,7 +52,7 @@ internal fun OwnerMenuFlatRow(
     val imageLabel = if (soldOut) Color(0xFFB7B7B7) else Color(0xFFE1D2B5)
     Box(Modifier.fillMaxWidth().height(74.dp)
         .background(V4Color.background)
-        .then(if (onSelect != null) Modifier.ownerQuietClick(onSelect) else Modifier)
+        .then(if (onSelect != null) Modifier.ownerQuietClick(onClick = onSelect) else Modifier)
         .testTag("manual-menu-row-" + item.barMenuItemId)) {
         Row(Modifier.fillMaxSize().padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -152,7 +152,7 @@ private fun OwnerMenuRowAction(
     Column(modifier.height(49.dp)
         .background(V4Color.elevated, RoundedCornerShape(7.dp))
         .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
-        .ownerQuietClick(onClick), horizontalAlignment = Alignment.CenterHorizontally,
+        .ownerQuietClick(onClick = onClick), horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
         BmIcon(icon, null, Modifier.size(16.dp), tint = V4Color.sub)
         Spacer(Modifier.height(2.dp))
