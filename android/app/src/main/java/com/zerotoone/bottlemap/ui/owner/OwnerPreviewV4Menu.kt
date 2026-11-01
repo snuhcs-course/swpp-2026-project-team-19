@@ -1,6 +1,10 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -128,7 +132,23 @@ private fun OwnerPreviewV4MenuRow(
         horizontalArrangement = Arrangement.spacedBy(7.dp)) {
         Box(Modifier.size(43.dp).background(V4Color.elevated,
             RoundedCornerShape(5.dp)), contentAlignment = Alignment.Center) {
-            Text("♜", fontSize = 23.sp, color = V4Color.primary)
+            Canvas(Modifier.size(width = 30.dp, height = 38.dp)) {
+                val unit = size.width / 30f
+                drawRoundRect(Color(0xFF967F58),
+                    topLeft = Offset(11f * unit, 1f * unit),
+                    size = Size(8f * unit, 7f * unit),
+                    cornerRadius = CornerRadius(2f * unit))
+                drawRoundRect(Color(0xFF658C7A),
+                    topLeft = Offset(5f * unit, 7f * unit),
+                    size = Size(20f * unit, 30f * unit),
+                    cornerRadius = CornerRadius(4f * unit))
+                drawRect(Color(0xFFE1D2B5),
+                    topLeft = Offset(7f * unit, 18f * unit),
+                    size = Size(16f * unit, 13f * unit))
+                drawRect(Color(0xFFC99D6B),
+                    topLeft = Offset(11f * unit, 20f * unit),
+                    size = Size(8f * unit, 2f * unit))
+            }
         }
         Text(product?.displayName ?: "상품 정보 없음",
             modifier = Modifier.weight(1f), color = V4Color.text,
