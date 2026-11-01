@@ -1,6 +1,13 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,5 +73,31 @@ internal fun V4FormField(
                 }
             }
         )
+    }
+}
+
+@Composable
+internal fun V4CompactCheck(label: String, checked: Boolean, onChange: (Boolean)->Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable { onChange(!checked) },
+        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(Modifier.size(14.dp).background(if (checked) V4Color.primary else
+            V4Color.elevated, RoundedCornerShape(3.dp))
+            .border(1.dp, V4Color.line, RoundedCornerShape(3.dp)),
+            contentAlignment = Alignment.Center) {
+            if (checked) Text("✓", fontSize = 9.sp, color = V4Color.background)
+        }
+        Text(label, color = V4Color.sub, fontSize = 11.sp, maxLines = 1)
+    }
+}
+
+@Composable
+internal fun V4HourButton(text: String, onClick: ()->Unit, modifier: Modifier = Modifier) {
+    Box(modifier.width(75.dp).height(35.dp)
+        .background(V4Color.elevated, RoundedCornerShape(6.dp))
+        .border(1.dp, V4Color.line, RoundedCornerShape(6.dp))
+        .clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+        Text(text, color = V4Color.text, fontSize = 11.sp, maxLines = 1,
+            textAlign = TextAlign.Center)
     }
 }
