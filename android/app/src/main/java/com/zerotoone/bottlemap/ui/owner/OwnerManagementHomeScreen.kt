@@ -171,7 +171,11 @@ fun OwnerManagementHomeScreen(
                         Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        V4BarName(bar.name, modifier = Modifier.weight(1f))
+                        Text(
+                            bar.name, modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
                         OutlinedButton(
                             onClick = onPreview,
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
@@ -418,7 +422,7 @@ fun OwnerOperatingQuickScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text("영업 상태 변경", fontSize = 24.sp,
-                fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
                 color = V4Color.text, modifier = Modifier.padding(bottom = 6.dp))
             if (state == MockOwnerLoadState.Loading) {
                 OwnerLoading("영업 상태 불러오는 중")
@@ -546,9 +550,9 @@ fun OwnerOperatingQuickScreen(
                         fontWeight = FontWeight.Bold)
                     OutlinedTextField(
                         value = note,
-                        onValueChange = { note = it.take(80) },
+                        onValueChange = { note = it.take(100) },
                         placeholder = { Text("예: 내부 사정으로 조기 마감합니다") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().testTag("owner-operating-note"),
                         shape = RoundedCornerShape(9.dp),
                         singleLine = true
                     )
