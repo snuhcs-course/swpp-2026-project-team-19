@@ -53,14 +53,15 @@ fun manualMenuMatches(
     }
     return candidates.any { it.contains(term, ignoreCase = true) }
 }
-fun manualMenuOptionError(options: List<MockMenuOption>, category: String): String? {
+fun manualMenuOptionError(options: List<MockMenuOption>, category: String, original: List<MockMenuOption> = emptyList()): String? {
     if (options.isEmpty() || options.size > MANUAL_MENU_MAX_OPTIONS) return "가격 옵션은 1~3개여야 해요."
     if (manualMenuCategoryLabel(category) != "위스키" && options.size != 1)
         return "이 메뉴는 가격을 하나만 등록할 수 있어요."
-    if (options.any { it.priceKrw !in 1..MAX_OWNER_MENU_PRICE_KRW })
+    if (options.any { option -> option.priceKrw !in 1..MAX_OWNER_MENU_PRICE_KRW &&
+            original.none { it.optionId == option.optionId && it.priceKrw == option.priceKrw } })
         return "가격은 1원 이상, 1억 원 미만이어야 해요."
     if (manualMenuCategoryLabel(category) == "위스키" && options.any {
-            it.label != "Bottle" && (it.pourMl == null || it.pourMl !in 1..32767)
+            it.pourMl != null && it.pourMl !in 1..32767
         }) return "용량을 입력하거나 Bottle 판매를 선택해 주세요."
     if (options.distinctBy { it.identityKey() }.size != options.size)
         return "같은 제품에 동일한 용량 옵션을 중복 등록할 수 없어요."
