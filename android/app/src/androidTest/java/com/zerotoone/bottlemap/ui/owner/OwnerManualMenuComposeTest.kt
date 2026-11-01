@@ -378,10 +378,36 @@ class OwnerManualMenuComposeTest {
             OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
         } }
         for (cat in listOf("gin", "brandy", "rum", "wine")) {
-            compose.onNodeWithText(cat, substring = false).performClick()
+            compose.onNodeWithText(cat, substring = false).performScrollTo().performClick()
             compose.onNodeWithTag("manual-menu-row-menu-$cat").assertExists()
         }
         compose.runOnIdle { assertEquals(4, vm.preview("fixture-bar", 0)!!.visibleMenu.size) }
+    }
+
+    @Test fun activeImportAllowsViewingButBlocksDirectActionsAndUnlocksAfterApply() {
+        val original = MockBarMenuItem("listed", "fixture-bar", "prod-a",
+            listOf(MockMenuOption("pour-a", pourMl = 30, priceKrw = 13000)))
+        val base = OwnerMockFixtures.registeredBar().copy(
+            brands = listOf(MockBrand("brand-a", "브랜드")),
+            products = listOf(MockCatalogProduct("prod-a", "brand-a", "상품 A")),
+            menuItems = listOf(original),
+            imports = listOf(MockMenuImport("job-1", "fixture-bar",
+                MockImportStatus.READY_FOR_REVIEW, 1, emptyList())))
+        val store = InMemoryMockOwnerStateStore(base)
+        val r = LocalOwnerMockRepository(store)
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithText("추가할 메뉴 확인하기").assertExists()
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithText("메뉴 직접 추가").assertDoesNotExist()
+        compose.onNodeWithTag("manual-menu-row-listed").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithText("메뉴 수정").assertDoesNotExist()
+        compose.onNodeWithTag("manual-menu-reset").performScrollTo().performClick()
+        compose.onNodeWithText("전체 메뉴를 초기화할까요?").assertDoesNotExist()
+        compose.runOnIdle { assertEquals(original, r.preview("fixture-bar", 0)!!.visibleMenu.single()) }
     }
 
 }
