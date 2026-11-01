@@ -894,6 +894,7 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 노출되는 `menu_board_entries`에는 `menu_entry_options`가 최소 하나 있어야 한다.
 - 전체 교체 또는 일부 수정의 적용은 트랜잭션으로 처리해 메뉴판이 중간 상태로 노출되지 않게 한다.
 - 최종 확정은 신규 브랜드·상품 중복 재검사와 생성, 추출 결과 확정, diff 재계산, 현재 메뉴판 반영을 모두 포함한 하나의 `SERIALIZABLE` 트랜잭션으로 실행한다. 직렬화 충돌이면 전체를 롤백하고 처음부터 최대 3회 재시도한다. AI 호출과 객체 저장소 작업 같은 외부 부수 효과는 재시도될 수 있는 이 트랜잭션 안에서 실행하지 않는다.
+- 메뉴판이나 메뉴 항목을 바꾸거나 그 상태를 확인해 기록하는 요청(등록 작업 생성, 검수 반영, 직접 편집, 품절 표시, 판매 정보 확인)은 모두 먼저 같은 `bars` 행을 `FOR UPDATE`로 잠그고 차례로 처리한다(API 명세 3.14.1). 잠그는 순서는 `bars` 다음 `menu_imports`다.
 - 한 업장에는 `uploaded`, `processing`, `ready_for_review` 상태의 `menu_imports`가 동시에 하나만 존재해야 한다. PostgreSQL 부분 unique 인덱스와 업장 행 잠금·트랜잭션 검사를 함께 사용해 보장한다.
 - 한 업장에는 `revoked_at IS NULL`인 `bar_owners`가 최대 하나여야 한다. PostgreSQL 부분 unique 인덱스로 보장한다.
 - 한 사용자는 같은 업장에 `status = pending`인 `existing_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending' AND application_type = 'existing_bar'`)로 보장한다.
