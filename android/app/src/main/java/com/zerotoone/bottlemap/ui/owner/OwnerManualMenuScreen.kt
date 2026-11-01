@@ -102,13 +102,16 @@ private fun fromSaved(o: MockMenuOption) = DraftOption(
     o.discount?.endAtEpochMs?.toString().orEmpty()
 )
 private fun toOption(d: DraftOption, whisky: Boolean,
-    original: MockMenuOption? = null): MockMenuOption {
+    original: MockMenuOption? = null, preserveOriginalServing: Boolean = true): MockMenuOption {
     val price = d.price.toIntOrNull() ?: throw IllegalArgumentException("가격을 숫자로 입력해 주세요.")
     require(price in 1..MAX_OWNER_MENU_PRICE_KRW || original?.priceKrw == price) {
         "가격은 1원 이상, 1억 원 미만이어야 해요."
     }
     val ml = if (whisky && !d.bottle) d.ml.toIntOrNull() else null
-    if (whisky && !d.bottle && !(original != null && original.pourMl == null && d.ml.isBlank()))
+    val unchangedLegacyNullPour = preserveOriginalServing && original != null &&
+        original.pourMl == null && d.ml.isBlank() &&
+        original.label?.trim()?.lowercase() !in listOf("bottle", "병")
+    if (whisky && !d.bottle && !unchangedLegacyNullPour)
         require(ml != null && ml in 1..32767) {
         "용량을 입력하거나 Bottle 판매를 선택해 주세요."
     }
@@ -135,7 +138,8 @@ private fun toOption(d: DraftOption, whisky: Boolean,
             start.atStartOfDay(ownerManualZone).toInstant().toEpochMilli(),
             end.plusDays(1).atStartOfDay(ownerManualZone).toInstant().toEpochMilli())
     }
-    val keepOriginal = original != null && original.optionId == d.id &&
+    val keepOriginal = preserveOriginalServing &&
+        original != null && original.optionId == d.id &&
         (if (whisky) {
             if (d.bottle) original.pourMl == null &&
                 original.label?.trim()?.lowercase() in listOf("bottle", "병")
@@ -268,7 +272,8 @@ internal fun OwnerManualMenuScreen(
             val editedOptions = (if (whisky) draftOptions else draftOptions.take(1))
                 .mapIndexed { index, draft ->
                     val parsed = toOption(draft, whisky,
-                        old?.options?.firstOrNull { it.optionId == draft.id })
+                        old?.options?.firstOrNull { it.optionId == draft.id },
+                        preserveOriginalServing = sameCategory)
                     // Preserve imported serving labels/identity when editing a
                     // single-price category without switching its category.
                     if (!whisky && sameCategory) {
