@@ -420,7 +420,8 @@ internal fun OwnerManualMenuScreen(
                                     }
                                     if (!d.bottle) V4FormField("용량 (ml)", d.ml, { v ->
                                         changeOption(i) { it.copy(ml = v.filter(Char::isDigit)) }
-                                    }, keyboardType = KeyboardType.Number)
+                                    }, keyboardType = KeyboardType.Number,
+                                        testTag = "manual-menu-ml-" + i)
                                 }
                                 V4FormField("가격 (원)", d.price, { v ->
                                     changeOption(i) { it.copy(price = v.filter(Char::isDigit)) }
