@@ -571,14 +571,14 @@ internal fun OwnerManualMenuScreen(
                                             keyboardType = KeyboardType.Number,
                                             testTag = "manual-menu-ml-" + i)
                                         V4FormField("가격 (원)", d.price, { v ->
-                                            changeOption(i) { it.copy(price = ownerPriceInput(v)) }
+                                            changeOption(i) { it.copy(price = ownerPriceInput(it.price, v)) }
                                         }, modifier = Modifier.weight(1f),
                                             keyboardType = KeyboardType.Number,
                                             testTag = "manual-menu-price-" + i)
                                     }
                                 } else {
                                     V4FormField("판매 가격 (원)", d.price, { v ->
-                                        changeOption(i) { it.copy(price = ownerPriceInput(v)) }
+                                        changeOption(i) { it.copy(price = ownerPriceInput(it.price, v)) }
                                     }, keyboardType = KeyboardType.Number,
                                         testTag = "manual-menu-price-" + i)
                                 }
@@ -643,7 +643,7 @@ internal fun OwnerManualMenuScreen(
                     val d = draftOptions.getOrNull(saleOption)
                     if (d != null) {
                         V4FormField("할인 가격 (원)", d.sale, { v ->
-                            changeOption(saleOption) { it.copy(sale = ownerPriceInput(v)) }
+                            changeOption(saleOption) { it.copy(sale = ownerPriceInput(it.sale, v)) }
                         }, keyboardType = KeyboardType.Number,
                             testTag = "manual-menu-discount-price")
                         ManualDateField("시작일", d.start) {
