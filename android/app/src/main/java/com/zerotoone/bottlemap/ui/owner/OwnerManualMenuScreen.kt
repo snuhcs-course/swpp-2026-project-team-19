@@ -249,8 +249,12 @@ internal fun OwnerManualMenuScreen(
             val old = items.firstOrNull { it.barMenuItemId == editId }
             val persisted = products.firstOrNull { it.productId == old?.productId }
             val savedName = old?.displayNameOverride ?: persisted?.displayName
-            require(name.isNotEmpty() &&
-                (name.length <= 80 || (name == savedName && name.length <= 200))) {
+            val confirmedCatalogName = old == null && candidates.any {
+                it.productId == linkedId && it.catalogMatched &&
+                    it.displayName == name && manualMenuCategoryLabel(it.category) == category
+            }
+            require(name.isNotEmpty() && (name.length <= 80 ||
+                (name.length <= 200 && (name == savedName || confirmedCatalogName)))) {
                 "메뉴 이름을 확인해 주세요."
             }
             val sameCategory = persisted?.let { manualMenuCategoryLabel(it.category) } == category
