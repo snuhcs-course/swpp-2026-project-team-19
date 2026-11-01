@@ -368,15 +368,17 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             // Photo-imported rows can predate the direct editor's three-option cap.
             // Keep their original overflow untouched when editing the first three.
             val oldRow = state.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
-            val legacyTail = oldRow?.options?.drop(MANUAL_MENU_MAX_OPTIONS).orEmpty()
-            val preservesLegacyTail = legacyTail.isNotEmpty() &&
-                item.options.size == oldRow!!.options.size &&
-                item.options.drop(MANUAL_MENU_MAX_OPTIONS) == legacyTail &&
-                item.options.take(MANUAL_MENU_MAX_OPTIONS).all { proposed ->
+            val editableLimit = if (manualMenuCategoryLabel(proposedProduct.category) == "위스키")
+                MANUAL_MENU_MAX_OPTIONS else 1
+            val legacyTail = oldRow?.options?.drop(editableLimit).orEmpty()
+            val preservesLegacyTail = oldRow != null && legacyTail.isNotEmpty() &&
+                item.options.size == oldRow.options.size &&
+                item.options.drop(editableLimit) == legacyTail &&
+                item.options.take(editableLimit).all { proposed ->
                     oldRow.options.any { it.optionId == proposed.optionId }
                 }
             val directOptions = if (preservesLegacyTail)
-                item.options.take(MANUAL_MENU_MAX_OPTIONS) else item.options
+                item.options.take(editableLimit) else item.options
             val error = manualMenuOptionError(directOptions, proposedProduct.category)
             require(error == null) { error ?: "잘못된 가격 옵션" }
             require(item.options.all { it.optionId.isNotBlank() } &&
