@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -243,7 +244,11 @@ fun OwnerPreviewHtmlV4Screen(
                                     OwnerStatusNoteBubble(
                                         customerNote,
                                         modifier = Modifier.align(Alignment.BottomStart)
-                                            .offset(y = (-26).dp),
+                                            .offset(y = (-26).dp)
+                                            .wrapContentSize(
+                                                align = Alignment.BottomStart,
+                                                unbounded = true,
+                                            ),
                                     )
                                 }
                             }
