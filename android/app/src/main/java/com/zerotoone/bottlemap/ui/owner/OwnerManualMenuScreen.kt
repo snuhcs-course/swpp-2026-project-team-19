@@ -175,6 +175,9 @@ internal fun OwnerManualMenuScreen(
     val bar = snapshot?.bars?.firstOrNull { it.barId == snapshot.selectedBarId }
         ?: snapshot?.bars?.firstOrNull()
     val items = snapshot?.menuItems?.filter { it.barId == bar?.barId }.orEmpty()
+    val activePhotoImport = snapshot?.imports?.any { it.barId == bar?.barId &&
+        it.status in listOf(MockImportStatus.UPLOADED, MockImportStatus.PROCESSING,
+            MockImportStatus.READY_FOR_REVIEW) } == true
     val products = snapshot?.products.orEmpty()
     val brands = (snapshot?.brands.orEmpty() + htmlBrands).distinctBy { it.brandId }
     // A deleted local product retains its ID; offer it again only for this bar,
@@ -256,6 +259,7 @@ internal fun OwnerManualMenuScreen(
     fun save() {
         if (bar == null) return
         try {
+            require(!activePhotoImport) { "ACTIVE_IMPORT_EXISTS" }
             val name = itemName.trim()
             val old = items.firstOrNull { it.barMenuItemId == editId }
             val persisted = products.firstOrNull { it.productId == old?.productId }
@@ -482,9 +486,16 @@ internal fun OwnerManualMenuScreen(
                         verticalAlignment = Alignment.CenterVertically) {
                         Text("현재 게시 메뉴", color = V4Color.text, fontWeight = FontWeight.Bold,
                             fontSize = 16.sp)
-                        Text("+ 직접 추가", Modifier.manualTap { edit(null) }
+                        Text("+ 직접 추가", Modifier.manualTap {
+                            if (activePhotoImport) error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                            else edit(null)
+                        }
                             .testTag("manual-menu-add"), color = V4Color.primary, fontSize = 12.sp)
                     }
+                    if (activePhotoImport) Text(
+                        "메뉴판 사진 등록 작업이 진행 중이에요. 작업이 끝난 후 메뉴를 수정할 수 있어요.",
+                        color = V4Color.primary, fontSize = 12.sp)
+                    error?.let { Text(it, color = Color(0xFFFFB4AB), fontSize = 12.sp) }
                     V4SearchField(query, { query = it }, "manual-menu-search", "메뉴명·브랜드 검색")
                     val entries = items.map { item ->
                         val p = products.firstOrNull { it.productId == item.productId }
@@ -503,11 +514,11 @@ internal fun OwnerManualMenuScreen(
                     if (visible.isEmpty()) Text(if (query.isEmpty()) "등록된 메뉴가 없어요."
                         else "검색 결과가 없어요.", color = V4Color.sub)
                     val shownCategories = MANUAL_MENU_CATEGORIES + visible.mapNotNull { (_, p, _) ->
-                        p?.let { manualMenuCategoryLabel(it.category) }
+                        p?.let(::ownerV4Category)
                     }.distinct().filterNot { it in MANUAL_MENU_CATEGORIES }
                     shownCategories.forEach { cat ->
                         val rows = visible.filter { (_, p, _) ->
-                            p != null && manualMenuCategoryLabel(p.category) == cat
+                            p != null && ownerV4Category(p) == cat
                         }
                         if (rows.isNotEmpty()) {
                             val open = query.isNotBlank() || cat in openCategories
@@ -541,8 +552,16 @@ internal fun OwnerManualMenuScreen(
                                                 nowEpochMs, selectedId == item.barMenuItemId,
                                                 onSelect = { selectedId = if (selectedId == item.barMenuItemId)
                                                     null else item.barMenuItemId },
-                                                onEdit = { edit(item) },
-                                                onStock = { confirm = "stock:" + item.barMenuItemId })
+                                                onEdit = {
+                                                     if (activePhotoImport)
+                                                         error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                                     else edit(item)
+                                                 },
+                                                onStock = {
+                                                     if (activePhotoImport)
+                                                         error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                                     else confirm = "stock:" + item.barMenuItemId
+                                                 })
                                             if (index < entry.value.lastIndex)
                                                 HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                                         }
@@ -559,7 +578,10 @@ internal fun OwnerManualMenuScreen(
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     Box(Modifier.fillMaxWidth().height(43.dp)
                         .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(8.dp))
-                        .manualTap { confirm = "reset" }
+                        .manualTap {
+                            if (activePhotoImport) error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                            else confirm = "reset"
+                        }
                         .testTag("manual-menu-reset"), contentAlignment = Alignment.Center) {
                         Row(horizontalArrangement = Arrangement.spacedBy(9.dp),
                             verticalAlignment = Alignment.CenterVertically) {
@@ -583,7 +605,9 @@ internal fun OwnerManualMenuScreen(
                                 saleOption = 0; error = null; screen = "promo"
                             }
                             if (editId != null) ManualTopButton("삭제", true) {
-                                confirm = "delete"
+                                if (activePhotoImport)
+                                    error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                else confirm = "delete"
                             }
                         }
                     }
