@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.composed
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
@@ -39,6 +40,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+/** Shared Owner action: no temporary highlight/ripple; unfocus and hide the keyboard. */
+internal fun Modifier.ownerQuietClick(
+    enabled: Boolean = true, onClick: () -> Unit,
+): Modifier = composed {
+    val interaction = remember { MutableInteractionSource() }
+    val focus = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    clickable(enabled = enabled, interactionSource = interaction, indication = null) {
+        focus.clearFocus()
+        keyboard?.hide()
+        onClick()
+    }
+}
 
 /** Exact manager HTML CSS palette (ACTION_FIRST_v4 MANAGER_DOCUMENT). */
 internal object V4Color {
@@ -123,7 +138,7 @@ internal fun V4HourButton(text: String, onClick: ()->Unit, modifier: Modifier = 
     Box(modifier.width(75.dp).height(35.dp)
         .background(V4Color.elevated, RoundedCornerShape(6.dp))
         .border(1.dp, V4Color.line, RoundedCornerShape(6.dp))
-        .clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+        .ownerQuietClick(onClick = onClick), contentAlignment = Alignment.Center) {
         Text(text, color = V4Color.text, fontSize = 11.sp, maxLines = 1,
             textAlign = TextAlign.Center)
     }
@@ -184,7 +199,7 @@ internal fun V4TagChip(label: String, selected: Boolean = false, onClick: ()->Un
             RoundedCornerShape(7.dp))
             .border(1.dp, if (selected) V4Color.primary else V4Color.line,
                 RoundedCornerShape(7.dp))
-            .clickable(onClick = onClick)
+            .ownerQuietClick(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 7.dp)
     ) {
         Text(label, fontSize = 12.sp, color = if (selected) Color(0xFFF7DFBF)
