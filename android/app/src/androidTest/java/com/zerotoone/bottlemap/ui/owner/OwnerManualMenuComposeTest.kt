@@ -636,4 +636,33 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun addingConfirmedLongCatalogNamePreservesCanonicalProductId() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val longName = "한정판 위스키 27년" + " 스페셜 에디션".repeat(12)
+        require(longName.length in 81..200)
+        r.saveBrand(MockBrand("long-confirmed-brand", "한정판 브랜드"))
+        r.saveCatalogProduct(MockCatalogProduct(
+            "long-confirmed-product", "long-confirmed-brand", longName,
+            category = "whisky"))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextInput("한정판 위스키 27년")
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithTag("manual-menu-name").assertTextEquals(longName)
+        compose.onNodeWithTag("manual-menu-ml-0").performTextInput("30")
+        compose.onNodeWithTag("manual-menu-price-0").performTextInput("29000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snapshot = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snapshot.menuItems.size)
+            assertEquals("long-confirmed-product", snapshot.menuItems.single().productId)
+            assertEquals(1, snapshot.products.size)
+            assertEquals(longName, snapshot.products.single().displayName)
+        }
+    }
+
 }
