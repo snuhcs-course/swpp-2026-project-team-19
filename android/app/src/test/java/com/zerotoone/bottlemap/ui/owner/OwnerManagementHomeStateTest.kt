@@ -69,6 +69,23 @@ class OwnerManagementHomeStateTest {
         assertEquals("영업시간 정보 없음", homeOperatingState(bar, at(3, 3)))
     }
 
+    @Test fun previewOvernightCloseTimeUsesTodayForOngoingMultiDayShift() {
+        val start = day.toEpochDay()
+        val custom = MockOperatingException(
+            "overnight-range", MockExceptionKind.CUSTOM_HOURS,
+            start, start + 2, openMinutes = 19 * 60, closeMinutes = 2 * 60,
+            closesNextDay = true
+        )
+        val bar = MockBar("bar", "바", "서울", exceptions = listOf(custom))
+        fun at(offset: Long, hour: Int) = day.plusDays(offset).atTime(hour, 0)
+            .atZone(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals("익일 02:00 종료", ownerPreviewNextText(bar, at(0, 20)))
+        assertEquals("02:00 종료", ownerPreviewNextText(bar, at(1, 1)))
+        assertEquals("02:00 종료", ownerPreviewNextText(bar, at(2, 1)))
+        assertEquals("02:00 종료", ownerPreviewNextText(bar, at(3, 1)))
+        assertEquals("익일 02:00 종료", ownerPreviewNextText(bar, at(2, 20)))
+    }
+
     @Test fun yesterdayTemporaryOvernightHoursRemainVisibleAfterMidnight() {
         val yesterday = day.minusDays(1)
         val hours = MockOperatingException(
