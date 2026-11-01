@@ -85,6 +85,15 @@ internal fun moveSecondaryBarPhoto(
 ): List<MockPhoto> = if (index <= 0 || index + offset <= 0)
     photos else moveBarPhoto(photos, index, offset)
 
+/** A tag already selected in the unsaved draft is not a newly creatable tag. */
+internal fun canCreateOwnerTagDraft(
+    query: String, available: List<String>, selected: List<String>,
+): Boolean {
+    val candidate = query.trim()
+    return candidate.isNotEmpty() &&
+        (available + selected).none { it.equals(candidate, ignoreCase = true) }
+}
+
 /** HTML's "평일에 복사" applies Monday to Tue-Fri only. */
 internal fun copyMondayToWeekdays(hours: List<MockWeeklyHours>): List<MockWeeklyHours> {
     val monday = hours.firstOrNull { it.isoDayOfWeek == 1 } ?: return hours
