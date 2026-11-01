@@ -165,7 +165,8 @@ internal fun OwnerManualMenuScreen(
     viewModel: OwnerMockViewModel,
     onBack: () -> Unit,
     onNewPhoto: () -> Unit,
-    onExistingJob: (MockImportStatus) -> Unit
+    onExistingJob: (MockImportStatus) -> Unit,
+    nowEpochMs: Long = rememberOwnerNow(),
 ) {
     val snapshot = when (state) {
         is MockOwnerLoadState.Ready -> state.snapshot
@@ -477,7 +478,7 @@ internal fun OwnerManualMenuScreen(
                                         } else Spacer(Modifier.height(8.dp))
                                         entry.value.forEachIndexed { index, (item, product, brandLabel) ->
                                             OwnerManualMenuRow(item, requireNotNull(product), brandLabel,
-                                                selectedId == item.barMenuItemId,
+                                                nowEpochMs, selectedId == item.barMenuItemId,
                                                 onSelect = { selectedId = if (selectedId == item.barMenuItemId)
                                                     null else item.barMenuItemId },
                                                 onEdit = { edit(item) },
@@ -902,12 +903,13 @@ private fun ManualButton(
 
 @Composable
 private fun OwnerManualMenuRow(
-    item: MockBarMenuItem, product: MockCatalogProduct, brand: String, selected: Boolean,
+    item: MockBarMenuItem, product: MockCatalogProduct, brand: String,
+    nowEpochMs: Long, selected: Boolean,
     onSelect: () -> Unit, onEdit: () -> Unit, onStock: () -> Unit
 ) {
     OwnerMenuFlatRow(
         item = item, product = product, brandName = brand,
-        nowEpochMs = System.currentTimeMillis(), showStatus = true,
+        nowEpochMs = nowEpochMs, showStatus = true,
         selected = selected, onSelect = onSelect, onEdit = onEdit, onStock = onStock
     )
 }
