@@ -67,15 +67,21 @@ internal fun homeOperatingState(bar: MockBar, atEpochMs: Long): String {
     val today = now.dayOfWeek.value
     val previous = if (today == 1) 7 else today - 1
     val previousShift = bar.weeklyHours.firstOrNull { it.isoDayOfWeek == previous }
-    val overnight = previousShift != null && !previousShift.closed &&
+    // Evaluate yesterday's effective schedule independently of today's exception.
+    // A temporary closure or shortened shift overrides yesterday's regular
+    // overnight hours even though it is no longer active on today's date.
+    val previousException = bar.exceptions.lastOrNull {
+        (day - 1) in it.fromEpochDay..it.toEpochDay
+    }
+    val overnight = previousException == null &&
+        previousShift != null && !previousShift.closed &&
         previousShift.closesNextDay && previousShift.closeMinutes != null &&
         todayMinute < previousShift.closeMinutes
     val regular = bar.weeklyHours.firstOrNull { it.isoDayOfWeek == today }
     // A shift starting *today* cannot make the bar open this morning.
     // Yesterday's overnight shift is evaluated separately.
-    val previousTemporary = exception?.takeIf {
-        it.kind == MockExceptionKind.CUSTOM_HOURS &&
-            (day - 1) in it.fromEpochDay..it.toEpochDay && it.closesNextDay
+    val previousTemporary = previousException?.takeIf {
+        it.kind == MockExceptionKind.CUSTOM_HOURS && it.closesNextDay
     }
     if (previousTemporary?.closeMinutes != null &&
         todayMinute < previousTemporary.closeMinutes) return "영업 중"
