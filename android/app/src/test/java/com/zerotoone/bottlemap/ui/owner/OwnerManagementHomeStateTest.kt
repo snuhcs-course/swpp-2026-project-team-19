@@ -153,6 +153,37 @@ class OwnerManagementHomeStateTest {
         assertEquals("영업 종료", homeOperatingState(override, time(3)))
     }
 
+    @Test fun previewUsesTodaysCloseWhenYesterdaysRegularOvernightWasOverridden() {
+        val friday = day.minusDays(1).toEpochDay()
+        val regularFriday = MockWeeklyHours(5, false, 18 * 60, 4 * 60,
+            closesNextDay = true)
+        val saturday = MockWeeklyHours(6, false, 0, 6 * 60)
+        val base = MockBar("b", "바", "서울",
+            weeklyHours = listOf(regularFriday, saturday))
+        assertEquals("04:00 종료", ownerPreviewNextText(base, time(1)))
+
+        val shortFriday = MockOperatingException(
+            "short", MockExceptionKind.CUSTOM_HOURS, friday, friday,
+            openMinutes = 18 * 60, closeMinutes = 23 * 60
+        )
+        val overridden = base.copy(exceptions = listOf(shortFriday))
+        assertEquals("영업 중", homeOperatingState(overridden, time(1)))
+        assertEquals("06:00 종료", ownerPreviewNextText(overridden, time(1)))
+
+        val closedFriday = shortFriday.copy(kind = MockExceptionKind.CLOSED_TODAY)
+        assertEquals("06:00 종료", ownerPreviewNextText(
+            base.copy(exceptions = listOf(closedFriday)), time(1)))
+
+        val vacationFriday = shortFriday.copy(kind = MockExceptionKind.VACATION)
+        assertEquals("06:00 종료", ownerPreviewNextText(
+            base.copy(exceptions = listOf(vacationFriday)), time(1)))
+
+        // The temporary overnight closing time, when present, still takes precedence.
+        val overnightFriday = shortFriday.copy(closeMinutes = 2 * 60, closesNextDay = true)
+        assertEquals("02:00 종료", ownerPreviewNextText(
+            base.copy(exceptions = listOf(overnightFriday)), time(1)))
+    }
+
     @Test fun completedTemporaryDayReturnsToRegularSchedule() {
         val ended = MockOperatingException(
             "ended", MockExceptionKind.CLOSED_TODAY, day.minusDays(1).toEpochDay(),
