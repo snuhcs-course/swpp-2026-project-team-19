@@ -5,6 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -240,62 +242,46 @@ fun OwnerInfoHtmlV4Screen(
                         error = null
                     }) { Text("평일에 복사") }
                 }
+
                 WEEKDAY.forEachIndexed { index, dayName ->
                     val day = index + 1
                     val setting = weekly.firstOrNull { it.isoDayOfWeek == day }
-                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(3.dp),
-                        ) {
-                            Text(dayName, style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold, modifier = Modifier.width(24.dp))
-                            Checkbox(checked = setting?.closed == true,
-                                modifier = Modifier.size(36.dp),
-                                onCheckedChange = { checked ->
-                                    if (checked) setDay(day, MockWeeklyHours(day, closed = true))
-                                    else setDay(day, null)
-                                    error = null
-                                })
-                            Text("휴무", style = MaterialTheme.typography.labelSmall)
-                        }
-                        // On small Android displays, controls are on their own
-                        // line so the hours wheel and "익일" checkbox never clip.
-                        if (setting?.closed != true) {
-                            Row(
-                                Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(7.dp),
-                            ) {
-                                Spacer(Modifier.width(15.dp))
-                                listOf("open", "close").forEachIndexed { partIndex, part ->
-                                    if (partIndex == 1) Text("–")
-                                    OutlinedButton(
-                                        modifier = Modifier.width(70.dp).height(36.dp),
-                                        onClick = {
-                                            if (wheelDay == day && wheelPart == part) {
-                                                wheelDay = 0
-                                                wheelPart = ""
-                                            } else {
-                                                wheelDay = day
-                                                wheelPart = part
-                                            }
-                                        },
-                                        contentPadding = PaddingValues(horizontal = 2.dp),
-                                    ) {
-                                        Text(shortTime(if (part == "open") setting?.openMinutes
-                                            else setting?.closeMinutes),
-                                            style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                    Column(Modifier.fillMaxWidth()) {
+                        BoxWithConstraints {
+                            val wrapControls = maxWidth < 335.dp
+                            Column {
+                                Row(Modifier.fillMaxWidth().heightIn(min = 49.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                                    Text(dayName, fontSize = 13.sp, color = V4Color.text,
+                                        fontWeight = FontWeight.Bold, modifier = Modifier.width(22.dp))
+                                    V4CompactCheck("휴무", setting?.closed == true) { isClosed ->
+                                        setDay(day, if (isClosed) MockWeeklyHours(day, true) else null)
+                                        error = null
+                                    }
+                                    if (!wrapControls && setting?.closed != true) {
+                                        Spacer(Modifier.weight(1f))
+                                        V4HoursControls(
+                                            setting = setting, day = day,
+                                            onTime = { side -> wheelDay = day; wheelPart = side },
+                                            onNextDay = { checked ->
+                                                setDay(day, (setting ?: MockWeeklyHours(day, false))
+                                                    .copy(closesNextDay = checked))
+                                            })
                                     }
                                 }
-                                Checkbox(checked = setting?.closesNextDay == true,
-                                    modifier = Modifier.size(30.dp),
-                                    onCheckedChange = { checked ->
-                                        val old = setting ?: MockWeeklyHours(day, closed = false)
-                                        setDay(day, old.copy(closesNextDay = checked))
-                                    })
-                                Text("익일", style = MaterialTheme.typography.labelSmall)
+                                if (wrapControls && setting?.closed != true) {
+                                    Row(Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                        horizontalArrangement = Arrangement.End) {
+                                        V4HoursControls(
+                                            setting = setting, day = day,
+                                            onTime = { side -> wheelDay = day; wheelPart = side },
+                                            onNextDay = { checked ->
+                                                setDay(day, (setting ?: MockWeeklyHours(day, false))
+                                                    .copy(closesNextDay = checked))
+                                            })
+                                    }
+                                }
                             }
                         }
                         if (wheelDay == day && setting?.closed != true) {
@@ -304,20 +290,19 @@ fun OwnerInfoHtmlV4Screen(
                             val selectedMinute = current ?: 18 * 60
                             Column(
                                 Modifier.fillMaxWidth().background(
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                    RoundedCornerShape(10.dp)).padding(10.dp),
+                                    V4Color.surface, RoundedCornerShape(10.dp)).padding(10.dp),
                                 verticalArrangement = Arrangement.spacedBy(7.dp),
                             ) {
                                 Text(dayName + "요일 " +
                                     (if (wheelPart == "open") "시작" else "종료") + " 시간 · 5분 단위",
-                                    style = MaterialTheme.typography.labelSmall)
+                                    fontSize = 11.sp, color = V4Color.sub)
                                 key(day, wheelPart) {
-                                    OwnerQuickTimeWheel(selectedMinute / 60, selectedMinute % 60) { hour, minute ->
+                                    OwnerQuickTimeWheel(selectedMinute / 60, selectedMinute % 60) {
+                                        hour, minute ->
                                         val old = setting ?: MockWeeklyHours(day, closed = false)
-                                        val next = if (wheelPart == "open")
+                                        setDay(day, if (wheelPart == "open")
                                             old.copy(openMinutes = hour * 60 + minute)
-                                        else old.copy(closeMinutes = hour * 60 + minute)
-                                        setDay(day, next)
+                                        else old.copy(closeMinutes = hour * 60 + minute))
                                         wheelDay = 0
                                         wheelPart = ""
                                         error = null
@@ -325,12 +310,10 @@ fun OwnerInfoHtmlV4Screen(
                                 }
                             }
                         }
+                        Spacer(Modifier.fillMaxWidth().height(1.dp).background(V4Color.line))
                     }
                 }
-                Text("시간 미설정은 휴무와 다르며, 자정을 넘기는 마감은 익일을 선택하세요.",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-
+                Spacer(Modifier.height(2.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("매장 태그", style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold)
@@ -418,5 +401,24 @@ fun OwnerInfoHtmlV4Screen(
                 Spacer(Modifier.height(20.dp))
             }
         }
+    }
+}
+
+
+@Composable
+private fun V4HoursControls(
+    setting: MockWeeklyHours?,
+    day: Int,
+    onTime: (String) -> Unit,
+    onNextDay: (Boolean) -> Unit,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        V4HourButton(setting?.openMinutes?.let { "%02d:%02d".format(it/60,it%60) } ?: "설정",
+            onClick = { onTime("open") })
+        Text("–", color = V4Color.text, fontSize = 13.sp)
+        V4HourButton(setting?.closeMinutes?.let { "%02d:%02d".format(it/60,it%60) } ?: "설정",
+            onClick = { onTime("close") })
+        V4CompactCheck("익일", setting?.closesNextDay == true, onNextDay)
     }
 }
