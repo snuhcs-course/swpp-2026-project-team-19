@@ -233,13 +233,23 @@ internal fun OwnerManualMenuScreen(
                 "주류 종류를 입력해 주세요."
             }
             val whisky = category == "위스키"
+            val old = items.firstOrNull { it.barMenuItemId == editId }
+            val persisted = products.firstOrNull { it.productId == old?.productId }
+            val sameCategory = persisted?.let { manualMenuCategoryLabel(it.category) } == category
             val editedOptions = (if (whisky) draftOptions else draftOptions.take(1))
-                .map { toOption(it, whisky) }
+                .mapIndexed { index, draft ->
+                    val parsed = toOption(draft, whisky)
+                    // Preserve imported serving labels/identity when editing a
+                    // single-price category without switching its category.
+                    if (!whisky && sameCategory) {
+                        old?.options?.getOrNull(index)?.let { original ->
+                            parsed.copy(label = original.label, pourMl = original.pourMl)
+                        } ?: parsed
+                    } else parsed
+                }
             manualMenuOptionError(editedOptions, manualMenuCategoryCode(category))?.let {
                 throw IllegalArgumentException(it)
             }
-            val old = items.firstOrNull { it.barMenuItemId == editId }
-            val persisted = products.firstOrNull { it.productId == old?.productId }
             val editableLimit = if (whisky) MANUAL_MENU_MAX_OPTIONS else 1
             val legacyTail = if (old != null && old.options.size > editableLimit) {
                 require(persisted?.let { manualMenuCategoryLabel(it.category) } == category) {
