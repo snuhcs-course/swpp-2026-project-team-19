@@ -8,6 +8,17 @@ const val MAX_OWNER_MENU_PRICE_DIGITS = 8
 fun ownerPriceInput(raw: String): String = raw.filter(Char::isDigit)
     .take(MAX_OWNER_MENU_PRICE_DIGITS)
 
+/** Once 8 digits are present, reject insertion (even in the middle), preserving
+ * existing digits. An oversized paste before the limit accepts at most 8 digits. */
+fun ownerPriceInput(previous: String, proposed: String): String {
+    val digits = proposed.filter(Char::isDigit)
+    return when {
+        digits.length <= MAX_OWNER_MENU_PRICE_DIGITS -> digits
+        previous.length >= MAX_OWNER_MENU_PRICE_DIGITS -> previous
+        else -> digits.take(MAX_OWNER_MENU_PRICE_DIGITS)
+    }
+}
+
 val MANUAL_MENU_CATEGORIES = listOf("위스키", "칵테일", "안주", "기타 주류")
 
 fun manualMenuCategoryCode(label: String): String = when (label) {
