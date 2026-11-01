@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -400,7 +401,7 @@ private fun V4PreviewGlyph(kind: String, modifier: Modifier = Modifier, accent: 
             path.cubicTo(20*u, 13*u, 15*u, 18*u, 12*u, 22*u)
             drawPath(path, tint, style = Stroke(
                 width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
-            drawCircle(tint, radius = 2.5*u, center = Offset(12*u, 9*u),
+            drawCircle(tint, radius = 2.5f*u, center = Offset(12*u, 9*u),
                 style = Stroke(width = 1.8.dp.toPx()))
         } else {
             // Curves reproduce the handset from HTML's BM_PATHS.phone.
