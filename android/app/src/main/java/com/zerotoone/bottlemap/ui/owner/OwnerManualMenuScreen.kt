@@ -273,7 +273,7 @@ internal fun OwnerManualMenuScreen(
                     persisted?.otherAlcoholKind?.takeIf { it.isNotBlank() })) {
                 "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
             }
-            // Catalog fields are immutable; do not report a successful save after
+            // Match catalog subtypes on both create and edit.
             // silently dropping a modified subtype from the editor.
             if (old != null && persisted?.catalogMatched == true &&
                 category == "기타 주류") {
