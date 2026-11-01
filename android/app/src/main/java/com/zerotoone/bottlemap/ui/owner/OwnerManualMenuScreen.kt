@@ -591,6 +591,8 @@ internal fun OwnerManualMenuScreen(
                                     itemName = suggested.displayName
                                     brandName = brands.firstOrNull {
                                         it.brandId == suggested.brandId }?.name.orEmpty()
+                                    if (category == "기타 주류")
+                                        alcoholKind = suggested.otherAlcoholKind.orEmpty()
                                 }, modifier = Modifier.weight(1f))
                                 ManualButton("아니에요", { rejectedId = suggested.productId },
                                     modifier = Modifier.weight(1f), secondary = true)
