@@ -181,7 +181,7 @@ fun OwnerPreviewHtmlV4Screen(
                                 },
                             )
                         }
-                        .clickable(enabled = photoCount > 0) { fullImage = true }
+                        .ownerQuietClick(enabled = photoCount > 0) { fullImage = true }
                         .testTag("owner-customer-hero"),
                 ) {
                     if (photoCount > 0) {
@@ -238,7 +238,7 @@ fun OwnerPreviewHtmlV4Screen(
                                 color = V4Color.positive, fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier
-                                    .clickable(enabled = customerNote != null) {
+                                    .ownerQuietClick(enabled = customerNote != null) {
                                         noteVisible = !noteVisible
                                     }
                                     .testTag("owner-preview-status-label"))
@@ -261,7 +261,7 @@ fun OwnerPreviewHtmlV4Screen(
                                 maxLines = 1)
                         }
                         Canvas(Modifier.size(22.dp)
-                            .clickable {
+                            .ownerQuietClick {
                                 noteVisible = false
                                 expanded = if (expanded == "hours") "" else "hours"
                             }
@@ -419,7 +419,7 @@ private fun OwnerStatusNoteBubble(note: String, modifier: Modifier = Modifier) {
 private fun V4PreviewSmallButton(label: String, kind: String, onClick: () -> Unit) {
     Row(Modifier.background(V4Color.surface, RoundedCornerShape(7.dp))
         .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
-        .clickable(onClick = onClick)
+        .ownerQuietClick(onClick = onClick)
         .padding(horizontal = 7.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -432,7 +432,7 @@ private fun V4PreviewSmallButton(label: String, kind: String, onClick: () -> Uni
 private fun V4PreviewCopy(label: String, onClick: () -> Unit, enabled: Boolean = true) {
     Box(Modifier.background(V4Color.elevated, RoundedCornerShape(7.dp))
         .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
-        .clickable(enabled = enabled, onClick = onClick)
+        .ownerQuietClick(enabled = enabled, onClick = onClick)
         .padding(horizontal = 10.dp, vertical = 7.dp)) {
         Text(label, fontSize = 11.sp,
             color = if (enabled) V4Color.primary else V4Color.sub)
