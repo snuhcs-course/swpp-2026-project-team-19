@@ -171,7 +171,7 @@ fun OwnerInfoHtmlV4Screen(
     val validation = barInfoError(name, intro, address, phone, pour)
         ?: weeklyHoursError(weekly)
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        OwnerHeader("매장 정보 관리", ::requestExit)
+        V4Toolbar("매장 정보 관리", ::requestExit)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 21.dp),
@@ -202,12 +202,15 @@ fun OwnerInfoHtmlV4Screen(
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         bar.gallery.forEach { photo ->
-                            Box(Modifier.size(153.dp, 108.dp).clip(RoundedCornerShape(12.dp))) {
+                            Box(Modifier.size(153.dp, 108.dp).clip(RoundedCornerShape(12.dp))
+                                .background(V4Color.elevated)
+                                .border(1.dp, V4Color.line, RoundedCornerShape(12.dp))) {
                                 OwnerStoredPhoto(photo.uri, Modifier.fillMaxSize())
                             }
                         }
                     }
                 }
+                Spacer(Modifier.fillMaxWidth().height(1.dp).background(V4Color.line))
 
                 V4FormField("매장명", name, { name = it; error = null },
                     testTag = "owner-info-name")
@@ -236,6 +239,7 @@ fun OwnerInfoHtmlV4Screen(
                     }
                 }
 
+                Spacer(Modifier.fillMaxWidth().height(1.dp).background(V4Color.line))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
                     Text("정규 영업시간", fontSize = 16.sp, color = V4Color.text,
@@ -317,6 +321,7 @@ fun OwnerInfoHtmlV4Screen(
                     }
                 }
                 Spacer(Modifier.height(2.dp))
+                Spacer(Modifier.fillMaxWidth().height(1.dp).background(V4Color.line))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("매장 태그", color = V4Color.text, fontSize = 16.sp,
                         fontWeight = FontWeight.Bold)
@@ -341,12 +346,8 @@ fun OwnerInfoHtmlV4Screen(
                         }
                     }
                 }
-                OutlinedTextField(
-                    value = query, onValueChange = { query = it.take(24) },
-                    label = { Text("태그 검색 또는 새 태그 입력") },
-                    singleLine = true, modifier = Modifier.fillMaxWidth()
-                        .testTag("owner-tag-search"),
-                )
+                V4SearchField(query, { query = it.take(24) },
+                    tag = "owner-tag-search", hint = "태그 검색 또는 새 태그 입력")
                 if (candidates.isEmpty() && query.isNotBlank()) {
                     Text("검색 결과가 없습니다.", style = MaterialTheme.typography.labelSmall)
                 }
