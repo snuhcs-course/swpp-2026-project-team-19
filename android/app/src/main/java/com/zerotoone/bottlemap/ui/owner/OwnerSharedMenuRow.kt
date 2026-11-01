@@ -30,6 +30,10 @@ import com.zerotoone.bottlemap.ui.common.BmIconId
 internal fun ownerOptionDiscountActive(option: MockMenuOption, atEpochMs: Long): Boolean =
     option.discount?.let { atEpochMs >= it.startAtEpochMs && atEpochMs < it.endAtEpochMs } == true
 
+/** Configured discounts are visible in Owner edit and both menus even when scheduled.
+ * Discounted prices are still time-gated by MockMenuOption.displayPrice. */
+internal fun ownerOptionHasDiscount(option: MockMenuOption): Boolean = option.discount != null
+
 // 27 badge + 3 + 35 volume + 3 + 71 price = 139dp.
 // 71dp leaves room for the largest permitted "99,999,999원" at 10sp;
 // 'Bottle' sits directly to its left without shifting the discount slot.
@@ -123,7 +127,7 @@ internal fun OwnerMenuFlatRow(
 /** Discount badge is in a reserved leading slot: ml and right-edge prices never move. */
 @Composable
 internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut: Boolean = false) {
-    val configured = option.discount != null
+    val configured = ownerOptionHasDiscount(option)
     val textColor = if (soldOut) Color(0xFF999999) else V4Color.text
     val priceColor = if (soldOut) Color(0xFF999999) else V4Color.sub
     Row(Modifier.fillMaxWidth(),
