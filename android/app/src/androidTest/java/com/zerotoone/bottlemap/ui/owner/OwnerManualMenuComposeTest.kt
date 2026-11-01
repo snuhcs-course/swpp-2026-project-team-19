@@ -468,6 +468,7 @@ class OwnerManualMenuComposeTest {
         compose.setContent { MaterialTheme {
             OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
         } }
+        compose.onNodeWithText("기타 주류", substring = false).performClick()
         compose.onNodeWithTag("manual-menu-row-menu-other").performClick()
         compose.onNodeWithTag("manual-menu-row-edit").performClick()
         compose.onNodeWithTag("manual-menu-name").performTextReplacement("수제 주류 수정")
