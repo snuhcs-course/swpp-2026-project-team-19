@@ -394,7 +394,7 @@ internal fun OwnerManualMenuScreen(
                         else -> target?.let { viewModel.setSoldOut(it.barMenuItemId, !it.soldOut) }
                     }
                     confirm = null; error = null; selectedId = null; screen = "list"
-                } catch (e: Exception) { confirm = null; error = e.message }
+                } catch (e: Exception) { error = e.message }
             }) { Text(when(action) {
                 "delete" -> "삭제하기"; "reset" -> "초기화"; else -> "상태 변경"
             }) } },
