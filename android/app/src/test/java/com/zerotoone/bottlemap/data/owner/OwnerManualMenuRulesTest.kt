@@ -19,6 +19,19 @@ class OwnerManualMenuRulesTest {
         assertTrue("Expected invalid direct menu mutation to be rejected", rejected)
     }
 
+    @Test fun ownerPriceInputStopsAtEightDigitsIncludingPasteAndImeInput() {
+        assertEquals("12345678", ownerPriceInput("123456789"))
+        assertEquals("99999999", ownerPriceInput("99,999,999원"))
+        assertEquals("12345678", ownerPriceInput("a1 b2,c3d4e5f6g7h8j9"))
+        assertEquals("", ownerPriceInput("no digits"))
+        assertTrue(validMockMenuOption(MockMenuOption("max", pourMl = 30,
+            priceKrw = MAX_OWNER_MENU_PRICE_KRW)))
+        assertFalse(validMockMenuOption(MockMenuOption("over", pourMl = 30,
+            priceKrw = 100_000_000)))
+        assertNotNull(manualMenuOptionError(listOf(
+            MockMenuOption("over", pourMl = 30, priceKrw = 100_000_000)), "whisky"))
+    }
+
     @Test fun sameBrandDifferentCatalogIdsRemainDifferentProducts() {
         val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
         val r = repo(store)
