@@ -529,7 +529,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `bar_id` | `uuid`, NOT NULL, UNIQUE, FK → `bars.id` | 관악 위스키 바 ID | 업장당 현재 메뉴판 하나를 보장한다. |
 | `last_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 마지막 일부 수정 작업 ID | 여러 부분 수정이 누적될 수 있으므로 가장 최근 반영 작업을 기록한다. 메뉴 직접 편집은 이 값을 바꾸지 않는다. |
 | `version` | `integer`, NOT NULL, 기본 1 | `4` | 메뉴판 버전이다. 검수 반영과 직접 편집이 성공할 때마다 1씩 올린다. 직접 편집은 요청의 버전과 이 값이 다르면 거부해, 다른 사람의 변경을 덮어쓰지 않게 한다(API 명세 3.14.1). |
-| `published_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 고객에게 보여줄 메뉴 최종 업데이트 날짜다. 검수 반영과 직접 편집 모두 갱신한다. 검색 결과의 최신성 표시에 사용한다. 품절 표시와 판매 정보 확인은 바꾸지 않는다. |
+| `published_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 고객에게 보여줄 메뉴 최종 업데이트 날짜다. 검수 반영과 직접 편집 모두 갱신한다. 검색 결과의 최신성 표시에 사용한다. 품절 표시와 판매 정보 확인은 바꾸지 않는다. 업장 행을 잠근 뒤의 실제 시각(`clock_timestamp()`)으로 찍어, 먼저 기록된 `confirmed_at`보다 이르게 찍히지 않게 한다(API 명세 3.14.1). |
 | `confirmed_at` | `timestamptz`, nullable | `2026-10-20T02:30:00Z` | 업주나 운영자가 "지금도 맞아요"로 판매 정보가 맞다고 마지막으로 확인한 시각이다(API 명세 3.14.9). 메뉴를 바꾸지 않으며 `version`도 올리지 않는다. 검수 반영이나 직접 편집으로 바뀌지 않는다. 업주 화면은 `published_at`과 이 값 중 늦은 시각을 "최근 갱신"으로 보여 준다. 고객 화면에는 나오지 않는다. |
 | `confirmed_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 확인한 사용자다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
 
