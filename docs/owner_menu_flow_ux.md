@@ -122,7 +122,7 @@
   - 불러오는 중에는 같은 크기의 `surface` 칸, 실패하면 아래 종이 띠로 바꾼다.
   - 대체 텍스트: "메뉴판 {n}의 줄: {rawText}".
 - **`sourceBox`가 `null`이면(또는 사진을 못 불러오면): 종이 띠.** 배경 `#E7DDCB`(병 일러스트 팔레트의 `labelChoices[0]`), 글자 `#2A231D`, Pretendard `bodyLarge`(16sp) SemiBold. 명조는 화면 제목에만 쓴다(`DESIGN.md` 글꼴 규칙, 9장 38). `rawText`의 이름 부분, 점선, 옵션 글자(예: `시그나토리 쿨일라13 ········ 20,000`)를 한 줄에, 길면 줄바꿈.
-- 아래에 가격 줄: `20,000원` + `· 잔` 또는 `30ml`(가격 먼저, `DESIGN.md` 6.6). 가격이 `null`이면 가격 줄을 빼고 카드가 PRICE 단계를 묻는다. 오른쪽에 글자 버튼 "원본 사진 보기"(6.3), 가격 줄 옆에 "가격·용량 고치기"(5.6 PRICE).
+- 아래에 가격 줄: `20,000원` + `· 잔` 또는 `30ml`(가격 먼저, `DESIGN.md` 6.6). 가격이 `null`이면 가격 줄을 빼고 카드가 PRICE 단계를 묻는다. 옵션이 아예 없으면(`options = []`) 가격 줄 대신 "가격 없음"을 보이고 NO_OPTION 카드(5.6)가 된다. 오른쪽에 글자 버튼 "원본 사진 보기"(6.3), 가격 줄 옆에 "가격·용량 고치기"(5.6 PRICE).
 
 ### 3.3 `ProductChoiceRow`와 상품 두 줄 표기
 
@@ -192,21 +192,28 @@
   - "일부만 바꿔요" / "사진에 있는 술만 더하거나 가격을 바꿔요." → `mode = partial_update`
   - 선택된 행은 테두리 `primary`, 아니면 `outlineVariant`.
 - 주 버튼: "사진 {n}장 올리기". 사진이 0장이면 꺼지고 "사진을 한 장 이상 골라 주세요"(I3-P27 "사진 없이 올리지 않기").
-- 업로드 전 검사: JPEG·PNG가 아니면 JPEG로 바꾼다(지금 `ImageUploadPreparer`). 한 장 10MB, 합계 30MB를 넘으면 줄여서 올린다.
-- 올리는 중: 버튼에 진행 표시 + "올리는 중이에요", 다른 조작 막기. `Idempotency-Key`는 이 화면에서 처음 올릴 때 만들고, 재시도에는 같은 값을 쓴다(지금 `MenuUploadRetryCache`).
+- 업로드 전 검사(지금 코드 그대로): JPEG·PNG가 아니거나 한 장이 10MB를 넘으면 그 사진을 JPEG로 다시 줄인다(`ImageUploadPreparer`). 합계 30MB는 줄이지 않고 검사만 한다: 넘으면 아무것도 보내지 않는다(`prepareMenuBatch`가 합계를 넘긴 사진의 `imageOrder`로 `MenuPhotoPreparationException`을 낸다). 그때 U1에 오류 띠 "사진이 합쳐서 너무 커요. {n}장 이하로 줄이거나 다시 찍어 주세요."(n = `imageOrder - 1`, 합계 안에 든 장 수)를 보이고, 합계를 넘긴 `imageOrder`번 사진 썸네일에 "큰 사진" 표시를 한다. 합계를 넘으면 모든 사진을 다시 줄여 올리는 것은 제안일 뿐이다(11장 D14, 남호진).
+- 올리는 중: 버튼에 진행 표시 + "올리는 중이에요", 다른 조작 막기.
+- `Idempotency-Key`(명세 4.3): **업로드 시도마다 새로 만든다.** 같은 키는 그 시도의 전송 재시도(네트워크·시간 초과·`5xx`·`401` 갱신 뒤, 같은 사진 바이트·같은 `mode`)에만 쓴다(지금 `MenuUploadRetryCache`가 준비한 바이트와 키를 함께 보관). 다음 경우에는 키를 버리고 새로 만든다(`MenuUploadRetryCache.clear()`·`discardKey()`): 사진·순서·방식·업장을 바꿈, U3 `failed` 뒤 "사진 다시 올리기"(4.4, 지금 `startNewAttemptAfterFailure()`), 진행 중 작업을 취소한 뒤의 업로드(아래, 4.5), `409 IDEMPOTENCY_KEY_REUSED`. 이유: 서버는 같은 키 + 같은 내용이면 새 작업을 만들지 않고 그 키로 만든 작업을 그대로 돌려준다(명세 4.3). 실패·취소된 작업의 키로 같은 사진을 다시 보내면 `202`와 함께 그 `failed`/`canceled` 작업이 돌아오고 사진을 새로 읽지 않는다.
 - 오류(명세 4.4):
 
 | 오류 | 화면 |
 |---|---|
-| 네트워크·`5xx` | 오류 띠 "사진을 올리지 못했어요. 인터넷 연결을 확인해 주세요." + [다시 시도](같은 키) |
+| 업로드 전 검사: 합계 30MB 초과 (요청 없음) | 오류 띠 "사진이 합쳐서 너무 커요. {n}장 이하로 줄이거나 다시 찍어 주세요." + `imageOrder`번 사진에 "큰 사진" 표시(위 "업로드 전 검사") |
+| 업로드 전 검사: 그 밖의 준비 실패 (요청 없음) | "{imageOrder}번 사진을 준비하지 못했어요. 빼거나 다른 사진으로 바꿔 주세요." + 그 사진에 표시 |
+| 네트워크·`5xx` | 오류 띠 "사진을 올리지 못했어요. 인터넷 연결을 확인해 주세요." + [다시 시도](같은 키: 같은 시도의 전송 재시도) |
+| `401 UNAUTHENTICATED` | 명세 3.1.5: 세션을 한 번 갱신하고 같은 요청(같은 키·같은 바이트)을 한 번만 다시 보낸다. 갱신이 실패하거나 다시 `401`이면 로그아웃 후 로그인 화면. 고른 사진은 기기에 남긴다(4.4의 미리 채우기와 같은 저장) |
+| `403 FORBIDDEN` | "이 업장의 메뉴를 관리할 권한이 없어요" 안내 + [내 바로](H0). 재시도하거나 로그인 화면으로 보내지 않는다(명세 3.1.5). H0는 `GET /api/me/bars`를 다시 불러 목록을 갱신한다 |
+| `404 BAR_NOT_FOUND` | "업장을 찾을 수 없어요. 문을 닫았거나 비활성 업장이에요." + [내 바로](H0, 업장 목록 다시 불러오기. 명세 4.4 "업장 목록으로 이동") |
+| `422 VALIDATION_FAILED` | `fieldErrors[].path`별: `images` → 사진 칸 아래 "사진을 한 장 이상 골라 주세요", `mode` → 올리기 방식 아래 "올리기 방식을 골라 주세요". 그 밖(`Idempotency-Key`, `ownerNote` 등, U1에서 만들지 않는 값)은 앱 오류이므로 "사진을 올리지 못했어요. 다시 시도해 주세요" + [다시 시도](새 키) |
 | `409 ACTIVE_IMPORT_EXISTS` | "확인하던 메뉴판이 있어요" 대화상자 + [이어서 하기] → `details.menuImportId`의 U2 또는 S1, [그 작업 그만두고 새로 올리기] → 아래 "진행 중 작업 대신 올리기"(취소 대상은 `details.menuImportId`) |
-| `413 UPLOAD_TOO_LARGE` | "사진이 너무 커요. 사진 수를 줄여 주세요." |
+| `413 UPLOAD_TOO_LARGE` | "사진이 너무 커요. 사진 수를 줄여 주세요."(앱 검사를 통과했는데 서버 제한(`details.maxImages`·`maxImageBytes`·`maxTotalBytes`)이 다를 때. 다시 올리면 새 키) |
 | `415 UNSUPPORTED_IMAGE_TYPE` | "{imageOrder}번 사진은 올릴 수 없는 형식이에요" + 그 사진에 표시 |
 | `409 IDEMPOTENCY_KEY_REUSED` | 새 키로 자동 재요청 한 번 |
 
 - **진행 중 작업 대신 올리기**(H0 "새 사진 올리기"로 들어왔거나 위 `409`에서 고른 경우): U1 위에 안내 "올리면 확인하던 메뉴판은 그만둬요. 지금 게시된 메뉴는 바뀌지 않아요." 올리기 버튼을 누르면 확인 대화상자("확인하던 메뉴판을 그만두고 새로 올릴까요? 그 메뉴판에서 확인한 내용은 사라져요.") → `POST /api/menu-imports/{진행 중 작업 ID}/cancel`(명세 5.7) → 성공(또는 이미 `canceled`)이면 그 작업의 기기 초안을 지우고 같은 사진으로 업로드한다. 업로드 전에 U1을 나가면 아무것도 취소하지 않는다. 진행 중 작업이 `processing`이어도 취소할 수 있다(명세 5.7: 처리 결과는 저장되지 않는다). 취소 결과별 처리는 7.4.
-- 위 `409` 뒤의 업로드에는 같은 `Idempotency-Key`를 쓴다. `ACTIVE_IMPORT_EXISTS`로 거절된 요청은 작업을 만들지 않았으므로(지금 코드는 작업을 만들 때만 키를 기록한다) 같은 업로드의 재시도다(명세 4.3).
-- 취소는 성공했는데 업로드가 실패하면, 진행 중 작업은 이미 없으므로 U1의 오류 띠 + [다시 시도](같은 키)만 보여 준다. 취소를 되돌릴 수는 없다.
+- 취소 뒤의 업로드는 새 업로드 시도이므로 **새 `Idempotency-Key`**로 보낸다(위 규칙). `409 ACTIVE_IMPORT_EXISTS`로 거절된 요청의 키는 서버에 기록되지 않으므로(지금 백엔드 `create_menu_import`는 작업을 만들 때만 키를 저장한다) 그 키를 다시 써도 지금은 동작이 같지만, 규칙을 하나로 두려고 새 키를 쓴다. H0 "새 사진 올리기"로 들어온 경우에는 새 키가 꼭 필요하다: 기기에 남은 이전 시도의 키가 바로 그 진행 중 작업을 만든 키일 수 있고(응답을 못 받은 업로드), 그 키로 같은 사진을 보내면 방금 취소한 작업이 `202`로 돌아온다.
+- 취소는 성공했는데 업로드가 실패하면, 진행 중 작업은 이미 없으므로 U1의 오류 띠 + [다시 시도]만 보여 준다(취소 뒤 새로 만든 키를 그대로 쓰는 전송 재시도). 취소를 되돌릴 수는 없다.
 
 ### 4.3 U2 읽는 중 ("03 읽는 중")
 
@@ -215,7 +222,7 @@
   - `completedImages < totalImages`: "사진 {total}장 중 {completed}장을 읽었어요"
   - `completedImages == totalImages`인데 아직 `processing`: "후보를 정리하는 중이에요"(명세 5.2: 모든 사진이 끝나도 잠시 `processing`일 수 있다)
   - 보조: "다 읽으면 확인할 줄을 보여 드릴게요."
-- `pollAfterMs`(3초) 간격으로 `GET`. 화면이 보일 때만 부른다. 상태가 바뀌면: `ready_for_review` → S1 요약(또는 4.5의 빈 경우), `failed` → U3, `applied` → S9, `canceled` → "취소된 작업이에요" + [내 바로].
+- `pollAfterMs`(3초) 간격으로 `GET`. 화면이 보일 때만 부른다. 상태가 바뀌면: `ready_for_review` → S1 요약(또는 4.5의 빈 경우), `failed` → U3, `applied` → S9(폴링 응답(명세 5.5)에는 결과 숫자가 없으므로 저장한 `result`가 없으면 숫자 없는 완료 화면, 5.9), `canceled` → "취소된 작업이에요" + [내 바로].
 - 아래 보조 버튼 "내 바로 돌아가기". 뒤로도 같다. 다시 들어오면 H0 내 바의 진행 중 작업에서 이어진다.
 - 그 아래 글자 버튼 "읽기 그만두기"(명세 5.7: 처리 중인 작업이 진행되지 않을 때 쓰는 취소): 확인 대화상자("메뉴판 읽기를 그만둘까요? 지금 게시된 메뉴는 바뀌지 않아요.") → `POST .../cancel` → H0 내 바. 결과별 처리는 7.4. 언제부터 보일지(바로 / 오래 걸릴 때만)는 정하지 않았고 지금은 늘 보인다(11장 D13).
 - 남은 시간, 퍼센트, 단계별 이름(OCR·AI)을 보여 주지 않는다.
@@ -228,12 +235,12 @@
   - `PROCESSING_FAILED`(사진이 아니라 서버 처리 문제, `failedImages`가 0일 수 있음): "메뉴판을 처리하지 못했어요." + "사진 문제는 아니에요. 같은 사진을 잠시 뒤 다시 올려 주세요." 다시 찍으라고 하지 않는다.
   - 모르는 코드: `PROCESSING_FAILED`와 같은 문구.
 - 서버 `failure.message`는 고정 문구라 이유를 알려 주지 않는다. 어느 사진이 왜 실패했는지 지어내지 않는다.
-- 실패한 작업은 이어서 할 수 없다(명세 5.3). 주 버튼 "사진 다시 올리기" → U1(앞서 고른 사진이 기기에 남아 있으면 미리 채운다. `PROCESSING_FAILED`면 같은 사진을 그대로 올릴 수 있게 미리 채운 것을 기본으로 둔다). 글자 버튼 "내 바로 돌아가기".
+- 실패한 작업은 이어서 할 수 없다(명세 5.3). 주 버튼 "사진 다시 올리기" → U1(앞서 고른 사진이 기기에 남아 있으면 미리 채운다. `PROCESSING_FAILED`면 같은 사진을 그대로 올릴 수 있게 미리 채운 것을 기본으로 둔다). 이 업로드는 **새 `Idempotency-Key`**로 보낸다(4.2, 지금 `startNewAttemptAfterFailure()`가 키와 준비한 바이트를 버린다). 같은 키로 같은 사진을 보내면 서버는 새로 읽지 않고 실패한 그 작업을 돌려준다(명세 4.3). 글자 버튼 "내 바로 돌아가기".
 
 ### 4.5 처리 뒤 빈 경우
 
 - 읽은 줄이 0개: "메뉴판에서 술을 찾지 못했어요" + `EMPTY`. 이 작업은 `ready_for_review`로 남아 있어서, 끝내지 않으면 새 업로드가 `409 ACTIVE_IMPORT_EXISTS`로 막힌다. 그래서 이 화면의 주 버튼은 취소다.
-  - 주 버튼 [사진 다시 올리기] → 확인 대화상자("이 메뉴판은 그만두고 사진을 다시 올릴까요? 지금 게시된 메뉴는 바뀌지 않아요.") → `POST .../cancel`(명세 5.7) → U1(앞서 고른 사진이 기기에 남아 있으면 미리 채운다). 결과별 처리는 7.4. 글자 버튼 "내 바로 돌아가기"는 작업을 그대로 두고 나간다(H0에서 다시 이 화면으로 온다).
+  - 주 버튼 [사진 다시 올리기] → 확인 대화상자("이 메뉴판은 그만두고 사진을 다시 올릴까요? 지금 게시된 메뉴는 바뀌지 않아요.") → `POST .../cancel`(명세 5.7) → U1(앞서 고른 사진이 기기에 남아 있으면 미리 채운다. 업로드는 새 `Idempotency-Key`, 4.2). 결과별 처리는 7.4. 글자 버튼 "내 바로 돌아가기"는 작업을 그대로 두고 나간다(H0에서 다시 이 화면으로 온다).
   - `review-and-apply`는 보내지 않는다. `full_replace`에서도 게시 버튼(내릴 술만 남은 게시)은 두지 않고, 내릴지 묻는 카드도 만들지 않는다: 사진을 하나도 못 읽은 작업으로 메뉴 전체를 내리게 하지 않는다.
 - 카드가 0장(모두 자동이고 내릴 술도 없음): 요약을 건너뛰고 S8 "게시할까요?"로 가서 위에 "확인할 줄이 없어요. 모두 자동으로 찾았어요"를 보여 준다.
 
@@ -250,6 +257,7 @@
 | `CHOOSE` | 06 고르기 | 어느 술인가요? | 1 |
 | `NEW` | 07 새 술 | 새 술로 등록할게요 | 1~3 |
 | `PRICE` | 08 가격 | 가격을 못 읽었어요 | 숫자 입력 + 1 |
+| `NO_OPTION` | (시안 없음, PRICE 틀에 입력칸 없이) | 메뉴판에서 가격을 못 읽었어요 | 1 |
 | `NOT_MENU` | (시안 없음, 4.8) | 메뉴에 올릴 위스키가 아닌 것 같아요 | 1 |
 | `NON_PRODUCT_AUTO` | 요약 | (카드 없음. 요약의 접힌 "제목·설명 줄") | 0 |
 | `REMOVE` | 09 내리기 | 지금 메뉴에서 내릴까요? | 술마다 1 |
@@ -270,6 +278,7 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
     else -> {                                   // "product"
         val top = item.candidates.minByOrNull { it.candidateRank }
         when {
+            item.options.isEmpty() -> NO_OPTION  // 가격을 넣을 옵션이 없다(5.6, 10장 B5). 매칭 결과와 관계없이
             item.initialResolutionStatus == "exact_match" &&
                 item.candidates.size == 1 && !top!!.blocked() ->
                 if (item.hasPricedOption()) AUTO else PRICE
@@ -283,7 +292,8 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 
 - `exact_match`는 별칭 정확 일치와 단계 규칙 S1·S2·S2b·S3(충돌 없이 하나로 확정)을 모두 포함한다(`evidence.rule`로 구분). 둘 다 `AUTO`다. S1~S3로 확정된 줄은 자동 목록에서 "비슷한 표기로 찾음"이라는 작은 표시를 붙인다(`rule != "alias"`).
 - LLM 후보(`matchMethod = llm`)가 붙은 줄은 서버가 항상 `ambiguous`로 내므로 `AUTO`가 되지 않는다. `confirmRecommended`가 있으면 `CONFIRM`, 없으면 `CHOOSE`.
-- `CONFIRM`·`CHOOSE`·`NEW`에서 상품을 고른 뒤 그 줄에 가격 있는 옵션이 없으면 같은 카드 안에서 가격 입력 단계(5.7)를 이어서 보여 준다. "메뉴에서 빼기"를 고르면 가격은 묻지 않는다.
+- `NO_OPTION`은 상품 줄인데 `options = []`인 줄이다. 검수 API는 이미 읽은 옵션(`extractedOptionId`)을 고치는 것만 받으므로(명세 8.1 `optionDecisions`) 앱이 가격을 새로 만들 수 없다. 그래서 PRICE로 보내지 않는다(5.6 NO_OPTION).
+- `CONFIRM`·`CHOOSE`·`NEW`에서 상품을 고른 뒤 그 줄에 가격 있는 옵션이 없으면 같은 카드 안에서 가격 입력 단계(5.7)를 이어서 보여 준다(이 카드들의 줄에는 옵션이 하나 이상 있다. 옵션이 없는 줄은 위에서 `NO_OPTION`이 된다). "메뉴에서 빼기"를 고르면 가격은 묻지 않는다.
 - 정의하지 않은 `effectiveLineType`이나 형식이 맞지 않는 항목은 `CHOOSE`(후보가 없으면 `NEW`)로 보낸다. 자동 처리하지 않는 쪽이 안전하다.
 
 ### 5.3 카드 순서와 개수
@@ -327,6 +337,7 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
  어느 술인지 고르기         3줄           (CHOOSE)
  새 술로 등록              2줄           (NEW)
  가격 적기                 1줄           (PRICE)
+ 가격이 없는 줄             1줄           (NO_OPTION)
  위스키가 맞는지            1줄           (NOT_MENU)
  지금 메뉴에서 빠지는 술     2개           (REMOVE, full_replace일 때만)
    새 사진에 없어서 내릴지 물어볼게요
@@ -377,14 +388,22 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 - 서버가 `newProductDraft`를 채우게 되면(10장 G2) 대체 규칙 대신 서버 값을 쓴다. 화면은 같다.
 
 **PRICE "가격을 못 읽었어요" ("08")**
-- `AUTO`인데 가격이 없는 줄은 PRICE 카드, 다른 카드에서는 상품을 고른 뒤 이어지는 단계다.
+- `AUTO`인데 옵션은 있고 가격이 모두 `null`인 줄은 PRICE 카드, 다른 카드에서는 상품을 고른 뒤 이어지는 단계다. 입력한 가격은 그 옵션의 `extractedOptionId`에 `correctedPriceKrw`로 간다. 옵션이 없는 줄은 PRICE가 아니라 NO_OPTION이다.
 - 본문: 병 M + "자동으로 찾은 술" + 상품. 옵션마다 입력칸("잔 · 30ml 가격", 숫자 키패드, 56dp, 오른쪽 "원"). 이미 가격이 있는 옵션은 입력칸 없이 보여 준다.
 - 하나 이상 입력하면 [저장](주) 켜짐. 1 이상 정수만(명세 8.1). 보조: "메뉴에서 빼기"(`reject`).
 - 이미 읽은 값을 고치려면 가격 줄 옆 "가격·용량 고치기"(글자 버튼)로 옵션 편집을 연다. 모든 카드와 자동 목록 바꾸기 화면에 있다. 옵션마다 세 칸: 이름(`잔`·`병`·`하프` 등, 1~100자), 용량(ml, 1~32767 정수, 숫자 키패드, 비우면 추출값 유지), 가격(1 이상 정수). 바꾼 칸만 `correctedOptionLabel`·`correctedPourMl`·`correctedPriceKrw`로 보낸다(명세 8.1). 추출값을 지워 `null`로 만들 수는 없으므로(명세 8.1) 용량을 지우는 동작은 두지 않는다.
 
+**NO_OPTION "메뉴판에서 가격을 못 읽었어요"** (시안 없음: PRICE 틀에 입력칸 없이)
+- 상품 줄인데 가격·용량 옵션이 하나도 없다(`options = []`). 요청으로 새 옵션을 만들 수 없고(명세 8.1: `optionDecisions`는 `extractedOptionId`가 있는 옵션만 고친다) 가격 없는 상품은 게시되지 않는다(`NO_PRICED_OPTION`, 명세 8.7). 그래서 이번 검수에서는 이 줄을 올릴 수 없다.
+- 본문: 메뉴판 줄(3.2, 가격 줄 대신 "가격 없음") + 1순위 후보가 있으면 상품 두 줄 표기("이 술 같아요", 참고용, 고르는 버튼 없음) + 안내 "게시 뒤 메뉴 직접 추가(P38)로 넣을 수 있어요."
+- 버튼: [이번엔 빼기](주) 하나 → `reject`, `finalLineType = product`(7.1). 그 줄의 `add`/`update` 변경은 `ignore`(7.3). 가격 입력칸, 상품 고르기·검색·새 술 등록은 두지 않는다.
+- 지금 메뉴판의 술은 `apply`한 `remove`로만 빠지므로(명세 8.7) 이 줄을 빼도 지금 메뉴에 있는 같은 술이 저절로 내려가지는 않는다.
+- 10장 B5(옵션을 새로 만드는 계약)가 생기면 PRICE 카드처럼 옵션을 만들어 가격을 넣게 바꾼다.
+
 **NOT_MENU "메뉴에 올릴 위스키가 아닌 것 같아요"** (시안 없음: CONFIRM 틀에 상품 칸 없이)
 - 부제 "AI가 이 줄을 술 이름으로 확신하지 못했어요."
 - 버튼: [메뉴에서 빼기](주) / [위스키예요](보조 → S5 검색. 매칭을 하지 않은 줄이라 후보가 없다).
+- 그 줄의 `options`가 비어 있으면 [위스키예요]를 두지 않고 NO_OPTION의 안내("게시 뒤 메뉴 직접 추가(P38)로 넣을 수 있어요")만 덧붙인다. 상품으로 골라도 게시할 수 없기 때문이다.
 
 **REMOVE "지금 메뉴에서 내릴까요?" ("09")**
 - 위: 뒤로 + "마지막 확인". 부제 "새로 올린 사진에 없는 술이에요. 하나씩 골라 주세요."
@@ -420,7 +439,7 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 - 숫자는 업주 결정에서 센다. "추가/가격 변경" 수는 서버가 최종 계산하므로(명세 8.7) 여기서 보여 주지 않고 완료 화면에서 서버 결과로 보여 준다.
 - **결정하지 않은 카드가 있으면(S7)** 단계는 "확인"에 머물고, 목록에 "아직 확인 안 한 줄 n개"(`primary` 글자), 게시하기는 꺼진다. 그 위 `surfaceElevated` 띠 "n개를 확인해야 게시할 수 있어요" + [이어서 확인 ›](다음 미결정 카드). 꺼진 버튼도 TalkBack이 이유를 읽는다.
 - "줄별로 다시 보기": 모든 줄(자동 포함)과 결정 요약. 누르면 해당 카드(자동은 바꾸기 화면)로 간다.
-- "검수 그만두기": 확인 대화상자("검수를 그만둘까요? 확인한 내용은 모두 사라지고, 지금 게시된 메뉴는 바뀌지 않아요.") 뒤 `POST .../cancel`(명세 5.7) → 기기 초안 삭제 → H0 내 바. `review-and-apply`로 "아무것도 게시하지 않는" 요청을 보내 끝내지 않는다(11장 D13). 결과별 처리는 7.4.
+- "검수 그만두기": 확인 대화상자("검수를 그만둘까요? 확인한 내용은 모두 사라지고, 지금 게시된 메뉴는 바뀌지 않아요.") 뒤 `POST .../cancel`(명세 5.7) → 기기 초안 삭제 → H0 내 바. 결과별 처리는 7.4.
 - 개발용 빌드에서는 "보낼 요청 보기"로 7장 요청 JSON을 펼쳐 볼 수 있게 해도 좋다.
 - **10장 G7 (전체 교체에서 남는 옛 상품)**: `full_replace`이고 1순위가 아닌 상품을 고른 줄이 있으면, 그 줄의 1순위 상품이 (a) `GET /api/bars/{barId}/menu`의 현재 메뉴에 있고, (b) 이 검수의 어느 줄에도 연결되지 않았고, (c) 그 상품의 `remove` 변경이 없으면, 서버는 그 상품을 내리지 않는다(명세 8.7: 현재 메뉴 항목은 `apply`한 `remove`로만 빠진다). 안내만 하고 게시하게 두면 업주가 모르는 사이 옛 술이 남는다. 그래서:
   - 그런 상품마다 S8에 "지금 메뉴에 남는 술" 칸을 둔다: 두 줄 표기 + "지금 메뉴 · {가격} {용량}" + "전체 교체지만 이 술은 내릴 수 없어서 메뉴에 남아요."
@@ -499,12 +518,13 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 | 위스키가 아니에요 (상품 줄) | `reject` | `product` | 없음 |
 | 메뉴에서 빼기 (`NOT_MENU`) | `confirm_non_product` | `unknown` | 없음 |
 | 메뉴에서 빼기 (가격 카드) | `reject` | `product` | 없음 |
+| 이번엔 빼기 (`NO_OPTION`) | `reject` | `product` | 없음 |
 | 위스키예요 (`NOT_MENU`) → 검색·새 술 | 위의 `select_existing_product` / `create_product` | `product` | 위와 같음 |
 | 제목·설명 줄 (`NON_PRODUCT_AUTO`) | `confirm_non_product` | `effectiveLineType` | 없음 |
 | 가격·용량·옵션 이름 입력·고치기 (상품 결정과 함께) | 위 상품 결정 | `product` | `optionDecisions: [{extractedOptionId, correctedPriceKrw?, correctedPourMl?, correctedOptionLabel?}]` 바뀐 옵션의 바뀐 칸만 |
 
 - `correctedProductName`, `aliasesToAdd`는 보내지 않는다(11장 D3).
-- 검수 그만두기, 새 사진 올리기, 읽은 줄 0개 작업은 이 요청이 아니라 취소 요청(7.4)이다. 이 표에 "아무것도 게시하지 않고 끝내기" 결정은 없다.
+- 이 요청은 S8 [게시하기]에서만 보낸다. 검수 그만두기, 새 사진 올리기, 읽은 줄 0개 작업은 취소 요청(7.4)이다(11장 D13).
 - 이름 조합에서 빈 값은 빼고 앞뒤 공백을 지운다. `displayName` 1~200자, `editionName` 1~150자, `canonicalName` 1~120자(명세 8.1). 넘으면 카드에서 막는다.
 
 ### 7.2 예시
@@ -577,8 +597,8 @@ fun classify(item: ReviewItemDto): CardKind = when (item.effectiveLineType) {
 | `409 REVIEW_OUTDATED` | "메뉴판이 바뀌어서 다시 확인이 필요해요" | `details.reviewUrl` 재조회 → 6.5 |
 | `409 DUPLICATE_PRODUCT_FOUND` | 해당 NEW 카드로 이동, "이미 등록된 술이 있어요" + `existingProduct` 두 줄 표기 + [이 술이에요] [다른 술이에요] | [이 술이에요] → `select_existing_product`. `isActive = false`면 꺼진 버튼 + "판매 중단 상품이라 연결할 수 없어요. 운영자에게 문의해 주세요". [다른 술이에요] → 그 줄의 메뉴판 표기 별칭을 빼고(겹친 것이 별칭일 수 있다, 명세 9.5 "겹치는 별칭을 빼고 다시 제출"), 이름을 고치게 한다. 같은 줄이 두 번째로 이 오류를 받으면 카드에 "이 이름도 이미 있는 술과 겹쳐요. 이미 있는 술에서 골라 주세요" + [이미 있는 술이에요](S5)를 주 버튼으로 둔다(같은 요청을 되풀이하지 않게) |
 | `409 DUPLICATE_BRAND_FOUND` | 해당 NEW 카드, "같은 브랜드가 이미 있어요" + `existingBrand.canonicalName` + [이 브랜드로] | 브랜드를 `existing`으로 바꾼다 |
-| `422 VALIDATION_FAILED` | `fieldErrors[].path`의 `itemDecisions[i]`를 카드로 바꿔 그 카드로 이동 | `NO_PRICED_OPTION` → 가격 단계, `PRODUCT_INACTIVE` → "판매 중단 상품" + 다시 고르기, `MISSING_*`/`UNKNOWN_*`/`DUPLICATE_*` → 앱 오류이므로 재조회 후 6.5 |
-| `409 INVALID_IMPORT_STATE` | `details.status`에 따라: `applied` → S9, `canceled` → "취소된 작업이에요", 그 밖 → 재조회 | |
+| `422 VALIDATION_FAILED` | `fieldErrors[].path`의 `itemDecisions[i]`를 카드로 바꿔 그 카드로 이동 | `NO_PRICED_OPTION` → 가격 단계(옵션이 없는 줄이면 NO_OPTION 카드), `PRODUCT_INACTIVE` → "판매 중단 상품" + 다시 고르기, `MISSING_*`/`UNKNOWN_*`/`DUPLICATE_*` → 앱 오류이므로 재조회 후 6.5 |
+| `409 INVALID_IMPORT_STATE` | `details.status`에 따라: `applied` → 재조회 후 S9(저장한 `result`가 없으면 숫자 없는 완료 화면, 5.9), `canceled` → "취소된 작업이에요", 그 밖 → 재조회 | |
 | `401` | 세션 갱신 후 한 번 재시도, 실패하면 로그인 | 초안은 남는다 |
 | `403 FORBIDDEN` | "이 업장의 메뉴를 관리할 권한이 없어요" | |
 | `404 MENU_IMPORT_NOT_FOUND` | "작업을 찾을 수 없어요" + [내 바로] | 초안 삭제 |
@@ -595,15 +615,19 @@ ViewModel 단위 테스트는 시안 시나리오(오드비 메뉴판 2장, 16�
 **업로드·읽기 (P27)**
 1. 사진 0장이면 올리기 버튼이 꺼져 있다. 6장째는 고를 수 없다.
 2. 올리기 방식을 고르지 않은 상태가 없다(기본값 전체 교체), 고른 값이 `mode`로 간다.
-3. 올리는 중 네트워크를 끊으면 오류 띠 + 다시 시도, 다시 시도는 같은 `Idempotency-Key`로 보낸다.
-4. `409 ACTIVE_IMPORT_EXISTS`면 [이어서 하기]로 그 작업이 열린다. [그 작업 그만두고 새로 올리기]는 확인 뒤 `details.menuImportId`를 취소하고 같은 `Idempotency-Key`로 다시 올린다. H0 "새 사진 올리기"로 U1에 들어갔다가 올리지 않고 나가면 진행 중 작업은 그대로다.
+3. 올리는 중 네트워크를 끊으면 오류 띠 + 다시 시도, 다시 시도는 같은 `Idempotency-Key`·같은 바이트로 보낸다. 사진·순서·방식을 바꾼 뒤 올리면 새 키다.
+3-1. 합계가 30MB를 넘으면 요청을 보내지 않고 "사진이 합쳐서 너무 커요. {n}장 이하로…"와 합계를 넘긴 사진의 "큰 사진" 표시가 보인다.
+3-2. 업로드가 `401`이면 세션 갱신 뒤 같은 키로 한 번만 다시 보내고, 또 `401`이면 로그인 화면이다. `403`은 권한 안내 + [내 바로](재시도 없음), `404 BAR_NOT_FOUND`는 H0로 가서 업장 목록을 다시 불러오고, `422`는 `fieldErrors`의 칸(`images`·`mode`)에 문구가 붙는다.
+4. `409 ACTIVE_IMPORT_EXISTS`면 [이어서 하기]로 그 작업이 열린다. [그 작업 그만두고 새로 올리기]는 확인 뒤 `details.menuImportId`를 취소하고 **새** `Idempotency-Key`로 다시 올린다. H0 "새 사진 올리기"로 취소한 뒤의 업로드도 새 키다. H0 "새 사진 올리기"로 U1에 들어갔다가 올리지 않고 나가면 진행 중 작업은 그대로다.
 5. 읽는 중 문구가 `completedImages`대로 바뀌고, 모두 읽었는데 `processing`이면 "후보를 정리하는 중이에요"다. 퍼센트가 없다.
 6. `failed`면 U3. `IMAGE_EXTRACTION_FAILED`면 못 읽은 사진 수와 다시 찍기 안내, `PROCESSING_FAILED`(`failedImages = 0` 포함)면 다시 찍으라는 말 없이 "같은 사진을 잠시 뒤 다시 올려 주세요"다. 이유를 지어내지 않는다.
-7. 읽는 중 화면을 나갔다 들어와도 같은 작업이 이어진다.
+6-1. U3 "사진 다시 올리기"의 업로드는 실패한 작업과 다른 새 `Idempotency-Key`로 가고, 응답은 새 `menuImportId`다(같은 사진이어도 실패한 작업이 돌아오지 않는다).
+7. 읽는 중 화면을 나갔다 들어와도 같은 작업이 이어진다. 폴링 중 `applied`를 만나면 저장한 `result`가 없으므로 숫자 없는 완료 화면이다.
 
 **분류 (P23)**
 8. `exact_match` + 후보 1 + 충돌 없음 + 가격 있음 → 카드가 없고 요약 "자동으로 찾은 술"에 센다.
-9. `exact_match`인데 가격 있는 옵션이 없음 → PRICE 카드.
+9. `exact_match`인데 옵션은 있고 가격 있는 옵션이 없음 → PRICE 카드.
+9-1. 상품 줄인데 `options = []` → 매칭 결과(`exact_match`/`ambiguous`/`unmatched`)와 관계없이 NO_OPTION 카드. 가격 입력칸과 상품 고르기가 없고 [이번엔 빼기]만 있다. 제출 요청에서 그 줄은 `reject`(`optionDecisions` 없음)이고 `add`/`update` 변경은 `ignore`다. 옵션이 없는 NOT_MENU 줄에는 [위스키예요]가 없다.
 10. `ambiguous` + 1순위 `confirmRecommended = true` + 충돌 없음 → CONFIRM 카드.
 11. `ambiguous` + 후보 2개 이상 → CHOOSE, 후보가 `candidateRank` 순서로 모두 보인다.
 12. `ambiguous` + 후보 1개 + `editionUnmatched` → CHOOSE, 그 후보를 누르면 확인 대화상자.
@@ -664,6 +688,7 @@ ViewModel 단위 테스트는 시안 시나리오(오드비 메뉴판 2장, 16�
 | B2 | `GET /api/me/bars` | **있음**(#75, 명세 3.11.9) | — |
 | B3 | `POST /api/menu-imports/{id}/cancel` (명세 5.7) | **있음**(#87). 지금은 operator 전용이고 업주 권한은 B1(P22)과 함께 열린다 | — (검수 그만두기, 새 사진 올리기, 읽은 줄 0개, 읽기 그만두기 모두 이 API, 7.4. P22 머지 전에는 operator 권한으로 부른다) |
 | B4 | 전체 교체에서 1순위가 아닌 상품을 고른 줄의 옛 1순위 상품 `remove` | 서버가 업주 결정으로 변경을 다시 계산할 때 `remove`를 만들지 않음(G7). 양해울과 정할 것: 제출 결정 기준으로 `remove`를 만들어 주거나, 다시 계산한 diff를 돌려주기(계약 변경) | 5.8 G7: 남는 술마다 [남겨도 돼요]를 받기 전에는 게시하지 않는다 |
+| B5 | 검수에서 옵션(가격)을 새로 만드는 계약 | 없음. `optionDecisions`는 `extractedOptionId`가 있는 옵션만 고친다(명세 8.1). 양해울(백엔드)께 요청: 상품 결정에 새 옵션(예: `optionsToAdd: [{optionLabel?, pourMl?, priceKrw}]`)을 받는 계약을 정하고 명세 8.1·8.7을 갱신(계약 변경) | NO_OPTION 카드: [이번엔 빼기]만, 게시 뒤 메뉴 직접 추가(P38)로 넣는다(5.6) |
 | G1 | 줄 좌표 `sourceBox` | I3-P25 백엔드 PR | 종이 띠(3.2) |
 | G2 | `newProductDraft`가 비어 있음 | I3-P30 뒤 매칭 쪽에서 채운다(박진우): 규칙 매칭이 찾은 브랜드·연수, LLM 번역의 병입사·증류소·브랜드·연수·에디션 | 5.6 NEW의 대체 규칙 |
 | G4 | 비위스키 판정 | G2와 함께: LLM 번역의 `kind` | 모든 상품 카드에 "위스키가 아니에요" |
@@ -687,14 +712,15 @@ Android DTO에는 계약에 있는 `proposedChanges[].before`가 빠져 있다. 
 | D3 | 업주가 확인한 메뉴 표기를 별칭(`aliasesToAdd`)으로 추가할지 | P23에서는 보내지 않음. 이후 `isSearchable = false`로 매칭에만 쓰는 안을 검토 |
 | D4 | 새 브랜드 영문 이름을 모를 때 한글 `canonicalName`을 허용할지 | 허용(업주가 확인한 표기만). 운영자가 나중에 고침 |
 | D5 | "모두 내리기"를 둘지 | 두지 않음 |
-| D6 | 가격 없는 줄을 게시 전에 꼭 정하게 할지 | 그렇게 함(서버가 `NO_PRICED_OPTION`으로 막기도 함). "메뉴에서 빼기"로 넘길 수 있음 |
+| D6 | 가격 없는 줄을 게시 전에 꼭 정하게 할지 | 그렇게 함(서버가 `NO_PRICED_OPTION`으로 막기도 함). "메뉴에서 빼기"로 넘길 수 있음. 옵션이 아예 없는 줄(NO_OPTION)은 가격을 넣을 수 없으므로 B5 전까지 [이번엔 빼기]만 둔다 |
 | D7 | `DESIGN.md` 5.2와 "한 번에 질문 하나"의 관계 | 질문은 카드 하나에 하나, 요약·자동 목록·게시 확인은 촘촘한 목록. 남호진과 이 해석에 합의할 것 |
 | D8 | 중간 결정을 기기에만 저장 | 서버 중간 저장 API 없이 기기 저장 |
 | D9 | 서버 LLM 층(`MATCHING_LLM_ENABLED`)을 켜는 시점 | P23 병합과 9장 수용 기준 통과 뒤, I3-P32 결정에 따름 |
 | D10 | 병 일러스트 | 브랜드별 규칙이 정해질 때까지 모든 상품이 같은 중립 병(3.3) |
 | D11 | 새 술의 메뉴판 표기를 손님 검색어로 저장할지 | 기본은 저장하지 않음(`isSearchable = false`, 매칭에만). 업주가 철자를 확인하고 켠 경우만 검색어. OCR 오타가 손님 검색에 영구히 남지 않게 한다 |
 | D12 | 전체 교체에서 내릴 수 없는 옛 상품 | 술마다 업주가 "남겨도 돼요"를 고른 뒤에만 게시(B4 전까지) |
-| D13 | 게시하지 않고 작업을 끝내는 길 | 모두 취소 API(명세 5.7, 7.4): 검수 그만두기, 새 사진 올리기, 읽은 줄 0개, 읽기 그만두기. `review-and-apply`로 아무것도 게시하지 않는 요청을 보내 끝내는 길("지금 메뉴 그대로 두고 끝내기")은 두지 않는다(아무것도 게시하지 않은 작업이 게시한 작업(`applied`)으로 남는다. 취소는 메뉴판을 건드리지 않는다, 명세 5.7). 새 사진 올리기는 U1에 들어갈 때가 아니라 실제로 올릴 때 취소한다(나가면 잃는 것이 없게). U2 "읽기 그만두기"를 늘 보일지, 오래 걸릴 때만 보일지는 남호진과 정할 것 |
+| D13 | 게시하지 않고 작업을 끝내는 길 | 모두 취소 API(명세 5.7, 7.4): 검수 그만두기, 새 사진 올리기, 읽은 줄 0개, 읽기 그만두기. `review-and-apply`는 S8 [게시하기]에서만 보낸다. 취소는 메뉴판과 카탈로그를 건드리지 않는다(명세 5.7). 새 사진 올리기는 U1에 들어갈 때가 아니라 실제로 올릴 때 취소한다(나가면 잃는 것이 없게). U2 "읽기 그만두기"를 늘 보일지, 오래 걸릴 때만 보일지는 남호진과 정할 것 |
+| D14 | 업로드 키와 사진 크기 | `Idempotency-Key`는 업로드 시도마다 새로 만들고 같은 시도의 전송 재시도에만 다시 쓴다(4.2, 지금 Android 코드와 같다). 합계 30MB는 지금 코드대로 넘으면 올리지 않고 줄이라고 안내한다. 합계를 넘을 때 모든 사진을 더 줄여 자동으로 맞추는 것은 제안이다(남호진이 정할 것) |
 
 ---
 
@@ -724,6 +750,7 @@ sealed interface LocalDecision {
                              val menuSpelling: String?,              // null: 보내지 않음(이름과 같음, 중복 오류 뒤 뺌)
                              val menuSpellingSearchable: Boolean = false) : LocalDecision  // D11
     data object NotWhisky : LocalDecision        // reject, finalLineType = effectiveLineType
+    data object Skip : LocalDecision             // reject, finalLineType = product: 가격 카드의 "메뉴에서 빼기", NO_OPTION의 [이번엔 빼기]
     data object NotMenuLine : LocalDecision      // confirm_non_product
 }
 data class OptionFix(val label: String? = null, val pourMl: Int? = null, val priceKrw: Int? = null)  // null = 고치지 않음
@@ -759,13 +786,15 @@ sealed interface ExtractionReviewUiState {
 - `OwnerApi`에 추가: `GET api/catalog/brands`, `GET api/catalog/products`, `GET api/me/bars`(B2), `POST api/menu-imports/{id}/cancel`(B3, 본문 없음, 응답은 `GET`의 `canceled` 응답과 같은 명세 5.6 본문). G7 대체 동작용 `GET api/bars/{barId}/menu`는 고객 쪽 API를 재사용.
 - `OwnerApiModels.kt`: `ReviewItemDto.sourceBox: List<Int>?`, `ProposedChangeDto.before`(`ChangeBeforeDto(productId, displayName, options[menuEntryOptionId, optionLabel, pourMl, priceKrw])`), `ChangeAfterDto.options`, `BrandSearchResponseDto`, `ProductSearchResponseDto`(`isActive`, `matchedAlias`). `ReviewAndApplyRequestDto.itemDecisions`는 `sealed class` + Moshi 어댑터로 바꾸면 `EXTRA_FORBIDDEN`을 컴파일 단계에서 막을 수 있다(권장).
 - `OwnerRepository`: 위 API 메서드. `ReviewDraftStore`(`MenuUploadRetryCache`와 같은 방식의 내부 저장 파일).
+- 업로드 키(4.2): 취소(7.4) 성공 뒤 업로드, U3 "사진 다시 올리기", 그 밖의 새 시도 전에 `MenuUploadRetryCache.clear()`를 부른다. 같은 캐시를 전송 재시도와 `401` 갱신 뒤 재시도에만 그대로 쓴다.
 - `BottleMapApiException.details`에서 `extractedItemId`, `existingProduct`, `existingBrand`, `reviewUrl`, `status`, `menuImportId`를 읽는 작은 파서.
 
 ### 12.4 단위 테스트 (최소)
 
-- `buildReviewCards`: 9장 8~16번.
-- `buildReviewRequest`: 모든 항목·변경 포함(23), 새 브랜드 경로(24), 비위스키(25), 내리기(26), 메뉴판 표기 별칭 `isSearchable`·생략(28-2), 중복 오류 뒤 별칭 뺌(28-3), 옵션 수정은 바뀐 칸만(28-4), 미결정이면 예외.
-- `cancelImport`: 성공·이미 취소됨 → 초안 삭제, `409`의 `applied`/`failed`, 네트워크 오류 뒤 같은 요청 재시도(21-1, 21-2, 7.4). 진행 중 작업 대신 올리기: 취소 → 같은 키로 업로드, 올리기 전에 나가면 취소 없음(4).
+- `buildReviewCards`: 9장 8~16번, 9-1.
+- `buildReviewRequest`: 모든 항목·변경 포함(23), 새 브랜드 경로(24), 비위스키(25), 내리기(26), 메뉴판 표기 별칭 `isSearchable`·생략(28-2), 중복 오류 뒤 별칭 뺌(28-3), 옵션 수정은 바뀐 칸만(28-4), NO_OPTION은 `reject`와 `ignore`(9-1), 미결정이면 예외.
+- `cancelImport`: 성공·이미 취소됨 → 초안 삭제, `409`의 `applied`/`failed`, 네트워크 오류 뒤 같은 요청 재시도(21-1, 21-2, 7.4). 진행 중 작업 대신 올리기: 취소 → 새 키로 업로드, 올리기 전에 나가면 취소 없음(4).
+- 업로드 키: 전송 재시도·`401` 갱신 뒤는 같은 키(3, 3-2), 사진·방식 변경·`failed` 뒤·취소 뒤는 새 키(3, 4, 6-1), `IDEMPOTENCY_KEY_REUSED` 뒤 새 키 한 번. 합계 30MB 초과면 요청 없음(3-1).
 - `staleTopProducts(dto, draft, currentMenu)`: 5.8 G7의 (a)~(c)와 [남겨도 돼요] 뒤 게시 가능(28-1).
 - `reconcile`: 같은 버전 복원, 항목 삭제, `remove` 재연결(6.5).
 - `cropRect`: 여유 포함, 사진 끝에서 자르기, 0–1000 좌표의 비율 변환.
