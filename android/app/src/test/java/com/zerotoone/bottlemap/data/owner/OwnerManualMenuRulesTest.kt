@@ -333,4 +333,34 @@ class OwnerManualMenuRulesTest {
             snapshot(reloaded).menuItems.single { it.barId == "fixture-bar" }.barMenuItemId)
     }
 
+    @Test fun sharedLocalProductCannotBeRewrittenThroughRepositoryFromAnotherBar() {
+        val fixture = OwnerMockFixtures.registeredBar()
+        val r = repo(InMemoryMockOwnerStateStore(fixture.copy(
+            bars = fixture.bars + MockBar("other-bar", "다른 바", "서울"))))
+        val local = MockCatalogProduct("local-unverified-shared", brand.brandId,
+            "공유 위스키 12년", category = "whisky", catalogMatched = false)
+        val owned = MockBarMenuItem("shared-own", "fixture-bar", local.productId,
+            listOf(option("shared-own-opt", 30, 12000)))
+        val elsewhere = MockBarMenuItem("shared-other", "other-bar", local.productId,
+            listOf(option("shared-other-opt", 30, 14000)))
+        r.saveManualMenuItem(owned, local, brand)
+        r.saveManualMenuItem(elsewhere)
+        rejects {
+            r.saveManualMenuItem(owned.copy(displayNameOverride = "변경"),
+                local.copy(displayName = "다른 바에도 반영될 잘못된 이름"))
+        }
+        rejects {
+            r.saveManualMenuItem(owned, local.copy(category = "cocktail"))
+        }
+        assertEquals("공유 위스키 12년",
+            snapshot(r).products.single().displayName)
+        assertEquals("whisky", snapshot(r).products.single().category)
+        assertEquals(elsewhere, snapshot(r).menuItems.single { it.barId == "other-bar" })
+        r.saveManualMenuItem(owned.copy(displayNameOverride = "우리 바 이름"))
+        assertEquals("우리 바 이름",
+            snapshot(r).menuItems.single { it.barId == "fixture-bar" }.displayNameOverride)
+        assertEquals(null,
+            snapshot(r).menuItems.single { it.barId == "other-bar" }.displayNameOverride)
+    }
+
 }
