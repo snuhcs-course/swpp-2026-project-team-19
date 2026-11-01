@@ -3,11 +3,16 @@ package com.zerotoone.bottlemap.ui.owner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -99,5 +104,22 @@ internal fun V4HourButton(text: String, onClick: ()->Unit, modifier: Modifier = 
         .clickable(onClick = onClick), contentAlignment = Alignment.Center) {
         Text(text, color = V4Color.text, fontSize = 11.sp, maxLines = 1,
             textAlign = TextAlign.Center)
+    }
+}
+
+/** HTML top bar: small section caption next to a standalone back arrow. */
+@Composable
+internal fun V4Toolbar(title: String?, onBack: () -> Unit) {
+    Row(Modifier.fillMaxWidth().height(52.dp).background(V4Color.background)
+        .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Box(Modifier.size(40.dp).clickable(onClick = onBack)
+            .semantics { contentDescription = "뒤로가기" },
+            contentAlignment = Alignment.Center) {
+            Text("←", color = V4Color.text, fontSize = 26.sp, lineHeight = 28.sp)
+        }
+        if (title != null) Text(title, color = V4Color.sub,
+            fontSize = 12.sp, fontWeight = FontWeight.Medium)
     }
 }
