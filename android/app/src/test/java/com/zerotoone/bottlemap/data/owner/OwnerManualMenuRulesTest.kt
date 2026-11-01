@@ -32,10 +32,89 @@ class OwnerManualMenuRulesTest {
         assertEquals("", ownerPriceInput("no digits"))
         assertTrue(validMockMenuOption(MockMenuOption("max", pourMl = 30,
             priceKrw = MAX_OWNER_MENU_PRICE_KRW)))
-        assertFalse(validMockMenuOption(MockMenuOption("over", pourMl = 30,
+        // The photo-import pipeline keeps its legacy positive Int invariant.
+        assertTrue(validMockMenuOption(MockMenuOption("over", pourMl = 30,
             priceKrw = 100_000_000)))
         assertNotNull(manualMenuOptionError(listOf(
             MockMenuOption("over", pourMl = 30, priceKrw = 100_000_000)), "whisky"))
+    }
+
+    @Test fun replacementLocalCategoryAcceptsSingleCocktailPriceAndRejectsWrongShape() {
+        val r = repo()
+        val local = MockCatalogProduct("local-unverified-changing", "local-brand-category",
+            "Original whisky", category = "whisky", catalogMatched = false)
+        val brand = MockBrand(local.brandId, "기타")
+        r.saveManualMenuItem(MockBarMenuItem("change", "fixture-bar", local.productId,
+            listOf(option("ml30", 30, 12000))), local, brand)
+        val changed = local.copy(displayName = "새 칵테일", category = "cocktail")
+        r.saveManualMenuItem(MockBarMenuItem("change", "fixture-bar", local.productId,
+            listOf(option("single", null, 15000))), changed, brand)
+        assertEquals("cocktail", snapshot(r).products.single().category)
+        assertNull(snapshot(r).menuItems.single().options.single().pourMl)
+        rejects {
+            r.saveManualMenuItem(MockBarMenuItem("change", "fixture-bar", local.productId,
+                listOf(option("ml99", 99, 15000), option("ml30-new", 30, 13000))),
+                changed, brand)
+        }
+        assertEquals("cocktail", snapshot(r).products.single().category)
+    }
+
+    @Test fun manualPourLimitMatchesSharedImportInvariant() {
+        val tooLarge = option("big", 32768, 10000)
+        assertNotNull(manualMenuOptionError(listOf(tooLarge), "whisky"))
+        assertFalse(validMockMenuOption(tooLarge))
+        val boundary = option("max", 32767, 10000)
+        assertNull(manualMenuOptionError(listOf(boundary), "whisky"))
+        assertTrue(validMockMenuOption(boundary))
+    }
+
+    @Test fun importSupportsLegacyHighPricesAndFourOptionsWhileManualCannotCreateThem() {
+        val r = repo()
+        r.saveBrand(brand)
+        r.saveCatalogProduct(ten)
+        val imported = (1..4).map { index ->
+            option("legacy-$index", index * 15, if (index == 4) 100_000_000 else 1000 * index)
+        }
+        r.saveMenuItem(MockBarMenuItem("legacy-row", "fixture-bar", ten.productId, imported))
+        assertEquals(4, snapshot(r).menuItems.single().options.size)
+        assertNotNull(manualMenuOptionError(imported, "whisky"))
+        // Editing first three fields does not delete/import-rewrite the fourth option.
+        val editFirstThree = imported.take(3).mapIndexed { index, o ->
+            if (index == 0) o.copy(priceKrw = 3300) else o
+        } + imported.drop(3)
+        r.saveManualMenuItem(MockBarMenuItem("legacy-row", "fixture-bar",
+            ten.productId, editFirstThree))
+        assertEquals(editFirstThree, snapshot(r).menuItems.single().options)
+        rejects {
+            r.saveManualMenuItem(MockBarMenuItem("legacy-row", "fixture-bar",
+                ten.productId, imported + option("fifth", 75, 2000)))
+        }
+    }
+
+    @Test fun changingCustomerVisibleMenuUpdatesFreshnessWithoutTouchingVerification() {
+        val r = repo()
+        r.saveManualMenuItem(MockBarMenuItem("menu-10", "fixture-bar", ten.productId,
+            listOf(option("pour", 30, 10000))), ten, brand)
+        val barBefore = snapshot(r).bars.single()
+        r.setSoldOut("menu-10", true)
+        val sold = snapshot(r).bars.single()
+        assertNotNull(sold.lastMenuPublishedAtEpochMs)
+        assertTrue(sold.lastMenuPublishedAtEpochMs!! >= barBefore.lastMenuPublishedAtEpochMs!!)
+        assertEquals(barBefore.lastVerifiedAtEpochMs, sold.lastVerifiedAtEpochMs)
+        r.setSoldOut("menu-10", false)
+        assertEquals(1, r.preview("fixture-bar", 0L)!!.visibleMenu.size)
+        r.deleteMenuItem("menu-10")
+        val deleted = snapshot(r).bars.single()
+        assertNotNull(deleted.lastMenuPublishedAtEpochMs)
+        assertTrue(deleted.lastMenuPublishedAtEpochMs!! >= sold.lastMenuPublishedAtEpochMs!!)
+        r.saveManualMenuItem(MockBarMenuItem("menu-again", "fixture-bar", ten.productId,
+            listOf(option("pour-again", 45, 12000))))
+        r.clearMenuForBar("fixture-bar")
+        val reset = snapshot(r).bars.single()
+        assertNotNull(reset.lastMenuPublishedAtEpochMs)
+        assertEquals(deleted.lastVerifiedAtEpochMs, reset.lastVerifiedAtEpochMs)
+        assertTrue(reset.lastMenuPublishedAtEpochMs!! >= deleted.lastMenuPublishedAtEpochMs!!)
+        assertTrue(snapshot(r).menuItems.isEmpty())
     }
 
     @Test fun sameBrandDifferentCatalogIdsRemainDifferentProducts() {
