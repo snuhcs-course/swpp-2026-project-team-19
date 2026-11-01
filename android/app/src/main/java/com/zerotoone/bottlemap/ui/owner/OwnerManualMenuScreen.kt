@@ -420,6 +420,7 @@ internal fun OwnerManualMenuScreen(
                 }
                 bar == null -> Text("관리할 매장이 없어요.", color = V4Color.sub)
                 screen == "list" -> {
+                    error?.let { Text(it, color = Color(0xFFFFB4AB)) }
                     Text("메뉴 관리", color = V4Color.text, fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif, fontSize = 24.sp,
                         modifier = Modifier.padding(bottom = 6.dp))
