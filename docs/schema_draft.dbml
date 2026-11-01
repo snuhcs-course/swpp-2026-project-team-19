@@ -304,7 +304,8 @@ Table bar_operating_exceptions {
 
   Note: '''
   A temporary closure or a change to today's hours. It overrides the regular hours of the dates it covers.
-  An expired row is not deleted by a job: the API hides it once it has ended, and the next apply or cancel
+  An expired row is not deleted by a job: the API keeps returning it through the day after end_date, which the
+  client needs for the early-morning status, and hides it after that. The next apply or cancel
   replaces or deletes it.
   '''
 }
@@ -325,8 +326,8 @@ Table bar_photos {
   }
 
   Note: '''
-  Gallery photos shown to customers, at most 15 per bar. Separate from menu photos, which are never public.
-  The bucket stays private: GET /api/bar-photos/{photoId} reads the file and serves it with a long cache lifetime.
+  Gallery photos shown to customers, at most 15 per bar, at most 2 MB and 2048 px on the long edge. Separate from menu photos, which are never public.
+  The bucket stays private: GET /api/bar-photos/{photoId} reads the file and serves it with a one-day cache lifetime.
   Deleting a photo deletes the row and then the stored file.
   '''
 }

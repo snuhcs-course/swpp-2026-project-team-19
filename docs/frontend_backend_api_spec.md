@@ -614,7 +614,7 @@ Authorization: Bearer <access-token>
 | `defaultPourMl` | 정수 | 예 | 매장 기본 잔 용량(ml). 업주가 매장 정보에서 정한다(3.7). 메뉴 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데 쓴다(3.14.2). 서버가 메뉴에 자동으로 적용하지 않으며 고객 화면(3.9)에는 없다. 없으면 `null` |
 | `tags` | 문자열 배열 | 아니오 | 매장 태그. 업주나 operator가 정한 순서대로 최대 5개(3.7). 없으면 `[]` |
 | `weeklyHours` | 배열 | 아니오 | 정규 영업시간(3.15.1). 정한 요일만 `dayOfWeek` 오름차순으로 온다. 없으면 `[]` |
-| `operatingException` | 객체 | 예 | 지금 적용 중이거나 앞으로 시작할 임시 휴무(3.15.4). 없거나 끝났으면 `null` |
+| `operatingException` | 객체 | 예 | 임시 휴무(3.15.4). 앞으로 시작할 것과 어제 끝난 것도 들어 있으므로, 지금 적용 중인지는 프론트엔드가 판단한다. 없거나 끝난 지 하루가 지났으면 `null` |
 | `photos` | 배열 | 아니오 | 매장 사진(3.16). 표시 순서대로 오며 첫 사진이 대표 사진이다. 없으면 `[]` |
 | `photos[].photoId` | UUID 문자열 | 아니오 | |
 | `photos[].imageUrl` | 문자열 | 아니오 | 사진 파일의 절대 URL(3.16.5). 만료되지 않으며, 같은 `photoId`의 내용은 바뀌지 않는다 |
@@ -825,7 +825,7 @@ GET /api/bars/{barId}/menu
 | `description` | 문자열 | 예 | 한 줄 소개(3.6과 같다). 줄바꿈이 들어 있을 수 있다. 프론트엔드는 HTML로 해석하지 않고 일반 텍스트로 보여 주며, 표시할 줄 수를 제한할 수 있다. 없으면 `null` |
 | `tags` | 문자열 배열 | 아니오 | 매장 태그(3.6과 같다). 받은 순서대로 보여 준다. 없으면 `[]` |
 | `weeklyHours` | 배열 | 아니오 | 정규 영업시간(3.15.1). 없으면 `[]` |
-| `operatingException` | 객체 | 예 | 임시 휴무(3.15.4). `note`는 고객 안내 문구다. 없거나 끝났으면 `null` |
+| `operatingException` | 객체 | 예 | 임시 휴무(3.15.4). `note`는 고객 안내 문구다. 어제 끝난 것도 영업 상태 계산을 위해 들어 있다. 없거나 끝난 지 하루가 지났으면 `null` |
 | `photos` | 배열 | 아니오 | 매장 사진(3.6과 같다). 첫 사진이 대표 사진이다. 없으면 `[]`이며, 프론트엔드는 기본 이미지를 보여 준다 |
 | `menuBoardId` | UUID 문자열 | 예 | 현재 메뉴판. 반영된 메뉴가 없으면 `null` |
 | `menuVersion` | 정수 | 예 | 메뉴판 버전. 검수 반영(8)이나 직접 편집(3.14)으로 메뉴판이 바뀔 때마다 1씩 오른다. 직접 편집 요청에 그대로 보낸다. 메뉴판이 없으면 `null` |
@@ -2182,22 +2182,24 @@ Authorization: Bearer <access-token>
 Content-Type: application/json
 ```
 
-operator와 해당 업장의 현재 업주가 호출할 수 있다(2.2). 비활성 업장도 바꿀 수 있다(3.7과 같다). 업장마다 임시 휴무는 하나만 있으며, 이 요청은 기존 임시 휴무(아직 시작하지 않은 기간 휴업 포함)를 이 요청의 내용으로 바꾼다. 같은 요청을 다시 보내도 결과가 같으므로 `Idempotency-Key`는 받지 않는다.
+operator와 해당 업장의 현재 업주가 호출할 수 있다(2.2). 비활성 업장도 바꿀 수 있다(3.7과 같다). 업장마다 임시 휴무는 하나만 있으며, 이 요청은 기존 임시 휴무(아직 시작하지 않은 기간 휴업 포함)를 이 요청의 내용으로 바꾼다. 같은 요청을 다시 보내도 결과가 같으므로(아래 "재시도") `Idempotency-Key`는 받지 않는다.
 
 `kind`에 따라 보내는 필드가 다르다.
 
 | `kind` | 뜻 | 날짜 | 시간 |
 |---|---|---|---|
-| `closed_today` | 오늘 하루 임시 휴무 | 보내지 않는다. 서버가 오늘 날짜로 정한다 | 보내지 않는다 |
-| `custom_hours` | 오늘만 영업시간 변경 | 보내지 않는다. 서버가 오늘 날짜로 정한다 | `openTime`, `closeTime` 필수. 규칙은 3.15.1과 같으며 자정을 넘길 수 있다 |
+| `closed_today` | 오늘 하루 임시 휴무 | `date` 필수(`"YYYY-MM-DD"`). 서버의 오늘 날짜와 다르면 `DATE_NOT_TODAY` | 보내지 않는다 |
+| `custom_hours` | 오늘만 영업시간 변경 | `date` 필수. 규칙은 `closed_today`와 같다 | `openTime`, `closeTime` 필수. 규칙은 3.15.1과 같으며 자정을 넘길 수 있다 |
 | `vacation` | 기간 임시 휴업 | `startDate`, `endDate` 필수(`"YYYY-MM-DD"`). `startDate`가 오늘보다 이르면 `DATE_IN_PAST`, `endDate`가 `startDate`보다 이르면 `END_BEFORE_START`. 하루만 지정해도 된다 | 보내지 않는다 |
 
-- "오늘"은 서버가 요청을 받은 시각의 서울 날짜다. 화면을 연 시각이 아니라 적용 버튼을 누른 시각이 기준이므로, 자정 직전에 화면을 열어 두었다가 자정이 지난 뒤 적용하면 새 날짜에 적용된다.
+- "오늘"은 서버가 요청을 받은 시각의 서울 날짜다. 프론트엔드는 화면을 연 시각이 아니라 적용 버튼을 누른 시각의 서울 날짜를 `date`로 보낸다. 서버가 날짜를 정하지 않는 이유는, 자정 직전에 보낸 요청을 자정이 지나 다시 보냈을 때 다른 날에 적용되지 않게 하기 위해서다.
+- `date`가 서버의 오늘과 다르면(기기 시계가 틀렸거나, 자정 무렵에 보낸 요청이 자정이 지나 도착함) `422`이고 `fieldErrors[].code = DATE_NOT_TODAY`다. 프론트엔드는 날짜가 바뀌었다고 안내하고 다시 적용하게 한다.
+- **재시도**: 요청의 내용(`kind`, 날짜, 시각, 앞뒤 공백을 지운 `note`)이 현재 임시 휴무와 모두 같으면, 날짜 검사(`DATE_NOT_TODAY`, `DATE_IN_PAST`) 없이 아무것도 바꾸지 않고 `200 OK`로 현재 상태를 돌려준다. 그래서 응답을 받지 못해 자정이 지난 뒤 같은 요청을 다시 보내도 오류 없이 같은 결과를 받는다.
 - 공통 필드 `note`는 고객 안내 문구로 선택이다. 앞뒤 공백을 지운 뒤 100자 이하이고, 없거나 공백뿐이면 `null`로 저장한다. 한 줄 문구이므로 줄바꿈과 제어 문자는 받지 않는다(`INVALID_CHARACTER`).
 - `kind`에 맞지 않는 필드(예: `closed_today`의 `openTime`)를 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. `kind`가 없거나 다른 값이면 `UNION_TAG_NOT_FOUND`나 `UNION_TAG_INVALID`다.
 
 ```json
-{ "kind": "custom_hours", "openTime": "20:00", "closeTime": "01:00", "note": "내부 사정으로 늦게 엽니다" }
+{ "kind": "custom_hours", "date": "2026-11-06", "openTime": "20:00", "closeTime": "01:00", "note": "내부 사정으로 늦게 엽니다" }
 ```
 
 ```json
@@ -2226,10 +2228,15 @@ Authorization: Bearer <access-token>
 | `openTime`, `closeTime` | `"HH:MM"` 문자열 | 예 | `custom_hours`일 때만 값이 있다. `closeTime < openTime`이면 다음 날 끝난다 |
 | `note` | 문자열 | 예 | 고객 안내 문구. 없으면 `null` |
 
-- 끝난 임시 휴무를 지우는 별도 작업은 두지 않는다. 서버는 응답을 만들 때 현재 서울 시각으로 판단해, 끝났으면 `operatingException = null`로 보낸다. 끝난 행은 다음 적용(3.15.2)이나 취소(3.15.3) 때 바뀌거나 지워진다.
 - 임시 휴무는 `endDate` 다음 날 0시에 끝난다. 단, 자정을 넘기는 `custom_hours`는 다음 날 `closeTime`까지 유효하다.
+- **응답에는 `endDate` 다음 날이 끝날 때까지 남는다.** 끝난 뒤에도 하루 더 보내는 이유는, 그날 새벽의 영업 상태를 계산할 때 전날의 정규 영업이 넘어오지 않게 막아야 하기 때문이다(3.15.5의 2). 예를 들어 금요일 정규 영업시간이 `18:00`~`02:00`이고 금요일에 `custom_hours` `18:00`~`22:00`을 적용했다면, 토요일 0시 30분에는 금요일 정규 영업이 아니라 이 임시 휴무로 계산해야 영업 종료가 된다.
+- 그 다음 날부터 서버는 `operatingException = null`로 보낸다. 끝난 행을 지우는 별도 작업은 두지 않으며, 다음 적용(3.15.2)이나 취소(3.15.3) 때 바뀌거나 지워진다.
+- 그래서 응답에 `operatingException`이 있어도 지금 적용 중이라는 뜻은 아니다. 프론트엔드는 아래 기준으로 지금 적용 중인지 판단해 업주 화면의 "오늘 임시 휴무" 같은 표시와 고객 안내 문구에 쓴다. 화면을 띄워 둔 동안에도 바뀔 수 있으므로 3.15.5처럼 다시 계산한다.
+  - 적용 중: 오늘이 `startDate`~`endDate` 안이거나, 자정을 넘기는 `custom_hours`의 `endDate` 다음 날이고 현재 시각이 `closeTime`보다 이를 때
+  - 예정: `startDate`가 오늘보다 뒤일 때
+  - 끝남: 그 밖의 경우. 화면에는 정상 영업으로 보여 준다
+- `endDate` 다음 날 새로 임시 휴무를 적용하면 전날 것은 바뀌어 응답에서 빠진다. 그날 새벽에는 전날 정규 영업이 넘어온 것으로 계산될 수 있지만, 드문 경우라 따로 막지 않는다.
 - 아직 시작하지 않은 `vacation`(`startDate`가 오늘보다 뒤)도 응답에 나온다. 업주 화면은 "임시 휴업 예정"으로 보여 줄 수 있고, 고객 영업 상태에는 `startDate`부터 반영한다(3.15.5).
-- 화면을 띄워 둔 동안에도 임시 휴무가 끝날 수 있으므로, 프론트엔드도 같은 기준으로 끝났는지 판단한다.
 
 #### 3.15.5 고객 영업 상태 계산
 
@@ -2244,7 +2251,7 @@ Authorization: Bearer <access-token>
 3. 오늘의 영업 구간은 임시 휴무가 D를 덮는 `custom_hours`이면 그 시간이고, 아니면 D 요일의 정규 영업시간(`closed = false`)이다. `openTime ≤ t`이고, 자정을 넘기는 구간이거나 t < `closeTime`이면 **영업 중**이다.
 4. 그 밖에는 `weeklyHours = []`이고 오늘 `custom_hours`도 없으면 **영업시간 정보 없음**, 아니면 **영업 종료**다.
 
-- 고객 안내 문구(`note`)는 임시 휴무가 오늘을 덮는 동안(자정을 넘기는 `custom_hours`는 다음 날 `closeTime`까지) 영업 상태와 함께 보여 줄 수 있다. 비어 있으면 표시하지 않는다.
+- 고객 안내 문구(`note`)는 임시 휴무가 적용 중인 동안(3.15.4) 영업 상태와 함께 보여 줄 수 있다. 비어 있으면 표시하지 않는다.
 - 이 상태는 메뉴 게시 여부(3.6의 `currentMenu`)와 따로 계산한다.
 - 업주 화면의 미리보기와 관리 홈도 같은 규칙을 쓴다.
 
@@ -2255,7 +2262,7 @@ Authorization: Bearer <access-token>
 | `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
 | `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
-| `422` | `VALIDATION_FAILED` | 위 규칙 위반: `MISSING`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `END_BEFORE_START`, `INVALID_CHARACTER`, `EXTRA_FORBIDDEN` | `fieldErrors` 표시. `DATE_IN_PAST`이면 날짜를 다시 고르게 함 |
+| `422` | `VALIDATION_FAILED` | 위 규칙 위반: `MISSING`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `INVALID_CHARACTER`, `EXTRA_FORBIDDEN` | `fieldErrors` 표시. `DATE_IN_PAST`이면 날짜를 다시 고르게 하고, `DATE_NOT_TODAY`이면 날짜가 바뀌었다고 안내한 뒤 다시 적용하게 함 |
 
 ### 3.16 매장 사진
 
@@ -2292,10 +2299,11 @@ Content-Type: multipart/form-data
 
 - JPEG와 PNG만 받으며 형식은 메뉴판 사진(4.1)처럼 파일 내용으로 판별한다. 사진당 **2MB 이하**다. 메뉴판 사진(사진당 10MB)보다 작은 이유는 고객 화면이 업장마다 최대 15장을 내려받기 때문이다.
 - 안드로이드 앱은 올리기 전에 **반드시** 사진의 긴 변을 2048px 이하로 줄이고 JPEG로 압축한다. 압축한 뒤에도 2MB를 넘으면 품질을 낮춰 다시 압축한다. PNG나 다른 형식의 사진도 JPEG로 바꿔 올린다.
-- 서버는 받은 파일을 줄이거나 다시 인코딩하지 않고 그대로 저장한다. 서버는 크기(2MB)와 형식만 확인하고 픽셀 크기는 확인하지 않는다. PNG는 앱이 아닌 클라이언트를 위해 계속 받는다.
+- **가로세로 크기**: 서버도 긴 변이 2048px 이하인지 확인한다. 2MB 안에도 픽셀 수가 매우 큰 이미지를 담을 수 있어, 고객 기기가 사진을 열다가 메모리가 부족해질 수 있기 때문이다. 넘으면 `422`이고 `fieldErrors[].path = image`, `code = IMAGE_DIMENSIONS_TOO_LARGE`다. 서버는 파일 헤더의 가로세로를 먼저 확인한 뒤 끝까지 디코딩되는지 확인하며, 디코딩되지 않는 파일은 `415 UNSUPPORTED_IMAGE_TYPE`이다.
+- 서버는 받은 파일을 줄이거나 다시 인코딩하지 않고 그대로 저장한다. PNG는 앱이 아닌 클라이언트를 위해 계속 받는다.
 - 새 사진은 맨 뒤에 붙는다. 업장에 사진이 없었다면 대표 사진이 된다.
 - **같은 사진**: 같은 업장에 내용이 같은 파일(SHA-256이 같음)이 이미 있으면 저장하지 않고 `409 PHOTO_EXISTS`이며, `details.photoId`에 기존 사진 ID를 담는다. 응답을 받지 못해 다시 보낸 요청도 이 오류를 받아 사진이 두 장 생기지 않으므로 `Idempotency-Key`는 받지 않는다.
-- 검사 순서: 요청 형식(`422`, `image`가 없으면 `MISSING`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 크기(`413 UPLOAD_TOO_LARGE`)와 형식(`415 UNSUPPORTED_IMAGE_TYPE`) → 같은 사진(`409 PHOTO_EXISTS`) → 장수(`409 PHOTO_LIMIT_REACHED`). 같은 사진을 장수보다 먼저 확인하므로, 15번째 사진을 올린 요청을 다시 보내도 `PHOTO_EXISTS`를 받는다.
+- 검사 순서: 요청 형식(`422`, `image`가 없으면 `MISSING`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 크기(`413 UPLOAD_TOO_LARGE`)와 형식(`415 UNSUPPORTED_IMAGE_TYPE`) → 가로세로(`422 IMAGE_DIMENSIONS_TOO_LARGE`) → 같은 사진(`409 PHOTO_EXISTS`) → 장수(`409 PHOTO_LIMIT_REACHED`). 같은 사진을 장수보다 먼저 확인하므로, 15번째 사진을 올린 요청을 다시 보내도 `PHOTO_EXISTS`를 받는다.
 - 파일을 저장한 뒤 DB에 기록한다. DB 기록이 실패하면 저장한 파일을 지운다.
 
 `201 Created`, 본문은 `{ "photos": [...] }`다.
@@ -2318,7 +2326,7 @@ Authorization: Bearer <access-token>
 
 - 사진을 지우고 뒤의 사진을 한 칸씩 앞으로 당긴다. 되돌리는 API는 없으므로 프론트엔드는 지우기 전에 확인을 받는다.
 - 이 업장의 사진이 아니거나 이미 지운 사진, `photoId`가 UUID 형식이 아니면 `404 PHOTO_NOT_FOUND`다. 응답을 받지 못해 다시 보낸 요청도 이 오류를 받으므로, 프론트엔드는 3.6을 다시 불러와 확인한다.
-- 저장소의 파일은 DB 커밋 뒤에 지운다. 파일 삭제가 실패하면 로그만 남긴다. 지운 사진의 `imageUrl`은 바로 `404`가 된다.
+- 저장소의 파일은 DB 커밋 뒤에 지운다. 파일 삭제가 실패하면 로그만 남긴다. 지운 사진의 `imageUrl`은 서버에서 바로 `404`가 되지만, 이미 받아 간 기기나 중간 캐시에는 최대 1일 남을 수 있다(3.16.5).
 
 `200 OK`, 본문은 `{ "photos": [...] }`다.
 
@@ -2348,7 +2356,7 @@ GET /api/bar-photos/{photoId}
 ```
 
 - 공개 API이며 인증하지 않는다. `Authorization` 헤더를 보내도 확인하지 않는다.
-- 응답 본문은 사진 파일 자체다. `Content-Type`은 저장한 형식(`image/jpeg` 또는 `image/png`)이고, `Cache-Control: public, max-age=31536000, immutable`을 붙인다. 같은 `photoId`의 내용은 바뀌지 않으므로 프론트엔드의 이미지 캐시는 URL을 키로 써도 된다.
+- 응답 본문은 사진 파일 자체다. `Content-Type`은 저장한 형식(`image/jpeg` 또는 `image/png`)이고, `Cache-Control: public, max-age=86400`(1일)을 붙인다. 같은 `photoId`의 내용은 바뀌지 않으므로 프론트엔드의 이미지 캐시는 URL을 키로 써도 된다. 캐시를 1일로 둔 이유는 지운 사진이 기기와 중간 캐시에 오래 남지 않게 하기 위해서다. 지운 사진은 1일 안에 사라지며, 프론트엔드는 업장 응답의 `photos`에 없는 사진을 캐시에 있어도 보여 주지 않는다.
 - 업장 응답의 `photos[].imageUrl`은 이 경로의 절대 URL이다(예: `https://bottlemap.o-r.kr/api/bar-photos/{photoId}`). 서버가 요청을 받은 주소로 만들므로 에뮬레이터(`10.0.2.2`)와 기기에서도 그대로 열린다. 프론트엔드는 URL을 직접 만들지 않고 `imageUrl`을 쓴다.
 - 메뉴판 사진의 서명 URL(5.4)과 달리 만료되지 않는다.
 - 비활성 업장의 사진도 반환한다. 사진 ID는 업장 응답으로만 알 수 있다.
@@ -2366,8 +2374,8 @@ GET /api/bar-photos/{photoId}
 | `409` | `PHOTO_LIMIT_REACHED` | 이미 15장. `details.maxPhotos = 15` | 사진을 지운 뒤 추가하라고 안내 |
 | `409` | `PHOTOS_OUTDATED` | 순서 변경의 ID 목록이 현재 사진과 다름. `details.photos` | `details.photos`로 화면을 바꾸고 다시 정렬하게 함 |
 | `413` | `UPLOAD_TOO_LARGE` | 사진이 2MB를 넘음. `details.maxImageBytes = 2097152` | 품질을 낮춰 다시 압축해 올림 |
-| `415` | `UNSUPPORTED_IMAGE_TYPE` | JPEG나 PNG가 아니거나, 선언한 형식과 내용이 다름 | JPEG로 바꿔 다시 올림 |
-| `422` | `VALIDATION_FAILED` | `image` 없음, `photoIds` 형식 오류, `DUPLICATE_ITEM` | `fieldErrors` 표시 |
+| `415` | `UNSUPPORTED_IMAGE_TYPE` | JPEG나 PNG가 아니거나, 선언한 형식과 내용이 다르거나, 끝까지 디코딩되지 않음 | JPEG로 바꿔 다시 올림 |
+| `422` | `VALIDATION_FAILED` | `image` 없음, 긴 변이 2048px 초과(`IMAGE_DIMENSIONS_TOO_LARGE`), `photoIds` 형식 오류, `DUPLICATE_ITEM` | `fieldErrors` 표시. `IMAGE_DIMENSIONS_TOO_LARGE`이면 줄여서 다시 올림 |
 
 ## 4. 메뉴 등록 요청
 
@@ -3208,7 +3216,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
 - **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `END_BEFORE_START`.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`.
 
 ### 9.4 검수 버전 충돌
 
@@ -3343,5 +3351,5 @@ canceled
 - 메뉴 직접 편집 요청은 모두 조회한 `menuVersion`을 포함하며, 업장에 미완료 메뉴 등록 작업이 있으면 받지 않는다.
 - `summary`나 사용자 표시 문자열을 서버 검증 기준으로 사용하지 않는다.
 - 매장 태그와 정규 영업시간은 업장 수정(3.7)에서 배열 전체를 바꾼다. 일부만 바꾸는 요청은 없다.
-- 영업 상태는 서버가 계산하지 않는다. 프론트엔드가 3.15.5의 규칙으로 계산한다.
+- 영업 상태는 서버가 계산하지 않는다. 프론트엔드가 3.15.5의 규칙으로 계산한다. `operatingException`은 `endDate` 다음 날까지 응답에 남으므로, 지금 적용 중인지도 프론트엔드가 판단한다(3.15.4).
 - 매장 사진의 `imageUrl`은 만료되지 않는 고정 URL이며, 프론트엔드는 URL을 직접 만들지 않는다. 대표 사진은 `photos`의 첫 항목이며, 업장 목록 API에서는 `coverPhotoUrl`(사진이 없으면 `null`)이다.
