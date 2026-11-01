@@ -1,12 +1,14 @@
-"""Operators reviewing owner applications (API spec, sections 3.11.6 to 3.11.8): list, approve, reject."""
+"""Operators reviewing owner applications (API spec, sections 3.11.6 to 3.11.8 and 3.11.13): list,
+approve, reject, and check the business registration again. The NTS check is a fake; no test calls it."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 
 import pytest
 from sqlalchemy import event, select
 from sqlalchemy.exc import IntegrityError
 
+from app.adapters.business_verification import BusinessCheck, BusinessVerificationUnavailable
 from app.api import deps
 from app.main import app
 from app.models import (
@@ -14,6 +16,7 @@ from app.models import (
     BarOwner,
     BarOwnerApplication,
     BarStatus,
+    BusinessStatus,
     BusinessVerificationResult,
     ImportMode,
     ImportStatus,
@@ -22,6 +25,7 @@ from app.models import (
     UserType,
 )
 from app.services import owner_application_review
+from app.services.request_limits import BUSINESS_VERIFICATION, InMemoryDailyLimiter
 from tests.factories import (
     make_application,
     make_application_menu_image,
@@ -30,6 +34,7 @@ from tests.factories import (
     make_user,
     publish_menu,
 )
+from tests.test_owner_applications_api import FakeVerifier
 
 OPERATOR_SUBJECT = "0b6b3f5e-6f1f-4c2a-9a55-6d3e2f1a7c10"
 APPLICANT_SUBJECT = "5d1c2b3a-0000-4000-8000-000000000002"
@@ -92,6 +97,10 @@ def with_stored_photos(db_session, storage, application, count: int = 2):
 def approve(client, headers, application_id, body=None):
     url = f"/api/owner-applications/{application_id}/approve"
     return client.post(url, headers=headers) if body is None else client.post(url, headers=headers, json=body)
+
+
+def verify_business(client, headers, application_id):
+    return client.post(f"/api/owner-applications/{application_id}/verify-business", headers=headers)
 
 
 def reject(client, headers, application_id, body=None):
@@ -499,14 +508,187 @@ def test_reason_rules(client, db_session, auth, applicant, body, expected):
     assert field_errors(reject(client, auth, application.id, body)) == [expected]
 
 
-# ---- both decisions ----
+# ---- check the business registration again (3.11.13) ----
 
 
-@pytest.mark.parametrize("decide", [approve, reject])
+@pytest.fixture
+def verifier():
+    fake = FakeVerifier()
+    app.dependency_overrides[deps.get_business_verifier] = lambda: fake
+    yield fake
+    app.dependency_overrides.pop(deps.get_business_verifier, None)
+
+
+def verification_of(response) -> tuple[str, str | None, str]:
+    assert response.status_code == 200, response.text
+    body = response.json()
+    return body["businessVerification"]["result"], body["businessStatus"], body["businessVerification"]["checkedAt"]
+
+
+def test_an_unavailable_check_is_made_again(client, db_session, auth, applicant, verifier):
+    application = make_application(db_session, applicant, make_bar(db_session))
+    verifier.answer = BusinessCheck(True, BusinessStatus.SUSPENDED)
+
+    response = verify_business(client, auth, application.id)
+
+    assert verification_of(response) == ("matched", "suspended", "2026-10-31T09:00:00Z")
+    assert response.json()["status"] == "pending"
+    assert verifier.calls == [(application.business_registration_number, "김사장", date(2020, 3, 2))]
+    db_session.refresh(application)
+    assert application.business_verification_result == BusinessVerificationResult.MATCHED
+    assert application.business_status == BusinessStatus.SUSPENDED
+    assert application.business_checked_at == NOW
+    assert application.status == OwnerApplicationStatus.PENDING
+
+
+def test_a_mismatch_is_stored_and_clears_the_business_status(client, db_session, auth, applicant, verifier):
+    application = make_application(db_session, applicant)
+    application.business_verification_result = BusinessVerificationResult.MATCHED
+    application.business_status = BusinessStatus.ACTIVE
+    db_session.flush()
+    verifier.answer = BusinessCheck(False)
+
+    response = verify_business(client, auth, application.id)
+
+    assert verification_of(response) == ("not_matched", None, "2026-10-31T09:00:00Z")
+    db_session.refresh(application)
+    assert (application.business_verification_result, application.business_status) == (
+        BusinessVerificationResult.NOT_MATCHED,
+        None,
+    )
+
+
+def test_the_recheck_feeds_the_list_filter(client, db_session, auth, applicant, verifier):
+    application = make_application(db_session, applicant)
+    verify_business(client, auth, application.id)
+
+    unavailable = client.get("/api/owner-applications", headers=auth, params={"verificationResult": "unavailable"})
+    matched = client.get("/api/owner-applications", headers=auth, params={"verificationResult": "matched"})
+
+    assert listed_ids(unavailable) == []
+    assert listed_ids(matched) == [str(application.id)]
+
+
+def stored_check(db_session, application) -> tuple:
+    db_session.refresh(application)
+    return (
+        application.business_verification_result,
+        application.business_status,
+        application.business_checked_at,
+        application.updated_at,
+    )
+
+
+def test_nothing_is_stored_when_nts_cannot_answer(client, db_session, auth, applicant, verifier):
+    application = make_application(db_session, applicant)
+    before = stored_check(db_session, application)
+    verifier.answer = BusinessVerificationUnavailable("timeout")
+
+    response = verify_business(client, auth, application.id)
+
+    assert error_of(response) == (503, "BUSINESS_VERIFICATION_UNAVAILABLE")
+    assert stored_check(db_session, application) == before
+
+
+def test_a_server_without_the_nts_key_answers_unavailable(client, db_session, auth, applicant):
+    app.dependency_overrides[deps.get_business_verifier] = lambda: None
+    try:
+        application = make_application(db_session, applicant)
+        before = stored_check(db_session, application)
+
+        response = verify_business(client, auth, application.id)
+    finally:
+        app.dependency_overrides.pop(deps.get_business_verifier, None)
+
+    assert error_of(response) == (503, "BUSINESS_VERIFICATION_UNAVAILABLE")
+    assert stored_check(db_session, application) == before
+
+
+def test_the_recheck_is_not_counted_against_the_daily_limit(client, db_session, auth, applicant, verifier):
+    limiter = InMemoryDailyLimiter()
+    app.dependency_overrides[deps.get_request_limiter] = lambda: limiter
+    try:
+        application = make_application(db_session, applicant)
+        for _ in range(6):
+            assert verify_business(client, auth, application.id).status_code == 200
+    finally:
+        app.dependency_overrides.pop(deps.get_request_limiter, None)
+
+    assert len(verifier.calls) == 6
+    assert limiter.used(OPERATOR_SUBJECT, BUSINESS_VERIFICATION, NOW) == 0
+
+
+def test_no_transaction_is_open_while_nts_answers(client, db_session, auth, applicant, verifier):
+    application = make_application(db_session, applicant)
+    open_during_call = []
+    verifier.during_call = lambda: open_during_call.append(db_session.in_transaction())
+    statements = []
+
+    def listen(conn, cursor, statement, *args):
+        statements.append(statement)
+
+    event.listen(db_session.get_bind(), "before_cursor_execute", listen)
+    try:
+        assert verify_business(client, auth, application.id).status_code == 200
+    finally:
+        event.remove(db_session.get_bind(), "before_cursor_execute", listen)
+
+    assert open_during_call == [False]
+    assert any("FOR UPDATE" in s and "FROM bar_owner_applications" in s for s in statements)
+
+
 @pytest.mark.parametrize(
     "status", [OwnerApplicationStatus.APPROVED, OwnerApplicationStatus.REJECTED, OwnerApplicationStatus.CANCELED]
 )
-def test_only_pending_applications_are_decided(client, db_session, auth, applicant, operator, decide, status):
+def test_a_decision_made_while_nts_answers_wins(client, db_session, auth, applicant, operator, verifier, status):
+    application = make_application(db_session, applicant, make_bar(db_session))
+
+    def decide():
+        reviewed = status != OwnerApplicationStatus.CANCELED
+        reviewer_id = operator.id if reviewed else None  # read before the changes, which autoflush would send
+        application.status = status
+        application.reviewed_by_user_id = reviewer_id
+        application.reviewed_at = NOW if reviewed else None
+        application.rejection_reason = "확인할 수 없습니다." if status == OwnerApplicationStatus.REJECTED else None
+        db_session.flush()
+
+    verifier.during_call = decide
+
+    response = verify_business(client, auth, application.id)
+
+    assert error_of(response) == (409, "INVALID_APPLICATION_STATE")
+    assert response.json()["error"]["details"] == {"status": status.value}
+    db_session.refresh(application)
+    assert application.business_verification_result == BusinessVerificationResult.UNAVAILABLE
+
+
+def test_a_temporary_operator_can_check_again_without_a_users_row(client, db_session, token_for, applicant, verifier):
+    application = make_application(db_session, applicant)
+    headers = {"Authorization": f"Bearer {token_for('operator')}"}
+
+    assert verification_of(verify_business(client, headers, application.id))[0] == "matched"
+
+
+def test_the_applicant_sees_only_the_rechecked_business_status(client, db_session, supabase, auth, applicant, verifier):
+    application = make_application(db_session, applicant)
+    verify_business(client, auth, application.id)
+
+    applicant_auth = {"Authorization": f"Bearer {supabase.token(sub=APPLICANT_SUBJECT)}"}
+    [mine] = client.get("/api/me/owner-applications", headers=applicant_auth).json()["items"]
+
+    assert (mine["businessStatus"], mine["businessVerification"]) == ("active", None)
+
+
+# ---- both decisions ----
+
+
+@pytest.mark.parametrize("decide", [approve, reject, verify_business])
+@pytest.mark.parametrize(
+    "status", [OwnerApplicationStatus.APPROVED, OwnerApplicationStatus.REJECTED, OwnerApplicationStatus.CANCELED]
+)
+def test_only_pending_applications_are_decided(
+    client, db_session, auth, applicant, operator, verifier, decide, status
+):
     application = make_application(db_session, applicant, make_bar(db_session), status=status, reviewer=operator)
 
     response = decide(client, auth, application.id)
@@ -515,10 +697,11 @@ def test_only_pending_applications_are_decided(client, db_session, auth, applica
     assert response.json()["error"]["details"] == {"status": status.value}
 
 
-@pytest.mark.parametrize("decide", [approve, reject])
+@pytest.mark.parametrize("decide", [approve, reject, verify_business])
 @pytest.mark.parametrize("application_id", [MISSING_ID, "not-a-uuid"])
-def test_missing_applications(client, auth, decide, application_id):
+def test_missing_applications(client, auth, verifier, decide, application_id):
     assert error_of(decide(client, auth, application_id)) == (404, "OWNER_APPLICATION_NOT_FOUND")
+    assert verifier.calls == []
 
 
 @pytest.mark.parametrize("decide", [approve, reject])

@@ -20,7 +20,7 @@ from app.api.routes.menu_imports import UploadedImage
 from app.core.security import Principal, get_current_user, require_operator, user_type_of
 from app.db.session import get_session, get_session_factory
 from app.matching.llm_layer import LLMLayerConfig
-from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
+from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.owner_application import (
     ApproveInput,
     OwnerApplicationInput,
@@ -39,6 +39,7 @@ from app.services.owner_application_review import (
     VerificationFilter,
     approve_application,
     list_applications,
+    recheck_business,
     reject_application,
 )
 from app.services.owner_applications import (
@@ -366,3 +367,40 @@ def reject_owner_application(
     clock: Callable[[], datetime] = Depends(get_clock),
 ) -> OwnerApplicationResponse:
     return reject_application(session, operator, application_id, request, links=links, now=clock())
+
+
+@router.post(
+    "/owner-applications/{applicationId}/verify-business",
+    response_model=OwnerApplicationResponse,
+    summary="Check an owner application's business registration with NTS again",
+    description=(
+        "Operator only. No request body. Calls the NTS check again with the application's stored "
+        "`businessRegistrationNumber`, `representativeName` and `openingDate`, for an application whose "
+        "result is `unavailable` or to see the business status again before approving. Not counted against "
+        "the daily limit.\n\n"
+        "- When NTS answers, `businessVerification.result` (`matched` or `not_matched`), `businessStatus` and "
+        "`businessVerification.checkedAt` are updated; `status` does not change. Reject a `not_matched` one.\n"
+        "- When NTS cannot be reached, nothing is stored (`503`)."
+    ),
+    responses=error_responses(
+        _UNAUTHENTICATED,
+        _FORBIDDEN,
+        (404, "`OWNER_APPLICATION_NOT_FOUND`: no such application, or `applicationId` is not a UUID."),
+        (409, _NOT_PENDING),
+        (
+            503,
+            "`BUSINESS_VERIFICATION_UNAVAILABLE`: NTS failed, timed out or hit its quota, or the server has no "
+            "NTS key; the stored result is unchanged. Try again later. " + AUTH_UNAVAILABLE_DESCRIPTION,
+        ),
+    ),
+)
+def verify_owner_application_business(
+    application_id: Annotated[str, Path(alias="applicationId", description="Application id (UUID)")],
+    _operator: Principal = Depends(require_operator),
+    session: Session = Depends(get_session),
+    verifier: BusinessVerifier | None = Depends(get_business_verifier),
+    links: ImageLinks = Depends(get_image_links),
+    clock: Callable[[], datetime] = Depends(get_clock),
+) -> OwnerApplicationResponse:
+    application = recheck_business(session, application_id, verifier=verifier, now=clock())
+    return application_responses(session, [application], links, show_verification=True)[0]
