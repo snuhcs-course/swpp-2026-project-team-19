@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
@@ -603,6 +604,35 @@ class OwnerManualMenuComposeTest {
             assertEquals(19000, saved[1].discount!!.discountedPriceKrw)
             assertEquals(start, saved[1].discount!!.startAtEpochMs)
             assertEquals(end, saved[1].discount!!.endAtEpochMs)
+        }
+    }
+
+    @Test fun ownerListRefreshesDiscountBadgeAndPriceAtStartAndEndWithoutNavigation() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("timed-brand", "브랜드"))
+        r.saveCatalogProduct(MockCatalogProduct("timed-product", "timed-brand",
+            "시간 위스키", category = "whisky"))
+        r.saveMenuItem(MockBarMenuItem("timed-row", "fixture-bar", "timed-product",
+            listOf(MockMenuOption("timed-pour", pourMl = 30, priceKrw = 10000,
+                discount = MockDiscount(5000, 1_000L, 2_000L)))))
+        val vm = OwnerMockViewModel(r)
+        val clock = mutableLongStateOf(999L)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {},
+                nowEpochMs = clock.longValue)
+        } }
+        compose.onNodeWithTag("manual-menu-row-timed-row").assertExists()
+        compose.onNodeWithText("10,000원").assertExists()
+        compose.onNodeWithText("5,000원").assertDoesNotExist()
+        compose.runOnIdle { clock.longValue = 1_000L }
+        compose.onNodeWithText("5,000원").assertExists()
+        compose.onNodeWithText("할인").assertExists()
+        compose.runOnIdle { clock.longValue = 2_000L }
+        compose.onNodeWithText("10,000원").assertExists()
+        compose.onNodeWithText("5,000원").assertDoesNotExist()
+        compose.runOnIdle {
+            assertEquals(1, vm.preview("fixture-bar", 1_000L)!!.visibleMenu.size)
         }
     }
 
