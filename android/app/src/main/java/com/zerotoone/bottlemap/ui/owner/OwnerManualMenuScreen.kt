@@ -534,13 +534,13 @@ internal fun OwnerManualMenuScreen(
                                             if (d.sale.isNotBlank()) {
                                                 Text("할인 · " + d.sale + "원",
                                                     color = Color(0xFFF7DFBF),
-                                                    fontSize = 10.sp,
+                                                    fontSize = 10.sp, lineHeight = 10.sp,
                                                     modifier = Modifier
                                                         .background(Color(0xFF4B3826),
                                                             RoundedCornerShape(4.dp))
                                                         .border(1.dp, Color(0xFF9C7A52),
                                                             RoundedCornerShape(4.dp))
-                                                        .padding(horizontal = 5.dp, vertical = 2.dp))
+                                                        .padding(all = 4.dp))
                                             }
                                         }
                                         if (draftOptions.size > 1) Text("제거",
