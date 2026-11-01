@@ -23,7 +23,7 @@ internal fun ownerPreviewNextText(bar: MockBar, atEpochMs: Long): String {
         (if (overnight) "익일 " else "") +
             "%02d:%02d 종료".format(close / 60, close % 60)
     val prevDay = if (weekday == 1) 7 else weekday - 1
-    val prevException = bar.exceptions.lastOrNull { it.toEpochDay == day - 1 }
+    val prevException = bar.exceptions.lastOrNull { (day - 1) in it.fromEpochDay..it.toEpochDay }
     val prevRegular = bar.weeklyHours.firstOrNull { it.isoDayOfWeek == prevDay }
     val prevClosed = prevException?.kind == MockExceptionKind.CLOSED_TODAY ||
         prevException?.kind == MockExceptionKind.VACATION
