@@ -1,10 +1,10 @@
 name: Owner Compose UI CI
 
+# Always create the PR check, including for unrelated changes. Path detection
+# happens inside the workflow so required checks do not remain Pending.
 on:
   pull_request:
-    paths:
-      - 'android/**'
-      - '.github/workflows/owner-compose-ui-ci.yml'
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Owner Compose / changes
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      owner: ${{ steps.filter.outputs.owner }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Detect Owner Compose changes
+        if: ${{ github.event_name == 'pull_request' }}
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            owner:
+              - 'android/**'
+              - '.github/workflows/owner-compose-ui-ci.yml'
+              - 'gradle/**'
+              - 'gradle.properties'
+              - 'gradlew'
+              - 'settings.gradle.kts'
+              - 'build.gradle.kts'
+
   owner-compose-ui:
+    needs: changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.owner == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
