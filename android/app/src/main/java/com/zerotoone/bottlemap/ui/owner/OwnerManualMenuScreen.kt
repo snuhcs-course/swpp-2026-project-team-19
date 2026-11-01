@@ -6,9 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -324,7 +320,7 @@ internal fun OwnerManualMenuScreen(
                         .padding(12.dp),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.Top) {
-                        BmIcon(BmIconId.REVIEW, null, Modifier.size(25.dp), V4Color.primary)
+                        BmIcon(BmIconId.REVIEW, null, Modifier.size(25.dp), tint = V4Color.primary)
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text(when(job?.status) {
                                 MockImportStatus.PROCESSING -> "메뉴판 분석 중"
@@ -431,7 +427,7 @@ internal fun OwnerManualMenuScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(9.dp),
                             verticalAlignment = Alignment.CenterVertically) {
                             BmIcon(BmIconId.ERROR, null, Modifier.size(17.dp),
-                                Color(0xFFFFB4AB))
+                                tint = Color(0xFFFFB4AB))
                             Text("전체 메뉴 초기화", color = Color(0xFFFFB4AB),
                                 fontSize = 12.sp)
                         }
@@ -789,6 +785,7 @@ private fun OwnerManualMenuRow(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(manualMenuShortName(product.copy(
                     displayName = item.displayNameOverride ?: product.displayName), brand),
+                    modifier = Modifier.weight(1f, fill = false),
                     color = if (item.soldOut) V4Color.sub else V4Color.text,
                     fontSize = 12.sp, fontWeight = FontWeight.Bold,
                     maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -860,7 +857,7 @@ private fun ManualRowAction(
         .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
         .manualTap(onClick), horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
-        BmIcon(icon, null, Modifier.size(16.dp), V4Color.sub)
+        BmIcon(icon, null, Modifier.size(16.dp), tint = V4Color.sub)
         Spacer(Modifier.height(2.dp))
         Text(text, color = V4Color.text, fontSize = 10.sp)
     }
