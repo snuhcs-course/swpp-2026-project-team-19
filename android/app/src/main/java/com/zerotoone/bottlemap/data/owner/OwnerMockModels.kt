@@ -17,6 +17,8 @@ data class MockOwnerSnapshot(
     val dismissedApplicationIds: Set<String> = emptySet(), // local-only hidden rejected cards
     val existingBarCandidates: List<MockBar> = emptyList(), // Local-only discovery fixtures, not owned bars
     val nextLocalId: Long = 1L,
+    // Local Mock tombstones: canonical bar + product retains its menu-item ID after deletion/reset.
+    val menuItemIdHistory: Map<String, String> = emptyMap(),
 )
 
 data class MockBar(
@@ -90,6 +92,9 @@ data class MockCatalogProduct(
     val category: String = "whisky",
     val ageYears: Int? = null,
     val editionName: String? = null,
+    // Local manual-menu state only. Never infer a verified catalog match from a name.
+    val catalogMatched: Boolean = true,
+    val otherAlcoholKind: String? = null,
 )
 
 data class MockDiscount(
@@ -120,6 +125,8 @@ data class MockBarMenuItem(
     val productId: String,
     val options: List<MockMenuOption>,
     val soldOut: Boolean = false, // C09 unagreed
+    // Local-only bar-facing label. Canonical catalog displayName remains unchanged.
+    val displayNameOverride: String? = null,
 )
 
 data class MockWeeklyHours(

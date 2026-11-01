@@ -38,6 +38,11 @@ interface OwnerMockRepository {
     fun saveBrand(brand: MockBrand)
     fun saveCatalogProduct(product: MockCatalogProduct)
     fun saveMenuItem(item: MockBarMenuItem)
+    /** Atomic, app-local direct menu edit. Not an agreed backend contract. */
+    fun saveManualMenuItem(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct? = null,
+        newBrand: MockBrand? = null,
+    )
     fun setSoldOut(barMenuItemId: String, value: Boolean)
     fun deleteMenuItem(barMenuItemId: String)
     fun clearMenuForBar(barId: String)
@@ -321,6 +326,29 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
     }
 
+    private fun menuHistoryKey(barId: String, productId: String) = "$barId|$productId"
+
+    private fun retainedMenuId(s: MockOwnerSnapshot, item: MockBarMenuItem): MockBarMenuItem {
+        val originalId = s.menuItemIdHistory[menuHistoryKey(item.barId, item.productId)]
+        val alreadyPublished = s.menuItems.any {
+            it.barId == item.barId && it.productId == item.productId
+        }
+        return if (!alreadyPublished && originalId != null)
+            item.copy(barMenuItemId = originalId) else item
+    }
+
+    private fun requireUnclaimedMenuId(s: MockOwnerSnapshot, item: MockBarMenuItem) {
+        val key = menuHistoryKey(item.barId, item.productId)
+        require(s.menuItemIdHistory.none { (knownKey, knownId) ->
+            knownKey != key && knownId == item.barMenuItemId
+        }) { "Menu item ID already belongs to another bar/product" }
+    }
+
+    private fun retainMenuOrder(rows: List<MockBarMenuItem>, item: MockBarMenuItem) =
+        if (rows.any { it.barMenuItemId == item.barMenuItemId })
+            rows.map { if (it.barMenuItemId == item.barMenuItemId) item else it }
+        else rows + item
+
     override fun saveMenuItem(item: MockBarMenuItem) {
         require(item.barMenuItemId.isNotBlank())
         require(item.options.isNotEmpty())
@@ -341,30 +369,158 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             }) { "Serving option ID is already used in another menu row" }
             require(s.menuItems.none { it.barMenuItemId == item.barMenuItemId &&
                 (it.barId != item.barId || it.productId != item.productId) })
-            s.copy(menuItems = s.menuItems.filterNot { it.barMenuItemId == item.barMenuItemId } + item) to Unit
+            val saved = retainedMenuId(s, item)
+            requireUnclaimedMenuId(s, saved)
+            require(s.menuItems.none { it.barMenuItemId == saved.barMenuItemId &&
+                (it.barId != saved.barId || it.productId != saved.productId) })
+            s.copy(menuItems = retainMenuOrder(s.menuItems, saved),
+                menuItemIdHistory = s.menuItemIdHistory +
+                    (menuHistoryKey(saved.barId, saved.productId) to saved.barMenuItemId)) to Unit
         }
     }
 
+    override fun saveManualMenuItem(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
+    ) {
+        require(item.barMenuItemId.isNotBlank() && item.productId.isNotBlank())
+        require(item.options.all { it.optionId.isNotBlank() })
+        require(item.options.map { it.optionId }.distinct().size == item.options.size)
+        change { state ->
+            require(state.bars.any { it.barId == item.barId }) { "Unknown bar" }
+            val product = state.products.firstOrNull { it.productId == item.productId }
+                ?: requireNotNull(newProduct) { "상품을 먼저 확인해 주세요." }
+            require(product.productId == item.productId && product.displayName.isNotBlank())
+            // A locally unverified product may be re-categorized in this atomic write.
+            // Validate against its replacement rather than its previous stored category.
+            val proposedProduct = newProduct ?: product
+            require(proposedProduct.productId == item.productId)
+            // Photo-imported rows can predate the direct editor's three-option cap.
+            // Keep their original overflow untouched when editing the first three.
+            val oldRow = state.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
+            val editableLimit = if (manualMenuCategoryLabel(proposedProduct.category) == "위스키")
+                MANUAL_MENU_MAX_OPTIONS else 1
+            val legacyTail = oldRow?.options?.drop(editableLimit).orEmpty()
+            val preservesLegacyTail = oldRow != null && legacyTail.isNotEmpty() &&
+                item.options.size == oldRow.options.size &&
+                item.options.drop(editableLimit) == legacyTail &&
+                item.options.take(editableLimit).all { proposed ->
+                    oldRow.options.any { it.optionId == proposed.optionId }
+                }
+            val directOptions = if (preservesLegacyTail)
+                item.options.take(editableLimit) else item.options
+            val error = manualMenuOptionError(directOptions, proposedProduct.category,
+                oldRow?.options.orEmpty())
+            require(error == null) { error ?: "잘못된 가격 옵션" }
+            require(item.options.all { it.optionId.isNotBlank() } &&
+                item.options.map { it.optionId }.distinct().size == item.options.size &&
+                item.options.distinctBy { it.identityKey() }.size == item.options.size &&
+                item.options.all(::validMockMenuOption)) { "잘못된 저장 옵션입니다." }
+            if (state.products.none { it.productId == product.productId }) {
+                require(newBrand != null && newBrand.brandId == product.brandId ||
+                    state.brands.any { it.brandId == product.brandId }) { "Unknown brand" }
+                require(product.catalogMatched || product.productId.startsWith("local-unverified-")) {
+                    "Unmatched product needs an unverified local ID"
+                }
+            }
+            require(state.menuItems.none {
+                it.barId == item.barId && it.productId == item.productId &&
+                    it.barMenuItemId != item.barMenuItemId
+            }) { "이미 등록한 제품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요." }
+            require(state.menuItems.none {
+                it.barMenuItemId == item.barMenuItemId &&
+                    (it.productId != item.productId || it.barId != item.barId)
+            }) { "기존 메뉴의 제품 ID는 변경할 수 없어요." }
+            require(state.menuItems.none { existing ->
+                existing.barMenuItemId != item.barMenuItemId && existing.options.any { other ->
+                    item.options.any { it.optionId == other.optionId }
+                }
+            }) { "판매 옵션 ID 중복" }
+            // Canonical catalog records are immutable; local unverified menu products
+            // may change their display name/type without changing their stable local ID.
+            // Other bars may reference the same local product. A direct repository
+            // caller must not silently rewrite its shared name/type metadata.
+            if (newProduct != null && newProduct != product &&
+                state.menuItems.any {
+                    it.barId != item.barId && it.productId == product.productId
+                }) {
+                require(false) { "다른 매장과 공유된 상품 정보는 변경할 수 없어요." }
+            }
+            val finalProduct = if (newProduct != null &&
+                state.products.any { it.productId == product.productId }) {
+                require(!product.catalogMatched && newProduct.productId == product.productId) {
+                    "카탈로그 제품명은 직접 변경할 수 없어요."
+                }
+                newProduct
+            } else product
+            val newBrands = if (newBrand != null) {
+                val existingBrand = state.brands.firstOrNull { it.brandId == newBrand.brandId }
+                require(existingBrand == null || !product.catalogMatched ||
+                    existingBrand == newBrand) { "카탈로그 브랜드는 변경할 수 없어요." }
+                state.brands.filterNot { it.brandId == newBrand.brandId } + newBrand
+            } else state.brands
+            val newProducts = state.products.filterNot { it.productId == finalProduct.productId } +
+                finalProduct
+            val saved = retainedMenuId(state, item)
+            requireUnclaimedMenuId(state, saved)
+            require(state.menuItems.none { it.barMenuItemId == saved.barMenuItemId &&
+                (it.barId != saved.barId || it.productId != saved.productId) })
+            state.copy(
+                brands = newBrands, products = newProducts,
+                menuItems = retainMenuOrder(state.menuItems, saved),
+                menuItemIdHistory = state.menuItemIdHistory +
+                    (menuHistoryKey(saved.barId, saved.productId) to saved.barMenuItemId),
+                bars = state.bars.map { b ->
+                    if (b.barId == item.barId)
+                        b.copy(lastMenuPublishedAtEpochMs = System.currentTimeMillis())
+                    else b
+                },
+            ) to Unit
+        }
+    }
+
+    private fun updatedMenuTimestamp(bars: List<MockBar>, barId: String): List<MockBar> =
+        bars.map { bar ->
+            if (bar.barId == barId) bar.copy(lastMenuPublishedAtEpochMs = System.currentTimeMillis())
+            else bar
+        }
+
     override fun setSoldOut(barMenuItemId: String, value: Boolean) {
         change { s ->
-            require(s.menuItems.any { it.barMenuItemId == barMenuItemId })
-            s.copy(menuItems = s.menuItems.map {
-                if (it.barMenuItemId == barMenuItemId) it.copy(soldOut = value) else it
-            }) to Unit
+            val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
+                ?: error("Unknown menu item")
+            if (row.soldOut == value) s to Unit else s.copy(
+                menuItems = s.menuItems.map {
+                    if (it.barMenuItemId == barMenuItemId) it.copy(soldOut = value) else it
+                }, bars = updatedMenuTimestamp(s.bars, row.barId)
+            ) to Unit
         }
     }
 
     override fun deleteMenuItem(barMenuItemId: String) {
         change { s ->
-            require(s.menuItems.any { it.barMenuItemId == barMenuItemId })
-            s.copy(menuItems = s.menuItems.filterNot { it.barMenuItemId == barMenuItemId }) to Unit
+            val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
+                ?: error("Unknown menu item")
+            s.copy(
+                menuItems = s.menuItems.filterNot { it.barMenuItemId == barMenuItemId },
+                menuItemIdHistory = s.menuItemIdHistory +
+                    (menuHistoryKey(row.barId, row.productId) to row.barMenuItemId),
+                bars = updatedMenuTimestamp(s.bars, row.barId)
+            ) to Unit
         }
     }
 
     override fun clearMenuForBar(barId: String) {
         change { s ->
             require(s.bars.any { it.barId == barId })
-            s.copy(menuItems = s.menuItems.filterNot { it.barId == barId }) to Unit
+            val remaining = s.menuItems.filterNot { it.barId == barId }
+            if (remaining.size == s.menuItems.size) s to Unit else s.copy(
+                menuItems = remaining,
+                menuItemIdHistory = s.menuItemIdHistory + s.menuItems
+                    .filter { it.barId == barId }.associate {
+                        menuHistoryKey(it.barId, it.productId) to it.barMenuItemId
+                    },
+                bars = updatedMenuTimestamp(s.bars, barId)
+            ) to Unit
         }
     }
 
@@ -440,6 +596,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         // Manual entries may use local-* IDs without advancing the import counter.
         // Reserve against all existing IDs AND those already generated in this publish.
         val usedMenuIds = s.menuItems.mapTo(mutableSetOf()) { it.barMenuItemId }
+        val historicallyReserved = s.menuItemIdHistory.values.toSet()
         val usedOptionIds = s.menuItems.flatMapTo(mutableSetOf()) { item ->
             item.options.map { it.optionId }
         }
@@ -447,7 +604,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             var candidate: String
             do {
                 candidate = "$prefix${index++}"
-            } while (!taken.add(candidate))
+            } while (candidate in historicallyReserved && prefix == "local-menu-" ||
+                !taken.add(candidate))
             return candidate
         }
         val added = grouped.mapNotNull { (productId, lines) ->
@@ -463,8 +621,12 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             }) {
                 "Conflicting extracted price or discount for same serving option; review before publish"
             }
+            val previousId = s.menuItemIdHistory[menuHistoryKey(job.barId, productId)]
+            if (previousId != null) require(usedMenuIds.add(previousId)) {
+                "Previously assigned menu ID conflicts with an active menu row"
+            }
             MockBarMenuItem(
-                barMenuItemId = reserveUnusedLocalId("local-menu-", usedMenuIds),
+                barMenuItemId = previousId ?: reserveUnusedLocalId("local-menu-", usedMenuIds),
                 barId = job.barId,
                 productId = productId,
                 options = byKey.values.map { opts ->
@@ -475,6 +637,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         val applied = job.copy(status = MockImportStatus.APPLIED)
         s.copy(
             menuItems = s.menuItems + added,
+            menuItemIdHistory = s.menuItemIdHistory + added.associate {
+                menuHistoryKey(it.barId, it.productId) to it.barMenuItemId
+            },
             imports = s.imports.map { if (it.menuImportId == importId) applied else it },
             bars = s.bars.map { bar ->
                 if (bar.barId == job.barId) bar.copy(

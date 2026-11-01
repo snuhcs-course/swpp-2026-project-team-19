@@ -45,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -75,6 +76,11 @@ fun SearchScreen(
     val canSearch = normalizedInput.isNotEmpty() && !tooLong &&
         !navigating && serverValidationErrorCode == null
     val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val dismissSearchIme = {
+        focusManager.clearFocus()
+        keyboard?.hide()
+    }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val nearbyState = nearbyViewModel?.state?.collectAsStateWithLifecycle()?.value
@@ -111,7 +117,7 @@ fun SearchScreen(
     val submit = {
         if (canSearch) {
             navigating = true
-            keyboard?.hide()
+            dismissSearchIme()
             onOpenResults(normalizedInput)
         }
     }
@@ -130,16 +136,20 @@ fun SearchScreen(
             onClear = {
                 query = ""
                 onClearServerValidation()
+                dismissSearchIme()
             },
             onSearch = submit,
-            onOpenAccount = onOpenAccount,
-            onOpenNearby = onOpenNearby,
+            onOpenAccount = { dismissSearchIme(); onOpenAccount() },
+            onOpenNearby = { dismissSearchIme(); onOpenNearby() },
             nearbyBars = nearbyBars,
             emptyNearbyText = nearbyCarouselEmptyMessage(
                 hasNearbyLocationPermission, nearbyState),
             selectedNearbyBarId = selectedNearbyId,
             onSelectNearbyBar = { id ->
-                if (nearbyViewModel?.selectBar(id) == true) onOpenNearby()
+                if (nearbyViewModel?.selectBar(id) == true) {
+                    dismissSearchIme()
+                    onOpenNearby()
+                }
             },
         )
     }
