@@ -326,6 +326,17 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
     }
 
+    private fun menuHistoryKey(barId: String, productId: String) = "$barId|$productId"
+
+    private fun retainedMenuId(s: MockOwnerSnapshot, item: MockBarMenuItem): MockBarMenuItem {
+        val originalId = s.menuItemIdHistory[menuHistoryKey(item.barId, item.productId)]
+        val alreadyPublished = s.menuItems.any {
+            it.barId == item.barId && it.productId == item.productId
+        }
+        return if (!alreadyPublished && originalId != null)
+            item.copy(barMenuItemId = originalId) else item
+    }
+
     private fun retainMenuOrder(rows: List<MockBarMenuItem>, item: MockBarMenuItem) =
         if (rows.any { it.barMenuItemId == item.barMenuItemId })
             rows.map { if (it.barMenuItemId == item.barMenuItemId) item else it }
@@ -351,7 +362,12 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             }) { "Serving option ID is already used in another menu row" }
             require(s.menuItems.none { it.barMenuItemId == item.barMenuItemId &&
                 (it.barId != item.barId || it.productId != item.productId) })
-            s.copy(menuItems = retainMenuOrder(s.menuItems, item)) to Unit
+            val saved = retainedMenuId(s, item)
+            require(s.menuItems.none { it.barMenuItemId == saved.barMenuItemId &&
+                (it.barId != saved.barId || it.productId != saved.productId) })
+            s.copy(menuItems = retainMenuOrder(s.menuItems, saved),
+                menuItemIdHistory = s.menuItemIdHistory +
+                    (menuHistoryKey(saved.barId, saved.productId) to saved.barMenuItemId)) to Unit
         }
     }
 
@@ -428,9 +444,14 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             } else state.brands
             val newProducts = state.products.filterNot { it.productId == finalProduct.productId } +
                 finalProduct
+            val saved = retainedMenuId(state, item)
+            require(state.menuItems.none { it.barMenuItemId == saved.barMenuItemId &&
+                (it.barId != saved.barId || it.productId != saved.productId) })
             state.copy(
                 brands = newBrands, products = newProducts,
-                menuItems = retainMenuOrder(state.menuItems, item),
+                menuItems = retainMenuOrder(state.menuItems, saved),
+                menuItemIdHistory = state.menuItemIdHistory +
+                    (menuHistoryKey(saved.barId, saved.productId) to saved.barMenuItemId),
                 bars = state.bars.map { b ->
                     if (b.barId == item.barId)
                         b.copy(lastMenuPublishedAtEpochMs = System.currentTimeMillis())
@@ -464,6 +485,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 ?: error("Unknown menu item")
             s.copy(
                 menuItems = s.menuItems.filterNot { it.barMenuItemId == barMenuItemId },
+                menuItemIdHistory = s.menuItemIdHistory +
+                    (menuHistoryKey(row.barId, row.productId) to row.barMenuItemId),
                 bars = updatedMenuTimestamp(s.bars, row.barId)
             ) to Unit
         }
@@ -475,6 +498,10 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             val remaining = s.menuItems.filterNot { it.barId == barId }
             if (remaining.size == s.menuItems.size) s to Unit else s.copy(
                 menuItems = remaining,
+                menuItemIdHistory = s.menuItemIdHistory + s.menuItems
+                    .filter { it.barId == barId }.associate {
+                        menuHistoryKey(it.barId, it.productId) to it.barMenuItemId
+                    },
                 bars = updatedMenuTimestamp(s.bars, barId)
             ) to Unit
         }
@@ -575,8 +602,12 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             }) {
                 "Conflicting extracted price or discount for same serving option; review before publish"
             }
+            val previousId = s.menuItemIdHistory[menuHistoryKey(job.barId, productId)]
+            if (previousId != null) require(usedMenuIds.add(previousId)) {
+                "Previously assigned menu ID conflicts with an active menu row"
+            }
             MockBarMenuItem(
-                barMenuItemId = reserveUnusedLocalId("local-menu-", usedMenuIds),
+                barMenuItemId = previousId ?: reserveUnusedLocalId("local-menu-", usedMenuIds),
                 barId = job.barId,
                 productId = productId,
                 options = byKey.values.map { opts ->
@@ -587,6 +618,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         val applied = job.copy(status = MockImportStatus.APPLIED)
         s.copy(
             menuItems = s.menuItems + added,
+            menuItemIdHistory = s.menuItemIdHistory + added.associate {
+                menuHistoryKey(it.barId, it.productId) to it.barMenuItemId
+            },
             imports = s.imports.map { if (it.menuImportId == importId) applied else it },
             bars = s.bars.map { bar ->
                 if (bar.barId == job.barId) bar.copy(
