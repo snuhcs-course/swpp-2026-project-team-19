@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.matchParentSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -89,6 +93,7 @@ fun OwnerPreviewHtmlV4Screen(
             (it.kind == MockExceptionKind.CUSTOM_HOURS && it.closesNextDay &&
                 it.toEpochDay == ownerToday(now).toEpochDay() - 1)
     }
+    val customerNote = activeException?.note?.takeIf { it.isNotBlank() }
     val photoCount = bar?.gallery?.size ?: 0
     val safeIndex = if (photoCount == 0) 0 else photoIndex.mod(photoCount)
     fun select(index: Int) {
@@ -130,7 +135,7 @@ fun OwnerPreviewHtmlV4Screen(
         V4Toolbar(null, onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 13.dp),
+                .padding(horizontal = BottleMapSpacing.screenHorizontal),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (bar == null) {
@@ -145,15 +150,14 @@ fun OwnerPreviewHtmlV4Screen(
             } else {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(bar.name, color = V4Color.text, fontSize = 22.sp,
-                        fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f))
-                    Box(Modifier.background(V4Color.background, RoundedCornerShape(8.dp))
-                        .border(1.dp, V4Color.line, RoundedCornerShape(8.dp))
-                        .clickable(onClick = onManage)
-                        .padding(horizontal = 10.dp, vertical = 9.dp)
-                        .testTag("owner-preview-manage"), contentAlignment = Alignment.Center) {
-                        Text("← 관리", fontSize = 11.sp, color = V4Color.sub)
+                    V4BarName(bar.name, modifier = Modifier.weight(1f))
+                    OutlinedButton(
+                        onClick = onManage,
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                            horizontal = 8.dp, vertical = 0.dp),
+                        modifier = Modifier.testTag("owner-preview-manage"),
+                    ) {
+                        Text("← 관리", color = V4Color.sub, fontSize = 11.sp)
                     }
                 }
                 Box(
@@ -226,19 +230,34 @@ fun OwnerPreviewHtmlV4Screen(
                     Row(Modifier.weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(5.dp),
                         verticalAlignment = Alignment.CenterVertically) {
-                        Text(homeOperatingState(bar, now),
-                            color = V4Color.positive, fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable {
-                                if (!activeException?.note.isNullOrBlank())
-                                    noteVisible = !noteVisible
-                            })
+                        Box(Modifier.zIndex(2f)) {
+                            Text(homeOperatingState(bar, now),
+                                color = V4Color.positive, fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .clickable(enabled = customerNote != null) {
+                                        noteVisible = !noteVisible
+                                    }
+                                    .testTag("owner-preview-status-label"))
+                            if (noteVisible && customerNote != null) {
+                                Box(Modifier.matchParentSize().zIndex(3f)) {
+                                    OwnerStatusNoteBubble(
+                                        customerNote,
+                                        modifier = Modifier.align(Alignment.BottomStart)
+                                            .offset(y = (-26).dp),
+                                    )
+                                }
+                            }
+                        }
                         ownerPreviewNextText(bar, now).takeIf { it.isNotEmpty() }?.let {
                             Text(it, color = V4Color.sub, fontSize = 11.sp,
                                 maxLines = 1)
                         }
                         Canvas(Modifier.size(22.dp)
-                            .clickable { expanded = if (expanded == "hours") "" else "hours" }
+                            .clickable {
+                                noteVisible = false
+                                expanded = if (expanded == "hours") "" else "hours"
+                            }
                             .semantics { contentDescription = "전체 영업시간 보기" }
                             .testTag("owner-preview-hours-toggle")) {
                             val leftY = if (expanded == "hours") 0.65f else 0.35f
@@ -255,17 +274,13 @@ fun OwnerPreviewHtmlV4Screen(
                         }
                     }
                     V4PreviewSmallButton("지도", "location") {
+                        noteVisible = false
                         expanded = if (expanded == "address") "" else "address"
                     }
                     V4PreviewSmallButton("전화", "phone") {
+                        noteVisible = false
                         expanded = if (expanded == "phone") "" else "phone"
                     }
-                }
-                if (noteVisible && !activeException?.note.isNullOrBlank()) {
-                    Text("고객 안내: " + activeException?.note.orEmpty(),
-                        modifier = Modifier.fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surfaceVariant,
-                                RoundedCornerShape(9.dp)).padding(12.dp))
                 }
                 when (expanded) {
                     "hours" -> {
@@ -361,6 +376,37 @@ fun OwnerPreviewHtmlV4Screen(
     }
 }
 
+
+/**
+ * ACTION_FIRST_v4 .visit-status-note: floating speech balloon above the status
+ * label, without inserting a full-width block into the preview's flow.
+ */
+@Composable
+private fun OwnerStatusNoteBubble(note: String, modifier: Modifier = Modifier) {
+    val fill = Color(0xFF403832)
+    val outline = Color(0xFF786A60)
+    Column(modifier.widthIn(max = 270.dp)) {
+        Box(Modifier.background(fill, RoundedCornerShape(12.dp))
+            .border(1.dp, outline, RoundedCornerShape(12.dp))
+            .padding(horizontal = 13.dp, vertical = 11.dp)) {
+            Text(note, color = V4Color.text, fontSize = 13.sp,
+                lineHeight = 19.sp, modifier = Modifier.testTag("owner-preview-status-note"))
+        }
+        Canvas(Modifier.padding(start = 19.dp).size(width = 12.dp, height = 7.dp)) {
+            val tail = Path().apply {
+                moveTo(0f, 0f)
+                lineTo(size.width / 2f, size.height)
+                lineTo(size.width, 0f)
+                close()
+            }
+            drawPath(tail, fill)
+            drawLine(outline, Offset(0f, 0f),
+                Offset(size.width / 2f, size.height), 1.dp.toPx())
+            drawLine(outline, Offset(size.width / 2f, size.height),
+                Offset(size.width, 0f), 1.dp.toPx())
+        }
+    }
+}
 
 @Composable
 private fun V4PreviewSmallButton(label: String, kind: String, onClick: () -> Unit) {
