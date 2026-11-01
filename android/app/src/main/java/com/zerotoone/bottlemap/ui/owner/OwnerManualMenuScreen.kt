@@ -114,7 +114,8 @@ private fun toOption(d: DraftOption, whisky: Boolean,
     }
     val discount = if (d.sale.isEmpty()) null else {
         val salePrice = d.sale.toIntOrNull() ?: throw IllegalArgumentException("할인 가격 오류")
-        require(salePrice in 1..price && salePrice <= MAX_OWNER_MENU_PRICE_KRW) {
+        require(salePrice in 1..price &&
+            (salePrice <= MAX_OWNER_MENU_PRICE_KRW || original?.discount?.discountedPriceKrw == salePrice)) {
             "할인 가격은 1원 이상, 원래 가격 이하여야 해요."
         }
         val start = runCatching { LocalDate.parse(d.start) }.getOrNull()
@@ -199,9 +200,6 @@ internal fun OwnerManualMenuScreen(
     var promoOptionExpanded by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val draftOptions = decodedOptions(optionText)
-    val activeImport = snapshot?.imports?.lastOrNull { it.barId == bar?.barId &&
-        it.status in setOf(MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW) }
-    val editBlocked = activeImport != null
     fun setOptions(v: List<DraftOption>) { optionText = encodedOptions(v) }
     fun changeOption(index: Int, transform: (DraftOption) -> DraftOption) {
         setOptions(draftOptions.mapIndexed { i, d -> if (i == index) transform(d) else d })
@@ -242,22 +240,24 @@ internal fun OwnerManualMenuScreen(
     fun save() {
         if (bar == null) return
         try {
-            require(!editBlocked) { "메뉴 등록·검수 중에는 직접 편집할 수 없어요." }
             val name = itemName.trim()
-            require(name.isNotEmpty() && name.length <= 80) { "메뉴 이름을 확인해 주세요." }
+            val old = items.firstOrNull { it.barMenuItemId == editId }
+            val persisted = products.firstOrNull { it.productId == old?.productId }
+            val savedName = old?.displayNameOverride ?: persisted?.displayName
+            require(name.isNotEmpty() &&
+                (name.length <= 80 || (name == savedName && name.length <= 200))) {
+                "메뉴 이름을 확인해 주세요."
+            }
             if (category == "기타 주류") require(alcoholKind.trim().isNotEmpty()) {
                 "주류 종류를 입력해 주세요."
             }
             val whisky = category == "위스키"
-            val old = items.firstOrNull { it.barMenuItemId == editId }
-            val persisted = products.firstOrNull { it.productId == old?.productId }
             val sameCategory = persisted?.let { manualMenuCategoryLabel(it.category) } == category
             val effectiveCategoryCode = if (category in MANUAL_MENU_CATEGORIES)
                 manualMenuCategoryCode(category) else {
                 require(sameCategory && persisted != null) { "지원하지 않는 종류로 변경할 수 없어요." }
                 persisted.category
             }
-            require(old == null || old.options.size <= 10) { "기존 옵션이 10개를 초과해 저장할 수 없어요." }
             require(old == null || sameCategory || old.options.size <= 1) {
                 "기존 용량 옵션을 삭제하지 않고 종류를 바꿀 수 없어요."
             }
@@ -339,7 +339,6 @@ internal fun OwnerManualMenuScreen(
             }) },
             confirmButton = { TextButton(onClick = {
                 try {
-                    require(!editBlocked) { "메뉴 등록·검수 중에는 직접 편집할 수 없어요." }
                     when(action) {
                         "delete" -> editId?.let { viewModel.deleteMenuItem(it) }
                         "reset" -> bar?.barId?.let { viewModel.clearMenuForBar(it) }
@@ -379,7 +378,7 @@ internal fun OwnerManualMenuScreen(
                         color = V4Color.sub, fontSize = 12.sp)
                     Text("사진으로 메뉴 추가", color = V4Color.text,
                         fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    val job = activeImport ?: snapshot?.imports?.lastOrNull { it.barId == bar.barId }
+                    val job = snapshot?.imports?.lastOrNull { it.barId == bar.barId }
                     Row(Modifier.fillMaxWidth()
                         .background(V4Color.surface, RoundedCornerShape(11.dp))
                         .padding(12.dp),
@@ -409,13 +408,11 @@ internal fun OwnerManualMenuScreen(
                                 })
                         }
                     }
-                    if (editBlocked) Text("메뉴판 등록·검수 중에는 직접 편집할 수 없어요. 위 작업을 완료하거나 취소해 주세요.",
-                        color = V4Color.sub, fontSize = 12.sp)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically) {
                         Text("현재 게시 메뉴", color = V4Color.text, fontWeight = FontWeight.Bold,
                             fontSize = 16.sp)
-                        Text("+ 직접 추가", Modifier.manualTap { if (!editBlocked) edit(null) }
+                        Text("+ 직접 추가", Modifier.manualTap { edit(null) }
                             .testTag("manual-menu-add"), color = V4Color.primary, fontSize = 12.sp)
                     }
                     V4SearchField(query, { query = it }, "manual-menu-search", "메뉴명·브랜드 검색")
@@ -474,8 +471,8 @@ internal fun OwnerManualMenuScreen(
                                                 selectedId == item.barMenuItemId,
                                                 onSelect = { selectedId = if (selectedId == item.barMenuItemId)
                                                     null else item.barMenuItemId },
-                                                onEdit = { if (!editBlocked) edit(item) },
-                                                onStock = { if (!editBlocked) confirm = "stock:" + item.barMenuItemId })
+                                                onEdit = { edit(item) },
+                                                onStock = { confirm = "stock:" + item.barMenuItemId })
                                             if (index < entry.value.lastIndex)
                                                 HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                                         }
@@ -492,7 +489,7 @@ internal fun OwnerManualMenuScreen(
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     Box(Modifier.fillMaxWidth().height(43.dp)
                         .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(8.dp))
-                        .manualTap { if (!editBlocked) confirm = "reset" }
+                        .manualTap { confirm = "reset" }
                         .testTag("manual-menu-reset"), contentAlignment = Alignment.Center) {
                         Row(horizontalArrangement = Arrangement.spacedBy(9.dp),
                             verticalAlignment = Alignment.CenterVertically) {
@@ -664,18 +661,6 @@ internal fun OwnerManualMenuScreen(
 
                             }
                         }
-                    val savedOverflow = items.firstOrNull { it.barMenuItemId == editId }
-                        ?.options?.drop(if (category == "위스키") MANUAL_MENU_MAX_OPTIONS else 1)
-                        .orEmpty()
-                    if (savedOverflow.isNotEmpty()) {
-                        Text("기존 추가 옵션 (${savedOverflow.size}개) · 원본 그대로 보존",
-                            color = V4Color.sub, fontSize = 12.sp)
-                        savedOverflow.forEach { original ->
-                            Text((original.pourMl?.let { "${it}ml" } ?: original.label ?: "용량 미표기") +
-                                " · %,d원".format(original.priceKrw),
-                                color = V4Color.sub, fontSize = 12.sp)
-                        }
-                    }
                     if (category == "위스키") {
                         if (draftOptions.size < MANUAL_MENU_MAX_OPTIONS)
                             Box(Modifier.fillMaxWidth().height(40.dp)
@@ -788,7 +773,9 @@ internal fun OwnerManualMenuScreen(
                             try {
                                 val latest = decodedOptions(optionText)[saleOption]
                                 require(latest.sale.isNotBlank()) { "할인 가격을 입력해 주세요." }
-                                toOption(latest, category == "위스키")
+                                toOption(latest, category == "위스키",
+                                    items.firstOrNull { it.barMenuItemId == editId }?.options
+                                        ?.firstOrNull { it.optionId == latest.id })
                                 beforePromoOptions = null
                                 calendarTarget = null
                                 screen = "item"; error = null
