@@ -4,8 +4,8 @@
  "queries": 823,
  "fit": "none (fixed model)",
  "embed_seconds": {
-  "catalog_texts": 22.791,
-  "line_names": 4.045
+  "catalog_texts": 25.451,
+  "line_names": 4.401
  },
  "index_size": {
   "canonical": {
@@ -11968,634 +11968,1258 @@
     },
     "lines_with_embedding_candidate": 0
    },
-   "docsets": {
-    "canonical": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 199,
-       "choose": 95,
-       "register": 0,
-       "wrong": 26
-      },
-      "per_photo": {
-       "confirm": 6.862068965517241,
-       "choose": 3.2758620689655173,
-       "register": 0.0,
-       "wrong": 0.896551724137931
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 4.172413793103448,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 151,
-       "correct": 149
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 129,
-      "cr_by_rank1_method": {
-       "llm": 178,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 64
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 186,
-       "choose": 108,
-       "register": 0,
-       "wrong": 26
-      },
-      "per_photo": {
-       "confirm": 6.413793103448276,
-       "choose": 3.7241379310344827,
-       "register": 0.0,
-       "wrong": 0.896551724137931
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 4.620689655172414,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 139,
-       "correct": 137
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 129,
-      "cr_by_rank1_method": {
-       "llm": 166,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 150
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.8811188811188811,
-       "@3": 0.9440559440559441,
-       "@5": 0.9685314685314685,
-       "@10": 0.9825174825174825
-      },
-      "embedding_then_M3a": {
-       "@1": 0.8811188811188811,
-       "@3": 0.9405594405594405,
-       "@5": 0.9615384615384616,
-       "@10": 0.9685314685314685
-      }
-     }
-    },
-    "aliases": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 199,
-       "choose": 78,
-       "register": 0,
-       "wrong": 43
-      },
-      "per_photo": {
-       "confirm": 6.862068965517241,
-       "choose": 2.689655172413793,
-       "register": 0.0,
-       "wrong": 1.4827586206896552
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 4.172413793103448,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 151,
-       "correct": 149
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 112,
-      "cr_by_rank1_method": {
-       "llm": 178,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 64
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 167,
-       "choose": 110,
-       "register": 0,
-       "wrong": 43
-      },
-      "per_photo": {
-       "confirm": 5.758620689655173,
-       "choose": 3.793103448275862,
-       "register": 0.0,
-       "wrong": 1.4827586206896552
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 5.275862068965517,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 120,
-       "correct": 118
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 112,
-      "cr_by_rank1_method": {
-       "llm": 147,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 150
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.8321678321678322,
-       "@3": 0.8916083916083916,
-       "@5": 0.9090909090909091,
-       "@10": 0.9370629370629371
-      },
-      "embedding_then_M3a": {
-       "@1": 0.8321678321678322,
-       "@3": 0.8881118881118881,
-       "@5": 0.9020979020979021,
-       "@10": 0.9090909090909091
-      }
-     }
-    },
-    "korean": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 199,
-       "choose": 68,
-       "register": 0,
-       "wrong": 53
-      },
-      "per_photo": {
-       "confirm": 6.862068965517241,
-       "choose": 2.3448275862068964,
-       "register": 0.0,
-       "wrong": 1.8275862068965518
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 4.172413793103448,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 151,
-       "correct": 149
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 102,
-      "cr_by_rank1_method": {
-       "llm": 178,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 64
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 141,
-       "choose": 126,
-       "register": 0,
-       "wrong": 53
-      },
-      "per_photo": {
-       "confirm": 4.862068965517241,
-       "choose": 4.344827586206897,
-       "register": 0.0,
-       "wrong": 1.8275862068965518
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 6.172413793103448,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 94,
-       "correct": 92
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 102,
-      "cr_by_rank1_method": {
-       "llm": 121,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 150
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.8041958041958042,
-       "@3": 0.8601398601398601,
-       "@5": 0.8706293706293706,
-       "@10": 0.8776223776223776
-      },
-      "embedding_then_M3a": {
-       "@1": 0.8041958041958042,
-       "@3": 0.8566433566433567,
-       "@5": 0.8671328671328671,
-       "@10": 0.8741258741258742
-      }
-     }
-    },
-    "brand_age": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 199,
-       "choose": 86,
-       "register": 0,
-       "wrong": 35
-      },
-      "per_photo": {
-       "confirm": 6.862068965517241,
-       "choose": 2.9655172413793105,
-       "register": 0.0,
-       "wrong": 1.206896551724138
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 4.172413793103448,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 151,
-       "correct": 149
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 120,
-      "cr_by_rank1_method": {
-       "llm": 178,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 64
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 173,
-       "choose": 112,
-       "register": 0,
-       "wrong": 35
-      },
-      "per_photo": {
-       "confirm": 5.9655172413793105,
-       "choose": 3.8620689655172415,
-       "register": 0.0,
-       "wrong": 1.206896551724138
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 5.068965517241379,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 126,
-       "correct": 124
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 120,
-      "cr_by_rank1_method": {
-       "llm": 153,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 150
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.8391608391608392,
-       "@3": 0.9125874125874126,
-       "@5": 0.9370629370629371,
-       "@10": 0.9545454545454546
-      },
-      "embedding_then_M3a": {
-       "@1": 0.8391608391608392,
-       "@3": 0.9090909090909091,
-       "@5": 0.9300699300699301,
-       "@10": 0.9370629370629371
-      }
-     }
-    },
-    "all": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 199,
-       "choose": 85,
-       "register": 0,
-       "wrong": 36
-      },
-      "per_photo": {
-       "confirm": 6.862068965517241,
-       "choose": 2.9310344827586206,
-       "register": 0.0,
-       "wrong": 1.2413793103448276
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 4.172413793103448,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 151,
-       "correct": 149
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 119,
-      "cr_by_rank1_method": {
-       "llm": 178,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 64
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 516,
-      "top1": 0.6433915211970075,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 177,
-       "choose": 107,
-       "register": 0,
-       "wrong": 36
-      },
-      "per_photo": {
-       "confirm": 6.103448275862069,
-       "choose": 3.689655172413793,
-       "register": 0.0,
-       "wrong": 1.2413793103448276
-      },
-      "owner_per_photo": 11.03448275862069,
-      "hard_per_photo": 4.931034482758621,
-      "cr_rule": {
-       "n": 34,
-       "correct": 32
-      },
-      "cr_llm": {
-       "n": 130,
-       "correct": 128
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 320,
-      "from_register": 150,
-      "from_register_gold_in": 119,
-      "cr_by_rank1_method": {
-       "llm": 157,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 150
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.8391608391608392,
-       "@3": 0.9090909090909091,
-       "@5": 0.9335664335664335,
-       "@10": 0.951048951048951
-      },
-      "embedding_then_M3a": {
-       "@1": 0.8391608391608392,
-       "@3": 0.9055944055944056,
-       "@5": 0.9265734265734266,
-       "@10": 0.9335664335664335
-      }
-     }
-    }
-   },
    "recall_known_not_confirmed": {
     "rules+M3a": {
      "@1": 0.7867132867132867,
      "@3": 0.8391608391608392,
      "@5": 0.8461538461538461,
      "@10": 0.8531468531468531
+    }
+   },
+   "policies": {
+    "unmatched_k5": {
+     "canonical": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 95,
+        "register": 0,
+        "wrong": 26
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 3.2758620689655173,
+        "register": 0.0,
+        "wrong": 0.896551724137931
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 129,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 186,
+        "choose": 108,
+        "register": 0,
+        "wrong": 26
+       },
+       "per_photo": {
+        "confirm": 6.413793103448276,
+        "choose": 3.7241379310344827,
+        "register": 0.0,
+        "wrong": 0.896551724137931
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.620689655172414,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 139,
+        "correct": 137
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 129,
+       "cr_by_rank1_method": {
+        "llm": 166,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8811188811188811,
+        "@3": 0.9405594405594405,
+        "@5": 0.9615384615384616,
+        "@10": 0.9685314685314685
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8811188811188811,
+        "@3": 0.9405594405594405,
+        "@5": 0.9615384615384616,
+        "@10": 0.9685314685314685
+       }
+      }
+     },
+     "aliases": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 78,
+        "register": 0,
+        "wrong": 43
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 2.689655172413793,
+        "register": 0.0,
+        "wrong": 1.4827586206896552
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 112,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 167,
+        "choose": 110,
+        "register": 0,
+        "wrong": 43
+       },
+       "per_photo": {
+        "confirm": 5.758620689655173,
+        "choose": 3.793103448275862,
+        "register": 0.0,
+        "wrong": 1.4827586206896552
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 5.275862068965517,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 120,
+        "correct": 118
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 112,
+       "cr_by_rank1_method": {
+        "llm": 147,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8321678321678322,
+        "@3": 0.8881118881118881,
+        "@5": 0.9020979020979021,
+        "@10": 0.9090909090909091
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8321678321678322,
+        "@3": 0.8881118881118881,
+        "@5": 0.9020979020979021,
+        "@10": 0.9090909090909091
+       }
+      }
+     },
+     "korean": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 68,
+        "register": 0,
+        "wrong": 53
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 2.3448275862068964,
+        "register": 0.0,
+        "wrong": 1.8275862068965518
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 102,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 141,
+        "choose": 126,
+        "register": 0,
+        "wrong": 53
+       },
+       "per_photo": {
+        "confirm": 4.862068965517241,
+        "choose": 4.344827586206897,
+        "register": 0.0,
+        "wrong": 1.8275862068965518
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 6.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 94,
+        "correct": 92
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 102,
+       "cr_by_rank1_method": {
+        "llm": 121,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8041958041958042,
+        "@3": 0.8566433566433567,
+        "@5": 0.8671328671328671,
+        "@10": 0.8741258741258742
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8041958041958042,
+        "@3": 0.8566433566433567,
+        "@5": 0.8671328671328671,
+        "@10": 0.8741258741258742
+       }
+      }
+     },
+     "brand_age": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 86,
+        "register": 0,
+        "wrong": 35
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 2.9655172413793105,
+        "register": 0.0,
+        "wrong": 1.206896551724138
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 120,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 173,
+        "choose": 112,
+        "register": 0,
+        "wrong": 35
+       },
+       "per_photo": {
+        "confirm": 5.9655172413793105,
+        "choose": 3.8620689655172415,
+        "register": 0.0,
+        "wrong": 1.206896551724138
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 5.068965517241379,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 126,
+        "correct": 124
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 120,
+       "cr_by_rank1_method": {
+        "llm": 153,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8391608391608392,
+        "@3": 0.9090909090909091,
+        "@5": 0.9300699300699301,
+        "@10": 0.9370629370629371
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8391608391608392,
+        "@3": 0.9090909090909091,
+        "@5": 0.9300699300699301,
+        "@10": 0.9370629370629371
+       }
+      }
+     },
+     "all": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 85,
+        "register": 0,
+        "wrong": 36
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 2.9310344827586206,
+        "register": 0.0,
+        "wrong": 1.2413793103448276
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 119,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 177,
+        "choose": 107,
+        "register": 0,
+        "wrong": 36
+       },
+       "per_photo": {
+        "confirm": 6.103448275862069,
+        "choose": 3.689655172413793,
+        "register": 0.0,
+        "wrong": 1.2413793103448276
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.931034482758621,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 130,
+        "correct": 128
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 119,
+       "cr_by_rank1_method": {
+        "llm": 157,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8391608391608392,
+        "@3": 0.9055944055944056,
+        "@5": 0.9265734265734266,
+        "@10": 0.9335664335664335
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8391608391608392,
+        "@3": 0.9055944055944056,
+        "@5": 0.9265734265734266,
+        "@10": 0.9335664335664335
+       }
+      }
+     }
+    },
+    "unmatched_k5+rerank_only": {
+     "canonical": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 95,
+        "register": 0,
+        "wrong": 26
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 3.2758620689655173,
+        "register": 0.0,
+        "wrong": 0.896551724137931
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 129,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 186,
+        "choose": 108,
+        "register": 0,
+        "wrong": 26
+       },
+       "per_photo": {
+        "confirm": 6.413793103448276,
+        "choose": 3.7241379310344827,
+        "register": 0.0,
+        "wrong": 0.896551724137931
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.620689655172414,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 139,
+        "correct": 137
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 129,
+       "cr_by_rank1_method": {
+        "llm": 166,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9020979020979021,
+        "@3": 0.9545454545454546,
+        "@5": 0.972027972027972,
+        "@10": 0.972027972027972
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8916083916083916,
+        "@3": 0.9440559440559441,
+        "@5": 0.9615384615384616,
+        "@10": 0.9685314685314685
+       }
+      }
+     },
+     "aliases": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 78,
+        "register": 0,
+        "wrong": 43
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 2.689655172413793,
+        "register": 0.0,
+        "wrong": 1.4827586206896552
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 112,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 167,
+        "choose": 110,
+        "register": 0,
+        "wrong": 43
+       },
+       "per_photo": {
+        "confirm": 5.758620689655173,
+        "choose": 3.793103448275862,
+        "register": 0.0,
+        "wrong": 1.4827586206896552
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 5.275862068965517,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 120,
+        "correct": 118
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 112,
+       "cr_by_rank1_method": {
+        "llm": 147,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8146853146853147,
+        "@3": 0.8881118881118881,
+        "@5": 0.9020979020979021,
+        "@10": 0.9090909090909091
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8391608391608392,
+        "@3": 0.8881118881118881,
+        "@5": 0.9020979020979021,
+        "@10": 0.9090909090909091
+       }
+      }
+     },
+     "korean": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 68,
+        "register": 0,
+        "wrong": 53
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 2.3448275862068964,
+        "register": 0.0,
+        "wrong": 1.8275862068965518
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 102,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 141,
+        "choose": 126,
+        "register": 0,
+        "wrong": 53
+       },
+       "per_photo": {
+        "confirm": 4.862068965517241,
+        "choose": 4.344827586206897,
+        "register": 0.0,
+        "wrong": 1.8275862068965518
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 6.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 94,
+        "correct": 92
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 102,
+       "cr_by_rank1_method": {
+        "llm": 121,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.7762237762237763,
+        "@3": 0.8531468531468531,
+        "@5": 0.8671328671328671,
+        "@10": 0.8741258741258742
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8076923076923077,
+        "@3": 0.8566433566433567,
+        "@5": 0.8671328671328671,
+        "@10": 0.8741258741258742
+       }
+      }
+     },
+     "brand_age": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 86,
+        "register": 0,
+        "wrong": 35
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 2.9655172413793105,
+        "register": 0.0,
+        "wrong": 1.206896551724138
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 120,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 173,
+        "choose": 112,
+        "register": 0,
+        "wrong": 35
+       },
+       "per_photo": {
+        "confirm": 5.9655172413793105,
+        "choose": 3.8620689655172415,
+        "register": 0.0,
+        "wrong": 1.206896551724138
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 5.068965517241379,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 126,
+        "correct": 124
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 120,
+       "cr_by_rank1_method": {
+        "llm": 153,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8496503496503497,
+        "@3": 0.9125874125874126,
+        "@5": 0.9300699300699301,
+        "@10": 0.9370629370629371
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8496503496503497,
+        "@3": 0.9125874125874126,
+        "@5": 0.9300699300699301,
+        "@10": 0.9370629370629371
+       }
+      }
+     },
+     "all": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 199,
+        "choose": 85,
+        "register": 0,
+        "wrong": 36
+       },
+       "per_photo": {
+        "confirm": 6.862068965517241,
+        "choose": 2.9310344827586206,
+        "register": 0.0,
+        "wrong": 1.2413793103448276
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.172413793103448,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 151,
+        "correct": 149
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 119,
+       "cr_by_rank1_method": {
+        "llm": 178,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 64
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 516,
+       "top1": 0.6433915211970075,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 177,
+        "choose": 107,
+        "register": 0,
+        "wrong": 36
+       },
+       "per_photo": {
+        "confirm": 6.103448275862069,
+        "choose": 3.689655172413793,
+        "register": 0.0,
+        "wrong": 1.2413793103448276
+       },
+       "owner_per_photo": 11.03448275862069,
+       "hard_per_photo": 4.931034482758621,
+       "cr_rule": {
+        "n": 34,
+        "correct": 32
+       },
+       "cr_llm": {
+        "n": 130,
+        "correct": 128
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 320,
+       "from_register": 150,
+       "from_register_gold_in": 119,
+       "cr_by_rank1_method": {
+        "llm": 157,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 150
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8426573426573427,
+        "@3": 0.9090909090909091,
+        "@5": 0.9265734265734266,
+        "@10": 0.9335664335664335
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8531468531468531,
+        "@3": 0.9090909090909091,
+        "@5": 0.9265734265734266,
+        "@10": 0.9335664335664335
+       }
+      }
+     }
     }
    }
   },
@@ -12664,722 +13288,1434 @@
     },
     "lines_with_embedding_candidate": 0
    },
-   "docsets": {
-    "canonical": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 14,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
-       "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
-       "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
-       "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
-       "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
-       "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.01674641148325359,
-      "totals": {
-       "confirm": 81,
-       "choose": 38,
-       "register": 0,
-       "wrong": 342
-      },
-      "per_photo": {
-       "confirm": 2.793103448275862,
-       "choose": 1.3103448275862069,
-       "register": 0.0,
-       "wrong": 11.793103448275861
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.10344827586207,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 57,
-       "correct": 48
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 46,
-      "cr_by_rank1_method": {
-       "llm": 75,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 292
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 8,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.009569377990430622,
-      "totals": {
-       "confirm": 77,
-       "choose": 42,
-       "register": 0,
-       "wrong": 342
-      },
-      "per_photo": {
-       "confirm": 2.6551724137931036,
-       "choose": 1.4482758620689655,
-       "register": 0.0,
-       "wrong": 11.793103448275861
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.241379310344827,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 48,
-       "correct": 45
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 46,
-      "cr_by_rank1_method": {
-       "llm": 66,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 334
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.9038461538461539,
-       "@3": 0.9903846153846154,
-       "@5": 1.0,
-       "@10": 1.0
-      },
-      "embedding_then_M3a": {
-       "@1": 0.9038461538461539,
-       "@3": 0.9807692307692307,
-       "@5": 0.9903846153846154,
-       "@10": 0.9903846153846154
-      }
-     }
-    },
-    "aliases": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 14,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
-       "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
-       "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
-       "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
-       "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
-       "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.01674641148325359,
-      "totals": {
-       "confirm": 81,
-       "choose": 38,
-       "register": 0,
-       "wrong": 342
-      },
-      "per_photo": {
-       "confirm": 2.793103448275862,
-       "choose": 1.3103448275862069,
-       "register": 0.0,
-       "wrong": 11.793103448275861
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.10344827586207,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 57,
-       "correct": 48
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 46,
-      "cr_by_rank1_method": {
-       "llm": 75,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 292
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 12,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
-       "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
-       "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
-       "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.014354066985645933,
-      "totals": {
-       "confirm": 78,
-       "choose": 41,
-       "register": 0,
-       "wrong": 342
-      },
-      "per_photo": {
-       "confirm": 2.689655172413793,
-       "choose": 1.4137931034482758,
-       "register": 0.0,
-       "wrong": 11.793103448275861
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.206896551724139,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 53,
-       "correct": 46
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 46,
-      "cr_by_rank1_method": {
-       "llm": 71,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 334
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.9134615384615384,
-       "@3": 0.9903846153846154,
-       "@5": 1.0,
-       "@10": 1.0
-      },
-      "embedding_then_M3a": {
-       "@1": 0.9134615384615384,
-       "@3": 0.9807692307692307,
-       "@5": 0.9903846153846154,
-       "@10": 0.9903846153846154
-      }
-     }
-    },
-    "korean": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 14,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
-       "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
-       "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
-       "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
-       "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
-       "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.01674641148325359,
-      "totals": {
-       "confirm": 81,
-       "choose": 38,
-       "register": 0,
-       "wrong": 342
-      },
-      "per_photo": {
-       "confirm": 2.793103448275862,
-       "choose": 1.3103448275862069,
-       "register": 0.0,
-       "wrong": 11.793103448275861
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.10344827586207,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 57,
-       "correct": 48
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 46,
-      "cr_by_rank1_method": {
-       "llm": 75,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 292
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 12,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
-       "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
-       "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
-       "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.014354066985645933,
-      "totals": {
-       "confirm": 76,
-       "choose": 43,
-       "register": 0,
-       "wrong": 342
-      },
-      "per_photo": {
-       "confirm": 2.6206896551724137,
-       "choose": 1.4827586206896552,
-       "register": 0.0,
-       "wrong": 11.793103448275861
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.275862068965518,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 51,
-       "correct": 44
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 46,
-      "cr_by_rank1_method": {
-       "llm": 69,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 334
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.9134615384615384,
-       "@3": 0.9903846153846154,
-       "@5": 1.0,
-       "@10": 1.0
-      },
-      "embedding_then_M3a": {
-       "@1": 0.9134615384615384,
-       "@3": 0.9807692307692307,
-       "@5": 0.9903846153846154,
-       "@10": 0.9903846153846154
-      }
-     }
-    },
-    "brand_age": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 14,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
-       "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
-       "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
-       "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
-       "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
-       "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.01674641148325359,
-      "totals": {
-       "confirm": 81,
-       "choose": 36,
-       "register": 0,
-       "wrong": 344
-      },
-      "per_photo": {
-       "confirm": 2.793103448275862,
-       "choose": 1.2413793103448276,
-       "register": 0.0,
-       "wrong": 11.862068965517242
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.10344827586207,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 57,
-       "correct": 48
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 44,
-      "cr_by_rank1_method": {
-       "llm": 75,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 292
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 13,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
-       "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
-       "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
-       "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
-       "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.01555023923444976,
-      "totals": {
-       "confirm": 72,
-       "choose": 45,
-       "register": 0,
-       "wrong": 344
-      },
-      "per_photo": {
-       "confirm": 2.4827586206896552,
-       "choose": 1.5517241379310345,
-       "register": 0.0,
-       "wrong": 11.862068965517242
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.413793103448276,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 48,
-       "correct": 40
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 44,
-      "cr_by_rank1_method": {
-       "llm": 66,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 334
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.8942307692307693,
-       "@3": 0.9807692307692307,
-       "@5": 0.9807692307692307,
-       "@10": 0.9903846153846154
-      },
-      "embedding_then_M3a": {
-       "@1": 0.8942307692307693,
-       "@3": 0.9711538461538461,
-       "@5": 0.9711538461538461,
-       "@10": 0.9711538461538461
-      }
-     }
-    },
-    "all": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 14,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
-       "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
-       "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
-       "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
-       "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
-       "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.01674641148325359,
-      "totals": {
-       "confirm": 81,
-       "choose": 38,
-       "register": 0,
-       "wrong": 342
-      },
-      "per_photo": {
-       "confirm": 2.793103448275862,
-       "choose": 1.3103448275862069,
-       "register": 0.0,
-       "wrong": 11.793103448275861
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.10344827586207,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 57,
-       "correct": 48
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 46,
-      "cr_by_rank1_method": {
-       "llm": 75,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 292
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 479,
-      "correct": 375,
-      "top1": 0.7828810020876826,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 13,
-      "wrong_cr_names": [
-       "벤리악(Benriach) 10년 -> Benromach 10",
-       "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
-       "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
-       "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House",
-       "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
-       "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
-       "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
-       "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
-       "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
-       "벤로막12 -> Benromach 12 Cask Strength"
-      ],
-      "accept_err_rate": 0.01555023923444976,
-      "totals": {
-       "confirm": 78,
-       "choose": 41,
-       "register": 0,
-       "wrong": 342
-      },
-      "per_photo": {
-       "confirm": 2.689655172413793,
-       "choose": 1.4137931034482758,
-       "register": 0.0,
-       "wrong": 11.793103448275861
-      },
-      "owner_per_photo": 15.89655172413793,
-      "hard_per_photo": 13.206896551724139,
-      "cr_rule": {
-       "n": 25,
-       "correct": 20
-      },
-      "cr_llm": {
-       "n": 54,
-       "correct": 46
-      },
-      "known_register": 0,
-      "absent_wrong": 323,
-      "llm_targets": 461,
-      "from_register": 334,
-      "from_register_gold_in": 46,
-      "cr_by_rank1_method": {
-       "llm": 72,
-       "alias": 7
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 334
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.9134615384615384,
-       "@3": 0.9903846153846154,
-       "@5": 1.0,
-       "@10": 1.0
-      },
-      "embedding_then_M3a": {
-       "@1": 0.9134615384615384,
-       "@3": 0.9807692307692307,
-       "@5": 0.9903846153846154,
-       "@10": 0.9903846153846154
-      }
-     }
-    }
-   },
    "recall_known_not_confirmed": {
     "rules+M3a": {
      "@1": 0.875,
      "@3": 0.9423076923076923,
      "@5": 0.9423076923076923,
      "@10": 0.9423076923076923
+    }
+   },
+   "policies": {
+    "unmatched_k5": {
+     "canonical": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 38,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.3103448275862069,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 8,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.009569377990430622,
+       "totals": {
+        "confirm": 77,
+        "choose": 42,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.6551724137931036,
+        "choose": 1.4482758620689655,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.241379310344827,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 48,
+        "correct": 45
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 66,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9038461538461539,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9038461538461539,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       }
+      }
+     },
+     "aliases": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 38,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.3103448275862069,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 12,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.014354066985645933,
+       "totals": {
+        "confirm": 78,
+        "choose": 41,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.689655172413793,
+        "choose": 1.4137931034482758,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.206896551724139,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 53,
+        "correct": 46
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 71,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9134615384615384,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9134615384615384,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       }
+      }
+     },
+     "korean": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 38,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.3103448275862069,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 12,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.014354066985645933,
+       "totals": {
+        "confirm": 76,
+        "choose": 43,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.6206896551724137,
+        "choose": 1.4827586206896552,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.275862068965518,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 51,
+        "correct": 44
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 69,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9134615384615384,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9134615384615384,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       }
+      }
+     },
+     "brand_age": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 36,
+        "register": 0,
+        "wrong": 344
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.2413793103448276,
+        "register": 0.0,
+        "wrong": 11.862068965517242
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 44,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 13,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01555023923444976,
+       "totals": {
+        "confirm": 72,
+        "choose": 45,
+        "register": 0,
+        "wrong": 344
+       },
+       "per_photo": {
+        "confirm": 2.4827586206896552,
+        "choose": 1.5517241379310345,
+        "register": 0.0,
+        "wrong": 11.862068965517242
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.413793103448276,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 48,
+        "correct": 40
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 44,
+       "cr_by_rank1_method": {
+        "llm": 66,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8942307692307693,
+        "@3": 0.9711538461538461,
+        "@5": 0.9711538461538461,
+        "@10": 0.9711538461538461
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8942307692307693,
+        "@3": 0.9711538461538461,
+        "@5": 0.9711538461538461,
+        "@10": 0.9711538461538461
+       }
+      }
+     },
+     "all": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 38,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.3103448275862069,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 13,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01555023923444976,
+       "totals": {
+        "confirm": 78,
+        "choose": 41,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.689655172413793,
+        "choose": 1.4137931034482758,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.206896551724139,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 54,
+        "correct": 46
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 72,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9134615384615384,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9134615384615384,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       }
+      }
+     }
+    },
+    "unmatched_k5+rerank_only": {
+     "canonical": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 38,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.3103448275862069,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 8,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.009569377990430622,
+       "totals": {
+        "confirm": 77,
+        "choose": 42,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.6551724137931036,
+        "choose": 1.4482758620689655,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.241379310344827,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 48,
+        "correct": 45
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 66,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8942307692307693,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8942307692307693,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       }
+      }
+     },
+     "aliases": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 38,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.3103448275862069,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 12,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.014354066985645933,
+       "totals": {
+        "confirm": 78,
+        "choose": 41,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.689655172413793,
+        "choose": 1.4137931034482758,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.206896551724139,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 53,
+        "correct": 46
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 71,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9423076923076923,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9230769230769231,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       }
+      }
+     },
+     "korean": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 38,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.3103448275862069,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 12,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.014354066985645933,
+       "totals": {
+        "confirm": 76,
+        "choose": 43,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.6206896551724137,
+        "choose": 1.4827586206896552,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.275862068965518,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 51,
+        "correct": 44
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 69,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9326923076923077,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9230769230769231,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       }
+      }
+     },
+     "brand_age": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 36,
+        "register": 0,
+        "wrong": 344
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.2413793103448276,
+        "register": 0.0,
+        "wrong": 11.862068965517242
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 44,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 13,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01555023923444976,
+       "totals": {
+        "confirm": 72,
+        "choose": 45,
+        "register": 0,
+        "wrong": 344
+       },
+       "per_photo": {
+        "confirm": 2.4827586206896552,
+        "choose": 1.5517241379310345,
+        "register": 0.0,
+        "wrong": 11.862068965517242
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.413793103448276,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 48,
+        "correct": 40
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 44,
+       "cr_by_rank1_method": {
+        "llm": 66,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8846153846153846,
+        "@3": 0.9711538461538461,
+        "@5": 0.9711538461538461,
+        "@10": 0.9711538461538461
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8846153846153846,
+        "@3": 0.9711538461538461,
+        "@5": 0.9711538461538461,
+        "@10": 0.9711538461538461
+       }
+      }
+     },
+     "all": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 14,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "캠벨타운 싱글몰트 글렌스코샤12 -> Glen Scotia 12 Mermaid",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01674641148325359,
+       "totals": {
+        "confirm": 81,
+        "choose": 38,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.793103448275862,
+        "choose": 1.3103448275862069,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.10344827586207,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 57,
+        "correct": 48
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 75,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 292
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 479,
+       "correct": 375,
+       "top1": 0.7828810020876826,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 13,
+       "wrong_cr_names": [
+        "벤리악(Benriach) 10년 -> Benromach 10",
+        "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+        "우드포드 리저브(Woodford Reserve) 더블 X.O -> Woodford Reserve Double Oaked",
+        "카발란(Kavalan) 올로로소 셰리 -> Kavalan Solist Oloroso Sherry",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House",
+        "시그나토리 쿨일라13 -> Signatory Vintage Macduff 13",
+        "시그나토리 올트모어14 -> Signatory Vintage Speyside 14",
+        "시그나토리 아벨라워13 -> Signatory Vintage Macduff 13",
+        "시그나토리 싱글몰트 링크우드14 -> Signatory Vintage Speyside 14",
+        "시그나토리 싱글몰트 벤네비스13 -> Signatory Vintage Macduff 13",
+        "벤로막12 -> Benromach 12 Cask Strength"
+       ],
+       "accept_err_rate": 0.01555023923444976,
+       "totals": {
+        "confirm": 78,
+        "choose": 41,
+        "register": 0,
+        "wrong": 342
+       },
+       "per_photo": {
+        "confirm": 2.689655172413793,
+        "choose": 1.4137931034482758,
+        "register": 0.0,
+        "wrong": 11.793103448275861
+       },
+       "owner_per_photo": 15.89655172413793,
+       "hard_per_photo": 13.206896551724139,
+       "cr_rule": {
+        "n": 25,
+        "correct": 20
+       },
+       "cr_llm": {
+        "n": 54,
+        "correct": 46
+       },
+       "known_register": 0,
+       "absent_wrong": 323,
+       "llm_targets": 461,
+       "from_register": 334,
+       "from_register_gold_in": 46,
+       "cr_by_rank1_method": {
+        "llm": 72,
+        "alias": 7
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 334
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9326923076923077,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9134615384615384,
+        "@3": 0.9807692307692307,
+        "@5": 0.9903846153846154,
+        "@10": 0.9903846153846154
+       }
+      }
+     }
     }
    }
   },
@@ -13438,628 +14774,6 @@
     },
     "lines_with_embedding_candidate": 0
    },
-   "docsets": {
-    "canonical": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 129,
-       "choose": 64,
-       "register": 0,
-       "wrong": 25
-      },
-      "per_photo": {
-       "confirm": 4.448275862068965,
-       "choose": 2.206896551724138,
-       "register": 0.0,
-       "wrong": 0.8620689655172413
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.0689655172413794,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 68,
-       "correct": 67
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 51,
-      "cr_by_rank1_method": {
-       "llm": 107,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 43
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 122,
-       "choose": 71,
-       "register": 0,
-       "wrong": 25
-      },
-      "per_photo": {
-       "confirm": 4.206896551724138,
-       "choose": 2.4482758620689653,
-       "register": 0.0,
-       "wrong": 0.8620689655172413
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.310344827586207,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 61,
-       "correct": 60
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 51,
-      "cr_by_rank1_method": {
-       "llm": 100,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 71
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.8858695652173914,
-       "@3": 0.9456521739130435,
-       "@5": 0.967391304347826,
-       "@10": 0.9836956521739131
-      },
-      "embedding_then_M3a": {
-       "@1": 0.8858695652173914,
-       "@3": 0.9402173913043478,
-       "@5": 0.9565217391304348,
-       "@10": 0.9619565217391305
-      }
-     }
-    },
-    "aliases": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 129,
-       "choose": 67,
-       "register": 0,
-       "wrong": 22
-      },
-      "per_photo": {
-       "confirm": 4.448275862068965,
-       "choose": 2.310344827586207,
-       "register": 0.0,
-       "wrong": 0.7586206896551724
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.0689655172413794,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 68,
-       "correct": 67
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 54,
-      "cr_by_rank1_method": {
-       "llm": 107,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 43
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 129,
-       "choose": 67,
-       "register": 0,
-       "wrong": 22
-      },
-      "per_photo": {
-       "confirm": 4.448275862068965,
-       "choose": 2.310344827586207,
-       "register": 0.0,
-       "wrong": 0.7586206896551724
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.0689655172413794,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 68,
-       "correct": 67
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 54,
-      "cr_by_rank1_method": {
-       "llm": 107,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 71
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.9130434782608695,
-       "@3": 0.9728260869565217,
-       "@5": 0.9836956521739131,
-       "@10": 0.9945652173913043
-      },
-      "embedding_then_M3a": {
-       "@1": 0.9130434782608695,
-       "@3": 0.967391304347826,
-       "@5": 0.9728260869565217,
-       "@10": 0.9782608695652174
-      }
-     }
-    },
-    "korean": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 129,
-       "choose": 66,
-       "register": 0,
-       "wrong": 23
-      },
-      "per_photo": {
-       "confirm": 4.448275862068965,
-       "choose": 2.2758620689655173,
-       "register": 0.0,
-       "wrong": 0.7931034482758621
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.0689655172413794,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 68,
-       "correct": 67
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 53,
-      "cr_by_rank1_method": {
-       "llm": 107,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 43
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 129,
-       "choose": 66,
-       "register": 0,
-       "wrong": 23
-      },
-      "per_photo": {
-       "confirm": 4.448275862068965,
-       "choose": 2.2758620689655173,
-       "register": 0.0,
-       "wrong": 0.7931034482758621
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.0689655172413794,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 68,
-       "correct": 67
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 53,
-      "cr_by_rank1_method": {
-       "llm": 107,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 71
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.907608695652174,
-       "@3": 0.967391304347826,
-       "@5": 0.9782608695652174,
-       "@10": 0.9891304347826086
-      },
-      "embedding_then_M3a": {
-       "@1": 0.907608695652174,
-       "@3": 0.9619565217391305,
-       "@5": 0.967391304347826,
-       "@10": 0.9728260869565217
-      }
-     }
-    },
-    "brand_age": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 129,
-       "choose": 65,
-       "register": 0,
-       "wrong": 24
-      },
-      "per_photo": {
-       "confirm": 4.448275862068965,
-       "choose": 2.2413793103448274,
-       "register": 0.0,
-       "wrong": 0.8275862068965517
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.0689655172413794,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 68,
-       "correct": 67
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 52,
-      "cr_by_rank1_method": {
-       "llm": 107,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 43
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 126,
-       "choose": 68,
-       "register": 0,
-       "wrong": 24
-      },
-      "per_photo": {
-       "confirm": 4.344827586206897,
-       "choose": 2.3448275862068964,
-       "register": 0.0,
-       "wrong": 0.8275862068965517
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.1724137931034484,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 65,
-       "correct": 64
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 52,
-      "cr_by_rank1_method": {
-       "llm": 104,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 71
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.8804347826086957,
-       "@3": 0.9510869565217391,
-       "@5": 0.9728260869565217,
-       "@10": 0.9891304347826086
-      },
-      "embedding_then_M3a": {
-       "@1": 0.8804347826086957,
-       "@3": 0.9456521739130435,
-       "@5": 0.9619565217391305,
-       "@10": 0.967391304347826
-      }
-     }
-    },
-    "all": {
-     "M3a_then_embedding": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 129,
-       "choose": 67,
-       "register": 0,
-       "wrong": 22
-      },
-      "per_photo": {
-       "confirm": 4.448275862068965,
-       "choose": 2.310344827586207,
-       "register": 0.0,
-       "wrong": 0.7586206896551724
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.0689655172413794,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 68,
-       "correct": 67
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 54,
-      "cr_by_rank1_method": {
-       "llm": 107,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 43
-     },
-     "embedding_then_M3a": {
-      "lines": 836,
-      "photos": 29,
-      "known": 802,
-      "correct": 618,
-      "top1": 0.770573566084788,
-      "fm": 0,
-      "fm_rate": 0.0,
-      "fm_names": [],
-      "wrong_cr": 4,
-      "wrong_cr_names": [
-       "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
-       "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
-       "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
-       "Compass Box (컴파스 박스) -> Compass Box Orchard House"
-      ],
-      "accept_err_rate": 0.004784688995215311,
-      "totals": {
-       "confirm": 129,
-       "choose": 67,
-       "register": 0,
-       "wrong": 22
-      },
-      "per_photo": {
-       "confirm": 4.448275862068965,
-       "choose": 2.310344827586207,
-       "register": 0.0,
-       "wrong": 0.7586206896551724
-      },
-      "owner_per_photo": 7.517241379310345,
-      "hard_per_photo": 3.0689655172413794,
-      "cr_rule": {
-       "n": 47,
-       "correct": 44
-      },
-      "cr_llm": {
-       "n": 68,
-       "correct": 67
-      },
-      "known_register": 0,
-      "absent_wrong": 0,
-      "llm_targets": 218,
-      "from_register": 71,
-      "from_register_gold_in": 54,
-      "cr_by_rank1_method": {
-       "llm": 107,
-       "alias": 8
-      },
-      "cr_embedding": {
-       "n": 0,
-       "correct": 0
-      },
-      "lines_with_embedding_candidate": 71
-     },
-     "recall_known_not_confirmed": {
-      "M3a_then_embedding": {
-       "@1": 0.9184782608695652,
-       "@3": 0.9728260869565217,
-       "@5": 0.9836956521739131,
-       "@10": 0.9891304347826086
-      },
-      "embedding_then_M3a": {
-       "@1": 0.9184782608695652,
-       "@3": 0.967391304347826,
-       "@5": 0.9728260869565217,
-       "@10": 0.9782608695652174
-      }
-     }
-    }
-   },
    "recall_known_not_confirmed": {
     "rules+M3a": {
      "@1": 0.8206521739130435,
@@ -14067,16 +14781,1262 @@
      "@5": 0.875,
      "@10": 0.8804347826086957
     }
+   },
+   "policies": {
+    "unmatched_k5": {
+     "canonical": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 64,
+        "register": 0,
+        "wrong": 25
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.206896551724138,
+        "register": 0.0,
+        "wrong": 0.8620689655172413
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 51,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 122,
+        "choose": 71,
+        "register": 0,
+        "wrong": 25
+       },
+       "per_photo": {
+        "confirm": 4.206896551724138,
+        "choose": 2.4482758620689653,
+        "register": 0.0,
+        "wrong": 0.8620689655172413
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.310344827586207,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 61,
+        "correct": 60
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 51,
+       "cr_by_rank1_method": {
+        "llm": 100,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8858695652173914,
+        "@3": 0.9402173913043478,
+        "@5": 0.9565217391304348,
+        "@10": 0.9619565217391305
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8858695652173914,
+        "@3": 0.9402173913043478,
+        "@5": 0.9565217391304348,
+        "@10": 0.9619565217391305
+       }
+      }
+     },
+     "aliases": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 67,
+        "register": 0,
+        "wrong": 22
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.310344827586207,
+        "register": 0.0,
+        "wrong": 0.7586206896551724
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 54,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 67,
+        "register": 0,
+        "wrong": 22
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.310344827586207,
+        "register": 0.0,
+        "wrong": 0.7586206896551724
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 54,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9130434782608695,
+        "@3": 0.967391304347826,
+        "@5": 0.9728260869565217,
+        "@10": 0.9782608695652174
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9130434782608695,
+        "@3": 0.967391304347826,
+        "@5": 0.9728260869565217,
+        "@10": 0.9782608695652174
+       }
+      }
+     },
+     "korean": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 66,
+        "register": 0,
+        "wrong": 23
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.2758620689655173,
+        "register": 0.0,
+        "wrong": 0.7931034482758621
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 53,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 66,
+        "register": 0,
+        "wrong": 23
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.2758620689655173,
+        "register": 0.0,
+        "wrong": 0.7931034482758621
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 53,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.907608695652174,
+        "@3": 0.9619565217391305,
+        "@5": 0.967391304347826,
+        "@10": 0.9728260869565217
+       },
+       "embedding_then_M3a": {
+        "@1": 0.907608695652174,
+        "@3": 0.9619565217391305,
+        "@5": 0.967391304347826,
+        "@10": 0.9728260869565217
+       }
+      }
+     },
+     "brand_age": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 65,
+        "register": 0,
+        "wrong": 24
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.2413793103448274,
+        "register": 0.0,
+        "wrong": 0.8275862068965517
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 52,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 126,
+        "choose": 68,
+        "register": 0,
+        "wrong": 24
+       },
+       "per_photo": {
+        "confirm": 4.344827586206897,
+        "choose": 2.3448275862068964,
+        "register": 0.0,
+        "wrong": 0.8275862068965517
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.1724137931034484,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 65,
+        "correct": 64
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 52,
+       "cr_by_rank1_method": {
+        "llm": 104,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8804347826086957,
+        "@3": 0.9456521739130435,
+        "@5": 0.9619565217391305,
+        "@10": 0.967391304347826
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8804347826086957,
+        "@3": 0.9456521739130435,
+        "@5": 0.9619565217391305,
+        "@10": 0.967391304347826
+       }
+      }
+     },
+     "all": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 67,
+        "register": 0,
+        "wrong": 22
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.310344827586207,
+        "register": 0.0,
+        "wrong": 0.7586206896551724
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 54,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 67,
+        "register": 0,
+        "wrong": 22
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.310344827586207,
+        "register": 0.0,
+        "wrong": 0.7586206896551724
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 54,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9184782608695652,
+        "@3": 0.967391304347826,
+        "@5": 0.9728260869565217,
+        "@10": 0.9782608695652174
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9184782608695652,
+        "@3": 0.967391304347826,
+        "@5": 0.9728260869565217,
+        "@10": 0.9782608695652174
+       }
+      }
+     }
+    },
+    "unmatched_k5+rerank_only": {
+     "canonical": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 64,
+        "register": 0,
+        "wrong": 25
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.206896551724138,
+        "register": 0.0,
+        "wrong": 0.8620689655172413
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 51,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 122,
+        "choose": 71,
+        "register": 0,
+        "wrong": 25
+       },
+       "per_photo": {
+        "confirm": 4.206896551724138,
+        "choose": 2.4482758620689653,
+        "register": 0.0,
+        "wrong": 0.8620689655172413
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.310344827586207,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 61,
+        "correct": 60
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 51,
+       "cr_by_rank1_method": {
+        "llm": 100,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.8913043478260869,
+        "@3": 0.9456521739130435,
+        "@5": 0.9619565217391305,
+        "@10": 0.9619565217391305
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8804347826086957,
+        "@3": 0.9402173913043478,
+        "@5": 0.9565217391304348,
+        "@10": 0.9619565217391305
+       }
+      }
+     },
+     "aliases": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 67,
+        "register": 0,
+        "wrong": 22
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.310344827586207,
+        "register": 0.0,
+        "wrong": 0.7586206896551724
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 54,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 67,
+        "register": 0,
+        "wrong": 22
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.310344827586207,
+        "register": 0.0,
+        "wrong": 0.7586206896551724
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 54,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9402173913043478,
+        "@3": 0.9782608695652174,
+        "@5": 0.9782608695652174,
+        "@10": 0.9782608695652174
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9184782608695652,
+        "@3": 0.967391304347826,
+        "@5": 0.9728260869565217,
+        "@10": 0.9782608695652174
+       }
+      }
+     },
+     "korean": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 66,
+        "register": 0,
+        "wrong": 23
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.2758620689655173,
+        "register": 0.0,
+        "wrong": 0.7931034482758621
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 53,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 66,
+        "register": 0,
+        "wrong": 23
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.2758620689655173,
+        "register": 0.0,
+        "wrong": 0.7931034482758621
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 53,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9347826086956522,
+        "@3": 0.9728260869565217,
+        "@5": 0.9728260869565217,
+        "@10": 0.9728260869565217
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9130434782608695,
+        "@3": 0.9619565217391305,
+        "@5": 0.967391304347826,
+        "@10": 0.9728260869565217
+       }
+      }
+     },
+     "brand_age": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 65,
+        "register": 0,
+        "wrong": 24
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.2413793103448274,
+        "register": 0.0,
+        "wrong": 0.8275862068965517
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 52,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 126,
+        "choose": 68,
+        "register": 0,
+        "wrong": 24
+       },
+       "per_photo": {
+        "confirm": 4.344827586206897,
+        "choose": 2.3448275862068964,
+        "register": 0.0,
+        "wrong": 0.8275862068965517
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.1724137931034484,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 65,
+        "correct": 64
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 52,
+       "cr_by_rank1_method": {
+        "llm": 104,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.907608695652174,
+        "@3": 0.9510869565217391,
+        "@5": 0.967391304347826,
+        "@10": 0.967391304347826
+       },
+       "embedding_then_M3a": {
+        "@1": 0.8695652173913043,
+        "@3": 0.9402173913043478,
+        "@5": 0.9619565217391305,
+        "@10": 0.967391304347826
+       }
+      }
+     },
+     "all": {
+      "M3a_then_embedding": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 67,
+        "register": 0,
+        "wrong": 22
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.310344827586207,
+        "register": 0.0,
+        "wrong": 0.7586206896551724
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 54,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 43
+      },
+      "embedding_then_M3a": {
+       "lines": 836,
+       "photos": 29,
+       "known": 802,
+       "correct": 618,
+       "top1": 0.770573566084788,
+       "fm": 0,
+       "fm_rate": 0.0,
+       "fm_names": [],
+       "wrong_cr": 4,
+       "wrong_cr_names": [
+        "벤로막(Benromach) 싱글 캐스크 -> Benromach 12 Cask Strength",
+        "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+        "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+        "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+       ],
+       "accept_err_rate": 0.004784688995215311,
+       "totals": {
+        "confirm": 129,
+        "choose": 67,
+        "register": 0,
+        "wrong": 22
+       },
+       "per_photo": {
+        "confirm": 4.448275862068965,
+        "choose": 2.310344827586207,
+        "register": 0.0,
+        "wrong": 0.7586206896551724
+       },
+       "owner_per_photo": 7.517241379310345,
+       "hard_per_photo": 3.0689655172413794,
+       "cr_rule": {
+        "n": 47,
+        "correct": 44
+       },
+       "cr_llm": {
+        "n": 68,
+        "correct": 67
+       },
+       "known_register": 0,
+       "absent_wrong": 0,
+       "llm_targets": 218,
+       "from_register": 71,
+       "from_register_gold_in": 54,
+       "cr_by_rank1_method": {
+        "llm": 107,
+        "alias": 8
+       },
+       "cr_embedding": {
+        "n": 0,
+        "correct": 0
+       },
+       "lines_with_embedding_candidate": 71
+      },
+      "recall_known_not_confirmed": {
+       "M3a_then_embedding": {
+        "@1": 0.9510869565217391,
+        "@3": 0.9782608695652174,
+        "@5": 0.9782608695652174,
+        "@10": 0.9782608695652174
+       },
+       "embedding_then_M3a": {
+        "@1": 0.9239130434782609,
+        "@3": 0.967391304347826,
+        "@5": 0.9728260869565217,
+        "@10": 0.9782608695652174
+       }
+      }
+     }
+    }
    }
   }
  },
  "latency_ms_per_photo": {
   "photos": 29,
   "lines_mean": 28.82758620689655,
-  "mean": 185.01,
-  "p50": 154.07,
-  "p95": 386.38,
-  "max": 408.77,
+  "mean": 200.41,
+  "p50": 195.42,
+  "p95": 409.96,
+  "max": 456.0,
   "docset": "all",
   "catalog": "service"
  },
@@ -14103,9 +16063,9 @@
   "eval/labels_heldout_v1_1.json": "047bf7d6f7274552f0dce0a4922ce7a72fa4282459d6cf1f6bbfb5271082c986",
   "eval/labels_v1_1.json": "a34249ebb0528371d23b5c18d3f9ca306a31646fe2a7a447cf4807a389b193cf"
  },
- "repo_head": "860540077c2a878872be7cbd968ab33b6979cfe0",
+ "repo_head": "bb526f89170d38895e5c8dd7cf9e4c1df0f16f9e",
  "provenance": {
-  "commit": "860540077c2a878872be7cbd968ab33b6979cfe0",
+  "commit": "bb526f89170d38895e5c8dd7cf9e4c1df0f16f9e",
   "uncommitted_changes": [],
   "checked_paths": [
    "ai/eval",
@@ -14115,17 +16075,31 @@
    "backend/app/adapters/matching_llm.py"
   ],
   "harness_sha256": {
-   "ai/eval/p24_embedding_compare.py": "f363e5a23cc2d881ff97c731fb5b1365a97ece62632ab6e994f4db3caa5cb80f",
+   "ai/eval/p24_embedding_compare.py": "f7d1d9689dcf677b050f713973ea5a82d72028c879115372a8aea43cecb5bd42",
    "ai/eval/i3_match_eval.py": "ae53dadd542691b921d5868f01ca5772ea82a968fbd81a7055663966208b8a0c"
+  },
+  "model": {
+   "repo": "intfloat/multilingual-e5-small",
+   "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+   "files": {
+    "onnx/model.onnx": {
+     "sha256": "ca456c06b3a9505ddfd9131408916dd79290368331e7d76bb621f1cba6bc8665",
+     "bytes": 470268510
+    },
+    "tokenizer.json": {
+     "sha256": "0b44a9d7b51c3c62626640cda0e2c2f70fdacdc25bbbd68038369d14ebdf4c39",
+     "bytes": 17082730
+    }
+   }
   }
  },
  "photos": 32,
  "lines": 836,
- "load_seconds": 1.624,
+ "load_seconds": 2.321,
  "memory_mb": {
-  "rss_before_model": 27.92578125,
-  "model_load_delta": 837.5,
-  "rss_after_run": 994.71484375,
-  "peak_rss": 1175.4921875
+  "rss_before_model": 28.1484375,
+  "model_load_delta": 829.9,
+  "rss_after_run": 984.6015625,
+  "peak_rss": 1168.11328125
  }
 }
