@@ -479,3 +479,117 @@ def test_percentile_and_parse_args():
     assert p30.percentile([5, 1, 3, 2, 4], 0.5) == 3 and p30.percentile(list(range(1, 21)), 0.95) == 19
     with pytest.raises(SystemExit):
         p30.parse_args(["--out", "x", "--runs", "1", "1"])
+
+
+@pytest.mark.parametrize("runs", [["0"], ["4"], ["1", "4"], ["-1"]])
+def test_runs_outside_1_to_3_are_refused(runs):
+    with pytest.raises(SystemExit):
+        p30.parse_args(["--out", "x", "--runs", *runs])
+    assert p30.parse_args(["--out", "x", "--runs", "3", "1"]).runs == [3, 1]
+
+
+@pytest.mark.parametrize("key", ["config", "photos", "frozen_code"])
+def test_check_validates_the_existing_manifest(setup, capsys, key):
+    run(setup, "--runs", "1")
+    capsys.readouterr()
+    code, gemini, clova = run(setup, "--check")
+    assert code == p30.EXIT_OK and "manifest: 1 earlier command(s)" in capsys.readouterr().out
+    m = manifest(setup.out)
+    if key == "config":
+        m["config"]["thinking_level"] = "high"
+    elif key == "photos":
+        m["photos"]["901_a_01.png"]["sha256"] = "0" * 64
+    else:
+        m["frozen_code"]["backend/app/extraction/hybrid.py"] = "0" * 64
+    (setup.out / "manifest.json").write_text(json.dumps(m), encoding="utf-8")
+    before = (setup.out / "manifest.json").read_bytes()
+    code, gemini, clova = run(setup, "--check")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == [] and clova.requests == []
+    assert f"'{key}' differs" in capsys.readouterr().out
+    assert (setup.out / "manifest.json").read_bytes() == before  # --check writes nothing
+
+
+@pytest.mark.parametrize("leftover", ["record", "error_file", "other_file"])
+@pytest.mark.parametrize("check", [False, True])
+def test_files_without_a_manifest_stop_instead_of_a_new_manifest(setup, capsys, leftover, check):
+    run(setup, "--runs", "1", gemini=FakeGemini([ApiError(400, "bad request")]))
+    assert (setup.out / "901_a_01_r1.error.json").exists()
+    (setup.out / "manifest.json").unlink()
+    if leftover != "record":
+        for f in setup.out.glob("*_r1.json"):
+            f.unlink()
+    if leftover == "other_file":
+        (setup.out / "901_a_01_r1.error.json").unlink()
+    left = sorted(f.name for f in setup.out.iterdir())
+    capsys.readouterr()
+    code, gemini, clova = run(setup, *(["--check"] if check else ["--runs", "1"]))
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == [] and clova.requests == []
+    assert "has no manifest.json but is not empty" in capsys.readouterr().out
+    assert sorted(f.name for f in setup.out.iterdir()) == left  # no new manifest, nothing written
+
+
+def test_an_empty_existing_run_dir_starts_a_new_manifest(setup):
+    setup.out.mkdir()
+    code, _, _ = run(setup, "--check")
+    assert code == p30.EXIT_OK and list(setup.out.iterdir()) == []
+    code, _, _ = run(setup, "--runs", "1")
+    assert code == p30.EXIT_OK and len(manifest(setup.out)["commands"]) == 1
+    assert manifest(setup.out)["frozen_matching"] == p30.FROZEN_MATCHING
+
+
+def raw_pins(tmp_path: Path, data: bytes) -> dict[str, str]:
+    (tmp_path / "frozen.json").write_bytes(data)
+    return {"frozen.json": sha(b'{\n  "a": 1\n}\n')}
+
+
+def test_raw_byte_check_names_crlf_changed_and_missing_files(tmp_path):
+    p30.check_raw_files(tmp_path, raw_pins(tmp_path, b'{\n  "a": 1\n}\n'), "x")  # LF: the frozen bytes
+    with pytest.raises(p30.Stop, match=r"CRLF line ends.*frozen\.json.*core\.autocrlf false"):
+        p30.check_raw_files(tmp_path, raw_pins(tmp_path, b'{\r\n  "a": 1\r\n}\r\n'), "x")
+    with pytest.raises(p30.Stop, match=r"SHA-256 differs from the frozen value: frozen\.json"):
+        p30.check_raw_files(tmp_path, raw_pins(tmp_path, b'{\r\n  "a": 2\r\n}\r\n'), "x")
+    with pytest.raises(p30.Stop, match=r"missing .*: gone\.json"):
+        p30.check_raw_files(tmp_path, {"gone.json": "0" * 64}, "x")
+
+
+def test_crlf_label_file_stops_check_before_any_call(setup, capsys, monkeypatch):
+    crlf = setup.tmp / "labels_crlf.json"  # a made-up label file, checked out with CRLF
+    crlf.write_bytes(b'{\r\n  "photos": []\r\n}\r\n')
+    monkeypatch.setitem(p30.FROZEN_RAW, str(crlf), sha(b'{\n  "photos": []\n}\n'))  # absolute: repo / path = path
+    for extra in (["--check"], ["--runs", "1"]):
+        code, gemini, clova = run(setup, *extra)
+        assert code == p30.EXIT_PREFLIGHT and gemini.requests == [] and clova.requests == []
+        printed = capsys.readouterr().out
+        assert "frozen label/gold/hash files" in printed and "CRLF line ends" in printed
+    assert not setup.out.exists()
+
+
+@pytest.mark.parametrize("change", ["changed", "missing"])
+def test_matching_component_change_stops_check(setup, capsys, monkeypatch, change):
+    if change == "changed":
+        monkeypatch.setitem(p30.FROZEN_MATCHING, "backend/app/matching/staged.py", "0" * 64)
+    else:
+        monkeypatch.setitem(p30.FROZEN_MATCHING, "backend/app/matching/not_here.py", "0" * 64)
+    code, gemini, _ = run(setup, "--check")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == []
+    printed = capsys.readouterr().out
+    assert "frozen matching files (i3_eval_freeze.md 4.5)" in printed
+    assert ("staged.py" if change == "changed" else "missing (the run needs them") in printed
+
+
+def test_frozen_pins_agree_with_the_scripts_and_the_checkout():
+    import i3_match_eval
+
+    assert p30.FROZEN_RAW == {"eval/labels_i3_v1.json": score.LABEL_SETS["i3"]["sha256"],
+                              "eval/match_gold_i3_v1.json": i3_match_eval.I3_GOLD_SHA256,
+                              "ai/eval/i3_photo_sha256.json": p30.PHOTO_HASHES_SHA256}
+    # hashes of the checkout's files only (their content is not read by the test)
+    p30.check_raw_files(p30.REPO_ROOT, p30.FROZEN_RAW, "raw")
+    p30.check_raw_files(p30.REPO_ROOT, p30.FROZEN_MATCHING, "matching")
+    rules = {}
+    for line in (p30.REPO_ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines():
+        if line.strip() and not line.startswith("#"):
+            path, *attrs = line.split()
+            rules[path] = attrs
+    assert {path for path, attrs in rules.items() if "eol=lf" in attrs} == set(p30.FROZEN_RAW)
+    assert all("text" in rules[path] for path in p30.FROZEN_RAW)

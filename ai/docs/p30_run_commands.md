@@ -7,7 +7,7 @@
 ## 0. 무엇을 돌리나
 
 - **추출기:** `ai/eval/p30_extract.py`. 배포 서버 코드 `backend/app/extraction/hybrid.py`의 `extract_menu_hybrid`를 **고치지 않고 그대로 불러** 33장 × r1–r3을 돌린다. 모델 `gemini-3.5-flash-lite`, thinking `medium`, 프롬프트 `hybrid-v1`(`hybrid_prompt_v1.md`, SHA-256 `b73f15d2…1ac50`), 재시도는 서버 정책(`call_with_retries`: 6번 시도, 시간 초과·HTTP 429/5xx에 5–60초 간격, 요청 300초·전체 330초). 모델·thinking은 `.env`의 `EXTRACTION_*`를 읽지 않고 동결 값으로 고정한다.
-- **API 호출 전에 멈추는 경우:** 추출 코드 파일 9개의 SHA-256이 동결 값과 다를 때(`5d49c8a` 기준, `clova.py`만 `1e149d4`: 사업자등록증용 `deadline_s` 경로만 추가되어 하이브리드 경로는 같음), 채점 코드 `ai/eval/score.py`(`15b1eff`: `5d49c8a` 로직 + `--set i3` 라벨 세트만 추가)·`ai/eval/e2e_match.py`(`5d49c8a`)의 SHA-256이 동결 값과 다를 때, 해시 파일 `ai/eval/i3_photo_sha256.json` 자체의 SHA-256이 동결 값(`305c4f0e…`, `15b1eff`)과 다를 때(`--hashes`로 다른 파일을 줘도 같다), 사진 33장 중 하나라도 해시 파일과 다르거나 빠졌을 때, `photo_map.json`이 해시 파일과 다를 때, OCR 캐시가 다른 사진으로 만든 것일 때. 이때 종료 코드는 2이고 API 호출은 0이다.
+- **API 호출 전에 멈추는 경우:** 추출 코드 파일 9개의 SHA-256이 동결 값과 다를 때(`5d49c8a` 기준, `clova.py`만 `1e149d4`: 사업자등록증용 `deadline_s` 경로만 추가되어 하이브리드 경로는 같음), 채점 코드 `ai/eval/score.py`(`15b1eff`: `5d49c8a` 로직 + `--set i3` 라벨 세트만 추가)·`ai/eval/e2e_match.py`(`5d49c8a`)의 SHA-256이 동결 값과 다를 때, 해시 파일 `ai/eval/i3_photo_sha256.json` 자체의 SHA-256이 동결 값(`305c4f0e…`, `15b1eff`)과 다를 때(`--hashes`로 다른 파일을 줘도 같다), 사진 33장 중 하나라도 해시 파일과 다르거나 빠졌을 때, `photo_map.json`이 해시 파일과 다를 때, OCR 캐시가 다른 사진으로 만든 것일 때, 라벨·2층 정답·해시 파일(`eval/labels_i3_v1.json`, `eval/match_gold_i3_v1.json`, `ai/eval/i3_photo_sha256.json`, `FROZEN_RAW`)의 **원본 바이트** SHA-256이 동결 값과 다를 때(CRLF 줄 끝만 다르면 그렇다고 알려 준다, 1절), 동결 4.5의 매칭 구성 요소(`FROZEN_MATCHING`: `staged.py`, `vocab_ko_en.json`, `catalog_v2_service.json`, `llm_layer.py`, 프롬프트 2개, `matching_llm.py`, `gemini_matching_llm.py`, `i3_match_eval.py`, `match_eval.py`)가 빠졌거나 원본 바이트 SHA-256이 4.5 값과 다를 때, 실행 폴더의 `manifest.json`이 이 명령의 구성·입력과 다를 때, `manifest.json` 없이 기록·`.error.json` 등 파일이 남은 폴더일 때. 이 점검은 `--check`에서도 똑같이 한다. 이때 종료 코드는 2이고 API 호출은 0이다.
 - **키:** 레포 루트 `.env`의 `GEMINI_API_KEY`, `CLOVA_OCR_INVOKE_URL`, `CLOVA_OCR_SECRET`만 읽는다. 화면·기록·manifest에 쓰지 않고, 오류 문구에 들어 있으면 `***`로 지운 뒤 저장한다.
 
 ### CLOVA는 사진당 한 번 (r1–r3 공유)
@@ -25,7 +25,7 @@
 - `<실행 폴더>/<파일 stem>_r<k>.json`, 모델 출력은 `output` = `{"items": [{raw_name, price_krw, pour_ml, unit, source_lines}]}` (P47 `hybrid_final_v1`과 같은 키). 그 밖에 `run`, `photo_id`, `photo_sha256`, `model`, `thinking_level`, `prompt_version`, `prompt_sha256`, `clova{latency_ms, from_cache, cache_sha256, image_check}`, `gemini{latency_ms, attempts}`, 토큰 수, `ocr_lines`, 서버가 만든 `flow_items`·`item_sources`.
 - 서버가 받아들이지 않는 응답(JSON·스키마·변환 검증 실패, `InvalidModelOutputError`): 서버에서는 그 사진 추출이 실패하므로 `output: null`(빈 출력으로 채점)로 쓰고 응답은 `raw_text`·`parsed_output`에 남긴다. 모델이 답은 했으므로 다시 돌리지 않는다.
 - 서버 재시도 뒤에도 답이 없음(`ModelCallError`): `<stem>_r<k>.error.json`. `score.py`는 이 파일을 읽지 않는다. 다음 명령이 그 사진만 다시 보낸다(동결 3장: 응답이 없을 때만 재시도).
-- `manifest.json`: 구성(모델·thinking·프롬프트 버전·SHA-256·재시도 정책), 동결 파일 해시, 사진·준비 이미지·OCR 전송 이미지·OCR 캐시 해시, 명령마다 커밋·브랜치·미커밋 변경·호출 수·멈춘 이유. 구성이나 입력이 manifest와 다르면 멈춘다(다른 구성은 새 `--out`).
+- `manifest.json`: 구성(모델·thinking·프롬프트 버전·SHA-256·재시도 정책), 동결 파일 해시(추출·채점·라벨/정답/해시 파일·매칭), 사진·준비 이미지·OCR 전송 이미지·OCR 캐시 해시, 명령마다 커밋·브랜치·미커밋 변경·호출 수·멈춘 이유. 구성이나 입력이 manifest와 다르면 멈춘다(`--check`도 같은 기준, 다른 구성은 새 `--out`). 새 manifest는 **비어 있거나 없는 폴더**에서만 만든다. manifest 없이 `*_r<k>.json`·`.error.json`(또는 다른 파일)이 있으면 그 기록이 어떤 구성으로 만들어졌는지 알 수 없으므로 멈춘다. 원래 `manifest.json`을 되살리거나 새 빈 `--out`을 쓴다.
 - `summary.json`: 회차별 기록 수, 빠진 사진, 서버가 거부한 출력, 재시도 수, 사진당 지연(CLOVA·Gemini 따로 평균·p50·p95·최댓값).
 
 ## 1. 준비 (한 번)
@@ -38,6 +38,36 @@ python -m venv .venv-ai
 .venv-ai\Scripts\python -m pip install -r ai/requirements.txt
 ```
 
+**줄 끝(CRLF) 맞추기.** `score.py`(라벨)와 `i3_match_eval.py`(2층 정답, 결과 JSON의 `catalog_file_sha256`·`llm_layer_sha256`)는 파일의 **원본 바이트** SHA-256을 동결 값과 비교한다. Windows에서 `core.autocrlf=true`로 받은 파일은 줄 끝이 CRLF라 내용이 같아도 해시가 달라진다. `.gitattributes`가 라벨·정답·해시 파일 3개를 항상 LF로 받게 하지만, 이미 CRLF로 받아 둔 파일은 다시 받아야 바뀐다. 한 번만 아래를 돌린다(PowerShell, 레포 루트). 이 파일들에 커밋하지 않은 변경이 있으면 지워지므로, 동결 파일은 고치지 않은 상태여야 한다.
+
+```
+git config core.autocrlf false
+$frozen = @(
+  "eval/labels_i3_v1.json", "eval/match_gold_i3_v1.json", "ai/eval/i3_photo_sha256.json",
+  "backend/app/matching/staged.py", "backend/app/matching/vocab_ko_en.json", "ai/catalog/catalog_v2_service.json",
+  "backend/app/matching/llm_layer.py", "backend/app/matching/prompts/translate_prompt_v3.md",
+  "backend/app/matching/prompts/pick_prompt_v1.md", "backend/app/adapters/matching_llm.py",
+  "backend/app/adapters/gemini_matching_llm.py", "ai/eval/i3_match_eval.py", "ai/eval/match_eval.py"
+)
+Remove-Item $frozen
+git checkout -- $frozen
+git status --short -- $frozen
+```
+
+macOS·Linux(또는 Git Bash)에서는 같은 목록으로:
+
+```
+git config core.autocrlf false
+frozen="eval/labels_i3_v1.json eval/match_gold_i3_v1.json ai/eval/i3_photo_sha256.json backend/app/matching/staged.py backend/app/matching/vocab_ko_en.json ai/catalog/catalog_v2_service.json backend/app/matching/llm_layer.py backend/app/matching/prompts/translate_prompt_v3.md backend/app/matching/prompts/pick_prompt_v1.md backend/app/adapters/matching_llm.py backend/app/adapters/gemini_matching_llm.py ai/eval/i3_match_eval.py ai/eval/match_eval.py"
+rm $frozen
+git checkout -- $frozen
+git status --short -- $frozen
+```
+
+- `git status`에 아무것도 나오지 않으면 된다. 파일을 지운 뒤 다시 받는 것은, 이미 받아 둔 파일은 설정을 바꿔도 git이 다시 쓰지 않기 때문이다. `core.autocrlf false`에서는 git이 커밋된 바이트(LF) 그대로 쓴다.
+- 목록은 `p30_extract.py`의 `FROZEN_RAW`(라벨·정답·해시 파일, `.gitattributes`에 `eol=lf`)와 `FROZEN_MATCHING`(동결 4.5 매칭 구성 요소)이다. 추출 코드(`FROZEN_CODE`)와 채점 코드(`FROZEN_EVAL`)는 CRLF를 LF로 읽어 비교하므로 다시 받지 않아도 된다.
+- 다음 절의 `--check`가 이것을 확인한다. 줄 끝만 다르면 `CRLF line ends (Windows core.autocrlf=true ...)`로 멈추고, 그때는 위 명령을 다시 돌린다.
+
 - `.env`(레포 루트)에 `GEMINI_API_KEY`, `CLOVA_OCR_INVOKE_URL`, `CLOVA_OCR_SECRET`이 있어야 한다. `BOTTLEMAP_DATA_DIR`이 없으면 `../bottlemap-p14/data`를 쓴다(다른 평가 스크립트와 같음). 사진은 `<data>/eval_photos_i3/`, `photo_map.json`도 거기.
 - 아래 명령은 모두 `.venv-ai\Scripts\python`으로 돌린다. 여기서는 `python`으로 적는다.
 
@@ -49,7 +79,7 @@ python -m venv .venv-ai
 python ai/eval/p30_extract.py --out ai/runs/2026-10-30_p30/hybrid_i3 --check
 ```
 
-기대 출력: `photos verified: 33`, `OCR caches: 33/33 present`(캐시가 일부 없으면 `CLOVA calls needed: N`), `r1: 0 done, 33 to run` × 3. `STOP:`이 나오면 원인을 고치기 전에는 아래로 가지 않는다.
+기대 출력: `photos verified: 33`, `OCR caches: 33/33 present`(캐시가 일부 없으면 `CLOVA calls needed: N`), `r1: 0 done, 33 to run` × 3, `manifest: none yet (new, empty run dir)`(이어서 할 때는 `manifest: N earlier command(s), configuration and inputs match`). `STOP:`이 나오면 원인을 고치기 전에는 아래로 가지 않는다. `--check`는 실제 명령과 같은 점검(동결 파일·원본 바이트·매칭 파일·사진·OCR 캐시·manifest)을 하고 API는 부르지 않는다.
 
 ### 2.1 추출 (회차별 명령 하나씩)
 
@@ -61,6 +91,7 @@ python ai/eval/p30_extract.py --out ai/runs/2026-10-30_p30/hybrid_i3 --runs 3 --
 
 - `--max-calls`: 명령 하나의 Gemini 호출 상한(서버 재시도 포함). 회차당 33회 + 재시도 여유 12. 닿으면 그 사진을 쓰지 않고 멈춘다. CLOVA 상한은 `--max-clova-calls`(기본 33)이고 서버 `call_ocr`의 재시도(최대 3번)도 HTTP 요청마다 하나씩 센다. 재시도 중에 닿으면 그 사진을 쓰지 않고 멈춘다.
 - 실행 폴더 이름은 첫날 날짜로 고정한다. 다른 날 이어서 돌려도 같은 `--out`을 쓴다.
+- `--runs`는 1, 2, 3만 받는다(동결 r1–r3). 다른 숫자는 인자 오류로 바로 끝난다.
 - 사진 사이 간격 4.5초(`--min-interval`, 분당 한도용). 구성과는 무관하다.
 
 **종료 코드와 이어서 하기**
@@ -68,7 +99,7 @@ python ai/eval/p30_extract.py --out ai/runs/2026-10-30_p30/hybrid_i3 --runs 3 --
 | 코드 | 뜻 | 할 일 |
 |---|---|---|
 | 0 | 그 회차 33장 기록 완료 | 다음 명령 |
-| 2 | 실행 전 점검 실패(해시·사진·캐시·키·manifest 불일치). API 호출 0 | 원인 수정 후 같은 명령 |
+| 2 | 실행 전 점검 실패(해시·CRLF·사진·캐시·키·manifest 불일치, manifest 없는 기록 폴더). API 호출 0 | 원인 수정 후 같은 명령 |
 | 3 | 깨끗하게 멈춤: 호출 상한, 할당량(일일 한도 429는 즉시, 분당 429는 서버 재시도 뒤), CLOVA 실패, 답 없음 `.error.json`, Ctrl+C | **같은 명령을 그대로 다시** 돌린다. 이미 있는 기록은 건너뛰고 빠진 사진만 보낸다. 일일 한도면 한도가 풀린 뒤(태평양 자정 = 한국 16:00, 10/30 기준 PDT) |
 
 - r1이 끝나기 전에 r2를 시작하지 않는다(동결 순서). `.error.json`이 남은 사진은 같은 회차 명령을 다시 돌려 채운다. 계속 답이 없으면 그 사진은 빈 출력으로 채점되므로 결과 보고에 적는다.
@@ -93,6 +124,7 @@ python ai/eval/score.py --set i3 ai/runs/2026-10-30_p30/hybrid_i3
 동결 4.2 "종단 입력", 4.3 "반복"(추출 r*i*에 LLM 회차 r*i*를 짝지음, 3쌍). C2 rules+LLM(서버 M3a, M3b 끔), 카탈로그 `full`·`asis` 둘 다. 결과 JSON의 `rules`가 같은 입력의 rules 결과이므로 rules만 따로 돌리지 않는다.
 
 - 시작 전에 동결 4.3 "실행 전 점검"(dev 5곳 E8 숫자 재현, Gemini 호출 0)을 병합된 `main`에서 다시 통과해야 한다. 라벨 입력 P10 실행(동결 4.3 명령 예)은 이 문서 범위가 아니다.
+- 바로 전에 `python ai/eval/p30_extract.py --out ai/runs/2026-10-30_p30/hybrid_i3 --check`를 다시 돌린다. 동결 4.5의 매칭 구성 요소(`FROZEN_MATCHING`)와 2층 정답이 원본 바이트로 4.5 값과 같은지, 추출 기록의 manifest가 맞는지 확인한다. `STOP: frozen matching files`가 나오면(파일이 빠졌거나 바뀜, CRLF) 매칭을 돌리지 않는다. 이 점검은 4.5 SHA-256(파일 바이트 = 동결 커밋의 blob 내용)으로 하고, 커밋 해시로는 하지 않는다(4장 "파일 SHA-256으로 동결").
 - 응답 캐시는 **(카탈로그, 회차)마다 새 빈 폴더**다. 회차끼리 공유하지 않는다(동결 4.3). 동결 문서 예의 `cache_e2e_r1`은 `full` 하나만 보인 것이고, 두 카탈로그가 캐시를 나눠 쓰면 같은 요청이 캐시에서 돌아와 두 조건이 독립이 아니게 되므로 카탈로그별로 나눈다(판단).
 - 키는 `i3_match_eval.py`가 `os.environ`에서 읽는다. 종단 입력은 `e2e_match.load_run`이 레포 `.env`를 불러오므로 따로 설정할 것은 없다. `GEMINI_API_KEY is not set`이 나오면 그 창에서 `.env`를 불러온 뒤 다시 돌린다.
 
@@ -105,7 +137,7 @@ python ai/eval/i3_match_eval.py --set i3 --catalog full --extraction ai/runs/202
 python ai/eval/i3_match_eval.py --set i3 --catalog asis --extraction ai/runs/2026-10-30_p30/hybrid_i3 --run 3 --llm --cache ai/runs/2026-10-30_p10/cache_e2e_asis_r3 --json ai/runs/2026-10-30_p10/c2_asis_e2e_r3.json
 ```
 
-- 실행마다 결과 JSON의 `catalog_file_sha256`, `catalog_digest`, `gold_sha256`, `translate_prompt_sha256`, `llm_layer_sha256`를 동결 4.5 표와 비교한다(`asis`·`full` digest는 4.5의 C1·C2 값).
+- 실행마다 결과 JSON의 `catalog_file_sha256`, `catalog_digest`, `gold_sha256`, `translate_prompt_sha256`, `llm_layer_sha256`를 동결 4.5 표와 비교한다(`asis`·`full` digest는 4.5의 C1·C2 값). 파일 해시는 `--check`가 이미 확인했으므로, 여기서는 하네스가 만든 `catalog_digest`(파일 없음)가 핵심이다.
 - 할당량 오류나 상한(`--max-calls` 기본 250)에서 멈추면 결과가 미완료로 표시된다. **같은 명령(같은 `--cache`)을 다시** 돌리면 빠진 요청만 보낸다.
 - 종단 숫자는 판정에 쓰지 않고 함께 보고한다. 종단 Top-1은 `top1_missed_as_fail`(놓친 정답 줄을 실패로 셈)을 쓴다(동결 4.4).
 

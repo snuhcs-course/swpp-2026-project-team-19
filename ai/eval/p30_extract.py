@@ -12,8 +12,10 @@ thinking medium, with the server's retry policy (`app.extraction.gemini.call_wit
 6 attempts, backoff 5-60 s on timeouts and HTTP 429/5xx, request 300 s, wall 330 s). Before
 anything else the frozen extraction files (FROZEN_CODE) and the scoring code (FROZEN_EVAL:
 score.py, e2e_match.py) are checked against their SHA-256, the photo hash file
-ai/eval/i3_photo_sha256.json against its frozen SHA-256, and every photo against that file; any
-mismatch stops the command.
+ai/eval/i3_photo_sha256.json against its frozen SHA-256, and every photo against that file. The
+label, gold and photo hash files (FROZEN_RAW) and the matching components of the freeze 4.5
+(FROZEN_MATCHING) are checked on their raw bytes, as score.py and i3_match_eval.py hash them, so a
+CRLF checkout stops here. Any mismatch stops the command, --check included.
 
 CLOVA OCR is called at most once per photo and shared by r1-r3. The freeze (1장 "사진 사용
 제한") lets the CLOVA cache for the labeling guideline's OCR check be made before P30 and says
@@ -44,7 +46,8 @@ skipped, so a rerun resumes. Outcomes per photo:
 
 <out>/manifest.json keeps the configuration, the frozen file hashes, the code commit, the input
 hashes (photos, prepared and sent images, OCR caches) and one entry per command; a command whose
-configuration or inputs differ from the manifest's stops. <out>/summary.json has per-run counts
+configuration or inputs differ from the manifest's stops (--check too). Without a manifest only an
+empty or new run dir is started: records or error files without their manifest stop the command. <out>/summary.json has per-run counts
 and per-photo latency (CLOVA and Gemini, mean / p50 / p95).
 
 Keys are read only from the repo .env (GEMINI_API_KEY, CLOVA_OCR_INVOKE_URL, CLOVA_OCR_SECRET)
@@ -112,6 +115,35 @@ FROZEN_EVAL = {
     "ai/eval/score.py": "c5a3a52b45d09d7b8730aef30c54789cc94558d4f16597e9f9a9b6038d966f7b",
     "ai/eval/e2e_match.py": "865e6d18748e12cd18b55914aa8112830d94956557720184d4b55288194d90f5",
 }
+# Files whose RAW bytes the frozen scripts hash: score.load_label_file (labels), i3_match_eval.i3_gold
+# (gold), and the photo hash file. A CRLF checkout (Windows core.autocrlf=true) changes these bytes,
+# so score.py / i3_match_eval.py would stop or record other hashes. Checked by every command, --check
+# included, on the raw bytes; .gitattributes forces LF for exactly these paths.
+FROZEN_RAW = {
+    "eval/labels_i3_v1.json": "486b47c0aa80e242ff4c34deffd6bccd3c4f100829e236a146d4eea5a11267bb",  # freeze 2장
+    "eval/match_gold_i3_v1.json": "85e32759fff774c2d6aee6adec8e3d21208d9fe7179294a2d9f7969c9787744e",  # 4.2, 4.5
+    "ai/eval/i3_photo_sha256.json": "305c4f0e7e9afd45de4b28426cdea980c18618a96da8d0f99e1bdbc0a29ff602",  # 1장, 15b1eff
+}
+# The matching components of the P10 freeze used by the end-to-end matching commands (C2 rules+LLM,
+# ai/docs/i3_eval_freeze.md 4.5): SHA-256 of the file bytes as listed in 4.5 (= the blob content; the
+# freeze pins by file SHA-256, not by commit). Raw bytes, because i3_match_eval.py writes raw-byte
+# hashes (catalog_file_sha256, llm_layer_sha256) that are compared with 4.5. Checked by every
+# command, --check included; a missing file stops too (the matching run needs it). Not pinned here:
+# the C0/C1 rules of 952db5c (another work tree, not run by P30) and the 4.5 test catalog digests
+# (computed by the harness and compared from its result JSON).
+FROZEN_MATCHING = {
+    "backend/app/matching/staged.py": "dddfb200d704aa4d7ac77f3abb9bc8cf02b04c00016d906be47531bd6dfb5434",
+    "backend/app/matching/vocab_ko_en.json": "486e1ca4dc233205b17e8ae00027433345bab66494460e8bb78b80b5da76e936",
+    "ai/catalog/catalog_v2_service.json": "9feb1874aae2ee279aba20efc311cde40ecbd6afaf11b607b7869a578eb981e7",
+    "backend/app/matching/llm_layer.py": "ba443a9da359cc6776e1bfc246b0c93f090d0ad2dc41f0269155a53c063311d1",
+    "backend/app/matching/prompts/translate_prompt_v3.md": "e8b77c3a80e26c694b1a0e7566e3347a21f406155f8f067f74cd61f55cefefd4",
+    "backend/app/matching/prompts/pick_prompt_v1.md": "e914bbe17b67b718c7de925974b2bc1433b472c9a995a3c25d1d291b35f9bf14",
+    "backend/app/adapters/matching_llm.py": "0d4db9f59622f82b96151fe50d92d1f087969366d4cbfcfcdc8de1698df76ec2",
+    "backend/app/adapters/gemini_matching_llm.py": "31153791c14c5e2fec06c3be27024bc770f1723582704c652907f41aebfd5394",
+    "ai/eval/i3_match_eval.py": "ae53dadd542691b921d5868f01ca5772ea82a968fbd81a7055663966208b8a0c",
+    "ai/eval/match_eval.py": "6f4347d9451e1d0cd7aec689e16fd79be84bc9e9e57a9836de4859e1fcb7e892",
+}
+RUNS = (1, 2, 3)  # freeze 3장: r1-r3
 PHOTO_HASHES = REPO_ROOT / "ai" / "eval" / "i3_photo_sha256.json"
 # SHA-256 (CRLF read as LF) of ai/eval/i3_photo_sha256.json as frozen in 15b1eff (#69). The photo
 # set is defined by this file, so the file itself is pinned: an edited copy or another --hashes
@@ -292,10 +324,38 @@ def check_frozen_code(repo: Path) -> dict[str, str]:
     diff = [rel for rel, digest in scoring.items() if digest != FROZEN_EVAL[rel]]
     if diff:
         raise Stop(f"frozen scoring files changed (no API call made): {', '.join(diff)}")
+    check_raw_files(repo, FROZEN_RAW, "frozen label/gold/hash files")
+    check_raw_files(repo, FROZEN_MATCHING, "frozen matching files (i3_eval_freeze.md 4.5)")
     prompt_sha = sha256_bytes(server_hybrid.load_prompt().encode("utf-8"))
     if server_hybrid.PROMPT_VERSION != PROMPT_VERSION or prompt_sha != PROMPT_SHA256:
         raise Stop(f"prompt {server_hybrid.PROMPT_VERSION} {prompt_sha[:12]}... is not the frozen {PROMPT_VERSION}")
     return actual
+
+
+def check_raw_files(repo: Path, pins: dict[str, str], what: str) -> None:
+    """SHA-256 of the raw file bytes against `pins`. Raises Stop on a missing or changed file, and
+    says so when the only change is CRLF line ends (a Windows checkout with core.autocrlf=true)."""
+    missing, crlf, changed = [], [], []
+    for rel, frozen in pins.items():
+        path = repo / rel
+        if not path.is_file():
+            missing.append(rel)
+            continue
+        data = path.read_bytes()
+        if sha256_bytes(data) == frozen:
+            continue
+        (crlf if b"\r\n" in data and sha256_bytes(data.replace(b"\r\n", b"\n")) == frozen else changed).append(rel)
+    problems = []
+    if missing:
+        problems.append("missing (the run needs them; check the branch): " + ", ".join(missing))
+    if crlf:
+        problems.append("CRLF line ends (Windows core.autocrlf=true; same content, other bytes): " + ", ".join(crlf)
+                        + ". Run `git config core.autocrlf false` and check these files out again "
+                        "(ai/docs/p30_run_commands.md 1장)")
+    if changed:
+        problems.append("SHA-256 differs from the frozen value: " + ", ".join(changed))
+    if problems:
+        raise Stop(f"{what} (no API call made):\n  " + "\n  ".join(problems))
 
 
 def git_info(repo: Path) -> dict[str, Any]:
@@ -599,9 +659,17 @@ def load_manifest(out: Path, config: dict, frozen: dict, photos: list[Photo]) ->
     inputs = {p.file: {"photo_id": p.photo_id, "sha256": p.sha256, "prepared_sha256": sha256_bytes(p.prepared),
                        "ocr_sent_sha256": p.sent_sha256} for p in photos}
     if not path.exists():
+        left = sorted(f.name for f in out.iterdir()) if out.is_dir() else []
+        if left:
+            runs = [n for n in left if re.match(r".+_r\d+(\.error)?\.json$", n)]
+            raise Stop(f"{out} has no manifest.json but is not empty ({len(runs)} record or error file(s), "
+                       f"{len(left)} file(s) in all, e.g. {left[0]}); records without their manifest cannot be "
+                       "resumed. Restore that manifest.json or use a new, empty --out")
         return {"task": "P30 extraction, I3 test set (33 photos x r1-r3)", "config": config, "frozen_code": frozen,
                 "frozen_code_reference": "5d49c8a (clova.py: 1e149d4, deadline_s path only)",
                 "frozen_eval": FROZEN_EVAL, "frozen_eval_reference": "score.py: 15b1eff, e2e_match.py: 5d49c8a",
+                "frozen_raw": FROZEN_RAW, "frozen_matching": FROZEN_MATCHING,
+                "frozen_matching_reference": "ai/docs/i3_eval_freeze.md 4.5 (file SHA-256, raw bytes)",
                 "photo_hashes_file": "ai/eval/i3_photo_sha256.json",
                 "photo_hashes_file_sha256": None, "photos": inputs, "ocr_caches": {}, "commands": []}
     manifest = json.loads(path.read_text(encoding="utf-8"))
@@ -661,22 +729,24 @@ def run_command(args: argparse.Namespace, secrets: Secrets, clients: Clients | N
         return EXIT_PREFLIGHT
 
     todo = plan(photos, args.runs, out, data_dir)
-    print(f"photos verified: {len(photos)} (SHA-256 = {args.hashes.name}); frozen code and prompt {PROMPT_VERSION} OK")
+    print(f"photos verified: {len(photos)} (SHA-256 = {args.hashes.name}); frozen code and prompt {PROMPT_VERSION}, "
+          f"scoring code, label/gold/hash files (raw bytes) and matching files (4.5) OK")
     print(f"OCR caches: {len(photos) - len(todo['no_ocr_cache'])}/{len(photos)} present"
           + (f"; CLOVA calls needed: {todo['clova_calls']}" if todo["no_ocr_cache"] else ""))
     for k, files in todo["todo"].items():
         print(f"r{k}: {len(photos) - len(files)} done, {len(files)} to run")
-    if args.check:
-        print(f"check only: no API call (Gemini calls needed: at least {todo['gemini_calls_min']})")
-        return EXIT_OK
-
     settings = settings_for(secrets.get("GEMINI_API_KEY"))
     config = config_block(settings)
     try:
-        manifest = load_manifest(out, config, frozen, photos)
+        manifest = load_manifest(out, config, frozen, photos)  # --check too: same criteria as a run
     except Stop as stop:
         print(f"STOP: {stop}")
         return EXIT_PREFLIGHT
+    print(f"manifest: {len(manifest['commands'])} earlier command(s), configuration and inputs match"
+          if manifest["commands"] else "manifest: none yet (new, empty run dir)")
+    if args.check:
+        print(f"check only: no API call (Gemini calls needed: at least {todo['gemini_calls_min']})")
+        return EXIT_OK
     if todo["gemini_calls_min"] and not secrets.has("GEMINI_API_KEY"):
         print("STOP: GEMINI_API_KEY is not set in the repo .env")
         return EXIT_PREFLIGHT
@@ -802,7 +872,7 @@ def default_data_dir() -> Path:
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--out", type=Path, required=True, help="run dir, e.g. ai/runs/2026-10-30_p30/hybrid_i3")
-    ap.add_argument("--runs", type=int, nargs="+", default=[1, 2, 3], help="run numbers, in this order")
+    ap.add_argument("--runs", type=int, nargs="+", default=list(RUNS), help="run numbers 1-3, in this order")
     ap.add_argument("--max-calls", type=int, default=45, help="Gemini API calls (attempts) per command")
     ap.add_argument("--max-clova-calls", type=int, default=33, help="CLOVA HTTP requests per command, the server's retries included (photos without cache)")
     ap.add_argument("--min-interval", type=float, default=4.5, help="seconds between photos' Gemini requests")
@@ -812,8 +882,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                     help="photo hash file; must have the frozen SHA-256 (PHOTO_HASHES_SHA256)")
     ap.add_argument("--env-file", type=Path, default=REPO_ROOT / ".env")
     args = ap.parse_args(argv)
-    if any(k < 1 for k in args.runs) or len(set(args.runs)) != len(args.runs):
-        ap.error("--runs: distinct numbers >= 1")
+    if any(k not in RUNS for k in args.runs) or len(set(args.runs)) != len(args.runs):
+        ap.error("--runs: distinct numbers from 1, 2, 3 (the freeze has r1-r3 only)")
     return args
 
 
