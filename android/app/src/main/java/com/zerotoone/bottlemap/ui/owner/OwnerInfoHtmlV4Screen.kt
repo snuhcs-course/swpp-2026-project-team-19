@@ -192,9 +192,9 @@ fun OwnerInfoHtmlV4Screen(
             } else {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text("매장 사진", style = MaterialTheme.typography.titleMedium,
+                    Text("매장 사진", fontSize = 16.sp, color = V4Color.text,
                         fontWeight = FontWeight.Bold)
-                    TextButton(onClick = onPhotos) { Text("편집 ›") }
+                    TextButton(onClick = onPhotos) { Text("편집 ›", color = V4Color.primary, fontSize = 12.sp) }
                 }
                 if (bar.gallery.isEmpty()) {
                     Text("등록된 사진이 없습니다.", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -209,38 +209,41 @@ fun OwnerInfoHtmlV4Screen(
                     }
                 }
 
-                OwnerTextInput("매장명", name, { name = it; error = null },
-                    modifier = Modifier.testTag("owner-info-name"))
-                OwnerTextInput("한 줄 소개 (100자 이내)", intro, {
+                V4FormField("매장명", name, { name = it; error = null },
+                    testTag = "owner-info-name")
+                V4FormField("한 줄 소개", intro, {
                     intro = it.take(100); error = null
                 }, singleLine = false)
-                OwnerTextInput("매장 기본 잔 용량 (ml)", pour, {
+                V4FormField("매장 기본 잔 용량 (ml)", pour, {
                     pour = it.filter(Char::isDigit).take(3); error = null
-                }, placeholder = "예: 30")
-                OutlinedTextField(value = phone, onValueChange = {
-                    phone = it.take(30); error = null
-                }, label = { Text("전화번호") }, keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Phone),
-                    modifier = Modifier.fillMaxWidth())
-                OwnerTextInput("주소", address, { address = it; error = null },
-                    singleLine = false)
-                TextButton(onClick = { mapVisible = !mapVisible }) {
-                    Text(if (mapVisible) "위치 접기" else "위치 확인")
+                }, placeholder = "예: 30", keyboardType = KeyboardType.Number)
+                V4FormField("전화번호", phone, { phone = it.take(30); error = null },
+                    keyboardType = KeyboardType.Phone)
+                V4FormField("주소", address, { address = it; error = null })
+                Box(Modifier.fillMaxWidth().height(38.dp)
+                    .background(V4Color.elevated, RoundedCornerShape(8.dp))
+                    .border(1.dp, V4Color.line, RoundedCornerShape(8.dp))
+                    .clickable { mapVisible = !mapVisible },
+                    contentAlignment = Alignment.Center) {
+                    Text("⌖  " + (if (mapVisible) "위치 접기" else "위치 확인"),
+                        color = V4Color.text, fontSize = 12.sp)
                 }
                 if (mapVisible) {
-                    // No invented geocoding or coordinates; mirror the HTML's demo-only placeholder.
-                    Text("위치 미리보기는 지도 연동 계약 확정 후 제공됩니다.",
-                        style = MaterialTheme.typography.bodySmall)
+                    Box(Modifier.fillMaxWidth().height(155.dp)
+                        .background(V4Color.surface, RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center) {
+                        Text("위치 미리보기", color = V4Color.sub, fontSize = 12.sp)
+                    }
                 }
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text("정규 영업시간", style = MaterialTheme.typography.titleMedium,
+                    Text("정규 영업시간", fontSize = 16.sp, color = V4Color.text,
                         fontWeight = FontWeight.Bold)
                     TextButton(onClick = {
                         storedHours = copyMondayToWeekdays(weekly).map(::encodeWeekday)
                         error = null
-                    }) { Text("평일에 복사") }
+                    }) { Text("평일에 복사", color = V4Color.primary, fontSize = 12.sp) }
                 }
 
                 WEEKDAY.forEachIndexed { index, dayName ->
@@ -315,7 +318,7 @@ fun OwnerInfoHtmlV4Screen(
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("매장 태그", style = MaterialTheme.typography.titleMedium,
+                    Text("매장 태그", color = V4Color.text, fontSize = 16.sp,
                         fontWeight = FontWeight.Bold)
                     Text(selectedTags.size.toString() + "/5",
                         style = MaterialTheme.typography.labelMedium)
