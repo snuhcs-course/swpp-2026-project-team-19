@@ -54,7 +54,7 @@ interface OwnerMockRepository {
 
 /** Local-only serving option invariants shared by direct entry, review, and publish. */
 internal fun validMockMenuOption(option: MockMenuOption): Boolean =
-    option.priceKrw > 0 &&
+    option.priceKrw in 1..MAX_OWNER_MENU_PRICE_KRW &&
         (option.pourMl == null || option.pourMl in 1..32767) &&
         (option.discount == null ||
             (option.discount.discountedPriceKrw in 1..option.priceKrw &&
