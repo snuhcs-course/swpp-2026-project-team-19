@@ -429,4 +429,27 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun highPricedImportedDiscountRemainsUntouchedOnUnrelatedMenuEdit() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("high-brand", "브랜드"))
+        r.saveCatalogProduct(MockCatalogProduct("high-product", "high-brand", "상품"))
+        val original = MockMenuOption("high-option", pourMl = 30,
+            priceKrw = 150_000_000,
+            discount = MockDiscount(120_000_000, 1000L, 100000L))
+        r.saveMenuItem(MockBarMenuItem("high-row", "fixture-bar",
+            "high-product", listOf(original)))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-high-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(original, r.preview("fixture-bar", 0L)!!.visibleMenu.single()
+                .options.single())
+        }
+    }
+
 }
