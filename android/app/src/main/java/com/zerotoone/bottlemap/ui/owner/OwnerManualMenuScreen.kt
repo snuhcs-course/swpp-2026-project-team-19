@@ -381,11 +381,11 @@ internal fun OwnerManualMenuScreen(
                 "reset" -> "전체 메뉴를 초기화할까요?"
                 else -> if (target?.soldOut == true) "판매를 재개할까요?" else "품절 처리할까요?"
             }) },
-            text = { Text(when(action) {
+            text = { Column { Text(when(action) {
                 "delete" -> "삭제하면 고객 메뉴에서도 바로 사라집니다."
                 "reset" -> "모든 메뉴와 용량·가격 정보가 삭제됩니다."
                 else -> "품절 메뉴는 고객에게 숨겨지며 판매 재개 시 다시 공개됩니다."
-            }) },
+            }); error?.let { Text(it, color = Color(0xFFFFB4AB)) } } },
             confirmButton = { TextButton(onClick = {
                 try {
                     when(action) {
