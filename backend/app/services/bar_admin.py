@@ -16,7 +16,7 @@ from app.services.menu_import_upload import UNFINISHED_STATUSES
 from app.services.search import validate_query_text
 
 BarStatusFilter = Literal["active", "inactive", "all"]
-ImportStatusFilter = Literal["active", "uploaded", "processing", "ready_for_review", "applied", "failed", "all"]
+ImportStatusFilter = Literal["active", "uploaded", "processing", "ready_for_review", "applied", "failed", "canceled", "all"]
 
 
 def _text(value) -> str:

@@ -132,7 +132,7 @@ def test_finds_only_unfinished_imports(db_session, image_storage):
     assert set(found) == {imports[ImportStatus.UPLOADED].id, imports[ImportStatus.PROCESSING].id}
 
 
-@pytest.mark.parametrize("status", [ImportStatus.READY_FOR_REVIEW, ImportStatus.FAILED])
+@pytest.mark.parametrize("status", [ImportStatus.READY_FOR_REVIEW, ImportStatus.FAILED, ImportStatus.CANCELED])
 def test_an_import_finished_after_it_was_found_is_left_alone(db_session, factory, image_storage, status):
     menu_import = new_import(db_session, image_storage)
     menu_import.status = status

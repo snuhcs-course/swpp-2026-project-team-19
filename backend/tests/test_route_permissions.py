@@ -61,6 +61,7 @@ OPERATOR_ONLY = [
         {"json": {"reviewVersion": 1, "itemDecisions": [], "changeDecisions": []}},
         (404, "MENU_IMPORT_NOT_FOUND"),
     ),
+    Route("post", "/api/menu-imports/{menuImportId}/cancel", {}, (404, "MENU_IMPORT_NOT_FOUND")),
     Route("get", "/api/catalog/brands", {"params": {"query": "glen"}}, (200, None)),
     Route("get", "/api/catalog/products", {"params": {"query": "glen"}}, (200, None)),
     Route("get", "/api/owner-applications", {}, (200, None)),
