@@ -143,7 +143,7 @@ internal fun OwnerManualMenuScreen(
         val p = products.firstOrNull { it.productId == item?.productId }
         linkedId = p?.productId?.takeIf { p.catalogMatched }
         rejectedId = null
-        itemName = p?.displayName.orEmpty()
+        itemName = item?.displayNameOverride ?: p?.displayName.orEmpty()
         brandName = brands.firstOrNull { it.brandId == p?.brandId }?.name.orEmpty()
         category = p?.let { manualMenuCategoryLabel(it.category) } ?: "위스키"
         alcoholKind = p?.otherAlcoholKind.orEmpty()
@@ -177,9 +177,8 @@ internal fun OwnerManualMenuScreen(
             val old = items.firstOrNull { it.barMenuItemId == editId }
             val persisted = products.firstOrNull { it.productId == old?.productId }
             if (old != null && persisted?.catalogMatched == true) {
-                require(persisted.displayName == name &&
-                    manualMenuCategoryLabel(persisted.category) == category) {
-                    "다른 상품은 새 메뉴로 추가해 주세요."
+                require(manualMenuCategoryLabel(persisted.category) == category) {
+                    "제품 종류를 변경하려면 새 메뉴를 추가해 주세요."
                 }
             }
             val linked = if (old != null) persisted
@@ -205,7 +204,9 @@ internal fun OwnerManualMenuScreen(
                 })
             viewModel.saveManualMenuItem(
                 MockBarMenuItem(old?.barMenuItemId ?: manualId("local-menu-"),
-                    bar.barId, p.productId, options, soldOut = old?.soldOut ?: false),
+                    bar.barId, p.productId, options, soldOut = old?.soldOut ?: false,
+                    displayNameOverride = if (p.catalogMatched && name != p.displayName)
+                        name else null),
                 if (products.none { it.productId == p.productId } ||
                     (persisted != null && !persisted.catalogMatched)) p else null,
                 brand
@@ -541,7 +542,9 @@ private fun OwnerManualMenuRow(
                 }
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(manualMenuShortName(product, brand), color = V4Color.text,
+                Text(manualMenuShortName(product.copy(
+                    displayName = item.displayNameOverride ?: product.displayName), brand),
+                    color = V4Color.text,
                     fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 2)
                 Text(if (item.soldOut) "품절" else "판매 중", fontSize = 10.sp,
                     color = if (item.soldOut) Color(0xFFFFB4AB) else V4Color.positive)
