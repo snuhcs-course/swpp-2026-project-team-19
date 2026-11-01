@@ -202,7 +202,8 @@ internal fun OwnerManualMenuScreen(
         alcoholKind = p?.otherAlcoholKind.orEmpty()
         // Photo-imported listings may contain more than three options. Allow editing
         // the first three without silently dropping any additional persisted ones.
-        setOptions(item?.options?.take(MANUAL_MENU_MAX_OPTIONS)?.map(::fromSaved)
+        val editableLimit = if (category == "위스키") MANUAL_MENU_MAX_OPTIONS else 1
+        setOptions(item?.options?.take(editableLimit)?.map(::fromSaved)
             ?: listOf(freshOption()))
         beforePromoOptions = null
         error = null
@@ -238,14 +239,15 @@ internal fun OwnerManualMenuScreen(
                 throw IllegalArgumentException(it)
             }
             val old = items.firstOrNull { it.barMenuItemId == editId }
-            val legacyTail = if (old != null && old.options.size > MANUAL_MENU_MAX_OPTIONS) {
-                require(category == "위스키") {
-                    "추가된 기존 용량 옵션을 유지하려면 위스키 종류를 선택해 주세요."
+            val persisted = products.firstOrNull { it.productId == old?.productId }
+            val editableLimit = if (whisky) MANUAL_MENU_MAX_OPTIONS else 1
+            val legacyTail = if (old != null && old.options.size > editableLimit) {
+                require(persisted?.let { manualMenuCategoryLabel(it.category) } == category) {
+                    "기존 추가 옵션을 보존하려면 원래 종류로 수정해 주세요."
                 }
-                old.options.drop(MANUAL_MENU_MAX_OPTIONS)
+                old.options.drop(editableLimit)
             } else emptyList()
             val options = editedOptions + legacyTail
-            val persisted = products.firstOrNull { it.productId == old?.productId }
             if (old != null && persisted?.catalogMatched == true) {
                 require(manualMenuCategoryLabel(persisted.category) == category) {
                     "제품 종류를 변경하려면 새 메뉴를 추가해 주세요."
