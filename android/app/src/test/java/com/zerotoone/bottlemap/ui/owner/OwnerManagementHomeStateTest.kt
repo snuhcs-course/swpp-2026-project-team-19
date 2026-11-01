@@ -114,6 +114,45 @@ class OwnerManagementHomeStateTest {
         assertEquals("영업 종료", homeOperatingState(bar, afterClose))
     }
 
+    @Test fun previousDayOverrideSuppressesStaleRegularOvernightShift() {
+        // Friday's regular hours cross midnight. Saturday at 01:00 must
+        // reflect Friday's active override, not Friday's regular template.
+        val friday = day.minusDays(1).toEpochDay()
+        val regular = MockWeeklyHours(5, false, 18 * 60, 4 * 60, closesNextDay = true)
+        val saturday = MockWeeklyHours(6, false, 19 * 60, 23 * 60)
+        val base = MockBar("b", "바", "서울", weeklyHours = listOf(regular, saturday))
+        assertEquals("영업 중", homeOperatingState(base, time(1)))
+
+        val shortened = MockOperatingException(
+            "short", MockExceptionKind.CUSTOM_HOURS, friday, friday,
+            openMinutes = 18 * 60, closeMinutes = 23 * 60
+        )
+        assertEquals("영업 종료",
+            homeOperatingState(base.copy(exceptions = listOf(shortened)), time(1)))
+        assertEquals("영업 중",
+            homeOperatingState(base.copy(exceptions = listOf(shortened)), time(20)))
+
+        val closed = MockOperatingException(
+            "closed", MockExceptionKind.CLOSED_TODAY, friday, friday
+        )
+        assertEquals("영업 종료",
+            homeOperatingState(base.copy(exceptions = listOf(closed)), time(1)))
+
+        val vacation = MockOperatingException(
+            "vacation", MockExceptionKind.VACATION, friday, friday
+        )
+        assertEquals("영업 종료",
+            homeOperatingState(base.copy(exceptions = listOf(vacation)), time(1)))
+
+        // A temporary overnight shift takes precedence over the original
+        // 04:00 regular close, and must stop being open at its own 02:00 close.
+        val shortenedOvernight = shortened.copy(
+            closeMinutes = 2 * 60, closesNextDay = true)
+        val override = base.copy(exceptions = listOf(shortenedOvernight))
+        assertEquals("영업 중", homeOperatingState(override, time(1)))
+        assertEquals("영업 종료", homeOperatingState(override, time(3)))
+    }
+
     @Test fun completedTemporaryDayReturnsToRegularSchedule() {
         val ended = MockOperatingException(
             "ended", MockExceptionKind.CLOSED_TODAY, day.minusDays(1).toEpochDay(),
