@@ -310,6 +310,11 @@ class OwnerManualMenuRulesTest {
             listOf(option("o1", 30, 12000))), ten, brand)
         r.deleteMenuItem("original-row-id")
         assertTrue(snapshot(r).menuItems.isEmpty())
+        r.saveCatalogProduct(sixteen)
+        rejects {
+            r.saveMenuItem(MockBarMenuItem("original-row-id", "fixture-bar", sixteen.productId,
+                listOf(option("different-product-serving", 30, 15000))))
+        }
         r.saveManualMenuItem(MockBarMenuItem("newly-generated-ui-id", "fixture-bar", ten.productId,
             listOf(option("o2", 45, 14000))))
         assertEquals("original-row-id", snapshot(r).menuItems.single().barMenuItemId)
