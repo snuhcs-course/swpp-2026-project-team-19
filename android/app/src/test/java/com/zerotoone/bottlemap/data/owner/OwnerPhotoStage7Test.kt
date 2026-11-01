@@ -70,7 +70,7 @@ class OwnerPhotoStage7Test {
         val oldId = r.queuePhotoImport("fixture-bar", listOf(photo("A")))
         assertEquals(MockImportStatus.FAILED,
             r.finishPhotoImport(oldId, MockPhotoExtractionSource { emptyList() }))
-        assertTrue(snap(r).imports.first().failureReason!!.contains("Fixture"))
+        assertTrue(snap(r).imports.first().failureReason!!.contains("Mock 추출 결과"))
         rejects { r.cancelPhotoImport(oldId) }
         val newId = r.retryFailedPhotoImport(oldId)
         assertTrue(newId != oldId)
