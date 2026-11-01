@@ -92,7 +92,8 @@ class OwnerBarEditorComposeTest {
         val before = vm.preview("fixture-bar", 0)!!.bar.tags
         compose.onNodeWithTag("owner-tag-search").performTextInput("혼술바")
         compose.runOnIdle { assertEquals(before, vm.preview("fixture-bar", 0)!!.bar.tags) }
-        compose.onNodeWithText("혼술바 ＋").performClick()
+        compose.onNodeWithText("혼술바 ＋").performScrollTo().performClick()
+        compose.onNodeWithText("혼술바 ×").assertExists()
         compose.onNodeWithTag("owner-info-save").performScrollTo().assertIsEnabled().performClick()
         compose.runOnIdle {
             assertEquals(true, vm.preview("fixture-bar", 0)!!.bar.tags.contains("혼술바"))
