@@ -898,4 +898,44 @@ class OwnerManualMenuComposeTest {
         compose.runOnIdle { assertEquals(0, store.saved.menuItems.size) }
     }
 
+    @Test fun renamedConfirmedCatalogProductKeepsCanonicalIdAndBarDisplayOverride() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val catalog = MockCatalogProduct("catalog-ginger-highball", "catalog-cocktail-brand",
+            "진저 하이볼", category = "cocktail")
+        r.saveBrand(MockBrand(catalog.brandId, "칵테일 브랜드"))
+        r.saveCatalogProduct(catalog)
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithText("위스키", substring = false).performClick()
+        compose.onNodeWithText("칵테일", substring = false).performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextReplacement("진저 하이볼")
+        compose.onNodeWithText("“진저 하이볼”이 맞나요?").assertExists()
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithTag("manual-menu-name")
+            .performTextReplacement("우리 매장 진저 하이볼")
+        compose.onNodeWithTag("manual-menu-price-0").performScrollTo()
+            .performTextReplacement("15000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snap.products.size)
+            assertEquals(catalog.productId, snap.menuItems.single().productId)
+            assertEquals("우리 매장 진저 하이볼",
+                snap.menuItems.single().displayNameOverride)
+            assertEquals("진저 하이볼", snap.products.single().displayName)
+            assertEquals(true, snap.products.single().catalogMatched)
+            assertEquals(15000, snap.menuItems.single().options.single().priceKrw)
+        }
+        compose.onNodeWithTag("manual-menu-row-" +
+            (vm.state.value as MockOwnerLoadState.Ready).snapshot.menuItems.single().barMenuItemId)
+            .performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-name")
+            .assertTextEquals("우리 매장 진저 하이볼")
+    }
+
 }
