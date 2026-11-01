@@ -2,6 +2,12 @@ package com.zerotoone.bottlemap.data.owner
 
 /** Owner Flow 6. Local-only policy: this is NOT a backend request or API contract. */
 const val MANUAL_MENU_MAX_OPTIONS = 3
+/** Mock UI input policy only; no unagreed Backend price field constraints. */
+const val MAX_OWNER_MENU_PRICE_KRW = 99_999_999
+const val MAX_OWNER_MENU_PRICE_DIGITS = 8
+fun ownerPriceInput(raw: String): String = raw.filter(Char::isDigit)
+    .take(MAX_OWNER_MENU_PRICE_DIGITS)
+
 val MANUAL_MENU_CATEGORIES = listOf("위스키", "칵테일", "안주", "기타 주류")
 
 fun manualMenuCategoryCode(label: String): String = when (label) {
@@ -40,7 +46,8 @@ fun manualMenuOptionError(options: List<MockMenuOption>, category: String): Stri
     if (options.isEmpty() || options.size > MANUAL_MENU_MAX_OPTIONS) return "가격 옵션은 1~3개여야 해요."
     if (manualMenuCategoryLabel(category) != "위스키" && options.size != 1)
         return "이 메뉴는 가격을 하나만 등록할 수 있어요."
-    if (options.any { it.priceKrw <= 0 }) return "가격은 1원 이상 숫자로 입력해 주세요."
+    if (options.any { it.priceKrw !in 1..MAX_OWNER_MENU_PRICE_KRW })
+        return "가격은 1원 이상, 1억 원 미만이어야 해요."
     if (manualMenuCategoryLabel(category) == "위스키" && options.any {
             it.label != "Bottle" && (it.pourMl == null || it.pourMl <= 0)
         }) return "용량을 입력하거나 Bottle 판매를 선택해 주세요."
