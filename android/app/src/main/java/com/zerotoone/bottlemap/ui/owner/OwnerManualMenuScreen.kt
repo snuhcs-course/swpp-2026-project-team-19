@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -143,6 +145,8 @@ internal fun OwnerManualMenuScreen(
     val candidates = (products.filter { it.catalogMatched } + htmlCatalog)
         .distinctBy { it.productId }
 
+    val outsideFocus = LocalFocusManager.current
+    val outsideKeyboard = LocalSoftwareKeyboardController.current
     var screen by rememberSaveable(bar?.barId) { mutableStateOf("list") }
     var query by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var openCategories by rememberSaveable(bar?.barId) { mutableStateOf(listOf("위스키")) }
@@ -290,7 +294,12 @@ internal fun OwnerManualMenuScreen(
         )
     }
     Column(Modifier.fillMaxSize().background(V4Color.background)
-        .manualTap { }) {
+        .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+                outsideFocus.clearFocus()
+                outsideKeyboard?.hide()
+            })
+        }) {
         V4Toolbar(when(screen) {
             "list" -> "메뉴 관리"
             "item" -> "메뉴 항목"
