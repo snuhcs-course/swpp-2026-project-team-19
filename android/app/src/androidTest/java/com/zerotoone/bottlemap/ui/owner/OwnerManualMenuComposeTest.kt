@@ -750,4 +750,74 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun confirmedOtherAlcoholCatalogSubtypeCannotSilentlyChange() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("catalog-kind-brand", "기타 브랜드"))
+        val product = MockCatalogProduct("catalog-kind-product", "catalog-kind-brand",
+            "정식 리큐르", category = "otherAlcohol", otherAlcoholKind = "리큐르")
+        r.saveCatalogProduct(product)
+        val original = MockBarMenuItem("catalog-kind-row", "fixture-bar", product.productId,
+            listOf(MockMenuOption("catalog-kind-option", label = "병", pourMl = null,
+                priceKrw = 24000)))
+        r.saveMenuItem(original)
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithText("기타 주류", substring = false).performScrollTo().performClick()
+        compose.onNodeWithTag("manual-menu-row-catalog-kind-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-alcohol-kind").performTextReplacement("맥주")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.onNodeWithText("카탈로그 상품의 주류 종류는 변경할 수 없어요.").assertExists()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals("리큐르", snap.products.single().otherAlcoholKind)
+            assertEquals(original, snap.menuItems.single())
+        }
+        compose.onNodeWithTag("manual-menu-alcohol-kind").performTextReplacement("리큐르")
+        compose.onNodeWithTag("manual-menu-name").performTextReplacement("정식 리큐르 추천")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals("리큐르", snap.products.single().otherAlcoholKind)
+            assertEquals("정식 리큐르 추천", snap.menuItems.single().displayNameOverride)
+        }
+    }
+
+    @Test fun importedKoreanBottleLabelWithPourSurvivesUnrelatedEditButNotPourChange() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("poured-bottle-brand", "브랜드"))
+        r.saveCatalogProduct(MockCatalogProduct("poured-bottle-product", "poured-bottle-brand",
+            "병 위스키 12년", category = "whisky"))
+        val option = MockMenuOption("poured-bottle-option", label = "병",
+            pourMl = 750, priceKrw = 74000)
+        r.saveMenuItem(MockBarMenuItem("poured-bottle-row", "fixture-bar",
+            "poured-bottle-product", listOf(option)))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-poured-bottle-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextReplacement("병 위스키 12년 추천")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(option, vm.preview("fixture-bar", 0L)!!.visibleMenu.single()
+                .options.single())
+        }
+        compose.onNodeWithTag("manual-menu-row-poured-bottle-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-ml-0").performScrollTo().performTextReplacement("700")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val changed = vm.preview("fixture-bar", 0L)!!.visibleMenu.single().options.single()
+            assertEquals(option.optionId, changed.optionId)
+            assertEquals(700, changed.pourMl)
+            assertEquals(null, changed.label)
+        }
+    }
+
 }
