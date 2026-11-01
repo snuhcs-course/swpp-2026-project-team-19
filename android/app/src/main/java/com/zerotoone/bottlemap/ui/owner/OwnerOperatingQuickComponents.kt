@@ -201,7 +201,7 @@ internal fun OwnerVacationCalendar(
                                             MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                                             RoundedCornerShape(6.dp)
                                         ) else Modifier)
-                                        .clickable(enabled = epoch >= today) { onPick(epoch) },
+                                        .ownerQuietClick(enabled = epoch >= today) { onPick(epoch) },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Box(
@@ -233,7 +233,7 @@ internal fun OwnerVacationCalendar(
                     Triple("end", "종료", endDay)
                 ).forEach { (target, label, date) ->
                     Surface(
-                        modifier = Modifier.weight(1f).clickable { onSelectTarget(target) },
+                        modifier = Modifier.weight(1f).ownerQuietClick { onSelectTarget(target) },
                         shape = RoundedCornerShape(8.dp),
                         color = if (selectedTarget == target)
                             MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)

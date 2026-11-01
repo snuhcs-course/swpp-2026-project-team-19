@@ -144,7 +144,7 @@ fun OwnerPhotoHtmlV4Screen(
                     Box(
                         Modifier.background(V4Color.elevated, RoundedCornerShape(10.dp))
                             .border(1.dp, V4Color.line, RoundedCornerShape(10.dp))
-                            .clickable {
+                            .ownerQuietClick {
                                 if (bar.gallery.size >= MAX_OWNER_BAR_GALLERY_PHOTOS) {
                                     error = "매장 사진은 최대 15장까지 등록할 수 있어요."
                                 } else {
@@ -184,7 +184,7 @@ fun OwnerPhotoHtmlV4Screen(
                                         Box(
                                             Modifier.fillMaxSize()
                                                 .clip(RoundedCornerShape(8.dp))
-                                                .clickable { menuPhotoId = photo.photoId }
+                                                .ownerQuietClick { menuPhotoId = photo.photoId }
                                                 .testTag("owner-photo-tile-" + index)
                                         ) {
                                             OwnerStoredPhoto(photo.uri, Modifier.fillMaxSize(),
@@ -208,7 +208,7 @@ fun OwnerPhotoHtmlV4Screen(
                                                     .padding(horizontal = 6.dp, vertical = 3.dp),
                                             ) {
                                                 Box(Modifier.fillMaxWidth().weight(1f)
-                                                    .clickable { commit(makeCoverPhoto(bar.gallery, index)) }
+                                                    .ownerQuietClick { commit(makeCoverPhoto(bar.gallery, index)) }
                                                     .padding(horizontal = 8.dp),
                                                     contentAlignment = Alignment.CenterStart) {
                                                     Text("대표 사진 등록", fontSize = 12.sp,
@@ -217,7 +217,7 @@ fun OwnerPhotoHtmlV4Screen(
                                                 Spacer(Modifier.fillMaxWidth().height(1.dp)
                                                     .background(V4Color.line))
                                                 Box(Modifier.fillMaxWidth().weight(1f)
-                                                    .clickable {
+                                                    .ownerQuietClick {
                                                         menuPhotoId = null
                                                         deletePhotoId = photo.photoId
                                                     }.padding(horizontal = 8.dp),
@@ -228,7 +228,7 @@ fun OwnerPhotoHtmlV4Screen(
                                                 Spacer(Modifier.fillMaxWidth().height(1.dp)
                                                     .background(V4Color.line))
                                                 Box(Modifier.fillMaxWidth().weight(1f)
-                                                    .clickable { menuPhotoId = null }
+                                                    .ownerQuietClick { menuPhotoId = null }
                                                     .padding(horizontal = 8.dp),
                                                     contentAlignment = Alignment.CenterStart) {
                                                     Text("닫기", fontSize = 12.sp,

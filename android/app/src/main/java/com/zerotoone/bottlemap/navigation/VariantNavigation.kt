@@ -1,6 +1,9 @@
 package com.zerotoone.bottlemap.navigation
 
 import android.net.Uri
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.openSingleBarManager
@@ -34,11 +37,15 @@ import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 /** One Android artifact: everyone starts in Customer, with Owner accessible from My Page. */
 internal const val variantStartDestination = "customer"
 
+@OptIn(ExperimentalMaterial3Api::class)
 internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
     // Shared by both ends of the Owner manage <-> preview round trip.
     val previewSwitchCooldown = OwnerPreviewSwitchCooldown()
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
+                CompositionLocalProvider(
+                    LocalRippleConfiguration provides null,
+                ) {
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                 OwnerMockRuntime.repository(LocalContext.current)))
             val mockState = ownerViewModel.state.collectAsStateWithLifecycle().value
@@ -66,8 +73,12 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     { navController.navigate(route) }
                 },
             )
+            }
         }
         composable(OwnerRoutes.ADD_BAR) {
+                CompositionLocalProvider(
+                    LocalRippleConfiguration provides null,
+                ) {
             OwnerOnboardingScreen(
                 viewModel = viewModel(factory = OwnerMockViewModel.Factory(
                     OwnerMockRuntime.repository(LocalContext.current))),
@@ -76,15 +87,25 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
             )
+            }
         }
         composable(OwnerRoutes.COMPONENTS) {
+                CompositionLocalProvider(
+                    LocalRippleConfiguration provides null,
+                ) {
             OwnerComponentGallery(onBack = { navController.popBackStack() })
+            }
         }
         OwnerPage.entries.forEach { page ->
             composable(page.route) {
                 val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                     OwnerMockRuntime.repository(LocalContext.current)))
                 val mockState = data.state.collectAsStateWithLifecycle().value
+                // Owner-wide policy: no transient bright/ripple feedback on press.
+                // Stateful selected/checked indicators are intentionally preserved.
+                CompositionLocalProvider(
+                    LocalRippleConfiguration provides null,
+                ) {
                 when (page) {
                     OwnerPage.MGR_HOME -> OwnerManagementHomeScreen(
                         state = mockState,
@@ -132,7 +153,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onManage = { navController.returnToOwnerManagerSafely(previewSwitchCooldown) },
                     )
                     OwnerPage.MGR_MENU -> OwnerMenuQuickEntryScreen(
-                        state = mockState,
+                        state = mockState, viewModel = data,
                         onRetry = data::retry,
                         onBack = { navController.popBackStack() },
                         onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
@@ -156,6 +177,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         },
                         onLegacyDebugUpload = null,
                     )
+                }
                 }
             }
         }

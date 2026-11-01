@@ -95,7 +95,7 @@ private fun OwnerQuickCard(
     modifier: Modifier, icon: BmIconId, title: String, footer: String, onClick: () -> Unit,
 ) {
     Surface(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier.ownerQuietClick(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surface
     ) {
@@ -117,7 +117,7 @@ private fun OwnerQuickCard(
 @Composable
 private fun OwnerManagerFooter(label: String, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().height(36.dp).clickable(onClick = onClick),
+        Modifier.fillMaxWidth().height(36.dp).ownerQuietClick(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
@@ -232,7 +232,7 @@ fun OwnerManagementHomeScreen(
                                                     Box(
                                                         Modifier.align(Alignment.CenterEnd)
                                                             .offset(x = 8.dp).size(36.dp)
-                                                            .clickable {
+                                                            .ownerQuietClick {
                                                                 try {
                                                                     viewModel.cancelOperatingException(bar.barId, exception.exceptionId)
                                                                     error = null
@@ -277,7 +277,7 @@ fun OwnerManagementHomeScreen(
                         Column(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 5.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Row(
-                                Modifier.fillMaxWidth().clickable(onClick = onMenu)
+                                Modifier.fillMaxWidth().ownerQuietClick(onClick = onMenu)
                                     .defaultMinSize(minHeight = 40.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(9.dp)
@@ -307,7 +307,7 @@ fun OwnerManagementHomeScreen(
                                 // prevents the border from appearing to touch the gauge.
                                 Box(
                                     Modifier.height(42.dp)
-                                        .clickable(enabled = hasPublishedMenu) {
+                                        .ownerQuietClick(enabled = hasPublishedMenu) {
                                             try {
                                                 viewModel.confirmMenuInformation(bar.barId, System.currentTimeMillis())
                                                 error = null
@@ -356,7 +356,7 @@ fun OwnerManagementHomeScreen(
                             if (job != null) {
                                 HorizontalDivider()
                                 Row(
-                                    Modifier.fillMaxWidth().clickable { onJob(job.status) }
+                                    Modifier.fillMaxWidth().ownerQuietClick { onJob(job.status) }
                                         .defaultMinSize(minHeight = 52.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -440,7 +440,7 @@ fun OwnerOperatingQuickScreen(
                     Triple("range", "기간 임시 휴업", BmIconId.UPDATED)
                 ).forEach { (option, label, icon) ->
                     Surface(
-                        modifier = Modifier.fillMaxWidth().clickable {
+                        modifier = Modifier.fillMaxWidth().ownerQuietClick {
                             choice = option
                             openWheel = ""
                             error = null
@@ -481,7 +481,7 @@ fun OwnerOperatingQuickScreen(
                         ) {
                             Text(label, style = MaterialTheme.typography.bodyMedium)
                             Surface(
-                                modifier = Modifier.clickable {
+                                modifier = Modifier.ownerQuietClick {
                                     openWheel = if (openWheel == target) "" else target
                                 },
                                 shape = RoundedCornerShape(9.dp),
@@ -610,58 +610,9 @@ fun OwnerOperatingQuickScreen(
 @Composable
 fun OwnerMenuQuickEntryScreen(
     state: MockOwnerLoadState,
+    viewModel: OwnerMockViewModel,
     onRetry: () -> Unit,
     onBack: () -> Unit,
     onNewPhoto: () -> Unit,
-    onExistingJob: (MockImportStatus) -> Unit
-) {
-    val selected = activeBar(state)
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        OwnerHeader("메뉴 관리", onBack)
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(BottleMapSpacing.screenHorizontal),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            if (state == MockOwnerLoadState.Loading) {
-                OwnerLoading("메뉴 정보 불러오는 중")
-            } else if (state is MockOwnerLoadState.Error) {
-                Text(state.message, color = MaterialTheme.colorScheme.error)
-                OwnerActionButton("다시 시도", onRetry)
-            } else if (selected == null) {
-                Text("관리할 매장이 없어요.")
-            } else {
-                val (snapshot, bar) = selected
-                val job = latestOwnerImport(snapshot.imports, bar.barId)
-                Text("최근 갱신 ${ownerDisplayDate(listOfNotNull(
-                    bar.lastMenuPublishedAtEpochMs, bar.lastVerifiedAtEpochMs
-                ).maxOrNull())}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("사진으로 메뉴 추가", style = MaterialTheme.typography.titleMedium)
-                when (job?.status) {
-                    MockImportStatus.PROCESSING -> {
-                        OwnerStatusLabel("AI 분석 중 · 등록 불가", OwnerStatusTone.ATTENTION)
-                        OwnerActionButton("작업 확인하기", { onExistingJob(MockImportStatus.PROCESSING) },
-                            Modifier.fillMaxWidth(), secondary = true)
-                    }
-                    MockImportStatus.READY_FOR_REVIEW -> {
-                        OwnerStatusLabel("메뉴판 확인 준비 완료", OwnerStatusTone.ATTENTION)
-                        OwnerActionButton("추가할 메뉴 확인하기", { onExistingJob(MockImportStatus.READY_FOR_REVIEW) },
-                            Modifier.fillMaxWidth(), secondary = true)
-                    }
-                    MockImportStatus.FAILED -> {
-                        OwnerStatusLabel("메뉴판 분석 실패", OwnerStatusTone.ERROR)
-                        OwnerActionButton("작업 확인하기", { onExistingJob(MockImportStatus.FAILED) },
-                            Modifier.fillMaxWidth(), secondary = true)
-                    }
-                    else -> OwnerActionButton(
-                        "메뉴판 사진으로 추가하기", onNewPhoto, Modifier.fillMaxWidth(), secondary = true
-                    )
-                }
-                HorizontalDivider()
-                Text("현재 게시 메뉴", style = MaterialTheme.typography.titleMedium)
-                Text("게시된 메뉴 ${snapshot.menuItems.count { it.barId == bar.barId }}개")
-                OwnerStatusLabel("메뉴 상세 편집은 다음 단계에서 구현합니다.", OwnerStatusTone.NEUTRAL)
-            }
-        }
-    }
-}
+    onExistingJob: (MockImportStatus) -> Unit,
+) = OwnerManualMenuScreen(state, viewModel, onBack, onNewPhoto, onExistingJob)

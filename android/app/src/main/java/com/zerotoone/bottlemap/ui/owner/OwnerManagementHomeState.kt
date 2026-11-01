@@ -126,7 +126,7 @@ internal fun ownerMenuFreshness(bar: MockBar, atEpochMs: Long): Pair<Long?, Int>
         .maxOrNull() ?: return null to 0
     val elapsed = ChronoUnit.DAYS.between(ownerToday(mostRecent), ownerToday(atEpochMs))
         .coerceAtLeast(0)
-    return elapsed to (100 - elapsed.coerceAtMost(45) * 100 / 45).toInt()
+    return elapsed to (elapsed.coerceAtMost(30) * 100 / 30).toInt()
 }
 
 /** Resolve the actual day at Apply time, not the day captured on screen entry. */

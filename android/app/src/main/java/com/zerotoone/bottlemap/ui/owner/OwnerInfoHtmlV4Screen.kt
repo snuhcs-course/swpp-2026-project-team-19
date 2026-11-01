@@ -241,7 +241,7 @@ fun OwnerInfoHtmlV4Screen(
                 Box(Modifier.fillMaxWidth().height(38.dp)
                     .background(V4Color.elevated, RoundedCornerShape(8.dp))
                     .border(1.dp, V4Color.line, RoundedCornerShape(8.dp))
-                    .clickable { mapVisible = !mapVisible },
+                    .ownerQuietClick { mapVisible = !mapVisible },
                     contentAlignment = Alignment.Center) {
                     Text("⌖  " + (if (mapVisible) "위치 접기" else "위치 확인"),
                         color = V4Color.text, fontSize = 12.sp)

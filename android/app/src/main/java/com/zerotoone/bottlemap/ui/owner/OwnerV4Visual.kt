@@ -3,9 +3,15 @@ package com.zerotoone.bottlemap.ui.owner
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.composed
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,6 +41,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+/** Shared Owner action: no temporary highlight/ripple; unfocus and hide the keyboard. */
+internal fun Modifier.ownerQuietClick(
+    enabled: Boolean = true, onClick: () -> Unit,
+): Modifier = composed {
+    val interaction = remember { MutableInteractionSource() }
+    val focus = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    clickable(enabled = enabled, interactionSource = interaction, indication = null) {
+        focus.clearFocus()
+        keyboard?.hide()
+        onClick()
+    }
+}
 
 /** Exact manager HTML CSS palette (ACTION_FIRST_v4 MANAGER_DOCUMENT). */
 internal object V4Color {
@@ -86,8 +106,15 @@ internal fun V4FormField(
 
 @Composable
 internal fun V4CompactCheck(label: String, checked: Boolean, onChange: (Boolean)->Unit) {
+    val focus = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    val interaction = remember { MutableInteractionSource() }
     Row(verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { onChange(!checked) },
+        modifier = Modifier.clickable(interactionSource = interaction, indication = null) {
+            focus.clearFocus()
+            keyboard?.hide()
+            onChange(!checked)
+        },
         horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Box(Modifier.size(15.dp).background(if (checked) V4Color.primary else
             V4Color.elevated, RoundedCornerShape(4.dp))
@@ -112,7 +139,7 @@ internal fun V4HourButton(text: String, onClick: ()->Unit, modifier: Modifier = 
     Box(modifier.width(75.dp).height(35.dp)
         .background(V4Color.elevated, RoundedCornerShape(6.dp))
         .border(1.dp, V4Color.line, RoundedCornerShape(6.dp))
-        .clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+        .ownerQuietClick(onClick = onClick), contentAlignment = Alignment.Center) {
         Text(text, color = V4Color.text, fontSize = 11.sp, maxLines = 1,
             textAlign = TextAlign.Center)
     }
@@ -125,8 +152,15 @@ internal fun V4Toolbar(title: String?, onBack: () -> Unit) {
         .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.size(40.dp).clickable(onClick = onBack)
-            .semantics { contentDescription = "뒤로가기" },
+        val focus = LocalFocusManager.current
+        val keyboard = LocalSoftwareKeyboardController.current
+        val backInteraction = remember { MutableInteractionSource() }
+        Box(Modifier.size(40.dp).clickable(interactionSource = backInteraction,
+            indication = null) {
+                focus.clearFocus()
+                keyboard?.hide()
+                onBack()
+            }.semantics { contentDescription = "뒤로가기" },
             contentAlignment = Alignment.Center) {
             Text("←", color = V4Color.text, fontSize = 26.sp, lineHeight = 28.sp)
         }
@@ -146,12 +180,15 @@ internal fun V4SearchField(value: String, onChange: (String) -> Unit, tag: Strin
         Text("⌕", color = V4Color.sub, fontSize = 21.sp, lineHeight = 22.sp)
         BasicTextField(
             value = value, onValueChange = onChange, singleLine = true,
-            modifier = Modifier.weight(1f).testTag(tag),
-            textStyle = TextStyle(fontSize = 13.sp, color = V4Color.text),
+            modifier = Modifier.weight(1f).height(26.dp).testTag(tag),
+            textStyle = TextStyle(fontSize = 13.sp, color = V4Color.text,
+                lineHeight = 19.sp),
             decorationBox = { inner ->
-                Box {
+                // Center BOTH the placeholder and actual editable inner text field.
+                // With an empty value Compose otherwise anchors its caret at Box top.
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart) {
                     if (value.isEmpty()) Text(hint, fontSize = 13.sp,
-                        color = Color(0xFF938780))
+                        lineHeight = 19.sp, color = Color(0xFF938780))
                     inner()
                 }
             }
@@ -166,7 +203,7 @@ internal fun V4TagChip(label: String, selected: Boolean = false, onClick: ()->Un
             RoundedCornerShape(7.dp))
             .border(1.dp, if (selected) V4Color.primary else V4Color.line,
                 RoundedCornerShape(7.dp))
-            .clickable(onClick = onClick)
+            .ownerQuietClick(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 7.dp)
     ) {
         Text(label, fontSize = 12.sp, color = if (selected) Color(0xFFF7DFBF)
