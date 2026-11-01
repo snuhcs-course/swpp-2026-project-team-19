@@ -328,60 +328,38 @@ fun OwnerInfoHtmlV4Screen(
                     Text(selectedTags.size.toString() + "/5",
                         style = MaterialTheme.typography.labelMedium)
                 }
-                if (selectedTags.isEmpty()) {
-                    Text("선택한 태그가 없습니다.", style = MaterialTheme.typography.bodySmall)
-                } else {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        selectedTags.forEach { tag ->
-                            OutlinedButton(
-                                modifier = Modifier.widthIn(max = 250.dp),
-                                onClick = {
-                                    selectedTags = selectedTags.filterNot { it == tag }
-                                    error = null
-                                },
-                                contentPadding = PaddingValues(horizontal = 9.dp, vertical = 2.dp),
-                            ) { Text(tag + " ×", style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 2, overflow = TextOverflow.Ellipsis) }
-                        }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                    if (selectedTags.isEmpty()) Text("선택한 태그가 없습니다.",
+                        color = V4Color.sub, fontSize = 11.sp)
+                    selectedTags.forEach { tag ->
+                        V4TagChip(tag + " ×", selected = true, onClick = {
+                            selectedTags = selectedTags.filterNot { it == tag }
+                            error = null
+                        })
                     }
                 }
                 V4SearchField(query, { query = it.take(24) },
                     tag = "owner-tag-search", hint = "태그 검색 또는 새 태그 입력")
-                if (candidates.isEmpty() && query.isNotBlank()) {
-                    Text("검색 결과가 없습니다.", style = MaterialTheme.typography.labelSmall)
-                }
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     candidates.forEach { candidate ->
-                        OutlinedButton(
-                            modifier = Modifier.widthIn(max = 250.dp),
-                            onClick = {
-                                val next = toggleBarTag(selectedTags, candidate)
-                                if (next == null) error = "태그는 최대 5개까지 등록할 수 있어요."
-                                else { selectedTags = next; query = ""; error = null }
-                            },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
-                        ) {
-                            Text(candidate + " ＋", style = MaterialTheme.typography.labelSmall,
-                                maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        }
+                        V4TagChip(candidate + " ＋", onClick = {
+                            val next = toggleBarTag(selectedTags, candidate)
+                            if (next == null) error = "태그는 최대 5개까지 등록할 수 있어요."
+                            else { selectedTags = next; query = ""; error = null }
+                        })
                     }
                     if (canCreate) {
-                        OutlinedButton(
-                            modifier = Modifier.widthIn(max = 250.dp),
+                        V4TagChip("“" + query.trim() + "” 새 태그 등록 ＋",
                             onClick = {
                                 val next = toggleBarTag(selectedTags, query)
                                 if (next == null) error = "태그는 최대 5개까지 등록할 수 있어요."
                                 else { selectedTags = next; query = ""; error = null }
-                            },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
-                        ) {
-                            Text("“" + query.trim() + "” 새 태그 등록 ＋",
-                                style = MaterialTheme.typography.labelSmall)
-                        }
+                            })
                     }
                 }
+                Spacer(Modifier.fillMaxWidth().height(1.dp).background(V4Color.line))
 
                 validation?.let {
                     Text(it, color = MaterialTheme.colorScheme.error,
@@ -391,7 +369,7 @@ fun OwnerInfoHtmlV4Screen(
                     Text(it, color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall)
                 }
-                OwnerActionButton("저장하기", {
+                Button(onClick = {
                     try {
                         val modified = withBarInfo(bar, name, intro, address, phone, pour)
                             .copy(tags = selectedTags)
@@ -400,8 +378,12 @@ fun OwnerInfoHtmlV4Screen(
                     } catch (e: Exception) {
                         error = e.message ?: "저장에 실패했습니다. 다시 시도해 주세요."
                     }
-                }, Modifier.fillMaxWidth().testTag("owner-info-save"),
-                    enabled = validation == null)
+                }, modifier = Modifier.fillMaxWidth().height(56.dp)
+                    .testTag("owner-info-save"), enabled = validation == null,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = V4Color.primary, contentColor = V4Color.background)
+                ) { Text("저장하기", fontSize = 14.sp, fontWeight = FontWeight.Bold) }
                 Spacer(Modifier.height(20.dp))
             }
         }
