@@ -337,6 +337,13 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             item.copy(barMenuItemId = originalId) else item
     }
 
+    private fun requireUnclaimedMenuId(s: MockOwnerSnapshot, item: MockBarMenuItem) {
+        val key = menuHistoryKey(item.barId, item.productId)
+        require(s.menuItemIdHistory.none { (knownKey, knownId) ->
+            knownKey != key && knownId == item.barMenuItemId
+        }) { "Menu item ID already belongs to another bar/product" }
+    }
+
     private fun retainMenuOrder(rows: List<MockBarMenuItem>, item: MockBarMenuItem) =
         if (rows.any { it.barMenuItemId == item.barMenuItemId })
             rows.map { if (it.barMenuItemId == item.barMenuItemId) item else it }
@@ -363,6 +370,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(s.menuItems.none { it.barMenuItemId == item.barMenuItemId &&
                 (it.barId != item.barId || it.productId != item.productId) })
             val saved = retainedMenuId(s, item)
+            requireUnclaimedMenuId(s, saved)
             require(s.menuItems.none { it.barMenuItemId == saved.barMenuItemId &&
                 (it.barId != saved.barId || it.productId != saved.productId) })
             s.copy(menuItems = retainMenuOrder(s.menuItems, saved),
@@ -445,6 +453,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             val newProducts = state.products.filterNot { it.productId == finalProduct.productId } +
                 finalProduct
             val saved = retainedMenuId(state, item)
+            requireUnclaimedMenuId(state, saved)
             require(state.menuItems.none { it.barMenuItemId == saved.barMenuItemId &&
                 (it.barId != saved.barId || it.productId != saved.productId) })
             state.copy(
@@ -579,6 +588,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         // Manual entries may use local-* IDs without advancing the import counter.
         // Reserve against all existing IDs AND those already generated in this publish.
         val usedMenuIds = s.menuItems.mapTo(mutableSetOf()) { it.barMenuItemId }
+        val historicallyReserved = s.menuItemIdHistory.values.toSet()
         val usedOptionIds = s.menuItems.flatMapTo(mutableSetOf()) { item ->
             item.options.map { it.optionId }
         }
@@ -586,7 +596,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             var candidate: String
             do {
                 candidate = "$prefix${index++}"
-            } while (!taken.add(candidate))
+            } while (candidate in historicallyReserved && prefix == "local-menu-" ||
+                !taken.add(candidate))
             return candidate
         }
         val added = grouped.mapNotNull { (productId, lines) ->
