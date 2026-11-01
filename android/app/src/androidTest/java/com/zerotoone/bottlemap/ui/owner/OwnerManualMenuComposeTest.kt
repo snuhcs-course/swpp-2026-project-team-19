@@ -893,7 +893,6 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithText("테스트 저장 오류").assertExists()
         compose.runOnIdle { assertEquals(1, store.saved.menuItems.size) }
         compose.runOnIdle { store.rejectWrites = false }
-        compose.onNodeWithTag("manual-menu-reset").performScrollTo().performClick()
         compose.onNodeWithText("초기화", substring = false).performClick()
         compose.onNodeWithText("테스트 저장 오류").assertDoesNotExist()
         compose.runOnIdle { assertEquals(0, store.saved.menuItems.size) }
