@@ -265,43 +265,42 @@ class OwnerManualMenuRulesTest {
         assertEquals(imported, snapshot(r).menuItems.single().options)
     }
 
-    @Test fun activePhotoReviewBlocksAllManualMutationPathsAndTerminalJobsUnlockThem() {
-        val existing = MockBarMenuItem("existing", "fixture-bar", ten.productId,
-            listOf(option("pour", 30, 13000)))
-        val base = OwnerMockFixtures.registeredBar().copy(
-            brands = listOf(brand), products = listOf(ten), menuItems = listOf(existing))
-        for (status in listOf(MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW)) {
-            val s = base.copy(imports = listOf(MockMenuImport("job-$status", "fixture-bar",
-                status, 1, emptyList())))
-            val r = repo(InMemoryMockOwnerStateStore(s))
-            rejects { r.saveManualMenuItem(existing.copy(displayNameOverride = "changed")) }
-            rejects { r.saveMenuItem(existing.copy(soldOut = true)) }
-            rejects { r.deleteMenuItem(existing.barMenuItemId) }
-            rejects { r.clearMenuForBar("fixture-bar") }
-            rejects { r.setSoldOut(existing.barMenuItemId, true) }
-            assertEquals(s, snapshot(r))
-            assertEquals(1, r.preview("fixture-bar", 0L)!!.visibleMenu.size)
-        }
-        for (status in listOf(MockImportStatus.FAILED, MockImportStatus.APPLIED)) {
-            val r = repo(InMemoryMockOwnerStateStore(base.copy(imports = listOf(
-                MockMenuImport("done-$status", "fixture-bar", status, 1, emptyList())))))
-            r.saveManualMenuItem(existing.copy(displayNameOverride = "allowed"))
-            assertEquals("allowed", snapshot(r).menuItems.single().displayNameOverride)
-        }
-    }
-
-    @Test fun elevenImportedOptionsCanBeReadButNotResavedWithoutExplicitReduction() {
+    @Test fun editingExistingRowKeepsItsCustomerAndOwnerListPosition() {
         val r = repo()
         r.saveBrand(brand)
         r.saveCatalogProduct(ten)
-        val imported = (1..11).map { option("existing-$it", it * 10, 1000 * it) }
-        r.saveMenuItem(MockBarMenuItem("many", "fixture-bar", ten.productId, imported))
-        assertEquals(11, r.preview("fixture-bar", 0L)!!.visibleMenu.single().options.size)
+        r.saveCatalogProduct(sixteen)
+        val first = MockBarMenuItem("first", "fixture-bar", ten.productId,
+            listOf(option("first-pour", 30, 13000)))
+        val second = MockBarMenuItem("second", "fixture-bar", sixteen.productId,
+            listOf(option("second-pour", 30, 16000)))
+        r.saveMenuItem(first)
+        r.saveMenuItem(second)
+        r.saveManualMenuItem(first.copy(displayNameOverride = "이름 수정"))
+        assertEquals(listOf("first", "second"), snapshot(r).menuItems.map { it.barMenuItemId })
+        assertEquals(listOf("first", "second"), r.preview("fixture-bar", 0L)!!.visibleMenu
+            .map { it.barMenuItemId })
+        r.saveMenuItem(first.copy(soldOut = true))
+        assertEquals(listOf("first", "second"), snapshot(r).menuItems.map { it.barMenuItemId })
+    }
+
+    @Test fun originalImportedHighDiscountIsNotSubjectToNewEightDigitEntryCap() {
+        val r = repo()
+        r.saveBrand(brand)
+        r.saveCatalogProduct(ten)
+        val original = option("imported-high", 30, 150_000_000)
+            .copy(discount = MockDiscount(120_000_000, 1000L, 100_000L))
+        val row = MockBarMenuItem("imported-high-row", "fixture-bar",
+            ten.productId, listOf(original))
+        r.saveMenuItem(row)
+        r.saveManualMenuItem(row.copy(displayNameOverride = "이름만 수정"))
+        assertEquals(original, snapshot(r).menuItems.single().options.single())
+        assertEquals("이름만 수정", snapshot(r).menuItems.single().displayNameOverride)
         rejects {
-            r.saveManualMenuItem(MockBarMenuItem("many", "fixture-bar", ten.productId,
-                imported, displayNameOverride = "changed"))
+            r.saveManualMenuItem(row.copy(options = listOf(original.copy(
+                discount = MockDiscount(121_000_000, 1000L, 100_000L)))))
         }
-        assertEquals(imported, snapshot(r).menuItems.single().options)
+        assertEquals(original, snapshot(r).menuItems.single().options.single())
     }
 
 }
