@@ -79,6 +79,13 @@ class OwnerBarEditRulesTest {
         assertEquals(saturday, copied.last())
         val unset = copyMondayToWeekdays(listOf(saturday))
         assertEquals(listOf(saturday), unset)
+        // Regression: Monday is absent, but edits for Tue-Fri already exist.
+        // Copying from an unset day must not silently erase those drafts.
+        val tuesday = MockWeeklyHours(2, false, 18 * 60, 23 * 60)
+        val wednesday = MockWeeklyHours(3, true)
+        val friday = MockWeeklyHours(5, false, 20 * 60, 23 * 60)
+        val existing = listOf(tuesday, wednesday, friday, saturday)
+        assertEquals(existing, copyMondayToWeekdays(existing))
     }
 
     @Test fun weeklyHourValidationSeparatesUnsetClosedRegularAndOvernight() {
