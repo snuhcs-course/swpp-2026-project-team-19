@@ -1,6 +1,8 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,12 +23,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +44,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
@@ -122,6 +132,31 @@ fun OwnerInfoHtmlV4Screen(
     var query by rememberSaveable { mutableStateOf("") }
     var mapVisible by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var discardPrompt by rememberSaveable { mutableStateOf(false) }
+    val hasEdits = bar != null && (
+        name != bar.name || intro != bar.description.orEmpty() ||
+        address != bar.address || phone != bar.phone.orEmpty() ||
+        pour != bar.defaultPourMl?.toString().orEmpty() ||
+        selectedTags != bar.tags || weekly != bar.weeklyHours
+    )
+    fun requestExit() { if (hasEdits) discardPrompt = true else onBack() }
+    BackHandler { requestExit() }
+    if (discardPrompt) {
+        AlertDialog(
+            onDismissRequest = { discardPrompt = false },
+            containerColor = V4Color.surface,
+            titleContentColor = V4Color.text,
+            textContentColor = V4Color.sub,
+            title = { Text("변경을 취소할까요?") },
+            text = { Text("저장하지 않은 수정 사항은 사라집니다.") },
+            confirmButton = { TextButton(onClick = { discardPrompt = false; onBack() }) {
+                Text("변경 취소", color = V4Color.primary)
+            } },
+            dismissButton = { TextButton(onClick = { discardPrompt = false }) {
+                Text("계속 편집", color = V4Color.text)
+            } },
+        )
+    }
 
     val candidates = (OWNER_HTML_V4_TAGS + selected?.first?.bars.orEmpty().flatMap { it.tags })
         .distinctBy { it.lowercase() }
@@ -133,13 +168,16 @@ fun OwnerInfoHtmlV4Screen(
             .none { it.equals(query.trim(), ignoreCase = true) }
     val validation = barInfoError(name, intro, address, phone, pour)
         ?: weeklyHoursError(weekly)
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        OwnerHeader("매장 정보 관리", onBack)
+    Column(Modifier.fillMaxSize().background(V4Color.background)) {
+        OwnerHeader("매장 정보 관리", ::requestExit)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(horizontal = BottleMapSpacing.screenHorizontal),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+                .padding(horizontal = 20.dp, vertical = 21.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            Text("매장 정보 관리", fontSize = 24.sp, color = V4Color.text,
+                fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
+                lineHeight = 32.sp)
             if (bar == null) {
                 when (state) {
                     is MockOwnerLoadState.Error -> {
