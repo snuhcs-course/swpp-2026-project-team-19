@@ -153,11 +153,12 @@ private fun OwnerPreviewV4MenuRow(
             }
         }
         Text(product?.let {
+                val name = item.displayNameOverride ?: it.displayName
                 if (ownerV4Category(it.category) == "위스키") {
-                    val rest = it.displayName.removePrefix(brandName).trim()
-                    if (rest.isNotBlank() && it.displayName.startsWith(brandName)) rest
-                    else it.displayName
-                } else it.displayName
+                    val rest = name.removePrefix(brandName).trim()
+                    if (rest.isNotBlank() && name.startsWith(brandName)) rest
+                    else name
+                } else name
             } ?: "상품 정보 없음",
             modifier = Modifier.weight(1f), color = V4Color.text,
             fontWeight = FontWeight.Bold, fontSize = 12.sp)
