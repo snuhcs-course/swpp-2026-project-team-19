@@ -765,16 +765,17 @@ private fun OwnerManualMenuRow(
     item: MockBarMenuItem, product: MockCatalogProduct, brand: String, selected: Boolean,
     onSelect: () -> Unit, onEdit: () -> Unit, onStock: () -> Unit
 ) {
-    Box(Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 3.dp)
-        .background(V4Color.surface, RoundedCornerShape(9.dp))
-        .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
-        .height(80.dp).clickable(onClick = onSelect)
-        .testTag("manual-menu-row-" + item.barMenuItemId)) {
-        Row(Modifier.fillMaxSize().padding(horizontal = 7.dp),
+    // Product rows are flat menu lines, not separate bordered cards.
+    // Selected actions cover exactly the price region: height never changes.
+    Box(Modifier.fillMaxWidth().height(74.dp)
+        .background(V4Color.background)
+        .manualTap(onSelect).testTag("manual-menu-row-" + item.barMenuItemId)) {
+        Row(Modifier.fillMaxSize().padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            Box(Modifier.size(width = 42.dp, height = 54.dp)
-                .background(Color(0xFF40352C), RoundedCornerShape(6.dp)),
+            horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+            Box(Modifier.size(width = 37.dp, height = 49.dp)
+                .background(Color(0xFF40352C), RoundedCornerShape(6.dp))
+                .border(1.dp, V4Color.line, RoundedCornerShape(6.dp)),
                 contentAlignment = Alignment.Center) {
                 Canvas(Modifier.size(width = 27.dp, height = 40.dp)) {
                     val u = size.width / 27f
@@ -784,47 +785,83 @@ private fun OwnerManualMenuRow(
                     drawRect(Color(0xFFE1D2B5), Offset(6*u, 18*u), Size(15*u, 12*u))
                 }
             }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(manualMenuShortName(product.copy(
                     displayName = item.displayNameOverride ?: product.displayName), brand),
-                    color = V4Color.text,
-                    fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 2)
-                Text(if (item.soldOut) "품절" else "판매 중", fontSize = 10.sp,
-                    color = if (item.soldOut) Color(0xFFFFB4AB) else V4Color.positive)
-                if (!product.catalogMatched)
-                    Text("카탈로그 미확인", color = V4Color.sub, fontSize = 9.sp)
+                    color = if (item.soldOut) V4Color.sub else V4Color.text,
+                    fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                    maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Box(Modifier.border(1.dp, if (item.soldOut) Color(0xFFA36A63)
+                    else V4Color.line, RoundedCornerShape(4.dp))
+                    .padding(horizontal = 3.dp, vertical = 1.dp),
+                    contentAlignment = Alignment.Center) {
+                    Text(if (item.soldOut) "품절" else "판매 중",
+                        fontSize = 9.sp, maxLines = 1,
+                        color = if (item.soldOut) Color(0xFFFFB4AB) else V4Color.sub)
+                }
             }
-            Column(Modifier.widthIn(min = 96.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            // Reserve the same price column for every category, even without ml.
+            Column(Modifier.width(121.dp),
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+                horizontalAlignment = Alignment.End) {
                 item.options.take(3).forEach { option ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    val discount = option.discount
+                    val active = discount != null &&
+                        System.currentTimeMillis() >= discount.startAtEpochMs &&
+                        System.currentTimeMillis() < discount.endAtEpochMs
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
                         verticalAlignment = Alignment.CenterVertically) {
-                        val discount = option.discount
-                        val active = discount != null &&
-                            System.currentTimeMillis() >= discount.startAtEpochMs &&
-                            System.currentTimeMillis() < discount.endAtEpochMs
-                        if (active) Text("할인", color = V4Color.primary, fontSize = 9.sp,
-                            modifier = Modifier.border(1.dp, V4Color.primary,
-                                RoundedCornerShape(4.dp)).padding(horizontal = 3.dp))
+                        Box(Modifier.width(25.dp), contentAlignment = Alignment.CenterEnd) {
+                            if (active) Text("할인", color = Color(0xFFF7DFBF),
+                                fontSize = 8.sp, maxLines = 1,
+                                modifier = Modifier
+                                    .background(Color(0xFF4B3826), RoundedCornerShape(3.dp))
+                                    .border(1.dp, Color(0xFF9C7A52), RoundedCornerShape(3.dp))
+                                    .padding(horizontal = 2.dp))
+                        }
                         Text(option.pourMl?.toString()?.plus("ml") ?: option.label.orEmpty(),
-                            color = V4Color.text, fontSize = 10.sp)
+                            modifier = Modifier.width(33.dp),
+                            color = V4Color.text, fontSize = 10.sp,
+                            maxLines = 1, textAlign = TextAlign.Start)
                         Text("%,d원".format(option.displayPrice(System.currentTimeMillis())),
-                            color = V4Color.sub, fontSize = 10.sp)
+                            modifier = Modifier.weight(1f),
+                            color = V4Color.sub, fontSize = 10.sp,
+                            maxLines = 1, textAlign = TextAlign.End)
                     }
                 }
             }
         }
-        if (selected) Row(Modifier.align(Alignment.CenterEnd)
-            .background(V4Color.elevated, RoundedCornerShape(8.dp))
-            .padding(6.dp), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text("수정", Modifier.background(V4Color.background, RoundedCornerShape(6.dp))
-                .border(1.dp, V4Color.primary, RoundedCornerShape(6.dp))
-                .clickable(onClick = onEdit).padding(8.dp)
-                .testTag("manual-menu-row-edit"), color = V4Color.primary, fontSize = 12.sp)
-            Text(if (item.soldOut) "재개" else "품절",
-                Modifier.background(V4Color.background, RoundedCornerShape(6.dp))
-                    .border(1.dp, V4Color.line, RoundedCornerShape(6.dp))
-                    .clickable(onClick = onStock).padding(8.dp)
-                    .testTag("manual-menu-row-stock"), color = V4Color.text, fontSize = 12.sp)
+        if (selected) {
+            // Opaque overlay: covers EVERY price/volume glyph, while its background
+            // remains identical to the flat product row.
+            Row(Modifier.align(Alignment.CenterEnd)
+                .fillMaxHeight().width(128.dp)
+                .background(V4Color.background).padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                ManualRowAction("수정", BmIconId.REVIEW, onEdit,
+                    Modifier.weight(1f).testTag("manual-menu-row-edit"))
+                ManualRowAction(if (item.soldOut) "재개" else "품절",
+                    BmIconId.ERROR, onStock,
+                    Modifier.weight(1f).testTag("manual-menu-row-stock"))
+            }
         }
+    }
+}
+
+@Composable
+private fun ManualRowAction(
+    text: String, icon: BmIconId, onClick: () -> Unit, modifier: Modifier = Modifier
+) {
+    Column(modifier.height(49.dp)
+        .background(V4Color.elevated, RoundedCornerShape(7.dp))
+        .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
+        .manualTap(onClick), horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center) {
+        BmIcon(icon, null, Modifier.size(16.dp), V4Color.sub)
+        Spacer(Modifier.height(2.dp))
+        Text(text, color = V4Color.text, fontSize = 10.sp)
     }
 }
