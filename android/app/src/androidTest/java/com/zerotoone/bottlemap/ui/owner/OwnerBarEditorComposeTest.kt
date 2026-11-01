@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.performScrollTo
@@ -175,6 +176,25 @@ class OwnerBarEditorComposeTest {
         compose.onNodeWithText("02-1234-5678").assertIsDisplayed()
         compose.onNodeWithTag("owner-preview-manage").performClick()
         compose.runOnIdle { assertEquals(1, manageCount) }
+    }
+
+    @Test fun operatingCustomerNoteStopsAt100CharactersWithoutCounter() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        compose.setContent {
+            MaterialTheme {
+                OwnerOperatingQuickScreen(
+                    vm.state.collectAsState().value, vm, onBack = {})
+            }
+        }
+        compose.onNodeWithText("오늘 휴무").performClick()
+        compose.onNodeWithTag("owner-operating-note").performTextInput("가".repeat(115))
+        compose.runOnIdle {
+            val actual = compose.onNodeWithTag("owner-operating-note")
+                .fetchSemanticsNode().config[SemanticsProperties.EditableText].text
+            assertEquals("가".repeat(100), actual)
+        }
+        compose.onNodeWithText("100자", substring = true).assertDoesNotExist()
     }
 
     @Test fun customerStatusNoteAppearsAboveLabelOnlyWhenRequested() {
