@@ -60,7 +60,7 @@ fun manualMenuOptionError(options: List<MockMenuOption>, category: String): Stri
     if (options.any { it.priceKrw !in 1..MAX_OWNER_MENU_PRICE_KRW })
         return "가격은 1원 이상, 1억 원 미만이어야 해요."
     if (manualMenuCategoryLabel(category) == "위스키" && options.any {
-            it.label != "Bottle" && (it.pourMl == null || it.pourMl <= 0)
+            it.label != "Bottle" && (it.pourMl == null || it.pourMl !in 1..32767)
         }) return "용량을 입력하거나 Bottle 판매를 선택해 주세요."
     if (options.distinctBy { it.identityKey() }.size != options.size)
         return "같은 제품에 동일한 용량 옵션을 중복 등록할 수 없어요."
