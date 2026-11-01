@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.graphics.Color
@@ -254,7 +255,7 @@ fun OwnerInfoHtmlV4Screen(
                     val setting = weekly.firstOrNull { it.isoDayOfWeek == day }
                     Column(Modifier.fillMaxWidth()) {
                         BoxWithConstraints {
-                            val wrapControls = maxWidth < 335.dp
+                            val wrapControls = maxWidth < 335.dp || LocalDensity.current.fontScale > 1.25f
                             Column {
                                 Row(Modifier.fillMaxWidth().heightIn(min = 49.dp),
                                     verticalAlignment = Alignment.CenterVertically,
