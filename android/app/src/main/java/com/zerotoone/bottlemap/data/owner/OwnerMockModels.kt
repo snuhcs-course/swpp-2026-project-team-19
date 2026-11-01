@@ -90,6 +90,9 @@ data class MockCatalogProduct(
     val category: String = "whisky",
     val ageYears: Int? = null,
     val editionName: String? = null,
+    // Local manual-menu state only. Never infer a verified catalog match from a name.
+    val catalogMatched: Boolean = true,
+    val otherAlcoholKind: String? = null,
 )
 
 data class MockDiscount(
