@@ -887,6 +887,7 @@ class OwnerManualMenuComposeTest {
             assertEquals(false, (vm.state.value as MockOwnerLoadState.Ready)
                 .snapshot.menuItems.single().soldOut)
         }
+        compose.onNodeWithText("취소").performClick()
         compose.onNodeWithTag("manual-menu-reset").performScrollTo().performClick()
         compose.onNodeWithText("초기화", substring = false).performClick()
         compose.onNodeWithText("테스트 저장 오류").assertExists()
