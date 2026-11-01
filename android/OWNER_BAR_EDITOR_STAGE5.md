@@ -1,5 +1,17 @@
 # I3 Owner Flow Stage 5 — editable bar information (Android Mock)
 
+## UI parity correction — 2026-11-01 user screenshots
+
+**Authority:** final Google Drive ACTION_FIRST_v4 HTML and the four reference screenshots of the info form/customer preview. This revision changes *presentation only*, except for the user's explicit Back/discard policy and customer next-time projection.
+
+- Info screen: dark CSS palette (`#211E1B` background, `#3A332E` field surfaces, `#51473F` outlines, `#C99D6B` primary), serif 24sp page heading beneath the compact 12sp toolbar, 13sp labels, 45dp form fields and 75dp multiline intro; 153x108dp photo strip, divider rows, 56dp tan Save button.
+- Weekly opening hours: CSS-style single-line weekday / 14dp closed check / 75x35dp opening and closing / overnight check at normal widths, wrapped only on narrow portrait devices or high font scale. Removed the non-HTML explanatory text.
+- Tags: flat search field with search glyph, max-five chips with selection/remove and suggestion chips; no default Material filled labels.
+- Preview: no default-pour line; the text **영업 중 · 익일 HH:mm 종료** is inline with the chevron that expands the full weekly schedule. Map and Phone remain separate small actions. Tags are individual 11sp pills; menu is a category/brand hierarchy, grouped volume-price rows as `menuGroups(true)`, and displayed only from the existing Mock snapshot.
+- **User-approved behavioral override:** earlier HTML draft silently discarded the single-form draft on Back. The latest explicit user QA requirement is *show a confirmation before discarding unsaved changes*; toolbar and Android system Back both call that confirmation. Keeping edits returns to the form, explicitly discarding leaves prior Mock data intact. Photo edits still commit immediately and are not undone by leaving the info draft.
+- QA: unit coverage added for overnight status next text. Compose UI tests now check dirty Back dialog and preview chevron. Debug build, JVM unit, lint and emulator UI CI must pass for the *latest commit*. Pixel-level accuracy needs Galaxy S23 manual visual comparison.
+
+
 ## ACTION_FIRST_v4 source reconciliation (2026-11-01)
 
 - **Exact source inspected**: Google Drive `BottleMap_owner_flow_ACTION_FIRST_v4.html`, original Drive file ID `1rJh9r2Lkt8AHKHCQTBhMnTjd3dgitszj` (HTML, 360,007 bytes per Drive metadata; read using Drive connector). Management UI is the embedded `MANAGER_DOCUMENT`, not the outer registration sample.
