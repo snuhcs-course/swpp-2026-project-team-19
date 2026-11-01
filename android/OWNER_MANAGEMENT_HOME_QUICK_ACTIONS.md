@@ -13,7 +13,7 @@
 
 ## Data and invariants
 
-- `lastMenuPublishedAtEpochMs` is a **local Mock domain field** updated only by `publishAddOnly()` when a pending import becomes `APPLIED`. It is distinct from `lastVerifiedAtEpochMs`, which is updated only when the owner taps `지금도 맞아요`. Neither should overwrite the other. The 30-day age gauge uses the more recent of the two dates, counts elapsed calendar days in Asia/Seoul, and clamps at 100% from day 30 onward. It displays age, **not freshness**; confirmation resets the gauge to empty.
+- `lastMenuPublishedAtEpochMs` is a **local Mock domain field** updated when `publishAddOnly()` applies an import and when `saveManualMenuItem()`, an actual `setSoldOut()` change, `deleteMenuItem()`, or a non-empty `clearMenuForBar()` changes the published menu. Merely viewing a menu, a no-op stock update, and `지금도 맞아요` do not advance the publish timestamp. It is distinct from `lastVerifiedAtEpochMs`, which is updated only when the owner taps `지금도 맞아요`. Neither should overwrite the other. The 30-day age gauge uses the more recent of the two dates, counts elapsed calendar days in Asia/Seoul, and clamps at 100% from day 30 onward. It displays age, **not freshness**; confirmation resets the gauge to empty.
 - `MockOperatingException` already represented today closed, custom hours and vacation. The optional `closesNextDay` field supports quick overnight exceptions. Overlapping quick exceptions are replaced by the new applied exception; unrelated future exceptions are kept.
 - Date logic is explicitly Asia/Seoul, including midnight and overnight edges. No server authority is inferred from this local mock.
 - Preview entry is present only on the management home header. Manager info/menu detail/edit remain next-iteration placeholders.
