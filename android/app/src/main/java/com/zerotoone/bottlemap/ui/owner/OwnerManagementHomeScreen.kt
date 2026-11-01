@@ -610,58 +610,9 @@ fun OwnerOperatingQuickScreen(
 @Composable
 fun OwnerMenuQuickEntryScreen(
     state: MockOwnerLoadState,
+    viewModel: OwnerMockViewModel,
     onRetry: () -> Unit,
     onBack: () -> Unit,
     onNewPhoto: () -> Unit,
-    onExistingJob: (MockImportStatus) -> Unit
-) {
-    val selected = activeBar(state)
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        OwnerHeader("메뉴 관리", onBack)
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(BottleMapSpacing.screenHorizontal),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            if (state == MockOwnerLoadState.Loading) {
-                OwnerLoading("메뉴 정보 불러오는 중")
-            } else if (state is MockOwnerLoadState.Error) {
-                Text(state.message, color = MaterialTheme.colorScheme.error)
-                OwnerActionButton("다시 시도", onRetry)
-            } else if (selected == null) {
-                Text("관리할 매장이 없어요.")
-            } else {
-                val (snapshot, bar) = selected
-                val job = latestOwnerImport(snapshot.imports, bar.barId)
-                Text("최근 갱신 ${ownerDisplayDate(listOfNotNull(
-                    bar.lastMenuPublishedAtEpochMs, bar.lastVerifiedAtEpochMs
-                ).maxOrNull())}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("사진으로 메뉴 추가", style = MaterialTheme.typography.titleMedium)
-                when (job?.status) {
-                    MockImportStatus.PROCESSING -> {
-                        OwnerStatusLabel("AI 분석 중 · 등록 불가", OwnerStatusTone.ATTENTION)
-                        OwnerActionButton("작업 확인하기", { onExistingJob(MockImportStatus.PROCESSING) },
-                            Modifier.fillMaxWidth(), secondary = true)
-                    }
-                    MockImportStatus.READY_FOR_REVIEW -> {
-                        OwnerStatusLabel("메뉴판 확인 준비 완료", OwnerStatusTone.ATTENTION)
-                        OwnerActionButton("추가할 메뉴 확인하기", { onExistingJob(MockImportStatus.READY_FOR_REVIEW) },
-                            Modifier.fillMaxWidth(), secondary = true)
-                    }
-                    MockImportStatus.FAILED -> {
-                        OwnerStatusLabel("메뉴판 분석 실패", OwnerStatusTone.ERROR)
-                        OwnerActionButton("작업 확인하기", { onExistingJob(MockImportStatus.FAILED) },
-                            Modifier.fillMaxWidth(), secondary = true)
-                    }
-                    else -> OwnerActionButton(
-                        "메뉴판 사진으로 추가하기", onNewPhoto, Modifier.fillMaxWidth(), secondary = true
-                    )
-                }
-                HorizontalDivider()
-                Text("현재 게시 메뉴", style = MaterialTheme.typography.titleMedium)
-                Text("게시된 메뉴 ${snapshot.menuItems.count { it.barId == bar.barId }}개")
-                OwnerStatusLabel("메뉴 상세 편집은 다음 단계에서 구현합니다.", OwnerStatusTone.NEUTRAL)
-            }
-        }
-    }
-}
+    onExistingJob: (MockImportStatus) -> Unit,
+) = OwnerManualMenuScreen(state, viewModel, onBack, onNewPhoto, onExistingJob)
