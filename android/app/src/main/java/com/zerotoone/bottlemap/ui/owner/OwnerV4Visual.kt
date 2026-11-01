@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -33,8 +34,28 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+/**
+ * Owner heading used by both management and the local customer preview.
+ * SansSerif/Black is intentional: the Korean Serif fallback did not show a bold face
+ * on the Galaxy S23, despite requesting FontWeight.Bold.
+ */
+@Composable
+internal fun V4BarName(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = name,
+        modifier = modifier,
+        style = MaterialTheme.typography.headlineSmall.copy(
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.Black,
+        ),
+        color = V4Color.text,
+        maxLines = 1,
+    )
+}
 
 /** Exact manager HTML CSS palette (ACTION_FIRST_v4 MANAGER_DOCUMENT). */
 internal object V4Color {
