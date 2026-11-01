@@ -27,10 +27,16 @@ internal fun ownerPreviewNextText(bar: MockBar, atEpochMs: Long): String {
     val prevRegular = bar.weeklyHours.firstOrNull { it.isoDayOfWeek == prevDay }
     val prevClosed = prevException?.kind == MockExceptionKind.CLOSED_TODAY ||
         prevException?.kind == MockExceptionKind.VACATION
-    val previousClose = if (prevClosed) null else
-        if (prevException?.kind == MockExceptionKind.CUSTOM_HOURS &&
-            prevException.closesNextDay) prevException.closeMinutes
-        else prevRegular?.takeIf { !it.closed && it.closesNextDay }?.closeMinutes
+    // Yesterday's exception supersedes that day's regular shift, even when
+    // the exception did not run overnight. Do not resurrect the old close time.
+    val previousClose = when {
+        prevClosed -> null
+        prevException?.kind == MockExceptionKind.CUSTOM_HOURS ->
+            prevException.takeIf { it.closesNextDay }?.closeMinutes
+        prevException == null ->
+            prevRegular?.takeIf { !it.closed && it.closesNextDay }?.closeMinutes
+        else -> null
+    }
     if (state == "영업 중" && previousClose != null && minute < previousClose)
         return formatClose(previousClose, false)
 
