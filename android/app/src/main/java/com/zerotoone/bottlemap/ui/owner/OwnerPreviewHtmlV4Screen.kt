@@ -150,7 +150,9 @@ fun OwnerPreviewHtmlV4Screen(
             } else {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    V4BarName(bar.name, modifier = Modifier.weight(1f))
+                    Text(bar.name, color = V4Color.text, fontSize = 22.sp,
+                        fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f))
                     OutlinedButton(
                         onClick = onManage,
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(
