@@ -92,7 +92,7 @@ private fun shortTime(v: Int?): String =
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun OwnerInfoHtmlV4LegacyScreen(
+fun OwnerInfoHtmlV4Screen(
     state: MockOwnerLoadState,
     viewModel: OwnerMockViewModel,
     onBack: () -> Unit,
