@@ -940,4 +940,157 @@ class OwnerManualMenuComposeTest {
             .assertTextEquals("우리 매장 진저 하이볼")
     }
 
+    @Test fun activeLocalDuplicateOffersExistingItemAndDoesNotCreateAnotherProduct() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val product = MockCatalogProduct("local-unverified-active-duplicate",
+            "active-duplicate-brand", "소규모 위스키 17년",
+            category = "whisky", catalogMatched = false)
+        r.saveManualMenuItem(MockBarMenuItem("active-duplicate-row", "fixture-bar",
+            product.productId, listOf(MockMenuOption("active-duplicate-option",
+                pourMl = 30, priceKrw = 12000))),
+            product, MockBrand(product.brandId, "기타 브랜드"))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithTag("manual-menu-name")
+            .performTextReplacement("소규모 위스키 17년")
+        compose.onNodeWithText("“소규모 위스키 17년”이 맞나요?").assertExists()
+        // An accidental Save without confirming cannot create a second local ID.
+        compose.onNodeWithTag("manual-menu-ml-0").performTextReplacement("45")
+        compose.onNodeWithTag("manual-menu-price-0").performTextReplacement("16000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.onNodeWithText(
+            "이미 등록한 상품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요.").assertExists()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snap.products.size)
+            assertEquals(1, snap.menuItems.size)
+        }
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithText("기존 메뉴에서 용량·가격 수정").performClick()
+        compose.onNodeWithTag("manual-menu-price-0").performScrollTo()
+            .performTextReplacement("17000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snap.products.size)
+            assertEquals(1, snap.menuItems.size)
+            assertEquals(product.productId, snap.menuItems.single().productId)
+            assertEquals("active-duplicate-row", snap.menuItems.single().barMenuItemId)
+            assertEquals(17000, snap.menuItems.single().options.single().priceKrw)
+        }
+    }
+
+    @Test fun readdingDeletedUnsharedLocalProductPersistsNameAndOtherAlcoholSubtype() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val product = MockCatalogProduct("local-unverified-deleted-subtype",
+            "deleted-subtype-brand", "직접 등록한 리큐르",
+            category = "otherAlcohol", catalogMatched = false,
+            otherAlcoholKind = "리큐르")
+        r.saveManualMenuItem(MockBarMenuItem("deleted-subtype-row", "fixture-bar",
+            product.productId, listOf(MockMenuOption("original-subtype-option",
+                priceKrw = 18000))),
+            product, MockBrand(product.brandId, "기타 브랜드"))
+        r.deleteMenuItem("deleted-subtype-row")
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithText("위스키", substring = false).performClick()
+        compose.onNodeWithText("기타 주류", substring = false).performClick()
+        compose.onNodeWithTag("manual-menu-name")
+            .performTextReplacement("직접 등록한 리큐르")
+        compose.onNodeWithText("“직접 등록한 리큐르”이 맞나요?").assertExists()
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithTag("manual-menu-alcohol-kind").assertTextEquals("리큐르")
+        compose.onNodeWithTag("manual-menu-name")
+            .performTextReplacement("우리 가게 시그니처 리큐르")
+        compose.onNodeWithTag("manual-menu-alcohol-kind")
+            .performTextReplacement("시그니처 리큐르")
+        compose.onNodeWithTag("manual-menu-price-0").performScrollTo()
+            .performTextReplacement("21000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snap.products.size)
+            assertEquals(product.productId, snap.products.single().productId)
+            assertEquals("우리 가게 시그니처 리큐르", snap.products.single().displayName)
+            assertEquals("시그니처 리큐르", snap.products.single().otherAlcoholKind)
+            assertEquals(null, snap.menuItems.single().displayNameOverride)
+            assertEquals("deleted-subtype-row", snap.menuItems.single().barMenuItemId)
+            assertEquals(21000, snap.menuItems.single().options.single().priceKrw)
+        }
+        compose.onNodeWithText("기타 주류", substring = false).performScrollTo().performClick()
+        compose.onNodeWithTag("manual-menu-row-deleted-subtype-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-name")
+            .assertTextEquals("우리 가게 시그니처 리큐르")
+        compose.onNodeWithTag("manual-menu-alcohol-kind")
+            .assertTextEquals("시그니처 리큐르")
+    }
+
+    @Test fun readdingDeletedSharedLocalProductOnlyChangesThisBarsDisplayName() {
+        val fixture = OwnerMockFixtures.registeredBar()
+        val r = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(fixture.copy(
+            bars = fixture.bars + MockBar("other-bar", "다른 매장", "서울"))))
+        val product = MockCatalogProduct("local-unverified-deleted-shared",
+            "deleted-shared-brand", "공유 수제 리큐르",
+            category = "otherAlcohol", catalogMatched = false,
+            otherAlcoholKind = "리큐르")
+        r.saveManualMenuItem(MockBarMenuItem("deleted-shared-row", "fixture-bar",
+            product.productId, listOf(MockMenuOption("deleted-shared-option",
+                priceKrw = 18000))),
+            product, MockBrand(product.brandId, "기타 브랜드"))
+        r.saveManualMenuItem(MockBarMenuItem("other-bar-shared-row", "other-bar",
+            product.productId, listOf(MockMenuOption("other-bar-shared-option",
+                priceKrw = 19000))))
+        r.deleteMenuItem("deleted-shared-row")
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithText("위스키", substring = false).performClick()
+        compose.onNodeWithText("기타 주류", substring = false).performClick()
+        compose.onNodeWithTag("manual-menu-name")
+            .performTextReplacement("공유 수제 리큐르")
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithTag("manual-menu-name")
+            .performTextReplacement("우리 매장 수제 리큐르")
+        compose.onNodeWithTag("manual-menu-alcohol-kind")
+            .performTextReplacement("다른 종류")
+        compose.onNodeWithTag("manual-menu-price-0").performScrollTo()
+            .performTextReplacement("20000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.onNodeWithText("다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요.")
+            .assertExists()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snap.menuItems.size)
+            assertEquals("리큐르", snap.products.single().otherAlcoholKind)
+        }
+        compose.onNodeWithTag("manual-menu-alcohol-kind")
+            .performTextReplacement("리큐르")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snap.products.size)
+            assertEquals("공유 수제 리큐르", snap.products.single().displayName)
+            assertEquals("리큐르", snap.products.single().otherAlcoholKind)
+            assertEquals("우리 매장 수제 리큐르",
+                snap.menuItems.single { it.barId == "fixture-bar" }.displayNameOverride)
+            assertEquals(null,
+                snap.menuItems.single { it.barId == "other-bar" }.displayNameOverride)
+            assertEquals("deleted-shared-row",
+                snap.menuItems.single { it.barId == "fixture-bar" }.barMenuItemId)
+            assertEquals(19000,
+                r.preview("other-bar", 0L)!!.visibleMenu.single().options.single().priceKrw)
+        }
+    }
+
 }
