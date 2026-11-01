@@ -68,28 +68,37 @@ private fun manualId(prefix: String) = prefix + UUID.randomUUID().toString()
 /** Serializable as a single String through rememberSaveable; never sent to Backend. */
 private data class DraftOption(
     val id: String, val bottle: Boolean = false, val ml: String = "",
-    val price: String = "", val sale: String = "", val start: String = "", val end: String = ""
+    val price: String = "", val sale: String = "", val start: String = "", val end: String = "",
+    val originalStartMs: String = "", val originalEndMs: String = ""
 ) {
-    fun serialize() = listOf(id, if (bottle) "1" else "0", ml, price, sale, start, end)
+    fun serialize() = listOf(id, if (bottle) "1" else "0", ml, price, sale, start, end,
+        originalStartMs, originalEndMs)
         .joinToString("\u001f")
 }
 private fun freshOption() = DraftOption(manualId("local-serving-"))
 private fun decodedOptions(value: String): List<DraftOption> =
     if (value.isBlank()) emptyList() else value.split("\u001e").mapNotNull { row ->
         val p = row.split("\u001f")
-        if (p.size != 7) null else DraftOption(p[0], p[1] == "1", p[2], p[3], p[4], p[5], p[6])
+        if (p.size != 7 && p.size != 9) null else DraftOption(p[0], p[1] == "1",
+            p[2], p[3], p[4], p[5], p[6],
+            p.getOrElse(7) { "" }, p.getOrElse(8) { "" })
     }
 private fun encodedOptions(v: List<DraftOption>): String =
     v.joinToString("\u001e") { it.serialize() }
+private fun localDiscountEndDay(endAtEpochMs: Long): LocalDate {
+    val local = Instant.ofEpochMilli(endAtEpochMs).atZone(ownerManualZone)
+    return if (local.toLocalTime() == java.time.LocalTime.MIDNIGHT)
+        local.toLocalDate().minusDays(1) else local.toLocalDate()
+}
 private fun fromSaved(o: MockMenuOption) = DraftOption(
     o.optionId, o.label == "Bottle", o.pourMl?.toString().orEmpty(), o.priceKrw.toString(),
     o.discount?.discountedPriceKrw?.toString().orEmpty(),
     o.discount?.startAtEpochMs?.let {
         Instant.ofEpochMilli(it).atZone(ownerManualZone).toLocalDate().toString()
     }.orEmpty(),
-    o.discount?.endAtEpochMs?.let {
-        Instant.ofEpochMilli(it).atZone(ownerManualZone).toLocalDate().minusDays(1).toString()
-    }.orEmpty()
+    o.discount?.endAtEpochMs?.let { localDiscountEndDay(it).toString() }.orEmpty(),
+    o.discount?.startAtEpochMs?.toString().orEmpty(),
+    o.discount?.endAtEpochMs?.toString().orEmpty()
 )
 private fun toOption(d: DraftOption, whisky: Boolean): MockMenuOption {
     val price = d.price.toIntOrNull() ?: throw IllegalArgumentException("가격을 숫자로 입력해 주세요.")
@@ -97,7 +106,7 @@ private fun toOption(d: DraftOption, whisky: Boolean): MockMenuOption {
         "가격은 1원 이상, 1억 원 미만이어야 해요."
     }
     val ml = if (whisky && !d.bottle) d.ml.toIntOrNull() else null
-    if (whisky && !d.bottle) require(ml != null && ml > 0) {
+    if (whisky && !d.bottle) require(ml != null && ml in 1..32767) {
         "용량을 입력하거나 Bottle 판매를 선택해 주세요."
     }
     val discount = if (d.sale.isEmpty()) null else {
@@ -110,7 +119,15 @@ private fun toOption(d: DraftOption, whisky: Boolean): MockMenuOption {
         val end = runCatching { LocalDate.parse(d.end) }.getOrNull()
             ?: throw IllegalArgumentException("종료일은 YYYY-MM-DD 형식이에요.")
         require(!end.isBefore(start)) { "할인 종료일을 확인해 주세요." }
-        MockDiscount(salePrice,
+        // Existing imported discounts may start/end mid-day. Preserve their exact
+        // instants when only the menu name or price was edited.
+        val originalStart = d.originalStartMs.toLongOrNull()
+        val originalEnd = d.originalEndMs.toLongOrNull()
+        val unchangedDays = originalStart != null && originalEnd != null &&
+            start == Instant.ofEpochMilli(originalStart).atZone(ownerManualZone).toLocalDate() &&
+            end == localDiscountEndDay(originalEnd)
+        if (unchangedDays) MockDiscount(salePrice, originalStart!!, originalEnd!!)
+        else MockDiscount(salePrice,
             start.atStartOfDay(ownerManualZone).toInstant().toEpochMilli(),
             end.plusDays(1).atStartOfDay(ownerManualZone).toInstant().toEpochMilli())
     }
@@ -164,6 +181,7 @@ internal fun OwnerManualMenuScreen(
         mutableStateOf(encodedOptions(listOf(freshOption())))
     }
     var saleOption by rememberSaveable(bar?.barId) { mutableStateOf(0) }
+    var beforePromoOptions by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var confirm by rememberSaveable { mutableStateOf<String?>(null) }
     var calendarTarget by rememberSaveable { mutableStateOf<String?>(null) }
     var promoOptionExpanded by rememberSaveable { mutableStateOf(false) }
@@ -182,13 +200,23 @@ internal fun OwnerManualMenuScreen(
         brandName = brands.firstOrNull { it.brandId == p?.brandId }?.name.orEmpty()
         category = p?.let { manualMenuCategoryLabel(it.category) } ?: "위스키"
         alcoholKind = p?.otherAlcoholKind.orEmpty()
-        setOptions(item?.options?.map(::fromSaved) ?: listOf(freshOption()))
+        // Photo-imported listings may contain more than three options. Allow editing
+        // the first three without silently dropping any additional persisted ones.
+        setOptions(item?.options?.take(MANUAL_MENU_MAX_OPTIONS)?.map(::fromSaved)
+            ?: listOf(freshOption()))
+        beforePromoOptions = null
         error = null
         screen = "item"
     }
     fun back() {
         when (screen) {
-            "promo" -> { error = null; screen = "item" }
+            "promo" -> {
+                beforePromoOptions?.let { optionText = it }
+                beforePromoOptions = null
+                calendarTarget = null
+                error = null
+                screen = "item"
+            }
             "item" -> { error = null; screen = "list"; selectedId = null }
             else -> onBack()
         }
@@ -204,12 +232,19 @@ internal fun OwnerManualMenuScreen(
                 "주류 종류를 입력해 주세요."
             }
             val whisky = category == "위스키"
-            val options = (if (whisky) draftOptions else draftOptions.take(1))
+            val editedOptions = (if (whisky) draftOptions else draftOptions.take(1))
                 .map { toOption(it, whisky) }
-            manualMenuOptionError(options, manualMenuCategoryCode(category))?.let {
+            manualMenuOptionError(editedOptions, manualMenuCategoryCode(category))?.let {
                 throw IllegalArgumentException(it)
             }
             val old = items.firstOrNull { it.barMenuItemId == editId }
+            val legacyTail = if (old != null && old.options.size > MANUAL_MENU_MAX_OPTIONS) {
+                require(category == "위스키") {
+                    "추가된 기존 용량 옵션을 유지하려면 위스키 종류를 선택해 주세요."
+                }
+                old.options.drop(MANUAL_MENU_MAX_OPTIONS)
+            } else emptyList()
+            val options = editedOptions + legacyTail
             val persisted = products.firstOrNull { it.productId == old?.productId }
             if (old != null && persisted?.catalogMatched == true) {
                 require(manualMenuCategoryLabel(persisted.category) == category) {
