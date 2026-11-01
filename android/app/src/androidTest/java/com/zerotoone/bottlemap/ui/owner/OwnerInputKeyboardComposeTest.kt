@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
@@ -47,7 +46,7 @@ class OwnerInputKeyboardComposeTest {
         compose.onNodeWithTag("keyboard-name").assertIsFocused()
         compose.onNodeWithTag("keyboard-name").performTextInput("라가불린")
         compose.onNodeWithTag("keyboard-outside").performTouchInput {
-            click(Offset(size.width / 2f, size.height * 0.75f))
+            click()
         }
         compose.onNodeWithTag("keyboard-name").assertIsNotFocused()
         compose.onNodeWithTag("keyboard-name").performClick()
