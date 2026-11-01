@@ -123,3 +123,42 @@ internal fun V4Toolbar(title: String?, onBack: () -> Unit) {
             fontSize = 12.sp, fontWeight = FontWeight.Medium)
     }
 }
+
+@Composable
+internal fun V4SearchField(value: String, onChange: (String) -> Unit, tag: String, hint: String) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 52.dp)
+        .background(V4Color.elevated, RoundedCornerShape(9.dp))
+        .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
+        .padding(horizontal = 13.dp, vertical = 13.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("⌕", color = V4Color.sub, fontSize = 21.sp, lineHeight = 22.sp)
+        BasicTextField(
+            value = value, onValueChange = onChange, singleLine = true,
+            modifier = Modifier.weight(1f).testTag(tag),
+            textStyle = TextStyle(fontSize = 13.sp, color = V4Color.text),
+            decorationBox = { inner ->
+                Box {
+                    if (value.isEmpty()) Text(hint, fontSize = 13.sp,
+                        color = Color(0xFF938780))
+                    inner()
+                }
+            }
+        )
+    }
+}
+
+@Composable
+internal fun V4TagChip(label: String, selected: Boolean = false, onClick: ()->Unit) {
+    Box(
+        Modifier.background(if (selected) Color(0xFF4A382A) else V4Color.elevated,
+            RoundedCornerShape(7.dp))
+            .border(1.dp, if (selected) V4Color.primary else V4Color.line,
+                RoundedCornerShape(7.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 7.dp)
+    ) {
+        Text(label, fontSize = 12.sp, color = if (selected) Color(0xFFF7DFBF)
+            else V4Color.text, lineHeight = 17.sp)
+    }
+}
