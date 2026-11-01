@@ -46,6 +46,12 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun setSoldOut(itemId: String, soldOut: Boolean) = repository.setSoldOut(itemId, soldOut)
     fun deleteMenuItem(id: String) = repository.deleteMenuItem(id)
     fun clearMenuForBar(barId: String) = repository.clearMenuForBar(barId)
+    fun queuePhotoImport(barId: String, photos: List<MockPhoto>): String =
+        repository.queuePhotoImport(barId, photos)
+    fun finishPhotoImport(id: String, source: MockPhotoExtractionSource): MockImportStatus =
+        repository.finishPhotoImport(id, source)
+    fun cancelPhotoImport(id: String) = repository.cancelPhotoImport(id)
+    fun retryFailedPhotoImport(id: String): String = repository.retryFailedPhotoImport(id)
     fun importPhotos(barId: String, uris: List<String>, source: MockPhotoExtractionSource): String =
         repository.startPhotoImport(barId, uris, source)
     fun review(importId: String, lineId: String, version: Int, decision: MockReviewDecision) =

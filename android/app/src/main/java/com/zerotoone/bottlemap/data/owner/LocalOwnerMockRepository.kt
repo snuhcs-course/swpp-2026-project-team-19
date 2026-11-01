@@ -47,6 +47,10 @@ interface OwnerMockRepository {
     fun deleteMenuItem(barMenuItemId: String)
     fun clearMenuForBar(barId: String)
     fun startPhotoImport(barId: String, selectedUris: List<String>, fixture: MockPhotoExtractionSource): String
+    fun queuePhotoImport(barId: String, photos: List<MockPhoto>): String
+    fun finishPhotoImport(importId: String, source: MockPhotoExtractionSource): MockImportStatus
+    fun cancelPhotoImport(importId: String)
+    fun retryFailedPhotoImport(importId: String): String
     fun decideLine(importId: String, extractedItemId: String, expectedVersion: Int, decision: MockReviewDecision)
     fun publishAddOnly(importId: String, expectedVersion: Int): Int
     fun preview(barId: String, nowEpochMs: Long): MockPreview?
@@ -83,6 +87,31 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         } catch (e: Exception) {
             MockOwnerLoadState.Error(e.message ?: "Mock 저장소를 읽지 못했습니다.")
         }
+    }
+
+    private fun requireNoActiveImport(s: MockOwnerSnapshot, barId: String) {
+        require(s.imports.none { it.barId == barId &&
+            it.status in listOf(MockImportStatus.UPLOADED, MockImportStatus.PROCESSING,
+                MockImportStatus.READY_FOR_REVIEW) }) { "ACTIVE_IMPORT_EXISTS" }
+    }
+
+    private fun reservedImportId(s: MockOwnerSnapshot): Pair<String, Long> {
+        var n = s.nextLocalId
+        while (s.imports.any { it.menuImportId == "local-import-$n" }) n++
+        return "local-import-$n" to n + 1
+    }
+
+    private fun sanitizeExtractedLine(line: MockExtractedLine): MockExtractedLine {
+        // Stage 7 has no price entry UI. The Stage 8 price-entry state is
+        // explicitly represented by 0, never a plausible guessed amount.
+        val missingPrice = line.options.any { it.priceKrw <= 0 || it.priceKrw > 99_999_999 }
+        return line.copy(
+            needsPriceEntry = line.needsPriceEntry || missingPrice,
+            options = line.options.map {
+                if (it.priceKrw in 1..99_999_999) it
+                else it.copy(priceKrw = 0, discount = null)
+            },
+        )
     }
 
     private fun snapshot(): MockOwnerSnapshot = when (val value = current.value) {
@@ -387,6 +416,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(item.options.map { it.optionId }.distinct().size == item.options.size)
         change { state ->
             require(state.bars.any { it.barId == item.barId }) { "Unknown bar" }
+            requireNoActiveImport(state, item.barId)
             val product = state.products.firstOrNull { it.productId == item.productId }
                 ?: requireNotNull(newProduct) { "상품을 먼저 확인해 주세요." }
             require(product.productId == item.productId && product.displayName.isNotBlank())
@@ -488,6 +518,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         change { s ->
             val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
                 ?: error("Unknown menu item")
+            requireNoActiveImport(s, row.barId)
             if (row.soldOut == value) s to Unit else s.copy(
                 menuItems = s.menuItems.map {
                     if (it.barMenuItemId == barMenuItemId) it.copy(soldOut = value) else it
@@ -500,6 +531,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         change { s ->
             val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
                 ?: error("Unknown menu item")
+            requireNoActiveImport(s, row.barId)
             s.copy(
                 menuItems = s.menuItems.filterNot { it.barMenuItemId == barMenuItemId },
                 menuItemIdHistory = s.menuItemIdHistory +
@@ -512,6 +544,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
     override fun clearMenuForBar(barId: String) {
         change { s ->
             require(s.bars.any { it.barId == barId })
+            requireNoActiveImport(s, barId)
             val remaining = s.menuItems.filterNot { it.barId == barId }
             if (remaining.size == s.menuItems.size) s to Unit else s.copy(
                 menuItems = remaining,
@@ -531,8 +564,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(selectedUris.distinct().size == selectedUris.size)
         return change { s ->
             require(s.bars.any { it.barId == barId })
-            require(s.imports.none { it.barId == barId &&
-                it.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW) })
+            requireNoActiveImport(s, barId)
             // Fixture/restored snapshots may contain imports without advancing the local
             // sequence. Reserve a unique job ID before creating any image/line IDs.
             var reserved = s.nextLocalId
@@ -557,6 +589,77 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             val job = MockMenuImport(id, barId, MockImportStatus.READY_FOR_REVIEW, 1, images)
             s.copy(imports = s.imports + job, nextLocalId = sequence) to id
         }
+    }
+
+    override fun queuePhotoImport(barId: String, photos: List<MockPhoto>): String {
+        require(photos.size in 1..15 && photos.distinctBy { it.photoId }.size == photos.size)
+        require(photos.all { it.kind == MockPhotoKind.MENU_CAPTURE && it.uri.isNotBlank() })
+        return change { s ->
+            require(s.bars.any { it.barId == barId })
+            requireNoActiveImport(s, barId)
+            val (id, next) = reservedImportId(s)
+            // The same stored photo ID and imageOrder survive process recreation.
+            val images = photos.mapIndexed { index, photo ->
+                MockPhotoExtraction(photo.photoId, photo.uri, index + 1, emptyList())
+            }
+            s.copy(imports = s.imports + MockMenuImport(id, barId,
+                MockImportStatus.PROCESSING, 1, images), nextLocalId = next) to id
+        }
+    }
+
+    override fun finishPhotoImport(importId: String, source: MockPhotoExtractionSource):
+        MockImportStatus = change { s ->
+        val job = s.imports.firstOrNull { it.menuImportId == importId }
+            ?: error("Unknown photo import")
+        require(job.status == MockImportStatus.PROCESSING ||
+            job.status == MockImportStatus.UPLOADED) { "INVALID_IMPORT_STATE" }
+        var sequence = s.nextLocalId
+        val images = job.images.map { photo ->
+            photo.copy(lines = source.linesFor(photo.sourceUri).map { line ->
+                val normalized = sanitizeExtractedLine(line)
+                val normalizedOptions = normalized.options.map {
+                    it.copy(optionId = "local-option-${sequence++}")
+                }
+                normalized.copy(extractedItemId = "local-line-${sequence++}",
+                    options = normalizedOptions, decision = null)
+            })
+        }
+        val success = images.any { it.lines.isNotEmpty() }
+        val status = if (success) MockImportStatus.READY_FOR_REVIEW else MockImportStatus.FAILED
+        val updated = job.copy(status = status, images = images,
+            failureReason = if (success) null else
+                "이 사진에 연결된 Mock 추출 결과가 없습니다. 사진을 다시 선택하거나 나중에 재시도해 주세요.")
+        s.copy(imports = s.imports.map {
+            if (it.menuImportId == importId) updated else it
+        }, nextLocalId = sequence) to status
+    }
+
+    override fun cancelPhotoImport(importId: String) {
+        change { s ->
+            val job = s.imports.firstOrNull { it.menuImportId == importId }
+                ?: error("Unknown photo import")
+            if (job.status == MockImportStatus.CANCELED) return@change s to Unit
+            require(job.status in listOf(MockImportStatus.UPLOADED,
+                MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW)) {
+                "INVALID_IMPORT_STATE"
+            }
+            s.copy(imports = s.imports.map {
+                if (it.menuImportId == importId) it.copy(status = MockImportStatus.CANCELED)
+                else it
+            }) to Unit
+        }
+    }
+
+    override fun retryFailedPhotoImport(importId: String): String = change { s ->
+        val job = s.imports.firstOrNull { it.menuImportId == importId }
+            ?: error("Unknown photo import")
+        require(job.status == MockImportStatus.FAILED) { "INVALID_IMPORT_STATE" }
+        requireNoActiveImport(s, job.barId)
+        val (nextId, nextSequence) = reservedImportId(s)
+        s.copy(imports = s.imports + job.copy(menuImportId = nextId,
+            status = MockImportStatus.PROCESSING, reviewVersion = 1, failureReason = null,
+            images = job.images.map { it.copy(lines = emptyList()) }),
+            nextLocalId = nextSequence) to nextId
     }
 
     override fun decideLine(
