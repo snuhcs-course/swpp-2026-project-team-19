@@ -384,7 +384,7 @@ class OwnerManualMenuComposeTest {
         compose.runOnIdle { assertEquals(4, vm.preview("fixture-bar", 0)!!.visibleMenu.size) }
     }
 
-    @Test fun activeImportAllowsViewingButBlocksDirectActionsAndUnlocksAfterApply() {
+    @Test fun activeImportAllowsViewingButBlocksDirectActions() {
         val original = MockBarMenuItem("listed", "fixture-bar", "prod-a",
             listOf(MockMenuOption("pour-a", pourMl = 30, priceKrw = 13000)))
         val base = OwnerMockFixtures.registeredBar().copy(
