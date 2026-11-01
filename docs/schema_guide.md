@@ -512,9 +512,10 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `id` | `uuid`, PK | A바의 Deanston 12 항목 ID | 업장과 상품 조합을 다른 테이블에서 안정적으로 참조한다. |
 | `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | 어느 업장의 항목인지 나타낸다. |
 | `product_id` | `uuid`, NOT NULL, FK → `products.id` | Deanston 12 상품 ID | 어떤 정규 상품인지 나타낸다. |
+| `sold_out_at` | `timestamptz`, nullable | `2026-11-02T12:00:00Z` | 품절로 표시한 시각이다. `null`이면 판매 중이다(API 명세 3.14.8). 품절 항목은 메뉴판에 남지만 손님의 업장 메뉴와 고객 검색에서는 빠지고, 업주와 운영자에게만 품절로 보인다. 항목이 현재 메뉴판에서 빠지면 `null`로 되돌려, 다시 추가했을 때 판매 중으로 시작한다. 메뉴판을 다시 써도 이 행은 남으므로 품절을 여기에 저장한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T04:30:00Z` | 업장 메뉴 항목 최초 생성 시점이다. |
 
-**핵심 원칙:** `(bar_id, product_id)`는 unique다. 현재 메뉴판에서 빠져도 행은 삭제하지 않는다. 현재 `menu_board_entries`에 연결되면 노출되고 연결되지 않으면 보관된 상태로 본다.
+**핵심 원칙:** `(bar_id, product_id)`는 unique다. 현재 메뉴판에서 빠져도 행은 삭제하지 않는다. 현재 `menu_board_entries`에 연결되면 메뉴판에 있는 것이고, 연결되지 않으면 보관된 상태로 본다. 메뉴판에 있는 항목도 품절(`sold_out_at`)이면 손님에게는 보이지 않고 업주와 운영자에게만 보인다(API 명세 3.14.8).
 
 **필요한 이유:** 메뉴판을 교체할 때마다 같은 업장 상품 행을 새로 만들지 않고 과거에 취급했던 항목을 재사용한다.
 
@@ -528,7 +529,9 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `bar_id` | `uuid`, NOT NULL, UNIQUE, FK → `bars.id` | 관악 위스키 바 ID | 업장당 현재 메뉴판 하나를 보장한다. |
 | `last_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 마지막 일부 수정 작업 ID | 여러 부분 수정이 누적될 수 있으므로 가장 최근 반영 작업을 기록한다. 메뉴 직접 편집은 이 값을 바꾸지 않는다. |
 | `version` | `integer`, NOT NULL, 기본 1 | `4` | 메뉴판 버전이다. 검수 반영과 직접 편집이 성공할 때마다 1씩 올린다. 직접 편집은 요청의 버전과 이 값이 다르면 거부해, 다른 사람의 변경을 덮어쓰지 않게 한다(API 명세 3.14.1). |
-| `published_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 고객에게 보여줄 메뉴 최종 업데이트 날짜다. 검수 반영과 직접 편집 모두 갱신한다. 검색 결과의 최신성 표시에 사용한다. |
+| `published_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 고객에게 보여줄 메뉴 최종 업데이트 날짜다. 검수 반영과 직접 편집 모두 갱신한다. 검색 결과의 최신성 표시에 사용한다. 품절 표시와 판매 정보 확인은 바꾸지 않는다. 업장 행을 잠근 뒤의 실제 시각(`clock_timestamp()`)으로 찍어, 먼저 기록된 `confirmed_at`보다 이르게 찍히지 않게 한다(API 명세 3.14.1). |
+| `confirmed_at` | `timestamptz`, nullable | `2026-10-20T02:30:00Z` | 업주나 운영자가 "지금도 맞아요"로 판매 정보가 맞다고 마지막으로 확인한 시각이다(API 명세 3.14.9). 메뉴를 바꾸지 않으며 `version`도 올리지 않는다. 검수 반영이나 직접 편집으로 바뀌지 않는다. 업주 화면은 `published_at`과 이 값 중 늦은 시각을 "최근 갱신"으로 보여 준다. 고객 화면에는 나오지 않는다. |
+| `confirmed_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 확인한 사용자다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
 
 **필요한 이유:** 업장 메뉴 항목들의 현재 노출 묶음과 게시 메타데이터를 한 곳에서 관리한다.
 
@@ -558,13 +561,17 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `source_extracted_option_id` | `uuid`, nullable, FK → `extracted_options.id` | 30ml 가격을 추출한 옵션 ID | 어떤 AI 추출 옵션과 검수에서 게시 옵션이 만들어졌는지 추적한다. 메뉴 직접 편집으로 입력한 옵션은 null이다. |
 | `option_label` | `varchar(100)`, nullable | `Large` | ml로 표현되지 않는 실제 메뉴의 옵션명을 보존한다. |
 | `pour_ml` | `smallint`, nullable | `30` | 제공 용량이다. 메뉴에 용량이 없으면 null이다. |
-| `price_krw` | `integer`, NOT NULL | `15000` | 고객 검색 결과에 표시할 원화 가격이다. |
+| `price_krw` | `integer`, NOT NULL | `15000` | 고객 검색 결과에 표시할 원화 정가다. 할인 중에도 정가를 저장한다. |
+| `discount_price_krw` | `integer`, nullable | `12000` | 기간 할인가다. 1 이상이고 `price_krw`보다 낮다. 할인이 없으면 null이다. |
+| `discount_starts_at`, `discount_ends_at` | `timestamptz`, nullable | `2026-11-01T09:00:00Z`, `2026-11-15T15:00:00Z` | 할인 기간이다. 시작 이상 종료 미만 동안 할인가로 판다. 할인가와 함께 셋 다 값이 있거나 셋 다 null이다. |
 | `sort_order` | `smallint`, NOT NULL | `2` | 한 술 안에서 옵션 표시 순서를 정한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 옵션 생성 시점이다. |
 
 **예시:** Deanston 12의 `menu_board_entries` 한 행 아래에 `15ml / 8,000원`과 `30ml / 15,000원` 두 행이 존재한다.
 
 **핵심 제약:** 한 메뉴판 구성 안에서 옵션 순서가 중복되지 않는다. 각 노출 항목에 옵션이 최소 하나 존재한다는 규칙은 애플리케이션 또는 최종 DDL에서 보장해야 한다.
+
+**할인 유지:** 옵션은 메뉴판을 게시할 때마다 새로 쓰므로 할인이 옵션 행과 함께 사라질 수 있다. 검수 반영은 표기, 용량, 정가가 모두 같은 새 옵션에 할인을 옮기고, 정가가 바뀌거나 옵션이 없어지면 할인을 버린다(API 명세 8.7). 직접 수정(API 명세 3.14.4)은 요청에 담긴 할인을 그대로 저장한다. 직접 추가, 수정, 삭제는 요청 대상이 아닌 항목의 옵션과 할인을 바꾸지 않으므로, 메뉴판을 다시 쓰는 방식으로 구현하면 다른 항목의 할인도 새 옵션에 그대로 옮겨야 한다(API 명세 3.14.1). 끝난 할인을 지우는 배치 작업은 없으며 API가 응답에서 뺀다.
 
 ## 8 AI Menu Import
 
@@ -887,6 +894,7 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 노출되는 `menu_board_entries`에는 `menu_entry_options`가 최소 하나 있어야 한다.
 - 전체 교체 또는 일부 수정의 적용은 트랜잭션으로 처리해 메뉴판이 중간 상태로 노출되지 않게 한다.
 - 최종 확정은 신규 브랜드·상품 중복 재검사와 생성, 추출 결과 확정, diff 재계산, 현재 메뉴판 반영을 모두 포함한 하나의 `SERIALIZABLE` 트랜잭션으로 실행한다. 직렬화 충돌이면 전체를 롤백하고 처음부터 최대 3회 재시도한다. AI 호출과 객체 저장소 작업 같은 외부 부수 효과는 재시도될 수 있는 이 트랜잭션 안에서 실행하지 않는다.
+- 메뉴판이나 메뉴 항목을 바꾸거나 그 상태를 확인해 기록하는 요청(등록 작업 생성, 검수 반영, 직접 편집, 품절 표시, 판매 정보 확인)은 모두 먼저 같은 `bars` 행을 `FOR UPDATE`로 잠그고 차례로 처리한다(API 명세 3.14.1). 잠그는 순서는 `bars` 다음 `menu_imports`다.
 - 한 업장에는 `uploaded`, `processing`, `ready_for_review` 상태의 `menu_imports`가 동시에 하나만 존재해야 한다. PostgreSQL 부분 unique 인덱스와 업장 행 잠금·트랜잭션 검사를 함께 사용해 보장한다.
 - 한 업장에는 `revoked_at IS NULL`인 `bar_owners`가 최대 하나여야 한다. PostgreSQL 부분 unique 인덱스로 보장한다.
 - 한 사용자는 같은 업장에 `status = pending`인 `existing_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending' AND application_type = 'existing_bar'`)로 보장한다.
@@ -896,6 +904,7 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - `bar_weekly_hours.day_of_week`는 1부터 7이고, `is_closed`이면 두 시각이 `null`, 아니면 둘 다 값이 있고 서로 달라야 한다.
 - `bar_operating_exceptions`는 `end_date >= start_date`이고, `vacation`이 아니면 두 날짜가 같으며, `custom_hours`일 때만 두 시각이 있고 서로 달라야 한다.
 - 한 업장의 `bar_photos`에서 `content_sha256`이 중복되지 않아야 한다. unique 인덱스(`bar_id`, `content_sha256`)로 보장한다.
+- `menu_entry_options`의 할인 세 컬럼은 함께 값이 있거나 함께 null이고, `discount_price_krw`는 1 이상 `price_krw` 미만, `discount_ends_at`은 `discount_starts_at`보다 늦어야 한다.
 - 한 업장의 `bar_photos`에서 `sort_order`가 중복되지 않아야 한다. `DEFERRABLE INITIALLY DEFERRED` unique 제약(`bar_id`, `sort_order`)으로 보장한다.
 - 한 신청의 `bar_owner_application_menu_images`에서 `image_order`가 중복되지 않아야 한다. unique 인덱스(`application_id`, `image_order`)로 보장한다.
 - 외래키 삭제 정책은 이력 보존을 우선해 핵심 사용자 업장 상품 이미지에 `RESTRICT` 또는 soft delete를 검토한다.

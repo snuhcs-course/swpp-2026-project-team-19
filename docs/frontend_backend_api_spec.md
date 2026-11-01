@@ -13,7 +13,7 @@
 - 추출 항목·옵션·상품 후보·임시 diff 통합 조회
 - 검수 중 브랜드와 상품 검색
 - 모든 검수 결정의 일괄 제출과 메뉴 반영
-- 현재 메뉴판 항목의 직접 추가, 수정, 삭제와 초기화
+- 현재 메뉴판 항목의 직접 추가, 수정, 삭제와 초기화, 품절, 기간 할인, 판매 정보 확인
 - 매장 정보(한 줄 소개, 태그, 정규 영업시간), 임시 휴무, 매장 사진
 - 고객의 상품 검색, 주변·지도 업장 조회와 업장 상세 메뉴 조회
 - 멱등성, 검수 버전 충돌과 공통 오류 응답
@@ -109,6 +109,7 @@ GET 주변 업장 조회 (위치 + 반경)
 | `PATCH /api/bars/{barId}` | | | O (`status` 제외) | O |
 | `GET /api/bars/{barId}/menu-imports`, `POST /api/bars/{barId}/menu-imports` | | | O | O |
 | `POST /api/bars/{barId}/menu/items`, `PUT .../menu/items/{barMenuItemId}`, `DELETE .../menu/items/{barMenuItemId}`, `POST /api/bars/{barId}/menu/reset` | | | O | O |
+| `PUT /api/bars/{barId}/menu/items/{barMenuItemId}/sold-out`, `POST /api/bars/{barId}/menu/confirm` | | | O | O |
 | `PUT /api/bars/{barId}/operating-exception`, `DELETE /api/bars/{barId}/operating-exception` | | | O | O |
 | `POST /api/bars/{barId}/photos`, `DELETE .../photos/{photoId}`, `PUT .../photos/order` | | | O | O |
 | `GET /api/menu-imports/{menuImportId}`, `POST .../review-and-apply`, `POST .../cancel` | | | 해당 업장의 작업만 | O |
@@ -217,6 +218,8 @@ ignore
 | `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}` | 메뉴 항목 직접 수정 |
 | `DELETE` | `/api/bars/{barId}/menu/items/{barMenuItemId}` | 메뉴 항목 직접 삭제 |
 | `POST` | `/api/bars/{barId}/menu/reset` | 메뉴판 초기화 |
+| `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}/sold-out` | 메뉴 항목 품절 표시와 해제 |
+| `POST` | `/api/bars/{barId}/menu/confirm` | 판매 정보 확인 ("지금도 맞아요") |
 | `PUT` | `/api/bars/{barId}/operating-exception` | 임시 휴무나 오늘 영업시간 변경 적용 (기존 것을 바꿈) |
 | `DELETE` | `/api/bars/{barId}/operating-exception` | 임시 휴무 취소 |
 | `POST` | `/api/bars/{barId}/photos` | 매장 사진 한 장 추가 |
@@ -591,7 +594,9 @@ Authorization: Bearer <access-token>
   },
   "currentMenu": {
     "menuBoardId": "66666666-6666-4666-8666-666666666666",
-    "publishedAt": "2026-10-04T09:15:00Z"
+    "menuVersion": 4,
+    "publishedAt": "2026-10-04T09:15:00Z",
+    "confirmedAt": "2026-10-20T02:30:00Z"
   },
   "owner": {
     "userId": "11111111-1111-4111-8111-111111111111",
@@ -626,7 +631,9 @@ Authorization: Bearer <access-token>
 | `activeMenuImport.status` | `uploaded` \| `processing` \| `ready_for_review` | 아니오 | |
 | `currentMenu` | 객체 | 예 | 현재 메뉴판 요약. 반영된 메뉴가 없으면 `null` |
 | `currentMenu.menuBoardId` | UUID 문자열 | 아니오 | |
+| `currentMenu.menuVersion` | 정수 | 아니오 | 메뉴판 버전(3.9의 `menuVersion`과 같다). 관리 홈의 판매 정보 확인(3.14.9)에 그대로 보낸다 |
 | `currentMenu.publishedAt` | RFC 3339 문자열 | 아니오 | 현재 메뉴판이 마지막으로 반영된 시각 |
+| `currentMenu.confirmedAt` | RFC 3339 문자열 | 예 | 업주나 operator가 판매 정보를 마지막으로 확인한 시각(3.14.9). 확인한 적이 없으면 `null`. 업주 화면의 "최근 갱신"은 `publishedAt`과 이 값 중 늦은 시각이다 |
 | `owner` | 객체 | 예 | 현재 업주(3.11). 없으면 `null` |
 | `owner.userId` | UUID 문자열 | 아니오 | |
 | `owner.email`, `owner.displayName` | 문자열 | 예 | 3.2와 같다 |
@@ -776,12 +783,18 @@ GET /api/bars/{barId}/menu
       "category": "whisky",
       "displayName": "글렌피딕 12년",
       "sortOrder": 1,
+      "soldOut": false,
       "options": [
         {
           "menuEntryOptionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
           "optionLabel": "잔",
           "pourMl": 30,
           "priceKrw": 17000,
+          "discount": {
+            "discountedPriceKrw": 14000,
+            "startsAt": "2026-11-01T09:00:00Z",
+            "endsAt": "2026-11-15T15:00:00Z"
+          },
           "sortOrder": 1
         },
         {
@@ -789,6 +802,7 @@ GET /api/bars/{barId}/menu
           "optionLabel": "병",
           "pourMl": null,
           "priceKrw": 160000,
+          "discount": null,
           "sortOrder": 2
         }
       ]
@@ -803,12 +817,14 @@ GET /api/bars/{barId}/menu
       "category": "whisky",
       "displayName": "Deanston 12",
       "sortOrder": 2,
+      "soldOut": false,
       "options": [
         {
           "menuEntryOptionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
           "optionLabel": null,
           "pourMl": 15,
           "priceKrw": 8000,
+          "discount": null,
           "sortOrder": 1
         }
       ]
@@ -841,16 +857,24 @@ GET /api/bars/{barId}/menu
 | `items[].category` | 문자열 | 아니오 | 상품 분류. 예: `whisky`. 프론트엔드는 이 값과 브랜드로 메뉴를 묶어 보여 줄 수 있다 |
 | `items[].displayName` | 문자열 | 아니오 | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`). 정규 상품명이 아니다 |
 | `items[].sortOrder` | 정수 | 아니오 | 메뉴판 표시 순서 |
+| `items[].soldOut` | 불리언 | 아니오 | 품절이면 `true`(3.14.8). 품절 항목은 operator와 해당 업장의 업주에게만 제자리에 온다. 비로그인 사용자와 customer에게는 품절 항목이 빠지므로 항상 `false`다 |
 | `items[].options` | 배열 | 아니오 | 가격·용량 옵션. 최소 1개 |
 | `items[].options[].menuEntryOptionId` | UUID 문자열 | 아니오 | |
 | `items[].options[].optionLabel` | 문자열 | 예 | 메뉴판의 `잔`, `병` 같은 표기. 없으면 `null` |
 | `items[].options[].pourMl` | 정수 | 예 | 용량(ml). 메뉴판에 없으면 `null` |
-| `items[].options[].priceKrw` | 정수 | 아니오 | 가격(원) |
+| `items[].options[].priceKrw` | 정수 | 아니오 | 정가(원). 할인 중이어도 정가다 |
+| `items[].options[].discount` | 객체 | 예 | 기간 할인(3.14.2). 끝나지 않은 할인만 오며, 할인이 없거나 끝났으면 `null`. 아직 시작하지 않은 할인도 온다 |
+| `items[].options[].discount.discountedPriceKrw` | 정수 | 아니오 | 할인가(원). `priceKrw`보다 낮다 |
+| `items[].options[].discount.startsAt`, `items[].options[].discount.endsAt` | RFC 3339 문자열 | 아니오 | 할인 기간. `startsAt` 이상 `endsAt` 미만인 동안 할인가로 판다 |
 | `items[].options[].sortOrder` | 정수 | 아니오 | 옵션 표시 순서 |
+
+할인 중인지는 서버가 보내지 않는다. 프론트엔드가 기기의 현재 시각으로 `startsAt ≤ 현재 < endsAt`이면 할인가와 할인 표시를, 아니면 정가를 보여 주며, 화면을 띄워 둔 동안 다시 계산한다(3.15.5의 영업 상태와 같은 방식). 고객 검색(3.10)에도 같은 `discount`가 오므로 검색 결과와 업장 상세의 가격이 같다.
 
 정렬 기준: `items`는 `sortOrder` 오름차순이고, 각 항목의 `options`도 `sortOrder` 오름차순이다. 프론트엔드는 받은 순서대로 표시한다.
 
 영업 상태(영업 중, 영업 종료, 임시 휴무 등)는 응답에 없다. 프론트엔드가 `weeklyHours`와 `operatingException`으로 계산한다(3.15.5).
+
+품절 항목(3.14.8)은 비로그인 사용자와 customer의 응답에서 빠진다. 손님에게 지금 팔지 않는 상품을 보여 주지 않기 위해서다. operator와 해당 업장의 업주에게는 품절을 풀 수 있도록 `soldOut = true`로 제자리에 온다. 업주 화면의 고객 미리보기는 `soldOut = true`인 항목을 빼고 보여 준다. 서버가 token을 확인할 수 없어 비로그인 사용자로 처리할 때(3.1.5)는 operator와 업주에게도 품절 항목이 빠진다.
 
 `items`에는 상품으로 확정되어 현재 메뉴판에 반영된 항목과 직접 추가한 항목만 있다. 섹션 제목, 설명 등 비상품 줄은 포함하지 않는다. 검색 결과에서 진입한 경우 프론트엔드는 검색한 `productId`와 같은 항목을 강조해 표시할 수 있다.
 
@@ -880,9 +904,9 @@ GET /api/bars/{barId}/menu
 }
 ```
 
-메뉴판은 있지만 검수에서 모든 항목을 내렸거나 직접 편집으로 모두 지웠으면(3.14.5, 3.14.6) `menuBoardId`, `menuVersion`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
+메뉴판은 있지만 검수에서 모든 항목을 내렸거나 직접 편집으로 모두 지웠으면(3.14.5, 3.14.6), 또는 손님이 볼 때 모든 항목이 품절이면(3.14.8) `menuBoardId`, `menuVersion`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
 
-그 밖에 값이 없을 수 있는 필드는 `phone`, `description`, `operatingException`, `options[].optionLabel`, `options[].pourMl`뿐이며 모두 `null`로 온다. `tags`, `weeklyHours`, `photos`는 없으면 `[]`다. 프론트엔드는 해당 표시만 생략하고, 사진이 없으면 기본 이미지를 보여 준다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
+그 밖에 값이 없을 수 있는 필드는 `phone`, `description`, `operatingException`, `options[].optionLabel`, `options[].pourMl`, `options[].discount`뿐이며 모두 `null`로 온다. `tags`, `weeklyHours`, `photos`는 없으면 `[]`다. 프론트엔드는 해당 표시만 생략하고, 사진이 없으면 기본 이미지를 보여 준다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
 
 #### 3.9.2 메뉴 등록이 진행 중일 때
 
@@ -975,6 +999,7 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 | 비상품 항목 | 섹션 제목, 설명 등 상품이 아닌 줄은 상품과 연결된 메뉴 항목이 되지 않는다 |
 | 비활성 상품 | `products.is_active = false`인 상품은 어느 단계에서도 일치하지 않는다 |
 | 검색 제외 별칭 | `is_searchable = false`인 상품 별칭으로는 `alias_exact`와 `partial`에서 일치하지 않는다 |
+| 품절 항목 | `soldOut`인 항목(3.14.8). 이 API는 공개 API라 호출자와 관계없이 빠지며, 판매 중으로 되돌리면 바로 다시 검색된다 |
 
 정렬 기준:
 
@@ -1044,12 +1069,18 @@ options
           "optionLabel": "잔",
           "pourMl": 30,
           "priceKrw": 17000,
+          "discount": {
+            "discountedPriceKrw": 14000,
+            "startsAt": "2026-11-01T09:00:00Z",
+            "endsAt": "2026-11-15T15:00:00Z"
+          },
           "sortOrder": 1
         },
         {
           "optionLabel": "병",
           "pourMl": null,
           "priceKrw": 160000,
+          "discount": null,
           "sortOrder": 2
         }
       ],
@@ -1071,6 +1102,7 @@ options
           "optionLabel": null,
           "pourMl": 15,
           "priceKrw": 9000,
+          "discount": null,
           "sortOrder": 1
         }
       ],
@@ -1105,7 +1137,8 @@ options
 | `items[].options` | 배열 | 아니오 | 해당 항목의 가격·용량 옵션 전체. 최소 1개. 결과 카드에 어떤 옵션을 표시할지는 프론트엔드가 정한다 |
 | `items[].options[].optionLabel` | 문자열 | 예 | 메뉴판의 `잔`, `병` 같은 표기. 없으면 `null` |
 | `items[].options[].pourMl` | 정수 | 예 | 용량(ml). 메뉴판에 없으면 `null` |
-| `items[].options[].priceKrw` | 정수 | 아니오 | 가격(원) |
+| `items[].options[].priceKrw` | 정수 | 아니오 | 정가(원) |
+| `items[].options[].discount` | 객체 | 예 | 기간 할인. 3.9의 `options[].discount`와 같으며, 할인 중인지는 프론트엔드가 계산한다. 없거나 끝났으면 `null` |
 | `items[].options[].sortOrder` | 정수 | 아니오 | 옵션 표시 순서 |
 | `items[].menuUpdatedAt` | RFC 3339 문자열 | 아니오 | 업장 현재 메뉴판의 `menu_boards.published_at` |
 | `truncated` | 불리언 | 아니오 | `limit`보다 많은 행이 일치했으면 `true` |
@@ -1553,7 +1586,9 @@ Authorization: Bearer <access-token>
       "activeMenuImport": null,
       "currentMenu": {
         "menuBoardId": "66666666-6666-4666-8666-666666666666",
-        "publishedAt": "2026-10-04T09:15:00Z"
+        "menuVersion": 4,
+        "publishedAt": "2026-10-04T09:15:00Z",
+        "confirmedAt": null
       },
       "owner": {
         "userId": "11111111-1111-4111-8111-111111111111",
@@ -1976,6 +2011,8 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 | `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}` | 항목 수정 (3.14.4) |
 | `DELETE` | `/api/bars/{barId}/menu/items/{barMenuItemId}?menuVersion=<n>` | 항목 삭제 (3.14.5) |
 | `POST` | `/api/bars/{barId}/menu/reset` | 메뉴판 초기화 (3.14.6) |
+| `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}/sold-out` | 품절 표시와 해제 (3.14.8) |
+| `POST` | `/api/bars/{barId}/menu/confirm` | 판매 정보 확인 (3.14.9) |
 
 #### 3.14.1 공통 규칙
 
@@ -1983,13 +2020,21 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 - **항목 식별자**: 항목은 `barMenuItemId`로 가리킨다. 업장과 상품의 조합마다 하나이며 메뉴판에서 빠져도 바뀌지 않는다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀔 때마다(검수 반영과 직접 편집 모두) 새로 만들어질 수 있으므로 편집 요청에 쓰지 않는다.
 - **미완료 작업이 있을 때**: 업장에 미완료 메뉴 등록 작업(`uploaded`, `processing`, `ready_for_review`)이 있으면 추가, 수정, 삭제, 초기화는 모두 `409 ACTIVE_IMPORT_EXISTS`(`details.menuImportId`, `details.status`)다. 따라서 이 상황에서는 메뉴 편집이 불가능하고, 작업이 `applied`, `failed`, `canceled`가 되면 다시 편집할 수 있다. 검수 중에 메뉴판이 바뀌면 검수자가 오래된 메뉴판을 보고 결정하게 되기 때문이다.
 - **메뉴판 버전**: 모든 편집 요청은 3.9에서 받은 `menuVersion`을 보낸다. 메뉴판이 없으면 `null`이다. 서버의 현재 값과 다르면 아무것도 바꾸지 않고 `409 MENU_OUTDATED`(`details.submittedMenuVersion`, `details.currentMenuVersion`)다. 성공한 편집은 `menuVersion`을 1 올리고, 메뉴판이 없을 때의 첫 추가는 메뉴판을 만들고 `menuVersion = 1`이 된다. 검수 반영(8)도 `menuVersion`을 올린다.
-- **게시 시각**: 성공하면 `publishedAt`을 요청 시각으로 바꾼다. `menuBoardId`는 그대로다.
+- **게시 시각**: 성공하면 `publishedAt`을 업장 행을 잠근 뒤의 현재 시각으로 바꾼다. 트랜잭션이나 요청이 시작한 시각이 아니다(PostgreSQL `now()`가 아니라 `clock_timestamp()`). 잠금을 기다리는 동안 먼저 끝난 판매 정보 확인(3.14.9)보다 이른 시각이 찍히면, 확인하지 않은 새 메뉴가 확인된 것처럼 보이기 때문이다. 검수 반영(8.7)과 판매 정보 확인의 `confirmedAt`도 같은 방식으로 찍는다. `menuBoardId`는 그대로다.
 - **응답**: 성공 응답의 본문은 3.9와 같은 형식(업장 정보와 메뉴 전체)이다. 추가는 `201 Created`, 나머지는 `200 OK`다. 프론트엔드는 이 응답으로 화면을 바꾸고 따로 다시 조회하지 않아도 된다.
 - **원자성**: 요청 하나는 하나의 트랜잭션이다. 신규 상품 생성(3.14.3)을 포함해 어느 단계에서든 실패하면 아무것도 바뀌지 않는다.
-- **등록 작업과의 동시 요청**: 서버는 미완료 작업을 확인하기 전에 메뉴 등록(4.1)과 신청 승인의 첫 등록 작업 생성(3.11.7)이 잠그는 것과 같은 업장 행을 잠근다. 그래서 편집과 새 등록 작업이 동시에 와도 하나가 끝난 뒤에 다른 하나가 처리된다. 편집이 먼저면 등록 작업은 바뀐 메뉴판을 기준으로 만들어지고, 등록 작업이 먼저면 편집은 `409 ACTIVE_IMPORT_EXISTS`다.
+- **동시 요청은 업장 행 잠금으로 차례로 처리한다**: 메뉴판이나 메뉴 항목에 영향을 주는 요청은 모두, 무엇을 확인하기 전에 먼저 같은 업장 행(`bars`)을 `FOR UPDATE`로 잠그고 트랜잭션이 끝날 때까지 잡는다. 업장이 활성인지(비활성이면 `404 BAR_NOT_FOUND`)와 업주 권한처럼 업장 상태에 따라 달라지는 확인은 잠금을 잡은 뒤에 한다(잠그기 전에 이미 확인했다면 잠근 뒤 다시 확인한다). 그래야 확인과 잠금 사이에 업장이 비활성이 되어도 메뉴가 바뀌지 않는다. 대상은 다음과 같다.
+  - 메뉴 등록 작업 생성: 사진 업로드(4.1)와 신청 승인의 첫 등록 작업(3.11.7)
+  - 검수 반영(8)
+  - 직접 편집: 추가, 수정, 삭제, 초기화(3.14.3~3.14.6)
+  - 품절 표시(3.14.8)와 판매 정보 확인(3.14.9)
+
+  그래서 같은 업장에 이런 요청이 동시에 와도 하나가 끝난 뒤에 다음 것이 처리되고, 각 요청은 앞 요청이 커밋한 결과를 보고 확인한다. 예를 들어 편집이 먼저면 등록 작업은 바뀐 메뉴판을 기준으로 만들어지고, 등록 작업이 먼저면 편집은 `409 ACTIVE_IMPORT_EXISTS`다. 검수가 항목을 내린 뒤에 온 품절 표시는 `404 MENU_ITEM_NOT_FOUND`이고, 검수 반영으로 버전이 오른 뒤에 온 판매 정보 확인은 `409 MENU_OUTDATED`다. 잠금은 업장마다 따로이므로 다른 업장의 요청은 기다리지 않는다.
 - **재시도**: `Idempotency-Key`는 쓰지 않는다. 응답을 받지 못해 같은 요청을 다시 보내면, 앞 요청이 성공했다면 `menuVersion`이 이미 올라 `409 MENU_OUTDATED`를 받는다. 프론트엔드는 3.9를 다시 조회해 변경이 반영되었는지 확인한다.
 - **변경 기록**: 누가 언제 메뉴를 바꿨는지는 남기지 않는다. 메뉴 변경 이력은 운영 대시보드의 추가 기능으로 나중에 구현할 예정이다. 직접 추가로 만든 상품과 브랜드에는 만든 사용자를 기록한다(3.14.3).
-- **검사 순서**: 요청 형식(`422`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 미완료 작업(`409 ACTIVE_IMPORT_EXISTS`) → 메뉴판 버전(`409 MENU_OUTDATED`) → 각 API의 항목 확인과 업무 규칙. 형식 오류는 한 응답에 여러 개 올 수 있다.
+- **다른 항목은 그대로**: 추가, 수정, 삭제는 요청한 항목만 바꾼다. 다른 항목의 옵션, 할인(3.14.2), 품절(3.14.8)은 그대로 남는다. 서버가 메뉴판을 다시 쓰는 방식으로 구현하더라도 다른 항목의 할인은 같은 옵션에 옮겨야 한다. 초기화(3.14.6)는 모든 항목을 빼므로 할인과 품절도 함께 사라진다.
+- **품절과 판매 정보 확인**: 3.14.8과 3.14.9는 메뉴 내용을 바꾸지 않으므로 미완료 작업 규칙과 `menuVersion` 증가, 게시 시각 변경을 적용하지 않는다. 자세한 차이는 각 절에 적었다.
+- **검사 순서**: 인증(`401`, 3.1.5) → 요청 형식(`422`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 업장 행 잠금 → 업장 상태(비활성이면 `404 BAR_NOT_FOUND`) → 미완료 작업(`409 ACTIVE_IMPORT_EXISTS`) → 메뉴판 버전(`409 MENU_OUTDATED`) → 각 API의 항목 확인과 업무 규칙. 형식 오류는 한 응답에 여러 개 올 수 있다.
 
 #### 3.14.2 옵션
 
@@ -2000,11 +2045,17 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 | `optionLabel` | 문자열 | 아니오 | 메뉴판의 `잔`, `병` 같은 표기. 앞뒤 공백을 지운 뒤 1~100자. 없거나 `null`이면 표기 없음 |
 | `pourMl` | 정수 | 아니오 | 용량(ml). 1~32767. 없거나 `null`이면 용량 없음 |
 | `priceKrw` | 정수 | 예 | 가격(원). 1~99,999,999 (1억 원 미만, 최대 8자리) |
+| `discount` | 객체 | 아니오 | 기간 할인. 옵션마다 하나다. 없거나 `null`이면 할인 없음 |
+| `discount.discountedPriceKrw` | 정수 | `discount`를 보내면 예 | 할인가(원). 1 이상이고 `priceKrw`보다 낮아야 한다. 같거나 높으면 `DISCOUNT_NOT_LOWER` |
+| `discount.startsAt` | RFC 3339 문자열 | `discount`를 보내면 예 | 할인 시작 시각. 시간대를 포함한다(없으면 `TIMEZONE_AWARE`). 이미 지난 시각이어도 된다 |
+| `discount.endsAt` | RFC 3339 문자열 | `discount`를 보내면 예 | 할인 종료 시각. 이 시각부터 정가다. `startsAt`보다 늦어야 하고(`END_BEFORE_START`), 요청 시각보다 늦어야 한다(`DISCOUNT_ENDED`) |
+
 
 - 옵션은 1~3개다. 빈 배열이면 `fieldErrors[].code = TOO_SHORT`, 3개를 넘으면 `TOO_LONG`이다. 현재 메뉴판 UI의 표시 칸 크기에 맞춘 제한이다. 검수(8)로 이미 게시된 항목에 옵션이 4개 이상 있으면, 직접 수정하기 전에 옵션을 명시적으로 3개 이하로 정리해야 한다. 프론트엔드는 기존 옵션을 자동으로 잘라서 저장하지 않는다.
 - `optionLabel`과 `pourMl`이 모두 같은 옵션이 둘 이상이면 `DUPLICATE_OPTION_VALUES`다(8과 같다).
 - 서버는 `pourMl`을 받은 그대로 저장한다. 매장 기본 잔 용량(3.6의 `defaultPourMl`)을 서버가 채우지 않는다. 프론트엔드는 잔 옵션의 입력 칸을 `defaultPourMl`로 미리 채울 수 있다. 병 옵션에는 채우지 않는다.
-- 할인과 품절은 이 API에 없다.
+- **할인**: 기간은 특정 순간이므로 다른 시각처럼 UTC RFC 3339다(3.15의 현지 시각과 다르다). 할인가로 파는 기간은 `startsAt` 이상 `endsAt` 미만이다. 수정(3.14.4)은 옵션 전체를 바꾸므로, 할인을 유지하려면 3.9에서 받은 `discount`를 그대로 다시 보낸다. 빼고 보내면 할인이 지워진다. 화면을 연 뒤 할인이 끝나 `DISCOUNT_ENDED`를 받으면, 그 할인을 빼고 다시 보낸다. 끝난 할인은 응답에서 `null`이 되며, 서버는 끝난 할인을 지우는 별도 작업을 두지 않는다.
+- **품절**은 이 API가 아니라 3.14.8로 바꾼다. 추가와 수정은 품절 여부를 바꾸지 않으며, 새로 추가한 항목은 판매 중이다.
 
 #### 3.14.3 항목 추가
 
@@ -2083,8 +2134,11 @@ Content-Type: application/json
   "menuVersion": 5,
   "displayName": "글렌피딕 12년",
   "options": [
-    { "optionLabel": "잔", "pourMl": 30, "priceKrw": 18000 },
-    { "optionLabel": "병", "pourMl": null, "priceKrw": 170000 }
+    {
+      "optionLabel": "잔", "pourMl": 30, "priceKrw": 18000,
+      "discount": { "discountedPriceKrw": 15000, "startsAt": "2026-11-01T09:00:00Z", "endsAt": "2026-11-15T15:00:00Z" }
+    },
+    { "optionLabel": "병", "pourMl": null, "priceKrw": 170000, "discount": null }
   ]
 }
 ```
@@ -2129,7 +2183,7 @@ Content-Type: application/json
 
 #### 3.14.7 오류와 프론트엔드 처리
 
-프론트엔드는 오류를 기다리지 않고 편집을 미리 막는다. 메뉴 관리 화면에 들어올 때 3.6(또는 3.11.9)을 다시 불러와 `activeMenuImport`가 있으면 추가, 수정, 삭제, 초기화 버튼을 비활성화하고, 검수 중에는 메뉴를 고칠 수 없다는 안내와 함께 그 작업으로 가는 버튼을 보여 준다. 작업을 반영하거나 취소한 뒤 돌아오면 다시 불러와 편집을 푼다. 아래 `409 ACTIVE_IMPORT_EXISTS`는 화면에 보인 상태가 오래된 경우의 안전장치다.
+프론트엔드는 오류를 기다리지 않고 편집을 미리 막는다. 메뉴 관리 화면에 들어올 때 3.6(또는 3.11.9)을 다시 불러와 `activeMenuImport`가 있으면 추가, 수정, 삭제, 초기화 버튼을 비활성화하고(품절 표시와 판매 정보 확인은 막지 않는다), 검수 중에는 메뉴를 고칠 수 없다는 안내와 함께 그 작업으로 가는 버튼을 보여 준다. 작업을 반영하거나 취소한 뒤 돌아오면 다시 불러와 편집을 푼다. 아래 `409 ACTIVE_IMPORT_EXISTS`는 화면에 보인 상태가 오래된 경우의 안전장치다.
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
@@ -2141,8 +2195,81 @@ Content-Type: application/json
 | `409` | `MENU_OUTDATED` | 보낸 `menuVersion`이 현재 값과 다름. 다른 기기나 operator의 편집, 검수 반영, 성공한 요청의 재전송 | 3.9를 다시 불러오고, 입력 중이던 값은 유지한 채 다시 저장하게 함 |
 | `409` | `MENU_ITEM_EXISTS` | 추가하려는 상품이 이미 메뉴판에 있음. `details.barMenuItemId` | 그 항목의 수정 화면으로 안내 |
 | `409` | `DUPLICATE_BRAND_FOUND`, `DUPLICATE_PRODUCT_FOUND` | 신규 브랜드나 상품과 같은 것이 이미 있음 (3.14.3, 9.5) | 기존 브랜드나 상품을 보여 주고 고르게 함. `existingProduct.isActive = false`이면 상품 검색으로 안내 |
-| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `END_BEFORE_START`, `EXACTLY_ONE_REQUIRED`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 같은 요청 재시도 |
+
+#### 3.14.8 품절 표시
+
+```http
+PUT /api/bars/{barId}/menu/items/{barMenuItemId}/sold-out
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{ "soldOut": true }
+```
+
+메뉴 항목 하나를 품절로 표시하거나 판매 중으로 되돌린다. 품절은 옵션이 아니라 항목 단위다. 권한은 3.14.1과 같다(operator와 해당 업장의 현재 업주, 비활성 업장은 `404 BAR_NOT_FOUND`).
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `soldOut` | 불리언 | 예 | `true`이면 품절, `false`이면 판매 중 |
+
+- 품절은 메뉴 내용이 아니라 재고 상태이므로 3.14.1의 다음 규칙을 적용하지 않는다.
+  - **미완료 작업**: 검수 중에도 바꿀 수 있다. 검수 반영(8)의 "검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었는지" 검사에서도 품절 변경은 메뉴판 변경으로 보지 않는다.
+  - **메뉴판 버전**: `menuVersion`을 받지 않고 올리지도 않는다. `publishedAt`도 바뀌지 않는다. 품절은 재고 상태이지 판매 정보(상품과 가격)를 바꾸거나 확인한 것이 아니고, `publishedAt`은 고객 검색의 `menuUpdatedAt`으로도 쓰이기 때문이다. 따라서 업주 화면의 "최근 갱신"(3.6의 `publishedAt`과 `confirmedAt` 중 늦은 시각)도 품절 변경으로는 바뀌지 않는다.
+- 값을 정하는 요청이므로 같은 요청을 다시 보내도 결과가 같다. 이미 그 값이어도 `200 OK`다.
+- 품절은 항목이 현재 메뉴판에 있는 동안 유지된다. 검수 반영(8)이나 항목 수정(3.14.4)으로 옵션이 바뀌어도 그대로다. 항목이 메뉴판에서 빠지면(검수의 `remove`, 3.14.5 삭제, 3.14.6 초기화) 품절이 풀리므로, 같은 상품을 다시 추가하면 판매 중으로 시작한다.
+- 품절 항목은 손님에게 보이지 않는다. 비로그인 사용자와 customer의 3.9 응답과 고객 검색(3.10)에서 빠지고, operator와 해당 업장의 업주의 3.9 응답에만 `soldOut = true`로 나온다. 판매 중으로 되돌리면 바로 다시 보인다.
+- `barMenuItemId`가 이 업장의 현재 메뉴판에 없거나 UUID 형식이 아니면 `404 MENU_ITEM_NOT_FOUND`다.
+- 서버는 업장 행을 잠근 뒤(3.14.1) 항목이 현재 메뉴판에 있는지 확인하고 품절 값을 쓴다. 그래서 같은 항목을 내리는 검수 반영이나 삭제와 동시에 와도, 메뉴판에서 빠진 항목에 품절이 남지 않는다.
+
+`200 OK`, 본문은 3.9와 같은 형식이다. 프론트엔드는 메뉴 관리 화면에 `activeMenuImport`가 있어도 품절 버튼은 막지 않는다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님, 비활성 업장 | 업장 목록으로 이동 |
+| `404` | `MENU_ITEM_NOT_FOUND` | 항목이 현재 메뉴판에 없음 | 3.9를 다시 불러와 목록 갱신 |
+| `422` | `VALIDATION_FAILED` | `soldOut` 없음(`MISSING`)이나 불리언이 아님 | `fieldErrors` 표시 |
+
+#### 3.14.9 판매 정보 확인
+
+```http
+POST /api/bars/{barId}/menu/confirm
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{ "menuVersion": 6 }
+```
+
+업주가 관리 홈의 "지금도 맞아요"로 현재 메뉴판의 상품과 가격이 지금도 맞다고 확인한 시각을 남긴다. 메뉴는 바꾸지 않는다. 권한은 3.14.1과 같다.
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `menuVersion` | 정수 | 예 (`null` 가능) | 확인한 화면에서 받은 `menuVersion`(3.9). 메뉴판이 없으면 `null`이다(3.9.1). 서버의 현재 값과 다르면 `409 MENU_OUTDATED`다. 업주가 본 것과 다른 메뉴를 맞다고 확인하지 않게 하기 위해서다 |
+
+- 메뉴판이 없거나 항목이 하나도 없으면 `409 NO_PUBLISHED_MENU`다. 품절 항목도 항목으로 센다. 이 검사는 `menuVersion` 비교보다 먼저 한다. 그래서 메뉴판이 없는 업장에서 `menuVersion = null`을 보내면 `NO_PUBLISHED_MENU`를 받는다. 메뉴판이 있는데 `null`을 보내면 현재 값과 다르므로 `MENU_OUTDATED`다.
+- 검사 순서: 인증(`401`, 3.1.5) → 요청 형식(`422`, `menuVersion` 필드가 없으면 `MISSING`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 업장 행 잠금(3.14.1) → 업장 상태(비활성이면 `404 BAR_NOT_FOUND`) → 메뉴판과 항목(`409 NO_PUBLISHED_MENU`) → 메뉴판 버전(`409 MENU_OUTDATED`) → 확인 시각 기록. 잠금 안에서 버전을 확인하고 기록하므로, 검수 반영과 동시에 와도 반영 전의 메뉴를 반영 뒤의 시각으로 확인한 것처럼 남지 않는다.
+- 메뉴를 바꾸지 않으므로 검수 중에도 할 수 있다(`ACTIVE_IMPORT_EXISTS` 없음). `menuVersion`과 `publishedAt`은 그대로다.
+- 확인 시각과 확인한 사용자를 메뉴판에 기록한다. 다시 확인하면 시각을 새로 바꾼다. 같은 요청을 다시 보내도 확인 시각만 조금 늦어질 뿐 결과가 같다.
+- 확인 시각은 3.6과 3.11.9의 `currentMenu.confirmedAt`에 나온다. 고객 화면(3.9)과 검색의 `menuUpdatedAt`은 지금처럼 메뉴판을 마지막으로 바꾼 시각(`publishedAt`)이다.
+- 검수 반영이나 직접 편집으로 메뉴판이 바뀌어도 `confirmedAt`은 그대로 남는다. 업주 화면의 "최근 갱신"은 프론트엔드가 `publishedAt`과 `confirmedAt` 중 늦은 시각으로 계산한다.
+
+`200 OK`, 본문은 3.6과 같은 형식이다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님, 비활성 업장 | 업장 목록으로 이동 |
+| `409` | `MENU_OUTDATED` | 보낸 `menuVersion`이 현재 값과 다름 | 3.9를 다시 불러와 바뀐 메뉴를 보여 주고 다시 확인하게 함 |
+| `409` | `NO_PUBLISHED_MENU` | 메뉴판이 없거나 항목이 없음 | "지금도 맞아요" 버튼을 숨기고 메뉴 등록으로 안내 |
+| `422` | `VALIDATION_FAILED` | `menuVersion` 필드가 없음(`MISSING`)이나 정수도 `null`도 아님 | `fieldErrors` 표시 |
 
 ### 3.15 영업시간과 임시 휴무
 
@@ -2879,6 +3006,8 @@ Content-Type: application/json
 | `optionDecisions[].correctedPriceKrw` | 아니오 | 1~2,147,483,647 정수. 없거나 `null`이면 추출값 유지 |
 | `optionDecisions[].correctedPourMl` | 아니오 | 1~32767 정수. 없거나 `null`이면 추출값 유지 |
 
+검수에서는 할인(3.14.2)을 정하지 않는다. `optionDecisions`에 할인 필드는 없으며, 보내면 `EXTRA_FORBIDDEN`이다. 할인은 메뉴를 반영한 뒤 직접 편집(3.14.4)으로 정한다. 메뉴판 사진에 할인이 적힌 경우가 드물고, 할인은 기간이 있어 사진에서 읽을 수 없기 때문이다. 반영할 때 기존 할인이 이어지는 규칙은 8.7을 따른다.
+
 `optionDecisions`의 필드는 "없음 또는 `null` = 고치지 않음"이다. 따라서 추출된 값을 지워 `null`로 만들 수는 없다. 가격이 없는 옵션은 게시하지 않으며, 게시할 상품에는 가격 있는 옵션이 최소 하나 있어야 한다(`NO_PRICED_OPTION`).
 
 `select_existing_product`의 추가 필드:
@@ -3103,7 +3232,9 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - 백엔드는 운영자가 제출한 결정으로 최종 변경을 계산해 반영한다. 다른 후보를 고르거나 가격을 고쳐서 임시 diff와 달라진 변경도 운영자의 결정이므로 그대로 반영한다.
 - 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다.
 - 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면(다른 작업이 먼저 게시된 경우 등) 반영하지 않는다. 백엔드는 임시 diff를 다시 만들고 `reviewVersion`을 올린 뒤 `REVIEW_OUTDATED`를 반환한다.
-- 반영에 성공하면 메뉴판 버전(3.9의 `menuVersion`)을 1 올린다. 미완료 작업이 있는 동안에는 메뉴 직접 편집(3.14)을 받지 않으므로, 검수 중에 직접 편집으로 메뉴판이 바뀌는 일은 없다.
+- 반영은 메뉴 등록 작업을 잠그기 전에 업장 행을 먼저 잠근다(3.14.1). 같은 업장의 직접 편집, 품절 표시, 판매 정보 확인, 새 등록 작업과 차례로 처리하기 위해서다.
+- 반영할 때 품절과 할인은 다음처럼 이어진다. 품절(3.14.8)은 메뉴판에 남는 항목에서 그대로 유지되고, `remove`로 빠진 항목에서는 풀린다. 할인(3.14.2)은 반영 뒤에도 표기(`optionLabel`), 용량(`pourMl`), 정가(`priceKrw`)가 모두 같은 옵션이 남으면 그 옵션에 그대로 유지된다. 정가가 바뀌거나 옵션이 없어지면 할인이 지워진다. 정가가 바뀌면 원래 할인가가 맞는지 알 수 없기 때문이다. 품절 변경과 판매 정보 확인은 "검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었는지" 검사에서 메뉴판 변경으로 보지 않는다.
+- 반영에 성공하면 메뉴판 버전(3.9의 `menuVersion`)을 1 올리고, `publishedAt`을 업장 행을 잠근 뒤의 현재 시각으로 바꾼다(3.14.1의 게시 시각). 미완료 작업이 있는 동안에는 메뉴 직접 편집(3.14)을 받지 않으므로, 검수 중에 직접 편집으로 메뉴판이 바뀌는 일은 없다.
 
 ### 8.8 성공 응답
 
@@ -3178,7 +3309,8 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소·다시 검증 (3.11) | 신청 상세 재조회 |
 | `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 키에 다른 요청 내용 | 새 키로 명시적 재요청 |
 | `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있는데 새 작업을 올리거나(4.4) 메뉴를 직접 편집함(3.14). `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 다시 요청 |
-| `409` | `MENU_OUTDATED` | 직접 편집 요청의 `menuVersion`이 현재 메뉴판 버전과 다름. `details.submittedMenuVersion`, `details.currentMenuVersion` (3.14) | 메뉴 다시 조회 후 다시 저장 |
+| `409` | `MENU_OUTDATED` | 직접 편집이나 판매 정보 확인(3.14.9) 요청의 `menuVersion`이 현재 메뉴판 버전과 다름. `details.submittedMenuVersion`, `details.currentMenuVersion` (3.14) | 메뉴 다시 조회 후 다시 저장 |
+| `409` | `NO_PUBLISHED_MENU` | 판매 정보 확인(3.14.9)을 했는데 메뉴판이 없거나 항목이 없음 | 메뉴 등록으로 안내 |
 | `409` | `MENU_ITEM_EXISTS` | 직접 추가하려는 상품이 이미 현재 메뉴판에 있음. `details.barMenuItemId` (3.14.3) | 그 항목 수정으로 안내 |
 | `409` | `PHOTO_EXISTS` | 내용이 같은 매장 사진이 이미 있음. `details.photoId` (3.16.2) | 이미 등록된 사진이라고 안내하고 사진 목록 다시 조회 |
 | `409` | `PHOTO_LIMIT_REACHED` | 매장 사진이 이미 15장. `details.maxPhotos` (3.16.2) | 사진을 지운 뒤 추가하라고 안내 |
@@ -3223,8 +3355,8 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
-- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`.
+- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`, `TIMEZONE_AWARE`. `message`는 Pydantic의 영어 기본 문구다.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`.
 
 ### 9.4 검수 버전 충돌
 
@@ -3356,7 +3488,9 @@ canceled
 - 최종 요청에서 AI를 다시 호출하지 않는다.
 - 최종 요청은 부분 성공하지 않는다. 하나라도 실패하면 전체 롤백한다.
 - 메뉴 직접 편집(3.14)은 항목을 `barMenuItemId`로만 가리킨다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀌면 달라질 수 있다.
-- 메뉴 직접 편집 요청은 모두 조회한 `menuVersion`을 포함하며, 업장에 미완료 메뉴 등록 작업이 있으면 받지 않는다.
+- 메뉴 직접 편집 요청은 모두 조회한 `menuVersion`을 포함하며, 업장에 미완료 메뉴 등록 작업이 있으면 받지 않는다. 품절 표시(3.14.8)와 판매 정보 확인(3.14.9)은 예외로 검수 중에도 받는다.
+- 품절 항목은 손님(비로그인 사용자와 customer)의 3.9와 고객 검색(3.10)에서 빠진다. operator와 해당 업장의 업주만 3.9에서 `soldOut = true`로 받는다.
+- 할인 중인지는 프론트엔드가 `discount.startsAt`, `endsAt`과 현재 시각으로 계산한다. `priceKrw`는 항상 정가다.
 - `summary`나 사용자 표시 문자열을 서버 검증 기준으로 사용하지 않는다.
 - 매장 태그와 정규 영업시간은 업장 수정(3.7)에서 배열 전체를 바꾼다. 일부만 바꾸는 요청은 없다.
 - 영업 상태는 서버가 계산하지 않는다. 프론트엔드가 3.15.5의 규칙으로 계산한다. `operatingException`은 `endDate` 다음 날까지 응답에 남으므로, 지금 적용 중인지도 프론트엔드가 판단한다(3.15.4).

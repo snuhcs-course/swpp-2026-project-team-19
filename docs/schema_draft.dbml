@@ -652,6 +652,7 @@ Table bar_menu_items {
   id uuid [pk]
   bar_id uuid [not null, ref: > bars.id]
   product_id uuid [not null, ref: > products.id]
+  sold_out_at timestamptz [note: 'Set while the item is sold out; null when on sale. Cleared when the item leaves the current board']
   created_at timestamptz [not null]
 
   indexes {
@@ -662,8 +663,12 @@ Table bar_menu_items {
   Note: '''
   A row is one bar-specific menu item backed by a shared canonical product. It is not deleted merely
   because a later menu board omits it, and it can be reused if the product returns later.
-  Membership in the bar's current menu board is the single visibility rule: linked means visible;
-  unlinked means retained but not visible. No separate visibility status is stored.
+  Membership in the bar's current menu board decides whether the item is on the menu: linked means on the board;
+  unlinked means retained but not on the board. Customers see a linked item only while it is not sold out.
+  No separate visibility status is stored.
+  Sold-out is stock state: a sold-out item stays on the board, but customers and search do not see it;
+  only the owner and operators see it, marked as sold out.
+  It lives here because bar_menu_items rows survive board rewrites, while board entries do not.
   '''
 }
 
@@ -673,6 +678,8 @@ Table menu_boards {
   last_import_id uuid [ref: > menu_imports.id]
   version integer [not null, default: 1, note: 'Incremented on every review publish and manual edit; checked by manual edits']
   published_at timestamptz [not null]
+  confirmed_at timestamptz [note: 'Last time an owner or operator confirmed the menu is still accurate; publishing does not change it']
+  confirmed_by_user_id uuid [ref: > users.id, note: 'Who confirmed; null when never confirmed or for a temporary-login operator without a users row']
 
   Note: '''
   A menu board is the current grouping of bar menu items shown by a bar. Each bar has at most one current
@@ -710,7 +717,10 @@ Table menu_entry_options {
   source_extracted_option_id uuid [ref: > extracted_options.id]
   option_label varchar(100)
   pour_ml smallint
-  price_krw integer [not null]
+  price_krw integer [not null, note: 'List price, also while a discount is running']
+  discount_price_krw integer [note: 'CHECK between 1 and price_krw - 1; set together with both discount times or all null']
+  discount_starts_at timestamptz
+  discount_ends_at timestamptz [note: 'CHECK discount_ends_at > discount_starts_at; the discount applies in [starts_at, ends_at)']
   sort_order smallint [not null]
   created_at timestamptz [not null]
 
@@ -723,6 +733,10 @@ Table menu_entry_options {
   One row is one sales option, such as 15 ml at KRW 8,000 or 30 ml at KRW 15,000.
   Each visible menu-board entry must have at least one option. option_label supports non-volume
   labels found on a real menu while pour_ml remains nullable when the size is not stated.
+  An option has at most one time-limited discount. Options are rewritten on every publish, so a review publish
+  copies a discount to the new option with the same label, pour size and list price, and drops it otherwise.
+  A manual add, edit or delete changes only the requested item; other items keep their options and discounts.
+  An ended discount is not deleted by a job; the API omits it from responses.
   '''
 }
 
