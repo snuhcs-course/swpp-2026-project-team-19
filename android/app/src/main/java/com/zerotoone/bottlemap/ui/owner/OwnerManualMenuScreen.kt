@@ -423,15 +423,19 @@ internal fun OwnerManualMenuScreen(
                     }
                 }
                 screen == "item" -> {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically) {
                         Text(if (editId == null) "메뉴 직접 추가" else "메뉴 수정",
-                            color = V4Color.text, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Text("할인", Modifier.clickable { saleOption = 0; error = null; screen = "promo" },
-                                color = V4Color.primary)
-                            if (editId != null) Text("삭제", Modifier.clickable {
+                            color = V4Color.text, fontFamily = FontFamily.Serif,
+                            fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                            ManualTopButton("할인", false) {
+                                saleOption = 0; error = null; screen = "promo"
+                            }
+                            if (editId != null) ManualTopButton("삭제", true) {
                                 confirm = "delete"
-                            }, color = Color(0xFFFFB4AB))
+                            }
                         }
                     }
                     V4FormField("메뉴 이름", itemName, {
@@ -465,18 +469,14 @@ internal fun OwnerManualMenuScreen(
                                 edit(old)
                             }, secondary = true) else Text(
                                 "카탈로그 상품 ID: " + linkedId, color = V4Color.primary, fontSize = 11.sp)
-                        } else Text("카탈로그 미확인 · 수동 등록", color = V4Color.sub,
-                            fontSize = 11.sp)
+                        }
                     }
-                    if (editId == null && linkedId == null)
-                        V4FormField("브랜드", brandName, { brandName = it },
-                            placeholder = "브랜드 이름")
                     Text("종류", color = V4Color.text, fontSize = 13.sp)
                     Box(Modifier.fillMaxWidth()) {
                         Row(Modifier.fillMaxWidth().height(43.dp)
                             .background(V4Color.elevated, RoundedCornerShape(9.dp))
                             .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
-                            .clickable { categoryMenuExpanded = true }
+                            .manualTap { categoryMenuExpanded = true }
                             .padding(horizontal = 12.dp),
                             verticalAlignment = Alignment.CenterVertically) {
                             Text(category, color = V4Color.text, modifier = Modifier.weight(1f),
@@ -484,60 +484,105 @@ internal fun OwnerManualMenuScreen(
                             Text("⌄", color = V4Color.primary, fontSize = 16.sp)
                         }
                         DropdownMenu(expanded = categoryMenuExpanded,
-                            onDismissRequest = { categoryMenuExpanded = false }) {
+                            onDismissRequest = { categoryMenuExpanded = false },
+                            modifier = Modifier.background(V4Color.elevated)) {
                             MANUAL_MENU_CATEGORIES.forEach { cat ->
-                                DropdownMenuItem(text = { Text(cat) }, onClick = {
-                                    categoryMenuExpanded = false
-                                    if (cat != category) {
-                                        category = cat; linkedId = null; rejectedId = null
-                                        if (cat != "위스키")
-                                            setOptions(draftOptions.take(1))
-                                    }
-                                })
+                                Text(cat, modifier = Modifier.fillMaxWidth()
+                                    .background(if (cat == category) V4Color.surface
+                                        else V4Color.elevated)
+                                    .manualTap {
+                                        categoryMenuExpanded = false
+                                        if (cat != category) {
+                                            category = cat; linkedId = null; rejectedId = null
+                                            if (cat != "위스키")
+                                                setOptions(draftOptions.take(1))
+                                        }
+                                    }.padding(horizontal = 16.dp, vertical = 12.dp),
+                                    color = V4Color.text, fontSize = 13.sp)
                             }
                         }
                     }
                     if (category == "기타 주류")
                         V4FormField("주류 종류", alcoholKind, { alcoholKind = it.take(60) },
                             placeholder = "예: 하이볼, 맥주")
-                    if (category == "위스키") Text("용량별 가격",
-                        color = V4Color.text, fontWeight = FontWeight.Bold)
+                    HorizontalDivider(color = V4Color.line, thickness = 1.dp)
+                    if (category == "위스키") {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement =
+                            Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("용량별 가격", color = V4Color.text, fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold)
+                            Text(draftOptions.size.toString() + "/3", color = V4Color.sub,
+                                fontSize = 11.sp)
+                        }
+                    }
                     (if (category == "위스키") draftOptions else draftOptions.take(1))
                         .forEachIndexed { i, d ->
-                            Column(Modifier.fillMaxWidth().background(V4Color.elevated,
+                            Column(Modifier.fillMaxWidth().background(V4Color.surface,
                                 RoundedCornerShape(9.dp))
                                 .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
-                                .padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                .padding(11.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 if (category == "위스키") {
                                     Row(Modifier.fillMaxWidth(), horizontalArrangement =
-                                        Arrangement.SpaceBetween) {
-                                        Text((i+1).toString() + "번 옵션", color = V4Color.sub)
+                                        Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                        Text((i+1).toString() + "번 옵션",
+                                            color = V4Color.sub, fontSize = 11.sp)
                                         if (draftOptions.size > 1) Text("제거",
-                                            Modifier.clickable {
+                                            Modifier.manualTap {
                                                 setOptions(draftOptions.filterIndexed { j, _ -> j != i })
-                                            }, color = V4Color.primary)
+                                            }, color = V4Color.primary, fontSize = 11.sp)
                                     }
                                     V4CompactCheck("Bottle 판매", d.bottle) { checked ->
                                         changeOption(i) { it.copy(bottle = checked) }
                                     }
-                                    if (!d.bottle) V4FormField("용량 (ml)", d.ml, { v ->
-                                        changeOption(i) { it.copy(ml = v.filter(Char::isDigit)) }
+                                    Row(Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.Bottom) {
+                                        if (d.bottle) Column(Modifier.weight(1f),
+                                            verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                            Text("용량", color = V4Color.text,
+                                                fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                            Box(Modifier.fillMaxWidth().height(43.dp)
+                                                .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
+                                                .background(V4Color.elevated, RoundedCornerShape(9.dp))
+                                                .padding(horizontal = 12.dp),
+                                                contentAlignment = Alignment.CenterStart) {
+                                                Text("Bottle", color = V4Color.text, fontSize = 14.sp)
+                                            }
+                                        } else V4FormField("용량 (ml)", d.ml, { v ->
+                                            changeOption(i) { it.copy(ml = v.filter(Char::isDigit)) }
+                                        }, modifier = Modifier.weight(1f),
+                                            keyboardType = KeyboardType.Number,
+                                            testTag = "manual-menu-ml-" + i)
+                                        V4FormField("가격 (원)", d.price, { v ->
+                                            changeOption(i) { it.copy(price = v.filter(Char::isDigit)) }
+                                        }, modifier = Modifier.weight(1f),
+                                            keyboardType = KeyboardType.Number,
+                                            testTag = "manual-menu-price-" + i)
+                                    }
+                                } else {
+                                    V4FormField("판매 가격 (원)", d.price, { v ->
+                                        changeOption(i) { it.copy(price = v.filter(Char::isDigit)) }
                                     }, keyboardType = KeyboardType.Number,
-                                        testTag = "manual-menu-ml-" + i)
+                                        testTag = "manual-menu-price-" + i)
                                 }
-                                V4FormField(if (category == "위스키") "가격 (원)"
-                                    else "판매 가격 (원)", d.price, { v ->
-                                    changeOption(i) { it.copy(price = v.filter(Char::isDigit)) }
-                                }, keyboardType = KeyboardType.Number,
-                                    testTag = "manual-menu-price-" + i)
-                                if (d.sale.isNotBlank())
-                                    Text("할인 · " + d.sale + "원", color = V4Color.primary)
+                                if (d.sale.isNotBlank()) Text("할인 · " + d.sale + "원",
+                                    color = V4Color.primary, fontSize = 11.sp)
                             }
                         }
-                    if (category == "위스키" && draftOptions.size < MANUAL_MENU_MAX_OPTIONS)
-                        Text("＋ 용량 옵션 추가", Modifier.clickable {
-                            setOptions(draftOptions + freshOption())
-                        }.padding(vertical = 8.dp), color = V4Color.primary)
+                    if (category == "위스키") {
+                        if (draftOptions.size < MANUAL_MENU_MAX_OPTIONS)
+                            Box(Modifier.fillMaxWidth().height(40.dp)
+                                .background(V4Color.elevated, RoundedCornerShape(8.dp))
+                                .border(1.dp, V4Color.line, RoundedCornerShape(8.dp))
+                                .manualTap { setOptions(draftOptions + freshOption()) }
+                                .testTag("manual-menu-option-add"),
+                                contentAlignment = Alignment.Center) {
+                                Text("+ 용량 옵션 추가", color = V4Color.text, fontSize = 12.sp)
+                            }
+                        else Text("가격 옵션은 최대 3개까지 등록할 수 있어요.",
+                            color = V4Color.sub, fontSize = 11.sp)
+                    }
+                    HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     error?.let { Text(it, color = Color(0xFFFFB4AB)) }
                     ManualButton(if (editId == null) "메뉴 추가" else "저장하기",
                         ::save, modifier = Modifier.testTag("manual-menu-save"))
