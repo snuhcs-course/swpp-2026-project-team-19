@@ -23,6 +23,10 @@ import com.zerotoone.bottlemap.data.owner.MockExceptionKind
 import com.zerotoone.bottlemap.data.owner.MockOperatingException
 import com.zerotoone.bottlemap.data.owner.MockPhoto
 import com.zerotoone.bottlemap.data.owner.MockPhotoKind
+import com.zerotoone.bottlemap.data.owner.MockBrand
+import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
+import com.zerotoone.bottlemap.data.owner.MockBarMenuItem
+import com.zerotoone.bottlemap.data.owner.MockMenuOption
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -241,6 +245,31 @@ class OwnerBarEditorComposeTest {
             assertEquals(listOf(first, second),
                 vm.preview("fixture-bar", 0)!!.bar.gallery)
         }
+    }
+
+    @Test fun customerPreviewShowsFourthSavedServingOption() {
+        val repo = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val brand = MockBrand("brand-1", "Brand A")
+        repo.saveBrand(brand)
+        repo.saveCatalogProduct(MockCatalogProduct("product-12", "brand-1",
+            "Bottle 12", ageYears = 12))
+        repo.saveMenuItem(MockBarMenuItem("menu-1", "fixture-bar", "product-12",
+            (1..4).map { i ->
+                MockMenuOption("option-$i", pourMl = i * 15, priceKrw = i * 1000)
+            }))
+        val preview = repo.preview("fixture-bar", 0)!!
+        compose.setContent {
+            MaterialTheme {
+                OwnerPreviewV4Menu(preview.bar, preview, listOf(brand), 0)
+            }
+        }
+        // Search expands the matching category independent of initial grouping.
+        compose.onNodeWithTag("owner-preview-menu-search").performTextInput("Bottle")
+        compose.onNodeWithText("15ml").assertExists()
+        compose.onNodeWithText("45ml").assertExists()
+        compose.onNodeWithText("60ml").assertExists()
+        compose.onNodeWithText("4,000원").assertExists()
     }
 
     @Test fun photoEditorUsesImmediateActionsAndDoneButton() {
