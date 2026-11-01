@@ -7,12 +7,16 @@ import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.click
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zerotoone.bottlemap.data.owner.*
 import org.junit.Assert.assertEquals
@@ -171,6 +175,23 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithText("16년").assertDoesNotExist()
         compose.onNodeWithText("판매 중").assertDoesNotExist()
         compose.onNodeWithText("품절").assertDoesNotExist()
+    }
+
+    @Test fun editorPriceFieldRefocusesAfterTappingOutsideInput() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithTag("manual-menu-price-0").performClick()
+        compose.onNodeWithTag("manual-menu-price-0").assertIsFocused()
+        compose.onNodeWithText("용량별 가격").performTouchInput { click() }
+        compose.onNodeWithTag("manual-menu-price-0").assertIsNotFocused()
+        compose.onNodeWithTag("manual-menu-price-0").performClick()
+        compose.onNodeWithTag("manual-menu-price-0").assertIsFocused()
     }
 
     @Test fun regularAndDiscountPriceInputRejectNinthDigitAndUseVacationCalendar() {
