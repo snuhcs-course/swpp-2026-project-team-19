@@ -475,7 +475,8 @@ internal fun OwnerManualMenuScreen(
                                 else "메뉴판 사진으로 추가하기",
                                 onClick = {
                                     val status = job?.status
-                                    if (status == MockImportStatus.PROCESSING ||
+                                    if (status == MockImportStatus.UPLOADED ||
+                                        status == MockImportStatus.PROCESSING ||
                                         status == MockImportStatus.READY_FOR_REVIEW ||
                                         status == MockImportStatus.FAILED) onExistingJob(status)
                                     else onNewPhoto()
