@@ -51,8 +51,7 @@ internal fun OwnerRegistrationDashboard(
                 // Same persisted bar exception and weekly schedule as management home.
                 val temporary = homeOperatingException(bar, now)
                 // Match the home-card headline; keep current open/closed as separate detail.
-                val operatingLabel = if (temporary?.kind == MockExceptionKind.VACATION)
-                    "임시 휴무" else homeExceptionHeading(temporary)
+                val operatingLabel = registrationOperatingLabel(temporary, now)
                 OwnerStatusLabel(operatingLabel,
                     if (temporary != null) OwnerStatusTone.ATTENTION else OwnerStatusTone.SUCCESS)
                 if (bar.weeklyHours.isNotEmpty()) {
