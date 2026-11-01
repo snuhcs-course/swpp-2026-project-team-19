@@ -63,6 +63,11 @@ fun manualMenuOptionError(options: List<MockMenuOption>, category: String, origi
     if (manualMenuCategoryLabel(category) == "위스키" && options.any {
             it.pourMl != null && it.pourMl !in 1..32767
         }) return "용량을 입력하거나 Bottle 판매를 선택해 주세요."
+    if (options.any { option -> option.discount?.discountedPriceKrw?.let { price ->
+            price > MAX_OWNER_MENU_PRICE_KRW &&
+                original.none { it.optionId == option.optionId &&
+                    it.discount?.discountedPriceKrw == price }
+        } == true }) return "할인 가격은 1억 원 미만이어야 해요."
     if (options.distinctBy { it.identityKey() }.size != options.size)
         return "같은 제품에 동일한 용량 옵션을 중복 등록할 수 없어요."
     if (options.any { it.discount != null && (
