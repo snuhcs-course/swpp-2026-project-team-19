@@ -46,6 +46,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.*
+import com.zerotoone.bottlemap.ui.common.BmIcon
+import com.zerotoone.bottlemap.ui.common.BmIconId
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
