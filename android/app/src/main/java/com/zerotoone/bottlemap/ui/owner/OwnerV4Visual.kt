@@ -179,12 +179,15 @@ internal fun V4SearchField(value: String, onChange: (String) -> Unit, tag: Strin
         Text("⌕", color = V4Color.sub, fontSize = 21.sp, lineHeight = 22.sp)
         BasicTextField(
             value = value, onValueChange = onChange, singleLine = true,
-            modifier = Modifier.weight(1f).testTag(tag),
-            textStyle = TextStyle(fontSize = 13.sp, color = V4Color.text),
+            modifier = Modifier.weight(1f).height(26.dp).testTag(tag),
+            textStyle = TextStyle(fontSize = 13.sp, color = V4Color.text,
+                lineHeight = 19.sp),
             decorationBox = { inner ->
-                Box {
+                // Center BOTH the placeholder and actual editable inner text field.
+                // With an empty value Compose otherwise anchors its caret at Box top.
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart) {
                     if (value.isEmpty()) Text(hint, fontSize = 13.sp,
-                        color = Color(0xFF938780))
+                        lineHeight = 19.sp, color = Color(0xFF938780))
                     inner()
                 }
             }
