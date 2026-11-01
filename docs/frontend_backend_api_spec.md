@@ -1914,9 +1914,9 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 |---|---|---|---|
 | `optionLabel` | 문자열 | 아니오 | 메뉴판의 `잔`, `병` 같은 표기. 앞뒤 공백을 지운 뒤 1~100자. 없거나 `null`이면 표기 없음 |
 | `pourMl` | 정수 | 아니오 | 용량(ml). 1~32767. 없거나 `null`이면 용량 없음 |
-| `priceKrw` | 정수 | 예 | 가격(원). 1 이상 |
+| `priceKrw` | 정수 | 예 | 가격(원). 1~2,147,483,647 |
 
-- 옵션은 1개 이상이어야 한다. 빈 배열이면 `fieldErrors[].code = TOO_SHORT`다. 개수의 상한은 없다. 프론트엔드가 입력 줄 수를 제한할 수는 있지만, 이미 있는 옵션을 수정할 때는 모두 보여 주고 그대로 보내야 한다.
+- 옵션은 1~10개다. 빈 배열이면 `fieldErrors[].code = TOO_SHORT`, 10개를 넘으면 `TOO_LONG`이다. 프론트엔드는 입력 줄 수를 더 적게 제한할 수 있지만, 이미 있는 옵션을 수정할 때는 모두 보여 주고 그대로 보내야 한다. 검수(8)로 게시한 항목은 옵션이 10개를 넘을 수 있으며, 이런 항목을 수정하려면 10개 이하로 줄여서 보낸다.
 - `optionLabel`과 `pourMl`이 모두 같은 옵션이 둘 이상이면 `DUPLICATE_OPTION_VALUES`다(8과 같다).
 - 서버는 `pourMl`을 받은 그대로 저장한다. 매장 기본 잔 용량(3.6의 `defaultPourMl`)을 서버가 채우지 않는다. 프론트엔드는 잔 옵션의 입력 칸을 `defaultPourMl`로 미리 채울 수 있다. 병 옵션에는 채우지 않는다.
 - 할인과 품절은 이 API에 없다.
@@ -1981,7 +1981,7 @@ Content-Type: application/json
 - `productId`와 `newProduct`를 둘 다 보내거나 둘 다 빠뜨리면 `422`이고 `fieldErrors[].path = productId`, `code = EXACTLY_ONE_REQUIRED`다.
 - 같은 상품이 이미 현재 메뉴판에 있으면 `409 MENU_ITEM_EXISTS`(`details.barMenuItemId`)다. 한 상품은 메뉴판에 한 번만 있고, 용량이나 가격을 더하려면 그 항목을 수정한다(3.14.4).
 - 새 항목은 메뉴판의 맨 끝에 붙는다. 이 업장이 예전에 판매했던 상품이면 그때의 `barMenuItemId`를 다시 쓴다.
-- `newProduct`를 보내면 같은 트랜잭션 안에서 검수의 신규 생성(8.5, 8.6)과 같은 규칙으로 브랜드와 상품의 중복을 검사한다. 같은 브랜드나 상품이 있으면 아무것도 만들지 않고 `409 DUPLICATE_BRAND_FOUND` 또는 `409 DUPLICATE_PRODUCT_FOUND`다. `details`는 9.5와 같되 `extractedItemId`와 `reviewUrl`이 없다. 프론트엔드는 `details.existingProduct`(또는 `existingBrand`)를 보여 주고, 맞으면 그 `productId`(또는 `brandId`)로 다시 요청한다.
+- `newProduct`를 보내면 같은 트랜잭션 안에서 검수의 신규 생성(8.5, 8.6)과 같은 규칙으로 브랜드와 상품의 중복을 검사한다. 같은 브랜드나 상품이 있으면 아무것도 만들지 않고 `409 DUPLICATE_BRAND_FOUND` 또는 `409 DUPLICATE_PRODUCT_FOUND`다. `details`는 9.5와 같되 `extractedItemId`와 `reviewUrl`이 없다. 프론트엔드는 `details.existingProduct`(또는 `existingBrand`)를 보여 주고, 맞으면 그 `productId`(또는 `brandId`)로 다시 요청한다. `existingProduct.isActive = false`이면 그 상품으로는 추가할 수 없으므로(`PRODUCT_INACTIVE`) 다시 요청하지 않고, 상품 검색(7)에서 고르도록 안내한다(9.5).
 - 만든 상품과 브랜드에는 요청한 사용자를 기록한다. 만든 상품과 별칭은 바로 모든 업장의 고객 검색과 메뉴 매칭에 쓰인다.
 - 응답 본문에서 추가한 항목은 `productId`로 찾는다.
 
@@ -2055,8 +2055,8 @@ Content-Type: application/json
 | `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 메뉴 등록 작업이 있음. `details.menuImportId`, `details.status` | 3.6을 다시 불러와 편집을 막은 화면으로 전환 |
 | `409` | `MENU_OUTDATED` | 보낸 `menuVersion`이 현재 값과 다름. 다른 기기나 operator의 편집, 검수 반영, 성공한 요청의 재전송 | 3.9를 다시 불러오고, 입력 중이던 값은 유지한 채 다시 저장하게 함 |
 | `409` | `MENU_ITEM_EXISTS` | 추가하려는 상품이 이미 메뉴판에 있음. `details.barMenuItemId` | 그 항목의 수정 화면으로 안내 |
-| `409` | `DUPLICATE_BRAND_FOUND`, `DUPLICATE_PRODUCT_FOUND` | 신규 브랜드나 상품과 같은 것이 이미 있음 (3.14.3) | 기존 브랜드나 상품을 보여 주고 고르게 함 |
-| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
+| `409` | `DUPLICATE_BRAND_FOUND`, `DUPLICATE_PRODUCT_FOUND` | 신규 브랜드나 상품과 같은 것이 이미 있음 (3.14.3, 9.5) | 기존 브랜드나 상품을 보여 주고 고르게 함. `existingProduct.isActive = false`이면 상품 검색으로 안내 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 같은 요청 재시도 |
 
 ## 4. 메뉴 등록 요청
@@ -2550,7 +2550,7 @@ Content-Type: application/json
 | `optionDecisions` | 아니오 | 고칠 옵션만 보낸다. 보내지 않은 옵션은 추출값 그대로 반영한다. 기본 `[]` |
 | `optionDecisions[].extractedOptionId` | 예 | 그 항목의 옵션 ID |
 | `optionDecisions[].correctedOptionLabel` | 아니오 | 1~100자. 없거나 `null`이면 추출값 유지 |
-| `optionDecisions[].correctedPriceKrw` | 아니오 | 1 이상 정수. 없거나 `null`이면 추출값 유지 |
+| `optionDecisions[].correctedPriceKrw` | 아니오 | 1~2,147,483,647 정수. 없거나 `null`이면 추출값 유지 |
 | `optionDecisions[].correctedPourMl` | 아니오 | 1~32767 정수. 없거나 `null`이면 추출값 유지 |
 
 `optionDecisions`의 필드는 "없음 또는 `null` = 고치지 않음"이다. 따라서 추출된 값을 지워 `null`로 만들 수는 없다. 가격이 없는 옵션은 게시하지 않으며, 게시할 상품에는 가격 있는 옵션이 최소 하나 있어야 한다(`NO_PRICED_OPTION`).
@@ -2856,7 +2856,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가. 예: `ready_for_review`가 아닌 작업의 검수 제출, `applied`·`failed` 작업의 취소. `details.status`에 현재 상태 | 상태 재조회 |
 | `409` | `REVIEW_OUTDATED` | `reviewVersion` 불일치, 또는 검수 데이터를 만든 뒤 현재 메뉴판이 바뀜 | `details.reviewUrl`로 최신 검수 데이터 재조회 |
 | `409` | `DUPLICATE_BRAND_FOUND` | 신규 브랜드와 동일할 수 있는 브랜드 발견 (검수 또는 직접 추가) | 기존 브랜드 선택 화면 표시 |
-| `409` | `DUPLICATE_PRODUCT_FOUND` | 신규 상품과 동일한 상품 발견, 또는 제출한 이름·별칭이 기존 상품의 별칭과 일치 | 기존 상품 선택 화면 표시. 다른 상품이면 겹치는 별칭을 빼고 다시 제출 |
+| `409` | `DUPLICATE_PRODUCT_FOUND` | 신규 상품과 동일한 상품 발견, 또는 제출한 이름·별칭이 기존 상품의 별칭과 일치 | 기존 상품 선택 화면 표시. 다른 상품이면 겹치는 별칭을 빼고 다시 제출. `existingProduct.isActive = false`이면 상품 검색으로 안내 (9.5) |
 | `413` | `UPLOAD_TOO_LARGE` | 파일 개수 또는 크기 초과 | 이미지 축소 또는 개수 조정 |
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | 지원하지 않는 이미지 형식 | 지원 형식 안내 |
 | `422` | `VALIDATION_FAILED` | 필드 값이나 옵션 구성이 잘못됨 | `fieldErrors` 표시 |
@@ -2893,14 +2893,14 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
-- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`. `message`는 Pydantic의 영어 기본 문구다.
+- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`. `message`는 Pydantic의 영어 기본 문구다.
 - **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`.
 
 ### 9.4 검수 버전 충돌
 
 `REVIEW_OUTDATED`가 발생하면 최종 반영은 전부 롤백된다. 프론트엔드는 사용자의 로컬 입력을 즉시 버리지 말고 최신 검수 응답을 받은 뒤 항목 ID 기준으로 재적용 가능한 수정값을 보여줄 수 있다. 사용자는 바뀐 diff를 확인하고 다시 제출해야 한다.
 
-### 9.5 신규 상품 중복 발견
+### 9.5 신규 브랜드와 상품 중복 발견
 
 ```json
 {
@@ -2916,7 +2916,8 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
         "brandName": "Deanston",
         "category": "whisky",
         "ageYears": null,
-        "editionName": "Virgin Oak"
+        "editionName": "Virgin Oak",
+        "isActive": true
       },
       "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777777"
     },
@@ -2925,9 +2926,52 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 }
 ```
 
-이 경우 신규 상품은 생성되지 않고 `menuImport`는 `ready_for_review`를 유지한다.
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `extractedItemId` | UUID 문자열 | 아니오 | 중복이 난 검수 항목. 직접 추가(3.14.3)에는 없다 |
+| `existingProduct.productId`, `displayName`, `brandId`, `brandName`, `category` | 7.2와 같다 | 아니오 | 이미 있는 상품 |
+| `existingProduct.ageYears`, `editionName` | 7.2와 같다 | 예 | |
+| `existingProduct.isActive` | 불리언 | 아니오 | 활성 상품인지. `false`이면 그 상품을 고를 수 없다(`PRODUCT_INACTIVE`) |
+| `reviewUrl` | 문자열 | 아니오 | 검수 데이터 경로. 직접 추가에는 없다 |
 
-메뉴 항목 직접 추가(3.14.3)에서 생긴 중복도 같은 형식이지만 `details`에 `extractedItemId`와 `reviewUrl`이 없다. 메뉴판은 바뀌지 않는다.
+중복 검사는 비활성 상품도 대상으로 한다(같은 상품을 다시 만들지 않기 위해서다). 제출한 이름이나 별칭이 여러 상품에 걸리면 활성 상품을 먼저 돌려준다. 비활성 상품은 대부분 잘못 만들어져 정리된 중복이고, 실제 상품은 따로 활성 상태로 있기 때문이다.
+
+> **현재 구현과의 차이 (수정 예정):** 지금 백엔드는 걸린 상품 중 상품명 순으로 첫 번째를 돌려주므로, 활성 상품이 함께 걸려도 비활성 상품이 돌아올 수 있다. 메뉴 직접 편집을 구현할 때 활성 상품을 먼저 돌려주도록 고친다.
+
+프론트엔드 처리:
+
+- `isActive = true`: 기존 상품을 보여 주고, 맞으면 그 상품을 선택해(검수는 `select_existing_product`, 직접 추가는 `productId`) 다시 제출한다. 다른 상품이면 겹치는 별칭을 빼고 다시 제출한다.
+- `isActive = false`: 그 상품으로 다시 제출하지 않는다. 이미 정리된 상품과 이름이 겹친다고 안내하고 상품 검색(7)에서 고르게 한다. 검색에도 없으면 operator 문의를 안내한다(7.2).
+
+신규 브랜드가 기존 브랜드와 같으면 `409 DUPLICATE_BRAND_FOUND`다.
+
+```json
+{
+  "error": {
+    "code": "DUPLICATE_BRAND_FOUND",
+    "message": "같은 브랜드가 이미 등록되어 있습니다. 기존 브랜드를 선택해 주세요.",
+    "details": {
+      "extractedItemId": "10000000-0000-4000-8000-000000000009",
+      "existingBrand": {
+        "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
+        "canonicalName": "Deanston"
+      },
+      "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777777"
+    },
+    "fieldErrors": []
+  }
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `extractedItemId`, `reviewUrl` | | 아니오 | 상품 중복과 같다. 직접 추가에는 없다 |
+| `existingBrand.brandId` | UUID 문자열 | 아니오 | 이미 있는 브랜드 |
+| `existingBrand.canonicalName` | 문자열 | 아니오 | 대표 브랜드명 |
+
+프론트엔드는 기존 브랜드를 보여 주고, 맞으면 `brand`를 `{"type": "existing", "brandId": ...}`로 바꿔 다시 제출한다. 브랜드에는 비활성 상태가 없다.
+
+두 오류 모두 아무것도 만들지 않는다. 검수에서는 `menuImport`가 `ready_for_review`를 유지하고, 직접 추가에서는 메뉴판이 바뀌지 않는다.
 
 ### 9.6 API가 만들지 않은 오류
 
