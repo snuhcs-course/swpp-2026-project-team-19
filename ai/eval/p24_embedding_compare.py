@@ -171,23 +171,33 @@ class CharTfidf:
         return rows
 
 
+def model_files(model_dir: Path, onnx_file: str) -> dict[str, Path]:
+    """The files an OnnxEmbedder loads from `model_dir`: the ONNX graph, its external weights when the
+    export has them (<onnx_file>_data, read by onnxruntime next to the graph) and the tokenizer."""
+    tok = model_dir / "tokenizer.json"
+    files = {"onnx": model_dir / "onnx" / onnx_file, "onnx_data": model_dir / "onnx" / f"{onnx_file}_data",
+             "tokenizer": tok if tok.exists() else model_dir / "onnx" / "tokenizer.json"}
+    return {k: f for k, f in files.items() if k != "onnx_data" or f.is_file()}
+
+
 class OnnxEmbedder:
     """A Hugging Face ONNX export run with onnxruntime on CPU (what a small server would run;
-    no torch). `model_dir` holds onnx/<onnx_file> (+ model.onnx_data) and tokenizer.json."""
+    no torch). `model_dir` holds onnx/<onnx_file> (+ <onnx_file>_data) and tokenizer.json (or
+    onnx/tokenizer.json); `files` are the paths it loaded (see model_files)."""
 
     def __init__(self, name: str, model_dir: Path, pooling: str, prefix: str, threads: int,
                  onnx_file: str = FP32, max_length: int = 64, batch_size: int = 64):
         import onnxruntime as ort
         from tokenizers import Tokenizer
         self.name, self.pooling, self.prefix, self.batch_size = name, pooling, prefix, batch_size
-        tok = model_dir / "tokenizer.json"
-        self.tokenizer = Tokenizer.from_file(str(tok if tok.exists() else model_dir / "onnx" / "tokenizer.json"))
+        self.files = model_files(model_dir, onnx_file)
+        self.tokenizer = Tokenizer.from_file(str(self.files["tokenizer"]))
         self.tokenizer.enable_truncation(max_length)
         self.tokenizer.enable_padding()
         opts = ort.SessionOptions()
         opts.intra_op_num_threads = threads
         opts.inter_op_num_threads = 1
-        self.session = ort.InferenceSession(str(model_dir / "onnx" / onnx_file), opts,
+        self.session = ort.InferenceSession(str(self.files["onnx"]), opts,
                                             providers=["CPUExecutionProvider"])
         self.inputs = {i.name for i in self.session.get_inputs()}
         self.outputs = [o.name for o in self.session.get_outputs()]
@@ -568,7 +578,7 @@ def evaluate(embedder: Embedder, be, seed: dict, photos: list, *, variants=CATAL
     # server LLM layer (M3a, merge, M3b off) with embedding candidates after it / before it
     if llm_factory is not None:
         result["llm"] = run_llm(be, rbe, embedder.name, seed, photos, catalogs, base, rankings, rows_for, types,
-                                llm_factory, [v for v in llm_catalogs if v in variants], docsets)
+                                llm_factory, [v for v in llm_catalogs if v in variants], docsets, policies)
 
     # latency per menu photo: embed the photo's lines and rank them against the bar index
     if latency_docset in docsets:
@@ -620,12 +630,20 @@ def calibrate(items: list[tuple[list, str, set]]) -> dict:
     return out
 
 
+# the policies the M3a combinations run with: the first one measured and the recommended one
+LLM_POLICIES = ("unmatched_k5", "unmatched_k5+rerank_only")
+
+
 def run_llm(be, rbe, model_name, seed, photos, catalogs, base, rankings, rows_for, types, llm_factory,
-            variants, docsets) -> dict:
+            variants, docsets, policies=POLICIES, llm_policies=LLM_POLICIES) -> dict:
+    """Per catalog: rules + M3a, and per LLM policy and doc set the embedding candidates after M3a
+    (`M3a_then_embedding`) or before it (`embedding_then_M3a`). The recall of either is over the
+    candidates each result shows, as the policies' `recall_shown` is."""
     layer = h.load_llm_layer()
     llm = llm_factory(layer)
     pmeta = h.product_meta(layer, seed, None)
-    pol = POLICIES[0]
+    by_name = {p.name: p for p in policies}
+    pols = [by_name[n] for n in llm_policies if n in by_name]
     out = {}
     for v in variants:
         bars = list(dict.fromkeys(p.bar for p in photos))
@@ -647,36 +665,38 @@ def run_llm(be, rbe, model_name, seed, photos, catalogs, base, rankings, rows_fo
 
         l0 = {(p.photo_id, n): m3(p, n, base[v][(p.photo_id, n)]) for p in photos for n, _ in p.lines}
         l0_rows = rows_for(v, l0, targets)
-        vout = {"rules+M3a": {**h.summarize(l0_rows, photos)["all"], **extra_stats(l0_rows, l0)}, "docsets": {}}
+        vout = {"rules+M3a": {**h.summarize(l0_rows, photos)["all"], **extra_stats(l0_rows, l0)}}
         known = [(p, n) for p in photos for n, g in p.lines
                  if base[v][(p.photo_id, n)].status not in CONFIRMED
                  and gold_ids_of(be, g, catalogs[v][p.bar].key_to_id)[0] == "known"]
         golds = [gold_ids_of(be, dict(p.lines)[n], catalogs[v][p.bar].key_to_id)[1] for p, n in known]
         l0_lists = [[c.product_id for c in l0[(p.photo_id, n)].candidates] for p, n in known]
         vout["recall_known_not_confirmed"] = {"rules+M3a": recall_at(l0_lists, golds)}
-        for d in docsets:
-            rk = rankings[(v, d)]
-            # after: the LLM layer first, then embedding candidates on the lines still unmatched
-            after = {(p.photo_id, n): apply_policy(l0[(p.photo_id, n)], rk.get((p.bar, n), []), pol, model_name, types)
-                     for p in photos for n, _ in p.lines}
-            # before: rules + embedding is the base the LLM layer merges into (an LLM pick on a line rules
-            # left unmatched is then confirm recommended only when it is among the embedding candidates)
-            before = {}
-            for p in photos:
-                for n, _ in p.lines:
-                    b = apply_policy(base[v][(p.photo_id, n)], rk.get((p.bar, n), []), pol, model_name, types)
-                    before[(p.photo_id, n)] = m3(p, n, b)
-            vd = {}
-            for label, res in (("M3a_then_embedding", after), ("embedding_then_M3a", before)):
-                rows = rows_for(v, res, targets)
-                check_invariants(rows_for(v, base[v]), rows, base[v], res)
-                vd[label] = {**h.summarize(rows, photos)["all"], **extra_stats(rows, res)}
-            emb_lists = [[pid for pid, _, _ in rk.get((p.bar, n), [])] for p, n in known]
-            vd["recall_known_not_confirmed"] = {
-                "M3a_then_embedding": recall_at([merged(a, e) for a, e in zip(l0_lists, emb_lists)], golds),
-                "embedding_then_M3a": recall_at(
-                    [[c.product_id for c in before[(p.photo_id, n)].candidates] for p, n in known], golds)}
-            vout["docsets"][d] = vd
+        vout["policies"] = {}
+        rules_rows = rows_for(v, base[v])
+        for pol in pols:
+            vout["policies"][pol.name] = {}
+            for d in docsets:
+                rk = rankings[(v, d)]
+                # after: the LLM layer first, then embedding candidates on the lines still unmatched
+                after = {(p.photo_id, n): apply_policy(l0[(p.photo_id, n)], rk.get((p.bar, n), []), pol,
+                                                       model_name, types) for p in photos for n, _ in p.lines}
+                # before: rules + embedding is the base the LLM layer merges into (an LLM pick on a line rules
+                # left unmatched is then confirm recommended only when it is among the embedding candidates)
+                before = {}
+                for p in photos:
+                    for n, _ in p.lines:
+                        b = apply_policy(base[v][(p.photo_id, n)], rk.get((p.bar, n), []), pol, model_name, types)
+                        before[(p.photo_id, n)] = m3(p, n, b)
+                vd = {}
+                for label, res in (("M3a_then_embedding", after), ("embedding_then_M3a", before)):
+                    rows = rows_for(v, res, targets)
+                    check_invariants(rules_rows, rows, base[v], res)
+                    vd[label] = {**h.summarize(rows, photos)["all"], **extra_stats(rows, res)}
+                vd["recall_known_not_confirmed"] = {
+                    label: recall_at([[c.product_id for c in res[(p.photo_id, n)].candidates] for p, n in known], golds)
+                    for label, res in (("M3a_then_embedding", after), ("embedding_then_M3a", before))}
+                vout["policies"][pol.name][d] = vd
         out[v] = vout
     return out
 
@@ -705,11 +725,34 @@ def model_info(name: str, models_root: Path | None) -> dict:
     if name == "tfidf":
         return {"model": "char n-gram TF-IDF (n=1..3), fitted on the catalog texts", "files_mb": 0}
     repo, rev, pooling, prefix, onnx_file = MODELS[name]
-    d = models_root / repo.replace("/", "--") / "onnx"
-    files = [d / onnx_file, d / f"{onnx_file}_data"]
-    size = sum(f.stat().st_size for f in files if f.is_file()) / 2**20
+    files = model_files(models_root / repo.replace("/", "--"), onnx_file)
+    size = sum(f.stat().st_size for k, f in files.items() if k != "tokenizer" and f.is_file()) / 2**20
     return {"model": repo, "revision": rev, "pooling": pooling, "prefix": prefix,
             "onnx_file": f"onnx/{onnx_file}", "files_mb": round(size, 1)}
+
+
+def model_provenance(name: str, embedder) -> dict:
+    """The declared Hugging Face repo and revision next to the SHA-256 of the files actually loaded
+    (the revision says what was asked for, the hashes what ran)."""
+    if name == "tfidf":
+        return {"repo": None, "revision": None, "files": {}}
+    repo, rev, *_ = MODELS[name]
+    root = next(iter(embedder.files.values())).parent
+    root = root.parent if root.name == "onnx" else root
+    return {"repo": repo, "revision": rev,
+            "files": {f.relative_to(root).as_posix(): {"sha256": sha256_streamed(f), "bytes": f.stat().st_size}
+                      for f in embedder.files.values()}}
+
+
+def sha256_streamed(path: Path, chunk: int = 2**20) -> str:
+    """SHA-256 of a file read in chunks (h.sha256_file reads it whole, which would add a 2 GB model
+    file to the process's peak RSS)."""
+    import hashlib
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        while block := f.read(chunk):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 # What a run reads besides its recorded inputs: the harness, the matching code it runs, the catalog and
@@ -755,6 +798,9 @@ def cmd_run(args) -> dict:
         result = evaluate(embedder, be, seed, photos,
                           llm_factory=None if args.no_llm else cached_llm_factory(Path(cache)))
     rss2 = rss_mb()
+    memory = {"rss_before_model": rss0, "model_load_delta": round(rss1 - rss0, 1) if rss0 else None,
+              "rss_after_run": rss2, "peak_rss": peak_rss_mb()}  # before hashing the model files
+    prov["model"] = model_provenance(args.model, embedder)
     result.update({
         "harness": "ai/eval/p24_embedding_compare.py", "set": "dev", "input": "label",
         "info": model_info(args.model, args.models_root), "threads": args.threads,
@@ -763,8 +809,7 @@ def cmd_run(args) -> dict:
         "labels_sha256": {g: h.sha256_file(REPO_ROOT / g) for g in sorted(set(h.DEV_LABELS.values()))},
         "repo_head": prov["commit"], "provenance": prov, "photos": len(photos), "lines": sum(len(p.lines) for p in photos),
         "load_seconds": round(load_s, 3),
-        "memory_mb": {"rss_before_model": rss0, "model_load_delta": round(rss1 - rss0, 1) if rss0 else None,
-                      "rss_after_run": rss2, "peak_rss": peak_rss_mb()},
+        "memory_mb": memory,
     })
     args.out.mkdir(parents=True, exist_ok=True)
     path = args.out / f"model_{args.model}.json"
@@ -773,14 +818,61 @@ def cmd_run(args) -> dict:
     return result
 
 
+def run_fingerprint(r: dict) -> dict:
+    """What must be the same in every model_*.json a summary merges: the inputs (catalog file, gold,
+    labels, the per-bar catalogs), what was measured (catalog variants, doc sets, policies, M3a
+    catalogs and policies), the harness that measured it, and the rules baseline (which also catches
+    a change in the server matching code, whose files are not hashed). Not the commit: two commits
+    with the same harness and inputs give the same numbers; the commits are recorded instead."""
+    cats = r.get("catalogs", {})
+    llm = r.get("llm") or {}
+    return {
+        "catalog_file_sha256": r.get("catalog_file_sha256"), "gold_sha256": r.get("gold_sha256"),
+        "labels_sha256": r.get("labels_sha256"),
+        "harness_sha256": (r.get("provenance") or {}).get("harness_sha256"),
+        "catalog_digest": {v: c.get("catalog_digest") for v, c in cats.items()},
+        "variants": list(cats),
+        "docsets": {v: sorted(k for k in c.get("recall", {}) if k not in ("lines", "rules")) for v, c in cats.items()},
+        "policies": {v: sorted(c.get("policies", {})) for v, c in cats.items()},
+        "llm": {v: sorted(x.get("policies", {})) if "skipped" not in x else "skipped" for v, x in llm.items()},
+        "rules": {v: c.get("rules") for v, c in cats.items()},
+    }
+
+
+def check_consistent(runs: dict[str, dict]) -> dict:
+    """The common fingerprint of the runs, or SystemExit naming each field that differs (or is missing)."""
+    prints = {name: run_fingerprint(r) for name, r in runs.items()}
+    first = next(iter(prints.values()))
+    problems = [f"{name}: {key} is missing (a run before it was recorded; rerun it)"
+                for name, fp in prints.items() for key, val in fp.items() if val is None]
+    for key in first:
+        values = {json.dumps(fp[key], sort_keys=True, default=str) for fp in prints.values()}
+        if len(values) > 1:
+            groups: dict[str, list[str]] = {}
+            for name, fp in prints.items():
+                groups.setdefault(json.dumps(fp[key], sort_keys=True, default=str), []).append(name)
+            problems.append(f"{key} differs: " + "; ".join(  # grouped by the whole value, shown shortened
+                f"{', '.join(n)} -> {v if len(v) <= 80 else v[:77] + '...'}" for v, n in groups.items()))
+    if problems:
+        raise SystemExit("model_*.json come from different inputs or harnesses; rerun them at one commit:\n  "
+                         + "\n  ".join(problems))
+    return first
+
+
 def cmd_summary(args) -> dict:
     runs = {json.loads(p.read_text(encoding="utf-8"))["embedder"]: json.loads(p.read_text(encoding="utf-8"))
             for p in sorted(args.out.glob("model_*.json"))}
     if not runs:
         raise SystemExit(f"no model_*.json in {args.out}")
+    fp = check_consistent(runs)
     first = next(iter(runs.values()))
     summary = {"models": {}, "rules": {v: first["catalogs"][v]["rules"] for v in first["catalogs"]},
-               "catalog_file_sha256": first["catalog_file_sha256"], "gold_sha256": first["gold_sha256"]}
+               "catalog_file_sha256": first["catalog_file_sha256"], "gold_sha256": first["gold_sha256"],
+               "labels_sha256": first["labels_sha256"], "harness_sha256": fp["harness_sha256"],
+               "catalog_digest": fp["catalog_digest"],
+               "runs": {name: {"commit": r["provenance"].get("commit"),
+                               "uncommitted_changes": r["provenance"].get("uncommitted_changes"),
+                               "model": r["provenance"].get("model")} for name, r in runs.items()}}
     for name, r in runs.items():
         summary["models"][name] = {
             "info": r["info"], "memory_mb": r["memory_mb"], "latency_ms_per_photo": r.get("latency_ms_per_photo"),

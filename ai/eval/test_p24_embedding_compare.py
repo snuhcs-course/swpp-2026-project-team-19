@@ -149,6 +149,35 @@ def test_make_embedder_and_model_info():
     assert p24.model_info("tfidf", None)["files_mb"] == 0
 
 
+def test_model_provenance_hashes_the_files_actually_loaded(tmp_path):
+    root = tmp_path / "BAAI--bge-m3"
+    (root / "onnx").mkdir(parents=True)
+    (root / "onnx" / "model.onnx").write_bytes(b"graph")
+    (root / "onnx" / "model.onnx_data").write_bytes(b"weights")
+    (root / "onnx" / "tokenizer.json").write_bytes(b"{}")  # no tokenizer.json at the top: this one is read
+    files = p24.model_files(root, "model.onnx")
+    assert files == {"onnx": root / "onnx" / "model.onnx", "onnx_data": root / "onnx" / "model.onnx_data",
+                     "tokenizer": root / "onnx" / "tokenizer.json"}
+    (root / "tokenizer.json").write_bytes(b"{ }")
+    (root / "onnx" / "model.onnx_data").unlink()
+    files = p24.model_files(root, "model.onnx")
+    assert files == {"onnx": root / "onnx" / "model.onnx", "tokenizer": root / "tokenizer.json"}
+
+    class Loaded:
+        pass
+
+    emb = Loaded()
+    emb.files = files
+    prov = p24.model_provenance("bge-m3", emb)
+    assert prov["repo"] == "BAAI/bge-m3" and prov["revision"] == p24.MODELS["bge-m3"][1]
+    assert prov["files"] == {"onnx/model.onnx": {"sha256": h.sha256_file(root / "onnx" / "model.onnx"), "bytes": 5},
+                             "tokenizer.json": {"sha256": h.sha256_file(root / "tokenizer.json"), "bytes": 3}}
+    assert p24.model_provenance("tfidf", None) == {"repo": None, "revision": None, "files": {}}
+    big = root / "big.bin"
+    big.write_bytes(bytes(range(256)) * 9000)  # several chunks
+    assert p24.sha256_streamed(big, chunk=1000) == h.sha256_file(big)
+
+
 def test_model_info_reads_the_onnx_folder(tmp_path):
     d = tmp_path / "intfloat--multilingual-e5-small" / "onnx"
     d.mkdir(parents=True)
@@ -305,21 +334,77 @@ def test_evaluate_keeps_top1_and_false_merges_of_rules_and_reports_everything(be
     assert ev["policies"]["all/unmatched_k5"]["totals"]["register"] == 0  # ... get embedding candidates
     assert result["latency_ms_per_photo"]["photos"] == 2
     assert result["llm"]["eval"]["rules+M3a"]["top1"] == ev["rules"]["top1"]
-    for d in p24.DOCSETS:
-        for label in ("M3a_then_embedding", "embedding_then_M3a"):
-            assert result["llm"]["eval"]["docsets"][d][label]["top1"] == ev["rules"]["top1"]
+    # the M3a combinations run with the first policy and the recommended one
+    assert set(result["llm"]["eval"]["policies"]) == set(p24.LLM_POLICIES)
+    for pol in p24.LLM_POLICIES:
+        for d in p24.DOCSETS:
+            for label in ("M3a_then_embedding", "embedding_then_M3a"):
+                assert result["llm"]["eval"]["policies"][pol][d][label]["top1"] == ev["rules"]["top1"]
 
-    # summary over a model file
+    # summary over model files from the same inputs
     out = tmp_path / "runs"
     out.mkdir()
     result.update({"info": p24.model_info("tfidf", None), "memory_mb": {}, "catalog_file_sha256": "x",
-                   "gold_sha256": {}})
+                   "gold_sha256": {"g": "1"}, "labels_sha256": {"l": "2"},
+                   "provenance": {"commit": "abc", "uncommitted_changes": [], "harness_sha256": {"h": "3"},
+                                  "model": {"repo": None, "revision": None, "files": {}}}})
     (out / "model_fake.json").write_text(json.dumps(result, default=str), encoding="utf-8")
+    (out / "model_fake2.json").write_text(json.dumps({**result, "embedder": "fake2",
+                                                      "provenance": {**result["provenance"], "commit": "def"}},
+                                                     default=str), encoding="utf-8")
     summary = p24.main(["summary", "--out", str(out)])
     assert summary["models"]["fake"]["policies"]["eval"]["all/unmatched_k5"]["invariants"]["holds"]
+    assert {n: r["commit"] for n, r in summary["runs"].items()} == {"fake": "abc", "fake2": "def"}  # recorded
+    assert summary["harness_sha256"] == {"h": "3"} and summary["labels_sha256"] == {"l": "2"}
     assert (out / "summary.json").exists()
     with pytest.raises(SystemExit):
         p24.main(["summary", "--out", str(tmp_path)])
+
+    # a run from other inputs, another harness, or before provenance was recorded: no summary
+    (out / "summary.json").unlink()
+    for key, change in (("gold_sha256", {"g": "other"}), ("labels_sha256", {}), ("catalog_file_sha256", "y"),
+                        ("provenance", {**result["provenance"], "harness_sha256": {"h": "other"}}),
+                        ("provenance", {"commit": "abc"}),
+                        ("catalogs", {k: c for k, c in result["catalogs"].items() if k != "eval_p17"}),
+                        ("llm", {**result["llm"], "eval": {**result["llm"]["eval"], "policies": {}}})):
+        (out / "model_fake2.json").write_text(json.dumps({**result, "embedder": "fake2", key: change}, default=str),
+                                              encoding="utf-8")
+        with pytest.raises(SystemExit, match="different inputs or harnesses"):
+            p24.main(["summary", "--out", str(out)])
+        assert not (out / "summary.json").exists(), key
+    # values that share a long prefix are still told apart
+    long_a, long_b = {"a": "0" * 100 + "1"}, {"a": "0" * 100 + "2"}
+    (out / "model_fake.json").write_text(json.dumps({**result, "gold_sha256": long_a}, default=str), encoding="utf-8")
+    (out / "model_fake2.json").write_text(json.dumps({**result, "embedder": "fake2", "gold_sha256": long_b},
+                                                     default=str), encoding="utf-8")
+    with pytest.raises(SystemExit) as stop:
+        p24.main(["summary", "--out", str(out)])
+    assert re.search(r"gold_sha256 differs: fake -> .{77}\.\.\.; fake2 -> ", str(stop.value))
+    (out / "model_fake.json").write_text(json.dumps(result, default=str), encoding="utf-8")
+    other_rules = json.loads(json.dumps(result["catalogs"], default=str))
+    other_rules["eval"]["rules"]["top1"] = 0.0  # same inputs, other matching code
+    (out / "model_fake2.json").write_text(json.dumps({**result, "embedder": "fake2", "catalogs": other_rules},
+                                                     default=str), encoding="utf-8")
+    with pytest.raises(SystemExit, match="rules differs"):
+        p24.main(["summary", "--out", str(out)])
+
+
+def test_llm_recall_counts_only_the_candidates_each_result_shows(be):
+    # k=0: no embedding candidate is shown after M3a, so its recall is that of rules + M3a, although the
+    # embedding ranking holds the gold of lines M3a misses (a merged list would count those)
+    class SilentLLM(FakeLLM):  # M3a reads no line
+        def generate_json(self, prompt, payload, schema):
+            return json.dumps({"items": []})
+
+    pols = (p24.Policy("unmatched_k5", k=0), p24.Policy("unmatched_k5+rerank_only", k=0))
+    result = p24.evaluate(FakeEmbedder(), be, SEED, PHOTOS, variants=("eval",), docsets=("aliases",), policies=pols,
+                          llm_factory=lambda layer: SilentLLM(), latency_docset="none")
+    llm = result["llm"]["eval"]
+    for pol in p24.LLM_POLICIES:
+        rec = llm["policies"][pol]["aliases"]["recall_known_not_confirmed"]
+        assert rec["M3a_then_embedding"] == llm["recall_known_not_confirmed"]["rules+M3a"]
+    emb = result["catalogs"]["eval"]["recall"]["aliases"]["embedding"]
+    assert emb["@10"] > llm["recall_known_not_confirmed"]["rules+M3a"]["@10"]  # the case the old count got wrong
 
 
 def test_llm_cache_misses_skip_the_catalog(be):
