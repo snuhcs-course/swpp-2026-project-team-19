@@ -1,7 +1,8 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic_core import PydanticCustomError
 
 from app.schemas.common import Latitude, Longitude, UtcDateTime
 
@@ -52,3 +53,32 @@ class BarDetail(BarListItem):
 
 class MyBarsResponse(BaseModel):
     items: list[BarDetail] = Field(description="Bars the caller currently owns, sorted by name")
+
+
+class BarUpdateInput(BaseModel):
+    """PATCH /api/bars/{barId} (spec 3.7): only the fields sent change. The field rules are those of
+    `BarInput` (3.5); which fields must come together is checked by the service."""
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=150)
+    address: str | None = Field(
+        default=None, min_length=1, max_length=500, description="Send `latitude` and `longitude` with it"
+    )
+    latitude: float | None = Field(default=None, ge=-90, le=90, description="Sent together with `longitude`")
+    longitude: float | None = Field(default=None, ge=-180, le=180, description="Sent together with `latitude`")
+    phone: str | None = Field(default=None, max_length=30, description="null or blank removes the phone")
+    status: Literal["active", "inactive"] | None = Field(default=None, description="Operators only")
+
+    @field_validator("name", "address", "latitude", "longitude", "status")
+    @classmethod
+    def _not_null(cls, value: object) -> object:
+        # Runs only for a value that was sent: a field left out keeps its default without validation.
+        if value is None:
+            raise PydanticCustomError("null_not_allowed", "이 항목은 비울 수 없습니다.")
+        return value
+
+    @field_validator("phone")
+    @classmethod
+    def _blank_phone(cls, value: str | None) -> str | None:
+        return value or None

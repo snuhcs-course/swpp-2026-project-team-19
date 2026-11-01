@@ -1,17 +1,22 @@
-"""Bars with their management state (API spec 3.6), and the bars the caller owns (3.11.9).
+"""Bars with their management state (API spec 3.6), editing a bar (3.7), and the bars the caller owns (3.11.9).
 
 `bar_details` loads the unfinished imports, current menus and current owners of many bars with one
 query each, so a list of bars costs the same few queries as one bar.
 """
 
 from collections.abc import Sequence
+from decimal import Decimal
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.errors import validation_failed_fields
 from app.core.security import Principal
-from app.models import Bar, BarOwner, MenuBoard, MenuImport, User
-from app.schemas.bar import ActiveMenuImport, BarDetail, BarOwnerSummary, CurrentMenu
+from app.models import Bar, BarOwner, BarStatus, MenuBoard, MenuImport, User
+from app.schemas.bar import ActiveMenuImport, BarDetail, BarOwnerSummary, BarUpdateInput, CurrentMenu
+from app.services.bar_access import forbidden
+from app.services.bar_menu import bar_not_found
 from app.services.menu_import_upload import UNFINISHED_STATUSES
 
 
@@ -26,6 +31,53 @@ def my_bars(session: Session, principal: Principal) -> list[BarDetail]:
         .order_by(Bar.name, Bar.id)
     ).all()
     return bar_details(session, bars)
+
+
+def _load_bar(session: Session, bar_id: str) -> Bar:
+    try:
+        bar = session.get(Bar, UUID(bar_id))
+    except ValueError:
+        bar = None
+    if bar is None:
+        raise bar_not_found(bar_id)
+    return bar
+
+
+def get_bar_detail(session: Session, bar_id: str) -> BarDetail:
+    """One bar, inactive ones included (3.6)."""
+    return bar_details(session, [_load_bar(session, bar_id)])[0]
+
+
+def update_bar(session: Session, bar_id: str, patch: BarUpdateInput, *, operator: bool) -> BarDetail:
+    """Change the fields that were sent (3.7). Only an operator may change `status`."""
+    bar = _load_bar(session, bar_id)
+    sent = patch.model_fields_set
+    if "status" in sent and not operator:
+        raise forbidden()
+    if ("latitude" in sent) != ("longitude" in sent):
+        missing = "longitude" if "latitude" in sent else "latitude"
+        raise validation_failed_fields(
+            [{"path": missing, "code": "LAT_LNG_REQUIRED_TOGETHER", "message": "위도와 경도는 함께 보내야 합니다."}]
+        )
+    if "address" in sent and "latitude" not in sent:
+        # A new address without coordinates would leave the bar's map position at the old address.
+        raise validation_failed_fields(
+            [
+                {"path": path, "code": "COORDINATES_REQUIRED", "message": "주소를 바꾸면 위도와 경도도 함께 보내야 합니다."}
+                for path in ("latitude", "longitude")
+            ]
+        )
+    for field in ("name", "address", "phone"):
+        if field in sent:
+            setattr(bar, field, getattr(patch, field))
+    if "latitude" in sent:
+        bar.latitude = Decimal(str(patch.latitude))
+        bar.longitude = Decimal(str(patch.longitude))
+    if "status" in sent:
+        bar.status = BarStatus(patch.status)
+    # A value equal to the stored one is no change, so `updatedAt` moves only when something changed.
+    session.commit()
+    return bar_details(session, [bar])[0]
 
 
 def bar_details(session: Session, bars: Sequence[Bar]) -> list[BarDetail]:

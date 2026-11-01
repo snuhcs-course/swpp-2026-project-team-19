@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from uuid import UUID
 
 from sqlalchemy import select
@@ -12,13 +13,14 @@ def bar_not_found(bar_id: str) -> ApiError:
     return ApiError(404, "BAR_NOT_FOUND", "업장을 찾을 수 없습니다.", details={"barId": bar_id})
 
 
-def get_bar_menu(session: Session, bar_id: str, *, include_inactive: bool) -> BarMenuResponse:
-    """The bar and its current menu board. Inactive bars look missing unless include_inactive."""
+def get_bar_menu(session: Session, bar_id: str, *, may_see_inactive: Callable[[Bar], bool]) -> BarMenuResponse:
+    """The bar and its current menu board. An inactive bar looks missing unless may_see_inactive(bar),
+    which is asked only for inactive bars so that public requests cost no permission query."""
     try:
         bar = session.get(Bar, UUID(bar_id))
     except ValueError:
         bar = None
-    if bar is None or (bar.status != BarStatus.ACTIVE and not include_inactive):
+    if bar is None or (bar.status != BarStatus.ACTIVE and not may_see_inactive(bar)):
         raise bar_not_found(bar_id)
 
     board = session.scalar(

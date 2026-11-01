@@ -102,7 +102,7 @@ def read_nearby_bars(
         "It is not normalized: spaces count, and `%` and `_` are plain characters.\n"
         "- Only active bars, sorted by name (ties by `barId`), at most `limit`; `truncated` tells "
         "whether more matched. No paging.\n"
-        "- `hasOwner` is always false until bar owners exist (Iteration 3).\n"
+        "- `hasOwner` is true when the bar has a current owner; a pending application does not count.\n"
         "- No match is `200` with `items: []`."
     ),
     responses=error_responses(

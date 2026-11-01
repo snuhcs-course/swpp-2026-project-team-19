@@ -4,7 +4,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.core.security import Principal, require_operator
+from app.api.permissions import require_operator_or_owner
+from app.core.security import Principal
 from app.db.session import get_session
 from app.schemas.catalog import CatalogBrandsResponse, CatalogProductsResponse
 from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
@@ -19,7 +20,7 @@ _MATCHING = (
 )
 _COMMON_ERRORS = (
     (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
-    (403, "`FORBIDDEN`: the caller is not an operator."),
+    (403, "`FORBIDDEN`: the caller is neither an operator nor the current owner of a bar."),
     AUTH_UNAVAILABLE,
     (
         422,
@@ -34,7 +35,7 @@ _COMMON_ERRORS = (
     response_model=CatalogBrandsResponse,
     summary="Find brands for the menu review screen",
     description=(
-        "Operator only. Used to pick an existing brand when creating a product during review.\n\n"
+        "Operators and bar owners. Used to pick an existing brand when creating a product during review.\n\n"
         f"{_MATCHING} Several brands can share an alias; all are returned."
     ),
     responses=error_responses(*_COMMON_ERRORS),
@@ -43,7 +44,7 @@ def read_catalog_brands(
     query: Annotated[str, Query(description="Brand name or alias; 1-100 characters after trimming")],
     limit: Annotated[int, Query(ge=1, le=50, description="Maximum number of brands")] = 20,
     session: Session = Depends(get_session),
-    _operator: Principal = Depends(require_operator),
+    _caller: Principal = Depends(require_operator_or_owner),
 ) -> CatalogBrandsResponse:
     return search_brands(session, query, limit=limit)
 
@@ -53,7 +54,7 @@ def read_catalog_brands(
     response_model=CatalogProductsResponse,
     summary="Find products for the menu review screen",
     description=(
-        "Operator only. Used to pick a product that is not among the candidates, and to check for an "
+        "Operators and bar owners. Used to pick a product that is not among the candidates, and to check for an "
         "existing product before creating one.\n\n"
         f"{_MATCHING} Unlike customer search, non-searchable aliases also match and inactive products are "
         "included by default."
@@ -68,6 +69,6 @@ def read_catalog_products(
     ] = True,
     limit: Annotated[int, Query(ge=1, le=50, description="Maximum number of products")] = 20,
     session: Session = Depends(get_session),
-    _operator: Principal = Depends(require_operator),
+    _caller: Principal = Depends(require_operator_or_owner),
 ) -> CatalogProductsResponse:
     return search_products(session, query, brand_id=brand_id, include_inactive=include_inactive, limit=limit)

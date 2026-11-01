@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
-from app.core.security import Principal, require_operator
+from app.api.permissions import require_active_bar_manager, require_import_manager
+from app.core.security import Principal
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
 from app.matching.llm_layer import LLMLayerConfig
 from app.models import ImportMode
@@ -34,7 +35,7 @@ UploadedImage = Annotated[UploadFile, WithJsonSchema({"type": "string", "format"
     response_model=MenuImportAcceptedResponse,
     summary="Upload menu photos and start extraction",
     description=(
-        "Operator only. Stores the photos, creates the import, schedules extraction and matching in the "
+        "Operator or the bar's owner. Stores the photos, creates the import, schedules extraction and matching in the "
         "background, and returns `202` with `status: processing` without waiting for them. "
         "Poll `statusUrl` until the status is `ready_for_review` or `failed`.\n\n"
         f"- Up to {upload.MAX_IMAGES} JPEG or PNG photos in display order, "
@@ -49,7 +50,7 @@ UploadedImage = Annotated[UploadFile, WithJsonSchema({"type": "string", "format"
     ),
     responses=error_responses(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
-        (403, "`FORBIDDEN`: the caller is not an operator."),
+        (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
         AUTH_UNAVAILABLE,
         (404, "`BAR_NOT_FOUND`: no such bar, a malformed id, or an inactive bar."),
         (
@@ -78,7 +79,7 @@ def upload_menu_import(
     extractor: MenuExtractor = Depends(get_menu_extractor),
     llm_layer: LLMLayerConfig | None = Depends(get_matching_llm_layer),
     session_factory: SessionFactory = Depends(get_session_factory),
-    _operator: Principal = Depends(require_operator),
+    _manager: Principal = Depends(require_active_bar_manager),
 ) -> MenuImportAcceptedResponse:
     menu_import, created = create_menu_import(
         session,
@@ -117,7 +118,7 @@ def upload_menu_import(
     response_model=MenuImportStatusResponse,
     summary="Import status, or the full review data when ready",
     description=(
-        "Operator only. Poll every `pollAfterMs` after uploading. The body depends on `status`:\n\n"
+        "Operator or the bar's owner. Poll every `pollAfterMs` after uploading. The body depends on `status`:\n\n"
         "- `uploaded` / `processing`: `progress` and `pollAfterMs`. Keep polling.\n"
         "- `failed`: `progress` and `failure` (`IMAGE_EXTRACTION_FAILED` or `PROCESSING_FAILED`). "
         "Stop polling; a failed import is not resumed, so start a new upload.\n"
@@ -130,7 +131,7 @@ def upload_menu_import(
     ),
     responses=error_responses(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
-        (403, "`FORBIDDEN`: the caller is not an operator."),
+        (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
         AUTH_UNAVAILABLE,
         (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
     ),
@@ -140,7 +141,7 @@ def read_menu_import(
     menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
     session: Session = Depends(get_session),
     storage: ImageStorage = Depends(get_image_storage),
-    _operator: Principal = Depends(require_operator),
+    _manager: Principal = Depends(require_import_manager),
 ) -> MenuImportStatusResponse:
     return get_menu_import_status(session, menu_import_id, storage, str(request.base_url))
 
@@ -150,7 +151,7 @@ def read_menu_import(
     response_model=ReviewAppliedResponse,
     summary="Submit the review and publish the menu",
     description=(
-        "Operator only. Submits every decision of the review screen at once. Catalog changes, the "
+        "Operator or the bar's owner. Submits every decision of the review screen at once. Catalog changes, the "
         "decisions and the new menu board are saved in one transaction; on any error nothing is saved "
         "and the import stays `ready_for_review`.\n\n"
         "**Decisions.** `itemDecisions` has exactly one entry per extracted item and `changeDecisions` "
@@ -175,7 +176,7 @@ def read_menu_import(
     ),
     responses=error_responses(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
-        (403, "`FORBIDDEN`: the caller is not an operator."),
+        (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
         (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
         (
             409,
@@ -203,7 +204,7 @@ def submit_menu_review(
     body: ReviewAndApplyRequest,
     menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
     session_factory: SessionFactory = Depends(get_serializable_session_factory),
-    _operator: Principal = Depends(require_operator),
+    _manager: Principal = Depends(require_import_manager),
 ) -> ReviewAppliedResponse:
     return review_and_apply(session_factory, menu_import_id, body)
 
@@ -213,7 +214,7 @@ def submit_menu_review(
     response_model=ImportCanceledResponse,
     summary="Cancel an unfinished import",
     description=(
-        "Operator only. Ends an `uploaded`, `processing` or `ready_for_review` import without applying it, "
+        "Operator or the bar's owner. Ends an `uploaded`, `processing` or `ready_for_review` import without applying it, "
         "so the bar can take a new upload. The menu board and the catalog do not change, and the photos "
         "and AI records are kept. Processing still running stores nothing more, and the import stays "
         "`canceled`. No request body.\n\n"
@@ -222,7 +223,7 @@ def submit_menu_review(
     ),
     responses=error_responses(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
-        (403, "`FORBIDDEN`: the caller is not an operator."),
+        (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
         AUTH_UNAVAILABLE,
         (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
         (409, "`INVALID_IMPORT_STATE`: the import is `applied` or `failed`; `details.status` is the current status."),
@@ -231,6 +232,6 @@ def submit_menu_review(
 def cancel_import(
     menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
     session: Session = Depends(get_session),
-    _operator: Principal = Depends(require_operator),
+    _manager: Principal = Depends(require_import_manager),
 ) -> ImportCanceledResponse:
     return cancel_menu_import(session, menu_import_id)

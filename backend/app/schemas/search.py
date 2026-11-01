@@ -64,7 +64,7 @@ class BarNameItem(BaseModel):
     longitude: Longitude
     hasOwner: bool = Field(
         description="True when the bar has a current owner; an owner application for it would be "
-        "`409 BAR_OWNER_EXISTS`. Always false until bar owners exist (Iteration 3)"
+        "`409 BAR_OWNER_EXISTS`"
     )
 
 
