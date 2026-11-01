@@ -626,7 +626,7 @@ operator와 해당 업장의 현재 업주가 호출할 수 있다. 바꿀 필�
 | `name`, `address` | operator, 업주 | `null`을 보낼 수 없다 |
 | `latitude`, `longitude` | operator, 업주 | 둘을 함께 보낸다. 하나만 보내면 `LAT_LNG_REQUIRED_TOGETHER` |
 | `phone` | operator, 업주 | `null`을 보내면 연락처를 지운다 |
-| `description` | operator, 업주 | 한 줄 소개. 앞뒤 공백을 지운 뒤 100자 이하. 공백뿐이면 `null`로 저장한다. `null`을 보내면 지운다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
+| `description` | operator, 업주 | 한 줄 소개. 앞뒤 공백을 지운 뒤 100자 이하(줄바꿈도 한 글자로 센다). 공백뿐이면 `null`로 저장한다. `null`을 보내면 지운다. 줄바꿈을 허용하며, 서버는 HTML 이스케이프나 금칙어 검사 없이 받은 그대로 저장한다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
 | `defaultPourMl` | operator, 업주 | 1~999 정수. `null`을 보내면 지운다. 바꿔도 이미 게시된 메뉴의 용량은 바뀌지 않는다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
 | `status` | operator만 | `active` 또는 `inactive`. 업주가 보내면 `403 FORBIDDEN` |
 
@@ -771,7 +771,7 @@ GET /api/bars/{barId}/menu
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
 | `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
-| `description` | 문자열 | 예 | 한 줄 소개(3.6과 같다). 없으면 `null` |
+| `description` | 문자열 | 예 | 한 줄 소개(3.6과 같다). 줄바꿈이 들어 있을 수 있다. 프론트엔드는 HTML로 해석하지 않고 일반 텍스트로 보여 주며, 표시할 줄 수를 제한할 수 있다. 없으면 `null` |
 | `menuBoardId` | UUID 문자열 | 예 | 현재 메뉴판. 반영된 메뉴가 없으면 `null` |
 | `menuVersion` | 정수 | 예 | 메뉴판 버전. 검수 반영(8)이나 직접 편집(3.14)으로 메뉴판이 바뀔 때마다 1씩 오른다. 직접 편집 요청에 그대로 보낸다. 메뉴판이 없으면 `null` |
 | `publishedAt` | RFC 3339 문자열 | 예 | 현재 메뉴판이 검수 반영이나 직접 편집으로 마지막으로 바뀐 시각. 반영된 메뉴가 없으면 `null` |
