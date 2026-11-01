@@ -173,7 +173,7 @@ internal fun OwnerManualMenuScreen(
             }
             val old = items.firstOrNull { it.barMenuItemId == editId }
             val persisted = products.firstOrNull { it.productId == old?.productId }
-            if (old != null && persisted != null) {
+            if (old != null && persisted?.catalogMatched == true) {
                 require(persisted.displayName == name &&
                     manualMenuCategoryLabel(persisted.category) == category) {
                     "다른 상품은 새 메뉴로 추가해 주세요."
@@ -181,23 +181,30 @@ internal fun OwnerManualMenuScreen(
             }
             val linked = if (old != null) persisted
                 else candidates.firstOrNull { it.productId == linkedId }
-            val p = linked ?: MockCatalogProduct(
-                manualId("local-unverified-"), manualId("local-brand-"), name,
-                category = manualMenuCategoryCode(category), catalogMatched = false,
-                otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" }
-            )
+            val p = when {
+                linked != null && !linked.catalogMatched -> linked.copy(
+                    displayName = name, category = manualMenuCategoryCode(category),
+                    otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" })
+                linked != null -> linked
+                else -> MockCatalogProduct(
+                    manualId("local-unverified-"), manualId("local-brand-"), name,
+                    category = manualMenuCategoryCode(category), catalogMatched = false,
+                    otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" })
+            }
             val duplicate = existingBarProductMenu(items, bar.barId, p.productId)
             require(duplicate == null || duplicate.barMenuItemId == editId) {
                 "이미 등록한 상품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요."
             }
-            val brand = if (linked != null) brands.firstOrNull { it.brandId == p.brandId }
+            val brand = if (linked != null && linked.catalogMatched)
+                brands.firstOrNull { it.brandId == p.brandId }
                 else MockBrand(p.brandId, brandName.trim().ifEmpty {
                     if (whisky) "기타 브랜드" else category
                 })
             viewModel.saveManualMenuItem(
                 MockBarMenuItem(old?.barMenuItemId ?: manualId("local-menu-"),
                     bar.barId, p.productId, options, soldOut = old?.soldOut ?: false),
-                if (products.none { it.productId == p.productId }) p else null,
+                if (products.none { it.productId == p.productId } ||
+                    (persisted != null && !persisted.catalogMatched)) p else null,
                 brand
             )
             screen = "list"; selectedId = null; editId = null; error = null
