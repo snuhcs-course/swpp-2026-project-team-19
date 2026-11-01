@@ -4,8 +4,8 @@
  "queries": 823,
  "fit": "per bar index",
  "embed_seconds": {
-  "catalog_texts": 8.708,
-  "line_names": 0.171
+  "catalog_texts": 8.117,
+  "line_names": 0.15
  },
  "index_size": {
   "canonical": {
@@ -14073,10 +14073,10 @@
  "latency_ms_per_photo": {
   "photos": 29,
   "lines_mean": 28.82758620689655,
-  "mean": 199.15,
-  "p50": 165.06,
-  "p95": 420.26,
-  "max": 477.92,
+  "mean": 122.1,
+  "p50": 112.66,
+  "p95": 205.56,
+  "max": 281.18,
   "docset": "all",
   "catalog": "service"
  },
@@ -14099,9 +14099,9 @@
   "eval/labels_heldout_v1_1.json": "047bf7d6f7274552f0dce0a4922ce7a72fa4282459d6cf1f6bbfb5271082c986",
   "eval/labels_v1_1.json": "a34249ebb0528371d23b5c18d3f9ca306a31646fe2a7a447cf4807a389b193cf"
  },
- "repo_head": "32b831492cc8fddee20eef4e10f5c176f497fdd9",
+ "repo_head": "860540077c2a878872be7cbd968ab33b6979cfe0",
  "provenance": {
-  "commit": "32b831492cc8fddee20eef4e10f5c176f497fdd9",
+  "commit": "860540077c2a878872be7cbd968ab33b6979cfe0",
   "uncommitted_changes": [],
   "checked_paths": [
    "ai/eval",
@@ -14119,9 +14119,9 @@
  "lines": 836,
  "load_seconds": 0.0,
  "memory_mb": {
-  "rss_before_model": 31.69921875,
+  "rss_before_model": 27.96484375,
   "model_load_delta": 0.0,
-  "rss_after_run": 319.96484375,
-  "peak_rss": 1048.11328125
+  "rss_after_run": 317.1796875,
+  "peak_rss": 1048.34765625
  }
 }

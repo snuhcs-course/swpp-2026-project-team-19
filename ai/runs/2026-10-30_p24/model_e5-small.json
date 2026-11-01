@@ -2,9 +2,10 @@
  "embedder": "e5-small",
  "doc_texts": 5382,
  "queries": 823,
+ "fit": "none (fixed model)",
  "embed_seconds": {
-  "catalog_texts": 38.332,
-  "line_names": 6.328
+  "catalog_texts": 22.791,
+  "line_names": 4.045
  },
  "index_size": {
   "canonical": {
@@ -492,6 +493,78 @@
       "holds": true
      }
     },
+    "canonical/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 36
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 150,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 516,
+     "top1": 0.6433915211970075,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 3,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask"
+     ],
+     "accept_err_rate": 0.0035885167464114833,
+     "totals": {
+      "confirm": 85,
+      "choose": 181,
+      "register": 0,
+      "wrong": 54
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 6.241379310344827,
+      "register": 0.0,
+      "wrong": 1.8620689655172413
+     },
+     "owner_per_photo": 11.03448275862069,
+     "hard_per_photo": 8.10344827586207,
+     "cr_rule": {
+      "n": 36,
+      "correct": 33
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 150,
+     "from_register_gold_in": 114,
+     "hard_under_5_photo_rate": 0.4482758620689655,
+     "recall_shown": {
+      "@1": 0.7552447552447552,
+      "@3": 0.8496503496503497,
+      "@5": 0.8741258741258742,
+      "@10": 0.8741258741258742
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       516,
+       516
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
     "aliases/unmatched_k5": {
      "cr_by_rank1_method": {
       "alias": 36
@@ -765,6 +838,78 @@
       "@3": 0.6223776223776224,
       "@5": 0.7657342657342657,
       "@10": 0.7657342657342657
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       516,
+       516
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
+    "aliases/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 36
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 150,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 516,
+     "top1": 0.6433915211970075,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 3,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask"
+     ],
+     "accept_err_rate": 0.0035885167464114833,
+     "totals": {
+      "confirm": 85,
+      "choose": 144,
+      "register": 0,
+      "wrong": 91
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 4.9655172413793105,
+      "register": 0.0,
+      "wrong": 3.1379310344827585
+     },
+     "owner_per_photo": 11.03448275862069,
+     "hard_per_photo": 8.10344827586207,
+     "cr_rule": {
+      "n": 36,
+      "correct": 33
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 150,
+     "from_register_gold_in": 77,
+     "hard_under_5_photo_rate": 0.4482758620689655,
+     "recall_shown": {
+      "@1": 0.6013986013986014,
+      "@3": 0.7202797202797203,
+      "@5": 0.7447552447552448,
+      "@10": 0.7447552447552448
      },
      "invariants": {
       "new_confirmed_lines": 0,
@@ -1068,6 +1213,78 @@
       "holds": true
      }
     },
+    "korean/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 36
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 150,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 516,
+     "top1": 0.6433915211970075,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 3,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask"
+     ],
+     "accept_err_rate": 0.0035885167464114833,
+     "totals": {
+      "confirm": 85,
+      "choose": 108,
+      "register": 0,
+      "wrong": 127
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.7241379310344827,
+      "register": 0.0,
+      "wrong": 4.379310344827586
+     },
+     "owner_per_photo": 11.03448275862069,
+     "hard_per_photo": 8.10344827586207,
+     "cr_rule": {
+      "n": 36,
+      "correct": 33
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 150,
+     "from_register_gold_in": 41,
+     "hard_under_5_photo_rate": 0.4482758620689655,
+     "recall_shown": {
+      "@1": 0.5,
+      "@3": 0.6013986013986014,
+      "@5": 0.6153846153846154,
+      "@10": 0.6188811188811189
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       516,
+       516
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
     "brand_age/unmatched_k5": {
      "cr_by_rank1_method": {
       "alias": 36
@@ -1341,6 +1558,78 @@
       "@3": 0.7377622377622378,
       "@5": 0.8286713286713286,
       "@10": 0.8321678321678322
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       516,
+       516
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
+    "brand_age/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 36
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 150,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 516,
+     "top1": 0.6433915211970075,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 3,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask"
+     ],
+     "accept_err_rate": 0.0035885167464114833,
+     "totals": {
+      "confirm": 85,
+      "choose": 158,
+      "register": 0,
+      "wrong": 77
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 5.448275862068965,
+      "register": 0.0,
+      "wrong": 2.6551724137931036
+     },
+     "owner_per_photo": 11.03448275862069,
+     "hard_per_photo": 8.10344827586207,
+     "cr_rule": {
+      "n": 36,
+      "correct": 33
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 150,
+     "from_register_gold_in": 91,
+     "hard_under_5_photo_rate": 0.4482758620689655,
+     "recall_shown": {
+      "@1": 0.6783216783216783,
+      "@3": 0.7692307692307693,
+      "@5": 0.7902097902097902,
+      "@10": 0.7937062937062938
      },
      "invariants": {
       "new_confirmed_lines": 0,
@@ -1643,6 +1932,78 @@
       ],
       "holds": true
      }
+    },
+    "all/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 36
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 150,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 516,
+     "top1": 0.6433915211970075,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 3,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask"
+     ],
+     "accept_err_rate": 0.0035885167464114833,
+     "totals": {
+      "confirm": 85,
+      "choose": 161,
+      "register": 0,
+      "wrong": 74
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 5.551724137931035,
+      "register": 0.0,
+      "wrong": 2.5517241379310347
+     },
+     "owner_per_photo": 11.03448275862069,
+     "hard_per_photo": 8.10344827586207,
+     "cr_rule": {
+      "n": 36,
+      "correct": 33
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 150,
+     "from_register_gold_in": 94,
+     "hard_under_5_photo_rate": 0.4482758620689655,
+     "recall_shown": {
+      "@1": 0.6923076923076923,
+      "@3": 0.7832167832167832,
+      "@5": 0.8041958041958042,
+      "@10": 0.8041958041958042
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       516,
+       516
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
     }
    },
    "cr_calibration": {
@@ -1680,751 +2041,901 @@
     [
      0.8719,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8735,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8849,
      "known",
-     10
+     10,
+     0.8692
     ],
     [
      0.8805,
      "known",
+     null,
      null
     ],
     [
      0.8947,
      "known",
+     null,
      null
     ],
     [
      0.8997,
      "known",
+     null,
      null
     ],
     [
      0.9058,
      "known",
-     3
+     3,
+     0.9038
     ],
     [
      0.8976,
      "known",
-     4
+     4,
+     0.8951
     ],
     [
      0.913,
      "known",
-     6
+     6,
+     0.8944
     ],
     [
      0.9053,
      "known",
-     3
+     3,
+     0.8919
     ],
     [
      0.8662,
      "known",
+     null,
      null
     ],
     [
      0.9174,
      "known",
-     1
+     1,
+     0.9174
     ],
     [
      0.909,
      "known",
-     1
+     1,
+     0.909
     ],
     [
      0.9303,
      "known",
-     1
+     1,
+     0.9303
     ],
     [
      0.9132,
      "known",
+     null,
      null
     ],
     [
      0.9176,
      "known",
+     null,
      null
     ],
     [
      0.8668,
      "known",
-     1
+     1,
+     0.8668
     ],
     [
      0.8717,
      "known",
+     null,
      null
     ],
     [
      0.8664,
      "known",
+     null,
      null
     ],
     [
      0.8725,
      "known",
+     null,
      null
     ],
     [
      0.8851,
      "known",
-     1
+     1,
+     0.8851
     ],
     [
      0.9076,
      "known",
-     5
+     5,
+     0.8605
     ],
     [
      0.9122,
      "known",
-     1
+     1,
+     0.9122
     ],
     [
      0.9498,
      "known",
-     1
+     1,
+     0.9498
     ],
     [
      0.9187,
      "known",
-     1
+     1,
+     0.9187
     ],
     [
      0.9204,
      "known",
-     9
+     9,
+     0.8626
     ],
     [
      0.9134,
      "known",
-     3
+     3,
+     0.9029
     ],
     [
      0.9034,
      "unknown",
+     null,
      null
     ],
     [
      0.9483,
      "known",
-     1
+     1,
+     0.9483
     ],
     [
      0.9413,
      "known",
-     1
+     1,
+     0.9413
     ],
     [
      0.9624,
      "known",
-     1
+     1,
+     0.9624
     ],
     [
      0.9608,
      "known",
-     1
+     1,
+     0.9608
     ],
     [
      0.933,
      "known",
-     1
+     1,
+     0.933
     ],
     [
      0.9406,
      "known",
-     1
+     1,
+     0.9406
     ],
     [
      0.954,
      "known",
-     1
+     1,
+     0.954
     ],
     [
      0.9428,
      "known",
-     1
+     1,
+     0.9428
     ],
     [
      0.9522,
      "known",
-     1
+     1,
+     0.9522
     ],
     [
      0.9659,
      "known",
-     2
+     2,
+     0.9645
     ],
     [
      0.8794,
      "known",
-     1
+     1,
+     0.8794
     ],
     [
      0.8926,
      "known",
-     1
+     1,
+     0.8926
     ],
     [
      0.8777,
      "known",
-     2
+     2,
+     0.8671
     ],
     [
      0.9329,
      "known",
-     1
+     1,
+     0.9329
     ],
     [
      0.868,
      "known",
+     null,
      null
     ],
     [
      0.8863,
      "known",
-     1
+     1,
+     0.8863
     ],
     [
      0.864,
      "known",
+     null,
      null
     ],
     [
      0.896,
      "known",
-     4
+     4,
+     0.8821
     ],
     [
      0.8981,
      "known",
-     3
+     3,
+     0.8804
     ],
     [
      0.8947,
      "known",
-     2
+     2,
+     0.8819
     ],
     [
      0.8929,
      "known",
-     1
+     1,
+     0.8929
     ],
     [
      0.9095,
      "known",
-     1
+     1,
+     0.9095
     ],
     [
      0.882,
      "known",
-     2
+     2,
+     0.8792
     ],
     [
      0.8857,
      "known",
-     1
+     1,
+     0.8857
     ],
     [
      0.8907,
      "known",
-     7
+     7,
+     0.8706
     ],
     [
      0.9017,
      "known",
-     5
+     5,
+     0.8892
     ],
     [
      0.9687,
      "known",
-     1
+     1,
+     0.9687
     ],
     [
      0.871,
      "known",
+     null,
      null
     ],
     [
      0.9128,
      "known",
+     null,
      null
     ],
     [
      0.9042,
      "known",
-     1
+     1,
+     0.9042
     ],
     [
      0.9674,
      "known",
-     1
+     1,
+     0.9674
     ],
     [
      0.9305,
      "known",
-     1
+     1,
+     0.9305
     ],
     [
      0.9116,
      "known",
+     null,
      null
     ],
     [
      0.937,
      "known",
-     1
+     1,
+     0.937
     ],
     [
      0.9565,
      "known",
-     1
+     1,
+     0.9565
     ],
     [
      0.929,
      "known",
-     1
+     1,
+     0.929
     ],
     [
      0.8914,
      "known",
-     1
+     1,
+     0.8914
     ],
     [
      0.8818,
      "known",
-     1
+     1,
+     0.8818
     ],
     [
      0.8769,
      "known",
-     1
+     1,
+     0.8769
     ],
     [
      0.8963,
      "known",
-     5
+     5,
+     0.8827
     ],
     [
      0.9561,
      "known",
-     1
+     1,
+     0.9561
     ],
     [
      0.9483,
      "known",
-     1
+     1,
+     0.9483
     ],
     [
      0.916,
      "known",
-     1
+     1,
+     0.916
     ],
     [
      0.8939,
      "unknown",
+     null,
      null
     ],
     [
      0.8941,
      "unknown",
+     null,
      null
     ],
     [
      0.9029,
      "unknown",
+     null,
      null
     ],
     [
      0.9208,
      "known",
-     1
+     1,
+     0.9208
     ],
     [
      0.885,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9792,
      "known",
-     1
+     1,
+     0.9792
     ],
     [
      0.985,
      "known",
-     1
+     1,
+     0.985
     ],
     [
      0.9439,
      "known",
+     null,
      null
     ],
     [
      0.8454,
      "non_whisky",
+     null,
      null
     ],
     [
      0.953,
      "known",
-     1
+     1,
+     0.953
     ],
     [
      0.9595,
      "known",
-     1
+     1,
+     0.9595
     ],
     [
      0.8836,
      "known",
-     1
+     1,
+     0.8836
     ],
     [
      0.8802,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8745,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8722,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8846,
      "known",
-     1
+     1,
+     0.8846
     ],
     [
      0.8806,
      "known",
-     2
+     2,
+     0.88
     ],
     [
      0.885,
      "known",
+     null,
      null
     ],
     [
      0.9351,
      "known",
-     1
+     1,
+     0.9351
     ],
     [
      0.9392,
      "known",
-     1
+     1,
+     0.9392
     ],
     [
      0.8685,
      "known",
+     null,
      null
     ],
     [
      0.872,
      "known",
+     null,
      null
     ],
     [
      0.9179,
      "unknown",
+     null,
      null
     ],
     [
      0.9316,
      "known",
-     1
+     1,
+     0.9316
     ],
     [
      0.9341,
      "known",
-     1
+     1,
+     0.9341
     ],
     [
      0.875,
      "known",
-     3
+     3,
+     0.8518
     ],
     [
      0.8645,
      "known",
-     1
+     1,
+     0.8645
     ],
     [
      0.8567,
      "known",
+     null,
      null
     ],
     [
      0.8514,
      "known",
-     1
+     1,
+     0.8514
     ],
     [
      0.8532,
      "known",
+     null,
      null
     ],
     [
      0.8909,
      "known",
+     null,
      null
     ],
     [
      0.8925,
      "known",
+     null,
      null
     ],
     [
      0.8682,
      "known",
+     null,
      null
     ],
     [
      0.867,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8633,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8606,
      "non_whisky",
+     null,
      null
     ],
     [
      0.868,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8707,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9033,
      "unknown",
+     null,
      null
     ],
     [
      0.9134,
      "known",
+     null,
      null
     ],
     [
      0.9186,
      "known",
-     7
+     7,
+     0.9076
     ],
     [
      0.8858,
      "known",
+     null,
      null
     ],
     [
      0.8498,
      "known",
+     null,
      null
     ],
     [
      0.8895,
      "known",
+     null,
      null
     ],
     [
      0.8558,
      "known",
+     null,
      null
     ],
     [
      0.9099,
      "known",
+     null,
      null
     ],
     [
      0.9451,
      "known",
-     1
+     1,
+     0.9451
     ],
     [
      0.9551,
      "known",
-     1
+     1,
+     0.9551
     ],
     [
      0.9645,
      "known",
-     1
+     1,
+     0.9645
     ],
     [
      0.8573,
      "known",
+     null,
      null
     ],
     [
      0.9536,
      "unknown",
+     null,
      null
     ],
     [
      0.9234,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9078,
      "known",
-     1
+     1,
+     0.9078
     ],
     [
      0.9274,
      "known",
+     null,
      null
     ],
     [
      0.9816,
      "known",
-     1
+     1,
+     0.9816
     ],
     [
      0.9066,
      "known",
-     9
+     9,
+     0.8623
     ],
     [
      0.9071,
      "known",
+     null,
      null
     ],
     [
      0.955,
      "known",
-     1
+     1,
+     0.955
     ],
     [
      0.9309,
      "known",
-     4
+     4,
+     0.929
     ],
     [
      0.9305,
      "known",
-     1
+     1,
+     0.9305
     ],
     [
      0.9674,
      "known",
-     1
+     1,
+     0.9674
     ],
     [
      0.9568,
      "known",
-     2
+     2,
+     0.9327
     ],
     [
      0.9441,
      "known",
-     1
+     1,
+     0.9441
     ],
     [
      0.9345,
      "known",
-     1
+     1,
+     0.9345
     ],
     [
      0.9602,
      "known",
-     1
+     1,
+     0.9602
     ],
     [
      0.8918,
      "known",
-     8
+     8,
+     0.8542
     ],
     [
      0.8817,
      "unknown",
+     null,
      null
     ],
     [
      0.8855,
      "unknown",
+     null,
      null
     ],
     [
      0.8634,
      "unknown",
+     null,
      null
     ],
     [
      0.878,
      "known",
-     1
+     1,
+     0.878
     ],
     [
      0.9117,
      "unknown",
+     null,
      null
     ],
     [
      0.9148,
      "known",
-     1
+     1,
+     0.9148
     ],
     [
      0.9516,
      "known",
-     1
+     1,
+     0.9516
     ],
     [
      0.9503,
      "known",
-     1
+     1,
+     0.9503
     ],
     [
      0.8701,
      "known",
-     2
+     2,
+     0.8687
     ],
     [
      0.8419,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8526,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8642,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8813,
      "non_whisky",
+     null,
      null
     ]
    ]
@@ -2882,6 +3393,79 @@
       "holds": true
      }
     },
+    "canonical/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 97,
+      "register": 0,
+      "wrong": 36
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.3448275862068964,
+      "register": 0.0,
+      "wrong": 1.2413793103448276
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 44,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.7717391304347826,
+      "@3": 0.8804347826086957,
+      "@5": 0.9021739130434783,
+      "@10": 0.9021739130434783
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
     "aliases/unmatched_k5": {
      "cr_by_rank1_method": {
       "alias": 50
@@ -3159,6 +3743,79 @@
       "@3": 0.9836956521739131,
       "@5": 0.9836956521739131,
       "@10": 0.9836956521739131
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
+    "aliases/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 107,
+      "register": 0,
+      "wrong": 26
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.689655172413793,
+      "register": 0.0,
+      "wrong": 0.896551724137931
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 54,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.907608695652174,
+      "@3": 0.9565217391304348,
+      "@5": 0.9565217391304348,
+      "@10": 0.9565217391304348
      },
      "invariants": {
       "new_confirmed_lines": 0,
@@ -3466,6 +4123,79 @@
       "holds": true
      }
     },
+    "korean/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 106,
+      "register": 0,
+      "wrong": 27
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.6551724137931036,
+      "register": 0.0,
+      "wrong": 0.9310344827586207
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 53,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.8967391304347826,
+      "@3": 0.9510869565217391,
+      "@5": 0.9510869565217391,
+      "@10": 0.9510869565217391
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
     "brand_age/unmatched_k5": {
      "cr_by_rank1_method": {
       "alias": 50
@@ -3743,6 +4473,79 @@
       "@3": 0.8967391304347826,
       "@5": 0.9510869565217391,
       "@10": 0.9565217391304348
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
+    "brand_age/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 102,
+      "register": 0,
+      "wrong": 31
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.5172413793103448,
+      "register": 0.0,
+      "wrong": 1.0689655172413792
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 49,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.8043478260869565,
+      "@3": 0.8967391304347826,
+      "@5": 0.9239130434782609,
+      "@10": 0.9293478260869565
      },
      "invariants": {
       "new_confirmed_lines": 0,
@@ -4049,6 +4852,79 @@
       ],
       "holds": true
      }
+    },
+    "all/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 107,
+      "register": 0,
+      "wrong": 26
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.689655172413793,
+      "register": 0.0,
+      "wrong": 0.896551724137931
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 54,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.907608695652174,
+      "@3": 0.9565217391304348,
+      "@5": 0.9565217391304348,
+      "@10": 0.9565217391304348
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
     }
    },
    "cr_calibration": {
@@ -4086,356 +4962,427 @@
     [
      0.8765,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8735,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9487,
      "known",
-     1
+     1,
+     0.9487
     ],
     [
      0.9386,
      "known",
-     1
+     1,
+     0.9386
     ],
     [
      0.9425,
      "known",
-     1
+     1,
+     0.9425
     ],
     [
      0.9458,
      "known",
-     1
+     1,
+     0.9458
     ],
     [
      0.9521,
      "known",
-     1
+     1,
+     0.9521
     ],
     [
      0.9303,
      "known",
-     1
+     1,
+     0.9303
     ],
     [
      0.9132,
      "known",
-     2
+     2,
+     0.9104
     ],
     [
      0.9468,
      "known",
-     1
+     1,
+     0.9468
     ],
     [
      0.9596,
      "known",
-     1
+     1,
+     0.9596
     ],
     [
      0.9204,
      "known",
-     2
+     2,
+     0.9204
     ],
     [
      0.936,
      "known",
-     1
+     1,
+     0.936
     ],
     [
      0.9034,
      "unknown",
+     null,
      null
     ],
     [
      0.9624,
      "known",
-     1
+     1,
+     0.9624
     ],
     [
      0.9608,
      "known",
-     1
+     1,
+     0.9608
     ],
     [
      0.9828,
      "known",
-     1
+     1,
+     0.9828
     ],
     [
      0.9624,
      "known",
-     1
+     1,
+     0.9624
     ],
     [
      0.9522,
      "known",
-     1
+     1,
+     0.9522
     ],
     [
      0.9713,
      "known",
-     1
+     1,
+     0.9713
     ],
     [
      0.9882,
      "known",
-     1
+     1,
+     0.9882
     ],
     [
      0.9329,
      "known",
-     1
+     1,
+     0.9329
     ],
     [
      0.9744,
      "known",
-     1
+     1,
+     0.9744
     ],
     [
      0.9103,
      "known",
-     2
+     2,
+     0.9095
     ],
     [
      0.9357,
      "known",
-     1
+     1,
+     0.9357
     ],
     [
      0.9305,
      "known",
-     1
+     1,
+     0.9305
     ],
     [
      0.9562,
      "known",
-     1
+     1,
+     0.9562
     ],
     [
      0.937,
      "known",
-     1
+     1,
+     0.937
     ],
     [
      0.9312,
      "known",
-     1
+     1,
+     0.9312
     ],
     [
      0.8939,
      "unknown",
+     null,
      null
     ],
     [
      0.8941,
      "unknown",
+     null,
      null
     ],
     [
      0.9413,
      "known",
-     1
+     1,
+     0.9413
     ],
     [
      0.9099,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9792,
      "known",
-     1
+     1,
+     0.9792
     ],
     [
      0.985,
      "known",
-     1
+     1,
+     0.985
     ],
     [
      0.8611,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9595,
      "known",
-     1
+     1,
+     0.9595
     ],
     [
      0.8859,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8791,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8774,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9251,
      "unknown",
+     null,
      null
     ],
     [
      0.931,
      "known",
-     1
+     1,
+     0.931
     ],
     [
      0.9381,
      "known",
-     1
+     1,
+     0.9381
     ],
     [
      0.9132,
      "known",
-     1
+     1,
+     0.9132
     ],
     [
      0.9124,
      "known",
-     1
+     1,
+     0.9124
     ],
     [
      0.9526,
      "known",
-     1
+     1,
+     0.9526
     ],
     [
      0.9544,
      "known",
-     1
+     1,
+     0.9544
     ],
     [
      0.9445,
      "known",
-     1
+     1,
+     0.9445
     ],
     [
      0.867,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8633,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8606,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8699,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8707,
      "non_whisky",
+     null,
      null
     ],
     [
      0.915,
      "unknown",
+     null,
      null
     ],
     [
      0.9243,
      "known",
-     2
+     2,
+     0.9184
     ],
     [
      0.9283,
      "known",
-     1
+     1,
+     0.9283
     ],
     [
      0.9394,
      "known",
-     1
+     1,
+     0.9394
     ],
     [
      0.965,
      "known",
-     1
+     1,
+     0.965
     ],
     [
      0.9645,
      "known",
-     1
+     1,
+     0.9645
     ],
     [
      0.9557,
      "unknown",
+     null,
      null
     ],
     [
      0.9234,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9078,
      "known",
-     1
+     1,
+     0.9078
     ],
     [
      0.9305,
      "known",
-     1
+     1,
+     0.9305
     ],
     [
      0.9747,
      "known",
-     1
+     1,
+     0.9747
     ],
     [
      0.8817,
      "unknown",
+     null,
      null
     ],
     [
      0.8945,
      "unknown",
+     null,
      null
     ],
     [
      0.9223,
      "unknown",
+     null,
      null
     ],
     [
      0.8514,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8532,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8642,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8905,
      "non_whisky",
+     null,
      null
     ]
    ]
@@ -4893,6 +5840,79 @@
       "holds": true
      }
     },
+    "canonical/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 97,
+      "register": 0,
+      "wrong": 36
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.3448275862068964,
+      "register": 0.0,
+      "wrong": 1.2413793103448276
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 44,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.7717391304347826,
+      "@3": 0.8804347826086957,
+      "@5": 0.9021739130434783,
+      "@10": 0.9021739130434783
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
     "aliases/unmatched_k5": {
      "cr_by_rank1_method": {
       "alias": 50
@@ -5170,6 +6190,79 @@
       "@3": 0.9836956521739131,
       "@5": 0.9836956521739131,
       "@10": 0.9836956521739131
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
+    "aliases/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 107,
+      "register": 0,
+      "wrong": 26
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.689655172413793,
+      "register": 0.0,
+      "wrong": 0.896551724137931
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 54,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.8967391304347826,
+      "@3": 0.9565217391304348,
+      "@5": 0.9565217391304348,
+      "@10": 0.9565217391304348
      },
      "invariants": {
       "new_confirmed_lines": 0,
@@ -5477,6 +6570,79 @@
       "holds": true
      }
     },
+    "korean/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 106,
+      "register": 0,
+      "wrong": 27
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.6551724137931036,
+      "register": 0.0,
+      "wrong": 0.9310344827586207
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 53,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.8858695652173914,
+      "@3": 0.9510869565217391,
+      "@5": 0.9510869565217391,
+      "@10": 0.9510869565217391
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
     "brand_age/unmatched_k5": {
      "cr_by_rank1_method": {
       "alias": 50
@@ -5754,6 +6920,79 @@
       "@3": 0.8967391304347826,
       "@5": 0.9510869565217391,
       "@10": 0.9565217391304348
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
+    "brand_age/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 102,
+      "register": 0,
+      "wrong": 31
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.5172413793103448,
+      "register": 0.0,
+      "wrong": 1.0689655172413792
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 49,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.8043478260869565,
+      "@3": 0.8967391304347826,
+      "@5": 0.9239130434782609,
+      "@10": 0.9293478260869565
      },
      "invariants": {
       "new_confirmed_lines": 0,
@@ -6060,6 +7299,79 @@
       ],
       "holds": true
      }
+    },
+    "all/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 50
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 71,
+     "lines": 836,
+     "photos": 29,
+     "known": 802,
+     "correct": 618,
+     "top1": 0.770573566084788,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 4,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "Compass Box (컴파스 박스) -> Compass Box Orchard House"
+     ],
+     "accept_err_rate": 0.004784688995215311,
+     "totals": {
+      "confirm": 85,
+      "choose": 107,
+      "register": 0,
+      "wrong": 26
+     },
+     "per_photo": {
+      "confirm": 2.9310344827586206,
+      "choose": 3.689655172413793,
+      "register": 0.0,
+      "wrong": 0.896551724137931
+     },
+     "owner_per_photo": 7.517241379310345,
+     "hard_per_photo": 4.586206896551724,
+     "cr_rule": {
+      "n": 50,
+      "correct": 46
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 0,
+     "llm_targets": 0,
+     "from_register": 71,
+     "from_register_gold_in": 54,
+     "hard_under_5_photo_rate": 0.6551724137931034,
+     "recall_shown": {
+      "@1": 0.8967391304347826,
+      "@3": 0.9565217391304348,
+      "@5": 0.9565217391304348,
+      "@10": 0.9565217391304348
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       618,
+       618
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
     }
    },
    "cr_calibration": {
@@ -6097,356 +7409,427 @@
     [
      0.8765,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8735,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9487,
      "known",
-     1
+     1,
+     0.9487
     ],
     [
      0.9386,
      "known",
-     1
+     1,
+     0.9386
     ],
     [
      0.9425,
      "known",
-     1
+     1,
+     0.9425
     ],
     [
      0.9458,
      "known",
-     1
+     1,
+     0.9458
     ],
     [
      0.9521,
      "known",
-     1
+     1,
+     0.9521
     ],
     [
      0.9303,
      "known",
-     1
+     1,
+     0.9303
     ],
     [
      0.9132,
      "known",
-     2
+     2,
+     0.9104
     ],
     [
      0.9468,
      "known",
-     1
+     1,
+     0.9468
     ],
     [
      0.9596,
      "known",
-     1
+     1,
+     0.9596
     ],
     [
      0.9204,
      "known",
-     2
+     2,
+     0.9204
     ],
     [
      0.936,
      "known",
-     1
+     1,
+     0.936
     ],
     [
      0.9034,
      "unknown",
+     null,
      null
     ],
     [
      0.9624,
      "known",
-     1
+     1,
+     0.9624
     ],
     [
      0.9608,
      "known",
-     1
+     1,
+     0.9608
     ],
     [
      0.9828,
      "known",
-     1
+     1,
+     0.9828
     ],
     [
      0.9624,
      "known",
-     1
+     1,
+     0.9624
     ],
     [
      0.9522,
      "known",
-     1
+     1,
+     0.9522
     ],
     [
      0.9713,
      "known",
-     1
+     1,
+     0.9713
     ],
     [
      0.9882,
      "known",
-     1
+     1,
+     0.9882
     ],
     [
      0.9329,
      "known",
-     1
+     1,
+     0.9329
     ],
     [
      0.9744,
      "known",
-     1
+     1,
+     0.9744
     ],
     [
      0.9103,
      "known",
-     2
+     2,
+     0.9095
     ],
     [
      0.9357,
      "known",
-     1
+     1,
+     0.9357
     ],
     [
      0.9305,
      "known",
-     1
+     1,
+     0.9305
     ],
     [
      0.9562,
      "known",
-     1
+     1,
+     0.9562
     ],
     [
      0.937,
      "known",
-     1
+     1,
+     0.937
     ],
     [
      0.9312,
      "known",
-     1
+     1,
+     0.9312
     ],
     [
      0.8939,
      "unknown",
+     null,
      null
     ],
     [
      0.8941,
      "unknown",
+     null,
      null
     ],
     [
      0.9413,
      "known",
-     1
+     1,
+     0.9413
     ],
     [
      0.9099,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9792,
      "known",
-     1
+     1,
+     0.9792
     ],
     [
      0.985,
      "known",
-     1
+     1,
+     0.985
     ],
     [
      0.8611,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9595,
      "known",
-     1
+     1,
+     0.9595
     ],
     [
      0.8859,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8791,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8774,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9251,
      "unknown",
+     null,
      null
     ],
     [
      0.931,
      "known",
-     1
+     1,
+     0.931
     ],
     [
      0.9381,
      "known",
-     1
+     1,
+     0.9381
     ],
     [
      0.9132,
      "known",
-     1
+     1,
+     0.9132
     ],
     [
      0.9124,
      "known",
-     1
+     1,
+     0.9124
     ],
     [
      0.9526,
      "known",
-     1
+     1,
+     0.9526
     ],
     [
      0.9544,
      "known",
-     1
+     1,
+     0.9544
     ],
     [
      0.9445,
      "known",
-     1
+     1,
+     0.9445
     ],
     [
      0.867,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8633,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8606,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8699,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8707,
      "non_whisky",
+     null,
      null
     ],
     [
      0.915,
      "unknown",
+     null,
      null
     ],
     [
      0.9243,
      "known",
-     2
+     2,
+     0.9184
     ],
     [
      0.9283,
      "known",
-     1
+     1,
+     0.9283
     ],
     [
      0.9394,
      "known",
-     1
+     1,
+     0.9394
     ],
     [
      0.965,
      "known",
-     1
+     1,
+     0.965
     ],
     [
      0.975,
      "known",
-     1
+     1,
+     0.975
     ],
     [
      0.9762,
      "unknown",
+     null,
      null
     ],
     [
      0.9234,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9078,
      "known",
-     1
+     1,
+     0.9078
     ],
     [
      0.9404,
      "known",
-     1
+     1,
+     0.9404
     ],
     [
      0.9776,
      "known",
-     1
+     1,
+     0.9776
     ],
     [
      0.8817,
      "unknown",
+     null,
      null
     ],
     [
      0.8945,
      "unknown",
+     null,
      null
     ],
     [
      0.9223,
      "unknown",
+     null,
      null
     ],
     [
      0.8514,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8532,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8642,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8905,
      "non_whisky",
+     null,
      null
     ]
    ]
@@ -6914,6 +8297,81 @@
       "holds": true
      }
     },
+    "canonical/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 26
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 334,
+     "lines": 836,
+     "photos": 29,
+     "known": 479,
+     "correct": 375,
+     "top1": 0.7828810020876826,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 6,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "벤리악(Benriach) 10년 -> Benromach 10",
+      "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "벤로막12 -> Benromach 12 Cask Strength"
+     ],
+     "accept_err_rate": 0.007177033492822967,
+     "totals": {
+      "confirm": 42,
+      "choose": 71,
+      "register": 0,
+      "wrong": 348
+     },
+     "per_photo": {
+      "confirm": 1.4482758620689655,
+      "choose": 2.4482758620689653,
+      "register": 0.0,
+      "wrong": 12.0
+     },
+     "owner_per_photo": 15.89655172413793,
+     "hard_per_photo": 14.448275862068966,
+     "cr_rule": {
+      "n": 26,
+      "correct": 20
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 323,
+     "llm_targets": 0,
+     "from_register": 334,
+     "from_register_gold_in": 43,
+     "hard_under_5_photo_rate": 0.3448275862068966,
+     "recall_shown": {
+      "@1": 0.7692307692307693,
+      "@3": 0.9134615384615384,
+      "@5": 0.9326923076923077,
+      "@10": 0.9326923076923077
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       375,
+       375
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
     "aliases/unmatched_k5": {
      "cr_by_rank1_method": {
       "alias": 26
@@ -7199,6 +8657,81 @@
       "@3": 0.9423076923076923,
       "@5": 0.9711538461538461,
       "@10": 0.9711538461538461
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       375,
+       375
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
+    "aliases/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 26
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 334,
+     "lines": 836,
+     "photos": 29,
+     "known": 479,
+     "correct": 375,
+     "top1": 0.7828810020876826,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 6,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "벤리악(Benriach) 10년 -> Benromach 10",
+      "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "벤로막12 -> Benromach 12 Cask Strength"
+     ],
+     "accept_err_rate": 0.007177033492822967,
+     "totals": {
+      "confirm": 42,
+      "choose": 72,
+      "register": 0,
+      "wrong": 347
+     },
+     "per_photo": {
+      "confirm": 1.4482758620689655,
+      "choose": 2.4827586206896552,
+      "register": 0.0,
+      "wrong": 11.96551724137931
+     },
+     "owner_per_photo": 15.89655172413793,
+     "hard_per_photo": 14.448275862068966,
+     "cr_rule": {
+      "n": 26,
+      "correct": 20
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 323,
+     "llm_targets": 0,
+     "from_register": 334,
+     "from_register_gold_in": 44,
+     "hard_under_5_photo_rate": 0.3448275862068966,
+     "recall_shown": {
+      "@1": 0.8653846153846154,
+      "@3": 0.9326923076923077,
+      "@5": 0.9423076923076923,
+      "@10": 0.9423076923076923
      },
      "invariants": {
       "new_confirmed_lines": 0,
@@ -7514,6 +9047,81 @@
       "holds": true
      }
     },
+    "korean/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 26
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 334,
+     "lines": 836,
+     "photos": 29,
+     "known": 479,
+     "correct": 375,
+     "top1": 0.7828810020876826,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 6,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "벤리악(Benriach) 10년 -> Benromach 10",
+      "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "벤로막12 -> Benromach 12 Cask Strength"
+     ],
+     "accept_err_rate": 0.007177033492822967,
+     "totals": {
+      "confirm": 42,
+      "choose": 70,
+      "register": 0,
+      "wrong": 349
+     },
+     "per_photo": {
+      "confirm": 1.4482758620689655,
+      "choose": 2.413793103448276,
+      "register": 0.0,
+      "wrong": 12.03448275862069
+     },
+     "owner_per_photo": 15.89655172413793,
+     "hard_per_photo": 14.448275862068966,
+     "cr_rule": {
+      "n": 26,
+      "correct": 20
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 323,
+     "llm_targets": 0,
+     "from_register": 334,
+     "from_register_gold_in": 42,
+     "hard_under_5_photo_rate": 0.3448275862068966,
+     "recall_shown": {
+      "@1": 0.8269230769230769,
+      "@3": 0.9134615384615384,
+      "@5": 0.9230769230769231,
+      "@10": 0.9230769230769231
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       375,
+       375
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
     "brand_age/unmatched_k5": {
      "cr_by_rank1_method": {
       "alias": 26
@@ -7799,6 +9407,81 @@
       "@3": 0.8269230769230769,
       "@5": 0.8846153846153846,
       "@10": 0.8942307692307693
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       375,
+       375
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
+    },
+    "brand_age/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 26
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 334,
+     "lines": 836,
+     "photos": 29,
+     "known": 479,
+     "correct": 375,
+     "top1": 0.7828810020876826,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 6,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "벤리악(Benriach) 10년 -> Benromach 10",
+      "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "벤로막12 -> Benromach 12 Cask Strength"
+     ],
+     "accept_err_rate": 0.007177033492822967,
+     "totals": {
+      "confirm": 42,
+      "choose": 64,
+      "register": 0,
+      "wrong": 355
+     },
+     "per_photo": {
+      "confirm": 1.4482758620689655,
+      "choose": 2.206896551724138,
+      "register": 0.0,
+      "wrong": 12.241379310344827
+     },
+     "owner_per_photo": 15.89655172413793,
+     "hard_per_photo": 14.448275862068966,
+     "cr_rule": {
+      "n": 26,
+      "correct": 20
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 323,
+     "llm_targets": 0,
+     "from_register": 334,
+     "from_register_gold_in": 36,
+     "hard_under_5_photo_rate": 0.3448275862068966,
+     "recall_shown": {
+      "@1": 0.7115384615384616,
+      "@3": 0.8461538461538461,
+      "@5": 0.8557692307692307,
+      "@10": 0.8653846153846154
      },
      "invariants": {
       "new_confirmed_lines": 0,
@@ -8113,6 +9796,81 @@
       ],
       "holds": true
      }
+    },
+    "all/unmatched_k5+rerank_only": {
+     "cr_by_rank1_method": {
+      "alias": 26
+     },
+     "cr_embedding": {
+      "n": 0,
+      "correct": 0
+     },
+     "lines_with_embedding_candidate": 334,
+     "lines": 836,
+     "photos": 29,
+     "known": 479,
+     "correct": 375,
+     "top1": 0.7828810020876826,
+     "fm": 0,
+     "fm_rate": 0.0,
+     "fm_names": [],
+     "wrong_cr": 6,
+     "wrong_cr_names": [
+      "글렌가일(Glengyle) 킬커란 12년 -> Glengoyne 12",
+      "벤리악(Benriach) 10년 -> Benromach 10",
+      "아녹(Ancnoc) 피티드 셰리 -> Arran Bodega Sherry Cask",
+      "잭다니엘(Jack Daniel) 애플 -> Jack Daniel's Old No.7",
+      "anCnoc Sherry (아녹) -> anCnoc Peated Sherry Cask",
+      "벤로막12 -> Benromach 12 Cask Strength"
+     ],
+     "accept_err_rate": 0.007177033492822967,
+     "totals": {
+      "confirm": 42,
+      "choose": 72,
+      "register": 0,
+      "wrong": 347
+     },
+     "per_photo": {
+      "confirm": 1.4482758620689655,
+      "choose": 2.4827586206896552,
+      "register": 0.0,
+      "wrong": 11.96551724137931
+     },
+     "owner_per_photo": 15.89655172413793,
+     "hard_per_photo": 14.448275862068966,
+     "cr_rule": {
+      "n": 26,
+      "correct": 20
+     },
+     "cr_llm": {
+      "n": 0,
+      "correct": 0
+     },
+     "known_register": 0,
+     "absent_wrong": 323,
+     "llm_targets": 0,
+     "from_register": 334,
+     "from_register_gold_in": 44,
+     "hard_under_5_photo_rate": 0.3448275862068966,
+     "recall_shown": {
+      "@1": 0.8461538461538461,
+      "@3": 0.9326923076923077,
+      "@5": 0.9423076923076923,
+      "@10": 0.9423076923076923
+     },
+     "invariants": {
+      "new_confirmed_lines": 0,
+      "changed_confirmed_lines": 0,
+      "top1_correct": [
+       375,
+       375
+      ],
+      "false_merges": [
+       0,
+       0
+      ],
+      "holds": true
+     }
     }
    },
    "cr_calibration": {
@@ -8150,1671 +9908,2005 @@
     [
      0.8568,
      "absent",
+     null,
      null
     ],
     [
      0.9068,
      "absent",
+     null,
      null
     ],
     [
      0.8719,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8735,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8849,
      "absent",
+     null,
      null
     ],
     [
      0.8805,
      "absent",
+     null,
      null
     ],
     [
      0.8947,
      "absent",
+     null,
      null
     ],
     [
      0.8918,
      "absent",
+     null,
      null
     ],
     [
      0.9291,
      "absent",
+     null,
      null
     ],
     [
      0.9178,
      "absent",
+     null,
      null
     ],
     [
      0.905,
      "absent",
+     null,
      null
     ],
     [
      0.8969,
      "absent",
+     null,
      null
     ],
     [
      0.9018,
      "absent",
+     null,
      null
     ],
     [
      0.9053,
      "absent",
+     null,
      null
     ],
     [
      0.8715,
      "absent",
+     null,
      null
     ],
     [
      0.9077,
      "absent",
+     null,
      null
     ],
     [
      0.9184,
      "absent",
+     null,
      null
     ],
     [
      0.9202,
      "absent",
+     null,
      null
     ],
     [
      0.9188,
      "absent",
+     null,
      null
     ],
     [
      0.9072,
      "absent",
+     null,
      null
     ],
     [
      0.9007,
      "absent",
+     null,
      null
     ],
     [
      0.9034,
      "absent",
+     null,
      null
     ],
     [
      0.8984,
      "absent",
+     null,
      null
     ],
     [
      0.9003,
      "absent",
+     null,
      null
     ],
     [
      0.9076,
      "absent",
+     null,
      null
     ],
     [
      0.9334,
      "absent",
+     null,
      null
     ],
     [
      0.9171,
      "absent",
+     null,
      null
     ],
     [
      0.9182,
      "absent",
+     null,
      null
     ],
     [
      0.8662,
      "absent",
+     null,
      null
     ],
     [
      0.9174,
      "known",
-     1
+     1,
+     0.9174
     ],
     [
      0.9559,
      "absent",
+     null,
      null
     ],
     [
      0.8999,
      "absent",
+     null,
      null
     ],
     [
      0.881,
      "absent",
+     null,
      null
     ],
     [
      0.8717,
      "absent",
+     null,
      null
     ],
     [
      0.9303,
      "known",
-     1
+     1,
+     0.9303
     ],
     [
      0.9212,
      "absent",
+     null,
      null
     ],
     [
      0.954,
      "absent",
+     null,
      null
     ],
     [
      0.9132,
      "absent",
+     null,
      null
     ],
     [
      0.9176,
      "absent",
+     null,
      null
     ],
     [
      0.9076,
      "absent",
+     null,
      null
     ],
     [
      0.9412,
      "absent",
+     null,
      null
     ],
     [
      0.9021,
      "absent",
+     null,
      null
     ],
     [
      0.9152,
      "absent",
+     null,
      null
     ],
     [
      0.8937,
      "absent",
+     null,
      null
     ],
     [
      0.9118,
      "absent",
+     null,
      null
     ],
     [
      0.8539,
      "absent",
+     null,
      null
     ],
     [
      0.9286,
      "absent",
+     null,
      null
     ],
     [
      0.9259,
      "absent",
+     null,
      null
     ],
     [
      0.8717,
      "absent",
+     null,
      null
     ],
     [
      0.8664,
      "absent",
+     null,
      null
     ],
     [
      0.8758,
      "absent",
+     null,
      null
     ],
     [
      0.8725,
      "absent",
+     null,
      null
     ],
     [
      0.9073,
      "absent",
+     null,
      null
     ],
     [
      0.8798,
      "absent",
+     null,
      null
     ],
     [
      0.8717,
      "absent",
+     null,
      null
     ],
     [
      0.9269,
      "absent",
+     null,
      null
     ],
     [
      0.9089,
      "absent",
+     null,
      null
     ],
     [
      0.8569,
      "absent",
+     null,
      null
     ],
     [
      0.8846,
      "absent",
+     null,
      null
     ],
     [
      0.9155,
      "absent",
+     null,
      null
     ],
     [
      0.9123,
      "absent",
+     null,
      null
     ],
     [
      0.8958,
      "absent",
+     null,
      null
     ],
     [
      0.9112,
      "absent",
+     null,
      null
     ],
     [
      0.9071,
      "absent",
+     null,
      null
     ],
     [
      0.9076,
      "absent",
+     null,
      null
     ],
     [
      0.9017,
      "absent",
+     null,
      null
     ],
     [
      0.8885,
      "absent",
+     null,
      null
     ],
     [
      0.8982,
      "absent",
+     null,
      null
     ],
     [
      0.9024,
      "absent",
+     null,
      null
     ],
     [
      0.8986,
      "absent",
+     null,
      null
     ],
     [
      0.9099,
      "absent",
+     null,
      null
     ],
     [
      0.8978,
      "absent",
+     null,
      null
     ],
     [
      0.9148,
      "absent",
+     null,
      null
     ],
     [
      0.9682,
      "absent",
+     null,
      null
     ],
     [
      0.9667,
      "absent",
+     null,
      null
     ],
     [
      0.9705,
      "absent",
+     null,
      null
     ],
     [
      0.9683,
      "absent",
+     null,
      null
     ],
     [
      0.9135,
      "absent",
+     null,
      null
     ],
     [
      0.9146,
      "absent",
+     null,
      null
     ],
     [
      0.9066,
      "absent",
+     null,
      null
     ],
     [
      0.9088,
      "absent",
+     null,
      null
     ],
     [
      0.901,
      "absent",
+     null,
      null
     ],
     [
      0.9218,
      "absent",
+     null,
      null
     ],
     [
      0.9368,
      "absent",
+     null,
      null
     ],
     [
      0.9034,
      "unknown",
+     null,
      null
     ],
     [
      0.9432,
      "absent",
+     null,
      null
     ],
     [
      0.9455,
      "absent",
+     null,
      null
     ],
     [
      0.9112,
      "absent",
+     null,
      null
     ],
     [
      0.9134,
      "absent",
+     null,
      null
     ],
     [
      0.9043,
      "absent",
+     null,
      null
     ],
     [
      0.9401,
      "absent",
+     null,
      null
     ],
     [
      0.9419,
      "absent",
+     null,
      null
     ],
     [
      0.9624,
      "known",
-     1
+     1,
+     0.9624
     ],
     [
      0.9608,
      "known",
-     1
+     1,
+     0.9608
     ],
     [
      0.913,
      "absent",
+     null,
      null
     ],
     [
      0.9119,
      "absent",
+     null,
      null
     ],
     [
      0.9256,
      "absent",
+     null,
      null
     ],
     [
      0.9175,
      "absent",
+     null,
      null
     ],
     [
      0.912,
      "absent",
+     null,
      null
     ],
     [
      0.9014,
      "absent",
+     null,
      null
     ],
     [
      0.9178,
      "absent",
+     null,
      null
     ],
     [
      0.9313,
      "absent",
+     null,
      null
     ],
     [
      0.8914,
      "absent",
+     null,
      null
     ],
     [
      0.9414,
      "absent",
+     null,
      null
     ],
     [
      0.9574,
      "absent",
+     null,
      null
     ],
     [
      0.9538,
      "absent",
+     null,
      null
     ],
     [
      0.9144,
      "absent",
+     null,
      null
     ],
     [
      0.9096,
      "absent",
+     null,
      null
     ],
     [
      0.916,
      "absent",
+     null,
      null
     ],
     [
      0.9132,
      "absent",
+     null,
      null
     ],
     [
      0.932,
      "absent",
+     null,
      null
     ],
     [
      0.934,
      "absent",
+     null,
      null
     ],
     [
      0.9486,
      "absent",
+     null,
      null
     ],
     [
      0.9522,
      "absent",
+     null,
      null
     ],
     [
      0.9112,
      "absent",
+     null,
      null
     ],
     [
      0.9092,
      "absent",
+     null,
      null
     ],
     [
      0.9049,
      "unknown",
+     null,
      null
     ],
     [
      0.9547,
      "absent",
+     null,
      null
     ],
     [
      0.9012,
      "absent",
+     null,
      null
     ],
     [
      0.9339,
      "absent",
+     null,
      null
     ],
     [
      0.9495,
      "absent",
+     null,
      null
     ],
     [
      0.906,
      "absent",
+     null,
      null
     ],
     [
      0.9618,
      "absent",
+     null,
      null
     ],
     [
      0.9518,
      "absent",
+     null,
      null
     ],
     [
      0.9304,
      "absent",
+     null,
      null
     ],
     [
      0.9192,
      "absent",
+     null,
      null
     ],
     [
      0.9197,
      "absent",
+     null,
      null
     ],
     [
      0.9259,
      "absent",
+     null,
      null
     ],
     [
      0.9047,
      "absent",
+     null,
      null
     ],
     [
      0.9523,
      "absent",
+     null,
      null
     ],
     [
      0.9171,
      "absent",
+     null,
      null
     ],
     [
      0.8666,
      "absent",
+     null,
      null
     ],
     [
      0.9115,
      "absent",
+     null,
      null
     ],
     [
      0.9408,
      "absent",
+     null,
      null
     ],
     [
      0.9399,
      "absent",
+     null,
      null
     ],
     [
      0.9502,
      "absent",
+     null,
      null
     ],
     [
      0.9269,
      "absent",
+     null,
      null
     ],
     [
      0.9047,
      "absent",
+     null,
      null
     ],
     [
      0.9471,
      "absent",
+     null,
      null
     ],
     [
      0.9363,
      "absent",
+     null,
      null
     ],
     [
      0.9568,
      "absent",
+     null,
      null
     ],
     [
      0.9295,
      "absent",
+     null,
      null
     ],
     [
      0.9365,
      "absent",
+     null,
      null
     ],
     [
      0.9446,
      "absent",
+     null,
      null
     ],
     [
      0.9433,
      "absent",
+     null,
      null
     ],
     [
      0.8956,
      "absent",
+     null,
      null
     ],
     [
      0.9155,
      "absent",
+     null,
      null
     ],
     [
      0.9553,
      "absent",
+     null,
      null
     ],
     [
      0.8917,
      "absent",
+     null,
      null
     ],
     [
      0.9222,
      "absent",
+     null,
      null
     ],
     [
      0.9522,
      "known",
-     1
+     1,
+     0.9522
     ],
     [
      0.9659,
      "known",
-     2
+     2,
+     0.9645
     ],
     [
      0.8794,
      "known",
-     1
+     1,
+     0.8794
     ],
     [
      0.8926,
      "known",
-     1
+     1,
+     0.8926
     ],
     [
      0.8924,
      "absent",
+     null,
      null
     ],
     [
      0.9059,
      "absent",
+     null,
      null
     ],
     [
      0.9026,
      "absent",
+     null,
      null
     ],
     [
      0.8877,
      "absent",
+     null,
      null
     ],
     [
      0.8984,
      "absent",
+     null,
      null
     ],
     [
      0.8777,
      "absent",
+     null,
      null
     ],
     [
      0.8929,
      "absent",
+     null,
      null
     ],
     [
      0.9329,
      "known",
-     1
+     1,
+     0.9329
     ],
     [
      0.9147,
      "absent",
+     null,
      null
     ],
     [
      0.8936,
      "absent",
+     null,
      null
     ],
     [
      0.9137,
      "absent",
+     null,
      null
     ],
     [
      0.868,
      "absent",
+     null,
      null
     ],
     [
      0.8625,
      "absent",
+     null,
      null
     ],
     [
      0.883,
      "absent",
+     null,
      null
     ],
     [
      0.8904,
      "absent",
+     null,
      null
     ],
     [
      0.9012,
      "absent",
+     null,
      null
     ],
     [
      0.9152,
      "absent",
+     null,
      null
     ],
     [
      0.864,
      "absent",
+     null,
      null
     ],
     [
      0.863,
      "absent",
+     null,
      null
     ],
     [
      0.8603,
      "absent",
+     null,
      null
     ],
     [
      0.896,
      "absent",
+     null,
      null
     ],
     [
      0.8981,
      "absent",
+     null,
      null
     ],
     [
      0.8947,
      "absent",
+     null,
      null
     ],
     [
      0.891,
      "absent",
+     null,
      null
     ],
     [
      0.8846,
      "absent",
+     null,
      null
     ],
     [
      0.882,
      "absent",
+     null,
      null
     ],
     [
      0.8839,
      "absent",
+     null,
      null
     ],
     [
      0.8907,
      "absent",
+     null,
      null
     ],
     [
      0.9017,
      "absent",
+     null,
      null
     ],
     [
      0.9687,
      "known",
-     1
+     1,
+     0.9687
     ],
     [
      0.9021,
      "absent",
+     null,
      null
     ],
     [
      0.871,
      "absent",
+     null,
      null
     ],
     [
      0.9128,
      "absent",
+     null,
      null
     ],
     [
      0.9294,
      "absent",
+     null,
      null
     ],
     [
      0.8803,
      "absent",
+     null,
      null
     ],
     [
      0.9674,
      "known",
-     1
+     1,
+     0.9674
     ],
     [
      0.9305,
      "known",
-     1
+     1,
+     0.9305
     ],
     [
      0.9116,
      "known",
+     null,
      null
     ],
     [
      0.937,
      "known",
-     1
+     1,
+     0.937
     ],
     [
      0.9565,
      "known",
-     1
+     1,
+     0.9565
     ],
     [
      0.8735,
      "absent",
+     null,
      null
     ],
     [
      0.929,
      "known",
-     1
+     1,
+     0.929
     ],
     [
      0.8837,
      "absent",
+     null,
      null
     ],
     [
      0.8845,
      "absent",
+     null,
      null
     ],
     [
      0.8812,
      "absent",
+     null,
      null
     ],
     [
      0.8648,
      "absent",
+     null,
      null
     ],
     [
      0.8673,
      "absent",
+     null,
      null
     ],
     [
      0.9061,
      "absent",
+     null,
      null
     ],
     [
      0.9211,
      "absent",
+     null,
      null
     ],
     [
      0.9357,
      "absent",
+     null,
      null
     ],
     [
      0.8686,
      "absent",
+     null,
      null
     ],
     [
      0.875,
      "absent",
+     null,
      null
     ],
     [
      0.9074,
      "absent",
+     null,
      null
     ],
     [
      0.889,
      "absent",
+     null,
      null
     ],
     [
      0.8601,
      "absent",
+     null,
      null
     ],
     [
      0.8712,
      "absent",
+     null,
      null
     ],
     [
      0.8675,
      "absent",
+     null,
      null
     ],
     [
      0.8938,
      "absent",
+     null,
      null
     ],
     [
      0.8936,
      "absent",
+     null,
      null
     ],
     [
      0.8662,
      "absent",
+     null,
      null
     ],
     [
      0.8683,
      "absent",
+     null,
      null
     ],
     [
      0.8571,
      "absent",
+     null,
      null
     ],
     [
      0.8847,
      "absent",
+     null,
      null
     ],
     [
      0.883,
      "absent",
+     null,
      null
     ],
     [
      0.871,
      "absent",
+     null,
      null
     ],
     [
      0.8723,
      "absent",
+     null,
      null
     ],
     [
      0.9498,
      "absent",
+     null,
      null
     ],
     [
      0.968,
      "absent",
+     null,
      null
     ],
     [
      0.9588,
      "absent",
+     null,
      null
     ],
     [
      0.9106,
      "absent",
+     null,
      null
     ],
     [
      0.9205,
      "absent",
+     null,
      null
     ],
     [
      0.8837,
      "absent",
+     null,
      null
     ],
     [
      0.9144,
      "absent",
+     null,
      null
     ],
     [
      0.9442,
      "absent",
+     null,
      null
     ],
     [
      0.8985,
      "absent",
+     null,
      null
     ],
     [
      0.871,
      "absent",
+     null,
      null
     ],
     [
      0.908,
      "absent",
+     null,
      null
     ],
     [
      0.8711,
      "absent",
+     null,
      null
     ],
     [
      0.8965,
      "absent",
+     null,
      null
     ],
     [
      0.8939,
      "unknown",
+     null,
      null
     ],
     [
      0.8941,
      "unknown",
+     null,
      null
     ],
     [
      0.8923,
      "absent",
+     null,
      null
     ],
     [
      0.8914,
      "absent",
+     null,
      null
     ],
     [
      0.8779,
      "absent",
+     null,
      null
     ],
     [
      0.9029,
      "unknown",
+     null,
      null
     ],
     [
      0.9144,
      "absent",
+     null,
      null
     ],
     [
      0.885,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9259,
      "absent",
+     null,
      null
     ],
     [
      0.8958,
      "absent",
+     null,
      null
     ],
     [
      0.8959,
      "absent",
+     null,
      null
     ],
     [
      0.8928,
      "absent",
+     null,
      null
     ],
     [
      0.8916,
      "absent",
+     null,
      null
     ],
     [
      0.9153,
      "absent",
+     null,
      null
     ],
     [
      0.9088,
      "absent",
+     null,
      null
     ],
     [
      0.8999,
      "absent",
+     null,
      null
     ],
     [
      0.9439,
      "absent",
+     null,
      null
     ],
     [
      0.8454,
      "non_whisky",
+     null,
      null
     ],
     [
      0.953,
      "known",
-     1
+     1,
+     0.953
     ],
     [
      0.9595,
      "known",
-     1
+     1,
+     0.9595
     ],
     [
      0.8739,
      "absent",
+     null,
      null
     ],
     [
      0.8802,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8745,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8722,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8797,
      "absent",
+     null,
      null
     ],
     [
      0.8806,
      "absent",
+     null,
      null
     ],
     [
      0.885,
      "absent",
+     null,
      null
     ],
     [
      0.9268,
      "absent",
+     null,
      null
     ],
     [
      0.9031,
      "absent",
+     null,
      null
     ],
     [
      0.9245,
      "absent",
+     null,
      null
     ],
     [
      0.9549,
      "absent",
+     null,
      null
     ],
     [
      0.9183,
      "absent",
+     null,
      null
     ],
     [
      0.9199,
      "absent",
+     null,
      null
     ],
     [
      0.8685,
      "absent",
+     null,
      null
     ],
     [
      0.872,
      "absent",
+     null,
      null
     ],
     [
      0.9179,
      "unknown",
+     null,
      null
     ],
     [
      0.9085,
      "absent",
+     null,
      null
     ],
     [
      0.9211,
      "absent",
+     null,
      null
     ],
     [
      0.9055,
      "absent",
+     null,
      null
     ],
     [
      0.875,
      "absent",
+     null,
      null
     ],
     [
      0.8627,
      "absent",
+     null,
      null
     ],
     [
      0.8567,
      "absent",
+     null,
      null
     ],
     [
      0.8511,
      "absent",
+     null,
      null
     ],
     [
      0.8532,
      "absent",
+     null,
      null
     ],
     [
      0.8909,
      "absent",
+     null,
      null
     ],
     [
      0.8925,
      "absent",
+     null,
      null
     ],
     [
      0.8682,
      "absent",
+     null,
      null
     ],
     [
      0.867,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8633,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8606,
      "non_whisky",
+     null,
      null
     ],
     [
      0.868,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8707,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9286,
      "absent",
+     null,
      null
     ],
     [
      0.9033,
      "unknown",
+     null,
      null
     ],
     [
      0.9104,
      "absent",
+     null,
      null
     ],
     [
      0.9264,
      "absent",
+     null,
      null
     ],
     [
      0.9134,
      "absent",
+     null,
      null
     ],
     [
      0.9186,
      "known",
-     7
+     7,
+     0.9076
     ],
     [
      0.8858,
      "absent",
+     null,
      null
     ],
     [
      0.8498,
      "absent",
+     null,
      null
     ],
     [
      0.8895,
      "absent",
+     null,
      null
     ],
     [
      0.8558,
      "absent",
+     null,
      null
     ],
     [
      0.9099,
      "absent",
+     null,
      null
     ],
     [
      0.9451,
      "known",
-     1
+     1,
+     0.9451
     ],
     [
      0.9551,
      "known",
-     1
+     1,
+     0.9551
     ],
     [
      0.9645,
      "known",
-     1
+     1,
+     0.9645
     ],
     [
      0.8573,
      "absent",
+     null,
      null
     ],
     [
      0.9536,
      "unknown",
+     null,
      null
     ],
     [
      0.9234,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9078,
      "known",
-     1
+     1,
+     0.9078
     ],
     [
      0.9274,
      "absent",
+     null,
      null
     ],
     [
      0.9816,
      "known",
-     1
+     1,
+     0.9816
     ],
     [
      0.9066,
      "absent",
+     null,
      null
     ],
     [
      0.9071,
      "absent",
+     null,
      null
     ],
     [
      0.955,
      "known",
-     1
+     1,
+     0.955
     ],
     [
      0.9309,
      "known",
-     4
+     4,
+     0.929
     ],
     [
      0.9305,
      "known",
-     1
+     1,
+     0.9305
     ],
     [
      0.9674,
      "known",
-     1
+     1,
+     0.9674
     ],
     [
      0.9568,
      "known",
-     2
+     2,
+     0.9327
     ],
     [
      0.9441,
      "known",
-     1
+     1,
+     0.9441
     ],
     [
      0.8889,
      "absent",
+     null,
      null
     ],
     [
      0.9602,
      "known",
-     1
+     1,
+     0.9602
     ],
     [
      0.9246,
      "absent",
+     null,
      null
     ],
     [
      0.8918,
      "absent",
+     null,
      null
     ],
     [
      0.8817,
      "unknown",
+     null,
      null
     ],
     [
      0.889,
      "absent",
+     null,
      null
     ],
     [
      0.8767,
      "absent",
+     null,
      null
     ],
     [
      0.8855,
      "unknown",
+     null,
      null
     ],
     [
      0.8634,
      "unknown",
+     null,
      null
     ],
     [
      0.8745,
      "absent",
+     null,
      null
     ],
     [
      0.9117,
      "unknown",
+     null,
      null
     ],
     [
      0.9148,
      "known",
-     1
+     1,
+     0.9148
     ],
     [
      0.9044,
      "absent",
+     null,
      null
     ],
     [
      0.9516,
      "known",
-     1
+     1,
+     0.9516
     ],
     [
      0.9503,
      "known",
-     1
+     1,
+     0.9503
     ],
     [
      0.8701,
      "absent",
+     null,
      null
     ],
     [
      0.9372,
      "absent",
+     null,
      null
     ],
     [
      0.8419,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8526,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8642,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8813,
      "non_whisky",
+     null,
      null
     ]
    ]
@@ -11981,10 +14073,10 @@
  "latency_ms_per_photo": {
   "photos": 29,
   "lines_mean": 28.82758620689655,
-  "mean": 322.21,
-  "p50": 307.21,
-  "p95": 654.31,
-  "max": 728.46,
+  "mean": 185.01,
+  "p50": 154.07,
+  "p95": 386.38,
+  "max": 408.77,
   "docset": "all",
   "catalog": "service"
  },
@@ -12011,14 +14103,29 @@
   "eval/labels_heldout_v1_1.json": "047bf7d6f7274552f0dce0a4922ce7a72fa4282459d6cf1f6bbfb5271082c986",
   "eval/labels_v1_1.json": "a34249ebb0528371d23b5c18d3f9ca306a31646fe2a7a447cf4807a389b193cf"
  },
- "repo_head": "c976b4f60621037510ec881d50a187c2ffb71901",
+ "repo_head": "860540077c2a878872be7cbd968ab33b6979cfe0",
+ "provenance": {
+  "commit": "860540077c2a878872be7cbd968ab33b6979cfe0",
+  "uncommitted_changes": [],
+  "checked_paths": [
+   "ai/eval",
+   "ai/catalog",
+   "eval",
+   "backend/app/matching",
+   "backend/app/adapters/matching_llm.py"
+  ],
+  "harness_sha256": {
+   "ai/eval/p24_embedding_compare.py": "f363e5a23cc2d881ff97c731fb5b1365a97ece62632ab6e994f4db3caa5cb80f",
+   "ai/eval/i3_match_eval.py": "ae53dadd542691b921d5868f01ca5772ea82a968fbd81a7055663966208b8a0c"
+  }
+ },
  "photos": 32,
  "lines": 836,
- "load_seconds": 8.498,
+ "load_seconds": 1.624,
  "memory_mb": {
-  "rss_before_model": 27.40625,
-  "model_load_delta": 830.7,
-  "rss_after_run": 992.91015625,
-  "peak_rss": 1168.08984375
+  "rss_before_model": 27.92578125,
+  "model_load_delta": 837.5,
+  "rss_after_run": 994.71484375,
+  "peak_rss": 1175.4921875
  }
 }

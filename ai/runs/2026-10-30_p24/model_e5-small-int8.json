@@ -2,9 +2,10 @@
  "embedder": "e5-small-int8",
  "doc_texts": 5382,
  "queries": 823,
+ "fit": "none (fixed model)",
  "embed_seconds": {
-  "catalog_texts": 25.772,
-  "line_names": 4.631
+  "catalog_texts": 9.76,
+  "line_names": 1.497
  },
  "index_size": {
   "canonical": {
@@ -2040,751 +2041,901 @@
     [
      0.8727,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8793,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8887,
      "known",
+     null,
      null
     ],
     [
      0.8837,
      "known",
+     null,
      null
     ],
     [
      0.8974,
      "known",
+     null,
      null
     ],
     [
      0.8996,
      "known",
+     null,
      null
     ],
     [
      0.9048,
      "known",
-     3
+     3,
+     0.8986
     ],
     [
      0.903,
      "known",
-     3
+     3,
+     0.9022
     ],
     [
      0.9143,
      "known",
-     6
+     6,
+     0.8956
     ],
     [
      0.9053,
      "known",
-     3
+     3,
+     0.8946
     ],
     [
      0.8709,
      "known",
+     null,
      null
     ],
     [
      0.92,
      "known",
-     1
+     1,
+     0.92
     ],
     [
      0.9034,
      "known",
-     1
+     1,
+     0.9034
     ],
     [
      0.9169,
      "known",
-     1
+     1,
+     0.9169
     ],
     [
      0.9123,
      "known",
+     null,
      null
     ],
     [
      0.9186,
      "known",
+     null,
      null
     ],
     [
      0.8652,
      "known",
-     1
+     1,
+     0.8652
     ],
     [
      0.8783,
      "known",
+     null,
      null
     ],
     [
      0.8728,
      "known",
+     null,
      null
     ],
     [
      0.8811,
      "known",
+     null,
      null
     ],
     [
      0.8884,
      "known",
-     1
+     1,
+     0.8884
     ],
     [
      0.91,
      "known",
-     5
+     5,
+     0.86
     ],
     [
      0.9051,
      "known",
-     1
+     1,
+     0.9051
     ],
     [
      0.9499,
      "known",
-     1
+     1,
+     0.9499
     ],
     [
      0.9194,
      "known",
-     1
+     1,
+     0.9194
     ],
     [
      0.9246,
      "known",
+     null,
      null
     ],
     [
      0.9161,
      "known",
-     2
+     2,
+     0.9153
     ],
     [
      0.9003,
      "unknown",
+     null,
      null
     ],
     [
      0.9511,
      "known",
-     1
+     1,
+     0.9511
     ],
     [
      0.9361,
      "known",
-     1
+     1,
+     0.9361
     ],
     [
      0.9635,
      "known",
-     1
+     1,
+     0.9635
     ],
     [
      0.9595,
      "known",
-     1
+     1,
+     0.9595
     ],
     [
      0.9311,
      "known",
-     1
+     1,
+     0.9311
     ],
     [
      0.944,
      "known",
-     1
+     1,
+     0.944
     ],
     [
      0.95,
      "known",
-     1
+     1,
+     0.95
     ],
     [
      0.9396,
      "known",
-     1
+     1,
+     0.9396
     ],
     [
      0.9469,
      "known",
-     1
+     1,
+     0.9469
     ],
     [
      0.9633,
      "known",
-     1
+     1,
+     0.9633
     ],
     [
      0.889,
      "known",
-     1
+     1,
+     0.889
     ],
     [
      0.9006,
      "known",
-     1
+     1,
+     0.9006
     ],
     [
      0.8849,
      "known",
-     2
+     2,
+     0.8737
     ],
     [
      0.9335,
      "known",
-     1
+     1,
+     0.9335
     ],
     [
      0.8765,
      "known",
+     null,
      null
     ],
     [
      0.8871,
      "known",
-     1
+     1,
+     0.8871
     ],
     [
      0.8651,
      "known",
+     null,
      null
     ],
     [
      0.8911,
      "known",
-     5
+     5,
+     0.8829
     ],
     [
      0.8989,
      "known",
-     3
+     3,
+     0.8859
     ],
     [
      0.9012,
      "known",
-     2
+     2,
+     0.8795
     ],
     [
      0.8944,
      "known",
-     1
+     1,
+     0.8944
     ],
     [
      0.9141,
      "known",
-     1
+     1,
+     0.9141
     ],
     [
      0.8826,
      "known",
-     2
+     2,
+     0.8824
     ],
     [
      0.8875,
      "known",
-     1
+     1,
+     0.8875
     ],
     [
      0.8958,
      "known",
+     null,
      null
     ],
     [
      0.9,
      "known",
-     5
+     5,
+     0.8875
     ],
     [
      0.9656,
      "known",
-     1
+     1,
+     0.9656
     ],
     [
      0.879,
      "known",
+     null,
      null
     ],
     [
      0.9189,
      "known",
+     null,
      null
     ],
     [
      0.8995,
      "known",
-     1
+     1,
+     0.8995
     ],
     [
      0.9683,
      "known",
-     1
+     1,
+     0.9683
     ],
     [
      0.9312,
      "known",
-     1
+     1,
+     0.9312
     ],
     [
      0.9128,
      "known",
+     null,
      null
     ],
     [
      0.9429,
      "known",
-     1
+     1,
+     0.9429
     ],
     [
      0.9533,
      "known",
-     1
+     1,
+     0.9533
     ],
     [
      0.9235,
      "known",
-     1
+     1,
+     0.9235
     ],
     [
      0.8885,
      "known",
-     1
+     1,
+     0.8885
     ],
     [
      0.8893,
      "known",
-     1
+     1,
+     0.8893
     ],
     [
      0.8769,
      "known",
-     1
+     1,
+     0.8769
     ],
     [
      0.8949,
      "known",
-     3
+     3,
+     0.8865
     ],
     [
      0.9454,
      "known",
-     1
+     1,
+     0.9454
     ],
     [
      0.9463,
      "known",
-     1
+     1,
+     0.9463
     ],
     [
      0.9049,
      "known",
-     1
+     1,
+     0.9049
     ],
     [
      0.8932,
      "unknown",
+     null,
      null
     ],
     [
      0.8964,
      "unknown",
+     null,
      null
     ],
     [
      0.9023,
      "unknown",
+     null,
      null
     ],
     [
      0.9188,
      "known",
-     2
+     2,
+     0.9176
     ],
     [
      0.8721,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9771,
      "known",
-     1
+     1,
+     0.9771
     ],
     [
      0.9842,
      "known",
-     1
+     1,
+     0.9842
     ],
     [
      0.9407,
      "known",
+     null,
      null
     ],
     [
      0.8566,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9457,
      "known",
-     1
+     1,
+     0.9457
     ],
     [
      0.958,
      "known",
-     1
+     1,
+     0.958
     ],
     [
      0.8894,
      "known",
-     1
+     1,
+     0.8894
     ],
     [
      0.8783,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8715,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8679,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8859,
      "known",
-     1
+     1,
+     0.8859
     ],
     [
      0.8821,
      "known",
-     5
+     5,
+     0.8784
     ],
     [
      0.8948,
      "known",
+     null,
      null
     ],
     [
      0.9367,
      "known",
-     1
+     1,
+     0.9367
     ],
     [
      0.9338,
      "known",
-     1
+     1,
+     0.9338
     ],
     [
      0.8682,
      "known",
+     null,
      null
     ],
     [
      0.8789,
      "known",
+     null,
      null
     ],
     [
      0.922,
      "unknown",
+     null,
      null
     ],
     [
      0.9282,
      "known",
-     1
+     1,
+     0.9282
     ],
     [
      0.9322,
      "known",
-     1
+     1,
+     0.9322
     ],
     [
      0.8795,
      "known",
-     5
+     5,
+     0.8554
     ],
     [
      0.8738,
      "known",
-     1
+     1,
+     0.8738
     ],
     [
      0.8517,
      "known",
+     null,
      null
     ],
     [
      0.8572,
      "known",
-     4
+     4,
+     0.8526
     ],
     [
      0.8499,
      "known",
+     null,
      null
     ],
     [
      0.8973,
      "known",
+     null,
      null
     ],
     [
      0.8909,
      "known",
+     null,
      null
     ],
     [
      0.8685,
      "known",
+     null,
      null
     ],
     [
      0.8734,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8654,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8613,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8792,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8783,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9052,
      "unknown",
+     null,
      null
     ],
     [
      0.9125,
      "known",
+     null,
      null
     ],
     [
      0.9185,
      "known",
-     4
+     4,
+     0.9093
     ],
     [
      0.8841,
      "known",
+     null,
      null
     ],
     [
      0.8462,
      "known",
+     null,
      null
     ],
     [
      0.8922,
      "known",
+     null,
      null
     ],
     [
      0.8599,
      "known",
+     null,
      null
     ],
     [
      0.9146,
      "known",
+     null,
      null
     ],
     [
      0.9487,
      "known",
-     1
+     1,
+     0.9487
     ],
     [
      0.9569,
      "known",
-     1
+     1,
+     0.9569
     ],
     [
      0.9618,
      "known",
-     1
+     1,
+     0.9618
     ],
     [
      0.86,
      "known",
+     null,
      null
     ],
     [
      0.9541,
      "unknown",
+     null,
      null
     ],
     [
      0.9201,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9099,
      "known",
-     1
+     1,
+     0.9099
     ],
     [
      0.9236,
      "known",
+     null,
      null
     ],
     [
      0.9815,
      "known",
-     1
+     1,
+     0.9815
     ],
     [
      0.8985,
      "known",
+     null,
      null
     ],
     [
      0.9024,
      "known",
+     null,
      null
     ],
     [
      0.9564,
      "known",
-     1
+     1,
+     0.9564
     ],
     [
      0.9351,
      "known",
-     4
+     4,
+     0.9272
     ],
     [
      0.9279,
      "known",
-     1
+     1,
+     0.9279
     ],
     [
      0.9705,
      "known",
-     1
+     1,
+     0.9705
     ],
     [
      0.9515,
      "known",
-     4
+     4,
+     0.922
     ],
     [
      0.9463,
      "known",
-     1
+     1,
+     0.9463
     ],
     [
      0.9331,
      "known",
-     1
+     1,
+     0.9331
     ],
     [
      0.9574,
      "known",
-     1
+     1,
+     0.9574
     ],
     [
      0.891,
      "known",
+     null,
      null
     ],
     [
      0.8802,
      "unknown",
+     null,
      null
     ],
     [
      0.8841,
      "unknown",
+     null,
      null
     ],
     [
      0.8642,
      "unknown",
+     null,
      null
     ],
     [
      0.8762,
      "known",
-     2
+     2,
+     0.8733
     ],
     [
      0.9145,
      "unknown",
+     null,
      null
     ],
     [
      0.9139,
      "known",
-     1
+     1,
+     0.9139
     ],
     [
      0.9459,
      "known",
-     1
+     1,
+     0.9459
     ],
     [
      0.9482,
      "known",
-     1
+     1,
+     0.9482
     ],
     [
      0.8738,
      "known",
-     5
+     5,
+     0.8683
     ],
     [
      0.847,
      "non_whisky",
+     null,
      null
     ],
     [
      0.853,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8625,
      "non_whisky",
+     null,
      null
     ],
     [
      0.878,
      "non_whisky",
+     null,
      null
     ]
    ]
@@ -4811,356 +4962,427 @@
     [
      0.8836,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8793,
      "non_whisky",
+     null,
      null
     ],
     [
      0.949,
      "known",
-     1
+     1,
+     0.949
     ],
     [
      0.9366,
      "known",
-     1
+     1,
+     0.9366
     ],
     [
      0.9406,
      "known",
-     1
+     1,
+     0.9406
     ],
     [
      0.9495,
      "known",
-     1
+     1,
+     0.9495
     ],
     [
      0.9543,
      "known",
-     1
+     1,
+     0.9543
     ],
     [
      0.9169,
      "known",
-     1
+     1,
+     0.9169
     ],
     [
      0.9123,
      "known",
-     2
+     2,
+     0.91
     ],
     [
      0.9471,
      "known",
-     1
+     1,
+     0.9471
     ],
     [
      0.952,
      "known",
-     1
+     1,
+     0.952
     ],
     [
      0.9246,
      "known",
-     2
+     2,
+     0.9232
     ],
     [
      0.9347,
      "known",
-     1
+     1,
+     0.9347
     ],
     [
      0.9003,
      "unknown",
+     null,
      null
     ],
     [
      0.9635,
      "known",
-     1
+     1,
+     0.9635
     ],
     [
      0.9595,
      "known",
-     1
+     1,
+     0.9595
     ],
     [
      0.9733,
      "known",
-     1
+     1,
+     0.9733
     ],
     [
      0.9619,
      "known",
-     1
+     1,
+     0.9619
     ],
     [
      0.9511,
      "known",
-     1
+     1,
+     0.9511
     ],
     [
      0.9658,
      "known",
-     1
+     1,
+     0.9658
     ],
     [
      0.9834,
      "known",
-     1
+     1,
+     0.9834
     ],
     [
      0.9335,
      "known",
-     1
+     1,
+     0.9335
     ],
     [
      0.97,
      "known",
-     1
+     1,
+     0.97
     ],
     [
      0.9093,
      "known",
-     1
+     1,
+     0.9093
     ],
     [
      0.9399,
      "known",
-     1
+     1,
+     0.9399
     ],
     [
      0.9312,
      "known",
-     1
+     1,
+     0.9312
     ],
     [
      0.9564,
      "known",
-     1
+     1,
+     0.9564
     ],
     [
      0.9429,
      "known",
-     1
+     1,
+     0.9429
     ],
     [
      0.9241,
      "known",
-     1
+     1,
+     0.9241
     ],
     [
      0.8932,
      "unknown",
+     null,
      null
     ],
     [
      0.8964,
      "unknown",
+     null,
      null
     ],
     [
      0.9452,
      "known",
-     1
+     1,
+     0.9452
     ],
     [
      0.9069,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9771,
      "known",
-     1
+     1,
+     0.9771
     ],
     [
      0.9842,
      "known",
-     1
+     1,
+     0.9842
     ],
     [
      0.8676,
      "non_whisky",
+     null,
      null
     ],
     [
      0.958,
      "known",
-     1
+     1,
+     0.958
     ],
     [
      0.8815,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8763,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8722,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9261,
      "unknown",
+     null,
      null
     ],
     [
      0.9303,
      "known",
-     1
+     1,
+     0.9303
     ],
     [
      0.9414,
      "known",
-     1
+     1,
+     0.9414
     ],
     [
      0.9134,
      "known",
-     1
+     1,
+     0.9134
     ],
     [
      0.9179,
      "known",
-     1
+     1,
+     0.9179
     ],
     [
      0.951,
      "known",
-     1
+     1,
+     0.951
     ],
     [
      0.9472,
      "known",
-     1
+     1,
+     0.9472
     ],
     [
      0.9416,
      "known",
-     1
+     1,
+     0.9416
     ],
     [
      0.8759,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8676,
      "non_whisky",
+     null,
      null
     ],
     [
      0.864,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8803,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8783,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9179,
      "unknown",
+     null,
      null
     ],
     [
      0.9233,
      "known",
-     1
+     1,
+     0.9233
     ],
     [
      0.9299,
      "known",
-     1
+     1,
+     0.9299
     ],
     [
      0.947,
      "known",
-     1
+     1,
+     0.947
     ],
     [
      0.9605,
      "known",
-     1
+     1,
+     0.9605
     ],
     [
      0.9618,
      "known",
-     1
+     1,
+     0.9618
     ],
     [
      0.9541,
      "unknown",
+     null,
      null
     ],
     [
      0.9201,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9106,
      "known",
-     1
+     1,
+     0.9106
     ],
     [
      0.9279,
      "known",
-     1
+     1,
+     0.9279
     ],
     [
      0.9742,
      "known",
-     1
+     1,
+     0.9742
     ],
     [
      0.8802,
      "unknown",
+     null,
      null
     ],
     [
      0.8932,
      "unknown",
+     null,
      null
     ],
     [
      0.9271,
      "unknown",
+     null,
      null
     ],
     [
      0.86,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8539,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8625,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8872,
      "non_whisky",
+     null,
      null
     ]
    ]
@@ -7187,356 +7409,427 @@
     [
      0.8836,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8793,
      "non_whisky",
+     null,
      null
     ],
     [
      0.949,
      "known",
-     1
+     1,
+     0.949
     ],
     [
      0.9366,
      "known",
-     1
+     1,
+     0.9366
     ],
     [
      0.9406,
      "known",
-     1
+     1,
+     0.9406
     ],
     [
      0.9495,
      "known",
-     1
+     1,
+     0.9495
     ],
     [
      0.9543,
      "known",
-     1
+     1,
+     0.9543
     ],
     [
      0.9169,
      "known",
-     1
+     1,
+     0.9169
     ],
     [
      0.9123,
      "known",
-     2
+     2,
+     0.91
     ],
     [
      0.9471,
      "known",
-     1
+     1,
+     0.9471
     ],
     [
      0.952,
      "known",
-     1
+     1,
+     0.952
     ],
     [
      0.9246,
      "known",
-     2
+     2,
+     0.9232
     ],
     [
      0.9347,
      "known",
-     1
+     1,
+     0.9347
     ],
     [
      0.9003,
      "unknown",
+     null,
      null
     ],
     [
      0.9635,
      "known",
-     1
+     1,
+     0.9635
     ],
     [
      0.9595,
      "known",
-     1
+     1,
+     0.9595
     ],
     [
      0.9733,
      "known",
-     1
+     1,
+     0.9733
     ],
     [
      0.9619,
      "known",
-     1
+     1,
+     0.9619
     ],
     [
      0.9511,
      "known",
-     1
+     1,
+     0.9511
     ],
     [
      0.9658,
      "known",
-     1
+     1,
+     0.9658
     ],
     [
      0.9834,
      "known",
-     1
+     1,
+     0.9834
     ],
     [
      0.9335,
      "known",
-     1
+     1,
+     0.9335
     ],
     [
      0.97,
      "known",
-     1
+     1,
+     0.97
     ],
     [
      0.9093,
      "known",
-     1
+     1,
+     0.9093
     ],
     [
      0.9399,
      "known",
-     1
+     1,
+     0.9399
     ],
     [
      0.9312,
      "known",
-     1
+     1,
+     0.9312
     ],
     [
      0.9564,
      "known",
-     1
+     1,
+     0.9564
     ],
     [
      0.9429,
      "known",
-     1
+     1,
+     0.9429
     ],
     [
      0.9241,
      "known",
-     1
+     1,
+     0.9241
     ],
     [
      0.8932,
      "unknown",
+     null,
      null
     ],
     [
      0.8964,
      "unknown",
+     null,
      null
     ],
     [
      0.9452,
      "known",
-     1
+     1,
+     0.9452
     ],
     [
      0.9069,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9771,
      "known",
-     1
+     1,
+     0.9771
     ],
     [
      0.9842,
      "known",
-     1
+     1,
+     0.9842
     ],
     [
      0.8676,
      "non_whisky",
+     null,
      null
     ],
     [
      0.958,
      "known",
-     1
+     1,
+     0.958
     ],
     [
      0.8815,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8763,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8722,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9261,
      "unknown",
+     null,
      null
     ],
     [
      0.9303,
      "known",
-     1
+     1,
+     0.9303
     ],
     [
      0.9414,
      "known",
-     1
+     1,
+     0.9414
     ],
     [
      0.9134,
      "known",
-     1
+     1,
+     0.9134
     ],
     [
      0.9179,
      "known",
-     1
+     1,
+     0.9179
     ],
     [
      0.951,
      "known",
-     1
+     1,
+     0.951
     ],
     [
      0.9472,
      "known",
-     1
+     1,
+     0.9472
     ],
     [
      0.9416,
      "known",
-     1
+     1,
+     0.9416
     ],
     [
      0.8759,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8676,
      "non_whisky",
+     null,
      null
     ],
     [
      0.864,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8803,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8783,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9179,
      "unknown",
+     null,
      null
     ],
     [
      0.9233,
      "known",
-     1
+     1,
+     0.9233
     ],
     [
      0.9299,
      "known",
-     1
+     1,
+     0.9299
     ],
     [
      0.947,
      "known",
-     1
+     1,
+     0.947
     ],
     [
      0.9605,
      "known",
-     1
+     1,
+     0.9605
     ],
     [
      0.9732,
      "known",
-     1
+     1,
+     0.9732
     ],
     [
      0.9729,
      "unknown",
+     null,
      null
     ],
     [
      0.9201,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9106,
      "known",
-     1
+     1,
+     0.9106
     ],
     [
      0.9443,
      "known",
-     1
+     1,
+     0.9443
     ],
     [
      0.9779,
      "known",
-     1
+     1,
+     0.9779
     ],
     [
      0.8802,
      "unknown",
+     null,
      null
     ],
     [
      0.8932,
      "unknown",
+     null,
      null
     ],
     [
      0.9271,
      "unknown",
+     null,
      null
     ],
     [
      0.86,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8539,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8625,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8872,
      "non_whisky",
+     null,
      null
     ]
    ]
@@ -9615,1671 +9908,2005 @@
     [
      0.8634,
      "absent",
+     null,
      null
     ],
     [
      0.9127,
      "absent",
+     null,
      null
     ],
     [
      0.8727,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8793,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8887,
      "absent",
+     null,
      null
     ],
     [
      0.8837,
      "absent",
+     null,
      null
     ],
     [
      0.8967,
      "absent",
+     null,
      null
     ],
     [
      0.893,
      "absent",
+     null,
      null
     ],
     [
      0.9316,
      "absent",
+     null,
      null
     ],
     [
      0.9213,
      "absent",
+     null,
      null
     ],
     [
      0.8997,
      "absent",
+     null,
      null
     ],
     [
      0.9023,
      "absent",
+     null,
      null
     ],
     [
      0.9019,
      "absent",
+     null,
      null
     ],
     [
      0.9053,
      "absent",
+     null,
      null
     ],
     [
      0.8782,
      "absent",
+     null,
      null
     ],
     [
      0.913,
      "absent",
+     null,
      null
     ],
     [
      0.9242,
      "absent",
+     null,
      null
     ],
     [
      0.9271,
      "absent",
+     null,
      null
     ],
     [
      0.9264,
      "absent",
+     null,
      null
     ],
     [
      0.9062,
      "absent",
+     null,
      null
     ],
     [
      0.9009,
      "absent",
+     null,
      null
     ],
     [
      0.915,
      "absent",
+     null,
      null
     ],
     [
      0.902,
      "absent",
+     null,
      null
     ],
     [
      0.8946,
      "absent",
+     null,
      null
     ],
     [
      0.9021,
      "absent",
+     null,
      null
     ],
     [
      0.9383,
      "absent",
+     null,
      null
     ],
     [
      0.9157,
      "absent",
+     null,
      null
     ],
     [
      0.9244,
      "absent",
+     null,
      null
     ],
     [
      0.8709,
      "absent",
+     null,
      null
     ],
     [
      0.92,
      "known",
-     1
+     1,
+     0.92
     ],
     [
      0.9569,
      "absent",
+     null,
      null
     ],
     [
      0.9054,
      "absent",
+     null,
      null
     ],
     [
      0.8875,
      "absent",
+     null,
      null
     ],
     [
      0.8785,
      "absent",
+     null,
      null
     ],
     [
      0.9169,
      "known",
-     1
+     1,
+     0.9169
     ],
     [
      0.92,
      "absent",
+     null,
      null
     ],
     [
      0.9428,
      "absent",
+     null,
      null
     ],
     [
      0.9123,
      "absent",
+     null,
      null
     ],
     [
      0.9186,
      "absent",
+     null,
      null
     ],
     [
      0.9023,
      "absent",
+     null,
      null
     ],
     [
      0.9385,
      "absent",
+     null,
      null
     ],
     [
      0.8989,
      "absent",
+     null,
      null
     ],
     [
      0.9159,
      "absent",
+     null,
      null
     ],
     [
      0.8986,
      "absent",
+     null,
      null
     ],
     [
      0.9123,
      "absent",
+     null,
      null
     ],
     [
      0.8616,
      "absent",
+     null,
      null
     ],
     [
      0.9206,
      "absent",
+     null,
      null
     ],
     [
      0.9238,
      "absent",
+     null,
      null
     ],
     [
      0.8783,
      "absent",
+     null,
      null
     ],
     [
      0.8728,
      "absent",
+     null,
      null
     ],
     [
      0.8785,
      "absent",
+     null,
      null
     ],
     [
      0.8811,
      "absent",
+     null,
      null
     ],
     [
      0.9009,
      "absent",
+     null,
      null
     ],
     [
      0.88,
      "absent",
+     null,
      null
     ],
     [
      0.8737,
      "absent",
+     null,
      null
     ],
     [
      0.9183,
      "absent",
+     null,
      null
     ],
     [
      0.908,
      "absent",
+     null,
      null
     ],
     [
      0.8652,
      "absent",
+     null,
      null
     ],
     [
      0.8789,
      "absent",
+     null,
      null
     ],
     [
      0.9224,
      "absent",
+     null,
      null
     ],
     [
      0.9169,
      "absent",
+     null,
      null
     ],
     [
      0.8932,
      "absent",
+     null,
      null
     ],
     [
      0.9038,
      "absent",
+     null,
      null
     ],
     [
      0.9059,
      "absent",
+     null,
      null
     ],
     [
      0.91,
      "absent",
+     null,
      null
     ],
     [
      0.8999,
      "absent",
+     null,
      null
     ],
     [
      0.8921,
      "absent",
+     null,
      null
     ],
     [
      0.8938,
      "absent",
+     null,
      null
     ],
     [
      0.8941,
      "absent",
+     null,
      null
     ],
     [
      0.9035,
      "absent",
+     null,
      null
     ],
     [
      0.9014,
      "absent",
+     null,
      null
     ],
     [
      0.8971,
      "absent",
+     null,
      null
     ],
     [
      0.9137,
      "absent",
+     null,
      null
     ],
     [
      0.965,
      "absent",
+     null,
      null
     ],
     [
      0.9628,
      "absent",
+     null,
      null
     ],
     [
      0.9698,
      "absent",
+     null,
      null
     ],
     [
      0.9648,
      "absent",
+     null,
      null
     ],
     [
      0.9118,
      "absent",
+     null,
      null
     ],
     [
      0.9092,
      "absent",
+     null,
      null
     ],
     [
      0.9042,
      "absent",
+     null,
      null
     ],
     [
      0.9081,
      "absent",
+     null,
      null
     ],
     [
      0.901,
      "absent",
+     null,
      null
     ],
     [
      0.9289,
      "absent",
+     null,
      null
     ],
     [
      0.9345,
      "absent",
+     null,
      null
     ],
     [
      0.9003,
      "unknown",
+     null,
      null
     ],
     [
      0.9421,
      "absent",
+     null,
      null
     ],
     [
      0.9429,
      "absent",
+     null,
      null
     ],
     [
      0.913,
      "absent",
+     null,
      null
     ],
     [
      0.9137,
      "absent",
+     null,
      null
     ],
     [
      0.9057,
      "absent",
+     null,
      null
     ],
     [
      0.9311,
      "absent",
+     null,
      null
     ],
     [
      0.9344,
      "absent",
+     null,
      null
     ],
     [
      0.9635,
      "known",
-     1
+     1,
+     0.9635
     ],
     [
      0.9595,
      "known",
-     1
+     1,
+     0.9595
     ],
     [
      0.9194,
      "absent",
+     null,
      null
     ],
     [
      0.9105,
      "absent",
+     null,
      null
     ],
     [
      0.9261,
      "absent",
+     null,
      null
     ],
     [
      0.9142,
      "absent",
+     null,
      null
     ],
     [
      0.918,
      "absent",
+     null,
      null
     ],
     [
      0.901,
      "absent",
+     null,
      null
     ],
     [
      0.9183,
      "absent",
+     null,
      null
     ],
     [
      0.923,
      "absent",
+     null,
      null
     ],
     [
      0.8941,
      "absent",
+     null,
      null
     ],
     [
      0.9415,
      "absent",
+     null,
      null
     ],
     [
      0.9569,
      "absent",
+     null,
      null
     ],
     [
      0.9479,
      "absent",
+     null,
      null
     ],
     [
      0.9158,
      "absent",
+     null,
      null
     ],
     [
      0.9038,
      "absent",
+     null,
      null
     ],
     [
      0.9165,
      "absent",
+     null,
      null
     ],
     [
      0.9153,
      "absent",
+     null,
      null
     ],
     [
      0.9271,
      "absent",
+     null,
      null
     ],
     [
      0.938,
      "absent",
+     null,
      null
     ],
     [
      0.946,
      "absent",
+     null,
      null
     ],
     [
      0.947,
      "absent",
+     null,
      null
     ],
     [
      0.9198,
      "absent",
+     null,
      null
     ],
     [
      0.9051,
      "absent",
+     null,
      null
     ],
     [
      0.9107,
      "unknown",
+     null,
      null
     ],
     [
      0.9496,
      "absent",
+     null,
      null
     ],
     [
      0.9067,
      "absent",
+     null,
      null
     ],
     [
      0.9305,
      "absent",
+     null,
      null
     ],
     [
      0.9467,
      "absent",
+     null,
      null
     ],
     [
      0.9011,
      "absent",
+     null,
      null
     ],
     [
      0.9548,
      "absent",
+     null,
      null
     ],
     [
      0.9424,
      "absent",
+     null,
      null
     ],
     [
      0.931,
      "absent",
+     null,
      null
     ],
     [
      0.9232,
      "absent",
+     null,
      null
     ],
     [
      0.9178,
      "absent",
+     null,
      null
     ],
     [
      0.9221,
      "absent",
+     null,
      null
     ],
     [
      0.9055,
      "absent",
+     null,
      null
     ],
     [
      0.9495,
      "absent",
+     null,
      null
     ],
     [
      0.9205,
      "absent",
+     null,
      null
     ],
     [
      0.8665,
      "absent",
+     null,
      null
     ],
     [
      0.8964,
      "absent",
+     null,
      null
     ],
     [
      0.9384,
      "absent",
+     null,
      null
     ],
     [
      0.9359,
      "absent",
+     null,
      null
     ],
     [
      0.9532,
      "absent",
+     null,
      null
     ],
     [
      0.9322,
      "absent",
+     null,
      null
     ],
     [
      0.8965,
      "absent",
+     null,
      null
     ],
     [
      0.9494,
      "absent",
+     null,
      null
     ],
     [
      0.936,
      "absent",
+     null,
      null
     ],
     [
      0.9448,
      "absent",
+     null,
      null
     ],
     [
      0.9267,
      "absent",
+     null,
      null
     ],
     [
      0.9412,
      "absent",
+     null,
      null
     ],
     [
      0.946,
      "absent",
+     null,
      null
     ],
     [
      0.9432,
      "absent",
+     null,
      null
     ],
     [
      0.8967,
      "absent",
+     null,
      null
     ],
     [
      0.9061,
      "absent",
+     null,
      null
     ],
     [
      0.9576,
      "absent",
+     null,
      null
     ],
     [
      0.8849,
      "absent",
+     null,
      null
     ],
     [
      0.9259,
      "absent",
+     null,
      null
     ],
     [
      0.9469,
      "known",
-     1
+     1,
+     0.9469
     ],
     [
      0.9633,
      "known",
-     1
+     1,
+     0.9633
     ],
     [
      0.889,
      "known",
-     1
+     1,
+     0.889
     ],
     [
      0.9006,
      "known",
-     1
+     1,
+     0.9006
     ],
     [
      0.8989,
      "absent",
+     null,
      null
     ],
     [
      0.9051,
      "absent",
+     null,
      null
     ],
     [
      0.9061,
      "absent",
+     null,
      null
     ],
     [
      0.8925,
      "absent",
+     null,
      null
     ],
     [
      0.8957,
      "absent",
+     null,
      null
     ],
     [
      0.8849,
      "absent",
+     null,
      null
     ],
     [
      0.8916,
      "absent",
+     null,
      null
     ],
     [
      0.9335,
      "known",
-     1
+     1,
+     0.9335
     ],
     [
      0.9178,
      "absent",
+     null,
      null
     ],
     [
      0.8896,
      "absent",
+     null,
      null
     ],
     [
      0.9134,
      "absent",
+     null,
      null
     ],
     [
      0.8765,
      "absent",
+     null,
      null
     ],
     [
      0.8721,
      "absent",
+     null,
      null
     ],
     [
      0.8864,
      "absent",
+     null,
      null
     ],
     [
      0.8935,
      "absent",
+     null,
      null
     ],
     [
      0.9097,
      "absent",
+     null,
      null
     ],
     [
      0.9217,
      "absent",
+     null,
      null
     ],
     [
      0.8651,
      "absent",
+     null,
      null
     ],
     [
      0.8746,
      "absent",
+     null,
      null
     ],
     [
      0.8686,
      "absent",
+     null,
      null
     ],
     [
      0.8911,
      "absent",
+     null,
      null
     ],
     [
      0.8989,
      "absent",
+     null,
      null
     ],
     [
      0.9012,
      "absent",
+     null,
      null
     ],
     [
      0.8915,
      "absent",
+     null,
      null
     ],
     [
      0.8896,
      "absent",
+     null,
      null
     ],
     [
      0.8826,
      "absent",
+     null,
      null
     ],
     [
      0.8866,
      "absent",
+     null,
      null
     ],
     [
      0.8958,
      "absent",
+     null,
      null
     ],
     [
      0.9,
      "absent",
+     null,
      null
     ],
     [
      0.9656,
      "known",
-     1
+     1,
+     0.9656
     ],
     [
      0.8961,
      "absent",
+     null,
      null
     ],
     [
      0.879,
      "absent",
+     null,
      null
     ],
     [
      0.9189,
      "absent",
+     null,
      null
     ],
     [
      0.9376,
      "absent",
+     null,
      null
     ],
     [
      0.8846,
      "absent",
+     null,
      null
     ],
     [
      0.9683,
      "known",
-     1
+     1,
+     0.9683
     ],
     [
      0.9312,
      "known",
-     1
+     1,
+     0.9312
     ],
     [
      0.9128,
      "known",
+     null,
      null
     ],
     [
      0.9429,
      "known",
-     1
+     1,
+     0.9429
     ],
     [
      0.9533,
      "known",
-     1
+     1,
+     0.9533
     ],
     [
      0.8786,
      "absent",
+     null,
      null
     ],
     [
      0.9235,
      "known",
-     1
+     1,
+     0.9235
     ],
     [
      0.8818,
      "absent",
+     null,
      null
     ],
     [
      0.8809,
      "absent",
+     null,
      null
     ],
     [
      0.8832,
      "absent",
+     null,
      null
     ],
     [
      0.8705,
      "absent",
+     null,
      null
     ],
     [
      0.872,
      "absent",
+     null,
      null
     ],
     [
      0.9001,
      "absent",
+     null,
      null
     ],
     [
      0.9114,
      "absent",
+     null,
      null
     ],
     [
      0.9353,
      "absent",
+     null,
      null
     ],
     [
      0.8786,
      "absent",
+     null,
      null
     ],
     [
      0.8753,
      "absent",
+     null,
      null
     ],
     [
      0.9059,
      "absent",
+     null,
      null
     ],
     [
      0.8903,
      "absent",
+     null,
      null
     ],
     [
      0.8636,
      "absent",
+     null,
      null
     ],
     [
      0.8761,
      "absent",
+     null,
      null
     ],
     [
      0.8658,
      "absent",
+     null,
      null
     ],
     [
      0.8963,
      "absent",
+     null,
      null
     ],
     [
      0.8955,
      "absent",
+     null,
      null
     ],
     [
      0.869,
      "absent",
+     null,
      null
     ],
     [
      0.8727,
      "absent",
+     null,
      null
     ],
     [
      0.8584,
      "absent",
+     null,
      null
     ],
     [
      0.8776,
      "absent",
+     null,
      null
     ],
     [
      0.8852,
      "absent",
+     null,
      null
     ],
     [
      0.8665,
      "absent",
+     null,
      null
     ],
     [
      0.8775,
      "absent",
+     null,
      null
     ],
     [
      0.9459,
      "absent",
+     null,
      null
     ],
     [
      0.9663,
      "absent",
+     null,
      null
     ],
     [
      0.9603,
      "absent",
+     null,
      null
     ],
     [
      0.9127,
      "absent",
+     null,
      null
     ],
     [
      0.9155,
      "absent",
+     null,
      null
     ],
     [
      0.8804,
      "absent",
+     null,
      null
     ],
     [
      0.9095,
      "absent",
+     null,
      null
     ],
     [
      0.9399,
      "absent",
+     null,
      null
     ],
     [
      0.9016,
      "absent",
+     null,
      null
     ],
     [
      0.8764,
      "absent",
+     null,
      null
     ],
     [
      0.9126,
      "absent",
+     null,
      null
     ],
     [
      0.873,
      "absent",
+     null,
      null
     ],
     [
      0.8993,
      "absent",
+     null,
      null
     ],
     [
      0.8932,
      "unknown",
+     null,
      null
     ],
     [
      0.8964,
      "unknown",
+     null,
      null
     ],
     [
      0.8887,
      "absent",
+     null,
      null
     ],
     [
      0.8898,
      "absent",
+     null,
      null
     ],
     [
      0.8808,
      "absent",
+     null,
      null
     ],
     [
      0.9023,
      "unknown",
+     null,
      null
     ],
     [
      0.9188,
      "absent",
+     null,
      null
     ],
     [
      0.8721,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9184,
      "absent",
+     null,
      null
     ],
     [
      0.9029,
      "absent",
+     null,
      null
     ],
     [
      0.8966,
      "absent",
+     null,
      null
     ],
     [
      0.8958,
      "absent",
+     null,
      null
     ],
     [
      0.895,
      "absent",
+     null,
      null
     ],
     [
      0.9139,
      "absent",
+     null,
      null
     ],
     [
      0.912,
      "absent",
+     null,
      null
     ],
     [
      0.8981,
      "absent",
+     null,
      null
     ],
     [
      0.9407,
      "absent",
+     null,
      null
     ],
     [
      0.8566,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9457,
      "known",
-     1
+     1,
+     0.9457
     ],
     [
      0.958,
      "known",
-     1
+     1,
+     0.958
     ],
     [
      0.8818,
      "absent",
+     null,
      null
     ],
     [
      0.8783,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8715,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8679,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8822,
      "absent",
+     null,
      null
     ],
     [
      0.8821,
      "absent",
+     null,
      null
     ],
     [
      0.8948,
      "absent",
+     null,
      null
     ],
     [
      0.9199,
      "absent",
+     null,
      null
     ],
     [
      0.9044,
      "absent",
+     null,
      null
     ],
     [
      0.9227,
      "absent",
+     null,
      null
     ],
     [
      0.9475,
      "absent",
+     null,
      null
     ],
     [
      0.9208,
      "absent",
+     null,
      null
     ],
     [
      0.9181,
      "absent",
+     null,
      null
     ],
     [
      0.8682,
      "absent",
+     null,
      null
     ],
     [
      0.8789,
      "absent",
+     null,
      null
     ],
     [
      0.922,
      "unknown",
+     null,
      null
     ],
     [
      0.905,
      "absent",
+     null,
      null
     ],
     [
      0.9182,
      "absent",
+     null,
      null
     ],
     [
      0.9079,
      "absent",
+     null,
      null
     ],
     [
      0.8795,
      "absent",
+     null,
      null
     ],
     [
      0.8642,
      "absent",
+     null,
      null
     ],
     [
      0.8517,
      "absent",
+     null,
      null
     ],
     [
      0.8572,
      "absent",
+     null,
      null
     ],
     [
      0.8499,
      "absent",
+     null,
      null
     ],
     [
      0.8973,
      "absent",
+     null,
      null
     ],
     [
      0.8909,
      "absent",
+     null,
      null
     ],
     [
      0.8685,
      "absent",
+     null,
      null
     ],
     [
      0.8734,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8654,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8613,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8792,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8783,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9251,
      "absent",
+     null,
      null
     ],
     [
      0.9052,
      "unknown",
+     null,
      null
     ],
     [
      0.9151,
      "absent",
+     null,
      null
     ],
     [
      0.922,
      "absent",
+     null,
      null
     ],
     [
      0.9125,
      "absent",
+     null,
      null
     ],
     [
      0.9185,
      "known",
-     4
+     4,
+     0.9093
     ],
     [
      0.8841,
      "absent",
+     null,
      null
     ],
     [
      0.8462,
      "absent",
+     null,
      null
     ],
     [
      0.8922,
      "absent",
+     null,
      null
     ],
     [
      0.8599,
      "absent",
+     null,
      null
     ],
     [
      0.9146,
      "absent",
+     null,
      null
     ],
     [
      0.9487,
      "known",
-     1
+     1,
+     0.9487
     ],
     [
      0.9569,
      "known",
-     1
+     1,
+     0.9569
     ],
     [
      0.9618,
      "known",
-     1
+     1,
+     0.9618
     ],
     [
      0.86,
      "absent",
+     null,
      null
     ],
     [
      0.9541,
      "unknown",
+     null,
      null
     ],
     [
      0.9201,
      "non_whisky",
+     null,
      null
     ],
     [
      0.9099,
      "known",
-     1
+     1,
+     0.9099
     ],
     [
      0.9236,
      "absent",
+     null,
      null
     ],
     [
      0.9815,
      "known",
-     1
+     1,
+     0.9815
     ],
     [
      0.8985,
      "absent",
+     null,
      null
     ],
     [
      0.9024,
      "absent",
+     null,
      null
     ],
     [
      0.9564,
      "known",
-     1
+     1,
+     0.9564
     ],
     [
      0.9351,
      "known",
-     4
+     4,
+     0.9272
     ],
     [
      0.9279,
      "known",
-     1
+     1,
+     0.9279
     ],
     [
      0.9705,
      "known",
-     1
+     1,
+     0.9705
     ],
     [
      0.9515,
      "known",
-     4
+     4,
+     0.922
     ],
     [
      0.9463,
      "known",
-     1
+     1,
+     0.9463
     ],
     [
      0.8911,
      "absent",
+     null,
      null
     ],
     [
      0.9574,
      "known",
-     1
+     1,
+     0.9574
     ],
     [
      0.9217,
      "absent",
+     null,
      null
     ],
     [
      0.891,
      "absent",
+     null,
      null
     ],
     [
      0.8802,
      "unknown",
+     null,
      null
     ],
     [
      0.885,
      "absent",
+     null,
      null
     ],
     [
      0.8843,
      "absent",
+     null,
      null
     ],
     [
      0.8841,
      "unknown",
+     null,
      null
     ],
     [
      0.8642,
      "unknown",
+     null,
      null
     ],
     [
      0.8762,
      "absent",
+     null,
      null
     ],
     [
      0.9145,
      "unknown",
+     null,
      null
     ],
     [
      0.9139,
      "known",
-     1
+     1,
+     0.9139
     ],
     [
      0.9077,
      "absent",
+     null,
      null
     ],
     [
      0.9459,
      "known",
-     1
+     1,
+     0.9459
     ],
     [
      0.9482,
      "known",
-     1
+     1,
+     0.9482
     ],
     [
      0.8738,
      "absent",
+     null,
      null
     ],
     [
      0.9397,
      "absent",
+     null,
      null
     ],
     [
      0.847,
      "non_whisky",
+     null,
      null
     ],
     [
      0.853,
      "non_whisky",
+     null,
      null
     ],
     [
      0.8625,
      "non_whisky",
+     null,
      null
     ],
     [
      0.878,
      "non_whisky",
+     null,
      null
     ]
    ]
@@ -13448,10 +14075,10 @@
  "latency_ms_per_photo": {
   "photos": 29,
   "lines_mean": 28.82758620689655,
-  "mean": 253.38,
-  "p50": 228.09,
-  "p95": 518.52,
-  "max": 726.54,
+  "mean": 107.52,
+  "p50": 107.24,
+  "p95": 206.48,
+  "max": 218.48,
   "docset": "all",
   "catalog": "service"
  },
@@ -13478,14 +14105,29 @@
   "eval/labels_heldout_v1_1.json": "047bf7d6f7274552f0dce0a4922ce7a72fa4282459d6cf1f6bbfb5271082c986",
   "eval/labels_v1_1.json": "a34249ebb0528371d23b5c18d3f9ca306a31646fe2a7a447cf4807a389b193cf"
  },
- "repo_head": "c976b4f60621037510ec881d50a187c2ffb71901",
+ "repo_head": "860540077c2a878872be7cbd968ab33b6979cfe0",
+ "provenance": {
+  "commit": "860540077c2a878872be7cbd968ab33b6979cfe0",
+  "uncommitted_changes": [],
+  "checked_paths": [
+   "ai/eval",
+   "ai/catalog",
+   "eval",
+   "backend/app/matching",
+   "backend/app/adapters/matching_llm.py"
+  ],
+  "harness_sha256": {
+   "ai/eval/p24_embedding_compare.py": "f363e5a23cc2d881ff97c731fb5b1365a97ece62632ab6e994f4db3caa5cb80f",
+   "ai/eval/i3_match_eval.py": "ae53dadd542691b921d5868f01ca5772ea82a968fbd81a7055663966208b8a0c"
+  }
+ },
  "photos": 32,
  "lines": 836,
- "load_seconds": 2.088,
+ "load_seconds": 1.05,
  "memory_mb": {
-  "rss_before_model": 27.46484375,
-  "model_load_delta": 453.2,
-  "rss_after_run": 625.9296875,
-  "peak_rss": 694.0703125
+  "rss_before_model": 27.921875,
+  "model_load_delta": 459.9,
+  "rss_after_run": 626.31640625,
+  "peak_rss": 706.46484375
  }
 }
