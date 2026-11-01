@@ -235,6 +235,75 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithText("종료 선택").assertExists()
     }
 
+    @Test fun backFromDiscountEditorDiscardsUnappliedPrice() {
+        val vm = fixture()
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("manual-menu-row-bar-10").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithText("할인").performClick()
+        compose.onNodeWithTag("manual-menu-discount-price").performTextInput("3000")
+        compose.onNodeWithContentDescription("뒤로가기").performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val saved = vm.preview("fixture-bar", System.currentTimeMillis())!!
+                .visibleMenu.single().options
+            assertEquals(null, saved.first().discount)
+            assertEquals(2, saved.size)
+        }
+    }
+
+    @Test fun editingImportedSameDayDiscountDoesNotRoundOrLoseExactTimestamps() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val now = System.currentTimeMillis()
+        val discount = MockDiscount(5000, now - 100000L, now + 100000L)
+        r.saveBrand(MockBrand("brand-exact", "라가불린"))
+        r.saveCatalogProduct(MockCatalogProduct("prod-exact", "brand-exact", "라가불린 10년"))
+        r.saveMenuItem(MockBarMenuItem("menu-exact", "fixture-bar", "prod-exact",
+            listOf(MockMenuOption("exact30", pourMl = 30, priceKrw = 10000,
+                discount = discount))))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("manual-menu-row-menu-exact").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(discount, r.preview("fixture-bar", now)!!.visibleMenu.single()
+                .options.single().discount)
+        }
+    }
+
+    @Test fun editingFirstThreeImportedOptionsKeepsFourthOptionIntact() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("brand-import", "라가불린"))
+        r.saveCatalogProduct(MockCatalogProduct("prod-import", "brand-import", "라가불린 10년"))
+        val four = (1..4).map { i ->
+            MockMenuOption("import-$i", pourMl = 15 * i, priceKrw = 1000 * i)
+        }
+        r.saveMenuItem(MockBarMenuItem("menu-import", "fixture-bar", "prod-import", four))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("manual-menu-row-menu-import").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(four, r.preview("fixture-bar", 0)!!.visibleMenu.single().options)
+        }
+    }
+
     @Test fun soldOutConfirmationRemovesCustomerOnlyAndKeepsOwnerMenu() {
         val vm = fixture()
         compose.setContent {
