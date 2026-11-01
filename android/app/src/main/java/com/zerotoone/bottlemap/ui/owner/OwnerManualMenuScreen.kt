@@ -184,8 +184,13 @@ internal fun OwnerManualMenuScreen(
             snapshot?.menuItemIdHistory?.containsKey("${bar.barId}|${product.productId}") == true &&
             items.none { it.productId == product.productId }
     }
+    // Existing unverified rows must also be offered for explicit ID confirmation.
+    // Otherwise entering the same name creates a second local product ID.
+    val activeLocalCandidates = products.filter { product ->
+        !product.catalogMatched && items.any { it.productId == product.productId }
+    }
     val candidates = (products.filter { it.catalogMatched } + htmlCatalog +
-        deletedLocalCandidates).distinctBy { it.productId }
+        deletedLocalCandidates + activeLocalCandidates).distinctBy { it.productId }
 
     val outsideFocus = LocalFocusManager.current
     val outsideKeyboard = LocalSoftwareKeyboardController.current
@@ -254,6 +259,8 @@ internal fun OwnerManualMenuScreen(
             val name = itemName.trim()
             val old = items.firstOrNull { it.barMenuItemId == editId }
             val persisted = products.firstOrNull { it.productId == old?.productId }
+            val linked = if (old != null) persisted
+                else candidates.firstOrNull { it.productId == linkedId }
             val savedName = old?.displayNameOverride ?: persisted?.displayName
             val confirmedExistingName = old == null && candidates.any {
                 it.productId == linkedId && it.displayName == name &&
@@ -263,10 +270,10 @@ internal fun OwnerManualMenuScreen(
                 (name.length <= 200 && (name == savedName || confirmedExistingName)))) {
                 "메뉴 이름을 확인해 주세요."
             }
-            val sameCategory = persisted?.let { manualMenuCategoryLabel(it.category) } == category
-            val sharedLocal = old != null && persisted?.catalogMatched == false &&
+            val sameCategory = linked?.let { manualMenuCategoryLabel(it.category) } == category
+            val sharedLocal = linked?.catalogMatched == false &&
                 snapshot?.menuItems.orEmpty().any {
-                    it.barId != bar.barId && it.productId == persisted.productId
+                    it.barId != bar.barId && it.productId == linked.productId
                 }
             require(!sharedLocal || (sameCategory &&
                 alcoholKind.trim().takeIf { category == "기타 주류" && it.isNotEmpty() } ==
@@ -274,8 +281,7 @@ internal fun OwnerManualMenuScreen(
                 "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
             }
             // Check the immutable catalog subtype for both new links and edits.
-            val linkedCatalog = if (old != null) persisted?.takeIf { it.catalogMatched }
-                else candidates.firstOrNull { it.productId == linkedId && it.catalogMatched }
+            val linkedCatalog = linked?.takeIf { it.catalogMatched }
             if (linkedCatalog != null && category == "기타 주류") {
                 require(alcoholKind.trim().takeIf { it.isNotBlank() } ==
                     linkedCatalog.otherAlcoholKind?.trim()?.takeIf { it.isNotBlank() }) {
@@ -328,8 +334,20 @@ internal fun OwnerManualMenuScreen(
                     "제품 종류를 변경하려면 새 메뉴를 추가해 주세요."
                 }
             }
-            val linked = if (old != null) persisted
-                else candidates.firstOrNull { it.productId == linkedId }
+            // Distinguish an explicit "아니에요" from an accidental second row.
+            // Never infer or assign a canonical ID solely from matching text.
+            if (old == null && linked == null) {
+                val existingLocal = products.firstOrNull { product ->
+                    !product.catalogMatched && product.productId != rejectedId &&
+                        manualMenuCategoryLabel(product.category) == category &&
+                        product.displayName.replace(" ", "").equals(
+                            name.replace(" ", ""), ignoreCase = true) &&
+                        existingBarProductMenu(items, bar.barId, product.productId) != null
+                }
+                require(existingLocal == null) {
+                    "이미 등록한 상품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요."
+                }
+            }
             val p = when {
                 linked != null && !linked.catalogMatched -> if (sharedLocal) linked else linked.copy(
                     displayName = name, category = effectiveCategoryCode,
@@ -364,7 +382,7 @@ internal fun OwnerManualMenuScreen(
                     displayNameOverride = if ((p.catalogMatched || sharedLocal) &&
                         name != p.displayName) name else null),
                 if (products.none { it.productId == p.productId } ||
-                    (persisted != null && !persisted.catalogMatched && !sharedLocal)) p else null,
+                    (linked != null && !linked.catalogMatched && !sharedLocal)) p else null,
                 brand
             )
             screen = "list"; selectedId = null; editId = null; error = null
