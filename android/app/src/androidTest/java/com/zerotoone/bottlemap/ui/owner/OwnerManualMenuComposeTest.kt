@@ -665,4 +665,89 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun deletedUnverifiedLocalProductCanBeExplicitlyReaddedWithOriginalMenuId() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val product = MockCatalogProduct("local-unverified-readd", "local-brand-readd",
+            "동네 수제 위스키 17년", category = "whisky", catalogMatched = false)
+        r.saveManualMenuItem(MockBarMenuItem("stable-readd-row", "fixture-bar",
+            product.productId, listOf(MockMenuOption("old-opt", pourMl = 30, priceKrw = 13000))),
+            product, MockBrand(product.brandId, "기타 브랜드"))
+        r.deleteMenuItem("stable-readd-row")
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextInput("동네 수제 위스키 17년")
+        compose.onNodeWithText("“동네 수제 위스키 17년”이 맞나요?").assertExists()
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithTag("manual-menu-ml-0").performTextInput("45")
+        compose.onNodeWithTag("manual-menu-price-0").performTextInput("15000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snap.products.size)
+            assertEquals(1, snap.brands.size)
+            assertEquals("local-unverified-readd", snap.menuItems.single().productId)
+            assertEquals("stable-readd-row", snap.menuItems.single().barMenuItemId)
+        }
+    }
+
+    @Test fun editingSharedLocalMenuNameDoesNotChangeAnotherBarsCatalogProduct() {
+        val fixture = OwnerMockFixtures.registeredBar()
+        val r = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(fixture.copy(
+            bars = fixture.bars + MockBar("other-bar", "다른 바", "서울"))))
+        val product = MockCatalogProduct("local-unverified-both", "local-shared-brand",
+            "우리 위스키 18년", category = "whisky", catalogMatched = false)
+        r.saveManualMenuItem(MockBarMenuItem("shared-own", "fixture-bar", product.productId,
+            listOf(MockMenuOption("our-opt", pourMl = 30, priceKrw = 14000))),
+            product, MockBrand(product.brandId, "기타 브랜드"))
+        r.saveManualMenuItem(MockBarMenuItem("shared-other", "other-bar", product.productId,
+            listOf(MockMenuOption("other-opt", pourMl = 30, priceKrw = 16000))))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-shared-own").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextReplacement("우리 바 위스키 18년")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals("우리 위스키 18년", snap.products.single().displayName)
+            assertEquals("우리 바 위스키 18년",
+                snap.menuItems.single { it.barId == "fixture-bar" }.displayNameOverride)
+            assertEquals(null,
+                snap.menuItems.single { it.barId == "other-bar" }.displayNameOverride)
+            assertEquals(16000, r.preview("other-bar", 0L)!!.visibleMenu.single()
+                .options.single().priceKrw)
+        }
+    }
+
+    @Test fun addingTwoUnverifiedWhiskiesReusesOneFallbackBrand() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        for ((name, price) in listOf("작은 수제 위스키 21년" to "13000",
+                                   "또 다른 수제 위스키 22년" to "15000")) {
+            compose.onNodeWithTag("manual-menu-add").performClick()
+            compose.onNodeWithTag("manual-menu-name").performTextReplacement(name)
+            compose.onNodeWithTag("manual-menu-ml-0").performTextInput("30")
+            compose.onNodeWithTag("manual-menu-price-0").performTextInput(price)
+            compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        }
+        compose.runOnIdle {
+            val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(2, snap.menuItems.size)
+            assertEquals(2, snap.products.size)
+            assertEquals(1, snap.brands.size)
+            assertEquals("기타 브랜드", snap.brands.single().name)
+            assertEquals(1, snap.products.map { it.brandId }.distinct().size)
+        }
+    }
+
 }
