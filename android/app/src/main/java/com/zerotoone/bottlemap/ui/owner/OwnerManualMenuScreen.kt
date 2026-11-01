@@ -193,6 +193,21 @@ internal fun OwnerManualMenuScreen(
         }
     }
     BackHandler(screen != "list") { back() }
+    if (calendarTarget != null && screen == "promo") {
+        val current = decodedOptions(optionText).getOrNull(saleOption)
+        val isStart = calendarTarget == "start"
+        ManualDatePicker(
+            if (isStart) current?.start.orEmpty() else current?.end.orEmpty(),
+            onDismiss = { calendarTarget = null },
+            onPick = { picked ->
+                changeOption(saleOption) {
+                    if (isStart) it.copy(start = picked) else it.copy(end = picked)
+                }
+                calendarTarget = null
+            }
+        )
+    }
+
 
     fun save() {
         if (bar == null) return
@@ -588,15 +603,40 @@ internal fun OwnerManualMenuScreen(
                         ::save, modifier = Modifier.testTag("manual-menu-save"))
                 }
                 screen == "promo" -> {
-                    Text("할인 설정", color = V4Color.text, fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold)
-                    Text("할인 기간과 가격을 설정해 주세요.", color = V4Color.sub)
-                    if (category == "위스키") draftOptions.forEachIndexed { i, d ->
-                        Row(Modifier.fillMaxWidth().clickable { saleOption = i }
-                            .padding(8.dp)) {
-                            Text(if (saleOption == i) "◉ " else "○ ", color = V4Color.primary)
-                            Text((if (d.bottle) "Bottle" else d.ml + "ml") +
-                                " · " + d.price + "원", color = V4Color.text)
+                    Text("할인 설정", color = V4Color.text, fontFamily = FontFamily.Serif,
+                        fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Text("할인 기간과 가격을 설정해 주세요.", color = V4Color.sub,
+                        fontSize = 12.sp)
+                    if (category == "위스키") {
+                        Text("적용 용량", color = V4Color.text, fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold)
+                        Box(Modifier.fillMaxWidth()) {
+                            Row(Modifier.fillMaxWidth().height(43.dp)
+                                .background(V4Color.elevated, RoundedCornerShape(9.dp))
+                                .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
+                                .manualTap { promoOptionExpanded = true }
+                                .padding(horizontal = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically) {
+                                val selected = draftOptions.getOrNull(saleOption)
+                                Text(selected?.let {
+                                    (if (it.bottle) "Bottle" else it.ml + "ml") +
+                                        " · " + it.price + "원"
+                                }.orEmpty(), modifier = Modifier.weight(1f),
+                                    color = V4Color.text, fontSize = 14.sp)
+                                Text("⌄", color = V4Color.text)
+                            }
+                            DropdownMenu(expanded = promoOptionExpanded,
+                                onDismissRequest = { promoOptionExpanded = false },
+                                modifier = Modifier.background(V4Color.elevated)) {
+                                draftOptions.forEachIndexed { i, d ->
+                                    Text((if (d.bottle) "Bottle" else d.ml + "ml") +
+                                        " · " + d.price + "원",
+                                        modifier = Modifier.fillMaxWidth()
+                                            .manualTap { saleOption = i; promoOptionExpanded = false }
+                                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                                        color = V4Color.text, fontSize = 13.sp)
+                                }
+                            }
                         }
                     }
                     val d = draftOptions.getOrNull(saleOption)
@@ -604,12 +644,9 @@ internal fun OwnerManualMenuScreen(
                         V4FormField("할인 가격 (원)", d.sale, { v ->
                             changeOption(saleOption) { it.copy(sale = v.filter(Char::isDigit)) }
                         }, keyboardType = KeyboardType.Number)
-                        V4FormField("시작일", d.start, { v ->
-                            changeOption(saleOption) { it.copy(start = v) }
-                        }, placeholder = "YYYY-MM-DD")
-                        V4FormField("종료일", d.end, { v ->
-                            changeOption(saleOption) { it.copy(end = v) }
-                        }, placeholder = "YYYY-MM-DD")
+                        ManualDateField("시작일", d.start) { calendarTarget = "start" }
+                        ManualDateField("종료일", d.end) { calendarTarget = "end" }
+                        HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                         error?.let { Text(it, color = Color(0xFFFFB4AB)) }
                         ManualButton("할인 적용", {
                             try {
@@ -632,6 +669,83 @@ internal fun OwnerManualMenuScreen(
 }
 
 @Composable
+private fun ManualSmallButton(label: String, onClick: () -> Unit) {
+    Box(Modifier.border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
+        .background(V4Color.elevated, RoundedCornerShape(7.dp))
+        .manualTap(onClick).padding(horizontal = 10.dp, vertical = 7.dp)) {
+        Text(label, color = V4Color.text, fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun ManualTopButton(label: String, danger: Boolean, onClick: () -> Unit) {
+    Box(Modifier.height(31.dp)
+        .background(if (danger) Color(0xFF693630) else V4Color.elevated,
+            RoundedCornerShape(7.dp))
+        .border(1.dp, if (danger) Color(0xFF7B453E) else V4Color.line,
+            RoundedCornerShape(7.dp))
+        .manualTap(onClick).padding(horizontal = 11.dp),
+        contentAlignment = Alignment.Center) {
+        Text(label, color = if (danger) Color(0xFFFFE8E5) else V4Color.text,
+            fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun ManualDateField(label: String, isoDate: String, onClick: () -> Unit) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        Text(label, color = V4Color.text, fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold)
+        Row(Modifier.fillMaxWidth().height(43.dp)
+            .background(V4Color.elevated, RoundedCornerShape(9.dp))
+            .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
+            .manualTap(onClick).padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            val display = runCatching {
+                LocalDate.parse(isoDate).format(
+                    java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+            }.getOrDefault("날짜 선택")
+            Text(display, modifier = Modifier.weight(1f), color = V4Color.text,
+                fontSize = 13.sp)
+            Canvas(Modifier.size(17.dp)) {
+                drawRoundRect(V4Color.text, topLeft = Offset(2.dp.toPx(), 3.dp.toPx()),
+                    size = Size(13.dp.toPx(), 12.dp.toPx()),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(1.dp.toPx()),
+                    style = Stroke(1.5.dp.toPx()))
+                drawLine(V4Color.text, Offset(2.dp.toPx(), 7.dp.toPx()),
+                    Offset(15.dp.toPx(), 7.dp.toPx()), strokeWidth = 1.5.dp.toPx())
+                drawLine(V4Color.text, Offset(6.dp.toPx(), 1.dp.toPx()),
+                    Offset(6.dp.toPx(), 5.dp.toPx()), strokeWidth = 1.5.dp.toPx())
+                drawLine(V4Color.text, Offset(11.dp.toPx(), 1.dp.toPx()),
+                    Offset(11.dp.toPx(), 5.dp.toPx()), strokeWidth = 1.5.dp.toPx())
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ManualDatePicker(
+    initialIso: String, onDismiss: () -> Unit, onPick: (String) -> Unit
+) {
+    val initial = runCatching { LocalDate.parse(initialIso) }.getOrNull()
+        ?: LocalDate.now(ownerManualZone)
+    val state = rememberDatePickerState(initialSelectedDateMillis =
+        initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+    DatePickerDialog(onDismissRequest = onDismiss,
+        confirmButton = { TextButton(onClick = {
+            state.selectedDateMillis?.let { epoch ->
+                onPick(Instant.ofEpochMilli(epoch)
+                    .atZone(ZoneOffset.UTC).toLocalDate().toString())
+            }
+        }) { Text("선택") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("취소") } }) {
+        DatePicker(state = state)
+    }
+}
+
+@Composable
 private fun ManualButton(
     label: String, onClick: () -> Unit, modifier: Modifier = Modifier,
     secondary: Boolean = false
@@ -639,7 +753,7 @@ private fun ManualButton(
     Box(modifier.fillMaxWidth().background(
         if (secondary) V4Color.elevated else V4Color.primary, RoundedCornerShape(9.dp))
         .border(1.dp, if (secondary) V4Color.line else V4Color.primary,
-            RoundedCornerShape(9.dp)).clickable(onClick = onClick).padding(12.dp),
+            RoundedCornerShape(9.dp)).manualTap(onClick).padding(12.dp),
         contentAlignment = Alignment.Center) {
         Text(label, color = if (secondary) V4Color.text else V4Color.background,
             fontSize = 13.sp, fontWeight = FontWeight.Bold)
