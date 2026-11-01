@@ -53,6 +53,20 @@ internal fun toggleBarTag(current: List<String>, candidate: String): List<String
     return current + value
 }
 
+/**
+ * Keep a weekday's draft times when the holiday checkbox is switched on or off.
+ * An unset weekday temporarily checked as closed returns to unset on uncheck.
+ */
+internal fun toggleWeeklyDayClosed(
+    setting: MockWeeklyHours?, day: Int, checked: Boolean,
+): MockWeeklyHours? {
+    if (checked) return (setting ?: MockWeeklyHours(day, true)).copy(closed = true)
+    if (setting == null) return null
+    val hasDraftTimes = setting.openMinutes != null ||
+        setting.closeMinutes != null || setting.closesNextDay
+    return if (hasDraftTimes) setting.copy(closed = false) else null
+}
+
 /** Null = no regular schedule, closed = weekly holiday, otherwise 5-minute hours. */
 internal fun validWeeklyHourDraft(day: MockWeeklyHours): Boolean {
     if (day.isoDayOfWeek !in 1..7) return false
