@@ -151,6 +151,28 @@ class OwnerBarEditorComposeTest {
             .assertIsDisplayed()
     }
 
+    @Test fun customerPreviewMapPhonePanelsAndManageReturnFollowHtmlV4() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        val current = vm.preview("fixture-bar", 0)!!.bar
+        vm.saveBar(current.copy(address = "서울시 관악구 관악로 20",
+            phone = "02-1234-5678"))
+        var manageCount = 0
+        compose.setContent {
+            MaterialTheme {
+                OwnerPreviewHtmlV4Screen(
+                    vm.state.collectAsState().value, vm, onBack = {},
+                    onManage = { manageCount++ })
+            }
+        }
+        compose.onNodeWithText("지도").performScrollTo().performClick()
+        compose.onNodeWithText("서울시 관악구 관악로 20").assertIsDisplayed()
+        compose.onNodeWithText("전화").performClick()
+        compose.onNodeWithText("02-1234-5678").assertIsDisplayed()
+        compose.onNodeWithTag("owner-preview-manage").performClick()
+        compose.runOnIdle { assertEquals(1, manageCount) }
+    }
+
     @Test fun photoEditorUsesImmediateActionsAndDoneButton() {
         val vm = OwnerMockViewModel(
             LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
