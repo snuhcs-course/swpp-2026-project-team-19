@@ -6,21 +6,21 @@
 - Android only. Shared `OwnerMockRepository` and `MockBar` persist state. No production Backend API fields, endpoints, or permission rules changed.
 - Home header: selected bar name, small **미리보기** action (home only).
 - Equal-height management information / operating status tiles with BottleMap icons, text hierarchy, active/coming temporary schedule labels, multi-line vacation range, and schedule cancellation.
-- Menu quick card: published count, distinct publish and owner-confirmation dates, 45-day age gauge from latest publication or owner confirmation, persistent **지금도 맞아요** action.
+- Menu quick card: published count, distinct publish and owner-confirmation dates, **30-day age gauge** from the latest publication or owner confirmation, persistent **지금도 맞아요** action. The gauge fills left to right: day 0 = empty (0%), day 15 = half (50%), day 30 or later = full (100%).
 - Existing import state is read from the selected bar's `MockMenuImport`: `PROCESSING` (disable new upload), `READY_FOR_REVIEW` (resume review entry), `FAILED` (inspect/retry destination), `APPLIED` (published). The job action opens existing skeleton routes, which **remain placeholders**, not implemented AI pipelines.
 - Status screen provides today closed, changed opening/closing time (including next-day closing), and temporary vacation date range with calendar selection, optional customer note, and explicit apply. Cancelling an exception removes that ID from the shared repository.
 - All screen state comes from ViewModel StateFlow, surviving Activity restart and reopening from existing persisted Mock state. The form's unsubmitted picker choices use rememberSaveable.
 
 ## Data and invariants
 
-- `lastMenuPublishedAtEpochMs` is a **local Mock domain field** updated only by `publishAddOnly()` when a pending import becomes `APPLIED`. It is distinct from `lastVerifiedAtEpochMs`, which is updated only when the owner taps `지금도 맞아요`. Neither should overwrite the other.
+- `lastMenuPublishedAtEpochMs` is a **local Mock domain field** updated only by `publishAddOnly()` when a pending import becomes `APPLIED`. It is distinct from `lastVerifiedAtEpochMs`, which is updated only when the owner taps `지금도 맞아요`. Neither should overwrite the other. The 30-day age gauge uses the more recent of the two dates, counts elapsed calendar days in Asia/Seoul, and clamps at 100% from day 30 onward. It displays age, **not freshness**; confirmation resets the gauge to empty.
 - `MockOperatingException` already represented today closed, custom hours and vacation. The optional `closesNextDay` field supports quick overnight exceptions. Overlapping quick exceptions are replaced by the new applied exception; unrelated future exceptions are kept.
 - Date logic is explicitly Asia/Seoul, including midnight and overnight edges. No server authority is inferred from this local mock.
 - Preview entry is present only on the management home header. Manager info/menu detail/edit remain next-iteration placeholders.
 
 ## Automated validation
 
-- JUnit tests: quick menu verification persistence, publish vs verified independence, today/custom/vacation exception apply/cancel/reload, KST business state, overnight boundary, freshness, active import precedence and four statuses.
+- JUnit tests: quick menu verification persistence, publish vs verified independence, today/custom/vacation exception apply/cancel/reload, KST business state, overnight boundary, **30-day increasing age gauge** (0/15/30/45-day boundaries), active import precedence and four statuses.
 - GitHub Actions: Android Debug APK, unit tests and lint; AI CI (results to be recorded in PR).
 - No local Android emulator or USB device verification is claimed by the automation.
 
@@ -36,7 +36,9 @@ The user reported the following **seven feature-level scenarios PASS** on the ma
 - [x] System Back, small portrait and large fonts do not overlap the tested components.
 - [x] Customer search, map and Google sign-in have no observed regressions.
 
-**UI acceptance remains open:** precise text positions, text sizes, horizontal/vertical spacing and latest-info gauge need refinement. At the time of this QA the gauge was inverted: `ownerMenuFreshness()` returns 0% immediately after confirmation and 100% at 45 days old. It should represent freshness (100% just confirmed, decreasing toward 0% over 45 days) with a left-to-right progress fill. This code fix and subsequent device recheck are **not completed**. Do not conflate 7/7 functionality PASS with pixel-perfect visual approval.
+**Historical QA note (2026-10-31, superseded):** This device session recorded a 45-day freshness interpretation (100% immediately after confirmation, decreasing to 0% at 45 days). That earlier interpretation is **not** the current requirement.
+
+**Current approved gauge specification (subsequent user acceptance):** `ownerMenuFreshness()` is a **30-day age gauge**, filling **left to right**: just confirmed = **0%/empty**; 15 days elapsed = **50%**; 30 days elapsed or more = **100%/full**. The most recent of menu publication and `지금도 맞아요` confirmation determines age. Keep publication and confirmation timestamps distinct. This is the approved behavior already implemented and tested in `OwnerManagementHomeState.kt` and `OwnerManagementHomeStateTest.kt`. Exact text positions, sizing, spacing and pixel-level Galaxy S23 comparison to ACTION_FIRST v4 are **still unverified for this revision**. Do not conflate earlier 7/7 functionality PASS with visual acceptance.
 
 ### Standard device install sequence (repo root, Windows PowerShell)
 
@@ -56,8 +58,8 @@ Use a plain-text/Markdown block with the checks for **that revision**; the teste
 ```text
 [Owner manager-home device QA — revision SHA: __________]
 Device: Galaxy S23 / small portrait or font scale: __________
-[ ] Freshly confirmed menu fills from left to right and shows full latest-info gauge.
-[ ] Older menu confirmation produces a smaller filled area, not larger.
+[ ] Just confirmed menu shows an empty (0%) 30-day age gauge, with no reverse fill.
+[ ] Age gauge grows from left to right: 15 days = 50%, 30 days or older = full (100%).
 [ ] Text positions/sizes match ACTION_FIRST v4 layout.
 [ ] Cards, 3-line vacation date and cancel button preserve spacing and alignment.
 [ ] Screen exit/reentry and process restart retain confirmed/menu dates.
