@@ -248,11 +248,15 @@ internal fun OwnerManualMenuScreen(
                 (name.length <= 80 || (name == savedName && name.length <= 200))) {
                 "메뉴 이름을 확인해 주세요."
             }
-            if (category == "기타 주류") require(alcoholKind.trim().isNotEmpty()) {
-                "주류 종류를 입력해 주세요."
+            val sameCategory = persisted?.let { manualMenuCategoryLabel(it.category) } == category
+            if (category == "기타 주류" && alcoholKind.isBlank()) {
+                // Existing catalog/photo entries may have no Mock-only subtype.
+                // Do not require one unless the owner is adding or changing the type.
+                require(old != null && sameCategory && persisted?.otherAlcoholKind.isNullOrBlank()) {
+                    "주류 종류를 입력해 주세요."
+                }
             }
             val whisky = category == "위스키"
-            val sameCategory = persisted?.let { manualMenuCategoryLabel(it.category) } == category
             val effectiveCategoryCode = if (category in MANUAL_MENU_CATEGORIES)
                 manualMenuCategoryCode(category) else {
                 require(sameCategory && persisted != null) { "지원하지 않는 종류로 변경할 수 없어요." }
