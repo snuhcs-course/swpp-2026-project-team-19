@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -170,6 +171,25 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithText("16년").assertDoesNotExist()
         compose.onNodeWithText("판매 중").assertDoesNotExist()
         compose.onNodeWithText("품절").assertDoesNotExist()
+    }
+
+    @Test fun regularAndDiscountPriceInputRejectNinthDigitAndUseVacationCalendar() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithTag("manual-menu-price-0").performTextInput("123456789")
+        compose.onNodeWithTag("manual-menu-price-0").assertTextEquals("12345678")
+        compose.onNodeWithText("할인").performClick()
+        compose.onNodeWithTag("manual-menu-discount-price").performTextInput("999999999")
+        compose.onNodeWithTag("manual-menu-discount-price").assertTextEquals("99999999")
+        compose.onNodeWithTag("manual-menu-start-date").performScrollTo().performClick()
+        compose.onNodeWithText("시작 선택").assertExists()
+        compose.onNodeWithText("종료 선택").assertExists()
     }
 
     @Test fun soldOutConfirmationRemovesCustomerOnlyAndKeepsOwnerMenu() {
