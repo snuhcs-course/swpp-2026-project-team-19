@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
@@ -43,10 +45,15 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.zerotoone.bottlemap.data.owner.MockExceptionKind
@@ -66,6 +73,7 @@ fun OwnerPreviewHtmlV4Screen(
     state: MockOwnerLoadState,
     viewModel: OwnerMockViewModel,
     onBack: () -> Unit,
+    onManage: () -> Unit = onBack,
 ) {
     val bar = ownerInfoBar(state)?.second
     var photoIndex by rememberSaveable(bar?.barId) { mutableIntStateOf(0) }
@@ -134,8 +142,19 @@ fun OwnerPreviewHtmlV4Screen(
                     else -> Text("관리할 매장이 없어요.")
                 }
             } else {
-                Text(bar.name, color = V4Color.text, fontSize = 22.sp,
-                    fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(bar.name, color = V4Color.text, fontSize = 22.sp,
+                        fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f))
+                    Box(Modifier.background(V4Color.background, RoundedCornerShape(8.dp))
+                        .border(1.dp, V4Color.line, RoundedCornerShape(8.dp))
+                        .clickable(onClick = onManage)
+                        .padding(horizontal = 10.dp, vertical = 9.dp)
+                        .testTag("owner-preview-manage"), contentAlignment = Alignment.Center) {
+                        Text("← 관리", fontSize = 11.sp, color = V4Color.sub)
+                    }
+                }
                 Box(
                     Modifier.fillMaxWidth().height(185.dp)
                         .clip(RoundedCornerShape(11.dp))
@@ -217,17 +236,27 @@ fun OwnerPreviewHtmlV4Screen(
                             Text(it, color = V4Color.sub, fontSize = 11.sp,
                                 maxLines = 1)
                         }
-                        Text(if (expanded == "hours") "⌃" else "⌄",
-                            fontSize = 20.sp, color = V4Color.primary,
-                            modifier = Modifier.clickable {
-                                expanded = if (expanded == "hours") "" else "hours"
-                            }.semantics { contentDescription = "전체 영업시간 보기" }
-                                .testTag("owner-preview-hours-toggle"))
+                        Canvas(Modifier.size(22.dp)
+                            .clickable { expanded = if (expanded == "hours") "" else "hours" }
+                            .semantics { contentDescription = "전체 영업시간 보기" }
+                            .testTag("owner-preview-hours-toggle")) {
+                            val leftY = if (expanded == "hours") 0.65f else 0.35f
+                            val centerY = if (expanded == "hours") 0.35f else 0.65f
+                            val stroke = 2.dp.toPx()
+                            drawLine(V4Color.primary,
+                                Offset(size.width * .18f, size.height * leftY),
+                                Offset(size.width * .50f, size.height * centerY),
+                                strokeWidth = stroke, cap = StrokeCap.Round)
+                            drawLine(V4Color.primary,
+                                Offset(size.width * .50f, size.height * centerY),
+                                Offset(size.width * .82f, size.height * leftY),
+                                strokeWidth = stroke, cap = StrokeCap.Round)
+                        }
                     }
-                    V4PreviewSmallButton("⌖ 지도") {
+                    V4PreviewSmallButton("지도", "location") {
                         expanded = if (expanded == "address") "" else "address"
                     }
-                    V4PreviewSmallButton("☎ 전화") {
+                    V4PreviewSmallButton("전화", "phone") {
                         expanded = if (expanded == "phone") "" else "phone"
                     }
                 }
@@ -269,24 +298,52 @@ fun OwnerPreviewHtmlV4Screen(
                         }
                     }
                     "address" -> {
-                        Text("위치 미리보기는 지도 연동 계약 확정 후 제공됩니다.",
-                            style = MaterialTheme.typography.bodySmall)
-                        Row(Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(bar.address, modifier = Modifier.weight(1f))
-                            TextButton(onClick = {
-                                clipboard.setText(AnnotatedString(bar.address))
-                            }) { Text("복사") }
+                        Column(Modifier.fillMaxWidth().background(V4Color.surface,
+                            RoundedCornerShape(9.dp)).padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Box(Modifier.fillMaxWidth().height(190.dp)
+                                .clip(RoundedCornerShape(9.dp))
+                                .background(Color(0xFF7D7060)), contentAlignment = Alignment.Center) {
+                                Canvas(Modifier.fillMaxSize()) {
+                                    drawLine(Color(0xFFD8D0C6),
+                                        Offset(size.width * -.1f, size.height * 1.18f),
+                                        Offset(size.width * 1.1f, size.height * -.1f),
+                                        strokeWidth = 34.dp.toPx())
+                                    drawLine(Color(0xFFD8D0C6),
+                                        Offset(size.width * .45f, size.height * -.2f),
+                                        Offset(size.width * .28f, size.height * 1.2f),
+                                        strokeWidth = 24.dp.toPx())
+                                }
+                                Box(Modifier.background(V4Color.background, RoundedCornerShape(50))
+                                    .border(2.dp, V4Color.primary, RoundedCornerShape(50))
+                                    .padding(horizontal = 11.dp, vertical = 6.dp)) {
+                                    Text(bar.name, color = V4Color.text, fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium)
+                                }
+                            }
+                            Row(Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(9.dp),
+                                verticalAlignment = Alignment.CenterVertically) {
+                                V4PreviewGlyph("location", Modifier.size(17.dp))
+                                Text(bar.address, color = V4Color.text, fontSize = 12.sp,
+                                    modifier = Modifier.weight(1f))
+                                V4PreviewCopy("복사", { clipboard.setText(AnnotatedString(bar.address)) })
+                            }
                         }
                     }
                     "phone" -> {
-                        Row(Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween) {
+                        Row(Modifier.fillMaxWidth()
+                            .background(V4Color.surface, RoundedCornerShape(9.dp))
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(9.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            V4PreviewGlyph("phone", Modifier.size(17.dp))
                             Text(bar.phone ?: "전화번호 정보 없음",
+                                color = V4Color.text, fontSize = 12.sp,
                                 modifier = Modifier.weight(1f))
-                            TextButton(onClick = {
+                            V4PreviewCopy("복사", {
                                 clipboard.setText(AnnotatedString(bar.phone.orEmpty()))
-                            }, enabled = !bar.phone.isNullOrBlank()) { Text("복사") }
+                            }, enabled = !bar.phone.isNullOrBlank())
                         }
                     }
                 }
@@ -305,12 +362,63 @@ fun OwnerPreviewHtmlV4Screen(
 
 
 @Composable
-private fun V4PreviewSmallButton(label: String, onClick: ()->Unit) {
-    Box(Modifier.background(V4Color.surface, RoundedCornerShape(7.dp))
+private fun V4PreviewSmallButton(label: String, kind: String, onClick: () -> Unit) {
+    Row(Modifier.background(V4Color.surface, RoundedCornerShape(7.dp))
         .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
         .clickable(onClick = onClick)
         .padding(horizontal = 7.dp, vertical = 7.dp),
-        contentAlignment = Alignment.Center) {
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        V4PreviewGlyph(kind, Modifier.size(15.dp))
         Text(label, fontSize = 11.sp, color = V4Color.text, maxLines = 1)
+    }
+}
+
+@Composable
+private fun V4PreviewCopy(label: String, onClick: () -> Unit, enabled: Boolean = true) {
+    Box(Modifier.background(V4Color.elevated, RoundedCornerShape(7.dp))
+        .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
+        .clickable(enabled = enabled, onClick = onClick)
+        .padding(horizontal = 10.dp, vertical = 7.dp)) {
+        Text(label, fontSize = 11.sp,
+            color = if (enabled) V4Color.primary else V4Color.sub)
+    }
+}
+
+/** Matching line-art glyphs for HTML-v4. The supplied brand-logo ZIP has no map/phone icons. */
+@Composable
+private fun V4PreviewGlyph(kind: String, modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val u = size.minDimension / 24f
+        val path = Path()
+        if (kind == "location") {
+            path.moveTo(12*u, 22*u)
+            path.cubicTo(9*u, 18*u, 4*u, 13*u, 4*u, 9*u)
+            path.cubicTo(4*u, 4*u, 7*u, 2*u, 12*u, 2*u)
+            path.cubicTo(17*u, 2*u, 20*u, 4*u, 20*u, 9*u)
+            path.cubicTo(20*u, 13*u, 15*u, 18*u, 12*u, 22*u)
+            drawPath(path, V4Color.sub, style = Stroke(
+                width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+            drawCircle(V4Color.sub, radius = 2.5*u, center = Offset(12*u, 9*u),
+                style = Stroke(width = 1.8.dp.toPx()))
+        } else {
+            path.moveTo(5*u, 2.5f*u)
+            path.cubicTo(3*u, 2*u, 2*u, 3*u, 2.5f*u, 6*u)
+            path.cubicTo(4.5f*u, 14*u, 10*u, 19.5f*u, 18*u, 21.5f*u)
+            path.cubicTo(21*u, 22*u, 22*u, 21*u, 22*u, 19*u)
+            path.lineTo(22*u, 17*u)
+            path.cubicTo(22*u, 16*u, 21.5f*u, 15.5f*u, 20*u, 15*u)
+            path.lineTo(17.5f*u, 14.3f*u)
+            path.cubicTo(16.8f*u, 14*u, 16*u, 14.2f*u, 15.5f*u, 14.8f*u)
+            path.lineTo(14*u, 16.2f*u)
+            path.cubicTo(11*u, 15*u, 9*u, 13*u, 7.8f*u, 10*u)
+            path.lineTo(9.2f*u, 8.5f*u)
+            path.cubicTo(9.8f*u, 8*u, 10*u, 7.2f*u, 9.7f*u, 6.5f*u)
+            path.lineTo(9*u, 4*u)
+            path.cubicTo(8.6f*u, 2.8f*u, 8*u, 2.5f*u, 7*u, 2.5f*u)
+            path.close()
+            drawPath(path, V4Color.sub, style = Stroke(
+                width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+        }
     }
 }
