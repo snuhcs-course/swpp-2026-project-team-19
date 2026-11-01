@@ -3,6 +3,10 @@ package com.zerotoone.bottlemap.ui.owner
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Arrangement
@@ -86,8 +90,15 @@ internal fun V4FormField(
 
 @Composable
 internal fun V4CompactCheck(label: String, checked: Boolean, onChange: (Boolean)->Unit) {
+    val focus = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    val interaction = remember { MutableInteractionSource() }
     Row(verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { onChange(!checked) },
+        modifier = Modifier.clickable(interactionSource = interaction, indication = null) {
+            focus.clearFocus()
+            keyboard?.hide()
+            onChange(!checked)
+        },
         horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Box(Modifier.size(15.dp).background(if (checked) V4Color.primary else
             V4Color.elevated, RoundedCornerShape(4.dp))
@@ -125,8 +136,15 @@ internal fun V4Toolbar(title: String?, onBack: () -> Unit) {
         .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.size(40.dp).clickable(onClick = onBack)
-            .semantics { contentDescription = "뒤로가기" },
+        val focus = LocalFocusManager.current
+        val keyboard = LocalSoftwareKeyboardController.current
+        val backInteraction = remember { MutableInteractionSource() }
+        Box(Modifier.size(40.dp).clickable(interactionSource = backInteraction,
+            indication = null) {
+                focus.clearFocus()
+                keyboard?.hide()
+                onBack()
+            }.semantics { contentDescription = "뒤로가기" },
             contentAlignment = Alignment.Center) {
             Text("←", color = V4Color.text, fontSize = 26.sp, lineHeight = 28.sp)
         }
