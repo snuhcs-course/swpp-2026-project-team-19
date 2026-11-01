@@ -745,7 +745,10 @@ private fun ManualDateField(label: String, isoDate: String, onClick: () -> Unit)
         Row(Modifier.fillMaxWidth().height(43.dp)
             .background(V4Color.elevated, RoundedCornerShape(9.dp))
             .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
-            .manualTap(onClick).padding(horizontal = 12.dp),
+            .manualTap(onClick)
+            .testTag(if (label == "시작일") "manual-menu-start-date"
+                else "manual-menu-end-date")
+            .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically) {
             val display = runCatching {
                 LocalDate.parse(isoDate).format(
