@@ -1,4 +1,5 @@
-"""Owner applications for operators (API spec, sections 3.11.6 to 3.11.8): list, approve, reject.
+"""Owner applications for operators (API spec, sections 3.11.6 to 3.11.8 and 3.11.13): list, approve,
+reject, and check the business registration with NTS again.
 
 Approving and rejecting lock the application row, like the applicant's cancel and photo upload, so
 only one of them changes a pending application. Approving an existing_bar application also locks the
@@ -6,6 +7,9 @@ bar row and checks for a current owner; the partial unique index on bar_owners b
 
 When the application has menu photos, approval creates the bar's first menu import from them in the
 same transaction (spec 3.11.7). The caller starts processing after the commit, as for an upload.
+
+The NTS recheck holds no lock while NTS answers; it locks the row only to store the answer, so a
+decision made meanwhile wins and the answer is dropped.
 """
 
 from datetime import datetime
@@ -17,6 +21,7 @@ from sqlalchemy import select, tuple_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.adapters.business_verification import BusinessVerificationUnavailable, BusinessVerifier
 from app.adapters.extraction import MenuExtractor
 from app.core.errors import ApiError, validation_failed
 from app.core.pagination import decode_cursor, encode_cursor
@@ -56,6 +61,14 @@ CURRENT_OWNER_INDEX = "uq_bar_owners_current_bar_id"
 
 def bar_owner_exists() -> ApiError:
     return ApiError(409, "BAR_OWNER_EXISTS", "이미 업주가 등록된 업장입니다.")
+
+
+def business_verification_unavailable() -> ApiError:
+    return ApiError(
+        503,
+        "BUSINESS_VERIFICATION_UNAVAILABLE",
+        "지금은 사업자등록 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    )
 
 
 def list_applications(
@@ -181,6 +194,40 @@ def reject_application(
     return application_responses(session, [application], links, show_verification=True)[0]
 
 
+def recheck_business(
+    session: Session, application_id: str, *, verifier: BusinessVerifier | None, now: datetime
+) -> BarOwnerApplication:
+    """Check a pending application's stored values with NTS again (spec 3.11.13) and store the answer;
+    the application's status stays. Not counted against the daily limit of 3.11.14. When NTS cannot
+    answer, or the server has no NTS key, the stored result and `checkedAt` stay as they were."""
+    application = _pending_application(session, application_id, lock=False)
+    if verifier is None:
+        raise business_verification_unavailable()
+    number, name, opened = (
+        application.business_registration_number,
+        application.representative_name,
+        application.opening_date,
+    )
+    # End the read transaction so the connection goes back to the pool while NTS answers (up to two
+    # 5 s tries). The row is locked and checked again afterwards: an approval, rejection or cancel
+    # made meanwhile answers 409 and the result is not stored.
+    session.commit()
+    try:
+        check = verifier.verify(number, name, opened)
+    except BusinessVerificationUnavailable:
+        raise business_verification_unavailable() from None
+    application = _pending_application(session, application_id)
+    if check.matched:
+        application.business_verification_result = BusinessVerificationResult.MATCHED
+        application.business_status = check.business_status
+    else:
+        application.business_verification_result = BusinessVerificationResult.NOT_MATCHED
+        application.business_status = None
+    application.business_checked_at = now
+    session.commit()
+    return application
+
+
 def _reviewer(session: Session, principal: Principal) -> User:
     """The operator's users row, recorded as the reviewer. Only a temporary-login operator can lack one."""
     reviewer = session.scalar(select(User).where(User.auth_subject == principal.subject))
@@ -189,9 +236,9 @@ def _reviewer(session: Session, principal: Principal) -> User:
     return reviewer
 
 
-def _pending_application(session: Session, application_id: str) -> BarOwnerApplication:
+def _pending_application(session: Session, application_id: str, *, lock: bool = True) -> BarOwnerApplication:
     try:
-        application = session.get(BarOwnerApplication, UUID(application_id), with_for_update=True)
+        application = session.get(BarOwnerApplication, UUID(application_id), with_for_update=lock)
     except ValueError:
         application = None
     if application is None:
