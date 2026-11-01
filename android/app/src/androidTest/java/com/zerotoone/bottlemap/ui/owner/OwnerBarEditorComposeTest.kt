@@ -189,11 +189,9 @@ class OwnerBarEditorComposeTest {
         }
         compose.onNodeWithText("오늘 휴무").performClick()
         compose.onNodeWithTag("owner-operating-note").performTextInput("가".repeat(115))
-        compose.runOnIdle {
-            val actual = compose.onNodeWithTag("owner-operating-note")
-                .fetchSemanticsNode().config[SemanticsProperties.EditableText].text
-            assertEquals("가".repeat(100), actual)
-        }
+        val actual = compose.onNodeWithTag("owner-operating-note")
+            .fetchSemanticsNode().config[SemanticsProperties.EditableText].text
+        assertEquals("가".repeat(100), actual)
         compose.onNodeWithText("100자", substring = true).assertDoesNotExist()
     }
 
