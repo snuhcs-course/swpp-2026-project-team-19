@@ -567,7 +567,9 @@ internal fun OwnerManualMenuScreen(
                     }
                     V4FormField("메뉴 이름", itemName, {
                         itemName = it.take(80)
-                        if (editId == null) { linkedId = null; rejectedId = null }
+                        // Keep an explicitly confirmed product link when its per-bar
+                        // display name is customized. Category changes still clear it.
+                        if (editId == null) rejectedId = null
                     }, placeholder = "예: 라가불린 10년", testTag = "manual-menu-name")
                     if (editId == null) {
                         val suggested = candidates.firstOrNull { p ->
