@@ -857,4 +857,45 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun failedStockAndResetWritesShowListErrorAndKeepPublishedMenu() {
+        val store = object : MockOwnerStateStore {
+            var saved = OwnerMockFixtures.registeredBar()
+            var rejectWrites = false
+            override fun read(): MockOwnerSnapshot? = saved
+            override fun write(snapshot: MockOwnerSnapshot) {
+                if (rejectWrites) throw IllegalStateException("테스트 저장 오류")
+                saved = snapshot
+            }
+        }
+        val repo = LocalOwnerMockRepository(store)
+        repo.saveBrand(MockBrand("failure-brand", "테스트 브랜드"))
+        repo.saveCatalogProduct(MockCatalogProduct("failure-product", "failure-brand",
+            "실패 검증 위스키", category = "whisky"))
+        repo.saveMenuItem(MockBarMenuItem("failure-row", "fixture-bar", "failure-product",
+            listOf(MockMenuOption("failure-option", pourMl = 30, priceKrw = 14000))))
+        val vm = OwnerMockViewModel(repo)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.runOnIdle { store.rejectWrites = true }
+        compose.onNodeWithTag("manual-menu-row-failure-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-stock").performClick()
+        compose.onNodeWithText("상태 변경").performClick()
+        compose.onNodeWithText("테스트 저장 오류").assertExists()
+        compose.runOnIdle {
+            assertEquals(false, store.saved.menuItems.single().soldOut)
+            assertEquals(false, (vm.state.value as MockOwnerLoadState.Ready)
+                .snapshot.menuItems.single().soldOut)
+        }
+        compose.onNodeWithTag("manual-menu-reset").performScrollTo().performClick()
+        compose.onNodeWithText("초기화", substring = false).performClick()
+        compose.onNodeWithText("테스트 저장 오류").assertExists()
+        compose.runOnIdle { assertEquals(1, store.saved.menuItems.size) }
+        compose.runOnIdle { store.rejectWrites = false }
+        compose.onNodeWithTag("manual-menu-reset").performScrollTo().performClick()
+        compose.onNodeWithText("초기화", substring = false).performClick()
+        compose.onNodeWithText("테스트 저장 오류").assertDoesNotExist()
+        compose.runOnIdle { assertEquals(0, store.saved.menuItems.size) }
+    }
+
 }
