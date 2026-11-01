@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.click
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -469,15 +470,17 @@ class OwnerManualMenuComposeTest {
         } }
         compose.onNodeWithTag("manual-menu-row-menu-other").performClick()
         compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextReplacement("수제 주류 수정")
         compose.onNodeWithTag("manual-menu-price-0").performScrollTo()
-            .performTextInput("1")
+            .performTextReplacement("19000")
         compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
         compose.runOnIdle {
             val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
             assertEquals(null, snap.products.single().otherAlcoholKind)
             assertEquals("otherAlcohol", snap.products.single().category)
             assertEquals("병", snap.menuItems.single().options.single().label)
-            assertEquals(original.priceKrw, snap.menuItems.single().options.single().priceKrw)
+            assertEquals(19000, snap.menuItems.single().options.single().priceKrw)
+            assertEquals("수제 주류 수정", snap.menuItems.single().displayNameOverride)
         }
     }
 
