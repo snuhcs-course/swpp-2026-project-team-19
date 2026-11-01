@@ -72,6 +72,7 @@ internal class OwnerMenuPhotoStore(context: Context) {
             "사진은 최대 15장까지 선택할 수 있어요."
         }
         val created = mutableListOf<File>()
+        var completed = false
         var total = existing.sumOf(::size)
         try {
             val additions = sources.map { uri ->
@@ -124,13 +125,15 @@ internal class OwnerMenuPhotoStore(context: Context) {
             require(validateMenuPhotoSizes((existing + additions).map(::size)) == null) {
                 validateMenuPhotoSizes((existing + additions).map(::size)).orEmpty()
             }
+            completed = true
             return existing + additions
         } catch (oom: OutOfMemoryError) {
             throw IllegalStateException("사진을 처리할 메모리가 부족해요. 사진을 줄여 다시 선택해 주세요.")
         } finally {
-            // After a successful copy all completed files are tracked in additions;
-            // only temporary/failed batches should be removed.
-            if (created.any { it.extension == "part" }) created.forEach(File::delete)
+            // A failed batch must never retain partial or successfully copied
+            // images from the same selection. Earlier selected photos survive.
+            if (!completed) created.forEach { it.delete() }
+            else created.filter { it.extension == "part" }.forEach { it.delete() }
         }
     }
 
