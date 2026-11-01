@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -47,7 +49,7 @@ class OwnerBarEditorComposeTest {
         compose.runOnIdle {
             assertEquals(initial, vm.preview("fixture-bar", 0)!!.bar.name)
         }
-        compose.onNodeWithTag("owner-info-save").performClick()
+        compose.onNodeWithTag("owner-info-save").performScrollTo().assertIsEnabled().performClick()
         compose.runOnIdle {
             assertEquals("바뀐 매장", vm.preview("fixture-bar", 0)!!.bar.name)
             assertEquals(1, exits)
@@ -91,7 +93,7 @@ class OwnerBarEditorComposeTest {
         compose.onNodeWithTag("owner-tag-search").performTextInput("혼술바")
         compose.runOnIdle { assertEquals(before, vm.preview("fixture-bar", 0)!!.bar.tags) }
         compose.onNodeWithText("혼술바 ＋").performClick()
-        compose.onNodeWithTag("owner-info-save").performClick()
+        compose.onNodeWithTag("owner-info-save").performScrollTo().assertIsEnabled().performClick()
         compose.runOnIdle {
             assertEquals(true, vm.preview("fixture-bar", 0)!!.bar.tags.contains("혼술바"))
         }
