@@ -24,6 +24,8 @@ import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerComponentGallery
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoSelectionScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoJobScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerOperatingQuickScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuQuickEntryScreen
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
@@ -119,10 +121,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onAddBar = { navController.navigate(OwnerRoutes.ADD_BAR) },
                         onJob = { status ->
                             navController.navigate(
-                                if (status == MockImportStatus.READY_FOR_REVIEW)
-                                    OwnerPage.MGR_REVIEW.route
-                                else if (status == MockImportStatus.APPLIED)
-                                    OwnerPage.MGR_MENU.route
+                                if (status == MockImportStatus.APPLIED) OwnerPage.MGR_MENU.route
                                 else OwnerPage.MGR_JOB.route
                             )
                         },
@@ -159,10 +158,24 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
                         onExistingJob = { status ->
                             navController.navigate(
-                                if (status == MockImportStatus.READY_FOR_REVIEW)
-                                    OwnerPage.MGR_REVIEW.route else OwnerPage.MGR_JOB.route
+                                OwnerPage.MGR_JOB.route
                             )
                         },
+                    )
+                    OwnerPage.MGR_PHOTO -> OwnerMenuPhotoSelectionScreen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.popBackStack() },
+                        onJob = { navController.navigate(OwnerPage.MGR_JOB.route) }
+                    )
+                    OwnerPage.MGR_JOB -> OwnerMenuPhotoJobScreen(
+                        state = mockState, viewModel = data,
+                        onHome = {
+                            navController.navigate(OwnerPage.MGR_HOME.route) {
+                                popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        },
+                        onRetryPhotos = { navController.navigate(OwnerPage.MGR_PHOTO.route) }
                     )
                     else -> OwnerSkeletonScreen(
                         page = page,

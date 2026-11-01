@@ -148,7 +148,7 @@ data class MockOperatingException(
     val closesNextDay: Boolean = false, // local-only overnight temporary hours
 )
 
-enum class MockImportStatus { PROCESSING, READY_FOR_REVIEW, FAILED, APPLIED }
+enum class MockImportStatus { UPLOADED, PROCESSING, READY_FOR_REVIEW, FAILED, APPLIED, CANCELED }
 enum class MockLineKind { PRODUCT, NON_PRODUCT, UNKNOWN }
 enum class MockDecisionKind { SELECT_PRODUCT, EXCLUDE, CONFIRM_NON_PRODUCT }
 data class MockReviewDecision(
@@ -165,6 +165,8 @@ data class MockExtractedLine(
     val candidateProductIds: List<String> = emptyList(),
     val options: List<MockMenuOption> = emptyList(),
     val decision: MockReviewDecision? = null,
+    // Stage 8: this option's 0 price means manual entry is required, never 0 KRW.
+    val needsPriceEntry: Boolean = false,
 )
 data class MockPhotoExtraction(
     val imageId: String,
