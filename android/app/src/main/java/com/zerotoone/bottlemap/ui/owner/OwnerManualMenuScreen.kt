@@ -256,12 +256,12 @@ internal fun OwnerManualMenuScreen(
             val old = items.firstOrNull { it.barMenuItemId == editId }
             val persisted = products.firstOrNull { it.productId == old?.productId }
             val savedName = old?.displayNameOverride ?: persisted?.displayName
-            val confirmedCatalogName = old == null && candidates.any {
-                it.productId == linkedId && it.catalogMatched &&
-                    it.displayName == name && manualMenuCategoryLabel(it.category) == category
+            val confirmedExistingName = old == null && candidates.any {
+                it.productId == linkedId && it.displayName == name &&
+                    manualMenuCategoryLabel(it.category) == category
             }
             require(name.isNotEmpty() && (name.length <= 80 ||
-                (name.length <= 200 && (name == savedName || confirmedCatalogName)))) {
+                (name.length <= 200 && (name == savedName || confirmedExistingName)))) {
                 "메뉴 이름을 확인해 주세요."
             }
             val sameCategory = persisted?.let { manualMenuCategoryLabel(it.category) } == category
@@ -270,8 +270,8 @@ internal fun OwnerManualMenuScreen(
                     it.barId != bar.barId && it.productId == persisted.productId
                 }
             require(!sharedLocal || (sameCategory &&
-                alcoholKind.trim().takeIf { category == "기타 주류" } ==
-                    persisted?.otherAlcoholKind)) {
+                alcoholKind.trim().takeIf { category == "기타 주류" && it.isNotEmpty() } ==
+                    persisted?.otherAlcoholKind?.takeIf { it.isNotBlank() })) {
                 "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
             }
             if (category == "기타 주류" && alcoholKind.isBlank()) {
@@ -324,7 +324,8 @@ internal fun OwnerManualMenuScreen(
             val p = when {
                 linked != null && !linked.catalogMatched -> if (sharedLocal) linked else linked.copy(
                     displayName = name, category = effectiveCategoryCode,
-                    otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" })
+                    otherAlcoholKind = alcoholKind.trim().takeIf {
+                        category == "기타 주류" && it.isNotEmpty() })
                 linked != null -> linked
                 else -> {
                     val fallbackBrand = brandName.trim().ifEmpty {
@@ -336,7 +337,8 @@ internal fun OwnerManualMenuScreen(
                     MockCatalogProduct(
                         manualId("local-unverified-"), reusedBrandId, name,
                         category = effectiveCategoryCode, catalogMatched = false,
-                        otherAlcoholKind = alcoholKind.trim().takeIf { category == "기타 주류" })
+                        otherAlcoholKind = alcoholKind.trim().takeIf {
+                        category == "기타 주류" && it.isNotEmpty() })
                 }
             }
             val duplicate = existingBarProductMenu(items, bar.barId, p.productId)
