@@ -78,7 +78,7 @@ GET 주변 업장 조회 (위치 + 반경)
 - 업로드 요청: `multipart/form-data`
 - 외부 API 필드명: `camelCase`
 - ID: 문자열로 표현한 UUID
-- 시각: UTC 기준 RFC 3339 문자열
+- 시각: UTC 기준 RFC 3339 문자열. 예외로 영업시간과 임시 휴무(3.15)의 시각과 날짜는 서울 현지 값을 `"HH:MM"`과 `"YYYY-MM-DD"` 문자열로 쓴다. 특정 순간이 아니라 매주 반복되는 시각이나 달력 날짜라서 UTC로 바꿀 수 없기 때문이다
 - 가격: 원 단위 정수
 - 좌표: WGS84 위도·경도를 십진 도 숫자로 표현한다. `latitude`는 -90~90, `longitude`는 -180~180이고 소수점 아래 6자리까지 저장한다. 응답의 업장 좌표는 `null`이 아니다(3.9.4)
 - 퍼센트·점수: 별도 표기가 없으면 `0.0`부터 `1.0`
@@ -97,7 +97,7 @@ GET 주변 업장 조회 (위치 + 반경)
 |---|---|---|---|---|
 | `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names` | O | O | O | O |
 | `GET /api/bars/{barId}/menu` | 활성 업장만 | 활성 업장만 | O | O |
-| `GET /api/bar-photos/{photoId}` | O | O | O | O |
+| `GET /api/bar-photos/{photoId}`, `GET /api/bar-photos/{photoId}/thumbnail` | O | O | O | O |
 | `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
 | `POST /api/owner-applications`, `GET /api/me/owner-applications`, `POST /api/owner-applications/business-certificate-ocr` | | O | O | O |
 | `GET /api/owner-applications/{applicationId}` | | 본인 신청만 | 본인 신청만 | O |
@@ -116,7 +116,7 @@ GET 주변 업장 조회 (위치 + 반경)
 | `POST /api/auth/temp-login` | 임시 로그인이 켜진 서버에서만 O (3.1.3) | 같음 | 같음 | 같음 |
 | `GET /health` | O | O | O | O |
 
-`/media/{key}`는 로컬 저장소를 쓰는 개발 환경에서만 있는 사진 파일 경로이며 API 계약이 아니다. 배포 서버(S3)에는 없다. 매장 사진은 이 경로가 아니라 `GET /api/bar-photos/{photoId}`(3.16.5)로 전달하며, 이 경로는 모든 환경에 있다.
+`/media/{key}`는 로컬 저장소를 쓰는 개발 환경에서만 있는 사진 파일 경로이며 API 계약이 아니다. 배포 서버(S3)에는 없다. 매장 사진은 이 경로가 아니라 `GET /api/bar-photos/{photoId}`와 `GET /api/bar-photos/{photoId}/thumbnail`(3.16.5)로 전달하며, 이 경로는 모든 환경에 있다.
 
 인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다.
 
@@ -223,6 +223,7 @@ ignore
 | `DELETE` | `/api/bars/{barId}/photos/{photoId}` | 매장 사진 삭제 |
 | `PUT` | `/api/bars/{barId}/photos/order` | 매장 사진 순서 변경 (첫 사진이 대표 사진) |
 | `GET` | `/api/bar-photos/{photoId}` | 매장 사진 파일 (공개) |
+| `GET` | `/api/bar-photos/{photoId}/thumbnail` | 매장 사진 썸네일 파일 (공개) |
 | `GET` | `/api/search/bar-names` | 업장 이름·주소 검색. 업주 신청과 고객 지도 검색용 (공개) |
 | `POST` | `/api/owner-applications/business-certificate-ocr` | 사업자등록증 사진에서 신청 항목 읽기 |
 | `POST` | `/api/owner-applications` | 업주 신청과 사업자등록 정보 1차 검증 |
@@ -245,7 +246,7 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 
 사용자는 다음과 같이 구분한다.
 
-- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/bars/{barId}/menu`)만 호출하며 `users` 행을 만들지 않는다.
+- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/bars/{barId}/menu`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`)만 호출하며 `users` 행을 만들지 않는다.
 - **로그인 사용자**: Google 계정으로 로그인한 사용자다. 최초 `GET /api/me` 호출 때 `customer`로 생성된다.
 - Supabase의 익명 로그인(anonymous sign-in)은 사용하지 않는다. `is_anonymous = true`인 token은 `401`로 거부한다.
 
@@ -352,7 +353,7 @@ API 응답 401 UNAUTHENTICATED
 - 여러 요청이 동시에 `401`을 받아도 세션 갱신은 한 번만 하고, 나머지 요청은 그 결과를 기다려 재시도한다.
 - 공개 API 처리:
   - `GET /api/bars/{barId}/menu`는 `Authorization` 헤더가 있으면 token을 검증하고, 잘못된 token이면 `401`을 반환한다. 프론트엔드는 위 재시도 흐름을 똑같이 적용하되, 세션 갱신에 실패하면 로그인 화면으로 보내지 않고 로그아웃한 뒤 헤더 없이 비로그인 사용자로 다시 요청한다. 단, 서버가 지금 token을 확인할 수 없으면(위 표의 `503` 조건) 이 API는 `503` 대신 token이 없는 것처럼 비로그인 사용자로 처리한다. 공개 정보라서 Supabase 장애 중에도 로그인 사용자가 업장 상세를 볼 수 있게 하려는 것이다. 이때는 operator도 비활성 업장을 볼 수 없다(`404`).
-  - `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`는 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
+  - `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`(3.16.5)은 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
 
 #### 3.1.6 백엔드 설정 항목
 
@@ -482,7 +483,7 @@ Authorization: Bearer <access-token>
       "longitude": 126.123456,
       "phone": "02-000-0000",
       "status": "active",
-      "coverPhotoUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211",
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "activeMenuImport": {
         "menuImportId": "77777777-7777-4777-8777-777777777777",
         "status": "ready_for_review"
@@ -495,7 +496,7 @@ Authorization: Bearer <access-token>
 
 `activeMenuImport`는 미완료 작업이 없으면 `null`이다. 목록 화면이 별도 요청 없이 기존 작업으로 진입할 수 있도록 제공한다.
 
-`coverPhotoUrl`은 업장 대표 사진(3.16.1)의 `imageUrl`이며, 사진이 없으면 `null`이다. 3.10, 3.11.11, 3.12, 3.13의 `coverPhotoUrl`과 같다.
+`coverThumbnailUrl`은 업장 대표 사진(3.16.1)의 썸네일 URL(`thumbnailUrl`)이며, 사진이 없으면 `null`이다. 3.10, 3.11.11, 3.12, 3.13의 `coverThumbnailUrl`과 같다.
 
 ### 3.5 업장 생성
 
@@ -581,7 +582,7 @@ Authorization: Bearer <access-token>
     "note": "내부 사정으로 일찍 마감합니다"
   },
   "photos": [
-    { "photoId": "12121212-1212-4212-8212-121212121211", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211" }
+    { "photoId": "12121212-1212-4212-8212-121212121211", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail" }
   ],
   "status": "active",
   "activeMenuImport": {
@@ -617,7 +618,8 @@ Authorization: Bearer <access-token>
 | `operatingException` | 객체 | 예 | 임시 휴무(3.15.4). 앞으로 시작할 것과 어제 끝난 것도 들어 있으므로, 지금 적용 중인지는 프론트엔드가 판단한다. 없거나 끝난 지 하루가 지났으면 `null` |
 | `photos` | 배열 | 아니오 | 매장 사진(3.16). 표시 순서대로 오며 첫 사진이 대표 사진이다. 없으면 `[]` |
 | `photos[].photoId` | UUID 문자열 | 아니오 | |
-| `photos[].imageUrl` | 문자열 | 아니오 | 사진 파일의 절대 URL(3.16.5). 만료되지 않으며, 같은 `photoId`의 내용은 바뀌지 않는다 |
+| `photos[].imageUrl` | 문자열 | 아니오 | 사진 파일의 절대 URL(3.16.5). 만료되지 않으며, 같은 `photoId`의 내용은 바뀌지 않는다. 전체 화면과 상세 갤러리에 쓴다 |
+| `photos[].thumbnailUrl` | 문자열 | 아니오 | 긴 변 480px 썸네일의 절대 URL(3.16.5). 목록, 격자, 작은 카드에 쓴다 |
 | `status` | `active` \| `inactive` | 아니오 | |
 | `activeMenuImport` | 객체 | 예 | 미완료 메뉴 등록 작업. 없으면 `null`. 3.4와 같다. 있으면 메뉴 직접 편집을 할 수 없다(3.14.1) |
 | `activeMenuImport.menuImportId` | UUID 문자열 | 아니오 | `GET /api/menu-imports/{menuImportId}`로 이어서 진행한다 |
@@ -757,8 +759,8 @@ GET /api/bars/{barId}/menu
   ],
   "operatingException": null,
   "photos": [
-    { "photoId": "12121212-1212-4212-8212-121212121211", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211" },
-    { "photoId": "12121212-1212-4212-8212-121212121212", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212" }
+    { "photoId": "12121212-1212-4212-8212-121212121211", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail" },
+    { "photoId": "12121212-1212-4212-8212-121212121212", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212/thumbnail" }
   ],
   "menuBoardId": "66666666-6666-4666-8666-666666666666",
   "menuVersion": 4,
@@ -1033,7 +1035,7 @@ options
       "latitude": 37.478321,
       "longitude": 126.951234,
       "distanceMeters": 41,
-      "coverPhotoUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211",
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "productId": "44444444-4444-4444-8444-444444444444",
       "productDisplayName": "Glenfiddich 12",
       "menuDisplayName": "글렌피딕 12년",
@@ -1060,7 +1062,7 @@ options
       "latitude": 37.484102,
       "longitude": 126.929815,
       "distanceMeters": 1989,
-      "coverPhotoUrl": null,
+      "coverThumbnailUrl": null,
       "productId": "44444444-4444-4444-8444-444444444444",
       "productDisplayName": "Glenfiddich 12",
       "menuDisplayName": "Glenfiddich 12Y",
@@ -1096,7 +1098,7 @@ options
 | `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `items[].distanceMeters` | 정수 | 예 | 고객 위치와 업장 사이의 직선 거리(미터). 위치를 보내지 않으면 `null` |
-| `items[].coverPhotoUrl` | 문자열 | 예 | 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 `imageUrl`. 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다 |
+| `items[].coverThumbnailUrl` | 문자열 | 예 | 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 썸네일 URL(`thumbnailUrl`). 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다 |
 | `items[].productId` | UUID 문자열 | 아니오 | `matchedProducts`의 상품 중 하나 |
 | `items[].productDisplayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`) |
 | `items[].menuDisplayName` | 문자열 | 아니오 | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`) |
@@ -1610,7 +1612,7 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
       "address": "서울특별시 관악구 관악로 1 2층",
       "latitude": 37.478321,
       "longitude": 126.951234,
-      "coverPhotoUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211",
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "hasOwner": true
     }
   ],
@@ -1623,7 +1625,7 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
 | `items[].barId` | UUID 문자열 | 아니오 | |
 | `items[].name`, `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4. 고객 지도 검색에서 지도를 옮길 위치 |
-| `items[].coverPhotoUrl` | 문자열 | 예 | 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 `imageUrl`. 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다. 업주 신청에서 자기 업장을 알아보는 데도 쓴다 |
+| `items[].coverThumbnailUrl` | 문자열 | 예 | 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 썸네일 URL(`thumbnailUrl`). 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다. 업주 신청에서 자기 업장을 알아보는 데도 쓴다 |
 | `items[].hasOwner` | 불리언 | 아니오 | 현재 업주가 있으면 `true`. 이 업장에 신청하면 `409 BAR_OWNER_EXISTS`다 |
 | `truncated` | 불리언 | 아니오 | `limit`보다 많이 일치했으면 `true` |
 
@@ -1811,7 +1813,7 @@ GET /api/search/nearby-bars?lat=37.478&lng=126.951&radiusMeters=500
       "latitude": 37.478321,
       "longitude": 126.951234,
       "distanceMeters": 41,
-      "coverPhotoUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211",
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "menuUpdatedAt": "2026-10-02T11:00:00Z"
     },
     {
@@ -1821,7 +1823,7 @@ GET /api/search/nearby-bars?lat=37.478&lng=126.951&radiusMeters=500
       "latitude": 37.479874,
       "longitude": 126.954512,
       "distanceMeters": 373,
-      "coverPhotoUrl": null,
+      "coverThumbnailUrl": null,
       "menuUpdatedAt": null
     }
   ]
@@ -1835,7 +1837,7 @@ GET /api/search/nearby-bars?lat=37.478&lng=126.951&radiusMeters=500
 | `items[].name`, `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `items[].distanceMeters` | 정수 | 아니오 | 고객 위치와 업장 사이의 직선 거리(미터). `radiusMeters` 이하 |
-| `items[].coverPhotoUrl` | 문자열 | 예 | 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 `imageUrl`. 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다 |
+| `items[].coverThumbnailUrl` | 문자열 | 예 | 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 썸네일 URL(`thumbnailUrl`). 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다 |
 | `items[].menuUpdatedAt` | RFC 3339 문자열 | 예 | 업장 현재 메뉴판의 `menu_boards.published_at`(3.9의 `publishedAt`과 같은 값). 게시된 메뉴가 한 번도 없으면 `null`이다. 메뉴판은 있지만 항목이 0개이면 값이 있다(3.9.1과 같은 규칙) |
 
 근처에 업장이 없으면 `200 OK`와 `items = []`를 반환한다. 프론트엔드는 반경 안에 업장이 없다는 빈 상태를 표시한다.
@@ -1915,7 +1917,7 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
       "address": "서울특별시 관악구 관악로 1 2층",
       "latitude": 37.478321,
       "longitude": 126.951234,
-      "coverPhotoUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211",
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "menuUpdatedAt": "2026-10-02T11:00:00Z"
     },
     {
@@ -1924,7 +1926,7 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
       "address": "서울특별시 관악구 관악로14길 10",
       "latitude": 37.479874,
       "longitude": 126.954512,
-      "coverPhotoUrl": null,
+      "coverThumbnailUrl": null,
       "menuUpdatedAt": null
     }
   ]
@@ -1937,7 +1939,7 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 | `items[].barId` | UUID 문자열 | 아니오 | |
 | `items[].name`, `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
-| `items[].coverPhotoUrl` | 문자열 | 예 | 3.12의 `coverPhotoUrl`과 같다. 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 `imageUrl`. 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다 |
+| `items[].coverThumbnailUrl` | 문자열 | 예 | 3.12의 `coverThumbnailUrl`과 같다. 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 썸네일 URL(`thumbnailUrl`). 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다 |
 | `items[].menuUpdatedAt` | RFC 3339 문자열 | 예 | 3.12의 `menuUpdatedAt`과 같다. 게시된 메뉴가 한 번도 없으면 `null`이고, 메뉴판은 있지만 항목이 0개이면 값이 있다 |
 
 영역 안에 업장이 없으면 `200 OK`와 `items = []`를 반환한다. 프론트엔드는 이 영역에 업장이 없다는 빈 상태를 표시한다.
@@ -2249,7 +2251,7 @@ Authorization: Bearer <access-token>
    - 임시 휴무가 D-1을 덮으면, 그것이 자정을 넘기는 `custom_hours`이고 t < `closeTime`일 때만 **영업 중**이다. 임시 휴무는 그날의 정규 영업시간을 대신하므로 D-1의 정규 영업은 넘어오지 않는다.
    - 임시 휴무가 D-1을 덮지 않으면, D-1 요일의 정규 영업시간이 자정을 넘기고 t < `closeTime`일 때 **영업 중**이다.
 3. 오늘의 영업 구간은 임시 휴무가 D를 덮는 `custom_hours`이면 그 시간이고, 아니면 D 요일의 정규 영업시간(`closed = false`)이다. `openTime ≤ t`이고, 자정을 넘기는 구간이거나 t < `closeTime`이면 **영업 중**이다.
-4. 그 밖에는 `weeklyHours = []`이고 오늘 `custom_hours`도 없으면 **영업시간 정보 없음**, 아니면 **영업 종료**다.
+4. 그 밖에는, 오늘 `custom_hours`가 없고 D 요일이 `weeklyHours`에 없으면 **영업시간 정보 없음**, 아니면 **영업 종료**다. 다른 요일이 있어도 오늘 요일이 없으면 정보 없음이다(3.15.1). 정기 휴무(`closed = true`)인 요일은 영업 종료다.
 
 - 고객 안내 문구(`note`)는 임시 휴무가 적용 중인 동안(3.15.4) 영업 상태와 함께 보여 줄 수 있다. 비어 있으면 표시하지 않는다.
 - 이 상태는 메뉴 게시 여부(3.6의 `currentMenu`)와 따로 계산한다.
@@ -2274,16 +2276,17 @@ Authorization: Bearer <access-token>
 | `DELETE` | `/api/bars/{barId}/photos/{photoId}` | 사진 삭제 (3.16.3) |
 | `PUT` | `/api/bars/{barId}/photos/order` | 순서 변경과 대표 사진 지정 (3.16.4) |
 | `GET` | `/api/bar-photos/{photoId}` | 사진 파일 (3.16.5, 공개) |
+| `GET` | `/api/bar-photos/{photoId}/thumbnail` | 썸네일 파일 (3.16.5, 공개) |
 
 #### 3.16.1 공통 규칙
 
 - **권한**: 추가, 삭제, 순서 변경은 operator와 해당 업장의 현재 업주가 호출할 수 있다(2.2). 비활성 업장도 바꿀 수 있다(3.7과 같다). 사진 파일 조회(3.16.5)는 공개다.
 - **장수**: 업장당 최대 15장이다. 메뉴판 사진의 15장(4.1)과는 따로 센다.
-- **대표 사진**: 표시 순서의 첫 사진이 대표 사진이다. 대표 여부를 따로 저장하지 않으며, 대표 사진을 바꾸려면 그 사진을 맨 앞으로 옮긴다(3.16.4). 대표 사진을 지우면 다음 사진이 대표가 된다. 업장 목록 API(3.4, 3.10, 3.11.11, 3.12, 3.13)는 업장마다 대표 사진의 `imageUrl`만 `coverPhotoUrl`로 준다.
+- **대표 사진**: 표시 순서의 첫 사진이 대표 사진이다. 대표 여부를 따로 저장하지 않으며, 대표 사진을 바꾸려면 그 사진을 맨 앞으로 옮긴다(3.16.4). 대표 사진을 지우면 다음 사진이 대표가 된다. 업장 목록 API(3.4, 3.10, 3.11.11, 3.12, 3.13)는 업장마다 대표 사진의 썸네일 URL만 `coverThumbnailUrl`로 준다. 목록은 업장이 많아(지도는 1,000곳이 넘을 수 있다) 원본을 쓰면 내려받는 양과 메모리가 너무 크기 때문이다.
 - **사진이 없을 때**: 0장도 허용하며 마지막 사진도 지울 수 있다. 프론트엔드는 `photos = []`이면 기본 이미지를 보여 준다.
 - **응답**: 추가, 삭제, 순서 변경의 성공 응답 본문은 `{ "photos": [...] }`이며 3.6의 `photos`와 같은 형식이다. 프론트엔드는 이 응답으로 화면을 바꾸고 따로 다시 조회하지 않아도 된다.
 - **동시 요청**: 추가, 삭제, 순서 변경은 업장 행을 잠그고 처리하므로 한 업장에서는 하나씩 차례로 반영된다.
-- **저장소**: 메뉴판 사진과 같은 저장소(개발 환경은 로컬 파일, 배포 서버는 비공개 S3 버킷)에 둔다. 버킷은 공개하지 않으며, 서버가 사진을 읽어 3.16.5로 전달한다.
+- **저장소**: 메뉴판 사진과 같은 저장소(개발 환경은 로컬 파일, 배포 서버는 비공개 S3 버킷)에 사진마다 다시 인코딩한 사진과 썸네일 두 파일을 둔다(3.16.2). 버킷은 공개하지 않으며, 서버가 파일을 읽어 3.16.5로 전달한다.
 
 #### 3.16.2 사진 추가
 
@@ -2300,19 +2303,20 @@ Content-Type: multipart/form-data
 - JPEG와 PNG만 받으며 형식은 메뉴판 사진(4.1)처럼 파일 내용으로 판별한다. 사진당 **2MB 이하**다. 메뉴판 사진(사진당 10MB)보다 작은 이유는 고객 화면이 업장마다 최대 15장을 내려받기 때문이다.
 - 안드로이드 앱은 올리기 전에 **반드시** 사진의 긴 변을 2048px 이하로 줄이고 JPEG로 압축한다. 압축한 뒤에도 2MB를 넘으면 품질을 낮춰 다시 압축한다. PNG나 다른 형식의 사진도 JPEG로 바꿔 올린다.
 - **가로세로 크기**: 서버도 긴 변이 2048px 이하인지 확인한다. 2MB 안에도 픽셀 수가 매우 큰 이미지를 담을 수 있어, 고객 기기가 사진을 열다가 메모리가 부족해질 수 있기 때문이다. 넘으면 `422`이고 `fieldErrors[].path = image`, `code = IMAGE_DIMENSIONS_TOO_LARGE`다. 서버는 파일 헤더의 가로세로를 먼저 확인한 뒤 끝까지 디코딩되는지 확인하며, 디코딩되지 않는 파일은 `415 UNSUPPORTED_IMAGE_TYPE`이다.
-- 서버는 받은 파일을 줄이거나 다시 인코딩하지 않고 그대로 저장한다. PNG는 앱이 아닌 클라이언트를 위해 계속 받는다.
+- **다시 인코딩**: 서버는 받은 파일을 그대로 공개하지 않는다. 검사를 통과한 사진을 디코딩해 EXIF 방향을 적용하고, 메타데이터(EXIF, XMP, 위치, 촬영 시각, 기기 정보 등)를 모두 뺀 JPEG(품질 약 85)로 다시 저장한다. GPS 좌표 같은 정보가 공개 URL로 새어 나가지 않게 하기 위해서다. PNG도 JPEG로 바뀌며, 투명한 부분은 흰색으로 채운다. PNG는 앱이 아닌 클라이언트를 위해 계속 받는다.
+- **썸네일**: 같은 단계에서 긴 변 480px(원본이 더 작으면 원본 크기)의 메타데이터 없는 JPEG 썸네일을 함께 만든다. 목록과 격자 화면은 썸네일(`thumbnailUrl`, `coverThumbnailUrl`)을, 전체 화면과 상세 갤러리는 `imageUrl`을 쓴다.
 - 새 사진은 맨 뒤에 붙는다. 업장에 사진이 없었다면 대표 사진이 된다.
-- **같은 사진**: 같은 업장에 내용이 같은 파일(SHA-256이 같음)이 이미 있으면 저장하지 않고 `409 PHOTO_EXISTS`이며, `details.photoId`에 기존 사진 ID를 담는다. 응답을 받지 못해 다시 보낸 요청도 이 오류를 받아 사진이 두 장 생기지 않으므로 `Idempotency-Key`는 받지 않는다.
+- **같은 사진**: 같은 업장에 내용이 같은 파일(업로드한 원본 바이트의 SHA-256이 같음. 다시 인코딩한 파일이 아니다)이 이미 있으면 저장하지 않고 `409 PHOTO_EXISTS`이며, `details.photoId`에 기존 사진 ID를 담는다. 응답을 받지 못해 다시 보낸 요청도 이 오류를 받아 사진이 두 장 생기지 않으므로 `Idempotency-Key`는 받지 않는다.
 - 검사 순서: 요청 형식(`422`, `image`가 없으면 `MISSING`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 크기(`413 UPLOAD_TOO_LARGE`)와 형식(`415 UNSUPPORTED_IMAGE_TYPE`) → 가로세로(`422 IMAGE_DIMENSIONS_TOO_LARGE`) → 같은 사진(`409 PHOTO_EXISTS`) → 장수(`409 PHOTO_LIMIT_REACHED`). 같은 사진을 장수보다 먼저 확인하므로, 15번째 사진을 올린 요청을 다시 보내도 `PHOTO_EXISTS`를 받는다.
-- 파일을 저장한 뒤 DB에 기록한다. DB 기록이 실패하면 저장한 파일을 지운다.
+- 두 파일을 저장한 뒤 DB에 기록한다. 하나라도 저장에 실패하거나 DB 기록이 실패하면 저장한 파일을 지운다. 받은 원본 파일은 저장하지 않는다.
 
 `201 Created`, 본문은 `{ "photos": [...] }`다.
 
 ```json
 {
   "photos": [
-    { "photoId": "12121212-1212-4212-8212-121212121211", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211" },
-    { "photoId": "12121212-1212-4212-8212-121212121212", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212" }
+    { "photoId": "12121212-1212-4212-8212-121212121211", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail" },
+    { "photoId": "12121212-1212-4212-8212-121212121212", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212/thumbnail" }
   ]
 }
 ```
@@ -2326,7 +2330,7 @@ Authorization: Bearer <access-token>
 
 - 사진을 지우고 뒤의 사진을 한 칸씩 앞으로 당긴다. 되돌리는 API는 없으므로 프론트엔드는 지우기 전에 확인을 받는다.
 - 이 업장의 사진이 아니거나 이미 지운 사진, `photoId`가 UUID 형식이 아니면 `404 PHOTO_NOT_FOUND`다. 응답을 받지 못해 다시 보낸 요청도 이 오류를 받으므로, 프론트엔드는 3.6을 다시 불러와 확인한다.
-- 저장소의 파일은 DB 커밋 뒤에 지운다. 파일 삭제가 실패하면 로그만 남긴다. 지운 사진의 `imageUrl`은 서버에서 바로 `404`가 되지만, 이미 받아 간 기기나 중간 캐시에는 최대 1일 남을 수 있다(3.16.5).
+- 저장소의 두 파일(사진과 썸네일)은 DB 커밋 뒤에 지운다. 파일 삭제가 실패하면 로그만 남긴다. 지운 사진의 `imageUrl`과 `thumbnailUrl`은 서버에서 바로 `404`가 되지만, 이미 받아 간 기기나 중간 캐시에는 최대 1일 남을 수 있다(3.16.5).
 
 `200 OK`, 본문은 `{ "photos": [...] }`다.
 
@@ -2353,11 +2357,15 @@ Content-Type: application/json
 
 ```http
 GET /api/bar-photos/{photoId}
+GET /api/bar-photos/{photoId}/thumbnail
 ```
 
+앞의 것은 사진, 뒤의 것은 썸네일(3.16.2)을 돌려준다. 아래 규칙은 둘 다 같다.
+
+
 - 공개 API이며 인증하지 않는다. `Authorization` 헤더를 보내도 확인하지 않는다.
-- 응답 본문은 사진 파일 자체다. `Content-Type`은 저장한 형식(`image/jpeg` 또는 `image/png`)이고, `Cache-Control: public, max-age=86400`(1일)을 붙인다. 같은 `photoId`의 내용은 바뀌지 않으므로 프론트엔드의 이미지 캐시는 URL을 키로 써도 된다. 캐시를 1일로 둔 이유는 지운 사진이 기기와 중간 캐시에 오래 남지 않게 하기 위해서다. 지운 사진은 1일 안에 사라지며, 프론트엔드는 업장 응답의 `photos`에 없는 사진을 캐시에 있어도 보여 주지 않는다.
-- 업장 응답의 `photos[].imageUrl`은 이 경로의 절대 URL이다(예: `https://bottlemap.o-r.kr/api/bar-photos/{photoId}`). 서버가 요청을 받은 주소로 만들므로 에뮬레이터(`10.0.2.2`)와 기기에서도 그대로 열린다. 프론트엔드는 URL을 직접 만들지 않고 `imageUrl`을 쓴다.
+- 응답 본문은 파일 자체다. 서버가 다시 인코딩해 저장하므로 `Content-Type`은 항상 `image/jpeg`이고, `Cache-Control: public, max-age=86400`(1일)을 붙인다. 같은 `photoId`의 내용은 바뀌지 않으므로 프론트엔드의 이미지 캐시는 URL을 키로 써도 된다. 캐시를 1일로 둔 이유는 지운 사진이 기기와 중간 캐시에 오래 남지 않게 하기 위해서다. 지운 사진은 1일 안에 사라지며, 프론트엔드는 업장 응답의 `photos`에 없는 사진을 캐시에 있어도 보여 주지 않는다.
+- 업장 응답의 `photos[].imageUrl`, `photos[].thumbnailUrl`, `coverThumbnailUrl`은 이 경로의 절대 URL이다(예: `https://bottlemap.o-r.kr/api/bar-photos/{photoId}/thumbnail`). 서버가 요청을 받은 주소로 만들므로 에뮬레이터(`10.0.2.2`)와 기기에서도 그대로 열린다. 프론트엔드는 URL을 직접 만들지 않고 응답의 URL을 쓴다.
 - 메뉴판 사진의 서명 URL(5.4)과 달리 만료되지 않는다.
 - 비활성 업장의 사진도 반환한다. 사진 ID는 업장 응답으로만 알 수 있다.
 - 지운 사진이나 없는 `photoId`는 `404 PHOTO_NOT_FOUND`이며 본문은 공통 오류 형식(9.1)이다.
@@ -3352,4 +3360,4 @@ canceled
 - `summary`나 사용자 표시 문자열을 서버 검증 기준으로 사용하지 않는다.
 - 매장 태그와 정규 영업시간은 업장 수정(3.7)에서 배열 전체를 바꾼다. 일부만 바꾸는 요청은 없다.
 - 영업 상태는 서버가 계산하지 않는다. 프론트엔드가 3.15.5의 규칙으로 계산한다. `operatingException`은 `endDate` 다음 날까지 응답에 남으므로, 지금 적용 중인지도 프론트엔드가 판단한다(3.15.4).
-- 매장 사진의 `imageUrl`은 만료되지 않는 고정 URL이며, 프론트엔드는 URL을 직접 만들지 않는다. 대표 사진은 `photos`의 첫 항목이며, 업장 목록 API에서는 `coverPhotoUrl`(사진이 없으면 `null`)이다.
+- 매장 사진의 `imageUrl`과 `thumbnailUrl`은 만료되지 않는 고정 URL이며, 프론트엔드는 URL을 직접 만들지 않는다. 대표 사진은 `photos`의 첫 항목이며, 업장 목록 API에서는 `coverThumbnailUrl`(사진이 없으면 `null`)이다.

@@ -410,9 +410,9 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 |---|---|---|---|
 | `id` | `uuid`, PK | 사진 ID | 공개 경로 `GET /api/bar-photos/{photoId}`의 ID다. |
 | `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | |
-| `storage_key` | `varchar(500)`, NOT NULL | `bars/2222.../photos/1212....jpg` | 메뉴 사진처럼 바이너리 대신 저장소 위치를 저장한다. |
-| `content_type` | `varchar(20)`, NOT NULL | `image/jpeg` | 파일 내용으로 판별한 형식이다. 사진을 전달할 때 `Content-Type`으로 쓴다. |
-| `content_sha256` | `char(64)`, NOT NULL | SHA-256 16진수 문자열 | 같은 사진을 두 번 올리지 않게 막는다. 응답을 받지 못해 다시 보낸 업로드도 이 값으로 걸러진다. |
+| `storage_key` | `varchar(500)`, NOT NULL | `bars/2222.../photos/1212....jpg` | 서버가 다시 인코딩한 사진의 저장소 위치다. 메타데이터를 뺀 JPEG이며, 받은 원본은 저장하지 않는다. |
+| `thumbnail_storage_key` | `varchar(500)`, NOT NULL | `bars/2222.../photos/1212...-thumb.jpg` | 긴 변 480px 썸네일의 저장소 위치다. 업장 목록 API의 `coverThumbnailUrl`과 격자 화면이 쓴다. |
+| `content_sha256` | `char(64)`, NOT NULL | SHA-256 16진수 문자열 | 업로드한 원본 바이트의 SHA-256이다(다시 인코딩한 파일이 아니다). 같은 사진을 두 번 올리지 않게 막고, 응답을 받지 못해 다시 보낸 업로드도 이 값으로 걸러진다. |
 | `sort_order` | `smallint`, NOT NULL | `1` | 표시 순서이며 1이 대표 사진이다. 업장 안에서 1부터 빈틈없이 이어진다. |
 | `uploaded_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 누가 올렸는지 남긴다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-11-02T03:00:00Z` | 올린 시각이다. |
@@ -421,8 +421,10 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 - 업장당 최대 15장이고, 사진당 2MB 이하, 긴 변 2048px 이하다(API가 확인). 추가, 삭제, 순서 변경은 업장 행을 잠그고 처리해 장수와 순서를 지킨다.
 - (`bar_id`, `content_sha256`)은 unique다.
-- 대표 여부는 따로 저장하지 않고 `sort_order = 1`로 정한다. 업장 목록 API는 업장마다 이 행을 (`bar_id`, `sort_order`) 인덱스로 찾아 `coverPhotoUrl`로 준다.
-- 삭제하면 행을 지운 뒤 DB 커밋 다음에 저장소 파일을 지운다. 파일 삭제가 실패하면 로그만 남긴다.
+- (`bar_id`, `sort_order`)도 unique라서 대표 사진(`sort_order = 1`)은 업장마다 하나뿐이다. 순서 변경이 한 트랜잭션 안에서 자리를 맞바꿀 수 있도록 커밋 때 검사하는(DEFERRABLE) 제약으로 만든다.
+- 대표 여부는 따로 저장하지 않고 `sort_order = 1`로 정한다. 업장 목록 API는 업장마다 이 행을 (`bar_id`, `sort_order`) 인덱스로 찾아 썸네일을 `coverThumbnailUrl`로 준다.
+- 삭제하면 행을 지운 뒤 DB 커밋 다음에 저장소의 두 파일(사진과 썸네일)을 지운다. 파일 삭제가 실패하면 로그만 남긴다.
+- 공개되는 파일에는 메타데이터(EXIF, XMP, GPS 좌표, 촬영 시각, 기기 정보)가 없다. 서버가 업로드마다 디코딩해 JPEG로 다시 인코딩하기 때문이다.
 - 저장소는 공개하지 않는다. API가 파일을 읽어 고정 URL로 전달하므로, 메뉴판 사진의 서명 URL과 달리 만료되지 않는다. 지운 사진이 오래 남지 않도록 캐시는 1일이다.
 
 **필요한 이유:** 메뉴판 사진(`menu_images`)은 AI 처리와 검수용이라 공개하지 않는다. 고객에게 보여 줄 사진은 공개 범위, 순서, 삭제 규칙이 달라 따로 저장한다.
@@ -894,6 +896,7 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - `bar_weekly_hours.day_of_week`는 1부터 7이고, `is_closed`이면 두 시각이 `null`, 아니면 둘 다 값이 있고 서로 달라야 한다.
 - `bar_operating_exceptions`는 `end_date >= start_date`이고, `vacation`이 아니면 두 날짜가 같으며, `custom_hours`일 때만 두 시각이 있고 서로 달라야 한다.
 - 한 업장의 `bar_photos`에서 `content_sha256`이 중복되지 않아야 한다. unique 인덱스(`bar_id`, `content_sha256`)로 보장한다.
+- 한 업장의 `bar_photos`에서 `sort_order`가 중복되지 않아야 한다. `DEFERRABLE INITIALLY DEFERRED` unique 제약(`bar_id`, `sort_order`)으로 보장한다.
 - 한 신청의 `bar_owner_application_menu_images`에서 `image_order`가 중복되지 않아야 한다. unique 인덱스(`application_id`, `image_order`)로 보장한다.
 - 외래키 삭제 정책은 이력 보존을 우선해 핵심 사용자 업장 상품 이미지에 `RESTRICT` 또는 soft delete를 검토한다.
 

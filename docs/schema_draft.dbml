@@ -313,22 +313,23 @@ Table bar_operating_exceptions {
 Table bar_photos {
   id uuid [pk]
   bar_id uuid [not null, ref: > bars.id]
-  storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>.<jpg|png> in the image storage']
-  content_type varchar(20) [not null, note: 'image/jpeg or image/png, detected from the content']
-  content_sha256 char(64) [not null, note: 'SHA-256 of the stored bytes; the same photo cannot be added twice to a bar']
+  storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>.jpg: the re-encoded JPEG without metadata']
+  thumbnail_storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>-thumb.jpg: 480 px on the long edge']
+  content_sha256 char(64) [not null, note: 'SHA-256 of the uploaded bytes before re-encoding; the same photo cannot be added twice to a bar']
   sort_order smallint [not null, note: '1 = cover photo; contiguous from 1 within a bar']
   uploaded_by_user_id uuid [ref: > users.id, note: 'null for a temporary-login operator without a users row']
   created_at timestamptz [not null]
 
   indexes {
     (bar_id, content_sha256) [unique]
-    (bar_id, sort_order)
+    (bar_id, sort_order) [unique, note: 'Deferrable, so a reorder can swap positions in one transaction']
   }
 
   Note: '''
   Gallery photos shown to customers, at most 15 per bar, at most 2 MB and 2048 px on the long edge. Separate from menu photos, which are never public.
-  The bucket stays private: GET /api/bar-photos/{photoId} reads the file and serves it with a one-day cache lifetime.
-  Deleting a photo deletes the row and then the stored file.
+  The server re-encodes every upload to a JPEG without metadata (EXIF, XMP, GPS) and makes a thumbnail; the uploaded
+  file itself is not kept. The bucket stays private: GET /api/bar-photos/{photoId} and its /thumbnail read the files
+  and serve them with a one-day cache lifetime. Deleting a photo deletes the row and then both stored files.
   '''
 }
 
