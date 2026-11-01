@@ -298,6 +298,26 @@ class OwnerBarEditorComposeTest {
         assertEquals(AndroidColor.RED, transposed.getPixel(0, 0))
     }
 
+    @Test fun photoGalleryDoesNotLaunchPickerPastFifteenPhotos() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        val original = vm.preview("fixture-bar", 0)!!.bar
+        val photos = (1..MAX_OWNER_BAR_GALLERY_PHOTOS).map { i ->
+            MockPhoto("photo-$i", "content://mock/photo-$i", MockPhotoKind.BAR_GALLERY)
+        }
+        vm.saveBar(original.copy(gallery = photos))
+        compose.setContent {
+            MaterialTheme {
+                OwnerPhotoHtmlV4Screen(vm.state.collectAsState().value, vm, onBack = {})
+            }
+        }
+        compose.onNodeWithTag("owner-photo-add").performClick()
+        compose.onNodeWithText("매장 사진은 최대 15장까지 등록할 수 있어요.").assertExists()
+        compose.runOnIdle {
+            assertEquals(photos, vm.preview("fixture-bar", 0)!!.bar.gallery)
+        }
+    }
+
     @Test fun photoEditorUsesImmediateActionsAndDoneButton() {
         val vm = OwnerMockViewModel(
             LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
