@@ -127,6 +127,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     OwnerPage.MGR_PREVIEW -> OwnerPreviewHtmlV4Screen(
                         state = mockState, viewModel = data,
                         onBack = { navController.popBackStack() },
+                        onManage = { navController.popBackStack() },
                     )
                     OwnerPage.MGR_MENU -> OwnerMenuQuickEntryScreen(
                         state = mockState,
