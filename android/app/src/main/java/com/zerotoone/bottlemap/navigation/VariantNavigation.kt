@@ -132,7 +132,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onManage = { navController.returnToOwnerManagerSafely(previewSwitchCooldown) },
                     )
                     OwnerPage.MGR_MENU -> OwnerMenuQuickEntryScreen(
-                        state = mockState,
+                        state = mockState, viewModel = data,
                         onRetry = data::retry,
                         onBack = { navController.popBackStack() },
                         onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
