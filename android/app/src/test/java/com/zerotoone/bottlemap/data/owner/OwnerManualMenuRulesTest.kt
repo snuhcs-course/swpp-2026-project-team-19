@@ -21,6 +21,12 @@ class OwnerManualMenuRulesTest {
 
     @Test fun ownerPriceInputStopsAtEightDigitsIncludingPasteAndImeInput() {
         assertEquals("12345678", ownerPriceInput("123456789"))
+        // A ninth digit inserted at the start or middle must be fully ignored.
+        assertEquals("12345678", ownerPriceInput("12345678", "912345678"))
+        assertEquals("12345678", ownerPriceInput("12345678", "123945678"))
+        assertEquals("12345678", ownerPriceInput("12345678", "123456789"))
+        assertEquals("12345678", ownerPriceInput("", "123456789"))
+        assertEquals("1234567", ownerPriceInput("12345678", "1234567"))
         assertEquals("99999999", ownerPriceInput("99,999,999원"))
         assertEquals("12345678", ownerPriceInput("a1 b2,c3d4e5f6g7h8j9"))
         assertEquals("", ownerPriceInput("no digits"))
