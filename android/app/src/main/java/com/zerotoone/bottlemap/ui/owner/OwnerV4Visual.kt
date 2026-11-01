@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -61,13 +66,14 @@ internal fun V4FormField(
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             modifier = Modifier.fillMaxWidth()
                 .then(if (testTag == null) Modifier else Modifier.testTag(testTag))
-                .heightIn(min = if (singleLine) 45.dp else 75.dp)
+                .height(if (singleLine) 43.dp else 75.dp)
                 .background(V4Color.elevated, RoundedCornerShape(9.dp))
                 .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
-                .padding(horizontal = 12.dp, vertical = 11.dp),
+                .padding(horizontal = 12.dp, vertical = if (singleLine) 0.dp else 11.dp),
             textStyle = TextStyle(fontSize = 14.sp, color = V4Color.text, lineHeight = 20.sp),
             decorationBox = { inner ->
-                Box {
+                Box(Modifier.fillMaxWidth().then(if (singleLine) Modifier.height(43.dp)
+                    else Modifier), contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart) {
                     if (value.isEmpty() && placeholder.isNotEmpty()) {
                         Text(placeholder, color = Color(0xFFA69B91), fontSize = 13.sp)
                     }
@@ -83,11 +89,19 @@ internal fun V4CompactCheck(label: String, checked: Boolean, onChange: (Boolean)
     Row(verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable { onChange(!checked) },
         horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Box(Modifier.size(14.dp).background(if (checked) V4Color.primary else
-            V4Color.elevated, RoundedCornerShape(3.dp))
-            .border(1.dp, V4Color.line, RoundedCornerShape(3.dp)),
+        Box(Modifier.size(15.dp).background(if (checked) V4Color.primary else
+            V4Color.elevated, RoundedCornerShape(4.dp))
+            .border(1.dp, V4Color.line, RoundedCornerShape(4.dp)),
             contentAlignment = Alignment.Center) {
-            if (checked) Text("✓", fontSize = 9.sp, color = V4Color.background)
+            if (checked) Canvas(Modifier.size(11.dp)) {
+                val check = Path().apply {
+                    moveTo(size.width * 0.14f, size.height * 0.50f)
+                    lineTo(size.width * 0.40f, size.height * 0.72f)
+                    lineTo(size.width * 0.87f, size.height * 0.25f)
+                }
+                drawPath(check, V4Color.background, style = Stroke(
+                    width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+            }
         }
         Text(label, color = V4Color.sub, fontSize = 11.sp, maxLines = 1)
     }
