@@ -54,17 +54,22 @@ git checkout -- $frozen
 git status --short -- $frozen
 ```
 
-macOS·Linux(또는 Git Bash)에서는 같은 목록으로:
+macOS·Linux(bash·zsh, 또는 Git Bash)에서는 같은 목록으로:
 
 ```
 git config core.autocrlf false
-frozen="eval/labels_i3_v1.json eval/match_gold_i3_v1.json ai/eval/i3_photo_sha256.json backend/app/matching/staged.py backend/app/matching/vocab_ko_en.json ai/catalog/catalog_v2_service.json backend/app/matching/llm_layer.py backend/app/matching/prompts/translate_prompt_v3.md backend/app/matching/prompts/pick_prompt_v1.md backend/app/adapters/matching_llm.py backend/app/adapters/gemini_matching_llm.py ai/eval/i3_match_eval.py ai/eval/match_eval.py"
-rm $frozen
-git checkout -- $frozen
-git status --short -- $frozen
+frozen=(eval/labels_i3_v1.json eval/match_gold_i3_v1.json ai/eval/i3_photo_sha256.json
+  backend/app/matching/staged.py backend/app/matching/vocab_ko_en.json ai/catalog/catalog_v2_service.json
+  backend/app/matching/llm_layer.py backend/app/matching/prompts/translate_prompt_v3.md
+  backend/app/matching/prompts/pick_prompt_v1.md backend/app/adapters/matching_llm.py
+  backend/app/adapters/gemini_matching_llm.py ai/eval/i3_match_eval.py ai/eval/match_eval.py)
+rm -- "${frozen[@]}"
+git checkout -- "${frozen[@]}"
+git status --short -- "${frozen[@]}"
 ```
 
-- `git status`에 아무것도 나오지 않으면 된다. 파일을 지운 뒤 다시 받는 것은, 이미 받아 둔 파일은 설정을 바꿔도 git이 다시 쓰지 않기 때문이다. `core.autocrlf false`에서는 git이 커밋된 바이트(LF) 그대로 쓴다.
+- 마지막 `git status`에 아무것도 나오지 않으면 된다. 파일을 지운 뒤 다시 받는 것은, 이미 받아 둔 파일은 설정을 바꿔도 git이 다시 쓰지 않기 때문이다. `core.autocrlf false`에서는 git이 커밋된 바이트(LF) 그대로 쓴다.
+- 그 뒤 `git status --short`에 다른 파일이 많이 `M`으로 나오면 줄 끝만 다른 것이다(CRLF로 받아 둔 나머지 파일). 그대로 두면 `manifest.json`의 `uncommitted_changes`에 추출 코드가 바뀐 것으로 남으므로 전체를 LF로 다시 받는다. 먼저 `git diff --ignore-cr-at-eol --stat`이 아무것도 내지 않는지(줄 끝 말고는 바뀐 것이 없는지) 확인하고, 그때만 `git checkout -- .`을 돌린다. 이 명령은 커밋하지 않은 변경을 모두 지운다. 다시 `git status --short`가 비어 있어야 한다.
 - 목록은 `p30_extract.py`의 `FROZEN_RAW`(라벨·정답·해시 파일, `.gitattributes`에 `eol=lf`)와 `FROZEN_MATCHING`(동결 4.5 매칭 구성 요소)이다. 추출 코드(`FROZEN_CODE`)와 채점 코드(`FROZEN_EVAL`)는 CRLF를 LF로 읽어 비교하므로 다시 받지 않아도 된다.
 - 다음 절의 `--check`가 이것을 확인한다. 줄 끝만 다르면 `CRLF line ends (Windows core.autocrlf=true ...)`로 멈추고, 그때는 위 명령을 다시 돌린다.
 
