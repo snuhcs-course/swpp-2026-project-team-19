@@ -26,6 +26,7 @@ internal fun OwnerRegistrationDashboard(
     onReject: (String) -> Unit,
     onApprove: (MockOwnerApplication) -> Unit,
 ) {
+    val now = rememberOwnerNow()
     val bars = snapshot.bars
     val applications = snapshot.applications
         .filterNot { it.applicationId in snapshot.dismissedApplicationIds }
@@ -47,11 +48,19 @@ internal fun OwnerRegistrationDashboard(
                 RoundedCornerShape(16.dp)).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(bar.name, style = MaterialTheme.typography.titleLarge)
-                OwnerStatusLabel(
-                    if (snapshot.hasPublishedInitialReview(bar.barId)) "정상 영업" else "메뉴 확인 필요",
-                    if (snapshot.hasPublishedInitialReview(bar.barId)) OwnerStatusTone.SUCCESS
-                    else OwnerStatusTone.ATTENTION
-                )
+                // Same persisted bar exception and weekly schedule as management home.
+                val temporary = homeOperatingException(bar, now)
+                // Match the home-card headline; keep current open/closed as separate detail.
+                val operatingLabel = registrationOperatingLabel(temporary, now)
+                OwnerStatusLabel(operatingLabel,
+                    if (temporary != null) OwnerStatusTone.ATTENTION else OwnerStatusTone.SUCCESS)
+                if (bar.weeklyHours.isNotEmpty()) {
+                    Text(homeOperatingState(bar, now), style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (!snapshot.hasPublishedInitialReview(bar.barId)) {
+                    OwnerStatusLabel("메뉴 확인 필요", OwnerStatusTone.ATTENTION)
+                }
                 Text(bar.address, style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OwnerActionButton("매장 관리하기", { onManage(bar) }, Modifier.fillMaxWidth())

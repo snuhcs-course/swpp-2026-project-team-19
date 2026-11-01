@@ -24,12 +24,19 @@ import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerOperatingQuickScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuQuickEntryScreen
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
+import com.zerotoone.bottlemap.ui.owner.OwnerInfoHtmlV4Screen
+import com.zerotoone.bottlemap.ui.owner.OwnerPhotoHtmlV4Screen
+import com.zerotoone.bottlemap.ui.owner.OwnerBarTagsEditorScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerBarHoursEditorScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerPreviewHtmlV4Screen
 import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 
 /** One Android artifact: everyone starts in Customer, with Owner accessible from My Page. */
 internal const val variantStartDestination = "customer"
 
 internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
+    // Shared by both ends of the Owner manage <-> preview round trip.
+    val previewSwitchCooldown = OwnerPreviewSwitchCooldown()
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
@@ -84,7 +91,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         viewModel = data,
                         onRetry = data::retry,
                         onBack = { navController.popBackStack() },
-                        onPreview = { navController.navigate(OwnerPage.MGR_PREVIEW.route) },
+                        onPreview = { navController.openOwnerManagerPreviewSafely(previewSwitchCooldown) },
                         onInfo = { navController.navigate(OwnerPage.MGR_INFO.route) },
                         onStatus = { navController.navigate(OwnerPage.MGR_STATUS.route) },
                         onMenu = { navController.navigate(OwnerPage.MGR_MENU.route) },
@@ -103,6 +110,26 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         state = mockState,
                         viewModel = data,
                         onBack = { navController.popBackStack() },
+                    )
+                    OwnerPage.MGR_INFO -> OwnerInfoHtmlV4Screen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.popBackStack() },
+                        onPhotos = { navController.navigate(OwnerPage.MGR_PHOTOS.route) },
+                    )
+                    OwnerPage.MGR_PHOTOS -> OwnerPhotoHtmlV4Screen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.popBackStack() },
+                    )
+                    // Legacy UX jump destinations share the one HTML-v4 info form.
+                    OwnerPage.MGR_TAGS, OwnerPage.MGR_HOURS -> OwnerInfoHtmlV4Screen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.popBackStack() },
+                        onPhotos = { navController.navigate(OwnerPage.MGR_PHOTOS.route) },
+                    )
+                    OwnerPage.MGR_PREVIEW -> OwnerPreviewHtmlV4Screen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.returnToOwnerManagerSafely(previewSwitchCooldown) },
+                        onManage = { navController.returnToOwnerManagerSafely(previewSwitchCooldown) },
                     )
                     OwnerPage.MGR_MENU -> OwnerMenuQuickEntryScreen(
                         state = mockState,
@@ -154,4 +181,45 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
             }
         }
     }
+}
+
+/**
+ * A fast click on "미리보기 -> 관리 -> 미리보기" can arrive while the outgoing
+ * Compose destination is still being drawn. Never use an unqualified popBackStack
+ * for that return action: a stale second click must not pop the manager itself.
+ */
+/**
+ * One monotonic 500-ms window for both "미리보기" and "관리" actions.
+ * The time source is injectable so the boundary can be regression tested.
+ */
+internal class OwnerPreviewSwitchCooldown(
+    private val nowMs: () -> Long = { android.os.SystemClock.elapsedRealtime() },
+) {
+    private var lastAcceptedMs: Long? = null
+
+    fun allow(): Boolean {
+        val current = nowMs()
+        val previous = lastAcceptedMs
+        if (previous != null && current - previous < 500L) return false
+        lastAcceptedMs = current
+        return true
+    }
+}
+
+internal fun NavHostController.returnToOwnerManagerSafely(
+    cooldown: OwnerPreviewSwitchCooldown,
+): Boolean {
+    if (currentDestination?.route != OwnerPage.MGR_PREVIEW.route) return false
+    if (!cooldown.allow()) return false
+    return popBackStack(OwnerPage.MGR_HOME.route, inclusive = false)
+}
+
+/** Reject clicks on a stale destination and early repeats across both buttons. */
+internal fun NavHostController.openOwnerManagerPreviewSafely(
+    cooldown: OwnerPreviewSwitchCooldown,
+): Boolean {
+    if (currentDestination?.route != OwnerPage.MGR_HOME.route) return false
+    if (!cooldown.allow()) return false
+    navigate(OwnerPage.MGR_PREVIEW.route) { launchSingleTop = true }
+    return true
 }

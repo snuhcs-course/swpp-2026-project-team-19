@@ -32,6 +32,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", stringBuildConfigValue(kakaoNativeAppKey))
         buildConfigField("String", "SUPABASE_URL", stringBuildConfigValue(supabaseUrl))
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", stringBuildConfigValue(supabasePublishableKey))
@@ -91,6 +92,11 @@ dependencies {
 
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

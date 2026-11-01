@@ -43,6 +43,16 @@ internal fun homeExceptionHeading(exception: MockOperatingException?): String = 
     null -> "정상 영업"
 }
 
+/** Registration headline must not claim a future vacation has already closed the bar. */
+internal fun registrationOperatingLabel(
+    exception: MockOperatingException?, atEpochMs: Long,
+): String = when {
+    exception?.kind == MockExceptionKind.VACATION ->
+        if (exception.fromEpochDay > ownerToday(atEpochMs).toEpochDay())
+            "임시 휴업 예정" else "임시 휴무"
+    else -> homeExceptionHeading(exception)
+}
+
 internal fun homeOperatingState(bar: MockBar, atEpochMs: Long): String {
     val now = Instant.ofEpochMilli(atEpochMs).atZone(ownerSeoulZone)
     val day = now.toLocalDate().toEpochDay()
@@ -57,22 +67,38 @@ internal fun homeOperatingState(bar: MockBar, atEpochMs: Long): String {
     val today = now.dayOfWeek.value
     val previous = if (today == 1) 7 else today - 1
     val previousShift = bar.weeklyHours.firstOrNull { it.isoDayOfWeek == previous }
-    val overnight = previousShift != null && !previousShift.closed &&
+    // Evaluate yesterday's effective schedule independently of today's exception.
+    // A temporary closure or shortened shift overrides yesterday's regular
+    // overnight hours even though it is no longer active on today's date.
+    val previousException = bar.exceptions.lastOrNull {
+        (day - 1) in it.fromEpochDay..it.toEpochDay
+    }
+    val overnight = previousException == null &&
+        previousShift != null && !previousShift.closed &&
         previousShift.closesNextDay && previousShift.closeMinutes != null &&
         todayMinute < previousShift.closeMinutes
     val regular = bar.weeklyHours.firstOrNull { it.isoDayOfWeek == today }
-    val open = if (exception?.kind == MockExceptionKind.CUSTOM_HOURS) exception.openMinutes
-        else regular?.takeUnless { it.closed }?.openMinutes
-    val close = if (exception?.kind == MockExceptionKind.CUSTOM_HOURS) exception.closeMinutes
-        else regular?.takeUnless { it.closed }?.closeMinutes
-    val endsNextDay = if (exception?.kind == MockExceptionKind.CUSTOM_HOURS)
-        exception.closesNextDay else regular?.closesNextDay == true
-    if (open == null || close == null) {
-        return if (overnight) "영업 중" else if (bar.weeklyHours.isEmpty()) "영업시간 정보 없음" else "영업 종료"
+    // A shift starting *today* cannot make the bar open this morning.
+    // Yesterday's overnight shift is evaluated separately.
+    val previousTemporary = previousException?.takeIf {
+        it.kind == MockExceptionKind.CUSTOM_HOURS && it.closesNextDay
     }
-    val currentlyOpen = if (endsNextDay || close <= open)
-        todayMinute >= open || todayMinute < close
-    else todayMinute in open until close
+    if (previousTemporary?.closeMinutes != null &&
+        todayMinute < previousTemporary.closeMinutes) return "영업 중"
+
+    val todayTemporary = exception?.takeIf {
+        it.kind == MockExceptionKind.CUSTOM_HOURS &&
+            day in it.fromEpochDay..it.toEpochDay
+    }
+    val open = todayTemporary?.openMinutes ?: regular?.takeUnless { it.closed }?.openMinutes
+    val close = todayTemporary?.closeMinutes ?: regular?.takeUnless { it.closed }?.closeMinutes
+    val endsNextDay = todayTemporary?.closesNextDay ?: (regular?.closesNextDay == true)
+    if (open == null || close == null) {
+        return if (overnight) "영업 중"
+        else if (bar.weeklyHours.isEmpty()) "영업시간 정보 없음" else "영업 종료"
+    }
+    val currentlyOpen = if (endsNextDay) todayMinute >= open
+        else todayMinute in open until close
     return if (overnight || currentlyOpen) "영업 중" else "영업 종료"
 }
 

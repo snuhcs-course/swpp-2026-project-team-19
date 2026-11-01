@@ -23,6 +23,11 @@ class OwnerManagementHomeStateTest {
         assertEquals(vacation, homeOperatingException(bar, time(12)))
         assertTrue(homeExceptionHeading(vacation).contains("임시 휴업"))
         assertTrue(homeExceptionHeading(vacation).contains("\n"))
+        assertEquals("임시 휴업 예정", registrationOperatingLabel(vacation, time(12)))
+        val duringVacation = day.plusDays(3).atTime(12, 0)
+            .atZone(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals("임시 휴무", registrationOperatingLabel(vacation, duringVacation))
+        assertEquals("정상 영업", registrationOperatingLabel(null, time(12)))
         assertNull(homeOperatingException(bar, day.plusDays(8).atStartOfDay(ownerSeoulZone)
             .toInstant().toEpochMilli()))
     }
@@ -43,6 +48,44 @@ class OwnerManagementHomeStateTest {
         assertEquals("오늘 영업시간 변경", homeExceptionHeading(custom))
     }
 
+    @Test fun multiDayCustomHoursApplyEveryDayAndOvernightAfterFinalDay() {
+        val start = day.toEpochDay()
+        val schedule = MockOperatingException(
+            "multi-day", MockExceptionKind.CUSTOM_HOURS,
+            start, start + 2, openMinutes = 19 * 60, closeMinutes = 2 * 60,
+            closesNextDay = true
+        )
+        val bar = MockBar("b", "바", "서울", exceptions = listOf(schedule))
+        fun at(offset: Long, hour: Int): Long =
+            day.plusDays(offset).atTime(hour, 0)
+                .atZone(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals("영업 종료", homeOperatingState(bar, at(0, 12)))
+        assertEquals("영업 중", homeOperatingState(bar, at(0, 20)))
+        assertEquals("영업 중", homeOperatingState(bar, at(1, 1)))
+        assertEquals("영업 종료", homeOperatingState(bar, at(1, 12)))
+        assertEquals("영업 중", homeOperatingState(bar, at(1, 20)))
+        assertEquals("영업 중", homeOperatingState(bar, at(2, 20)))
+        assertEquals("영업 중", homeOperatingState(bar, at(3, 1)))
+        assertEquals("영업시간 정보 없음", homeOperatingState(bar, at(3, 3)))
+    }
+
+    @Test fun previewOvernightCloseTimeUsesTodayForOngoingMultiDayShift() {
+        val start = day.toEpochDay()
+        val custom = MockOperatingException(
+            "overnight-range", MockExceptionKind.CUSTOM_HOURS,
+            start, start + 2, openMinutes = 19 * 60, closeMinutes = 2 * 60,
+            closesNextDay = true
+        )
+        val bar = MockBar("bar", "바", "서울", exceptions = listOf(custom))
+        fun at(offset: Long, hour: Int) = day.plusDays(offset).atTime(hour, 0)
+            .atZone(ownerSeoulZone).toInstant().toEpochMilli()
+        assertEquals("익일 02:00 종료", ownerPreviewNextText(bar, at(0, 20)))
+        assertEquals("02:00 종료", ownerPreviewNextText(bar, at(1, 1)))
+        assertEquals("02:00 종료", ownerPreviewNextText(bar, at(2, 1)))
+        assertEquals("02:00 종료", ownerPreviewNextText(bar, at(3, 1)))
+        assertEquals("익일 02:00 종료", ownerPreviewNextText(bar, at(2, 20)))
+    }
+
     @Test fun yesterdayTemporaryOvernightHoursRemainVisibleAfterMidnight() {
         val yesterday = day.minusDays(1)
         val hours = MockOperatingException(
@@ -54,6 +97,103 @@ class OwnerManagementHomeStateTest {
         assertEquals(hours, homeOperatingException(bar, time(1)))
         assertEquals("영업 중", homeOperatingState(bar, time(1)))
         assertNull(homeOperatingException(bar, time(3)))
+    }
+
+    @Test fun regularOvernightDoesNotOpenBeforeTonightWhenYesterdayWasClosed() {
+        val currentDay = MockWeeklyHours(6, closed = false, openMinutes = 18 * 60,
+            closeMinutes = 2 * 60, closesNextDay = true)
+        val fridayClosed = MockWeeklyHours(5, closed = true)
+        val bar = MockBar("b", "바", "서울", weeklyHours = listOf(currentDay, fridayClosed))
+        assertEquals("영업 종료", homeOperatingState(bar, time(1)))
+        assertEquals("영업 중", homeOperatingState(bar, time(19)))
+        val nextMorning = day.plusDays(1).atTime(1, 0).atZone(ownerSeoulZone)
+            .toInstant().toEpochMilli()
+        assertEquals("영업 중", homeOperatingState(bar, nextMorning))
+        val afterClose = day.plusDays(1).atTime(3, 0).atZone(ownerSeoulZone)
+            .toInstant().toEpochMilli()
+        assertEquals("영업 종료", homeOperatingState(bar, afterClose))
+    }
+
+    @Test fun previousDayOverrideSuppressesStaleRegularOvernightShift() {
+        // Friday's regular hours cross midnight. Saturday at 01:00 must
+        // reflect Friday's active override, not Friday's regular template.
+        val friday = day.minusDays(1).toEpochDay()
+        val regular = MockWeeklyHours(5, false, 18 * 60, 4 * 60, closesNextDay = true)
+        val saturday = MockWeeklyHours(6, false, 19 * 60, 23 * 60)
+        val base = MockBar("b", "바", "서울", weeklyHours = listOf(regular, saturday))
+        assertEquals("영업 중", homeOperatingState(base, time(1)))
+
+        val shortened = MockOperatingException(
+            "short", MockExceptionKind.CUSTOM_HOURS, friday, friday,
+            openMinutes = 18 * 60, closeMinutes = 23 * 60
+        )
+        assertEquals("영업 종료",
+            homeOperatingState(base.copy(exceptions = listOf(shortened)), time(1)))
+        assertEquals("영업 중",
+            homeOperatingState(base.copy(exceptions = listOf(shortened)), time(20)))
+
+        val closed = MockOperatingException(
+            "closed", MockExceptionKind.CLOSED_TODAY, friday, friday
+        )
+        assertEquals("영업 종료",
+            homeOperatingState(base.copy(exceptions = listOf(closed)), time(1)))
+
+        val vacation = MockOperatingException(
+            "vacation", MockExceptionKind.VACATION, friday, friday
+        )
+        assertEquals("영업 종료",
+            homeOperatingState(base.copy(exceptions = listOf(vacation)), time(1)))
+
+        // A temporary overnight shift takes precedence over the original
+        // 04:00 regular close, and must stop being open at its own 02:00 close.
+        val shortenedOvernight = shortened.copy(
+            closeMinutes = 2 * 60, closesNextDay = true)
+        val override = base.copy(exceptions = listOf(shortenedOvernight))
+        assertEquals("영업 중", homeOperatingState(override, time(1)))
+        assertEquals("영업 종료", homeOperatingState(override, time(3)))
+    }
+
+    @Test fun previewUsesTodaysCloseWhenYesterdaysRegularOvernightWasOverridden() {
+        val friday = day.minusDays(1).toEpochDay()
+        val regularFriday = MockWeeklyHours(5, false, 18 * 60, 4 * 60,
+            closesNextDay = true)
+        val saturday = MockWeeklyHours(6, false, 0, 6 * 60)
+        val base = MockBar("b", "바", "서울",
+            weeklyHours = listOf(regularFriday, saturday))
+        assertEquals("04:00 종료", ownerPreviewNextText(base, time(1)))
+
+        val shortFriday = MockOperatingException(
+            "short", MockExceptionKind.CUSTOM_HOURS, friday, friday,
+            openMinutes = 18 * 60, closeMinutes = 23 * 60
+        )
+        val overridden = base.copy(exceptions = listOf(shortFriday))
+        assertEquals("영업 중", homeOperatingState(overridden, time(1)))
+        assertEquals("06:00 종료", ownerPreviewNextText(overridden, time(1)))
+
+        val closedFriday = shortFriday.copy(kind = MockExceptionKind.CLOSED_TODAY)
+        assertEquals("06:00 종료", ownerPreviewNextText(
+            base.copy(exceptions = listOf(closedFriday)), time(1)))
+
+        val vacationFriday = shortFriday.copy(kind = MockExceptionKind.VACATION)
+        assertEquals("06:00 종료", ownerPreviewNextText(
+            base.copy(exceptions = listOf(vacationFriday)), time(1)))
+
+        // The temporary overnight closing time, when present, still takes precedence.
+        val overnightFriday = shortFriday.copy(closeMinutes = 2 * 60, closesNextDay = true)
+        assertEquals("02:00 종료", ownerPreviewNextText(
+            base.copy(exceptions = listOf(overnightFriday)), time(1)))
+    }
+
+    @Test fun completedTemporaryDayReturnsToRegularSchedule() {
+        val ended = MockOperatingException(
+            "ended", MockExceptionKind.CLOSED_TODAY, day.minusDays(1).toEpochDay(),
+            day.minusDays(1).toEpochDay(), note = "어제 휴무"
+        )
+        val bar = MockBar("b", "바", "서울",
+            weeklyHours = listOf(MockWeeklyHours(6, false, 18 * 60, 23 * 60)),
+            exceptions = listOf(ended))
+        assertNull(homeOperatingException(bar, time(20)))
+        assertEquals("영업 중", homeOperatingState(bar, time(20)))
     }
 
     @Test fun menuFreshnessUsesLatestOfPublishedAndVerifiedButKeepsThemIndependent() {
