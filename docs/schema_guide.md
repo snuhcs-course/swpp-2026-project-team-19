@@ -261,6 +261,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `latitude` | `decimal(9,6)`, NOT NULL, CHECK -90~90 | `37.478321` | WGS84 위도다. 지도 표시와 고객 위치와의 직선 거리 계산에 사용한다. |
 | `longitude` | `decimal(9,6)`, NOT NULL, CHECK -180~180 | `126.951234` | WGS84 경도다. 지도 표시와 고객 위치와의 직선 거리 계산에 사용한다. |
 | `phone` | `varchar(30)`, nullable | `02-1234-5678` | 업장 상세 정보로 제공할 수 있다. |
+| `description` | `varchar(100)`, nullable | `싱글몰트 위주의 조용한 바` | 업장 한 줄 소개다. 업주나 운영자가 업장 수정(API 명세 3.7)으로 정하고, 앞뒤 공백을 지운 값을 저장하며 공백뿐이면 null이다. 업장을 만들 때(생성, 신청 승인)는 받지 않아 null이다. 고객 업장 상세(API 명세 3.9)에 나온다. |
 | `default_pour_ml` | `smallint`, nullable, CHECK 1~999 | `30` | 업주가 정한 매장 기본 잔 용량이다. 메뉴 직접 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데만 쓴다. 백엔드가 게시 메뉴에 자동으로 적용하지 않으며, 바꿔도 이미 게시된 옵션은 바뀌지 않는다. |
 | `status` | `bar_status`, NOT NULL, 기본 `active` | `active` | 폐업 또는 서비스 제외 업장을 삭제하지 않고 비활성화한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:10:00Z` | 업장 등록 시점이다. |
