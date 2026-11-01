@@ -62,12 +62,9 @@ def _float(value) -> float | None:
     return float(value) if value is not None else None
 
 
-def _load_import(session: Session, menu_import_id: str) -> MenuImport:
-    try:
-        import_id = UUID(menu_import_id)
-    except ValueError:
-        raise menu_import_not_found(menu_import_id) from None
-    menu_import = session.scalar(
+def _load_import(session: Session, import_id: UUID) -> MenuImport:
+    """The import with everything the review needs; the route has checked that it exists."""
+    return session.scalar(
         select(MenuImport)
         .where(MenuImport.id == import_id)
         .options(
@@ -77,9 +74,6 @@ def _load_import(session: Session, menu_import_id: str) -> MenuImport:
             .options(selectinload(ExtractedItem.options), selectinload(ExtractedItem.candidates))
         )
     )
-    if menu_import is None:
-        raise menu_import_not_found(menu_import_id)
-    return menu_import
 
 
 def _progress(menu_import: MenuImport) -> ImportProgress:
@@ -306,9 +300,9 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
 
 
 def get_menu_import_status(
-    session: Session, menu_import_id: str, storage: ImageStorage, base_url: str
+    session: Session, import_id: UUID, storage: ImageStorage, base_url: str
 ) -> MenuImportStatusResponse:
-    menu_import = _load_import(session, menu_import_id)
+    menu_import = _load_import(session, import_id)
     status = menu_import.status
     if status in (ImportStatus.UPLOADED, ImportStatus.PROCESSING):
         return ImportProcessingResponse(

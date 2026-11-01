@@ -1,9 +1,11 @@
 """GET /api/search/bar-names: active bars by part of their name or address (API spec, section 3.11.11)."""
 
+from datetime import datetime, timezone
+
 import pytest
 
-from app.models import BarStatus
-from tests.factories import make_bar
+from app.models import BarStatus, UserType
+from tests.factories import make_application, make_bar, make_owner, make_user
 from tests.sql_support import recorded_statements
 from tests.test_search_api import ANY_AUTHORIZATION
 
@@ -183,3 +185,26 @@ def test_every_item_has_exactly_the_spec_fields(client, db_session):
     make_bar(db_session, "Seorosang")
 
     assert [set(item) for item in find(client, "Seorosang")["items"]] == [ITEM_FIELDS]
+
+
+def test_has_owner_only_with_a_current_owner(client, db_session):
+    reviewer = make_user(db_session, "reviewer", user_type=UserType.OPERATOR)
+    owned = make_bar(db_session, "Malt Owned")
+    make_owner(db_session, make_user(db_session, "owner"), owned, reviewer)
+    revoked = make_bar(db_session, "Malt Revoked")
+    former = make_owner(db_session, make_user(db_session, "former"), revoked, reviewer)
+    former.revoked_at = datetime(2026, 10, 20, tzinfo=timezone.utc)
+    former.revoked_by_user_id = reviewer.id
+    applied = make_bar(db_session, "Malt Applied")
+    make_application(db_session, make_user(db_session, "applicant"), applied)
+    make_bar(db_session, "Malt Plain")
+    db_session.flush()
+
+    body = find(client, "Malt")
+
+    assert {item["name"]: item["hasOwner"] for item in body["items"]} == {
+        "Malt Applied": False,
+        "Malt Owned": True,
+        "Malt Plain": False,
+        "Malt Revoked": False,
+    }

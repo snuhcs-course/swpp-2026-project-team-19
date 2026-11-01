@@ -21,14 +21,12 @@ from app.adapters.storage import ImageStorage
 from app.core.errors import ApiError
 from app.models import (
     Bar,
-    BarStatus,
     ExtractionRun,
     ImportMode,
     ImportStatus,
     MenuImage,
     MenuImport,
 )
-from app.services.bar_menu import bar_not_found
 
 logger = logging.getLogger(__name__)
 
@@ -179,20 +177,14 @@ def create_menu_import(
     storage: ImageStorage,
     extractor: MenuExtractor,
     *,
-    bar_id: str,
+    bar: Bar,
     idempotency_key: str,
     mode: ImportMode,
     owner_note: str | None,
     uploads: list[ImageUpload],
 ) -> tuple[MenuImport, bool]:
-    """Returns the import and whether it was created now (False for a retried request)."""
-    try:
-        bar = session.get(Bar, UUID(bar_id))
-    except ValueError:
-        bar = None
-    if bar is None or bar.status != BarStatus.ACTIVE:
-        raise bar_not_found(bar_id)
-
+    """Returns the import and whether it was created now (False for a retried request). The route
+    has checked that `bar` is active and that the caller may manage it."""
     # The API sends null, not an empty string, for "no value".
     if owner_note is not None:
         owner_note = owner_note.strip() or None

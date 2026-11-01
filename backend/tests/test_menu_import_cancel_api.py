@@ -46,7 +46,7 @@ def new_import(db_session, storage, *, status=ImportStatus.UPLOADED, images=2, k
         db_session,
         storage,
         MockMenuExtractor(),
-        bar_id=str(make_bar(db_session, key).id),
+        bar=make_bar(db_session, key),
         idempotency_key=key,
         mode=ImportMode.FULL_REPLACE,
         owner_note=None,
@@ -212,7 +212,7 @@ class CancelingExtractor(MockMenuExtractor):
         self.calls += 1
         result = super().extract(image, content_type, filename)
         if self.calls == self.on_call:
-            cancel_menu_import(self.session, str(self.menu_import_id))
+            cancel_menu_import(self.session, self.menu_import_id)
             if self.error is not None:
                 raise self.error
         return result
@@ -250,7 +250,7 @@ def test_a_cancel_between_images_stops_before_the_next(db_session, factory, imag
         checks.append(import_id)
         # Checks: before image 1, after image 1, before image 2.
         if len(checks) == 3:
-            cancel_menu_import(session, str(import_id))
+            cancel_menu_import(session, import_id)
         return real_check(session, import_id)
 
     monkeypatch.setattr(menu_import_processing, "_still_processing", cancel_before_the_second_image)
@@ -268,7 +268,7 @@ def test_matching_after_a_cancel_is_rolled_back(db_session, factory, image_stora
 
     def cancel_then_resolve(session, menu_import, llm_layer=None):
         # A cancel committed before matching ends: the job's draft must not be kept.
-        cancel_menu_import(session, str(menu_import.id))
+        cancel_menu_import(session, menu_import.id)
         real_resolve(session, menu_import, llm_layer)
 
     monkeypatch.setattr(menu_import_processing, "_resolve_and_draft", cancel_then_resolve)
@@ -286,7 +286,7 @@ def test_an_error_after_a_cancel_keeps_the_import_canceled(db_session, factory, 
     menu_import = new_import(db_session, image_storage, status=ImportStatus.PROCESSING)
 
     def cancel_then_crash(session, menu_import, llm_layer=None):
-        cancel_menu_import(session, str(menu_import.id))
+        cancel_menu_import(session, menu_import.id)
         raise RuntimeError("bug")
 
     monkeypatch.setattr(menu_import_processing, "_resolve_and_draft", cancel_then_crash)
@@ -299,7 +299,7 @@ def test_an_error_after_a_cancel_keeps_the_import_canceled(db_session, factory, 
 
 def test_an_import_canceled_before_processing_is_not_processed(db_session, factory, image_storage):
     menu_import = new_import(db_session, image_storage, status=ImportStatus.PROCESSING)
-    cancel_menu_import(db_session, str(menu_import.id))
+    cancel_menu_import(db_session, menu_import.id)
 
     process_menu_import(factory, image_storage, MockMenuExtractor(), menu_import.id)
 
@@ -309,7 +309,7 @@ def test_an_import_canceled_before_processing_is_not_processed(db_session, facto
 def test_a_cancel_before_processing_starts_is_kept(db_session, factory, image_storage):
     # Canceled after the upload committed the import but before the request started processing it.
     menu_import = new_import(db_session, image_storage)
-    cancel_menu_import(db_session, str(menu_import.id))
+    cancel_menu_import(db_session, menu_import.id)
     db_session.expire_all()
     tasks = BackgroundTasks()
 

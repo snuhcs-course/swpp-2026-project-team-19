@@ -13,19 +13,14 @@ from sqlalchemy.orm import Session
 from app.core.errors import ApiError
 from app.models import ImportStatus, MenuImport, PipelineStatus
 from app.schemas.menu_import import ImportCanceledResponse
-from app.services.menu_import_review import canceled_response, menu_import_not_found
+from app.services.menu_import_review import canceled_response
 from app.services.menu_import_upload import UNFINISHED_STATUSES
 
 
-def cancel_menu_import(session: Session, menu_import_id: str) -> ImportCanceledResponse:
-    try:
-        import_id = UUID(menu_import_id)
-    except ValueError:
-        raise menu_import_not_found(menu_import_id) from None
-    # The same row lock as review-and-apply and the background job, so only one of them wins.
+def cancel_menu_import(session: Session, import_id: UUID) -> ImportCanceledResponse:
+    # The route has checked that the import exists. The same row lock as review-and-apply and the
+    # background job, so only one of them wins.
     menu_import = session.get(MenuImport, import_id, with_for_update=True)
-    if menu_import is None:
-        raise menu_import_not_found(menu_import_id)
     if menu_import.status == ImportStatus.CANCELED:
         # A retried request gets the same response.
         return canceled_response(menu_import)
