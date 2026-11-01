@@ -38,6 +38,11 @@ interface OwnerMockRepository {
     fun saveBrand(brand: MockBrand)
     fun saveCatalogProduct(product: MockCatalogProduct)
     fun saveMenuItem(item: MockBarMenuItem)
+    /** Atomic, app-local direct menu edit. Not an agreed backend contract. */
+    fun saveManualMenuItem(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct? = null,
+        newBrand: MockBrand? = null,
+    )
     fun setSoldOut(barMenuItemId: String, value: Boolean)
     fun deleteMenuItem(barMenuItemId: String)
     fun clearMenuForBar(barId: String)
@@ -342,6 +347,57 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(s.menuItems.none { it.barMenuItemId == item.barMenuItemId &&
                 (it.barId != item.barId || it.productId != item.productId) })
             s.copy(menuItems = s.menuItems.filterNot { it.barMenuItemId == item.barMenuItemId } + item) to Unit
+        }
+    }
+
+    override fun saveManualMenuItem(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
+    ) {
+        require(item.barMenuItemId.isNotBlank() && item.productId.isNotBlank())
+        require(item.options.all { it.optionId.isNotBlank() })
+        require(item.options.map { it.optionId }.distinct().size == item.options.size)
+        change { state ->
+            require(state.bars.any { it.barId == item.barId }) { "Unknown bar" }
+            val product = state.products.firstOrNull { it.productId == item.productId }
+                ?: requireNotNull(newProduct) { "상품을 먼저 확인해 주세요." }
+            require(product.productId == item.productId && product.displayName.isNotBlank())
+            require(manualMenuOptionError(item.options, product.category) == null) {
+                manualMenuOptionError(item.options, product.category) ?: "잘못된 가격 옵션"
+            }
+            if (state.products.none { it.productId == product.productId }) {
+                require(newBrand != null && newBrand.brandId == product.brandId ||
+                    state.brands.any { it.brandId == product.brandId }) { "Unknown brand" }
+                require(product.catalogMatched || product.productId.startsWith("local-unverified-")) {
+                    "Unmatched product needs an unverified local ID"
+                }
+            }
+            require(state.menuItems.none {
+                it.barId == item.barId && it.productId == item.productId &&
+                    it.barMenuItemId != item.barMenuItemId
+            }) { "이미 등록한 제품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요." }
+            require(state.menuItems.none {
+                it.barMenuItemId == item.barMenuItemId &&
+                    (it.productId != item.productId || it.barId != item.barId)
+            }) { "기존 메뉴의 제품 ID는 변경할 수 없어요." }
+            require(state.menuItems.none { existing ->
+                existing.barMenuItemId != item.barMenuItemId && existing.options.any { other ->
+                    item.options.any { it.optionId == other.optionId }
+                }
+            }) { "판매 옵션 ID 중복" }
+            val newBrands = if (newBrand != null &&
+                state.brands.none { it.brandId == newBrand.brandId })
+                state.brands + newBrand else state.brands
+            val newProducts = if (state.products.none { it.productId == product.productId })
+                state.products + product else state.products
+            state.copy(
+                brands = newBrands, products = newProducts,
+                menuItems = state.menuItems.filterNot { it.barMenuItemId == item.barMenuItemId } + item,
+                bars = state.bars.map { b ->
+                    if (b.barId == item.barId)
+                        b.copy(lastMenuPublishedAtEpochMs = System.currentTimeMillis())
+                    else b
+                },
+            ) to Unit
         }
     }
 
