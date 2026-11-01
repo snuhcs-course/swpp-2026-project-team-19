@@ -72,7 +72,6 @@ fun OwnerPreviewHtmlV4Screen(
     var fullImage by rememberSaveable { mutableStateOf(false) }
     var expanded by rememberSaveable { mutableStateOf("") }
     var noteVisible by rememberSaveable { mutableStateOf(false) }
-    var menuSearch by rememberSaveable { mutableStateOf("") }
     var drag by remember { mutableFloatStateOf(0f) }
     val clipboard = LocalClipboardManager.current
     val now = rememberOwnerNow()
@@ -287,41 +286,12 @@ fun OwnerPreviewHtmlV4Screen(
                     }
                 }
                 val preview = viewModel.preview(bar.barId, now)
-                Text("메뉴", style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold)
-                OutlinedTextField(
-                    value = menuSearch,
-                    onValueChange = { menuSearch = it },
-                    label = { Text("메뉴 검색") },
-                    modifier = Modifier.fillMaxWidth())
-                val visible = preview?.visibleMenu.orEmpty().filter { menu ->
-                    val product = preview?.products?.firstOrNull {
-                        it.productId == menu.productId
-                    }
-                    product?.displayName.orEmpty().contains(menuSearch.trim(),
-                        ignoreCase = true)
-                }
-                if (visible.isEmpty()) {
-                    Text(if (menuSearch.isBlank()) "등록된 메뉴가 없어요."
-                    else "검색 결과가 없어요.", style = MaterialTheme.typography.bodySmall)
-                }
-                visible.forEach { menu ->
-                    val product = preview?.products?.firstOrNull {
-                        it.productId == menu.productId
-                    }
-                    Column(Modifier.fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface,
-                            RoundedCornerShape(10.dp)).padding(11.dp)) {
-                        Text(product?.displayName ?: "상품 정보 없음",
-                            style = MaterialTheme.typography.titleSmall)
-                        menu.options.forEach { option ->
-                            val detail = (option.pourMl?.let { it.toString() + "ml · " }
-                                ?: option.label?.let { it + " · " }.orEmpty())
-                            Text(detail + option.displayPrice(now).toString() + "원",
-                                style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                }
+                OwnerPreviewV4Menu(
+                    bar = bar,
+                    preview = preview,
+                    brandCatalog = ownerInfoBar(state)?.first?.brands.orEmpty(),
+                    nowEpochMs = now,
+                )
                 Spacer(Modifier.height(20.dp))
             }
         }
