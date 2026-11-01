@@ -153,6 +153,7 @@ Table bars {
   latitude decimal(9,6) [not null, note: 'WGS84; CHECK between -90 and 90']
   longitude decimal(9,6) [not null, note: 'WGS84; CHECK between -180 and 180']
   phone varchar(30)
+  default_pour_ml smallint [note: 'CHECK between 1 and 999; owner-chosen default glass size, null when unset']
   status bar_status [not null, default: 'active']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
@@ -161,6 +162,8 @@ Table bars {
   Bars are created by project operators, or by an operator approving a new_bar owner application.
   The schema does not retain which operator originally created a bar.
   The bar's approved owner, if any, is the bar_owners row whose revoked_at is null.
+  default_pour_ml only pre-fills glass-option inputs in the owner's menu edit and review screens.
+  The backend never applies it to stored menu options.
   Coordinate storage may later change to a PostGIS geography or geometry type if spatial search requires it.
   '''
 }
@@ -264,10 +267,11 @@ Table bar_owners {
 Table brands {
   id uuid [pk]
   canonical_name varchar(120) [not null, unique]
+  created_by_user_id uuid [ref: > users.id, note: 'User who created the brand in a review or a manual menu add; null for seeded brands']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 
-  Note: 'Canonical brand record shared by all products from the same brand. The schema does not retain which operator originally created a brand.'
+  Note: 'Canonical brand record shared by all products from the same brand.'
 }
 
 Table brand_aliases {
@@ -303,6 +307,7 @@ Table products {
   abv decimal(5,2)
   is_active boolean [not null, default: true]
   created_from_extracted_item_id uuid [ref: > extracted_items.id]
+  created_by_user_id uuid [ref: > users.id, note: 'User who created the product in a review or a manual menu add; null for seeded products']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 
@@ -318,10 +323,10 @@ Table products {
   brand, age, edition, and full-product aliases. A conflicting age or edition must not be auto-merged.
   age_years is nullable for no-age-statement products, and edition_name distinguishes releases that
   share the same brand and age. ABV is optional metadata and is not an identity key in the MVP.
-  When no existing product matches, an operator may create a product during menu review and link its
-  originating extracted item. This optional link records only the item that triggered initial product
-  creation, not every later occurrence of the product. Manually pre-registered products have no source
-  item. The schema does not separately retain which operator originally created a product.
+  When no existing product matches, an operator or the bar's owner may create a product during menu review
+  and link its originating extracted item. This optional link records only the item that triggered initial
+  product creation, not every later occurrence of the product. A product created by a manual menu add has
+  no source item. Manually pre-registered products have neither a source item nor a creating user.
   '''
 }
 
@@ -597,13 +602,15 @@ Table menu_boards {
   id uuid [pk]
   bar_id uuid [not null, unique, ref: > bars.id]
   last_import_id uuid [ref: > menu_imports.id]
+  version integer [not null, default: 1, note: 'Incremented on every review publish and manual edit; checked by manual edits']
   published_at timestamptz [not null]
 
   Note: '''
   A menu board is the current grouping of bar menu items shown by a bar. Each bar has at most one current
   menu board. A full replacement rebuilds its entries, while a partial update changes only selected
-  entries. last_import_id identifies the latest change; each sales option can trace its own source
-  through source_extracted_option_id. The underlying bar_menu_items rows remain, and original images
+  entries. Manual edits change one entry or empty the board without an import. last_import_id identifies
+  the latest import publish and is unchanged by manual edits; each sales option can trace its own source
+  through source_extracted_option_id, which is null for options entered manually. The underlying bar_menu_items rows remain, and original images
   and AI processing records remain under the import workflow.
   '''
 }
