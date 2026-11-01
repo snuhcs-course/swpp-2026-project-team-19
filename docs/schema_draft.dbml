@@ -128,6 +128,12 @@ Enum business_status {
   closed
 }
 
+Enum operating_exception_kind {
+  closed_today
+  custom_hours
+  vacation
+}
+
 Table users {
   id uuid [pk]
   auth_subject varchar(255) [not null, unique, note: 'Supabase Auth user ID (the access token sub, a UUID string)']
@@ -155,6 +161,7 @@ Table bars {
   phone varchar(30)
   description varchar(100) [note: 'One-line introduction set by the owner or an operator; trimmed, null when blank']
   default_pour_ml smallint [note: 'CHECK between 1 and 999; owner-chosen default glass size, null when unset']
+  tags "varchar(24)[]" [not null, default: '{}', note: 'Up to 5 owner-chosen tags in display order; trimmed, no line breaks or control characters, unique ignoring case']
   status bar_status [not null, default: 'active']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
@@ -165,6 +172,7 @@ Table bars {
   The bar's approved owner, if any, is the bar_owners row whose revoked_at is null.
   default_pour_ml only pre-fills glass-option inputs in the owner's menu edit and review screens.
   The backend never applies it to stored menu options.
+  Tags are free text shown on the customer bar detail; they are not used by search.
   Coordinate storage may later change to a PostGIS geography or geometry type if spatial search requires it.
   '''
 }
@@ -262,6 +270,64 @@ Table bar_owners {
   bar's information and menu imports; a user may own several bars, but a bar has at most one current
   owner. Revoking keeps the row and sets revoked_at so the history remains. Ownership does not change
   users.user_type.
+  '''
+}
+
+Table bar_weekly_hours {
+  bar_id uuid [not null, ref: > bars.id]
+  day_of_week smallint [not null, note: 'ISO 8601: 1 = Monday .. 7 = Sunday']
+  is_closed boolean [not null, note: 'Regular day off']
+  open_time time [note: 'Local Asia/Seoul time, 5-minute steps; null exactly when is_closed']
+  close_time time [note: 'Earlier than open_time means the shift ends the next day; never equal to open_time']
+
+  indexes {
+    (bar_id, day_of_week) [pk]
+  }
+
+  Note: '''
+  Regular opening hours, one shift per weekday. A weekday without a row has no information, which differs
+  from a day off. PATCH /api/bars/{barId} replaces all rows of the bar at once.
+  '''
+}
+
+Table bar_operating_exceptions {
+  id uuid [pk]
+  bar_id uuid [not null, unique, ref: - bars.id, note: 'At most one exception per bar; applying a new one replaces it']
+  kind operating_exception_kind [not null]
+  start_date date [not null, note: 'Local Asia/Seoul date. closed_today and custom_hours: the day it was applied']
+  end_date date [not null, note: 'CHECK end_date >= start_date; equal to start_date unless kind is vacation']
+  open_time time [note: 'custom_hours only, required there']
+  close_time time [note: 'custom_hours only, required there; earlier than open_time means it ends the next day']
+  note varchar(100) [note: 'Message shown to customers; trimmed, single line, null when blank']
+  created_by_user_id uuid [ref: > users.id, note: 'Who applied it; null for a temporary-login operator without a users row']
+  created_at timestamptz [not null]
+
+  Note: '''
+  A temporary closure or a change to today's hours. It overrides the regular hours of the dates it covers.
+  An expired row is not deleted by a job: the API hides it once it has ended, and the next apply or cancel
+  replaces or deletes it.
+  '''
+}
+
+Table bar_photos {
+  id uuid [pk]
+  bar_id uuid [not null, ref: > bars.id]
+  storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>.<jpg|png> in the image storage']
+  content_type varchar(20) [not null, note: 'image/jpeg or image/png, detected from the content']
+  content_sha256 char(64) [not null, note: 'SHA-256 of the stored bytes; the same photo cannot be added twice to a bar']
+  sort_order smallint [not null, note: '1 = cover photo; contiguous from 1 within a bar']
+  uploaded_by_user_id uuid [ref: > users.id, note: 'null for a temporary-login operator without a users row']
+  created_at timestamptz [not null]
+
+  indexes {
+    (bar_id, content_sha256) [unique]
+    (bar_id, sort_order)
+  }
+
+  Note: '''
+  Gallery photos shown to customers, at most 15 per bar. Separate from menu photos, which are never public.
+  The bucket stays private: GET /api/bar-photos/{photoId} reads the file and serves it with a long cache lifetime.
+  Deleting a photo deletes the row and then the stored file.
   '''
 }
 

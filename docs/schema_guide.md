@@ -231,6 +231,14 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 휴업이나 폐업 사업자의 신청도 받으며, 승인 여부는 운영자가 판단한다.
 
+### 4.18 operating_exception_kind
+
+| 값 | 의미 |
+|---|---|
+| `closed_today` | 적용한 날 하루 임시 휴무 |
+| `custom_hours` | 적용한 날만 영업시간 변경. `open_time`, `close_time`이 필수다 |
+| `vacation` | `start_date`부터 `end_date`까지 임시 휴업 |
+
 ## 5 Accounts and Bars
 
 ### 5.1 users
@@ -263,6 +271,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `phone` | `varchar(30)`, nullable | `02-1234-5678` | 업장 상세 정보로 제공할 수 있다. |
 | `description` | `varchar(100)`, nullable | `싱글몰트 위주의 조용한 바` | 업장 한 줄 소개다. 업주나 운영자가 업장 수정(API 명세 3.7)으로 정하고, 앞뒤 공백을 지운 값을 저장하며 공백뿐이면 null이다. 줄바꿈을 허용하고 이스케이프 없이 받은 그대로 저장한다. 업장을 만들 때(생성, 신청 승인)는 받지 않아 null이다. 고객 업장 상세(API 명세 3.9)에 나온다. |
 | `default_pour_ml` | `smallint`, nullable, CHECK 1~999 | `30` | 업주가 정한 매장 기본 잔 용량이다. 메뉴 직접 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데만 쓴다. 백엔드가 게시 메뉴에 자동으로 적용하지 않으며, 바꿔도 이미 게시된 옵션은 바뀌지 않는다. |
+| `tags` | `varchar(24)[]`, NOT NULL, 기본 `{}` | `{싱글몰트,조용한 분위기}` | 매장 태그를 표시 순서대로 저장한다. 최대 5개이고, 태그마다 앞뒤 공백을 지운 1~24자이며 줄바꿈과 제어 문자가 없고, 대소문자를 무시해도 서로 다르다. 업주나 운영자가 업장 수정(API 명세 3.7)으로 목록 전체를 바꾼다. 자유 입력이며 검색에는 쓰지 않는다. 검색에 쓰게 되면 별도 테이블이나 GIN 인덱스를 검토한다. |
 | `status` | `bar_status`, NOT NULL, 기본 `active` | `active` | 폐업 또는 서비스 제외 업장을 삭제하지 않고 비활성화한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:10:00Z` | 업장 등록 시점이다. |
 | `updated_at` | `timestamptz`, NOT NULL | `2026-09-28T04:10:00Z` | 주소 전화번호 등의 최종 변경 시점이다. |
@@ -348,6 +357,75 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 - 사진은 신청자와 운영자에게만 서명 URL로 보여 주며 공개 API에 포함하지 않는다.
 
 **필요한 이유:** 새 업장 신청은 승인 전까지 업장이 없어 `menu_imports`(`bar_id` NOT NULL)를 만들 수 없다. 그래서 승인 전 사진은 신청에 묶어 두고, 승인할 때 업장이 정해지면 작업으로 옮긴다.
+
+### 5.6 bar_weekly_hours
+
+**역할:** 업장의 요일별 정규 영업시간을 저장한다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `bar_id` | `uuid`, NOT NULL, FK → `bars.id`, PK 일부 | 관악 위스키 바 ID | |
+| `day_of_week` | `smallint`, NOT NULL, PK 일부, CHECK 1~7 | `5` | ISO 8601 요일 번호(1 = 월요일). |
+| `is_closed` | `boolean`, NOT NULL | `false` | 정기 휴무일이면 `true`다. |
+| `open_time` | `time`, nullable | `18:00` | 영업 시작. 서울 현지 시각이며 5분 단위다. |
+| `close_time` | `time`, nullable | `02:00` | 영업 종료. `open_time`보다 이르면 다음 날 끝난다(자정 넘김). |
+
+**핵심 제약:**
+
+- 기본 키는 (`bar_id`, `day_of_week`)라서 요일마다 한 행, 영업 구간도 하나다.
+- `is_closed = true`이면 `open_time`, `close_time`이 모두 `null`이고, `false`이면 둘 다 값이 있고 서로 다르다.
+- 행이 없는 요일은 영업시간 정보가 없는 것이며 정기 휴무와 다르다.
+- 업장 수정(API 명세 3.7)의 `weeklyHours`로 업장의 행 전체를 한 번에 바꾼다.
+
+**필요한 이유:** 고객 화면이 영업 상태를 계산하려면(API 명세 3.15.5) 요일별 시각을 구조화된 값으로 가져야 한다. 요일을 행으로 나누면 CHECK 제약으로 규칙을 지킬 수 있다.
+
+### 5.7 bar_operating_exceptions
+
+**역할:** 정규 영업시간 대신 적용하는 임시 휴무나 오늘만의 영업시간 변경을 저장한다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | | |
+| `bar_id` | `uuid`, NOT NULL, UNIQUE, FK → `bars.id` | 관악 위스키 바 ID | 업장마다 하나만 있다. |
+| `kind` | `operating_exception_kind`, NOT NULL | `vacation` | 4.18 |
+| `start_date` | `date`, NOT NULL | `2026-11-10` | 서울 현지 날짜. `closed_today`와 `custom_hours`는 적용한 날이다. |
+| `end_date` | `date`, NOT NULL | `2026-11-12` | `start_date` 이후다. `vacation`이 아니면 `start_date`와 같다. |
+| `open_time`, `close_time` | `time`, nullable | `20:00`, `01:00` | `custom_hours`에서만 값이 있고 필수다. `close_time`이 더 이르면 다음 날 끝난다. |
+| `note` | `varchar(100)`, nullable | `내부 사정으로 늦게 엽니다` | 고객 안내 문구다. 앞뒤 공백을 지운 한 줄이며 공백뿐이면 `null`이다. |
+| `created_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 누가 적용했는지 남긴다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
+| `created_at` | `timestamptz`, NOT NULL | `2026-11-02T03:00:00Z` | 적용 시각이다. |
+
+**핵심 제약:**
+
+- 업장마다 최대 한 행(`bar_id` UNIQUE)이다. 새로 적용하면 기존 행을 바꾸고, 취소하면 지운다(API 명세 3.15.2, 3.15.3).
+- 끝난 행을 지우는 배치 작업은 없다. API가 응답을 만들 때 현재 서울 시각으로 끝났는지 판단해 숨긴다(API 명세 3.15.4).
+
+**필요한 이유:** 관리 홈의 빠른 변경은 정규 영업시간을 건드리지 않고 정해진 날짜에만 적용되어야 하며, 날짜가 지나면 정규 영업시간으로 자동으로 돌아가야 한다.
+
+### 5.8 bar_photos
+
+**역할:** 고객 업장 상세에 보여 줄 매장 사진의 저장소 위치와 순서를 저장한다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 사진 ID | 공개 경로 `GET /api/bar-photos/{photoId}`의 ID다. |
+| `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | |
+| `storage_key` | `varchar(500)`, NOT NULL | `bars/2222.../photos/1212....jpg` | 메뉴 사진처럼 바이너리 대신 저장소 위치를 저장한다. |
+| `content_type` | `varchar(20)`, NOT NULL | `image/jpeg` | 파일 내용으로 판별한 형식이다. 사진을 전달할 때 `Content-Type`으로 쓴다. |
+| `content_sha256` | `char(64)`, NOT NULL | SHA-256 16진수 문자열 | 같은 사진을 두 번 올리지 않게 막는다. 응답을 받지 못해 다시 보낸 업로드도 이 값으로 걸러진다. |
+| `sort_order` | `smallint`, NOT NULL | `1` | 표시 순서이며 1이 대표 사진이다. 업장 안에서 1부터 빈틈없이 이어진다. |
+| `uploaded_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 누가 올렸는지 남긴다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
+| `created_at` | `timestamptz`, NOT NULL | `2026-11-02T03:00:00Z` | 올린 시각이다. |
+
+**핵심 제약:**
+
+- 업장당 최대 15장이다. 추가, 삭제, 순서 변경은 업장 행을 잠그고 처리해 장수와 순서를 지킨다.
+- (`bar_id`, `content_sha256`)은 unique다.
+- 대표 여부는 따로 저장하지 않고 `sort_order = 1`로 정한다. 업장 목록 API는 업장마다 이 행을 (`bar_id`, `sort_order`) 인덱스로 찾아 `coverPhotoUrl`로 준다.
+- 삭제하면 행을 지운 뒤 DB 커밋 다음에 저장소 파일을 지운다. 파일 삭제가 실패하면 로그만 남긴다.
+- 저장소는 공개하지 않는다. API가 파일을 읽어 고정 URL로 전달하므로, 메뉴판 사진의 서명 URL과 달리 만료되지 않고 캐시할 수 있다.
+
+**필요한 이유:** 메뉴판 사진(`menu_images`)은 AI 처리와 검수용이라 공개하지 않는다. 고객에게 보여 줄 사진은 공개 범위, 순서, 삭제 규칙이 달라 따로 저장한다.
 
 ## 6 Product Catalog
 
@@ -770,6 +848,9 @@ A와 C는 사진에 없어도 remove 후보가 되지 않으며 현재 메뉴판
 | `bars` | `bar_owner_applications` | 1:N | 한 업장에 여러 사용자가 신청할 수 있다. 새 업장 신청은 승인 전까지 업장이 없다. |
 | `bar_owner_applications` | `bar_owners` | 1:0..1 | 승인된 신청 하나가 업주 관계 하나를 만든다. |
 | `bar_owner_applications` | `bar_owner_application_menu_images` | 1:N | 한 신청에 메뉴판 사진 여러 장을 첨부할 수 있다. 승인하면 첫 메뉴 등록 작업의 사진이 된다. |
+| `bars` | `bar_weekly_hours` | 1:0..7 | 요일마다 정규 영업시간이 최대 하나다. |
+| `bars` | `bar_operating_exceptions` | 1:0..1 | 업장에는 임시 휴무가 없거나 하나만 있다. |
+| `bars` | `bar_photos` | 1:N | 업장 하나에 매장 사진이 최대 15장이다. |
 | `bars` + `users` | `bar_owners` | N:M 해소 | 한 사용자는 여러 업장의 업주가 될 수 있고, 한 업장에는 현재 업주가 최대 한 명이다. |
 | `bars` | `menu_imports` | 1:N | 한 업장에 여러 메뉴 등록 작업이 누적된다. |
 | `menu_imports` | `menu_images` | 1:N | 한 번의 등록에 여러 사진을 올릴 수 있다. |
@@ -809,6 +890,10 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 한 사용자는 같은 업장에 `status = pending`인 `existing_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending' AND application_type = 'existing_bar'`)로 보장한다.
 - 한 사용자는 같은 사업자등록번호로 `status = pending`인 `new_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `business_registration_number` WHERE `status = 'pending' AND application_type = 'new_bar'`)로 보장한다.
 - `bar_owner_applications.business_registration_number`는 숫자 10자리여야 한다.
+- `bars.tags`는 5개 이하여야 한다(`cardinality(tags) <= 5`).
+- `bar_weekly_hours.day_of_week`는 1부터 7이고, `is_closed`이면 두 시각이 `null`, 아니면 둘 다 값이 있고 서로 달라야 한다.
+- `bar_operating_exceptions`는 `end_date >= start_date`이고, `vacation`이 아니면 두 날짜가 같으며, `custom_hours`일 때만 두 시각이 있고 서로 달라야 한다.
+- 한 업장의 `bar_photos`에서 `content_sha256`이 중복되지 않아야 한다. unique 인덱스(`bar_id`, `content_sha256`)로 보장한다.
 - 한 신청의 `bar_owner_application_menu_images`에서 `image_order`가 중복되지 않아야 한다. unique 인덱스(`application_id`, `image_order`)로 보장한다.
 - 외래키 삭제 정책은 이력 보존을 우선해 핵심 사용자 업장 상품 이미지에 `RESTRICT` 또는 soft delete를 검토한다.
 
