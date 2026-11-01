@@ -669,7 +669,7 @@ fun OwnerOnboardingScreen(
         .padding(16.dp)){Text(value,style=MaterialTheme.typography.bodyMedium)}
 }
 @Composable private fun OwnerV4Previous(label:String,value:String,action:()->Unit){
-    Column(Modifier.fillMaxWidth().clickable(onClick=action).padding(vertical=8.dp)){
+    Column(Modifier.fillMaxWidth().ownerQuietClick(onClick=action).padding(vertical=8.dp)){
         Text(label,style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value,style=MaterialTheme.typography.bodyLarge)
     }
