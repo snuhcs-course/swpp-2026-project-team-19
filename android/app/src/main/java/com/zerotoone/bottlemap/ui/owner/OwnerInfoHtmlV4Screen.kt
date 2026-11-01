@@ -279,7 +279,7 @@ fun OwnerInfoHtmlV4Screen(
                                     Text(dayName, fontSize = 13.sp, color = V4Color.text,
                                         fontWeight = FontWeight.Bold, modifier = Modifier.width(22.dp))
                                     V4CompactCheck("휴무", setting?.closed == true) { isClosed ->
-                                        setDay(day, if (isClosed) MockWeeklyHours(day, true) else null)
+                                        setDay(day, toggleWeeklyDayClosed(setting, day, isClosed))
                                         error = null
                                     }
                                     if (!wrapControls && setting?.closed != true) {
