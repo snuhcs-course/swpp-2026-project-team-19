@@ -108,17 +108,21 @@ internal fun latestOwnerImport(jobs: List<MockMenuImport>, barId: String): MockM
     jobs.lastOrNull { it.barId == barId }
 
 internal fun ownerJobTitle(status: MockImportStatus): String = when (status) {
+    MockImportStatus.UPLOADED -> "사진 업로드 완료"
     MockImportStatus.PROCESSING -> "AI 분석 중"
     MockImportStatus.READY_FOR_REVIEW -> "메뉴판 확인 준비 완료"
     MockImportStatus.FAILED -> "메뉴판 분석 실패"
     MockImportStatus.APPLIED -> "게시 완료"
+    MockImportStatus.CANCELED -> "작업 취소됨"
 }
 
 internal fun ownerJobDescription(status: MockImportStatus): String = when (status) {
+    MockImportStatus.UPLOADED -> "업로드된 사진의 분석을 기다리고 있어요"
     MockImportStatus.PROCESSING -> "다른 작업을 계속할 수 있어요"
     MockImportStatus.READY_FOR_REVIEW -> "추가할 메뉴를 확인해 주세요"
     MockImportStatus.FAILED -> "작업을 확인해 주세요"
     MockImportStatus.APPLIED -> "메뉴가 게시됐어요"
+    MockImportStatus.CANCELED -> "새 작업을 시작할 수 있어요"
 }
 
 internal fun ownerMenuFreshness(bar: MockBar, atEpochMs: Long): Pair<Long?, Int> {
