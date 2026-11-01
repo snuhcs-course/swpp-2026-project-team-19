@@ -52,7 +52,6 @@ from app.schemas.menu_review import (
     SelectExistingProduct,
 )
 from app.services.menu_draft import build_draft, replace_draft
-from app.services.menu_import_review import menu_import_not_found
 from app.services.menu_publish import AppliedChange, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
 from app.services.menu_review_validation import ReviewedItem, ValidatedReview, pending_changes, validate_review
@@ -219,14 +218,9 @@ def _draft_keys(changes) -> set[tuple]:
     return {(c.change_type, c.extracted_item_id, c.bar_menu_item_id) for c in changes}
 
 
-def _apply_once(session: Session, menu_import_id: str, request: ReviewAndApplyRequest) -> ReviewAppliedResponse:
-    try:
-        import_id = UUID(menu_import_id)
-    except ValueError:
-        raise menu_import_not_found(menu_import_id) from None
+def _apply_once(session: Session, import_id: UUID, request: ReviewAndApplyRequest) -> ReviewAppliedResponse:
+    # The route has checked that the import exists; this transaction locks it again.
     menu_import = session.scalar(select(MenuImport).where(MenuImport.id == import_id).with_for_update())
-    if menu_import is None:
-        raise menu_import_not_found(menu_import_id)
     if menu_import.status == ImportStatus.APPLIED:
         return applied_response(session, menu_import)
     if menu_import.status != ImportStatus.READY_FOR_REVIEW:
@@ -265,19 +259,19 @@ def _is_retryable(error: DBAPIError) -> bool:
 
 
 def review_and_apply(
-    session_factory: SessionFactory, menu_import_id: str, request: ReviewAndApplyRequest
+    session_factory: SessionFactory, import_id: UUID, request: ReviewAndApplyRequest
 ) -> ReviewAppliedResponse:
     for attempt in range(1, MAX_ATTEMPTS + 1):
         with session_factory() as session:
             try:
-                response = _apply_once(session, menu_import_id, request)
+                response = _apply_once(session, import_id, request)
                 session.commit()
                 return response
             except DBAPIError as error:
                 session.rollback()
                 if not _is_retryable(error):
                     raise
-                logger.info("review-and-apply %s: write conflict, attempt %d", menu_import_id, attempt)
+                logger.info("review-and-apply %s: write conflict, attempt %d", import_id, attempt)
             except BaseException:
                 session.rollback()
                 raise
@@ -287,5 +281,5 @@ def review_and_apply(
         503,
         "TEMPORARY_WRITE_CONFLICT",
         "다른 요청과 동시에 처리되어 반영하지 못했습니다. 잠시 후 다시 제출해 주세요.",
-        details={"menuImportId": menu_import_id},
+        details={"menuImportId": str(import_id)},
     )

@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
 
 from app.api.permissions import require_bar_manager
-from app.core.security import Principal, get_optional_user, require_operator
+from app.core.security import Principal, get_current_user, get_optional_user, require_operator
 from app.db.session import get_session
+from app.models import Bar
 from app.schemas.bar import BarDetail, BarListResponse, BarUpdateInput
 from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
 from app.schemas.menu import BarMenuResponse
@@ -85,7 +86,6 @@ def read_bars(
     ),
 )
 def read_bar_menu_imports(
-    bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
     status: Annotated[
         ImportStatusFilter,
         Query(description="`active`, `uploaded`, `processing`, `ready_for_review`, `applied`, `failed`, `canceled` or `all`"),
@@ -93,9 +93,9 @@ def read_bar_menu_imports(
     limit: Limit = 20,
     cursor: Cursor = None,
     session: Session = Depends(get_session),
-    _manager: Principal = Depends(require_bar_manager),
+    bar: Bar = Depends(require_bar_manager),
 ) -> MenuImportListResponse:
-    return list_menu_imports(session, bar_id, status=status, limit=limit, cursor=cursor)
+    return list_menu_imports(session, bar, status=status, limit=limit, cursor=cursor)
 
 
 @router.get(
@@ -141,11 +141,10 @@ def read_bar_menu(
     responses=error_responses(*_MANAGER_ERRORS, (404, "`BAR_NOT_FOUND`: no such bar or a malformed id.")),
 )
 def read_bar(
-    bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
     session: Session = Depends(get_session),
-    _manager: Principal = Depends(require_bar_manager),
+    bar: Bar = Depends(require_bar_manager),
 ) -> BarDetail:
-    return get_bar_detail(session, bar_id)
+    return get_bar_detail(session, bar)
 
 
 @router.patch(
@@ -180,8 +179,9 @@ def read_bar(
 )
 def edit_bar(
     body: BarUpdateInput,
-    bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
+    # Declared before the bar so the token is checked first; FastAPI runs it once for both.
+    principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
-    manager: Principal = Depends(require_bar_manager),
+    bar: Bar = Depends(require_bar_manager),
 ) -> BarDetail:
-    return update_bar(session, bar_id, body, operator=is_operator(session, manager))
+    return update_bar(session, bar, body, operator=is_operator(session, principal))

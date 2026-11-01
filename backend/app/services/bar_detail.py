@@ -6,7 +6,6 @@ query each, so a list of bars costs the same few queries as one bar.
 
 from collections.abc import Sequence
 from decimal import Decimal
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -16,7 +15,6 @@ from app.core.security import Principal
 from app.models import Bar, BarOwner, BarStatus, MenuBoard, MenuImport, User
 from app.schemas.bar import ActiveMenuImport, BarDetail, BarOwnerSummary, BarUpdateInput, CurrentMenu
 from app.services.bar_access import forbidden
-from app.services.bar_menu import bar_not_found
 from app.services.menu_import_upload import UNFINISHED_STATUSES
 
 
@@ -33,24 +31,13 @@ def my_bars(session: Session, principal: Principal) -> list[BarDetail]:
     return bar_details(session, bars)
 
 
-def _load_bar(session: Session, bar_id: str) -> Bar:
-    try:
-        bar = session.get(Bar, UUID(bar_id))
-    except ValueError:
-        bar = None
-    if bar is None:
-        raise bar_not_found(bar_id)
-    return bar
-
-
-def get_bar_detail(session: Session, bar_id: str) -> BarDetail:
+def get_bar_detail(session: Session, bar: Bar) -> BarDetail:
     """One bar, inactive ones included (3.6)."""
-    return bar_details(session, [_load_bar(session, bar_id)])[0]
+    return bar_details(session, [bar])[0]
 
 
-def update_bar(session: Session, bar_id: str, patch: BarUpdateInput, *, operator: bool) -> BarDetail:
+def update_bar(session: Session, bar: Bar, patch: BarUpdateInput, *, operator: bool) -> BarDetail:
     """Change the fields that were sent (3.7). Only an operator may change `status`."""
-    bar = _load_bar(session, bar_id)
     sent = patch.model_fields_set
     if "status" in sent and not operator:
         raise forbidden()

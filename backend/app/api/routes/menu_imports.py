@@ -1,6 +1,7 @@
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, Path, Request, Response, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, Request, Response, UploadFile
 from pydantic import WithJsonSchema
 from sqlalchemy.orm import Session
 
@@ -8,10 +9,9 @@ from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
 from app.api.permissions import require_active_bar_manager, require_import_manager
-from app.core.security import Principal
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
 from app.matching.llm_layer import LLMLayerConfig
-from app.models import ImportMode
+from app.models import Bar, ImportMode
 from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.menu_import import ImportCanceledResponse, MenuImportAcceptedResponse, MenuImportStatusResponse
 from app.schemas.menu_review import ReviewAndApplyRequest, ReviewAppliedResponse
@@ -66,7 +66,6 @@ UploadedImage = Annotated[UploadFile, WithJsonSchema({"type": "string", "format"
 def upload_menu_import(
     response: Response,
     background_tasks: BackgroundTasks,
-    bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
     idempotency_key: Annotated[
         str,
         Header(alias="Idempotency-Key", min_length=1, max_length=255, description="Client-generated UUID, reused on retry"),
@@ -79,13 +78,13 @@ def upload_menu_import(
     extractor: MenuExtractor = Depends(get_menu_extractor),
     llm_layer: LLMLayerConfig | None = Depends(get_matching_llm_layer),
     session_factory: SessionFactory = Depends(get_session_factory),
-    _manager: Principal = Depends(require_active_bar_manager),
+    bar: Bar = Depends(require_active_bar_manager),
 ) -> MenuImportAcceptedResponse:
     menu_import, created = create_menu_import(
         session,
         storage,
         extractor,
-        bar_id=bar_id,
+        bar=bar,
         idempotency_key=idempotency_key,
         mode=mode,
         owner_note=owner_note,
@@ -138,12 +137,11 @@ def upload_menu_import(
 )
 def read_menu_import(
     request: Request,
-    menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
     session: Session = Depends(get_session),
     storage: ImageStorage = Depends(get_image_storage),
-    _manager: Principal = Depends(require_import_manager),
+    import_id: UUID = Depends(require_import_manager),
 ) -> MenuImportStatusResponse:
-    return get_menu_import_status(session, menu_import_id, storage, str(request.base_url))
+    return get_menu_import_status(session, import_id, storage, str(request.base_url))
 
 
 @router.post(
@@ -202,11 +200,10 @@ def read_menu_import(
 )
 def submit_menu_review(
     body: ReviewAndApplyRequest,
-    menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
     session_factory: SessionFactory = Depends(get_serializable_session_factory),
-    _manager: Principal = Depends(require_import_manager),
+    import_id: UUID = Depends(require_import_manager),
 ) -> ReviewAppliedResponse:
-    return review_and_apply(session_factory, menu_import_id, body)
+    return review_and_apply(session_factory, import_id, body)
 
 
 @router.post(
@@ -230,8 +227,7 @@ def submit_menu_review(
     ),
 )
 def cancel_import(
-    menu_import_id: Annotated[str, Path(alias="menuImportId", description="Menu import id (UUID)")],
     session: Session = Depends(get_session),
-    _manager: Principal = Depends(require_import_manager),
+    import_id: UUID = Depends(require_import_manager),
 ) -> ImportCanceledResponse:
-    return cancel_menu_import(session, menu_import_id)
+    return cancel_menu_import(session, import_id)

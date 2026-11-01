@@ -53,7 +53,7 @@ def new_import(db_session, storage, *, images: int = 3, key: str = "key-1") -> M
         db_session,
         storage,
         MockMenuExtractor(),
-        bar_id=str(make_bar(db_session, key).id),
+        bar=make_bar(db_session, key),
         idempotency_key=key,
         mode=ImportMode.FULL_REPLACE,
         owner_note=None,

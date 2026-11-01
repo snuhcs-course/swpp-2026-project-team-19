@@ -3,6 +3,9 @@
 The order is the spec's: a valid token (`401`), then the target bar or import exists (`404`), then
 the caller is an operator or the target bar's current owner (`403`). Like `require_operator`, they
 run before the endpoint, so a caller without access never reaches the request's own checks.
+
+They return what they found, so the services do not look it up again. The bar is loaded with the
+request's session, which the route shares.
 """
 
 from typing import Annotated
@@ -35,36 +38,37 @@ def require_bar_manager(
     # Declared before the session so a request without a valid token never opens a database session.
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
-) -> Principal:
-    """An operator or the bar's current owner; inactive bars included."""
+) -> Bar:
+    """The bar, for an operator or its current owner; inactive bars included."""
     bar = _bar(session, bar_id)
     if bar is None:
         raise bar_not_found(bar_id)
     if not can_manage_bar(session, principal, bar.id):
         raise forbidden()
-    return principal
+    return bar
 
 
 def require_active_bar_manager(
     bar_id: BarId,
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
-) -> Principal:
+) -> Bar:
     """As require_bar_manager, but an inactive bar is `404` for everyone (spec 4.4)."""
     bar = _bar(session, bar_id)
     if bar is None or bar.status != BarStatus.ACTIVE:
         raise bar_not_found(bar_id)
     if not can_manage_bar(session, principal, bar.id):
         raise forbidden()
-    return principal
+    return bar
 
 
 def require_import_manager(
     menu_import_id: MenuImportId,
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
-) -> Principal:
-    """An operator or the current owner of the import's bar."""
+) -> UUID:
+    """The import's id, for an operator or the current owner of its bar. Only the id: review-and-apply
+    loads the import again in its own transaction."""
     try:
         import_id = UUID(menu_import_id)
     except ValueError:
@@ -74,7 +78,7 @@ def require_import_manager(
         raise menu_import_not_found(menu_import_id)
     if not can_manage_bar(session, principal, bar_id):
         raise forbidden()
-    return principal
+    return import_id
 
 
 def require_operator_or_owner(

@@ -11,7 +11,6 @@ from app.core.pagination import decode_cursor, encode_cursor
 from app.models import Bar, BarStatus, ImportStatus, MenuImage, MenuImport
 from app.schemas.bar import ActiveMenuImport, BarListItem, BarListResponse
 from app.schemas.menu_import import MenuImportListItem, MenuImportListResponse
-from app.services.bar_menu import bar_not_found
 from app.services.menu_import_upload import UNFINISHED_STATUSES
 from app.services.search import validate_query_text
 
@@ -85,20 +84,13 @@ def list_bars(
 
 def list_menu_imports(
     session: Session,
-    bar_id: str,
+    bar: Bar,
     *,
     status: ImportStatusFilter = "all",
     limit: int = 20,
     cursor: str | None = None,
 ) -> MenuImportListResponse:
     """A bar's imports, newest first. `active` means unfinished (uploaded, processing, ready_for_review)."""
-    try:
-        bar = session.get(Bar, UUID(bar_id))
-    except ValueError:
-        bar = None
-    if bar is None:
-        raise bar_not_found(bar_id)
-
     image_count = (
         select(func.count()).where(MenuImage.menu_import_id == MenuImport.id).correlate(MenuImport).scalar_subquery()
     )
