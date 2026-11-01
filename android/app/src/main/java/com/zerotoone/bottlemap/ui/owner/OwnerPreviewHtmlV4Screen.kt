@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +41,11 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -52,6 +60,7 @@ import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
  * All text, hero ordering, photo URIs, schedule, tags and menu come from
  * the existing shared owner snapshot. Mirrors ACTION_FIRST_v4 preview hierarchy.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OwnerPreviewHtmlV4Screen(
     state: MockOwnerLoadState,
@@ -109,11 +118,11 @@ fun OwnerPreviewHtmlV4Screen(
             }
         }
     }
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        OwnerHeader("고객 페이지 미리보기", onBack)
+    Column(Modifier.fillMaxSize().background(V4Color.background)) {
+        V4Toolbar(null, onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(horizontal = BottleMapSpacing.screenHorizontal),
+                .padding(horizontal = 20.dp, vertical = 13.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (bar == null) {
@@ -126,12 +135,12 @@ fun OwnerPreviewHtmlV4Screen(
                     else -> Text("관리할 매장이 없어요.")
                 }
             } else {
-                Text(bar.name, style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold)
+                Text(bar.name, color = V4Color.text, fontSize = 22.sp,
+                    fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
                 Box(
                     Modifier.fillMaxWidth().height(185.dp)
                         .clip(RoundedCornerShape(11.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .background(Color(0xFF4A382A))
                         .pointerInput(photoCount, safeIndex) {
                             detectHorizontalDragGestures(
                                 onDragStart = { drag = 0f },
@@ -178,35 +187,50 @@ fun OwnerPreviewHtmlV4Screen(
                 bar.description?.takeIf { it.isNotBlank() }?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall)
                 }
-                bar.defaultPourMl?.let {
-                    Text("기본 잔 용량 " + it + "ml",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
                 if (bar.tags.isNotEmpty()) {
-                    Text(bar.tags.take(5).joinToString("  ·  "),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary)
+                    FlowRow(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        bar.tags.take(5).forEach { tag ->
+                            Box(Modifier.background(V4Color.elevated,
+                                RoundedCornerShape(50))
+                                .border(1.dp, V4Color.line, RoundedCornerShape(50))
+                                .padding(horizontal = 9.dp, vertical = 4.dp)) {
+                                Text(tag, color = V4Color.text, fontSize = 11.sp)
+                            }
+                        }
+                    }
                 }
                 Row(Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
                     verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = { if (!activeException?.note.isNullOrBlank())
-                        noteVisible = !noteVisible
-                    }) {
+                    Row(Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
                         Text(homeOperatingState(bar, now),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold)
+                            color = V4Color.positive, fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable {
+                                if (!activeException?.note.isNullOrBlank())
+                                    noteVisible = !noteVisible
+                            })
+                        ownerPreviewNextText(bar, now).takeIf { it.isNotEmpty() }?.let {
+                            Text(it, color = V4Color.sub, fontSize = 11.sp,
+                                maxLines = 1)
+                        }
+                        Text(if (expanded == "hours") "⌃" else "⌄",
+                            fontSize = 20.sp, color = V4Color.primary,
+                            modifier = Modifier.clickable {
+                                expanded = if (expanded == "hours") "" else "hours"
+                            }.semantics { contentDescription = "전체 영업시간 보기" }
+                                .testTag("owner-preview-hours-toggle"))
                     }
-                    Spacer(Modifier.weight(1f))
-                    TextButton(onClick = {
-                        expanded = if (expanded == "hours") "" else "hours"
-                    }) { Text(if (expanded == "hours") "시간 접기 ⌃" else "영업시간 ⌄") }
-                    TextButton(onClick = {
+                    V4PreviewSmallButton("⌖ 지도") {
                         expanded = if (expanded == "address") "" else "address"
-                    }) { Text("지도") }
-                    TextButton(onClick = {
+                    }
+                    V4PreviewSmallButton("☎ 전화") {
                         expanded = if (expanded == "phone") "" else "phone"
-                    }) { Text("전화") }
+                    }
                 }
                 if (noteVisible && !activeException?.note.isNullOrBlank()) {
                     Text("고객 안내: " + activeException?.note.orEmpty(),
@@ -301,5 +325,17 @@ fun OwnerPreviewHtmlV4Screen(
                 Spacer(Modifier.height(20.dp))
             }
         }
+    }
+}
+
+
+@Composable
+private fun V4PreviewSmallButton(label: String, onClick: ()->Unit) {
+    Box(Modifier.background(V4Color.surface, RoundedCornerShape(7.dp))
+        .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
+        .clickable(onClick = onClick)
+        .padding(horizontal = 7.dp, vertical = 7.dp),
+        contentAlignment = Alignment.Center) {
+        Text(label, fontSize = 11.sp, color = V4Color.text, maxLines = 1)
     }
 }
