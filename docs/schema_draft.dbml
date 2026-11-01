@@ -153,6 +153,7 @@ Table bars {
   latitude decimal(9,6) [not null, note: 'WGS84; CHECK between -90 and 90']
   longitude decimal(9,6) [not null, note: 'WGS84; CHECK between -180 and 180']
   phone varchar(30)
+  description varchar(100) [note: 'One-line introduction set by the owner or an operator; trimmed, null when blank']
   default_pour_ml smallint [note: 'CHECK between 1 and 999; owner-chosen default glass size, null when unset']
   status bar_status [not null, default: 'active']
   created_at timestamptz [not null]

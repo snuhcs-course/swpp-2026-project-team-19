@@ -521,7 +521,7 @@ HTTP/1.1 201 Created
 Location: /api/bars/22222222-2222-4222-8222-222222222222
 ```
 
-응답 본문은 3.6과 같은 형식이다. 새 업장이므로 `status = active`, `defaultPourMl = null`, `activeMenuImport = null`, `currentMenu = null`, `owner = null`이다.
+응답 본문은 3.6과 같은 형식이다. 새 업장이므로 `status = active`, `description = null`, `defaultPourMl = null`, `activeMenuImport = null`, `currentMenu = null`, `owner = null`이다.
 
 이름·주소가 비슷한 업장이 있어도 생성을 막지 않으며, 응답에 경고도 담지 않는다. 프론트엔드는 생성 전에 3.4로 같은 업장이 있는지 확인하게 한다.
 
@@ -552,6 +552,7 @@ Authorization: Bearer <access-token>
   "latitude": 37.478321,
   "longitude": 126.951234,
   "phone": "02-000-0000",
+  "description": "싱글몰트 위주의 조용한 바",
   "defaultPourMl": 30,
   "status": "active",
   "activeMenuImport": {
@@ -580,6 +581,7 @@ Authorization: Bearer <access-token>
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
 | `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
+| `description` | 문자열 | 예 | 한 줄 소개. 업주나 operator가 정한다(3.7). 고객 화면(3.9)에도 나온다. 없으면 `null` |
 | `defaultPourMl` | 정수 | 예 | 매장 기본 잔 용량(ml). 업주가 매장 정보에서 정한다(3.7). 메뉴 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데 쓴다(3.14.2). 서버가 메뉴에 자동으로 적용하지 않으며 고객 화면(3.9)에는 없다. 없으면 `null` |
 | `status` | `active` \| `inactive` | 아니오 | |
 | `activeMenuImport` | 객체 | 예 | 미완료 메뉴 등록 작업. 없으면 `null`. 3.4와 같다. 있으면 메뉴 직접 편집을 할 수 없다(3.14.1) |
@@ -624,6 +626,7 @@ operator와 해당 업장의 현재 업주가 호출할 수 있다. 바꿀 필�
 | `name`, `address` | operator, 업주 | `null`을 보낼 수 없다 |
 | `latitude`, `longitude` | operator, 업주 | 둘을 함께 보낸다. 하나만 보내면 `LAT_LNG_REQUIRED_TOGETHER` |
 | `phone` | operator, 업주 | `null`을 보내면 연락처를 지운다 |
+| `description` | operator, 업주 | 한 줄 소개. 앞뒤 공백을 지운 뒤 100자 이하(줄바꿈도 한 글자로 센다). 공백뿐이면 `null`로 저장한다. `null`을 보내면 지운다. 줄바꿈을 허용하며, 서버는 HTML 이스케이프나 금칙어 검사 없이 받은 그대로 저장한다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
 | `defaultPourMl` | operator, 업주 | 1~999 정수. `null`을 보내면 지운다. 바꿔도 이미 게시된 메뉴의 용량은 바뀌지 않는다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
 | `status` | operator만 | `active` 또는 `inactive`. 업주가 보내면 `403 FORBIDDEN` |
 
@@ -705,6 +708,7 @@ GET /api/bars/{barId}/menu
   "latitude": 37.478321,
   "longitude": 126.951234,
   "phone": "02-000-0000",
+  "description": "싱글몰트 위주의 조용한 바",
   "menuBoardId": "66666666-6666-4666-8666-666666666666",
   "menuVersion": 4,
   "publishedAt": "2026-10-04T09:15:00Z",
@@ -767,6 +771,7 @@ GET /api/bars/{barId}/menu
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
 | `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
+| `description` | 문자열 | 예 | 한 줄 소개(3.6과 같다). 줄바꿈이 들어 있을 수 있다. 프론트엔드는 HTML로 해석하지 않고 일반 텍스트로 보여 주며, 표시할 줄 수를 제한할 수 있다. 없으면 `null` |
 | `menuBoardId` | UUID 문자열 | 예 | 현재 메뉴판. 반영된 메뉴가 없으면 `null` |
 | `menuVersion` | 정수 | 예 | 메뉴판 버전. 검수 반영(8)이나 직접 편집(3.14)으로 메뉴판이 바뀔 때마다 1씩 오른다. 직접 편집 요청에 그대로 보낸다. 메뉴판이 없으면 `null` |
 | `publishedAt` | RFC 3339 문자열 | 예 | 현재 메뉴판이 검수 반영이나 직접 편집으로 마지막으로 바뀐 시각. 반영된 메뉴가 없으면 `null` |
@@ -804,6 +809,7 @@ GET /api/bars/{barId}/menu
   "latitude": 37.478321,
   "longitude": 126.951234,
   "phone": null,
+  "description": null,
   "menuBoardId": null,
   "menuVersion": null,
   "publishedAt": null,
@@ -813,7 +819,7 @@ GET /api/bars/{barId}/menu
 
 메뉴판은 있지만 검수에서 모든 항목을 내렸거나 직접 편집으로 모두 지웠으면(3.14.5, 3.14.6) `menuBoardId`, `menuVersion`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
 
-그 밖에 값이 없을 수 있는 필드는 `phone`, `options[].optionLabel`, `options[].pourMl`뿐이며 모두 `null`로 온다. 프론트엔드는 해당 표시만 생략한다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
+그 밖에 값이 없을 수 있는 필드는 `phone`, `description`, `options[].optionLabel`, `options[].pourMl`뿐이며 모두 `null`로 온다. 프론트엔드는 해당 표시만 생략한다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
 
 #### 3.9.2 메뉴 등록이 진행 중일 때
 
@@ -1395,7 +1401,7 @@ Content-Type: application/json
 operator만 호출할 수 있다. 사업자등록 정보 검증 결과가 `matched`가 아니어도 승인할 수 있다. 판단은 operator가 하며, 대시보드는 `unavailable`인 신청을 먼저 다시 검증(3.11.13)하도록 안내한다.
 
 - `existing_bar`: 요청 본문이 없거나 `{}`다.
-- `new_bar`: operator가 확인한 업장 정보를 보낸다. 프론트엔드는 `proposedBar`를 초기값으로 채우고, operator가 주소를 확인해 좌표를 입력한다. 필드 규칙은 3.5와 같다.
+- `new_bar`: operator가 확인한 업장 정보를 보낸다. 프론트엔드는 `proposedBar`를 초기값으로 채우고, operator가 주소를 확인해 좌표를 입력한다. 필드 규칙은 3.5와 같다. `description`과 `defaultPourMl`은 받지 않으며(`EXTRA_FORBIDDEN`, 3.7), 만든 업장의 두 값은 `null`이다. 업주가 승인 뒤 3.7로 정한다.
 
 ```json
 {
@@ -1471,6 +1477,7 @@ Authorization: Bearer <access-token>
       "latitude": 37.478321,
       "longitude": 126.951234,
       "phone": "02-000-0000",
+      "description": null,
       "defaultPourMl": null,
       "status": "active",
       "activeMenuImport": null,
