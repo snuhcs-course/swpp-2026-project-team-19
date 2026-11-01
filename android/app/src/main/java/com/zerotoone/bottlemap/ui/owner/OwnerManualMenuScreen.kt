@@ -468,6 +468,7 @@ internal fun OwnerManualMenuScreen(
                             fontSize = 24.sp, fontWeight = FontWeight.Bold)
                         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                             ManualTopButton("할인", false) {
+                                beforePromoOptions = optionText
                                 saleOption = 0; error = null; screen = "promo"
                             }
                             if (editId != null) ManualTopButton("삭제", true) {
@@ -733,11 +734,18 @@ internal fun OwnerManualMenuScreen(
                                 val latest = decodedOptions(optionText)[saleOption]
                                 require(latest.sale.isNotBlank()) { "할인 가격을 입력해 주세요." }
                                 toOption(latest, category == "위스키")
+                                beforePromoOptions = null
+                                calendarTarget = null
                                 screen = "item"; error = null
                             } catch (e: Exception) { error = e.message }
                         }, modifier = Modifier.testTag("manual-menu-promo-apply"))
                         if (d.sale.isNotEmpty()) ManualButton("할인 제거", {
-                            changeOption(saleOption) { it.copy(sale = "", start = "", end = "") }
+                            changeOption(saleOption) {
+                                it.copy(sale = "", start = "", end = "",
+                                    originalStartMs = "", originalEndMs = "")
+                            }
+                            beforePromoOptions = null
+                            calendarTarget = null
                             screen = "item"; error = null
                         }, secondary = true)
                     }
