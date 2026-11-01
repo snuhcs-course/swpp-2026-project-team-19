@@ -143,8 +143,7 @@ private fun toOption(d: DraftOption, whisky: Boolean,
         (if (whisky) {
             if (d.bottle) original.pourMl == null &&
                 original.label?.trim()?.lowercase() in listOf("bottle", "병")
-            else original.pourMl?.toString().orEmpty() == d.ml &&
-                original.label?.trim()?.lowercase() !in listOf("bottle", "병")
+            else original.pourMl?.toString().orEmpty() == d.ml
         } else true)
     return MockMenuOption(d.id,
         if (keepOriginal) original!!.label else if (whisky && d.bottle) "Bottle" else null,
@@ -273,6 +272,15 @@ internal fun OwnerManualMenuScreen(
                 alcoholKind.trim().takeIf { category == "기타 주류" && it.isNotEmpty() } ==
                     persisted?.otherAlcoholKind?.takeIf { it.isNotBlank() })) {
                 "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
+            }
+            // Catalog fields are immutable; do not report a successful save after
+            // silently dropping a modified subtype from the editor.
+            if (old != null && persisted?.catalogMatched == true &&
+                category == "기타 주류") {
+                require(alcoholKind.trim().ifBlank { null } ==
+                    persisted.otherAlcoholKind?.trim()?.ifBlank { null }) {
+                    "카탈로그 상품의 주류 종류는 변경할 수 없어요."
+                }
             }
             if (category == "기타 주류" && alcoholKind.isBlank()) {
                 // Existing catalog/photo entries may have no Mock-only subtype.
@@ -626,7 +634,8 @@ internal fun OwnerManualMenuScreen(
                     }
                     if (category == "기타 주류")
                         V4FormField("주류 종류", alcoholKind, { alcoholKind = it.take(60) },
-                            placeholder = "예: 하이볼, 맥주")
+                            placeholder = "예: 하이볼, 맥주",
+                            testTag = "manual-menu-alcohol-kind")
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     if (category == "위스키") {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement =
