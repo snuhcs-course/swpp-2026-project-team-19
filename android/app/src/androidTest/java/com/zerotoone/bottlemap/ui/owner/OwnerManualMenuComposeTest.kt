@@ -323,4 +323,65 @@ class OwnerManualMenuComposeTest {
         }
         compose.onNodeWithText("품절", substring = true).assertExists()
     }
+    @Test fun importedLocalizedBottleAndHighPriceRemainUnchangedAfterSaving() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("brand-local", "라가불린"))
+        r.saveCatalogProduct(MockCatalogProduct("product-local", "brand-local", "라가불린 12년"))
+        val original = listOf(
+            MockMenuOption("bottle-ko", label = "병", pourMl = null, priceKrw = 100_000_000),
+            MockMenuOption("glass-ko", label = "잔", pourMl = 30, priceKrw = 20_000),
+            MockMenuOption("other", label = null, pourMl = null, priceKrw = 12_000))
+        r.saveMenuItem(MockBarMenuItem("menu-local", "fixture-bar", "product-local", original))
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-menu-local").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(original, r.preview("fixture-bar", 0)!!.visibleMenu.single().options)
+        }
+    }
+
+    @Test fun categoryToggleDoesNotDestroyWhiskyOptions() {
+        val vm = fixture()
+        val initial = vm.preview("fixture-bar", 0)!!.visibleMenu.single().options
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-row-bar-10").performClick()
+        compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        compose.onNodeWithText("위스키", substring = false).performClick()
+        compose.onNodeWithText("칵테일", substring = false).performClick()
+        compose.onNodeWithText("칵테일", substring = false).performClick()
+        compose.onNodeWithText("위스키", substring = false).performClick()
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(initial, vm.preview("fixture-bar", 0)!!.visibleMenu.single().options)
+        }
+    }
+
+    @Test fun otherCatalogCategoriesAreVisibleAndSearchableInOwnerMenu() {
+        val r = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        for (cat in listOf("gin", "brandy", "rum", "wine")) {
+            r.saveBrand(MockBrand("brand-$cat", cat))
+            r.saveCatalogProduct(MockCatalogProduct("product-$cat", "brand-$cat",
+                "상품 $cat", category = cat))
+            r.saveMenuItem(MockBarMenuItem("menu-$cat", "fixture-bar", "product-$cat",
+                listOf(MockMenuOption("option-$cat", label = "병", priceKrw = 22000))))
+        }
+        val vm = OwnerMockViewModel(r)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        for (cat in listOf("gin", "brandy", "rum", "wine")) {
+            compose.onNodeWithText(cat, substring = false).performClick()
+            compose.onNodeWithTag("manual-menu-row-menu-$cat").assertExists()
+        }
+        compose.runOnIdle { assertEquals(4, vm.preview("fixture-bar", 0)!!.visibleMenu.size) }
+    }
+
 }
