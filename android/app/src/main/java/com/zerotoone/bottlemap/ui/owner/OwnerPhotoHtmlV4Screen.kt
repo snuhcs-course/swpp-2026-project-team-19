@@ -47,7 +47,6 @@ import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.MockPhoto
 import com.zerotoone.bottlemap.data.owner.MockPhotoKind
 import com.zerotoone.bottlemap.ui.common.OwnerActionButton
-import com.zerotoone.bottlemap.ui.common.OwnerHeader
 import com.zerotoone.bottlemap.ui.common.OwnerLoading
 import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
 import java.util.UUID
@@ -117,7 +116,7 @@ fun OwnerPhotoHtmlV4Screen(
         )
     }
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        OwnerHeader("사진 편집", onBack)
+        V4Toolbar(null, onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(horizontal = BottleMapSpacing.screenHorizontal),
@@ -139,7 +138,7 @@ fun OwnerPhotoHtmlV4Screen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("매장 사진 편집", color = V4Color.text, fontSize = 24.sp,
-                        fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
+                        fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black)
                     Box(
                         Modifier.background(V4Color.elevated, RoundedCornerShape(10.dp))
                             .border(1.dp, V4Color.line, RoundedCornerShape(10.dp))
@@ -193,29 +192,40 @@ fun OwnerPhotoHtmlV4Screen(
                                         }
                                         if (menuPhotoId == photo.photoId) {
                                             Column(
-                                                Modifier.align(Alignment.TopCenter).fillMaxWidth()
-                                                    .padding(horizontal = 1.dp, vertical = 8.dp)
-                                                    .background(V4Color.background, RoundedCornerShape(9.dp))
-                                                    .border(1.dp, V4Color.primary, RoundedCornerShape(9.dp))
-                                                    .padding(4.dp),
+                                                Modifier.matchParentSize()
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(V4Color.background)
+                                                    .border(1.dp, V4Color.primary,
+                                                        RoundedCornerShape(8.dp))
+                                                    .testTag("owner-photo-action-panel")
+                                                    .padding(horizontal = 6.dp, vertical = 3.dp),
                                             ) {
-                                                Box(Modifier.fillMaxWidth().height(40.dp)
+                                                Box(Modifier.fillMaxWidth().weight(1f)
                                                     .clickable { commit(makeCoverPhoto(bar.gallery, index)) }
-                                                    .padding(horizontal = 10.dp),
+                                                    .padding(horizontal = 8.dp),
                                                     contentAlignment = Alignment.CenterStart) {
                                                     Text("대표 사진 등록", fontSize = 12.sp,
                                                         color = V4Color.text)
                                                 }
                                                 Spacer(Modifier.fillMaxWidth().height(1.dp)
                                                     .background(V4Color.line))
-                                                Box(Modifier.fillMaxWidth().height(40.dp)
+                                                Box(Modifier.fillMaxWidth().weight(1f)
                                                     .clickable {
                                                         menuPhotoId = null
                                                         deletePhotoId = photo.photoId
-                                                    }.padding(horizontal = 10.dp),
+                                                    }.padding(horizontal = 8.dp),
                                                     contentAlignment = Alignment.CenterStart) {
                                                     Text("삭제하기", fontSize = 12.sp,
                                                         color = Color(0xFFFFB4AB))
+                                                }
+                                                Spacer(Modifier.fillMaxWidth().height(1.dp)
+                                                    .background(V4Color.line))
+                                                Box(Modifier.fillMaxWidth().weight(1f)
+                                                    .clickable { menuPhotoId = null }
+                                                    .padding(horizontal = 8.dp),
+                                                    contentAlignment = Alignment.CenterStart) {
+                                                    Text("닫기", fontSize = 12.sp,
+                                                        color = V4Color.sub)
                                                 }
                                             }
                                         }
