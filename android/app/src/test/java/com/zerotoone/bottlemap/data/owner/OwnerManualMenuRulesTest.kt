@@ -91,6 +91,23 @@ class OwnerManualMenuRulesTest {
         }
     }
 
+    @Test fun importedCocktailExtraOptionsAreRetainedWhileManualEditsSinglePrice() {
+        val r = repo()
+        val product = MockCatalogProduct("product-imported-cocktail", "brand-cocktail",
+            "수제 칵테일", category = "cocktail")
+        r.saveBrand(MockBrand(product.brandId, "칵테일"))
+        r.saveCatalogProduct(product)
+        val options = (1..4).map {
+            MockMenuOption("import-cocktail-$it", priceKrw = 4000 * it)
+        }
+        r.saveMenuItem(MockBarMenuItem("cocktail-menu", "fixture-bar", product.productId, options))
+        val edited = listOf(options.first().copy(priceKrw = 6000)) + options.drop(1)
+        r.saveManualMenuItem(MockBarMenuItem(
+            "cocktail-menu", "fixture-bar", product.productId, edited))
+        assertEquals(edited, snapshot(r).menuItems.single().options)
+        assertNotNull(manualMenuOptionError(options, "cocktail"))
+    }
+
     @Test fun changingCustomerVisibleMenuUpdatesFreshnessWithoutTouchingVerification() {
         val r = repo()
         r.saveManualMenuItem(MockBarMenuItem("menu-10", "fixture-bar", ten.productId,
