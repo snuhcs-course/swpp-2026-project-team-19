@@ -52,7 +52,11 @@ internal fun OwnerMenuFlatRow(
     val imageBackground = if (soldOut) Color(0xFF363636) else Color(0xFF40352C)
     val imageBottle = if (soldOut) Color(0xFF888888) else Color(0xFF658C7A)
     val imageLabel = if (soldOut) Color(0xFFB7B7B7) else Color(0xFFE1D2B5)
-    Box(Modifier.fillMaxWidth().height(74.dp)
+    // Imported menus may carry four or more existing portions. They remain visible
+    // even though the direct editor limits new entries to three portions.
+    // Selection never changes the height for a given menu item.
+    val rowHeight = maxOf(74, item.options.size * 17 + 12).dp
+    Box(Modifier.fillMaxWidth().height(rowHeight)
         .background(V4Color.background)
         .then(if (onSelect != null) Modifier.ownerQuietClick(onClick = onSelect) else Modifier)
         .testTag("manual-menu-row-" + item.barMenuItemId)) {
@@ -94,7 +98,7 @@ internal fun OwnerMenuFlatRow(
             Column(Modifier.width(ownerMenuPriceSlotWidth),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                item.options.take(3).forEach { option ->
+                item.options.forEach { option ->
                     OwnerMenuPriceLine(option, nowEpochMs, soldOut)
                 }
                 if (item.options.isEmpty()) Text("가격 없음", color = secondary, fontSize = 10.sp)
