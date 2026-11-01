@@ -10,6 +10,9 @@ class OwnerMenuDiscountPresentationTest {
         val discount = MockMenuOption("pour30", pourMl = 30, priceKrw = 10000,
             discount = MockDiscount(5000, 100L, 200L))
         val regular = MockMenuOption("bottle", label = "Bottle", priceKrw = 120000)
+        // Badge is tied to a configured option, not to today's schedule window.
+        assertTrue(ownerOptionHasDiscount(discount))
+        assertFalse(ownerOptionHasDiscount(regular))
         assertFalse(ownerOptionDiscountActive(discount, 99L))
         assertTrue(ownerOptionDiscountActive(discount, 100L))
         assertTrue(ownerOptionDiscountActive(discount, 199L))
