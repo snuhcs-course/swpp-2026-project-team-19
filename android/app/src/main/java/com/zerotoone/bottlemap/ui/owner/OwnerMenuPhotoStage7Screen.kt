@@ -183,7 +183,8 @@ internal fun OwnerMenuPhotoSelectionScreen(
         if (index < 1) null else MockPhoto(
             it.substring(0, index), it.substring(index + 1), MockPhotoKind.MENU_CAPTURE)
     }
-    var busy by rememberSaveable { mutableStateOf(false) }
+    // An interrupted file-copy coroutine must not restore a permanent busy state.
+    var busy by remember { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val picker = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(OWNER_MENU_MAX_PHOTOS)
@@ -213,6 +214,16 @@ internal fun OwnerMenuPhotoSelectionScreen(
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())
             .padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             MenuPhotoSteps(0)
+            if (bar == null) {
+                val loadingMessage = when (state) {
+                    MockOwnerLoadState.Loading -> "매장 정보를 불러오고 있어요."
+                    is MockOwnerLoadState.Error -> state.message
+                    else -> "사진을 추가할 매장을 선택해 주세요."
+                }
+                Text(loadingMessage, color = V4Color.sub, fontSize = 12.sp)
+                if (state is MockOwnerLoadState.Error)
+                    MenuPhotoSecondary("다시 시도", viewModel::retry)
+            }
             Text(if (photos.isEmpty()) "메뉴판 사진을 올려 주세요" else "메뉴판 사진 선택",
                 fontSize = 24.sp, fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif, color = V4Color.text)
