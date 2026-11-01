@@ -123,6 +123,8 @@ data class MockBarMenuItem(
     val productId: String,
     val options: List<MockMenuOption>,
     val soldOut: Boolean = false, // C09 unagreed
+    // Local-only bar-facing label. Canonical catalog displayName remains unchanged.
+    val displayNameOverride: String? = null,
 )
 
 data class MockWeeklyHours(
