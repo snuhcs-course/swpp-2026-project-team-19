@@ -30,15 +30,8 @@ import com.zerotoone.bottlemap.ui.common.BmIconId
 internal fun ownerOptionDiscountActive(option: MockMenuOption, atEpochMs: Long): Boolean =
     option.discount?.let { atEpochMs >= it.startAtEpochMs && atEpochMs < it.endAtEpochMs } == true
 
-/** Configured discounts are visible in Owner edit and both menus even when scheduled.
- * Discounted prices are still time-gated by MockMenuOption.displayPrice. */
-internal fun ownerOptionHasDiscount(option: MockMenuOption): Boolean = option.discount != null
-
-// 27 badge + 3 + 35 volume + 3 + 71 price = 139dp.
-// 71dp leaves room for the largest permitted "99,999,999원" at 10sp;
-// 'Bottle' sits directly to its left without shifting the discount slot.
-// Discount badge remains in its fixed slot, while right-aligning volume beside price.
-// With 8-digit price limit the price still reserves enough width for 99,999,999원.
+// Fixed price area: reserved discount badge slot, 30dp right-aligned volume
+// slot and right-aligned price. Even without an active discount, columns do not shift.
 internal val ownerMenuPriceSlotWidth = 129.dp
 
 @Composable
@@ -91,9 +84,10 @@ internal fun OwnerMenuFlatRow(
                 if (showStatus) {
                     Box(Modifier.border(1.dp, if (soldOut) Color(0xFF737373)
                         else V4Color.line, RoundedCornerShape(4.dp))
-                        .padding(horizontal = 3.dp, vertical = 1.dp)) {
+                        .padding(all = 4.dp)) {
                         Text(if (soldOut) "품절" else "판매 중",
-                            color = secondary, fontSize = 9.sp, maxLines = 1)
+                            color = secondary, fontSize = 9.sp, lineHeight = 9.sp,
+                            maxLines = 1)
                     }
                 }
             }
@@ -127,21 +121,22 @@ internal fun OwnerMenuFlatRow(
 /** Discount badge is in a reserved leading slot: ml and right-edge prices never move. */
 @Composable
 internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut: Boolean = false) {
-    val configured = ownerOptionHasDiscount(option)
+    val active = ownerOptionDiscountActive(option, atEpochMs)
     val textColor = if (soldOut) Color(0xFF999999) else V4Color.text
     val priceColor = if (soldOut) Color(0xFF999999) else V4Color.sub
     Row(Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp)) {
         Box(Modifier.width(27.dp), contentAlignment = Alignment.CenterEnd) {
-            if (configured) Box(Modifier.background(
+            if (active) Box(Modifier.background(
                 if (soldOut) Color(0xFF414141) else Color(0xFF4B3826),
                 RoundedCornerShape(3.dp))
                 .border(1.dp, if (soldOut) Color(0xFF666666) else Color(0xFF9C7A52),
                     RoundedCornerShape(3.dp))
-                .padding(horizontal = 2.dp)) {
+                .padding(all = 3.dp)) {
                 Text("할인", color = if (soldOut) Color(0xFFB0B0B0)
-                    else Color(0xFFF7DFBF), fontSize = 8.sp, maxLines = 1)
+                    else Color(0xFFF7DFBF), fontSize = 8.sp, lineHeight = 8.sp,
+                    maxLines = 1)
             }
         }
         Text(option.pourMl?.toString()?.plus("ml") ?: option.label.orEmpty(),
