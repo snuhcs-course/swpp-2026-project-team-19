@@ -505,8 +505,9 @@ private fun OwnerManualMenuRow(
     Box(Modifier.fillMaxWidth().padding(horizontal = 7.dp, vertical = 3.dp)
         .background(V4Color.surface, RoundedCornerShape(9.dp))
         .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
-        .height(80.dp).testTag("manual-menu-row-" + item.barMenuItemId)) {
-        Row(Modifier.fillMaxSize().clickable(onClick = onSelect).padding(horizontal = 7.dp),
+        .height(80.dp).clickable(onClick = onSelect)
+        .testTag("manual-menu-row-" + item.barMenuItemId)) {
+        Row(Modifier.fillMaxSize().padding(horizontal = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(7.dp)) {
             Box(Modifier.size(width = 42.dp, height = 54.dp)
