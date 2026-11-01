@@ -138,7 +138,7 @@ fun OwnerPhotoHtmlV4Screen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("매장 사진 편집", color = V4Color.text, fontSize = 24.sp,
-                        fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Black)
+                        fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
                     Box(
                         Modifier.background(V4Color.elevated, RoundedCornerShape(10.dp))
                             .border(1.dp, V4Color.line, RoundedCornerShape(10.dp))
