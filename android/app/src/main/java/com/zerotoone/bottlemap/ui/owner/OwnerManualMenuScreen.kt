@@ -532,9 +532,14 @@ internal fun OwnerManualMenuScreen(
                     }, placeholder = "예: 라가불린 10년", testTag = "manual-menu-name")
                     if (editId == null) {
                         val suggested = candidates.firstOrNull { p ->
-                            itemName.any(Char::isDigit) && itemName.isNotBlank() &&
+                            itemName.isNotBlank() &&
                                 p.displayName.replace(" ", "").contains(
                                     itemName.trim().replace(" ", ""), ignoreCase = true) &&
+                                // Digitless catalog names must match exactly before
+                                // offering explicit canonical product confirmation.
+                                (itemName.any(Char::isDigit) ||
+                                    p.displayName.replace(" ", "").equals(
+                                        itemName.trim().replace(" ", ""), ignoreCase = true)) &&
                                 p.productId != rejectedId &&
                                 manualMenuCategoryLabel(p.category) == category
                         }
@@ -718,7 +723,21 @@ internal fun OwnerManualMenuScreen(
                                     Text((if (d.bottle) "Bottle" else d.ml + "ml") +
                                         " · " + d.price + "원",
                                         modifier = Modifier.fillMaxWidth()
-                                            .manualTap { saleOption = i; promoOptionExpanded = false }
+                                            .manualTap {
+                                                if (i != saleOption) {
+                                                    // Discard this option's un-applied promotion edits;
+                                                    // other options retain their original draft values.
+                                                    val previous = beforePromoOptions
+                                                        ?.let(::decodedOptions)
+                                                        ?.getOrNull(saleOption)
+                                                    if (previous != null)
+                                                        changeOption(saleOption) { previous }
+                                                    saleOption = i
+                                                    calendarTarget = null
+                                                    error = null
+                                                }
+                                                promoOptionExpanded = false
+                                            }
                                             .padding(horizontal = 16.dp, vertical = 12.dp),
                                         color = V4Color.text, fontSize = 13.sp)
                                 }
