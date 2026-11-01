@@ -30,7 +30,10 @@ import com.zerotoone.bottlemap.ui.common.BmIconId
 internal fun ownerOptionDiscountActive(option: MockMenuOption, atEpochMs: Long): Boolean =
     option.discount?.let { atEpochMs >= it.startAtEpochMs && atEpochMs < it.endAtEpochMs } == true
 
-internal val ownerMenuPriceSlotWidth = 154.dp
+// 27 badge + 3 + 35 volume + 3 + 71 price = 139dp.
+// 71dp leaves room for the largest permitted "99,999,999원" at 10sp;
+// 'Bottle' sits directly to its left without shifting the discount slot.
+internal val ownerMenuPriceSlotWidth = 139.dp
 
 @Composable
 internal fun OwnerMenuFlatRow(
@@ -124,7 +127,7 @@ internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut
     Row(Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-        Box(Modifier.width(28.dp), contentAlignment = Alignment.CenterEnd) {
+        Box(Modifier.width(27.dp), contentAlignment = Alignment.CenterEnd) {
             if (active) Box(Modifier.background(
                 if (soldOut) Color(0xFF414141) else Color(0xFF4B3826),
                 RoundedCornerShape(3.dp))
@@ -136,8 +139,8 @@ internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut
             }
         }
         Text(option.pourMl?.toString()?.plus("ml") ?: option.label.orEmpty(),
-            modifier = Modifier.width(39.dp), color = textColor,
-            fontSize = 10.sp, maxLines = 1)
+            modifier = Modifier.width(35.dp), color = textColor,
+            fontSize = 10.sp, maxLines = 1, textAlign = TextAlign.End)
         Text("%,d원".format(option.displayPrice(atEpochMs)),
             modifier = Modifier.weight(1f),
             color = priceColor, fontSize = 10.sp,
