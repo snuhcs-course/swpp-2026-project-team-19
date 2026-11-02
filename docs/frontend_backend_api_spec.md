@@ -296,9 +296,9 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 
 #### 3.1.3 임시 로그인 (로컬 개발용)
 
-Supabase 연동 전과 로컬 개발을 위해 `POST /api/auth/temp-login`을 유지한다. 이 API는 명시적으로 활성화해야 하며, 고정된 `local-dev-user` subject로 짧은 만료 시간의 HS256 JWT를 발급한다. 이 token은 Supabase access token이 아니다.
+로컬 개발을 위해 `POST /api/auth/temp-login`을 유지한다. 이 API는 명시적으로 활성화해야 하며, 고정된 `local-dev-user` subject로 짧은 만료 시간의 HS256 JWT를 발급한다. 이 token은 Supabase access token이 아니다.
 
-배포 서버에서는 앱에서 Google 로그인이 가능해질 때까지만 데모용으로 켜 둘 수 있고, Google 로그인이 가능해지면 끈다(`TEMP_AUTH_ENABLED=false`). 켜져 있는 동안에는 서버에 접근하는 누구나 같은 임시 계정을 공유하며, `TEMP_AUTH_USER_TYPE=operator`이면 operator 권한을 얻는다. 켜져 있는 동안 서버는 시작할 때마다 경고 로그를 남긴다. 끄는 절차는 `backend/DEPLOY.md`를 따른다.
+배포 서버에서는 앱에서 Google 로그인이 가능해질 때까지만 데모용으로 켜 두었고, 2026-11-02에 껐다(`TEMP_AUTH_ENABLED=false`). 배포 서버에서는 다시 켜지 않는다. 켜져 있으면 서버에 접근하는 누구나 같은 임시 계정을 공유하며, `TEMP_AUTH_USER_TYPE=operator`이면 operator 권한을 얻는다. 켜져 있는 동안 서버는 시작할 때마다 경고 로그를 남긴다. 배포 서버 설정은 `backend/DEPLOY.md`를 따른다.
 
 개발 환경에서 `TEMP_AUTH_ENABLED=true`와 32자 이상의 로컬 `TEMP_AUTH_JWT_SECRET`을 설정한 뒤 호출한다. 요청 본문은 없으며, 응답은 세 시간 동안 유효한 bearer token이다.
 
@@ -1749,7 +1749,7 @@ operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 �
 | 사업자등록증 OCR (3.11.12) | 사용자마다 하루 5회 | `413`, `415`, `422` 검사를 통과해 CLOVA OCR을 실제로 호출한 요청. 읽은 항목이 없어도, 호출이 실패해 `503`이 되어도 센다. 서버에 OCR 설정이 없어 호출하지 않은 요청은 세지 않는다 |
 
 - 사용자는 token의 `sub`(3.1.2)로 구분한다. OCR은 `users` 행이 없어도 호출할 수 있으므로 `users.id`가 아니라 `sub`로 센다.
-- 임시 로그인(3.1.3) 토큰은 모두 `sub`가 같으므로 한도 하나를 함께 쓴다. 임시 로그인은 로컬 개발과 Google 로그인 전환 전의 데모 서버에서만 쓰므로 이 한계를 받아들인다.
+- 임시 로그인(3.1.3) 토큰은 모두 `sub`가 같으므로 한도 하나를 함께 쓴다. 임시 로그인은 로컬 개발에서만 쓰므로 이 한계를 받아들인다.
 - 두 한도는 따로 센다. operator의 다시 검증(3.11.13)은 제한하지 않는다.
 - 하루는 한국 시간(KST) 자정에 초기화된다.
 - 한도를 넘으면 외부 API를 호출하지 않고 `429 RATE_LIMITED`를 반환한다. `details.retryAfter`에 다음 초기화 시각(RFC 3339, UTC)을 담는다.

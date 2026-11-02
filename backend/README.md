@@ -48,7 +48,7 @@ TEMP_AUTH_USER_TYPE=operator \
 uv run uvicorn app.main:app --reload
 ```
 
-The role of a temporary token is `TEMP_AUTH_USER_TYPE` (`customer` or `operator`) at request time, so changing it applies to tokens already issued; the `user_type` claim in the token is ignored. The deployed server keeps temporary login on only until Google login works in the app. While it is on, the server logs a warning at start-up; [DEPLOY.md](DEPLOY.md#turning-off-temporary-login) describes how to turn it off.
+The role of a temporary token is `TEMP_AUTH_USER_TYPE` (`customer` or `operator`) at request time, so changing it applies to tokens already issued; the `user_type` claim in the token is ignored. The deployed server has temporary login off since 2026-11-02 and uses Google login only ([DEPLOY.md](DEPLOY.md#6-operations)). Whenever it is on, the server logs a warning at start-up.
 
 **Users and roles.** `GET /api/me` is the only API that creates users: the first call stores the token's subject as `users.auth_subject` with user type `customer` (a temporary user takes `TEMP_AUTH_USER_TYPE`), and later calls keep the email in step with the token. Operator routes (`require_operator`) read a Supabase user's role from `users.user_type` on every request; a user without a row is a customer. Token claims never grant a role.
 
