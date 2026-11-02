@@ -199,6 +199,8 @@ data class MockMenuImport(
     val reviewVersion: Int,
     val images: List<MockPhotoExtraction>,
     val failureReason: String? = null,
+    // Local Mock publication result: deduplicated actual new bar menu rows.
+    val publishedAddedCount: Int? = null,
 )
 
 /**
