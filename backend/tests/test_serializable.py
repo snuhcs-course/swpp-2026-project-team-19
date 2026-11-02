@@ -3,22 +3,29 @@
 from contextlib import contextmanager
 
 import pytest
+from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from app.core.errors import ApiError
 from app.services import serializable
-from app.services.serializable import MAX_ATTEMPTS, run_serializable, write_conflict
+from app.services.serializable import CATALOG_UNIQUE_CONSTRAINTS, MAX_ATTEMPTS, run_serializable, write_conflict
 
 CONFLICT = write_conflict("잠시 후 다시 시도해 주세요.")
 
 
+class _Diagnostic:
+    def __init__(self, constraint_name: str | None) -> None:
+        self.constraint_name = constraint_name
+
+
 class _DatabaseError(Exception):
-    def __init__(self, sqlstate: str) -> None:
+    def __init__(self, sqlstate: str, constraint: str | None = None) -> None:
         self.sqlstate = sqlstate
+        self.diag = _Diagnostic(constraint)
 
 
-def db_error(sqlstate: str) -> OperationalError:
-    return OperationalError("UPDATE ...", {}, _DatabaseError(sqlstate))
+def db_error(sqlstate: str, constraint: str | None = None) -> OperationalError:
+    return OperationalError("UPDATE ...", {}, _DatabaseError(sqlstate, constraint))
 
 
 class FakeSession:
@@ -65,9 +72,17 @@ def test_the_result_is_committed(log):
     assert log == ["open", "commit"]
 
 
-@pytest.mark.parametrize("sqlstate", ["40001", "40P01"], ids=["serialization failure", "deadlock"])
-def test_a_write_conflict_is_retried_in_a_new_session(log, sqlstate):
-    result = run_serializable(factory(log), failing(db_error(sqlstate)), label="test", conflict=CONFLICT)
+@pytest.mark.parametrize(
+    "error",
+    [
+        db_error("40001"),
+        db_error("40P01"),
+        *(db_error("23505", constraint) for constraint in sorted(CATALOG_UNIQUE_CONSTRAINTS)),
+    ],
+    ids=["serialization failure", "deadlock", *(f"duplicate {c}" for c in sorted(CATALOG_UNIQUE_CONSTRAINTS))],
+)
+def test_a_write_conflict_is_retried_in_a_new_session(log, error):
+    result = run_serializable(factory(log), failing(error), label="test", conflict=CONFLICT)
 
     assert result == "done"
     assert log == ["open", "rollback", "sleep", "open", "commit"]
@@ -87,11 +102,27 @@ def test_conflicts_on_every_attempt_raise_the_callers_error(log):
 
 @pytest.mark.parametrize(
     "error",
-    [db_error("23505"), ApiError(409, "MENU_OUTDATED", "outdated")],
-    ids=["other database error", "api error"],
+    [
+        db_error("23505", "uq_menu_board_entries_menu_board_id_sort_order"),
+        db_error("23503"),
+        ApiError(409, "MENU_OUTDATED", "outdated"),
+    ],
+    ids=["duplicate outside the catalog", "other database error", "api error"],
 )
 def test_other_errors_are_rolled_back_and_raised_without_a_retry(log, error):
     with pytest.raises(type(error)):
         run_serializable(factory(log), failing(error), label="test", conflict=CONFLICT)
 
     assert log == ["open", "rollback"]
+
+
+def test_the_catalog_constraints_exist_under_these_names(db_session):
+    """A renamed constraint would silently stop being retried."""
+    names = set(
+        db_session.scalars(
+            text("SELECT conname FROM pg_constraint WHERE contype = 'u' AND conname = ANY(:names)"),
+            {"names": list(CATALOG_UNIQUE_CONSTRAINTS)},
+        )
+    )
+
+    assert names == CATALOG_UNIQUE_CONSTRAINTS
