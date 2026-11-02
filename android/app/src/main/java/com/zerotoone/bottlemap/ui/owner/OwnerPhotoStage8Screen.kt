@@ -230,7 +230,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
 @Composable private fun St8ReviewToolbar(step: Int, total: Int, back: () -> Unit) {
     Box(Modifier.fillMaxWidth().height(52.dp)) {
         TextButton(onClick=back,modifier=Modifier.align(Alignment.CenterStart)
-            .padding(start=10.dp).size(48.dp)) {
+            .padding(start=14.dp).size(48.dp)) {
             Text("←",color=V4Color.text,fontSize=26.sp)
         }
         Text("${step} / ${total}",color=V4Color.sub,fontWeight=FontWeight.Bold,
@@ -238,14 +238,18 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 }
 @Composable private fun St8ReviewPager(
-    at:Int,total:Int,remaining:Int,previous:()->Unit,next:()->Unit
+    index:Int, total:Int, remaining:Int, previous:()->Unit,next:()->Unit
 ) {
     HorizontalDivider(color=V4Color.line,modifier=Modifier.padding(top=3.dp))
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
         verticalAlignment=Alignment.CenterVertically) {
-        TextButton(onClick=previous) {Text("‹ 이전",color=V4Color.primary)}
+        if(index>0)TextButton(onClick=previous) {
+            Text("‹ 이전",color=V4Color.primary)
+        } else Spacer(Modifier.width(68.dp))
         Text("남은 확인 ${remaining}개",color=V4Color.primary,fontSize=12.sp)
-        TextButton(onClick=next) {Text("다음 ›",color=V4Color.primary)}
+        if(index<total-1)TextButton(onClick=next) {
+            Text("다음 ›",color=V4Color.primary)
+        } else Spacer(Modifier.width(68.dp))
     }
 }
 @Composable private fun St8Bottle() {
@@ -299,15 +303,25 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
 @Composable internal fun OwnerPhotoStage8Screen(
     state: MockOwnerLoadState, vm: OwnerMockViewModel,
     onBack:()->Unit, onHome:()->Unit,
+    resumeFromMenu: Boolean=false,
 ) {
     val s=reviewSnap(state)
     val barId=s?.selectedBarId ?: s?.bars?.firstOrNull()?.barId
     val job=s?.imports?.lastOrNull { it.barId==barId }
-    val all=job?.images?.flatMap { photo->photo.lines.map { photo to it } }.orEmpty()
+    // Only product lines are review pages; notices never appear in the UI.
+    val all=job?.images?.flatMap { photo ->
+        photo.lines.filter{it.kind!=MockLineKind.NON_PRODUCT}.map { photo to it }
+    }.orEmpty()
+    val reviewPositions=all.indices.toList()
     val counts=if(job!=null && s!=null)stage8Counts(job,s) else null
     val focusManager=LocalFocusManager.current
     val keyboardController=LocalSoftwareKeyboardController.current
-    var screen by rememberSaveable(job?.menuImportId){mutableStateOf("summary")}
+    var screen by rememberSaveable(job?.menuImportId) {
+        mutableStateOf(if(resumeFromMenu) {
+            if(all.isNotEmpty() && all.all{it.second.decision!=null}) "publish"
+            else "incomplete"
+        } else "summary")
+    }
     var position by rememberSaveable(job?.menuImportId){mutableIntStateOf(0)}
     var error by rememberSaveable {mutableStateOf<String?>(null)}
     var publishConfirmed by rememberSaveable {mutableStateOf(false)}
@@ -328,6 +342,15 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
     fun visitLine(target:Int) {
         all.getOrNull(target)?.second?.let {visit(stage8ReviewDestination(it),target)}
+    }
+    fun pageIndex()=reviewPositions.indexOf(position)
+    fun previousPage() {
+        val i=pageIndex()
+        if(i>0)visitLine(reviewPositions[i-1])
+    }
+    fun followingPage() {
+        val i=pageIndex()
+        if(i>=0 && i<reviewPositions.lastIndex)visitLine(reviewPositions[i+1])
     }
     fun backPage() {
         val last=pageHistory.lastOrNull()
@@ -362,12 +385,20 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     if(showRestartWarning) AlertDialog(
         onDismissRequest={showRestartWarning=false},
         title={Text("처음부터 검수할까요?")},
-        text={Text("첫 번째 메뉴부터 다시 확인해요. 이미 저장한 결정은 지워지지 않으며, 변경하면 새 결정으로 저장돼요.")},
+        text={Text("기존 검수 결과를 모두 초기화하고 AI 검수 요약부터 다시 시작해요. 게시된 메뉴와 사진은 그대로 유지돼요.")},
         confirmButton={TextButton(onClick={
             showRestartWarning=false
-            visitLine(0)
+            runCatching {job?.let {vm.resetPhotoReview(it.menuImportId,it.reviewVersion)}}
+                .onSuccess {
+                    error=null
+                    pageHistory=emptyList()
+                    position=0
+                    selectedProductId=null
+                    pendingNewDraft=null
+                    screen="summary"
+                }.onFailure {error=it.message}
         }){Text("처음부터 검수")}},
-        dismissButton={TextButton(onClick={showRestartWarning=false}){Text("돌아가기")}}
+        dismissButton={TextButton(onClick={showRestartWarning=false}){Text("취소")}}
     )
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         val back: () -> Unit = { backPage() }
@@ -725,8 +756,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                     focusedContainerColor=V4Color.background,
                                     unfocusedContainerColor=V4Color.background))
                             OutlinedButton(onClick={noAge=!noAge;if(noAge)age=""},
-                                modifier=Modifier.height(54.dp),
-                                shape=RoundedCornerShape(9.dp),
+                                modifier=Modifier.height(28.dp).width(47.dp),
+                                contentPadding=PaddingValues(0.dp),
+                                shape=RoundedCornerShape(7.dp),
                                 border=androidx.compose.foundation.BorderStroke(1.dp,
                                     if(noAge)V4Color.primary else V4Color.line),
                                 colors=ButtonDefaults.outlinedButtonColors(
@@ -872,7 +904,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             } else if(screen=="price" && pair!=null) {
                 val (photo,line)=pair
                 var openPhoto by remember {mutableStateOf(false)}
-                Text("메뉴판 ${photo.imageOrder} · 가격을 읽지 못한 줄",color=V4Color.sub,fontSize=12.sp)
                 St8RecognizedStrip(photo,line,
                     s.bars.firstOrNull{it.barId==barId}?.defaultPourMl){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
@@ -969,7 +1000,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             Text(s.products.firstOrNull {it.productId==line.suggestedProductId}
                                 ?.displayName ?: line.sourceText,color=V4Color.text,
                                 fontSize=12.sp,modifier=Modifier.weight(1f))
-                            Text("자동 인식",color=V4Color.sub,fontSize=10.sp)
+                            V4ReviewStateBadge("자동 인식")
                         }
                         HorizontalDivider(color=V4Color.line)
                     }
@@ -1089,7 +1120,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     Text("›",color=V4Color.sub,fontSize=21.sp)
                 }
             } else if(screen=="publishFailed") {
-                Spacer(Modifier.height(20.dp))
                 Column(Modifier.fillMaxWidth().background(Color(0xFF492927),
                     RoundedCornerShape(12.dp)).padding(15.dp),
                     verticalArrangement=Arrangement.spacedBy(5.dp)) {
@@ -1156,16 +1186,13 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             }
                         }
                     }
-                    St8ReviewPager(position,all.size,counts!!.remaining,
-                        previous={if(position>0)visitLine(position-1) else backPage()},
-                        next={if(position+1<all.size)visitLine(position+1) else visit("summary")})
+                    St8ReviewPager(pageIndex(),reviewPositions.size,counts!!.remaining,
+                        previous={previousPage()},next={followingPage()})
                 }
-                "price"->St8ReviewPager(position,all.size,counts!!.remaining,
-                    previous={if(position>0)visitLine(position-1) else backPage()},
-                    next={if(position+1<all.size)visitLine(position+1) else visit("summary")})
-                "edit","new"->St8ReviewPager(position,all.size,counts!!.remaining,
-                    previous={if(position>0)visitLine(position-1) else backPage()},
-                    next={if(position+1<all.size)visitLine(position+1) else visit("summary")})
+                "price"->St8ReviewPager(pageIndex(),reviewPositions.size,counts!!.remaining,
+                    previous={previousPage()},next={followingPage()})
+                "edit","new"->St8ReviewPager(pageIndex(),reviewPositions.size,counts!!.remaining,
+                    previous={previousPage()},next={followingPage()})
                 "incomplete"->{
                     St8Button("${counts!!.remaining}줄 이어서 확인",enabled=counts.remaining>0){
                         val pos=all.indexOfFirst {it.second.decision==null}
