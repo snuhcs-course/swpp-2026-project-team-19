@@ -87,7 +87,8 @@ def apply_operating_exception(
             current.note,
         ) = values
         current.created_by_user_id = caller_user_id(session, principal)
-        current.created_at = func.now()
+        # clock_timestamp(), not now(): an apply that waited for the lock must not look older than the one before.
+        current.created_at = func.clock_timestamp()
     # Also ends the transaction of an unchanged retry, releasing the lock.
     session.commit()
     return get_bar_detail(session, bar)

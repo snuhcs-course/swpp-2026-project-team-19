@@ -449,7 +449,9 @@ def test_hours_are_replaced_under_the_bar_lock(client, db_session, bar, owner):
     lock = next(i for i, sql in enumerate(statements) if "FOR UPDATE" in sql)
     assert "FROM bars" in statements[lock]
     replace = next(i for i, sql in enumerate(statements) if sql.startswith("DELETE FROM bar_weekly_hours"))
-    assert lock < replace
+    # Stamped by the clock after the lock, not the transaction start (now()).
+    stamp = next(i for i, sql in enumerate(statements) if "updated_at=clock_timestamp()" in sql.replace(" ", ""))
+    assert lock < replace < stamp
 
 
 def test_other_fields_take_no_lock(client, db_session, bar, owner):

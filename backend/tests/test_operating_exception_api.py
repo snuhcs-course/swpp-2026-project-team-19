@@ -255,7 +255,9 @@ def test_the_closure_is_changed_under_the_bar_lock(client, db_session, bar, owne
     lock = next(i for i, sql in enumerate(statements) if "FOR UPDATE" in sql)
     assert "FROM bars" in statements[lock]
     write = next(i for i, sql in enumerate(statements) if sql.startswith("INSERT INTO bar_operating_exceptions"))
-    assert lock < write
+    # Stamped by the clock after the lock, not the transaction start (now()).
+    stamp = next(i for i, sql in enumerate(statements) if "clock_timestamp()" in sql)
+    assert lock < write <= stamp
 
 
 def test_an_owner_revoked_before_the_lock_is_forbidden(db_session, bar, owner_user):

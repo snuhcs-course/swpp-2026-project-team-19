@@ -86,8 +86,9 @@ def update_bar(session: Session, bar: Bar, patch: BarUpdateInput, *, operator: b
         # The bar row lock orders concurrent replacements, which would otherwise insert the same days twice.
         session.execute(select(Bar.id).where(Bar.id == bar.id).with_for_update())
         if replace_weekly_hours(session, bar.id, patch.weeklyHours):
-            # The hours live in their own table, so the bars row would not change by itself.
-            bar.updated_at = func.now()
+            # The hours live in their own table, so the bars row would not change by itself. clock_timestamp(),
+            # not now(): a request that waited for the lock must not look older than the one it waited for.
+            bar.updated_at = func.clock_timestamp()
     # A value equal to the stored one is no change, so `updatedAt` moves only when something changed.
     session.commit()
     return bar_details(session, [bar])[0]
