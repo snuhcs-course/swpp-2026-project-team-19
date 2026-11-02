@@ -637,7 +637,9 @@ fun OwnerOnboardingScreen(
                                         .clip(RoundedCornerShape(12.dp))
                                         .then(if(index==photoItems.size && photoItems.size<15)
                                             Modifier.registrationDashedBorder(12.dp) else Modifier)
-                                        .background(RegistrationV4.surface),
+                                        .background(if(index<photoItems.size ||
+                                                (index==photoItems.size && photoItems.size<15))
+                                            RegistrationV4.surface else RegistrationV4.bg),
                                         contentAlignment=Alignment.Center) {
                                         when {
                                             index < photoItems.size -> {
