@@ -81,15 +81,14 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("이번 줄 제외").assertExists()
     }
 
-    @Test fun pdf92PartialReviewAllowsResumeWithoutPublishing() {
-        showLine(MockExtractedLine("raw", "위스키 미확인", MockLineKind.PRODUCT,
+    @Test fun summaryLongPressNeverOpensDeveloperIncompletePreview() {
+        showLine(MockExtractedLine("raw","위스키 미확인",MockLineKind.PRODUCT,
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=14000))))
         compose.onNodeWithText("←").performClick()
         compose.onNodeWithText("1줄 확인").performTouchInput {longClick()}
-        compose.onNodeWithText("1줄 남았어요").assertExists()
-        compose.onNodeWithText("1줄 이어서 확인").assertExists()
+        compose.onNodeWithText("1줄 남았어요").assertDoesNotExist()
+        compose.onNodeWithText("1줄 확인 시작").assertExists()
     }
-
 
     @Test fun squareHomeIconAlignsWithSourceLabelBaseline() {
         showLine(MockExtractedLine("home-line","하쿠슈DR",MockLineKind.PRODUCT,
