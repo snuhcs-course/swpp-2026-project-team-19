@@ -1080,4 +1080,40 @@ class LocalOwnerMockRepositoryTest {
         assertTrue(ready(r).imports.any{it.menuImportId==fresh})
     }
 
+    @Test fun explicitAutoMatchedBottleSkipsReviewButPublishesWithBottleLabel() {
+        val r=repo()
+        catalog(r)
+        val importId=r.queuePhotoImport("fixture-bar",listOf(
+            MockPhoto("p-auto","content://auto",MockPhotoKind.MENU_CAPTURE)))
+        r.finishPhotoImport(importId,MockPhotoExtractionSource { listOf(
+            MockExtractedLine("auto-lagavulin","라가불린 16년",MockLineKind.PRODUCT,
+                suggestedProductId="product-16",
+                options=listOf(MockMenuOption("bottle",label="Bottle",priceKrw=280000)),
+                mockAutoAccepted=true),
+            MockExtractedLine("manual-hakushu","하쿠슈 DR",MockLineKind.PRODUCT,
+                suggestedProductId="product-12",
+                options=listOf(serving("glass",30,19000)))
+        )})
+        val job=ready(r).imports.last()
+        val lines=job.images.single().lines
+        assertEquals(MockDecisionKind.SELECT_PRODUCT,lines.first().decision?.kind)
+        assertEquals("product-16",lines.first().decision?.productId)
+        assertEquals(null,lines.last().decision)
+        r.decideLine(importId,lines.last().extractedItemId,job.reviewVersion,
+            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                productId="product-12",correctedOptions=lines.last().options))
+        r.resetPhotoReview(importId,job.reviewVersion)
+        val restarted=ready(r).imports.last()
+        assertEquals(MockDecisionKind.SELECT_PRODUCT,
+            restarted.images.single().lines.first().decision?.kind)
+        assertEquals(null,restarted.images.single().lines.last().decision)
+        r.decideLine(importId,restarted.images.single().lines.last().extractedItemId,
+            restarted.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))
+        assertEquals(1,r.publishAddOnly(importId,restarted.reviewVersion))
+        val added=ready(r).menuItems.single()
+        assertEquals("product-16",added.productId)
+        assertEquals("Bottle",added.options.single().label)
+        assertEquals(280000,added.options.single().priceKrw)
+    }
+
 }
