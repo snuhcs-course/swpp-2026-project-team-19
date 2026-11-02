@@ -646,7 +646,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                         productId=it, correctedOptions=normalizedOptions) })
             })
         }
-        val success = images.any { it.lines.isNotEmpty() }
+        // A partial multi-photo fixture is not a successful import.
+        val success = images.isNotEmpty() && images.all { it.lines.isNotEmpty() }
         val status = if (success) MockImportStatus.READY_FOR_REVIEW else MockImportStatus.FAILED
         val updated = job.copy(status = status, images = images,
             failureReason = if (success) null else
@@ -863,7 +864,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                     .firstOrNull(),
             )
         }
-        val applied = job.copy(status = MockImportStatus.APPLIED)
+        val applied = job.copy(status = MockImportStatus.APPLIED,
+            publishedAddedCount = added.size)
         s.copy(
             brands = s.brands + newBrands,
             products = s.products + newProducts,
