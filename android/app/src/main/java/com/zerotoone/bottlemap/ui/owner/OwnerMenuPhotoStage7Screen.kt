@@ -1,6 +1,10 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import android.net.Uri
+import com.zerotoone.bottlemap.BuildConfig
+import com.zerotoone.bottlemap.data.owner.MockExtractedLine
+import com.zerotoone.bottlemap.data.owner.MockLineKind
+import com.zerotoone.bottlemap.data.owner.MockMenuOption
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -341,6 +345,7 @@ internal fun OwnerMenuPhotoJobScreen(
     viewModel: OwnerMockViewModel,
     onHome: () -> Unit,
     onRetryPhotos: () -> Unit,
+    onReview: () -> Unit,
     fixture: MockPhotoExtractionSource = MockPhotoExtractionSource { emptyList() },
 ) {
     val job = latestImport(state)
@@ -454,6 +459,35 @@ internal fun OwnerMenuPhotoJobScreen(
             if (job?.status == MockImportStatus.FAILED)
                 MenuPhotoPrimary("📷 사진 다시 올리기", tag = "stage7-failed-retry",
                     onClick = onRetryPhotos)
+            if (job?.status == MockImportStatus.READY_FOR_REVIEW) {
+                MenuPhotoPrimary("검수 결과 확인하기", onClick = onReview)
+            }
+            if (BuildConfig.DEBUG && job?.status == MockImportStatus.FAILED) {
+                TextButton(onClick = {
+                    runCatching {
+                        // Explicit developer fixture, NEVER an OCR response for these photos.
+                        val newImportId = viewModel.retryFailedPhotoImport(job.menuImportId)
+                        var pageIndex = 0
+                        viewModel.finishPhotoImport(newImportId, MockPhotoExtractionSource {
+                            pageIndex++
+                            listOf(
+                                MockExtractedLine("fixture-$pageIndex-product",
+                                    "[시연 데이터] 메뉴판 샘플 $pageIndex - 실제 사진 인식 결과 아님",
+                                    MockLineKind.PRODUCT,
+                                    options = listOf(MockMenuOption(
+                                        "fixture-$pageIndex-opt", label = "잔",
+                                        pourMl = 30, priceKrw = 19000))),
+                                MockExtractedLine("fixture-$pageIndex-excluded",
+                                    "[시연 데이터] 비상품 안내문 $pageIndex",
+                                    MockLineKind.NON_PRODUCT),
+                            )
+                        })
+                        onReview()
+                    }.onFailure { error = it.message }
+                }, modifier = Modifier.fillMaxWidth()) {
+                    Text("[개발용] 샘플 결과로 검수 체험", color = V4Color.sub, fontSize = 11.sp)
+                }
+            }
             // A running mock extraction cannot be canceled from this screen.
             // The READY_FOR_REVIEW cancellation path remains for already-prepared jobs.
             if (job?.status == MockImportStatus.READY_FOR_REVIEW)
