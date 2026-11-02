@@ -333,6 +333,48 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         HorizontalDivider(color=V4Color.line)
                     }
                 }
+            } else if(screen=="catalog" && pair!=null) {
+                val q=catalogQuery.trim()
+                val candidates=s.products.filter { p ->
+                    p.isActive && q.isNotEmpty() && (
+                        p.displayName.contains(q,ignoreCase=true) ||
+                        (q.contains("잭다니엘") && p.displayName.contains("Jack Daniel",ignoreCase=true)) ||
+                        s.brands.firstOrNull {it.brandId==p.brandId}?.name
+                            ?.contains(q,ignoreCase=true)==true)
+                }
+                Text("카탈로그에서 찾은 메뉴 ${candidates.size}개",color=V4Color.sub,
+                    fontSize=12.sp)
+                candidates.forEach { product ->
+                    Row(Modifier.fillMaxWidth()
+                        .background(V4Color.surface,RoundedCornerShape(14.dp))
+                        .border(1.dp,V4Color.line,RoundedCornerShape(14.dp))
+                        .clickable {
+                            selectedProductId=product.productId
+                            val line=pair.second
+                            if(line.options.isEmpty() || line.options.any{it.priceKrw<=0}) {
+                                screen="price"
+                            } else runCatching {
+                                vm.review(job.menuImportId,line.extractedItemId,
+                                    job.reviewVersion,MockReviewDecision(
+                                        MockDecisionKind.SELECT_PRODUCT,productId=product.productId,
+                                        correctedOptions=line.options))
+                            }.onSuccess {error=null;next()}.onFailure {error=it.message}
+                        }.padding(horizontal=13.dp,vertical=12.dp),
+                        verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.spacedBy(11.dp)) {
+                        St8Bottle()
+                        Column(Modifier.weight(1f)) {
+                            val brand=s.brands.firstOrNull {it.brandId==product.brandId}?.name
+                            Text(brand ?: product.displayName,color=V4Color.text,
+                                fontSize=15.sp,fontWeight=FontWeight.Bold)
+                            Text(product.displayName.removePrefix((brand ?: "")+" "),
+                                color=V4Color.text,fontSize=13.sp)
+                            if(product.displayName.contains("Old No.7"))
+                                Text("이미 메뉴에 있을 수 있어요 · 선택 전 확인",
+                                    color=V4Color.sub,fontSize=11.sp)
+                        }
+                    }
+                }
             } else if(screen=="line" && pair!=null) {
                 val (photo,line)=pair
                 var openPhoto by remember {mutableStateOf(false)}
@@ -667,6 +709,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                 }
                 "auto","existing"->St8Button("요약으로") {screen="summary"}
+                "catalog"->St8Secondary("찾는 메뉴가 없어요, 새로 등록") {screen="new"}
                 "line"->{
                     if(pair!=null) {
                         val line=pair.second
