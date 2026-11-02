@@ -211,19 +211,17 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 }
 /** Secondary review actions sit below the source excerpt, never in the bottom CTA. */
-@Composable private fun St8ReviewShortcuts(exclude:()->Unit) {
-    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.End,
+@Composable private fun St8ReviewHeading(title: String, exclude:()->Unit) {
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(4.dp),
         verticalAlignment=Alignment.CenterVertically) {
+        Text(title,modifier=Modifier.weight(1f),color=V4Color.text,
+            fontSize=20.sp,fontWeight=FontWeight.Bold,maxLines=2)
         listOf("위스키가 아니에요","이번 줄 제외").forEach { label ->
-            OutlinedButton(onClick=exclude,modifier=Modifier.height(34.dp),
-                contentPadding=PaddingValues(horizontal=10.dp,vertical=0.dp),
-                shape=RoundedCornerShape(100),
-                border=BorderStroke(1.dp,V4Color.line),
-                colors=ButtonDefaults.outlinedButtonColors(
-                    containerColor=V4Color.surface,contentColor=V4Color.sub)) {
-                Text(label,fontSize=11.sp,maxLines=1)
+            Box(Modifier.height(30.dp).border(1.dp,V4Color.primary,
+                RoundedCornerShape(100)).clickable(onClick=exclude)
+                .padding(horizontal=7.dp),contentAlignment=Alignment.Center) {
+                Text(label,color=V4Color.primary,fontSize=10.sp,maxLines=1)
             }
-            if(label=="위스키가 아니에요")Spacer(Modifier.width(7.dp))
         }
     }
 }
@@ -620,15 +618,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 St8RecognizedStrip(photo,line){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 var categoryPopup by remember {mutableStateOf(false)}
-                St8ReviewShortcuts {
-                    runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                St8ReviewHeading(
+                    if(line.candidateProductIds.size>1)"어느 메뉴인가요?" else "이 메뉴가 맞나요?"
+                ) {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                         .onSuccess{pendingNewDraft=null;error=null;next()}
-                        .onFailure{error=it.message}
-                }
-                Text(if(line.candidateProductIds.size>1)"어느 메뉴인가요?"
-                    else "이 메뉴가 맞나요?",
-                    color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold)
+                        .onFailure{error=it.message}}
                 val candidates=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
                     .distinct().mapNotNull{id->s.products.firstOrNull{
                         it.productId==id && it.isActive}}
@@ -682,15 +677,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 var photoOpen by remember {mutableStateOf(false)}
                 St8RecognizedStrip(pair.first,line){photoOpen=true}
                 if(photoOpen)Stage8SourcePhoto(pair.first,line.sourceBox){photoOpen=false}
-                St8ReviewShortcuts {
-                    runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                St8ReviewHeading(
+                    if(screen=="edit")"가격과 용량을 확인해 주세요" else "새로 등록할게요"
+                ) {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                         .onSuccess{pendingNewDraft=null;error=null;next()}
-                        .onFailure{error=it.message}
-                }
-                Text(if(screen=="edit")"가격과 용량을 확인해 주세요"
-                    else "새로 등록할게요",color=V4Color.text,fontSize=22.sp,
-                    fontWeight=FontWeight.Bold)
+                        .onFailure{error=it.message}}
                 var name by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.name ?: 
                         if(line.sourceText=="시그나토리 쿨일라13")"Caol Ila" else "")
@@ -907,14 +899,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 St8RecognizedStrip(photo,line,
                     s.bars.firstOrNull{it.barId==barId}?.defaultPourMl){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
-                St8ReviewShortcuts {
-                    runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                St8ReviewHeading("가격을 못 읽었어요") {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                         .onSuccess{pendingNewDraft=null;error=null;next()}
-                        .onFailure{error=it.message}
-                }
-                Text("가격을 못 읽었어요",color=V4Color.text,
-                    fontSize=23.sp,fontWeight=FontWeight.Bold)
+                        .onFailure{error=it.message}}
                 St8Card {
                     Row(verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(11.dp)) {
