@@ -164,7 +164,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 strokeWidth=1.5.dp.toPx(),pathEffect=PathEffect.dashPathEffect(
                     floatArrayOf(3.dp.toPx(),3.dp.toPx())))
         }
-        Text(if(price!=null&&price>0)"%,d".format(price) else "확인 필요",
+        Text(if(price!=null&&price>0)"%,d".format(price)
+            else (pour?.let{"${it}ml"} ?: "가격 확인 필요"),
             color=Color(0xFF2A231D),fontSize=17.sp,fontWeight=FontWeight.Bold)
     }
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
@@ -793,13 +794,29 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)
                 }}개",color=V4Color.sub,fontSize=12.sp)
                 St8Card {
+                    val auto=all.filter {(_,line)->
+                        line.kind==MockLineKind.PRODUCT &&
+                            line.suggestedProductId!=null && line.candidateProductIds.isEmpty()
+                    }
+                    Text("자동으로 찾은 신규 메뉴 ${auto.size}줄",color=V4Color.primary,
+                        fontWeight=FontWeight.Bold,fontSize=12.sp)
+                    auto.forEach {(_,line)->
+                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
+                            Text(s.products.firstOrNull {it.productId==line.suggestedProductId}
+                                ?.displayName ?: line.sourceText,color=V4Color.text,
+                                fontSize=12.sp,modifier=Modifier.weight(1f))
+                            Text("자동 인식",color=V4Color.sub,fontSize=10.sp)
+                        }
+                        HorizontalDivider(color=V4Color.line)
+                    }
+                    Spacer(Modifier.height(4.dp))
                     Text("검수한 메뉴 ${counts.reviewed}줄",
-                        color=V4Color.primary,fontSize=13.sp,fontWeight=FontWeight.Bold)
-                    all.forEach { (_,line)->
+                        color=V4Color.primary,fontSize=12.sp,fontWeight=FontWeight.Bold)
+                    all.filter {it.second.decision!=null}.forEach { (_,line)->
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                             verticalAlignment=Alignment.CenterVertically) {
                             val name=line.decision?.newProduct?.name ?:
-                                s.products.firstOrNull {
+                                s.products.firstOrNull{
                                     it.productId==line.decision?.productId
                                 }?.displayName ?: line.sourceText
                             Text(name,color=V4Color.text,fontSize=12.sp,
@@ -813,8 +830,22 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         }
                         HorizontalDivider(color=V4Color.line)
                     }
+                    Spacer(Modifier.height(4.dp))
                     Text("이미 있는 메뉴 ${counts.existing}줄",
-                        color=V4Color.primary,fontSize=12.sp)
+                        color=V4Color.primary,fontSize=12.sp,fontWeight=FontWeight.Bold)
+                    val existingIds=s.menuItems.filter{it.barId==job.barId}
+                        .map{it.productId}.toSet()
+                    all.filter {(_,line)->
+                        line.suggestedProductId in existingIds ||
+                            line.candidateProductIds.any{it in existingIds}
+                    }.forEach {(_,line)->
+                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
+                            Text(line.sourceText,color=V4Color.text,fontSize=12.sp,
+                                modifier=Modifier.weight(1f))
+                            Text("건너뜀",color=V4Color.sub,fontSize=10.sp)
+                        }
+                        HorizontalDivider(color=V4Color.line)
+                    }
                 }
             } else if(screen=="publish") {
                 St8PublishSteps(3)
