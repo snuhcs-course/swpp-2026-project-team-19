@@ -406,7 +406,7 @@ internal fun OwnerManualMenuScreen(
         AlertDialog(
             onDismissRequest={cancelPhotoConfirm=false},
             title={Text("메뉴판 사진 등록을 취소할까요?")},
-            text={Text("선택한 사진과 저장한 검수 내용이 삭제돼요. 이미 게시한 메뉴와 가격은 그대로 유지됩니다.")},
+            text={Text("선택한 사진과 검수한 내용이 모두 삭제돼요.")},
             confirmButton={TextButton(onClick={
                 runCatching {viewModel.discardPhotoImport(activeJob.menuImportId)}
                     .onSuccess {cancelPhotoConfirm=false;error=null;screen="list"}
@@ -475,7 +475,17 @@ internal fun OwnerManualMenuScreen(
                         verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(9.dp)) {
                         BmIcon(BmIconId.REVIEW,null,Modifier.size(24.dp),tint=V4Color.primary)
-                        Text("메뉴판 사진으로 추가하기",color=V4Color.text,
+                        Text(when(activeJob?.status) {
+                            MockImportStatus.PROCESSING,MockImportStatus.UPLOADED ->
+                                "메뉴판 분석 중 · 작업 확인하기"
+                            MockImportStatus.READY_FOR_REVIEW ->
+                                if(activeJob.images.flatMap { it.lines }
+                                        .filter {it.kind==MockLineKind.PRODUCT}
+                                        .all {it.decision!=null}) "메뉴 게시 이어서 하기"
+                                else "추가할 메뉴 확인하기"
+                            MockImportStatus.FAILED -> "메뉴판 분석 실패 · 다시 확인하기"
+                            else -> "메뉴판 사진으로 추가하기"
+                        },color=V4Color.text,
                             fontWeight=FontWeight.Bold,fontSize=13.sp,
                             modifier=Modifier.weight(1f))
                         if(activeJob!=null) {
@@ -499,7 +509,7 @@ internal fun OwnerManualMenuScreen(
                             .testTag("manual-menu-add"), color = V4Color.primary, fontSize = 12.sp)
                     }
                     if (activePhotoImport) Text(
-                        "메뉴판 사진 등록 작업이 진행 중이에요. 작업이 끝난 후 메뉴를 수정할 수 있어요.",
+                        "메뉴판 사진 등록 작업 중에는 메뉴를 수정할 수 없어요.",
                         color = V4Color.primary, fontSize = 12.sp)
                     error?.let { Text(it, color = Color(0xFFFFB4AB), fontSize = 12.sp) }
                     V4SearchField(query, { query = it }, "manual-menu-search", "메뉴명·브랜드 검색")
@@ -511,12 +521,17 @@ internal fun OwnerManualMenuScreen(
                         manualMenuMatches(item, p, brand, query)
                     }
                     Row(Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically) {
-                        Text(if (query.isEmpty()) "전체 " + items.size + "개" else
-                            visible.size.toString() + "개 검색됨", color = V4Color.sub, fontSize = 11.sp)
-                        Text("최근 갱신 "+ownerDisplayDate(bar.lastMenuPublishedAtEpochMs),
-                            color=V4Color.primary,fontSize=11.sp)
+                        horizontalArrangement=Arrangement.SpaceBetween,
+                        verticalAlignment=Alignment.CenterVertically) {
+                        Row(horizontalArrangement=Arrangement.spacedBy(9.dp),
+                            verticalAlignment=Alignment.CenterVertically) {
+                            Text(if(query.isEmpty()) "전체 " + items.size + "개" else
+                                visible.size.toString() + "개 검색됨",
+                                color=V4Color.sub,fontSize=11.sp)
+                            Text("최근 갱신 "+ownerDisplayDate(bar.lastMenuPublishedAtEpochMs),
+                                color=V4Color.primary,fontSize=11.sp)
+                        }
+                        Text("메뉴를 선택해서 편집하세요",color=V4Color.sub,fontSize=11.sp)
                     }
                     if (visible.isEmpty()) Text(if (query.isEmpty()) "등록된 메뉴가 없어요."
                         else "검색 결과가 없어요.", color = V4Color.sub)
