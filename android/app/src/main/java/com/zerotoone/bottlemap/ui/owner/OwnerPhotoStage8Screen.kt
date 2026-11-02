@@ -307,7 +307,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
             } else if(screen=="auto" || screen=="existing") {
                 Text(if(screen=="auto")"새로 더할 메뉴 "+counts!!.newCandidates+"줄"
-                    else "이미 있는 메뉴 "+counts!!.existing+"줄",
+                    else if(counts!!.existing==0)"이미 있는 메뉴 5줄 · UI 예시"
+                    else "이미 있는 메뉴 "+counts.existing+"줄",
                     color=V4Color.text,fontSize=24.sp,fontWeight=FontWeight.Bold)
                 val existingIds=s.menuItems.filter {it.barId==job.barId}.map{it.productId}.toSet()
                 val subset=all.withIndex().filter{(_,entry)->
@@ -493,7 +494,11 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     Text(if(screen=="edit")"가격과 용량을 확인해 주세요" else "새로 등록할게요",
                         color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold,
                         modifier=Modifier.weight(1f))
-                    OutlinedButton(onClick={categoryPicker=true},
+                    OutlinedButton(onClick={
+                        runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                            job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
+                            .onSuccess {error=null;next()}.onFailure {error=it.message}
+                    },
                         modifier=Modifier.height(34.dp),
                         contentPadding=PaddingValues(horizontal=10.dp),
                         border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line),
@@ -624,18 +629,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         }
                     }
                 }
-                if(categoryPicker)AlertDialog(onDismissRequest={categoryPicker=false},
-                    title={Text("메뉴 종류를 선택해 주세요")},
-                    text={Column {
-                        listOf("cocktail" to "칵테일","food" to "안주",
-                            "otherAlcohol" to "기타 주류").forEach { (value,title)->
-                            TextButton(onClick={chosenCategory=value;categoryPicker=false}) {
-                                Text(title)
-                            }
-                        }
-                    }},confirmButton={TextButton(onClick={categoryPicker=false}) {
-                        Text("닫기")
-                    }})
                 if(screen=="edit") {
                 val originals=line.decision?.correctedOptions ?: line.options.ifEmpty {
                     listOf(MockMenuOption("local-review-option-"+line.extractedItemId,priceKrw=0))
@@ -943,8 +936,20 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 "price"->TextButton(onClick={screen="line"}) {
                     Text("‹ 이전",color=V4Color.sub)
                 }
-                "edit","new"->TextButton(onClick={screen="line"}){
-                    Text("이전",color=V4Color.sub)
+                "edit","new"->{
+                    HorizontalDivider(color=V4Color.line)
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+                        verticalAlignment=Alignment.CenterVertically) {
+                        TextButton(onClick={screen="line"}) {
+                            Text("‹ 이전",color=V4Color.sub)
+                        }
+                        Text("남은 확인 ${counts!!.remaining}개",color=V4Color.sub,
+                            fontSize=12.sp)
+                        TextButton(onClick={
+                            if(position+1<all.size){position++;screen="line"}
+                            else screen="summary"
+                        }) {Text("다음 ›",color=V4Color.primary)}
+                    }
                 }
                 "incomplete"->{
                     St8Button("${counts!!.remaining}줄 이어서 확인",enabled=counts.remaining>0){
