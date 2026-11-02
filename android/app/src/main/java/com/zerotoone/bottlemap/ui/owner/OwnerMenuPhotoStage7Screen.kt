@@ -153,28 +153,24 @@ private fun MenuPhotoSecondary(label: String, onClick: () -> Unit) {
 @Composable private fun MenuPhotoCameraIcon() {
     Canvas(Modifier.size(24.dp).testTag("stage7-retry-camera-icon")) {
         val unit = size.width / 24f
+        // Exact action-first v4 icon path: M4 8h3l2-3h6l2 3h3v11H4z.
         val outline = Path().apply {
-            moveTo(3f*unit, 8f*unit)
-            lineTo(7f*unit, 8f*unit)
-            lineTo(9f*unit, 5f*unit)
-            lineTo(15f*unit, 5f*unit)
-            lineTo(17f*unit, 8f*unit)
-            lineTo(21f*unit, 8f*unit)
-            quadraticBezierTo(22f*unit, 8f*unit, 22f*unit, 9f*unit)
-            lineTo(22f*unit, 19f*unit)
-            quadraticBezierTo(22f*unit, 20f*unit, 21f*unit, 20f*unit)
-            lineTo(3f*unit, 20f*unit)
-            quadraticBezierTo(2f*unit, 20f*unit, 2f*unit, 19f*unit)
-            lineTo(2f*unit, 9f*unit)
-            quadraticBezierTo(2f*unit, 8f*unit, 3f*unit, 8f*unit)
+            moveTo(4f*unit,8f*unit)
+            lineTo(7f*unit,8f*unit)
+            lineTo(9f*unit,5f*unit)
+            lineTo(15f*unit,5f*unit)
+            lineTo(17f*unit,8f*unit)
+            lineTo(20f*unit,8f*unit)
+            lineTo(20f*unit,19f*unit)
+            lineTo(4f*unit,19f*unit)
             close()
         }
         val c = Color(0xFF211A14)
-        drawPath(outline,c,style=Stroke(width=1.65f*unit,cap=StrokeCap.Round,
+        drawPath(outline,c,style=Stroke(width=1.5f*unit,cap=StrokeCap.Round,
             join=StrokeJoin.Round))
         drawCircle(c,radius=3.5f*unit,
-            center=Offset(12f*unit,14f*unit),
-            style=Stroke(width=1.65f*unit))
+            center=Offset(12f*unit,13f*unit),
+            style=Stroke(width=1.5f*unit))
     }
 }
 
