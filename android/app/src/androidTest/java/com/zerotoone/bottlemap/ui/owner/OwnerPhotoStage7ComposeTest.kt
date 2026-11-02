@@ -50,7 +50,7 @@ class OwnerPhotoStage7ComposeTest {
         compose.onNodeWithTag("stage7-failed-icon").assertExists()
         compose.onNodeWithText("메뉴판을 읽지 못했어요").assertExists()
         compose.onNodeWithText(
-            "사진 분석을 완료하지 못했어요.\\n메뉴판을 화면에 꽉 채우고, 흔들리지 않게 다시 찍어주세요."
+            "사진 분석을 완료하지 못했어요.\n메뉴판을 화면에 꽉 채우고, 흔들리지 않게 다시 찍어주세요."
         ).assertExists()
         compose.onNodeWithText("📷 사진 다시 올리기").assertExists()
         compose.onNodeWithText("AI 인식 실패").assertDoesNotExist()
