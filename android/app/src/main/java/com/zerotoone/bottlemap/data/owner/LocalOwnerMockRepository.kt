@@ -797,6 +797,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 options = byKey.values.map { opts ->
                     opts.first().copy(optionId = reserveUnusedLocalId("local-serving-", usedOptionIds))
                 },
+                displayNameOverride = lines.mapNotNull { it.decision?.displayNameOverride }
+                    .firstOrNull(),
             )
         }
         val applied = job.copy(status = MockImportStatus.APPLIED)
