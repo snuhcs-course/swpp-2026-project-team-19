@@ -272,7 +272,10 @@ internal fun RegistrationChoice(
         verticalAlignment=Alignment.CenterVertically,
         horizontalArrangement=Arrangement.spacedBy(16.dp)) {
         Box(Modifier.size(44.dp).background(RegistrationV4.elevated,RoundedCornerShape(12.dp)),
-            contentAlignment=Alignment.Center) { RegistrationGlyph(icon) }
+            contentAlignment=Alignment.Center) {
+            if(icon=="pen") V4PencilIcon(Modifier.size(22.dp),RegistrationV4.primary)
+            else RegistrationGlyph(icon)
+        }
         Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment=Alignment.CenterVertically,
                 horizontalArrangement=Arrangement.spacedBy(8.dp)) {
@@ -385,7 +388,9 @@ internal fun RegistrationCenterContent(
         horizontalAlignment=Alignment.CenterHorizontally,
         verticalArrangement=Arrangement.spacedBy(8.dp)) {
         if(loading) {
-            Canvas(Modifier.size(88.dp)) {
+            MenuPhotoProcessingIllustration(diameter=88.dp)
+            /* Disabled static illustration, preserved only for v4 comparison. */
+            /*Canvas(Modifier.size(88.dp)) {
                 val w=size.width;val h=size.height
                 val glass=Path().apply {
                     moveTo(w*.25f,h*.15f);lineTo(w*.31f,h*.77f)
@@ -405,7 +410,7 @@ internal fun RegistrationCenterContent(
                 drawPath(liquid,RegistrationV4.primary)
                 drawPath(glass,RegistrationV4.secondary,
                     style=Stroke(2.5.dp.toPx(),cap=StrokeCap.Round,join=StrokeJoin.Round))
-            }
+            }*/
         } else {
             RegistrationSuccessMark()
         }
