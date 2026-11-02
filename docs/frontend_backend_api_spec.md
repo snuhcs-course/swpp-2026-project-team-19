@@ -16,6 +16,7 @@
 - 현재 메뉴판 항목의 직접 추가, 수정, 삭제와 초기화, 품절, 기간 할인, 판매 정보 확인
 - 매장 정보(한 줄 소개, 태그, 정규 영업시간), 임시 휴무, 매장 사진
 - 고객의 상품 검색, 주변·지도 업장 조회와 업장 상세 메뉴 조회
+- 고객 홈 화면의 "요즘 많이 찾는 위스키"와 이를 위한 검색 로그
 - 멱등성, 검수 버전 충돌과 공통 오류 응답
 
 제외 범위:
@@ -37,6 +38,15 @@ POST 메뉴 등록
 → 필요한 브랜드·상품 검색
 → POST review-and-apply 한 번 제출
 → applied
+```
+
+고객 홈 화면은 다음 흐름을 사용한다.
+
+```text
+GET 요즘 많이 찾는 위스키 (3.17)
+→ 검색창, 최근 검색(기기에 저장), 인기 위스키 카드, 지도로 보기 표시
+→ 검색하거나 카드를 고르면 GET 상품 검색 (3.10)
+→ 지도로 보기를 고르면 지도 화면 (3.13)
 ```
 
 고객 검색은 다음 흐름을 사용한다.
@@ -95,7 +105,7 @@ GET 주변 업장 조회 (위치 + 반경)
 
 | API | 비로그인 | customer | 해당 업장의 업주 | operator |
 |---|---|---|---|---|
-| `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names` | O | O | O | O |
+| `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/search/popular-products` | O | O | O | O |
 | `GET /api/bars/{barId}/menu` | 활성 업장만 | 활성 업장만 | O | O |
 | `GET /api/bar-photos/{photoId}`, `GET /api/bar-photos/{photoId}/thumbnail` | O | O | O | O |
 | `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
@@ -208,6 +218,7 @@ ignore
 | `GET` | `/api/search/bars` | 고객 상품 검색과 판매 업장 목록 조회 (공개) |
 | `GET` | `/api/search/nearby-bars` | 고객 위치 반경 안의 활성 업장 조회 (공개) |
 | `GET` | `/api/search/map-bars` | 지도 화면 영역 안의 활성 업장 조회 (공개) |
+| `GET` | `/api/search/popular-products` | 홈 화면의 요즘 많이 찾는 위스키 (공개) |
 | `POST` | `/api/bars/{barId}/menu-imports` | 사진 업로드와 AI 처리 작업 생성 |
 | `GET` | `/api/menu-imports/{menuImportId}` | 처리 상태 또는 통합 검수 데이터 조회 |
 | `GET` | `/api/catalog/brands` | 검수 중 기존 브랜드 검색 |
@@ -249,7 +260,7 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 
 사용자는 다음과 같이 구분한다.
 
-- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/bars/{barId}/menu`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`)만 호출하며 `users` 행을 만들지 않는다.
+- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/search/popular-products`, `GET /api/bars/{barId}/menu`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`)만 호출하며 `users` 행을 만들지 않는다.
 - **로그인 사용자**: Google 계정으로 로그인한 사용자다. 최초 `GET /api/me` 호출 때 `customer`로 생성된다.
 - Supabase의 익명 로그인(anonymous sign-in)은 사용하지 않는다. `is_anonymous = true`인 token은 `401`로 거부한다.
 
@@ -356,7 +367,7 @@ API 응답 401 UNAUTHENTICATED
 - 여러 요청이 동시에 `401`을 받아도 세션 갱신은 한 번만 하고, 나머지 요청은 그 결과를 기다려 재시도한다.
 - 공개 API 처리:
   - `GET /api/bars/{barId}/menu`는 `Authorization` 헤더가 있으면 token을 검증하고, 잘못된 token이면 `401`을 반환한다. 프론트엔드는 위 재시도 흐름을 똑같이 적용하되, 세션 갱신에 실패하면 로그인 화면으로 보내지 않고 로그아웃한 뒤 헤더 없이 비로그인 사용자로 다시 요청한다. 단, 서버가 지금 token을 확인할 수 없으면(위 표의 `503` 조건) 이 API는 `503` 대신 token이 없는 것처럼 비로그인 사용자로 처리한다. 공개 정보라서 Supabase 장애 중에도 로그인 사용자가 업장 상세를 볼 수 있게 하려는 것이다. 이때는 operator도 비활성 업장을 볼 수 없다(`404`).
-  - `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`(3.16.5)은 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
+  - `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/search/popular-products`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`(3.16.5)은 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
 
 #### 3.1.6 백엔드 설정 항목
 
@@ -943,7 +954,7 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 | `lng` | 아니오 | 없음 | 고객 위치 경도. -180~180. `lat`과 함께 보내야 한다 |
 | `limit` | 아니오 | `50` | 반환할 결과 행(`items`)의 최대 개수. 1~100 |
 
-고객 위치는 거리 계산에만 사용하며 서버에 저장하지 않는다. 서버 접근 로그에서도 `lat`, `lng`를 지우고 나머지 query(검색어 등)만 남긴다.
+고객 위치는 거리 계산에만 사용하며 서버에 저장하지 않는다. 서버 접근 로그에서도 `lat`, `lng`를 지우고 나머지 query(검색어 등)만 남긴다. 인기 위스키 순위를 위한 검색 로그(3.10.6)에도 위치는 남기지 않는다.
 
 #### 3.10.1 검색어 해석
 
@@ -1180,6 +1191,24 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 - 프론트엔드는 요청 전에 검색어의 앞뒤 공백을 지우고, 빈 검색어면 API를 호출하지 않는다. 검색 입력 칸은 100자로 제한한다. 그래도 서버가 `query` 오류를 반환하면 위 표대로 `code`를 기준으로 문구를 보여 준다.
 - 위치 권한이 없거나 위치를 얻지 못하면 `lat`과 `lng`를 둘 다 빼고 요청한다. 결과는 `menuUpdatedAt` 순으로 정렬되고 `distanceMeters`는 `null`이다.
 - 네트워크 오류와 `5xx`(`500 INTERNAL_ERROR`, `503`, 프록시의 `502`·`504` 포함)는 오류 상태와 재시도 버튼을 보여 준다(9.6).
+
+#### 3.10.6 검색 로그
+
+"요즘 많이 찾는 위스키"(3.17)의 순위를 정하기 위해, 서버는 이 API가 `200 OK`로 응답한 검색마다 로그 한 행을 남긴다. 결과가 없는 검색(`matchType = none`)도 남긴다. 인식하지 못한 검색어를 모으면 카탈로그에 빠진 상품을 찾을 수 있기 때문이다.
+
+| 남기는 값 | 설명 |
+|---|---|
+| 검색 시각 | 서버가 요청을 받은 시각 |
+| 정규화한 검색어 | 3.10.1의 정규화를 거친 값. 사용자가 입력한 원문은 남기지 않는다 |
+| `matchType` | `brand`, `alias_exact`, `partial`, `none` |
+| 일치한 상품 | `matchedProducts`의 `productId` 전체. `none`이면 비어 있다 |
+| 결과 행 수 | `limit`을 적용하기 전의 결과 행 수(`matchedProducts[].resultCount`의 합) |
+
+- **남기지 않는 값**: 위치(`lat`, `lng`), 사용자 ID, IP 주소, 기기 정보, token. 이 API는 `Authorization` 헤더를 읽지 않으므로 누가 검색했는지 알 수 없다.
+- 검증 오류(`422`)와 서버 오류로 끝난 요청은 남기지 않는다.
+- 로그를 쓰다 실패해도 검색 응답은 그대로 `200 OK`로 보낸다. 실패는 서버 로그에만 남긴다.
+- 90일이 지난 로그는 지운다.
+- 같은 검색을 다시 불러와도 로그가 한 번 더 남는다. 프론트엔드는 결과 화면에서 뒤로 갔다가 돌아오는 경우처럼 같은 검색을 다시 보여 줄 때는 이미 받은 결과를 쓰고 3.10을 다시 호출하지 않는다. 사용자가 새로 검색하거나 재시도를 누를 때만 호출한다.
 
 ### 3.11 업주 신청과 승인
 
@@ -2512,6 +2541,99 @@ GET /api/bar-photos/{photoId}/thumbnail
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | JPEG나 PNG가 아니거나, 선언한 형식과 내용이 다르거나, 끝까지 디코딩되지 않음 | JPEG로 바꿔 다시 올림 |
 | `422` | `VALIDATION_FAILED` | `image` 없음, 긴 변이 2048px 초과(`IMAGE_DIMENSIONS_TOO_LARGE`), `photoIds` 형식 오류, `DUPLICATE_ITEM` | `fieldErrors` 표시. `IMAGE_DIMENSIONS_TOO_LARGE`이면 줄여서 다시 올림 |
 
+### 3.17 요즘 많이 찾는 위스키
+
+고객 홈 화면의 "요즘 많이 찾는 위스키" 카드에 쓸 상품 목록을 반환한다. 순위는 고객 검색(3.10)의 검색 로그(3.10.6)로 정한다.
+
+```http
+GET /api/search/popular-products?limit=10
+```
+
+로그인 없이 호출할 수 있는 공개 API이며, 다른 검색 API처럼 `Authorization` 헤더를 읽지 않는다(3.1.5). 결과는 호출자와 관계없이 같다.
+
+| Query | 필수 | 기본값 | 설명 |
+|---|---|---|---|
+| `limit` | 아니오 | `10` | 반환할 상품의 최대 개수. 1~20 |
+
+#### 3.17.1 홈 화면 구성
+
+고객 홈 화면은 위에서부터 다음으로 구성한다.
+
+| 영역 | 내용 | 데이터 |
+|---|---|---|
+| 검색창 | 위스키 이름 입력. 검색하면 3.10 결과 화면으로 간다 | 3.10 |
+| 최근 검색 | 이 기기에서 검색한 검색어 | 앱이 기기에 저장한다. 서버는 받지도 저장하지도 않는다 |
+| 요즘 많이 찾는 위스키 | 카드마다 상품명과 "바 N곳". 최대 10개를 가로로 넘겨 본다 | 이 API(`limit = 10`) |
+| 지도로 보기 | 지도 화면으로 간다 | 3.13 |
+
+- 카드를 누르면 앱은 그 상품의 `displayName`을 검색어로 3.10을 호출하고, 결과에서 같은 `productId`를 강조한다. 상품을 만들 때 대표 상품명도 검색 별칭으로 저장하므로(스키마 가이드 6.4) 상품명으로 검색하면 그 상품이 결과에 나온다. `productId`로 검색하는 별도 기능은 두지 않는다.
+- `items = []`이면 "요즘 많이 찾는 위스키" 영역을 숨긴다. 이 API가 실패해도 홈 화면의 다른 영역은 그대로 보여 주고, 이 영역만 숨기거나 재시도 버튼을 보여 준다.
+
+#### 3.17.2 순위 기준
+
+서버는 요청을 받을 때마다 다음 순서로 상품을 고른다.
+
+1. **후보**: 활성 상품 중 "바 N곳"(`barCount`)이 1 이상인 상품만 후보다. 판매 업장이 0곳인 상품은 눌러도 결과가 없으므로 보여 주지 않는다.
+2. **검색 수**: 최근 30일(요청 시각 기준 지난 720시간)의 검색 로그 중 `matchType = alias_exact`이고 그 상품이 일치한 검색의 수를 센다. 브랜드 검색(`brand`)과 부분 일치(`partial`)는 한 번의 검색에 상품이 여러 개 일치해 순위가 부풀려지므로 세지 않는다.
+3. **인기 상품**: 검색 수가 3 이상인 후보를 검색 수 내림차순으로 놓는다. 동점이면 `barCount` 내림차순, `displayName` 오름차순, `productId` 오름차순이다. 1~2번 검색된 상품이 상위에 뜨지 않게 하려고 3번 이상으로 정했다.
+4. **대체 기준**: 3의 상품이 `limit`보다 적으면, 아직 넣지 않은 후보를 `barCount` 내림차순, `displayName` 오름차순, `productId` 오름차순으로 채운다. 검색 로그가 적은 서비스 초기에도 카드가 비지 않게 하기 위해서다.
+5. 앞에서부터 `limit`개를 반환한다.
+
+`barCount`는 고객 검색(3.10.2)에 그 상품의 결과로 나오는 업장 수와 같다. 활성 업장이고, 그 상품이 업장의 현재 메뉴판에 있고, 품절(3.14.8)이 아닌 업장만 센다. 그래서 카드를 눌러 3.10으로 검색하면 "바 N곳"과 같은 수의 업장이 나온다. 다만 이 API의 응답을 받은 뒤 품절이나 메뉴판이 바뀌면 달라질 수 있다.
+
+홈 화면의 카드를 눌러 한 검색(3.17.1)도 다른 검색과 똑같이 로그에 남고 순위에 들어간다. 카드를 고른 것도 그 상품에 대한 관심으로 본다.
+
+같은 사람이 여러 번 검색해도 따로 거르지 않는다. 검색 로그에 사용자나 기기를 남기지 않으므로 구분할 수 없기 때문이다.
+
+#### 3.17.3 응답
+
+`200 OK`
+
+```json
+{
+  "items": [
+    {
+      "productId": "44444444-4444-4444-8444-444444444444",
+      "displayName": "Glenfiddich 12",
+      "brandName": "Glenfiddich",
+      "ageYears": 12,
+      "editionName": null,
+      "barCount": 7
+    },
+    {
+      "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+      "displayName": "Deanston 12",
+      "brandName": "Deanston",
+      "ageYears": 12,
+      "editionName": null,
+      "barCount": 2
+    }
+  ]
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `items` | 배열 | 아니오 | 순위대로 정렬한 상품. 최대 `limit`개. 판매 업장이 있는 상품이 하나도 없으면 `[]` |
+| `items[].productId` | UUID 문자열 | 아니오 | |
+| `items[].displayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`). 카드의 상품명이며, 카드를 누르면 이 값으로 3.10을 검색한다 |
+| `items[].brandName` | 문자열 | 아니오 | 브랜드 대표명(`brands.canonical_name`) |
+| `items[].ageYears` | 정수 | 예 | 숙성 연수. 표기가 없는 상품은 `null` |
+| `items[].editionName` | 문자열 | 예 | 에디션명. 없으면 `null` |
+| `items[].barCount` | 정수 | 아니오 | 지금 이 상품을 파는 업장 수(3.17.2). 1 이상. 카드에 "바 N곳"으로 표시한다 |
+
+- 검색 수는 응답에 넣지 않는다. 운영 정보이고, 숫자를 보여 주면 순위를 올리려고 검색을 반복할 동기가 생기기 때문이다.
+- 응답에는 `Cache-Control: public, max-age=600`(10분)을 붙인다. 순위는 천천히 바뀌므로 앱은 10분 안에 홈 화면으로 돌아오면 다시 받지 않아도 된다.
+
+#### 3.17.4 오류와 프론트엔드 처리
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `422` | `VALIDATION_FAILED` | `limit`이 1~20 밖(`GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`)이거나 정수가 아님(`INT_PARSING`) | 앱 버그. 이 영역을 숨긴다 |
+| 네트워크 오류, `5xx` | | | 이 영역만 숨기거나 재시도 버튼을 보여 준다. 홈 화면의 다른 영역은 그대로 쓴다 |
+
+이 API는 공개 API이므로 `401`과 `403`을 반환하지 않는다.
+
 ## 4. 메뉴 등록 요청
 
 ### 4.1 요청
@@ -3489,6 +3611,8 @@ canceled
 - 최종 요청은 부분 성공하지 않는다. 하나라도 실패하면 전체 롤백한다.
 - 메뉴 직접 편집(3.14)은 항목을 `barMenuItemId`로만 가리킨다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀌면 달라질 수 있다.
 - 메뉴 직접 편집 요청은 모두 조회한 `menuVersion`을 포함하며, 업장에 미완료 메뉴 등록 작업이 있으면 받지 않는다. 품절 표시(3.14.8)와 판매 정보 확인(3.14.9)은 예외로 검수 중에도 받는다.
+- 고객 검색 로그(3.10.6)에는 위치, 사용자, IP, 기기 정보를 남기지 않는다. 최근 검색은 앱이 기기에 저장하며 서버로 보내지 않는다.
+- "요즘 많이 찾는 위스키"(3.17)의 `barCount`는 고객 검색(3.10)에 나오는 업장 수와 같은 규칙으로 센다. 검색 수는 응답에 넣지 않는다.
 - 품절 항목은 손님(비로그인 사용자와 customer)의 3.9와 고객 검색(3.10)에서 빠진다. operator와 해당 업장의 업주만 3.9에서 `soldOut = true`로 받는다.
 - 할인 중인지는 프론트엔드가 `discount.startsAt`, `endsAt`과 현재 시각으로 계산한다. `priceKrw`는 항상 정가다.
 - `summary`나 사용자 표시 문자열을 서버 검증 기준으로 사용하지 않는다.

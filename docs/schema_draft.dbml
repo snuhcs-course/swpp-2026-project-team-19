@@ -128,6 +128,13 @@ Enum business_status {
   closed
 }
 
+Enum search_match_type {
+  brand
+  alias_exact
+  partial
+  none
+}
+
 Enum operating_exception_kind {
   closed_today
   custom_hours
@@ -737,6 +744,26 @@ Table menu_entry_options {
   copies a discount to the new option with the same label, pour size and list price, and drops it otherwise.
   A manual add, edit or delete changes only the requested item; other items keep their options and discounts.
   An ended discount is not deleted by a job; the API omits it from responses.
+  '''
+}
+
+Table search_logs {
+  id uuid [pk]
+  searched_at timestamptz [not null]
+  normalized_query varchar(200) [not null, note: 'The query after the shared normalization; the raw input is not kept']
+  match_type search_match_type [not null]
+  matched_product_ids "uuid[]" [not null, default: '{}', note: 'Every matchedProducts productId of the response; empty for none. No foreign key']
+  result_count integer [not null, note: 'Result rows before the limit was applied']
+
+  indexes {
+    (match_type, searched_at)
+    searched_at
+  }
+
+  Note: '''
+  One row per customer product search (GET /api/search/bars) that returned 200, including searches with no match.
+  It is used to rank "요즘 많이 찾는 위스키" (API spec 3.17) and to find queries the catalogue does not cover.
+  It never stores a location, user, IP address, device, or token. Rows older than 90 days are deleted.
   '''
 }
 
