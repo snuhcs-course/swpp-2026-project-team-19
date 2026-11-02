@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.*
@@ -144,6 +145,21 @@ internal fun stage8ReviewDestination(line: MockExtractedLine): String = when {
     line.candidateProductIds.distinct().size > 1 -> "line"
     line.options.isEmpty() || line.options.any { it.priceKrw <= 0 } -> "price"
     else -> "line"
+}
+
+/** Inactive or stale OCR suggestions must be matched explicitly before price entry. */
+internal fun stage8DestinationForCatalog(
+    line: MockExtractedLine, products: List<MockCatalogProduct>,
+): String {
+    if (line.kind != MockLineKind.PRODUCT) return stage8ReviewDestination(line)
+    val knownIds = (listOfNotNull(line.suggestedProductId) + line.candidateProductIds)
+        .distinct()
+    val activeIds = products.filter { it.isActive }.map { it.productId }.toSet()
+    if (knownIds.isNotEmpty() && knownIds.none { it in activeIds }) return "catalog"
+    if (line.suggestedProductId != null && line.suggestedProductId !in activeIds) {
+        return "line" // Show the active alternative; never preselect an inactive suggestion.
+    }
+    return stage8ReviewDestination(line)
 }
 private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     is MockOwnerLoadState.Ready->s.snapshot
@@ -441,8 +457,11 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var pendingNewDraftLineId by rememberSaveable(job?.menuImportId) {
         mutableStateOf<String?>(null)
     }
-    val pendingNewDraft=remember(pendingNewDraftEncoded) {
-        pendingNewDraftEncoded?.let(::decodeReviewDraft)
+    val currentLineId = all.getOrNull(position)?.second?.extractedItemId
+    // A saved draft must not affect another line reached through the review summary.
+    val pendingNewDraft=remember(pendingNewDraftEncoded,pendingNewDraftLineId,currentLineId) {
+        pendingNewDraftEncoded?.takeIf {pendingNewDraftLineId == currentLineId}
+            ?.let(::decodeReviewDraft)
     }
     var showRestartWarning by rememberSaveable { mutableStateOf(false) }
     var pageHistory by rememberSaveable(job?.menuImportId) { mutableStateOf(listOf<String>()) }
@@ -453,15 +472,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             position=target
         }
     }
-    fun destinationFor(line:MockExtractedLine):String {
-        val knownIds=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
-        val available=knownIds.any { id->
-            s?.products?.any {it.productId==id && it.isActive}==true
-        }
-        // Stale or inactive catalog IDs must never be auto-selected.
-        return if(line.kind==MockLineKind.PRODUCT && knownIds.isNotEmpty() &&
-            !available) "catalog" else stage8ReviewDestination(line)
-    }
+    fun destinationFor(line:MockExtractedLine):String =
+        stage8DestinationForCatalog(line,s?.products.orEmpty())
     fun visitLine(target:Int) {
         // Even exact fixture matches require an explicit owner decision.
         all.getOrNull(target)?.second?.let {visit(destinationFor(it),target)}
@@ -524,6 +536,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     )
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         val back: () -> Unit = { if(screen=="summary") onHome() else backPage() }
+        // Match the existing toolbar history. Dialog owns Back while it is visible.
+        BackHandler(enabled=!showRestartWarning) { back() }
         if(screen=="catalog") {
             Row(Modifier.fillMaxWidth().height(66.dp)
                 .padding(start=17.dp,end=14.dp,top=10.dp,bottom=0.dp),
