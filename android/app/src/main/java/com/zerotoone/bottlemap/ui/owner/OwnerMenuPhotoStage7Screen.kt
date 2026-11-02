@@ -4,6 +4,12 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.EaseInOutSine
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,6 +52,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -133,33 +140,55 @@ private fun MenuPhotoSecondary(label: String, onClick: () -> Unit) {
  */
 @Composable
 private fun MenuPhotoProcessingIllustration() {
-    Canvas(Modifier.size(96.dp)) {
-        val w = size.width
-        val h = size.height
-        val fill = Path().apply {
-            moveTo(w * .24f, h * .54f)
-            quadraticBezierTo(w * .42f, h * .65f, w * .52f, h * .57f)
-            quadraticBezierTo(w * .66f, h * .50f, w * .81f, h * .56f)
-            lineTo(w * .77f, h * .83f)
-            quadraticBezierTo(w * .75f, h * .89f, w * .66f, h * .89f)
-            lineTo(w * .39f, h * .89f)
-            quadraticBezierTo(w * .29f, h * .88f, w * .28f, h * .81f)
+    // ACTION_FIRST v4: the wave moves inside a clipped glass, not the glass itself.
+    // Keep the progress motion decorative; it must not imply a completed OCR line.
+    val transition = rememberInfiniteTransition(label = "menu-photo-liquid")
+    val wave by transition.animateFloat(
+        initialValue = 3f, targetValue = -3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1700, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse
+        ), label = "menu-photo-wave"
+    )
+    Canvas(Modifier.size(96.dp).testTag("stage7-processing-glass")) {
+        val scale = size.width / 48f
+        val glassInterior = Path().apply {
+            moveTo(11.4f * scale, 13f * scale)
+            lineTo(13f * scale, 38.5f * scale)
+            quadraticBezierTo(13.2f * scale, 41f * scale, 16f * scale, 41f * scale)
+            lineTo(32f * scale, 41f * scale)
+            quadraticBezierTo(35f * scale, 41f * scale, 35f * scale, 38.5f * scale)
+            lineTo(36.6f * scale, 13f * scale)
             close()
         }
-        drawPath(fill, V4Color.primary)
-        val outline = Path().apply {
-            moveTo(w * .18f, h * .19f)
-            lineTo(w * .26f, h * .83f)
-            quadraticBezierTo(w * .27f, h * .91f, w * .38f, h * .91f)
-            lineTo(w * .67f, h * .91f)
-            quadraticBezierTo(w * .79f, h * .91f, w * .80f, h * .83f)
-            lineTo(w * .88f, h * .19f)
+        // A long wave crosses the entire clipped interior at every animation frame.
+        // This is the glassFill / whiskey-liquid geometry from the v4 HTML.
+        val y = (26f + wave) * scale
+        val liquid = Path().apply {
+            moveTo(-12f * scale, y)
+            quadraticBezierTo(-6f * scale, y - 3f * scale, 0f, y)
+            quadraticBezierTo(6f * scale, y + 3f * scale, 12f * scale, y)
+            quadraticBezierTo(18f * scale, y - 3f * scale, 24f * scale, y)
+            quadraticBezierTo(30f * scale, y + 3f * scale, 36f * scale, y)
+            quadraticBezierTo(42f * scale, y - 3f * scale, 48f * scale, y)
+            quadraticBezierTo(54f * scale, y + 3f * scale, 60f * scale, y)
+            lineTo(60f * scale, 48f * scale)
+            lineTo(-12f * scale, 48f * scale)
+            close()
         }
-        drawPath(outline, Color(0xFFD0C1B5), style = Stroke(
-            width = 5.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+        clipPath(glassInterior) { drawPath(liquid, V4Color.primary) }
+        val rim = Path().apply {
+            moveTo(10f * scale, 11f * scale)
+            lineTo(12.8f * scale, 38.2f * scale)
+            quadraticBezierTo(13.2f * scale, 41f * scale, 16f * scale, 41f * scale)
+            lineTo(32f * scale, 41f * scale)
+            quadraticBezierTo(35f * scale, 41f * scale, 35.2f * scale, 38.2f * scale)
+            lineTo(38f * scale, 11f * scale)
+        }
+        drawPath(rim, Color(0xFFC7BBB0), style = Stroke(
+            width = 2f * scale, cap = StrokeCap.Round, join = StrokeJoin.Round))
     }
 }
-
 @Composable
 internal fun OwnerMenuPhotoSelectionScreen(
     state: MockOwnerLoadState,
@@ -224,11 +253,10 @@ internal fun OwnerMenuPhotoSelectionScreen(
                 if (state is MockOwnerLoadState.Error)
                     MenuPhotoSecondary("다시 시도", viewModel::retry)
             }
-            Text(if (photos.isEmpty()) "메뉴판 사진을 올려 주세요" else "메뉴판 사진 선택",
+            Text("메뉴판 사진 선택",
                 fontSize = 24.sp, fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif, color = V4Color.text)
-            Text(if (photos.isEmpty()) "메뉴를 순서대로 최대 15장까지 올릴 수 있어요."
-                else "최대 15장", fontSize = 12.sp, color = V4Color.sub)
+            Text("사진을 최대 15장까지 올릴 수 있어요.", fontSize = 12.sp, color = V4Color.sub)
             if (active != null) {
                 Text("진행 중인 메뉴판 작업이 있어요. 먼저 기존 작업을 확인해 주세요.",
                     color = V4Color.primary, fontSize = 12.sp)
@@ -280,10 +308,6 @@ internal fun OwnerMenuPhotoSelectionScreen(
                     }
                 }
             }
-            Text("새 메뉴만 추가 · 기존 메뉴와 가격 유지",
-                color = V4Color.sub, fontSize = 11.sp)
-            Text("JPEG/PNG · 사진당 10MB · 전체 60MB",
-                color = V4Color.sub, fontSize = 11.sp)
             error?.let { Text(it, color = Color(0xFFFFB4AB), fontSize = 12.sp,
                 modifier = Modifier.testTag("stage7-photo-error")) }
             if (photos.isNotEmpty() && !valid && error == null)
@@ -293,7 +317,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
         Box(Modifier.fillMaxWidth().navigationBarsPadding()
             .padding(start = 18.dp, end = 18.dp, top = 12.dp, bottom = 14.dp)) {
             MenuPhotoPrimary(
-                if (busy) "사진을 확인하고 있어요" else "사진 ${photos.size}장 분석 시작",
+                if (busy) "사진을 확인하고 있어요" else "사진 ${photos.size}장 올리기",
                 enabled = valid && !busy && active == null,
                 tag = "stage7-photo-submit") {
                 if (bar != null) {
@@ -351,12 +375,11 @@ internal fun OwnerMenuPhotoJobScreen(
         Column(Modifier.weight(1f).padding(horizontal = 18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)) {
             MenuPhotoSteps(1)
-            Text(if (job?.status == MockImportStatus.FAILED) "AI 인식 실패"
-                else if (job?.status == MockImportStatus.READY_FOR_REVIEW) "메뉴 확인 준비"
+            if (job?.status != MockImportStatus.FAILED) Text(if (job?.status == MockImportStatus.READY_FOR_REVIEW) "메뉴 확인 준비"
                 else "메뉴판 분석 중",
                 color = V4Color.text, fontFamily = FontFamily.Serif,
                 fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text(
+            if (job?.status != MockImportStatus.FAILED) Text(
                 if (job?.status == MockImportStatus.PROCESSING ||
                     job?.status == MockImportStatus.UPLOADED) "다른 작업도 할 수 있어요."
                 else if (job?.status == MockImportStatus.READY_FOR_REVIEW)
@@ -370,7 +393,7 @@ internal fun OwnerMenuPhotoJobScreen(
                     job?.status == MockImportStatus.UPLOADED)
                     MenuPhotoProcessingIllustration()
                 else {
-                    Box(Modifier.size(74.dp)
+                    Box(Modifier.size(64.dp)
                         .background(V4Color.surface, CircleShape),
                         contentAlignment = Alignment.Center) {
                         Text(when(job?.status) {
@@ -380,7 +403,7 @@ internal fun OwnerMenuPhotoJobScreen(
                             else -> "·"
                         }, color = if (job?.status == MockImportStatus.FAILED)
                             Color(0xFFFFADA3) else V4Color.primary,
-                            fontSize = 34.sp)
+                            fontSize = 30.sp)
                     }
                 }
                 Text(when(job?.status) {
@@ -391,19 +414,21 @@ internal fun OwnerMenuPhotoJobScreen(
                     MockImportStatus.PROCESSING, MockImportStatus.UPLOADED ->
                         "메뉴판을 읽고 있어요"
                     else -> "진행 중인 작업이 없어요"
-                }, color = V4Color.text, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }, color = V4Color.text, fontWeight = FontWeight.Bold,
+                    fontSize = if (job?.status == MockImportStatus.FAILED) 24.sp else 16.sp,
+                    textAlign = TextAlign.Center)
                 Text(when(job?.status) {
                     MockImportStatus.FAILED ->
-                        "사진 분석을 완료하지 못했어요. 사진을 확인하고 다시 제출해 주세요."
+                        "사진 분석을 완료하지 못했어요.\n메뉴판을 화면에 꽉 채우고, 흔들리지 않게 다시 찍어주세요."
                     MockImportStatus.PROCESSING, MockImportStatus.UPLOADED ->
-                        "사진 ${job.images.size}장을 확인하고 있어요. 분석률은 제공되지 않아요."
+                        "사진 ${job.images.size}장 중 0장을 읽었어요"
                     MockImportStatus.READY_FOR_REVIEW ->
                         "${job.images.size}장의 사진이 작업 ${job.menuImportId}에 연결됐어요."
                     else -> "매장 관리로 돌아갈 수 있어요."
-                }, color = V4Color.sub, fontSize = 12.sp, textAlign = TextAlign.Center)
-                if (job?.status == MockImportStatus.FAILED)
-                    Text(job.failureReason.orEmpty(), color = Color(0xFFFFB4AB),
-                        fontSize = 11.sp, textAlign = TextAlign.Center)
+                }, color = V4Color.sub,
+                    fontSize = if (job?.status == MockImportStatus.FAILED) 16.sp else 14.sp,
+                    lineHeight = if (job?.status == MockImportStatus.FAILED) 24.sp else 20.sp,
+                    textAlign = TextAlign.Center)
                 error?.let { Text(it, color = Color(0xFFFFB4AB), fontSize = 12.sp) }
             }
             Spacer(Modifier.weight(2f))
@@ -412,9 +437,11 @@ internal fun OwnerMenuPhotoJobScreen(
             .padding(horizontal = 18.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (job?.status == MockImportStatus.FAILED)
-                MenuPhotoPrimary("사진 다시 올리기", tag = "stage7-failed-retry",
+                MenuPhotoPrimary("📷 사진 다시 올리기", tag = "stage7-failed-retry",
                     onClick = onRetryPhotos)
-            if (active)
+            // A running mock extraction cannot be canceled from this screen.
+            // The READY_FOR_REVIEW cancellation path remains for already-prepared jobs.
+            if (job?.status == MockImportStatus.READY_FOR_REVIEW)
                 TextButton(onClick = { cancelConfirmation = true },
                     modifier = Modifier.fillMaxWidth()) {
                     Text("메뉴 등록 작업 취소", color = V4Color.sub, fontSize = 12.sp)
