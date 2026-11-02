@@ -35,6 +35,17 @@ class Stage8ReviewDestinationTest {
         assertEquals("line",stage8ReviewDestination(russell))
     }
 
+    @Test fun ambiguousOrUnselectedCandidateWithMissingPriceRequiresMatchingFirst() {
+        val ambiguous=MockExtractedLine("a","메뉴판 인식 줄",MockLineKind.PRODUCT,
+            candidateProductIds=listOf("first","second"),
+            options=listOf(MockMenuOption("a1",priceKrw=0)))
+        val single=ambiguous.copy(candidateProductIds=listOf("first"))
+        val suggested=ambiguous.copy(suggestedProductId="first")
+        assertEquals("line",stage8ReviewDestination(ambiguous))
+        assertEquals("line",stage8ReviewDestination(single))
+        assertEquals("line",stage8ReviewDestination(suggested))
+    }
+
     @Test fun noCandidateAndNoPriceStillGoesToNewProductNotCandidatePage() {
         val line=MockExtractedLine("m","미매칭",MockLineKind.PRODUCT,
             options=listOf(MockMenuOption("m1",priceKrw=0)))
