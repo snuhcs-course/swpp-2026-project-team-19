@@ -354,7 +354,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
                     "빛 반사 없이 정면에서").forEach { guidance ->
                     Row(verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(11.dp)) {
-                        Text("✓", color = Color(0xFFB9DFC8), fontSize = 16.sp)
+                        V4StrokeCheck(Modifier.size(16.dp), Color(0xFFB9DFC8))
                         Text(guidance, color = V4Color.sub, fontSize = 13.sp)
                     }
                 }
