@@ -229,7 +229,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 }
 @Composable private fun St8ReviewToolbar(step: Int, total: Int, back: () -> Unit) {
-    Box(Modifier.fillMaxWidth().height(52.dp)) {
+    Box(Modifier.fillMaxWidth().height(48.dp)) {
         TextButton(onClick=back,modifier=Modifier.align(Alignment.CenterStart)
             .padding(start=14.dp).size(48.dp)) {
             Text("←",color=V4Color.text,fontSize=26.sp)
@@ -240,26 +240,33 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
 }
 /** Exit an in-progress photo review without modifying any review decision. */
 @Composable private fun St8ReviewHome(onLater:()->Unit) {
-    Box(Modifier.size(38.dp).testTag("stage8-review-home")
+    // The reference icon has a nearly square silhouette and rounded corners.
+    // Its visual bottom shares the extracted-line label's bottom alignment.
+    Box(Modifier.size(31.dp).testTag("stage8-review-home")
         .semantics { contentDescription="나중에 하기 · 메뉴 관리로" }
         .clickable(onClick=onLater),contentAlignment=Alignment.BottomCenter) {
-        Canvas(Modifier.size(36.dp)) {
+        Canvas(Modifier.size(29.dp)) {
             val u=size.width/24f
             val home=Path().apply {
-                moveTo(2f*u,10f*u)
-                lineTo(12f*u,1.5f*u)
-                lineTo(22f*u,10f*u)
-                moveTo(5f*u,9f*u)
-                lineTo(5f*u,23.5f*u)
-                lineTo(19f*u,23.5f*u)
-                lineTo(19f*u,9f*u)
-                moveTo(10f*u,23.5f*u)
-                lineTo(10f*u,15f*u)
-                lineTo(14f*u,15f*u)
-                lineTo(14f*u,23.5f*u)
+                moveTo(3f*u,11f*u)
+                lineTo(11.3f*u,3.4f*u)
+                quadraticBezierTo(12f*u,2.8f*u,12.7f*u,3.4f*u)
+                lineTo(21f*u,11f*u)
+                moveTo(5.4f*u,10.7f*u)
+                lineTo(5.4f*u,20.7f*u)
+                quadraticBezierTo(5.4f*u,21.7f*u,6.4f*u,21.7f*u)
+                lineTo(10f*u,21.7f*u)
+                lineTo(10f*u,16.4f*u)
+                quadraticBezierTo(10f*u,15f*u,11.4f*u,15f*u)
+                lineTo(12.6f*u,15f*u)
+                quadraticBezierTo(14f*u,15f*u,14f*u,16.4f*u)
+                lineTo(14f*u,21.7f*u)
+                lineTo(17.6f*u,21.7f*u)
+                quadraticBezierTo(18.6f*u,21.7f*u,18.6f*u,20.7f*u)
+                lineTo(18.6f*u,10.7f*u)
             }
             drawPath(home,V4Color.primary,style=Stroke(
-                width=1.9f*u,cap=androidx.compose.ui.graphics.StrokeCap.Round,
+                width=2.35f*u,cap=androidx.compose.ui.graphics.StrokeCap.Round,
                 join=androidx.compose.ui.graphics.StrokeJoin.Round))
         }
     }
@@ -285,7 +292,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         ?:line.options.firstOrNull()?.pourMl ?: defaultPourMl
     val ordinal=listOf("첫째","둘째","셋째","넷째","다섯째","여섯째","일곱째")
     val photoRow=photo.lines.indexOfFirst { it.extractedItemId==line.extractedItemId }
-    Row(Modifier.fillMaxWidth().height(38.dp),
+    Row(Modifier.fillMaxWidth().height(31.dp),
         verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.SpaceBetween) {
         Text("메뉴판 ${photo.imageOrder} · ${ordinal.getOrElse(photoRow){(photoRow+1).toString()+"번째"}} 줄",
             modifier=Modifier.weight(1f).padding(bottom=1.dp),
@@ -452,7 +459,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             if(job.status==MockImportStatus.APPLIED)visit("done")
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())
-            .padding(start=19.dp,end=19.dp,top=3.dp,bottom=19.dp),
+            .padding(start=19.dp,end=19.dp,
+                top=if(screen in listOf("line","new","edit","price"))0.dp else 3.dp,
+                bottom=19.dp),
             verticalArrangement=Arrangement.spacedBy(10.dp)) {
             if(screen=="summary") {
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(5.dp)){
