@@ -143,10 +143,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var publishConfirmed by rememberSaveable {mutableStateOf(false)}
     var selectedProductId by rememberSaveable(job?.menuImportId) { mutableStateOf<String?>(null) }
     var chosenCategory by rememberSaveable(job?.menuImportId) { mutableStateOf("whisky") }
+    var choosingOther by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
     val pair=all.getOrNull(position)
     LaunchedEffect(pair?.second?.extractedItemId) {
         selectedProductId=pair?.second?.decision?.productId
         chosenCategory=pair?.second?.decision?.newProduct?.category ?: "whisky"
+        choosingOther=false
     }
     fun next() {
         selectedProductId=null
@@ -296,53 +298,55 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 val candidates=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
                     .distinct().mapNotNull{id->s.products.firstOrNull{
                         it.productId==id && it.isActive}}
-                if(chosenCategory=="whisky")candidates.forEach{product->
-                    St8Card {
-                        Text(product.displayName,color=V4Color.text,fontWeight=FontWeight.Bold)
-                        Text(s.brands.firstOrNull{it.brandId==product.brandId}?.name.orEmpty(),
-                            color=V4Color.sub,fontSize=12.sp)
-                        St8Button("맞아요") {
-                            selectedProductId=product.productId
-                            screen="edit"
+                if(!choosingOther && chosenCategory=="whisky")candidates.forEach{product->
+                    Row(Modifier.fillMaxWidth()
+                        .background(V4Color.surface,RoundedCornerShape(16.dp))
+                        .border(1.dp,if(selectedProductId==product.productId)
+                            V4Color.primary else V4Color.line,RoundedCornerShape(16.dp))
+                        .clickable {selectedProductId=product.productId}
+                        .padding(horizontal=15.dp,vertical=12.dp),
+                        verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                        St8Bottle()
+                        Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(3.dp)) {
+                            val visible=product.displayName
+                            val split=visible.indexOf(' ')
+                            Text(if(split>0) visible.substring(0,split) else visible,
+                                color=V4Color.text,fontSize=17.sp,fontWeight=FontWeight.Bold)
+                            Text(if(split>0) visible.substring(split+1) else
+                                (s.brands.firstOrNull {it.brandId==product.brandId}?.name.orEmpty()),
+                                color=V4Color.text,fontSize=15.sp)
+                            if(line.sourceText.contains("DR")) Text(
+                                "메뉴판의 'DR'을 풀어서 찾았어요",
+                                color=V4Color.sub,fontSize=11.sp)
+                            else if(candidates.size>1)Text("메뉴판 표기와 비교해 주세요",
+                                color=V4Color.sub,fontSize=11.sp)
                         }
                     }
                 }
-                if(candidates.isEmpty())Text("일치하는 상품 후보가 없어요.",
-                    color=V4Color.sub,fontSize=13.sp)
-                var searchExpanded by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(false)
-                }
-                var searchTerm by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf("")
-                }
-                TextButton(onClick={searchExpanded=!searchExpanded}) {
-                    Text("⌕ 카탈로그에서 찾기",color=V4Color.primary)
-                }
-                if(searchExpanded) {
-                    St8Field("상품 이름 검색",searchTerm,{searchTerm=it})
-                    s.products.filter { product -> product.isActive &&
-                        product.displayName.contains(searchTerm,ignoreCase=true) }
-                        .take(12).forEach {product ->
-                            TextButton(onClick={
-                                selectedProductId=product.productId
-                                screen="edit"
-                            }) {
-                                Text(product.displayName,color=V4Color.primary)
-                            }
+                if(!choosingOther && candidates.isEmpty()) Text(
+                    "일치하는 상품 후보가 없어요.",color=V4Color.sub,fontSize=13.sp)
+                if(choosingOther) {
+                    var term by rememberSaveable(line.extractedItemId) {mutableStateOf("")}
+                    St8Field("카탈로그에서 메뉴 찾기",term,{term=it})
+                    s.products.filter {it.isActive && term.isNotBlank() &&
+                        it.displayName.contains(term,ignoreCase=true)}.take(12).forEach{p->
+                        Row(Modifier.fillMaxWidth()
+                            .background(V4Color.surface,RoundedCornerShape(12.dp))
+                            .clickable {selectedProductId=p.productId;screen="edit"}
+                            .padding(14.dp),
+                            verticalAlignment=Alignment.CenterVertically) {
+                            St8Bottle()
+                            Text(p.displayName,color=V4Color.text,
+                                modifier=Modifier.padding(start=12.dp))
                         }
-                }
-
-                candidates.forEach{p->
-                    TextButton(onClick={selectedProductId=p.productId;screen="edit"}){
-                        Text(if(selectedProductId==p.productId)"✓ "+p.displayName else p.displayName,
-                            color=V4Color.primary)
                     }
-                }
-                St8Button("다른 메뉴예요 · 새 제품으로 등록") {screen="new"}
-                St8Button("메뉴가 아니에요 · 제외"){
-                    runCatching {vm.review(job.menuImportId,line.extractedItemId,
-                        job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
-                        .onSuccess{error=null;next()}.onFailure{error=it.message}
+                    St8Secondary("새 제품으로 등록") {screen="new"}
+                    St8Secondary("메뉴가 아니에요 · 제외") {
+                        runCatching {vm.review(job.menuImportId,line.extractedItemId,
+                            job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
+                            .onSuccess {error=null;next()}.onFailure {error=it.message}
+                    }
                 }
             } else if((screen=="edit" || screen=="new") && pair!=null) {
                 val line=pair.second
@@ -511,14 +515,48 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 "auto","existing"->St8Button("요약으로") {screen="summary"}
                 "line"->{
-                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
-                        TextButton(onClick={if(position>0)position-- else screen="summary"}){
-                            Text("‹ 이전",color=V4Color.sub)
+                    if(!choosingOther && pair!=null) {
+                        val line=pair.second
+                        val ids=(listOfNotNull(line.suggestedProductId)+
+                            line.candidateProductIds).distinct().filter { id ->
+                            s.products.any {it.productId==id && it.isActive}
                         }
-                        Text("남은 확인 "+counts!!.remaining+"개",color=V4Color.sub)
-                        TextButton(onClick={if(position+1<all.size)position++ else screen="summary"}){
-                            Text("다음 ›",color=V4Color.primary)
+                        if(line.kind==MockLineKind.NON_PRODUCT) {
+                            St8Button("메뉴가 아니에요 · 제외") {
+                                runCatching {vm.review(job.menuImportId,line.extractedItemId,
+                                    job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
+                                    .onSuccess {error=null;next()}.onFailure {error=it.message}
+                            }
+                        } else {
+                            St8Button(if(ids.size>1)"선택한 메뉴로 확인" else "맞아요",
+                                enabled=ids.size==1 || selectedProductId!=null) {
+                                val chosen=selectedProductId ?: ids.singleOrNull()
+                                if(chosen==null) {error="상품을 선택해 주세요."}
+                                else if(line.options.isEmpty() ||
+                                    line.options.any{it.priceKrw<=0 || it.pourMl!=null &&
+                                        it.pourMl !in 1..32767}) {
+                                    selectedProductId=chosen;screen="edit"
+                                } else runCatching {
+                                    vm.review(job.menuImportId,line.extractedItemId,
+                                        job.reviewVersion,MockReviewDecision(
+                                            MockDecisionKind.SELECT_PRODUCT,productId=chosen,
+                                            correctedOptions=line.decision?.correctedOptions?:line.options))
+                                }.onSuccess{error=null;next()}.onFailure{error=it.message}
+                            }
+                            St8Secondary("다른 메뉴예요") {choosingOther=true}
                         }
+                    }
+                    HorizontalDivider(color=V4Color.line,modifier=Modifier.padding(top=9.dp))
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+                        verticalAlignment=Alignment.CenterVertically) {
+                        TextButton(onClick={
+                            if(position>0){position--;screen="line"}else screen="summary"
+                        }){Text("‹ 이전",color=V4Color.sub)}
+                        Text("남은 확인 "+counts!!.remaining+"개",color=V4Color.sub,fontSize=12.sp)
+                        TextButton(onClick={
+                            if(position+1<all.size){position++;screen="line"}
+                            else screen="summary"
+                        }){Text("다음 ›",color=V4Color.primary)}
                     }
                 }
                 "edit","new"->TextButton(onClick={screen="line"}){
