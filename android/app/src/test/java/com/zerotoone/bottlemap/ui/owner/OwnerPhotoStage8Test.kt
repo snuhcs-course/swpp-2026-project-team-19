@@ -146,6 +146,48 @@ class OwnerPhotoStage8Test {
         assertNotNull(ready(r).imports.single().images.single().lines.single().decision)
     }
 
+    @Test fun autoProposalsReflectOnlyFinalOwnerConfirmedMatch() {
+        val initial=MockExtractedLine("a","Whisky",MockLineKind.PRODUCT,
+            suggestedProductId="catalog-original",mockAutoAccepted=true,
+            options=listOf(MockMenuOption("o",priceKrw=12000)))
+        assertFalse(stage8ConfirmedAutoMatch(initial))
+        assertTrue(stage8ConfirmedAutoMatch(initial.copy(
+            decision=MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                productId="catalog-original"))))
+        assertFalse(stage8ConfirmedAutoMatch(initial.copy(
+            decision=MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                productId="catalog-other"))))
+        assertFalse(stage8ConfirmedAutoMatch(initial.copy(
+            decision=MockReviewDecision(MockDecisionKind.EXCLUDE))))
+    }
+
+    @Test fun previewCountMatchesPublicationForDifferentlyCasedEditions() {
+        val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("review-brand","Review Brand"))
+        val id=r.queuePhotoImport("fixture-bar",listOf(photo("a")))
+        r.finishPhotoImport(id,MockPhotoExtractionSource {
+            listOf(
+                MockExtractedLine("a1","Whisky case 1",MockLineKind.PRODUCT,
+                    options=listOf(MockMenuOption("o1",label="잔",pourMl=30,priceKrw=12000))),
+                MockExtractedLine("a2","Whisky case 2",MockLineKind.PRODUCT,
+                    options=listOf(MockMenuOption("o2",label="잔",pourMl=60,priceKrw=21000)))
+            )
+        })
+        val job=ready(r).imports.single()
+        val lines=job.images.single().lines
+        listOf("Cask Strength","cask strength").forEachIndexed {i,edition ->
+            r.decideLine(id,lines[i].extractedItemId,job.reviewVersion,
+                MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
+                    correctedOptions=lines[i].options,
+                    newProduct=MockNewProductDraft("Whisky",brandId="review-brand",
+                        editionName=edition)))
+        }
+        assertEquals(2,stage8ExpectedAddedCount(ready(r).imports.single(),ready(r)))
+        assertEquals(2,r.publishAddOnly(id,job.reviewVersion))
+        assertEquals(2,ready(r).imports.single().publishedAddedCount)
+    }
+
     @Test fun malformedSourceBoxRejectedBeforeReviewWithoutMutation() {
         val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         val id=r.queuePhotoImport("fixture-bar",listOf(photo("a")))
