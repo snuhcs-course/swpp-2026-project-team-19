@@ -212,8 +212,8 @@ fun OwnerOnboardingScreen(
         RegPage.BN,RegPage.REP,RegPage.DATE,RegPage.VERIFIED,
         RegPage.BARNAME,RegPage.BARPHOTO,RegPage.ADDRESS,RegPage.BARPHONE,
         RegPage.MENUS,RegPage.CONTACT->"다음"
-        RegPage.BIZCHECK->"사업자 정보 확인 (Mock)"
-        RegPage.REVIEW->"신청하기 (Mock)"
+        RegPage.BIZCHECK->"국세청에 확인하기"
+        RegPage.REVIEW->"신청하기"
         RegPage.DONE->"확인"
         else->null
     }
@@ -228,7 +228,7 @@ fun OwnerOnboardingScreen(
         RegPage.ADDRESS->draft.proposedBarAddress.isNotBlank() &&
             listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
                 .filter{it.isNotBlank()}.joinToString(" ").trim().length in 1..500
-        RegPage.BARPHONE->draft.storePhone.isNotBlank()&&validOwnerPhone(draft.storePhone)
+        RegPage.BARPHONE->draft.storePhone.isBlank()||validOwnerPhone(draft.storePhone)
         RegPage.MENUS->draft.initialMenuPhotos.isNotEmpty()
         RegPage.CONTACT->validContact
         RegPage.REVIEW->validContact&&draft.initialMenuPhotos.isNotEmpty()&&
@@ -306,27 +306,16 @@ fun OwnerOnboardingScreen(
         },
         confirmButton={TextButton(onClick={showAddressSheet=false}){Text("닫기")}})
 
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).imePadding()) {
-        if(screen!=RegPage.DONE)OwnerHeader(
-            if(screen==RegPage.HOME||screen==RegPage.VIEW_APPLICATION)"내 매장 관리" else "",
-            if(screen==RegPage.HOME)onBack else ::back)
-        if(stage!=0){
-            Row(Modifier.fillMaxWidth().padding(horizontal=20.dp),
-                horizontalArrangement=Arrangement.spacedBy(4.dp)){
-                repeat(4){ index ->
-                    Box(Modifier.weight(1f).height(3.dp).background(
-                        if(index<stage)MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.outlineVariant,RoundedCornerShape(3.dp)))
-                }
-            }
-            Text(stage.toString()+"/4 "+listOf("사업자 정보","매장 정보","메뉴판","확인")[stage-1],
-                modifier=Modifier.padding(start=20.dp,top=8.dp),
-                style=MaterialTheme.typography.labelSmall,
-                color=MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())
-            .padding(horizontal=20.dp,vertical=12.dp),
-            verticalArrangement=Arrangement.spacedBy(16.dp)) {
+    Column(Modifier.fillMaxSize().background(RegistrationV4.bg).imePadding()) {
+        if(screen!=RegPage.DONE) RegistrationBackBar(if(screen==RegPage.HOME)onBack else ::back)
+        if(stage!=0) RegistrationProgress(stage)
+        val centered=screen in listOf(RegPage.READING,RegPage.VERIFYING,
+            RegPage.VERIFIED,RegPage.DONE)
+        Column(Modifier.fillMaxWidth().weight(1f)
+            .then(if(centered)Modifier else Modifier.verticalScroll(rememberScrollState()))
+            .padding(horizontal=20.dp,vertical=if(centered)0.dp else 12.dp),
+            horizontalAlignment=if(centered)Alignment.CenterHorizontally else Alignment.Start,
+            verticalArrangement=if(centered)Arrangement.Center else Arrangement.spacedBy(16.dp)) {
             if(bars.isNotEmpty() && screen!=RegPage.HOME && screen!=RegPage.DONE &&
                 screen!=RegPage.VIEW_APPLICATION) {
                 TextButton(onClick=::showDashboard) { Text("내 매장 목록으로 돌아가기") }
@@ -628,47 +617,52 @@ fun OwnerOnboardingScreen(
             }
             error?.let{Text(it,color=MaterialTheme.colorScheme.error)}
         }
-        if(cta!=null&&state !is MockOwnerLoadState.Error){
-            Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal=20.dp,vertical=12.dp)){
-                OwnerActionButton(cta,::primaryAction,Modifier.fillMaxWidth(),enabled=enabled)
+        if(cta!=null&&state !is MockOwnerLoadState.Error) {
+            Box(Modifier.fillMaxWidth()
+                .then(if(screen==RegPage.BN||screen==RegPage.DATE)Modifier
+                    else Modifier.navigationBarsPadding())
+                .padding(start=20.dp,end=20.dp,top=12.dp,
+                    bottom=if(screen==RegPage.BN||screen==RegPage.DATE)8.dp else 24.dp)) {
+                RegistrationButton(cta,enabled=enabled,onClick=::primaryAction)
             }
+        }
+        if(screen==RegPage.BN || screen==RegPage.DATE) {
+            RegistrationDigitsKeypad(onDigit={ digit ->
+                if(screen==RegPage.BN)save(draft.copy(
+                    businessNumberDigits=(draft.businessNumberDigits+digit).take(10)))
+                else save(draft.copy(openingDateIso=dateInput(draft.openingDateIso+digit)))
+            },onDelete={
+                if(screen==RegPage.BN)save(draft.copy(
+                    businessNumberDigits=draft.businessNumberDigits.dropLast(1)))
+                else save(draft.copy(openingDateIso=dateInput(
+                    draft.openingDateIso.filter(Char::isDigit).dropLast(1))))
+            })
         }
     }
 }
 
-@Composable private fun OwnerV4Question(title:String,subtitle:String?=null){
-    Text(title,style=MaterialTheme.typography.headlineSmall,
-        color=MaterialTheme.colorScheme.onBackground)
-    if(!subtitle.isNullOrBlank())Text(subtitle,style=MaterialTheme.typography.bodyMedium,
-        color=MaterialTheme.colorScheme.onSurfaceVariant)
+@Composable private fun OwnerV4Question(title:String,subtitle:String?=null) {
+    RegistrationHeading(title,subtitle)
 }
-@Composable private fun OwnerV4Panel(value:String){
-    Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface,RoundedCornerShape(16.dp))
-        .padding(16.dp)){Text(value,style=MaterialTheme.typography.bodyMedium)}
+@Composable private fun OwnerV4Panel(value:String) {
+    Box(Modifier.fillMaxWidth().background(RegistrationV4.surface,RoundedCornerShape(16.dp))
+        .padding(16.dp)){Text(value,color=RegistrationV4.text,fontSize=14.sp)}
 }
-@Composable private fun OwnerV4Previous(label:String,value:String,action:()->Unit){
+@Composable private fun OwnerV4Previous(label:String,value:String,action:()->Unit) {
     Column(Modifier.fillMaxWidth().ownerQuietClick(onClick=action).padding(vertical=8.dp)){
-        Text(label,style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value,style=MaterialTheme.typography.bodyLarge)
+        Text(label,fontSize=12.sp,color=RegistrationV4.secondary)
+        Text(value,fontSize=16.sp,color=RegistrationV4.text)
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider(color=RegistrationV4.border)
     }
 }
-@Composable private fun OwnerV4Summary(label:String,value:String,edit:(()->Unit)?){
-    Row(Modifier.fillMaxWidth().padding(vertical=8.dp),
-        horizontalArrangement=Arrangement.spacedBy(8.dp),
-        verticalAlignment=Alignment.CenterVertically){
-        Text(label,modifier=Modifier.width(88.dp),
-            color=MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value,modifier=Modifier.weight(1f),style=MaterialTheme.typography.bodyMedium)
-        if(edit!=null)TextButton(onClick=edit){Text("수정")}
-    }
-    HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant)
+@Composable private fun OwnerV4Summary(label:String,value:String,edit:(()->Unit)?) {
+    RegistrationRow(label,value,edit)
 }
 @Composable private fun OwnerV4Input(label:String,value:String,change:(String)->Unit,
-    keyboard:KeyboardType=KeyboardType.Text,placeholder:String=""){
-    OutlinedTextField(value=value,onValueChange=change,label={Text(label)},
-        placeholder={Text(placeholder)},singleLine=true,
-        keyboardOptions=KeyboardOptions(keyboardType=keyboard),
-        modifier=Modifier.fillMaxWidth())
+    keyboard:KeyboardType=KeyboardType.Text,placeholder:String="") {
+    RegistrationInput(value,change,placeholder,keyboard=keyboard,
+        tag="registration-field-"+label)
 }
 private fun persistSelectedUri(context:Context,uri:Uri){
     try{
