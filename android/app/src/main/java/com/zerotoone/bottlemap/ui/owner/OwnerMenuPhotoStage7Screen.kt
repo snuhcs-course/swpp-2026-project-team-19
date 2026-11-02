@@ -82,6 +82,10 @@ import com.zerotoone.bottlemap.data.owner.MockPhoto
 import com.zerotoone.bottlemap.data.owner.MockPhotoKind
 import com.zerotoone.bottlemap.data.owner.MockPhotoExtractionSource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -305,21 +309,52 @@ internal fun OwnerMenuPhotoSelectionScreen(
     // The app-private temporary JPEG is copied through the SAME validation/store
     // pipeline as Gallery; no CAMERA permission or original-image URL is needed.
     var pendingCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
+    var copyingCapturePath by remember { mutableStateOf<String?>(null) }
+    // Sweep only this feature's abandoned camera output files. Keep current
+    // TakePicture and copy source files until their callbacks finish.
+    LaunchedEffect(pendingCapturePath, copyingCapturePath) {
+        val protected=setOfNotNull(pendingCapturePath, copyingCapturePath)
+        withContext(Dispatchers.IO) {
+            removeAbandonedOwnerCaptures(
+                File(context.filesDir,"owner-menu-captures"),protected)
+        }
+    }
     fun addImages(sources: List<Uri>, capture: File? = null) {
         if (sources.isEmpty() || busy || active != null) {
             capture?.delete()
             return
         }
         busy = true
+        copyingCapturePath = capture?.absolutePath
+        val before=photos
+        // withContext(IO) can finish a blocking copy after the composing
+        // coroutine was canceled. Coordinate both sides of that handoff.
+        val newCopies=AtomicReference<List<MockPhoto>?>(null)
+        val cleanupRequested=AtomicBoolean(false)
         scope.launch {
+            var saved=false
             try {
-                val next = withContext(Dispatchers.IO) { store.add(photos, sources) }
+                val next = withContext(Dispatchers.IO) {
+                    val completed=store.add(before,sources)
+                    val added=completed.drop(before.size)
+                    newCopies.set(added)
+                    if(cleanupRequested.get())added.forEach(store::delete)
+                    completed
+                }
                 entries = next.map { it.photoId + "|" + it.uri }
+                saved=true
                 error = null
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 error = e.message ?: "사진을 읽을 수 없어요. 다시 선택해 주세요."
             } finally {
-                withContext(Dispatchers.IO) { capture?.delete() }
+                cleanupRequested.set(true)
+                withContext(NonCancellable + Dispatchers.IO) {
+                    if(!saved)newCopies.get()?.forEach(store::delete)
+                    capture?.delete()
+                }
+                copyingCapturePath=null
                 busy = false
             }
         }
