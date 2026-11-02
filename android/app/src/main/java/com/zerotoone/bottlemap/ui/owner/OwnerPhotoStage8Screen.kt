@@ -683,6 +683,68 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                 }
                 }
+            } else if(screen=="price" && pair!=null) {
+                val (photo,line)=pair
+                var openPhoto by remember {mutableStateOf(false)}
+                Text("메뉴판 ${photo.imageOrder} · 가격을 읽지 못한 줄",color=V4Color.sub,fontSize=12.sp)
+                St8RecognizedStrip(photo,line){openPhoto=true}
+                if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
+                Text("가격을 못 읽었어요",color=V4Color.text,
+                    fontSize=24.sp,fontWeight=FontWeight.Bold)
+                St8Card {
+                    Row(verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.spacedBy(11.dp)) {
+                        St8Bottle()
+                        Column {
+                            Text("자동으로 찾은 메뉴",color=V4Color.sub,fontSize=11.sp)
+                            Text(pendingNewDraft?.name ?:
+                                s.products.firstOrNull{it.productId==selectedProductId}?.displayName
+                                    ?: line.sourceText,
+                                color=V4Color.text,fontSize=16.sp,fontWeight=FontWeight.Bold)
+                        }
+                    }
+                    val options=line.decision?.correctedOptions ?: line.options.ifEmpty {
+                        listOf(MockMenuOption("manual-price-${line.extractedItemId}",
+                            label="잔",pourMl=30,priceKrw=0))
+                    }
+                    var prices by rememberSaveable(line.extractedItemId) {
+                        mutableStateOf(options.map {if(it.priceKrw>0)it.priceKrw.toString() else ""})
+                    }
+                    options.forEachIndexed { i,o ->
+                        Text((o.label ?: "잔")+" · "+(o.pourMl?.let{"${it}ml"}?:"용량 미표기")+
+                            " 가격",color=V4Color.sub,fontSize=13.sp)
+                        OutlinedTextField(prices.getOrElse(i){""},{
+                            val filtered=it.filter(Char::isDigit).take(10)
+                            prices=prices.toMutableList().apply{set(i,filtered)}
+                        },modifier=Modifier.fillMaxWidth(),
+                            keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Number),
+                            singleLine=true,placeholder={Text("예: 18000")},
+                            suffix={Text("원")})
+                    }
+                    St8Button("저장",enabled=prices.size==options.size &&
+                        prices.all{it.toIntOrNull()?.let {p->p>0}==true}) {
+                        val corrected=options.mapIndexed{i,o->
+                            o.copy(priceKrw=prices[i].toInt())
+                        }
+                        val d=if(pendingNewDraft!=null)MockReviewDecision(
+                            MockDecisionKind.CREATE_PRODUCT,correctedOptions=corrected,
+                            newProduct=pendingNewDraft)
+                        else MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                            productId=selectedProductId,correctedOptions=corrected)
+                        runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                            job.reviewVersion,d)}
+                            .onSuccess{pendingNewDraft=null;error=null;next()}
+                            .onFailure{error=it.message}
+                    }
+                }
+                TextButton(onClick={
+                    runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                        job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
+                        .onSuccess {pendingNewDraft=null;error=null;next()}
+                        .onFailure {error=it.message}
+                },modifier=Modifier.align(Alignment.CenterHorizontally)) {
+                    Text("이 줄은 올리지 않기",color=V4Color.sub,fontSize=13.sp)
+                }
             } else if(screen=="publish") {
                 Text(if(counts!!.remaining==0)"검수를 마쳤어요" else "검수 미완료",
                     color=V4Color.text,fontSize=24.sp,fontWeight=FontWeight.Bold)
@@ -758,6 +820,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             else screen="summary"
                         }){Text("다음 ›",color=V4Color.primary)}
                     }
+                }
+                "price"->TextButton(onClick={screen="line"}) {
+                    Text("‹ 이전",color=V4Color.sub)
                 }
                 "edit","new"->TextButton(onClick={screen="line"}){
                     Text("이전",color=V4Color.sub)
