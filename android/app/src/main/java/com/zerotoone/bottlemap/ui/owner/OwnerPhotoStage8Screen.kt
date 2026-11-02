@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.*
 
@@ -1010,17 +1011,28 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             MockPhoto(photo.imageId,photo.sourceUri,MockPhotoKind.MENU_CAPTURE)
         )?.asImageBitmap()}.getOrNull()
     }
-    AlertDialog(onDismissRequest=dismiss,title={Text("원본 사진 보기")},
-        text={if(bitmap==null)Text("원본 사진을 열 수 없어요.")
-            else BoxWithConstraints(Modifier.fillMaxWidth().height(240.dp),
+    Dialog(onDismissRequest=dismiss) {
+        Column(Modifier.fillMaxWidth().background(V4Color.surface,
+            RoundedCornerShape(15.dp)).padding(12.dp),
+            verticalArrangement=Arrangement.spacedBy(7.dp)) {
+            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+                verticalAlignment=Alignment.CenterVertically) {
+                Text("원본 사진 보기",color=V4Color.text,fontSize=15.sp,
+                    fontWeight=FontWeight.Bold)
+                TextButton(onClick=dismiss,contentPadding=PaddingValues(horizontal=8.dp)) {
+                    Text("닫기",color=V4Color.primary)
+                }
+            }
+            if(bitmap==null) Text("원본 사진을 열 수 없어요.",color=V4Color.sub)
+            else BoxWithConstraints(Modifier.fillMaxWidth(),
                 contentAlignment=Alignment.Center) {
                 val ratio=bitmap.width.toFloat()/bitmap.height.toFloat()
-                val shownHeight=if(maxWidth/ratio < 240.dp)maxWidth/ratio else 240.dp
+                val shownHeight=(maxWidth/ratio).coerceAtMost(290.dp)
                 val shownWidth=shownHeight*ratio
                 Box(Modifier.size(shownWidth,shownHeight)) {
                     Image(bitmap,contentDescription="원본 메뉴판",modifier=Modifier.fillMaxSize(),
                         contentScale=ContentScale.FillBounds)
-                    if(box!=null && box.size==4)Canvas(Modifier.fillMaxSize()){
+                    if(box!=null && box.size==4)Canvas(Modifier.fillMaxSize()) {
                         drawRect(Color(0xFFFFBC74),
                             topLeft=Offset(size.width*box[0]/1000f,
                                 size.height*box[1]/1000f),
@@ -1029,7 +1041,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             style=Stroke(width=3.dp.toPx()))
                     }
                 }
-            }},
-        confirmButton={TextButton(onClick=dismiss){Text("닫기")}})
+            }
+        }
+    }
 
 }
