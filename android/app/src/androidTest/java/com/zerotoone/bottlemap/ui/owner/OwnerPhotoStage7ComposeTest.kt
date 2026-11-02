@@ -32,6 +32,9 @@ class OwnerPhotoStage7ComposeTest {
         compose.onNodeWithText("메뉴판 사진 선택").assertExists()
         compose.onNodeWithText("사진을 최대 15장까지 올릴 수 있어요.").assertExists()
         compose.onNodeWithText("사진 0장 올리기").assertExists()
+        compose.onNodeWithText("메뉴판 순서대로 올려주세요.").assertExists()
+        compose.onNodeWithText("한 장에 한 면씩, 글자와 가격이 잘리지 않게").assertExists()
+        compose.onNodeWithText("빛 반사 없이 정면에서").assertExists()
         compose.onNodeWithText("JPEG/PNG · 사진당 10MB · 전체 60MB").assertDoesNotExist()
         compose.onNodeWithText("새 메뉴만 추가 · 기존 메뉴와 가격 유지").assertDoesNotExist()
     }
@@ -52,7 +55,8 @@ class OwnerPhotoStage7ComposeTest {
         compose.onNodeWithText(
             "사진 분석을 완료하지 못했어요.\n메뉴판을 화면에 꽉 채우고, 흔들리지 않게 다시 찍어주세요."
         ).assertExists()
-        compose.onNodeWithText("📷 사진 다시 올리기").assertExists()
+        compose.onNodeWithText("사진 다시 올리기").assertExists()
+        compose.onNodeWithTag("stage7-retry-camera-icon").assertExists()
         compose.onNodeWithText("AI 인식 실패").assertDoesNotExist()
     }
 
