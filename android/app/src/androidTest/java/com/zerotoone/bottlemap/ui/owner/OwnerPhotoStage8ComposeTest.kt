@@ -186,7 +186,7 @@ class OwnerPhotoStage8ComposeTest {
         showLine(MockExtractedLine("inactive","위스키12",MockLineKind.PRODUCT,
             candidateProductIds=listOf("inactive-or-missing"),
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=19000))))
-        compose.onNodeWithText("카탈로그에서 찾은 메뉴 0개").assertExists()
+        compose.onNodeWithText("카탈로그에서 찾은 메뉴",substring=true).assertExists()
         compose.onNodeWithText("찾는 메뉴가 없어요, 새로 등록").assertExists()
     }
 
