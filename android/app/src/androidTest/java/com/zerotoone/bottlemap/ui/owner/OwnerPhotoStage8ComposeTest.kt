@@ -49,8 +49,6 @@ class OwnerPhotoStage8ComposeTest {
     @Test fun pdf89NewProductFormHasDistilleryAgeAndNamePreview() {
         showLine(MockExtractedLine("raw", "시그나토리 쿨일라13", MockLineKind.PRODUCT,
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=20000))))
-        compose.onNodeWithText("⌕  목록에 없어요").performClick()
-        compose.onNodeWithText("찾는 메뉴가 없어요, 새로 등록").performClick()
         compose.onNodeWithText("새로 등록할게요").assertExists()
         compose.onNodeWithText("병입사").assertExists()
         compose.onNodeWithText("증류소").assertExists()
@@ -60,8 +58,9 @@ class OwnerPhotoStage8ComposeTest {
     }
     @Test fun pdf91CatalogSearchHasCountAndFixedNewProductEntry() {
         showLine(MockExtractedLine("new", "알려지지 않은 위스키", MockLineKind.PRODUCT,
+            suggestedProductId="demo-canonical",
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=20000))))
-        compose.onNodeWithText("⌕  목록에 없어요").performClick()
+        compose.onNodeWithText("다른 메뉴예요").performClick()
         compose.onNodeWithText("카탈로그에서 찾은 메뉴 0개").assertExists()
         compose.onNodeWithText("찾는 메뉴가 없어요, 새로 등록").performClick()
         compose.onNodeWithText("새로 등록할게요").assertExists()
@@ -71,7 +70,6 @@ class OwnerPhotoStage8ComposeTest {
         showLine(MockExtractedLine("bookers", "부커스", MockLineKind.PRODUCT,
             suggestedProductId="demo-canonical",
             options=listOf(MockMenuOption("o",label="30ml",pourMl=30,priceKrw=0))))
-        compose.onNodeWithText("맞아요").performClick()
         compose.onNodeWithText("가격을 못 읽었어요").assertExists()
         compose.onNodeWithText("저장").assertExists()
         compose.onNodeWithText("이 줄은 올리지 않기").assertExists()
