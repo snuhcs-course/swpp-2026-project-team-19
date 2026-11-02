@@ -4,6 +4,8 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import com.zerotoone.bottlemap.BuildConfig
@@ -326,13 +328,23 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     modifier=Modifier.width(35.dp)) {
                     Text("←",color=V4Color.text,fontSize=25.sp)
                 }
-                OutlinedTextField(catalogQuery,{catalogQuery=it},
-                    modifier=Modifier.weight(1f).height(53.dp),
-                    singleLine=true,leadingIcon={Text("⌕",color=V4Color.sub,fontSize=24.sp)},
-                    colors=OutlinedTextFieldDefaults.colors(
-                        focusedTextColor=V4Color.text,unfocusedTextColor=V4Color.text,
-                        focusedBorderColor=V4Color.line,unfocusedBorderColor=V4Color.line),
-                    placeholder={Text("메뉴 이름 검색")})
+                BasicTextField(value=catalogQuery,onValueChange={catalogQuery=it},
+                    singleLine=true,textStyle=TextStyle(color=V4Color.text,fontSize=16.sp),
+                    modifier=Modifier.weight(1f),
+                    decorationBox={field ->
+                        Row(Modifier.fillMaxWidth().height(45.dp)
+                            .border(1.dp,V4Color.line,RoundedCornerShape(14.dp))
+                            .padding(horizontal=12.dp),
+                            verticalAlignment=Alignment.CenterVertically,
+                            horizontalArrangement=Arrangement.spacedBy(9.dp)){
+                            Text("⌕",color=V4Color.sub,fontSize=24.sp)
+                            Box(Modifier.weight(1f)) {
+                                if(catalogQuery.isBlank())
+                                    Text("메뉴 이름 검색",color=V4Color.sub,fontSize=16.sp)
+                                field()
+                            }
+                        }
+                    })
             }
         } else if(screen in listOf("line","edit","new","price") && counts!=null)
             St8ReviewToolbar(position+1,counts.lines,back)
@@ -379,17 +391,19 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             placeholder={Text("예: 30")},colors=OutlinedTextFieldDefaults.colors(
                                 focusedTextColor=V4Color.text,unfocusedTextColor=V4Color.text))
                         Text("ml",color=V4Color.text)
-                        OutlinedButton(onClick={
-                            val n=pour.toIntOrNull()
-                            if(bar!=null && (pour.isBlank() || n!=null && n in 1..999)){
-                                vm.saveBar(bar.copy(defaultPourMl=n));error=null
-                            }else error="1~999ml로 입력해 주세요."
-                        },modifier=Modifier.height(32.dp).width(54.dp),
-                            contentPadding=PaddingValues(horizontal=5.dp,vertical=0.dp),
-                            shape=RoundedCornerShape(8.dp),colors=ButtonDefaults.outlinedButtonColors(
-                            containerColor=V4Color.surface,contentColor=V4Color.primary),
-                            border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line)) {
-                            Text("저장",color=V4Color.primary)
+                        Box(Modifier.size(width=52.dp,height=46.dp),
+                            contentAlignment=Alignment.Center) {
+                            Box(Modifier.size(width=43.dp,height=26.dp)
+                                .border(1.dp,V4Color.line,RoundedCornerShape(7.dp))
+                                .clickable {
+                                    val n=pour.toIntOrNull()
+                                    if(bar!=null && (pour.isBlank() || n!=null && n in 1..999)){
+                                        vm.saveBar(bar.copy(defaultPourMl=n));error=null
+                                    } else error="1~999ml로 입력해 주세요."
+                                },contentAlignment=Alignment.Center) {
+                                Text("저장",color=V4Color.primary,fontSize=14.sp,
+                                    fontWeight=FontWeight.Medium)
+                            }
                         }
                     }
                     Text("용량 표시가 없는 잔에 적용해요.",color=V4Color.sub,fontSize=11.sp)
