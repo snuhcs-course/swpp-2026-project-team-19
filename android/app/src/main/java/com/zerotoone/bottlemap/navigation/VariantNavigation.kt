@@ -6,7 +6,6 @@ import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
-import com.zerotoone.bottlemap.data.owner.openSingleBarManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -57,16 +56,9 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 is MockOwnerLoadState.Empty -> mockState.snapshot
                 else -> null
             }
-            val directManager = snapshot?.openSingleBarManager() == true
-            LaunchedEffect(directManager) {
-                if (directManager) {
-                    navController.navigate(OwnerPage.MGR_HOME.route) {
-                        popUpTo(OwnerRoutes.ENTRY) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-            }
-            if (!directManager) OwnerOnboardingScreen(
+            // Always show the owned-bar list. One or many bars use the same flow;
+            // the user explicitly selects which bar to manage.
+            OwnerOnboardingScreen(
                 viewModel = ownerViewModel,
                 onBack = { navController.popBackStack() },
                 onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
