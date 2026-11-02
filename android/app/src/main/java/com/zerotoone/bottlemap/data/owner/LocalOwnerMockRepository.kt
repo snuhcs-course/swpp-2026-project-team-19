@@ -628,8 +628,22 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 val normalizedOptions = normalized.options.map {
                     it.copy(optionId = "local-option-${sequence++}")
                 }
+                // Only explicit DEBUG fixture rows can be auto-confirmed. Never infer
+                // this from a display name or a generic OCR candidate.
+                val autoId = normalized.suggestedProductId?.takeIf { productId ->
+                    normalized.mockAutoAccepted && normalized.kind == MockLineKind.PRODUCT &&
+                        normalized.candidateProductIds.isEmpty() &&
+                        s.products.any {it.productId==productId && it.isActive} &&
+                        normalizedOptions.isNotEmpty() &&
+                        normalizedOptions.all(::validMockMenuOption)
+                }
+                require(!normalized.mockAutoAccepted || autoId!=null) {
+                    "Invalid mock auto-accepted fixture"
+                }
                 normalized.copy(extractedItemId = "local-line-${sequence++}",
-                    options = normalizedOptions, decision = null)
+                    options = normalizedOptions,
+                    decision = autoId?.let { MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                        productId=it, correctedOptions=normalizedOptions) })
             })
         }
         val success = images.any { it.lines.isNotEmpty() }
@@ -686,7 +700,13 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(job.reviewVersion==expectedVersion) { "REVIEW_OUTDATED" }
             val reset=job.copy(reviewVersion=job.reviewVersion+1,
                 images=job.images.map { photo ->
-                    photo.copy(lines=photo.lines.map{it.copy(decision=null)})
+                    photo.copy(lines=photo.lines.map { line ->
+                        line.copy(decision=if(line.mockAutoAccepted)
+                            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                                productId=requireNotNull(line.suggestedProductId),
+                                correctedOptions=line.options)
+                        else null)
+                    })
                 })
             state.copy(imports=state.imports.map {
                 if(it.menuImportId==importId)reset else it
