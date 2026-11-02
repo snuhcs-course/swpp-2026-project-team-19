@@ -198,6 +198,23 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var catalogQuery by rememberSaveable(job?.menuImportId) { mutableStateOf("") }
     var demoPublishError by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
     var pendingNewDraft by remember { mutableStateOf<MockNewProductDraft?>(null) }
+    var showRestartWarning by rememberSaveable { mutableStateOf(false) }
+    var pageHistory by rememberSaveable(job?.menuImportId) { mutableStateOf(listOf<String>()) }
+    fun visit(page:String, target:Int=position) {
+        if(screen!=page || position!=target) {
+            pageHistory=pageHistory+("$screen|$position")
+            screen=page
+            position=target
+        }
+    }
+    fun backPage() {
+        val last=pageHistory.lastOrNull()
+        if(last==null) onBack() else {
+            pageHistory=pageHistory.dropLast(1)
+            screen=last.substringBeforeLast("|")
+            position=last.substringAfterLast("|").toIntOrNull() ?: position
+        }
+    }
     val pair=all.getOrNull(position)
     LaunchedEffect(pair?.second?.extractedItemId) {
         selectedProductId=pair?.second?.decision?.productId
@@ -208,18 +225,20 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         selectedProductId=null
         val target=all.indices.firstOrNull{it>position && all[it].second.decision==null}
             ?: all.indices.firstOrNull{it!=position && all[it].second.decision==null}
-        if(target==null)screen="publish" else {position=target;screen="line"}
+        if(target==null) visit("publish") else {
+            val line=all[target].second
+            val page=when {
+                line.kind==MockLineKind.NON_PRODUCT -> "line"
+                line.suggestedProductId==null && line.candidateProductIds.isEmpty() -> "new"
+                line.options.isEmpty() || line.options.any{it.priceKrw<=0} -> "price"
+                else -> "line"
+            }
+            if(page=="price") selectedProductId=line.suggestedProductId
+            visit(page,target)
+        }
     }
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        val back: () -> Unit = {
-            when(screen) {
-                "line","publish","auto","existing","catalog","incomplete" -> screen="summary"
-                "results","publishFailed" -> screen="publish"
-                "edit","new","price" -> screen="line"
-                "done"->onHome()
-                else->onBack()
-            }
-        }
+        val back: () -> Unit = { backPage() }
         if(screen=="catalog") {
             Row(Modifier.fillMaxWidth().height(58.dp).padding(horizontal=14.dp),
                 horizontalArrangement=Arrangement.spacedBy(9.dp),
