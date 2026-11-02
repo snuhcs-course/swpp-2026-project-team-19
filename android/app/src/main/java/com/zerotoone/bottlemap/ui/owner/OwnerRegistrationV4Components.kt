@@ -365,3 +365,22 @@ internal fun RegistrationCenterContent(
             fontSize=14.sp,lineHeight=21.sp,textAlign=TextAlign.Center)
     }
 }
+
+@Composable
+internal fun RegistrationHint(text:String) {
+    Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.Top,
+        horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        RegistrationGlyph("check",Modifier.size(16.dp),Color(0xFFB9DFC8))
+        Text(text,color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=20.sp)
+    }
+}
+@Composable
+internal fun RegistrationVisibility(public:Boolean) {
+    Box(Modifier.background(if(public)Color(0xFF503C29) else RegistrationV4.elevated,
+        RoundedCornerShape(20.dp))
+        .padding(horizontal=8.dp,vertical=5.dp)) {
+        Text(if(public)"▣ 손님에게 보여요" else "♙ 운영팀만 봐요",
+            color=if(public)Color(0xFFF7DFBF) else RegistrationV4.secondary,
+            fontSize=12.sp,lineHeight=18.sp)
+    }
+}
