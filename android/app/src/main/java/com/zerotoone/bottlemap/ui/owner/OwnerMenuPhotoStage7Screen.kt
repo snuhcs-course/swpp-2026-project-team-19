@@ -53,6 +53,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -435,8 +436,11 @@ internal fun OwnerMenuPhotoSelectionScreen(
                 photos.forEachIndexed { index, photo ->
                     Box(Modifier.width(112.dp).height(144.dp).testTag("stage7-photo-${index+1}")
                         .background(Color(0xFFE9DDC9), RoundedCornerShape(7.dp))) {
-                        val picture = remember(photo.uri) {
-                            runCatching { store.preview(photo)?.asImageBitmap() }.getOrNull()
+                        val picture by produceState<androidx.compose.ui.graphics.ImageBitmap?>(
+                            initialValue=null,key1=photo.uri) {
+                            value=withContext(Dispatchers.IO) {
+                                runCatching {store.preview(photo)?.asImageBitmap()}.getOrNull()
+                            }
                         }
                         if (picture != null)
                             Image(picture, "메뉴판 사진 ${index+1}",
