@@ -63,6 +63,16 @@ interface OwnerMockRepository {
 /** Only discard the current import and its unpublished retries since the latest APPLIED job.
  * Historical failures preceding a successful publication are preserved for diagnostics.
  */
+/** Append a confirmed edition only when the composed product name does not already include it.
+ * Prevent distinct editions sharing the same canonical display name.
+ */
+internal fun canonicalReviewProductName(draft: MockNewProductDraft): String {
+    val name=draft.name.trim()
+    val edition=draft.editionName?.trim().orEmpty()
+    return if(edition.isNotEmpty() && !name.endsWith(edition,ignoreCase=true))
+        "$name $edition" else name
+}
+
 internal fun unpublishedRetryChainIds(snapshot: MockOwnerSnapshot, importId: String): Set<String> {
     val index=snapshot.imports.indexOfFirst { it.menuImportId==importId }
     require(index>=0) { "Unknown import" }
@@ -827,7 +837,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 requireNotNull(decision.productId)
             } else {
                 val draft = requireNotNull(decision.newProduct)
-                val normalized = draft.name.trim()
+                val normalized = canonicalReviewProductName(draft)
                 val brand = if (draft.brandId != null) {
                     requireNotNull((s.brands + newBrands).firstOrNull { it.brandId == draft.brandId }) {
                         "BRAND_NOT_FOUND"
