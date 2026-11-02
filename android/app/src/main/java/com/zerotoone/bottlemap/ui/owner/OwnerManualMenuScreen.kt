@@ -489,11 +489,13 @@ internal fun OwnerManualMenuScreen(
                             fontWeight=FontWeight.Bold,fontSize=13.sp,
                             modifier=Modifier.weight(1f))
                         if(activeJob!=null) {
-                            Box(Modifier.border(1.dp,Color(0xFF7B453E),
-                                RoundedCornerShape(8.dp)).manualTap {
-                                    cancelPhotoConfirm=true
-                                }.padding(horizontal=8.dp,vertical=5.dp)) {
-                                Text("취소하기",color=Color(0xFF7B453E),fontSize=11.sp)
+                            Box(Modifier
+                                .background(Color(0xFF693630),RoundedCornerShape(7.dp))
+                                .border(1.dp,Color(0xFF7B453E),RoundedCornerShape(7.dp))
+                                .manualTap { cancelPhotoConfirm=true }
+                                .padding(horizontal=11.dp,vertical=5.dp)) {
+                                Text("취소하기",color=Color(0xFFFFE8E5),fontSize=11.sp,
+                                    fontWeight=FontWeight.SemiBold)
                             }
                         }
                         Text("›",color=V4Color.sub,fontSize=20.sp)
@@ -599,7 +601,8 @@ internal fun OwnerManualMenuScreen(
                     }
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     Box(Modifier.fillMaxWidth().height(43.dp)
-                        .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(8.dp))
+                        .background(Color(0xFF693630),RoundedCornerShape(7.dp))
+                        .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(7.dp))
                         .manualTap {
                             if (activePhotoImport) error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
                             else confirm = "reset"
@@ -608,9 +611,9 @@ internal fun OwnerManualMenuScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(9.dp),
                             verticalAlignment = Alignment.CenterVertically) {
                             BmIcon(BmIconId.ERROR, null, Modifier.size(17.dp),
-                                tint = Color(0xFF7B453E))
-                            Text("전체 메뉴 초기화", color = Color(0xFF7B453E),
-                                fontSize = 12.sp)
+                                tint = Color(0xFFFFE8E5))
+                            Text("전체 메뉴 초기화", color = Color(0xFFFFE8E5),
+                                fontSize = 12.sp,fontWeight=FontWeight.SemiBold)
                         }
                     }
                 }
