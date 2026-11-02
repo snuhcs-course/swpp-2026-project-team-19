@@ -308,7 +308,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     title={Text("메뉴 종류 선택")},text={Column{
                         listOf("cocktail" to "칵테일","food" to "안주",
                             "otherAlcohol" to "기타 주류").forEach{(v,label)->
-                            TextButton(onClick={chosenCategory=v;categoryPopup=false}){Text(label)}
+                            TextButton(onClick={chosenCategory=v;categoryPopup=false;
+                                choosingOther=true;screen="new"}){Text(label)}
                         }
                     }},confirmButton={TextButton(onClick={categoryPopup=false}){Text("닫기")}})
                 val candidates=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
@@ -456,6 +457,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         HorizontalDivider(color=V4Color.line)
                         St8NewField("시리즈 (선택)",edition,{edition=it},
                             placeholder="없으면 비워 두세요")
+                        if(chosenCategory=="otherAlcohol") St8NewField(
+                            "기타 주류 세부 종류",subtype,{subtype=it},
+                            placeholder="예: 맥주, 사케, 와인")
                         var extra by rememberSaveable(line.extractedItemId) {mutableStateOf(false)}
                         TextButton(onClick={extra=!extra}) {
                             Text(if(extra)"추가 정보 접기" else "추가 정보 입력",color=V4Color.sub)
@@ -464,8 +468,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             St8NewField("매장 표시명 (선택)",displayOverride,
                                 {displayOverride=it})
                             St8NewField("도수 (%) (선택)",alcohol,{alcohol=it})
-                            if(chosenCategory=="otherAlcohol") St8NewField(
-                                "기타 주류 종류",subtype,{subtype=it})
                             var expanded by remember {mutableStateOf(false)}
                             TextButton(onClick={expanded=true}) {
                                 Text("분류: "+chosenCategory+" ▾",color=V4Color.primary)
@@ -563,7 +565,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         error="가격·용량·중복 옵션을 확인해 주세요."
                     } else {
                         if(screen=="new" && (!noAge && age.toIntOrNull()==null ||
-                            alcohol.isNotBlank() && alcohol.toDoubleOrNull()==null)) {
+                            alcohol.isNotBlank() && alcohol.toDoubleOrNull()==null ||
+                            chosenCategory=="otherAlcohol" && subtype.isBlank())) {
                             error="숙성 연수와 도수 값을 확인해 주세요."
                             return@St8Button
                         }
