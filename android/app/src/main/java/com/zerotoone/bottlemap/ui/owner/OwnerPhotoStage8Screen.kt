@@ -24,6 +24,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -47,6 +49,14 @@ internal fun stage8Counts(job: MockMenuImport, s: MockOwnerSnapshot): Stage8Coun
         lines.count {it.kind == MockLineKind.PRODUCT &&
             it.suggestedProductId !in ids && it.candidateProductIds.none { id->id in ids } &&
             it.decision?.kind !in listOf(MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)})
+}
+// One source of truth for EVERY entry into an extracted line (start/next/previous/back).
+// A price-less known product is a price-entry page; an unmatched line is a new product.
+internal fun stage8ReviewDestination(line: MockExtractedLine): String = when {
+    line.kind == MockLineKind.NON_PRODUCT -> "line"
+    line.suggestedProductId == null && line.candidateProductIds.isEmpty() -> "new"
+    line.options.isEmpty() || line.options.any { it.priceKrw <= 0 } -> "price"
+    else -> "line"
 }
 private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     is MockOwnerLoadState.Ready->s.snapshot
@@ -194,9 +204,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 }
 @Composable private fun St8ReviewToolbar(step: Int, total: Int, back: () -> Unit) {
-    Box(Modifier.fillMaxWidth().height(56.dp)) {
+    Box(Modifier.fillMaxWidth().height(52.dp)) {
         TextButton(onClick=back,modifier=Modifier.align(Alignment.CenterStart)
-            .size(52.dp)) {
+            .padding(start=10.dp).size(48.dp)) {
             Text("←",color=V4Color.text,fontSize=26.sp)
         }
         Text("${step} / ${total}",color=V4Color.sub,fontWeight=FontWeight.Bold,
@@ -260,6 +270,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     val job=s?.imports?.lastOrNull { it.barId==barId }
     val all=job?.images?.flatMap { photo->photo.lines.map { photo to it } }.orEmpty()
     val counts=if(job!=null && s!=null)stage8Counts(job,s) else null
+    val focusManager=LocalFocusManager.current
+    val keyboardController=LocalSoftwareKeyboardController.current
     var screen by rememberSaveable(job?.menuImportId){mutableStateOf("summary")}
     var position by rememberSaveable(job?.menuImportId){mutableIntStateOf(0)}
     var error by rememberSaveable {mutableStateOf<String?>(null)}
@@ -278,6 +290,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             screen=page
             position=target
         }
+    }
+    fun visitLine(target:Int) {
+        all.getOrNull(target)?.second?.let {visit(stage8ReviewDestination(it),target)}
     }
     fun backPage() {
         val last=pageHistory.lastOrNull()
@@ -298,17 +313,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         selectedProductId=null
         val target=all.indices.firstOrNull{it>position && all[it].second.decision==null}
             ?: all.indices.firstOrNull{it!=position && all[it].second.decision==null}
-        if(target==null) visit("publish") else {
-            val line=all[target].second
-            val page=when {
-                line.kind==MockLineKind.NON_PRODUCT -> "line"
-                line.suggestedProductId==null && line.candidateProductIds.isEmpty() -> "new"
-                line.options.isEmpty() || line.options.any{it.priceKrw<=0} -> "price"
-                else -> "line"
-            }
-            if(page=="price") selectedProductId=line.suggestedProductId
-            visit(page,target)
-        }
+        if(target==null) visit("publish") else visitLine(target)
     }
     if(showRestartWarning) AlertDialog(
         onDismissRequest={showRestartWarning=false},
@@ -316,18 +321,19 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         text={Text("첫 번째 메뉴부터 다시 확인해요. 이미 저장한 결정은 지워지지 않으며, 변경하면 새 결정으로 저장돼요.")},
         confirmButton={TextButton(onClick={
             showRestartWarning=false
-            visit("line",0)
+            visitLine(0)
         }){Text("처음부터 검수")}},
         dismissButton={TextButton(onClick={showRestartWarning=false}){Text("돌아가기")}}
     )
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         val back: () -> Unit = { backPage() }
         if(screen=="catalog") {
-            Row(Modifier.fillMaxWidth().height(58.dp).padding(horizontal=14.dp),
+            Row(Modifier.fillMaxWidth().height(66.dp)
+                .padding(start=17.dp,end=14.dp,top=10.dp,bottom=0.dp),
                 horizontalArrangement=Arrangement.spacedBy(9.dp),
                 verticalAlignment=Alignment.CenterVertically) {
                 TextButton(onClick=back,contentPadding=PaddingValues(0.dp),
-                    modifier=Modifier.width(35.dp)) {
+                    modifier=Modifier.width(40.dp)) {
                     Text("←",color=V4Color.text,fontSize=25.sp)
                 }
                 BasicTextField(value=catalogQuery,onValueChange={catalogQuery=it},
@@ -362,8 +368,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         LaunchedEffect(job.status) {
             if(job.status==MockImportStatus.APPLIED)visit("done")
         }
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(19.dp),
-            verticalArrangement=Arrangement.spacedBy(15.dp)) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())
+            .padding(start=19.dp,end=19.dp,top=3.dp,bottom=19.dp),
+            verticalArrangement=Arrangement.spacedBy(10.dp)) {
             if(screen=="summary") {
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(5.dp)){
                     listOf("사진 올리기","읽기","확인","더하기").forEachIndexed{ i,label->
@@ -404,6 +411,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                     val n=pour.toIntOrNull()
                                     if(bar!=null && (pour.isBlank() || n!=null && n in 1..999)){
                                         vm.saveBar(bar.copy(defaultPourMl=n));error=null
+                                        focusManager.clearFocus()
+                                        keyboardController?.hide()
                                     } else error="1~999ml로 입력해 주세요."
                                 },contentAlignment=Alignment.Center) {
                                 Text("저장",color=V4Color.primary,fontSize=14.sp,
@@ -472,7 +481,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             found,registered?.options?.firstOrNull()?.priceKrw)
                     } else {
                         Column(Modifier.fillMaxWidth().clickable{
-                            visit("line",entry.index)
+                            visitLine(entry.index)
                         }.padding(vertical=2.dp)) {
                             Row(Modifier.fillMaxWidth(),
                                 horizontalArrangement=Arrangement.SpaceBetween,
@@ -1136,29 +1145,29 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                         verticalAlignment=Alignment.CenterVertically) {
                         TextButton(onClick={
-                            if(position>0)visit("line",position-1) else backPage()
-                        }){Text("‹ 이전",color=V4Color.sub)}
-                        Text("남은 확인 "+counts!!.remaining+"개",color=V4Color.sub,fontSize=12.sp)
+                            if(position>0)visitLine(position-1) else backPage()
+                        }){Text("‹ 이전",color=V4Color.primary)}
+                        Text("남은 확인 "+counts!!.remaining+"개",color=V4Color.primary,fontSize=12.sp)
                         TextButton(onClick={
-                            if(position+1<all.size)visit("line",position+1)
+                            if(position+1<all.size)visitLine(position+1)
                             else backPage()
                         }){Text("다음 ›",color=V4Color.primary)}
                     }
                 }
-                "price"->TextButton(onClick={visit("line")}) {
+                "price"->TextButton(onClick=back) {
                     Text("‹ 이전",color=V4Color.sub)
                 }
                 "edit","new"->{
                     HorizontalDivider(color=V4Color.line)
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                         verticalAlignment=Alignment.CenterVertically) {
-                        TextButton(onClick={visit("line")}) {
+                        TextButton(onClick=back) {
                             Text("‹ 이전",color=V4Color.sub)
                         }
-                        Text("남은 확인 ${counts!!.remaining}개",color=V4Color.sub,
+                        Text("남은 확인 ${counts!!.remaining}개",color=V4Color.primary,
                             fontSize=12.sp)
                         TextButton(onClick={
-                            if(position+1<all.size){position++;visit("line")}
+                            if(position+1<all.size)visitLine(position+1)
                             else visit("summary")
                         }) {Text("다음 ›",color=V4Color.primary)}
                     }
@@ -1166,7 +1175,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 "incomplete"->{
                     St8Button("${counts!!.remaining}줄 이어서 확인",enabled=counts.remaining>0){
                         val pos=all.indexOfFirst {it.second.decision==null}
-                        if(pos>=0)visit("line",pos)
+                        if(pos>=0)visitLine(pos)
                     }
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){
                         Box(Modifier.weight(1f)){
