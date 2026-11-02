@@ -19,7 +19,8 @@ import org.junit.runner.RunWith
 class OwnerPhotoStage8ComposeTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
-    private fun showLine(line: MockExtractedLine) {
+    private fun showLine(line: MockExtractedLine) = showLines(listOf(line))
+    private fun showLines(lines: List<MockExtractedLine>) {
         val repository = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         repository.saveBrand(MockBrand("demo-brand", "Suntory"))
@@ -28,7 +29,7 @@ class OwnerPhotoStage8ComposeTest {
                 "Hakushu Distiller's Reserve"))
         val importId = repository.queuePhotoImport("fixture-bar",
             listOf(MockPhoto("p1", "file:///mock/p1.png", MockPhotoKind.MENU_CAPTURE)))
-        repository.finishPhotoImport(importId, MockPhotoExtractionSource { listOf(line) })
+        repository.finishPhotoImport(importId, MockPhotoExtractionSource { lines })
         val vm = OwnerMockViewModel(repository)
         compose.setContent { MaterialTheme {
             OwnerPhotoStage8Screen(vm.state.collectAsState().value,vm,{}, {})
@@ -74,7 +75,7 @@ class OwnerPhotoStage8ComposeTest {
             options=listOf(MockMenuOption("o",label="30ml",pourMl=30,priceKrw=0))))
         compose.onNodeWithText("가격을 못 읽었어요").assertExists()
         compose.onNodeWithText("저장").assertExists()
-        compose.onNodeWithText("이 줄은 올리지 않기").assertExists()
+        compose.onNodeWithText("이번 줄 제외").assertExists()
     }
 
     @Test fun pdf92PartialReviewAllowsResumeWithoutPublishing() {
@@ -86,5 +87,42 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("1줄 이어서 확인").assertExists()
     }
 
+
+    @Test fun nextPreviousAlwaysUseNewAndPriceScreensAndNeverDeadEndInCandidateUI() {
+        val list=listOf(
+            MockExtractedLine("hakushu","하쿠슈DR",MockLineKind.PRODUCT,
+                suggestedProductId="demo-canonical",
+                options=listOf(MockMenuOption("h1",label="잔",pourMl=30,priceKrw=19000))),
+            MockExtractedLine("signatory","시그나토리 쿨일라13",MockLineKind.PRODUCT,
+                options=listOf(MockMenuOption("s1",label="잔",pourMl=30,priceKrw=20000))),
+            MockExtractedLine("bookers","부커스",MockLineKind.PRODUCT,
+                suggestedProductId="demo-canonical",
+                options=listOf(MockMenuOption("b1",label="잔",priceKrw=0))),
+            MockExtractedLine("lagavulin","라가불린 16년",MockLineKind.PRODUCT,
+                suggestedProductId="demo-canonical",
+                options=listOf(MockMenuOption("l1",label="잔",pourMl=30,priceKrw=22000)))
+        )
+        showLines(list)
+        compose.onNodeWithText("이 메뉴가 맞나요?").assertExists()
+        compose.onNodeWithText("다음 ›").performClick()
+        compose.onNodeWithText("새로 등록할게요").assertExists()
+        compose.onNodeWithText("이 메뉴가 맞나요?").assertDoesNotExist()
+        compose.onNodeWithText("다음 ›").performClick()
+        compose.onNodeWithText("가격을 못 읽었어요").assertExists()
+        compose.onNodeWithText("이 메뉴가 맞나요?").assertDoesNotExist()
+        compose.onNodeWithText("‹ 이전").performClick()
+        compose.onNodeWithText("새로 등록할게요").assertExists()
+        compose.onNodeWithText("‹ 이전").performClick()
+        compose.onNodeWithText("이 메뉴가 맞나요?").assertExists()
+    }
+
+    @Test fun allReviewTypesHaveCompactTopExclusionAndCatalogDoesNot() {
+        showLine(MockExtractedLine("raw", "하쿠슈DR", MockLineKind.PRODUCT,
+            suggestedProductId="demo-canonical",
+            options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=19000))))
+        compose.onNodeWithText("이번 줄 제외").assertExists()
+        compose.onNodeWithText("다른 메뉴예요").performClick()
+        compose.onNodeWithText("이번 줄 제외").assertDoesNotExist()
+    }
 
 }
