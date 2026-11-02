@@ -250,6 +250,16 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `partial` | 검색어를 포함하는 상품 별칭이 있음 |
 | `none` | 일치하는 상품이 없음 |
 
+### 4.20 search_source
+
+고객 검색을 어디서 시작했는지다(API 명세 3.10의 `source`).
+
+| 값 | 의미 |
+|---|---|
+| `input` | 검색창에 직접 입력. 기본값 |
+| `recent` | 기기에 저장된 최근 검색을 다시 누름 |
+| `popular` | 홈 화면의 요즘 많이 찾는 위스키 카드를 누름 |
+
 ## 5 Accounts and Bars
 
 ### 5.1 users
@@ -594,6 +604,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `searched_at` | `timestamptz`, NOT NULL | `2026-11-02T11:00:00Z` | 서버가 요청을 받은 시각이다. 순위는 최근 30일만 센다. |
 | `normalized_query` | `varchar(200)`, NOT NULL | `글렌피딕12` | 공통 정규화를 거친 검색어다. 사용자가 입력한 원문은 남기지 않는다. 인식하지 못한 검색어(`none`)도 남겨 카탈로그에 빠진 상품을 찾는다. |
 | `match_type` | `search_match_type`, NOT NULL | `alias_exact` | 4.19 |
+| `source` | `search_source`, NOT NULL, 기본 `input` | `popular` | 검색을 시작한 곳이다(4.20). 지금은 순위에서 구분하지 않지만, 카드를 누른 검색이 순위를 굳히면 `popular`를 빼고 셀 수 있게 남긴다. |
 | `matched_product_ids` | `uuid[]`, NOT NULL, 기본 `{}` | `{4444...}` | 응답의 `matchedProducts`에 나온 상품 전체다. `none`이면 비어 있다. 지운 상품이 있어도 로그는 남도록 외래키를 두지 않는다. |
 | `result_count` | `integer`, NOT NULL | `7` | `limit`을 적용하기 전의 결과 행 수다. |
 

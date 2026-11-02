@@ -128,6 +128,12 @@ Enum business_status {
   closed
 }
 
+Enum search_source {
+  input
+  recent
+  popular
+}
+
 Enum search_match_type {
   brand
   alias_exact
@@ -752,6 +758,7 @@ Table search_logs {
   searched_at timestamptz [not null]
   normalized_query varchar(200) [not null, note: 'The query after the shared normalization; the raw input is not kept']
   match_type search_match_type [not null]
+  source search_source [not null, default: 'input', note: 'Where the search started; all sources count toward the ranking for now']
   matched_product_ids "uuid[]" [not null, default: '{}', note: 'Every matchedProducts productId of the response; empty for none. No foreign key']
   result_count integer [not null, note: 'Result rows before the limit was applied']
 
