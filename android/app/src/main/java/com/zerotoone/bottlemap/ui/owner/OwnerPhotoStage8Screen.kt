@@ -259,6 +259,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 var brand by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.brandName.orEmpty())
                 }
+                var brandId by rememberSaveable(line.extractedItemId) {
+                    mutableStateOf(line.decision?.newProduct?.brandId)
+                }
                 var age by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.ageYears?.toString().orEmpty())
                 }
@@ -276,7 +279,14 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 if(screen=="new") St8Card {
                     St8Field("상품 이름",name,{name=it})
-                    St8Field("브랜드",brand,{brand=it})
+                    St8Field("브랜드",brand,{brand=it;brandId=null})
+                    s.brands.filter { brand.isNotBlank() &&
+                        it.name.contains(brand,ignoreCase=true) }.take(5).forEach { existing ->
+                        TextButton(onClick={brand=existing.name;brandId=existing.brandId}) {
+                            Text((if(brandId==existing.brandId)"✓ " else "")+
+                                "기존 브랜드: "+existing.name,color=V4Color.primary)
+                        }
+                    }
                     var expanded by remember {mutableStateOf(false)}
                     TextButton(onClick={expanded=true}){
                         Text("분류: "+chosenCategory+" ▾",color=V4Color.primary)
@@ -355,7 +365,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             correctedOptions=resolved)
                         else MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
                             correctedOptions=resolved,newProduct=MockNewProductDraft(
-                                name=name.trim(),brandName=brand.trim(),category=chosenCategory,
+                                name=name.trim(),brandId=brandId,brandName=if(brandId==null)brand.trim() else null,
+                                category=chosenCategory,
                                 ageYears=if(noAge)null else age.toIntOrNull(),
                                 editionName=edition.trim().ifBlank{null},
                                 abvPercent=alcohol.toDoubleOrNull(),
