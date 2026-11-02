@@ -397,7 +397,6 @@ internal fun OwnerMenuPhotoJobScreen(
 ) {
     val job = latestImport(state)
     val active = activeImport(job)
-    var cancelConfirmation by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     // The persisted PROCESSING job is recoverable after leaving the screen.
     // This is a documented Mock-only resolution, NOT a real OCR server call.
@@ -408,6 +407,11 @@ internal fun OwnerMenuPhotoJobScreen(
             runCatching { viewModel.finishPhotoImport(job.menuImportId, fixture) }
                 .onFailure { error = it.message }
         }
+    }
+    // READY_FOR_REVIEW goes straight into Stage 8. There is no intermediary
+    // "menu ready" or "canceled" user page.
+    LaunchedEffect(job?.menuImportId,job?.status) {
+        if(job?.status==MockImportStatus.READY_FOR_REVIEW) onReview()
     }
     // A DEBUG-only long press on the failure heading opens the demonstrator.
     // No developer UI distorts the pixel-perfect PDF failure screen.
@@ -478,21 +482,7 @@ internal fun OwnerMenuPhotoJobScreen(
                         }
                         val newImportId = viewModel.retryFailedPhotoImport(failedJob.menuImportId)
                         viewModel.finishPhotoImport(newImportId, demoResult)
-                        onReview()
                     }.onFailure { error = it.message }
-    }
-    if (cancelConfirmation && job != null) {
-        AlertDialog(onDismissRequest = { cancelConfirmation = false },
-            title = { Text("메뉴 등록 작업을 취소할까요?") },
-            text = { Text("현재 게시된 메뉴는 그대로 유지됩니다.") },
-            confirmButton = { TextButton(onClick = {
-                try { viewModel.cancelPhotoImport(job.menuImportId) }
-                catch (e: Exception) { error = e.message }
-                cancelConfirmation = false
-            }) { Text("작업 취소") } },
-            dismissButton = { TextButton(onClick = { cancelConfirmation = false }) {
-                Text("돌아가기")
-            } })
     }
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         V4Toolbar(null, onHome)
@@ -582,17 +572,6 @@ internal fun OwnerMenuPhotoJobScreen(
                 MenuPhotoPrimary("사진 다시 올리기", tag = "stage7-failed-retry",
                     leadingIcon = { MenuPhotoCameraIcon() },
                     onClick = onRetryPhotos)
-            if (job?.status == MockImportStatus.READY_FOR_REVIEW) {
-                MenuPhotoPrimary("검수 결과 확인하기", onClick = onReview)
-            }
-
-            // A running mock extraction cannot be canceled from this screen.
-            // The READY_FOR_REVIEW cancellation path remains for already-prepared jobs.
-            if (job?.status == MockImportStatus.READY_FOR_REVIEW)
-                TextButton(onClick = { cancelConfirmation = true },
-                    modifier = Modifier.fillMaxWidth()) {
-                    Text("메뉴 등록 작업 취소", color = V4Color.sub, fontSize = 12.sp)
-                }
             if (job?.status == MockImportStatus.FAILED) {
                 TextButton(onClick = onHome, modifier = Modifier.fillMaxWidth().height(48.dp)) {
                     Text("내 매장으로 돌아가기", color = V4Color.sub, fontSize = 14.sp)
