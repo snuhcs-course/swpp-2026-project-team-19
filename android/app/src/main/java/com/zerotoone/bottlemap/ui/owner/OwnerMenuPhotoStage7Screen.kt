@@ -471,7 +471,8 @@ internal fun OwnerMenuPhotoJobScreen(
                             MockExtractedLine("demo-lagavulin", "라가불린 16년",
                                 MockLineKind.PRODUCT, suggestedProductId = "demo-lagavulin-16",
                                 options = listOf(MockMenuOption("demo-lagavulin-bottle",
-                                    label = "병", priceKrw = 280000)))
+                                    label = "Bottle", priceKrw = 280000)),
+                                mockAutoAccepted = true)
                         )
                         val photoUris = failedJob.images.map { it.sourceUri }
                         val demoResult = MockPhotoExtractionSource { uri ->
