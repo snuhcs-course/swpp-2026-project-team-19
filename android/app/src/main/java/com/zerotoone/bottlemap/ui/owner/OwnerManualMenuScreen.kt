@@ -19,11 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -209,7 +205,6 @@ internal fun OwnerManualMenuScreen(
 
     val photoContext=LocalContext.current
     val photoStore=remember(photoContext) { OwnerMenuPhotoStore(photoContext) }
-    val cancelScope=rememberCoroutineScope()
     val outsideFocus = LocalFocusManager.current
     val outsideKeyboard = LocalSoftwareKeyboardController.current
     var screen by rememberSaveable(bar?.barId) { mutableStateOf("list") }
@@ -432,11 +427,9 @@ internal fun OwnerManualMenuScreen(
                 runCatching {viewModel.discardPhotoImport(activeJob.menuImportId)}
                     .onSuccess {
                         cancelPhotoConfirm=false;error=null;screen="list"
-                        cancelScope.launch {
-                            withContext(Dispatchers.IO) {
-                                photoCopies.forEach(photoStore::delete)
-                            }
-                        }
+                        // File.unlink is cheap (no image decoding); perform before
+                        // leaving this composition so navigation cannot cancel cleanup.
+                        photoCopies.forEach(photoStore::delete)
                     }.onFailure {error=it.message}
             }){Text("작업 취소하기",color=Color(0xFFFFB4AB))}},
             dismissButton={TextButton(onClick={cancelPhotoConfirm=false}){Text("돌아가기")}}
