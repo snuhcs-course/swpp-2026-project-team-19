@@ -408,33 +408,89 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 var subtype by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.otherAlcoholKind.orEmpty())
                 }
-                if(screen=="new") St8Card {
-                    St8Field("상품 이름",name,{name=it})
-                    St8Field("매장 표시명 (선택)",displayOverride,{displayOverride=it})
-                    St8Field("브랜드",brand,{brand=it;brandId=null})
-                    s.brands.filter { brand.isNotBlank() &&
-                        it.name.contains(brand,ignoreCase=true) }.take(5).forEach { existing ->
-                        TextButton(onClick={brand=existing.name;brandId=existing.brandId}) {
-                            Text((if(brandId==existing.brandId)"✓ " else "")+
-                                "기존 브랜드: "+existing.name,color=V4Color.primary)
+                if(screen=="new") {
+                    Column(Modifier.fillMaxWidth().background(V4Color.surface,
+                        RoundedCornerShape(16.dp)).padding(16.dp),
+                        verticalArrangement=Arrangement.spacedBy(11.dp)) {
+                        St8NewField("병입사",brand,{brand=it;brandId=null},
+                            placeholder="예: Signatory Vintage")
+                        s.brands.filter { brand.isNotBlank() &&
+                            it.name.contains(brand,ignoreCase=true) }.take(5).forEach{existing->
+                            TextButton(onClick={brand=existing.name;brandId=existing.brandId}) {
+                                Text((if(brandId==existing.brandId)"✓ " else "")+
+                                    "기존 병입사: "+existing.name,color=V4Color.primary)
+                            }
+                        }
+                        HorizontalDivider(color=V4Color.line)
+                        St8NewField("증류소",name,{name=it},placeholder="예: Caol Ila")
+                        HorizontalDivider(color=V4Color.line)
+                        Text("숙성 연수",color=V4Color.sub,fontSize=12.sp)
+                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp),
+                            verticalAlignment=Alignment.CenterVertically) {
+                            OutlinedTextField(age,{
+                                age=it.filter(Char::isDigit);if(age.isNotEmpty())noAge=false
+                            },enabled=!noAge,placeholder={Text("예: 13")},
+                                modifier=Modifier.width(105.dp),singleLine=true,
+                                colors=OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor=V4Color.text,
+                                    unfocusedTextColor=V4Color.text,
+                                    focusedContainerColor=V4Color.background,
+                                    unfocusedContainerColor=V4Color.background))
+                            OutlinedButton(onClick={noAge=!noAge;if(noAge)age=""},
+                                modifier=Modifier.height(54.dp),
+                                shape=RoundedCornerShape(9.dp),
+                                border=androidx.compose.foundation.BorderStroke(1.dp,
+                                    if(noAge)V4Color.primary else V4Color.line),
+                                colors=ButtonDefaults.outlinedButtonColors(
+                                    containerColor=V4Color.surface,contentColor=V4Color.primary)) {
+                                Text("없음",color=V4Color.primary)
+                            }
+                        }
+                        HorizontalDivider(color=V4Color.line)
+                        St8NewField("시리즈 (선택)",edition,{edition=it},
+                            placeholder="없으면 비워 두세요")
+                        var extra by rememberSaveable(line.extractedItemId) {mutableStateOf(false)}
+                        TextButton(onClick={extra=!extra}) {
+                            Text(if(extra)"추가 정보 접기" else "추가 정보 입력",color=V4Color.sub)
+                        }
+                        if(extra) {
+                            St8NewField("매장 표시명 (선택)",displayOverride,
+                                {displayOverride=it})
+                            St8NewField("도수 (%) (선택)",alcohol,{alcohol=it})
+                            if(chosenCategory=="otherAlcohol") St8NewField(
+                                "기타 주류 종류",subtype,{subtype=it})
+                            var expanded by remember {mutableStateOf(false)}
+                            TextButton(onClick={expanded=true}) {
+                                Text("분류: "+chosenCategory+" ▾",color=V4Color.primary)
+                            }
+                            if(expanded) AlertDialog(onDismissRequest={expanded=false},
+                                title={Text("분류")},text={Column {
+                                    listOf("whisky","cocktail","food","otherAlcohol",
+                                        "gin","brandy","rum","wine").forEach {kind->
+                                        TextButton(onClick={chosenCategory=kind;expanded=false}) {
+                                            Text(kind)
+                                        }
+                                    }
+                                }},confirmButton={TextButton(onClick={expanded=false}) {
+                                    Text("닫기")
+                                }})
                         }
                     }
-                    var expanded by remember {mutableStateOf(false)}
-                    TextButton(onClick={expanded=true}){
-                        Text("분류: "+chosenCategory+" ▾",color=V4Color.primary)
+                    Row(Modifier.fillMaxWidth().border(1.dp,V4Color.line,
+                        RoundedCornerShape(16.dp)).padding(13.dp),
+                        verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                        St8Bottle()
+                        Column(verticalArrangement=Arrangement.spacedBy(3.dp)) {
+                            Text("등록될 이름",fontSize=12.sp,color=V4Color.sub)
+                            Text(brand.ifBlank{"병입사 미입력"},fontSize=17.sp,
+                                color=V4Color.text,fontWeight=FontWeight.Bold)
+                            Text(listOfNotNull(name.ifBlank{null},
+                                age.toIntOrNull()?.takeIf{!noAge}?.let{it.toString()+"년"},
+                                edition.trim().ifBlank{null}).joinToString(" ").ifBlank{"정보를 입력해 주세요"},
+                                color=V4Color.text,fontSize=15.sp)
+                        }
                     }
-                    if(expanded)AlertDialog(onDismissRequest={expanded=false},title={Text("분류")},
-                        text={Column{listOf("whisky","cocktail","food","otherAlcohol",
-                            "gin","brandy","rum","wine").forEach{kind->
-                            TextButton(onClick={chosenCategory=kind;expanded=false}){Text(kind)}
-                        }}},confirmButton={TextButton(onClick={expanded=false}){Text("닫기")}})
-                    Row(verticalAlignment=Alignment.CenterVertically){
-                        Checkbox(noAge,{noAge=it});Text("숙성 연수 없음",color=V4Color.text)
-                    }
-                    if(!noAge)St8Field("숙성 연수",age,{age=it},digits=true)
-                    St8Field("에디션 (선택)",edition,{edition=it})
-                    St8Field("도수 (선택)",alcohol,{alcohol=it})
-                    if(chosenCategory=="otherAlcohol")St8Field("기타 주류 종류",subtype,{subtype=it})
                 }
                 val originals=line.decision?.correctedOptions ?: line.options.ifEmpty {
                     listOf(MockMenuOption("local-review-option-"+line.extractedItemId,priceKrw=0))
