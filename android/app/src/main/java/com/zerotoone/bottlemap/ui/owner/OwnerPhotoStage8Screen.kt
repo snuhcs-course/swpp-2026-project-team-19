@@ -90,6 +90,33 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         verticalArrangement=Arrangement.spacedBy(9.dp),content=content)
 }
 /** PDF 87/89: compact back navigation and a truly centered item index. */
+@Composable private fun St8PublishSteps(active:Int) {
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
+        listOf("사진 올리기","읽기","확인","더하기").forEachIndexed { i,label->
+            Column(Modifier.weight(1f)) {
+                Box(Modifier.fillMaxWidth().height(3.dp).background(
+                    if(i<=active)V4Color.primary else V4Color.line))
+                Spacer(Modifier.height(7.dp))
+                Text(label,color=if(i==active)V4Color.primary else V4Color.sub,
+                    fontSize=10.sp)
+            }
+        }
+    }
+}
+@Composable private fun St8CountCard(firstLabel:String,firstCount:Int,
+    secondLabel:String,secondCount:Int,secondSuffix:String="줄") {
+    St8Card {
+        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
+            Text(firstLabel,color=V4Color.sub,fontSize=14.sp)
+            Text("${firstCount}${secondSuffix}",color=V4Color.text,fontWeight=FontWeight.Bold)
+        }
+        HorizontalDivider(color=V4Color.line)
+        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
+            Text(secondLabel,color=V4Color.sub,fontSize=14.sp)
+            Text("${secondCount}줄",color=V4Color.text,fontWeight=FontWeight.Bold)
+        }
+    }
+}
 @Composable private fun St8ReviewToolbar(step: Int, total: Int, back: () -> Unit) {
     Box(Modifier.fillMaxWidth().height(56.dp)) {
         TextButton(onClick=back,modifier=Modifier.align(Alignment.CenterStart)
@@ -745,6 +772,52 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 },modifier=Modifier.align(Alignment.CenterHorizontally)) {
                     Text("이 줄은 올리지 않기",color=V4Color.sub,fontSize=13.sp)
                 }
+            } else if(screen=="incomplete") {
+                St8PublishSteps(2)
+                Text("${counts!!.remaining}줄 남았어요",
+                    color=V4Color.text,fontSize=26.sp,fontWeight=FontWeight.Bold)
+                Text("확인을 마치면 메뉴를 게시할 수 있어요.",
+                    color=V4Color.sub,fontSize=13.sp)
+                St8CountCard("추가 예정",all.count {
+                    it.second.kind==MockLineKind.PRODUCT &&
+                        it.second.decision?.kind in listOf(
+                            MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)
+                },"확인 필요",counts.remaining)
+            } else if(screen=="results") {
+                St8PublishSteps(3)
+                Text("확인한 메뉴판 내용",color=V4Color.text,
+                    fontSize=23.sp,fontWeight=FontWeight.Bold)
+                Text("읽은 ${counts!!.lines}줄 · 새로 추가 ${all.count {
+                    it.second.decision?.kind in listOf(
+                        MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)
+                }}개 · 건너뜀 ${all.count {
+                    it.second.decision?.kind in listOf(
+                        MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)
+                }}개",color=V4Color.sub,fontSize=12.sp)
+                St8Card {
+                    Text("검수한 메뉴 ${counts.reviewed}줄",
+                        color=V4Color.primary,fontSize=13.sp,fontWeight=FontWeight.Bold)
+                    all.forEach { (_,line)->
+                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+                            verticalAlignment=Alignment.CenterVertically) {
+                            val name=line.decision?.newProduct?.name ?:
+                                s.products.firstOrNull {
+                                    it.productId==line.decision?.productId
+                                }?.displayName ?: line.sourceText
+                            Text(name,color=V4Color.text,fontSize=12.sp,
+                                modifier=Modifier.weight(1f))
+                            Text(when(line.decision?.kind){
+                                MockDecisionKind.SELECT_PRODUCT->"확인됨"
+                                MockDecisionKind.CREATE_PRODUCT->"신규 등록"
+                                MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT->"건너뜀"
+                                else->"확인 필요"
+                            },color=V4Color.sub,fontSize=10.sp)
+                        }
+                        HorizontalDivider(color=V4Color.line)
+                    }
+                    Text("이미 있는 메뉴 ${counts.existing}줄",
+                        color=V4Color.primary,fontSize=12.sp)
+                }
             } else if(screen=="publish") {
                 Text(if(counts!!.remaining==0)"검수를 마쳤어요" else "검수 미완료",
                     color=V4Color.text,fontSize=24.sp,fontWeight=FontWeight.Bold)
@@ -774,7 +847,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         else counts.remaining.toString()+"줄 확인 시작",
                         enabled=counts.remaining>0) {next()}
                     if(counts.remaining==0)St8Button("검수 결과 확인"){screen="publish"}
-                    TextButton(onClick=onHome,modifier=Modifier.fillMaxWidth()){
+                    TextButton(onClick={screen="incomplete"},modifier=Modifier.fillMaxWidth()){
                         Text("나중에 하기",color=V4Color.sub)
                     }
                 }
@@ -827,6 +900,21 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 "edit","new"->TextButton(onClick={screen="line"}){
                     Text("이전",color=V4Color.sub)
                 }
+                "incomplete"->{
+                    St8Button("${counts!!.remaining}줄 이어서 확인",enabled=counts.remaining>0){
+                        val pos=all.indexOfFirst {it.second.decision==null}
+                        if(pos>=0){position=pos;screen="line"}
+                    }
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                        Box(Modifier.weight(1f)){
+                            St8Secondary("나중에 하기",onHome)
+                        }
+                        Box(Modifier.weight(1f)){
+                            St8Secondary("처음부터 검수") {position=0;screen="line"}
+                        }
+                    }
+                }
+                "results"->St8Button("돌아가기"){screen="publish"}
                 "publish"->{
                     St8Button("메뉴 더하기",enabled=counts!!.remaining==0 && publishConfirmed){
                         runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
