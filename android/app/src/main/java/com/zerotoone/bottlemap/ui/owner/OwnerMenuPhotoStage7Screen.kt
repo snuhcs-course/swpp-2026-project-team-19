@@ -228,7 +228,7 @@ private fun MenuPhotoSecondary(label: String, onClick: () -> Unit) {
     }
 }
 @Composable
-private fun MenuPhotoProcessingIllustration() {
+internal fun MenuPhotoProcessingIllustration(diameter: androidx.compose.ui.unit.Dp = 96.dp) {
     // ACTION_FIRST v4: the wave moves inside a clipped glass, not the glass itself.
     // Keep the progress motion decorative; it must not imply a completed OCR line.
     val transition = rememberInfiniteTransition(label = "menu-photo-liquid")
@@ -239,7 +239,7 @@ private fun MenuPhotoProcessingIllustration() {
             repeatMode = RepeatMode.Reverse
         ), label = "menu-photo-wave"
     )
-    Canvas(Modifier.size(96.dp).testTag("stage7-processing-glass")) {
+    Canvas(Modifier.size(diameter).testTag("stage7-processing-glass")) {
         val scale = size.width / 48f
         val glassInterior = Path().apply {
             moveTo(11.4f * scale, 13f * scale)
