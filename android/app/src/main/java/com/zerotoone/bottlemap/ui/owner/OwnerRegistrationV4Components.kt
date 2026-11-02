@@ -18,6 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.StrokeCap
@@ -35,6 +39,16 @@ import androidx.compose.ui.unit.sp
 
 /** Screen-specific ACTION_FIRST v4 CSS port. All sizes are dp equivalents of
  * the 360-wide HTML phone, not default Material outlined-field/alert styling. */
+internal fun Modifier.registrationDashedBorder(radius:Dp=16.dp):Modifier =
+    this.drawWithContent {
+        drawContent()
+        drawRoundRect(color=RegistrationV4.muted,
+            cornerRadius=CornerRadius(radius.toPx()),
+            style=Stroke(width=1.5.dp.toPx(),
+                pathEffect=PathEffect.dashPathEffect(
+                    floatArrayOf(4.dp.toPx(),4.dp.toPx()))))
+    }
+
 internal object RegistrationV4 {
     val bg=Color(0xFF211E1B)
     val surface=Color(0xFF302B27)
@@ -272,6 +286,7 @@ internal fun RegistrationInput(
     keyboard:KeyboardType=KeyboardType.Text,readonly:Boolean=false,
     onClick:(()->Unit)?=null,tag:String?=null,
 ) {
+    var focused by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     Column(modifier.fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(8.dp)) {
         if(label!=null) Text(label,color=RegistrationV4.secondary,fontSize=12.sp,lineHeight=18.sp)
         if(readonly) {
@@ -289,7 +304,9 @@ internal fun RegistrationInput(
                 modifier=Modifier.fillMaxWidth().heightIn(min=56.dp)
                     .then(if(tag!=null)Modifier.testTag(tag) else Modifier)
                     .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
-                    .border(1.dp,RegistrationV4.border,RoundedCornerShape(12.dp))
+                    .border(1.dp,if(focused)RegistrationV4.primary else RegistrationV4.border,
+                        RoundedCornerShape(12.dp))
+                    .onFocusChanged { focused=it.isFocused }
                     .padding(horizontal=16.dp),
                 textStyle=TextStyle(color=RegistrationV4.text,fontSize=16.sp,lineHeight=24.sp),
                 decorationBox={inner->
