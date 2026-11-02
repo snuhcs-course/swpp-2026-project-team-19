@@ -8,7 +8,10 @@ the remaining images are not extracted, since the import cannot be reviewed anyw
 Matching runs the rule stages S1–S3 and, when the LLM matching layer is configured
 (MATCHING_LLM_ENABLED, see `app.api.deps.get_matching_llm_layer`), the M3 layer on the lines
 they did not confirm. The layer only adds candidates: its lines are ambiguous, and any
-failure in it leaves the rule results as they were.
+failure in it leaves the rule results as they were. Last, when EMBEDDING_ENABLED=true, the
+embedding step (`app.matching.embedding`) works on those results: lines still unmatched get up to
+five similar products as ambiguous candidates, and ambiguous lines without a confirmRecommended
+candidate are reordered. It never confirms, and a failure in it keeps the earlier results too.
 
 Processing runs inside the API process, so a restart stops it. At start-up the unfinished
 imports (`uploaded`, `processing`) are resumed: an image's items are committed together with
@@ -36,6 +39,7 @@ from app.adapters.extraction import ExtractedItemData, ExtractionError, MenuExtr
 from app.adapters.storage import ImageStorage
 from app.matching import ExtractedProduct, ResolutionResult
 from app.matching.db_catalog import CatalogSnapshot, DbCatalog
+from app.matching.embedding import EmbeddingStep, get_embedding_step, summarize
 from app.matching.llm_layer import CONFIRMED, LLMLayerConfig, M3Engine
 from app.matching.staged import resolve_product_staged
 from app.models import (
@@ -300,6 +304,9 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: LLM
         results = _apply_llm_layer(session, menu_import.id, items, results, llm_layer)
         # The layer ended the read transaction, which expired the loaded rows; load them again.
         items = product_items(session, menu_import)
+    embedding = get_embedding_step()
+    if embedding is not None:
+        results = _apply_embedding(session, menu_import.id, items, results, embedding)
     for item in items:
         result = results[item.id]
         # "multi" (one line naming two products) has no stored status: the line stays ambiguous
@@ -367,5 +374,28 @@ def _apply_llm_layer(
     logger.info(
         "Menu import %s: LLM matching layer gave candidates to %d of %d unconfirmed lines (requests: %s)",
         import_id, changed, len(unconfirmed), dict(engine.stats) or "none",
+    )
+    return resolved
+
+
+def _apply_embedding(
+    session: Session,
+    import_id: UUID,
+    items: list[ExtractedItem],
+    results: dict[UUID, ResolutionResult],
+    embedding: EmbeddingStep,
+) -> dict[UUID, ResolutionResult]:
+    """Run the embedding step on the results of the earlier steps (rules, then the LLM layer if it ran);
+    on any failure return `results` unchanged. Only reads: nothing is written before this point."""
+    try:
+        resolved = embedding.apply(session, {item.id: item.extracted_product_name for item in items}, results)
+    except Exception:
+        logger.exception("Menu import %s: the embedding step failed; keeping the earlier results", import_id)
+        # Only reads happened in this transaction; the rows reload on their next access.
+        session.rollback()
+        return results
+    logger.info(
+        "Menu import %s: embedding step (%s, floor %s): %s",
+        import_id, embedding.provider.model_id, embedding.min_similarity, summarize(results, resolved),
     )
     return resolved
