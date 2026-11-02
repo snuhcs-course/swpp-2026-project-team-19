@@ -52,6 +52,42 @@ class OwnerMenuPhotoPolicyTest {
         } finally {dir.deleteRecursively()}
     }
 
+    @Test fun priorProcessOrphanFinalsAreReconciledWithRetainedAndLivePhotos() {
+        val dir=Files.createTempDirectory("owner-photo-final-recovery").toFile()
+        try {
+            val orphan=File(dir,"00000000-0000-4000-8000-000000000001.jpg")
+                .apply {writeText("orphan")}
+            val retained=File(dir,"00000000-0000-4000-8000-000000000002.png")
+                .apply {writeText("saved picker/import")}
+            val active=File(dir,"00000000-0000-4000-8000-000000000003.jpg")
+                .apply {writeText("being copied")}
+            val unrelated=File(dir,"user-provided.jpg").apply {writeText("not managed")}
+            assertEquals(1,removeUnreferencedOwnerPhotoFiles(dir,
+                setOf(retained.absolutePath),setOf(active.absolutePath)))
+            assertFalse(orphan.exists())
+            assertTrue(retained.exists())
+            assertTrue(active.exists())
+            assertTrue(unrelated.exists())
+        } finally {dir.deleteRecursively()}
+    }
+
+    @Test fun recoveryGuardPreservesCaptureCreatedAfterPriorProtectionSnapshot() {
+        val dir=Files.createTempDirectory("owner-camera-lock-recovery").toFile()
+        try {
+            val capture=File(dir,"menu-capture-new.jpg").apply{writeText("active")}
+            synchronized(OwnerMenuCaptureGuard.lock) {
+                OwnerMenuCaptureGuard.livePaths += capture.absolutePath
+                assertEquals(0,removeAbandonedOwnerCaptures(dir,
+                    OwnerMenuCaptureGuard.livePaths))
+            }
+            assertTrue(capture.exists())
+            synchronized(OwnerMenuCaptureGuard.lock) {
+                OwnerMenuCaptureGuard.livePaths.remove(capture.absolutePath)
+            }
+            assertEquals(1,removeAbandonedOwnerCaptures(dir,emptySet()))
+        } finally {dir.deleteRecursively()}
+    }
+
     @Test fun jpegAndPngMagicAreAcceptedButUnsupportedFormatsRejected() {
         assertEquals("image/jpeg", menuPhotoSignature(byteArrayOf(
             0xff.toByte(), 0xd8.toByte(), 0xff.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00)))
