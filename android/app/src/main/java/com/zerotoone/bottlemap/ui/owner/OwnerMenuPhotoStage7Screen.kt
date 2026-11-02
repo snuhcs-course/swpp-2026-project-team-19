@@ -96,7 +96,7 @@ private fun activeImport(job: MockMenuImport?) = job?.status in listOf(
 
 @Composable
 private fun MenuPhotoSteps(step: Int) {
-    val labels = listOf("사진 올리기", "읽기", "확인", "게시")
+    val labels = listOf("사진 올리기", "읽기", "확인", "더하기")
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         labels.forEachIndexed { i, label ->
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
@@ -396,14 +396,28 @@ internal fun OwnerMenuPhotoJobScreen(
                     Box(Modifier.size(64.dp)
                         .background(V4Color.surface, CircleShape),
                         contentAlignment = Alignment.Center) {
-                        Text(when(job?.status) {
-                            MockImportStatus.FAILED -> "!"
-                            MockImportStatus.READY_FOR_REVIEW -> "✓"
-                            MockImportStatus.CANCELED -> "×"
-                            else -> "·"
-                        }, color = if (job?.status == MockImportStatus.FAILED)
-                            Color(0xFFFFADA3) else V4Color.primary,
-                            fontSize = 30.sp)
+                        if (job?.status == MockImportStatus.FAILED) {
+                            // v4 p83: outlined exclamation inside the shaded 64dp disk.
+                            Canvas(Modifier.size(26.dp).testTag("stage7-failed-icon")) {
+                                val accent = Color(0xFFFFB4AB)
+                                val cx = size.width / 2f
+                                val cy = size.height / 2f
+                                drawCircle(accent, radius = size.minDimension * .44f,
+                                    style = Stroke(width = 2.dp.toPx()))
+                                drawLine(accent,
+                                    start = androidx.compose.ui.geometry.Offset(cx, cy - 6.dp.toPx()),
+                                    end = androidx.compose.ui.geometry.Offset(cx, cy + 2.dp.toPx()),
+                                    strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
+                                drawCircle(accent, radius = 1.2.dp.toPx(),
+                                    center = androidx.compose.ui.geometry.Offset(cx, cy + 6.dp.toPx()))
+                            }
+                        } else {
+                            Text(when(job?.status) {
+                                MockImportStatus.READY_FOR_REVIEW -> "✓"
+                                MockImportStatus.CANCELED -> "×"
+                                else -> "·"
+                            }, color = V4Color.primary, fontSize = 30.sp)
+                        }
                     }
                 }
                 Text(when(job?.status) {
