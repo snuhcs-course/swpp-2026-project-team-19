@@ -43,6 +43,23 @@ class OwnerPhotoStage7ComposeTest {
     }
 
 
+    @Test fun photoAddOffersGalleryOrCameraAndCancelLeavesSelectionUnchanged() {
+        val repository=LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val vm=OwnerMockViewModel(repository)
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoSelectionScreen(vm.state.collectAsState().value,vm,{}, {})
+        } }
+        compose.onNodeWithTag("stage7-photo-add").performClick()
+        compose.onNodeWithText("사진을 어떻게 추가할까요?").assertExists()
+        compose.onNodeWithTag("stage7-source-gallery").assertExists()
+        compose.onNodeWithTag("stage7-source-camera").assertExists()
+        compose.onNodeWithText("취소").performClick()
+        compose.onNodeWithText("사진을 어떻게 추가할까요?").assertDoesNotExist()
+        compose.onNodeWithText("사진 0장 올리기").assertExists()
+        compose.onNodeWithTag("stage7-photo-submit").assertIsNotEnabled()
+    }
+
     @Test fun failedImportMatchesActionFirstV4ErrorCopyWithoutExtraDiagnostics() {
         val repository = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
