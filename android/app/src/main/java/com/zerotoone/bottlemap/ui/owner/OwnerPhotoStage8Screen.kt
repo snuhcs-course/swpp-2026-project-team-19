@@ -36,6 +36,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.*
 import org.json.JSONObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** Only save the owner-confirmed product draft, not inferred OCR data. */
 private fun encodeReviewDraft(draft: MockNewProductDraft): String = JSONObject().apply {
@@ -370,10 +372,14 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var error by rememberSaveable {mutableStateOf<String?>(null)}
     var publishConfirmed by rememberSaveable {mutableStateOf(false)}
     var selectedProductId by rememberSaveable(job?.menuImportId) { mutableStateOf<String?>(null) }
+    var selectedForLineId by rememberSaveable(job?.menuImportId) { mutableStateOf<String?>(null) }
     var chosenCategory by rememberSaveable(job?.menuImportId) { mutableStateOf("whisky") }
     var choosingOther by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
     var catalogQuery by rememberSaveable(job?.menuImportId) { mutableStateOf("") }
     var pendingNewDraftEncoded by rememberSaveable(job?.menuImportId) {
+        mutableStateOf<String?>(null)
+    }
+    var pendingNewDraftLineId by rememberSaveable(job?.menuImportId) {
         mutableStateOf<String?>(null)
     }
     val pendingNewDraft=remember(pendingNewDraftEncoded) {
@@ -420,13 +426,19 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         }
     }
     LaunchedEffect(pair?.second?.extractedItemId) {
-        selectedProductId=pair?.second?.decision?.productId ?:
-            pair?.second?.suggestedProductId
-        chosenCategory=pair?.second?.decision?.newProduct?.category ?: "whisky"
-        choosingOther=false
+        val lineId=pair?.second?.extractedItemId
+        if(selectedForLineId!=lineId) {
+            selectedProductId=pair?.second?.decision?.productId ?:
+                pair?.second?.suggestedProductId
+            selectedForLineId=lineId
+            chosenCategory=pair?.second?.decision?.newProduct?.category ?: "whisky"
+            choosingOther=false
+        }
     }
     fun next() {
         selectedProductId=null
+        pendingNewDraftEncoded=null
+        pendingNewDraftLineId=null
         val target=all.indices.firstOrNull{it>position && all[it].second.decision==null}
             ?: all.indices.firstOrNull{it!=position && all[it].second.decision==null}
         if(target==null) visit("publish") else visitLine(target)
@@ -444,6 +456,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     position=0
                     selectedProductId=null
                     pendingNewDraftEncoded=null
+                    pendingNewDraftLineId=null
+                    selectedForLineId=null
                     screen="summary"
                 }.onFailure {error=it.message}
         }){Text("처음부터 검수")}},
@@ -484,7 +498,14 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         if (s==null || job==null || job.status !in
             listOf(MockImportStatus.READY_FOR_REVIEW,MockImportStatus.APPLIED)) {
             Box(Modifier.weight(1f),contentAlignment=Alignment.Center) {
-                Text("검수 가능한 메뉴판 작업이 없어요.",color=V4Color.text)
+                Text(when(state) {
+                    MockOwnerLoadState.Loading -> "검수 정보를 불러오고 있어요."
+                    is MockOwnerLoadState.Error -> state.message
+                    else -> "검수 가능한 메뉴판 작업이 없어요."
+                },color=V4Color.text)
+            }
+            if(state is MockOwnerLoadState.Error) {
+                St8Button("다시 시도",click=vm::retry)
             }
             St8Button("내 매장으로 돌아가기",click=onHome)
             return@Column
@@ -716,32 +737,44 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                         .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
                         .onFailure{error=it.message}}
+                val restoredDraft=pendingNewDraft.takeIf {
+                    pendingNewDraftLineId==line.extractedItemId
+                }
+                val previousDraft=line.decision?.newProduct ?: restoredDraft
                 var name by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.name.orEmpty())
+                    // New-product name holds the confirmed distillery, age and edition;
+                    // split the suffix to avoid duplicating age/edition on re-entry.
+                    val previous=previousDraft?.name.orEmpty()
+                    val suffix=listOfNotNull(
+                        previousDraft?.ageYears?.let{"${it}년"},
+                        previousDraft?.editionName?.takeIf{it.isNotBlank()}
+                    ).joinToString(" ")
+                    mutableStateOf(if(suffix.isNotEmpty()&&previous.endsWith(" "+suffix))
+                        previous.removeSuffix(" "+suffix) else previous)
                 }
                 var brand by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.brandName.orEmpty())
+                    mutableStateOf(previousDraft?.brandName.orEmpty())
                 }
                 var brandId by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.brandId)
+                    mutableStateOf(previousDraft?.brandId)
                 }
                 var age by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.ageYears?.toString().orEmpty())
+                    mutableStateOf(previousDraft?.ageYears?.toString().orEmpty())
                 }
                 var noAge by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.ageYears==null)
+                    mutableStateOf(previousDraft?.ageYears==null)
                 }
                 var edition by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.editionName.orEmpty())
+                    mutableStateOf(previousDraft?.editionName.orEmpty())
                 }
                 var alcohol by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.abvPercent?.toString().orEmpty())
+                    mutableStateOf(previousDraft?.abvPercent?.toString().orEmpty())
                 }
                 var displayOverride by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.displayNameOverride.orEmpty())
                 }
                 var subtype by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.otherAlcoholKind.orEmpty())
+                    mutableStateOf(previousDraft?.otherAlcoholKind.orEmpty())
                 }
                 if(screen=="new") {
                     Column(Modifier.fillMaxWidth().background(V4Color.surface,
@@ -820,7 +853,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         } else {
                             val draft=MockNewProductDraft(
                                 name=listOfNotNull(name.trim(),
-                                    ageValue?.let{it.toString()+"년"}).joinToString(" "),
+                                    ageValue?.let{it.toString()+"년"},
+                                    edition.trim().ifBlank{null}).joinToString(" "),
                                 brandId=brandId,
                                 brandName=if(brandId==null)brand.trim() else null,
                                 ageYears=ageValue,
@@ -828,6 +862,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                 category=chosenCategory)
                             if(line.options.isEmpty() || line.options.any{it.priceKrw<=0}) {
                                 pendingNewDraftEncoded=encodeReviewDraft(draft)
+                                pendingNewDraftLineId=line.extractedItemId
                                 visit("price")
                             } else runCatching {
                                 vm.review(job.menuImportId,line.extractedItemId,
@@ -1008,8 +1043,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }}개",color=V4Color.sub,fontSize=12.sp)
                 St8Card {
                     val auto=all.filter {(_,line)->
-                        line.kind==MockLineKind.PRODUCT &&
-                            line.suggestedProductId!=null && line.candidateProductIds.isEmpty()
+                        line.kind==MockLineKind.PRODUCT && line.mockAutoAccepted
                     }
                     Text("자동으로 찾은 신규 메뉴 ${auto.size}줄",color=V4Color.primary,
                         fontWeight=FontWeight.Bold,fontSize=12.sp)
@@ -1101,7 +1135,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     HorizontalDivider(color=V4Color.line)
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
                         Text("카탈로그에 새로 등록",color=V4Color.sub,fontSize=14.sp)
-                        Text("${all.count{it.second.decision?.kind==MockDecisionKind.CREATE_PRODUCT}}개",
+                        Text("${job.publishedNewProductCount ?: 0}개",
                             color=V4Color.text,fontWeight=FontWeight.Bold)
                     }
                     HorizontalDivider(color=V4Color.line)
@@ -1272,10 +1306,14 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     photo: MockPhotoExtraction, box: List<Int>?, dismiss:()->Unit
 ) {
     val context=LocalContext.current
-    val bitmap=remember(photo.sourceUri){
-        runCatching{OwnerMenuPhotoStore(context).preview(
-            MockPhoto(photo.imageId,photo.sourceUri,MockPhotoKind.MENU_CAPTURE)
-        )?.asImageBitmap()}.getOrNull()
+    val bitmap by produceState<androidx.compose.ui.graphics.ImageBitmap?>(
+        initialValue=null,key1=photo.sourceUri) {
+        value=withContext(Dispatchers.IO) {
+            runCatching {OwnerMenuPhotoStore(context).preview(
+                MockPhoto(photo.imageId,photo.sourceUri,MockPhotoKind.MENU_CAPTURE),
+                size=1600
+            )?.asImageBitmap()}.getOrNull()
+        }
     }
     Dialog(onDismissRequest=dismiss,
         properties=DialogProperties(usePlatformDefaultWidth=false)) {
@@ -1299,7 +1337,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                 } else {
                     Box(Modifier.size(imageWidth,imageHeight)) {
-                        Image(bitmap,contentDescription="원본 메뉴판",
+                        Image(requireNotNull(bitmap),contentDescription="원본 메뉴판",
                             modifier=Modifier.fillMaxSize(),contentScale=ContentScale.FillBounds)
                         if(box!=null && box.size==4)Canvas(Modifier.fillMaxSize()) {
                             drawRect(Color(0xFFFFBC74),
