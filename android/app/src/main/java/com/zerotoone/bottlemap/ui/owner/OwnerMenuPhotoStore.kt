@@ -45,9 +45,25 @@ internal fun menuPhotoSignature(bytes: ByteArray): String? = when {
  * ViewModel/SavedState, a repository snapshot, Git or a public URL.
  * Copy on Dispatchers.IO; a transient Photo Picker grant is then sufficient.
  */
+/** Recover incomplete private copies; never touch successfully stored JPG/PNG photos. */
+internal fun removeInterruptedMenuPhotoArtifacts(dir: File, activePaths: Set<String> = emptySet()): Int =
+    dir.listFiles().orEmpty().count { file ->
+        file.isFile && file.extension in setOf("part", "oriented") &&
+            file.absolutePath !in activePaths && file.delete()
+    }
+
 internal class OwnerMenuPhotoStore(context: Context) {
+    private companion object {
+        // Shared by store instances in this process so a screen re-entry cannot
+        // delete another coroutine's in-progress image normalization.
+        val tempLock = Any()
+        val inFlightPaths = mutableSetOf<String>()
+    }
     private val app = context.applicationContext
-    private val dir = File(app.noBackupFilesDir, "owner-menu-photo-drafts").apply { mkdirs() }
+    private val dir = File(app.noBackupFilesDir, "owner-menu-photo-drafts").apply {
+        mkdirs()
+        synchronized(tempLock) { removeInterruptedMenuPhotoArtifacts(this, inFlightPaths) }
+    }
 
     fun isReadable(photo: MockPhoto): Boolean = try {
         val file = fileFor(photo)
@@ -167,6 +183,7 @@ internal class OwnerMenuPhotoStore(context: Context) {
             "사진은 최대 15장까지 선택할 수 있어요."
         }
         val created = mutableListOf<File>()
+        val claimedTempPaths = mutableSetOf<String>()
         var completed = false
         var total = existing.sumOf(::size)
         try {
@@ -180,6 +197,12 @@ internal class OwnerMenuPhotoStore(context: Context) {
                 }
                 val photoId = UUID.randomUUID().toString()
                 val temp = File(dir, "$photoId.part")
+                // Claim both intermediate names before creating either file.
+                synchronized(tempLock) {
+                    claimedTempPaths += temp.absolutePath
+                    claimedTempPaths += File(dir, "$photoId.oriented").absolutePath
+                    inFlightPaths.addAll(claimedTempPaths)
+                }
                 created += temp
                 val originalLength = if(heic) convertHeicToJpeg(uri,temp) else
                     app.contentResolver.openInputStream(uri)?.use { source ->
@@ -237,6 +260,7 @@ internal class OwnerMenuPhotoStore(context: Context) {
             // images from the same selection. Earlier selected photos survive.
             if (!completed) created.forEach { it.delete() }
             else created.filter { it.extension == "part" }.forEach { it.delete() }
+            synchronized(tempLock) { inFlightPaths.removeAll(claimedTempPaths) }
         }
     }
 
