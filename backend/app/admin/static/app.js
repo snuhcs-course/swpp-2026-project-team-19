@@ -1,0 +1,1000 @@
+// Operator dashboard for owner applications (API spec 3.11.4, 3.11.6-3.11.8, 3.11.13).
+// Data from the API is always put on the page as text (textContent), never as HTML.
+"use strict";
+
+const config = window.BOTTLEMAP_ADMIN_CONFIG || {};
+const PAGE_SIZE = 20;
+const DEFAULT_FILTERS = { status: "pending", applicationType: "", verificationResult: "" };
+
+const LABELS = {
+  status: { pending: "대기", approved: "승인됨", rejected: "거절됨", canceled: "취소됨" },
+  applicationType: { existing_bar: "기존 업장", new_bar: "새 업장" },
+  verification: { matched: "일치", not_matched: "불일치", unavailable: "확인 못 함" },
+  businessStatus: { active: "계속사업자", suspended: "휴업자", closed: "폐업자" },
+};
+
+const FIELD_ERROR_TEXT = {
+  MISSING: "필수 항목입니다.",
+  STRING_TOO_SHORT: "비어 있을 수 없습니다.",
+  BLANK: "비어 있을 수 없습니다.",
+  STRING_TOO_LONG: "너무 깁니다.",
+  GREATER_THAN_EQUAL: "허용 범위보다 작습니다.",
+  LESS_THAN_EQUAL: "허용 범위보다 큽니다.",
+  FLOAT_PARSING: "숫자를 입력하세요.",
+  FLOAT_TYPE: "숫자를 입력하세요.",
+  EXTRA_FORBIDDEN: "보낼 수 없는 항목입니다.",
+};
+
+const supabaseClient =
+  config.supabaseUrl && config.supabasePublishableKey && window.supabase
+    ? window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey, {
+        auth: { flowType: "pkce", persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+      })
+    : null;
+
+const state = {
+  filters: { ...DEFAULT_FILTERS },
+  items: [],
+  nextCursor: null,
+  listRequest: 0,
+  listLoading: false,
+  selectedId: null,
+  detail: null,
+  detailRequest: 0,
+  photosRefreshed: false,
+  barDraft: null,
+  busy: false,
+  notice: null,
+};
+
+// ---------- small DOM helpers ----------
+
+const $ = (id) => document.getElementById(id);
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (value === null || value === undefined || value === false) continue;
+    if (key === "class") node.className = value;
+    else if (key.startsWith("on")) node.addEventListener(key.slice(2), value);
+    else node.setAttribute(key, value === true ? "" : value);
+  }
+  for (const child of children.flat()) {
+    if (child === null || child === undefined || child === false) continue;
+    node.append(child instanceof Node ? child : String(child));
+  }
+  return node;
+}
+
+function showView(name) {
+  for (const view of ["loading", "login", "message", "dashboard"]) {
+    $(`view-${view}`).hidden = view !== name;
+  }
+}
+
+function showMessage(text, retry) {
+  $("message-text").textContent = text;
+  const button = $("message-retry");
+  button.hidden = !retry;
+  button.onclick = retry || null;
+  showView("message");
+}
+
+const seoulTime = new Intl.DateTimeFormat("ko-KR", {
+  timeZone: "Asia/Seoul",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+function formatTime(value) {
+  return value ? seoulTime.format(new Date(value)) : "-";
+}
+
+function formatBusinessNumber(value) {
+  return /^\d{10}$/.test(value || "") ? `${value.slice(0, 3)}-${value.slice(3, 5)}-${value.slice(5)}` : value || "-";
+}
+
+function label(group, value) {
+  return value ? LABELS[group][value] || value : "-";
+}
+
+function badge(group, value) {
+  return el("span", { class: `badge ${value || ""}` }, label(group, value));
+}
+
+function barOf(application) {
+  return application.bar || application.proposedBar || { name: "-", address: "-" };
+}
+
+// ---------- API ----------
+
+class ApiError extends Error {
+  constructor(status, body) {
+    const error = (body && body.error) || {};
+    super(error.message || `요청이 실패했습니다 (HTTP ${status}).`);
+    this.status = status;
+    this.code = error.code || (status === 0 ? "NETWORK_ERROR" : "HTTP_ERROR");
+    this.details = error.details || null;
+    this.fieldErrors = error.fieldErrors || [];
+  }
+}
+
+async function accessToken() {
+  if (!supabaseClient) return null;
+  const { data } = await supabaseClient.auth.getSession();
+  return data.session ? data.session.access_token : null;
+}
+
+// Concurrent 401s share one refresh (spec 3.1.5).
+let refreshing = null;
+function refreshSession() {
+  if (!supabaseClient) return Promise.resolve(false);
+  if (!refreshing) {
+    refreshing = supabaseClient.auth
+      .refreshSession()
+      .then(({ data, error }) => !error && Boolean(data.session))
+      .catch(() => false)
+      .finally(() => {
+        refreshing = null;
+      });
+  }
+  return refreshing;
+}
+
+async function api(method, path, body, retried = false) {
+  const token = await accessToken();
+  const headers = { Accept: "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+
+  let response;
+  try {
+    response = await fetch(path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  } catch {
+    throw new ApiError(0, { error: { message: "서버에 연결하지 못했습니다. 네트워크를 확인해 주세요." } });
+  }
+  const data = await response.json().catch(() => null);
+  if (response.ok) return data;
+
+  if (response.status === 401) {
+    if (!retried && (await refreshSession())) return api(method, path, body, true);
+    await signOut();
+    showLogin("로그인이 만료되었습니다. 다시 로그인해 주세요.");
+  }
+  throw new ApiError(response.status, data);
+}
+
+// Approve and reject record the operator, who needs a users row; GET /api/me creates it (3.11.7).
+async function withUsersRow(call) {
+  try {
+    return await call();
+  } catch (error) {
+    if (error.code !== "USER_NOT_FOUND") throw error;
+    await api("GET", "/api/me");
+    return call();
+  }
+}
+
+// ---------- sign-in ----------
+
+function showLogin(message) {
+  $("account").hidden = true;
+  const text = $("login-message");
+  text.textContent = message || "";
+  text.hidden = !message;
+  $("login-google").disabled = !supabaseClient;
+  if (!supabaseClient && !message) {
+    text.textContent = "서버에 Google 로그인 설정(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)이 없습니다.";
+    text.hidden = false;
+  }
+  showView("login");
+}
+
+async function signOut() {
+  clearDashboard();
+  if (supabaseClient) {
+    // Drop the stored session even if Supabase cannot be reached (spec 3.1.2).
+    await supabaseClient.auth.signOut({ scope: "local" }).catch(() => {});
+  }
+}
+
+// Applications hold applicant data and signed photo URLs, so nothing of them stays after sign-out.
+// Bumping the request counters drops responses still in flight.
+function clearDashboard() {
+  state.listRequest++;
+  state.detailRequest++;
+  state.listLoading = false;
+  state.filters = { ...DEFAULT_FILTERS };
+  state.items = [];
+  state.nextCursor = null;
+  state.photosRefreshed = false;
+  state.barDraft = null;
+  state.notice = null;
+  writeFilters();
+  setListStatus("");
+  $("load-more").hidden = true;
+  closeDetail();
+}
+
+async function loginWithGoogle() {
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${location.origin}/admin/` },
+  });
+  if (error) showLogin("Google 로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+}
+
+async function start() {
+  showView("loading");
+  const token = await accessToken();
+  // supabase-js has exchanged the OAuth code in the URL by now; keep it out of the address bar.
+  if (new URLSearchParams(location.search).has("code")) history.replaceState(null, "", location.pathname);
+  if (!token) {
+    showLogin();
+    return;
+  }
+  let me;
+  try {
+    me = await api("GET", "/api/me");
+  } catch (error) {
+    if (error.status === 401) return; // api() already showed the login screen
+    // 503 SERVICE_UNAVAILABLE keeps the session (spec 3.1.5).
+    showMessage(error.message, start);
+    return;
+  }
+  $("account-email").textContent = me.email || me.displayName || "";
+  $("account").hidden = false;
+  if (me.userType !== "operator") {
+    showMessage("operator 권한이 없는 계정입니다. 운영자 계정으로 다시 로그인하세요.");
+    return;
+  }
+  showView("dashboard");
+  loadList(true);
+}
+
+// ---------- list (3.11.6) ----------
+
+function listQuery() {
+  const params = new URLSearchParams({ status: state.filters.status, limit: String(PAGE_SIZE) });
+  if (state.filters.applicationType) params.set("applicationType", state.filters.applicationType);
+  if (state.filters.verificationResult) params.set("verificationResult", state.filters.verificationResult);
+  if (state.nextCursor) params.set("cursor", state.nextCursor);
+  return params;
+}
+
+function setListStatus(text, retry) {
+  $("list-status").textContent = text;
+  $("list-retry").hidden = !retry;
+  $("list-retry").onclick = retry || null;
+}
+
+async function loadList(reset) {
+  if (reset) {
+    state.items = [];
+    state.nextCursor = null;
+    renderRows();
+  }
+  const request = ++state.listRequest;
+  state.listLoading = true;
+  $("load-more").hidden = true;
+  setListStatus("불러오는 중...");
+  try {
+    const page = await api("GET", `/api/owner-applications?${listQuery()}`);
+    if (request !== state.listRequest) return;
+    state.listLoading = false;
+    state.items = state.items.concat(page.items);
+    state.nextCursor = page.nextCursor;
+    renderRows();
+    showListSummary();
+  } catch (error) {
+    if (request !== state.listRequest) return;
+    state.listLoading = false;
+    if (error.status === 401) return;
+    const filtered = state.nextCursor || JSON.stringify(state.filters) !== JSON.stringify(DEFAULT_FILTERS);
+    if (error.code === "VALIDATION_FAILED" && filtered) {
+      // A filter or cursor the server does not accept: start over from the defaults (3.11.6).
+      state.filters = { ...DEFAULT_FILTERS };
+      writeFilters();
+      loadList(true);
+      return;
+    }
+    if (error.code === "FORBIDDEN") {
+      showMessage("operator 권한이 없는 계정입니다.");
+      return;
+    }
+    setListStatus(error.message, () => loadList(false));
+  }
+}
+
+function showListSummary() {
+  setListStatus(
+    state.items.length
+      ? `${state.items.length}건${state.nextCursor ? " (더 있음)" : ""}`
+      : state.nextCursor
+        ? "이 페이지의 신청을 모두 처리했습니다."
+        : "조건에 맞는 신청이 없습니다.",
+  );
+  $("load-more").hidden = !state.nextCursor;
+}
+
+// Whether the list's current filters still select the application (applicationType never changes).
+function matchesFilters(application) {
+  const { status, verificationResult } = state.filters;
+  const result = application.businessVerification ? application.businessVerification.result : null;
+  return (status === "all" || application.status === status) && (!verificationResult || result === verificationResult);
+}
+
+function writeFilters() {
+  const form = $("filters");
+  for (const [name, value] of Object.entries(state.filters)) form.elements[name].value = value;
+}
+
+function renderRows() {
+  const rows = state.items.map((item) => {
+    const row = el(
+      "tr",
+      {
+        tabindex: "0",
+        class: item.applicationId === state.selectedId ? "selected" : null,
+        onclick: () => selectApplication(item.applicationId),
+        onkeydown: (event) => {
+          if (event.key === "Enter") selectApplication(item.applicationId);
+        },
+      },
+      el("td", {}, formatTime(item.createdAt)),
+      el("td", {}, label("applicationType", item.applicationType)),
+      el("td", {}, barOf(item).name),
+      el("td", {}, item.applicant.displayName || item.applicant.email || "-"),
+      el("td", {}, badge("status", item.status)),
+      el("td", {}, item.businessVerification ? badge("verification", item.businessVerification.result) : "-"),
+      el("td", {}, String(item.menuPhotos.length)),
+    );
+    return row;
+  });
+  $("rows").replaceChildren(...rows);
+}
+
+// Puts a fresh copy of an application in the list, or drops it once it no longer matches the filters
+// (approved or rejected under "pending", or rechecked out of a verification filter). The cursor is
+// keyed on the last row the server returned, so dropping rows here skips nothing on the next page.
+function replaceListItem(application) {
+  const index = state.items.findIndex((item) => item.applicationId === application.applicationId);
+  if (index < 0) return;
+  if (matchesFilters(application)) state.items[index] = application;
+  else state.items.splice(index, 1);
+  renderRows();
+  // A load in flight shows its own status when it finishes.
+  if (!state.listLoading) showListSummary();
+}
+
+// ---------- detail (3.11.4) ----------
+
+// Another application cannot be opened while an action runs, so its result never lands on the wrong one.
+function selectApplication(applicationId) {
+  if (!state.busy) openDetail(applicationId);
+}
+
+async function openDetail(applicationId, notice = null) {
+  if (state.selectedId !== applicationId) state.photosRefreshed = false;
+  state.selectedId = applicationId;
+  state.notice = notice;
+  renderRows();
+  const request = ++state.detailRequest;
+  if (!state.detail || state.detail.applicationId !== applicationId) {
+    $("detail").replaceChildren(el("p", { class: "placeholder" }, "불러오는 중..."));
+  }
+  try {
+    const application = await api("GET", `/api/owner-applications/${encodeURIComponent(applicationId)}`);
+    if (request !== state.detailRequest) return;
+    state.detail = application;
+    replaceListItem(application);
+    renderDetail();
+  } catch (error) {
+    if (request !== state.detailRequest || error.status === 401) return;
+    if (error.code === "OWNER_APPLICATION_NOT_FOUND") {
+      closeDetail("신청을 찾을 수 없습니다. 목록을 다시 불러옵니다.");
+      loadList(true);
+      return;
+    }
+    $("detail").replaceChildren(
+      el("p", { class: "notice error" }, error.message),
+      el("button", { type: "button", onclick: () => openDetail(applicationId) }, "다시 시도"),
+    );
+  }
+}
+
+function closeDetail(message) {
+  state.selectedId = null;
+  state.detail = null;
+  renderRows();
+  $("detail").replaceChildren(el("p", { class: "placeholder" }, message || "목록에서 신청을 고르세요."));
+}
+
+function fields(pairs) {
+  return el("dl", { class: "fields" }, pairs.flatMap(([name, value]) => [el("dt", {}, name), el("dd", {}, value ?? "-")]));
+}
+
+function mapSearchLink(address) {
+  return el(
+    "a",
+    { href: `https://map.kakao.com/?q=${encodeURIComponent(address)}`, target: "_blank", rel: "noopener noreferrer" },
+    "카카오맵에서 주소 확인",
+  );
+}
+
+function renderDetail() {
+  const app = state.detail;
+  if (!app) return;
+  const verification = app.businessVerification;
+  const bar = barOf(app);
+  const pending = app.status === "pending";
+
+  const children = [
+    el("h2", {}, bar.name),
+    el("div", { class: "action-row" }, badge("status", app.status), label("applicationType", app.applicationType)),
+  ];
+  if (state.notice) children.push(el("p", { class: `notice ${state.notice.kind}` }, state.notice.text));
+
+  children.push(el("h3", {}, "신청 정보"));
+  children.push(
+    fields([
+      ["신청자", [app.applicant.displayName, app.applicant.email].filter(Boolean).join(" / ") || "-"],
+      ["연락처", app.contactPhone],
+      ["메모", app.applicantNote],
+      ["신청 시각", formatTime(app.createdAt)],
+      ["처리 시각", formatTime(app.reviewedAt)],
+      ...(app.rejectionReason ? [["거절 사유", app.rejectionReason]] : []),
+    ]),
+  );
+
+  children.push(el("h3", {}, app.bar ? "업장" : "신청한 새 업장"));
+  children.push(
+    fields([
+      ["이름", bar.name],
+      ["주소", el("span", {}, bar.address, " ", mapSearchLink(bar.address))],
+      ...(app.proposedBar ? [["전화", app.proposedBar.phone]] : []),
+    ]),
+  );
+
+  children.push(el("h3", {}, "사업자등록 검증"));
+  children.push(
+    fields([
+      ["사업자등록번호", formatBusinessNumber(app.businessRegistrationNumber)],
+      ["대표자명", app.representativeName],
+      ["개업일자", app.openingDate],
+      ["검증 결과", verification ? badge("verification", verification.result) : "-"],
+      ["검증 시각", verification ? formatTime(verification.checkedAt) : "-"],
+      ["사업자 상태", label("businessStatus", app.businessStatus)],
+    ]),
+  );
+
+  children.push(el("h3", {}, `메뉴판 사진 (${app.menuPhotos.length})`));
+  children.push(renderPhotos(app));
+
+  if (pending) {
+    children.push(el("h3", {}, "처리"));
+    children.push(renderActions(app));
+  }
+  $("detail").replaceChildren(...children);
+}
+
+function renderPhotos(app) {
+  if (!app.menuPhotos.length) return el("p", { class: "placeholder" }, "올린 사진이 없습니다.");
+  return el(
+    "div",
+    { class: "photos" },
+    app.menuPhotos.map((photo) =>
+      el(
+        "a",
+        { href: photo.imageUrl, target: "_blank", rel: "noopener noreferrer" },
+        el("img", {
+          src: photo.imageUrl,
+          alt: `메뉴판 사진 ${photo.imageOrder}`,
+          loading: "lazy",
+          // A signed URL may have expired; the detail API hands out fresh ones (3.11.1). Once per opening.
+          onerror: () => {
+            // A photo of an application the operator has already left must not bring it back.
+            if (state.photosRefreshed || state.selectedId !== app.applicationId) return;
+            state.photosRefreshed = true;
+            openDetail(app.applicationId, state.notice);
+          },
+        }),
+      ),
+    ),
+  );
+}
+
+// ---------- actions (3.11.7, 3.11.8, 3.11.13) ----------
+
+function renderActions(app) {
+  const result = app.businessVerification ? app.businessVerification.result : null;
+  const box = el("div", { class: "actions" });
+
+  if (result === "unavailable") {
+    box.append(
+      el(
+        "p",
+        { class: "notice warn" },
+        "국세청 검증을 하지 못한 신청입니다. 승인하기 전에 먼저 사업자등록 정보를 다시 확인하세요.",
+      ),
+    );
+  } else if (result === "not_matched") {
+    box.append(el("p", { class: "notice error" }, "사업자등록 정보가 국세청 정보와 맞지 않습니다. 거절을 검토하세요."));
+  }
+
+  box.append(
+    el(
+      "div",
+      { class: "action-row" },
+      el(
+        "button",
+        { type: "button", class: result === "unavailable" ? null : "secondary", onclick: () => verifyBusiness(app) },
+        "사업자등록 정보 다시 확인",
+      ),
+    ),
+  );
+
+  box.append(app.applicationType === "new_bar" ? newBarApproveForm(app) : existingBarApproveRow(app));
+  box.append(rejectForm(app));
+  return box;
+}
+
+function existingBarApproveRow(app) {
+  return el(
+    "div",
+    { class: "action-row" },
+    el("button", { type: "button", onclick: () => approve(app, {}) }, "승인"),
+    el("span", { class: "hint" }, "승인하면 신청자가 이 업장의 업주가 됩니다."),
+  );
+}
+
+const BAR_FIELDS = [
+  ["name", "이름"],
+  ["address", "주소"],
+  ["latitude", "위도"],
+  ["longitude", "경도"],
+  ["phone", "전화"],
+];
+
+function newBarApproveForm(app) {
+  // What the operator typed survives a re-render of the detail (a notice, a failed approval).
+  const draft = state.barDraft && state.barDraft.applicationId === app.applicationId ? state.barDraft.values : {};
+  const proposed = app.proposedBar || {};
+  const form = el("form", { class: "form-grid", novalidate: true });
+  for (const [name, text] of BAR_FIELDS) {
+    const input = el("input", {
+      name,
+      type: "text",
+      value: draft[name] ?? proposed[name] ?? "",
+      inputmode: name === "latitude" || name === "longitude" ? "decimal" : null,
+      placeholder: name === "latitude" ? "37.484102" : name === "longitude" ? "126.929815" : null,
+    });
+    form.append(el("label", {}, text), input, el("div", { class: "field-error", "data-for": name, hidden: true }));
+    if (name === "address") form.append(el("span"), geocodeRow(form));
+  }
+  const saveDraft = () => {
+    const values = {};
+    for (const [name] of BAR_FIELDS) values[name] = form.elements[name].value;
+    state.barDraft = { applicationId: app.applicationId, values };
+  };
+  form.addEventListener("input", saveDraft);
+  // Pasting "37.48, 126.92" copied from a map fills both coordinates.
+  form.elements.latitude.addEventListener("paste", (event) => {
+    const text = (event.clipboardData || window.clipboardData).getData("text");
+    const match = text.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if (!match) return;
+    event.preventDefault();
+    setCoordinates(form, Number(match[1]), Number(match[2]));
+  });
+  const map = el("div", { class: "map", hidden: true });
+  form.append(
+    el("span"),
+    el(
+      "div",
+      { class: "map-box" },
+      map,
+      el("span", { class: "hint", "data-role": "map-hint" }, "주소로 좌표를 찾은 뒤 지도에서 위치가 맞는지 확인하세요."),
+    ),
+    el("span"),
+    el("div", { class: "action-row" }, el("button", { type: "submit" }, "확인한 정보로 승인")),
+  );
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const bar = readBarForm(form);
+    if (bar) approve(app, { bar }, form);
+  });
+  setUpMap(form, map);
+  return form;
+}
+
+function geocodeRow(form) {
+  return el(
+    "div",
+    { class: "geocode" },
+    el("div", { class: "action-row" },
+      el("button", { type: "button", class: "secondary", "data-role": "geocode", onclick: () => findCoordinates(form) }, "주소로 좌표 찾기"),
+      el("span", { class: "hint", "data-role": "geocode-status" }),
+    ),
+    el("div", { class: "candidates", "data-role": "candidates", hidden: true }),
+  );
+}
+
+// ---------- Kakao map and address search (new_bar approval) ----------
+// The Kakao Maps JavaScript SDK runs in the browser with the public JavaScript key, which works only
+// on the domains registered in Kakao Developers; the API is not involved.
+
+const KAKAO_SDK_URL = "https://dapi.kakao.com/v2/maps/sdk.js";
+const SEOUL_CITY_HALL = [37.566826, 126.978656];
+let kakaoLoading = null;
+
+function loadKakao() {
+  if (!config.kakaoJavascriptKey) {
+    return Promise.reject(new Error("서버에 카카오 지도 설정(KAKAO_JAVASCRIPT_KEY)이 없어 좌표를 직접 입력해야 합니다."));
+  }
+  if (!kakaoLoading) {
+    kakaoLoading = new Promise((resolve, reject) => {
+      const failed = () => reject(new Error("카카오 지도를 불러오지 못했습니다. 키와 Kakao Developers의 Web 도메인 등록을 확인하세요."));
+      const script = document.createElement("script");
+      script.src = `${KAKAO_SDK_URL}?appkey=${encodeURIComponent(config.kakaoJavascriptKey)}&libraries=services&autoload=false`;
+      script.onerror = failed;
+      script.onload = () => {
+        if (!window.kakao || !window.kakao.maps) return failed();
+        const timer = setTimeout(failed, 10000);
+        window.kakao.maps.load(() => {
+          clearTimeout(timer);
+          resolve(window.kakao);
+        });
+      };
+      document.head.append(script);
+    }).catch((error) => {
+      kakaoLoading = null; // the next try loads again
+      throw error;
+    });
+  }
+  return kakaoLoading;
+}
+
+const formMaps = new WeakMap();
+
+async function setUpMap(form, container) {
+  let kakao;
+  try {
+    kakao = await loadKakao();
+  } catch (error) {
+    const button = form.querySelector('[data-role="geocode"]');
+    if (button) button.disabled = true;
+    setGeocodeStatus(form, error.message, true);
+    return;
+  }
+  // The form may have been replaced while the SDK loaded.
+  if (!form.isConnected) return;
+  container.hidden = false;
+  const current = readCoordinates(form);
+  const center = new kakao.maps.LatLng(...(current || SEOUL_CITY_HALL));
+  const map = new kakao.maps.Map(container, { center, level: current ? 3 : 8 });
+  const marker = new kakao.maps.Marker({ position: center, draggable: true });
+  if (current) marker.setMap(map);
+  const moved = (latLng) => setCoordinates(form, latLng.getLat(), latLng.getLng(), { pan: false });
+  kakao.maps.event.addListener(map, "click", (event) => moved(event.latLng));
+  kakao.maps.event.addListener(marker, "dragend", () => moved(marker.getPosition()));
+  formMaps.set(form, { kakao, map, marker });
+  form.querySelector('[data-role="map-hint"]').textContent =
+    "마커가 실제 매장 위치인지 확인하세요. 지도를 누르거나 마커를 끌면 좌표가 바뀝니다.";
+  // Typed coordinates move the marker.
+  for (const name of ["latitude", "longitude"]) {
+    form.elements[name].addEventListener("change", () => {
+      const typed = readCoordinates(form);
+      if (typed) placeMarker(form, typed[0], typed[1], { pan: true });
+    });
+  }
+}
+
+function readCoordinates(form) {
+  const latitude = Number(form.elements.latitude.value.trim());
+  const longitude = Number(form.elements.longitude.value.trim());
+  const valid = form.elements.latitude.value.trim() && form.elements.longitude.value.trim() &&
+    Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180;
+  return valid ? [latitude, longitude] : null;
+}
+
+// The API stores 6 decimal places (spec 3.5).
+function setCoordinates(form, latitude, longitude, { pan = true } = {}) {
+  form.elements.latitude.value = latitude.toFixed(6);
+  form.elements.longitude.value = longitude.toFixed(6);
+  form.dispatchEvent(new Event("input")); // keeps the draft
+  showFieldErrors(form, {});
+  placeMarker(form, latitude, longitude, { pan });
+}
+
+function placeMarker(form, latitude, longitude, { pan }) {
+  const view = formMaps.get(form);
+  if (!view) return;
+  const position = new view.kakao.maps.LatLng(latitude, longitude);
+  view.marker.setPosition(position);
+  view.marker.setMap(view.map);
+  if (pan) {
+    view.map.setLevel(3);
+    view.map.setCenter(position);
+  }
+}
+
+function setGeocodeStatus(form, text, isError = false) {
+  const node = form.querySelector('[data-role="geocode-status"]');
+  node.textContent = text;
+  node.classList.toggle("error-text", isError);
+}
+
+// Floors and units ("3층", "201호", "B1", "(신림동)") are part of a display address (spec 3.5) but
+// make the address search miss, so a second try drops them from the end.
+function withoutUnit(address) {
+  const tokens = address.replace(/\([^)]*\)/g, " ").replace(/,/g, " ").trim().split(/\s+/);
+  // A bare number is the building number ("신림로 2") and stays; a floor or unit carries a suffix.
+  const unit = /^(지하)?\d+([~-]\d+)?(층|호|F|동)$|^B\d+(층|F)?$|^지하$|^지상$/i;
+  while (tokens.length > 2 && unit.test(tokens[tokens.length - 1])) tokens.pop();
+  return tokens.join(" ");
+}
+
+function addressSearch(kakao, query) {
+  return new Promise((resolve, reject) => {
+    new kakao.maps.services.Geocoder().addressSearch(query, (result, status) => {
+      if (status === kakao.maps.services.Status.OK) resolve(result);
+      else if (status === kakao.maps.services.Status.ZERO_RESULT) resolve([]);
+      // The SDK and map load on any domain, but the search answers 401 (status not OK) unless this
+      // origin is a registered Web domain, e.g. http://127.0.0.1:8000 when only localhost is registered.
+      else {
+        reject(
+          new Error(
+            `주소 검색에 실패했습니다. 지금 주소(${location.origin})가 Kakao Developers의 Web 도메인에 등록되어 있는지 확인하고, 등록되어 있으면 잠시 후 다시 시도하세요.`,
+          ),
+        );
+      }
+    });
+  });
+}
+
+async function findCoordinates(form) {
+  const address = form.elements.address.value.trim();
+  const candidates = form.querySelector('[data-role="candidates"]');
+  candidates.hidden = true;
+  candidates.replaceChildren();
+  if (!address) {
+    showFieldErrors(form, { address: FIELD_ERROR_TEXT.MISSING });
+    return;
+  }
+  const button = form.querySelector('[data-role="geocode"]');
+  button.disabled = true;
+  setGeocodeStatus(form, "찾는 중...");
+  try {
+    const kakao = await loadKakao();
+    let results = await addressSearch(kakao, address);
+    const shorter = withoutUnit(address);
+    if (!results.length && shorter !== address) results = await addressSearch(kakao, shorter);
+    if (!results.length) {
+      setGeocodeStatus(
+        form,
+        readCoordinates(form)
+          ? "주소로 위치를 찾지 못해 좌표는 그대로 두었습니다. 주소를 고치거나 지도를 눌러 위치를 정하세요."
+          : "주소로 위치를 찾지 못했습니다. 주소를 고치거나 지도를 눌러 위치를 정하세요.",
+        true,
+      );
+    } else if (results.length === 1) {
+      useResult(form, results[0]);
+    } else {
+      setGeocodeStatus(form, `${results.length}곳이 나왔습니다. 맞는 주소를 고르세요.`);
+      candidates.replaceChildren(
+        ...results.slice(0, 10).map((result) =>
+          el("button", { type: "button", class: "candidate", onclick: () => useResult(form, result) }, resultLabel(result)),
+        ),
+      );
+      candidates.hidden = false;
+    }
+  } catch (error) {
+    setGeocodeStatus(form, error.message, true);
+  } finally {
+    button.disabled = !config.kakaoJavascriptKey;
+  }
+}
+
+function resultLabel(result) {
+  const road = result.road_address && result.road_address.address_name;
+  const lot = result.address && result.address.address_name;
+  if (road && lot && road !== lot) return `${road} (지번 ${lot})`;
+  return road || lot || result.address_name;
+}
+
+function useResult(form, result) {
+  const candidates = form.querySelector('[data-role="candidates"]');
+  candidates.hidden = true;
+  candidates.replaceChildren();
+  // Kakao gives x as the longitude and y as the latitude.
+  setCoordinates(form, Number(result.y), Number(result.x));
+  setGeocodeStatus(form, `좌표를 채웠습니다: ${resultLabel(result)}. 지도에서 위치를 확인하세요.`);
+}
+
+function showFieldErrors(form, errors) {
+  for (const node of form.querySelectorAll(".field-error")) {
+    const message = errors[node.dataset.for];
+    node.textContent = message || "";
+    node.hidden = !message;
+  }
+}
+
+function readBarForm(form) {
+  const value = (name) => form.elements[name].value.trim();
+  const errors = {};
+  if (!value("name")) errors.name = FIELD_ERROR_TEXT.MISSING;
+  else if (value("name").length > 150) errors.name = "150자 이하로 입력하세요.";
+  if (!value("address")) errors.address = FIELD_ERROR_TEXT.MISSING;
+  else if (value("address").length > 500) errors.address = "500자 이하로 입력하세요.";
+  if (value("phone").length > 30) errors.phone = "30자 이하로 입력하세요.";
+  const coordinate = (name, limit) => {
+    const raw = value(name);
+    const number = Number(raw);
+    if (!raw) errors[name] = FIELD_ERROR_TEXT.MISSING;
+    else if (!Number.isFinite(number)) errors[name] = FIELD_ERROR_TEXT.FLOAT_PARSING;
+    else if (Math.abs(number) > limit) errors[name] = `-${limit}~${limit} 사이여야 합니다.`;
+    return number;
+  };
+  const latitude = coordinate("latitude", 90);
+  const longitude = coordinate("longitude", 180);
+  showFieldErrors(form, errors);
+  if (Object.keys(errors).length) return null;
+  return { name: value("name"), address: value("address"), latitude, longitude, phone: value("phone") || null };
+}
+
+function rejectForm(app) {
+  const reason = el("textarea", { name: "reason", maxlength: "500", placeholder: "신청자에게 그대로 보입니다." });
+  const error = el("div", { class: "message error", hidden: true });
+  const form = el(
+    "form",
+    { class: "actions", novalidate: true },
+    el("label", {}, "거절 사유"),
+    reason,
+    error,
+    el("div", { class: "action-row" }, el("button", { type: "submit", class: "danger" }, "거절")),
+  );
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const text = reason.value.trim();
+    error.hidden = Boolean(text) && text.length <= 500;
+    error.textContent = text ? "500자 이하로 입력하세요." : "거절 사유를 입력하세요.";
+    if (error.hidden) reject(app, text);
+  });
+  return form;
+}
+
+function confirmApproval(app) {
+  const result = app.businessVerification ? app.businessVerification.result : null;
+  const lines = [`${barOf(app).name} 신청을 승인할까요?`];
+  if (result === "unavailable") lines.push("", "국세청 검증을 하지 못한 신청입니다. 다시 확인하지 않고 승인합니다.");
+  if (result === "not_matched") lines.push("", "사업자등록 정보가 국세청 정보와 맞지 않는 신청입니다.");
+  if (app.businessStatus && app.businessStatus !== "active") {
+    lines.push("", `사업자 상태가 ${label("businessStatus", app.businessStatus)}입니다.`);
+  }
+  return window.confirm(lines.join("\n"));
+}
+
+// Runs one action on the open application with the buttons disabled, then shows the result.
+async function runAction(app, call, successText, onError) {
+  if (state.busy) return;
+  state.busy = true;
+  $("rows").classList.add("busy");
+  setListControlsDisabled(true);
+  for (const button of $("detail").querySelectorAll("button")) button.disabled = true;
+  // The detail may have changed meanwhile (sign-out), so the result goes only on the same application.
+  const stillOpen = () => state.selectedId === app.applicationId;
+  try {
+    const updated = await call();
+    // A list request still in flight may have read the application before this change; load again.
+    if (state.listLoading) loadList(true);
+    else replaceListItem(updated);
+    if (!stillOpen()) return;
+    state.detail = updated;
+    state.notice = { kind: "ok", text: successText(updated) };
+    renderDetail();
+  } catch (error) {
+    if (error.status === 401 || !stillOpen()) return;
+    if (onError && onError(error)) return;
+    handleActionError(app, error);
+  } finally {
+    state.busy = false;
+    $("rows").classList.remove("busy");
+    setListControlsDisabled(false);
+    for (const button of $("detail").querySelectorAll("button")) button.disabled = false;
+  }
+}
+
+// While an action runs, the list cannot be reloaded, so no list response can predate the action.
+function setListControlsDisabled(disabled) {
+  for (const control of $("filters").elements) control.disabled = disabled;
+  $("load-more").disabled = disabled;
+  $("list-retry").disabled = disabled;
+}
+
+function handleActionError(app, error) {
+  switch (error.code) {
+    case "INVALID_APPLICATION_STATE":
+      openDetail(app.applicationId, { kind: "error", text: "이미 처리된 신청입니다. 최신 상태를 불러왔습니다." });
+      loadList(true);
+      return;
+    case "OWNER_APPLICATION_NOT_FOUND":
+      closeDetail("신청을 찾을 수 없습니다. 목록을 다시 불러옵니다.");
+      loadList(true);
+      return;
+    case "BAR_OWNER_EXISTS":
+      setNotice("error", "이 업장에는 이미 업주가 있습니다. 같은 업장의 다른 신청이 먼저 승인되었으면 이 신청은 거절하세요.");
+      return;
+    case "BUSINESS_VERIFICATION_UNAVAILABLE":
+      setNotice("error", "국세청 검증 서비스에 연결하지 못했습니다. 저장된 결과는 그대로입니다. 잠시 후 다시 시도하세요.");
+      return;
+    case "FORBIDDEN":
+      showMessage("operator 권한이 없는 계정입니다.");
+      return;
+    default:
+      setNotice("error", error.message);
+  }
+}
+
+function setNotice(kind, text) {
+  state.notice = { kind, text };
+  renderDetail();
+}
+
+function verifyBusiness(app) {
+  runAction(
+    app,
+    () => api("POST", `/api/owner-applications/${encodeURIComponent(app.applicationId)}/verify-business`),
+    (updated) => `다시 확인했습니다: ${label("verification", updated.businessVerification && updated.businessVerification.result)}`,
+  );
+}
+
+function approve(app, body, form) {
+  if (!confirmApproval(app)) return;
+  runAction(
+    app,
+    () => withUsersRow(() => api("POST", `/api/owner-applications/${encodeURIComponent(app.applicationId)}/approve`, body)),
+    () =>
+      app.menuPhotos.length
+        ? "승인했습니다. 업장에 진행 중인 메뉴 등록이 없으면 메뉴판 사진으로 AI 분석을 시작합니다."
+        : "승인했습니다. 메뉴판 사진이 없으므로 업주가 승인 뒤 메뉴를 올립니다.",
+    (error) => {
+      if (error.code !== "VALIDATION_FAILED" || !form) return false;
+      const errors = {};
+      for (const fieldError of error.fieldErrors) {
+        const name = fieldError.path.replace(/^bar\.?/, "") || "name";
+        errors[name] = FIELD_ERROR_TEXT[fieldError.code] || fieldError.message;
+      }
+      showFieldErrors(form, errors);
+      return true;
+    },
+  );
+}
+
+function reject(app, reason) {
+  if (!window.confirm(`${barOf(app).name} 신청을 거절할까요? 메뉴판 사진은 삭제됩니다.`)) return;
+  runAction(
+    app,
+    () => withUsersRow(() => api("POST", `/api/owner-applications/${encodeURIComponent(app.applicationId)}/reject`, { reason })),
+    () => "거절했습니다.",
+  );
+}
+
+// ---------- wiring ----------
+
+$("login-google").addEventListener("click", loginWithGoogle);
+$("logout").addEventListener("click", async () => {
+  await signOut();
+  showLogin();
+});
+$("filters").addEventListener("change", (event) => {
+  state.filters[event.target.name] = event.target.value;
+  loadList(true);
+});
+$("refresh").addEventListener("click", () => loadList(true));
+$("load-more").addEventListener("click", () => loadList(false));
+
+start();

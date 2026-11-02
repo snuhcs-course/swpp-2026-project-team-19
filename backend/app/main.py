@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.admin import mount_admin
 from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
 from app.api.router import api_router
 from app.core.access_log import strip_location_from_access_log
@@ -72,3 +73,4 @@ strip_location_from_access_log()
 app = FastAPI(title="BottleMap API", version="0.1.0", lifespan=lifespan)
 register_error_handlers(app)
 app.include_router(api_router)
+mount_admin(app)
