@@ -184,7 +184,7 @@ fun OwnerOnboardingScreen(
         // Explicit local checkpoint outranks field-derived migration heuristics.
         // A newly launched process has an empty rememberSaveable history; rebuild it
         // so system Back and the header Back stay inside registration.
-        if(snapshot?.registrationDraft!=null &&
+        if(snapshot?.registrationDraft!=null && (bars.isEmpty() || startRegistration) &&
             (screen==RegPage.HOME || (startRegistration && screen==RegPage.INTRO))){
             val target=registrationResumePage(draft)
             screen=RegPage.valueOf(target)
