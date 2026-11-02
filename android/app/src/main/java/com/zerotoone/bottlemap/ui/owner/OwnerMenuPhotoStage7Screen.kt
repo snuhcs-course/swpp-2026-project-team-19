@@ -3,12 +3,9 @@ package com.zerotoone.bottlemap.ui.owner
 import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
-import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.owner.MockExtractedLine
 import com.zerotoone.bottlemap.data.owner.MockLineKind
 import com.zerotoone.bottlemap.data.owner.MockMenuOption
-import com.zerotoone.bottlemap.data.owner.MockBrand
-import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,7 +16,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.EaseInOutSine
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -71,7 +67,6 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -550,78 +545,6 @@ internal fun OwnerMenuPhotoJobScreen(
     LaunchedEffect(job?.menuImportId,job?.status) {
         if(job?.status==MockImportStatus.READY_FOR_REVIEW) onReview()
     }
-    // A DEBUG-only long press on the failure heading opens the demonstrator.
-    // No developer UI distorts the pixel-perfect PDF failure screen.
-    val startMockDemo: () -> Unit = demo@{
-        if(!BuildConfig.DEBUG) return@demo
-        val failedJob=job ?: return@demo
-        if(failedJob.status != MockImportStatus.FAILED) return@demo
-
-                    runCatching {
-                        // Clearly labeled DEMO data: never inferred from selected image pixels.
-                        val brands = listOf(
-                            MockBrand("demo-brand-hakushu", "Suntory"),
-                            MockBrand("demo-brand-russells", "Russell's Reserve"),
-                            MockBrand("demo-brand-lagavulin", "Lagavulin"),
-                            MockBrand("demo-brand-bookers", "Booker's"),
-                            MockBrand("demo-brand-jack", "Jack Daniel's")
-                        )
-                        val products = listOf(
-                            MockCatalogProduct("demo-hakushu-dr", "demo-brand-hakushu",
-                                "Hakushu Distiller's Reserve"),
-                            MockCatalogProduct("demo-russell-single", "demo-brand-russells",
-                                "Russell's Reserve Single Barrel"),
-                            MockCatalogProduct("demo-russell-rye", "demo-brand-russells",
-                                "Russell's Reserve Single Barrel Rye"),
-                            MockCatalogProduct("demo-lagavulin-16", "demo-brand-lagavulin",
-                                "Lagavulin 16", ageYears = 16),
-                            MockCatalogProduct("demo-bookers", "demo-brand-bookers", "Booker's"),
-                            MockCatalogProduct("demo-jack-old", "demo-brand-jack", "Jack Daniel's Old No.7"),
-                            MockCatalogProduct("demo-jack-proof", "demo-brand-jack", "Jack Daniel's Single Barrel 100 Proof"),
-                            MockCatalogProduct("demo-jack-gentleman", "demo-brand-jack", "Jack Daniel's Gentleman Jack")
-                        )
-                        val existingSnapshot = photoBar(state)
-                        brands.filter { b ->
-                            existingSnapshot?.brands?.none { it.brandId == b.brandId } != false
-                        }.forEach(viewModel::saveBrand)
-                        products.filter { product ->
-                            existingSnapshot?.products?.none { it.productId == product.productId } != false
-                        }.forEach(viewModel::saveProduct)
-                        val examples = listOf(
-                            MockExtractedLine("demo-hakushu", "하쿠슈DR",
-                                MockLineKind.PRODUCT, suggestedProductId = "demo-hakushu-dr",
-                                options = listOf(MockMenuOption("demo-hakushu-glass",
-                                    label = "잔", pourMl = 30, priceKrw = 19000))),
-                            MockExtractedLine("demo-russell", "러셀 싱글배럴",
-                                MockLineKind.PRODUCT, candidateProductIds = listOf(
-                                    "demo-russell-single", "demo-russell-rye"),
-                                options = listOf(MockMenuOption("demo-russell-glass",
-                                    label = "잔", pourMl = 30, priceKrw = 15000))),
-                            MockExtractedLine("demo-signatory", "시그나토리 쿨일라13",
-                                MockLineKind.PRODUCT,
-                                options = listOf(MockMenuOption("demo-signatory-glass",
-                                    label = "잔", pourMl = 30, priceKrw = 20000))),
-                            MockExtractedLine("demo-bookers", "부커스",
-                                MockLineKind.PRODUCT, suggestedProductId = "demo-bookers",
-                                options = listOf(MockMenuOption("demo-bookers-glass",
-                                    label = "잔", pourMl = null, priceKrw = 0))),
-                            MockExtractedLine("demo-lagavulin", "라가불린 16년",
-                                MockLineKind.PRODUCT, suggestedProductId = "demo-lagavulin-16",
-                                options = listOf(MockMenuOption("demo-lagavulin-bottle",
-                                    label = "Bottle", priceKrw = 280000)),
-                                mockAutoAccepted = true)
-                        )
-                        val photoUris = failedJob.images.map { it.sourceUri }
-                        val demoResult = MockPhotoExtractionSource { uri ->
-                            val imageIndex = photoUris.indexOf(uri)
-                            if (imageIndex < 0) emptyList() else examples.filterIndexed { i, _ ->
-                                i % photoUris.size == imageIndex
-                            }
-                        }
-                        val newImportId = viewModel.retryFailedPhotoImport(failedJob.menuImportId)
-                        viewModel.finishPhotoImport(newImportId, demoResult)
-                    }.onFailure { error = it.message }
-    }
     // Do not draw an intermediary ready/canceled page even for one frame while
     // Navigation handles the transition to the actual review screen.
     if(job?.status==MockImportStatus.READY_FOR_REVIEW ||
@@ -688,11 +611,7 @@ internal fun OwnerMenuPhotoJobScreen(
                     else -> "진행 중인 작업이 없어요"
                 }, color = V4Color.text, fontWeight = FontWeight.Bold,
                     fontSize = if (job?.status == MockImportStatus.FAILED) 24.sp else 16.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = if (BuildConfig.DEBUG && job?.status == MockImportStatus.FAILED)
-                        Modifier.pointerInput(job.menuImportId) {
-                            detectTapGestures(onLongPress = { startMockDemo() })
-                        } else Modifier)
+                    textAlign = TextAlign.Center)
                 Text(when(job?.status) {
                     MockImportStatus.FAILED ->
                         "사진 분석을 완료하지 못했어요.\n메뉴판을 화면에 꽉 채우고, 흔들리지 않게 다시 찍어주세요."
