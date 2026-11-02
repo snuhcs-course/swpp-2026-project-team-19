@@ -234,7 +234,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             if(bar!=null && (pour.isBlank() || n!=null && n in 1..999)){
                                 vm.saveBar(bar.copy(defaultPourMl=n));error=null
                             }else error="1~999ml로 입력해 주세요."
-                        },shape=RoundedCornerShape(9.dp),colors=ButtonDefaults.outlinedButtonColors(
+                        },modifier=Modifier.height(32.dp).width(54.dp),
+                            contentPadding=PaddingValues(horizontal=5.dp,vertical=0.dp),
+                            shape=RoundedCornerShape(8.dp),colors=ButtonDefaults.outlinedButtonColors(
                             containerColor=V4Color.surface,contentColor=V4Color.primary),
                             border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line)) {
                             Text("저장",color=V4Color.primary)
@@ -266,15 +268,41 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT) &&
                         (if(screen=="existing")known else !known)
                 }
-                if(subset.isEmpty())Text("해당하는 메뉴가 없어요.",color=V4Color.sub)
+                if(subset.isEmpty() && screen=="existing") {
+                    Text("UI 검토용 예시 · 실제 등록 데이터가 아니에요.",
+                        color=V4Color.sub,fontSize=11.sp)
+                    val examples=listOf(
+                        Triple("Glenfiddich 12년","메뉴판 2 · 셋째 줄","메뉴판 16,000원 · 지금 14,000원"),
+                        Triple("Jack Daniel's Old No.7","메뉴판 1 · 둘째 줄","메뉴판 12,000원 · 지금 11,000원"),
+                        Triple("Macallan 12년 Double Cask","메뉴판 1 · 셋째 줄","22,000원"),
+                        Triple("Laphroaig 10년","메뉴판 1 · 넷째 줄","17,000원"),
+                        Triple("Buffalo Trace","메뉴판 2 · 여섯째 줄","13,000원"))
+                    examples.forEach { (name,detail,price) ->
+                        Column(Modifier.fillMaxWidth().padding(vertical=2.dp)) {
+                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
+                                Text(name,color=V4Color.text,fontSize=17.sp,
+                                    modifier=Modifier.weight(1f))
+                                Text(price,color=V4Color.sub,fontSize=11.sp)
+                            }
+                            Text(detail,color=V4Color.sub,fontSize=11.sp)
+                            HorizontalDivider(color=V4Color.line)
+                        }
+                    }
+                    St8Card {
+                        Text("✎  가격은 메뉴 직접 편집에서 바꿔요",
+                            color=V4Color.text,fontSize=12.sp)
+                        Text("확인한 다음, 뒤로 화면에서 바로 갈 수 있어요.",
+                            color=V4Color.sub,fontSize=10.sp)
+                    }
+                } else if(subset.isEmpty())Text("해당하는 메뉴가 없어요.",color=V4Color.sub)
                 subset.forEach{entry->
                     Column(Modifier.fillMaxWidth().clickable{
                         position=entry.index;screen="line"
-                    }.padding(vertical=10.dp)) {
+                    }.padding(vertical=2.dp)) {
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                             verticalAlignment=Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
-                                Text(entry.value.second.sourceText,color=V4Color.text,fontSize=15.sp)
+                                Text(entry.value.second.sourceText,color=V4Color.text,fontSize=17.sp)
                                 Text("메뉴판 "+entry.value.first.imageOrder+" · "+
                                     (if(screen=="existing")"기존 등록 메뉴" else "신규 등록 후보"),
                                     color=V4Color.sub,fontSize=12.sp)
