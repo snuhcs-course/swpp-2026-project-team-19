@@ -634,16 +634,11 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                 enabled=ids.size==1 || selectedProductId!=null) {
                                 val chosen=selectedProductId ?: ids.singleOrNull()
                                 if(chosen==null) {error="상품을 선택해 주세요."}
-                                else if(line.options.isEmpty() ||
-                                    line.options.any{it.priceKrw<=0 || it.pourMl!=null &&
-                                        it.pourMl !in 1..32767}) {
-                                    selectedProductId=chosen;screen="edit"
-                                } else runCatching {
-                                    vm.review(job.menuImportId,line.extractedItemId,
-                                        job.reviewVersion,MockReviewDecision(
-                                            MockDecisionKind.SELECT_PRODUCT,productId=chosen,
-                                            correctedOptions=line.decision?.correctedOptions?:line.options))
-                                }.onSuccess{error=null;next()}.onFailure{error=it.message}
+                                else {
+                                    // Confirm canonical candidate, then explicitly review editable options.
+                                    selectedProductId=chosen
+                                    screen="edit"
+                                }
                             }
                             St8Secondary("다른 메뉴예요") {choosingOther=true}
                         }
