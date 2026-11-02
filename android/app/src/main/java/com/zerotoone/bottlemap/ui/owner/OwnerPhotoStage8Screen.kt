@@ -402,28 +402,11 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 if(!choosingOther && candidates.isEmpty()) Text(
                     "일치하는 상품 후보가 없어요.",color=V4Color.sub,fontSize=13.sp)
-                if(choosingOther) {
-                    var term by rememberSaveable(line.extractedItemId) {mutableStateOf("")}
-                    St8Field("카탈로그에서 메뉴 찾기",term,{term=it})
-                    s.products.filter {it.isActive && term.isNotBlank() &&
-                        it.displayName.contains(term,ignoreCase=true)}.take(12).forEach{p->
-                        Row(Modifier.fillMaxWidth()
-                            .background(V4Color.surface,RoundedCornerShape(12.dp))
-                            .clickable {selectedProductId=p.productId;screen="edit"}
-                            .padding(14.dp),
-                            verticalAlignment=Alignment.CenterVertically) {
-                            St8Bottle()
-                            Text(p.displayName,color=V4Color.text,
-                                modifier=Modifier.padding(start=12.dp))
-                        }
+                if(candidates.size>1 || candidates.isEmpty())
+                    St8Secondary("⌕  목록에 없어요") {
+                        catalogQuery="잭다니엘"
+                        screen="catalog"
                     }
-                    St8Secondary("새 제품으로 등록") {screen="new"}
-                    St8Secondary("메뉴가 아니에요 · 제외") {
-                        runCatching {vm.review(job.menuImportId,line.extractedItemId,
-                            job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
-                            .onSuccess {error=null;next()}.onFailure {error=it.message}
-                    }
-                }
             } else if((screen=="edit" || screen=="new") && pair!=null) {
                 val line=pair.second
                 var categoryPicker by remember {mutableStateOf(false)}
@@ -685,33 +668,34 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 "auto","existing"->St8Button("요약으로") {screen="summary"}
                 "line"->{
-                    if(!choosingOther && pair!=null) {
+                    if(pair!=null) {
                         val line=pair.second
                         val ids=(listOfNotNull(line.suggestedProductId)+
                             line.candidateProductIds).distinct().filter { id ->
                             s.products.any {it.productId==id && it.isActive}
                         }
                         if(line.kind==MockLineKind.NON_PRODUCT) {
-                            St8Button("메뉴가 아니에요 · 제외") {
+                            St8Button("이번 검수에서 제외") {
                                 runCatching {vm.review(job.menuImportId,line.extractedItemId,
                                     job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
                                     .onSuccess {error=null;next()}.onFailure {error=it.message}
                             }
-                        } else {
-                            St8Button(if(ids.size>1)"선택한 메뉴로 확인" else "맞아요",
-                                enabled=ids.size==1 || selectedProductId!=null) {
-                                val chosen=selectedProductId ?: ids.singleOrNull()
-                                if(chosen==null) {error="상품을 선택해 주세요."}
-                                else {
-                                    // Confirm canonical candidate, then explicitly review editable options.
-                                    selectedProductId=chosen
-                                    screen="edit"
-                                }
+                        } else if(ids.size==1) {
+                            St8Button("맞아요") {
+                                val id=ids.single()
+                                if(line.options.isEmpty() || line.options.any {it.priceKrw<=0}) {
+                                    selectedProductId=id;screen="price"
+                                } else runCatching {vm.review(job.menuImportId,line.extractedItemId,
+                                    job.reviewVersion,MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                                        productId=id,correctedOptions=line.options))}
+                                    .onSuccess{error=null;next()}.onFailure{error=it.message}
                             }
-                            St8Secondary("다른 메뉴예요") {choosingOther=true}
+                            St8Secondary("다른 메뉴예요") {
+                                catalogQuery="잭다니엘";screen="catalog"
+                            }
                         }
                     }
-                    HorizontalDivider(color=V4Color.line,modifier=Modifier.padding(top=9.dp))
+                    HorizontalDivider(color=V4Color.line,modifier=Modifier.padding(top=4.dp))
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                         verticalAlignment=Alignment.CenterVertically) {
                         TextButton(onClick={
