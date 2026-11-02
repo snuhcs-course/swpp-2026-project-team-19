@@ -277,6 +277,7 @@ class LocalOwnerMockRepositoryTest {
         val second = repo(store)
         assertEquals(2, ready(second).imports.single().images.flatMap { it.lines }.count { it.decision != null })
         assertEquals(1, second.publishAddOnly(id, job.reviewVersion))
+        assertEquals(1,ready(second).imports.single().publishedAddedCount)
         val updated = ready(second)
         assertEquals(2, updated.menuItems.size)
         assertEquals(12000, updated.menuItems.first { it.productId == "product-12" }.options.single().priceKrw)
@@ -286,14 +287,45 @@ class LocalOwnerMockRepositoryTest {
         rejects { second.publishAddOnly(id, job.reviewVersion) }
     }
 
-    @Test fun unrecognisedPhotoHasNoInventedLinesAndEmptyPublishIsValid() {
-        val r = repo()
-        val id = r.startPhotoImport("fixture-bar", listOf("content://test/random"),
+    @Test fun unrecognisedPhotoFailsWithoutInventingExtractionOrPublishing() {
+        val r=repo()
+        val id=r.startPhotoImport("fixture-bar",listOf("content://test/random"),
             OwnerMockFixtures.imageFixtures(emptyMap()))
-        val job = ready(r).imports.single()
+        val job=ready(r).imports.single()
+        assertEquals(MockImportStatus.FAILED,job.status)
         assertTrue(job.images.single().lines.isEmpty())
-        assertEquals(0, r.publishAddOnly(id, job.reviewVersion))
-        assertTrue(r.preview("fixture-bar", 0)!!.visibleMenu.isEmpty())
+        rejects {r.publishAddOnly(id,job.reviewVersion)}
+        assertTrue(r.preview("fixture-bar",0)!!.visibleMenu.isEmpty())
+    }
+
+    @Test fun partiallyExtractedMultiPhotoImportIsFailedNotReadyForReview() {
+        val r=repo()
+        val id=r.startPhotoImport("fixture-bar",
+            listOf("content://fixture/first","content://fixture/missing"),
+            OwnerMockFixtures.imageFixtures(mapOf("content://fixture/first" to listOf(
+                MockExtractedLine("one","위스키12",MockLineKind.PRODUCT,
+                    options=listOf(serving("one-serving",30,19000)))
+            ))))
+        val job=ready(r).imports.single()
+        assertEquals(MockImportStatus.FAILED,job.status)
+        assertEquals(1,job.images.first().lines.size)
+        assertTrue(job.images.last().lines.isEmpty())
+        rejects {r.publishAddOnly(id,job.reviewVersion)}
+    }
+
+    @Test fun nonProductExtractionMustBeExplicitlyReviewedBeforePublishing() {
+        val r=repo()
+        catalog(r)
+        val id=r.startPhotoImport("fixture-bar",listOf("content://nonproduct"),
+            OwnerMockFixtures.imageFixtures(mapOf("content://nonproduct" to listOf(
+                MockExtractedLine("header","영업 안내",MockLineKind.NON_PRODUCT)
+            ))))
+        val job=ready(r).imports.single()
+        assertEquals(MockImportStatus.READY_FOR_REVIEW,job.status)
+        rejects {r.publishAddOnly(id,job.reviewVersion)}
+        r.decideLine(id,job.images.single().lines.single().extractedItemId,
+            job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))
+        assertEquals(0,r.publishAddOnly(id,job.reviewVersion))
     }
 
     @Test fun conflictingTwoPhotoPricesForOneOptionAreRejectedAtomically() {
