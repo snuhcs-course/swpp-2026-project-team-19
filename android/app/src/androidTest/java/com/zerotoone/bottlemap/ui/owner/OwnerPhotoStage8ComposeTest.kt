@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
@@ -89,6 +90,16 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("1줄 이어서 확인").assertExists()
     }
 
+
+    @Test fun squareHomeIconAlignsWithSourceLabelBaseline() {
+        showLine(MockExtractedLine("home-line","하쿠슈DR",MockLineKind.PRODUCT,
+            suggestedProductId="demo-canonical",
+            options=listOf(MockMenuOption("home-option",label="잔",pourMl=30,priceKrw=19000))))
+        val home=compose.onNodeWithTag("stage8-review-home").getUnclippedBoundsInRoot()
+        val label=compose.onNodeWithTag("stage8-source-line-label").getUnclippedBoundsInRoot()
+        assert(kotlin.math.abs(home.width.value-home.height.value)<1f)
+        assert(kotlin.math.abs(home.bottom.value-label.bottom.value)<4f)
+    }
 
     @Test fun reviewScreenHasNoManualPagingFooterAndUsesHeaderHome() {
         showLines(listOf(
