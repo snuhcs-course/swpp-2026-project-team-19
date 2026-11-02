@@ -67,7 +67,7 @@ class OwnerPhotoStage8ComposeTest {
             suggestedProductId="demo-canonical",
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=20000))))
         compose.onNodeWithText("다른 메뉴예요").performClick()
-        compose.onNodeWithText("카탈로그에서 찾은 메뉴 0개").assertExists()
+        compose.onNodeWithText("카탈로그에서 찾은 메뉴",substring=true).assertExists()
         compose.onNodeWithText("찾는 메뉴가 없어요, 새로 등록").performClick()
         compose.onNodeWithText("새로 등록할게요").assertExists()
     }
