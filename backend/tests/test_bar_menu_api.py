@@ -363,6 +363,10 @@ BAR_FIELDS = {
     "latitude",
     "longitude",
     "phone",
+    "description",
+    "tags",
+    "weeklyHours",
+    "operatingException",
     "menuBoardId",
     "menuVersion",
     "publishedAt",
@@ -400,6 +404,7 @@ def test_a_bar_with_nothing_optional_still_sends_every_field(client, db_session)
         None,
         [],
     )
+    assert (body["description"], body["tags"], body["weeklyHours"], body["operatingException"]) == (None, [], [], None)
 
 
 def test_menu_items_and_options_send_every_field(client, db_session):

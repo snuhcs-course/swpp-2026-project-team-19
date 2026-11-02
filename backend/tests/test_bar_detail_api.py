@@ -3,13 +3,15 @@
 Who may call them is in test_route_permissions.py; here an operator and the bar's owner use them.
 """
 
-from datetime import timezone
+from datetime import datetime, time, timezone
 from decimal import Decimal
 
 import pytest
+from sqlalchemy import select
 
-from app.models import Bar, BarStatus, ImportMode, ImportStatus, MenuImport, UserType
+from app.models import Bar, BarStatus, BarWeeklyHours, ImportMode, ImportStatus, MenuImport, UserType
 from tests.factories import make_bar, make_brand, make_owner, make_product, make_user, publish_menu
+from tests.sql_support import recorded_statements
 
 OWNER_SUBJECT = "owner-subject"
 DETAIL_FIELDS = {
@@ -19,6 +21,11 @@ DETAIL_FIELDS = {
     "latitude",
     "longitude",
     "phone",
+    "description",
+    "defaultPourMl",
+    "tags",
+    "weeklyHours",
+    "operatingException",
     "status",
     "activeMenuImport",
     "currentMenu",
@@ -233,3 +240,220 @@ def test_an_inactive_bar_can_be_edited_by_its_owner(client, db_session, bar, own
 
     assert response.status_code == 200
     assert response.json()["phone"] == "02-333-4444"
+
+
+# ---- PATCH: description, default pour, tags and weekly hours (spec 3.7, 3.15.1) ----
+
+FRIDAY_LATE = {"dayOfWeek": 5, "closed": False, "openTime": "18:00", "closeTime": "02:00"}
+MONDAY_OFF = {"dayOfWeek": 1, "closed": True, "openTime": None, "closeTime": None}
+OLD = datetime(2026, 1, 1, tzinfo=timezone.utc)
+
+
+def stored_hours(db_session, bar) -> list[tuple]:
+    db_session.expire_all()
+    rows = db_session.scalars(
+        select(BarWeeklyHours).where(BarWeeklyHours.bar_id == bar.id).order_by(BarWeeklyHours.day_of_week)
+    )
+    return [(row.day_of_week, row.is_closed, row.open_time, row.close_time) for row in rows]
+
+
+def test_the_owner_sets_the_bar_profile(client, db_session, bar, owner):
+    body = {
+        "description": "  싱글몰트 위주의\n조용한 바  ",
+        "defaultPourMl": 30,
+        "tags": [" 싱글몰트 ", "Peat", "조용한 분위기"],
+        # A day off sent without times; days in any order.
+        "weeklyHours": [FRIDAY_LATE, {"dayOfWeek": 1, "closed": True}],
+    }
+
+    response = patch(client, owner, bar, body)
+
+    assert response.status_code == 200, response.text
+    sent = response.json()
+    assert sent["description"] == "싱글몰트 위주의\n조용한 바"
+    assert sent["defaultPourMl"] == 30
+    assert sent["tags"] == ["싱글몰트", "Peat", "조용한 분위기"]
+    assert sent["weeklyHours"] == [MONDAY_OFF, FRIDAY_LATE]
+    assert sent["operatingException"] is None
+    stored = reload(db_session, bar)
+    assert (stored.description, stored.default_pour_ml, stored.tags) == (
+        "싱글몰트 위주의\n조용한 바",
+        30,
+        ["싱글몰트", "Peat", "조용한 분위기"],
+    )
+    assert stored_hours(db_session, bar) == [(1, True, None, None), (5, False, time(18), time(2))]
+    assert client.get(f"/api/bars/{bar.id}", headers=owner).json() == sent
+
+
+def test_customers_see_the_profile_but_not_the_default_pour(client, db_session, bar, owner):
+    patch(client, owner, bar, {"description": "소개", "defaultPourMl": 30, "tags": ["싱글몰트"], "weeklyHours": [FRIDAY_LATE]})
+
+    menu = client.get(f"/api/bars/{bar.id}/menu").json()
+
+    assert (menu["description"], menu["tags"], menu["weeklyHours"]) == ("소개", ["싱글몰트"], [FRIDAY_LATE])
+    assert "defaultPourMl" not in menu
+
+
+def test_the_operator_sets_the_profile_too(client, db_session, bar, operator):
+    response = patch(client, operator, bar, {"tags": ["버번"], "weeklyHours": [MONDAY_OFF]})
+
+    assert response.status_code == 200, response.text
+    assert (response.json()["tags"], response.json()["weeklyHours"]) == (["버번"], [MONDAY_OFF])
+
+
+@pytest.mark.parametrize("description", [None, "  \n "])
+def test_null_or_blank_description_removes_it(client, db_session, bar, owner, description):
+    bar.description = "소개"
+    db_session.flush()
+
+    response = patch(client, owner, bar, {"description": description})
+
+    assert response.status_code == 200
+    assert response.json()["description"] is None
+    assert reload(db_session, bar).description is None
+
+
+def test_null_default_pour_removes_it(client, db_session, bar, owner):
+    bar.default_pour_ml = 45
+    db_session.flush()
+
+    response = patch(client, owner, bar, {"defaultPourMl": None})
+
+    assert response.json()["defaultPourMl"] is None
+    assert reload(db_session, bar).default_pour_ml is None
+
+
+def test_tags_and_hours_are_replaced_as_a_whole(client, db_session, bar, owner):
+    patch(client, owner, bar, {"tags": ["a", "b"], "weeklyHours": [MONDAY_OFF, FRIDAY_LATE]})
+
+    response = patch(client, owner, bar, {"tags": ["c"], "weeklyHours": [{**FRIDAY_LATE, "closeTime": "00:00"}]})
+
+    assert response.json()["tags"] == ["c"]
+    assert response.json()["weeklyHours"] == [{**FRIDAY_LATE, "closeTime": "00:00"}]
+    assert stored_hours(db_session, bar) == [(5, False, time(18), time(0))]
+
+
+def test_empty_arrays_remove_tags_and_hours(client, db_session, bar, owner):
+    patch(client, owner, bar, {"tags": ["a"], "weeklyHours": [MONDAY_OFF]})
+
+    response = patch(client, owner, bar, {"tags": [], "weeklyHours": []})
+
+    assert (response.json()["tags"], response.json()["weeklyHours"]) == ([], [])
+    assert reload(db_session, bar).tags == []
+    assert stored_hours(db_session, bar) == []
+
+
+def test_fields_left_out_keep_their_values(client, db_session, bar, owner):
+    patch(client, owner, bar, {"description": "소개", "defaultPourMl": 30, "tags": ["a"], "weeklyHours": [MONDAY_OFF]})
+
+    response = patch(client, owner, bar, {"phone": "02-555-5555"})
+
+    sent = response.json()
+    assert (sent["description"], sent["defaultPourMl"], sent["tags"], sent["weeklyHours"]) == ("소개", 30, ["a"], [MONDAY_OFF])
+
+
+def test_changed_hours_move_updated_at(client, db_session, bar, owner):
+    bar.updated_at = OLD
+    db_session.flush()
+
+    response = patch(client, owner, bar, {"weeklyHours": [FRIDAY_LATE]})
+
+    assert response.json()["updatedAt"] != rfc3339(OLD)
+    assert reload(db_session, bar).updated_at != OLD
+
+
+def test_the_same_hours_again_change_nothing(client, db_session, bar, owner):
+    patch(client, owner, bar, {"weeklyHours": [FRIDAY_LATE, MONDAY_OFF]})
+    bar.updated_at = OLD
+    db_session.flush()
+
+    response = patch(client, owner, bar, {"weeklyHours": [MONDAY_OFF, FRIDAY_LATE]})
+
+    assert response.json()["updatedAt"] == rfc3339(OLD)
+    assert stored_hours(db_session, bar) == [(1, True, None, None), (5, False, time(18), time(2))]
+
+
+def hours(**change) -> dict:
+    return {"weeklyHours": [{**FRIDAY_LATE, **change}]}
+
+
+@pytest.mark.parametrize(
+    ("body", "errors"),
+    [
+        ({"description": "가" * 101}, [("description", "STRING_TOO_LONG")]),
+        ({"defaultPourMl": 0}, [("defaultPourMl", "GREATER_THAN_EQUAL")]),
+        ({"defaultPourMl": 1000}, [("defaultPourMl", "LESS_THAN_EQUAL")]),
+        ({"tags": None}, [("tags", "NULL_NOT_ALLOWED")]),
+        ({"tags": ["a", "b", "c", "d", "e", "f"]}, [("tags", "TOO_LONG")]),
+        ({"tags": ["ok", "  "]}, [("tags[1]", "STRING_TOO_SHORT")]),
+        ({"tags": ["가" * 25]}, [("tags[0]", "STRING_TOO_LONG")]),
+        ({"tags": ["싱글\n몰트"]}, [("tags[0]", "INVALID_CHARACTER")]),
+        ({"tags": ["a\tb"]}, [("tags[0]", "INVALID_CHARACTER")]),
+        ({"tags": ["Peat", "x", "peat", "PEAT"]}, [("tags[2]", "DUPLICATE_TAG"), ("tags[3]", "DUPLICATE_TAG")]),
+        ({"weeklyHours": None}, [("weeklyHours", "NULL_NOT_ALLOWED")]),
+        (hours(dayOfWeek=0), [("weeklyHours[0].dayOfWeek", "GREATER_THAN_EQUAL")]),
+        (hours(dayOfWeek=8), [("weeklyHours[0].dayOfWeek", "LESS_THAN_EQUAL")]),
+        (hours(closed="no"), [("weeklyHours[0].closed", "BOOL_TYPE")]),
+        ({"weeklyHours": [{"dayOfWeek": 5}]}, [("weeklyHours[0].closed", "MISSING")]),
+        (hours(openTime="24:00"), [("weeklyHours[0].openTime", "INVALID_TIME")]),
+        (hours(openTime="18:03"), [("weeklyHours[0].openTime", "INVALID_TIME")]),
+        (hours(openTime="9:00"), [("weeklyHours[0].openTime", "INVALID_TIME")]),
+        (hours(closeTime="02:00:00"), [("weeklyHours[0].closeTime", "INVALID_TIME")]),
+        (hours(closeTime=200), [("weeklyHours[0].closeTime", "INVALID_TIME")]),
+        (hours(closeTime=None), [("weeklyHours[0].closeTime", "MISSING")]),
+        (
+            {"weeklyHours": [{"dayOfWeek": 5, "closed": False}]},
+            [("weeklyHours[0].openTime", "MISSING"), ("weeklyHours[0].closeTime", "MISSING")],
+        ),
+        (hours(closeTime="18:00"), [("weeklyHours[0].closeTime", "SAME_OPEN_CLOSE")]),
+        (hours(closed=True), [("weeklyHours[0].openTime", "TIME_ON_CLOSED_DAY"), ("weeklyHours[0].closeTime", "TIME_ON_CLOSED_DAY")]),
+        ({"weeklyHours": [MONDAY_OFF, FRIDAY_LATE, {**MONDAY_OFF}]}, [("weeklyHours[2].dayOfWeek", "DUPLICATE_DAY")]),
+        ({"operatingException": None}, [("operatingException", "EXTRA_FORBIDDEN")]),
+        ({"photos": []}, [("photos", "EXTRA_FORBIDDEN")]),
+        # Rules that compare fields are reported together.
+        (
+            {"latitude": 37.5, "tags": ["a", "A"], "weeklyHours": [{"dayOfWeek": 5, "closed": False, "openTime": "18:00"}]},
+            [
+                ("longitude", "LAT_LNG_REQUIRED_TOGETHER"),
+                ("tags[1]", "DUPLICATE_TAG"),
+                ("weeklyHours[0].closeTime", "MISSING"),
+            ],
+        ),
+    ],
+)
+def test_profile_field_rules(client, db_session, bar, owner, body, errors):
+    response = patch(client, owner, bar, {"description": "새 소개", **body})
+
+    assert response.status_code == 422, response.text
+    assert [(field["path"], field["code"]) for field in response.json()["error"]["fieldErrors"]] == errors
+    stored = reload(db_session, bar)
+    assert (stored.description, stored.tags) == (None, [])
+    assert stored_hours(db_session, bar) == []
+
+
+def test_a_description_of_100_characters_with_line_breaks_fits(client, db_session, bar, owner):
+    description = ("가" * 49 + "\n") * 2
+
+    response = patch(client, owner, bar, {"description": description})
+
+    assert response.status_code == 200, response.text
+    # The last line break is trimmed, so 99 characters are stored.
+    assert reload(db_session, bar).description == description.strip()
+
+
+def test_hours_are_replaced_under_the_bar_lock(client, db_session, bar, owner):
+    """The bar row lock orders concurrent replacements, which would otherwise insert the same weekdays twice."""
+    with recorded_statements(db_session) as statements:
+        assert patch(client, owner, bar, {"weeklyHours": [MONDAY_OFF]}).status_code == 200
+
+    lock = next(i for i, sql in enumerate(statements) if "FOR UPDATE" in sql)
+    assert "FROM bars" in statements[lock]
+    replace = next(i for i, sql in enumerate(statements) if sql.startswith("DELETE FROM bar_weekly_hours"))
+    assert lock < replace
+
+
+def test_other_fields_take_no_lock(client, db_session, bar, owner):
+    with recorded_statements(db_session) as statements:
+        assert patch(client, owner, bar, {"tags": ["a"]}).status_code == 200
+
+    assert not any("FOR UPDATE" in sql for sql in statements)

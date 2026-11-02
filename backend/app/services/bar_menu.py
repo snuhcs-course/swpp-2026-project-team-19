@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.errors import ApiError
 from app.models import Bar, BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
 from app.schemas.menu import BarMenuResponse, DiscountResponse, MenuItemResponse, MenuOptionResponse
+from app.services.bar_hours import operating_exceptions_by_bar, seoul_today, weekly_hours_by_bar
 
 
 def bar_not_found(bar_id: str) -> ApiError:
@@ -94,6 +95,10 @@ def get_bar_menu(session: Session, bar_id: str, *, can_manage: Callable[[Bar], b
         latitude=float(bar.latitude),
         longitude=float(bar.longitude),
         phone=bar.phone,
+        description=bar.description,
+        tags=list(bar.tags),
+        weeklyHours=weekly_hours_by_bar(session, [bar.id])[bar.id],
+        operatingException=operating_exceptions_by_bar(session, [bar.id], seoul_today()).get(bar.id),
         menuBoardId=board.id if board else None,
         menuVersion=board.version if board else None,
         publishedAt=board.published_at if board else None,

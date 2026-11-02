@@ -2,6 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.schemas.bar_hours import OperatingException, WeeklyHours
 from app.schemas.common import Latitude, Longitude, UtcDateTime
 
 
@@ -47,6 +48,17 @@ class BarMenuResponse(BaseModel):
     latitude: Latitude
     longitude: Longitude
     phone: str | None
+    description: str | None = Field(
+        description="One-line introduction; may contain line breaks. Show it as plain text, not HTML. null when none"
+    )
+    tags: list[str] = Field(description="Up to 5 tags; show them in this order. Empty when none")
+    weeklyHours: list[WeeklyHours] = Field(
+        description="Regular hours by `dayOfWeek`; a weekday left out has no information. Empty when none"
+    )
+    operatingException: OperatingException | None = Field(
+        description="The temporary closure, also one not started yet or one that ended yesterday (for the status "
+        "early that morning); null when none. The open status is computed by the app (spec 3.15.5)"
+    )
     menuBoardId: UUID | None = Field(description="null when the bar has no published menu")
     menuVersion: int | None = Field(
         description="Raised by every review publish and manual edit; send it with a manual edit. null without a menu"
