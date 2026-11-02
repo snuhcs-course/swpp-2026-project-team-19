@@ -195,10 +195,29 @@ function showLogin(message) {
 }
 
 async function signOut() {
+  clearDashboard();
   if (supabaseClient) {
     // Drop the stored session even if Supabase cannot be reached (spec 3.1.2).
     await supabaseClient.auth.signOut({ scope: "local" }).catch(() => {});
   }
+}
+
+// Applications hold applicant data and signed photo URLs, so nothing of them stays after sign-out.
+// Bumping the request counters drops responses still in flight.
+function clearDashboard() {
+  state.listRequest++;
+  state.detailRequest++;
+  state.listLoading = false;
+  state.filters = { ...DEFAULT_FILTERS };
+  state.items = [];
+  state.nextCursor = null;
+  state.photosRefreshed = false;
+  state.barDraft = null;
+  state.notice = null;
+  writeFilters();
+  setListStatus("");
+  $("load-more").hidden = true;
+  closeDetail();
 }
 
 async function loginWithGoogle() {
@@ -478,7 +497,8 @@ function renderPhotos(app) {
           loading: "lazy",
           // A signed URL may have expired; the detail API hands out fresh ones (3.11.1). Once per opening.
           onerror: () => {
-            if (state.photosRefreshed) return;
+            // A photo of an application the operator has already left must not bring it back.
+            if (state.photosRefreshed || state.selectedId !== app.applicationId) return;
             state.photosRefreshed = true;
             openDetail(app.applicationId, state.notice);
           },
@@ -863,12 +883,15 @@ async function runAction(app, call, successText, onError) {
   if (state.busy) return;
   state.busy = true;
   $("rows").classList.add("busy");
+  setListControlsDisabled(true);
   for (const button of $("detail").querySelectorAll("button")) button.disabled = true;
   // The detail may have changed meanwhile (sign-out), so the result goes only on the same application.
   const stillOpen = () => state.selectedId === app.applicationId;
   try {
     const updated = await call();
-    replaceListItem(updated);
+    // A list request still in flight may have read the application before this change; load again.
+    if (state.listLoading) loadList(true);
+    else replaceListItem(updated);
     if (!stillOpen()) return;
     state.detail = updated;
     state.notice = { kind: "ok", text: successText(updated) };
@@ -880,8 +903,16 @@ async function runAction(app, call, successText, onError) {
   } finally {
     state.busy = false;
     $("rows").classList.remove("busy");
+    setListControlsDisabled(false);
     for (const button of $("detail").querySelectorAll("button")) button.disabled = false;
   }
+}
+
+// While an action runs, the list cannot be reloaded, so no list response can predate the action.
+function setListControlsDisabled(disabled) {
+  for (const control of $("filters").elements) control.disabled = disabled;
+  $("load-more").disabled = disabled;
+  $("list-retry").disabled = disabled;
 }
 
 function handleActionError(app, error) {
@@ -957,7 +988,6 @@ function reject(app, reason) {
 $("login-google").addEventListener("click", loginWithGoogle);
 $("logout").addEventListener("click", async () => {
   await signOut();
-  closeDetail();
   showLogin();
 });
 $("filters").addEventListener("change", (event) => {
