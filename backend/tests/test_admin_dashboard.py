@@ -14,7 +14,6 @@ SUPABASE_URL = "https://project-ref.supabase.co"
 def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.delenv("SUPABASE_URL", raising=False)
     monkeypatch.delenv("SUPABASE_PUBLISHABLE_KEY", raising=False)
-    monkeypatch.delenv("TEMP_AUTH_ENABLED", raising=False)
     return TestClient(app)
 
 
@@ -72,7 +71,6 @@ def test_config_hands_out_the_public_supabase_settings(client, monkeypatch):
     assert read_config(client) == {
         "supabaseUrl": SUPABASE_URL,
         "supabasePublishableKey": "sb_publishable_example",
-        "tempLoginEnabled": False,
     }
 
 
@@ -88,12 +86,6 @@ def test_config_turns_google_login_off_without_both_settings(client, monkeypatch
     config = read_config(client)
 
     assert config["supabaseUrl"] is None and config["supabasePublishableKey"] is None
-
-
-def test_config_offers_temporary_login_only_while_it_is_on(client, monkeypatch):
-    monkeypatch.setenv("TEMP_AUTH_ENABLED", "true")
-
-    assert read_config(client)["tempLoginEnabled"] is True
 
 
 def test_admin_is_not_in_the_api_document():

@@ -14,7 +14,6 @@ from starlette.staticfiles import StaticFiles
 from starlette.types import Scope
 
 from app.core.auth_config import load_supabase_auth_settings
-from app.core.security import temporary_login_enabled
 
 ADMIN_PATH = "/admin"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -65,7 +64,6 @@ def admin_config() -> Response:
     config = {
         "supabaseUrl": settings.url if settings and key else None,
         "supabasePublishableKey": key if settings and key else None,
-        "tempLoginEnabled": temporary_login_enabled(),
     }
     body = f"window.BOTTLEMAP_ADMIN_CONFIG = {json.dumps(config)};\n"
     return add_admin_headers(Response(body, media_type="text/javascript"))

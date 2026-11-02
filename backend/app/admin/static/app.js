@@ -3,7 +3,6 @@
 "use strict";
 
 const config = window.BOTTLEMAP_ADMIN_CONFIG || {};
-const TEMP_TOKEN_KEY = "bottlemap-admin-temp-token";
 const PAGE_SIZE = 20;
 const DEFAULT_FILTERS = { status: "pending", applicationType: "", verificationResult: "" };
 
@@ -122,28 +121,7 @@ class ApiError extends Error {
   }
 }
 
-function readTempToken() {
-  try {
-    return sessionStorage.getItem(TEMP_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function writeTempToken(token) {
-  try {
-    if (token) sessionStorage.setItem(TEMP_TOKEN_KEY, token);
-    else sessionStorage.removeItem(TEMP_TOKEN_KEY);
-  } catch {
-    // Without storage the temporary login lasts until the page is reloaded.
-  }
-  memoryTempToken = token;
-}
-
-let memoryTempToken = readTempToken();
-
 async function accessToken() {
-  if (memoryTempToken) return memoryTempToken;
   if (!supabaseClient) return null;
   const { data } = await supabaseClient.auth.getSession();
   return data.session ? data.session.access_token : null;
@@ -152,7 +130,7 @@ async function accessToken() {
 // Concurrent 401s share one refresh (spec 3.1.5).
 let refreshing = null;
 function refreshSession() {
-  if (memoryTempToken || !supabaseClient) return Promise.resolve(false);
+  if (!supabaseClient) return Promise.resolve(false);
   if (!refreshing) {
     refreshing = supabaseClient.auth
       .refreshSession()
@@ -211,12 +189,10 @@ function showLogin(message) {
     text.textContent = "서버에 Google 로그인 설정(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)이 없습니다.";
     text.hidden = false;
   }
-  $("login-temp").hidden = !config.tempLoginEnabled;
   showView("login");
 }
 
 async function signOut() {
-  writeTempToken(null);
   if (supabaseClient) {
     // Drop the stored session even if Supabase cannot be reached (spec 3.1.2).
     await supabaseClient.auth.signOut({ scope: "local" }).catch(() => {});
@@ -229,16 +205,6 @@ async function loginWithGoogle() {
     options: { redirectTo: `${location.origin}/admin/` },
   });
   if (error) showLogin("Google 로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.");
-}
-
-async function loginTemporarily() {
-  try {
-    const data = await api("POST", "/api/auth/temp-login");
-    writeTempToken(data.accessToken);
-    await start();
-  } catch (error) {
-    showLogin(error.message);
-  }
 }
 
 async function start() {
@@ -730,7 +696,6 @@ function reject(app, reason) {
 // ---------- wiring ----------
 
 $("login-google").addEventListener("click", loginWithGoogle);
-$("login-temp").addEventListener("click", loginTemporarily);
 $("logout").addEventListener("click", async () => {
   await signOut();
   closeDetail();
