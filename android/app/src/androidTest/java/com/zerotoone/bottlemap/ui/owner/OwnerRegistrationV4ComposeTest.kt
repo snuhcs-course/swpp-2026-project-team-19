@@ -86,7 +86,7 @@ class OwnerRegistrationV4ComposeTest {
         val draft=MockRegistrationDraft(resumePageKey="MENUS",initialMenuPhotos=listOf(photo))
         show(MockOwnerSnapshot(registrationDraft=draft))
         compose.waitUntil(4000) {
-            compose.onAllNodesWithText("메뉴판 사진을\\n올려 주세요")
+            compose.onAllNodesWithText("메뉴판 사진을\n올려 주세요")
                 .fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText("메뉴판 순서대로 올려 주세요").assertExists()
@@ -101,7 +101,7 @@ class OwnerRegistrationV4ComposeTest {
     @Test fun whiskeyLoadingReusesAnimatedPr96Canvas() {
         compose.setContent {
             MaterialTheme {
-                RegistrationCenterContent("사업자 정보를\\n확인하고 있어요",
+                RegistrationCenterContent("사업자 정보를\n확인하고 있어요",
                     "국세청 정보와 비교하고 있어요.",loading=true)
             }
         }
