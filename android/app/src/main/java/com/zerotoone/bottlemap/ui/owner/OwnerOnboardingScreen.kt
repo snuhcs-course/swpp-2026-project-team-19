@@ -10,9 +10,17 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -228,7 +236,7 @@ fun OwnerOnboardingScreen(
         RegPage.ADDRESS->draft.proposedBarAddress.isNotBlank() &&
             listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
                 .filter{it.isNotBlank()}.joinToString(" ").trim().length in 1..500
-        RegPage.BARPHONE->draft.storePhone.isBlank()||validOwnerPhone(draft.storePhone)
+        RegPage.BARPHONE->draft.storePhone.isNotBlank()&&validOwnerPhone(draft.storePhone)
         RegPage.MENUS->draft.initialMenuPhotos.isNotEmpty()
         RegPage.CONTACT->validContact
         RegPage.REVIEW->validContact&&draft.initialMenuPhotos.isNotEmpty()&&
@@ -449,16 +457,16 @@ fun OwnerOnboardingScreen(
 
                     RegPage.BARNAME -> {
                         OwnerV4Question("매장 이름을\n알려주세요",
-                            "손님에게 보이는 이름이에요. 간판 이름으로 적어 주세요.")
-                        OwnerV4Input("매장 이름",draft.proposedBarName,{
+                            "손님에게 보이는 이름이에요. 사업자등록증의 상호와 간판이 다르면 간판 이름으로 고쳐 주세요.")
+                        Spacer(Modifier.height(16.dp))
+                        RegistrationInput(draft.proposedBarName,{
                             val edited=updatedBarNameDraft(draft,it)
                             if(needsNewBarDetailsAfterClaimEdit(editingReview,draft.kind,edited.kind)) {
-                                // Changing from a claim to a new bar requires its photo/address/phone steps.
                                 editingReview=false
                                 history=registrationHistoryFor(RegPage.BARNAME.name,edited.kind)
                             }
                             save(edited)
-                        },placeholder="예: 몰트 앤 무드")
+                        },"예: 몰트 앤 무드",tag="registration-bar-name")
                         exactMatches.forEach{ candidate ->
                             OwnerV4Panel("BottleMap에 이미 등록된 매장\n"+candidate.name+"\n"+candidate.address)
                             Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
@@ -482,25 +490,57 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.BARPHOTO -> {
                         OwnerV4Question("매장 사진을\n올려 주세요",
-                            "갤러리에서 선택한 사진이 대표 사진으로 지정돼요.")
+                            "갤러리에서 사진을 선택해 주세요. 등록한 사진은 대표 사진으로 지정돼요.")
+                        Spacer(Modifier.height(16.dp))
                         val cover=draft.applicantGallery.firstOrNull()
-                        if(cover!=null)OwnerV4Thumbnail(cover.uri,Modifier.fillMaxWidth().height(230.dp))
-                        OwnerActionButton(if(cover==null)"사진 올리기" else "사진 바꾸기",{
-                            coverPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                        },Modifier.fillMaxWidth(),secondary=true)
-                        Text("간판·입구·매장 안쪽이 보이는 사진을 선택해 주세요.",
-                            style=MaterialTheme.typography.bodySmall)
+                        Box(Modifier.fillMaxWidth().aspectRatio(4f/3f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(RegistrationV4.surface)
+                            .then(if(cover==null)Modifier.border(
+                                1.dp,RegistrationV4.muted,RoundedCornerShape(16.dp)) else Modifier)
+                            .ownerQuietClick {
+                                coverPicker.launch(PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            }.testTag("registration-cover-photo"),
+                            contentAlignment=Alignment.Center) {
+                            if(cover!=null) {
+                                OwnerV4Thumbnail(cover.uri,Modifier.fillMaxSize())
+                                Box(Modifier.align(Alignment.BottomEnd).padding(10.dp)
+                                    .background(RegistrationV4.bg,RoundedCornerShape(20.dp))
+                                    .padding(horizontal=12.dp,vertical=8.dp)) {
+                                    Text("바꾸기",color=RegistrationV4.text,fontSize=14.sp)
+                                }
+                            } else Column(horizontalAlignment=Alignment.CenterHorizontally,
+                                verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                                RegistrationGlyph("camera",color=RegistrationV4.primary)
+                                Text("사진 올리기",color=RegistrationV4.secondary,fontSize=14.sp)
+                            }
+                        }
+                        RegistrationHint("간판이나 입구, 매장 안쪽이 잘 보이는 사진")
+                        RegistrationHint("사람 얼굴이 크게 나오지 않은 사진")
                     }
                     RegPage.ADDRESS -> {
                         OwnerV4Question("매장 주소를\n알려주세요",
                             "손님이 지도에서 찾을 수 있게 정확히 입력해 주세요.")
-                        OwnerV4Input("주소",draft.proposedBarAddress,{
-                            save(draft.copy(proposedBarAddress=it))
-                        },placeholder="도로명, 건물명으로 검색")
-                        TextButton(onClick={showAddressSheet=true}){Text("주소 검색 결과 예시 (Mock)")}
-                        OwnerV4Input("상세 주소",draft.proposedBarAddressDetail,{
+                        Spacer(Modifier.height(16.dp))
+                        Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                            Text("주소",color=RegistrationV4.secondary,fontSize=12.sp)
+                            Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
+                                .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
+                                .border(1.dp,RegistrationV4.border,RoundedCornerShape(12.dp))
+                                .ownerQuietClick{showAddressSheet=true}
+                                .padding(horizontal=16.dp),
+                                verticalAlignment=Alignment.CenterVertically,
+                                horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                                RegistrationGlyph("search",color=RegistrationV4.text)
+                                Text(draft.proposedBarAddress.ifEmpty{"도로명, 건물명으로 검색"},
+                                    color=if(draft.proposedBarAddress.isEmpty())RegistrationV4.muted
+                                    else RegistrationV4.text,fontSize=16.sp)
+                            }
+                        }
+                        RegistrationInput(draft.proposedBarAddressDetail,{
                             save(draft.copy(proposedBarAddressDetail=it))
-                        },placeholder="예: 2층")
+                        },"예: 2층",label="상세 주소",tag="registration-address-detail")
                     }
                     RegPage.BARPHONE -> {
                         OwnerV4Question("매장 전화번호를\n알려주세요",
