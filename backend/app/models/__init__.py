@@ -31,6 +31,7 @@ from app.models.owner import (
     OwnerApplicationStatus,
     OwnerApplicationType,
 )
+from app.models.search_count import ProductSearchCount, SearchSource, UnmatchedSearchQuery
 from app.models.user import User, UserType
 
 __all__ = [
@@ -64,10 +65,13 @@ __all__ = [
     "OwnerApplicationType",
     "PipelineStatus",
     "Product",
+    "ProductSearchCount",
     "ProductAlias",
     "ResolutionCandidate",
     "ResolutionStatus",
     "ReviewStatus",
+    "SearchSource",
+    "UnmatchedSearchQuery",
     "User",
     "UserType",
 ]
