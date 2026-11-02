@@ -37,6 +37,7 @@ const state = {
   items: [],
   nextCursor: null,
   listRequest: 0,
+  listLoading: false,
   selectedId: null,
   detail: null,
   detailRequest: 0,
@@ -258,18 +259,21 @@ async function loadList(reset) {
     renderRows();
   }
   const request = ++state.listRequest;
+  state.listLoading = true;
   $("load-more").hidden = true;
   setListStatus("불러오는 중...");
   try {
     const page = await api("GET", `/api/owner-applications?${listQuery()}`);
     if (request !== state.listRequest) return;
+    state.listLoading = false;
     state.items = state.items.concat(page.items);
     state.nextCursor = page.nextCursor;
     renderRows();
-    setListStatus(state.items.length ? `${state.items.length}건${state.nextCursor ? " (더 있음)" : ""}` : "조건에 맞는 신청이 없습니다.");
-    $("load-more").hidden = !state.nextCursor;
+    showListSummary();
   } catch (error) {
-    if (request !== state.listRequest || error.status === 401) return;
+    if (request !== state.listRequest) return;
+    state.listLoading = false;
+    if (error.status === 401) return;
     const filtered = state.nextCursor || JSON.stringify(state.filters) !== JSON.stringify(DEFAULT_FILTERS);
     if (error.code === "VALIDATION_FAILED" && filtered) {
       // A filter or cursor the server does not accept: start over from the defaults (3.11.6).
@@ -284,6 +288,24 @@ async function loadList(reset) {
     }
     setListStatus(error.message, () => loadList(false));
   }
+}
+
+function showListSummary() {
+  setListStatus(
+    state.items.length
+      ? `${state.items.length}건${state.nextCursor ? " (더 있음)" : ""}`
+      : state.nextCursor
+        ? "이 페이지의 신청을 모두 처리했습니다."
+        : "조건에 맞는 신청이 없습니다.",
+  );
+  $("load-more").hidden = !state.nextCursor;
+}
+
+// Whether the list's current filters still select the application (applicationType never changes).
+function matchesFilters(application) {
+  const { status, verificationResult } = state.filters;
+  const result = application.businessVerification ? application.businessVerification.result : null;
+  return (status === "all" || application.status === status) && (!verificationResult || result === verificationResult);
 }
 
 function writeFilters() {
@@ -316,10 +338,17 @@ function renderRows() {
   $("rows").replaceChildren(...rows);
 }
 
+// Puts a fresh copy of an application in the list, or drops it once it no longer matches the filters
+// (approved or rejected under "pending", or rechecked out of a verification filter). The cursor is
+// keyed on the last row the server returned, so dropping rows here skips nothing on the next page.
 function replaceListItem(application) {
   const index = state.items.findIndex((item) => item.applicationId === application.applicationId);
-  if (index >= 0) state.items[index] = application;
+  if (index < 0) return;
+  if (matchesFilters(application)) state.items[index] = application;
+  else state.items.splice(index, 1);
   renderRows();
+  // A load in flight shows its own status when it finishes.
+  if (!state.listLoading) showListSummary();
 }
 
 // ---------- detail (3.11.4) ----------
