@@ -50,6 +50,15 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         Text(text,fontSize=15.sp,fontWeight=FontWeight.Bold)
     }
 }
+@Composable private fun St8Secondary(text: String, click:()->Unit) {
+    OutlinedButton(onClick=click,modifier=Modifier.fillMaxWidth().height(56.dp),
+        shape=RoundedCornerShape(12.dp),
+        border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line),
+        colors=ButtonDefaults.outlinedButtonColors(
+            containerColor=V4Color.surface,contentColor=V4Color.text)) {
+        Text(text,fontSize=15.sp,fontWeight=FontWeight.Bold)
+    }
+}
 @Composable private fun St8Field(text: String, value: String, change:(String)->Unit, digits:Boolean=false) {
     OutlinedTextField(value=value,onValueChange={change(if(digits)it.filter(Char::isDigit) else it)},
         label={Text(text)},singleLine=true,modifier=Modifier.fillMaxWidth(),
@@ -146,14 +155,17 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         if(target==null)screen="publish" else {position=target;screen="line"}
     }
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        V4Toolbar(null, {
+        val back: () -> Unit = {
             when(screen) {
                 "line","publish","auto","existing" -> screen="summary"
                 "edit","new" -> screen="line"
                 "done"->onHome()
                 else->onBack()
             }
-        })
+        }
+        if(screen in listOf("line","edit","new") && counts!=null)
+            St8ReviewToolbar(position+1,counts.lines,back)
+        else V4Toolbar(null,back)
         if (s==null || job==null || job.status !in
             listOf(MockImportStatus.READY_FOR_REVIEW,MockImportStatus.APPLIED)) {
             Box(Modifier.weight(1f),contentAlignment=Alignment.Center) {
@@ -256,24 +268,24 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
             } else if(screen=="line" && pair!=null) {
                 val (photo,line)=pair
-                Text((position+1).toString()+" / "+counts!!.lines,
-                    color=V4Color.sub,modifier=Modifier.align(Alignment.CenterHorizontally))
-                Text("메뉴판 "+photo.imageOrder+" · "+(position+1)+"번째 줄",
-                    color=V4Color.sub,fontSize=12.sp)
-                Box(Modifier.fillMaxWidth().background(Color(0xFFE8DDC9),
-                    RoundedCornerShape(8.dp)).padding(14.dp)){
-                    Text(line.sourceText,color=Color(0xFF261E18),fontSize=18.sp,
-                        fontWeight=FontWeight.Bold)
-                }
                 var openPhoto by remember {mutableStateOf(false)}
-                TextButton(onClick={openPhoto=true},modifier=Modifier.align(Alignment.End)){
-                    Text("원본 사진 보기",color=V4Color.sub)
-                }
+                St8RecognizedStrip(photo,line){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
-                Text("이 메뉴가 맞나요?",color=V4Color.text,fontSize=23.sp,
-                    fontWeight=FontWeight.Bold)
                 var categoryPopup by remember {mutableStateOf(false)}
-                TextButton(onClick={categoryPopup=true}){Text("위스키가 아니에요",color=V4Color.sub)}
+                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+                    verticalAlignment=Alignment.CenterVertically) {
+                    Text(if(line.candidateProductIds.size>1)"어느 메뉴인가요?"
+                        else "이 메뉴가 맞나요?",
+                        color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold)
+                    OutlinedButton(onClick={categoryPopup=true},
+                        modifier=Modifier.height(34.dp),
+                        contentPadding=PaddingValues(horizontal=10.dp,vertical=1.dp),
+                        border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line),
+                        colors=ButtonDefaults.outlinedButtonColors(
+                            containerColor=V4Color.surface,contentColor=V4Color.sub)) {
+                        Text("위스키가 아니에요",fontSize=11.sp)
+                    }
+                }
                 if(categoryPopup)AlertDialog(onDismissRequest={categoryPopup=false},
                     title={Text("메뉴 종류 선택")},text={Column{
                         listOf("cocktail" to "칵테일","food" to "안주",
