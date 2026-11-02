@@ -216,11 +216,11 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 }
 @Composable private fun St8RecognizedStrip(photo: MockPhotoExtraction, line: MockExtractedLine,
-    onPhoto: ()->Unit) {
+    onPhoto: ()->Unit, defaultPourMl: Int?=null) {
     val price=line.decision?.correctedOptions?.firstOrNull()?.priceKrw
         ?:line.options.firstOrNull()?.priceKrw
     val pour=line.decision?.correctedOptions?.firstOrNull()?.pourMl
-        ?:line.options.firstOrNull()?.pourMl
+        ?:line.options.firstOrNull()?.pourMl ?: defaultPourMl
     val ordinal=listOf("첫째","둘째","셋째","넷째","다섯째","여섯째","일곱째")
     val photoRow=photo.lines.indexOfFirst { it.extractedItemId==line.extractedItemId }
     Text("메뉴판 ${photo.imageOrder} · ${ordinal.getOrElse(photoRow){(photoRow+1).toString()+"번째"}} 줄",
@@ -288,7 +288,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
     val pair=all.getOrNull(position)
     LaunchedEffect(pair?.second?.extractedItemId) {
-        selectedProductId=pair?.second?.decision?.productId
+        selectedProductId=pair?.second?.decision?.productId ?:
+            pair?.second?.suggestedProductId
         chosenCategory=pair?.second?.decision?.newProduct?.category ?: "whisky"
         choosingOther=false
     }
@@ -828,7 +829,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 val (photo,line)=pair
                 var openPhoto by remember {mutableStateOf(false)}
                 Text("메뉴판 ${photo.imageOrder} · 가격을 읽지 못한 줄",color=V4Color.sub,fontSize=12.sp)
-                St8RecognizedStrip(photo,line){openPhoto=true}
+                St8RecognizedStrip(photo,line,{openPhoto=true},
+                    s.bars.firstOrNull{it.barId==barId}?.defaultPourMl)
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 Text("가격을 못 읽었어요",color=V4Color.text,
                     fontSize=24.sp,fontWeight=FontWeight.Bold)
@@ -852,8 +854,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         mutableStateOf(options.map {if(it.priceKrw>0)it.priceKrw.toString() else ""})
                     }
                     options.forEachIndexed { i,o ->
-                        Text((o.label ?: "잔")+" · "+(o.pourMl?.let{"${it}ml"}?:"용량 미표기")+
-                            " 가격",color=V4Color.sub,fontSize=13.sp)
+                        Text((o.label ?: "잔")+" · "+((o.pourMl ?:
+                            s.bars.firstOrNull{it.barId==barId}?.defaultPourMl)?.let{"${it}ml"}
+                            ?: "용량 미표기")+" 가격",color=V4Color.sub,fontSize=13.sp)
                         OutlinedTextField(prices.getOrElse(i){""},{
                             val filtered=it.filter(Char::isDigit).take(10)
                             prices=prices.toMutableList().apply{set(i,filtered)}
@@ -865,7 +868,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     St8Button("저장",enabled=prices.size==options.size &&
                         prices.all{it.toIntOrNull()?.let {p->p>0}==true}) {
                         val corrected=options.mapIndexed{i,o->
-                            o.copy(priceKrw=prices[i].toInt())
+                            o.copy(priceKrw=prices[i].toInt(),
+                                pourMl=o.pourMl ?: s.bars.firstOrNull{it.barId==barId}
+                                    ?.defaultPourMl?.takeIf{ ml->
+                                        o.label?.trim() !in listOf("병","Bottle") && ml in 1..999})
                         }
                         val d=if(pendingNewDraft!=null)MockReviewDecision(
                             MockDecisionKind.CREATE_PRODUCT,correctedOptions=corrected,
@@ -878,14 +884,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             .onFailure{error=it.message}
                     }
                 }
-                TextButton(onClick={
-                    runCatching{vm.review(job.menuImportId,line.extractedItemId,
-                        job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
-                        .onSuccess {pendingNewDraft=null;error=null;next()}
-                        .onFailure {error=it.message}
-                },modifier=Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("이 줄은 올리지 않기",color=V4Color.sub,fontSize=13.sp)
-                }
+
             } else if(screen=="incomplete") {
                 St8PublishSteps(2)
                 Text("${counts!!.remaining}줄 남았어요",
@@ -1153,6 +1152,16 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         Text("나중에 하기",color=V4Color.sub)
                     }
                 }
+            if(screen in listOf("line","new","price","catalog","edit") && pair!=null) {
+                TextButton(onClick={
+                    runCatching{vm.review(job.menuImportId,pair.second.extractedItemId,
+                        job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
+                        .onSuccess{pendingNewDraft=null;error=null;next()}
+                        .onFailure{error=it.message}
+                },modifier=Modifier.fillMaxWidth()) {
+                    Text("이 줄은 올리지 않기",color=V4Color.sub,fontSize=12.sp)
+                }
+            }
             }
         }
     }
