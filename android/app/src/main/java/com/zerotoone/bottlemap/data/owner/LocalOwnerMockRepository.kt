@@ -60,6 +60,21 @@ interface OwnerMockRepository {
     fun preview(barId: String, nowEpochMs: Long): MockPreview?
 }
 
+/** Only discard the current import and its unpublished retries since the latest APPLIED job.
+ * Historical failures preceding a successful publication are preserved for diagnostics.
+ */
+internal fun unpublishedRetryChainIds(snapshot: MockOwnerSnapshot, importId: String): Set<String> {
+    val index=snapshot.imports.indexOfFirst { it.menuImportId==importId }
+    require(index>=0) { "Unknown import" }
+    val job=snapshot.imports[index]
+    val boundary=snapshot.imports.subList(0,index).indexOfLast {
+        it.barId==job.barId && it.status==MockImportStatus.APPLIED
+    }
+    return snapshot.imports.drop(boundary+1).take(index-boundary)
+        .filter {it.barId==job.barId && it.status!=MockImportStatus.APPLIED}
+        .mapTo(mutableSetOf()) {it.menuImportId}
+}
+
 /** Local-only serving option invariants shared by direct entry, review, and publish. */
 internal fun validMockMenuOption(option: MockMenuOption): Boolean =
     option.priceKrw > 0 &&
@@ -682,11 +697,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 MockImportStatus.FAILED,MockImportStatus.CANCELED)) {
                 "INVALID_IMPORT_STATE"
             }
-            // Retry-from-failure creates a new import while leaving the previous failed
-            // attempt for diagnostics. Canceling a registration must clear that entire
-            // unpublished chain; APPLIED history and posted menu rows stay untouched.
+            val discardIds=unpublishedRetryChainIds(state,importId)
             state.copy(imports=state.imports.filterNot {
-                it.barId==job.barId && it.status!=MockImportStatus.APPLIED
+                it.menuImportId in discardIds
             }) to Unit
         }
     }
@@ -756,6 +769,13 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                     require(decision.productId == null)
                     require(draft.name.trim().length in 1..200)
                     require(draft.brandId != null || !draft.brandName.isNullOrBlank())
+                    if(draft.brandId==null) {
+                        val canonical=requireNotNull(draft.brandName).trim()
+                        require(canonical.length in 1..120) { "BRAND_NAME_OUT_OF_RANGE" }
+                        require(s.brands.none {it.name.trim().equals(canonical,ignoreCase=true)}) {
+                            "DUPLICATE_BRAND_FOUND: 기존 병입사를 선택해 주세요."
+                        }
+                    } else require(s.brands.any {it.brandId==draft.brandId}) { "BRAND_NOT_FOUND" }
                     require(draft.ageYears == null || draft.ageYears in 0..200)
                     require(draft.abvPercent == null || draft.abvPercent in 0.0..100.0)
                     require(draft.category in listOf("whisky", "cocktail", "food", "otherAlcohol",
@@ -829,7 +849,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 }) { "DUPLICATE_PRODUCT_FOUND" }
                 // Same user-confirmed new product in different photos shares one ID and many options.
                 newProducts.firstOrNull { it.displayName.equals(normalized, ignoreCase = true) &&
-                    it.category == draft.category && it.brandId == brand.brandId }?.productId
+                    it.category == draft.category && it.brandId == brand.brandId &&
+                    it.editionName == draft.editionName }?.productId
                     ?: MockCatalogProduct("local-review-product-${index++}", brand.brandId,
                         normalized, draft.category, draft.ageYears, draft.editionName,
                         catalogMatched = false, otherAlcoholKind = draft.otherAlcoholKind,
@@ -865,7 +886,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             )
         }
         val applied = job.copy(status = MockImportStatus.APPLIED,
-            publishedAddedCount = added.size)
+            publishedAddedCount = added.size,
+            publishedNewProductCount = newProducts.size)
         s.copy(
             brands = s.brands + newBrands,
             products = s.products + newProducts,
