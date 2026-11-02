@@ -293,7 +293,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     verticalAlignment=Alignment.CenterVertically) {
                     Text(if(line.candidateProductIds.size>1)"어느 메뉴인가요?"
                         else "이 메뉴가 맞나요?",
-                        color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold)
+                        color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold,
+                        modifier=Modifier.weight(1f))
                     OutlinedButton(onClick={categoryPopup=true},
                         modifier=Modifier.height(34.dp),
                         contentPadding=PaddingValues(horizontal=10.dp,vertical=1.dp),
@@ -372,7 +373,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                     verticalAlignment=Alignment.CenterVertically) {
                     Text(if(screen=="edit")"가격과 용량을 확인해 주세요" else "새로 등록할게요",
-                        color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold)
+                        color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold,
+                        modifier=Modifier.weight(1f))
                     OutlinedButton(onClick={categoryPicker=true},
                         modifier=Modifier.height(34.dp),
                         contentPadding=PaddingValues(horizontal=10.dp),
@@ -602,7 +604,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             }
             error?.let{Text(it,color=Color(0xFFFFB4AB),fontSize=12.sp)}
         }
-        Column(Modifier.fillMaxWidth().navigationBarsPadding()
+        Column(Modifier.fillMaxWidth().navigationBarsPadding().imePadding()
             .padding(horizontal=19.dp,vertical=12.dp),
             verticalArrangement=Arrangement.spacedBy(7.dp)) {
             when(screen) {
