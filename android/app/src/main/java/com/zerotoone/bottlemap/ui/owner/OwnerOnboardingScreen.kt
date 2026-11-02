@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
+import java.io.File
+import androidx.core.content.FileProvider
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -97,6 +99,7 @@ fun OwnerOnboardingScreen(
     var inputMethod by rememberSaveable { mutableStateOf("manual") }
     var verify by rememberSaveable { mutableStateOf(VerifyFixture.MATCHED) }
     var showCertificateSheet by remember { mutableStateOf(false) }
+    var certificateCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
     var showAddressSheet by remember { mutableStateOf(false) }
     var cancelId by remember { mutableStateOf<String?>(null) }
     var dismissId by remember { mutableStateOf<String?>(null) }
@@ -155,6 +158,22 @@ fun OwnerOnboardingScreen(
             save((latestDraft()?:draft).copy(certificatePhoto=MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.REGISTRATION_ATTACHMENT)))
             go(RegPage.READING)
         }
+    }
+    // App-owned camera output, never a public upload or production OCR request.
+    val certificateCamera=rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()){ ok ->
+        val file=certificateCapturePath?.let(::File)
+        if(ok && file?.isFile==true && file.length()>0L) {
+            val uri=FileProvider.getUriForFile(ctx,
+                "${ctx.packageName}.owner.camera.provider",file)
+            inputMethod="photo"
+            save((latestDraft()?:draft).copy(certificatePhoto=MockPhoto(
+                UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.REGISTRATION_ATTACHMENT)))
+            go(RegPage.READING)
+        } else {
+            file?.delete()
+            if(ok) error="촬영한 사진을 읽지 못했어요. 다시 찍어 주세요."
+        }
+        certificateCapturePath=null
     }
     val coverPicker=rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()){ uri ->
         if(uri!=null){
@@ -290,14 +309,52 @@ fun OwnerOnboardingScreen(
             dismissId=null
         }){Text("지우기")}},
         dismissButton={TextButton(onClick={dismissId=null}){Text("닫기")}})
-    if(showCertificateSheet)AlertDialog(onDismissRequest={showCertificateSheet=false},
-        title={Text("사업자등록증 사진")},
-        text={Text("네 모서리와 글자가 잘 보이게 선택해 주세요. 실제 OCR은 실행하지 않습니다.")},
-        confirmButton={TextButton(onClick={
-            showCertificateSheet=false
-            certificatePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        }){Text("앨범에서 고르기")}},
-        dismissButton={TextButton(onClick={showCertificateSheet=false}){Text("닫기")}})
+    if(showCertificateSheet) ModalBottomSheet(
+        onDismissRequest={showCertificateSheet=false},
+        containerColor=RegistrationV4.surface,
+        contentColor=RegistrationV4.text,
+        dragHandle={Box(Modifier.padding(top=12.dp,bottom=12.dp)
+            .size(width=32.dp,height=4.dp)
+            .background(RegistrationV4.muted,RoundedCornerShape(4.dp)))}
+    ) {
+        Column(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,bottom=28.dp),
+            verticalArrangement=Arrangement.spacedBy(12.dp)) {
+            Text("사업자등록증 사진",color=RegistrationV4.text,
+                fontWeight=FontWeight.SemiBold,fontSize=18.sp)
+            Text("글자가 잘 보이게, 네 모서리가 모두 나오게 찍어 주세요.",
+                color=RegistrationV4.secondary,fontSize=14.sp)
+            Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
+                .ownerQuietClick {
+                    showCertificateSheet=false
+                    try {
+                        val dir=File(ctx.filesDir,"owner-menu-captures").apply{mkdirs()}
+                        val file=File.createTempFile("registration-cert-", ".jpg",dir)
+                        certificateCapturePath=file.absolutePath
+                        val uri=FileProvider.getUriForFile(ctx,
+                            "${ctx.packageName}.owner.camera.provider",file)
+                        certificateCamera.launch(uri)
+                    } catch(e:Exception) {
+                        certificateCapturePath?.let {File(it).delete()}
+                        certificateCapturePath=null
+                        error="카메라를 열지 못했어요. 앨범에서 선택해 주세요."
+                    }
+                },verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(16.dp)) {
+                RegistrationGlyph("camera")
+                Text("바로 찍기",fontSize=16.sp,color=RegistrationV4.text)
+            }
+            Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
+                .ownerQuietClick {
+                    showCertificateSheet=false
+                    certificatePicker.launch(PickVisualMediaRequest(
+                        ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(16.dp)) {
+                RegistrationGlyph("picture")
+                Text("앨범에서 고르기",fontSize=16.sp,color=RegistrationV4.text)
+            }
+        }
+    }
     if(showAddressSheet)AlertDialog(onDismissRequest={showAddressSheet=false},
         title={Text("주소 검색 · Mock 예시")},
         text={
