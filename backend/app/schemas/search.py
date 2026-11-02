@@ -45,9 +45,10 @@ class SearchResultItem(BaseModel):
 
 
 class SearchBarsResponse(BaseModel):
-    query: str = Field(description="The query after trimming")
-    matchType: Literal["alias_exact", "brand", "partial", "none"] = Field(
-        description="The resolution step that produced the products"
+    query: str | None = Field(description="The query after trimming; null for a productId search")
+    matchType: Literal["alias_exact", "brand", "partial", "product", "none"] = Field(
+        description="The resolution step that produced the products; `product` for a productId search "
+        "that found its product"
     )
     matchedProducts: list[MatchedProductResponse] = Field(
         description="Every product the query resolved to, including ones no bar sells now. "
@@ -114,3 +115,4 @@ class NearbyBarsResponse(BaseModel):
     items: list[NearbyBarItem] = Field(
         description="Every active bar within the radius, nearest first; ties by barId. Never truncated."
     )
+

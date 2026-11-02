@@ -21,14 +21,15 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.normalize import normalize
 from app.models import BrandAlias, Product, ProductAlias
 
-MatchType = Literal["alias_exact", "brand", "partial", "none"]
+# "product" is a productId search that found its product; it runs none of the steps (app.services.search).
+MatchType = Literal["alias_exact", "brand", "partial", "product", "none"]
 
 PARTIAL_LIMIT = 10
 
 
 @dataclass
 class QueryResolution:
-    normalized_query: str
+    normalized_query: str | None  # None for a productId search
     match_type: MatchType
     # Each with `brand` loaded. Sorted by display name, except that exact product-alias matches come
     # first in the brand step and partial matches are sorted closest alias first.
