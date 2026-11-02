@@ -420,50 +420,53 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         (if(screen=="existing")known else !known)
                 }
                 if(subset.isEmpty() && screen=="existing") {
-                    Text("UI 검토용 예시 · 실제 등록 데이터가 아니에요.",
-                        color=V4Color.sub,fontSize=11.sp)
-                    val examples=listOf(
-                        Triple("Glenfiddich 12년","메뉴판 2 · 셋째 줄","메뉴판 16,000원 · 지금 14,000원"),
-                        Triple("Jack Daniel's Old No.7","메뉴판 1 · 둘째 줄","메뉴판 12,000원 · 지금 11,000원"),
-                        Triple("Macallan 12년 Double Cask","메뉴판 1 · 셋째 줄","22,000원"),
-                        Triple("Laphroaig 10년","메뉴판 1 · 넷째 줄","17,000원"),
-                        Triple("Buffalo Trace","메뉴판 2 · 여섯째 줄","13,000원"))
-                    examples.forEach { (name,detail,price) ->
-                        Column(Modifier.fillMaxWidth().padding(vertical=2.dp)) {
-                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
-                                Text(name,color=V4Color.text,fontSize=17.sp,
+                    if(BuildConfig.DEBUG) {
+                        Text("UI 검토용 예시 · 실제 등록 데이터가 아니에요.",
+                            color=V4Color.sub,fontSize=11.sp)
+                        val examples=listOf(
+                            Triple("Glenfiddich 12년","메뉴판 2 · 셋째 줄",16000 to 14000),
+                            Triple("Jack Daniel's Old No.7","메뉴판 1 · 둘째 줄",12000 to 11000),
+                            Triple("Macallan 12년 Double Cask","메뉴판 1 · 셋째 줄",22000 to 22000),
+                            Triple("Laphroaig 10년","메뉴판 1 · 넷째 줄",17000 to 17000),
+                            Triple("Buffalo Trace","메뉴판 2 · 여섯째 줄",13000 to 13000)
+                        )
+                        examples.forEach { (name,source,prices)->
+                            V4ExistingPriceRow(name,source,prices.first,prices.second)
+                        }
+                    } else Text("이미 등록된 메뉴가 없어요.",color=V4Color.sub)
+                } else if(subset.isEmpty()) {
+                    Text("해당하는 메뉴가 없어요.",color=V4Color.sub)
+                }
+                subset.forEach { entry->
+                    val line=entry.value.second
+                    val matchingId=(listOfNotNull(line.suggestedProductId)+
+                        line.candidateProductIds).firstOrNull{ id->
+                        s.menuItems.any{it.barId==job.barId && it.productId==id}
+                    }
+                    val registered=s.menuItems.firstOrNull{it.barId==job.barId &&
+                        it.productId==matchingId}
+                    val found=line.decision?.correctedOptions?.firstOrNull()?.priceKrw ?:
+                        line.options.firstOrNull()?.priceKrw
+                    if(screen=="existing") {
+                        V4ExistingPriceRow(line.sourceText,
+                            "메뉴판 ${entry.value.first.imageOrder} · 인식한 줄",
+                            found,registered?.options?.firstOrNull()?.priceKrw)
+                    } else {
+                        Column(Modifier.fillMaxWidth().clickable{
+                            visit("line",entry.index)
+                        }.padding(vertical=2.dp)) {
+                            Row(Modifier.fillMaxWidth(),
+                                horizontalArrangement=Arrangement.SpaceBetween,
+                                verticalAlignment=Alignment.CenterVertically) {
+                                Text(line.sourceText,color=V4Color.text,fontSize=17.sp,
                                     modifier=Modifier.weight(1f))
-                                Text(price,color=V4Color.sub,fontSize=11.sp)
+                                Text(found?.takeIf{it>0}?.let{"%,d원".format(it)}
+                                    ?: "가격 확인 필요",color=V4Color.text,fontSize=13.sp)
                             }
-                            Text(detail,color=V4Color.sub,fontSize=11.sp)
+                            Text("메뉴판 ${entry.value.first.imageOrder} · 신규 등록 후보",
+                                color=V4Color.sub,fontSize=11.sp)
                             HorizontalDivider(color=V4Color.line)
                         }
-                    }
-                    St8Card {
-                        Text("✎  가격은 메뉴 직접 편집에서 바꿔요",
-                            color=V4Color.text,fontSize=12.sp)
-                        Text("확인한 다음, 뒤로 화면에서 바로 갈 수 있어요.",
-                            color=V4Color.sub,fontSize=10.sp)
-                    }
-                } else if(subset.isEmpty())Text("해당하는 메뉴가 없어요.",color=V4Color.sub)
-                subset.forEach{entry->
-                    Column(Modifier.fillMaxWidth().clickable{
-                        visit("line",entry.index)
-                    }.padding(vertical=2.dp)) {
-                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
-                            verticalAlignment=Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f)) {
-                                Text(entry.value.second.sourceText,color=V4Color.text,fontSize=17.sp)
-                                Text("메뉴판 "+entry.value.first.imageOrder+" · "+
-                                    (if(screen=="existing")"기존 등록 메뉴" else "신규 등록 후보"),
-                                    color=V4Color.sub,fontSize=12.sp)
-                            }
-                            val price=entry.value.second.decision?.correctedOptions?.firstOrNull()?.priceKrw
-                                ?: entry.value.second.options.firstOrNull()?.priceKrw
-                            Text(if(price!=null && price>0)"%,d원".format(price) else "가격 확인 필요",
-                                color=V4Color.text,fontSize=13.sp)
-                        }
-                        HorizontalDivider(color=V4Color.line)
                     }
                 }
             } else if(screen=="catalog" && pair!=null) {
@@ -1019,7 +1022,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         Text("나중에 하기",color=V4Color.sub)
                     }
                 }
-                "auto","existing"->St8Button("요약으로") {visit("summary")}
+                "auto"->St8Button("요약으로") {visit("summary")}
+                "existing"->{
+                    V4ExistingHint()
+                    Spacer(Modifier.height(9.dp))
+                    St8Secondary("요약으로") {visit("summary")}
+                }
                 "catalog"->St8Secondary("찾는 메뉴가 없어요, 새로 등록") {visit("new")}
                 "line"->{
                     if(pair!=null) {
