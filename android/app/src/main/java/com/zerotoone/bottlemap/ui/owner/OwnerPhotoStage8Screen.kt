@@ -237,6 +237,16 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             visit(page,target)
         }
     }
+    if(showRestartWarning) AlertDialog(
+        onDismissRequest={showRestartWarning=false},
+        title={Text("처음부터 검수할까요?")},
+        text={Text("첫 번째 메뉴부터 다시 확인해요. 이미 저장한 결정은 지워지지 않으며, 변경하면 새 결정으로 저장돼요.")},
+        confirmButton={TextButton(onClick={
+            showRestartWarning=false
+            visit("line",0)
+        }){Text("처음부터 검수")}},
+        dismissButton={TextButton(onClick={showRestartWarning=false}){Text("돌아가기")}}
+    )
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         val back: () -> Unit = { backPage() }
         if(screen=="catalog") {
@@ -267,7 +277,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             return@Column
         }
         LaunchedEffect(job.status) {
-            if(job.status==MockImportStatus.APPLIED)screen="done"
+            if(job.status==MockImportStatus.APPLIED)visit("done")
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(19.dp),
             verticalArrangement=Arrangement.spacedBy(15.dp)) {
@@ -318,12 +328,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 St8Card {
                     Text("자동 인식 신규 메뉴 "+counts.newCandidates+"줄 ›",
                         color=V4Color.text,fontWeight=FontWeight.Bold,
-                        modifier=Modifier.fillMaxWidth().clickable {screen="auto"})
+                        modifier=Modifier.fillMaxWidth().clickable {visit("auto")})
                 }
                 St8Card {
                     Text("이미 등록된 메뉴 "+counts.existing+"줄 ›",
                         color=V4Color.text,fontWeight=FontWeight.Bold,
-                        modifier=Modifier.fillMaxWidth().clickable {screen="existing"})
+                        modifier=Modifier.fillMaxWidth().clickable {visit("existing")})
                 }
             } else if(screen=="auto" || screen=="existing") {
                 Text(if(screen=="auto")"새로 더할 메뉴 "+counts!!.newCandidates+"줄"
@@ -369,7 +379,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 } else if(subset.isEmpty())Text("해당하는 메뉴가 없어요.",color=V4Color.sub)
                 subset.forEach{entry->
                     Column(Modifier.fillMaxWidth().clickable{
-                        position=entry.index;screen="line"
+                        visit("line",entry.index)
                     }.padding(vertical=2.dp)) {
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                             verticalAlignment=Alignment.CenterVertically) {
@@ -406,7 +416,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             selectedProductId=product.productId
                             val line=pair.second
                             if(line.options.isEmpty() || line.options.any{it.priceKrw<=0}) {
-                                screen="price"
+                                visit("price")
                             } else runCatching {
                                 vm.review(job.menuImportId,line.extractedItemId,
                                     job.reviewVersion,MockReviewDecision(
@@ -464,7 +474,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             V4Color.primary else V4Color.line,RoundedCornerShape(16.dp))
                         .clickable {
                             if(line.options.isEmpty() || line.options.any{it.priceKrw<=0}) {
-                                selectedProductId=product.productId;screen="price"
+                                selectedProductId=product.productId;visit("price")
                             } else runCatching {vm.review(job.menuImportId,line.extractedItemId,
                                 job.reviewVersion,MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
                                     productId=product.productId,
@@ -501,7 +511,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 if(candidates.size>1 || candidates.isEmpty())
                     St8Secondary("⌕  목록에 없어요") {
                         catalogQuery="잭다니엘"
-                        screen="catalog"
+                        visit("catalog")
                     }
             } else if((screen=="edit" || screen=="new") && pair!=null) {
                 val line=pair.second
@@ -638,7 +648,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                 category=chosenCategory)
                             if(line.options.isEmpty() || line.options.any{it.priceKrw<=0}) {
                                 pendingNewDraft=draft
-                                screen="price"
+                                visit("price")
                             } else runCatching {
                                 vm.review(job.menuImportId,line.extractedItemId,
                                     job.reviewVersion,MockReviewDecision(
@@ -879,7 +889,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 val skipped=all.count {it.second.decision?.kind in listOf(
                     MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)}
                 St8CountCard("새로 추가",selected,"건너뜀",skipped,"개")
-                TextButton(onClick={screen="results"}) {
+                TextButton(onClick={visit("results")}) {
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
                         Text("줄별 결과 보기",color=V4Color.primary,fontSize=14.sp)
                         Text("›",color=V4Color.primary,fontSize=18.sp)
@@ -935,13 +945,13 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     St8Button(if(counts!!.reviewed>0)counts.remaining.toString()+"줄 이어서 확인"
                         else counts.remaining.toString()+"줄 확인 시작",
                         enabled=counts.remaining>0) {next()}
-                    if(counts.remaining==0)St8Button("검수 결과 확인"){screen="publish"}
-                    TextButton(onClick={screen="incomplete"},modifier=Modifier.fillMaxWidth()){
+                    if(counts.remaining==0)St8Button("검수 결과 확인"){visit("publish")}
+                    TextButton(onClick={visit("incomplete")},modifier=Modifier.fillMaxWidth()){
                         Text("나중에 하기",color=V4Color.sub)
                     }
                 }
-                "auto","existing"->St8Button("요약으로") {screen="summary"}
-                "catalog"->St8Secondary("찾는 메뉴가 없어요, 새로 등록") {screen="new"}
+                "auto","existing"->St8Button("요약으로") {visit("summary")}
+                "catalog"->St8Secondary("찾는 메뉴가 없어요, 새로 등록") {visit("new")}
                 "line"->{
                     if(pair!=null) {
                         val line=pair.second
@@ -959,14 +969,14 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             St8Button("맞아요") {
                                 val id=ids.single()
                                 if(line.options.isEmpty() || line.options.any {it.priceKrw<=0}) {
-                                    selectedProductId=id;screen="price"
+                                    selectedProductId=id;visit("price")
                                 } else runCatching {vm.review(job.menuImportId,line.extractedItemId,
                                     job.reviewVersion,MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
                                         productId=id,correctedOptions=line.options))}
                                     .onSuccess{error=null;next()}.onFailure{error=it.message}
                             }
                             St8Secondary("다른 메뉴예요") {
-                                catalogQuery="잭다니엘";screen="catalog"
+                                catalogQuery="잭다니엘";visit("catalog")
                             }
                         }
                     }
@@ -974,65 +984,65 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                         verticalAlignment=Alignment.CenterVertically) {
                         TextButton(onClick={
-                            if(position>0){position--;screen="line"}else screen="summary"
+                            if(position>0)visit("line",position-1) else backPage()
                         }){Text("‹ 이전",color=V4Color.sub)}
                         Text("남은 확인 "+counts!!.remaining+"개",color=V4Color.sub,fontSize=12.sp)
                         TextButton(onClick={
-                            if(position+1<all.size){position++;screen="line"}
-                            else screen="summary"
+                            if(position+1<all.size)visit("line",position+1)
+                            else backPage()
                         }){Text("다음 ›",color=V4Color.primary)}
                     }
                 }
-                "price"->TextButton(onClick={screen="line"}) {
+                "price"->TextButton(onClick={visit("line")}) {
                     Text("‹ 이전",color=V4Color.sub)
                 }
                 "edit","new"->{
                     HorizontalDivider(color=V4Color.line)
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                         verticalAlignment=Alignment.CenterVertically) {
-                        TextButton(onClick={screen="line"}) {
+                        TextButton(onClick={visit("line")}) {
                             Text("‹ 이전",color=V4Color.sub)
                         }
                         Text("남은 확인 ${counts!!.remaining}개",color=V4Color.sub,
                             fontSize=12.sp)
                         TextButton(onClick={
-                            if(position+1<all.size){position++;screen="line"}
-                            else screen="summary"
+                            if(position+1<all.size){position++;visit("line")}
+                            else visit("summary")
                         }) {Text("다음 ›",color=V4Color.primary)}
                     }
                 }
                 "incomplete"->{
                     St8Button("${counts!!.remaining}줄 이어서 확인",enabled=counts.remaining>0){
                         val pos=all.indexOfFirst {it.second.decision==null}
-                        if(pos>=0){position=pos;screen="line"}
+                        if(pos>=0)visit("line",pos)
                     }
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){
                         Box(Modifier.weight(1f)){
                             St8Secondary("나중에 하기",onHome)
                         }
                         Box(Modifier.weight(1f)){
-                            St8Secondary("처음부터 검수") {position=0;screen="line"}
+                            St8Secondary("처음부터 검수") {showRestartWarning=true}
                         }
                     }
                 }
-                "results"->St8Button("돌아가기"){screen="publish"}
+                "results"->St8Button("돌아가기"){visit("publish")}
                 "publish"->{
                     val accepted=all.count{it.second.decision?.kind in listOf(
                         MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}
                     St8Button("+  메뉴 ${accepted}개 게시",enabled=counts!!.remaining==0){
                         if(BuildConfig.DEBUG && demoPublishError){
                             demoPublishError=false
-                            screen="publishFailed"
+                            visit("publishFailed")
                         } else runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
-                            .onSuccess{error=null;screen="done"}
-                            .onFailure{error=it.message;screen="publishFailed"}
+                            .onSuccess{error=null;visit("done")}
+                            .onFailure{error=it.message;visit("publishFailed")}
                     }
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                         Box(Modifier.weight(1f)) {
                             St8Secondary("나중에 하기",onHome)
                         }
                         Box(Modifier.weight(1f)) {
-                            St8Secondary("처음부터 검수") {position=0;screen="line"}
+                            St8Secondary("처음부터 검수") {showRestartWarning=true}
                         }
                     }
                 }
@@ -1045,8 +1055,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 "publishFailed"->{
                     St8Button("+  다시 시도") {
                         runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
-                            .onSuccess{error=null;screen="done"}
-                            .onFailure{error=it.message;screen="publishFailed"}
+                            .onSuccess{error=null;visit("done")}
+                            .onFailure{error=it.message;visit("publishFailed")}
                     }
                     TextButton(onClick=onHome,modifier=Modifier.fillMaxWidth()) {
                         Text("나중에 하기",color=V4Color.sub)
