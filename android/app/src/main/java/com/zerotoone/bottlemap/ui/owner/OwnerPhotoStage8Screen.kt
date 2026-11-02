@@ -65,6 +65,21 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         colors=OutlinedTextFieldDefaults.colors(focusedTextColor=V4Color.text,
             unfocusedTextColor=V4Color.text,focusedBorderColor=V4Color.primary))
 }
+@Composable private fun St8NewField(title:String, value:String,
+    change:(String)->Unit, placeholder:String="",digits:Boolean=false) {
+    Column(Modifier.fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(7.dp)) {
+        Text(title,color=V4Color.sub,fontSize=12.sp)
+        OutlinedTextField(value=value,onValueChange={
+            change(if(digits)it.filter(Char::isDigit) else it)
+        },modifier=Modifier.fillMaxWidth(),singleLine=true,
+            placeholder={Text(placeholder,fontSize=15.sp)},
+            colors=OutlinedTextFieldDefaults.colors(
+                focusedTextColor=V4Color.text,unfocusedTextColor=V4Color.text,
+                focusedBorderColor=V4Color.primary,unfocusedBorderColor=V4Color.line,
+                focusedContainerColor=V4Color.background,
+                unfocusedContainerColor=V4Color.background))
+    }
+}
 @Composable private fun St8Card(content:@Composable ColumnScope.()->Unit) {
     Column(Modifier.fillMaxWidth().background(V4Color.surface,RoundedCornerShape(12.dp))
         .border(1.dp,V4Color.line,RoundedCornerShape(12.dp)).padding(14.dp),
@@ -350,8 +365,22 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
             } else if((screen=="edit" || screen=="new") && pair!=null) {
                 val line=pair.second
-                Text(if(screen=="edit")"가격과 용량을 확인해 주세요" else "새로 등록할게요",
-                    color=V4Color.text,fontSize=24.sp,fontWeight=FontWeight.Bold)
+                var photoOpen by remember {mutableStateOf(false)}
+                St8RecognizedStrip(pair.first,line){photoOpen=true}
+                if(photoOpen)Stage8SourcePhoto(pair.first,line.sourceBox){photoOpen=false}
+                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+                    verticalAlignment=Alignment.CenterVertically) {
+                    Text(if(screen=="edit")"가격과 용량을 확인해 주세요" else "새로 등록할게요",
+                        color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold)
+                    OutlinedButton(onClick={chosenCategory="otherAlcohol"},
+                        modifier=Modifier.height(34.dp),
+                        contentPadding=PaddingValues(horizontal=10.dp),
+                        border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line),
+                        colors=ButtonDefaults.outlinedButtonColors(
+                            containerColor=V4Color.surface,contentColor=V4Color.sub)) {
+                        Text("위스키가 아니에요",fontSize=11.sp)
+                    }
+                }
                 var name by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.name.orEmpty())
                 }
