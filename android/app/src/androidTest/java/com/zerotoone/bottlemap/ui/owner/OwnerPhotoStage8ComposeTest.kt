@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.longClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zerotoone.bottlemap.data.owner.*
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -147,6 +148,45 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("다음 ›").performClick()
         compose.onNodeWithText("‹ 이전").assertExists()
         compose.onNodeWithText("다음 ›").assertDoesNotExist()
+    }
+
+    @Test fun summaryAlwaysOpensFirstUnreviewedHakushuRatherThanSecondLine() {
+        showLines(listOf(
+            MockExtractedLine("h","하쿠슈DR",MockLineKind.PRODUCT,
+                suggestedProductId="demo-canonical",
+                options=listOf(MockMenuOption("h1",label="잔",pourMl=30,priceKrw=19000))),
+            MockExtractedLine("s","시그나토리 쿨일라 13",MockLineKind.PRODUCT,
+                options=listOf(MockMenuOption("s1",label="잔",pourMl=30,priceKrw=20000)))
+        ))
+        compose.onNodeWithText("하쿠슈DR",substring=true).assertExists()
+        compose.onNodeWithText("이 메뉴가 맞나요?").assertExists()
+        compose.onNodeWithText("새로 등록할게요").assertDoesNotExist()
+    }
+
+    @Test fun reviewPagerLaterButtonReturnsWithoutDecidingCurrentLine() {
+        val repository=LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        repository.saveBrand(MockBrand("b","브랜드"))
+        repository.saveCatalogProduct(MockCatalogProduct("p","b","첫 상품"))
+        val id=repository.queuePhotoImport("fixture-bar",listOf(
+            MockPhoto("ph","file:///mock/ph.jpg",MockPhotoKind.MENU_CAPTURE)))
+        repository.finishPhotoImport(id,MockPhotoExtractionSource {listOf(
+            MockExtractedLine("line","첫 상품",MockLineKind.PRODUCT,
+                suggestedProductId="p",options=listOf(
+                    MockMenuOption("o",label="잔",pourMl=30,priceKrw=19000)))
+        )})
+        val vm=OwnerMockViewModel(repository)
+        var later=false
+        compose.setContent{MaterialTheme {
+            OwnerPhotoStage8Screen(vm.state.collectAsState().value,vm,{}, {later=true})
+        }}
+        compose.onNodeWithText("1줄 확인 시작").performClick()
+        compose.onNodeWithText("나중에 하기").performClick()
+        compose.runOnIdle {
+            assert(later)
+            val snap=(vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(null,snap.imports.last().images.single().lines.single().decision)
+        }
     }
 
 }
