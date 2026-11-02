@@ -24,6 +24,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.sp
@@ -118,6 +120,73 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
             Text(secondLabel,color=V4Color.sub,fontSize=14.sp)
             Text("${secondCount}${secondSuffix}",color=V4Color.text,fontWeight=FontWeight.Bold)
+        }
+    }
+}
+@Composable private fun V4PencilIcon(modifier: Modifier = Modifier.size(22.dp),
+    color: Color=V4Color.primary) {
+    Canvas(modifier) {
+        val u=size.width/24f
+        drawLine(color,Offset(5f*u,17f*u),Offset(17f*u,5f*u),
+            strokeWidth=2.1f*u,cap=androidx.compose.ui.graphics.StrokeCap.Round)
+        drawLine(color,Offset(7.5f*u,19f*u),Offset(19.5f*u,7f*u),
+            strokeWidth=2.1f*u,cap=androidx.compose.ui.graphics.StrokeCap.Round)
+        drawLine(color,Offset(5f*u,17f*u),Offset(7.5f*u,19f*u),
+            strokeWidth=2.1f*u)
+        drawLine(color,Offset(17f*u,5f*u),Offset(19.5f*u,7f*u),
+            strokeWidth=2.1f*u)
+    }
+}
+@Composable private fun V4PriceBadge(label: String, color:Color=V4Color.primary) {
+    Box(Modifier.background(Color(0xFF4A382A),RoundedCornerShape(100))
+        .padding(horizontal=9.dp,vertical=3.dp)) {
+        Text(label,color=color,fontSize=11.sp,maxLines=1)
+    }
+}
+@Composable private fun V4ReviewStateBadge(label: String) {
+    val isSkip=label=="건너뜀"
+    Box(Modifier.background(if(isSkip)Color(0xFF423B36) else Color(0xFF463D34),
+        RoundedCornerShape(100)).padding(horizontal=8.dp,vertical=3.dp)){
+        Text(label,color=V4Color.sub,fontSize=11.sp,maxLines=1)
+    }
+}
+@Composable private fun V4ExistingPriceRow(
+    name:String,source:String,menuPrice:Int?,currentPrice:Int?,
+) {
+    val different=menuPrice!=null && currentPrice!=null && menuPrice!=currentPrice
+    Row(Modifier.fillMaxWidth().padding(vertical=7.dp),
+        verticalAlignment=Alignment.CenterVertically,
+        horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(6.dp)) {
+            Text(name,color=V4Color.text,fontSize=16.sp,maxLines=2)
+            Row(verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                Text(source,color=V4Color.sub,fontSize=11.sp)
+                if(different) V4PriceBadge("가격이 달라요",Color(0xFFD5B991))
+            }
+        }
+        Column(horizontalAlignment=Alignment.End,verticalArrangement=Arrangement.spacedBy(6.dp)){
+            Text(menuPrice?.let { "메뉴판 %,d원".format(it) } ?:
+                currentPrice?.let{"%,d원".format(it)} ?: "가격 확인 필요",
+                color=V4Color.text,fontSize=13.sp)
+            if(different)Text("지금 %,d원".format(currentPrice),
+                color=V4Color.sub,fontSize=13.sp,
+                textDecoration=TextDecoration.LineThrough)
+        }
+    }
+    HorizontalDivider(color=V4Color.line)
+}
+@Composable private fun V4ExistingHint() {
+    Row(Modifier.fillMaxWidth().border(1.dp,Color(0xFF75583D),
+        RoundedCornerShape(12.dp)).background(Color(0xFF302822),RoundedCornerShape(12.dp))
+        .padding(15.dp),horizontalArrangement=Arrangement.spacedBy(15.dp),
+        verticalAlignment=Alignment.CenterVertically) {
+        V4PencilIcon(Modifier.size(22.dp))
+        Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)){
+            Text("가격은 메뉴 직접 편집에서 바꿔요",
+                color=V4Color.text,fontWeight=FontWeight.Bold,fontSize=14.sp)
+            Text("확인을 다 끝낸 뒤 완료 화면에서 바로 갈 수 있어요.",
+                color=V4Color.sub,fontSize=11.sp)
         }
     }
 }
