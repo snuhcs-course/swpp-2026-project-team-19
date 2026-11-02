@@ -2,6 +2,9 @@ package com.zerotoone.bottlemap.ui.owner
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.os.Build
 import android.net.Uri
 import com.zerotoone.bottlemap.data.owner.MockPhoto
 import com.zerotoone.bottlemap.data.owner.MockPhotoKind
@@ -56,6 +59,37 @@ internal class OwnerMenuPhotoStore(context: Context) {
 
     fun size(photo: MockPhoto): Long = fileFor(photo).length()
 
+    /** HEIC/HEIF is an Android picker input type, not an upload format.
+     * The app stores only re-encoded JPEG, bounded to 4096px on the long edge.
+     * ImageDecoder applies source orientation before conversion.
+     */
+    private fun convertHeicToJpeg(uri: Uri, output: File): Long {
+        require(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            "이 기기에서 HEIC 사진을 변환할 수 없어요. JPEG로 변환해 다시 선택해 주세요."
+        }
+        val bitmap = try {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(app.contentResolver,uri)) {
+                    decoder, info, _ ->
+                val largest=maxOf(info.size.width,info.size.height)
+                require(largest>0) { "사진 크기를 읽을 수 없어요." }
+                decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE)
+                if(largest>4096)decoder.setTargetSampleSize((largest+4095)/4096)
+            }
+        } catch (e: Exception) {
+            throw IllegalArgumentException("HEIC 사진을 변환하지 못했어요. JPEG로 바꿔 주세요.",e)
+        }
+        try {
+            for(quality in listOf(85,75,65)) {
+                val encoded=FileOutputStream(output).use {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG,quality,it)
+                }
+                require(encoded) { "사진을 JPEG로 저장하지 못했어요." }
+                if(output.length() in 1..OWNER_MENU_MAX_PHOTO_BYTES)return output.length()
+            }
+        } finally { bitmap.recycle() }
+        error("변환한 사진이 10MB를 초과해요. 더 작은 사진을 선택해 주세요.")
+    }
+
     private fun fileFor(photo: MockPhoto): File {
         val path = Uri.parse(photo.uri).path ?: error("사진 경로가 없어요.")
         val file = File(path).canonicalFile
@@ -77,37 +111,44 @@ internal class OwnerMenuPhotoStore(context: Context) {
         try {
             val additions = sources.map { uri ->
                 val declared = app.contentResolver.getType(uri)
-                require(declared == null || declared == "image/jpeg" || declared == "image/png") {
-                    "JPEG 또는 PNG 사진만 올릴 수 있어요."
+                val heic=declared in setOf("image/heic","image/heif",
+                    "image/heic-sequence","image/heif-sequence")
+                require(declared == null || declared == "image/jpeg" ||
+                    declared == "image/png" || heic) {
+                    "JPEG, PNG 또는 HEIC 사진을 선택해 주세요."
                 }
                 val photoId = UUID.randomUUID().toString()
                 val temp = File(dir, "$photoId.part")
                 created += temp
-                val length = app.contentResolver.openInputStream(uri)?.use { source ->
-                    FileOutputStream(temp).use { sink ->
-                        val buffer = ByteArray(16 * 1024)
-                        var count = 0L
-                        while (true) {
-                            val n = source.read(buffer)
-                            if (n < 0) break
-                            count += n
-                            require(count <= OWNER_MENU_MAX_PHOTO_BYTES) {
-                                "사진 한 장은 최대 10MB까지 가능해요."
+                val length = if(heic) convertHeicToJpeg(uri,temp) else
+                    app.contentResolver.openInputStream(uri)?.use { source ->
+                        FileOutputStream(temp).use { sink ->
+                            val buffer=ByteArray(16*1024)
+                            var count=0L
+                            while(true) {
+                                val n=source.read(buffer)
+                                if(n<0)break
+                                count+=n
+                                require(count<=OWNER_MENU_MAX_PHOTO_BYTES) {
+                                    "사진 한 장은 최대 10MB까지 가능해요."
+                                }
+                                require(total+count<=OWNER_MENU_MAX_TOTAL_BYTES) {
+                                    "전체 사진은 60MB 이하여야 해요."
+                                }
+                                sink.write(buffer,0,n)
                             }
-                            require(total + count <= OWNER_MENU_MAX_TOTAL_BYTES) {
-                                "전체 사진은 60MB 이하여야 해요."
-                            }
-                            sink.write(buffer, 0, n)
+                            count
                         }
-                        count
-                    }
-                } ?: error("사진 URI를 읽을 수 없어요. 다시 선택해 주세요.")
+                    } ?: error("사진 URI를 읽을 수 없어요. 다시 선택해 주세요.")
+                require(total+length<=OWNER_MENU_MAX_TOTAL_BYTES) {
+                    "전체 사진은 60MB 이하여야 해요."
+                }
                 require(length > 0) { "빈 사진은 등록할 수 없어요." }
                 val magic = temp.inputStream().use { input ->
                     ByteArray(8).let { it.copyOf(input.read(it).coerceAtLeast(0)) }
                 }
                 val signature = menuPhotoSignature(magic)
-                require(signature != null && (declared == null || declared == signature)) {
+                require(signature != null && (heic || declared == null || declared == signature)) {
                     "JPEG 또는 PNG 사진만 올릴 수 있어요."
                 }
                 val dimensions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
