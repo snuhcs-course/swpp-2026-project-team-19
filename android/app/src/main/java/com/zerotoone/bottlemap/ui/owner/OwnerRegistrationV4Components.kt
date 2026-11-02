@@ -199,6 +199,13 @@ internal fun RegistrationGlyph(kind:String,modifier:Modifier=Modifier,color:Colo
                 path.moveTo(w*.5f,h*.46f);path.lineTo(w*.5f,h*.72f);stroke()
                 drawCircle(color,w*.045f,center=androidx.compose.ui.geometry.Offset(w*.5f,h*.30f))
             }
+            "delete" -> {
+                path.moveTo(w*.875f,h*.25f);path.lineTo(w*.333f,h*.25f)
+                path.lineTo(w*.125f,h*.5f);path.lineTo(w*.333f,h*.75f)
+                path.lineTo(w*.875f,h*.75f);path.close()
+                path.moveTo(w*.5f,h*.4167f);path.lineTo(w*.6667f,h*.5833f)
+                path.moveTo(w*.6667f,h*.4167f);path.lineTo(w*.5f,h*.5833f);stroke()
+            }
             "remove" -> {
                 path.moveTo(w*.25f,h*.25f);path.lineTo(w*.75f,h*.75f)
                 path.moveTo(w*.75f,h*.25f);path.lineTo(w*.25f,h*.75f);stroke()
@@ -336,7 +343,8 @@ internal fun RegistrationDigitsKeypad(
                             if(key=="⌫") onDelete() else onDigit(key)
                         }) else Modifier),
                         contentAlignment=Alignment.Center) {
-                        Text(key,color=RegistrationV4.text,fontSize=20.sp,
+                        if(key=="⌫")RegistrationGlyph("delete",color=RegistrationV4.text,size=22.dp)
+                        else Text(key,color=RegistrationV4.text,fontSize=20.sp,
                             fontWeight=FontWeight.Medium,lineHeight=28.sp)
                     }
                 }
