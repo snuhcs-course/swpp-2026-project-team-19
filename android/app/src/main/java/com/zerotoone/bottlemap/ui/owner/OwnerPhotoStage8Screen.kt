@@ -986,21 +986,57 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 Box(Modifier.align(Alignment.CenterHorizontally).size(72.dp)
                     .background(Color(0xFF245740),RoundedCornerShape(50)),
                     contentAlignment=Alignment.Center) {
-                    Text("✓",color=Color.White,fontSize=36.sp)
+                    V4StrokeCheck(Modifier.size(32.dp),Color(0xFFE6FFF2))
                 }
-                Text("메뉴에 ${all.count{it.second.decision?.kind in listOf(
-                    MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}}개를 더했어요",
+                val added=all.count{it.second.decision?.kind in listOf(
+                    MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}
+                val skipped=all.count{it.second.decision?.kind in listOf(
+                    MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)}
+                Text("메뉴에 ${added}개를 더했어요",
                     color=V4Color.text,fontSize=23.sp,fontWeight=FontWeight.Bold,
                     modifier=Modifier.align(Alignment.CenterHorizontally))
-                Text((s.bars.firstOrNull{it.barId==barId}?.name ?: "매장")+" · 메뉴 게시 완료",color=V4Color.sub,
-                    fontSize=12.sp,modifier=Modifier.align(Alignment.CenterHorizontally))
-                St8CountCard("새로 더한 메뉴",all.count{it.second.decision?.kind in listOf(
-                    MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)},
-                    "건너뛴 줄",all.count{it.second.decision?.kind in listOf(
-                    MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)},"개")
+                Text((s.bars.firstOrNull{it.barId==barId}?.name ?: "매장")+
+                    " · 메뉴 게시 완료",color=V4Color.sub,
+                    fontSize=13.sp,modifier=Modifier.align(Alignment.CenterHorizontally))
                 St8Card {
-                    Text("✎ 메뉴판과 가격이 다른 메뉴는 직접 편집에서 수정할 수 있어요.",
-                        color=V4Color.sub,fontSize=12.sp)
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
+                        Text("새로 더한 메뉴",color=V4Color.sub,fontSize=14.sp)
+                        Text("${added}개",color=V4Color.text,fontWeight=FontWeight.Bold)
+                    }
+                    HorizontalDivider(color=V4Color.line)
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
+                        Text("카탈로그에 새로 등록",color=V4Color.sub,fontSize=14.sp)
+                        Text("${all.count{it.second.decision?.kind==MockDecisionKind.CREATE_PRODUCT}}개",
+                            color=V4Color.text,fontWeight=FontWeight.Bold)
+                    }
+                    HorizontalDivider(color=V4Color.line)
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
+                        Text("건너뛴 줄",color=V4Color.sub,fontSize=14.sp)
+                        Text("${skipped}개",color=V4Color.text,fontWeight=FontWeight.Bold)
+                    }
+                }
+                val changed=all.count { (_,line)->
+                    val productId=line.decision?.productId ?: line.suggestedProductId
+                    val barPrice=s.menuItems.firstOrNull{
+                        it.barId==job.barId && it.productId==productId
+                    }?.options?.firstOrNull()?.priceKrw
+                    val imported=line.options.firstOrNull()?.priceKrw
+                    barPrice!=null && imported!=null && imported>0 && barPrice!=imported
+                }
+                Row(Modifier.fillMaxWidth()
+                    .border(1.dp,Color(0xFF75583D),RoundedCornerShape(12.dp))
+                    .background(Color(0xFF302822),RoundedCornerShape(12.dp))
+                    .clickable(onClick=onHome).padding(15.dp),
+                    verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(14.dp)){
+                    V4PencilIcon(Modifier.size(24.dp))
+                    Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                        Text("메뉴판과 가격이 다른 메뉴 ${changed}개",
+                            color=V4Color.text,fontWeight=FontWeight.Bold,fontSize=14.sp)
+                        Text("지금 메뉴 가격을 그대로 두었어요. 눌러서 바꿀 수 있어요.",
+                            color=V4Color.sub,fontSize=12.sp)
+                    }
+                    Text("›",color=V4Color.sub,fontSize=21.sp)
                 }
             } else if(screen=="publishFailed") {
                 Spacer(Modifier.height(20.dp))
