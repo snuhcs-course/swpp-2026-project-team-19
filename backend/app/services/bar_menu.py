@@ -26,14 +26,23 @@ def discount_response(option: MenuEntryOption, now: datetime) -> DiscountRespons
     )
 
 
-def get_bar_menu(session: Session, bar_id: str, *, may_see_inactive: Callable[[Bar], bool]) -> BarMenuResponse:
-    """The bar and its current menu board. An inactive bar looks missing unless may_see_inactive(bar),
-    which is asked only for inactive bars so that public requests cost no permission query."""
+def get_bar_menu(session: Session, bar_id: str, *, can_manage: Callable[[Bar], bool]) -> BarMenuResponse:
+    """The bar and its current menu board, as the caller may see it (spec 3.9). Unless can_manage(bar),
+    an inactive bar looks missing and sold-out items are left out; a manager gets them in place with
+    `soldOut = true`. can_manage is asked at most once and only when the answer matters, so a public
+    request for an active bar without sold-out items costs no permission query."""
     try:
         bar = session.get(Bar, UUID(bar_id))
     except ValueError:
         bar = None
-    if bar is None or (bar.status != BarStatus.ACTIVE and not may_see_inactive(bar)):
+    manages: list[bool] = []
+
+    def is_manager() -> bool:
+        if not manages:
+            manages.append(can_manage(bar))
+        return manages[0]
+
+    if bar is None or (bar.status != BarStatus.ACTIVE and not is_manager()):
         raise bar_not_found(bar_id)
 
     board = session.scalar(
@@ -47,6 +56,10 @@ def get_bar_menu(session: Session, bar_id: str, *, may_see_inactive: Callable[[B
             .selectinload(Product.brand),
         )
     )
+    entries = board.entries if board else []
+    # Customers are not shown what the bar does not sell right now (spec 3.14.8).
+    if any(e.bar_menu_item.sold_out_at is not None for e in entries) and not is_manager():
+        entries = [e for e in entries if e.bar_menu_item.sold_out_at is None]
     now = datetime.now(timezone.utc)
     items = [
         MenuItemResponse(
@@ -59,6 +72,7 @@ def get_bar_menu(session: Session, bar_id: str, *, may_see_inactive: Callable[[B
             category=entry.bar_menu_item.product.category,
             displayName=entry.display_name,
             sortOrder=entry.sort_order,
+            soldOut=entry.bar_menu_item.sold_out_at is not None,
             options=[
                 MenuOptionResponse(
                     menuEntryOptionId=option.id,
@@ -71,7 +85,7 @@ def get_bar_menu(session: Session, bar_id: str, *, may_see_inactive: Callable[[B
                 for option in entry.options
             ],
         )
-        for entry in (board.entries if board else [])
+        for entry in entries
     ]
     return BarMenuResponse(
         barId=bar.id,

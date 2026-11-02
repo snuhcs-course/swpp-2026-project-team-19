@@ -1,4 +1,5 @@
-"""Request bodies of the manual menu edit APIs (API spec 3.14.2 to 3.14.6).
+"""Request bodies of the manual menu edit APIs (API spec 3.14.2 to 3.14.6), the sold-out mark (3.14.8) and
+the sales info confirmation (3.14.9).
 
 The shapes, lengths and ranges are checked here. The rules that compare fields (duplicate
 options, discounts, exactly one of productId and newProduct, names that normalize to nothing)
@@ -8,7 +9,7 @@ are checked by app.services.menu_edit.check_request, still before the bar is loo
 from typing import Annotated
 from uuid import UUID
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictBool
 
 from app.schemas.menu_review import BrandDecision, NewProduct, ProductAliasInput
 
@@ -71,3 +72,11 @@ class MenuItemUpdateRequest(_Strict):
 
 class MenuResetRequest(_Strict):
     menuVersion: int | None = Field(description="`menuVersion` of the menu the edit was made on; null without one")
+
+
+class SoldOutRequest(_Strict):
+    soldOut: StrictBool = Field(description="true to mark the item sold out, false to put it back on sale")
+
+
+class MenuConfirmRequest(_Strict):
+    menuVersion: int | None = Field(description="`menuVersion` of the menu that was confirmed; null without one")

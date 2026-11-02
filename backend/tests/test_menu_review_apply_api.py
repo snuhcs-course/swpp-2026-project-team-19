@@ -10,6 +10,7 @@ from sqlalchemy.exc import OperationalError
 from app.core.errors import ApiError
 from app.core.security import Principal
 from app.models import (
+    BarMenuItem,
     BarStatus,
     Brand,
     ExtractedItem,
@@ -392,6 +393,26 @@ def test_a_publish_keeps_a_discount_only_where_the_option_is_unchanged(
         ("글렌피딕 12년", [(15, 9000, None), (30, 17000, 16000)]),
         ("Unknown Distillery 25", [(None, 45000, None)]),
     ]
+
+
+def test_a_publish_keeps_sold_out_on_kept_items_and_clears_it_on_removed_ones(
+    client, db_session, sample, operator, glenfiddich
+):
+    for item in db_session.scalars(select(BarMenuItem).where(BarMenuItem.bar_id == sample.bar.id)):
+        item.sold_out_at = datetime.now(timezone.utc)
+    db_session.flush()
+
+    applied(client, sample, valid_body(sample, glenfiddich), operator)
+
+    db_session.expire_all()
+    sold_out = {
+        item.product_id: item.sold_out_at is not None
+        for item in db_session.scalars(select(BarMenuItem).where(BarMenuItem.bar_id == sample.bar.id))
+    }
+    # The 12 stays on the board with new prices and stays sold out; the 15 was removed.
+    assert (sold_out[glenfiddich[12].id], sold_out[glenfiddich[15].id]) == (True, False)
+    # The Unknown Distillery 25 the review added starts on sale.
+    assert sum(sold_out.values()) == 1
 
 
 def test_the_bar_row_is_locked_before_the_import(client, db_session, sample, operator, glenfiddich):

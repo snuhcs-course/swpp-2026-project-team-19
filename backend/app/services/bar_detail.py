@@ -109,7 +109,16 @@ def _detail(
             if menu_import is not None
             else None
         ),
-        currentMenu=CurrentMenu(menuBoardId=board.id, publishedAt=board.published_at) if board is not None else None,
+        currentMenu=(
+            CurrentMenu(
+                menuBoardId=board.id,
+                menuVersion=board.version,
+                publishedAt=board.published_at,
+                confirmedAt=board.confirmed_at,
+            )
+            if board is not None
+            else None
+        ),
         owner=(
             BarOwnerSummary(
                 userId=owner[1].id,

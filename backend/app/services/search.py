@@ -61,7 +61,7 @@ def validate_search_input(query: str, lat: float | None, lng: float | None) -> s
 
 
 def _selling_entries(session: Session, product_ids: list[UUID]):
-    """(entry with options, product_id, bar, published_at) for products on an active bar's current board."""
+    """(entry with options, product_id, bar, published_at) for products on sale on an active bar's current board."""
     query = (
         select(MenuBoardEntry, BarMenuItem.product_id, Bar, MenuBoard.published_at)
         .join(MenuBoard, MenuBoard.id == MenuBoardEntry.menu_board_id)
@@ -70,6 +70,8 @@ def _selling_entries(session: Session, product_ids: list[UUID]):
         .where(
             BarMenuItem.product_id.in_(product_ids),
             BarMenuItem.bar_id == MenuBoard.bar_id,
+            # Sold-out items are hidden from every caller of this public API (spec 3.10.2).
+            BarMenuItem.sold_out_at.is_(None),
             Bar.status == BarStatus.ACTIVE,
         )
         .options(selectinload(MenuBoardEntry.options))

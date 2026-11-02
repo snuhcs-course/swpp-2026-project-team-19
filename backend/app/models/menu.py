@@ -21,7 +21,8 @@ from app.models.catalog import Product
 
 
 class BarMenuItem(Base):
-    """A product a bar has sold. Kept when a later board drops it; board membership decides visibility."""
+    """A product a bar has sold. Kept when a later board drops it; board membership decides whether it is
+    on the menu, and `sold_out_at` whether customers see it."""
 
     __tablename__ = "bar_menu_items"
     __table_args__ = (
@@ -33,6 +34,9 @@ class BarMenuItem(Base):
     product_id: Mapped[UUID] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("products.id"), nullable=False, index=True
     )
+    # Set while the item is sold out, null while it is on sale. Stock state, not menu content: it lives
+    # here because these rows survive board rewrites, and it is cleared when the item leaves the board.
+    sold_out_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -57,6 +61,12 @@ class MenuBoard(Base):
     # Raised by every review publish and manual edit; a manual edit must send the version it read.
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default=text("1"))
     published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    # When an owner or operator last confirmed the menu is still accurate; publishing does not change it.
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Who confirmed; null when never confirmed or for a temporary-login operator without a users row.
+    confirmed_by_user_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
 
     entries: Mapped[list["MenuBoardEntry"]] = relationship(
         back_populates="menu_board",

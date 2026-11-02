@@ -11,13 +11,20 @@ from app.models import Bar
 from app.schemas.bar import BarDetail, BarListResponse, BarUpdateInput
 from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.menu import BarMenuResponse
-from app.schemas.menu_edit import MenuItemAddRequest, MenuItemUpdateRequest, MenuResetRequest
+from app.schemas.menu_edit import (
+    MenuConfirmRequest,
+    MenuItemAddRequest,
+    MenuItemUpdateRequest,
+    MenuResetRequest,
+    SoldOutRequest,
+)
 from app.schemas.menu_import import MenuImportListResponse
 from app.services.bar_access import can_manage_bar, is_operator
 from app.services.bar_admin import BarStatusFilter, ImportStatusFilter, list_bars, list_menu_imports
 from app.services.bar_detail import get_bar_detail, update_bar
 from app.services.bar_menu import get_bar_menu
 from app.services.menu_edit import add_menu_item, check_request, delete_menu_item, reset_menu, update_menu_item
+from app.services.menu_status import confirm_menu, set_sold_out
 from app.services.serializable import SessionFactory
 
 router = APIRouter(prefix="/api/bars", tags=["bars"])
@@ -113,8 +120,11 @@ def read_bar_menu_imports(
         "is treated as no token rather than failing with `503`.\n"
         "- Inactive bars are returned only to operators and the bar's current owner. Anyone else gets "
         "`404 BAR_NOT_FOUND`, the same as for a missing bar.\n"
+        "- Sold-out items are left out for everyone but operators and the bar's current owner, who get "
+        "them in place with `soldOut: true` (a token the server cannot check counts as no token).\n"
         "- A bar without a published menu returns `200` with `menuBoardId: null` and `items: []`. A menu "
-        "whose items were all taken down keeps `menuBoardId` and `publishedAt`, with `items: []`.\n"
+        "whose items were all taken down, or are all sold out for a customer, keeps `menuBoardId` and "
+        "`publishedAt`, with `items: []`.\n"
         "- `menuVersion` goes up with every review publish and manual edit; manual edits send it back.\n"
         "- `options[].discount` comes only while the discount has not ended (one that has not started yet comes "
         "too); `priceKrw` is always the list price. The app shows the discounted price while "
@@ -134,7 +144,7 @@ def read_bar_menu(
     user: Principal | None = Depends(get_optional_user),
 ) -> BarMenuResponse:
     return get_bar_menu(
-        session, bar_id, may_see_inactive=lambda bar: user is not None and can_manage_bar(session, user, bar.id)
+        session, bar_id, can_manage=lambda bar: user is not None and can_manage_bar(session, user, bar.id)
     )
 
 
@@ -367,3 +377,83 @@ def reset_bar_menu(
 ) -> BarMenuResponse:
     bar = managed_bar(session, principal, bar_id)
     return reset_menu(session_factory, principal, bar.id, body)
+
+
+# ---- sold-out and the sales info confirmation (spec 3.14.8, 3.14.9) ----
+
+_STATUS_RULES = (
+    "Operator or the bar's owner. Accepted while the bar has an unfinished import, since neither changes "
+    "the menu's content: `menuVersion` does not go up and `publishedAt` stays."
+)
+
+
+@router.put(
+    "/{barId}/menu/items/{barMenuItemId}/sold-out",
+    response_model=BarMenuResponse,
+    summary="Mark a menu item sold out, or back on sale",
+    description=(
+        _STATUS_RULES
+        + "\n\n- The whole item goes sold out, not single options. Customers no longer see it in the bar menu "
+        "or in search; operators and the owner get it in place with `soldOut: true`.\n"
+        "- It sets a value, so sending the same request again gives the same result (`200`).\n"
+        "- It stays while the item is on the menu, through edits and review publishes, and clears when the "
+        "item leaves the menu.\n"
+        "- The response is the menu as in `GET /api/bars/{barId}/menu`, sold-out items included.\n"
+        "- Checks, first failure answering: token, request (`422`), bar (`404`), caller (`403`), then under "
+        "the bar row lock: inactive bar (`404`), the item."
+    ),
+    responses=error_responses(
+        (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+        (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
+        AUTH_UNAVAILABLE,
+        (404, "`BAR_NOT_FOUND`: no such bar, a malformed id, or an inactive bar; " + _ITEM_NOT_FOUND + "."),
+        (422, "`VALIDATION_FAILED`: `soldOut` `MISSING` or not a boolean (`BOOL_TYPE`)."),
+    ),
+)
+def mark_bar_menu_item_sold_out(
+    bar_id: BarId,
+    bar_menu_item_id: BarMenuItemId,
+    body: SoldOutRequest,
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> BarMenuResponse:
+    bar = managed_bar(session, principal, bar_id)
+    return set_sold_out(session, principal, bar.id, bar_menu_item_id, body.soldOut)
+
+
+@router.post(
+    "/{barId}/menu/confirm",
+    response_model=BarDetail,
+    summary="Confirm the menu is still accurate",
+    description=(
+        _STATUS_RULES
+        + "\n\n- Records the time and the caller as `currentMenu.confirmedAt`; confirming again moves it. "
+        "Customers keep seeing `publishedAt` as the menu date.\n"
+        "- Send the `menuVersion` of the menu that was shown, so a menu the user did not see is not confirmed.\n"
+        "- A bar without a menu, or whose menu has no items, is `409 NO_PUBLISHED_MENU`, checked before the "
+        "version: `menuVersion: null` there gets `NO_PUBLISHED_MENU`. Sold-out items count as items.\n"
+        "- The response is the bar as in `GET /api/bars/{barId}`.\n"
+        "- Checks, first failure answering: token, request (`422`), bar (`404`), caller (`403`), then under "
+        "the bar row lock: inactive bar (`404`), `NO_PUBLISHED_MENU`, `MENU_OUTDATED`."
+    ),
+    responses=error_responses(
+        (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+        (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
+        AUTH_UNAVAILABLE,
+        (404, "`BAR_NOT_FOUND`: no such bar, a malformed id, or an inactive bar."),
+        (
+            409,
+            "`NO_PUBLISHED_MENU`: no menu, or no item on it. `MENU_OUTDATED` (`details.submittedMenuVersion`, "
+            "`details.currentMenuVersion`): reload the menu and ask the user to confirm again.",
+        ),
+        (422, "`VALIDATION_FAILED`: `menuVersion` `MISSING`, or neither an integer nor null."),
+    ),
+)
+def confirm_bar_menu(
+    bar_id: BarId,
+    body: MenuConfirmRequest,
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> BarDetail:
+    bar = managed_bar(session, principal, bar_id)
+    return confirm_menu(session, principal, bar.id, body.menuVersion)
