@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner
 import com.zerotoone.bottlemap.data.owner.MockExtractedLine
 import com.zerotoone.bottlemap.data.owner.MockLineKind
 import com.zerotoone.bottlemap.data.owner.MockMenuOption
+import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -44,6 +45,20 @@ class Stage8ReviewDestinationTest {
         assertEquals("line",stage8ReviewDestination(ambiguous))
         assertEquals("line",stage8ReviewDestination(single))
         assertEquals("line",stage8ReviewDestination(suggested))
+    }
+
+    @Test fun inactiveSuggestionWithOneActiveFallbackRequiresMatchingBeforePrice() {
+        val suggested=MockCatalogProduct("retired","brand","Retired",isActive=false)
+        val fallback=MockCatalogProduct("active","brand","Active")
+        val line=MockExtractedLine("mixed","Mixed OCR",MockLineKind.PRODUCT,
+            suggestedProductId="retired",candidateProductIds=listOf("active"),
+            options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=0)))
+        assertEquals("line",stage8DestinationForCatalog(line,listOf(suggested,fallback)))
+        assertEquals("catalog",stage8DestinationForCatalog(line,listOf(suggested)))
+        // A valid, unambiguous active suggestion retains the direct price flow.
+        assertEquals("price",stage8DestinationForCatalog(
+            line.copy(suggestedProductId="active",candidateProductIds=emptyList()),
+            listOf(suggested,fallback)))
     }
 
     @Test fun noCandidateAndNoPriceStillGoesToNewProductNotCandidatePage() {
