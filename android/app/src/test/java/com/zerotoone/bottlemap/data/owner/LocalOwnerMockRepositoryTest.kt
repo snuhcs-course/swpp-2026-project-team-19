@@ -1115,7 +1115,7 @@ class LocalOwnerMockRepositoryTest {
         assertTrue(ready(r).imports.any{it.menuImportId==fresh})
     }
 
-    @Test fun explicitAutoMatchedBottleSkipsReviewButPublishesWithBottleLabel() {
+    @Test fun explicitAutoMatchedBottleRequiresReviewAndPublishesWithBottleLabel() {
         val r=repo()
         catalog(r)
         val importId=r.queuePhotoImport("fixture-bar",listOf(
@@ -1131,19 +1131,22 @@ class LocalOwnerMockRepositoryTest {
         )})
         val job=ready(r).imports.last()
         val lines=job.images.single().lines
-        assertEquals(MockDecisionKind.SELECT_PRODUCT,lines.first().decision?.kind)
-        assertEquals("product-16",lines.first().decision?.productId)
+        assertEquals(null,lines.first().decision)
+        assertEquals(true,lines.first().mockAutoAccepted)
         assertEquals(null,lines.last().decision)
         r.decideLine(importId,lines.last().extractedItemId,job.reviewVersion,
             MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
                 productId="product-12",correctedOptions=lines.last().options))
         r.resetPhotoReview(importId,job.reviewVersion)
         val restarted=ready(r).imports.last()
-        assertEquals(MockDecisionKind.SELECT_PRODUCT,
-            restarted.images.single().lines.first().decision?.kind)
+        assertEquals(null,restarted.images.single().lines.first().decision)
         assertEquals(null,restarted.images.single().lines.last().decision)
         r.decideLine(importId,restarted.images.single().lines.last().extractedItemId,
             restarted.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))
+        rejects { r.publishAddOnly(importId,restarted.reviewVersion) }
+        r.decideLine(importId,restarted.images.single().lines.first().extractedItemId,
+            restarted.reviewVersion,MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                productId="product-16",correctedOptions=restarted.images.single().lines.first().options))
         assertEquals(1,r.publishAddOnly(importId,restarted.reviewVersion))
         val added=ready(r).menuItems.single()
         assertEquals("product-16",added.productId)
