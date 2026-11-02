@@ -245,14 +245,79 @@ class OwnerPhotoStage8Test {
         assertEquals(0,stage8RetainedPriceMismatchCount(job,ready(r)))
     }
 
-    @Test fun malformedSourceBoxRejectedBeforeReviewWithoutMutation() {
-        val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+    @Test fun malformedSourceBoxBecomesDurableFailedJobAndCanRetry() {
+        val store=InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r=LocalOwnerMockRepository(store)
         val id=r.queuePhotoImport("fixture-bar",listOf(photo("a")))
-        reject {r.finishPhotoImport(id,MockPhotoExtractionSource {
+        assertEquals(MockImportStatus.FAILED,r.finishPhotoImport(id,MockPhotoExtractionSource {
             listOf(MockExtractedLine("invalid","raw",MockLineKind.PRODUCT,
                 sourceBox=listOf(950,20,100,900),
                 options=listOf(MockMenuOption("o",priceKrw=9000))))
-        })}
-        assertEquals(MockImportStatus.PROCESSING,ready(r).imports.single().status)
+        }))
+        val failed=ready(LocalOwnerMockRepository(store)).imports.single()
+        assertEquals(MockImportStatus.FAILED,failed.status)
+        assertTrue(failed.failureReason?.contains("검증 실패")==true)
+        assertTrue(failed.images.single().lines.isEmpty())
+        val retry=r.retryFailedPhotoImport(id)
+        assertEquals(MockImportStatus.READY_FOR_REVIEW,
+            r.finishPhotoImport(retry,MockPhotoExtractionSource {
+                listOf(MockExtractedLine("valid","raw",MockLineKind.PRODUCT,
+                    options=listOf(MockMenuOption("o",priceKrw=9000))))
+            }))
+        assertEquals(MockImportStatus.READY_FOR_REVIEW,ready(r).imports.last().status)
+    }
+
+    @Test fun malformedSecondPhotoOrAutoMatchMustFailWholeBatchWithoutLeakingLines() {
+        val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val id=r.queuePhotoImport("fixture-bar",listOf(photo("a"),photo("b")))
+        assertEquals(MockImportStatus.FAILED,r.finishPhotoImport(id,MockPhotoExtractionSource { uri ->
+            if(uri.endsWith("a.jpg")) listOf(MockExtractedLine("valid","Whisky",MockLineKind.PRODUCT,
+                options=listOf(MockMenuOption("a",priceKrw=12000))))
+            else listOf(MockExtractedLine("auto","Unknown",MockLineKind.PRODUCT,
+                suggestedProductId="unknown",mockAutoAccepted=true,
+                options=listOf(MockMenuOption("b",priceKrw=15000))))
+        }))
+        val failed=ready(r).imports.single()
+        assertEquals(MockImportStatus.FAILED,failed.status)
+        assertTrue(failed.failureReason?.contains("Invalid mock auto-accepted fixture")==true)
+        assertTrue(failed.images.all{it.lines.isEmpty()})
+        val another=r.queuePhotoImport("fixture-bar",listOf(photo("c")))
+        assertNotEquals(id,another)
+    }
+
+    @Test fun correctedNameOverridesMustBeTrimmedOneToTwoHundredCharactersForBothDecisions() {
+        val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("known-brand","Known Brand"))
+        r.saveCatalogProduct(MockCatalogProduct("known-product","known-brand","Known Whisky"))
+        val id=r.queuePhotoImport("fixture-bar",listOf(photo("a")))
+        r.finishPhotoImport(id,MockPhotoExtractionSource {
+            listOf(
+                MockExtractedLine("known","Known Whisky",MockLineKind.PRODUCT,
+                    suggestedProductId="known-product",
+                    options=listOf(MockMenuOption("o1",priceKrw=15000))),
+                MockExtractedLine("new","New Whisky",MockLineKind.PRODUCT,
+                    options=listOf(MockMenuOption("o2",priceKrw=20000)))
+            )
+        })
+        val job=ready(r).imports.single()
+        val lines=job.images.single().lines
+        lines.forEachIndexed { i,line ->
+            fun decision(name:String)=if(i==0) MockReviewDecision(
+                MockDecisionKind.SELECT_PRODUCT,productId="known-product",
+                correctedOptions=line.options,displayNameOverride=name)
+            else MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
+                newProduct=MockNewProductDraft(name="New Whisky",brandName="New Brand"),
+                correctedOptions=line.options,displayNameOverride=name)
+            for(invalid in listOf("  ","x".repeat(201))) {
+                reject{r.decideLine(id,line.extractedItemId,job.reviewVersion,decision(invalid))}
+                assertNull(ready(r).imports.single().images.single().lines[i].decision)
+            }
+            val valid="  "+"x".repeat(200)+"  "
+            r.decideLine(id,line.extractedItemId,job.reviewVersion,decision(valid))
+            assertEquals("x".repeat(200),
+                ready(r).imports.single().images.single().lines[i].decision?.displayNameOverride)
+        }
+        assertEquals(2,r.publishAddOnly(id,job.reviewVersion))
+        assertTrue(ready(r).menuItems.all{it.displayNameOverride=="x".repeat(200)})
     }
 }
