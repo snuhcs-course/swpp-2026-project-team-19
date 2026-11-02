@@ -171,7 +171,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     OwnerPage.MGR_JOB -> OwnerMenuPhotoJobScreen(
                         state = mockState, viewModel = data,
                         onHome = {
-                            navController.navigate(OwnerPage.MGR_HOME.route) {
+                            navController.navigate(OwnerPage.MGR_MENU.route) {
                                 popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
                                 launchSingleTop = true
                             }
@@ -182,7 +182,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     OwnerPage.MGR_REVIEW -> OwnerPhotoStage8Screen(
                         state = mockState, vm = data,
                         onBack = { navController.popBackStack() },
-                        onHome = { navController.navigate(OwnerPage.MGR_HOME.route) {
+                        onHome = { navController.navigate(OwnerPage.MGR_MENU.route) {
                             popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
                             launchSingleTop = true
                         } }
