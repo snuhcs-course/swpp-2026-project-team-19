@@ -535,12 +535,11 @@ internal fun OwnerMenuPhotoJobScreen(
                                 drawCircle(accent, radius = 1.2.dp.toPx(),
                                     center = androidx.compose.ui.geometry.Offset(cx, cy + 6.dp.toPx()))
                             }
+                        } else if (job?.status == MockImportStatus.READY_FOR_REVIEW) {
+                            V4StrokeCheck(Modifier.size(30.dp),V4Color.primary)
                         } else {
-                            Text(when(job?.status) {
-                                MockImportStatus.READY_FOR_REVIEW -> "✓"
-                                MockImportStatus.CANCELED -> "×"
-                                else -> "·"
-                            }, color = V4Color.primary, fontSize = 30.sp)
+                            Text(if(job?.status==MockImportStatus.CANCELED)"×" else "·",
+                                color = V4Color.primary, fontSize = 30.sp)
                         }
                     }
                 }
