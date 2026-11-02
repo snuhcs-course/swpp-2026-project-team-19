@@ -34,7 +34,7 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("1줄 확인 시작").performClick()
     }
 
-    @Test fun pdf87CandidateAndFixedActionsLeadIntoOptionCheck() {
+    @Test fun pdf87MatchingCandidateRecordsDecisionWithoutExtraOptionPage() {
         showLine(MockExtractedLine("raw", "하쿠슈DR", MockLineKind.PRODUCT,
             suggestedProductId="demo-canonical",
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=19000))))
@@ -43,14 +43,14 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("위스키가 아니에요").assertExists()
         compose.onNodeWithText("다른 메뉴예요").assertExists()
         compose.onNodeWithText("맞아요").performClick()
-        compose.onNodeWithText("가격과 용량을 확인해 주세요").assertExists()
+        compose.onNodeWithText("메뉴 게시").assertExists()
     }
 
     @Test fun pdf89NewProductFormHasDistilleryAgeAndNamePreview() {
         showLine(MockExtractedLine("raw", "시그나토리 쿨일라13", MockLineKind.PRODUCT,
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=20000))))
-        compose.onNodeWithText("다른 메뉴예요").performClick()
-        compose.onNodeWithText("새 제품으로 등록").performScrollTo().performClick()
+        compose.onNodeWithText("⌕  목록에 없어요").performClick()
+        compose.onNodeWithText("찾는 메뉴가 없어요, 새로 등록").performClick()
         compose.onNodeWithText("새로 등록할게요").assertExists()
         compose.onNodeWithText("병입사").assertExists()
         compose.onNodeWithText("증류소").assertExists()
