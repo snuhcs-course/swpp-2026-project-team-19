@@ -88,6 +88,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         V4Toolbar(null, {
             when(screen) {
                 "line","publish","auto","existing" -> screen="summary"
+                "edit","new" -> screen="line"
                 "done"->onHome()
                 else->onBack()
             }
@@ -100,7 +101,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             St8Button("내 매장으로 돌아가기",click=onHome)
             return@Column
         }
-        if(job.status==MockImportStatus.APPLIED)screen="done"
+        LaunchedEffect(job.status) {
+            if(job.status==MockImportStatus.APPLIED)screen="done"
+        }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(19.dp),
             verticalArrangement=Arrangement.spacedBy(15.dp)) {
             if(screen=="summary") {
@@ -342,8 +345,13 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         resolved.map{it.identityKey()}.distinct().size!=resolved.size){
                         error="가격·용량·중복 옵션을 확인해 주세요."
                     } else {
+                        if(screen=="new" && (!noAge && age.toIntOrNull()==null ||
+                            alcohol.isNotBlank() && alcohol.toDoubleOrNull()==null)) {
+                            error="숙성 연수와 도수 값을 확인해 주세요."
+                            return@St8Button
+                        }
                         val decision=if(screen=="edit")MockReviewDecision(
-                            MockDecisionKind.SELECT_PRODUCT,productId=selectedProductId ?: line.decision?.productId ?: candidates.firstOrNull(),
+                            MockDecisionKind.SELECT_PRODUCT,productId=selectedProductId ?: line.decision?.productId,
                             correctedOptions=resolved)
                         else MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
                             correctedOptions=resolved,newProduct=MockNewProductDraft(
