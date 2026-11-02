@@ -135,14 +135,18 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             placeholder={Text("예: 30")},colors=OutlinedTextFieldDefaults.colors(
                                 focusedTextColor=V4Color.text,unfocusedTextColor=V4Color.text))
                         Text("ml",color=V4Color.text)
-                        TextButton(onClick={
+                        OutlinedButton(onClick={
                             val n=pour.toIntOrNull()
                             if(bar!=null && (pour.isBlank() || n!=null && n in 1..999)){
                                 vm.saveBar(bar.copy(defaultPourMl=n));error=null
                             }else error="1~999ml로 입력해 주세요."
-                        }){Text("저장",color=V4Color.primary)}
+                        },shape=RoundedCornerShape(9.dp),colors=ButtonDefaults.outlinedButtonColors(
+                            containerColor=V4Color.surface,contentColor=V4Color.primary),
+                            border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line)) {
+                            Text("저장",color=V4Color.primary)
+                        }
                     }
-                    Text("용량 표시가 없는 잔에 적용",color=V4Color.sub,fontSize=11.sp)
+                    Text("용량 표시가 없는 잔에 적용해요.",color=V4Color.sub,fontSize=11.sp)
                 }
                 St8Card {
                     Text("자동 인식 신규 메뉴 "+counts.newCandidates+"줄 ›",
@@ -154,8 +158,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         color=V4Color.text,fontWeight=FontWeight.Bold,
                         modifier=Modifier.fillMaxWidth().clickable {screen="existing"})
                 }
-                Text("확인한 줄 "+counts.reviewed+"개 · 남은 줄 "+counts.remaining+"개",
-                    color=V4Color.sub,fontSize=12.sp)
             } else if(screen=="auto" || screen=="existing") {
                 Text(if(screen=="auto")"새로 더할 메뉴 "+counts!!.newCandidates+"줄"
                     else "이미 있는 메뉴 "+counts!!.existing+"줄",
