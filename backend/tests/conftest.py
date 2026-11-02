@@ -37,7 +37,7 @@ def mock_extractor(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
 
     monkeypatch.setenv("MENU_EXTRACTOR", "mock")
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    for name in ("MATCHING_LLM_ENABLED", "MATCHING_LLM_MAX_CALLS", "MATCHING_LLM_M3B_ENABLED"):
+    for name in ("MATCHING_LLM_ENABLED", "MATCHING_LLM_MAX_CALLS", "MATCHING_LLM_M3B_ENABLED", "MATCHING_LLM_MODE"):
         monkeypatch.delenv(name, raising=False)
     for name in ("EMBEDDING_ENABLED", "EMBEDDING_MODEL", "EMBEDDING_MIN_SIMILARITY"):
         monkeypatch.delenv(name, raising=False)

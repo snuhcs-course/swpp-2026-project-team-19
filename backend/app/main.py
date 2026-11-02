@@ -55,7 +55,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # the first upload. The local defaults need nothing.
     get_menu_extractor()
     get_image_storage()
-    # An invalid MATCHING_LLM_MAX_CALLS stops the server; a missing key only logs a warning.
+    # An invalid MATCHING_LLM_MAX_CALLS or MATCHING_LLM_MODE stops the server; a missing key only logs a warning.
     get_matching_llm_layer()
     # Invalid EMBEDDING_* settings stop the server, even while the step is off. The index is built on first use.
     get_embedding_step()
