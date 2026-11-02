@@ -96,6 +96,7 @@ data class MockCatalogProduct(
     val catalogMatched: Boolean = true,
     val otherAlcoholKind: String? = null,
     val abvPercent: Double? = null, // local review draft; not a backend DTO
+    val isActive: Boolean = true,
 )
 
 data class MockDiscount(
