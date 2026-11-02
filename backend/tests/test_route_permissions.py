@@ -150,6 +150,15 @@ BAR_MANAGER = [
         (404, "BAR_NOT_FOUND"),
         (409, "NO_PUBLISHED_MENU"),
     ),
+    # A vacation far ahead passes the date checks on any day.
+    ManagerRoute(
+        "put",
+        "/api/bars/{barId}/operating-exception",
+        {"json": {"kind": "vacation", "startDate": "2099-01-01", "endDate": "2099-01-02"}},
+        (404, "BAR_NOT_FOUND"),
+        (200, None),
+    ),
+    ManagerRoute("delete", "/api/bars/{barId}/operating-exception", {}, (404, "BAR_NOT_FOUND"), (200, None)),
 ]
 # Operators and the owner of at least one bar.
 CATALOG = [

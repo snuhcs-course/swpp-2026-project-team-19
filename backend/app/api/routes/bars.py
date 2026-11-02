@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Body, Depends, Path, Query
 from sqlalchemy.orm import Session
 
 from app.api.permissions import BarId, managed_bar, require_bar_manager
@@ -9,6 +9,7 @@ from app.core.security import Principal, get_current_user, get_optional_user, re
 from app.db.session import get_serializable_session_factory, get_session
 from app.models import Bar
 from app.schemas.bar import BarDetail, BarListResponse, BarUpdateInput
+from app.schemas.bar_hours import OperatingExceptionInput
 from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.menu import BarMenuResponse
 from app.schemas.menu_edit import (
@@ -25,6 +26,7 @@ from app.services.bar_detail import get_bar_detail, update_bar
 from app.services.bar_menu import get_bar_menu
 from app.services.menu_edit import add_menu_item, check_request, delete_menu_item, reset_menu, update_menu_item
 from app.services.menu_status import confirm_menu, set_sold_out
+from app.services.operating_exception import apply_operating_exception, cancel_operating_exception
 from app.services.serializable import SessionFactory
 
 router = APIRouter(prefix="/api/bars", tags=["bars"])
@@ -177,8 +179,20 @@ def read_bar(
         "- `latitude` and `longitude` are sent together. A new `address` needs both, so the map "
         "position follows it; coordinates alone can correct the position.\n"
         "- `phone`: null or blank removes it.\n"
+        "- `description`: one line of introduction, up to 100 characters (line breaks allowed and counted). "
+        "null or blank removes it. Stored as sent, without escaping.\n"
+        "- `defaultPourMl`: 1-999, null removes it. Only pre-fills glass options in the app; the menu is not "
+        "changed.\n"
+        "- `tags`: replaces all tags, in display order; `[]` removes them, null is not allowed. Up to 5, each "
+        "1-24 characters on one line, unique ignoring case; stored with their case as sent.\n"
+        "- `weeklyHours`: replaces all regular hours; `[]` removes them, null is not allowed. One entry per "
+        "`dayOfWeek` (1 = Monday); `closed: true` is a day off and takes no times, otherwise `openTime` and "
+        "`closeTime` are Seoul local `HH:MM` in 5-minute steps, different, and a close earlier than the open "
+        "ends the next day. A change moves `updatedAt`.\n"
         "- `status` (`active` or `inactive`) only by operators; an owner who sends it gets `403`. "
-        "An inactive bar leaves customer search and takes no new upload."
+        "An inactive bar leaves customer search and takes no new upload.\n"
+        "- The temporary closure is changed with `PUT /api/bars/{barId}/operating-exception`; sending "
+        "`operatingException` here is `EXTRA_FORBIDDEN`."
     ),
     responses=error_responses(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
@@ -191,8 +205,10 @@ def read_bar(
         (
             422,
             "`VALIDATION_FAILED`: a field rule (`NULL_NOT_ALLOWED`, `STRING_TOO_SHORT`, `STRING_TOO_LONG`, a "
-            "coordinate out of range, `EXTRA_FORBIDDEN`), `LAT_LNG_REQUIRED_TOGETHER`, or "
-            "`COORDINATES_REQUIRED` (an `address` without coordinates).",
+            "coordinate or `defaultPourMl` out of range, `TOO_LONG` for more than 5 tags, `EXTRA_FORBIDDEN`), "
+            "`LAT_LNG_REQUIRED_TOGETHER`, `COORDINATES_REQUIRED` (an `address` without coordinates), "
+            "`INVALID_CHARACTER` and `DUPLICATE_TAG` (`tags[i]`), or an hours rule (`weeklyHours[i].<field>`): "
+            "`MISSING`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`.",
         ),
     ),
 )
@@ -204,6 +220,72 @@ def edit_bar(
     bar: Bar = Depends(require_bar_manager),
 ) -> BarDetail:
     return update_bar(session, bar, body, operator=is_operator(session, principal))
+
+
+# ---- the temporary closure (spec 3.15.2 to 3.15.4) ----
+
+_EXCEPTION_RULES = (
+    "Operator or the bar's owner; inactive bars too. The response is the bar as in `GET /api/bars/{barId}`.\n\n"
+    "- `operatingException` is sent through the day after its `endDate` (a `custom_hours` past midnight still "
+    "applies early that morning), then null. Whether it is in effect now is for the app to compute; the "
+    "server sends no open status.\n"
+    "- Changing it does not move `updatedAt`."
+)
+
+
+@router.put(
+    "/{barId}/operating-exception",
+    response_model=BarDetail,
+    summary="Apply a temporary closure or today's changed hours",
+    description=(
+        _EXCEPTION_RULES
+        + "\n\nReplaces the bar's closure, a `vacation` not started yet included. By `kind`:\n\n"
+        "- `closed_today`: `date`, today in Seoul when the user applies it.\n"
+        "- `custom_hours`: `date` as above, `openTime` and `closeTime` (`HH:MM`, 5-minute steps, different; "
+        "may end past midnight).\n"
+        "- `vacation`: `startDate` today or later, `endDate` on or after it.\n\n"
+        "`note` is optional for every kind: one line for customers, up to 100 characters; blank is null. "
+        "A request equal to the current closure (kind, dates, times, trimmed note) changes nothing and skips "
+        "the date checks, so it can be sent again safely after midnight."
+    ),
+    responses=error_responses(
+        *_MANAGER_ERRORS,
+        (404, "`BAR_NOT_FOUND`: no such bar or a malformed id."),
+        (
+            422,
+            "`VALIDATION_FAILED`: `UNION_TAG_NOT_FOUND` or `UNION_TAG_INVALID` (`kind`), `EXTRA_FORBIDDEN` (a "
+            "field of another kind), `MISSING`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `END_BEFORE_START`, "
+            "`INVALID_CHARACTER` or `STRING_TOO_LONG` (`note`), `DATE_NOT_TODAY` (`date`: ask the user to "
+            "apply again), `DATE_IN_PAST` (`startDate`).",
+        ),
+    ),
+)
+def put_operating_exception(
+    body: Annotated[OperatingExceptionInput, Body(discriminator="kind")],
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    bar: Bar = Depends(require_bar_manager),
+) -> BarDetail:
+    return apply_operating_exception(session, principal, bar, body)
+
+
+@router.delete(
+    "/{barId}/operating-exception",
+    response_model=BarDetail,
+    summary="Cancel the temporary closure",
+    description=(
+        _EXCEPTION_RULES
+        + "\n\nBack to the regular hours. `200` with `operatingException: null` also when there was none or "
+        "it had ended, so it can be sent again."
+    ),
+    responses=error_responses(*_MANAGER_ERRORS, (404, "`BAR_NOT_FOUND`: no such bar or a malformed id.")),
+)
+def delete_operating_exception(
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    bar: Bar = Depends(require_bar_manager),
+) -> BarDetail:
+    return cancel_operating_exception(session, principal, bar)
 
 
 # ---- manual menu edits (spec 3.14) ----

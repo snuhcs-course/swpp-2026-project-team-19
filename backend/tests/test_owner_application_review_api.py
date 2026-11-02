@@ -373,6 +373,11 @@ def test_a_new_bar_application_needs_the_bar(client, db_session, auth, applicant
         ({"longitude": -181}, ("bar.longitude", "GREATER_THAN_EQUAL")),
         ({"phone": "0" * 31}, ("bar.phone", "STRING_TOO_LONG")),
         ({"floor": 2}, ("bar.floor", "EXTRA_FORBIDDEN")),
+        # Set by the owner after approval with PATCH /api/bars/{barId} (spec 3.11.7).
+        ({"description": "조용한 바"}, ("bar.description", "EXTRA_FORBIDDEN")),
+        ({"defaultPourMl": 30}, ("bar.defaultPourMl", "EXTRA_FORBIDDEN")),
+        ({"tags": ["싱글몰트"]}, ("bar.tags", "EXTRA_FORBIDDEN")),
+        ({"weeklyHours": []}, ("bar.weeklyHours", "EXTRA_FORBIDDEN")),
     ],
 )
 def test_bar_field_rules(client, auth, change, expected):

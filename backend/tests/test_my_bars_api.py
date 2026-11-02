@@ -56,6 +56,11 @@ def test_lists_my_bars_with_their_management_state(client, db_session, supabase)
         "latitude": 37.478,
         "longitude": 126.951,
         "phone": "02-000-0000",
+        "description": None,
+        "defaultPourMl": None,
+        "tags": [],
+        "weeklyHours": [],
+        "operatingException": None,
         "status": "active",
         "activeMenuImport": {"menuImportId": str(unfinished.id), "status": "ready_for_review"},
         "currentMenu": {
