@@ -45,6 +45,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -368,8 +369,9 @@ internal fun OwnerMenuPhotoSelectionScreen(
         if (!busy && active == null) chooseSource = true
     }
     if(chooseSource) {
-        Dialog(onDismissRequest={chooseSource=false}) {
-            Column(Modifier.fillMaxWidth()
+        Dialog(onDismissRequest={chooseSource=false},
+            properties=DialogProperties(usePlatformDefaultWidth=false)) {
+            Column(Modifier.fillMaxWidth(0.92f)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh,
                     RoundedCornerShape(12.dp))
                 .padding(horizontal=15.dp,vertical=14.dp),
