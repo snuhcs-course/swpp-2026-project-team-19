@@ -41,6 +41,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -176,6 +180,51 @@ private fun MenuPhotoSecondary(label: String, onClick: () -> Unit) {
     }
 }
 
+/** Compact line icons for the image-source popup, matching the reference camera/photo composition. */
+@Composable private fun MenuPhotoSourceCameraIcon() {
+    Canvas(Modifier.size(35.dp)) {
+        val u=size.width/32f
+        drawRoundRect(V4Color.text,topLeft=Offset(3f*u,3f*u),
+            size=androidx.compose.ui.geometry.Size(26f*u,26f*u),
+            cornerRadius=androidx.compose.ui.geometry.CornerRadius(4.5f*u),
+            style=Stroke(width=2f*u))
+        drawCircle(V4Color.text,6f*u,Offset(16f*u,16f*u),
+            style=Stroke(width=2f*u))
+        drawCircle(V4Color.text,1.7f*u,Offset(24.5f*u,8f*u))
+    }
+}
+@Composable private fun MenuPhotoSourceGalleryIcon() {
+    Canvas(Modifier.size(35.dp)) {
+        val u=size.width/32f
+        val back=Path().apply {
+            moveTo(7f*u,12f*u)
+            lineTo(5f*u,5f*u)
+            lineTo(23f*u,1f*u)
+            lineTo(25f*u,10f*u)
+        }
+        drawPath(back,V4Color.text,style=Stroke(width=2f*u,
+            join=StrokeJoin.Round,cap=StrokeCap.Round))
+        val frame=Path().apply {
+            moveTo(10f*u,12f*u)
+            lineTo(29f*u,12f*u)
+            lineTo(29f*u,29f*u)
+            lineTo(10f*u,29f*u)
+            close()
+        }
+        drawPath(frame,V4Color.text,style=Stroke(width=2f*u,
+            join=StrokeJoin.Round,cap=StrokeCap.Round))
+        val hills=Path().apply {
+            moveTo(12f*u,26f*u)
+            lineTo(17f*u,20f*u)
+            lineTo(20f*u,23f*u)
+            lineTo(23f*u,19f*u)
+            lineTo(27f*u,26f*u)
+            close()
+        }
+        drawPath(hills,V4Color.text)
+        drawCircle(V4Color.text,1.4f*u,Offset(16f*u,16f*u))
+    }
+}
 @Composable
 private fun MenuPhotoProcessingIllustration() {
     // ACTION_FIRST v4: the wave moves inside a clipped glass, not the glass itself.
@@ -319,33 +368,43 @@ internal fun OwnerMenuPhotoSelectionScreen(
         if (!busy && active == null) chooseSource = true
     }
     if(chooseSource) {
-        AlertDialog(
-            onDismissRequest = { chooseSource = false },
-            title = { Text("사진을 어떻게 추가할까요?") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = {
-                        chooseSource = false
-                        picker.launch(PickVisualMediaRequest(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },modifier=Modifier.fillMaxWidth().testTag("stage7-source-gallery")) {
-                        Text("갤러리에서 선택",color=V4Color.primary)
+        Dialog(onDismissRequest={chooseSource=false}) {
+            Column(Modifier.fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh,
+                    RoundedCornerShape(12.dp))
+                .padding(horizontal=15.dp,vertical=14.dp),
+                verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                Text("사진을 어떻게 추가할까요?",
+                    style=MaterialTheme.typography.headlineSmall,
+                    color=MaterialTheme.colorScheme.onSurface)
+                HorizontalDivider(color=V4Color.line)
+                Row(Modifier.fillMaxWidth().height(97.dp)) {
+                    Column(Modifier.weight(1f).fillMaxHeight()
+                        .ownerQuietClick {
+                            chooseSource=false
+                            takePhoto()
+                        }.testTag("stage7-source-camera"),
+                        verticalArrangement=Arrangement.Center,
+                        horizontalAlignment=Alignment.CenterHorizontally) {
+                        MenuPhotoSourceCameraIcon()
+                        Spacer(Modifier.height(7.dp))
+                        Text("카메라",color=V4Color.primary,fontSize=14.sp)
                     }
-                    TextButton(onClick = {
-                        chooseSource = false
-                        takePhoto()
-                    },modifier=Modifier.fillMaxWidth().testTag("stage7-source-camera")) {
-                        Text("카메라로 촬영",color=V4Color.primary)
+                    Column(Modifier.weight(1f).fillMaxHeight()
+                        .ownerQuietClick {
+                            chooseSource=false
+                            picker.launch(PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        }.testTag("stage7-source-gallery"),
+                        verticalArrangement=Arrangement.Center,
+                        horizontalAlignment=Alignment.CenterHorizontally) {
+                        MenuPhotoSourceGalleryIcon()
+                        Spacer(Modifier.height(7.dp))
+                        Text("갤러리",color=V4Color.primary,fontSize=14.sp)
                     }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { chooseSource = false }) {
-                    Text("취소",color=V4Color.text)
                 }
             }
-        )
+        }
     }
     val valid = photos.isNotEmpty() && photos.size <= OWNER_MENU_MAX_PHOTOS &&
         photos.all(store::isReadable) &&
