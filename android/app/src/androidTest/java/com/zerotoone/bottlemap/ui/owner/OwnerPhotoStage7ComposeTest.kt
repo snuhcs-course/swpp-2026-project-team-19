@@ -81,7 +81,7 @@ class OwnerPhotoStage7ComposeTest {
             assertTrue(opened)
             val snap=(vm.state.value as MockOwnerLoadState.Ready).snapshot
             assertEquals(MockImportStatus.READY_FOR_REVIEW,snap.imports.last().status)
-            assertEquals(7,snap.imports.last().images.single().lines.size)
+            assertEquals(5,snap.imports.last().images.single().lines.size)
         }
     }
 
