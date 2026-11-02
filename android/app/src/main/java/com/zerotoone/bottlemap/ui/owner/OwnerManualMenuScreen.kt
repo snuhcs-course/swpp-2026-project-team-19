@@ -462,6 +462,8 @@ internal fun OwnerManualMenuScreen(
                 screen == "list" -> {
                     Text("메뉴 관리", color=V4Color.text,fontWeight=FontWeight.Bold,
                         fontFamily=FontFamily.Serif,fontSize=24.sp)
+                    Text("사진으로 메뉴 추가",color=V4Color.text,
+                        fontWeight=FontWeight.Bold,fontSize=16.sp)
                     Row(Modifier.fillMaxWidth().background(V4Color.surface,
                         RoundedCornerShape(11.dp)).manualTap {
                             val status=activeJob?.status
