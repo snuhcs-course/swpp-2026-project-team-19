@@ -119,7 +119,7 @@ GET 주변 업장 조회 (위치 + 반경)
 
 `/media/{key}`는 로컬 저장소를 쓰는 개발 환경에서만 있는 사진 파일 경로이며 API 계약이 아니다. 배포 서버(S3)에는 없다. 매장 사진은 이 경로가 아니라 `GET /api/bar-photos/{photoId}`와 `GET /api/bar-photos/{photoId}/thumbnail`(3.16.5)로 전달하며, 이 경로는 모든 환경에 있다.
 
-`/admin/`은 operator 웹 대시보드의 정적 파일(HTML, JS, CSS)이며 API 계약이 아니다. 페이지가 브라우저에서 Supabase Google 로그인을 하고 3.11의 API를 그대로 호출하므로, 권한은 위 표와 같다(operator만 신청 목록을 보고 승인·거절한다). `/admin/config.js`는 페이지에 공개 Supabase 설정(프로젝트 URL과 publishable key)만 준다.
+`/admin/`은 operator 웹 대시보드의 정적 파일(HTML, JS, CSS)이며 API 계약이 아니다. 페이지가 브라우저에서 Supabase Google 로그인을 하고 3.11의 API를 그대로 호출하므로, 권한은 위 표와 같다(operator만 신청 목록을 보고 승인·거절한다). `/admin/config.js`는 페이지에 공개 설정만 준다: Supabase 프로젝트 URL과 publishable key, 그리고 `new_bar` 승인 화면의 지도와 주소 검색에 쓰는 Kakao JavaScript 키(등록한 도메인에서만 동작). 좌표는 브라우저에서 Kakao Maps JavaScript SDK로 찾으며 백엔드 API는 쓰지 않는다. 승인 요청(3.11.7)의 `latitude`, `longitude`는 지금과 같다.
 
 인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다.
 

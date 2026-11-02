@@ -19,6 +19,11 @@ ADMIN_PATH = "/admin"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 # The supabase-js build index.html loads, pinned with Subresource Integrity.
 SUPABASE_JS_ORIGIN = "https://cdn.jsdelivr.net"
+# The Kakao Maps JavaScript SDK (map and address search for new_bar approval) and the scripts it loads.
+# No scheme: the SDK loads its files over the page's scheme, so this allows https on the server and
+# http on a local http://localhost page.
+KAKAO_SCRIPT_HOSTS = "dapi.kakao.com t1.kakaocdn.net t1.daumcdn.net"
+KAKAO_IMAGE_HOSTS = "*.kakaocdn.net *.daumcdn.net"
 
 router = APIRouter(prefix=ADMIN_PATH, include_in_schema=False)
 
@@ -29,11 +34,14 @@ def content_security_policy() -> str:
     return "; ".join(
         [
             "default-src 'self'",
-            f"script-src 'self' {SUPABASE_JS_ORIGIN}",
-            "style-src 'self'",
-            # Menu photos are signed object-storage URLs (S3) or /media paths on this server (local).
-            "img-src 'self' https: data:",
-            f"connect-src 'self'{supabase}",
+            f"script-src 'self' {SUPABASE_JS_ORIGIN} {KAKAO_SCRIPT_HOSTS}",
+            # The Kakao map adds an inline <style> that changes with its version, so no hash. Scripts stay
+            # strict, and the page puts data on the page only as text.
+            "style-src 'self' 'unsafe-inline'",
+            # Menu photos are signed object-storage URLs (S3) or /media paths on this server (local),
+            # and Kakao map tiles and marker images come from kakaocdn.net and daumcdn.net hosts.
+            f"img-src 'self' https: data: {KAKAO_IMAGE_HOSTS}",
+            f"connect-src 'self'{supabase} dapi.kakao.com",
             "frame-ancestors 'none'",
             "base-uri 'none'",
             "form-action 'self'",
@@ -58,12 +66,14 @@ class AdminStaticFiles(StaticFiles):
 
 @router.get("/config.js")
 def admin_config() -> Response:
-    """The public settings the page needs: the Supabase project URL and publishable (anon) key."""
+    """The public settings the page needs: the Supabase project URL and publishable (anon) key, and the
+    Kakao JavaScript key, which works only on the domains registered in Kakao Developers."""
     settings = load_supabase_auth_settings()
     key = os.getenv("SUPABASE_PUBLISHABLE_KEY", "").strip()
     config = {
         "supabaseUrl": settings.url if settings and key else None,
         "supabasePublishableKey": key if settings and key else None,
+        "kakaoJavascriptKey": os.getenv("KAKAO_JAVASCRIPT_KEY", "").strip() or None,
     }
     body = f"window.BOTTLEMAP_ADMIN_CONFIG = {json.dumps(config)};\n"
     return add_admin_headers(Response(body, media_type="text/javascript"))

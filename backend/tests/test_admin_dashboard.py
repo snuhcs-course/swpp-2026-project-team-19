@@ -14,6 +14,7 @@ SUPABASE_URL = "https://project-ref.supabase.co"
 def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.delenv("SUPABASE_URL", raising=False)
     monkeypatch.delenv("SUPABASE_PUBLISHABLE_KEY", raising=False)
+    monkeypatch.delenv("KAKAO_JAVASCRIPT_KEY", raising=False)
     return TestClient(app)
 
 
@@ -49,15 +50,17 @@ def test_the_page_is_not_cached_and_allows_only_known_sources(client, monkeypatc
     for path in ("/admin/", "/admin/app.js", "/admin/config.js"):
         headers = client.get(path).headers
         policy = headers["content-security-policy"]
-        assert "script-src 'self' https://cdn.jsdelivr.net" in policy
-        assert f"connect-src 'self' {SUPABASE_URL}" in policy
+        assert "script-src 'self' https://cdn.jsdelivr.net dapi.kakao.com t1.kakaocdn.net t1.daumcdn.net" in policy
+        assert "img-src 'self' https: data: *.kakaocdn.net *.daumcdn.net" in policy
+        assert f"connect-src 'self' {SUPABASE_URL} dapi.kakao.com" in policy
+        assert "style-src 'self' 'unsafe-inline'" in policy
         assert "frame-ancestors 'none'" in policy
         assert headers["referrer-policy"] == "no-referrer"
         assert headers["cache-control"] == "no-cache"
 
 
 def test_the_policy_allows_no_supabase_origin_without_supabase_url(client):
-    assert "connect-src 'self';" in client.get("/admin/").headers["content-security-policy"]
+    assert "connect-src 'self' dapi.kakao.com;" in client.get("/admin/").headers["content-security-policy"]
 
 
 def test_a_missing_file_is_404(client):
@@ -71,6 +74,7 @@ def test_config_hands_out_the_public_supabase_settings(client, monkeypatch):
     assert read_config(client) == {
         "supabaseUrl": SUPABASE_URL,
         "supabasePublishableKey": "sb_publishable_example",
+        "kakaoJavascriptKey": None,
     }
 
 
@@ -86,6 +90,13 @@ def test_config_turns_google_login_off_without_both_settings(client, monkeypatch
     config = read_config(client)
 
     assert config["supabaseUrl"] is None and config["supabasePublishableKey"] is None
+
+
+@pytest.mark.parametrize(("value", "expected"), [(" kakao-js-key ", "kakao-js-key"), ("  ", None)])
+def test_config_hands_out_the_kakao_javascript_key(client, monkeypatch, value, expected):
+    monkeypatch.setenv("KAKAO_JAVASCRIPT_KEY", value)
+
+    assert read_config(client)["kakaoJavascriptKey"] == expected
 
 
 def test_admin_is_not_in_the_api_document():

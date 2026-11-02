@@ -42,6 +42,7 @@ const state = {
   detail: null,
   detailRequest: 0,
   photosRefreshed: false,
+  barDraft: null,
   busy: false,
   notice: null,
 };
@@ -527,38 +528,52 @@ function existingBarApproveRow(app) {
 }
 
 const BAR_FIELDS = [
-  ["name", "이름", "text"],
-  ["address", "주소", "text"],
-  ["latitude", "위도", "text"],
-  ["longitude", "경도", "text"],
-  ["phone", "전화", "text"],
+  ["name", "이름"],
+  ["address", "주소"],
+  ["latitude", "위도"],
+  ["longitude", "경도"],
+  ["phone", "전화"],
 ];
 
 function newBarApproveForm(app) {
+  // What the operator typed survives a re-render of the detail (a notice, a failed approval).
+  const draft = state.barDraft && state.barDraft.applicationId === app.applicationId ? state.barDraft.values : {};
   const proposed = app.proposedBar || {};
   const form = el("form", { class: "form-grid", novalidate: true });
-  for (const [name, text, type] of BAR_FIELDS) {
+  for (const [name, text] of BAR_FIELDS) {
     const input = el("input", {
       name,
-      type,
-      value: proposed[name] ?? "",
+      type: "text",
+      value: draft[name] ?? proposed[name] ?? "",
       inputmode: name === "latitude" || name === "longitude" ? "decimal" : null,
       placeholder: name === "latitude" ? "37.484102" : name === "longitude" ? "126.929815" : null,
     });
     form.append(el("label", {}, text), input, el("div", { class: "field-error", "data-for": name, hidden: true }));
+    if (name === "address") form.append(el("span"), geocodeRow(form));
   }
+  const saveDraft = () => {
+    const values = {};
+    for (const [name] of BAR_FIELDS) values[name] = form.elements[name].value;
+    state.barDraft = { applicationId: app.applicationId, values };
+  };
+  form.addEventListener("input", saveDraft);
   // Pasting "37.48, 126.92" copied from a map fills both coordinates.
   form.elements.latitude.addEventListener("paste", (event) => {
     const text = (event.clipboardData || window.clipboardData).getData("text");
     const match = text.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
     if (!match) return;
     event.preventDefault();
-    form.elements.latitude.value = match[1];
-    form.elements.longitude.value = match[2];
+    setCoordinates(form, Number(match[1]), Number(match[2]));
   });
+  const map = el("div", { class: "map", hidden: true });
   form.append(
     el("span"),
-    el("span", { class: "hint" }, "주소를 지도에서 확인하고 좌표를 입력하세요. 위도 칸에 \"위도, 경도\"를 붙여 넣으면 둘 다 채워집니다."),
+    el(
+      "div",
+      { class: "map-box" },
+      map,
+      el("span", { class: "hint", "data-role": "map-hint" }, "주소로 좌표를 찾은 뒤 지도에서 위치가 맞는지 확인하세요."),
+    ),
     el("span"),
     el("div", { class: "action-row" }, el("button", { type: "submit" }, "확인한 정보로 승인")),
   );
@@ -567,7 +582,212 @@ function newBarApproveForm(app) {
     const bar = readBarForm(form);
     if (bar) approve(app, { bar }, form);
   });
+  setUpMap(form, map);
   return form;
+}
+
+function geocodeRow(form) {
+  return el(
+    "div",
+    { class: "geocode" },
+    el("div", { class: "action-row" },
+      el("button", { type: "button", class: "secondary", "data-role": "geocode", onclick: () => findCoordinates(form) }, "주소로 좌표 찾기"),
+      el("span", { class: "hint", "data-role": "geocode-status" }),
+    ),
+    el("div", { class: "candidates", "data-role": "candidates", hidden: true }),
+  );
+}
+
+// ---------- Kakao map and address search (new_bar approval) ----------
+// The Kakao Maps JavaScript SDK runs in the browser with the public JavaScript key, which works only
+// on the domains registered in Kakao Developers; the API is not involved.
+
+const KAKAO_SDK_URL = "https://dapi.kakao.com/v2/maps/sdk.js";
+const SEOUL_CITY_HALL = [37.566826, 126.978656];
+let kakaoLoading = null;
+
+function loadKakao() {
+  if (!config.kakaoJavascriptKey) {
+    return Promise.reject(new Error("서버에 카카오 지도 설정(KAKAO_JAVASCRIPT_KEY)이 없어 좌표를 직접 입력해야 합니다."));
+  }
+  if (!kakaoLoading) {
+    kakaoLoading = new Promise((resolve, reject) => {
+      const failed = () => reject(new Error("카카오 지도를 불러오지 못했습니다. 키와 Kakao Developers의 Web 도메인 등록을 확인하세요."));
+      const script = document.createElement("script");
+      script.src = `${KAKAO_SDK_URL}?appkey=${encodeURIComponent(config.kakaoJavascriptKey)}&libraries=services&autoload=false`;
+      script.onerror = failed;
+      script.onload = () => {
+        if (!window.kakao || !window.kakao.maps) return failed();
+        const timer = setTimeout(failed, 10000);
+        window.kakao.maps.load(() => {
+          clearTimeout(timer);
+          resolve(window.kakao);
+        });
+      };
+      document.head.append(script);
+    }).catch((error) => {
+      kakaoLoading = null; // the next try loads again
+      throw error;
+    });
+  }
+  return kakaoLoading;
+}
+
+const formMaps = new WeakMap();
+
+async function setUpMap(form, container) {
+  let kakao;
+  try {
+    kakao = await loadKakao();
+  } catch (error) {
+    const button = form.querySelector('[data-role="geocode"]');
+    if (button) button.disabled = true;
+    setGeocodeStatus(form, error.message, true);
+    return;
+  }
+  // The form may have been replaced while the SDK loaded.
+  if (!form.isConnected) return;
+  container.hidden = false;
+  const current = readCoordinates(form);
+  const center = new kakao.maps.LatLng(...(current || SEOUL_CITY_HALL));
+  const map = new kakao.maps.Map(container, { center, level: current ? 3 : 8 });
+  const marker = new kakao.maps.Marker({ position: center, draggable: true });
+  if (current) marker.setMap(map);
+  const moved = (latLng) => setCoordinates(form, latLng.getLat(), latLng.getLng(), { pan: false });
+  kakao.maps.event.addListener(map, "click", (event) => moved(event.latLng));
+  kakao.maps.event.addListener(marker, "dragend", () => moved(marker.getPosition()));
+  formMaps.set(form, { kakao, map, marker });
+  form.querySelector('[data-role="map-hint"]').textContent =
+    "마커가 실제 매장 위치인지 확인하세요. 지도를 누르거나 마커를 끌면 좌표가 바뀝니다.";
+  // Typed coordinates move the marker.
+  for (const name of ["latitude", "longitude"]) {
+    form.elements[name].addEventListener("change", () => {
+      const typed = readCoordinates(form);
+      if (typed) placeMarker(form, typed[0], typed[1], { pan: true });
+    });
+  }
+}
+
+function readCoordinates(form) {
+  const latitude = Number(form.elements.latitude.value.trim());
+  const longitude = Number(form.elements.longitude.value.trim());
+  const valid = form.elements.latitude.value.trim() && form.elements.longitude.value.trim() &&
+    Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180;
+  return valid ? [latitude, longitude] : null;
+}
+
+// The API stores 6 decimal places (spec 3.5).
+function setCoordinates(form, latitude, longitude, { pan = true } = {}) {
+  form.elements.latitude.value = latitude.toFixed(6);
+  form.elements.longitude.value = longitude.toFixed(6);
+  form.dispatchEvent(new Event("input")); // keeps the draft
+  showFieldErrors(form, {});
+  placeMarker(form, latitude, longitude, { pan });
+}
+
+function placeMarker(form, latitude, longitude, { pan }) {
+  const view = formMaps.get(form);
+  if (!view) return;
+  const position = new view.kakao.maps.LatLng(latitude, longitude);
+  view.marker.setPosition(position);
+  view.marker.setMap(view.map);
+  if (pan) {
+    view.map.setLevel(3);
+    view.map.setCenter(position);
+  }
+}
+
+function setGeocodeStatus(form, text, isError = false) {
+  const node = form.querySelector('[data-role="geocode-status"]');
+  node.textContent = text;
+  node.classList.toggle("error-text", isError);
+}
+
+// Floors and units ("3층", "201호", "B1", "(신림동)") are part of a display address (spec 3.5) but
+// make the address search miss, so a second try drops them from the end.
+function withoutUnit(address) {
+  const tokens = address.replace(/\([^)]*\)/g, " ").replace(/,/g, " ").trim().split(/\s+/);
+  // A bare number is the building number ("신림로 2") and stays; a floor or unit carries a suffix.
+  const unit = /^(지하)?\d+([~-]\d+)?(층|호|F|동)$|^B\d+(층|F)?$|^지하$|^지상$/i;
+  while (tokens.length > 2 && unit.test(tokens[tokens.length - 1])) tokens.pop();
+  return tokens.join(" ");
+}
+
+function addressSearch(kakao, query) {
+  return new Promise((resolve, reject) => {
+    new kakao.maps.services.Geocoder().addressSearch(query, (result, status) => {
+      if (status === kakao.maps.services.Status.OK) resolve(result);
+      else if (status === kakao.maps.services.Status.ZERO_RESULT) resolve([]);
+      // The SDK and map load on any domain, but the search answers 401 (status not OK) unless this
+      // origin is a registered Web domain, e.g. http://127.0.0.1:8000 when only localhost is registered.
+      else {
+        reject(
+          new Error(
+            `주소 검색에 실패했습니다. 지금 주소(${location.origin})가 Kakao Developers의 Web 도메인에 등록되어 있는지 확인하고, 등록되어 있으면 잠시 후 다시 시도하세요.`,
+          ),
+        );
+      }
+    });
+  });
+}
+
+async function findCoordinates(form) {
+  const address = form.elements.address.value.trim();
+  const candidates = form.querySelector('[data-role="candidates"]');
+  candidates.hidden = true;
+  candidates.replaceChildren();
+  if (!address) {
+    showFieldErrors(form, { address: FIELD_ERROR_TEXT.MISSING });
+    return;
+  }
+  const button = form.querySelector('[data-role="geocode"]');
+  button.disabled = true;
+  setGeocodeStatus(form, "찾는 중...");
+  try {
+    const kakao = await loadKakao();
+    let results = await addressSearch(kakao, address);
+    const shorter = withoutUnit(address);
+    if (!results.length && shorter !== address) results = await addressSearch(kakao, shorter);
+    if (!results.length) {
+      setGeocodeStatus(
+        form,
+        readCoordinates(form)
+          ? "주소로 위치를 찾지 못해 좌표는 그대로 두었습니다. 주소를 고치거나 지도를 눌러 위치를 정하세요."
+          : "주소로 위치를 찾지 못했습니다. 주소를 고치거나 지도를 눌러 위치를 정하세요.",
+        true,
+      );
+    } else if (results.length === 1) {
+      useResult(form, results[0]);
+    } else {
+      setGeocodeStatus(form, `${results.length}곳이 나왔습니다. 맞는 주소를 고르세요.`);
+      candidates.replaceChildren(
+        ...results.slice(0, 10).map((result) =>
+          el("button", { type: "button", class: "candidate", onclick: () => useResult(form, result) }, resultLabel(result)),
+        ),
+      );
+      candidates.hidden = false;
+    }
+  } catch (error) {
+    setGeocodeStatus(form, error.message, true);
+  } finally {
+    button.disabled = !config.kakaoJavascriptKey;
+  }
+}
+
+function resultLabel(result) {
+  const road = result.road_address && result.road_address.address_name;
+  const lot = result.address && result.address.address_name;
+  if (road && lot && road !== lot) return `${road} (지번 ${lot})`;
+  return road || lot || result.address_name;
+}
+
+function useResult(form, result) {
+  const candidates = form.querySelector('[data-role="candidates"]');
+  candidates.hidden = true;
+  candidates.replaceChildren();
+  // Kakao gives x as the longitude and y as the latitude.
+  setCoordinates(form, Number(result.y), Number(result.x));
+  setGeocodeStatus(form, `좌표를 채웠습니다: ${resultLabel(result)}. 지도에서 위치를 확인하세요.`);
 }
 
 function showFieldErrors(form, errors) {
