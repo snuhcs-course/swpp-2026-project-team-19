@@ -349,10 +349,6 @@ fun OwnerManagementHomeScreen(
                                 }
                             }
                             Spacer(Modifier.height(5.dp))
-                            Text("마지막 메뉴 게시 ${ownerDisplayDate(bar.lastMenuPublishedAtEpochMs)} · " +
-                                    "판매 정보 확인 ${ownerDisplayDate(bar.lastVerifiedAtEpochMs)}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
                             if (job != null && job.status !in listOf(
                                 MockImportStatus.APPLIED,MockImportStatus.CANCELED)) {
                                 HorizontalDivider()
@@ -381,14 +377,6 @@ fun OwnerManagementHomeScreen(
                             }
                         }
                     }
-                    // Single-bar owners skip the entry/dashboard screen. Keep a direct
-                    // path back to the existing self-registration introduction.
-                    OwnerActionButton(
-                        "다른 매장 등록하기",
-                        onAddBar,
-                        Modifier.fillMaxWidth(),
-                        secondary = true
-                    )
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 }
             }
