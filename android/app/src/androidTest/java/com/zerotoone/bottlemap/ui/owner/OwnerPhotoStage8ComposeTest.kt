@@ -174,4 +174,20 @@ class OwnerPhotoStage8ComposeTest {
         }
     }
 
+    @Test fun nonProductLineRemainsReviewableSoItCannotBlockPublishing() {
+        showLine(MockExtractedLine("notice","영업 안내",MockLineKind.NON_PRODUCT))
+        compose.onNodeWithText("영업 안내").assertExists()
+        compose.onNodeWithText("이번 검수에서 제외").assertExists()
+        compose.onNodeWithText("이번 검수에서 제외").performClick()
+        compose.onNodeWithText("메뉴 게시").assertExists()
+    }
+
+    @Test fun unavailableCatalogCandidateDoesNotTrapOwnerInEmptyReview() {
+        showLine(MockExtractedLine("inactive","위스키12",MockLineKind.PRODUCT,
+            candidateProductIds=listOf("inactive-or-missing"),
+            options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=19000))))
+        compose.onNodeWithText("카탈로그에서 찾은 메뉴 0개").assertExists()
+        compose.onNodeWithText("찾는 메뉴가 없어요, 새로 등록").assertExists()
+    }
+
 }
