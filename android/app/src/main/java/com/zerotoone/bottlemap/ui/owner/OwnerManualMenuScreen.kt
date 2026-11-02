@@ -415,9 +415,9 @@ internal fun OwnerManualMenuScreen(
             text={Text("선택한 사진과 검수한 내용이 모두 삭제돼요.")},
             confirmButton={TextButton(onClick={
                 // Never erase a photo still referenced by any published job.
-                val removed=snapshot?.imports.orEmpty().filter {
-                    it.barId==activeJob.barId && it.status!=MockImportStatus.APPLIED
-                }
+                val removedIds=unpublishedRetryChainIds(
+                    requireNotNull(snapshot),activeJob.menuImportId)
+                val removed=snapshot.imports.filter {it.menuImportId in removedIds}
                 val retainedUris=snapshot?.imports.orEmpty().filterNot {
                     it in removed
                 }.flatMap{it.images.map {image->image.sourceUri}}.toSet()
