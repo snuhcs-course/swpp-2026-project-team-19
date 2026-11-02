@@ -784,9 +784,10 @@ fun OwnerOnboardingScreen(
                             Text("신청자",color=RegistrationV4.secondary,fontSize=14.sp)
                             OwnerV4Summary("연락처",formatOwnerPhone(draft.contactPhone)){edit(RegPage.CONTACT)}
                         }
-                        Row(Modifier.fillMaxWidth()
+                        Row(Modifier.fillMaxWidth().heightIn(min=72.dp)
                             .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
-                            .padding(12.dp),horizontalArrangement=Arrangement.spacedBy(12.dp),
+                            .padding(horizontal=16.dp,vertical=12.dp),
+                            horizontalArrangement=Arrangement.spacedBy(12.dp),
                             verticalAlignment=Alignment.CenterVertically) {
                             Text("ⓘ",color=RegistrationV4.primary,fontSize=18.sp)
                             Text("운영팀 승인 전에는 매장과 메뉴가 손님에게 보이지 않아요.",
