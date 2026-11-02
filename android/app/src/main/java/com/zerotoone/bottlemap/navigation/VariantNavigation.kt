@@ -26,6 +26,7 @@ import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoSelectionScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoJobScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerPhotoStage8Screen
 import com.zerotoone.bottlemap.ui.owner.OwnerOperatingQuickScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuQuickEntryScreen
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
@@ -175,7 +176,16 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                                 launchSingleTop = true
                             }
                         },
-                        onRetryPhotos = { navController.navigate(OwnerPage.MGR_PHOTO.route) }
+                        onRetryPhotos = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
+                        onReview = { navController.navigate(OwnerPage.MGR_REVIEW.route) }
+                    )
+                    OwnerPage.MGR_REVIEW -> OwnerPhotoStage8Screen(
+                        state = mockState, vm = data,
+                        onBack = { navController.popBackStack() },
+                        onHome = { navController.navigate(OwnerPage.MGR_HOME.route) {
+                            popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
+                            launchSingleTop = true
+                        } }
                     )
                     else -> OwnerSkeletonScreen(
                         page = page,
