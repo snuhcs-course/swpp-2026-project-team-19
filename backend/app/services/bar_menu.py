@@ -1,16 +1,29 @@
 from collections.abc import Callable
+from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.errors import ApiError
-from app.models import Bar, BarStatus, MenuBoard, MenuBoardEntry
-from app.schemas.menu import BarMenuResponse, MenuItemResponse, MenuOptionResponse
+from app.models import Bar, BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
+from app.schemas.menu import BarMenuResponse, DiscountResponse, MenuItemResponse, MenuOptionResponse
 
 
 def bar_not_found(bar_id: str) -> ApiError:
     return ApiError(404, "BAR_NOT_FOUND", "업장을 찾을 수 없습니다.", details={"barId": bar_id})
+
+
+def discount_response(option: MenuEntryOption, now: datetime) -> DiscountResponse | None:
+    """The option's discount unless it has ended; one that has not started yet is sent too.
+    Ended discounts stay in the database and are only left out here (spec 3.14.2)."""
+    if option.discount_ends_at is None or option.discount_ends_at <= now:
+        return None
+    return DiscountResponse(
+        discountedPriceKrw=option.discount_price_krw,
+        startsAt=option.discount_starts_at,
+        endsAt=option.discount_ends_at,
+    )
 
 
 def get_bar_menu(session: Session, bar_id: str, *, may_see_inactive: Callable[[Bar], bool]) -> BarMenuResponse:
@@ -28,14 +41,22 @@ def get_bar_menu(session: Session, bar_id: str, *, may_see_inactive: Callable[[B
         .where(MenuBoard.bar_id == bar.id)
         .options(
             selectinload(MenuBoard.entries).selectinload(MenuBoardEntry.options),
-            selectinload(MenuBoard.entries).selectinload(MenuBoardEntry.bar_menu_item),
+            selectinload(MenuBoard.entries)
+            .selectinload(MenuBoardEntry.bar_menu_item)
+            .selectinload(BarMenuItem.product)
+            .selectinload(Product.brand),
         )
     )
+    now = datetime.now(timezone.utc)
     items = [
         MenuItemResponse(
             menuBoardEntryId=entry.id,
             barMenuItemId=entry.bar_menu_item_id,
             productId=entry.bar_menu_item.product_id,
+            productName=entry.bar_menu_item.product.display_name,
+            brandId=entry.bar_menu_item.product.brand_id,
+            brandName=entry.bar_menu_item.product.brand.canonical_name,
+            category=entry.bar_menu_item.product.category,
             displayName=entry.display_name,
             sortOrder=entry.sort_order,
             options=[
@@ -44,6 +65,7 @@ def get_bar_menu(session: Session, bar_id: str, *, may_see_inactive: Callable[[B
                     optionLabel=option.option_label,
                     pourMl=option.pour_ml,
                     priceKrw=option.price_krw,
+                    discount=discount_response(option, now),
                     sortOrder=option.sort_order,
                 )
                 for option in entry.options
@@ -59,6 +81,7 @@ def get_bar_menu(session: Session, bar_id: str, *, may_see_inactive: Callable[[B
         longitude=float(bar.longitude),
         phone=bar.phone,
         menuBoardId=board.id if board else None,
+        menuVersion=board.version if board else None,
         publishedAt=board.published_at if board else None,
         items=items,
     )

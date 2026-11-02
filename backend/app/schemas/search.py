@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from app.schemas.common import Latitude, Longitude, UtcDateTime
+from app.schemas.menu import DiscountResponse
 
 
 class MatchedProductResponse(BaseModel):
@@ -20,7 +21,10 @@ class MatchedProductResponse(BaseModel):
 class SearchOptionResponse(BaseModel):
     optionLabel: str | None = Field(description='Label from the menu such as "잔" or "병"; null when none')
     pourMl: int | None = Field(description="Pour size in ml; null when the menu does not state it")
-    priceKrw: int
+    priceKrw: int = Field(description="List price, also while a discount is running")
+    discount: DiscountResponse | None = Field(
+        description="The same as on the bar menu; null when there is no discount or it has ended"
+    )
     sortOrder: int = Field(description="Options are returned in this order")
 
 

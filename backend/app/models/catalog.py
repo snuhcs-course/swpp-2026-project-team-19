@@ -25,6 +25,11 @@ class Brand(Base):
 
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
     canonical_name: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
+    # Who created it in a review or a manual menu add; null for seeded rows and for a
+    # temporary-login operator without a users row.
+    created_by_user_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -88,6 +93,11 @@ class Product(Base):
     # The extracted item whose review created this product; null for pre-registered products.
     created_from_extracted_item_id: Mapped[UUID | None] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("extracted_items.id"), nullable=True
+    )
+    # Who created it in a review or a manual menu add; null for seeded rows and for a
+    # temporary-login operator without a users row.
+    created_by_user_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

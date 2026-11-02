@@ -32,7 +32,9 @@ router = APIRouter(prefix="/api/search", tags=["search"])
         "**Results.** One row per bar x product, for products on an active bar's current menu board. "
         "Rows of products whose alias equals the query come first; within each group, sorted by "
         "`distanceMeters` when lat/lng are sent, otherwise by `menuUpdatedAt` (newest first); "
-        "ties by bar name, then product name. At most `limit` rows; `truncated` tells whether more matched.\n\n"
+        "ties by bar name, then product name. At most `limit` rows; `truncated` tells whether more matched. "
+        "`options[].discount` is the same as on the bar menu: only discounts that have not ended, and "
+        "`priceKrw` is always the list price.\n\n"
         "**Empty results** are `200`: `matchedProducts: []` means the name was not recognized; "
         "`items: []` with products means no bar currently sells them."
     ),

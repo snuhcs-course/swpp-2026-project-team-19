@@ -3,32 +3,34 @@ one SERIALIZABLE transaction (API spec 8, flow doc 17).
 
 Steps, all rolled back together on any error:
 
-1. lock the import; an `applied` import returns its stored result (a retried request)
+1. lock the bar row, then the import (spec 3.14.1: every request that changes a bar's menu
+   takes the bar row first, so they run one after another); under the lock, an inactive bar is
+   BAR_NOT_FOUND and the caller is checked again; an `applied` import returns its stored result
+   (a retried request)
 2. check the status and reviewVersion
 3. rebuild the draft; if the board changed since it was made, store the new draft with a new
    reviewVersion and answer REVIEW_OUTDATED (the only write that is kept on an error)
 4. validate the decisions (menu_review_validation)
 5. create brands, products and aliases (menu_review_catalog)
 6. record the decisions on extracted_items and extracted_options
-7. publish the board (menu_publish) and record the applied changes in menu_import_changes
-8. mark the import applied
+7. publish the board (menu_publish): raise its version and stamp it with the time taken after
+   the lock; record the applied changes in menu_import_changes
+8. mark the import applied at the same time
 
-A serialization failure reruns everything from step 1, up to three attempts in total.
+A serialization failure reruns everything from step 1, up to three attempts in total
+(app.services.serializable).
 """
 
-import logging
-import random
-import time
-from collections.abc import Callable
-from contextlib import AbstractContextManager
 from uuid import UUID
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
+from app.core.security import Principal
 from app.models import (
+    Bar,
+    BarStatus,
     Brand,
     ExtractedItem,
     ExtractionRun,
@@ -51,21 +53,14 @@ from app.schemas.menu_review import (
     ReviewResult,
     SelectExistingProduct,
 )
+from app.services.bar_access import can_manage_bar, forbidden
+from app.services.bar_menu import bar_not_found
 from app.services.menu_draft import build_draft, replace_draft
 from app.services.menu_publish import AppliedChange, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
 from app.services.menu_review_validation import ReviewedItem, ValidatedReview, pending_changes, validate_review
-
-logger = logging.getLogger(__name__)
-
-SessionFactory = Callable[[], AbstractContextManager[Session]]
-
-MAX_ATTEMPTS = 3
-# serialization_failure, deadlock_detected
-RETRYABLE_SQLSTATES = {"40001", "40P01"}
-
-# Replaced in tests so retries do not wait.
-sleep = time.sleep
+from app.services.serializable import SessionFactory, run_serializable, write_conflict
+from app.services.users import caller_user_id
 
 
 def _review_url(menu_import_id: UUID) -> str:
@@ -218,8 +213,22 @@ def _draft_keys(changes) -> set[tuple]:
     return {(c.change_type, c.extracted_item_id, c.bar_menu_item_id) for c in changes}
 
 
-def _apply_once(session: Session, import_id: UUID, request: ReviewAndApplyRequest) -> ReviewAppliedResponse:
-    # The route has checked that the import exists; this transaction locks it again.
+def _apply_once(
+    session: Session, import_id: UUID, request: ReviewAndApplyRequest, principal: Principal
+) -> ReviewAppliedResponse:
+    # The route has checked that the import exists. Lock its bar before the import, the order every
+    # menu request uses, so this cannot deadlock with a manual edit or an upload.
+    bar_id = session.scalar(select(MenuImport.bar_id).where(MenuImport.id == import_id))
+    status = session.scalar(select(Bar.status).where(Bar.id == bar_id).with_for_update())
+    # Checked under the lock (spec 3.14.1): an inactive bar takes no menu change, and an owner revoked
+    # after the route's check is refused here.
+    if status != BarStatus.ACTIVE:
+        raise bar_not_found(str(bar_id))
+    if not can_manage_bar(session, principal, bar_id):
+        raise forbidden()
+    # clock_timestamp(), not now(): a publish that waited for the lock must not look older than a
+    # request that committed while it waited (spec 3.14.1).
+    published_at = session.scalar(select(func.clock_timestamp()))
     menu_import = session.scalar(select(MenuImport).where(MenuImport.id == import_id).with_for_update())
     if menu_import.status == ImportStatus.APPLIED:
         return applied_response(session, menu_import)
@@ -240,46 +249,31 @@ def _apply_once(session: Session, import_id: UUID, request: ReviewAndApplyReques
         raise _outdated(menu_import, request.reviewVersion)
 
     review = validate_review(session, menu_import, request)
-    catalog = create_catalog_entries(session, menu_import, review)
+    catalog = create_catalog_entries(
+        session, menu_import, review, created_by_user_id=caller_user_id(session, principal)
+    )
     for entry in review.items:
         _record_item(entry, catalog)
     board, plan = review_plan(session, menu_import.bar_id, menu_import.mode, review, catalog)
-    write_board(session, board, menu_import.bar_id, menu_import.id, plan.entries)
+    write_board(session, board, menu_import.bar_id, menu_import.id, plan.entries, published_at=published_at)
     _record_changes(session, menu_import, review, plan.changes)
     menu_import.status = ImportStatus.APPLIED
-    menu_import.review_confirmed_at = func.now()
-    menu_import.completed_at = func.now()
+    menu_import.review_confirmed_at = published_at
+    menu_import.completed_at = published_at
     session.flush()
     session.refresh(menu_import)
     return applied_response(session, menu_import)
 
 
-def _is_retryable(error: DBAPIError) -> bool:
-    return getattr(error.orig, "sqlstate", None) in RETRYABLE_SQLSTATES
-
-
 def review_and_apply(
-    session_factory: SessionFactory, import_id: UUID, request: ReviewAndApplyRequest
+    session_factory: SessionFactory, import_id: UUID, request: ReviewAndApplyRequest, principal: Principal
 ) -> ReviewAppliedResponse:
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        with session_factory() as session:
-            try:
-                response = _apply_once(session, import_id, request)
-                session.commit()
-                return response
-            except DBAPIError as error:
-                session.rollback()
-                if not _is_retryable(error):
-                    raise
-                logger.info("review-and-apply %s: write conflict, attempt %d", import_id, attempt)
-            except BaseException:
-                session.rollback()
-                raise
-        if attempt < MAX_ATTEMPTS:
-            sleep(random.uniform(0.05, 0.2) * attempt)
-    raise ApiError(
-        503,
-        "TEMPORARY_WRITE_CONFLICT",
-        "다른 요청과 동시에 처리되어 반영하지 못했습니다. 잠시 후 다시 제출해 주세요.",
-        details={"menuImportId": str(import_id)},
+    return run_serializable(
+        session_factory,
+        lambda session: _apply_once(session, import_id, request, principal),
+        label=f"review-and-apply {import_id}",
+        conflict=write_conflict(
+            "다른 요청과 동시에 처리되어 반영하지 못했습니다. 잠시 후 다시 제출해 주세요.",
+            details={"menuImportId": str(import_id)},
+        ),
     )

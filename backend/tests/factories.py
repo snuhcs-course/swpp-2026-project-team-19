@@ -98,12 +98,14 @@ def make_product(
 def publish_menu(
     session: Session,
     bar: Bar,
-    entries: list[tuple[Product, str, list[tuple[str | None, int | None, int]]]],
+    entries: list[tuple[Product, str, list[tuple]]],
     *,
     published_at: datetime | None = None,
+    version: int = 1,
 ) -> MenuBoard:
-    """entries: (product, menu display name, [(option label, pour ml, price krw), ...]) in menu order."""
-    board = MenuBoard(bar_id=bar.id, published_at=published_at or datetime.now(timezone.utc))
+    """entries: (product, menu display name, [(option label, pour ml, price krw), ...]) in menu order.
+    An option may add a fourth value, its discount: (discounted price krw, starts at, ends at)."""
+    board = MenuBoard(bar_id=bar.id, published_at=published_at or datetime.now(timezone.utc), version=version)
     session.add(board)
     session.flush()
     for entry_order, (product, display_name, options) in enumerate(entries, start=1):
@@ -115,13 +117,17 @@ def publish_menu(
         )
         session.add(entry)
         session.flush()
-        for option_order, (label, pour_ml, price_krw) in enumerate(options, start=1):
+        for option_order, (label, pour_ml, price_krw, *discount) in enumerate(options, start=1):
+            discount_price_krw, starts_at, ends_at = discount[0] if discount else (None, None, None)
             session.add(
                 MenuEntryOption(
                     menu_board_entry_id=entry.id,
                     option_label=label,
                     pour_ml=pour_ml,
                     price_krw=price_krw,
+                    discount_price_krw=discount_price_krw,
+                    discount_starts_at=starts_at,
+                    discount_ends_at=ends_at,
                     sort_order=option_order,
                 )
             )

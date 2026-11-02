@@ -60,7 +60,7 @@ class ManagerRoute:
         return f"{self.method.upper()} {self.path}"
 
     def url(self, bar_id: str = MISSING_ID, menu_import_id: str = MISSING_ID) -> str:
-        return self.path.format(barId=bar_id, menuImportId=menu_import_id)
+        return self.path.format(barId=bar_id, menuImportId=menu_import_id, barMenuItemId=MISSING_ID)
 
 
 UPLOAD = {
@@ -106,6 +106,35 @@ BAR_MANAGER = [
         (409, "INVALID_IMPORT_STATE"),
     ),
     ManagerRoute("post", "/api/menu-imports/{menuImportId}/cancel", {}, (404, "MENU_IMPORT_NOT_FOUND"), (200, None)),
+    # Manual menu edits: the target bar has an unfinished import, so a manager's edit stops there.
+    ManagerRoute(
+        "post",
+        "/api/bars/{barId}/menu/items",
+        {"json": {"menuVersion": None, "productId": MISSING_ID, "options": [{"priceKrw": 10000}]}},
+        (404, "BAR_NOT_FOUND"),
+        (409, "ACTIVE_IMPORT_EXISTS"),
+    ),
+    ManagerRoute(
+        "put",
+        "/api/bars/{barId}/menu/items/{barMenuItemId}",
+        {"json": {"menuVersion": 1, "displayName": "Glenfiddich 12", "options": [{"priceKrw": 10000}]}},
+        (404, "BAR_NOT_FOUND"),
+        (409, "ACTIVE_IMPORT_EXISTS"),
+    ),
+    ManagerRoute(
+        "delete",
+        "/api/bars/{barId}/menu/items/{barMenuItemId}",
+        {"params": {"menuVersion": 1}},
+        (404, "BAR_NOT_FOUND"),
+        (409, "ACTIVE_IMPORT_EXISTS"),
+    ),
+    ManagerRoute(
+        "post",
+        "/api/bars/{barId}/menu/reset",
+        {"json": {"menuVersion": None}},
+        (404, "BAR_NOT_FOUND"),
+        (409, "ACTIVE_IMPORT_EXISTS"),
+    ),
 ]
 # Operators and the owner of at least one bar.
 CATALOG = [

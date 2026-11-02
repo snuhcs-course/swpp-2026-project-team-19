@@ -4,6 +4,7 @@ from uuid import uuid4
 import pytest
 
 from app.models import BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption, User, UserType
+from app.services.bar_menu import discount_response
 from tests.auth_support import connection_error
 from tests.factories import make_bar, make_brand, make_product, publish_menu
 from tests.sql_support import recorded_statements
@@ -29,11 +30,15 @@ def test_returns_bar_and_menu_in_display_order(client, db_session):
     body = response.json()
     assert body["barId"] == str(bar.id)
     assert (body["name"], body["latitude"], body["longitude"]) == ("Seorosang", 37.477648, 126.963763)
-    assert body["menuBoardId"] == str(board.id)
+    assert (body["menuBoardId"], body["menuVersion"]) == (str(board.id), 1)
     assert body["publishedAt"] == "2026-10-04T09:15:00Z"
     assert [(i["displayName"], i["productId"], i["sortOrder"]) for i in body["items"]] == [
         ("글렌드로낙 12Y", str(twelve.id), 1),
         ("글렌드로낙 15Y", str(fifteen.id), 2),
+    ]
+    assert [(i["productName"], i["brandId"], i["brandName"], i["category"]) for i in body["items"]] == [
+        ("GlenDronach 12", str(brand.id), "GlenDronach", "whisky"),
+        ("GlenDronach 15", str(brand.id), "GlenDronach", "whisky"),
     ]
     assert [(o["optionLabel"], o["pourMl"], o["priceKrw"]) for o in body["items"][0]["options"]] == [
         ("잔", None, 13000),
@@ -241,9 +246,32 @@ def test_after_a_401_the_same_request_without_a_token_succeeds(client, db_sessio
 
 # ---- every field is always present; a missing value is null (spec 3.9, 3.9.1) ----
 
-BAR_FIELDS = {"barId", "name", "address", "latitude", "longitude", "phone", "menuBoardId", "publishedAt", "items"}
-ITEM_FIELDS = {"menuBoardEntryId", "barMenuItemId", "productId", "displayName", "sortOrder", "options"}
-OPTION_FIELDS = {"menuEntryOptionId", "optionLabel", "pourMl", "priceKrw", "sortOrder"}
+BAR_FIELDS = {
+    "barId",
+    "name",
+    "address",
+    "latitude",
+    "longitude",
+    "phone",
+    "menuBoardId",
+    "menuVersion",
+    "publishedAt",
+    "items",
+}
+ITEM_FIELDS = {
+    "menuBoardEntryId",
+    "barMenuItemId",
+    "productId",
+    "productName",
+    "brandId",
+    "brandName",
+    "category",
+    "displayName",
+    "sortOrder",
+    "options",
+}
+OPTION_FIELDS = {"menuEntryOptionId", "optionLabel", "pourMl", "priceKrw", "discount", "sortOrder"}
+DISCOUNT_FIELDS = {"discountedPriceKrw", "startsAt", "endsAt"}
 
 
 def test_a_bar_with_nothing_optional_still_sends_every_field(client, db_session):
@@ -254,7 +282,13 @@ def test_a_bar_with_nothing_optional_still_sends_every_field(client, db_session)
     body = client.get(f"/api/bars/{bar.id}/menu").json()
 
     assert set(body) == BAR_FIELDS
-    assert (body["phone"], body["menuBoardId"], body["publishedAt"], body["items"]) == (None, None, None, [])
+    assert (body["phone"], body["menuBoardId"], body["menuVersion"], body["publishedAt"], body["items"]) == (
+        None,
+        None,
+        None,
+        None,
+        [],
+    )
 
 
 def test_menu_items_and_options_send_every_field(client, db_session):
@@ -269,6 +303,62 @@ def test_menu_items_and_options_send_every_field(client, db_session):
     assert set(item) == ITEM_FIELDS
     assert [set(option) for option in item["options"]] == [OPTION_FIELDS, OPTION_FIELDS]
     assert (item["options"][0]["optionLabel"], item["options"][0]["pourMl"]) == (None, None)
+    assert item["options"][0]["discount"] is None
+
+
+def test_a_discount_sends_every_field(client, db_session):
+    bar = make_bar(db_session)
+    product = make_product(db_session, make_brand(db_session, "Ardbeg"), "Ardbeg 10")
+    publish_menu(db_session, bar, [(product, "Ardbeg 10", [("잔", 30, 13000, (11000, PAST, FUTURE))])])
+
+    [option] = client.get(f"/api/bars/{bar.id}/menu").json()["items"][0]["options"]
+
+    assert set(option) == OPTION_FIELDS
+    assert set(option["discount"]) == DISCOUNT_FIELDS
+
+
+# ---- menu version and discounts ----
+
+NOW = datetime.now(timezone.utc)
+PAST = NOW - timedelta(days=30)
+FUTURE = NOW + timedelta(days=30)
+
+
+def test_menu_version_is_the_boards_version(client, db_session):
+    bar = make_bar(db_session)
+    publish_menu(db_session, bar, [], version=4)
+
+    assert client.get(f"/api/bars/{bar.id}/menu").json()["menuVersion"] == 4
+
+
+def test_running_and_upcoming_discounts_are_sent_but_ended_ones_are_not(client, db_session):
+    bar = make_bar(db_session)
+    product = make_product(db_session, make_brand(db_session, "Ardbeg"), "Ardbeg 10")
+    options = [
+        ("잔", 30, 13000, (11000, PAST, FUTURE)),
+        ("더블", 60, 25000, (20000, FUTURE, FUTURE + timedelta(days=1))),
+        ("병", None, 260000, (200000, PAST - timedelta(days=1), PAST)),
+        ("하프", None, 140000),
+    ]
+    publish_menu(db_session, bar, [(product, "Ardbeg 10", options)])
+
+    body = client.get(f"/api/bars/{bar.id}/menu").json()
+
+    discounts = [option["discount"] for option in body["items"][0]["options"]]
+    assert discounts[2:] == [None, None]
+    assert [d["discountedPriceKrw"] for d in discounts[:2]] == [11000, 20000]
+    assert discounts[0]["startsAt"] == PAST.isoformat().replace("+00:00", "Z")
+    assert discounts[1]["endsAt"] == (FUTURE + timedelta(days=1)).isoformat().replace("+00:00", "Z")
+    # The list price stays the list price while the discount runs.
+    assert body["items"][0]["options"][0]["priceKrw"] == 13000
+
+
+def test_a_discount_ends_at_its_end_time():
+    option = MenuEntryOption(discount_price_krw=11000, discount_starts_at=PAST, discount_ends_at=FUTURE)
+
+    assert discount_response(option, FUTURE - timedelta(microseconds=1)) is not None
+    assert discount_response(option, FUTURE) is None
+    assert discount_response(MenuEntryOption(), NOW) is None
 
 
 # ---- the number of queries does not grow with the menu ----

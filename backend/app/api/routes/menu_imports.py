@@ -9,6 +9,7 @@ from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
 from app.api.permissions import require_active_bar_manager, require_import_manager
+from app.core.security import Principal, get_current_user
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
 from app.matching.llm_layer import LLMLayerConfig
 from app.models import Bar, ImportMode
@@ -79,11 +80,13 @@ def upload_menu_import(
     llm_layer: LLMLayerConfig | None = Depends(get_matching_llm_layer),
     session_factory: SessionFactory = Depends(get_session_factory),
     bar: Bar = Depends(require_active_bar_manager),
+    principal: Principal = Depends(get_current_user),
 ) -> MenuImportAcceptedResponse:
     menu_import, created = create_menu_import(
         session,
         storage,
         extractor,
+        principal=principal,
         bar=bar,
         idempotency_key=idempotency_key,
         mode=mode,
@@ -175,7 +178,11 @@ def read_menu_import(
     responses=error_responses(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
         (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
-        (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
+        (
+            404,
+            "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id. `BAR_NOT_FOUND` (`details.barId`): the "
+            "import's bar is inactive; nothing is applied.",
+        ),
         (
             409,
             "`INVALID_IMPORT_STATE` (not `ready_for_review`); `REVIEW_OUTDATED` (`reviewVersion` differs, or "
@@ -202,8 +209,9 @@ def submit_menu_review(
     body: ReviewAndApplyRequest,
     session_factory: SessionFactory = Depends(get_serializable_session_factory),
     import_id: UUID = Depends(require_import_manager),
+    principal: Principal = Depends(get_current_user),
 ) -> ReviewAppliedResponse:
-    return review_and_apply(session_factory, import_id, body)
+    return review_and_apply(session_factory, import_id, body, principal)
 
 
 @router.post(

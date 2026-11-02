@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
 import pytest
@@ -17,10 +17,11 @@ from app.services.menu_publish import (
 )
 from app.services.menu_review_catalog import create_catalog_entries
 from app.services.menu_review_validation import validate_review
-from tests.factories import make_bar
+from tests.factories import make_bar, publish_menu
 from tests.review_support import make_glenfiddich, upload_sample_review, valid_body
 
 FULL, PARTIAL = ImportMode.FULL_REPLACE, ImportMode.PARTIAL_UPDATE
+NOW = datetime(2026, 11, 2, 9, tzinfo=timezone.utc)
 A, B, C, D = (UUID(int=n) for n in range(1, 5))  # products
 
 
@@ -147,9 +148,9 @@ def sample(client, db_session, image_storage, operator, glenfiddich):
 
 def publish(db_session, sample, body):
     review = validate_review(db_session, sample.menu_import, ReviewAndApplyRequest.model_validate(body))
-    catalog = create_catalog_entries(db_session, sample.menu_import, review)
+    catalog = create_catalog_entries(db_session, sample.menu_import, review, created_by_user_id=None)
     board, result = review_plan(db_session, sample.bar.id, sample.menu_import.mode, review, catalog)
-    write_board(db_session, board, sample.bar.id, sample.menu_import.id, result.entries)
+    write_board(db_session, board, sample.bar.id, sample.menu_import.id, result.entries, published_at=NOW)
     db_session.expire_all()
     return result, catalog
 
@@ -214,7 +215,55 @@ def test_first_publish_creates_the_board(client, db_session, image_storage, oper
     bar = make_bar(db_session, "Empty")
     entries = [BoardEntry(glenfiddich[12].id, "글렌피딕 12년", (opt(9000),))]
 
-    board = write_board(db_session, None, bar.id, sample.menu_import.id, entries)
+    board = write_board(db_session, None, bar.id, sample.menu_import.id, entries, published_at=NOW)
 
-    assert board.bar_id == bar.id
+    assert (board.bar_id, board.version, board.published_at) == (bar.id, 1, NOW)
     assert board_rows(db_session, bar.id) == [("글렌피딕 12년", [(None, 30, 9000)])]
+
+
+def test_a_publish_raises_the_version_and_carries_discounts_to_the_same_options(
+    client, db_session, image_storage, operator, glenfiddich
+):
+    sample = upload_sample_review(client, db_session, operator, glenfiddich)
+    bar = make_bar(db_session, "Discounts")
+    started, ends = NOW, NOW + timedelta(days=14)
+    publish_menu(
+        db_session,
+        bar,
+        [
+            (
+                glenfiddich[12],
+                "글렌피딕 12년",
+                [("잔", 30, 17000, (14000, started, ends)), ("병", None, 160000, (150000, started, ends))],
+            ),
+            (
+                glenfiddich[15],
+                "글렌피딕 15년",
+                [("잔", 30, 21000, (19000, started, ends)), ("하프", None, 90000, (80000, started, ends))],
+            ),
+        ],
+        version=4,
+    )
+    board, current = load_board(db_session, bar.id)
+    twelve, fifteen = current
+    entries = [
+        # The 12 keeps its glass; its bottle price changed, so that discount no longer fits.
+        BoardEntry(
+            glenfiddich[12].id, "글렌피딕 12Y", (opt(17000, 30, "잔"), opt(170000, None, "병")), twelve.bar_menu_item_id
+        ),
+        # The 15 is kept as it was, except its half bottle was dropped.
+        BoardEntry(glenfiddich[15].id, "글렌피딕 15년", (fifteen.options[0],), fifteen.bar_menu_item_id),
+    ]
+
+    written = write_board(db_session, board, bar.id, sample.menu_import.id, entries, published_at=NOW)
+
+    assert (written.version, written.published_at, written.last_import_id) == (5, NOW, sample.menu_import.id)
+    db_session.expire_all()
+    written = db_session.get(MenuBoard, written.id)
+    assert [
+        [(o.option_label, o.discount_price_krw, o.discount_starts_at, o.discount_ends_at) for o in entry.options]
+        for entry in written.entries
+    ] == [
+        [("잔", 14000, started, ends), ("병", None, None, None)],
+        [("잔", 19000, started, ends)],
+    ]

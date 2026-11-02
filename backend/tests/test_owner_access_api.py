@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import pytest
 from sqlalchemy import select
 
-from app.models import BarOwner, BarStatus, ImportStatus, MenuBoard, UserType
+from app.models import BarOwner, BarStatus, ImportStatus, MenuBoard, Product, User, UserType
 from tests.factories import make_bar, make_owner, make_user
 from tests.review_support import JPEG, make_glenfiddich, upload_sample_review, valid_body
 
@@ -49,6 +49,10 @@ def test_the_owner_uploads_reviews_and_publishes_the_menu(client, db_session, su
     assert board.last_import_id == sample.menu_import.id
     listed = client.get(f"/api/bars/{bar.id}/menu-imports", headers=owner).json()["items"]
     assert [item["status"] for item in listed] == ["applied"]
+    # The brand and product the review created record the owner who created them.
+    created = db_session.scalar(select(Product).where(Product.created_from_extracted_item_id == sample.items[3].id))
+    owner_id = db_session.scalar(select(User.id).where(User.auth_subject == OWNER_SUBJECT))
+    assert (created.created_by_user_id, created.brand.created_by_user_id) == (owner_id, owner_id)
 
 
 def test_the_owner_cancels_an_import_and_uploads_again(client, db_session, supabase, reviewer, image_storage):

@@ -11,6 +11,12 @@ from jwt import PyJWKClient
 from jwt.algorithms import ECAlgorithm
 from jwt.exceptions import PyJWKClientConnectionError
 
+from app.core.security import Principal
+from app.models import UserType
+
+# A temporary-login operator, for services called directly rather than through the API.
+TEMPORARY_OPERATOR = Principal(kind="temporary", subject="local-dev-user", claims={}, user_type=UserType.OPERATOR)
+
 
 @dataclass(frozen=True)
 class SigningKey:

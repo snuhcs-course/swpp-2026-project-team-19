@@ -959,7 +959,7 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 한 신청의 `bar_owner_application_menu_images`에서 `image_order`가 중복되지 않아야 한다. unique 인덱스(`application_id`, `image_order`)로 보장한다.
 - 외래키 삭제 정책은 이력 보존을 우선해 핵심 사용자 업장 상품 이미지에 `RESTRICT` 또는 soft delete를 검토한다.
 
-> **현재 구현과의 차이 (수정 예정):** 지금 Alembic 마이그레이션에는 업장 좌표 범위(`ck_bars_latitude_range`, `ck_bars_longitude_range`)를 제외한 위의 `CHECK` 제약과 부분 unique 인덱스가 없다. 그동안은 백엔드가 다음처럼 규칙을 지킨다. 위 제약을 추가하는 마이그레이션을 만들 예정이며, 그 전에 기존 데이터가 규칙을 어기지 않는지 확인한다.
+> **현재 구현과의 차이 (수정 예정):** 지금 Alembic 마이그레이션에는 업장 좌표 범위(`ck_bars_latitude_range`, `ck_bars_longitude_range`)와 `menu_entry_options`의 할인 제약(`ck_menu_entry_options_discount_*`)을 제외한 위의 `CHECK` 제약과 부분 unique 인덱스가 없다. 그동안은 백엔드가 다음처럼 규칙을 지킨다. 위 제약을 추가하는 마이그레이션을 만들 예정이며, 그 전에 기존 데이터가 규칙을 어기지 않는지 확인한다.
 >
 > - 가격·용량·연수·신뢰도·점수 범위: 요청 스키마와 추출 어댑터가 검사한다.
 > - `corrected_line_type`: 최초 분류와 같으면 백엔드가 `null`로 저장한다. `completed_at`은 백엔드가 항상 나중 시각으로 기록한다.

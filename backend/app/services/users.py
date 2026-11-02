@@ -7,7 +7,7 @@ the user may have changed.
 """
 
 from typing import Any
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
@@ -19,6 +19,13 @@ from app.models import User, UserType
 
 MAX_DISPLAY_NAME_LENGTH = 20
 MAX_EMAIL_LENGTH = 255
+
+
+def caller_user_id(session: Session, principal: Principal) -> UUID | None:
+    """The caller's users id, recorded as who created or changed something. Null only for a caller
+    that has not called `GET /api/me`, such as a temporary-login operator: owners and Supabase
+    operators always have a row."""
+    return session.scalar(select(User.id).where(User.auth_subject == principal.subject))
 
 
 def sync_current_user(session: Session, principal: Principal) -> User:
