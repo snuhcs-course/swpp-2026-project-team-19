@@ -416,10 +416,12 @@ internal fun OwnerMenuPhotoSelectionScreen(
     }
     fun takePhoto() {
         if (busy || active != null || photos.size >= OWNER_MENU_MAX_PHOTOS) return
+        var newlyCreated: File? = null
         try {
             val directory = File(context.filesDir,"owner-menu-captures").apply { mkdirs() }
             val file = synchronized(OwnerMenuCaptureGuard.lock) {
                 File.createTempFile("menu-capture-", ".jpg", directory).also {
+                    newlyCreated = it
                     OwnerMenuCaptureGuard.livePaths.add(it.absolutePath)
                 }
             }
@@ -428,10 +430,11 @@ internal fun OwnerMenuPhotoSelectionScreen(
             pendingCapturePath = file.absolutePath
             camera.launch(uri)
         } catch (e: Exception) {
-            pendingCapturePath?.let { path ->
+            // FileProvider can fail before pendingCapturePath was saved.
+            (pendingCapturePath?.let(::File) ?: newlyCreated)?.let { file ->
                 synchronized(OwnerMenuCaptureGuard.lock) {
-                    File(path).delete()
-                    OwnerMenuCaptureGuard.livePaths.remove(path)
+                    file.delete()
+                    OwnerMenuCaptureGuard.livePaths.remove(file.absolutePath)
                 }
             }
             pendingCapturePath = null
