@@ -323,3 +323,45 @@ internal fun RegistrationSuccessMark() {
         RegistrationGlyph("check",Modifier.size(32.dp),RegistrationV4.onPrimary)
     }
 }
+
+/** PDF 4, 9, 10 and 19: centered and intentionally free of debug labels. */
+@Composable
+internal fun RegistrationCenterContent(
+    title:String,subtitle:String,loading:Boolean=false,success:Boolean=true,
+) {
+    Column(Modifier.fillMaxWidth().testTag("registration-result"),
+        horizontalAlignment=Alignment.CenterHorizontally,
+        verticalArrangement=Arrangement.spacedBy(8.dp)) {
+        if(loading) {
+            Canvas(Modifier.size(88.dp)) {
+                val w=size.width;val h=size.height
+                val glass=Path().apply {
+                    moveTo(w*.25f,h*.15f);lineTo(w*.31f,h*.77f)
+                    quadraticTo(w*.32f,h*.85f,w*.4f,h*.85f)
+                    lineTo(w*.62f,h*.85f)
+                    quadraticTo(w*.70f,h*.85f,w*.71f,h*.77f)
+                    lineTo(w*.77f,h*.15f)
+                }
+                val liquid=Path().apply {
+                    moveTo(w*.32f,h*.55f);lineTo(w*.69f,h*.55f)
+                    lineTo(w*.66f,h*.78f)
+                    quadraticTo(w*.64f,h*.81f,w*.60f,h*.81f)
+                    lineTo(w*.42f,h*.81f)
+                    quadraticTo(w*.38f,h*.81f,w*.37f,h*.77f)
+                    close()
+                }
+                drawPath(liquid,RegistrationV4.primary)
+                drawPath(glass,RegistrationV4.secondary,
+                    style=Stroke(2.5.dp.toPx(),cap=StrokeCap.Round,join=StrokeJoin.Round))
+            }
+        } else {
+            RegistrationSuccessMark()
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(title,color=RegistrationV4.text,
+            fontSize=24.sp,lineHeight=32.sp,fontWeight=FontWeight.Bold,
+            textAlign=TextAlign.Center)
+        Text(subtitle,color=RegistrationV4.secondary,
+            fontSize=14.sp,lineHeight=21.sp,textAlign=TextAlign.Center)
+    }
+}
