@@ -1,7 +1,8 @@
+from datetime import datetime, timezone
 from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.db.session import get_session
@@ -11,11 +12,16 @@ from app.schemas.search import (
     BarNamesResponse,
     MapBarsResponse,
     NearbyBarsResponse,
+    PopularProductsResponse,
     SearchBarsResponse,
 )
 from app.services.bar_name_search import DEFAULT_LIMIT, MAX_LIMIT, search_bar_names
 from app.services.map_bars import MAX_SPAN_DEGREES, find_map_bars
 from app.services.nearby_bars import DEFAULT_RADIUS_METERS, MAX_RADIUS_METERS, find_nearby_bars
+from app.services.popular_products import DEFAULT_LIMIT as POPULAR_DEFAULT_LIMIT
+from app.services.popular_products import MAX_LIMIT as POPULAR_MAX_LIMIT
+from app.services.popular_products import popular_products
+from app.services.request_limits import kst_date
 from app.services.search import search_bars
 
 router = APIRouter(prefix="/api/search", tags=["search"])
@@ -89,6 +95,39 @@ def read_search_bars(
     return search_bars(
         session, query, product_id=product_id, lat=lat, lng=lng, limit=limit, source=SearchSource(source)
     )
+
+
+@router.get(
+    "/popular-products",
+    response_model=PopularProductsResponse,
+    summary="The popular whiskies for the customer home screen",
+    description=(
+        "Public; the Authorization header is not read, so every caller gets the same result.\n\n"
+        "- Only active products that at least one active bar sells now, not sold out. `barCount` is the "
+        "number of those bars, the same bars a `productId` search shows.\n"
+        "- Products searched at least 3 times in the last 30 Seoul dates (today included, every `source`) "
+        "come first, most searched first; ties by `barCount` (most first), `displayName`, `productId`. "
+        "The rest of the list is filled with the other products by `barCount`, `displayName`, `productId`.\n"
+        "- Search counts are not sent.\n"
+        "- No product sold anywhere is `200` with `items: []`; hide the section then.\n"
+        "- Sent with `Cache-Control: public, max-age=600`."
+    ),
+    responses=error_responses(
+        (
+            422,
+            "`VALIDATION_FAILED`: `limit` `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL` or `INT_PARSING`.",
+        ),
+    ),
+)
+def read_popular_products(
+    response: Response,
+    limit: Annotated[
+        int, Query(ge=1, le=POPULAR_MAX_LIMIT, description="Maximum number of products")
+    ] = POPULAR_DEFAULT_LIMIT,
+    session: Session = Depends(get_session),
+) -> PopularProductsResponse:
+    response.headers["Cache-Control"] = "public, max-age=600"
+    return popular_products(session, kst_date(datetime.now(timezone.utc)), limit)
 
 
 @router.get(

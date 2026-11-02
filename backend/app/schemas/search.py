@@ -116,3 +116,20 @@ class NearbyBarsResponse(BaseModel):
         description="Every active bar within the radius, nearest first; ties by barId. Never truncated."
     )
 
+
+class PopularProductItem(BaseModel):
+    productId: UUID = Field(description="Search it with `GET /api/search/bars?productId=...&source=popular`")
+    displayName: str = Field(description="Canonical product name, shown on the card")
+    brandName: str
+    ageYears: int | None
+    editionName: str | None
+    barCount: int = Field(
+        description="Active bars selling it now, not sold out; the number of bars its productId search "
+        "shows. At least 1."
+    )
+
+
+class PopularProductsResponse(BaseModel):
+    items: list[PopularProductItem] = Field(
+        description="Ranked products, at most `limit`; empty when no bar sells any product"
+    )
