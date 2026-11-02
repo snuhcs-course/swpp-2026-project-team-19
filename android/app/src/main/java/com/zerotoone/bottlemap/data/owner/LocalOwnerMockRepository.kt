@@ -772,6 +772,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                     val draft = requireNotNull(decision.newProduct)
                     require(decision.productId == null)
                     require(draft.name.trim().length in 1..200)
+                    require(canonicalReviewProductName(draft).length in 1..200) {
+                        "PRODUCT_NAME_OUT_OF_RANGE"
+                    }
                     require(draft.brandId != null || !draft.brandName.isNullOrBlank())
                     if(draft.brandId==null) {
                         val canonical=requireNotNull(draft.brandName).trim()
@@ -779,13 +782,22 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                         require(s.brands.none {it.name.trim().equals(canonical,ignoreCase=true)}) {
                             "DUPLICATE_BRAND_FOUND: 기존 병입사를 선택해 주세요."
                         }
-                    } else require(s.brands.any {it.brandId==draft.brandId}) { "BRAND_NOT_FOUND" }
+                    } else {
+                        require(s.brands.any {it.brandId==draft.brandId}) { "BRAND_NOT_FOUND" }
+                        // Fail at line review, not at a retry-only publication screen.
+                        val normalized=canonicalReviewProductName(draft)
+                        require(s.products.none {
+                            it.brandId==draft.brandId && it.category==draft.category &&
+                                it.displayName.equals(normalized,ignoreCase=true)
+                        }) { "DUPLICATE_PRODUCT_FOUND: 기존 카탈로그 상품을 선택해 주세요." }
+                    }
                     require(draft.editionName == null ||
                         draft.editionName.trim().length in 1..150) {
                         "EDITION_NAME_OUT_OF_RANGE"
                     }
                     require(draft.ageYears == null || draft.ageYears in 0..200)
-                    require(draft.abvPercent == null || draft.abvPercent in 0.0..100.0)
+                    require(draft.abvPercent == null ||
+                        (draft.abvPercent > 0.0 && draft.abvPercent <= 100.0))
                     require(draft.category in listOf("whisky", "cocktail", "food", "otherAlcohol",
                         "gin", "brandy", "rum", "wine"))
                 }
