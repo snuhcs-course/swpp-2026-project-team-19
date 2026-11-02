@@ -653,8 +653,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 val normalizedOptions = normalized.options.map {
                     it.copy(optionId = "local-option-${sequence++}")
                 }
-                // Only explicit DEBUG fixture rows can be auto-confirmed. Never infer
-                // this from a display name or a generic OCR candidate.
+                // Only explicit test fixtures may mark an exact match proposal.
+                // Even those proposals must be confirmed by the owner before publishing.
                 val autoId = normalized.suggestedProductId?.takeIf { productId ->
                     normalized.mockAutoAccepted && normalized.kind == MockLineKind.PRODUCT &&
                         normalized.candidateProductIds.isEmpty() &&
@@ -666,9 +666,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                     "Invalid mock auto-accepted fixture"
                 }
                 normalized.copy(extractedItemId = "local-line-${sequence++}",
-                    options = normalizedOptions,
-                    decision = autoId?.let { MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
-                        productId=it, correctedOptions=normalizedOptions) })
+                    options = normalizedOptions, decision = null)
             })
         }
         // A partial multi-photo fixture is not a successful import.
@@ -725,11 +723,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             val reset=job.copy(reviewVersion=job.reviewVersion+1,
                 images=job.images.map { photo ->
                     photo.copy(lines=photo.lines.map { line ->
-                        line.copy(decision=if(line.mockAutoAccepted)
-                            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
-                                productId=requireNotNull(line.suggestedProductId),
-                                correctedOptions=line.options)
-                        else null)
+                        line.copy(decision=null)
                     })
                 })
             state.copy(imports=state.imports.map {
@@ -786,6 +780,10 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                             "DUPLICATE_BRAND_FOUND: 기존 병입사를 선택해 주세요."
                         }
                     } else require(s.brands.any {it.brandId==draft.brandId}) { "BRAND_NOT_FOUND" }
+                    require(draft.editionName == null ||
+                        draft.editionName.trim().length in 1..150) {
+                        "EDITION_NAME_OUT_OF_RANGE"
+                    }
                     require(draft.ageYears == null || draft.ageYears in 0..200)
                     require(draft.abvPercent == null || draft.abvPercent in 0.0..100.0)
                     require(draft.category in listOf("whisky", "cocktail", "food", "otherAlcohol",
