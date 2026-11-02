@@ -4,6 +4,9 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import com.zerotoone.bottlemap.BuildConfig
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -208,7 +211,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         val back: () -> Unit = {
             when(screen) {
-                "line","publish","auto","existing","catalog","incomplete","results","publishFailed" -> screen="summary"
+                "line","publish","auto","existing","catalog","incomplete" -> screen="summary"
+                "results","publishFailed" -> screen="publish"
                 "edit","new","price" -> screen="line"
                 "done"->onHome()
                 else->onBack()
@@ -819,22 +823,63 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         color=V4Color.primary,fontSize=12.sp)
                 }
             } else if(screen=="publish") {
-                Text(if(counts!!.remaining==0)"검수를 마쳤어요" else "검수 미완료",
-                    color=V4Color.text,fontSize=24.sp,fontWeight=FontWeight.Bold)
-                Text(counts.reviewed.toString()+" / "+counts.lines+"줄 확인",color=V4Color.sub)
-                all.forEach{(photo,line)->
-                    Text("사진 "+photo.imageOrder+": "+line.sourceText.take(90)+" · "+
-                        (line.decision?.kind?.name?:"미확인"),color=V4Color.text,fontSize=12.sp)
-                }
-                Row(verticalAlignment=Alignment.CenterVertically){
-                    Checkbox(publishConfirmed,{publishConfirmed=it})
-                    Text("검수 결과를 확인했어요 (Mock 게시)",color=V4Color.text)
+                St8PublishSteps(3)
+                Text("검수 완료",color=V4Color.sub,fontSize=12.sp)
+                Text("메뉴 게시",color=V4Color.text,fontSize=26.sp,
+                    fontWeight=FontWeight.Bold,
+                    modifier=if(BuildConfig.DEBUG) Modifier.pointerInput(job.menuImportId) {
+                        detectTapGestures(onLongPress={demoPublishError=true})
+                    } else Modifier)
+                val selected=all.count {it.second.decision?.kind in listOf(
+                    MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}
+                val skipped=all.count {it.second.decision?.kind in listOf(
+                    MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)}
+                St8CountCard("새로 추가",selected,"건너뜀",skipped,"개")
+                TextButton(onClick={screen="results"}) {
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
+                        Text("줄별 결과 보기",color=V4Color.primary,fontSize=14.sp)
+                        Text("›",color=V4Color.primary,fontSize=18.sp)
+                    }
                 }
             } else if(screen=="done") {
-                Spacer(Modifier.height(90.dp))
-                Text("메뉴가 추가됐어요",color=V4Color.text,fontSize=26.sp,
-                    fontWeight=FontWeight.Bold,modifier=Modifier.align(Alignment.CenterHorizontally))
-                Text("기존 메뉴와 가격은 그대로 유지했어요.",color=V4Color.sub)
+                St8PublishSteps(3)
+                Spacer(Modifier.height(80.dp))
+                Box(Modifier.align(Alignment.CenterHorizontally).size(72.dp)
+                    .background(Color(0xFF245740),RoundedCornerShape(50)),
+                    contentAlignment=Alignment.Center) {
+                    Text("✓",color=Color.White,fontSize=36.sp)
+                }
+                Text("메뉴에 ${all.count{it.second.decision?.kind in listOf(
+                    MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}}개를 더했어요",
+                    color=V4Color.text,fontSize=23.sp,fontWeight=FontWeight.Bold,
+                    modifier=Modifier.align(Alignment.CenterHorizontally))
+                Text("몰트 앤 무드 · 메뉴 게시 완료",color=V4Color.sub,
+                    fontSize=12.sp,modifier=Modifier.align(Alignment.CenterHorizontally))
+                St8CountCard("새로 더한 메뉴",all.count{it.second.decision?.kind in listOf(
+                    MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)},
+                    "건너뛴 줄",all.count{it.second.decision?.kind in listOf(
+                    MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)},"개")
+                St8Card {
+                    Text("✎ 메뉴판과 가격이 다른 메뉴는 직접 편집에서 수정할 수 있어요.",
+                        color=V4Color.sub,fontSize=12.sp)
+                }
+            } else if(screen=="publishFailed") {
+                Spacer(Modifier.height(20.dp))
+                Column(Modifier.fillMaxWidth().background(Color(0xFF492927),
+                    RoundedCornerShape(12.dp)).padding(15.dp),
+                    verticalArrangement=Arrangement.spacedBy(5.dp)) {
+                    Text("ⓘ  메뉴에 더하지 못했어요",color=Color(0xFFFFB4AB),
+                        fontSize=15.sp,fontWeight=FontWeight.Bold)
+                    Text("인터넷 연결을 확인해 주세요. 확인한 내용은 그대로 있어요.",
+                        color=V4Color.text,fontSize=12.sp)
+                }
+                Text("게시 실패",color=V4Color.text,fontSize=25.sp,
+                    fontWeight=FontWeight.Bold)
+                St8CountCard("메뉴에 새로 더하는 줄",all.count{
+                    it.second.decision?.kind in listOf(
+                        MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)},
+                    "건너뛰는 줄",all.count{it.second.decision?.kind in listOf(
+                        MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)},"개")
             }
             error?.let{Text(it,color=Color(0xFFFFB4AB),fontSize=12.sp)}
         }
@@ -916,13 +961,41 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 "results"->St8Button("돌아가기"){screen="publish"}
                 "publish"->{
-                    St8Button("메뉴 더하기",enabled=counts!!.remaining==0 && publishConfirmed){
-                        runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
-                            .onSuccess{error=null;screen="done"}.onFailure{error=it.message}
+                    val accepted=all.count{it.second.decision?.kind in listOf(
+                        MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}
+                    St8Button("+  메뉴 ${accepted}개 게시",enabled=counts!!.remaining==0){
+                        if(BuildConfig.DEBUG && demoPublishError){
+                            demoPublishError=false
+                            screen="publishFailed"
+                        } else runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
+                            .onSuccess{error=null;screen="done"}
+                            .onFailure{error=it.message;screen="publishFailed"}
                     }
-                    TextButton(onClick={screen="summary"}){Text("계속 확인",color=V4Color.sub)}
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                        Box(Modifier.weight(1f)) {
+                            St8Secondary("나중에 하기",onHome)
+                        }
+                        Box(Modifier.weight(1f)) {
+                            St8Secondary("처음부터 검수") {position=0;screen="line"}
+                        }
+                    }
                 }
-                "done"->St8Button("내 매장으로 돌아가기",click=onHome)
+                "done"->{
+                    St8Secondary("메뉴 보기",onHome)
+                    TextButton(onClick=onHome,modifier=Modifier.fillMaxWidth()) {
+                        Text("닫기",color=V4Color.sub)
+                    }
+                }
+                "publishFailed"->{
+                    St8Button("+  다시 시도") {
+                        runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
+                            .onSuccess{error=null;screen="done"}
+                            .onFailure{error=it.message;screen="publishFailed"}
+                    }
+                    TextButton(onClick=onHome,modifier=Modifier.fillMaxWidth()) {
+                        Text("나중에 하기",color=V4Color.sub)
+                    }
+                }
             }
         }
     }
