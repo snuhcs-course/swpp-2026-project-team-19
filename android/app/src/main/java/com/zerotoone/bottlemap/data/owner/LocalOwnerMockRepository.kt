@@ -678,12 +678,14 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 it.extractedItemId == extractedItemId
             }
             if (decision.kind in listOf(MockDecisionKind.SELECT_PRODUCT, MockDecisionKind.CREATE_PRODUCT)) {
-                val options = decision.correctedOptions ?: original.options
+                if (decision.correctedOptions != null || decision.kind == MockDecisionKind.CREATE_PRODUCT) {
+                    val options = decision.correctedOptions ?: original.options
                 require(options.isNotEmpty() && options.all(::validMockMenuOption)) {
                     "가격이 있는 옵션을 확인해 주세요."
                 }
                 require(options.map { it.optionId }.distinct().size == options.size)
                 require(options.map { it.identityKey() }.distinct().size == options.size)
+                }
                 if (decision.kind == MockDecisionKind.SELECT_PRODUCT) {
                     val linked = s.products.firstOrNull { it.productId == decision.productId }
                     require(linked != null && linked.isActive) { "PRODUCT_INACTIVE_OR_NOT_FOUND" }
