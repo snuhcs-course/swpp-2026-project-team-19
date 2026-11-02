@@ -17,6 +17,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.EaseInOutSine
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -63,6 +64,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -411,6 +413,83 @@ internal fun OwnerMenuPhotoJobScreen(
                 .onFailure { error = it.message }
         }
     }
+    // A DEBUG-only long press on the failure heading opens the demonstrator.
+    // No developer UI distorts the pixel-perfect PDF failure screen.
+    val startMockDemo: () -> Unit = demo@{
+        if(!BuildConfig.DEBUG) return@demo
+        val failedJob=job ?: return@demo
+        if(failedJob.status != MockImportStatus.FAILED) return@demo
+
+                    runCatching {
+                        // Clearly labeled DEMO data: never inferred from selected image pixels.
+                        val brands = listOf(
+                            MockBrand("demo-brand-hakushu", "Suntory"),
+                            MockBrand("demo-brand-russells", "Russell's Reserve"),
+                            MockBrand("demo-brand-lagavulin", "Lagavulin"),
+                            MockBrand("demo-brand-bookers", "Booker's")
+                        )
+                        val products = listOf(
+                            MockCatalogProduct("demo-hakushu-dr", "demo-brand-hakushu",
+                                "Hakushu Distiller's Reserve"),
+                            MockCatalogProduct("demo-russell-single", "demo-brand-russells",
+                                "Russell's Reserve Single Barrel"),
+                            MockCatalogProduct("demo-russell-rye", "demo-brand-russells",
+                                "Russell's Reserve Single Barrel Rye"),
+                            MockCatalogProduct("demo-lagavulin-16", "demo-brand-lagavulin",
+                                "Lagavulin 16", ageYears = 16),
+                            MockCatalogProduct("demo-bookers", "demo-brand-bookers", "Booker's")
+                        )
+                        val existingSnapshot = photoBar(state)
+                        brands.filter { b ->
+                            existingSnapshot?.brands?.none { it.brandId == b.brandId } != false
+                        }.forEach(viewModel::saveBrand)
+                        products.filter { product ->
+                            existingSnapshot?.products?.none { it.productId == product.productId } != false
+                        }.forEach(viewModel::saveProduct)
+                        val examples = listOf(
+                            MockExtractedLine("demo-hakushu", "하쿠슈DR",
+                                MockLineKind.PRODUCT, suggestedProductId = "demo-hakushu-dr",
+                                options = listOf(MockMenuOption("demo-hakushu-glass",
+                                    label = "잔", pourMl = 30, priceKrw = 19000))),
+                            MockExtractedLine("demo-russell", "러셀 싱글배럴",
+                                MockLineKind.PRODUCT, candidateProductIds = listOf(
+                                    "demo-russell-single", "demo-russell-rye"),
+                                options = listOf(MockMenuOption("demo-russell-glass",
+                                    label = "잔", pourMl = 30, priceKrw = 15000))),
+                            MockExtractedLine("demo-signatory", "시그나토리 쿨일라13",
+                                MockLineKind.PRODUCT,
+                                options = listOf(MockMenuOption("demo-signatory-glass",
+                                    label = "잔", pourMl = 30, priceKrw = 20000))),
+                            MockExtractedLine("demo-cocktail", "네그로니",
+                                MockLineKind.PRODUCT,
+                                options = listOf(MockMenuOption("demo-cocktail-glass",
+                                    label = "잔", priceKrw = 16000))),
+                            MockExtractedLine("demo-nonproduct", "영업 안내 · 모든 가격은 원화 기준",
+                                MockLineKind.NON_PRODUCT),
+                            MockExtractedLine("demo-bookers", "부커스",
+                                MockLineKind.PRODUCT, suggestedProductId = "demo-bookers",
+                                options = listOf(
+                                    MockMenuOption("demo-bookers-15", label = "15ml",
+                                        pourMl = 15, priceKrw = 18000),
+                                    MockMenuOption("demo-bookers-30", label = "30ml",
+                                        pourMl = 30, priceKrw = 32000))),
+                            MockExtractedLine("demo-lagavulin", "라가불린 16년",
+                                MockLineKind.PRODUCT, suggestedProductId = "demo-lagavulin-16",
+                                options = listOf(MockMenuOption("demo-lagavulin-bottle",
+                                    label = "병", priceKrw = 280000)))
+                        )
+                        val photoUris = failedJob.images.map { it.sourceUri }
+                        val demoResult = MockPhotoExtractionSource { uri ->
+                            val imageIndex = photoUris.indexOf(uri)
+                            if (imageIndex < 0) emptyList() else examples.filterIndexed { i, _ ->
+                                i % photoUris.size == imageIndex
+                            }
+                        }
+                        val newImportId = viewModel.retryFailedPhotoImport(failedJob.menuImportId)
+                        viewModel.finishPhotoImport(newImportId, demoResult)
+                        onReview()
+                    }.onFailure { error = it.message }
+    }
     if (cancelConfirmation && job != null) {
         AlertDialog(onDismissRequest = { cancelConfirmation = false },
             title = { Text("메뉴 등록 작업을 취소할까요?") },
@@ -484,7 +563,11 @@ internal fun OwnerMenuPhotoJobScreen(
                     else -> "진행 중인 작업이 없어요"
                 }, color = V4Color.text, fontWeight = FontWeight.Bold,
                     fontSize = if (job?.status == MockImportStatus.FAILED) 24.sp else 16.sp,
-                    textAlign = TextAlign.Center)
+                    textAlign = TextAlign.Center,
+                    modifier = if (BuildConfig.DEBUG && job?.status == MockImportStatus.FAILED)
+                        Modifier.pointerInput(job.menuImportId) {
+                            detectTapGestures(onLongPress = { startMockDemo() })
+                        } else Modifier)
                 Text(when(job?.status) {
                     MockImportStatus.FAILED ->
                         "사진 분석을 완료하지 못했어요.\n메뉴판을 화면에 꽉 채우고, 흔들리지 않게 다시 찍어주세요."
@@ -512,81 +595,7 @@ internal fun OwnerMenuPhotoJobScreen(
             if (job?.status == MockImportStatus.READY_FOR_REVIEW) {
                 MenuPhotoPrimary("검수 결과 확인하기", onClick = onReview)
             }
-            if (BuildConfig.DEBUG && job?.status == MockImportStatus.FAILED) {
-                TextButton(onClick = {
-                    runCatching {
-                        // Clearly labeled DEMO data: never inferred from selected image pixels.
-                        val brands = listOf(
-                            MockBrand("demo-brand-hakushu", "Suntory"),
-                            MockBrand("demo-brand-russells", "Russell's Reserve"),
-                            MockBrand("demo-brand-lagavulin", "Lagavulin"),
-                            MockBrand("demo-brand-bookers", "Booker's")
-                        )
-                        val products = listOf(
-                            MockCatalogProduct("demo-hakushu-dr", "demo-brand-hakushu",
-                                "Hakushu Distiller's Reserve"),
-                            MockCatalogProduct("demo-russell-single", "demo-brand-russells",
-                                "Russell's Reserve Single Barrel"),
-                            MockCatalogProduct("demo-russell-rye", "demo-brand-russells",
-                                "Russell's Reserve Single Barrel Rye"),
-                            MockCatalogProduct("demo-lagavulin-16", "demo-brand-lagavulin",
-                                "Lagavulin 16", ageYears = 16),
-                            MockCatalogProduct("demo-bookers", "demo-brand-bookers", "Booker's")
-                        )
-                        val existingSnapshot = photoBar(state)
-                        brands.filter { b ->
-                            existingSnapshot?.brands?.none { it.brandId == b.brandId } != false
-                        }.forEach(viewModel::saveBrand)
-                        products.filter { product ->
-                            existingSnapshot?.products?.none { it.productId == product.productId } != false
-                        }.forEach(viewModel::saveProduct)
-                        val examples = listOf(
-                            MockExtractedLine("demo-hakushu", "하쿠슈DR",
-                                MockLineKind.PRODUCT, suggestedProductId = "demo-hakushu-dr",
-                                options = listOf(MockMenuOption("demo-hakushu-glass",
-                                    label = "잔", pourMl = 30, priceKrw = 19000))),
-                            MockExtractedLine("demo-russell", "러셀 싱글배럴",
-                                MockLineKind.PRODUCT, candidateProductIds = listOf(
-                                    "demo-russell-single", "demo-russell-rye"),
-                                options = listOf(MockMenuOption("demo-russell-glass",
-                                    label = "잔", pourMl = 30, priceKrw = 15000))),
-                            MockExtractedLine("demo-signatory", "시그나토리 쿨일라13",
-                                MockLineKind.PRODUCT,
-                                options = listOf(MockMenuOption("demo-signatory-glass",
-                                    label = "잔", pourMl = 30, priceKrw = 20000))),
-                            MockExtractedLine("demo-cocktail", "네그로니",
-                                MockLineKind.PRODUCT,
-                                options = listOf(MockMenuOption("demo-cocktail-glass",
-                                    label = "잔", priceKrw = 16000))),
-                            MockExtractedLine("demo-nonproduct", "영업 안내 · 모든 가격은 원화 기준",
-                                MockLineKind.NON_PRODUCT),
-                            MockExtractedLine("demo-bookers", "부커스",
-                                MockLineKind.PRODUCT, suggestedProductId = "demo-bookers",
-                                options = listOf(
-                                    MockMenuOption("demo-bookers-15", label = "15ml",
-                                        pourMl = 15, priceKrw = 18000),
-                                    MockMenuOption("demo-bookers-30", label = "30ml",
-                                        pourMl = 30, priceKrw = 32000))),
-                            MockExtractedLine("demo-lagavulin", "라가불린 16년",
-                                MockLineKind.PRODUCT, suggestedProductId = "demo-lagavulin-16",
-                                options = listOf(MockMenuOption("demo-lagavulin-bottle",
-                                    label = "병", priceKrw = 280000)))
-                        )
-                        val photoUris = job.images.map { it.sourceUri }
-                        val demoResult = MockPhotoExtractionSource { uri ->
-                            val imageIndex = photoUris.indexOf(uri)
-                            if (imageIndex < 0) emptyList() else examples.filterIndexed { i, _ ->
-                                i % photoUris.size == imageIndex
-                            }
-                        }
-                        val newImportId = viewModel.retryFailedPhotoImport(job.menuImportId)
-                        viewModel.finishPhotoImport(newImportId, demoResult)
-                        onReview()
-                    }.onFailure { error = it.message }
-                }, modifier = Modifier.fillMaxWidth()) {
-                    Text("[개발용] 샘플 결과로 검수 체험", color = V4Color.sub, fontSize = 11.sp)
-                }
-            }
+
             // A running mock extraction cannot be canceled from this screen.
             // The READY_FOR_REVIEW cancellation path remains for already-prepared jobs.
             if (job?.status == MockImportStatus.READY_FOR_REVIEW)
