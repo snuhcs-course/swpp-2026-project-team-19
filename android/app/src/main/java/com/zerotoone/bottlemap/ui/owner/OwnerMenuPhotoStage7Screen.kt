@@ -6,6 +6,7 @@ import java.io.File
 import com.zerotoone.bottlemap.data.owner.MockExtractedLine
 import com.zerotoone.bottlemap.data.owner.MockLineKind
 import com.zerotoone.bottlemap.data.owner.MockMenuOption
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -364,6 +365,19 @@ internal fun OwnerMenuPhotoSelectionScreen(
     fun pick() {
         if (!busy && active == null) chooseSource = true
     }
+    fun leavePicker() {
+        if(busy)return // Wait for the atomic IO selection to finish.
+        val retained=photoBar(state)?.imports.orEmpty().flatMap { job ->
+            job.images.map { it.sourceUri }
+        }.toSet()
+        // Submitted imports (including failed ones) retain their original copies.
+        photos.filter {it.uri !in retained}.forEach(store::delete)
+        pendingCapturePath?.let {File(it).delete()}
+        pendingCapturePath=null
+        entries=emptyList()
+        onBack()
+    }
+    BackHandler(enabled=busy || photos.isNotEmpty()) {leavePicker()}
     if(chooseSource) {
         Dialog(onDismissRequest={chooseSource=false},
             properties=DialogProperties(usePlatformDefaultWidth=false)) {
@@ -408,7 +422,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
         photos.all(store::isReadable) &&
         validateMenuPhotoSizes(photos.map(store::size)) == null
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        V4Toolbar(null, onBack)
+        V4Toolbar(null, ::leavePicker)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())
             .padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             MenuPhotoSteps(0)
