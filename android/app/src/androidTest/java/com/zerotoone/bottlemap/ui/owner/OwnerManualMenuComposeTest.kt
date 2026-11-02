@@ -11,6 +11,8 @@ import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -379,8 +381,9 @@ class OwnerManualMenuComposeTest {
         compose.setContent { MaterialTheme {
             OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
         } }
-        for (cat in listOf("gin", "brandy", "rum", "wine")) {
-            compose.onNodeWithText(cat, substring = false).performScrollTo().performClick()
+        for ((cat,label) in listOf("gin" to "진", "brandy" to "브랜디",
+            "rum" to "럼", "wine" to "와인")) {
+            compose.onNodeWithText(label, substring = false).performScrollTo().performClick()
             compose.onNodeWithTag("manual-menu-row-menu-$cat").assertExists()
         }
         compose.runOnIdle { assertEquals(4, vm.preview("fixture-bar", 0)!!.visibleMenu.size) }
@@ -765,7 +768,7 @@ class OwnerManualMenuComposeTest {
         compose.setContent { MaterialTheme {
             OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
         } }
-        compose.onNodeWithText("기타 주류", substring = false).performScrollTo().performClick()
+        compose.onNodeWithText("리큐르", substring = false).performScrollTo().performClick()
         compose.onNodeWithTag("manual-menu-row-catalog-kind-row").performClick()
         compose.onNodeWithTag("manual-menu-row-edit").performClick()
         compose.onNodeWithTag("manual-menu-alcohol-kind").performTextReplacement("맥주")
@@ -881,7 +884,7 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithTag("manual-menu-row-failure-row").performClick()
         compose.onNodeWithTag("manual-menu-row-stock").performClick()
         compose.onNodeWithText("상태 변경").performClick()
-        compose.onNodeWithText("테스트 저장 오류").assertExists()
+        compose.onAllNodesWithText("테스트 저장 오류").onFirst().assertExists()
         compose.runOnIdle {
             assertEquals(false, store.saved.menuItems.single().soldOut)
             assertEquals(false, (vm.state.value as MockOwnerLoadState.Ready)
@@ -890,7 +893,7 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithText("취소").performClick()
         compose.onNodeWithTag("manual-menu-reset").performScrollTo().performClick()
         compose.onNodeWithText("초기화", substring = false).performClick()
-        compose.onNodeWithText("테스트 저장 오류").assertExists()
+        compose.onAllNodesWithText("테스트 저장 오류").onFirst().assertExists()
         compose.runOnIdle { assertEquals(1, store.saved.menuItems.size) }
         compose.runOnIdle { store.rejectWrites = false }
         compose.onNodeWithText("초기화", substring = false).performClick()
@@ -1025,7 +1028,7 @@ class OwnerManualMenuComposeTest {
             assertEquals("deleted-subtype-row", snap.menuItems.single().barMenuItemId)
             assertEquals(21000, snap.menuItems.single().options.single().priceKrw)
         }
-        compose.onNodeWithText("기타 주류", substring = false).performScrollTo().performClick()
+        compose.onNodeWithText("시그니처 리큐르", substring = false).performScrollTo().performClick()
         compose.onNodeWithTag("manual-menu-row-deleted-subtype-row").performClick()
         compose.onNodeWithTag("manual-menu-row-edit").performClick()
         compose.onNodeWithTag("manual-menu-name")
