@@ -295,7 +295,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     Row(Modifier.fillMaxWidth().height(31.dp),
         verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.SpaceBetween) {
         Text("메뉴판 ${photo.imageOrder} · ${ordinal.getOrElse(photoRow){(photoRow+1).toString()+"번째"}} 줄",
-            modifier=Modifier.weight(1f).padding(bottom=1.dp),
+            modifier=Modifier.weight(1f).padding(bottom=1.dp)
+                .testTag("stage8-source-line-label"),
             color=V4Color.sub,fontSize=12.sp)
         St8ReviewHome(onLater)
     }
