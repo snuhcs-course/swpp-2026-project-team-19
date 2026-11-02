@@ -747,15 +747,15 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                     unfocusedTextColor=V4Color.text,
                                     focusedContainerColor=V4Color.background,
                                     unfocusedContainerColor=V4Color.background))
-                            OutlinedButton(onClick={noAge=!noAge;if(noAge)age=""},
-                                modifier=Modifier.height(28.dp).width(47.dp),
-                                contentPadding=PaddingValues(0.dp),
-                                shape=RoundedCornerShape(7.dp),
-                                border=androidx.compose.foundation.BorderStroke(1.dp,
-                                    if(noAge)V4Color.primary else V4Color.line),
-                                colors=ButtonDefaults.outlinedButtonColors(
-                                    containerColor=V4Color.surface,contentColor=V4Color.primary)) {
-                                Text("없음",color=V4Color.primary)
+                            Box(Modifier.size(width=52.dp,height=46.dp),
+                                contentAlignment=Alignment.Center) {
+                                Box(Modifier.size(width=43.dp,height=26.dp)
+                                    .border(1.dp,if(noAge)V4Color.primary else V4Color.line,
+                                        RoundedCornerShape(7.dp))
+                                    .clickable {noAge=!noAge;if(noAge)age=""},
+                                    contentAlignment=Alignment.Center) {
+                                    Text("없음",color=V4Color.primary,fontSize=14.sp)
+                                }
                             }
                         }
                         HorizontalDivider(color=V4Color.line)
