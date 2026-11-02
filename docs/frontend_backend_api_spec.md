@@ -16,6 +16,7 @@
 - 현재 메뉴판 항목의 직접 추가, 수정, 삭제와 초기화, 품절, 기간 할인, 판매 정보 확인
 - 매장 정보(한 줄 소개, 태그, 정규 영업시간), 임시 휴무, 매장 사진
 - 고객의 상품 검색, 주변·지도 업장 조회와 업장 상세 메뉴 조회
+- 고객 홈 화면의 "요즘 많이 찾는 위스키"와 이를 위한 검색 집계
 - 멱등성, 검수 버전 충돌과 공통 오류 응답
 
 제외 범위:
@@ -37,6 +38,15 @@ POST 메뉴 등록
 → 필요한 브랜드·상품 검색
 → POST review-and-apply 한 번 제출
 → applied
+```
+
+고객 홈 화면은 다음 흐름을 사용한다.
+
+```text
+GET 요즘 많이 찾는 위스키 (3.17)
+→ 검색창, 최근 검색(기기에 저장), 인기 위스키 카드, 지도로 보기 표시
+→ 검색하면 GET 상품 검색 (3.10, query), 카드를 고르면 같은 API를 productId로
+→ 지도로 보기를 고르면 지도 화면 (3.13)
 ```
 
 고객 검색은 다음 흐름을 사용한다.
@@ -95,7 +105,7 @@ GET 주변 업장 조회 (위치 + 반경)
 
 | API | 비로그인 | customer | 해당 업장의 업주 | operator |
 |---|---|---|---|---|
-| `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names` | O | O | O | O |
+| `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/search/popular-products` | O | O | O | O |
 | `GET /api/bars/{barId}/menu` | 활성 업장만 | 활성 업장만 | O | O |
 | `GET /api/bar-photos/{photoId}`, `GET /api/bar-photos/{photoId}/thumbnail` | O | O | O | O |
 | `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
@@ -208,6 +218,7 @@ ignore
 | `GET` | `/api/search/bars` | 고객 상품 검색과 판매 업장 목록 조회 (공개) |
 | `GET` | `/api/search/nearby-bars` | 고객 위치 반경 안의 활성 업장 조회 (공개) |
 | `GET` | `/api/search/map-bars` | 지도 화면 영역 안의 활성 업장 조회 (공개) |
+| `GET` | `/api/search/popular-products` | 홈 화면의 요즘 많이 찾는 위스키 (공개) |
 | `POST` | `/api/bars/{barId}/menu-imports` | 사진 업로드와 AI 처리 작업 생성 |
 | `GET` | `/api/menu-imports/{menuImportId}` | 처리 상태 또는 통합 검수 데이터 조회 |
 | `GET` | `/api/catalog/brands` | 검수 중 기존 브랜드 검색 |
@@ -249,7 +260,7 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 
 사용자는 다음과 같이 구분한다.
 
-- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/bars/{barId}/menu`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`)만 호출하며 `users` 행을 만들지 않는다.
+- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/search/popular-products`, `GET /api/bars/{barId}/menu`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`)만 호출하며 `users` 행을 만들지 않는다.
 - **로그인 사용자**: Google 계정으로 로그인한 사용자다. 최초 `GET /api/me` 호출 때 `customer`로 생성된다.
 - Supabase의 익명 로그인(anonymous sign-in)은 사용하지 않는다. `is_anonymous = true`인 token은 `401`로 거부한다.
 
@@ -356,7 +367,7 @@ API 응답 401 UNAUTHENTICATED
 - 여러 요청이 동시에 `401`을 받아도 세션 갱신은 한 번만 하고, 나머지 요청은 그 결과를 기다려 재시도한다.
 - 공개 API 처리:
   - `GET /api/bars/{barId}/menu`는 `Authorization` 헤더가 있으면 token을 검증하고, 잘못된 token이면 `401`을 반환한다. 프론트엔드는 위 재시도 흐름을 똑같이 적용하되, 세션 갱신에 실패하면 로그인 화면으로 보내지 않고 로그아웃한 뒤 헤더 없이 비로그인 사용자로 다시 요청한다. 단, 서버가 지금 token을 확인할 수 없으면(위 표의 `503` 조건) 이 API는 `503` 대신 token이 없는 것처럼 비로그인 사용자로 처리한다. 공개 정보라서 Supabase 장애 중에도 로그인 사용자가 업장 상세를 볼 수 있게 하려는 것이다. 이때는 operator도 비활성 업장을 볼 수 없다(`404`).
-  - `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`(3.16.5)은 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
+  - `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/search/popular-products`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`(3.16.5)은 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
 
 #### 3.1.6 백엔드 설정 항목
 
@@ -930,7 +941,7 @@ GET /api/bars/{barId}/menu
 
 ### 3.10 고객 상품 검색
 
-고객이 위스키 이름을 입력하면 해당 상품을 현재 게시 메뉴에 포함한 업장 목록을 반환한다. 로그인 없이 호출할 수 있는 공개 API이며, `Authorization` 헤더를 보내도 사용하지 않는다.
+고객이 위스키 이름을 입력하거나 홈 화면의 카드(3.17)에서 상품을 고르면 해당 상품을 현재 게시 메뉴에 포함한 업장 목록을 반환한다. 로그인 없이 호출할 수 있는 공개 API이며, `Authorization` 헤더를 보내도 사용하지 않는다.
 
 ```http
 GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=126.951
@@ -938,12 +949,14 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 
 | Query | 필수 | 기본값 | 설명 |
 |---|---|---|---|
-| `query` | 예 | 없음 | 검색어. 앞뒤 공백을 지운 뒤 1~100자 |
+| `query` | `productId`가 없으면 예 | 없음 | 검색어. 앞뒤 공백을 지운 뒤 1~100자 |
+| `productId` | 아니오 | 없음 | 상품 하나만 검색할 때의 상품 ID(UUID). 홈 화면의 카드를 누를 때 쓴다(3.17.1). `query`와 함께 보낼 수 없다 |
 | `lat` | 아니오 | 없음 | 고객 위치 위도. -90~90. `lng`와 함께 보내야 한다 |
 | `lng` | 아니오 | 없음 | 고객 위치 경도. -180~180. `lat`과 함께 보내야 한다 |
 | `limit` | 아니오 | `50` | 반환할 결과 행(`items`)의 최대 개수. 1~100 |
+| `source` | 아니오 | `input` | 검색을 시작한 곳. `input`(검색창에 직접 입력), `recent`(최근 검색을 다시 누름), `popular`(요즘 많이 찾는 위스키 카드를 누름, 3.17). 검색 집계(3.10.6)에만 쓰며 결과에는 영향이 없다 |
 
-고객 위치는 거리 계산에만 사용하며 서버에 저장하지 않는다. 서버 접근 로그에서도 `lat`, `lng`를 지우고 나머지 query(검색어 등)만 남긴다.
+고객 위치는 거리 계산에만 사용하며 서버에 저장하지 않는다. 서버 접근 로그에서도 `lat`, `lng`를 지우고 나머지 query(검색어 등)만 남긴다. 인기 위스키 순위를 위한 검색 집계(3.10.6)에도 위치는 남기지 않는다.
 
 #### 3.10.1 검색어 해석
 
@@ -967,6 +980,8 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 4. none
    일치하는 상품 없음
 ```
+
+`productId`로 검색하면 위 단계를 거치지 않는다. 그 상품이 활성 상품이면 `matchType = product`이고 `matchedProducts`는 그 상품 하나다. 없는 상품이거나 비활성 상품이면 `matchType = none`, `matchedProducts = []`다. 홈 화면을 띄운 뒤 상품이 비활성화될 수 있으므로 `404`가 아니라 결과 없음(3.10.4)으로 응답한다. 상품명으로 검색하지 않는 이유는 상품명이 브랜드 별칭이기도 하면(예: `Knob Creek`) 1단계에서 브랜드 전체가 나오기 때문이다.
 
 브랜드 단계를 먼저 시도하는 이유: 대표 상품이 브랜드 이름을 별칭으로 갖는 경우가 많다(예: Royal Brackla 12의 별칭 `Royal Brackla`). 상품 별칭을 먼저 보면 `Royal Brackla`는 12년만, `로얄브라클라`는 그 브랜드의 상품 전체를 돌려주어 고객이 입력한 표기에 따라 결과가 달라진다. 브랜드 이름의 어떤 표기로 찾든 같은 결과를 주기 위해 브랜드 별칭과 정확히 같은 검색어는 브랜드 결과로 해석한다. `로얄브라클라 12년`처럼 브랜드 이름보다 긴 검색어는 브랜드 별칭과 같지 않으므로 상품 별칭 단계에서 그 상품을 찾는다. 브랜드에 활성 상품이 없으면 다음 단계로 넘어간다.
 
@@ -1013,6 +1028,7 @@ items
 
 matchedProducts
   alias_exact  displayName 오름차순
+  product      그 상품 하나
   brand        정확 일치 상품 먼저, 그다음 나머지. 각 묶음 안에서 displayName 오름차순
   partial      일치한 별칭이 짧은 상품부터, 같으면 displayName 오름차순
 
@@ -1115,8 +1131,8 @@ options
 
 | 필드 | 타입 | null 가능 | 설명 |
 |---|---|---|---|
-| `query` | 문자열 | 아니오 | 앞뒤 공백을 지운 검색어. 정규화한 값이 아니다 |
-| `matchType` | `alias_exact` \| `brand` \| `partial` \| `none` | 아니오 | 검색어를 해석한 단계(3.10.1) |
+| `query` | 문자열 | 예 | 앞뒤 공백을 지운 검색어. 정규화한 값이 아니다. `productId`로 검색했으면 `null` |
+| `matchType` | `alias_exact` \| `brand` \| `partial` \| `product` \| `none` | 아니오 | 검색어를 해석한 단계(3.10.1). `product`는 `productId`로 검색해 그 상품을 찾은 경우다 |
 | `matchedProducts` | 배열 | 아니오 | 검색어로 해석된 상품 전체. 판매 업장이 없는 상품도 포함한다. 없으면 `[]` |
 | `matchedProducts[].productId` | UUID 문자열 | 아니오 | |
 | `matchedProducts[].displayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`) |
@@ -1162,24 +1178,51 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 }
 ```
 
+`productId`로 검색해 `matchType = none`이면 그 상품을 더 찾을 수 없다는 뜻이다. 프론트엔드는 "상품 정보를 찾을 수 없음"을 보여 주고, 홈 화면으로 돌아가면 3.17을 다시 불러온다.
+
 #### 3.10.5 검증 오류와 프론트엔드 처리
 
 입력이 잘못되면 `422 VALIDATION_FAILED`를 반환한다(9.1, 9.3).
 
 | 상황 | `fieldErrors[].path` | `fieldErrors[].code` | 프론트엔드 처리 |
 |---|---|---|---|
-| `query` 파라미터 없음 | `query` | `MISSING` | 앱 버그. 일반 오류와 재시도 |
+| `query`와 `productId`를 둘 다 보내거나 둘 다 빠뜨림 | `productId` | `EXACTLY_ONE_REQUIRED` | 앱 버그. 일반 오류와 재시도 |
+| `productId`가 UUID가 아님 | `productId` | `UUID_PARSING` | 앱 버그. 일반 오류와 재시도 |
 | 빈 문자열이거나 공백뿐 | `query` | `BLANK` | 검색창 아래에 검색어 입력 안내 |
 | 앞뒤 공백을 지운 뒤 100자 초과 | `query` | `STRING_TOO_LONG` | 검색창 아래에 100자 제한 안내 |
 | 정규화하면 남는 문자가 없음 (예: `!!!`) | `query` | `NOT_SEARCHABLE` | 검색창 아래에 검색할 수 있는 문자가 없다는 안내 |
 | `lat`과 `lng` 중 하나만 보냄 | 빠진 쪽 (`lat` 또는 `lng`) | `LAT_LNG_REQUIRED_TOGETHER` | 앱 버그. 일반 오류와 재시도 |
 | `lat`, `lng`, `limit`이 범위를 벗어남 | 해당 파라미터 | `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL` | 앱 버그. 일반 오류와 재시도 |
 | `lat`, `lng`, `limit`이 숫자가 아님 | 해당 파라미터 | `FLOAT_PARSING`(`lat`, `lng`), `INT_PARSING`(`limit`) | 앱 버그. 일반 오류와 재시도 |
+| `source`가 `input`, `recent`, `popular`가 아님 | `source` | `LITERAL_ERROR` | 앱 버그. 일반 오류와 재시도 |
 
-- 파라미터 누락, 범위, 숫자 형식 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `BLANK`, `STRING_TOO_LONG`, `LAT_LNG_REQUIRED_TOGETHER`, `NOT_SEARCHABLE`을 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
+- 범위, 숫자 형식, UUID 형식, 허용 값 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `EXACTLY_ONE_REQUIRED`, `BLANK`, `STRING_TOO_LONG`, `LAT_LNG_REQUIRED_TOGETHER`, `NOT_SEARCHABLE`을 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
 - 프론트엔드는 요청 전에 검색어의 앞뒤 공백을 지우고, 빈 검색어면 API를 호출하지 않는다. 검색 입력 칸은 100자로 제한한다. 그래도 서버가 `query` 오류를 반환하면 위 표대로 `code`를 기준으로 문구를 보여 준다.
 - 위치 권한이 없거나 위치를 얻지 못하면 `lat`과 `lng`를 둘 다 빼고 요청한다. 결과는 `menuUpdatedAt` 순으로 정렬되고 `distanceMeters`는 `null`이다.
 - 네트워크 오류와 `5xx`(`500 INTERNAL_ERROR`, `503`, 프록시의 `502`·`504` 포함)는 오류 상태와 재시도 버튼을 보여 준다(9.6).
+
+#### 3.10.6 검색 집계
+
+"요즘 많이 찾는 위스키"(3.17)의 순위를 정하고 카탈로그에 빠진 상품을 찾기 위해, 서버는 이 API가 `200 OK`로 응답한 검색을 서울 날짜(`YYYY-MM-DD`)별로 센다. 검색 한 번을 한 행으로 남기지 않으며, 검색어 원문과 검색 시각도 남기지 않는다.
+
+| 집계 | 키 | 1을 더하는 검색 |
+|---|---|---|
+| 상품별 검색 수 | 서울 날짜, `productId`, `source` | `matchType = product`인 검색, 또는 `matchType = alias_exact`이고 `matchedProducts`가 정확히 하나인 검색 |
+| 인식하지 못한 검색어 | 서울 날짜, 정규화한 검색어 | `query`로 검색해 `matchType = none`인 검색. 아래 보호 규칙에 걸리면 세지 않는다 |
+
+- 브랜드(`brand`), 부분 일치(`partial`), 여러 상품이 일치한 `alias_exact`는 어느 집계에도 넣지 않는다. 한 번의 검색이 여러 상품의 수를 올리면 순위가 부풀려지기 때문이다. `productId`로 검색했는데 `none`인 검색도 넣지 않는다.
+- 판매 업장이 없는 상품도 센다. 순위 후보에서만 빠진다(3.17.2).
+- `source`는 요청의 값이며, 보내지 않았으면 `input`이다.
+- **인식하지 못한 검색어의 보호 규칙**: 고객이 검색창에 이름이나 연락처를 잘못 넣을 수 있으므로 다음을 지킨다.
+  - 앞뒤 공백을 지운 원문에 `@`가 있으면 세지 않는다. 정규화한 검색어에서 `-`와 `.`을 뺀 값에 숫자가 7개 이상 이어져도 세지 않는다. 이메일과 전화번호를 거르기 위해서다. 숙성 연수나 빈티지(예: `1990`)는 7자리가 되지 않는다.
+  - 한 날짜에 새로 만드는 검색어 행은 1,000개까지다. 그 뒤로는 이미 있는 검색어만 센다.
+  - 30일이 지난 행은 지운다.
+  - 조회 API는 두지 않는다. 팀원이 데이터베이스에서 직접 보고 카탈로그에 별칭이나 상품을 더하는 데만 쓴다.
+- 상품별 검색 수는 90일이 지난 행을 지운다.
+- **집계에 남기지 않는 값**: 검색어 원문, 검색 시각(날짜만 남긴다), 위치(`lat`, `lng`), 사용자 ID, IP 주소, 기기 정보, token. 이 API는 `Authorization` 헤더를 읽지 않으므로 누가 검색했는지 알 수 없다. 서버 접근 로그에는 위의 규칙대로 `lat`, `lng`를 뺀 검색어가 남는다.
+- 검증 오류(`422`)와 서버 오류로 끝난 요청은 세지 않는다. 집계를 쓰다 실패해도 검색 응답은 그대로 `200 OK`로 보낸다. 실패는 서버 로그에만 남긴다.
+- 집계 행은 키마다 하나뿐이므로 검색이 많아져도 행 수에는 상한이 있다. 같은 검색을 반복하면 숫자는 계속 오른다. 요청 수 제한은 이 명세의 범위 밖이다.
+- 같은 검색을 다시 불러와도 한 번 더 센다. 프론트엔드는 결과 화면에서 뒤로 갔다가 돌아오는 경우처럼 같은 검색을 다시 보여 줄 때는 이미 받은 결과를 쓰고 3.10을 다시 호출하지 않는다. 사용자가 새로 검색하거나 재시도를 누를 때만 호출한다.
 
 ### 3.11 업주 신청과 승인
 
@@ -2512,6 +2555,99 @@ GET /api/bar-photos/{photoId}/thumbnail
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | JPEG나 PNG가 아니거나, 선언한 형식과 내용이 다르거나, 끝까지 디코딩되지 않음 | JPEG로 바꿔 다시 올림 |
 | `422` | `VALIDATION_FAILED` | `image` 없음, 긴 변이 2048px 초과(`IMAGE_DIMENSIONS_TOO_LARGE`), `photoIds` 형식 오류, `DUPLICATE_ITEM` | `fieldErrors` 표시. `IMAGE_DIMENSIONS_TOO_LARGE`이면 줄여서 다시 올림 |
 
+### 3.17 요즘 많이 찾는 위스키
+
+고객 홈 화면의 "요즘 많이 찾는 위스키" 카드에 쓸 상품 목록을 반환한다. 순위는 고객 검색(3.10)의 검색 집계(3.10.6)로 정한다.
+
+```http
+GET /api/search/popular-products?limit=10
+```
+
+로그인 없이 호출할 수 있는 공개 API이며, 다른 검색 API처럼 `Authorization` 헤더를 읽지 않는다(3.1.5). 결과는 호출자와 관계없이 같다.
+
+| Query | 필수 | 기본값 | 설명 |
+|---|---|---|---|
+| `limit` | 아니오 | `10` | 반환할 상품의 최대 개수. 1~20 |
+
+#### 3.17.1 홈 화면 구성
+
+고객 홈 화면은 위에서부터 다음으로 구성한다.
+
+| 영역 | 내용 | 데이터 |
+|---|---|---|
+| 검색창 | 위스키 이름 입력. 검색하면 3.10 결과 화면으로 간다 | 3.10 |
+| 최근 검색 | 이 기기에서 검색한 검색어 | 최근 검색 목록은 앱이 기기에만 저장하며 서버로 보내지 않는다. 누르면 그 검색어로 3.10을 `source=recent`로 호출하고, 이 검색은 다른 검색처럼 3.10.6의 집계에만 들어간다 |
+| 요즘 많이 찾는 위스키 | 카드마다 상품명과 "바 N곳". 최대 10개를 가로로 넘겨 본다 | 이 API(`limit = 10`) |
+| 지도로 보기 | 지도 화면으로 간다 | 3.13 |
+
+- 카드를 누르면 앱은 3.10을 `productId`와 `source=popular`로 호출한다(`query`는 보내지 않는다). 결과에는 그 상품을 파는 업장만 나온다. 상품명으로 검색하면 상품명이 브랜드 별칭이기도 한 경우 브랜드 전체가 나오므로 `productId`를 쓴다(3.10.1). 검색창에서 직접 검색할 때는 `source`를 보내지 않거나 `input`으로 보낸다.
+- `items = []`이면 "요즘 많이 찾는 위스키" 영역을 숨긴다. 이 API가 실패해도 홈 화면의 다른 영역은 그대로 보여 주고, 이 영역만 숨기거나 재시도 버튼을 보여 준다.
+
+#### 3.17.2 순위 기준
+
+서버는 요청을 받을 때마다 다음 순서로 상품을 고른다.
+
+1. **후보**: 활성 상품 중 "바 N곳"(`barCount`)이 1 이상인 상품만 후보다. 판매 업장이 0곳인 상품은 눌러도 결과가 없으므로 보여 주지 않는다.
+2. **검색 수**: 최근 30일(오늘을 포함한 서울 날짜 30일)의 상품별 검색 수(3.10.6)를 더한다. 집계는 상품 하나로 해석된 검색만 세므로 브랜드 검색이나 부분 일치로 여러 상품이 함께 올라가지 않는다. 검색 출처(`source`)는 지금은 구분하지 않고 `input`, `recent`, `popular`를 모두 더한다. 카드를 누른 검색(`popular`)도 세므로 위에 보이는 상품이 계속 위에 남기 쉽다. 이 효과가 커지면 집계는 그대로 두고 `popular`를 빼고 더하도록 이 기준만 바꾼다.
+3. **인기 상품**: 검색 수가 3 이상인 후보를 검색 수 내림차순으로 놓는다. 동점이면 `barCount` 내림차순, `displayName` 오름차순, `productId` 오름차순이다. 1~2번 검색된 상품이 상위에 뜨지 않게 하려고 3번 이상으로 정했다.
+4. **대체 기준**: 3의 상품이 `limit`보다 적으면, 아직 넣지 않은 후보를 `barCount` 내림차순, `displayName` 오름차순, `productId` 오름차순으로 채운다. 검색 수가 적은 서비스 초기에도 카드가 비지 않게 하기 위해서다.
+5. 앞에서부터 `limit`개를 반환한다.
+
+`barCount`는 고객 검색(3.10.2)에 그 상품의 결과로 나오는 업장 수와 같다. 활성 업장이고, 그 상품이 업장의 현재 메뉴판에 있고, 품절(3.14.8)이 아닌 업장만 센다. 그래서 카드를 눌러 3.10을 `productId`로 검색하면 "바 N곳"과 같은 수의 업장이 나온다. 다만 3.10은 `limit`까지만 반환하므로 `barCount`가 `limit`보다 크면 결과가 잘리고 `truncated = true`다. 이 API의 응답을 받은 뒤 품절이나 메뉴판이 바뀌어도 달라질 수 있다.
+
+홈 화면의 카드를 눌러 한 검색(3.17.1)도 다른 검색과 똑같이 집계되고 순위에 들어간다. 카드를 고른 것도 그 상품에 대한 관심으로 본다.
+
+같은 사람이 여러 번 검색해도 따로 거르지 않는다. 검색 집계에 사용자나 기기를 남기지 않으므로 구분할 수 없기 때문이다.
+
+#### 3.17.3 응답
+
+`200 OK`
+
+```json
+{
+  "items": [
+    {
+      "productId": "44444444-4444-4444-8444-444444444444",
+      "displayName": "Glenfiddich 12",
+      "brandName": "Glenfiddich",
+      "ageYears": 12,
+      "editionName": null,
+      "barCount": 7
+    },
+    {
+      "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+      "displayName": "Deanston 12",
+      "brandName": "Deanston",
+      "ageYears": 12,
+      "editionName": null,
+      "barCount": 2
+    }
+  ]
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `items` | 배열 | 아니오 | 순위대로 정렬한 상품. 최대 `limit`개. 판매 업장이 있는 상품이 하나도 없으면 `[]` |
+| `items[].productId` | UUID 문자열 | 아니오 | |
+| `items[].displayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`). 카드의 상품명이다. 카드를 누르면 `productId`로 3.10을 검색한다 |
+| `items[].brandName` | 문자열 | 아니오 | 브랜드 대표명(`brands.canonical_name`) |
+| `items[].ageYears` | 정수 | 예 | 숙성 연수. 표기가 없는 상품은 `null` |
+| `items[].editionName` | 문자열 | 예 | 에디션명. 없으면 `null` |
+| `items[].barCount` | 정수 | 아니오 | 지금 이 상품을 파는 업장 수(3.17.2). 1 이상. 카드에 "바 N곳"으로 표시한다 |
+
+- 검색 수는 응답에 넣지 않는다. 운영 정보이고, 숫자를 보여 주면 순위를 올리려고 검색을 반복할 동기가 생기기 때문이다.
+- 응답에는 `Cache-Control: public, max-age=600`(10분)을 붙인다. 순위는 천천히 바뀌므로 앱은 10분 안에 홈 화면으로 돌아오면 다시 받지 않아도 된다.
+
+#### 3.17.4 오류와 프론트엔드 처리
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `422` | `VALIDATION_FAILED` | `limit`이 1~20 밖(`GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`)이거나 정수가 아님(`INT_PARSING`) | 앱 버그. 이 영역을 숨긴다 |
+| 네트워크 오류, `5xx` | | | 이 영역만 숨기거나 재시도 버튼을 보여 준다. 홈 화면의 다른 영역은 그대로 쓴다 |
+
+이 API는 공개 API이므로 `401`과 `403`을 반환하지 않는다.
+
 ## 4. 메뉴 등록 요청
 
 ### 4.1 요청
@@ -3489,6 +3625,9 @@ canceled
 - 최종 요청은 부분 성공하지 않는다. 하나라도 실패하면 전체 롤백한다.
 - 메뉴 직접 편집(3.14)은 항목을 `barMenuItemId`로만 가리킨다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀌면 달라질 수 있다.
 - 메뉴 직접 편집 요청은 모두 조회한 `menuVersion`을 포함하며, 업장에 미완료 메뉴 등록 작업이 있으면 받지 않는다. 품절 표시(3.14.8)와 판매 정보 확인(3.14.9)은 예외로 검수 중에도 받는다.
+- 고객 검색은 서울 날짜별 집계(3.10.6)로만 센다. 집계에는 검색어 원문, 검색 시각, 위치, 사용자, IP, 기기 정보를 남기지 않으며(서버 접근 로그에는 위치를 뺀 검색어가 남는다), 인식하지 못한 검색어만 보호 규칙을 거쳐 정규화한 형태로 30일 동안 남긴다. 최근 검색 목록은 앱이 기기에만 저장한다.
+- 홈 화면의 카드는 3.10을 `productId`로 검색한다. `query`와 `productId`는 함께 보낼 수 없다.
+- "요즘 많이 찾는 위스키"(3.17)의 `barCount`는 고객 검색(3.10)에 나오는 업장 수와 같은 규칙으로 센다. 검색 수는 응답에 넣지 않는다.
 - 품절 항목은 손님(비로그인 사용자와 customer)의 3.9와 고객 검색(3.10)에서 빠진다. operator와 해당 업장의 업주만 3.9에서 `soldOut = true`로 받는다.
 - 할인 중인지는 프론트엔드가 `discount.startsAt`, `endsAt`과 현재 시각으로 계산한다. `priceKrw`는 항상 정가다.
 - `summary`나 사용자 표시 문자열을 서버 검증 기준으로 사용하지 않는다.
