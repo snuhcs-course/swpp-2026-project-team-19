@@ -83,8 +83,12 @@ class _CatalogWriter:
     def _find_product(self, product: NewProduct, aliases: list[ProductAliasInput], brand_id: UUID) -> Product | None:
         names = _product_names(product, aliases)
         by_alias = select(ProductAlias.product_id).where(ProductAlias.normalized_alias.in_(names))
+        # Active products first: an inactive match is usually a cleaned-up duplicate of an active one
+        # (spec 9.5), and only an active product can be put on a menu.
         found = self.session.scalars(
-            select(Product).where(Product.id.in_(by_alias)).order_by(Product.display_name, Product.id)
+            select(Product)
+            .where(Product.id.in_(by_alias))
+            .order_by(Product.is_active.desc(), Product.display_name, Product.id)
         ).first()
         if found is not None:
             return found
@@ -95,7 +99,7 @@ class _CatalogWriter:
                 Product.category == product.category,
                 Product.age_years.is_not_distinct_from(product.ageYears),
             )
-            .order_by(Product.display_name, Product.id)
+            .order_by(Product.is_active.desc(), Product.display_name, Product.id)
         )
         return next((p for p in same_attributes if _same_edition(p.edition_name, product.editionName)), None)
 

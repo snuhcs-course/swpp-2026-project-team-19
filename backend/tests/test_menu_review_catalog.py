@@ -7,7 +7,7 @@ from app.models import Brand, BrandAlias, Product, ProductAlias
 from app.schemas.menu_review import BrandDecision, NewProduct, ProductAliasInput, ReviewAndApplyRequest
 from app.services.menu_review_catalog import create_catalog_entries, create_new_product
 from app.services.menu_review_validation import validate_review
-from tests.factories import make_user
+from tests.factories import make_product, make_user
 from tests.review_support import make_glenfiddich, upload_sample_review, valid_body
 
 
@@ -261,3 +261,28 @@ def test_a_manual_add_of_an_existing_brand_is_a_conflict_without_review_fields(d
     assert caught.value.details == {
         "existingBrand": {"brandId": str(glenfiddich["brand"].id), "canonicalName": "Glenfiddich"}
     }
+
+
+def test_a_duplicate_matching_active_and_inactive_products_names_the_active_one(db_session, glenfiddich):
+    brand = glenfiddich["brand"]
+    # The inactive product sorts first by name, so only the active-first rule picks the other one.
+    make_product(db_session, brand, "Aaa Glenfiddich Select", aliases=("셀렉트",), is_active=False)
+    active = make_product(db_session, brand, "Glenfiddich Select", aliases=("셀렉트",))
+
+    with pytest.raises(ApiError) as caught:
+        new_product(db_session, {"type": "existing", "brandId": str(brand.id)}, {"displayName": "셀렉트"})
+
+    assert caught.value.details["existingProduct"]["productId"] == str(active.id)
+
+
+def test_a_duplicate_by_attributes_names_the_active_product_first(db_session, glenfiddich):
+    brand = glenfiddich["brand"]
+    make_product(db_session, brand, "Aaa Glenfiddich 40", age_years=40, is_active=False)
+    active = make_product(db_session, brand, "Glenfiddich 40", age_years=40)
+
+    with pytest.raises(ApiError) as caught:
+        new_product(
+            db_session, {"type": "existing", "brandId": str(brand.id)}, {"displayName": "Forty", "ageYears": 40}
+        )
+
+    assert caught.value.details["existingProduct"]["productId"] == str(active.id)
