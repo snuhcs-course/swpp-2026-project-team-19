@@ -547,59 +547,100 @@ fun OwnerOnboardingScreen(
                             "예약이나 문의 전화를 받을 가게 번호예요.")
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                             verticalAlignment=Alignment.CenterVertically){
-                            OwnerStatusLabel("손님에게 보여요")
-                            TextButton(onClick={
-                                save(draft.copy(storePhone=""));forward(RegPage.MENUS)
-                            }){Text("가게 전화가 없어요",style=MaterialTheme.typography.labelSmall)}
+                            RegistrationVisibility(public=true)
+                            Text("가게 전화가 없어요",color=RegistrationV4.primary,fontSize=12.sp,
+                                fontWeight=FontWeight.SemiBold,
+                                modifier=Modifier.ownerQuietClick {
+                                    save(draft.copy(storePhone=""));forward(RegPage.MENUS)
+                                }.padding(8.dp))
                         }
-                        OwnerV4Input("매장 전화번호",formatOwnerPhone(draft.storePhone),{
+                        RegistrationInput(formatOwnerPhone(draft.storePhone),{
                             save(draft.copy(storePhone=ownerPhoneDigits(it)))
-                        },KeyboardType.Phone,"02-000-0000")
+                        },"02-000-0000",keyboard=KeyboardType.Phone,tag="registration-store-phone")
                         Text("지역번호나 0507 안심번호도 넣을 수 있어요.",
-                            style=MaterialTheme.typography.bodySmall)
+                            fontSize=12.sp,color=RegistrationV4.secondary)
                     }
                     RegPage.MENUS -> {
                         OwnerV4Question("메뉴판 사진을\n올려 주세요",
-                            "AI 분석은 아직 실행하지 않으며 선택한 사진 참조와 순서를 보존해요.")
-                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                            horizontalArrangement=Arrangement.spacedBy(8.dp)){
-                            draft.initialMenuPhotos.forEachIndexed{ index,photo ->
-                                Column(verticalArrangement=Arrangement.spacedBy(4.dp)){
-                                    OwnerV4Thumbnail(photo.uri,Modifier.size(width=106.dp,height=142.dp))
-                                    Text((index+1).toString()+"번 사진",style=MaterialTheme.typography.labelSmall)
-                                    TextButton(onClick={
-                                        save(draft.copy(initialMenuPhotos=draft.initialMenuPhotos
-                                            .filterIndexed{ i,_->i!=index }))
-                                    }){Text("사진 빼기")}
+                            "AI가 메뉴를 읽어 두면, 승인된 뒤에 확인만 하고 공개할 수 있어요.")
+                        Spacer(Modifier.height(8.dp))
+                        val photoItems = draft.initialMenuPhotos
+                        (0 until ((photoItems.size + if(photoItems.size<15)1 else 0)+2)/3).forEach { rowIndex ->
+                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                repeat(3) { colIndex ->
+                                    val index=rowIndex*3+colIndex
+                                    Box(Modifier.weight(1f).aspectRatio(3f/4f)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .then(if(index==photoItems.size && photoItems.size<15)
+                                            Modifier.border(1.dp,RegistrationV4.muted,
+                                                RoundedCornerShape(12.dp)) else Modifier)
+                                        .background(RegistrationV4.surface),
+                                        contentAlignment=Alignment.Center) {
+                                        when {
+                                            index < photoItems.size -> {
+                                                OwnerV4Thumbnail(photoItems[index].uri,Modifier.fillMaxSize())
+                                                Box(Modifier.align(Alignment.TopStart).padding(6.dp)
+                                                    .background(RegistrationV4.bg,RoundedCornerShape(12.dp))
+                                                    .padding(horizontal=8.dp,vertical=2.dp)) {
+                                                    Text((index+1).toString(),color=RegistrationV4.text,fontSize=12.sp)
+                                                }
+                                                Box(Modifier.align(Alignment.TopEnd).size(48.dp)
+                                                    .ownerQuietClick {
+                                                        save(draft.copy(initialMenuPhotos=photoItems
+                                                            .filterIndexed{ i,_->i!=index }))
+                                                    }.testTag("registration-remove-menu-$index"),
+                                                    contentAlignment=Alignment.Center) {
+                                                    Box(Modifier.size(28.dp)
+                                                        .background(RegistrationV4.bg,CircleShape),
+                                                        contentAlignment=Alignment.Center) {
+                                                        RegistrationGlyph("remove",color=RegistrationV4.text)
+                                                    }
+                                                }
+                                            }
+                                            index==photoItems.size && photoItems.size<15 -> {
+                                                Column(Modifier.fillMaxSize().ownerQuietClick {
+                                                    menuPicker.launch(PickVisualMediaRequest(
+                                                        ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                                }.testTag("registration-add-menu"),
+                                                    horizontalAlignment=Alignment.CenterHorizontally,
+                                                    verticalArrangement=Arrangement.Center) {
+                                                    RegistrationGlyph("plus")
+                                                    Spacer(Modifier.height(4.dp))
+                                                    Text("사진 추가",color=RegistrationV4.secondary,fontSize=12.sp)
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
-                        if(draft.initialMenuPhotos.size<15)
-                            OwnerActionButton("사진 추가",{
-                                menuPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                            },Modifier.fillMaxWidth(),secondary=true)
-                        Text("메뉴판 순서대로 올려 주세요     "+draft.initialMenuPhotos.size+"/15")
-                        Text("한 장에 한 면씩, 글자와 가격이 잘리지 않게 촬영해 주세요.",
-                            style=MaterialTheme.typography.bodySmall)
+                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
+                            Text("메뉴판 순서대로 올려 주세요",
+                                fontSize=12.sp,color=RegistrationV4.secondary)
+                            Text(photoItems.size.toString()+"/15",
+                                fontSize=12.sp,color=RegistrationV4.secondary)
+                        }
+                        RegistrationHint("한 장에 한 면씩, 글자와 가격이 잘리지 않게")
+                        RegistrationHint("빛 반사 없이 정면에서")
                     }
                     RegPage.CONTACT -> {
                         OwnerV4Question("연락받을 번호를\n알려주세요",
                             "승인 전에 운영팀이 확인 연락을 드릴 수 있어요.")
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                             verticalAlignment=Alignment.CenterVertically){
-                            OwnerStatusLabel("운영팀만 봐요")
+                            RegistrationVisibility(public=false)
                             if (draft.storePhone.isNotBlank()) {
-                                TextButton(
-                                    onClick={save(draft.copy(contactPhone=draft.storePhone))},
-                                    enabled=canCopyShopPhone(draft.storePhone)
-                                ){
-                                    Text("매장 번호와 같아요",style=MaterialTheme.typography.labelSmall)
-                                }
+                                Text("매장 번호와 같아요",color=RegistrationV4.primary,fontSize=12.sp,
+                                    fontWeight=FontWeight.SemiBold,
+                                    modifier=Modifier.ownerQuietClick(
+                                        enabled=canCopyShopPhone(draft.storePhone)) {
+                                        save(draft.copy(contactPhone=draft.storePhone))
+                                    }.padding(8.dp))
                             }
                         }
-                        OwnerV4Input("연락받을 번호",formatOwnerPhone(draft.contactPhone),{
+                        RegistrationInput(formatOwnerPhone(draft.contactPhone),{
                             save(draft.copy(contactPhone=ownerPhoneDigits(it)))
-                        },KeyboardType.Phone,"010-0000-0000")
+                        },"010-0000-0000",keyboard=KeyboardType.Phone,tag="registration-contact")
                     }
                     RegPage.REVIEW -> {
                         OwnerV4Question("이렇게\n신청할게요","한 번 더 확인하고 신청해 주세요.")
