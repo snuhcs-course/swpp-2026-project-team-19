@@ -36,6 +36,26 @@ class OwnerPhotoStage7ComposeTest {
         compose.onNodeWithText("새 메뉴만 추가 · 기존 메뉴와 가격 유지").assertDoesNotExist()
     }
 
+
+    @Test fun failedImportMatchesActionFirstV4ErrorCopyWithoutExtraDiagnostics() {
+        val repository = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val importId = repository.queuePhotoImport("fixture-bar", listOf(
+            MockPhoto("photo-failed", "file:///mock/bad.jpg", MockPhotoKind.MENU_CAPTURE)))
+        repository.finishPhotoImport(importId, MockPhotoExtractionSource { emptyList() })
+        val vm = OwnerMockViewModel(repository)
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoJobScreen(vm.state.collectAsState().value, vm, {}, {})
+        } }
+        compose.onNodeWithTag("stage7-failed-icon").assertExists()
+        compose.onNodeWithText("메뉴판을 읽지 못했어요").assertExists()
+        compose.onNodeWithText(
+            "사진 분석을 완료하지 못했어요.\\n메뉴판을 화면에 꽉 채우고, 흔들리지 않게 다시 찍어주세요."
+        ).assertExists()
+        compose.onNodeWithText("📷 사진 다시 올리기").assertExists()
+        compose.onNodeWithText("AI 인식 실패").assertDoesNotExist()
+    }
+
     @Test fun readyImportRemainsUnpublishedAndCanBeCanceledFromJobScreen() {
         val r = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
