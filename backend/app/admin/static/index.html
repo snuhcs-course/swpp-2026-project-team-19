@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>BottleMap 운영자</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
+          integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o"
+          crossorigin="anonymous"></script>
+  <script src="config.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>BottleMap 운영자</h1>
+    <div id="account" class="account" hidden>
+      <span id="account-email"></span>
+      <button type="button" id="logout" class="secondary">로그아웃</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="view-loading" class="center">불러오는 중...</section>
+
+    <section id="view-login" class="center" hidden>
+      <p>운영자 계정으로 로그인하세요.</p>
+      <button type="button" id="login-google">Google로 로그인</button>
+      <button type="button" id="login-temp" class="secondary" hidden>임시 로그인 (개발용)</button>
+      <p id="login-message" class="message error" hidden></p>
+    </section>
+
+    <section id="view-message" class="center" hidden>
+      <p id="message-text"></p>
+      <button type="button" id="message-retry" hidden>다시 시도</button>
+    </section>
+
+    <section id="view-dashboard" class="dashboard" hidden>
+      <div class="list-pane">
+        <form id="filters" class="filters">
+          <label>상태
+            <select name="status">
+              <option value="pending">대기</option>
+              <option value="approved">승인됨</option>
+              <option value="rejected">거절됨</option>
+              <option value="canceled">취소됨</option>
+              <option value="all">전체</option>
+            </select>
+          </label>
+          <label>종류
+            <select name="applicationType">
+              <option value="">전체</option>
+              <option value="existing_bar">기존 업장</option>
+              <option value="new_bar">새 업장</option>
+            </select>
+          </label>
+          <label>검증 결과
+            <select name="verificationResult">
+              <option value="">전체</option>
+              <option value="matched">일치</option>
+              <option value="not_matched">불일치</option>
+              <option value="unavailable">확인 못 함</option>
+            </select>
+          </label>
+          <button type="button" id="refresh" class="secondary">새로고침</button>
+        </form>
+
+        <div class="table-wrap">
+          <table class="applications">
+            <thead>
+              <tr>
+                <th>신청 시각</th>
+                <th>종류</th>
+                <th>업장</th>
+                <th>신청자</th>
+                <th>상태</th>
+                <th>검증</th>
+                <th>사진</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <p id="list-status" class="list-status"></p>
+        <button type="button" id="list-retry" hidden>다시 시도</button>
+        <button type="button" id="load-more" class="secondary" hidden>더 보기</button>
+      </div>
+
+      <aside id="detail" class="detail-pane">
+        <p class="placeholder">목록에서 신청을 고르세요.</p>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>
