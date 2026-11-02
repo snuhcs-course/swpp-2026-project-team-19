@@ -6,9 +6,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.input.pointer.pointerInput
-import com.zerotoone.bottlemap.BuildConfig
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,7 +35,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.*
+import org.json.JSONObject
 
+/** Only save the owner-confirmed product draft, not inferred OCR data. */
+private fun encodeReviewDraft(draft: MockNewProductDraft): String = JSONObject().apply {
+    put("name",draft.name)
+    put("brandId",draft.brandId)
+    put("brandName",draft.brandName)
+    put("category",draft.category)
+    put("ageYears",draft.ageYears)
+    put("editionName",draft.editionName)
+    put("abvPercent",draft.abvPercent)
+    put("otherAlcoholKind",draft.otherAlcoholKind)
+}.toString()
+private fun decodeReviewDraft(value: String): MockNewProductDraft? = runCatching {
+    val obj=JSONObject(value)
+    fun optional(key:String)=if(obj.isNull(key))null else obj.optString(key).ifBlank{null}
+    MockNewProductDraft(
+        name=obj.getString("name"),
+        brandId=optional("brandId"), brandName=optional("brandName"),
+        category=obj.optString("category","whisky"),
+        ageYears=if(obj.isNull("ageYears"))null else obj.getInt("ageYears"),
+        editionName=optional("editionName"),
+        abvPercent=if(obj.isNull("abvPercent"))null else obj.getDouble("abvPercent"),
+        otherAlcoholKind=optional("otherAlcoholKind")
+    )
+}.getOrNull()
 internal data class Stage8Counts(val photos: Int, val lines: Int, val reviewed: Int, val existing: Int,
     val newCandidates: Int) {
     val remaining: Int get() = lines - reviewed
@@ -333,10 +355,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     val s=reviewSnap(state)
     val barId=s?.selectedBarId ?: s?.bars?.firstOrNull()?.barId
     val job=s?.imports?.lastOrNull { it.barId==barId }
-    // Only product lines are review pages; notices never appear in the UI.
-    val all=job?.images?.flatMap { photo ->
-        photo.lines.filter{it.kind!=MockLineKind.NON_PRODUCT}.map { photo to it }
-    }.orEmpty()
+    // Non-product lines must remain reviewable or they block final publication.
+    val all=job?.images?.flatMap { photo -> photo.lines.map { photo to it } }.orEmpty()
     val counts=if(job!=null && s!=null)stage8Counts(job,s) else null
     val focusManager=LocalFocusManager.current
     val keyboardController=LocalSoftwareKeyboardController.current
@@ -353,8 +373,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var chosenCategory by rememberSaveable(job?.menuImportId) { mutableStateOf("whisky") }
     var choosingOther by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
     var catalogQuery by rememberSaveable(job?.menuImportId) { mutableStateOf("") }
-    var demoPublishError by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
-    var pendingNewDraft by remember { mutableStateOf<MockNewProductDraft?>(null) }
+    var pendingNewDraftEncoded by rememberSaveable(job?.menuImportId) {
+        mutableStateOf<String?>(null)
+    }
+    val pendingNewDraft=remember(pendingNewDraftEncoded) {
+        pendingNewDraftEncoded?.let(::decodeReviewDraft)
+    }
     var showRestartWarning by rememberSaveable { mutableStateOf(false) }
     var pageHistory by rememberSaveable(job?.menuImportId) { mutableStateOf(listOf<String>()) }
     fun visit(page:String, target:Int=position) {
@@ -410,7 +434,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     pageHistory=emptyList()
                     position=0
                     selectedProductId=null
-                    pendingNewDraft=null
+                    pendingNewDraftEncoded=null
                     screen="summary"
                 }.onFailure {error=it.message}
         }){Text("처음부터 검수")}},
@@ -477,10 +501,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 Text("메뉴판 "+counts!!.photos+"장 · "+counts.lines+"줄 인식",
                     color=V4Color.sub,fontSize=13.sp)
                 Text(counts.remaining.toString()+"줄 확인",color=V4Color.text,
-                    fontWeight=FontWeight.Bold,fontSize=26.sp,
-                    modifier=if(BuildConfig.DEBUG) Modifier.pointerInput(job.menuImportId) {
-                        detectTapGestures(onLongPress={visit("incomplete")})
-                    } else Modifier)
+                    fontWeight=FontWeight.Bold,fontSize=26.sp)
                 val bar=s.bars.firstOrNull{it.barId==barId}
                 St8Card {
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
@@ -540,24 +561,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT) &&
                         (if(screen=="existing")known else !known)
                 }
-                if(subset.isEmpty() && screen=="existing") {
-                    if(BuildConfig.DEBUG) {
-                        Text("UI 검토용 예시 · 실제 등록 데이터가 아니에요.",
-                            color=V4Color.sub,fontSize=11.sp)
-                        val examples=listOf(
-                            Triple("Glenfiddich 12년","메뉴판 2 · 셋째 줄",16000 to 14000),
-                            Triple("Jack Daniel's Old No.7","메뉴판 1 · 둘째 줄",12000 to 11000),
-                            Triple("Macallan 12년 Double Cask","메뉴판 1 · 셋째 줄",22000 to 22000),
-                            Triple("Laphroaig 10년","메뉴판 1 · 넷째 줄",17000 to 17000),
-                            Triple("Buffalo Trace","메뉴판 2 · 여섯째 줄",13000 to 13000)
-                        )
-                        examples.forEach { (name,source,prices)->
-                            V4ExistingPriceRow(name,source,prices.first,prices.second)
-                        }
-                    } else Text("이미 등록된 메뉴가 없어요.",color=V4Color.sub)
-                } else if(subset.isEmpty()) {
-                    Text("해당하는 메뉴가 없어요.",color=V4Color.sub)
-                }
+                if(subset.isEmpty()) Text("해당하는 메뉴가 없어요.",color=V4Color.sub)
                 subset.forEach { entry->
                     val line=entry.value.second
                     val matchingId=(listOfNotNull(line.suggestedProductId)+
@@ -642,7 +646,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     if(line.candidateProductIds.size>1)"어느 메뉴인가요?" else "이 메뉴가 맞나요?"
                 ) {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
-                        .onSuccess{pendingNewDraft=null;error=null;next()}
+                        .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
                         .onFailure{error=it.message}}
                 val candidates=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
                     .distinct().mapNotNull{id->s.products.firstOrNull{
@@ -688,7 +692,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 if(candidates.size>1)
                     St8Secondary("⌕  목록에 없어요") {
-                        catalogQuery="잭다니엘"
+                        catalogQuery=""
                         visit("catalog")
                     }
             } else if((screen=="edit" || screen=="new") && pair!=null) {
@@ -701,26 +705,22 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     if(screen=="edit")"가격과 용량을 확인해 주세요" else "새로 등록할게요"
                 ) {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
-                        .onSuccess{pendingNewDraft=null;error=null;next()}
+                        .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
                         .onFailure{error=it.message}}
                 var name by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.name ?: 
-                        if(line.sourceText=="시그나토리 쿨일라13")"Caol Ila" else "")
+                    mutableStateOf(line.decision?.newProduct?.name.orEmpty())
                 }
                 var brand by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.brandName ?: 
-                        if(line.sourceText=="시그나토리 쿨일라13")"Signatory Vintage" else "")
+                    mutableStateOf(line.decision?.newProduct?.brandName.orEmpty())
                 }
                 var brandId by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.brandId)
                 }
                 var age by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.ageYears?.toString() ?:
-                        if(line.sourceText=="시그나토리 쿨일라13")"13" else "")
+                    mutableStateOf(line.decision?.newProduct?.ageYears?.toString().orEmpty())
                 }
                 var noAge by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.ageYears==null &&
-                        line.sourceText!="시그나토리 쿨일라13")
+                    mutableStateOf(line.decision?.newProduct?.ageYears==null)
                 }
                 var edition by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.editionName.orEmpty())
@@ -818,7 +818,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                 editionName=edition.trim().ifBlank{null},
                                 category=chosenCategory)
                             if(line.options.isEmpty() || line.options.any{it.priceKrw<=0}) {
-                                pendingNewDraft=draft
+                                pendingNewDraftEncoded=encodeReviewDraft(draft)
                                 visit("price")
                             } else runCatching {
                                 vm.review(job.menuImportId,line.extractedItemId,
@@ -922,7 +922,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 St8ReviewHeading("가격을 못 읽었어요") {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
-                        .onSuccess{pendingNewDraft=null;error=null;next()}
+                        .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
                         .onFailure{error=it.message}}
                 St8Card {
                     Row(verticalAlignment=Alignment.CenterVertically,
@@ -970,7 +970,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             productId=selectedProductId,correctedOptions=corrected)
                         runCatching{vm.review(job.menuImportId,line.extractedItemId,
                             job.reviewVersion,d)}
-                            .onSuccess{pendingNewDraft=null;error=null;next()}
+                            .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
                             .onFailure{error=it.message}
                     }
                 }
@@ -1055,10 +1055,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 St8PublishSteps(3)
                 Text("검수 완료",color=V4Color.sub,fontSize=12.sp)
                 Text("메뉴 게시",color=V4Color.text,fontSize=26.sp,
-                    fontWeight=FontWeight.Bold,
-                    modifier=if(BuildConfig.DEBUG) Modifier.pointerInput(job.menuImportId) {
-                        detectTapGestures(onLongPress={demoPublishError=true})
-                    } else Modifier)
+                    fontWeight=FontWeight.Bold)
                 val selected=all.count {it.second.decision?.kind in listOf(
                     MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}
                 val skipped=all.count {it.second.decision?.kind in listOf(
@@ -1078,8 +1075,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     contentAlignment=Alignment.Center) {
                     V4StrokeCheck(Modifier.size(32.dp),Color(0xFFE6FFF2))
                 }
-                val added=all.count{it.second.decision?.kind in listOf(
-                    MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}
+                val added=job.publishedAddedCount ?: 0
                 val skipped=all.count{it.second.decision?.kind in listOf(
                     MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)}
                 Text("메뉴에 ${added}개를 더했어요",
@@ -1204,7 +1200,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                     .onSuccess{error=null;next()}.onFailure{error=it.message}
                             }
                             St8Secondary("다른 메뉴예요") {
-                                catalogQuery="잭다니엘";visit("catalog")
+                                catalogQuery="";visit("catalog")
                             }
                         }
                     }
@@ -1228,10 +1224,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     val accepted=all.count{it.second.decision?.kind in listOf(
                         MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}
                     St8Button("+  메뉴 ${accepted}개 게시",enabled=counts!!.remaining==0){
-                        if(BuildConfig.DEBUG && demoPublishError){
-                            demoPublishError=false
-                            visit("publishFailed")
-                        } else runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
+                        runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
                             .onSuccess{error=null;visit("done")}
                             .onFailure{error=it.message;visit("publishFailed")}
                     }
