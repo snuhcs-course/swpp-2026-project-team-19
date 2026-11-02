@@ -616,6 +616,10 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         var sequence = s.nextLocalId
         val images = job.images.map { photo ->
             photo.copy(lines = source.linesFor(photo.sourceUri).map { line ->
+                require(line.sourceBox == null || (line.sourceBox.size == 4 &&
+                    line.sourceBox.all { it in 0..1000 } &&
+                    line.sourceBox[0] < line.sourceBox[2] &&
+                    line.sourceBox[1] < line.sourceBox[3]))
                 val normalized = sanitizeExtractedLine(line)
                 val normalizedOptions = normalized.options.map {
                     it.copy(optionId = "local-option-${sequence++}")
@@ -670,13 +674,33 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(job.status == MockImportStatus.READY_FOR_REVIEW)
             require(job.reviewVersion == expectedVersion) { "REVIEW_OUTDATED" }
             require(job.images.any { image -> image.lines.any { it.extractedItemId == extractedItemId } })
-            if (decision.kind == MockDecisionKind.SELECT_PRODUCT) {
-                require(decision.productId != null && s.products.any { it.productId == decision.productId })
-                require(decision.correctedOptions == null ||
-                    (decision.correctedOptions.isNotEmpty() &&
-                        decision.correctedOptions.map { it.identityKey() }.distinct().size == decision.correctedOptions.size &&
-                        decision.correctedOptions.all(::validMockMenuOption)))
-            } else require(decision.productId == null && decision.correctedOptions == null)
+            val original = job.images.flatMap { it.lines }.first {
+                it.extractedItemId == extractedItemId
+            }
+            if (decision.kind in listOf(MockDecisionKind.SELECT_PRODUCT, MockDecisionKind.CREATE_PRODUCT)) {
+                val options = decision.correctedOptions ?: original.options
+                require(options.isNotEmpty() && options.all(::validMockMenuOption)) {
+                    "가격이 있는 옵션을 확인해 주세요."
+                }
+                require(options.map { it.optionId }.distinct().size == options.size)
+                require(options.map { it.identityKey() }.distinct().size == options.size)
+                if (decision.kind == MockDecisionKind.SELECT_PRODUCT) {
+                    val linked = s.products.firstOrNull { it.productId == decision.productId }
+                    require(linked != null && linked.isActive) { "PRODUCT_INACTIVE_OR_NOT_FOUND" }
+                    require(decision.newProduct == null)
+                } else {
+                    val draft = requireNotNull(decision.newProduct)
+                    require(decision.productId == null)
+                    require(draft.name.trim().length in 1..200)
+                    require(draft.brandId != null || !draft.brandName.isNullOrBlank())
+                    require(draft.ageYears == null || draft.ageYears in 0..200)
+                    require(draft.abvPercent == null || draft.abvPercent in 0.0..100.0)
+                    require(draft.category in listOf("whisky", "cocktail", "food", "otherAlcohol",
+                        "gin", "brandy", "rum", "wine"))
+                }
+            } else require(decision.productId == null && decision.newProduct == null &&
+                decision.correctedOptions == null)
+
             val updated = job.copy(images = job.images.map { image ->
                 image.copy(lines = image.lines.map { line ->
                     if (line.extractedItemId == extractedItemId) line.copy(decision = decision) else line
@@ -693,8 +717,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(job.reviewVersion == expectedVersion) { "REVIEW_OUTDATED" }
         val allLines = job.images.flatMap { it.lines }
         require(allLines.all { it.decision != null }) { "Review required for every extracted line" }
-        val grouped = allLines.filter { it.decision?.kind == MockDecisionKind.SELECT_PRODUCT }
-            .groupBy { requireNotNull(it.decision?.productId) }
+        val selectedLines = allLines.filter {
+            it.decision?.kind in listOf(MockDecisionKind.SELECT_PRODUCT, MockDecisionKind.CREATE_PRODUCT)
+        }
         var index = s.nextLocalId
         // Manual entries may use local-* IDs without advancing the import counter.
         // Reserve against all existing IDs AND those already generated in this publish.
@@ -710,6 +735,38 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             } while (candidate in historicallyReserved && prefix == "local-menu-" ||
                 !taken.add(candidate))
             return candidate
+        }
+        val newBrands = mutableListOf<MockBrand>()
+        val newProducts = mutableListOf<MockCatalogProduct>()
+        val grouped = selectedLines.groupBy { line ->
+            val decision = requireNotNull(line.decision)
+            if (decision.kind == MockDecisionKind.SELECT_PRODUCT) {
+                requireNotNull(decision.productId)
+            } else {
+                val draft = requireNotNull(decision.newProduct)
+                val normalized = draft.name.trim()
+                // Do not silently create a second searchable canonical product.
+                require((s.products + newProducts).none {
+                    it.displayName.equals(normalized, ignoreCase = true) &&
+                        it.category == draft.category
+                }) { "DUPLICATE_PRODUCT_FOUND" }
+                val brand = if (draft.brandId != null) {
+                    requireNotNull((s.brands + newBrands).firstOrNull { it.brandId == draft.brandId }) {
+                        "BRAND_NOT_FOUND"
+                    }
+                } else {
+                    require((s.brands + newBrands).none {
+                        it.name.equals(draft.brandName!!.trim(), ignoreCase = true)
+                    }) { "DUPLICATE_BRAND_FOUND" }
+                    MockBrand("local-review-brand-${index++}", draft.brandName!!.trim()).also {
+                        newBrands.add(it)
+                    }
+                }
+                MockCatalogProduct("local-review-product-${index++}", brand.brandId,
+                    normalized, draft.category, draft.ageYears, draft.editionName,
+                    catalogMatched = false, otherAlcoholKind = draft.otherAlcoholKind,
+                    abvPercent = draft.abvPercent).also { newProducts.add(it) }.productId
+            }
         }
         val added = grouped.mapNotNull { (productId, lines) ->
             if (s.menuItems.any { it.barId == job.barId && it.productId == productId }) return@mapNotNull null
@@ -739,6 +796,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
         val applied = job.copy(status = MockImportStatus.APPLIED)
         s.copy(
+            brands = s.brands + newBrands,
+            products = s.products + newProducts,
             menuItems = s.menuItems + added,
             menuItemIdHistory = s.menuItemIdHistory + added.associate {
                 menuHistoryKey(it.barId, it.productId) to it.barMenuItemId
