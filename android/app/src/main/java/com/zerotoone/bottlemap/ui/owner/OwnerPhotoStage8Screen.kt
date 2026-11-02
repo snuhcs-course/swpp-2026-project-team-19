@@ -753,7 +753,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         previous.removeSuffix(" "+suffix) else previous)
                 }
                 var brand by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(previousDraft?.brandName.orEmpty())
+                    mutableStateOf(previousDraft?.brandName ?:
+                        s.brands.firstOrNull {it.brandId==previousDraft?.brandId}?.name.orEmpty())
                 }
                 var brandId by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(previousDraft?.brandId)
