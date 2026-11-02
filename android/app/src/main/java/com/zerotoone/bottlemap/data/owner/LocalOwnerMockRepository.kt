@@ -745,27 +745,32 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             } else {
                 val draft = requireNotNull(decision.newProduct)
                 val normalized = draft.name.trim()
-                // Do not silently create a second searchable canonical product.
-                require((s.products + newProducts).none {
-                    it.displayName.equals(normalized, ignoreCase = true) &&
-                        it.category == draft.category
-                }) { "DUPLICATE_PRODUCT_FOUND" }
                 val brand = if (draft.brandId != null) {
                     requireNotNull((s.brands + newBrands).firstOrNull { it.brandId == draft.brandId }) {
                         "BRAND_NOT_FOUND"
                     }
                 } else {
-                    require((s.brands + newBrands).none {
-                        it.name.equals(draft.brandName!!.trim(), ignoreCase = true)
-                    }) { "DUPLICATE_BRAND_FOUND" }
-                    MockBrand("local-review-brand-${index++}", draft.brandName!!.trim()).also {
-                        newBrands.add(it)
+                    val name = requireNotNull(draft.brandName).trim()
+                    // Choosing an existing persisted brand requires an explicit brandId.
+                    require(s.brands.none { it.name.equals(name, ignoreCase = true) }) {
+                        "DUPLICATE_BRAND_FOUND"
                     }
+                    // Two explicitly confirmed new products can share a newly created brand.
+                    newBrands.firstOrNull { it.name.equals(name, ignoreCase = true) }
+                        ?: MockBrand("local-review-brand-${index++}", name).also { newBrands.add(it) }
                 }
-                MockCatalogProduct("local-review-product-${index++}", brand.brandId,
-                    normalized, draft.category, draft.ageYears, draft.editionName,
-                    catalogMatched = false, otherAlcoholKind = draft.otherAlcoholKind,
-                    abvPercent = draft.abvPercent).also { newProducts.add(it) }.productId
+                // Existing catalog names require deliberate canonical selection, not silent linking.
+                require(s.products.none {
+                    it.displayName.equals(normalized, ignoreCase = true) &&
+                        it.category == draft.category && it.brandId == brand.brandId
+                }) { "DUPLICATE_PRODUCT_FOUND" }
+                // Same user-confirmed new product in different photos shares one ID and many options.
+                newProducts.firstOrNull { it.displayName.equals(normalized, ignoreCase = true) &&
+                    it.category == draft.category && it.brandId == brand.brandId }?.productId
+                    ?: MockCatalogProduct("local-review-product-${index++}", brand.brandId,
+                        normalized, draft.category, draft.ageYears, draft.editionName,
+                        catalogMatched = false, otherAlcoholKind = draft.otherAlcoholKind,
+                        abvPercent = draft.abvPercent).also { newProducts.add(it) }.productId
             }
         }
         val added = grouped.mapNotNull { (productId, lines) ->
