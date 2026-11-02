@@ -1,6 +1,8 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import android.net.Uri
+import androidx.core.content.FileProvider
+import java.io.File
 import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.owner.MockExtractedLine
 import com.zerotoone.bottlemap.data.owner.MockLineKind
@@ -251,25 +253,99 @@ internal fun OwnerMenuPhotoSelectionScreen(
     // An interrupted file-copy coroutine must not restore a permanent busy state.
     var busy by remember { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
-    val picker = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(OWNER_MENU_MAX_PHOTOS)
-    ) { uris ->
-        if (uris.isNotEmpty() && !busy) {
-            busy = true
-            scope.launch {
-                try {
-                    val next = withContext(Dispatchers.IO) { store.add(photos, uris) }
-                    entries = next.map { it.photoId + "|" + it.uri }
-                    error = null
-                } catch (e: Exception) {
-                    error = e.message ?: "사진을 읽을 수 없어요. 다시 선택해 주세요."
-                } finally { busy = false }
+    var chooseSource by rememberSaveable { mutableStateOf(false) }
+    // TakePicture keeps this path across activity recreation while the camera is open.
+    // The app-private temporary JPEG is copied through the SAME validation/store
+    // pipeline as Gallery; no CAMERA permission or original-image URL is needed.
+    var pendingCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
+    fun addImages(sources: List<Uri>, capture: File? = null) {
+        if (sources.isEmpty() || busy || active != null) {
+            capture?.delete()
+            return
+        }
+        busy = true
+        scope.launch {
+            try {
+                val next = withContext(Dispatchers.IO) { store.add(photos, sources) }
+                entries = next.map { it.photoId + "|" + it.uri }
+                error = null
+            } catch (e: Exception) {
+                error = e.message ?: "사진을 읽을 수 없어요. 다시 선택해 주세요."
+            } finally {
+                withContext(Dispatchers.IO) { capture?.delete() }
+                busy = false
             }
         }
     }
+    val picker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia(OWNER_MENU_MAX_PHOTOS)
+    ) { uris -> addImages(uris) }
+    val camera = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        val path = pendingCapturePath
+        pendingCapturePath = null
+        if (path != null) {
+            val file = File(path)
+            if (success) {
+                val uri = runCatching {
+                    FileProvider.getUriForFile(context,
+                        "${context.packageName}.owner.camera.provider", file)
+                }.getOrNull()
+                if (uri != null) addImages(listOf(uri),file)
+                else {
+                    file.delete()
+                    error = "촬영한 사진을 열 수 없어요. 다시 찍어주세요."
+                }
+            } else file.delete()
+        }
+    }
+    fun takePhoto() {
+        if (busy || active != null || photos.size >= OWNER_MENU_MAX_PHOTOS) return
+        try {
+            val directory = File(context.filesDir,"owner-menu-captures").apply { mkdirs() }
+            val file = File.createTempFile("menu-capture-", ".jpg", directory)
+            val uri = FileProvider.getUriForFile(context,
+                "${context.packageName}.owner.camera.provider", file)
+            pendingCapturePath = file.absolutePath
+            camera.launch(uri)
+        } catch (e: Exception) {
+            pendingCapturePath?.let { File(it).delete() }
+            pendingCapturePath = null
+            error = "카메라를 열지 못했어요. 갤러리에서 선택하거나 다시 시도해 주세요."
+        }
+    }
     fun pick() {
-        if (!busy && active == null) picker.launch(PickVisualMediaRequest(
-            ActivityResultContracts.PickVisualMedia.ImageOnly))
+        if (!busy && active == null) chooseSource = true
+    }
+    if(chooseSource) {
+        AlertDialog(
+            onDismissRequest = { chooseSource = false },
+            title = { Text("사진을 어떻게 추가할까요?") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = {
+                        chooseSource = false
+                        picker.launch(PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },modifier=Modifier.fillMaxWidth().testTag("stage7-source-gallery")) {
+                        Text("갤러리에서 선택",color=V4Color.primary)
+                    }
+                    TextButton(onClick = {
+                        chooseSource = false
+                        takePhoto()
+                    },modifier=Modifier.fillMaxWidth().testTag("stage7-source-camera")) {
+                        Text("카메라로 촬영",color=V4Color.primary)
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { chooseSource = false }) {
+                    Text("취소",color=V4Color.text)
+                }
+            }
+        )
     }
     val valid = photos.isNotEmpty() && photos.size <= OWNER_MENU_MAX_PHOTOS &&
         photos.all(store::isReadable) &&
