@@ -95,14 +95,14 @@ private fun activeImport(job: MockMenuImport?) = job?.status in listOf(
 )
 
 @Composable
-private fun MenuPhotoSteps(step: Int) {
+private fun MenuPhotoSteps(step: Int, failed: Boolean = false) {
     val labels = listOf("사진 올리기", "읽기", "확인", "더하기")
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         labels.forEachIndexed { i, label ->
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                 Box(Modifier.fillMaxWidth().height(2.dp)
-                    .background(if (i <= step) V4Color.primary else V4Color.line))
-                Text(label, color = if (i <= step) V4Color.primary else V4Color.sub,
+                    .background(if (failed && i == step) Color(0xFFFFB4AB) else if (i <= step) V4Color.primary else V4Color.line))
+                Text(label, color = if (failed && i == step) Color(0xFFFFB4AB) else if (i <= step) V4Color.primary else V4Color.sub,
                     fontSize = 10.sp, maxLines = 1)
             }
         }
@@ -374,7 +374,7 @@ internal fun OwnerMenuPhotoJobScreen(
         V4Toolbar(null, onHome)
         Column(Modifier.weight(1f).padding(horizontal = 18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            MenuPhotoSteps(1)
+            MenuPhotoSteps(1, failed = job?.status == MockImportStatus.FAILED)
             if (job?.status != MockImportStatus.FAILED) Text(if (job?.status == MockImportStatus.READY_FOR_REVIEW) "메뉴 확인 준비"
                 else "메뉴판 분석 중",
                 color = V4Color.text, fontFamily = FontFamily.Serif,
@@ -420,7 +420,7 @@ internal fun OwnerMenuPhotoJobScreen(
                         }
                     }
                 }
-                Text(when(job?.status) {
+                if (job?.status !in listOf(MockImportStatus.PROCESSING, MockImportStatus.UPLOADED)) Text(when(job?.status) {
                     MockImportStatus.FAILED -> "메뉴판을 읽지 못했어요"
                     MockImportStatus.READY_FOR_REVIEW -> "메뉴 확인을 준비했어요"
                     MockImportStatus.CANCELED -> "작업이 취소됐어요"
@@ -439,8 +439,9 @@ internal fun OwnerMenuPhotoJobScreen(
                     MockImportStatus.READY_FOR_REVIEW ->
                         "${job.images.size}장의 사진이 작업 ${job.menuImportId}에 연결됐어요."
                     else -> "매장 관리로 돌아갈 수 있어요."
-                }, color = V4Color.sub,
-                    fontSize = if (job?.status == MockImportStatus.FAILED) 16.sp else 14.sp,
+                }, color = if (job?.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.UPLOADED)) V4Color.text else V4Color.sub,
+                    fontWeight = if (job?.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.UPLOADED)) FontWeight.Bold else FontWeight.Normal,
+                    fontSize = if (job?.status in listOf(MockImportStatus.FAILED, MockImportStatus.PROCESSING, MockImportStatus.UPLOADED)) 16.sp else 14.sp,
                     lineHeight = if (job?.status == MockImportStatus.FAILED) 24.sp else 20.sp,
                     textAlign = TextAlign.Center)
                 error?.let { Text(it, color = Color(0xFFFFB4AB), fontSize = 12.sp) }
