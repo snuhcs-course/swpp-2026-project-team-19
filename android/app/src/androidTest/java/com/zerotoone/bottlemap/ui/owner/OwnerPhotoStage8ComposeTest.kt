@@ -58,4 +58,33 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("시리즈 (선택)").assertExists()
         compose.onNodeWithText("등록될 이름").assertExists()
     }
+    @Test fun pdf91CatalogSearchHasCountAndFixedNewProductEntry() {
+        showLine(MockExtractedLine("new", "알려지지 않은 위스키", MockLineKind.PRODUCT,
+            options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=20000))))
+        compose.onNodeWithText("⌕  목록에 없어요").performClick()
+        compose.onNodeWithText("카탈로그에서 찾은 메뉴 0개").assertExists()
+        compose.onNodeWithText("찾는 메뉴가 없어요, 새로 등록").performClick()
+        compose.onNodeWithText("새로 등록할게요").assertExists()
+    }
+
+    @Test fun pdf90MissingPriceCanBeReviewedWithoutInventingPrice() {
+        showLine(MockExtractedLine("bookers", "부커스", MockLineKind.PRODUCT,
+            suggestedProductId="demo-canonical",
+            options=listOf(MockMenuOption("o",label="30ml",pourMl=30,priceKrw=0))))
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithText("가격을 못 읽었어요").assertExists()
+        compose.onNodeWithText("저장").assertExists()
+        compose.onNodeWithText("이 줄은 올리지 않기").assertExists()
+    }
+
+    @Test fun pdf92PartialReviewAllowsResumeWithoutPublishing() {
+        showLine(MockExtractedLine("raw", "위스키 미확인", MockLineKind.PRODUCT,
+            options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=14000))))
+        compose.onNodeWithText("‹ 이전").performClick()
+        compose.onNodeWithText("나중에 하기").performClick()
+        compose.onNodeWithText("1줄 남았어요").assertExists()
+        compose.onNodeWithText("1줄 이어서 확인").assertExists()
+    }
+
+
 }
