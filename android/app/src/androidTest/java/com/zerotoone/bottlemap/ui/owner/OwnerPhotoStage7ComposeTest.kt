@@ -82,7 +82,7 @@ class OwnerPhotoStage7ComposeTest {
         compose.onNodeWithText("AI 인식 실패").assertDoesNotExist()
     }
 
-    @Test fun debugLongPressDemoKeepsPdfFailureScreenFreeOfExtraButtons() {
+    @Test fun failureHeadingLongPressCannotInjectSampleResults() {
         val repository = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         val importId = repository.queuePhotoImport("fixture-bar",listOf(
@@ -94,13 +94,13 @@ class OwnerPhotoStage7ComposeTest {
             OwnerMenuPhotoJobScreen(vm.state.collectAsState().value,vm,
                 onHome={},onRetryPhotos={},onReview={opened=true})
         } }
-        compose.onNodeWithText("[개발용] 샘플 결과로 검수 체험").assertDoesNotExist()
-        compose.onNodeWithText("메뉴판을 읽지 못했어요").performTouchInput { longClick() }
+        compose.onNodeWithText("메뉴판을 읽지 못했어요")
+            .performTouchInput { longClick() }
         compose.runOnIdle {
-            assertTrue(opened)
+            assertFalse(opened)
             val snap=(vm.state.value as MockOwnerLoadState.Ready).snapshot
-            assertEquals(MockImportStatus.READY_FOR_REVIEW,snap.imports.last().status)
-            assertEquals(5,snap.imports.last().images.single().lines.size)
+            assertEquals(MockImportStatus.FAILED,snap.imports.last().status)
+            assertTrue(snap.imports.last().images.single().lines.isEmpty())
         }
     }
 
