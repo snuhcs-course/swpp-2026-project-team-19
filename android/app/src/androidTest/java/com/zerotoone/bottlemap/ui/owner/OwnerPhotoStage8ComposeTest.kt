@@ -34,7 +34,7 @@ class OwnerPhotoStage8ComposeTest {
         compose.setContent { MaterialTheme {
             OwnerPhotoStage8Screen(vm.state.collectAsState().value,vm,{}, {})
         } }
-        compose.onNodeWithText("1줄 확인 시작").performClick()
+        compose.onNodeWithText("${lines.size}줄 확인 시작").performClick()
     }
 
     @Test fun pdf87MatchingCandidateRecordsDecisionWithoutExtraOptionPage() {
