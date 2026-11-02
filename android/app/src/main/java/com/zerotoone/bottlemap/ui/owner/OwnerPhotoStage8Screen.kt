@@ -122,16 +122,27 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     fontWeight=FontWeight.Bold,fontSize=26.sp)
                 val bar=s.bars.firstOrNull{it.barId==barId}
                 St8Card {
-                    Text("기본 잔 용량",color=V4Color.text,fontWeight=FontWeight.Bold)
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
+                        Text("기본 잔 용량",color=V4Color.text,fontWeight=FontWeight.Bold)
+                        Text(bar?.defaultPourMl?.let { it.toString()+"ml" } ?: "미설정",
+                            color=V4Color.sub,fontSize=12.sp)
+                    }
                     var pour by rememberSaveable(barId){mutableStateOf(bar?.defaultPourMl?.toString().orEmpty())}
-                    St8Field("ml (미설정 가능)",pour,{pour=it},digits=true)
-                    TextButton(onClick={
-                        val n=pour.toIntOrNull()
-                        if(bar!=null && (pour.isBlank() || n!=null && n in 1..999)){
-                            vm.saveBar(bar.copy(defaultPourMl=n));error=null
-                        }else error="1~999ml로 입력해 주세요."
-                    }){Text("저장",color=V4Color.primary)}
-                    Text("잔 옵션에 수동으로 적용한 경우에만 저장돼요.",color=V4Color.sub,fontSize=12.sp)
+                    Row(verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.spacedBy(7.dp)) {
+                        OutlinedTextField(pour,{pour=it.filter(Char::isDigit).take(3)},
+                            modifier=Modifier.width(100.dp),singleLine=true,
+                            placeholder={Text("예: 30")},colors=OutlinedTextFieldDefaults.colors(
+                                focusedTextColor=V4Color.text,unfocusedTextColor=V4Color.text))
+                        Text("ml",color=V4Color.text)
+                        TextButton(onClick={
+                            val n=pour.toIntOrNull()
+                            if(bar!=null && (pour.isBlank() || n!=null && n in 1..999)){
+                                vm.saveBar(bar.copy(defaultPourMl=n));error=null
+                            }else error="1~999ml로 입력해 주세요."
+                        }){Text("저장",color=V4Color.primary)}
+                    }
+                    Text("용량 표시가 없는 잔에 적용",color=V4Color.sub,fontSize=11.sp)
                 }
                 St8Card {
                     Text("자동 인식 신규 메뉴 "+counts.newCandidates+"줄 ›",
@@ -164,10 +175,19 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     Column(Modifier.fillMaxWidth().clickable{
                         position=entry.index;screen="line"
                     }.padding(vertical=10.dp)) {
-                        Text(entry.value.second.sourceText,color=V4Color.text,fontSize=15.sp)
-                        Text("메뉴판 "+entry.value.first.imageOrder+" · "+
-                            (if(entry.value.second.decision==null)"확인 필요" else "확인됨"),
-                            color=V4Color.sub,fontSize=12.sp)
+                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+                            verticalAlignment=Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(entry.value.second.sourceText,color=V4Color.text,fontSize=15.sp)
+                                Text("메뉴판 "+entry.value.first.imageOrder+" · "+
+                                    (if(screen=="existing")"기존 등록 메뉴" else "신규 등록 후보"),
+                                    color=V4Color.sub,fontSize=12.sp)
+                            }
+                            val price=entry.value.second.decision?.correctedOptions?.firstOrNull()?.priceKrw
+                                ?: entry.value.second.options.firstOrNull()?.priceKrw
+                            Text(if(price!=null && price>0)"%,d원".format(price) else "가격 확인 필요",
+                                color=V4Color.text,fontSize=13.sp)
+                        }
                         HorizontalDivider(color=V4Color.line)
                     }
                 }
