@@ -116,7 +116,8 @@ private fun MenuPhotoSteps(step: Int, failed: Boolean = false) {
 
 @Composable
 private fun MenuPhotoPrimary(
-    label: String, enabled: Boolean = true, tag: String? = null, onClick: () -> Unit,
+    label: String, enabled: Boolean = true, tag: String? = null,
+    leadingIcon: (@Composable () -> Unit)? = null, onClick: () -> Unit,
 ) {
     Button(onClick = onClick, enabled = enabled,
         modifier = Modifier.fillMaxWidth().height(56.dp).then(
@@ -126,6 +127,7 @@ private fun MenuPhotoPrimary(
             contentColor = V4Color.background,
             disabledContainerColor = Color(0xFF65513C),
             disabledContentColor = V4Color.sub)) {
+        if (leadingIcon != null) { leadingIcon(); Spacer(Modifier.width(8.dp)) }
         Text(label, fontWeight = FontWeight.Bold, fontSize = 15.sp)
     }
 }
