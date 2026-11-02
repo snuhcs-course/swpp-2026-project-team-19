@@ -387,18 +387,20 @@ fun OwnerOnboardingScreen(
                     RegPage.METHOD -> {
                         OwnerV4Question("사업자등록증으로\n한 번에 채울까요?",
                             "사진을 찍으면 사업자등록번호, 대표자 성명, 개업일을 읽어 채워 드려요.")
-                        Spacer(Modifier.height(16.dp))
-                        RegistrationChoice("camera","사진으로 채우기",
-                            "읽은 내용은 다음 화면에서 확인해요","추천") { showCertificateSheet=true }
-                        RegistrationChoice("pen","직접 입력하기","세 가지를 하나씩 입력해요") {
-                            inputMethod="manual";go(RegPage.BN)
+                        Spacer(Modifier.height(0.dp))
+                        Column(verticalArrangement=Arrangement.spacedBy(12.dp)) {
+                            RegistrationChoice("camera","사진으로 채우기",
+                                "읽은 내용은 다음 화면에서 확인해요","추천") { showCertificateSheet=true }
+                            RegistrationChoice("pen","직접 입력하기","세 가지를 하나씩 입력해요") {
+                                inputMethod="manual";go(RegPage.BN)
+                            }
                         }
                     }
                     RegPage.READING -> RegistrationCenterContent(
                         "사업자등록증을\n읽고 있어요","잠시만 기다려 주세요.",loading=true)
                     RegPage.BN -> {
                         OwnerV4Question("사업자등록번호를\n알려주세요")
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(0.dp))
                         RegistrationInput(bnFormat(draft.businessNumberDigits),{},"000-00-00000",
                             readonly=true,tag="registration-business-number")
                         Text("숫자 10자리. 하이픈은 자동으로 들어가요.",
@@ -410,22 +412,22 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.REP -> {
                         OwnerV4Question("대표자 성명을\n알려주세요","사업자등록증에 적힌 이름 그대로 입력해 주세요.")
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(0.dp))
                         RegistrationInput(draft.representativeName,{
                             save(draft.copy(representativeName=it.take(100)))},
                             "홍길동",tag="registration-representative")
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(0.dp))
                         OwnerV4Previous("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
                     }
                     RegPage.DATE -> {
                         OwnerV4Question("개업일을\n알려주세요","사업자등록증의 개업연월일이에요.")
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(0.dp))
                         RegistrationInput(draft.openingDateIso.replace("-","."),{},"YYYY.MM.DD",
                             readonly=true,tag="registration-opening-date")
                         if(draft.openingDateIso.length==10 && !validOpeningDate(draft.openingDateIso))
                             Text("날짜를 다시 확인해 주세요. 오늘 이후 날짜는 넣을 수 없어요.",
                                 fontSize=12.sp,color=RegistrationV4.error)
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(0.dp))
                         OwnerV4Previous("대표자 성명",draft.representativeName){go(RegPage.REP)}
                         OwnerV4Previous("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
                     }
@@ -435,7 +437,7 @@ fun OwnerOnboardingScreen(
                             else "이 정보로\n확인할게요",
                             if(inputMethod=="photo")"사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요."
                             else "국세청에 등록된 정보와 같은지 확인해요.")
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(0.dp))
                         Column(Modifier.fillMaxWidth()) {
                             OwnerV4Summary("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
                             OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
@@ -460,7 +462,7 @@ fun OwnerOnboardingScreen(
                     RegPage.BARNAME -> {
                         OwnerV4Question("매장 이름을\n알려주세요",
                             "손님에게 보이는 이름이에요. 사업자등록증의 상호와 간판이 다르면 간판 이름으로 고쳐 주세요.")
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(0.dp))
                         RegistrationInput(draft.proposedBarName,{
                             val edited=updatedBarNameDraft(draft,it)
                             if(needsNewBarDetailsAfterClaimEdit(editingReview,draft.kind,edited.kind)) {
@@ -493,7 +495,7 @@ fun OwnerOnboardingScreen(
                     RegPage.BARPHOTO -> {
                         OwnerV4Question("매장 사진을\n올려 주세요",
                             "갤러리에서 사진을 선택해 주세요. 등록한 사진은 대표 사진으로 지정돼요.")
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(0.dp))
                         val cover=draft.applicantGallery.firstOrNull()
                         Box(Modifier.fillMaxWidth().aspectRatio(4f/3f)
                             .clip(RoundedCornerShape(16.dp))
@@ -518,13 +520,15 @@ fun OwnerOnboardingScreen(
                                 Text("사진 올리기",color=RegistrationV4.secondary,fontSize=14.sp)
                             }
                         }
-                        RegistrationHint("간판이나 입구, 매장 안쪽이 잘 보이는 사진")
-                        RegistrationHint("사람 얼굴이 크게 나오지 않은 사진")
+                        Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                            RegistrationHint("간판이나 입구, 매장 안쪽이 잘 보이는 사진")
+                            RegistrationHint("사람 얼굴이 크게 나오지 않은 사진")
+                        }
                     }
                     RegPage.ADDRESS -> {
                         OwnerV4Question("매장 주소를\n알려주세요",
                             "손님이 지도에서 찾을 수 있게 정확히 입력해 주세요.")
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(0.dp))
                         Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
                             Text("주소",color=RegistrationV4.secondary,fontSize=12.sp)
                             Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
@@ -565,7 +569,7 @@ fun OwnerOnboardingScreen(
                     RegPage.MENUS -> {
                         OwnerV4Question("메뉴판 사진을\n올려 주세요",
                             "AI가 메뉴를 읽어 두면, 승인된 뒤에 확인만 하고 공개할 수 있어요.")
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(0.dp))
                         val photoItems = draft.initialMenuPhotos
                         (0 until ((photoItems.size + if(photoItems.size<15)1 else 0)+2)/3).forEach { rowIndex ->
                             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
@@ -622,8 +626,10 @@ fun OwnerOnboardingScreen(
                             Text(photoItems.size.toString()+"/15",
                                 fontSize=12.sp,color=RegistrationV4.secondary)
                         }
-                        RegistrationHint("한 장에 한 면씩, 글자와 가격이 잘리지 않게")
-                        RegistrationHint("빛 반사 없이 정면에서")
+                        Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                            RegistrationHint("한 장에 한 면씩, 글자와 가격이 잘리지 않게")
+                            RegistrationHint("빛 반사 없이 정면에서")
+                        }
                     }
                     RegPage.CONTACT -> {
                         OwnerV4Question("연락받을 번호를\n알려주세요",
