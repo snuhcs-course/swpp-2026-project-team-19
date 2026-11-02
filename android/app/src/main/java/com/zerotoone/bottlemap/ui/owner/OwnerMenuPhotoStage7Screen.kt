@@ -484,6 +484,13 @@ internal fun OwnerMenuPhotoJobScreen(
                         viewModel.finishPhotoImport(newImportId, demoResult)
                     }.onFailure { error = it.message }
     }
+    // Do not draw an intermediary ready/canceled page even for one frame while
+    // Navigation handles the transition to the actual review screen.
+    if(job?.status==MockImportStatus.READY_FOR_REVIEW ||
+       job?.status==MockImportStatus.CANCELED) {
+        Box(Modifier.fillMaxSize().background(V4Color.background))
+        return
+    }
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         V4Toolbar(null, onHome)
         Column(Modifier.weight(1f).padding(horizontal = 18.dp),
