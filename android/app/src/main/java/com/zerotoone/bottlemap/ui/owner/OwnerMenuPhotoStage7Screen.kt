@@ -5,6 +5,8 @@ import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.owner.MockExtractedLine
 import com.zerotoone.bottlemap.data.owner.MockLineKind
 import com.zerotoone.bottlemap.data.owner.MockMenuOption
+import com.zerotoone.bottlemap.data.owner.MockBrand
+import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -513,23 +515,72 @@ internal fun OwnerMenuPhotoJobScreen(
             if (BuildConfig.DEBUG && job?.status == MockImportStatus.FAILED) {
                 TextButton(onClick = {
                     runCatching {
-                        // Explicit developer fixture, NEVER an OCR response for these photos.
+                        // Clearly labeled DEMO data: never inferred from selected image pixels.
+                        val brands = listOf(
+                            MockBrand("demo-brand-hakushu", "Suntory"),
+                            MockBrand("demo-brand-russells", "Russell's Reserve"),
+                            MockBrand("demo-brand-lagavulin", "Lagavulin"),
+                            MockBrand("demo-brand-bookers", "Booker's")
+                        )
+                        val products = listOf(
+                            MockCatalogProduct("demo-hakushu-dr", "demo-brand-hakushu",
+                                "Hakushu Distiller's Reserve"),
+                            MockCatalogProduct("demo-russell-single", "demo-brand-russells",
+                                "Russell's Reserve Single Barrel"),
+                            MockCatalogProduct("demo-russell-rye", "demo-brand-russells",
+                                "Russell's Reserve Single Barrel Rye"),
+                            MockCatalogProduct("demo-lagavulin-16", "demo-brand-lagavulin",
+                                "Lagavulin 16", ageYears = 16),
+                            MockCatalogProduct("demo-bookers", "demo-brand-bookers", "Booker's")
+                        )
+                        val existingSnapshot = photoBar(state)
+                        brands.filter { b ->
+                            existingSnapshot?.brands?.none { it.brandId == b.brandId } != false
+                        }.forEach(viewModel::saveBrand)
+                        products.filter { product ->
+                            existingSnapshot?.products?.none { it.productId == product.productId } != false
+                        }.forEach(viewModel::saveProduct)
+                        val examples = listOf(
+                            MockExtractedLine("demo-hakushu", "하쿠슈DR",
+                                MockLineKind.PRODUCT, suggestedProductId = "demo-hakushu-dr",
+                                options = listOf(MockMenuOption("demo-hakushu-glass",
+                                    label = "잔", pourMl = 30, priceKrw = 19000))),
+                            MockExtractedLine("demo-russell", "러셀 싱글배럴",
+                                MockLineKind.PRODUCT, candidateProductIds = listOf(
+                                    "demo-russell-single", "demo-russell-rye"),
+                                options = listOf(MockMenuOption("demo-russell-glass",
+                                    label = "잔", pourMl = 30, priceKrw = 15000))),
+                            MockExtractedLine("demo-signatory", "시그나토리 쿨일라13",
+                                MockLineKind.PRODUCT,
+                                options = listOf(MockMenuOption("demo-signatory-glass",
+                                    label = "잔", pourMl = 30, priceKrw = 20000))),
+                            MockExtractedLine("demo-cocktail", "네그로니",
+                                MockLineKind.PRODUCT,
+                                options = listOf(MockMenuOption("demo-cocktail-glass",
+                                    label = "잔", priceKrw = 16000))),
+                            MockExtractedLine("demo-nonproduct", "영업 안내 · 모든 가격은 원화 기준",
+                                MockLineKind.NON_PRODUCT),
+                            MockExtractedLine("demo-bookers", "부커스",
+                                MockLineKind.PRODUCT, suggestedProductId = "demo-bookers",
+                                options = listOf(
+                                    MockMenuOption("demo-bookers-15", label = "15ml",
+                                        pourMl = 15, priceKrw = 18000),
+                                    MockMenuOption("demo-bookers-30", label = "30ml",
+                                        pourMl = 30, priceKrw = 32000))),
+                            MockExtractedLine("demo-lagavulin", "라가불린 16년",
+                                MockLineKind.PRODUCT, suggestedProductId = "demo-lagavulin-16",
+                                options = listOf(MockMenuOption("demo-lagavulin-bottle",
+                                    label = "병", priceKrw = 280000)))
+                        )
+                        val photoUris = job.images.map { it.sourceUri }
+                        val demoResult = MockPhotoExtractionSource { uri ->
+                            val imageIndex = photoUris.indexOf(uri)
+                            if (imageIndex < 0) emptyList() else examples.filterIndexed { i, _ ->
+                                i % photoUris.size == imageIndex
+                            }
+                        }
                         val newImportId = viewModel.retryFailedPhotoImport(job.menuImportId)
-                        var pageIndex = 0
-                        viewModel.finishPhotoImport(newImportId, MockPhotoExtractionSource {
-                            pageIndex++
-                            listOf(
-                                MockExtractedLine("fixture-$pageIndex-product",
-                                    "[시연 데이터] 메뉴판 샘플 $pageIndex - 실제 사진 인식 결과 아님",
-                                    MockLineKind.PRODUCT,
-                                    options = listOf(MockMenuOption(
-                                        "fixture-$pageIndex-opt", label = "잔",
-                                        pourMl = 30, priceKrw = 19000))),
-                                MockExtractedLine("fixture-$pageIndex-excluded",
-                                    "[시연 데이터] 비상품 안내문 $pageIndex",
-                                    MockLineKind.NON_PRODUCT),
-                            )
-                        })
+                        viewModel.finishPhotoImport(newImportId, demoResult)
                         onReview()
                     }.onFailure { error = it.message }
                 }, modifier = Modifier.fillMaxWidth()) {
