@@ -29,8 +29,11 @@ class OwnerPhotoStage7ComposeTest {
         } }
         compose.onNodeWithTag("stage7-photo-submit").assertIsNotEnabled()
         compose.onNodeWithTag("stage7-photo-add").assertExists()
-        compose.onNodeWithText("사진 0장 분석 시작").assertExists()
-        compose.onNodeWithText("JPEG/PNG · 사진당 10MB · 전체 60MB").assertExists()
+        compose.onNodeWithText("메뉴판 사진 선택").assertExists()
+        compose.onNodeWithText("사진을 최대 15장까지 올릴 수 있어요.").assertExists()
+        compose.onNodeWithText("사진 0장 올리기").assertExists()
+        compose.onNodeWithText("JPEG/PNG · 사진당 10MB · 전체 60MB").assertDoesNotExist()
+        compose.onNodeWithText("새 메뉴만 추가 · 기존 메뉴와 가격 유지").assertDoesNotExist()
     }
 
     @Test fun readyImportRemainsUnpublishedAndCanBeCanceledFromJobScreen() {
