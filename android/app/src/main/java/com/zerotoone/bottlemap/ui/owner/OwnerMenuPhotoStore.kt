@@ -3,6 +3,8 @@ package com.zerotoone.bottlemap.ui.owner
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.Bitmap
+import android.graphics.Matrix
+import androidx.exifinterface.media.ExifInterface
 import android.graphics.ImageDecoder
 import android.os.Build
 import android.net.Uri
@@ -90,6 +92,64 @@ internal class OwnerMenuPhotoStore(context: Context) {
         error("변환한 사진이 10MB를 초과해요. 더 작은 사진을 선택해 주세요.")
     }
 
+    /** Validate actual image pixels, then normalize EXIF orientation before persisting.
+     * Source overlays use coordinates after orientation; preview uses stored upright pixels.
+     * Called on the picker IO coroutine, never during composition.
+     */
+    private fun normalizeAndValidate(file: File, photoId: String,
+        created: MutableList<File>): Boolean {
+        val bounds=BitmapFactory.Options().apply {inJustDecodeBounds=true}
+        BitmapFactory.decodeFile(file.absolutePath,bounds)
+        require(bounds.outWidth>0 && bounds.outHeight>0) {
+            "사진을 읽을 수 없어요. 다시 선택해 주세요."
+        }
+        var sample=1
+        while(bounds.outWidth/sample>4096 || bounds.outHeight/sample>4096)sample*=2
+        val decoded=BitmapFactory.decodeFile(file.absolutePath,
+            BitmapFactory.Options().apply {inSampleSize=sample})
+            ?: error("사진 전체를 읽을 수 없어요. 다시 선택해 주세요.")
+        val orientation=runCatching {
+            ExifInterface(file.absolutePath).getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,ExifInterface.ORIENTATION_NORMAL)
+        }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+        val matrix=Matrix()
+        when(orientation) {
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1f,1f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.setScale(1f,-1f)
+            ExifInterface.ORIENTATION_TRANSPOSE -> {matrix.setRotate(90f);matrix.postScale(-1f,1f)}
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
+            ExifInterface.ORIENTATION_TRANSVERSE -> {matrix.setRotate(-90f);matrix.postScale(-1f,1f)}
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(-90f)
+        }
+        if(matrix.isIdentity) {
+            decoded.recycle()
+            return false
+        }
+        val upright=try {
+            Bitmap.createBitmap(decoded,0,0,decoded.width,decoded.height,matrix,true)
+        } finally {decoded.recycle()}
+        val output=File(dir,"$photoId.oriented")
+        created.add(output)
+        try {
+            for(quality in listOf(85,75,65)) {
+                val ok=FileOutputStream(output).use {
+                    upright.compress(Bitmap.CompressFormat.JPEG,quality,it)
+                }
+                require(ok) { "사진 방향을 바로잡지 못했어요." }
+                if(output.length() in 1..OWNER_MENU_MAX_PHOTO_BYTES)break
+            }
+        } finally {if(!upright.isRecycled)upright.recycle()}
+        require(output.length() in 1..OWNER_MENU_MAX_PHOTO_BYTES) {
+            "사진 방향을 보정한 결과가 10MB를 초과해요."
+        }
+        require(file.delete() && output.renameTo(file)) {
+            "사진 방향을 저장하지 못했어요. 다시 선택해 주세요."
+        }
+        created.remove(output)
+        return true
+    }
+
     private fun fileFor(photo: MockPhoto): File {
         val path = Uri.parse(photo.uri).path ?: error("사진 경로가 없어요.")
         val file = File(path).canonicalFile
@@ -120,7 +180,7 @@ internal class OwnerMenuPhotoStore(context: Context) {
                 val photoId = UUID.randomUUID().toString()
                 val temp = File(dir, "$photoId.part")
                 created += temp
-                val length = if(heic) convertHeicToJpeg(uri,temp) else
+                val originalLength = if(heic) convertHeicToJpeg(uri,temp) else
                     app.contentResolver.openInputStream(uri)?.use { source ->
                         FileOutputStream(temp).use { sink ->
                             val buffer=ByteArray(16*1024)
@@ -140,10 +200,10 @@ internal class OwnerMenuPhotoStore(context: Context) {
                             count
                         }
                     } ?: error("사진 URI를 읽을 수 없어요. 다시 선택해 주세요.")
-                require(total+length<=OWNER_MENU_MAX_TOTAL_BYTES) {
+                require(total+originalLength<=OWNER_MENU_MAX_TOTAL_BYTES) {
                     "전체 사진은 60MB 이하여야 해요."
                 }
-                require(length > 0) { "빈 사진은 등록할 수 없어요." }
+                require(originalLength > 0) { "빈 사진은 등록할 수 없어요." }
                 val magic = temp.inputStream().use { input ->
                     ByteArray(8).let { it.copyOf(input.read(it).coerceAtLeast(0)) }
                 }
@@ -151,12 +211,13 @@ internal class OwnerMenuPhotoStore(context: Context) {
                 require(signature != null && (heic || declared == null || declared == signature)) {
                     "JPEG 또는 PNG 사진만 올릴 수 있어요."
                 }
-                val dimensions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                BitmapFactory.decodeFile(temp.absolutePath, dimensions)
-                require(dimensions.outWidth > 0 && dimensions.outHeight > 0) {
-                    "사진을 읽을 수 없어요. 다시 선택해 주세요."
+                val normalized=normalizeAndValidate(temp,photoId,created)
+                val resultingType=if(normalized)"image/jpeg" else signature
+                val length=temp.length()
+                require(total+length<=OWNER_MENU_MAX_TOTAL_BYTES) {
+                    "전체 사진은 60MB 이하여야 해요."
                 }
-                val stored = File(dir, "$photoId.${if (signature == "image/png") "png" else "jpg"}")
+                val stored = File(dir, "$photoId.${if (resultingType == "image/png") "png" else "jpg"}")
                 require(temp.renameTo(stored)) { "사진을 보관하지 못했어요." }
                 created += stored
                 created.remove(temp)
