@@ -353,7 +353,8 @@ fun OwnerManagementHomeScreen(
                                     "판매 정보 확인 ${ownerDisplayDate(bar.lastVerifiedAtEpochMs)}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            if (job != null) {
+                            if (job != null && job.status !in listOf(
+                                MockImportStatus.APPLIED,MockImportStatus.CANCELED)) {
                                 HorizontalDivider()
                                 Row(
                                     Modifier.fillMaxWidth().ownerQuietClick { onJob(job.status) }
