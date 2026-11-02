@@ -424,7 +424,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         modifier=Modifier.weight(1f))
                     OutlinedButton(onClick={
                         runCatching {vm.review(job.menuImportId,line.extractedItemId,
-                            job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
+                            job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                             .onSuccess {error=null;next()}.onFailure {error=it.message}
                     },
                         modifier=Modifier.height(34.dp),
@@ -497,7 +497,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         modifier=Modifier.weight(1f))
                     OutlinedButton(onClick={
                         runCatching{vm.review(job.menuImportId,line.extractedItemId,
-                            job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
+                            job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                             .onSuccess {error=null;next()}.onFailure {error=it.message}
                     },
                         modifier=Modifier.height(34.dp),
