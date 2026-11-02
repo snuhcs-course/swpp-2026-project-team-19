@@ -329,7 +329,7 @@ fun OwnerManagementHomeScreen(
                                     ) {
                                         Text("지금도 맞아요",
                                             style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Bold,
+                                            fontWeight = FontWeight.Normal,
                                             color = MaterialTheme.colorScheme.primary)
                                     }
                                 }
