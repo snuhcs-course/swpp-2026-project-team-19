@@ -345,7 +345,7 @@ internal fun OwnerMenuPhotoJobScreen(
     viewModel: OwnerMockViewModel,
     onHome: () -> Unit,
     onRetryPhotos: () -> Unit,
-    onReview: () -> Unit,
+    onReview: () -> Unit = {},
     fixture: MockPhotoExtractionSource = MockPhotoExtractionSource { emptyList() },
 ) {
     val job = latestImport(state)
