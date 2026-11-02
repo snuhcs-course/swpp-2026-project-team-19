@@ -240,7 +240,7 @@ fun OwnerOnboardingScreen(
         RegPage.BN,RegPage.REP,RegPage.DATE,RegPage.VERIFIED,
         RegPage.BARNAME,RegPage.BARPHOTO,RegPage.ADDRESS,RegPage.BARPHONE,
         RegPage.MENUS,RegPage.CONTACT->"다음"
-        RegPage.BIZCHECK->"국세청에 확인하기"
+        RegPage.BIZCHECK->"확인하기"
         RegPage.REVIEW->"신청하기"
         RegPage.DONE->"확인"
         else->null
