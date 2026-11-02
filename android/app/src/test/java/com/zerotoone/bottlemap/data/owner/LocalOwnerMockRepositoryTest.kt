@@ -289,8 +289,9 @@ class LocalOwnerMockRepositoryTest {
 
     @Test fun unrecognisedPhotoFailsWithoutInventingExtractionOrPublishing() {
         val r=repo()
-        val id=r.startPhotoImport("fixture-bar",listOf("content://test/random"),
-            OwnerMockFixtures.imageFixtures(emptyMap()))
+        val id=r.queuePhotoImport("fixture-bar",listOf(
+            MockPhoto("random-photo","content://test/random",MockPhotoKind.MENU_CAPTURE)))
+        r.finishPhotoImport(id,OwnerMockFixtures.imageFixtures(emptyMap()))
         val job=ready(r).imports.single()
         assertEquals(MockImportStatus.FAILED,job.status)
         assertTrue(job.images.single().lines.isEmpty())
@@ -300,9 +301,11 @@ class LocalOwnerMockRepositoryTest {
 
     @Test fun partiallyExtractedMultiPhotoImportIsFailedNotReadyForReview() {
         val r=repo()
-        val id=r.startPhotoImport("fixture-bar",
-            listOf("content://fixture/first","content://fixture/missing"),
-            OwnerMockFixtures.imageFixtures(mapOf("content://fixture/first" to listOf(
+        val id=r.queuePhotoImport("fixture-bar",listOf(
+            MockPhoto("first","content://fixture/first",MockPhotoKind.MENU_CAPTURE),
+            MockPhoto("missing","content://fixture/missing",MockPhotoKind.MENU_CAPTURE)))
+        r.finishPhotoImport(id,OwnerMockFixtures.imageFixtures(
+            mapOf("content://fixture/first" to listOf(
                 MockExtractedLine("one","위스키12",MockLineKind.PRODUCT,
                     options=listOf(serving("one-serving",30,19000)))
             ))))
