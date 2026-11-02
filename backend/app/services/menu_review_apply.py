@@ -4,8 +4,9 @@ one SERIALIZABLE transaction (API spec 8, flow doc 17).
 Steps, all rolled back together on any error:
 
 1. lock the bar row, then the import (spec 3.14.1: every request that changes a bar's menu
-   takes the bar row first, so they run one after another); check the caller again under the
-   lock; an `applied` import returns its stored result (a retried request)
+   takes the bar row first, so they run one after another); under the lock, an inactive bar is
+   BAR_NOT_FOUND and the caller is checked again; an `applied` import returns its stored result
+   (a retried request)
 2. check the status and reviewVersion
 3. rebuild the draft; if the board changed since it was made, store the new draft with a new
    reviewVersion and answer REVIEW_OUTDATED (the only write that is kept on an error)
@@ -29,6 +30,7 @@ from app.core.errors import ApiError
 from app.core.security import Principal
 from app.models import (
     Bar,
+    BarStatus,
     Brand,
     ExtractedItem,
     ExtractionRun,
@@ -52,6 +54,7 @@ from app.schemas.menu_review import (
     SelectExistingProduct,
 )
 from app.services.bar_access import can_manage_bar, forbidden
+from app.services.bar_menu import bar_not_found
 from app.services.menu_draft import build_draft, replace_draft
 from app.services.menu_publish import AppliedChange, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
@@ -216,8 +219,11 @@ def _apply_once(
     # The route has checked that the import exists. Lock its bar before the import, the order every
     # menu request uses, so this cannot deadlock with a manual edit or an upload.
     bar_id = session.scalar(select(MenuImport.bar_id).where(MenuImport.id == import_id))
-    session.execute(select(Bar.id).where(Bar.id == bar_id).with_for_update())
-    # The route checked the caller before the lock; an owner revoked meanwhile is refused here.
+    status = session.scalar(select(Bar.status).where(Bar.id == bar_id).with_for_update())
+    # Checked under the lock (spec 3.14.1): an inactive bar takes no menu change, and an owner revoked
+    # after the route's check is refused here.
+    if status != BarStatus.ACTIVE:
+        raise bar_not_found(str(bar_id))
     if not can_manage_bar(session, principal, bar_id):
         raise forbidden()
     # clock_timestamp(), not now(): a publish that waited for the lock must not look older than a

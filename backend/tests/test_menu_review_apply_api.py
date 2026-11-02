@@ -10,6 +10,7 @@ from sqlalchemy.exc import OperationalError
 from app.core.errors import ApiError
 from app.core.security import Principal
 from app.models import (
+    BarStatus,
     Brand,
     ExtractedItem,
     ImportStatus,
@@ -417,6 +418,20 @@ def test_an_owner_revoked_before_the_lock_is_forbidden(db_session, sample, glenf
         review_and_apply(lambda: nullcontext(db_session), sample.menu_import.id, request, owner)
 
     assert (caught.value.status_code, caught.value.code) == (403, "FORBIDDEN")
+    db_session.expire_all()
+    assert sample.menu_import.status == ImportStatus.READY_FOR_REVIEW
+    assert db_session.get(MenuBoard, sample.board.id).version == 1
+
+
+def test_an_inactive_bar_takes_no_review_publish(client, db_session, sample, operator, glenfiddich):
+    sample.bar.status = BarStatus.INACTIVE
+    # Committed so the failed request's rollback keeps it.
+    db_session.commit()
+
+    response = submit(client, sample.menu_import.id, valid_body(sample, glenfiddich), operator)
+
+    assert (response.status_code, response.json()["error"]["code"]) == (404, "BAR_NOT_FOUND")
+    assert response.json()["error"]["details"] == {"barId": str(sample.bar.id)}
     db_session.expire_all()
     assert sample.menu_import.status == ImportStatus.READY_FOR_REVIEW
     assert db_session.get(MenuBoard, sample.board.id).version == 1

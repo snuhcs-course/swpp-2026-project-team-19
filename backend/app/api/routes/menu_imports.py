@@ -178,7 +178,11 @@ def read_menu_import(
     responses=error_responses(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
         (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
-        (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
+        (
+            404,
+            "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id. `BAR_NOT_FOUND` (`details.barId`): the "
+            "import's bar is inactive; nothing is applied.",
+        ),
         (
             409,
             "`INVALID_IMPORT_STATE` (not `ready_for_review`); `REVIEW_OUTDATED` (`reviewVersion` differs, or "
