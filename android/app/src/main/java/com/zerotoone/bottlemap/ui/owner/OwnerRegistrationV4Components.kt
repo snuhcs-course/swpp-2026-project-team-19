@@ -285,7 +285,7 @@ internal fun RegistrationDigitsKeypad(
 ) {
     val rows=listOf(listOf("1","2","3"),listOf("4","5","6"),
         listOf("7","8","9"),listOf("","0","⌫"))
-    Column(Modifier.fillMaxWidth().padding(horizontal=12.dp,bottom=8.dp)) {
+    Column(Modifier.fillMaxWidth().padding(start=12.dp,end=12.dp,bottom=8.dp)) {
         rows.forEach { row ->
             Row(Modifier.fillMaxWidth()) {
                 row.forEach { key ->
