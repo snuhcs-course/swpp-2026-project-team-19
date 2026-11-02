@@ -1306,15 +1306,17 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     photo: MockPhotoExtraction, box: List<Int>?, dismiss:()->Unit
 ) {
     val context=LocalContext.current
-    val bitmap by produceState<androidx.compose.ui.graphics.ImageBitmap?>(
-        initialValue=null,key1=photo.sourceUri) {
-        value=withContext(Dispatchers.IO) {
+    val result by produceState<Pair<Boolean,androidx.compose.ui.graphics.ImageBitmap?>>(
+        initialValue=false to null,key1=photo.sourceUri) {
+        val loaded=withContext(Dispatchers.IO) {
             runCatching {OwnerMenuPhotoStore(context).preview(
                 MockPhoto(photo.imageId,photo.sourceUri,MockPhotoKind.MENU_CAPTURE),
                 size=1600
             )?.asImageBitmap()}.getOrNull()
         }
+        value=true to loaded
     }
+    val bitmap=result.second
     Dialog(onDismissRequest=dismiss,
         properties=DialogProperties(usePlatformDefaultWidth=false)) {
         BoxWithConstraints(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) {
@@ -1333,7 +1335,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 if(bitmap==null) {
                     Box(Modifier.size(imageWidth,imageHeight),
                         contentAlignment=Alignment.Center) {
-                        Text("원본 사진을 열 수 없어요.",color=V4Color.sub)
+                        Text(if(result.first)"원본 사진을 열 수 없어요." else
+                            "사진을 불러오는 중이에요.",color=V4Color.sub)
                     }
                 } else {
                     Box(Modifier.size(imageWidth,imageHeight)) {
