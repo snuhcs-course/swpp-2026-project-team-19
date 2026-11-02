@@ -99,6 +99,51 @@ class OwnerPhotoStage8Test {
         assertNull(ready(r).imports.single().images.single().lines.single().sourceBox)
     }
 
+    @Test fun mockExactMatchNeedsExplicitDecisionEvenAfterReviewReset() {
+        val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("known-brand","Known"))
+        r.saveCatalogProduct(MockCatalogProduct("known-id","known-brand","Known 12"))
+        val id=r.queuePhotoImport("fixture-bar",listOf(photo("a")))
+        r.finishPhotoImport(id,MockPhotoExtractionSource {
+            listOf(MockExtractedLine("a","Known 12",MockLineKind.PRODUCT,
+                suggestedProductId="known-id",mockAutoAccepted=true,
+                options=listOf(MockMenuOption("o",priceKrw=12000))))
+        })
+        val job=ready(r).imports.single()
+        val line=job.images.single().lines.single()
+        assertTrue(line.mockAutoAccepted)
+        assertNull(line.decision)
+        assertEquals(1,stage8Counts(job,ready(r)).remaining)
+        reject {r.publishAddOnly(id,job.reviewVersion)}
+        r.decideLine(id,line.extractedItemId,job.reviewVersion,
+            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,productId="known-id",
+                correctedOptions=line.options))
+        assertEquals(0,stage8Counts(ready(r).imports.single(),ready(r)).remaining)
+        r.resetPhotoReview(id,job.reviewVersion)
+        assertNull(ready(r).imports.single().images.single().lines.single().decision)
+        reject {r.publishAddOnly(id,job.reviewVersion+1)}
+    }
+
+    @Test fun editionLengthIsCheckedWhenSavingNewProductDecision() {
+        val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val id=r.queuePhotoImport("fixture-bar",listOf(photo("a")))
+        r.finishPhotoImport(id,MockPhotoExtractionSource {
+            listOf(MockExtractedLine("a","New product",MockLineKind.PRODUCT,
+                options=listOf(MockMenuOption("o",priceKrw=10000))))
+        })
+        val job=ready(r).imports.single()
+        val line=job.images.single().lines.single()
+        fun decision(edition:String)=MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
+            correctedOptions=line.options,
+            newProduct=MockNewProductDraft(name="New",brandName="New brand",
+                editionName=edition))
+        reject {r.decideLine(id,line.extractedItemId,job.reviewVersion,decision("x".repeat(151)))}
+        reject {r.decideLine(id,line.extractedItemId,job.reviewVersion,decision("  "))}
+        assertNull(ready(r).imports.single().images.single().lines.single().decision)
+        r.decideLine(id,line.extractedItemId,job.reviewVersion,decision("x".repeat(150)))
+        assertNotNull(ready(r).imports.single().images.single().lines.single().decision)
+    }
+
     @Test fun malformedSourceBoxRejectedBeforeReviewWithoutMutation() {
         val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         val id=r.queuePhotoImport("fixture-bar",listOf(photo("a")))
