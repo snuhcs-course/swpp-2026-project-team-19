@@ -114,14 +114,14 @@ private fun MenuPhotoPrimary(
     label: String, enabled: Boolean = true, tag: String? = null, onClick: () -> Unit,
 ) {
     Button(onClick = onClick, enabled = enabled,
-        modifier = Modifier.fillMaxWidth().height(49.dp).then(
+        modifier = Modifier.fillMaxWidth().height(56.dp).then(
             if (tag == null) Modifier else Modifier.testTag(tag)),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(containerColor = V4Color.primary,
             contentColor = V4Color.background,
             disabledContainerColor = Color(0xFF65513C),
             disabledContentColor = V4Color.sub)) {
-        Text(label, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        Text(label, fontWeight = FontWeight.Bold, fontSize = 15.sp)
     }
 }
 
@@ -460,7 +460,11 @@ internal fun OwnerMenuPhotoJobScreen(
                     modifier = Modifier.fillMaxWidth()) {
                     Text("메뉴 등록 작업 취소", color = V4Color.sub, fontSize = 12.sp)
                 }
-            MenuPhotoSecondary("내 매장으로 돌아가기", onHome)
+            if (job?.status == MockImportStatus.FAILED) {
+                TextButton(onClick = onHome, modifier = Modifier.fillMaxWidth().height(48.dp)) {
+                    Text("내 매장으로 돌아가기", color = V4Color.sub, fontSize = 14.sp)
+                }
+            } else MenuPhotoSecondary("내 매장으로 돌아가기", onHome)
         }
     }
 }
