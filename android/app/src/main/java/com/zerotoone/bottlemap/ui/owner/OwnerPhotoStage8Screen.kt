@@ -72,7 +72,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var error by rememberSaveable {mutableStateOf<String?>(null)}
     var publishConfirmed by rememberSaveable {mutableStateOf(false)}
     var selectedProductId by rememberSaveable(job?.menuImportId) { mutableStateOf<String?>(null) }
+    var chosenCategory by rememberSaveable(job?.menuImportId) { mutableStateOf("whisky") }
     val pair=all.getOrNull(position)
+    LaunchedEffect(pair?.second?.extractedItemId) {
+        selectedProductId=pair?.second?.decision?.productId
+        chosenCategory=pair?.second?.decision?.newProduct?.category ?: "whisky"
+    }
     fun next() {
         selectedProductId=null
         val target=all.indices.firstOrNull{it>position && all[it].second.decision==null}
@@ -181,22 +186,19 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 Text("이 메뉴가 맞나요?",color=V4Color.text,fontSize=23.sp,
                     fontWeight=FontWeight.Bold)
-                var category by rememberSaveable(line.extractedItemId){
-                    mutableStateOf(line.decision?.newProduct?.category ?: "whisky")
-                }
                 var categoryPopup by remember {mutableStateOf(false)}
                 TextButton(onClick={categoryPopup=true}){Text("위스키가 아니에요",color=V4Color.sub)}
                 if(categoryPopup)AlertDialog(onDismissRequest={categoryPopup=false},
                     title={Text("메뉴 종류 선택")},text={Column{
                         listOf("cocktail" to "칵테일","food" to "안주",
                             "otherAlcohol" to "기타 주류").forEach{(v,label)->
-                            TextButton(onClick={category=v;categoryPopup=false}){Text(label)}
+                            TextButton(onClick={chosenCategory=v;categoryPopup=false}){Text(label)}
                         }
                     }},confirmButton={TextButton(onClick={categoryPopup=false}){Text("닫기")}})
                 val candidates=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
                     .distinct().mapNotNull{id->s.products.firstOrNull{
                         it.productId==id && it.isActive}}
-                if(category=="whisky")candidates.forEach{product->
+                if(chosenCategory=="whisky")candidates.forEach{product->
                     St8Card {
                         Text(product.displayName,color=V4Color.text,fontWeight=FontWeight.Bold)
                         Text(s.brands.firstOrNull{it.brandId==product.brandId}?.name.orEmpty(),
@@ -209,6 +211,29 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 if(candidates.isEmpty())Text("일치하는 상품 후보가 없어요.",
                     color=V4Color.sub,fontSize=13.sp)
+                var searchExpanded by rememberSaveable(line.extractedItemId) {
+                    mutableStateOf(false)
+                }
+                var searchTerm by rememberSaveable(line.extractedItemId) {
+                    mutableStateOf("")
+                }
+                TextButton(onClick={searchExpanded=!searchExpanded}) {
+                    Text("⌕ 카탈로그에서 찾기",color=V4Color.primary)
+                }
+                if(searchExpanded) {
+                    St8Field("상품 이름 검색",searchTerm,{searchTerm=it})
+                    s.products.filter { product -> product.isActive &&
+                        product.displayName.contains(searchTerm,ignoreCase=true) }
+                        .take(12).forEach {product ->
+                            TextButton(onClick={
+                                selectedProductId=product.productId
+                                screen="edit"
+                            }) {
+                                Text(product.displayName,color=V4Color.primary)
+                            }
+                        }
+                }
+
                 candidates.forEach{p->
                     TextButton(onClick={selectedProductId=p.productId;screen="edit"}){
                         Text(if(selectedProductId==p.productId)"✓ "+p.displayName else p.displayName,
@@ -231,9 +256,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 var brand by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.brandName.orEmpty())
                 }
-                var category by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.category ?: "whisky")
-                }
                 var age by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.ageYears?.toString().orEmpty())
                 }
@@ -254,12 +276,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     St8Field("브랜드",brand,{brand=it})
                     var expanded by remember {mutableStateOf(false)}
                     TextButton(onClick={expanded=true}){
-                        Text("분류: "+category+" ▾",color=V4Color.primary)
+                        Text("분류: "+chosenCategory+" ▾",color=V4Color.primary)
                     }
                     if(expanded)AlertDialog(onDismissRequest={expanded=false},title={Text("분류")},
                         text={Column{listOf("whisky","cocktail","food","otherAlcohol",
                             "gin","brandy","rum","wine").forEach{kind->
-                            TextButton(onClick={category=kind;expanded=false}){Text(kind)}
+                            TextButton(onClick={chosenCategory=kind;expanded=false}){Text(kind)}
                         }}},confirmButton={TextButton(onClick={expanded=false}){Text("닫기")}})
                     Row(verticalAlignment=Alignment.CenterVertically){
                         Checkbox(noAge,{noAge=it});Text("숙성 연수 없음",color=V4Color.text)
@@ -267,7 +289,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     if(!noAge)St8Field("숙성 연수",age,{age=it},digits=true)
                     St8Field("에디션 (선택)",edition,{edition=it})
                     St8Field("도수 (선택)",alcohol,{alcohol=it})
-                    if(category=="otherAlcohol")St8Field("기타 주류 종류",subtype,{subtype=it})
+                    if(chosenCategory=="otherAlcohol")St8Field("기타 주류 종류",subtype,{subtype=it})
                 }
                 val originals=line.decision?.correctedOptions ?: line.options.ifEmpty {
                     listOf(MockMenuOption("local-review-option-"+line.extractedItemId,priceKrw=0))
@@ -325,7 +347,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             correctedOptions=resolved)
                         else MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
                             correctedOptions=resolved,newProduct=MockNewProductDraft(
-                                name=name.trim(),brandName=brand.trim(),category=category,
+                                name=name.trim(),brandName=brand.trim(),category=chosenCategory,
                                 ageYears=if(noAge)null else age.toIntOrNull(),
                                 editionName=edition.trim().ifBlank{null},
                                 abvPercent=alcohol.toDoubleOrNull(),
