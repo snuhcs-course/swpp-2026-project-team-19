@@ -243,20 +243,20 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     Box(Modifier.size(38.dp).testTag("stage8-review-home")
         .semantics { contentDescription="나중에 하기 · 메뉴 관리로" }
         .clickable(onClick=onLater),contentAlignment=Alignment.BottomCenter) {
-        Canvas(Modifier.size(31.dp)) {
+        Canvas(Modifier.size(36.dp)) {
             val u=size.width/24f
             val home=Path().apply {
-                moveTo(3f*u,11f*u)
-                lineTo(12f*u,3.5f*u)
-                lineTo(21f*u,11f*u)
-                moveTo(5.5f*u,10f*u)
-                lineTo(5.5f*u,21f*u)
-                lineTo(18.5f*u,21f*u)
-                lineTo(18.5f*u,10f*u)
-                moveTo(10f*u,21f*u)
-                lineTo(10f*u,14f*u)
-                lineTo(14f*u,14f*u)
-                lineTo(14f*u,21f*u)
+                moveTo(2f*u,10f*u)
+                lineTo(12f*u,1.5f*u)
+                lineTo(22f*u,10f*u)
+                moveTo(5f*u,9f*u)
+                lineTo(5f*u,23.5f*u)
+                lineTo(19f*u,23.5f*u)
+                lineTo(19f*u,9f*u)
+                moveTo(10f*u,23.5f*u)
+                lineTo(10f*u,15f*u)
+                lineTo(14f*u,15f*u)
+                lineTo(14f*u,23.5f*u)
             }
             drawPath(home,V4Color.primary,style=Stroke(
                 width=1.9f*u,cap=androidx.compose.ui.graphics.StrokeCap.Round,
