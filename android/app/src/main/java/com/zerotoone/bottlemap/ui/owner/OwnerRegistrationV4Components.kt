@@ -388,29 +388,7 @@ internal fun RegistrationCenterContent(
         horizontalAlignment=Alignment.CenterHorizontally,
         verticalArrangement=Arrangement.spacedBy(8.dp)) {
         if(loading) {
-            MenuPhotoProcessingIllustration(diameter=88.dp)
-            /* Disabled static illustration, preserved only for v4 comparison. */
-            /*Canvas(Modifier.size(88.dp)) {
-                val w=size.width;val h=size.height
-                val glass=Path().apply {
-                    moveTo(w*.25f,h*.15f);lineTo(w*.31f,h*.77f)
-                    quadraticTo(w*.32f,h*.85f,w*.4f,h*.85f)
-                    lineTo(w*.62f,h*.85f)
-                    quadraticTo(w*.70f,h*.85f,w*.71f,h*.77f)
-                    lineTo(w*.77f,h*.15f)
-                }
-                val liquid=Path().apply {
-                    moveTo(w*.32f,h*.55f);lineTo(w*.69f,h*.55f)
-                    lineTo(w*.66f,h*.78f)
-                    quadraticTo(w*.64f,h*.81f,w*.60f,h*.81f)
-                    lineTo(w*.42f,h*.81f)
-                    quadraticTo(w*.38f,h*.81f,w*.37f,h*.77f)
-                    close()
-                }
-                drawPath(liquid,RegistrationV4.primary)
-                drawPath(glass,RegistrationV4.secondary,
-                    style=Stroke(2.5.dp.toPx(),cap=StrokeCap.Round,join=StrokeJoin.Round))
-            }*/
+            MenuPhotoProcessingIllustration(diameter=88.dp,tag="registration-processing-glass")
         } else {
             RegistrationSuccessMark()
         }
