@@ -117,7 +117,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         HorizontalDivider(color=V4Color.line)
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
             Text(secondLabel,color=V4Color.sub,fontSize=14.sp)
-            Text("${secondCount}줄",color=V4Color.text,fontWeight=FontWeight.Bold)
+            Text("${secondCount}${secondSuffix}",color=V4Color.text,fontWeight=FontWeight.Bold)
         }
     }
 }
@@ -847,7 +847,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}}개를 더했어요",
                     color=V4Color.text,fontSize=23.sp,fontWeight=FontWeight.Bold,
                     modifier=Modifier.align(Alignment.CenterHorizontally))
-                Text("몰트 앤 무드 · 메뉴 게시 완료",color=V4Color.sub,
+                Text((s.bars.firstOrNull{it.barId==barId}?.name ?: "매장")+" · 메뉴 게시 완료",color=V4Color.sub,
                     fontSize=12.sp,modifier=Modifier.align(Alignment.CenterHorizontally))
                 St8CountCard("새로 더한 메뉴",all.count{it.second.decision?.kind in listOf(
                     MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)},
