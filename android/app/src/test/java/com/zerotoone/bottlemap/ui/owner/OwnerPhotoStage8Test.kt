@@ -188,6 +188,63 @@ class OwnerPhotoStage8Test {
         assertEquals(2,ready(r).imports.single().publishedAddedCount)
     }
 
+    @Test fun finalExistingRowsAndCorrectedPricesIgnoreOriginalCatalogSuggestions() {
+        val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            OwnerMockFixtures.registeredBar()))
+        r.saveBrand(MockBrand("brand","Whisky Brand"))
+        r.saveCatalogProduct(MockCatalogProduct("already","brand","Already on bar"))
+        r.saveCatalogProduct(MockCatalogProduct("replacement","brand","Other whisky"))
+        r.saveMenuItem(MockBarMenuItem("old-row","fixture-bar","already",
+            listOf(MockMenuOption("old",label="잔",pourMl=30,priceKrw=12000))))
+        val id=r.queuePhotoImport("fixture-bar",listOf(photo("a")))
+        r.finishPhotoImport(id,MockPhotoExtractionSource {
+            listOf(
+                MockExtractedLine("a1","Suggested old but replaced",MockLineKind.PRODUCT,
+                    suggestedProductId="already",
+                    options=listOf(MockMenuOption("o1",label="잔",pourMl=30,priceKrw=18000))),
+                MockExtractedLine("a2","Selected old with corrected price",MockLineKind.PRODUCT,
+                    suggestedProductId="already",
+                    options=listOf(MockMenuOption("o2",label="잔",pourMl=30,priceKrw=0))),
+                MockExtractedLine("a3","Suggested old but excluded",MockLineKind.PRODUCT,
+                    suggestedProductId="already",
+                    options=listOf(MockMenuOption("o3",label="잔",pourMl=30,priceKrw=9000)))
+            )
+        })
+        val job=ready(r).imports.single()
+        val lines=job.images.single().lines
+        r.decideLine(id,lines[0].extractedItemId,job.reviewVersion,
+            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,productId="replacement",
+                correctedOptions=lines[0].options))
+        r.decideLine(id,lines[1].extractedItemId,job.reviewVersion,
+            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,productId="already",
+                correctedOptions=listOf(lines[1].options.single().copy(priceKrw=19500))))
+        r.decideLine(id,lines[2].extractedItemId,job.reviewVersion,
+            MockReviewDecision(MockDecisionKind.EXCLUDE))
+        val reviewed=ready(r).imports.single()
+        assertEquals(listOf(lines[1].extractedItemId),
+            stage8ConfirmedExistingLines(reviewed,ready(r)).map {it.extractedItemId})
+        assertEquals(1,stage8RetainedPriceMismatchCount(reviewed,ready(r)))
+        assertEquals(1,stage8ExpectedAddedCount(reviewed,ready(r)))
+        assertEquals(1,r.publishAddOnly(id,job.reviewVersion))
+        assertEquals(12000,ready(r).menuItems.first{it.productId=="already"}
+            .options.single().priceKrw)
+        assertEquals(1,stage8RetainedPriceMismatchCount(ready(r).imports.single(),ready(r)))
+    }
+
+    @Test fun finalExistingRowsAndCorrectedPricesAreEmptyWithoutExistingProducts() {
+        val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            OwnerMockFixtures.registeredBar()))
+        val id=r.queuePhotoImport("fixture-bar",listOf(photo("empty-existing")))
+        r.finishPhotoImport(id,MockPhotoExtractionSource {
+            listOf(MockExtractedLine("line","Unknown whisky",MockLineKind.PRODUCT,
+                options=listOf(MockMenuOption("opt",priceKrw=18000))))
+        })
+        val job=ready(r).imports.single()
+        assertEquals(0,stage8Counts(job,ready(r)).existing)
+        assertTrue(stage8ConfirmedExistingLines(job,ready(r)).isEmpty())
+        assertEquals(0,stage8RetainedPriceMismatchCount(job,ready(r)))
+    }
+
     @Test fun malformedSourceBoxRejectedBeforeReviewWithoutMutation() {
         val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         val id=r.queuePhotoImport("fixture-bar",listOf(photo("a")))
