@@ -535,7 +535,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 BasicTextField(value=catalogQuery,onValueChange={catalogQuery=it},
                     singleLine=true,textStyle=TextStyle(color=V4Color.text,fontSize=16.sp),
-                    modifier=Modifier.weight(1f).offset(y=7.dp),
+                    modifier=Modifier.weight(1f).offset(y=7.dp)
+                        .testTag("stage8-catalog-query"),
                     decorationBox={field ->
                         Row(Modifier.fillMaxWidth().height(45.dp)
                             .border(1.dp,V4Color.line,RoundedCornerShape(14.dp))
