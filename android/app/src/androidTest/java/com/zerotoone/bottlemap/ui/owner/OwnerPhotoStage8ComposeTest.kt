@@ -96,7 +96,7 @@ class OwnerPhotoStage8ComposeTest {
             options=listOf(MockMenuOption("home-option",label="잔",pourMl=30,priceKrw=19000))))
         val home=compose.onNodeWithTag("stage8-review-home").getUnclippedBoundsInRoot()
         val label=compose.onNodeWithTag("stage8-source-line-label").getUnclippedBoundsInRoot()
-        assert(kotlin.math.abs(home.width.value-home.height.value)<1f)
+        assert(kotlin.math.abs((home.right-home.left).value-(home.bottom-home.top).value)<1f)
         assert(kotlin.math.abs(home.bottom.value-label.bottom.value)<4f)
     }
 
