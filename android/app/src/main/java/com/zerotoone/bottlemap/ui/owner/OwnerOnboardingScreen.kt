@@ -472,7 +472,7 @@ fun OwnerOnboardingScreen(
                         Spacer(Modifier.height(0.dp))
                         RegistrationInput(draft.representativeName,{
                             save(draft.copy(representativeName=it.take(100)))},
-                            "홍길동",tag="registration-representative")
+                            "홍길동",tag="registration-representative",highlight=true)
                         Spacer(Modifier.height(0.dp))
                         OwnerV4Previous("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
                     }
@@ -527,7 +527,7 @@ fun OwnerOnboardingScreen(
                                 history=registrationHistoryFor(RegPage.BARNAME.name,edited.kind)
                             }
                             save(edited)
-                        },"예: 몰트 앤 무드",tag="registration-bar-name")
+                        },"예: 몰트 앤 무드",tag="registration-bar-name",highlight=true)
                         exactMatches.forEach{ candidate ->
                             OwnerV4Panel("BottleMap에 이미 등록된 매장\n"+candidate.name+"\n"+candidate.address)
                             Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
