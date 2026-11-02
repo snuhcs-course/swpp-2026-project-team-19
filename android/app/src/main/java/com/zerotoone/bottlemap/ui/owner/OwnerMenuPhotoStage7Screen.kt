@@ -301,6 +301,19 @@ internal fun OwnerMenuPhotoSelectionScreen(
         if (index < 1) null else MockPhoto(
             it.substring(0, index), it.substring(index + 1), MockPhotoKind.MENU_CAPTURE)
     }
+    val storedSnapshot=photoBar(state)
+    // First recovered composition knows both SavedState picker entries and all
+    // previously imported photo IDs. Prune finalized copies orphaned by a crash.
+    LaunchedEffect(store,storedSnapshot != null) {
+        storedSnapshot?.let { snapshot ->
+            val referenced=photos + snapshot.imports.flatMap { job ->
+                job.images.map {image->
+                    MockPhoto(image.imageId,image.sourceUri,MockPhotoKind.MENU_CAPTURE)
+                }
+            }
+            withContext(Dispatchers.IO) { store.pruneUnreferencedCopies(referenced) }
+        }
+    }
     // An interrupted file-copy coroutine must not restore a permanent busy state.
     var busy by remember { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
@@ -315,13 +328,21 @@ internal fun OwnerMenuPhotoSelectionScreen(
     LaunchedEffect(pendingCapturePath, copyingCapturePath) {
         val protected=setOfNotNull(pendingCapturePath, copyingCapturePath)
         withContext(Dispatchers.IO) {
-            removeAbandonedOwnerCaptures(
-                File(context.filesDir,"owner-menu-captures"),protected)
+            synchronized(OwnerMenuCaptureGuard.lock) {
+                removeAbandonedOwnerCaptures(
+                    File(context.filesDir,"owner-menu-captures"),
+                    protected + OwnerMenuCaptureGuard.livePaths)
+            }
         }
     }
     fun addImages(sources: List<Uri>, capture: File? = null) {
         if (sources.isEmpty() || busy || active != null) {
-            capture?.delete()
+            capture?.let { file ->
+                synchronized(OwnerMenuCaptureGuard.lock) {
+                    file.delete()
+                    OwnerMenuCaptureGuard.livePaths.remove(file.absolutePath)
+                }
+            }
             return
         }
         busy = true
@@ -352,7 +373,12 @@ internal fun OwnerMenuPhotoSelectionScreen(
                 cleanupRequested.set(true)
                 withContext(NonCancellable + Dispatchers.IO) {
                     if(!saved)newCopies.get()?.forEach(store::delete)
-                    capture?.delete()
+                    capture?.let { file ->
+                        synchronized(OwnerMenuCaptureGuard.lock) {
+                            file.delete()
+                            OwnerMenuCaptureGuard.livePaths.remove(file.absolutePath)
+                        }
+                    }
                 }
                 copyingCapturePath=null
                 busy = false
@@ -376,23 +402,38 @@ internal fun OwnerMenuPhotoSelectionScreen(
                 }.getOrNull()
                 if (uri != null) addImages(listOf(uri),file)
                 else {
-                    file.delete()
+                    synchronized(OwnerMenuCaptureGuard.lock) {
+                        file.delete()
+                        OwnerMenuCaptureGuard.livePaths.remove(file.absolutePath)
+                    }
                     error = "촬영한 사진을 열 수 없어요. 다시 찍어주세요."
                 }
-            } else file.delete()
+            } else synchronized(OwnerMenuCaptureGuard.lock) {
+                file.delete()
+                OwnerMenuCaptureGuard.livePaths.remove(file.absolutePath)
+            }
         }
     }
     fun takePhoto() {
         if (busy || active != null || photos.size >= OWNER_MENU_MAX_PHOTOS) return
         try {
             val directory = File(context.filesDir,"owner-menu-captures").apply { mkdirs() }
-            val file = File.createTempFile("menu-capture-", ".jpg", directory)
+            val file = synchronized(OwnerMenuCaptureGuard.lock) {
+                File.createTempFile("menu-capture-", ".jpg", directory).also {
+                    OwnerMenuCaptureGuard.livePaths.add(it.absolutePath)
+                }
+            }
             val uri = FileProvider.getUriForFile(context,
                 "${context.packageName}.owner.camera.provider", file)
             pendingCapturePath = file.absolutePath
             camera.launch(uri)
         } catch (e: Exception) {
-            pendingCapturePath?.let { File(it).delete() }
+            pendingCapturePath?.let { path ->
+                synchronized(OwnerMenuCaptureGuard.lock) {
+                    File(path).delete()
+                    OwnerMenuCaptureGuard.livePaths.remove(path)
+                }
+            }
             pendingCapturePath = null
             error = "카메라를 열지 못했어요. 갤러리에서 선택하거나 다시 시도해 주세요."
         }
@@ -407,7 +448,12 @@ internal fun OwnerMenuPhotoSelectionScreen(
         }.toSet()
         // Submitted imports (including failed ones) retain their original copies.
         photos.filter {it.uri !in retained}.forEach(store::delete)
-        pendingCapturePath?.let {File(it).delete()}
+        pendingCapturePath?.let { path ->
+            synchronized(OwnerMenuCaptureGuard.lock) {
+                File(path).delete()
+                OwnerMenuCaptureGuard.livePaths.remove(path)
+            }
+        }
         pendingCapturePath=null
         entries=emptyList()
         onBack()
