@@ -157,7 +157,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     line.kind==MockLineKind.PRODUCT &&
                         line.decision?.kind !in listOf(
                             MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT) &&
-                        if(screen=="existing")known else !known
+                        (if(screen=="existing")known else !known)
                 }
                 if(subset.isEmpty())Text("해당하는 메뉴가 없어요.",color=V4Color.sub)
                 subset.forEach{entry->
@@ -274,11 +274,15 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 var alcohol by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.abvPercent?.toString().orEmpty())
                 }
+                var displayOverride by rememberSaveable(line.extractedItemId) {
+                    mutableStateOf(line.decision?.displayNameOverride.orEmpty())
+                }
                 var subtype by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.otherAlcoholKind.orEmpty())
                 }
                 if(screen=="new") St8Card {
                     St8Field("상품 이름",name,{name=it})
+                    St8Field("매장 표시명 (선택)",displayOverride,{displayOverride=it})
                     St8Field("브랜드",brand,{brand=it;brandId=null})
                     s.brands.filter { brand.isNotBlank() &&
                         it.name.contains(brand,ignoreCase=true) }.take(5).forEach { existing ->
@@ -364,7 +368,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             MockDecisionKind.SELECT_PRODUCT,productId=selectedProductId ?: line.decision?.productId,
                             correctedOptions=resolved)
                         else MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
-                            correctedOptions=resolved,newProduct=MockNewProductDraft(
+                            correctedOptions=resolved,displayNameOverride=displayOverride.trim().ifBlank{null},
+                            newProduct=MockNewProductDraft(
                                 name=name.trim(),brandId=brandId,brandName=if(brandId==null)brand.trim() else null,
                                 category=chosenCategory,
                                 ageYears=if(noAge)null else age.toIntOrNull(),
