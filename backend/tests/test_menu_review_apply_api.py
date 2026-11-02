@@ -15,9 +15,10 @@ from app.models import (
     MenuEntryOption,
     MenuImport,
     MenuImportChange,
+    Product,
     ReviewStatus,
 )
-from app.services import menu_review_apply
+from app.services import menu_review_apply, serializable
 from tests.factories import make_bar
 from tests.review_support import JPEG, make_glenfiddich, upload_sample_review, valid_body
 
@@ -346,18 +347,27 @@ def conflict_error():
     return OperationalError("UPDATE ...", {}, _SerializationFailure())
 
 
+def test_a_temporary_operator_without_a_users_row_creates_catalog_rows_without_a_creator(
+    client, db_session, sample, operator, glenfiddich
+):
+    applied(client, sample, valid_body(sample, glenfiddich), operator)
+
+    created = db_session.scalar(select(Product).where(Product.created_from_extracted_item_id == sample.items[3].id))
+    assert (created.created_by_user_id, created.brand.created_by_user_id) == (None, None)
+
+
 def test_serialization_failures_are_retried(client, sample, operator, glenfiddich, monkeypatch):
     real = menu_review_apply._apply_once
     calls = []
 
-    def flaky(session, menu_import_id, request):
+    def flaky(session, menu_import_id, request, principal):
         calls.append(1)
         if len(calls) == 1:
             raise conflict_error()
-        return real(session, menu_import_id, request)
+        return real(session, menu_import_id, request, principal)
 
     monkeypatch.setattr(menu_review_apply, "_apply_once", flaky)
-    monkeypatch.setattr(menu_review_apply, "sleep", lambda seconds: None)
+    monkeypatch.setattr(serializable, "sleep", lambda seconds: None)
 
     applied(client, sample, valid_body(sample, glenfiddich), operator)
 
@@ -367,12 +377,12 @@ def test_serialization_failures_are_retried(client, sample, operator, glenfiddic
 def test_repeated_conflicts_are_503(client, sample, operator, glenfiddich, monkeypatch):
     calls = []
 
-    def always(session, menu_import_id, request):
+    def always(session, menu_import_id, request, principal):
         calls.append(1)
         raise conflict_error()
 
     monkeypatch.setattr(menu_review_apply, "_apply_once", always)
-    monkeypatch.setattr(menu_review_apply, "sleep", lambda seconds: None)
+    monkeypatch.setattr(serializable, "sleep", lambda seconds: None)
 
     response = submit(client, sample.menu_import.id, valid_body(sample, glenfiddich), operator)
 

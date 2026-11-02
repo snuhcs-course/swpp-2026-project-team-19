@@ -147,7 +147,7 @@ def sample(client, db_session, image_storage, operator, glenfiddich):
 
 def publish(db_session, sample, body):
     review = validate_review(db_session, sample.menu_import, ReviewAndApplyRequest.model_validate(body))
-    catalog = create_catalog_entries(db_session, sample.menu_import, review)
+    catalog = create_catalog_entries(db_session, sample.menu_import, review, created_by_user_id=None)
     board, result = review_plan(db_session, sample.bar.id, sample.menu_import.mode, review, catalog)
     write_board(db_session, board, sample.bar.id, sample.menu_import.id, result.entries)
     db_session.expire_all()

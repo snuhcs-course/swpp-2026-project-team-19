@@ -1,5 +1,6 @@
-"""Catalog rows created by a review submission (flow doc, chapter 16): new brands, new
-products, and the aliases the reviewer confirmed. Runs inside the apply transaction.
+"""Catalog rows created by a review submission (flow doc, chapter 16) or a manual menu add
+(API spec 3.14.3): new brands, new products, and their aliases. Runs inside the caller's
+transaction, and records the user who asked for them.
 
 Before creating anything the database is checked again for the same brand or product,
 since another review may have created it after this one's candidates were made:
@@ -10,9 +11,10 @@ since another review may have created it after this one's candidates were made:
   a product has the same brand, category, age and normalized edition. Inactive products
   count too, so a product is never created twice.
 
-A match with an existing row is a 409 for the reviewer to pick the existing entry. A match
+A match with an existing row is a 409 for the caller to pick the existing entry. A match
 with a row this submission created earlier (two lines of one new product, two products of
-one new brand) reuses that row, since the reviewer had no way to select it.
+one new brand) reuses that row, since the reviewer had no way to select it. A manual add
+creates one product, so only a review can reuse a row.
 """
 
 from dataclasses import dataclass, field
@@ -25,8 +27,15 @@ from sqlalchemy.orm import Session
 from app.core.errors import ApiError
 from app.core.normalize import normalize
 from app.models import Brand, BrandAlias, MenuImport, Product, ProductAlias
-from app.schemas.menu_review import CreateProduct, NewBrand, ProductAliasInput, SelectExistingProduct
-from app.services.menu_review_validation import ReviewedItem, ValidatedReview
+from app.schemas.menu_review import (
+    BrandDecision,
+    CreateProduct,
+    NewBrand,
+    NewProduct,
+    ProductAliasInput,
+    SelectExistingProduct,
+)
+from app.services.menu_review_validation import ValidatedReview
 
 
 @dataclass
@@ -45,8 +54,8 @@ def _brand_names(decision: NewBrand) -> set[str]:
     return {normalize(decision.canonicalName), *(normalize(a.aliasText) for a in decision.aliases)}
 
 
-def _product_names(decision: CreateProduct) -> set[str]:
-    return {normalize(decision.product.displayName), *(normalize(a.aliasText) for a in decision.aliases)}
+def _product_names(product: NewProduct, aliases: list[ProductAliasInput]) -> set[str]:
+    return {normalize(product.displayName), *(normalize(a.aliasText) for a in aliases)}
 
 
 def _same_edition(a: str | None, b: str | None) -> bool:
@@ -54,10 +63,9 @@ def _same_edition(a: str | None, b: str | None) -> bool:
 
 
 class _CatalogWriter:
-    def __init__(self, session: Session, menu_import: MenuImport) -> None:
+    def __init__(self, session: Session, created_by_user_id: UUID | None) -> None:
         self.session = session
-        self.menu_import = menu_import
-        self.result = CatalogResult()
+        self.created_by_user_id = created_by_user_id
         self.created_brand_ids: set[UUID] = set()
         self.created_product_ids: set[UUID] = set()
 
@@ -72,8 +80,9 @@ class _CatalogWriter:
         )
         return self.session.scalars(query).first()
 
-    def _find_product(self, decision: CreateProduct, brand_id: UUID) -> Product | None:
-        by_alias = select(ProductAlias.product_id).where(ProductAlias.normalized_alias.in_(_product_names(decision)))
+    def _find_product(self, product: NewProduct, aliases: list[ProductAliasInput], brand_id: UUID) -> Product | None:
+        names = _product_names(product, aliases)
+        by_alias = select(ProductAlias.product_id).where(ProductAlias.normalized_alias.in_(names))
         found = self.session.scalars(
             select(Product).where(Product.id.in_(by_alias)).order_by(Product.display_name, Product.id)
         ).first()
@@ -83,33 +92,29 @@ class _CatalogWriter:
             select(Product)
             .where(
                 Product.brand_id == brand_id,
-                Product.category == decision.product.category,
-                Product.age_years.is_not_distinct_from(decision.product.ageYears),
+                Product.category == product.category,
+                Product.age_years.is_not_distinct_from(product.ageYears),
             )
             .order_by(Product.display_name, Product.id)
         )
-        return next((p for p in same_attributes if _same_edition(p.edition_name, decision.product.editionName)), None)
+        return next((p for p in same_attributes if _same_edition(p.edition_name, product.editionName)), None)
 
-    def _duplicate_brand(self, entry: ReviewedItem, brand: Brand) -> ApiError:
+    def _duplicate_brand(self, brand: Brand, details: dict) -> ApiError:
         return ApiError(
             409,
             "DUPLICATE_BRAND_FOUND",
             "같은 브랜드가 이미 등록되어 있습니다. 기존 브랜드를 선택해 주세요.",
-            details={
-                "extractedItemId": str(entry.item.id),
-                "existingBrand": {"brandId": str(brand.id), "canonicalName": brand.canonical_name},
-                "reviewUrl": _review_url(self.menu_import),
-            },
+            details={**details, "existingBrand": {"brandId": str(brand.id), "canonicalName": brand.canonical_name}},
         )
 
-    def _duplicate_product(self, entry: ReviewedItem, product: Product) -> ApiError:
+    def _duplicate_product(self, product: Product, details: dict) -> ApiError:
         brand = self.session.get(Brand, product.brand_id)
         return ApiError(
             409,
             "DUPLICATE_PRODUCT_FOUND",
             "같은 상품이 이미 등록되어 있습니다. 기존 상품을 선택해 주세요.",
             details={
-                "extractedItemId": str(entry.item.id),
+                **details,
                 "existingProduct": {
                     "productId": str(product.id),
                     "displayName": product.display_name,
@@ -120,7 +125,6 @@ class _CatalogWriter:
                     "editionName": product.edition_name,
                     "isActive": product.is_active,
                 },
-                "reviewUrl": _review_url(self.menu_import),
             },
         )
 
@@ -137,7 +141,7 @@ class _CatalogWriter:
                 )
         self.session.flush()
 
-    def _add_product_aliases(self, product_id: UUID, aliases: list[ProductAliasInput]) -> None:
+    def add_product_aliases(self, product_id: UUID, aliases: list[ProductAliasInput]) -> None:
         existing = set(
             self.session.scalars(select(ProductAlias.normalized_alias).where(ProductAlias.product_id == product_id))
         )
@@ -156,61 +160,91 @@ class _CatalogWriter:
                 )
         self.session.flush()
 
-    def _brand_for(self, entry: ReviewedItem, decision: CreateProduct) -> UUID:
-        if decision.brand.type == "existing":
-            return decision.brand.brandId
-        aliases = [(decision.brand.canonicalName, None), *((a.aliasText, a.languageCode) for a in decision.brand.aliases)]
-        found = self._find_brand(decision.brand)
+    def _brand_for(self, decision: BrandDecision, details: dict) -> UUID:
+        if decision.type == "existing":
+            return decision.brandId
+        aliases = [(decision.canonicalName, None), *((a.aliasText, a.languageCode) for a in decision.aliases)]
+        found = self._find_brand(decision)
         if found is not None:
             if found.id not in self.created_brand_ids:
-                raise self._duplicate_brand(entry, found)
+                raise self._duplicate_brand(found, details)
             self._add_brand_aliases(found.id, aliases)
             return found.id
-        brand = Brand(canonical_name=decision.brand.canonicalName)
+        brand = Brand(canonical_name=decision.canonicalName, created_by_user_id=self.created_by_user_id)
         self.session.add(brand)
         self.session.flush()
         self._add_brand_aliases(brand.id, aliases)
         self.created_brand_ids.add(brand.id)
-        self.result.created_brands += 1
         return brand.id
 
-    def _create_product(self, entry: ReviewedItem, decision: CreateProduct) -> UUID:
-        brand_id = self._brand_for(entry, decision)
-        aliases = [ProductAliasInput(aliasText=decision.product.displayName), *decision.aliases]
-        found = self._find_product(decision, brand_id)
+    def create_product(
+        self,
+        brand: BrandDecision,
+        product: NewProduct,
+        aliases: list[ProductAliasInput],
+        *,
+        details: dict,
+        extracted_item_id: UUID | None = None,
+    ) -> UUID:
+        """The new product's id, or the one this writer already created for the same product.
+        `details` go into a duplicate's 409 next to the existing row."""
+        brand_id = self._brand_for(brand, details)
+        aliases = [ProductAliasInput(aliasText=product.displayName), *aliases]
+        found = self._find_product(product, aliases, brand_id)
         if found is not None:
             if found.id not in self.created_product_ids:
-                raise self._duplicate_product(entry, found)
-            self._add_product_aliases(found.id, aliases)
+                raise self._duplicate_product(found, details)
+            self.add_product_aliases(found.id, aliases)
             return found.id
-        product = Product(
-            category=decision.product.category,
-            display_name=decision.product.displayName,
+        row = Product(
+            category=product.category,
+            display_name=product.displayName,
             brand_id=brand_id,
-            age_years=decision.product.ageYears,
-            edition_name=decision.product.editionName,
-            abv=Decimal(str(decision.product.abv)) if decision.product.abv is not None else None,
+            age_years=product.ageYears,
+            edition_name=product.editionName,
+            abv=Decimal(str(product.abv)) if product.abv is not None else None,
             is_active=True,
-            created_from_extracted_item_id=entry.item.id,
+            created_from_extracted_item_id=extracted_item_id,
+            created_by_user_id=self.created_by_user_id,
         )
-        self.session.add(product)
+        self.session.add(row)
         self.session.flush()
-        self._add_product_aliases(product.id, aliases)
-        self.created_product_ids.add(product.id)
-        self.result.created_products += 1
-        return product.id
-
-    def run(self, review: ValidatedReview) -> CatalogResult:
-        for entry in review.items:
-            decision = entry.decision
-            if isinstance(decision, SelectExistingProduct):
-                self._add_product_aliases(decision.productId, decision.aliasesToAdd)
-                self.result.product_ids[entry.item.id] = decision.productId
-            elif isinstance(decision, CreateProduct):
-                self.result.product_ids[entry.item.id] = self._create_product(entry, decision)
-        return self.result
+        self.add_product_aliases(row.id, aliases)
+        self.created_product_ids.add(row.id)
+        return row.id
 
 
-def create_catalog_entries(session: Session, menu_import: MenuImport, review: ValidatedReview) -> CatalogResult:
+def create_catalog_entries(
+    session: Session, menu_import: MenuImport, review: ValidatedReview, *, created_by_user_id: UUID | None
+) -> CatalogResult:
     """Create the brands, products and aliases a validated review asks for, in menu order."""
-    return _CatalogWriter(session, menu_import).run(review)
+    writer = _CatalogWriter(session, created_by_user_id)
+    result = CatalogResult()
+    for entry in review.items:
+        decision = entry.decision
+        if isinstance(decision, SelectExistingProduct):
+            writer.add_product_aliases(decision.productId, decision.aliasesToAdd)
+            result.product_ids[entry.item.id] = decision.productId
+        elif isinstance(decision, CreateProduct):
+            result.product_ids[entry.item.id] = writer.create_product(
+                decision.brand,
+                decision.product,
+                decision.aliases,
+                details={"extractedItemId": str(entry.item.id), "reviewUrl": _review_url(menu_import)},
+                extracted_item_id=entry.item.id,
+            )
+    result.created_brands = len(writer.created_brand_ids)
+    result.created_products = len(writer.created_product_ids)
+    return result
+
+
+def create_new_product(
+    session: Session,
+    brand: BrandDecision,
+    product: NewProduct,
+    aliases: list[ProductAliasInput],
+    *,
+    created_by_user_id: UUID | None,
+) -> UUID:
+    """A manual add's new product (API spec 3.14.3). A duplicate's 409 has no review fields."""
+    return _CatalogWriter(session, created_by_user_id).create_product(brand, product, aliases, details={})

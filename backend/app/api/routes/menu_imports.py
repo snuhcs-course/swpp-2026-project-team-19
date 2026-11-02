@@ -9,6 +9,7 @@ from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
 from app.api.permissions import require_active_bar_manager, require_import_manager
+from app.core.security import Principal, get_current_user
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
 from app.matching.llm_layer import LLMLayerConfig
 from app.models import Bar, ImportMode
@@ -202,8 +203,9 @@ def submit_menu_review(
     body: ReviewAndApplyRequest,
     session_factory: SessionFactory = Depends(get_serializable_session_factory),
     import_id: UUID = Depends(require_import_manager),
+    principal: Principal = Depends(get_current_user),
 ) -> ReviewAppliedResponse:
-    return review_and_apply(session_factory, import_id, body)
+    return review_and_apply(session_factory, import_id, body, principal)
 
 
 @router.post(

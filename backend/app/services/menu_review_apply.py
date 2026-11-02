@@ -13,21 +13,17 @@ Steps, all rolled back together on any error:
 7. publish the board (menu_publish) and record the applied changes in menu_import_changes
 8. mark the import applied
 
-A serialization failure reruns everything from step 1, up to three attempts in total.
+A serialization failure reruns everything from step 1, up to three attempts in total
+(app.services.serializable).
 """
 
-import logging
-import random
-import time
-from collections.abc import Callable
-from contextlib import AbstractContextManager
 from uuid import UUID
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
+from app.core.security import Principal
 from app.models import (
     Brand,
     ExtractedItem,
@@ -55,17 +51,8 @@ from app.services.menu_draft import build_draft, replace_draft
 from app.services.menu_publish import AppliedChange, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
 from app.services.menu_review_validation import ReviewedItem, ValidatedReview, pending_changes, validate_review
-
-logger = logging.getLogger(__name__)
-
-SessionFactory = Callable[[], AbstractContextManager[Session]]
-
-MAX_ATTEMPTS = 3
-# serialization_failure, deadlock_detected
-RETRYABLE_SQLSTATES = {"40001", "40P01"}
-
-# Replaced in tests so retries do not wait.
-sleep = time.sleep
+from app.services.serializable import SessionFactory, run_serializable, write_conflict
+from app.services.users import caller_user_id
 
 
 def _review_url(menu_import_id: UUID) -> str:
@@ -218,7 +205,9 @@ def _draft_keys(changes) -> set[tuple]:
     return {(c.change_type, c.extracted_item_id, c.bar_menu_item_id) for c in changes}
 
 
-def _apply_once(session: Session, import_id: UUID, request: ReviewAndApplyRequest) -> ReviewAppliedResponse:
+def _apply_once(
+    session: Session, import_id: UUID, request: ReviewAndApplyRequest, principal: Principal
+) -> ReviewAppliedResponse:
     # The route has checked that the import exists; this transaction locks it again.
     menu_import = session.scalar(select(MenuImport).where(MenuImport.id == import_id).with_for_update())
     if menu_import.status == ImportStatus.APPLIED:
@@ -240,7 +229,9 @@ def _apply_once(session: Session, import_id: UUID, request: ReviewAndApplyReques
         raise _outdated(menu_import, request.reviewVersion)
 
     review = validate_review(session, menu_import, request)
-    catalog = create_catalog_entries(session, menu_import, review)
+    catalog = create_catalog_entries(
+        session, menu_import, review, created_by_user_id=caller_user_id(session, principal)
+    )
     for entry in review.items:
         _record_item(entry, catalog)
     board, plan = review_plan(session, menu_import.bar_id, menu_import.mode, review, catalog)
@@ -254,32 +245,15 @@ def _apply_once(session: Session, import_id: UUID, request: ReviewAndApplyReques
     return applied_response(session, menu_import)
 
 
-def _is_retryable(error: DBAPIError) -> bool:
-    return getattr(error.orig, "sqlstate", None) in RETRYABLE_SQLSTATES
-
-
 def review_and_apply(
-    session_factory: SessionFactory, import_id: UUID, request: ReviewAndApplyRequest
+    session_factory: SessionFactory, import_id: UUID, request: ReviewAndApplyRequest, principal: Principal
 ) -> ReviewAppliedResponse:
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        with session_factory() as session:
-            try:
-                response = _apply_once(session, import_id, request)
-                session.commit()
-                return response
-            except DBAPIError as error:
-                session.rollback()
-                if not _is_retryable(error):
-                    raise
-                logger.info("review-and-apply %s: write conflict, attempt %d", import_id, attempt)
-            except BaseException:
-                session.rollback()
-                raise
-        if attempt < MAX_ATTEMPTS:
-            sleep(random.uniform(0.05, 0.2) * attempt)
-    raise ApiError(
-        503,
-        "TEMPORARY_WRITE_CONFLICT",
-        "다른 요청과 동시에 처리되어 반영하지 못했습니다. 잠시 후 다시 제출해 주세요.",
-        details={"menuImportId": str(import_id)},
+    return run_serializable(
+        session_factory,
+        lambda session: _apply_once(session, import_id, request, principal),
+        label=f"review-and-apply {import_id}",
+        conflict=write_conflict(
+            "다른 요청과 동시에 처리되어 반영하지 못했습니다. 잠시 후 다시 제출해 주세요.",
+            details={"menuImportId": str(import_id)},
+        ),
     )
