@@ -53,6 +53,8 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun finishPhotoImport(id: String, source: MockPhotoExtractionSource): MockImportStatus =
         repository.finishPhotoImport(id, source)
     fun cancelPhotoImport(id: String) = repository.cancelPhotoImport(id)
+    fun discardPhotoImport(id: String) = repository.discardPhotoImport(id)
+    fun resetPhotoReview(id: String, version: Int) = repository.resetPhotoReview(id, version)
     fun retryFailedPhotoImport(id: String): String = repository.retryFailedPhotoImport(id)
     fun importPhotos(barId: String, uris: List<String>, source: MockPhotoExtractionSource): String =
         repository.startPhotoImport(barId, uris, source)
