@@ -60,12 +60,35 @@ internal fun removeAbandonedOwnerCaptures(dir: File, protectedPaths: Set<String>
             file.delete()
     }
 
+/** Prevent recovery from racing a camera destination created in the same process. */
+internal object OwnerMenuCaptureGuard {
+    val lock = Any()
+    val livePaths = mutableSetOf<String>()
+}
+
+/** Reconcile only completed private copies from a prior interrupted process.
+ * The caller supplies saved picker entries and ALL repository import references.
+ */
+internal fun removeUnreferencedOwnerPhotoFiles(
+    dir: File, retainedPaths: Set<String>, activePaths: Set<String> = emptySet(),
+): Int {
+    val finalPhotoName = Regex("[0-9a-fA-F-]{36}\\.(jpg|png)")
+    return dir.listFiles().orEmpty().count { file ->
+        file.isFile && finalPhotoName.matches(file.name) &&
+            file.absolutePath !in retainedPaths && file.absolutePath !in activePaths &&
+            file.delete()
+    }
+}
+
 internal class OwnerMenuPhotoStore(context: Context) {
     private companion object {
         // Shared by store instances in this process so a screen re-entry cannot
         // delete another coroutine's in-progress image normalization.
         val tempLock = Any()
         val inFlightPaths = mutableSetOf<String>()
+        // Protect newly completed batches from a second screen created while
+        // the composing coroutine is still committing its saved picker entries.
+        val producedThisProcess = mutableSetOf<String>()
     }
     private val app = context.applicationContext
     private val dir = File(app.noBackupFilesDir, "owner-menu-photo-drafts").apply {
@@ -84,6 +107,16 @@ internal class OwnerMenuPhotoStore(context: Context) {
     } catch (_: Exception) { false }
 
     fun size(photo: MockPhoto): Long = fileFor(photo).length()
+
+    /** Only call after the persisted repository snapshot and picker state load. */
+    fun pruneUnreferencedCopies(retained: List<MockPhoto>): Int {
+        val referenced = retained.mapNotNull {
+            runCatching { fileFor(it).absolutePath }.getOrNull()
+        }.toSet()
+        return synchronized(tempLock) {
+            removeUnreferencedOwnerPhotoFiles(dir,referenced,producedThisProcess + inFlightPaths)
+        }
+    }
 
     /** HEIC/HEIF is an Android picker input type, not an upload format.
      * The app stores only re-encoded JPEG, bounded to 4096px on the long edge.
@@ -250,7 +283,10 @@ internal class OwnerMenuPhotoStore(context: Context) {
                     "전체 사진은 60MB 이하여야 해요."
                 }
                 val stored = File(dir, "$photoId.${if (resultingType == "image/png") "png" else "jpg"}")
-                require(temp.renameTo(stored)) { "사진을 보관하지 못했어요." }
+                synchronized(tempLock) {
+                    require(temp.renameTo(stored)) { "사진을 보관하지 못했어요." }
+                    producedThisProcess += stored.absolutePath
+                }
                 created += stored
                 created.remove(temp)
                 total += length
@@ -268,12 +304,21 @@ internal class OwnerMenuPhotoStore(context: Context) {
             // images from the same selection. Earlier selected photos survive.
             if (!completed) created.forEach { it.delete() }
             else created.filter { it.extension == "part" }.forEach { it.delete() }
-            synchronized(tempLock) { inFlightPaths.removeAll(claimedTempPaths) }
+            synchronized(tempLock) {
+                if(!completed)producedThisProcess.removeAll(created.map {it.absolutePath}.toSet())
+                inFlightPaths.removeAll(claimedTempPaths)
+            }
         }
     }
 
     fun delete(photo: MockPhoto) {
-        runCatching { fileFor(photo).delete() }
+        runCatching {
+            val file=fileFor(photo)
+            synchronized(tempLock) {
+                file.delete()
+                producedThisProcess.remove(file.absolutePath)
+            }
+        }
     }
 
     fun preview(photo: MockPhoto, size: Int = 320): android.graphics.Bitmap? {
