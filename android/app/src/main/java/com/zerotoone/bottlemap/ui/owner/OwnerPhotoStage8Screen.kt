@@ -1212,35 +1212,42 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             MockPhoto(photo.imageId,photo.sourceUri,MockPhotoKind.MENU_CAPTURE)
         )?.asImageBitmap()}.getOrNull()
     }
-    Dialog(onDismissRequest=dismiss) {
-        Column(Modifier.fillMaxWidth().background(V4Color.surface,
-            RoundedCornerShape(15.dp)).padding(12.dp),
-            verticalArrangement=Arrangement.spacedBy(7.dp)) {
-            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
-                verticalAlignment=Alignment.CenterVertically) {
+    Dialog(onDismissRequest=dismiss,
+        properties=DialogProperties(usePlatformDefaultWidth=false)) {
+        BoxWithConstraints(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) {
+            val ratio=bitmap?.let{it.width.toFloat()/it.height.toFloat()} ?: 1f
+            val availableHeight=(maxHeight-160.dp).coerceAtLeast(160.dp)
+            val imageWidth=if(bitmap==null)220.dp else
+                minOf(maxWidth-58.dp,availableHeight*ratio)
+            val imageHeight=if(bitmap==null)100.dp else imageWidth/ratio
+            Column(Modifier.width(imageWidth+24.dp)
+                .background(V4Color.surface,RoundedCornerShape(15.dp))
+                .padding(horizontal=12.dp,vertical=11.dp),
+                horizontalAlignment=Alignment.CenterHorizontally,
+                verticalArrangement=Arrangement.spacedBy(11.dp)) {
                 Text("원본 사진 보기",color=V4Color.text,fontSize=15.sp,
-                    fontWeight=FontWeight.Bold)
-                TextButton(onClick=dismiss,contentPadding=PaddingValues(horizontal=8.dp)) {
-                    Text("닫기",color=V4Color.primary)
-                }
-            }
-            if(bitmap==null) Text("원본 사진을 열 수 없어요.",color=V4Color.sub)
-            else BoxWithConstraints(Modifier.fillMaxWidth(),
-                contentAlignment=Alignment.Center) {
-                val ratio=bitmap.width.toFloat()/bitmap.height.toFloat()
-                val shownHeight=(maxWidth/ratio).coerceAtMost(290.dp)
-                val shownWidth=shownHeight*ratio
-                Box(Modifier.size(shownWidth,shownHeight)) {
-                    Image(bitmap,contentDescription="원본 메뉴판",modifier=Modifier.fillMaxSize(),
-                        contentScale=ContentScale.FillBounds)
-                    if(box!=null && box.size==4)Canvas(Modifier.fillMaxSize()) {
-                        drawRect(Color(0xFFFFBC74),
-                            topLeft=Offset(size.width*box[0]/1000f,
-                                size.height*box[1]/1000f),
-                            size=Size(size.width*(box[2]-box[0])/1000f,
-                                size.height*(box[3]-box[1])/1000f),
-                            style=Stroke(width=3.dp.toPx()))
+                    fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
+                if(bitmap==null) {
+                    Box(Modifier.size(imageWidth,imageHeight),
+                        contentAlignment=Alignment.Center) {
+                        Text("원본 사진을 열 수 없어요.",color=V4Color.sub)
                     }
+                } else {
+                    Box(Modifier.size(imageWidth,imageHeight)) {
+                        Image(bitmap,contentDescription="원본 메뉴판",
+                            modifier=Modifier.fillMaxSize(),contentScale=ContentScale.FillBounds)
+                        if(box!=null && box.size==4)Canvas(Modifier.fillMaxSize()) {
+                            drawRect(Color(0xFFFFBC74),
+                                topLeft=Offset(size.width*box[0]/1000f,
+                                    size.height*box[1]/1000f),
+                                size=Size(size.width*(box[2]-box[0])/1000f,
+                                    size.height*(box[3]-box[1])/1000f),
+                                style=Stroke(width=3.dp.toPx()))
+                        }
+                    }
+                }
+                TextButton(onClick=dismiss) {
+                    Text("닫기",color=V4Color.sub,fontSize=14.sp)
                 }
             }
         }
