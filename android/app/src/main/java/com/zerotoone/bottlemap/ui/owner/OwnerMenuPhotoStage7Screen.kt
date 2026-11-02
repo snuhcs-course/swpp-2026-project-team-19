@@ -278,6 +278,47 @@ internal fun MenuPhotoProcessingIllustration(diameter: androidx.compose.ui.unit.
             width = 2f * scale, cap = StrokeCap.Round, join = StrokeJoin.Round))
     }
 }
+/** Identical PR96 photo source popup, shared with first registration. */
+@Composable internal fun OwnerMenuPhotoSourceDialog(
+    onDismiss:()->Unit,onCamera:()->Unit,onGallery:()->Unit
+) {
+    Dialog(onDismissRequest=onDismiss,
+                properties=DialogProperties(usePlatformDefaultWidth=false)) {
+                Column(Modifier.fillMaxWidth(0.92f)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh,
+                        RoundedCornerShape(12.dp))
+                    .padding(horizontal=15.dp,vertical=14.dp),
+                    verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                    Text("사진을 어떻게 추가할까요?",
+                        style=MaterialTheme.typography.headlineSmall,
+                        color=MaterialTheme.colorScheme.onSurface)
+                    HorizontalDivider(color=V4Color.line)
+                    Row(Modifier.fillMaxWidth().height(97.dp)) {
+                        Column(Modifier.weight(1f).fillMaxHeight()
+                            .ownerQuietClick {
+                                onCamera()
+                            }.testTag("stage7-source-camera"),
+                            verticalArrangement=Arrangement.Center,
+                            horizontalAlignment=Alignment.CenterHorizontally) {
+                            MenuPhotoSourceCameraIcon()
+                            Spacer(Modifier.height(7.dp))
+                            Text("카메라",color=V4Color.primary,fontSize=14.sp)
+                        }
+                        Column(Modifier.weight(1f).fillMaxHeight()
+                            .ownerQuietClick {
+                                onGallery()
+                            }.testTag("stage7-source-gallery"),
+                            verticalArrangement=Arrangement.Center,
+                            horizontalAlignment=Alignment.CenterHorizontally) {
+                            MenuPhotoSourceGalleryIcon()
+                            Spacer(Modifier.height(7.dp))
+                            Text("갤러리",color=V4Color.primary,fontSize=14.sp)
+                        }
+                    }
+                }
+            }
+}
+
 @Composable
 internal fun OwnerMenuPhotoSelectionScreen(
     state: MockOwnerLoadState,
@@ -462,46 +503,15 @@ internal fun OwnerMenuPhotoSelectionScreen(
         onBack()
     }
     BackHandler(enabled=busy || photos.isNotEmpty()) {leavePicker()}
-    if(chooseSource) {
-        Dialog(onDismissRequest={chooseSource=false},
-            properties=DialogProperties(usePlatformDefaultWidth=false)) {
-            Column(Modifier.fillMaxWidth(0.92f)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh,
-                    RoundedCornerShape(12.dp))
-                .padding(horizontal=15.dp,vertical=14.dp),
-                verticalArrangement=Arrangement.spacedBy(8.dp)) {
-                Text("사진을 어떻게 추가할까요?",
-                    style=MaterialTheme.typography.headlineSmall,
-                    color=MaterialTheme.colorScheme.onSurface)
-                HorizontalDivider(color=V4Color.line)
-                Row(Modifier.fillMaxWidth().height(97.dp)) {
-                    Column(Modifier.weight(1f).fillMaxHeight()
-                        .ownerQuietClick {
-                            chooseSource=false
-                            takePhoto()
-                        }.testTag("stage7-source-camera"),
-                        verticalArrangement=Arrangement.Center,
-                        horizontalAlignment=Alignment.CenterHorizontally) {
-                        MenuPhotoSourceCameraIcon()
-                        Spacer(Modifier.height(7.dp))
-                        Text("카메라",color=V4Color.primary,fontSize=14.sp)
-                    }
-                    Column(Modifier.weight(1f).fillMaxHeight()
-                        .ownerQuietClick {
-                            chooseSource=false
-                            picker.launch(PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly))
-                        }.testTag("stage7-source-gallery"),
-                        verticalArrangement=Arrangement.Center,
-                        horizontalAlignment=Alignment.CenterHorizontally) {
-                        MenuPhotoSourceGalleryIcon()
-                        Spacer(Modifier.height(7.dp))
-                        Text("갤러리",color=V4Color.primary,fontSize=14.sp)
-                    }
-                }
-            }
+    if(chooseSource) OwnerMenuPhotoSourceDialog(
+        onDismiss={chooseSource=false},
+        onCamera={chooseSource=false;takePhoto()},
+        onGallery={
+            chooseSource=false
+            picker.launch(PickVisualMediaRequest(
+                ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
-    }
+    )
     val valid = photos.isNotEmpty() && photos.size <= OWNER_MENU_MAX_PHOTOS &&
         photos.all(store::isReadable) &&
         validateMenuPhotoSizes(photos.map(store::size)) == null
