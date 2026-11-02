@@ -27,6 +27,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -235,25 +238,30 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             fontSize=14.sp,modifier=Modifier.align(Alignment.Center))
     }
 }
-@Composable private fun St8ReviewPager(
-    index:Int, total:Int, remaining:Int, previous:()->Unit,next:()->Unit,
-    onLater:()->Unit
-) {
-    HorizontalDivider(color=V4Color.line,modifier=Modifier.padding(top=3.dp))
-    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
-        verticalAlignment=Alignment.CenterVertically) {
-        if(index>0) TextButton(onClick=previous) {
-            Text("‹ 이전",color=V4Color.text)
-        } else Spacer(Modifier.width(61.dp))
-        Box(Modifier.border(1.dp,V4Color.primary,RoundedCornerShape(100))
-            .clickable(onClick=onLater)
-            .padding(horizontal=12.dp,vertical=7.dp)) {
-            Text("나중에 하기",color=V4Color.primary,fontWeight=FontWeight.Bold,
-                fontSize=13.sp)
+/** Exit an in-progress photo review without modifying any review decision. */
+@Composable private fun St8ReviewHome(onLater:()->Unit) {
+    Box(Modifier.size(38.dp).testTag("stage8-review-home")
+        .semantics { contentDescription="나중에 하기 · 메뉴 관리로" }
+        .clickable(onClick=onLater),contentAlignment=Alignment.BottomCenter) {
+        Canvas(Modifier.size(31.dp)) {
+            val u=size.width/24f
+            val home=Path().apply {
+                moveTo(3f*u,11f*u)
+                lineTo(12f*u,3.5f*u)
+                lineTo(21f*u,11f*u)
+                moveTo(5.5f*u,10f*u)
+                lineTo(5.5f*u,21f*u)
+                lineTo(18.5f*u,21f*u)
+                lineTo(18.5f*u,10f*u)
+                moveTo(10f*u,21f*u)
+                lineTo(10f*u,14f*u)
+                lineTo(14f*u,14f*u)
+                lineTo(14f*u,21f*u)
+            }
+            drawPath(home,V4Color.primary,style=Stroke(
+                width=1.9f*u,cap=androidx.compose.ui.graphics.StrokeCap.Round,
+                join=androidx.compose.ui.graphics.StrokeJoin.Round))
         }
-        if(index<total-1) TextButton(onClick=next) {
-            Text("다음 ›",color=V4Color.text)
-        } else Spacer(Modifier.width(61.dp))
     }
 }
 @Composable private fun St8Bottle() {
@@ -270,15 +278,20 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 }
 @Composable private fun St8RecognizedStrip(photo: MockPhotoExtraction, line: MockExtractedLine,
-    defaultPourMl: Int?=null, onPhoto: ()->Unit) {
+    defaultPourMl: Int?=null, onLater:()->Unit, onPhoto: ()->Unit) {
     val price=line.decision?.correctedOptions?.firstOrNull()?.priceKrw
         ?:line.options.firstOrNull()?.priceKrw
     val pour=line.decision?.correctedOptions?.firstOrNull()?.pourMl
         ?:line.options.firstOrNull()?.pourMl ?: defaultPourMl
     val ordinal=listOf("첫째","둘째","셋째","넷째","다섯째","여섯째","일곱째")
     val photoRow=photo.lines.indexOfFirst { it.extractedItemId==line.extractedItemId }
-    Text("메뉴판 ${photo.imageOrder} · ${ordinal.getOrElse(photoRow){(photoRow+1).toString()+"번째"}} 줄",
-        color=V4Color.sub,fontSize=12.sp)
+    Row(Modifier.fillMaxWidth().height(38.dp),
+        verticalAlignment=Alignment.Bottom,horizontalArrangement=Arrangement.SpaceBetween) {
+        Text("메뉴판 ${photo.imageOrder} · ${ordinal.getOrElse(photoRow){(photoRow+1).toString()+"번째"}} 줄",
+            modifier=Modifier.weight(1f).padding(bottom=1.dp),
+            color=V4Color.sub,fontSize=12.sp)
+        St8ReviewHome(onLater)
+    }
     Row(Modifier.fillMaxWidth().heightIn(min=50.dp).background(Color(0xFFE7DDCB),
         RoundedCornerShape(9.dp)).padding(horizontal=16.dp,vertical=10.dp),
         verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(6.dp)) {
@@ -316,7 +329,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     val all=job?.images?.flatMap { photo ->
         photo.lines.filter{it.kind!=MockLineKind.NON_PRODUCT}.map { photo to it }
     }.orEmpty()
-    val reviewPositions=all.indices.filter {!all[it].second.mockAutoAccepted}
     val counts=if(job!=null && s!=null)stage8Counts(job,s) else null
     val focusManager=LocalFocusManager.current
     val keyboardController=LocalSoftwareKeyboardController.current
@@ -347,15 +359,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     fun visitLine(target:Int) {
         all.getOrNull(target)?.second?.takeUnless {it.mockAutoAccepted}
             ?.let {visit(stage8ReviewDestination(it),target)}
-    }
-    fun pageIndex()=reviewPositions.indexOf(position)
-    fun previousPage() {
-        val i=pageIndex()
-        if(i>0)visitLine(reviewPositions[i-1])
-    }
-    fun followingPage() {
-        val i=pageIndex()
-        if(i>=0 && i<reviewPositions.lastIndex)visitLine(reviewPositions[i+1])
     }
     fun backPage() {
         val last=pageHistory.lastOrNull()
@@ -622,7 +625,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             } else if(screen=="line" && pair!=null) {
                 val (photo,line)=pair
                 var openPhoto by remember {mutableStateOf(false)}
-                St8RecognizedStrip(photo,line){openPhoto=true}
+                St8RecognizedStrip(photo,line,onLater=onHome){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 var categoryPopup by remember {mutableStateOf(false)}
                 St8ReviewHeading(
@@ -682,7 +685,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 val line=pair.second
                 var categoryPicker by remember {mutableStateOf(false)}
                 var photoOpen by remember {mutableStateOf(false)}
-                St8RecognizedStrip(pair.first,line){photoOpen=true}
+                St8RecognizedStrip(pair.first,line,onLater=onHome){photoOpen=true}
                 if(photoOpen)Stage8SourcePhoto(pair.first,line.sourceBox){photoOpen=false}
                 St8ReviewHeading(
                     if(screen=="edit")"가격과 용량을 확인해 주세요" else "새로 등록할게요"
@@ -904,7 +907,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 val (photo,line)=pair
                 var openPhoto by remember {mutableStateOf(false)}
                 St8RecognizedStrip(photo,line,
-                    s.bars.firstOrNull{it.barId==barId}?.defaultPourMl){openPhoto=true}
+                    defaultPourMl=s.bars.firstOrNull{it.barId==barId}?.defaultPourMl,
+                    onLater=onHome){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 St8ReviewHeading("가격을 못 읽었어요") {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
@@ -1133,6 +1137,16 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             }
             error?.let{Text(it,color=Color(0xFFFFB4AB),fontSize=12.sp)}
         }
+        // Item pages use the source-header home icon for "나중에 하기".
+        // Do not allocate an empty bottom bar under New/Product/Price screens.
+        if(screen !in listOf("price","edit","new") &&
+            (screen!="line" || pair?.second?.let { line ->
+                line.kind==MockLineKind.NON_PRODUCT ||
+                (listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
+                    .distinct().count { id ->
+                        s.products.any {it.productId==id && it.isActive}
+                    }==1
+            }==true))
         Column(Modifier.fillMaxWidth().navigationBarsPadding().imePadding()
             .padding(horizontal=19.dp,vertical=12.dp),
             verticalArrangement=Arrangement.spacedBy(7.dp)) {
@@ -1184,13 +1198,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             }
                         }
                     }
-                    St8ReviewPager(pageIndex(),reviewPositions.size,counts!!.remaining,
-                    previous={previousPage()},next={followingPage()},onLater=onHome)
                 }
-                "price"->St8ReviewPager(pageIndex(),reviewPositions.size,counts!!.remaining,
-                    previous={previousPage()},next={followingPage()},onLater=onHome)
-                "edit","new"->St8ReviewPager(pageIndex(),reviewPositions.size,counts!!.remaining,
-                    previous={previousPage()},next={followingPage()},onLater=onHome)
                 "incomplete"->{
                     St8Button("${counts!!.remaining}줄 이어서 확인",enabled=counts.remaining>0){
                         val pos=all.indexOfFirst {it.second.decision==null}
