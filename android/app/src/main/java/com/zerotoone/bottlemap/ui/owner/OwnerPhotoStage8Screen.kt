@@ -83,6 +83,9 @@ internal fun stage8Counts(job: MockMenuImport, s: MockOwnerSnapshot): Stage8Coun
 internal fun stage8ReviewDestination(line: MockExtractedLine): String = when {
     line.kind == MockLineKind.NON_PRODUCT -> "line"
     line.suggestedProductId == null && line.candidateProductIds.isEmpty() -> "new"
+    // Pick a candidate first; without a confirmed product, price entry cannot be saved.
+    line.suggestedProductId == null && line.candidateProductIds.isNotEmpty() -> "line"
+    line.candidateProductIds.distinct().size > 1 -> "line"
     line.options.isEmpty() || line.options.any { it.priceKrw <= 0 } -> "price"
     else -> "line"
 }
@@ -404,8 +407,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             !available) "catalog" else stage8ReviewDestination(line)
     }
     fun visitLine(target:Int) {
-        all.getOrNull(target)?.second?.takeUnless {it.mockAutoAccepted}
-            ?.let {visit(destinationFor(it),target)}
+        // Even exact fixture matches require an explicit owner decision.
+        all.getOrNull(target)?.second?.let {visit(destinationFor(it),target)}
     }
     fun backPage() {
         val last=pageHistory.lastOrNull()
