@@ -54,7 +54,11 @@ class OwnerPhotoStage7ComposeTest {
         compose.onNodeWithText("사진을 어떻게 추가할까요?").assertExists()
         compose.onNodeWithTag("stage7-source-gallery").assertExists()
         compose.onNodeWithTag("stage7-source-camera").assertExists()
-        compose.onNodeWithText("취소").performClick()
+        compose.onNodeWithText("카메라").assertExists()
+        compose.onNodeWithText("갤러리").assertExists()
+        compose.onNodeWithText("취소").assertDoesNotExist()
+        // Dismissing the dialog via system back does not modify selected photos.
+        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
         compose.onNodeWithText("사진을 어떻게 추가할까요?").assertDoesNotExist()
         compose.onNodeWithText("사진 0장 올리기").assertExists()
         compose.onNodeWithTag("stage7-photo-submit").assertIsNotEnabled()
