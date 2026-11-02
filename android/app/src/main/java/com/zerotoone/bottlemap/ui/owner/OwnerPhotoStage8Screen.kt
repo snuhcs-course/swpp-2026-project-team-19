@@ -216,7 +216,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 }
 @Composable private fun St8RecognizedStrip(photo: MockPhotoExtraction, line: MockExtractedLine,
-    onPhoto: ()->Unit, defaultPourMl: Int?=null) {
+    defaultPourMl: Int?=null, onPhoto: ()->Unit) {
     val price=line.decision?.correctedOptions?.firstOrNull()?.priceKrw
         ?:line.options.firstOrNull()?.priceKrw
     val pour=line.decision?.correctedOptions?.firstOrNull()?.pourMl
@@ -837,8 +837,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 val (photo,line)=pair
                 var openPhoto by remember {mutableStateOf(false)}
                 Text("메뉴판 ${photo.imageOrder} · 가격을 읽지 못한 줄",color=V4Color.sub,fontSize=12.sp)
-                St8RecognizedStrip(photo,line,{openPhoto=true},
-                    s.bars.firstOrNull{it.barId==barId}?.defaultPourMl)
+                St8RecognizedStrip(photo,line,
+                    s.bars.firstOrNull{it.barId==barId}?.defaultPourMl){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 Text("가격을 못 읽었어요",color=V4Color.text,
                     fontSize=24.sp,fontWeight=FontWeight.Bold)
