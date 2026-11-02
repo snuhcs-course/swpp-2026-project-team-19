@@ -687,20 +687,25 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         )?.asImageBitmap()}.getOrNull()
     }
     AlertDialog(onDismissRequest=dismiss,title={Text("원본 사진 보기")},
-        text={if(bitmap==null)Text("사진을 열 수 없어요.")
-            else Box(Modifier.fillMaxWidth().aspectRatio(
-                bitmap.width.toFloat()/bitmap.height.toFloat())){
-                Image(bitmap,contentDescription="원본 메뉴판",modifier=Modifier.fillMaxSize(),
-                    contentScale=ContentScale.FillBounds)
-                if(box!=null && box.size==4)Canvas(Modifier.fillMaxSize()){
-                    drawRect(Color(0xFFFFBC74),
-                        topLeft=androidx.compose.ui.geometry.Offset(
-                            size.width*box[0]/1000f,size.height*box[1]/1000f),
-                        size=androidx.compose.ui.geometry.Size(
-                            size.width*(box[2]-box[0])/1000f,
-                            size.height*(box[3]-box[1])/1000f),
-                        style=Stroke(width=3.dp.toPx()))
+        text={if(bitmap==null)Text("원본 사진을 열 수 없어요.")
+            else BoxWithConstraints(Modifier.fillMaxWidth().height(240.dp),
+                contentAlignment=Alignment.Center) {
+                val ratio=bitmap.width.toFloat()/bitmap.height.toFloat()
+                val shownHeight=if(maxWidth/ratio < 240.dp)maxWidth/ratio else 240.dp
+                val shownWidth=shownHeight*ratio
+                Box(Modifier.size(shownWidth,shownHeight)) {
+                    Image(bitmap,contentDescription="원본 메뉴판",modifier=Modifier.fillMaxSize(),
+                        contentScale=ContentScale.FillBounds)
+                    if(box!=null && box.size==4)Canvas(Modifier.fillMaxSize()){
+                        drawRect(Color(0xFFFFBC74),
+                            topLeft=Offset(size.width*box[0]/1000f,
+                                size.height*box[1]/1000f),
+                            size=Size(size.width*(box[2]-box[0])/1000f,
+                                size.height*(box[3]-box[1])/1000f),
+                            style=Stroke(width=3.dp.toPx()))
+                    }
                 }
             }},
         confirmButton={TextButton(onClick=dismiss){Text("닫기")}})
+
 }
