@@ -50,6 +50,8 @@ class OwnerPhotoStage8Test {
         assertEquals(ids,after.images.flatMap {it.lines.map{line->line.extractedItemId}})
         assertEquals(0,stage8Counts(after,ready(r)).remaining)
         assertEquals(3,stage8Counts(after,ready(r)).reviewed)
+        // Two accepted lines, but only one new bar-menu item will be inserted.
+        assertEquals(1,stage8ExpectedAddedCount(after,ready(r)))
         assertEquals(1,r.publishAddOnly(id,after.reviewVersion))
         val applied=ready(r)
         assertEquals(MockImportStatus.APPLIED,applied.imports.single().status)
