@@ -513,6 +513,64 @@ def test_reset_needs_the_menu_version_field(client, operator, bar):
     assert field_errors(reset(client, bar.id, {}, operator)) == [("menuVersion", "MISSING")]
 
 
+# ---- sold-out (spec 3.14.8): kept while on the board, cleared when the item leaves ----
+
+
+def mark_sold_out(db_session, item_id) -> BarMenuItem:
+    item = db_session.get(BarMenuItem, item_id)
+    item.sold_out_at = NOW
+    db_session.commit()
+    return item
+
+
+def sold_out_at(db_session, item_id):
+    db_session.expire_all()
+    return db_session.get(BarMenuItem, item_id).sold_out_at
+
+
+def test_editing_a_sold_out_item_keeps_it_sold_out(client, db_session, operator, bar, glenfiddich):
+    twelve = item_of(menu_of(client, bar, operator), glenfiddich[12])["barMenuItemId"]
+    mark_sold_out(db_session, twelve)
+
+    body = edit(client, bar.id, twelve, editing(4, [option(19000)]), operator).json()
+
+    assert item_of(body, glenfiddich[12])["soldOut"] is True
+    assert sold_out_at(db_session, twelve) is not None
+
+
+def test_deleting_puts_the_item_back_on_sale_for_a_later_add(client, db_session, operator, bar, glenfiddich):
+    fifteen = item_of(menu_of(client, bar, operator), glenfiddich[15])["barMenuItemId"]
+    mark_sold_out(db_session, fifteen)
+
+    assert delete(client, bar.id, fifteen, 4, operator).status_code == 200
+    assert sold_out_at(db_session, fifteen) is None
+    body = add(client, bar.id, adding(glenfiddich[15], 5), operator).json()
+    assert (item_of(body, glenfiddich[15])["barMenuItemId"], item_of(body, glenfiddich[15])["soldOut"]) == (
+        fifteen,
+        False,
+    )
+
+
+def test_deleting_leaves_other_sold_out_items_alone(client, db_session, operator, bar, glenfiddich):
+    menu = menu_of(client, bar, operator)
+    twelve, fifteen = (item_of(menu, glenfiddich[age])["barMenuItemId"] for age in (12, 15))
+    mark_sold_out(db_session, twelve)
+
+    delete(client, bar.id, fifteen, 4, operator)
+
+    assert sold_out_at(db_session, twelve) is not None
+
+
+def test_reset_puts_every_item_back_on_sale(client, db_session, operator, bar, glenfiddich):
+    menu = menu_of(client, bar, operator)
+    items = [item_of(menu, glenfiddich[age])["barMenuItemId"] for age in (12, 15)]
+    for item_id in items:
+        mark_sold_out(db_session, item_id)
+
+    assert reset(client, bar.id, {"menuVersion": 4}, operator).status_code == 200
+    assert [sold_out_at(db_session, item_id) for item_id in items] == [None, None]
+
+
 # ---- menu version ----
 
 

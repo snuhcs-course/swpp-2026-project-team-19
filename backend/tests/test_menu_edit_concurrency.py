@@ -1,24 +1,30 @@
-"""Two manual adds for two bars at the same time, both creating the same new brand (spec 3.14.3, 9.5).
+"""Menu requests that overlap on real connections.
 
-The bars' row locks do not order requests for different bars, so only the catalog checks inside
-SERIALIZABLE transactions keep the brand single. Unlike the other API tests, these requests run on
-their own connections and really commit, so that they can overlap; the rows are deleted afterwards.
+- Two manual adds for two bars, both creating the same new brand (spec 3.14.3, 9.5): the bars' row
+  locks do not order requests for different bars, so only the catalog checks inside SERIALIZABLE
+  transactions keep the brand single.
+- A delete that waited for the bar lock while a sold-out mark committed (spec 3.14.8): the delete
+  read from an older snapshot, and must still leave the item on sale.
+
+Unlike the other API tests, these requests run on their own connections and really commit, so that
+they can overlap; the rows are deleted afterwards.
 """
 
 import threading
+import time
 
 import pytest
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
-from app.models import Brand
+from app.models import BarMenuItem, Brand
 from app.schemas.menu import BarMenuResponse
 from app.schemas.menu_edit import MenuItemAddRequest
 from app.services import menu_edit, serializable
 from app.services.menu_review_catalog import _CatalogWriter
 from tests.auth_support import TEMPORARY_OPERATOR
-from tests.factories import make_bar
+from tests.factories import make_bar, make_brand, make_product, publish_menu
 
 BRAND = "Concurrent Distillery"
 
@@ -47,9 +53,91 @@ def two_bars(db_engine):
     try:
         yield bar_ids
     finally:
-        with db_engine.begin() as conn:
-            for statement in CLEANUP:
-                conn.execute(text(statement), {"bars": bar_ids, "brand": BRAND})
+        cleanup(db_engine, bar_ids)
+
+
+def cleanup(db_engine, bar_ids) -> None:
+    with db_engine.begin() as conn:
+        for statement in CLEANUP:
+            conn.execute(text(statement), {"bars": bar_ids, "brand": BRAND})
+
+
+@pytest.fixture
+def sold_bar(db_engine):
+    """A committed bar whose menu, at version 1, has one item on sale: (bar id, bar menu item id)."""
+    with Session(db_engine) as session:
+        bar = make_bar(session, "Concurrent Bar 1")
+        product = make_product(session, make_brand(session, BRAND), "Concurrent 12")
+        publish_menu(session, bar, [(product, "Concurrent 12", [(None, 30, 15000)])])
+        item_id = session.scalar(select(BarMenuItem.id).where(BarMenuItem.bar_id == bar.id))
+        session.commit()
+        bar_id = bar.id
+    try:
+        yield bar_id, item_id
+    finally:
+        cleanup(db_engine, [bar_id])
+
+
+def wait_until_a_request_waits_for_a_lock(db_engine) -> None:
+    deadline = time.monotonic() + 10
+    with db_engine.connect() as conn:
+        while time.monotonic() < deadline:
+            waiting = conn.scalar(
+                text(
+                    "SELECT count(*) FROM pg_stat_activity "
+                    "WHERE datname = current_database() AND wait_event_type = 'Lock'"
+                )
+            )
+            if waiting:
+                return
+            conn.rollback()
+            time.sleep(0.02)
+    raise AssertionError("the request never waited for the bar lock")
+
+
+def test_a_delete_that_waited_for_a_sold_out_mark_puts_the_item_back_on_sale(
+    db_engine, sold_bar, monkeypatch
+):
+    bar_id, item_id = sold_bar
+    attempts = []
+    real_delete = menu_edit._delete_once
+
+    def counted(*args):
+        attempts.append(1)
+        return real_delete(*args)
+
+    monkeypatch.setattr(menu_edit, "_delete_once", counted)
+    monkeypatch.setattr(serializable, "sleep", lambda seconds: None)
+    serializable_engine = db_engine.execution_options(isolation_level="SERIALIZABLE")
+    outcome = []
+
+    def delete():
+        try:
+            outcome.append(
+                menu_edit.delete_menu_item(
+                    lambda: Session(serializable_engine), TEMPORARY_OPERATOR, bar_id, str(item_id), 1
+                )
+            )
+        except Exception as error:  # noqa: BLE001 - recorded for the assertions below
+            outcome.append(error)
+
+    # The sold-out mark holds the bar lock, as 3.14.8 does, while the delete starts and waits for it.
+    with db_engine.connect() as mark:
+        mark.execute(text("SELECT id FROM bars WHERE id = :id FOR UPDATE"), {"id": bar_id})
+        thread = threading.Thread(target=delete)
+        thread.start()
+        wait_until_a_request_waits_for_a_lock(db_engine)
+        mark.execute(text("UPDATE bar_menu_items SET sold_out_at = now() WHERE id = :id"), {"id": item_id})
+        mark.commit()
+    thread.join(timeout=30)
+
+    [result] = outcome
+    assert isinstance(result, BarMenuResponse), result
+    assert result.items == []
+    # The first attempt did not see the mark; clearing it anyway failed it, and the retry saw the mark.
+    assert len(attempts) == 2
+    with Session(db_engine) as session:
+        assert session.get(BarMenuItem, item_id).sold_out_at is None
 
 
 def test_two_bars_adding_the_same_new_brand_create_it_once(db_engine, two_bars, monkeypatch):
@@ -70,7 +158,10 @@ def test_two_bars_adding_the_same_new_brand_create_it_once(db_engine, two_bars, 
     body = MenuItemAddRequest.model_validate(
         {
             "menuVersion": None,
-            "newProduct": {"brand": {"type": "new", "canonicalName": BRAND}, "product": {"displayName": "Concurrent 12"}},
+            "newProduct": {
+                "brand": {"type": "new", "canonicalName": BRAND},
+                "product": {"displayName": "Concurrent 12"},
+            },
             "options": [{"priceKrw": 15000}],
         }
     )

@@ -33,6 +33,10 @@ class MenuItemResponse(BaseModel):
     category: str = Field(description='Product category, e.g. "whisky"')
     displayName: str = Field(description="Name as written on the bar's menu, not the canonical product name")
     sortOrder: int = Field(description="Items are returned in this order")
+    soldOut: bool = Field(
+        description="Sold out (spec 3.14.8). Only operators and the bar's owner get sold-out items, in place; "
+        "everyone else gets them left out, so for them this is always false"
+    )
     options: list[MenuOptionResponse] = Field(description="Price and pour-size choices")
 
 

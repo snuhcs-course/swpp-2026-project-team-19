@@ -17,6 +17,8 @@ reviewer approved its removal.
 - Every option row is rewritten, so a discount moves to the new option of the same product
   with the same label, pour size and list price. A changed price or a dropped option drops it,
   since the old discounted price may no longer fit (spec 8.7).
+- Sold-out lives on the bar menu item, so it stays on entries that remain and is cleared on
+  entries that leave the board (spec 3.14.8).
 
 `plan_publish` decides all of this from plain data; `write_board` stores the result.
 """
@@ -25,7 +27,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
@@ -223,6 +225,22 @@ def review_plan(
     return board, plan
 
 
+def clear_sold_out(session: Session, bar_menu_item_ids: set[UUID]) -> None:
+    """Put items that leave the board back on sale, so the same product added again starts on sale.
+
+    An UPDATE that always touches the rows, rather than setting the attribute: a SERIALIZABLE request
+    reads from a snapshot taken before it waited for the bar lock, so it may not see a sold-out mark
+    committed meanwhile, and the ORM would skip a value it believes is already null. Touching the row
+    turns that race into a serialization failure, and the retry sees the mark.
+    """
+    if bar_menu_item_ids:
+        session.execute(
+            update(BarMenuItem)
+            .where(BarMenuItem.id.in_(bar_menu_item_ids))
+            .values(sold_out_at=None)
+        )
+
+
 def _discounts(board: MenuBoard | None) -> dict[tuple, tuple]:
     """(discounted price, starts at, ends at) by (product, label, pour size, list price)."""
     if board is None:
@@ -265,6 +283,7 @@ def write_board(
     """Replace the bar's board contents with `entries`, mark it published by the import at
     `published_at`, and raise its version. The caller holds the bar row lock (spec 3.14.1)."""
     discounts = _discounts(board)
+    old_item_ids = {entry.bar_menu_item_id for entry in board.entries} if board is not None else set()
     if board is None:
         board = MenuBoard(bar_id=bar_id, published_at=published_at, version=1)
         session.add(board)
@@ -291,6 +310,7 @@ def write_board(
             session.add(item)
             session.flush()
             item_ids[entry.product_id] = item.id
+    clear_sold_out(session, old_item_ids - {item_ids[entry.product_id] for entry in entries})
 
     for sort_order, entry in enumerate(entries, start=1):
         board.entries.append(

@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/search", tags=["search"])
         "3. `partial`: searchable product aliases containing the query; at most 10 products, "
         "those with the shortest matching alias first.\n"
         "4. `none`.\n\n"
-        "**Results.** One row per bar x product, for products on an active bar's current menu board. "
+        "**Results.** One row per bar x product, for products on an active bar's current menu board and not sold out. "
         "Rows of products whose alias equals the query come first; within each group, sorted by "
         "`distanceMeters` when lat/lng are sent, otherwise by `menuUpdatedAt` (newest first); "
         "ties by bar name, then product name. At most `limit` rows; `truncated` tells whether more matched. "

@@ -113,8 +113,11 @@ def read_bar_menu_imports(
         "is treated as no token rather than failing with `503`.\n"
         "- Inactive bars are returned only to operators and the bar's current owner. Anyone else gets "
         "`404 BAR_NOT_FOUND`, the same as for a missing bar.\n"
+        "- Sold-out items are left out for everyone but operators and the bar's current owner, who get "
+        "them in place with `soldOut: true` (a token the server cannot check counts as no token).\n"
         "- A bar without a published menu returns `200` with `menuBoardId: null` and `items: []`. A menu "
-        "whose items were all taken down keeps `menuBoardId` and `publishedAt`, with `items: []`.\n"
+        "whose items were all taken down, or are all sold out for a customer, keeps `menuBoardId` and "
+        "`publishedAt`, with `items: []`.\n"
         "- `menuVersion` goes up with every review publish and manual edit; manual edits send it back.\n"
         "- `options[].discount` comes only while the discount has not ended (one that has not started yet comes "
         "too); `priceKrw` is always the list price. The app shows the discounted price while "
@@ -134,7 +137,7 @@ def read_bar_menu(
     user: Principal | None = Depends(get_optional_user),
 ) -> BarMenuResponse:
     return get_bar_menu(
-        session, bar_id, may_see_inactive=lambda bar: user is not None and can_manage_bar(session, user, bar.id)
+        session, bar_id, can_manage=lambda bar: user is not None and can_manage_bar(session, user, bar.id)
     )
 
 

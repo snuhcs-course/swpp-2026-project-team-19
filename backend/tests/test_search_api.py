@@ -137,6 +137,25 @@ def yoichi(db_session):
     }
 
 
+def test_sold_out_items_are_left_out_for_every_caller(client, db_session, glenfiddich, token_for):
+    selling, sold_out = make_bar(db_session, "Selling"), make_bar(db_session, "Sold out")
+    for bar in (selling, sold_out):
+        publish_menu(db_session, bar, [(glenfiddich[12], "글렌피딕 12년", [("잔", 30, 17000)])])
+    item = db_session.scalar(select(BarMenuItem).where(BarMenuItem.bar_id == sold_out.id))
+    item.sold_out_at = T0
+    db_session.flush()
+    operator = {"Authorization": f"Bearer {token_for('operator')}"}
+
+    for headers in ({}, operator):
+        body = client.get("/api/search/bars", params={"query": "글렌피딕 12년"}, headers=headers).json()
+        assert [i["barId"] for i in body["items"]] == [str(selling.id)]
+        assert body["matchedProducts"][0]["resultCount"] == 1
+
+    item.sold_out_at = None
+    db_session.flush()
+    assert len(search(client, query="글렌피딕 12년")["items"]) == 2
+
+
 def test_brand_search_lists_the_exact_product_first(client, db_session, yoichi):
     # The 10 is sold nearer, but the customer typed the Single Malt's name.
     near = make_bar(db_session, "Near Bar", latitude="37.488000", longitude="126.951000")

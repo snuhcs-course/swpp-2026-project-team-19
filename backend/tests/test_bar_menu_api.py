@@ -2,11 +2,12 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import select
 
 from app.models import BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption, User, UserType
 from app.services.bar_menu import discount_response
 from tests.auth_support import connection_error
-from tests.factories import make_bar, make_brand, make_product, publish_menu
+from tests.factories import make_bar, make_brand, make_owner, make_product, make_user, publish_menu
 from tests.sql_support import recorded_statements
 
 def test_returns_bar_and_menu_in_display_order(client, db_session):
@@ -244,6 +245,115 @@ def test_after_a_401_the_same_request_without_a_token_succeeds(client, db_sessio
     assert retried.json()["barId"] == str(bar.id)
 
 
+# ---- sold-out items: only operators and the bar's owner see them (spec 3.9, 3.14.8) ----
+
+
+def menu_with_a_sold_out_item(db_session, *, all_sold_out=False):
+    """A bar selling Ardbeg 10, 5 (sold out) and Uigeadail, in that order."""
+    brand = make_brand(db_session, "Ardbeg")
+    products = [make_product(db_session, brand, name) for name in ("Ardbeg 10", "Ardbeg 5", "Ardbeg Uigeadail")]
+    bar = make_bar(db_session)
+    publish_menu(db_session, bar, [(p, p.display_name, [(None, 30, 12000)]) for p in products])
+    for product in products if all_sold_out else products[1:2]:
+        item = db_session.scalar(select(BarMenuItem).where(BarMenuItem.product_id == product.id))
+        item.sold_out_at = datetime(2026, 11, 3, 1, tzinfo=timezone.utc)
+    db_session.flush()
+    return bar
+
+
+def lines(body) -> list[tuple[str, int, bool]]:
+    return [(item["displayName"], item["sortOrder"], item["soldOut"]) for item in body["items"]]
+
+
+def test_guests_and_customers_do_not_get_sold_out_items(client, db_session, token_for):
+    bar = menu_with_a_sold_out_item(db_session)
+    customer = {"Authorization": f"Bearer {token_for('customer')}"}
+
+    for headers in ({}, customer):
+        body = client.get(f"/api/bars/{bar.id}/menu", headers=headers).json()
+        assert lines(body) == [("Ardbeg 10", 1, False), ("Ardbeg Uigeadail", 3, False)]
+
+
+def test_an_operator_gets_sold_out_items_in_place(client, db_session, token_for):
+    bar = menu_with_a_sold_out_item(db_session)
+    operator = {"Authorization": f"Bearer {token_for('operator')}"}
+
+    body = client.get(f"/api/bars/{bar.id}/menu", headers=operator).json()
+
+    assert lines(body) == [("Ardbeg 10", 1, False), ("Ardbeg 5", 2, True), ("Ardbeg Uigeadail", 3, False)]
+
+
+def test_only_the_bars_own_owner_gets_sold_out_items(client, db_session, supabase):
+    bar = menu_with_a_sold_out_item(db_session)
+    reviewer = make_user(db_session, "reviewer-subject", user_type=UserType.OPERATOR)
+    make_owner(db_session, make_user(db_session, "owner-subject"), bar, reviewer)
+    make_owner(db_session, make_user(db_session, "other-subject"), make_bar(db_session, "Other"), reviewer)
+
+    def seen_by(subject):
+        headers = {"Authorization": f"Bearer {supabase.token(sub=subject)}"}
+        return [name for name, _, _ in lines(client.get(f"/api/bars/{bar.id}/menu", headers=headers).json())]
+
+    assert seen_by("owner-subject") == ["Ardbeg 10", "Ardbeg 5", "Ardbeg Uigeadail"]
+    assert seen_by("other-subject") == ["Ardbeg 10", "Ardbeg Uigeadail"]
+
+
+def test_a_menu_sold_out_for_a_customer_keeps_the_board(client, db_session):
+    bar = menu_with_a_sold_out_item(db_session, all_sold_out=True)
+
+    body = client.get(f"/api/bars/{bar.id}/menu").json()
+
+    assert body["items"] == []
+    assert None not in (body["menuBoardId"], body["menuVersion"], body["publishedAt"])
+
+
+def test_an_operator_with_an_uncheckable_token_does_not_get_sold_out_items(client, db_session, supabase):
+    bar = menu_with_a_sold_out_item(db_session)
+    db_session.add(User(auth_subject="operator-subject", user_type=UserType.OPERATOR))
+    db_session.flush()
+    supabase.jwks.error = connection_error()
+
+    body = client.get(
+        f"/api/bars/{bar.id}/menu", headers={"Authorization": f"Bearer {supabase.token(sub='operator-subject')}"}
+    ).json()
+
+    assert [name for name, _, _ in lines(body)] == ["Ardbeg 10", "Ardbeg Uigeadail"]
+
+
+def permission_queries(statements) -> list[str]:
+    return [sql for sql in statements if "bar_owners" in sql or "FROM users" in sql]
+
+
+def test_the_callers_permission_is_read_only_when_a_sold_out_item_is_there(client, db_session, supabase):
+    plain = make_bar(db_session, "Plain")
+    product = make_product(db_session, make_brand(db_session, "Glenfiddich"), "Glenfiddich 12")
+    publish_menu(db_session, plain, [(product, "Glenfiddich 12", [(None, 30, 17000)])])
+    with_sold_out = menu_with_a_sold_out_item(db_session)
+    customer = {"Authorization": f"Bearer {supabase.token(sub='customer-subject')}"}
+
+    with recorded_statements(db_session) as for_plain:
+        assert client.get(f"/api/bars/{plain.id}/menu", headers=customer).status_code == 200
+    with recorded_statements(db_session) as for_guest:
+        assert client.get(f"/api/bars/{with_sold_out.id}/menu").status_code == 200
+    with recorded_statements(db_session) as for_customer:
+        assert client.get(f"/api/bars/{with_sold_out.id}/menu", headers=customer).status_code == 200
+
+    assert permission_queries(for_plain) == permission_queries(for_guest) == []
+    assert permission_queries(for_customer) != []
+
+
+def test_an_inactive_bar_with_sold_out_items_asks_for_the_permission_once(client, db_session, supabase):
+    bar = menu_with_a_sold_out_item(db_session)
+    bar.status = BarStatus.INACTIVE
+    make_user(db_session, "operator-subject", user_type=UserType.OPERATOR)
+    operator = {"Authorization": f"Bearer {supabase.token(sub='operator-subject')}"}
+
+    with recorded_statements(db_session) as statements:
+        body = client.get(f"/api/bars/{bar.id}/menu", headers=operator).json()
+
+    assert [sold_out for _, _, sold_out in lines(body)] == [False, True, False]
+    assert len(permission_queries(statements)) == 1
+
+
 # ---- every field is always present; a missing value is null (spec 3.9, 3.9.1) ----
 
 BAR_FIELDS = {
@@ -268,6 +378,7 @@ ITEM_FIELDS = {
     "category",
     "displayName",
     "sortOrder",
+    "soldOut",
     "options",
 }
 OPTION_FIELDS = {"menuEntryOptionId", "optionLabel", "pourMl", "priceKrw", "discount", "sortOrder"}

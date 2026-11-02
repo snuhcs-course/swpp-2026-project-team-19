@@ -29,6 +29,7 @@ from app.schemas.menu_edit import MenuItemAddRequest, MenuItemUpdateRequest, Men
 from app.services.bar_access import can_manage_bar, forbidden
 from app.services.bar_menu import bar_not_found, get_bar_menu
 from app.services.menu_import_upload import check_no_unfinished_import
+from app.services.menu_publish import clear_sold_out
 from app.services.menu_review_catalog import create_new_product
 from app.services.serializable import SessionFactory, run_serializable, write_conflict
 from app.services.users import caller_user_id
@@ -166,7 +167,7 @@ def _publish(session: Session, board: MenuBoard, *, created: bool = False) -> Ba
         board.version += 1
     session.flush()
     session.expire_all()
-    return get_bar_menu(session, str(board.bar_id), may_see_inactive=lambda bar: True)
+    return get_bar_menu(session, str(board.bar_id), can_manage=lambda bar: True)
 
 
 def _product_for(session: Session, body: MenuItemAddRequest, principal: Principal) -> Product:
@@ -243,9 +244,11 @@ def _delete_once(
     session: Session, principal: Principal, bar_id: UUID, bar_menu_item_id: str, menu_version: int
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, menu_version)
-    # The entry and its options go; the bar menu item stays for a later add of the same product.
-    # The other entries keep their sort orders, so the order may have a gap.
-    board.entries.remove(_entry(board, bar_menu_item_id))
+    # The entry and its options go; the bar menu item stays for a later add of the same product, back
+    # on sale. The other entries keep their sort orders, so the order may have a gap.
+    entry = _entry(board, bar_menu_item_id)
+    board.entries.remove(entry)
+    clear_sold_out(session, {entry.bar_menu_item_id})
     return _publish(session, board)
 
 
@@ -253,7 +256,8 @@ def _reset_once(session: Session, principal: Principal, bar_id: UUID, body: Menu
     board = _open_board(session, principal, bar_id, body.menuVersion)
     if board is None:
         # Nothing to empty: the answer is the menu as it is, with nothing changed.
-        return get_bar_menu(session, str(bar_id), may_see_inactive=lambda bar: True)
+        return get_bar_menu(session, str(bar_id), can_manage=lambda bar: True)
+    clear_sold_out(session, {entry.bar_menu_item_id for entry in board.entries})
     board.entries.clear()
     return _publish(session, board)
 
