@@ -11,6 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +60,63 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     Column(Modifier.fillMaxWidth().background(V4Color.surface,RoundedCornerShape(12.dp))
         .border(1.dp,V4Color.line,RoundedCornerShape(12.dp)).padding(14.dp),
         verticalArrangement=Arrangement.spacedBy(9.dp),content=content)
+}
+/** PDF 87/89: compact back navigation and a truly centered item index. */
+@Composable private fun St8ReviewToolbar(step: Int, total: Int, back: () -> Unit) {
+    Box(Modifier.fillMaxWidth().height(56.dp)) {
+        TextButton(onClick=back,modifier=Modifier.align(Alignment.CenterStart)
+            .size(52.dp)) {
+            Text("←",color=V4Color.text,fontSize=26.sp)
+        }
+        Text("${step} / ${total}",color=V4Color.sub,fontWeight=FontWeight.Bold,
+            fontSize=14.sp,modifier=Modifier.align(Alignment.Center))
+    }
+}
+@Composable private fun St8Bottle() {
+    Canvas(Modifier.width(40.dp).height(53.dp)) {
+        val u=size.width/40f
+        drawRect(Color(0xFFA86E36),topLeft=Offset(16f*u,8f*u),
+            size=Size(8f*u,5f*u))
+        drawRoundRect(Color(0xFF986128),topLeft=Offset(11f*u,14f*u),
+            size=Size(18f*u,35f*u),cornerRadius=androidx.compose.ui.geometry.CornerRadius(4f*u))
+        drawRoundRect(Color(0xFFDFC08C),topLeft=Offset(14f*u,27f*u),
+            size=Size(12f*u,14f*u),cornerRadius=androidx.compose.ui.geometry.CornerRadius(1f*u))
+        drawRect(Color(0xFFC99D6B),topLeft=Offset(16f*u,5f*u),
+            size=Size(8f*u,4f*u))
+    }
+}
+@Composable private fun St8RecognizedStrip(photo: MockPhotoExtraction, line: MockExtractedLine,
+    onPhoto: ()->Unit) {
+    val price=line.decision?.correctedOptions?.firstOrNull()?.priceKrw
+        ?:line.options.firstOrNull()?.priceKrw
+    val pour=line.decision?.correctedOptions?.firstOrNull()?.pourMl
+        ?:line.options.firstOrNull()?.pourMl
+    val ordinal=listOf("첫째","둘째","셋째","넷째","다섯째","여섯째","일곱째")
+    val photoRow=photo.lines.indexOfFirst { it.extractedItemId==line.extractedItemId }
+    Text("메뉴판 ${photo.imageOrder} · ${ordinal.getOrElse(photoRow){(photoRow+1).toString()+"번째"}} 줄",
+        color=V4Color.sub,fontSize=12.sp)
+    Row(Modifier.fillMaxWidth().heightIn(min=50.dp).background(Color(0xFFE7DDCB),
+        RoundedCornerShape(9.dp)).padding(horizontal=16.dp,vertical=10.dp),
+        verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+        Text(line.sourceText,color=Color(0xFF2A231D),fontSize=17.sp,
+            fontWeight=FontWeight.Bold,maxLines=2)
+        Canvas(Modifier.weight(1f).height(1.dp)) {
+            drawLine(Color(0xFFA99C8A),Offset.Zero,Offset(size.width,0f),
+                strokeWidth=1.5.dp.toPx(),pathEffect=PathEffect.dashPathEffect(
+                    floatArrayOf(3.dp.toPx(),3.dp.toPx())))
+        }
+        Text(if(price!=null&&price>0)"%,d".format(price) else "확인 필요",
+            color=Color(0xFF2A231D),fontSize=17.sp,fontWeight=FontWeight.Bold)
+    }
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+        verticalAlignment=Alignment.CenterVertically) {
+        Text((if(price!=null&&price>0)"%,d원".format(price) else "가격 확인 필요")+
+            (pour?.let{"  ${it}ml"} ?: ""),
+            color=V4Color.text,fontSize=14.sp)
+        TextButton(onClick=onPhoto,contentPadding=PaddingValues(0.dp)){
+            Text("원본 사진 보기",color=V4Color.sub,fontSize=14.sp)
+        }
+    }
 }
 /** Every count and item comes from the Stage 7 persisted import. No fixed PDF example data. */
 @Composable internal fun OwnerPhotoStage8Screen(
