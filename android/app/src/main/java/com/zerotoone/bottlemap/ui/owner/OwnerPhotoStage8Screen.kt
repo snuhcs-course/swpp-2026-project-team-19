@@ -78,6 +78,12 @@ internal fun stage8Counts(job: MockMenuImport, s: MockOwnerSnapshot): Stage8Coun
             it.suggestedProductId !in ids && it.candidateProductIds.none { id->id in ids } &&
             it.decision?.kind !in listOf(MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)})
 }
+/** A fixture proposal is reported as automatic only when the owner confirmed it. */
+internal fun stage8ConfirmedAutoMatch(line: MockExtractedLine): Boolean =
+    line.mockAutoAccepted && line.kind == MockLineKind.PRODUCT &&
+        line.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
+        line.decision.productId == line.suggestedProductId
+
 /** Match the repository's add-only product grouping for pre-publish counts.
  * This is a display preview only; the repository remains the final oracle.
  */
@@ -94,7 +100,8 @@ internal fun stage8ExpectedAddedCount(job: MockMenuImport, snapshot: MockOwnerSn
                 listOf("new",draft.brandId?.let {"id:$it"} ?:
                     "name:${draft.brandName?.trim()?.lowercase().orEmpty()}",
                     draft.category,canonicalReviewProductName(draft).lowercase(),
-                    draft.editionName?.trim()?.lowercase().orEmpty())
+                    // publishAddOnly compares editionName with exact String equality.
+                    draft.editionName.orEmpty())
             }
             else -> null
         }
@@ -1065,9 +1072,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)
                 }}개",color=V4Color.sub,fontSize=12.sp)
                 St8Card {
-                    val auto=all.filter {(_,line)->
-                        line.kind==MockLineKind.PRODUCT && line.mockAutoAccepted
-                    }
+                    val auto=all.filter {(_,line)->stage8ConfirmedAutoMatch(line)}
                     Text("자동으로 찾은 신규 메뉴 ${auto.size}줄",color=V4Color.primary,
                         fontWeight=FontWeight.Bold,fontSize=12.sp)
                     auto.forEach {(_,line)->
@@ -1075,7 +1080,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             Text(s.products.firstOrNull {it.productId==line.suggestedProductId}
                                 ?.displayName ?: line.sourceText,color=V4Color.text,
                                 fontSize=12.sp,modifier=Modifier.weight(1f))
-                            V4ReviewStateBadge("자동 인식")
+                            V4ReviewStateBadge("확인됨")
                         }
                         HorizontalDivider(color=V4Color.line)
                     }
