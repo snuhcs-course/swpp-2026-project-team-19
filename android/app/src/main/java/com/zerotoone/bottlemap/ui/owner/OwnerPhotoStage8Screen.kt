@@ -345,7 +345,11 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         else "이 메뉴가 맞나요?",
                         color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold,
                         modifier=Modifier.weight(1f))
-                    OutlinedButton(onClick={categoryPopup=true},
+                    OutlinedButton(onClick={
+                        runCatching {vm.review(job.menuImportId,line.extractedItemId,
+                            job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
+                            .onSuccess {error=null;next()}.onFailure {error=it.message}
+                    },
                         modifier=Modifier.height(34.dp),
                         contentPadding=PaddingValues(horizontal=10.dp,vertical=1.dp),
                         border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line),
@@ -354,14 +358,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         Text("위스키가 아니에요",fontSize=11.sp)
                     }
                 }
-                if(categoryPopup)AlertDialog(onDismissRequest={categoryPopup=false},
-                    title={Text("메뉴 종류 선택")},text={Column{
-                        listOf("cocktail" to "칵테일","food" to "안주",
-                            "otherAlcohol" to "기타 주류").forEach{(v,label)->
-                            TextButton(onClick={chosenCategory=v;categoryPopup=false;
-                                choosingOther=true;screen="new"}){Text(label)}
-                        }
-                    }},confirmButton={TextButton(onClick={categoryPopup=false}){Text("닫기")}})
                 val candidates=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
                     .distinct().mapNotNull{id->s.products.firstOrNull{
                         it.productId==id && it.isActive}}
@@ -370,7 +366,15 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         .background(V4Color.surface,RoundedCornerShape(16.dp))
                         .border(1.dp,if(selectedProductId==product.productId)
                             V4Color.primary else V4Color.line,RoundedCornerShape(16.dp))
-                        .clickable {selectedProductId=product.productId}
+                        .clickable {
+                            if(line.options.isEmpty() || line.options.any{it.priceKrw<=0}) {
+                                selectedProductId=product.productId;screen="price"
+                            } else runCatching {vm.review(job.menuImportId,line.extractedItemId,
+                                job.reviewVersion,MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                                    productId=product.productId,
+                                    correctedOptions=line.decision?.correctedOptions ?: line.options))}
+                                .onSuccess{error=null;next()}.onFailure{error=it.message}
+                        }
                         .padding(horizontal=15.dp,vertical=12.dp),
                         verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(12.dp)) {
@@ -386,8 +390,13 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             if(line.sourceText.contains("DR")) Text(
                                 "메뉴판의 'DR'을 풀어서 찾았어요",
                                 color=V4Color.sub,fontSize=11.sp)
-                            else if(candidates.size>1)Text("메뉴판 표기와 비교해 주세요",
-                                color=V4Color.sub,fontSize=11.sp)
+                            else if(product.displayName.contains("Rye",ignoreCase=true) &&
+                                !line.sourceText.contains("Rye",ignoreCase=true))
+                                Text("메뉴판엔 'Rye'가 안 적혀 있어요",
+                                    color=V4Color.sub,fontSize=11.sp)
+                            else if(candidates.size>1)
+                                Text("메뉴판에 에디션 표기가 없어 함께 찾았어요",
+                                    color=V4Color.sub,fontSize=11.sp)
                         }
                     }
                 }
