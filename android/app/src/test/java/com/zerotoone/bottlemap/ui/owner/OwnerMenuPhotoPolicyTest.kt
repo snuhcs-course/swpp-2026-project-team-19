@@ -36,6 +36,22 @@ class OwnerMenuPhotoPolicyTest {
         } finally { dir.deleteRecursively() }
     }
 
+    @Test fun orphanCameraFilesAreDeletedWithoutTouchingLiveCaptures() {
+        val dir=Files.createTempDirectory("owner-menu-capture-recovery").toFile()
+        try {
+            val orphan=File(dir,"menu-capture-stale.jpg").apply {writeText("private")}
+            val active=File(dir,"menu-capture-active.jpg").apply {writeText("active")}
+            val other=File(dir,"unrelated.jpg").apply {writeText("keep")}
+            assertEquals(1,removeAbandonedOwnerCaptures(dir,setOf(active.absolutePath)))
+            assertFalse(orphan.exists())
+            assertTrue(active.exists())
+            assertTrue(other.exists())
+            assertEquals(1,removeAbandonedOwnerCaptures(dir,emptySet()))
+            assertFalse(active.exists())
+            assertTrue(other.exists())
+        } finally {dir.deleteRecursively()}
+    }
+
     @Test fun jpegAndPngMagicAreAcceptedButUnsupportedFormatsRejected() {
         assertEquals("image/jpeg", menuPhotoSignature(byteArrayOf(
             0xff.toByte(), 0xd8.toByte(), 0xff.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00)))
