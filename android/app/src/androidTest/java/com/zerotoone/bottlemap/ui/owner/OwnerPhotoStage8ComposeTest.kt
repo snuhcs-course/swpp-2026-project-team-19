@@ -6,6 +6,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onAllNodes
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -79,6 +83,55 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("가격을 못 읽었어요").assertExists()
         compose.onNodeWithText("저장").assertExists()
         compose.onNodeWithText("이번 줄 제외").assertExists()
+    }
+
+    @Test fun emptyExistingMenuCardShowsActualZeroInsteadOfFixtureExample() {
+        showLine(MockExtractedLine("unmatched","Unknown whisky",MockLineKind.PRODUCT,
+            options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=20000))))
+        compose.onNodeWithText("←").performClick()
+        compose.onNodeWithText("이미 등록된 메뉴 0줄",substring=true).performClick()
+        compose.onNodeWithText("이미 있는 메뉴 0줄").assertExists()
+        compose.onNodeWithText("이미 있는 메뉴 5줄",substring=true).assertDoesNotExist()
+    }
+
+    @Test fun catalogSelectionAfterAbandonedNewProductDraftUsesSelectedProduct() {
+        val repository=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            OwnerMockFixtures.registeredBar()))
+        repository.saveBrand(MockBrand("demo-brand","Suntory"))
+        repository.saveCatalogProduct(MockCatalogProduct(
+            "demo-canonical","demo-brand","Hakushu Distiller's Reserve"))
+        val id=repository.queuePhotoImport("fixture-bar",
+            listOf(MockPhoto("photo","file:///mock/menu.png",MockPhotoKind.MENU_CAPTURE)))
+        repository.finishPhotoImport(id,MockPhotoExtractionSource {
+            listOf(MockExtractedLine("line","Unknown whisky",MockLineKind.PRODUCT,
+                candidateProductIds=listOf("demo-canonical"),
+                options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=0))))
+        })
+        val vm=OwnerMockViewModel(repository)
+        compose.setContent { MaterialTheme {
+            OwnerPhotoStage8Screen(vm.state.collectAsState().value,vm,{}, {})
+        } }
+        compose.onNodeWithText("1줄 확인 시작").performClick()
+        compose.onNodeWithText("다른 메뉴예요").performClick()
+        compose.onNodeWithText("찾는 메뉴가 없어요, 새로 등록").performClick()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("Fresh Brand")
+        compose.onAllNodes(hasSetTextAction())[1].performTextInput("Fresh Whisky")
+        compose.onNodeWithText("새 제품으로 등록").performScrollTo().performClick()
+        compose.onNodeWithText("가격을 못 읽었어요").assertExists()
+        compose.onNodeWithText("←").performClick()
+        compose.onNodeWithText("←").performClick()
+        compose.onNodeWithTag("stage8-catalog-query").performTextInput("Hakushu")
+        compose.onNodeWithText("Hakushu Distiller's Reserve").performClick()
+        compose.onNodeWithText("가격을 못 읽었어요").assertExists()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("19000")
+        compose.onNodeWithText("저장").performScrollTo().performClick()
+        compose.runOnIdle {
+            val decision=(vm.state.value as MockOwnerLoadState.Ready)
+                .snapshot.imports.last().images.single().lines.single().decision
+            assertEquals(MockDecisionKind.SELECT_PRODUCT,decision?.kind)
+            assertEquals("demo-canonical",decision?.productId)
+            assertEquals(null,decision?.newProduct)
+        }
     }
 
     @Test fun summaryLongPressNeverOpensDeveloperIncompletePreview() {
