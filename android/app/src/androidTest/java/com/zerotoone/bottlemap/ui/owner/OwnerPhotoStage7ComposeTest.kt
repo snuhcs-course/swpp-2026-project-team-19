@@ -8,10 +8,13 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.longClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zerotoone.bottlemap.data.owner.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,6 +61,28 @@ class OwnerPhotoStage7ComposeTest {
         compose.onNodeWithText("사진 다시 올리기").assertExists()
         compose.onNodeWithTag("stage7-retry-camera-icon", useUnmergedTree = true).assertExists()
         compose.onNodeWithText("AI 인식 실패").assertDoesNotExist()
+    }
+
+    @Test fun debugLongPressDemoKeepsPdfFailureScreenFreeOfExtraButtons() {
+        val repository = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val importId = repository.queuePhotoImport("fixture-bar",listOf(
+            MockPhoto("demo-photo","file:///mock/demo.jpg",MockPhotoKind.MENU_CAPTURE)))
+        repository.finishPhotoImport(importId,MockPhotoExtractionSource { emptyList() })
+        val vm=OwnerMockViewModel(repository)
+        var opened=false
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoJobScreen(vm.state.collectAsState().value,vm,
+                onHome={},onRetryPhotos={},onReview={opened=true})
+        } }
+        compose.onNodeWithText("[개발용] 샘플 결과로 검수 체험").assertDoesNotExist()
+        compose.onNodeWithText("메뉴판을 읽지 못했어요").performTouchInput { longClick() }
+        compose.runOnIdle {
+            assertTrue(opened)
+            val snap=(vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(MockImportStatus.READY_FOR_REVIEW,snap.imports.last().status)
+            assertEquals(7,snap.imports.last().images.single().lines.size)
+        }
     }
 
     @Test fun readyImportRemainsUnpublishedAndCanBeCanceledFromJobScreen() {
