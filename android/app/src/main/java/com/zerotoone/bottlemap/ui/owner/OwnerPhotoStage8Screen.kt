@@ -163,6 +163,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var selectedProductId by rememberSaveable(job?.menuImportId) { mutableStateOf<String?>(null) }
     var chosenCategory by rememberSaveable(job?.menuImportId) { mutableStateOf("whisky") }
     var choosingOther by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
+    var catalogQuery by rememberSaveable(job?.menuImportId) { mutableStateOf("") }
+    var demoPublishError by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
     val pair=all.getOrNull(position)
     LaunchedEffect(pair?.second?.extractedItemId) {
         selectedProductId=pair?.second?.decision?.productId
@@ -172,19 +174,35 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     fun next() {
         selectedProductId=null
         val target=all.indices.firstOrNull{it>position && all[it].second.decision==null}
-            ?: all.indices.firstOrNull{all[it].second.decision==null}
+            ?: all.indices.firstOrNull{it!=position && all[it].second.decision==null}
         if(target==null)screen="publish" else {position=target;screen="line"}
     }
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         val back: () -> Unit = {
             when(screen) {
-                "line","publish","auto","existing" -> screen="summary"
-                "edit","new" -> screen="line"
+                "line","publish","auto","existing","catalog","incomplete","results","publishFailed" -> screen="summary"
+                "edit","new","price" -> screen="line"
                 "done"->onHome()
                 else->onBack()
             }
         }
-        if(screen in listOf("line","edit","new") && counts!=null)
+        if(screen=="catalog") {
+            Row(Modifier.fillMaxWidth().height(58.dp).padding(horizontal=14.dp),
+                horizontalArrangement=Arrangement.spacedBy(9.dp),
+                verticalAlignment=Alignment.CenterVertically) {
+                TextButton(onClick=back,contentPadding=PaddingValues(0.dp),
+                    modifier=Modifier.width(35.dp)) {
+                    Text("←",color=V4Color.text,fontSize=25.sp)
+                }
+                OutlinedTextField(catalogQuery,{catalogQuery=it},
+                    modifier=Modifier.weight(1f).height(53.dp),
+                    singleLine=true,leadingIcon={Text("⌕",color=V4Color.sub,fontSize=24.sp)},
+                    colors=OutlinedTextFieldDefaults.colors(
+                        focusedTextColor=V4Color.text,unfocusedTextColor=V4Color.text,
+                        focusedBorderColor=V4Color.line,unfocusedBorderColor=V4Color.line),
+                    placeholder={Text("메뉴 이름 검색")})
+            }
+        } else if(screen in listOf("line","edit","new","price") && counts!=null)
             St8ReviewToolbar(position+1,counts.lines,back)
         else V4Toolbar(null,back)
         if (s==null || job==null || job.status !in
