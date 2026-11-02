@@ -168,8 +168,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             }
         }
         Column(horizontalAlignment=Alignment.End,verticalArrangement=Arrangement.spacedBy(6.dp)){
-            Text(menuPrice?.let { "메뉴판 %,d원".format(it) } ?:
-                currentPrice?.let{"%,d원".format(it)} ?: "가격 확인 필요",
+            Text(menuPrice?.let {
+                    if(different) "메뉴판 %,d원".format(it) else "%,d원".format(it)
+                } ?:currentPrice?.let{"%,d원".format(it)} ?: "가격 확인 필요",
                 color=V4Color.text,fontSize=13.sp)
             if(different)Text("지금 %,d원".format(currentPrice),
                 color=V4Color.sub,fontSize=13.sp,
