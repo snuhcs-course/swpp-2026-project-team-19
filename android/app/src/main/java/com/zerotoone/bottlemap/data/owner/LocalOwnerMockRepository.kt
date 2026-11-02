@@ -643,8 +643,11 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(job.status == MockImportStatus.PROCESSING ||
             job.status == MockImportStatus.UPLOADED) { "INVALID_IMPORT_STATE" }
         var sequence = s.nextLocalId
-        val images = job.images.map { photo ->
-            photo.copy(lines = source.linesFor(photo.sourceUri).map { line ->
+        // Never leave a queued job stuck in PROCESSING when a fixture is malformed.
+        // Keep validation inside change so FAILED is persisted atomically with its reason.
+        val extraction = try {
+            Result.success(job.images.map { photo ->
+                photo.copy(lines = source.linesFor(photo.sourceUri).map { line ->
                 require(line.sourceBox == null || (line.sourceBox.size == 4 &&
                     line.sourceBox.all { it in 0..1000 } &&
                     line.sourceBox[0] < line.sourceBox[2] &&
@@ -667,17 +670,24 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 }
                 normalized.copy(extractedItemId = "local-line-${sequence++}",
                     options = normalizedOptions, decision = null)
+                })
             })
+        } catch (e: Exception) {
+            Result.failure<List<MockPhotoExtraction>>(e)
         }
-        // A partial multi-photo fixture is not a successful import.
-        val success = images.isNotEmpty() && images.all { it.lines.isNotEmpty() }
+        // Partial and invalid batches must not expose a half-reviewed import.
+        val images = extraction.getOrNull() ?: job.images.map { it.copy(lines = emptyList()) }
+        val success = extraction.isSuccess && images.isNotEmpty() &&
+            images.all { it.lines.isNotEmpty() }
         val status = if (success) MockImportStatus.READY_FOR_REVIEW else MockImportStatus.FAILED
-        val updated = job.copy(status = status, images = images,
-            failureReason = if (success) null else
-                "이 사진에 연결된 Mock 추출 결과가 없습니다. 사진을 다시 선택하거나 나중에 재시도해 주세요.")
+        val failure = extraction.exceptionOrNull()?.message?.take(180)
+        val reason = if (success) null else if (extraction.isFailure)
+            "Mock 추출 결과 검증 실패: ${failure ?: "유효하지 않은 결과"}. 사진을 다시 선택하거나 재시도해 주세요."
+        else "이 사진에 연결된 Mock 추출 결과가 없습니다. 사진을 다시 선택하거나 나중에 재시도해 주세요."
+        val updated = job.copy(status = status, images = images, failureReason = reason)
         s.copy(imports = s.imports.map {
             if (it.menuImportId == importId) updated else it
-        }, nextLocalId = sequence) to status
+        }, nextLocalId = if (success) sequence else s.nextLocalId) to status
     }
 
     override fun cancelPhotoImport(importId: String) {
@@ -756,6 +766,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 it.extractedItemId == extractedItemId
             }
             if (decision.kind in listOf(MockDecisionKind.SELECT_PRODUCT, MockDecisionKind.CREATE_PRODUCT)) {
+                decision.displayNameOverride?.let { name ->
+                    require(name.trim().length in 1..200) { "CORRECTED_PRODUCT_NAME_OUT_OF_RANGE" }
+                }
                 if (decision.correctedOptions != null || decision.kind == MockDecisionKind.CREATE_PRODUCT) {
                     val options = decision.correctedOptions ?: original.options
                 require(options.isNotEmpty() && options.all(::validMockMenuOption)) {
@@ -804,9 +817,13 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             } else require(decision.productId == null && decision.newProduct == null &&
                 decision.correctedOptions == null)
 
+            val normalizedDecision = decision.copy(
+                displayNameOverride = decision.displayNameOverride?.trim()
+            )
             val updated = job.copy(images = job.images.map { image ->
                 image.copy(lines = image.lines.map { line ->
-                    if (line.extractedItemId == extractedItemId) line.copy(decision = decision) else line
+                    if (line.extractedItemId == extractedItemId)
+                        line.copy(decision = normalizedDecision) else line
                 })
             })
             s.copy(imports = s.imports.map { if (it.menuImportId == importId) updated else it }) to Unit
