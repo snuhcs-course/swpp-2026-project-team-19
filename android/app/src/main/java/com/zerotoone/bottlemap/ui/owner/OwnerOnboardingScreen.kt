@@ -375,51 +375,49 @@ fun OwnerOnboardingScreen(
                         if(onLegacyDebugUpload!=null)OwnerActionButton("개발자 도구 · 기존 메뉴 업로드 테스트",
                             onLegacyDebugUpload,Modifier.fillMaxWidth(),secondary=true)
                     }
-                    RegPage.INTRO -> {
-                        OwnerV4Question("매장 등록은\n이렇게 진행돼요",
-                            "중간에 멈춰도 입력한 내용은 기기에 남아 있어요.")
-                        listOf("1  사업자 정보 확인","2  매장 정보 입력",
-                            "3  메뉴판 사진 올리기 (최대 15장)","4  운영팀 승인").forEach{OwnerV4Panel(it)}
-                        OwnerV4Panel("미리 준비해 주세요 · 사업자등록증, 가게 사진 1장, 메뉴판 사진")
-                    }
+                    RegPage.INTRO -> RegistrationIntro()
                     RegPage.METHOD -> {
                         OwnerV4Question("사업자등록증으로\n한 번에 채울까요?",
-                            "사진을 선택하면 Mock OCR 샘플로 채워요. 실제 사진 인식은 하지 않습니다.")
-                        OwnerActionButton("사진으로 채우기 (Mock)",{showCertificateSheet=true},
-                            Modifier.fillMaxWidth())
-                        OwnerActionButton("직접 입력하기",{
+                            "사진을 찍으면 사업자등록번호, 대표자 성명, 개업일을 읽어 채워 드려요.")
+                        Spacer(Modifier.height(16.dp))
+                        RegistrationChoice("camera","사진으로 채우기",
+                            "읽은 내용은 다음 화면에서 확인해요","추천") { showCertificateSheet=true }
+                        RegistrationChoice("pen","직접 입력하기","세 가지를 하나씩 입력해요") {
                             inputMethod="manual";go(RegPage.BN)
-                        },Modifier.fillMaxWidth(),secondary=true)
+                        }
                     }
-                    RegPage.READING -> {
-                        OwnerLoading("사업자등록증 읽는 중 · Mock")
-                        Text("미리 준비한 예시 데이터입니다. 실제 OCR 결과가 아닙니다.")
-                    }
+                    RegPage.READING -> RegistrationCenterContent(
+                        "사업자등록증을\n읽고 있어요","잠시만 기다려 주세요.",loading=true)
                     RegPage.BN -> {
                         OwnerV4Question("사업자등록번호를\n알려주세요")
-                        OwnerV4Input("사업자등록번호",bnFormat(draft.businessNumberDigits),
-                            {save(draft.copy(businessNumberDigits=ownerBusinessDigits(it)))},
-                            KeyboardType.Number,"000-00-00000")
-                        Text("숫자 10자리. 마지막 자리 검증번호를 확인합니다.",
-                            style=MaterialTheme.typography.bodySmall)
+                        Spacer(Modifier.height(16.dp))
+                        RegistrationInput(bnFormat(draft.businessNumberDigits),{},"000-00-00000",
+                            readonly=true,tag="registration-business-number")
+                        Text("숫자 10자리. 하이픈은 자동으로 들어가요.",
+                            fontSize=12.sp,color=RegistrationV4.secondary)
                         if(draft.businessNumberDigits.length==10 &&
                             !validBusinessRegistrationNumber(draft.businessNumberDigits))
-                            Text("번호를 다시 확인해 주세요.",color=MaterialTheme.colorScheme.error)
+                            Text("번호를 다시 확인해 주세요. 사업자등록증의 10자리와 같아야 해요.",
+                                fontSize=12.sp,color=RegistrationV4.error)
                     }
                     RegPage.REP -> {
                         OwnerV4Question("대표자 성명을\n알려주세요","사업자등록증에 적힌 이름 그대로 입력해 주세요.")
-                        OwnerV4Input("대표자 성명",draft.representativeName,{
-                            save(draft.copy(representativeName=it.take(100)))
-                        },placeholder="홍길동")
+                        Spacer(Modifier.height(16.dp))
+                        RegistrationInput(draft.representativeName,{
+                            save(draft.copy(representativeName=it.take(100)))},
+                            "홍길동",tag="registration-representative")
+                        Spacer(Modifier.height(8.dp))
                         OwnerV4Previous("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
                     }
                     RegPage.DATE -> {
                         OwnerV4Question("개업일을\n알려주세요","사업자등록증의 개업연월일이에요.")
-                        OwnerV4Input("개업일",draft.openingDateIso.replace("-","."),{
-                            save(draft.copy(openingDateIso=dateInput(it)))
-                        },KeyboardType.Number,"YYYY.MM.DD")
+                        Spacer(Modifier.height(16.dp))
+                        RegistrationInput(draft.openingDateIso.replace("-","."),{},"YYYY.MM.DD",
+                            readonly=true,tag="registration-opening-date")
                         if(draft.openingDateIso.length==10 && !validOpeningDate(draft.openingDateIso))
-                            Text("잘못된 날짜이거나 오늘 이후 날짜예요.",color=MaterialTheme.colorScheme.error)
+                            Text("날짜를 다시 확인해 주세요. 오늘 이후 날짜는 넣을 수 없어요.",
+                                fontSize=12.sp,color=RegistrationV4.error)
+                        Spacer(Modifier.height(8.dp))
                         OwnerV4Previous("대표자 성명",draft.representativeName){go(RegPage.REP)}
                         OwnerV4Previous("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
                     }
@@ -427,26 +425,25 @@ fun OwnerOnboardingScreen(
                         OwnerV4Question(
                             if(inputMethod=="photo")"읽은 내용이\n맞는지 확인해 주세요"
                             else "이 정보로\n확인할게요",
-                            "직접 확인·수정해 주세요. 실제 국세청 조회는 실행하지 않습니다.")
+                            if(inputMethod=="photo")"사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요."
+                            else "국세청에 등록된 정보와 같은지 확인해요.")
+                        Spacer(Modifier.height(8.dp))
                         OwnerV4Summary("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
                         OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
                         OwnerV4Summary("개업일",draft.openingDateIso.replace("-",".")){go(RegPage.DATE)}
                     }
-                    RegPage.VERIFYING -> {
-                        OwnerLoading("사업자 정보 확인 중 · Mock")
-                        Text("국세청 API는 호출하지 않습니다.")
-                    }
+                    RegPage.VERIFYING -> RegistrationCenterContent(
+                        "사업자 정보를\n확인하고 있어요","국세청 정보와 비교하고 있어요.",loading=true)
                     RegPage.VERIFIED -> {
-                        OwnerStatusLabel("Mock 시뮬레이션 · 실제 인증 아님",OwnerStatusTone.ATTENTION)
                         when(verify){
-                            VerifyFixture.MATCHED->OwnerV4Question("사업자 정보가\n확인됐어요 (Mock)",
-                                "이제 매장 정보를 알려주세요.")
-                            VerifyFixture.FAILED->OwnerV4Question("사업자 정보가\n맞지 않아요 (Mock)",
-                                "사업자등록번호, 대표자 성명, 개업일을 다시 확인해 주세요.")
-                            VerifyFixture.UNAVAILABLE->OwnerV4Question("지금은 확인이\n어려워요 (Mock)",
-                                "운영팀이 나중에 다시 확인할 수 있어요.")
-                            VerifyFixture.LIMITED->OwnerV4Question("확인 횟수를\n모두 썼어요 (Mock)",
-                                "Mock 응답 시나리오예요. 입력한 내용은 저장됩니다.")
+                            VerifyFixture.MATCHED->RegistrationCenterContent(
+                                "사업자 정보가\n확인됐어요","이제 매장 정보를 알려주세요.")
+                            VerifyFixture.FAILED->RegistrationCenterContent(
+                                "사업자 정보가\n맞지 않아요","사업자 정보를 다시 확인해 주세요.",success=false)
+                            VerifyFixture.UNAVAILABLE->RegistrationCenterContent(
+                                "지금은 국세청 확인이\n어려워요","운영팀이 나중에 다시 확인해요.",success=false)
+                            VerifyFixture.LIMITED->RegistrationCenterContent(
+                                "오늘 확인 횟수를\n모두 썼어요","입력한 내용은 그대로 남아 있어요.",success=false)
                         }
                     }
 
@@ -584,13 +581,8 @@ fun OwnerOnboardingScreen(
                         OwnerV4Summary("연락처",formatOwnerPhone(draft.contactPhone)){edit(RegPage.CONTACT)}
                         OwnerV4Panel("운영팀 승인 전에는 매장과 메뉴가 손님에게 보이지 않아요.")
                     }
-                    RegPage.DONE -> {
-                        Spacer(Modifier.height(80.dp))
-                        OwnerV4Question("신청을 마쳤어요",
-                            "운영팀이 실제 매장인지 확인한 뒤 승인해요. "+
-                                "진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
-                        OwnerStatusLabel("Mock 신청 완료 · 실제 서버 제출 아님")
-                    }
+                    RegPage.DONE -> RegistrationCenterContent("신청을 마쳤어요",
+                        "운영팀이 실제 매장인지 확인한 뒤 승인해요. 진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
                     RegPage.VIEW_APPLICATION -> {
                         OwnerV4Question("신청한 내용",
                             "검토 중인 신청은 수정할 수 없어요.")
