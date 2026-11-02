@@ -102,6 +102,8 @@ fun OwnerOnboardingScreen(
     var showCertificateSheet by remember { mutableStateOf(false) }
     var certificateCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
     var showAddressSheet by remember { mutableStateOf(false) }
+    var showMenuPhotoSource by remember { mutableStateOf(false) }
+    var menuCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
     var cancelId by remember { mutableStateOf<String?>(null) }
     var dismissId by remember { mutableStateOf<String?>(null) }
     var activeApplicationId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -192,6 +194,40 @@ fun OwnerOnboardingScreen(
                 MockPhoto(UUID.randomUUID().toString(),it.toString(),MockPhotoKind.MENU_CAPTURE)
             }
         if(added.isNotEmpty())save(latest.copy(initialMenuPhotos=old+added))
+    }
+
+    // Registration capture uses the same camera provider/source choices as PR96.
+    val menuCamera=rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()){ ok ->
+        val path=menuCapturePath
+        menuCapturePath=null
+        val file=path?.let(::File)
+        if(ok && file?.isFile==true && file.length()>0L) {
+            val selected=(latestDraft()?:draft)
+            if(selected.initialMenuPhotos.size<15) {
+                val uri=FileProvider.getUriForFile(ctx,
+                    "${ctx.packageName}.owner.camera.provider",file)
+                save(selected.copy(initialMenuPhotos=selected.initialMenuPhotos+
+                    MockPhoto(UUID.randomUUID().toString(),uri.toString(),MockPhotoKind.MENU_CAPTURE)))
+            } else file.delete()
+        } else {
+            file?.delete()
+            if(ok) error="촬영한 사진을 열 수 없어요. 다시 찍어주세요."
+        }
+    }
+    fun takeMenuPhoto() {
+        if((latestDraft()?:draft).initialMenuPhotos.size>=15)return
+        try {
+            val dir=File(ctx.filesDir,"owner-menu-captures").apply {mkdirs()}
+            val file=File.createTempFile("registration-menu-", ".jpg",dir)
+            menuCapturePath=file.absolutePath
+            val uri=FileProvider.getUriForFile(ctx,
+                "${ctx.packageName}.owner.camera.provider",file)
+            menuCamera.launch(uri)
+        }catch(_:Exception) {
+            menuCapturePath?.let {File(it).delete()}
+            menuCapturePath=null
+            error="카메라를 열지 못했어요. 갤러리에서 선택하거나 다시 시도해 주세요."
+        }
     }
 
     LaunchedEffect(screen) {
@@ -356,6 +392,14 @@ fun OwnerOnboardingScreen(
             }
         }
     }
+    if(showMenuPhotoSource) OwnerMenuPhotoSourceDialog(
+        onDismiss={showMenuPhotoSource=false},
+        onCamera={showMenuPhotoSource=false;takeMenuPhoto()},
+        onGallery={
+            showMenuPhotoSource=false
+            menuPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+    )
     if(showAddressSheet)AlertDialog(onDismissRequest={showAddressSheet=false},
         title={Text("주소 검색 · Mock 예시")},
         text={
@@ -633,53 +677,45 @@ fun OwnerOnboardingScreen(
                             "AI가 메뉴를 읽어 두면, 승인된 뒤에 확인만 하고 공개할 수 있어요.")
                         Spacer(Modifier.height(0.dp))
                         val photoItems = draft.initialMenuPhotos
-                        (0 until ((photoItems.size + if(photoItems.size<15)1 else 0)+2)/3).forEach { rowIndex ->
-                            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                                repeat(3) { colIndex ->
-                                    val index=rowIndex*3+colIndex
-                                    Box(Modifier.weight(1f).aspectRatio(3f/4f)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .then(if(index==photoItems.size && photoItems.size<15)
-                                            Modifier.registrationDashedBorder(12.dp) else Modifier)
-                                        .background(if(index<photoItems.size ||
-                                                (index==photoItems.size && photoItems.size<15))
-                                            RegistrationV4.surface else RegistrationV4.bg),
-                                        contentAlignment=Alignment.Center) {
-                                        when {
-                                            index < photoItems.size -> {
-                                                OwnerV4Thumbnail(photoItems[index].uri,Modifier.fillMaxSize())
-                                                Box(Modifier.align(Alignment.TopStart).padding(6.dp)
-                                                    .background(RegistrationV4.bg,RoundedCornerShape(12.dp))
-                                                    .padding(horizontal=8.dp,vertical=2.dp)) {
-                                                    Text((index+1).toString(),color=RegistrationV4.text,fontSize=12.sp)
-                                                }
-                                                Box(Modifier.align(Alignment.TopEnd).size(48.dp)
-                                                    .ownerQuietClick {
-                                                        save(draft.copy(initialMenuPhotos=photoItems
-                                                            .filterIndexed{ i,_->i!=index }))
-                                                    }.testTag("registration-remove-menu-$index"),
-                                                    contentAlignment=Alignment.Center) {
-                                                    Box(Modifier.size(28.dp)
-                                                        .background(RegistrationV4.bg,CircleShape),
-                                                        contentAlignment=Alignment.Center) {
-                                                        RegistrationGlyph("remove",color=RegistrationV4.text)
-                                                    }
-                                                }
-                                            }
-                                            index==photoItems.size && photoItems.size<15 -> {
-                                                Column(Modifier.fillMaxSize().ownerQuietClick {
-                                                    menuPicker.launch(PickVisualMediaRequest(
-                                                        ActivityResultContracts.PickVisualMedia.ImageOnly))
-                                                }.testTag("registration-add-menu"),
-                                                    horizontalAlignment=Alignment.CenterHorizontally,
-                                                    verticalArrangement=Arrangement.Center) {
-                                                    RegistrationGlyph("plus")
-                                                    Spacer(Modifier.height(4.dp))
-                                                    Text("사진 추가",color=RegistrationV4.secondary,fontSize=12.sp)
-                                                }
-                                            }
-                                        }
-                                    }
+                        // Photo tiles and source popup follow PR96 Stage 7. Only this strip changes.
+                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                            photoItems.forEachIndexed { index,photo ->
+                                Box(Modifier.width(112.dp).height(144.dp)
+                                    .clip(RoundedCornerShape(7.dp))
+                                    .background(Color(0xFFE9DDC9),RoundedCornerShape(7.dp))
+                                    .testTag("registration-menu-photo-${index+1}")) {
+                                    OwnerV4Thumbnail(photo.uri,Modifier.fillMaxSize())
+                                    Text((index+1).toString(),
+                                        Modifier.align(Alignment.BottomStart).padding(5.dp)
+                                            .background(RegistrationV4.bg,RoundedCornerShape(50))
+                                            .padding(horizontal=6.dp,vertical=3.dp),
+                                        color=RegistrationV4.text,fontSize=10.sp)
+                                    Text("×",Modifier.align(Alignment.TopEnd).padding(4.dp)
+                                        .background(RegistrationV4.bg,RoundedCornerShape(50))
+                                        .ownerQuietClick {
+                                            save(draft.copy(initialMenuPhotos=photoItems.filterIndexed {
+                                                i,_->i!=index }))
+                                            // Remove only the app-owned capture, never a gallery URI.
+                                            val stored=Uri.parse(photo.uri).path.orEmpty()
+                                            if(stored.contains("/owner-menu-captures/registration-menu-"))
+                                                File(stored).delete()
+                                        }.testTag("registration-remove-menu-$index")
+                                        .padding(horizontal=7.dp),
+                                        color=RegistrationV4.text,fontSize=15.sp)
+                                }
+                            }
+                            if(photoItems.size<15) {
+                                Column(Modifier.width(112.dp).height(144.dp)
+                                    .border(1.dp,RegistrationV4.border,RoundedCornerShape(7.dp))
+                                    .background(RegistrationV4.surface,RoundedCornerShape(7.dp))
+                                    .ownerQuietClick {showMenuPhotoSource=true}
+                                    .testTag("registration-add-menu"),
+                                    verticalArrangement=Arrangement.Center,
+                                    horizontalAlignment=Alignment.CenterHorizontally) {
+                                    Text("+",color=RegistrationV4.primary,fontSize=28.sp,
+                                        fontWeight=FontWeight.Light,lineHeight=28.sp)
+                                    Text("사진 추가",color=RegistrationV4.secondary,fontSize=13.sp)
                                 }
                             }
                         }
@@ -738,7 +774,7 @@ fun OwnerOnboardingScreen(
                                     draft.proposedBarAddress,draft.proposedBarAddressDetail)
                                     .filter{it.isNotBlank()}.joinToString(" ")){edit(RegPage.ADDRESS)}
                                 OwnerV4Summary("전화번호",formatOwnerPhone(draft.storePhone)
-                                    .ifBlank{"없음"}+"\n손님에게 보여요"){edit(RegPage.BARPHONE)}
+                                    .ifBlank{"없음"}){edit(RegPage.BARPHONE)}
                             }
                         }
                         Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
@@ -747,13 +783,12 @@ fun OwnerOnboardingScreen(
                         }
                         Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
                             Text("신청자",color=RegistrationV4.secondary,fontSize=14.sp)
-                            OwnerV4Summary("연락처",formatOwnerPhone(draft.contactPhone)
-                                +"\n운영팀만 봐요"){edit(RegPage.CONTACT)}
+                            OwnerV4Summary("연락처",formatOwnerPhone(draft.contactPhone)){edit(RegPage.CONTACT)}
                         }
                         Row(Modifier.fillMaxWidth()
                             .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
                             .padding(12.dp),horizontalArrangement=Arrangement.spacedBy(12.dp),
-                            verticalAlignment=Alignment.Top) {
+                            verticalAlignment=Alignment.CenterVertically) {
                             Text("ⓘ",color=RegistrationV4.primary,fontSize=18.sp)
                             Text("운영팀 승인 전에는 매장과 메뉴가 손님에게 보이지 않아요.",
                                 color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=20.sp)
