@@ -237,6 +237,17 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             fontSize=14.sp,modifier=Modifier.align(Alignment.Center))
     }
 }
+@Composable private fun St8ReviewPager(
+    at:Int,total:Int,remaining:Int,previous:()->Unit,next:()->Unit
+) {
+    HorizontalDivider(color=V4Color.line,modifier=Modifier.padding(top=3.dp))
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
+        verticalAlignment=Alignment.CenterVertically) {
+        TextButton(onClick=previous) {Text("‹ 이전",color=V4Color.primary)}
+        Text("남은 확인 ${remaining}개",color=V4Color.primary,fontSize=12.sp)
+        TextButton(onClick=next) {Text("다음 ›",color=V4Color.primary)}
+    }
+}
 @Composable private fun St8Bottle() {
     Canvas(Modifier.width(40.dp).height(53.dp)) {
         val u=size.width/40f
@@ -327,6 +338,15 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         }
     }
     val pair=all.getOrNull(position)
+    // Normalize legacy saved "line" destinations after a configuration change/re-entry.
+    LaunchedEffect(job?.menuImportId,position,screen) {
+        if(screen=="line") {
+            pair?.second?.let { line ->
+                val destination=stage8ReviewDestination(line)
+                if(destination!="line")screen=destination
+            }
+        }
+    }
     LaunchedEffect(pair?.second?.extractedItemId) {
         selectedProductId=pair?.second?.decision?.productId ?:
             pair?.second?.suggestedProductId
@@ -620,7 +640,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         }
                     }
                 }
-                if(candidates.size>1 || candidates.isEmpty())
+                if(candidates.size>1)
                     St8Secondary("⌕  목록에 없어요") {
                         catalogQuery="잭다니엘"
                         visit("catalog")
@@ -1136,37 +1156,16 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             }
                         }
                     }
-                    HorizontalDivider(color=V4Color.line,modifier=Modifier.padding(top=4.dp))
-                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
-                        verticalAlignment=Alignment.CenterVertically) {
-                        TextButton(onClick={
-                            if(position>0)visitLine(position-1) else backPage()
-                        }){Text("‹ 이전",color=V4Color.primary)}
-                        Text("남은 확인 "+counts!!.remaining+"개",color=V4Color.primary,fontSize=12.sp)
-                        TextButton(onClick={
-                            if(position+1<all.size)visitLine(position+1)
-                            else backPage()
-                        }){Text("다음 ›",color=V4Color.primary)}
-                    }
+                    St8ReviewPager(position,all.size,counts!!.remaining,
+                        previous={if(position>0)visitLine(position-1) else backPage()},
+                        next={if(position+1<all.size)visitLine(position+1) else visit("summary")})
                 }
-                "price"->TextButton(onClick=back) {
-                    Text("‹ 이전",color=V4Color.sub)
-                }
-                "edit","new"->{
-                    HorizontalDivider(color=V4Color.line)
-                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
-                        verticalAlignment=Alignment.CenterVertically) {
-                        TextButton(onClick=back) {
-                            Text("‹ 이전",color=V4Color.sub)
-                        }
-                        Text("남은 확인 ${counts!!.remaining}개",color=V4Color.primary,
-                            fontSize=12.sp)
-                        TextButton(onClick={
-                            if(position+1<all.size)visitLine(position+1)
-                            else visit("summary")
-                        }) {Text("다음 ›",color=V4Color.primary)}
-                    }
-                }
+                "price"->St8ReviewPager(position,all.size,counts!!.remaining,
+                    previous={if(position>0)visitLine(position-1) else backPage()},
+                    next={if(position+1<all.size)visitLine(position+1) else visit("summary")})
+                "edit","new"->St8ReviewPager(position,all.size,counts!!.remaining,
+                    previous={if(position>0)visitLine(position-1) else backPage()},
+                    next={if(position+1<all.size)visitLine(position+1) else visit("summary")})
                 "incomplete"->{
                     St8Button("${counts!!.remaining}줄 이어서 확인",enabled=counts.remaining>0){
                         val pos=all.indexOfFirst {it.second.decision==null}
