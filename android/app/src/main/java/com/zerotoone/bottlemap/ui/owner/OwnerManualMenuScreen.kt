@@ -175,9 +175,12 @@ internal fun OwnerManualMenuScreen(
     val bar = snapshot?.bars?.firstOrNull { it.barId == snapshot.selectedBarId }
         ?: snapshot?.bars?.firstOrNull()
     val items = snapshot?.menuItems?.filter { it.barId == bar?.barId }.orEmpty()
-    val activeJob = snapshot?.imports?.lastOrNull { it.barId==bar?.barId &&
-        it.status in listOf(MockImportStatus.UPLOADED,MockImportStatus.PROCESSING,
-            MockImportStatus.READY_FOR_REVIEW,MockImportStatus.FAILED) }
+    // Only the latest import may be resumed/cancelled. An earlier FAILED attempt
+    // remains archival and must not resurrect after a later APPLIED import.
+    val latestPhotoJob = snapshot?.imports?.lastOrNull { it.barId==bar?.barId }
+    val activeJob = latestPhotoJob?.takeIf { it.status in listOf(
+        MockImportStatus.UPLOADED,MockImportStatus.PROCESSING,
+        MockImportStatus.READY_FOR_REVIEW,MockImportStatus.FAILED) }
     val activePhotoImport = activeJob != null
     val products = snapshot?.products.orEmpty()
     val brands = (snapshot?.brands.orEmpty() + htmlBrands).distinctBy { it.brandId }
