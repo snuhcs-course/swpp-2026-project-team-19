@@ -21,9 +21,9 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 SUPABASE_JS_ORIGIN = "https://cdn.jsdelivr.net"
 # The Kakao Maps JavaScript SDK (map and address search for new_bar approval) and the scripts it loads.
 # No scheme: the SDK loads its files over the page's scheme, so this allows https on the server and
-# http on a local http://localhost page.
-KAKAO_SCRIPT_HOSTS = "dapi.kakao.com t1.kakaocdn.net t1.daumcdn.net"
-KAKAO_IMAGE_HOSTS = "*.kakaocdn.net *.daumcdn.net"
+# http on a local http://localhost page. Kakao asks CSP users to allow every kakaocdn.net subhost, since
+# the SDK may pick another one (https://devtalk.kakao.com/t/api-daumcdn-net/152465).
+KAKAO_CDN_HOSTS = "*.kakaocdn.net *.daumcdn.net"
 
 router = APIRouter(prefix=ADMIN_PATH, include_in_schema=False)
 
@@ -34,13 +34,13 @@ def content_security_policy() -> str:
     return "; ".join(
         [
             "default-src 'self'",
-            f"script-src 'self' {SUPABASE_JS_ORIGIN} {KAKAO_SCRIPT_HOSTS}",
+            f"script-src 'self' {SUPABASE_JS_ORIGIN} dapi.kakao.com {KAKAO_CDN_HOSTS}",
             # The Kakao map adds an inline <style> that changes with its version, so no hash. Scripts stay
             # strict, and the page puts data on the page only as text.
             "style-src 'self' 'unsafe-inline'",
             # Menu photos are signed object-storage URLs (S3) or /media paths on this server (local),
             # and Kakao map tiles and marker images come from kakaocdn.net and daumcdn.net hosts.
-            f"img-src 'self' https: data: {KAKAO_IMAGE_HOSTS}",
+            f"img-src 'self' https: data: {KAKAO_CDN_HOSTS}",
             f"connect-src 'self'{supabase} dapi.kakao.com",
             "frame-ancestors 'none'",
             "base-uri 'none'",

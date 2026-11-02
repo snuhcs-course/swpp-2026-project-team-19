@@ -50,7 +50,7 @@ def test_the_page_is_not_cached_and_allows_only_known_sources(client, monkeypatc
     for path in ("/admin/", "/admin/app.js", "/admin/config.js"):
         headers = client.get(path).headers
         policy = headers["content-security-policy"]
-        assert "script-src 'self' https://cdn.jsdelivr.net dapi.kakao.com t1.kakaocdn.net t1.daumcdn.net" in policy
+        assert "script-src 'self' https://cdn.jsdelivr.net dapi.kakao.com *.kakaocdn.net *.daumcdn.net" in policy
         assert "img-src 'self' https: data: *.kakaocdn.net *.daumcdn.net" in policy
         assert f"connect-src 'self' {SUPABASE_URL} dapi.kakao.com" in policy
         assert "style-src 'self' 'unsafe-inline'" in policy

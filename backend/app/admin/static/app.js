@@ -321,9 +321,9 @@ function renderRows() {
       {
         tabindex: "0",
         class: item.applicationId === state.selectedId ? "selected" : null,
-        onclick: () => openDetail(item.applicationId),
+        onclick: () => selectApplication(item.applicationId),
         onkeydown: (event) => {
-          if (event.key === "Enter") openDetail(item.applicationId);
+          if (event.key === "Enter") selectApplication(item.applicationId);
         },
       },
       el("td", {}, formatTime(item.createdAt)),
@@ -353,6 +353,11 @@ function replaceListItem(application) {
 }
 
 // ---------- detail (3.11.4) ----------
+
+// Another application cannot be opened while an action runs, so its result never lands on the wrong one.
+function selectApplication(applicationId) {
+  if (!state.busy) openDetail(applicationId);
+}
 
 async function openDetail(applicationId, notice = null) {
   if (state.selectedId !== applicationId) state.photosRefreshed = false;
@@ -857,19 +862,24 @@ function confirmApproval(app) {
 async function runAction(app, call, successText, onError) {
   if (state.busy) return;
   state.busy = true;
+  $("rows").classList.add("busy");
   for (const button of $("detail").querySelectorAll("button")) button.disabled = true;
+  // The detail may have changed meanwhile (sign-out), so the result goes only on the same application.
+  const stillOpen = () => state.selectedId === app.applicationId;
   try {
     const updated = await call();
+    replaceListItem(updated);
+    if (!stillOpen()) return;
     state.detail = updated;
     state.notice = { kind: "ok", text: successText(updated) };
-    replaceListItem(updated);
     renderDetail();
   } catch (error) {
-    if (error.status === 401) return;
+    if (error.status === 401 || !stillOpen()) return;
     if (onError && onError(error)) return;
     handleActionError(app, error);
   } finally {
     state.busy = false;
+    $("rows").classList.remove("busy");
     for (const button of $("detail").querySelectorAll("button")) button.disabled = false;
   }
 }

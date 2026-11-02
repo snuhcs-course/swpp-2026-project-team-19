@@ -96,6 +96,7 @@ table.applications { width: 100%; border-collapse: collapse; }
 .applications tbody tr { cursor: pointer; }
 .applications tbody tr:hover, .applications tbody tr:focus { background: var(--bg); outline: none; }
 .applications tbody tr.selected { background: var(--selected); }
+.applications tbody.busy tr { cursor: progress; }
 
 .list-status { color: var(--muted); margin: 10px 0; }
 #load-more, #list-retry { margin-top: 4px; }
