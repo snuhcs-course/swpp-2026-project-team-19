@@ -17,6 +17,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
 from app.db.base import Base
+from app.models.catalog import Product
 
 
 class BarMenuItem(Base):
@@ -35,6 +36,8 @@ class BarMenuItem(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+    product: Mapped[Product] = relationship()
 
 
 class MenuBoard(Base):

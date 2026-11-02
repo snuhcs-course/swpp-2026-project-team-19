@@ -63,8 +63,8 @@ def test_exact_alias_search_returns_bar_rows(client, db_session, glenfiddich):
             "productDisplayName": "Glenfiddich 12",
             "menuDisplayName": "글렌피딕 12Y",
             "options": [
-                {"optionLabel": "잔", "pourMl": None, "priceKrw": 12000, "sortOrder": 1},
-                {"optionLabel": "병", "pourMl": None, "priceKrw": 200000, "sortOrder": 2},
+                {"optionLabel": "잔", "pourMl": None, "priceKrw": 12000, "discount": None, "sortOrder": 1},
+                {"optionLabel": "병", "pourMl": None, "priceKrw": 200000, "discount": None, "sortOrder": 2},
             ],
             "menuUpdatedAt": "2026-10-04T09:15:00Z",
         }
@@ -254,10 +254,33 @@ def test_options_carry_label_pour_size_and_price_as_written(client, db_session, 
 
     # Every option of the entry, with nulls kept as null rather than left out or emptied.
     assert item["options"] == [
-        {"optionLabel": "잔", "pourMl": 30, "priceKrw": 17000, "sortOrder": 1},
-        {"optionLabel": None, "pourMl": 15, "priceKrw": 9000, "sortOrder": 2},
-        {"optionLabel": "병", "pourMl": None, "priceKrw": 160000, "sortOrder": 3},
+        {"optionLabel": "잔", "pourMl": 30, "priceKrw": 17000, "discount": None, "sortOrder": 1},
+        {"optionLabel": None, "pourMl": 15, "priceKrw": 9000, "discount": None, "sortOrder": 2},
+        {"optionLabel": "병", "pourMl": None, "priceKrw": 160000, "discount": None, "sortOrder": 3},
     ]
+
+
+def test_options_carry_the_same_discounts_as_the_bar_menu(client, db_session, glenfiddich):
+    now = datetime.now(timezone.utc)
+    running = (14000, now - timedelta(days=1), now + timedelta(days=14))
+    ended = (150000, now - timedelta(days=14), now - timedelta(days=1))
+    bar = make_bar(db_session)
+    publish_menu(
+        db_session,
+        bar,
+        [(glenfiddich[12], "글렌피딕 12년", [("잔", 30, 17000, running), ("병", None, 160000, ended)])],
+    )
+
+    (item,) = search(client, query="Glenfiddich 12")["items"]
+    menu = client.get(f"/api/bars/{bar.id}/menu").json()
+
+    assert item["options"][0]["discount"] == {
+        "discountedPriceKrw": 14000,
+        "startsAt": running[1].isoformat().replace("+00:00", "Z"),
+        "endsAt": running[2].isoformat().replace("+00:00", "Z"),
+    }
+    assert item["options"][1]["discount"] is None
+    assert [o["discount"] for o in item["options"]] == [o["discount"] for o in menu["items"][0]["options"]]
 
 
 def test_options_follow_sort_order_not_insert_order(client, db_session, glenfiddich):
@@ -424,7 +447,7 @@ ITEM_FIELDS = {
     "options",
     "menuUpdatedAt",
 }
-OPTION_FIELDS = {"optionLabel", "pourMl", "priceKrw", "sortOrder"}
+OPTION_FIELDS = {"optionLabel", "pourMl", "priceKrw", "discount", "sortOrder"}
 
 
 def test_every_field_is_sent_even_when_its_value_is_missing(client, db_session):

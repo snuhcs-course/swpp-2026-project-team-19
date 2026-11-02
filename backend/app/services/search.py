@@ -2,6 +2,7 @@
 
 import math
 from collections import Counter
+from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import select
@@ -16,6 +17,7 @@ from app.schemas.search import (
     SearchOptionResponse,
     SearchResultItem,
 )
+from app.services.bar_menu import discount_response
 from app.services.search_query import resolve_search_query
 
 MAX_QUERY_LENGTH = 100
@@ -93,6 +95,7 @@ def search_bars(
 
     products = {product.id: product for product in resolution.products}
     rows = _selling_entries(session, list(products)) if products else []
+    now = datetime.now(timezone.utc)
 
     items = [
         SearchResultItem(
@@ -112,6 +115,7 @@ def search_bars(
                     optionLabel=option.option_label,
                     pourMl=option.pour_ml,
                     priceKrw=option.price_krw,
+                    discount=discount_response(option, now),
                     sortOrder=option.sort_order,
                 )
                 for option in entry.options

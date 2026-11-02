@@ -111,7 +111,12 @@ def read_bar_menu_imports(
         "`404 BAR_NOT_FOUND`, the same as for a missing bar.\n"
         "- A bar without a published menu returns `200` with `menuBoardId: null` and `items: []`. A menu "
         "whose items were all taken down keeps `menuBoardId` and `publishedAt`, with `items: []`.\n"
-        "- `phone`, `optionLabel` and `pourMl` are null when missing. Coordinates are WGS84 and never null.\n"
+        "- `menuVersion` goes up with every review publish and manual edit; manual edits send it back.\n"
+        "- `options[].discount` comes only while the discount has not ended (one that has not started yet comes "
+        "too); `priceKrw` is always the list price. The app shows the discounted price while "
+        "`startsAt <= now < endsAt`.\n"
+        "- `phone`, `optionLabel`, `pourMl` and `discount` are null when missing. Coordinates are WGS84 and never "
+        "null.\n"
         "- Items and their options are sorted by `sortOrder`."
     ),
     responses=error_responses(
