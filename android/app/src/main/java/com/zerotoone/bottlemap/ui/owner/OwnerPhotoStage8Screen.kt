@@ -377,7 +377,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 Text("메뉴판 "+counts!!.photos+"장 · "+counts.lines+"줄 인식",
                     color=V4Color.sub,fontSize=13.sp)
                 Text(counts.remaining.toString()+"줄 확인",color=V4Color.text,
-                    fontWeight=FontWeight.Bold,fontSize=26.sp)
+                    fontWeight=FontWeight.Bold,fontSize=26.sp,
+                    modifier=if(BuildConfig.DEBUG) Modifier.pointerInput(job.menuImportId) {
+                        detectTapGestures(onLongPress={visit("incomplete")})
+                    } else Modifier)
                 val bar=s.bars.firstOrNull{it.barId==barId}
                 St8Card {
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
@@ -1076,7 +1079,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         else counts.remaining.toString()+"줄 확인 시작",
                         enabled=counts.remaining>0) {next()}
                     if(counts.remaining==0)St8Button("검수 결과 확인"){visit("publish")}
-                    TextButton(onClick={visit("incomplete")},modifier=Modifier.fillMaxWidth()){
+                    TextButton(onClick=onHome,modifier=Modifier.fillMaxWidth()){
                         Text("나중에 하기",color=V4Color.sub)
                     }
                 }
