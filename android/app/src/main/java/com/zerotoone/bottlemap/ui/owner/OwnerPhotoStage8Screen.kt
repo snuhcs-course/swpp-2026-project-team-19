@@ -844,8 +844,22 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 St8RecognizedStrip(photo,line,
                     s.bars.firstOrNull{it.barId==barId}?.defaultPourMl){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
-                Text("가격을 못 읽었어요",color=V4Color.text,
-                    fontSize=24.sp,fontWeight=FontWeight.Bold)
+                Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.SpaceBetween) {
+                    Text("가격을 못 읽었어요",color=V4Color.text,
+                        fontSize=23.sp,fontWeight=FontWeight.Bold,
+                        modifier=Modifier.weight(1f))
+                    OutlinedButton(onClick={
+                        runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                            job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
+                            .onSuccess{pendingNewDraft=null;error=null;next()}
+                            .onFailure{error=it.message}
+                    },modifier=Modifier.height(34.dp),
+                        contentPadding=PaddingValues(horizontal=9.dp,vertical=0.dp),
+                        border=BorderStroke(1.dp,V4Color.line)) {
+                        Text("위스키가 아니에요",color=V4Color.sub,fontSize=11.sp)
+                    }
+                }
                 St8Card {
                     Row(verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(11.dp)) {
