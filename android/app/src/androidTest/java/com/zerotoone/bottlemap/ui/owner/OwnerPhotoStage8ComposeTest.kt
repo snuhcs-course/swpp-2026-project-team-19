@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
@@ -89,34 +90,21 @@ class OwnerPhotoStage8ComposeTest {
     }
 
 
-    @Test fun nextPreviousAlwaysUseNewAndPriceScreensAndNeverDeadEndInCandidateUI() {
-        val list=listOf(
+    @Test fun reviewScreenHasNoManualPagingFooterAndUsesHeaderHome() {
+        showLines(listOf(
             MockExtractedLine("hakushu","하쿠슈DR",MockLineKind.PRODUCT,
                 suggestedProductId="demo-canonical",
                 options=listOf(MockMenuOption("h1",label="잔",pourMl=30,priceKrw=19000))),
-            MockExtractedLine("signatory","시그나토리 쿨일라13",MockLineKind.PRODUCT,
-                options=listOf(MockMenuOption("s1",label="잔",pourMl=30,priceKrw=20000))),
-            MockExtractedLine("bookers","부커스",MockLineKind.PRODUCT,
-                suggestedProductId="demo-canonical",
-                options=listOf(MockMenuOption("b1",label="잔",priceKrw=0))),
-            MockExtractedLine("lagavulin","라가불린 16년",MockLineKind.PRODUCT,
-                suggestedProductId="demo-canonical",
-                options=listOf(MockMenuOption("l1",label="잔",pourMl=30,priceKrw=22000)))
-        )
-        showLines(list)
+            MockExtractedLine("signatory","시그나토리",MockLineKind.PRODUCT,
+                options=listOf(MockMenuOption("s1",label="잔",pourMl=30,priceKrw=20000)))
+        ))
         compose.onNodeWithText("이 메뉴가 맞나요?").assertExists()
+        compose.onNodeWithTag("stage8-review-home").assertExists()
+        compose.onNodeWithText("나중에 하기").assertDoesNotExist()
         compose.onNodeWithText("‹ 이전").assertDoesNotExist()
-        compose.onNodeWithText("다음 ›").performClick()
-        compose.onNodeWithText("새로 등록할게요").assertExists()
-        compose.onNodeWithText("이 메뉴가 맞나요?").assertDoesNotExist()
-        compose.onNodeWithText("다음 ›").performClick()
-        compose.onNodeWithText("가격을 못 읽었어요").assertExists()
-        compose.onNodeWithText("이 메뉴가 맞나요?").assertDoesNotExist()
-        compose.onNodeWithText("‹ 이전").performClick()
-        compose.onNodeWithText("새로 등록할게요").assertExists()
-        compose.onNodeWithText("‹ 이전").performClick()
-        compose.onNodeWithText("이 메뉴가 맞나요?").assertExists()
-        compose.onNodeWithText("‹ 이전").assertDoesNotExist()
+        compose.onNodeWithText("다음 ›").assertDoesNotExist()
+        compose.onNodeWithText("맞아요").assertExists()
+        compose.onNodeWithText("다른 메뉴예요").assertExists()
     }
 
     @Test fun allReviewTypesHaveCompactTopExclusionAndCatalogDoesNot() {
@@ -128,26 +116,13 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("이번 줄 제외").assertDoesNotExist()
     }
 
-    @Test fun singleReviewPageHidesBothPreviousAndNext() {
-        showLine(MockExtractedLine("single","하쿠슈DR",MockLineKind.PRODUCT,
-            suggestedProductId="demo-canonical",
-            options=listOf(MockMenuOption("one",label="잔",pourMl=30,priceKrw=19000))))
+    @Test fun priceAndNewReviewPagesOfferHeaderHomeWithoutPaging() {
+        showLine(MockExtractedLine("new-product","시그나토리",MockLineKind.PRODUCT,
+            options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=19000))))
+        compose.onNodeWithText("새로 등록할게요").assertExists()
+        compose.onNodeWithTag("stage8-review-home").assertExists()
+        compose.onNodeWithText("다음 ›").assertDoesNotExist()
         compose.onNodeWithText("‹ 이전").assertDoesNotExist()
-        compose.onNodeWithText("다음 ›").assertDoesNotExist()
-    }
-
-    @Test fun finalReviewPageHidesNextButRetainsPrevious() {
-        showLines(listOf(
-            MockExtractedLine("one","하쿠슈DR",MockLineKind.PRODUCT,
-                suggestedProductId="demo-canonical",
-                options=listOf(MockMenuOption("o1",label="잔",pourMl=30,priceKrw=19000))),
-            MockExtractedLine("two","러셀",MockLineKind.PRODUCT,
-                candidateProductIds=listOf("demo-canonical"),
-                options=listOf(MockMenuOption("o2",label="잔",pourMl=30,priceKrw=15000)))
-        ))
-        compose.onNodeWithText("다음 ›").performClick()
-        compose.onNodeWithText("‹ 이전").assertExists()
-        compose.onNodeWithText("다음 ›").assertDoesNotExist()
     }
 
     @Test fun summaryAlwaysOpensFirstUnreviewedHakushuRatherThanSecondLine() {
@@ -163,7 +138,7 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("새로 등록할게요").assertDoesNotExist()
     }
 
-    @Test fun reviewPagerLaterButtonReturnsWithoutDecidingCurrentLine() {
+    @Test fun headerHomeReturnsWithoutDecidingCurrentLine() {
         val repository=LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         repository.saveBrand(MockBrand("b","브랜드"))
@@ -181,7 +156,7 @@ class OwnerPhotoStage8ComposeTest {
             OwnerPhotoStage8Screen(vm.state.collectAsState().value,vm,{}, {later=true})
         }}
         compose.onNodeWithText("1줄 확인 시작").performClick()
-        compose.onNodeWithText("나중에 하기").performClick()
+        compose.onNodeWithTag("stage8-review-home").performClick()
         compose.runOnIdle {
             assert(later)
             val snap=(vm.state.value as MockOwnerLoadState.Ready).snapshot
