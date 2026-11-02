@@ -1,4 +1,4 @@
-"""The menu board version and option discount columns enforce docs/schema_guide.md 12 in the database."""
+"""The menu board version, option discount, sold-out and confirmation columns (docs/schema_guide.md 7 and 12)."""
 
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
@@ -29,7 +29,33 @@ def test_existing_boards_start_at_version_one(db_session):
         {"id": board_id, "bar": make_bar(db_session).id},
     )
 
-    assert db_session.execute(text("SELECT version FROM menu_boards WHERE id = :id"), {"id": board_id}).scalar() == 1
+    row = db_session.execute(
+        text("SELECT version, confirmed_at, confirmed_by_user_id FROM menu_boards WHERE id = :id"), {"id": board_id}
+    ).one()
+    # Never confirmed yet.
+    assert tuple(row) == (1, None, None)
+
+
+def test_existing_items_are_on_sale(db_session):
+    product = make_product(db_session, make_brand(db_session, "Glenfiddich"), "Glenfiddich 12")
+    item_id = uuid4()
+    db_session.execute(
+        text("INSERT INTO bar_menu_items (id, bar_id, product_id) VALUES (:id, :bar, :product)"),
+        {"id": item_id, "bar": make_bar(db_session).id, "product": product.id},
+    )
+
+    sold_out_at = db_session.scalar(text("SELECT sold_out_at FROM bar_menu_items WHERE id = :id"), {"id": item_id})
+    assert sold_out_at is None
+
+
+def test_a_confirmation_records_an_existing_user(db_session):
+    board = publish_menu(db_session, make_bar(db_session), [])
+
+    board.confirmed_at, board.confirmed_by_user_id = STARTS, make_user(db_session).id
+    db_session.flush()
+    board.confirmed_by_user_id = uuid4()
+    with pytest.raises(IntegrityError):
+        db_session.flush()
 
 
 def test_board_version_is_positive(db_session):
