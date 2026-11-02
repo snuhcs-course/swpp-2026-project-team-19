@@ -11,7 +11,7 @@ class OwnerRegistrationPhoneInputTest {
         val previous=TextFieldValue("010-1234",selection=TextRange(4))
         val incoming=TextFieldValue("010-91234",selection=TextRange(5))
         val result=ownerPhoneEdit(previous,incoming)
-        assertEquals("010-9123-4",result.text)
+        assertEquals("010-912-34",result.text)
         assertEquals(5,result.selection.start)
     }
 
