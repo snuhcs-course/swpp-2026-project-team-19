@@ -1152,6 +1152,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         Text("나중에 하기",color=V4Color.sub)
                     }
                 }
+            }
             if(screen in listOf("line","new","price","catalog","edit") && pair!=null) {
                 TextButton(onClick={
                     runCatching{vm.review(job.menuImportId,pair.second.extractedItemId,
@@ -1161,7 +1162,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 },modifier=Modifier.fillMaxWidth()) {
                     Text("이 줄은 올리지 않기",color=V4Color.sub,fontSize=12.sp)
                 }
-            }
             }
         }
     }
