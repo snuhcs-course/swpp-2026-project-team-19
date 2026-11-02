@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.MockBar
+import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
 import com.zerotoone.bottlemap.data.owner.MockBrand
 import com.zerotoone.bottlemap.data.owner.MockPreview
 
@@ -38,6 +39,15 @@ internal fun ownerV4Category(category: String): String = when (category.lowercas
     "beer" -> "맥주"
     "other" -> "기타"
     else -> category
+}
+
+/** UI-only grouping. Other-alcohol subtypes do not change a product's API category. */
+internal fun ownerV4Category(product: MockCatalogProduct?): String {
+    if (product?.category?.equals("otherAlcohol", ignoreCase = true) == true) {
+        val subtype = product.otherAlcoholKind?.trim()
+        if (!subtype.isNullOrEmpty()) return subtype
+    }
+    return ownerV4Category(product?.category ?: "기타")
 }
 
 /** Customer and Owner use identical menu rows; customer never displays sold-out products. */
@@ -70,7 +80,7 @@ internal fun OwnerPreviewV4Menu(
                 color = V4Color.sub, fontSize = 12.sp)
         }
         val groups = found.groupBy { (_, product) ->
-            ownerV4Category(product?.category ?: "기타")
+            ownerV4Category(product)
         }
         groups.forEach { (category, entries) ->
             val open = query.isNotBlank() || category in openCategories

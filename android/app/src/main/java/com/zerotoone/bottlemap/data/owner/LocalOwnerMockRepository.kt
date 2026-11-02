@@ -47,9 +47,42 @@ interface OwnerMockRepository {
     fun deleteMenuItem(barMenuItemId: String)
     fun clearMenuForBar(barId: String)
     fun startPhotoImport(barId: String, selectedUris: List<String>, fixture: MockPhotoExtractionSource): String
+    fun queuePhotoImport(barId: String, photos: List<MockPhoto>): String
+    fun finishPhotoImport(importId: String, source: MockPhotoExtractionSource): MockImportStatus
+    fun cancelPhotoImport(importId: String)
+    /** Removes only a pending local import and its draft decisions, never posted menus. */
+    fun discardPhotoImport(importId: String)
+    /** Starts a new review of the same OCR fixture, preserving images and their stable IDs. */
+    fun resetPhotoReview(importId: String, expectedVersion: Int)
+    fun retryFailedPhotoImport(importId: String): String
     fun decideLine(importId: String, extractedItemId: String, expectedVersion: Int, decision: MockReviewDecision)
     fun publishAddOnly(importId: String, expectedVersion: Int): Int
     fun preview(barId: String, nowEpochMs: Long): MockPreview?
+}
+
+/** Only discard the current import and its unpublished retries since the latest APPLIED job.
+ * Historical failures preceding a successful publication are preserved for diagnostics.
+ */
+/** Append a confirmed edition only when the composed product name does not already include it.
+ * Prevent distinct editions sharing the same canonical display name.
+ */
+internal fun canonicalReviewProductName(draft: MockNewProductDraft): String {
+    val name=draft.name.trim()
+    val edition=draft.editionName?.trim().orEmpty()
+    return if(edition.isNotEmpty() && !name.endsWith(edition,ignoreCase=true))
+        "$name $edition" else name
+}
+
+internal fun unpublishedRetryChainIds(snapshot: MockOwnerSnapshot, importId: String): Set<String> {
+    val index=snapshot.imports.indexOfFirst { it.menuImportId==importId }
+    require(index>=0) { "Unknown import" }
+    val job=snapshot.imports[index]
+    val boundary=snapshot.imports.subList(0,index).indexOfLast {
+        it.barId==job.barId && it.status==MockImportStatus.APPLIED
+    }
+    return snapshot.imports.drop(boundary+1).take(index-boundary)
+        .filter {it.barId==job.barId && it.status!=MockImportStatus.APPLIED}
+        .mapTo(mutableSetOf()) {it.menuImportId}
 }
 
 /** Local-only serving option invariants shared by direct entry, review, and publish. */
@@ -83,6 +116,31 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         } catch (e: Exception) {
             MockOwnerLoadState.Error(e.message ?: "Mock 저장소를 읽지 못했습니다.")
         }
+    }
+
+    private fun requireNoActiveImport(s: MockOwnerSnapshot, barId: String) {
+        require(s.imports.none { it.barId == barId &&
+            it.status in listOf(MockImportStatus.UPLOADED, MockImportStatus.PROCESSING,
+                MockImportStatus.READY_FOR_REVIEW) }) { "ACTIVE_IMPORT_EXISTS" }
+    }
+
+    private fun reservedImportId(s: MockOwnerSnapshot): Pair<String, Long> {
+        var n = s.nextLocalId
+        while (s.imports.any { it.menuImportId == "local-import-$n" }) n++
+        return "local-import-$n" to n + 1
+    }
+
+    private fun sanitizeExtractedLine(line: MockExtractedLine): MockExtractedLine {
+        // Stage 7 has no price entry UI. The Stage 8 price-entry state is
+        // explicitly represented by 0, never a plausible guessed amount.
+        val missingPrice = line.options.any { it.priceKrw <= 0 || it.priceKrw > 99_999_999 }
+        return line.copy(
+            needsPriceEntry = line.needsPriceEntry || missingPrice,
+            options = line.options.map {
+                if (it.priceKrw in 1..99_999_999) it
+                else it.copy(priceKrw = 0, discount = null)
+            },
+        )
     }
 
     private fun snapshot(): MockOwnerSnapshot = when (val value = current.value) {
@@ -387,6 +445,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(item.options.map { it.optionId }.distinct().size == item.options.size)
         change { state ->
             require(state.bars.any { it.barId == item.barId }) { "Unknown bar" }
+            requireNoActiveImport(state, item.barId)
             val product = state.products.firstOrNull { it.productId == item.productId }
                 ?: requireNotNull(newProduct) { "상품을 먼저 확인해 주세요." }
             require(product.productId == item.productId && product.displayName.isNotBlank())
@@ -488,6 +547,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         change { s ->
             val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
                 ?: error("Unknown menu item")
+            requireNoActiveImport(s, row.barId)
             if (row.soldOut == value) s to Unit else s.copy(
                 menuItems = s.menuItems.map {
                     if (it.barMenuItemId == barMenuItemId) it.copy(soldOut = value) else it
@@ -500,6 +560,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         change { s ->
             val row = s.menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
                 ?: error("Unknown menu item")
+            requireNoActiveImport(s, row.barId)
             s.copy(
                 menuItems = s.menuItems.filterNot { it.barMenuItemId == barMenuItemId },
                 menuItemIdHistory = s.menuItemIdHistory +
@@ -512,6 +573,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
     override fun clearMenuForBar(barId: String) {
         change { s ->
             require(s.bars.any { it.barId == barId })
+            requireNoActiveImport(s, barId)
             val remaining = s.menuItems.filterNot { it.barId == barId }
             if (remaining.size == s.menuItems.size) s to Unit else s.copy(
                 menuItems = remaining,
@@ -531,8 +593,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(selectedUris.distinct().size == selectedUris.size)
         return change { s ->
             require(s.bars.any { it.barId == barId })
-            require(s.imports.none { it.barId == barId &&
-                it.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW) })
+            requireNoActiveImport(s, barId)
             // Fixture/restored snapshots may contain imports without advancing the local
             // sequence. Reserve a unique job ID before creating any image/line IDs.
             var reserved = s.nextLocalId
@@ -559,6 +620,140 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
     }
 
+    override fun queuePhotoImport(barId: String, photos: List<MockPhoto>): String {
+        require(photos.size in 1..15 && photos.distinctBy { it.photoId }.size == photos.size)
+        require(photos.all { it.kind == MockPhotoKind.MENU_CAPTURE && it.uri.isNotBlank() })
+        return change { s ->
+            require(s.bars.any { it.barId == barId })
+            requireNoActiveImport(s, barId)
+            val (id, next) = reservedImportId(s)
+            // The same stored photo ID and imageOrder survive process recreation.
+            val images = photos.mapIndexed { index, photo ->
+                MockPhotoExtraction(photo.photoId, photo.uri, index + 1, emptyList())
+            }
+            s.copy(imports = s.imports + MockMenuImport(id, barId,
+                MockImportStatus.PROCESSING, 1, images), nextLocalId = next) to id
+        }
+    }
+
+    override fun finishPhotoImport(importId: String, source: MockPhotoExtractionSource):
+        MockImportStatus = change { s ->
+        val job = s.imports.firstOrNull { it.menuImportId == importId }
+            ?: error("Unknown photo import")
+        require(job.status == MockImportStatus.PROCESSING ||
+            job.status == MockImportStatus.UPLOADED) { "INVALID_IMPORT_STATE" }
+        var sequence = s.nextLocalId
+        // Never leave a queued job stuck in PROCESSING when a fixture is malformed.
+        // Keep validation inside change so FAILED is persisted atomically with its reason.
+        val extraction = try {
+            Result.success(job.images.map { photo ->
+                photo.copy(lines = source.linesFor(photo.sourceUri).map { line ->
+                require(line.sourceBox == null || (line.sourceBox.size == 4 &&
+                    line.sourceBox.all { it in 0..1000 } &&
+                    line.sourceBox[0] < line.sourceBox[2] &&
+                    line.sourceBox[1] < line.sourceBox[3]))
+                val normalized = sanitizeExtractedLine(line)
+                val normalizedOptions = normalized.options.map {
+                    it.copy(optionId = "local-option-${sequence++}")
+                }
+                // Only explicit test fixtures may mark an exact match proposal.
+                // Even those proposals must be confirmed by the owner before publishing.
+                val autoId = normalized.suggestedProductId?.takeIf { productId ->
+                    normalized.mockAutoAccepted && normalized.kind == MockLineKind.PRODUCT &&
+                        normalized.candidateProductIds.isEmpty() &&
+                        s.products.any {it.productId==productId && it.isActive} &&
+                        normalizedOptions.isNotEmpty() &&
+                        normalizedOptions.all(::validMockMenuOption)
+                }
+                require(!normalized.mockAutoAccepted || autoId!=null) {
+                    "Invalid mock auto-accepted fixture"
+                }
+                normalized.copy(extractedItemId = "local-line-${sequence++}",
+                    options = normalizedOptions, decision = null)
+                })
+            })
+        } catch (e: Exception) {
+            Result.failure<List<MockPhotoExtraction>>(e)
+        }
+        // Partial and invalid batches must not expose a half-reviewed import.
+        val images = extraction.getOrNull() ?: job.images.map { it.copy(lines = emptyList()) }
+        val success = extraction.isSuccess && images.isNotEmpty() &&
+            images.all { it.lines.isNotEmpty() }
+        val status = if (success) MockImportStatus.READY_FOR_REVIEW else MockImportStatus.FAILED
+        val failure = extraction.exceptionOrNull()?.message?.take(180)
+        val reason = if (success) null else if (extraction.isFailure)
+            "Mock 추출 결과 검증 실패: ${failure ?: "유효하지 않은 결과"}. 사진을 다시 선택하거나 재시도해 주세요."
+        else "이 사진에 연결된 Mock 추출 결과가 없습니다. 사진을 다시 선택하거나 나중에 재시도해 주세요."
+        val updated = job.copy(status = status, images = images, failureReason = reason)
+        s.copy(imports = s.imports.map {
+            if (it.menuImportId == importId) updated else it
+        }, nextLocalId = if (success) sequence else s.nextLocalId) to status
+    }
+
+    override fun cancelPhotoImport(importId: String) {
+        change { s ->
+            val job = s.imports.firstOrNull { it.menuImportId == importId }
+                ?: error("Unknown photo import")
+            if (job.status == MockImportStatus.CANCELED) return@change s to Unit
+            require(job.status in listOf(MockImportStatus.UPLOADED,
+                MockImportStatus.PROCESSING, MockImportStatus.READY_FOR_REVIEW)) {
+                "INVALID_IMPORT_STATE"
+            }
+            s.copy(imports = s.imports.map {
+                if (it.menuImportId == importId) it.copy(status = MockImportStatus.CANCELED)
+                else it
+            }) to Unit
+        }
+    }
+
+    override fun discardPhotoImport(importId: String) {
+        change { state ->
+            val job = state.imports.firstOrNull { it.menuImportId == importId }
+                ?: error("Unknown import")
+            require(job.status in listOf(MockImportStatus.UPLOADED,
+                MockImportStatus.PROCESSING,MockImportStatus.READY_FOR_REVIEW,
+                MockImportStatus.FAILED,MockImportStatus.CANCELED)) {
+                "INVALID_IMPORT_STATE"
+            }
+            val discardIds=unpublishedRetryChainIds(state,importId)
+            state.copy(imports=state.imports.filterNot {
+                it.menuImportId in discardIds
+            }) to Unit
+        }
+    }
+
+    override fun resetPhotoReview(importId: String, expectedVersion: Int) {
+        change { state ->
+            val job = state.imports.firstOrNull { it.menuImportId == importId }
+                ?: error("Unknown import")
+            require(job.status==MockImportStatus.READY_FOR_REVIEW) {
+                "INVALID_IMPORT_STATE"
+            }
+            require(job.reviewVersion==expectedVersion) { "REVIEW_OUTDATED" }
+            val reset=job.copy(reviewVersion=job.reviewVersion+1,
+                images=job.images.map { photo ->
+                    photo.copy(lines=photo.lines.map { line ->
+                        line.copy(decision=null)
+                    })
+                })
+            state.copy(imports=state.imports.map {
+                if(it.menuImportId==importId)reset else it
+            }) to Unit
+        }
+    }
+
+    override fun retryFailedPhotoImport(importId: String): String = change { s ->
+        val job = s.imports.firstOrNull { it.menuImportId == importId }
+            ?: error("Unknown photo import")
+        require(job.status == MockImportStatus.FAILED) { "INVALID_IMPORT_STATE" }
+        requireNoActiveImport(s, job.barId)
+        val (nextId, nextSequence) = reservedImportId(s)
+        s.copy(imports = s.imports + job.copy(menuImportId = nextId,
+            status = MockImportStatus.PROCESSING, reviewVersion = 1, failureReason = null,
+            images = job.images.map { it.copy(lines = emptyList()) }),
+            nextLocalId = nextSequence) to nextId
+    }
+
     override fun decideLine(
         importId: String, extractedItemId: String, expectedVersion: Int, decision: MockReviewDecision,
     ) {
@@ -567,16 +762,68 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(job.status == MockImportStatus.READY_FOR_REVIEW)
             require(job.reviewVersion == expectedVersion) { "REVIEW_OUTDATED" }
             require(job.images.any { image -> image.lines.any { it.extractedItemId == extractedItemId } })
-            if (decision.kind == MockDecisionKind.SELECT_PRODUCT) {
-                require(decision.productId != null && s.products.any { it.productId == decision.productId })
-                require(decision.correctedOptions == null ||
-                    (decision.correctedOptions.isNotEmpty() &&
-                        decision.correctedOptions.map { it.identityKey() }.distinct().size == decision.correctedOptions.size &&
-                        decision.correctedOptions.all(::validMockMenuOption)))
-            } else require(decision.productId == null && decision.correctedOptions == null)
+            val original = job.images.flatMap { it.lines }.first {
+                it.extractedItemId == extractedItemId
+            }
+            if (decision.kind in listOf(MockDecisionKind.SELECT_PRODUCT, MockDecisionKind.CREATE_PRODUCT)) {
+                decision.displayNameOverride?.let { name ->
+                    require(name.trim().length in 1..200) { "CORRECTED_PRODUCT_NAME_OUT_OF_RANGE" }
+                }
+                if (decision.correctedOptions != null || decision.kind == MockDecisionKind.CREATE_PRODUCT) {
+                    val options = decision.correctedOptions ?: original.options
+                require(options.isNotEmpty() && options.all(::validMockMenuOption)) {
+                    "가격이 있는 옵션을 확인해 주세요."
+                }
+                require(options.map { it.optionId }.distinct().size == options.size)
+                require(options.map { it.identityKey() }.distinct().size == options.size)
+                }
+                if (decision.kind == MockDecisionKind.SELECT_PRODUCT) {
+                    val linked = s.products.firstOrNull { it.productId == decision.productId }
+                    require(linked != null && linked.isActive) { "PRODUCT_INACTIVE_OR_NOT_FOUND" }
+                    require(decision.newProduct == null)
+                } else {
+                    val draft = requireNotNull(decision.newProduct)
+                    require(decision.productId == null)
+                    require(draft.name.trim().length in 1..200)
+                    require(canonicalReviewProductName(draft).length in 1..200) {
+                        "PRODUCT_NAME_OUT_OF_RANGE"
+                    }
+                    require(draft.brandId != null || !draft.brandName.isNullOrBlank())
+                    if(draft.brandId==null) {
+                        val canonical=requireNotNull(draft.brandName).trim()
+                        require(canonical.length in 1..120) { "BRAND_NAME_OUT_OF_RANGE" }
+                        require(s.brands.none {it.name.trim().equals(canonical,ignoreCase=true)}) {
+                            "DUPLICATE_BRAND_FOUND: 기존 병입사를 선택해 주세요."
+                        }
+                    } else {
+                        require(s.brands.any {it.brandId==draft.brandId}) { "BRAND_NOT_FOUND" }
+                        // Fail at line review, not at a retry-only publication screen.
+                        val normalized=canonicalReviewProductName(draft)
+                        require(s.products.none {
+                            it.brandId==draft.brandId && it.category==draft.category &&
+                                it.displayName.equals(normalized,ignoreCase=true)
+                        }) { "DUPLICATE_PRODUCT_FOUND: 기존 카탈로그 상품을 선택해 주세요." }
+                    }
+                    require(draft.editionName == null ||
+                        draft.editionName.trim().length in 1..150) {
+                        "EDITION_NAME_OUT_OF_RANGE"
+                    }
+                    require(draft.ageYears == null || draft.ageYears in 0..200)
+                    require(draft.abvPercent == null ||
+                        (draft.abvPercent > 0.0 && draft.abvPercent <= 100.0))
+                    require(draft.category in listOf("whisky", "cocktail", "food", "otherAlcohol",
+                        "gin", "brandy", "rum", "wine"))
+                }
+            } else require(decision.productId == null && decision.newProduct == null &&
+                decision.correctedOptions == null)
+
+            val normalizedDecision = decision.copy(
+                displayNameOverride = decision.displayNameOverride?.trim()
+            )
             val updated = job.copy(images = job.images.map { image ->
                 image.copy(lines = image.lines.map { line ->
-                    if (line.extractedItemId == extractedItemId) line.copy(decision = decision) else line
+                    if (line.extractedItemId == extractedItemId)
+                        line.copy(decision = normalizedDecision) else line
                 })
             })
             s.copy(imports = s.imports.map { if (it.menuImportId == importId) updated else it }) to Unit
@@ -590,8 +837,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         require(job.reviewVersion == expectedVersion) { "REVIEW_OUTDATED" }
         val allLines = job.images.flatMap { it.lines }
         require(allLines.all { it.decision != null }) { "Review required for every extracted line" }
-        val grouped = allLines.filter { it.decision?.kind == MockDecisionKind.SELECT_PRODUCT }
-            .groupBy { requireNotNull(it.decision?.productId) }
+        val selectedLines = allLines.filter {
+            it.decision?.kind in listOf(MockDecisionKind.SELECT_PRODUCT, MockDecisionKind.CREATE_PRODUCT)
+        }
         var index = s.nextLocalId
         // Manual entries may use local-* IDs without advancing the import counter.
         // Reserve against all existing IDs AND those already generated in this publish.
@@ -607,6 +855,44 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             } while (candidate in historicallyReserved && prefix == "local-menu-" ||
                 !taken.add(candidate))
             return candidate
+        }
+        val newBrands = mutableListOf<MockBrand>()
+        val newProducts = mutableListOf<MockCatalogProduct>()
+        val grouped = selectedLines.groupBy { line ->
+            val decision = requireNotNull(line.decision)
+            if (decision.kind == MockDecisionKind.SELECT_PRODUCT) {
+                requireNotNull(decision.productId)
+            } else {
+                val draft = requireNotNull(decision.newProduct)
+                val normalized = canonicalReviewProductName(draft)
+                val brand = if (draft.brandId != null) {
+                    requireNotNull((s.brands + newBrands).firstOrNull { it.brandId == draft.brandId }) {
+                        "BRAND_NOT_FOUND"
+                    }
+                } else {
+                    val name = requireNotNull(draft.brandName).trim()
+                    // Choosing an existing persisted brand requires an explicit brandId.
+                    require(s.brands.none { it.name.equals(name, ignoreCase = true) }) {
+                        "DUPLICATE_BRAND_FOUND"
+                    }
+                    // Two explicitly confirmed new products can share a newly created brand.
+                    newBrands.firstOrNull { it.name.equals(name, ignoreCase = true) }
+                        ?: MockBrand("local-review-brand-${index++}", name).also { newBrands.add(it) }
+                }
+                // Existing catalog names require deliberate canonical selection, not silent linking.
+                require(s.products.none {
+                    it.displayName.equals(normalized, ignoreCase = true) &&
+                        it.category == draft.category && it.brandId == brand.brandId
+                }) { "DUPLICATE_PRODUCT_FOUND" }
+                // Same user-confirmed new product in different photos shares one ID and many options.
+                newProducts.firstOrNull { it.displayName.equals(normalized, ignoreCase = true) &&
+                    it.category == draft.category && it.brandId == brand.brandId &&
+                    it.editionName == draft.editionName }?.productId
+                    ?: MockCatalogProduct("local-review-product-${index++}", brand.brandId,
+                        normalized, draft.category, draft.ageYears, draft.editionName,
+                        catalogMatched = false, otherAlcoholKind = draft.otherAlcoholKind,
+                        abvPercent = draft.abvPercent).also { newProducts.add(it) }.productId
+            }
         }
         val added = grouped.mapNotNull { (productId, lines) ->
             if (s.menuItems.any { it.barId == job.barId && it.productId == productId }) return@mapNotNull null
@@ -632,10 +918,16 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 options = byKey.values.map { opts ->
                     opts.first().copy(optionId = reserveUnusedLocalId("local-serving-", usedOptionIds))
                 },
+                displayNameOverride = lines.mapNotNull { it.decision?.displayNameOverride }
+                    .firstOrNull(),
             )
         }
-        val applied = job.copy(status = MockImportStatus.APPLIED)
+        val applied = job.copy(status = MockImportStatus.APPLIED,
+            publishedAddedCount = added.size,
+            publishedNewProductCount = newProducts.size)
         s.copy(
+            brands = s.brands + newBrands,
+            products = s.products + newProducts,
             menuItems = s.menuItems + added,
             menuItemIdHistory = s.menuItemIdHistory + added.associate {
                 menuHistoryKey(it.barId, it.productId) to it.barMenuItemId

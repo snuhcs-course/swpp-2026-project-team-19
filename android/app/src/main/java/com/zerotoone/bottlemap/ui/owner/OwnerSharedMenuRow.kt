@@ -15,6 +15,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,6 +59,18 @@ internal fun OwnerMenuFlatRow(
     // even though the direct editor limits new entries to three portions.
     // Selection never changes the height for a given menu item.
     val rowHeight = maxOf(74, item.options.size * 17 + 12).dp
+    // The v4 slot remains 129dp for ordinary prices. Longer existing prices
+    // and larger text scales get the real measured space they need. Stage 7
+    // prevents NEW extracted prices above eight digits; legacy rows remain legible.
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val measuredPricePx = item.options.maxOfOrNull {
+        measurer.measure("%,d원".format(it.displayPrice(nowEpochMs)),
+            style = TextStyle(fontSize = 10.sp), maxLines = 1).size.width
+    } ?: 0
+    val priceSlotWidth = with(density) {
+        maxOf(ownerMenuPriceSlotWidth, measuredPricePx.toDp() + 27.dp + 30.dp + 10.dp)
+    }
     Box(Modifier.fillMaxWidth().height(rowHeight)
         .background(V4Color.background)
         .then(if (onSelect != null) Modifier.ownerQuietClick(onClick = onSelect) else Modifier)
@@ -95,7 +110,7 @@ internal fun OwnerMenuFlatRow(
                     }
                 }
             }
-            Column(Modifier.width(ownerMenuPriceSlotWidth),
+            Column(Modifier.width(priceSlotWidth),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 item.options.forEach { option ->
@@ -107,7 +122,7 @@ internal fun OwnerMenuFlatRow(
         if (selected && onEdit != null && onStock != null) {
             // Deliberately wider than the total price column: even the discount badge
             // at its leading edge is covered, without changing the product row height.
-            Row(Modifier.align(Alignment.CenterEnd).width(ownerMenuPriceSlotWidth + 6.dp)
+            Row(Modifier.align(Alignment.CenterEnd).width(priceSlotWidth + 6.dp)
                 .fillMaxHeight().background(V4Color.background)
                 .padding(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),

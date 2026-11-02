@@ -277,6 +277,7 @@ class LocalOwnerMockRepositoryTest {
         val second = repo(store)
         assertEquals(2, ready(second).imports.single().images.flatMap { it.lines }.count { it.decision != null })
         assertEquals(1, second.publishAddOnly(id, job.reviewVersion))
+        assertEquals(1,ready(second).imports.single().publishedAddedCount)
         val updated = ready(second)
         assertEquals(2, updated.menuItems.size)
         assertEquals(12000, updated.menuItems.first { it.productId == "product-12" }.options.single().priceKrw)
@@ -286,14 +287,48 @@ class LocalOwnerMockRepositoryTest {
         rejects { second.publishAddOnly(id, job.reviewVersion) }
     }
 
-    @Test fun unrecognisedPhotoHasNoInventedLinesAndEmptyPublishIsValid() {
-        val r = repo()
-        val id = r.startPhotoImport("fixture-bar", listOf("content://test/random"),
-            OwnerMockFixtures.imageFixtures(emptyMap()))
-        val job = ready(r).imports.single()
+    @Test fun unrecognisedPhotoFailsWithoutInventingExtractionOrPublishing() {
+        val r=repo()
+        val id=r.queuePhotoImport("fixture-bar",listOf(
+            MockPhoto("random-photo","content://test/random",MockPhotoKind.MENU_CAPTURE)))
+        r.finishPhotoImport(id,OwnerMockFixtures.imageFixtures(emptyMap()))
+        val job=ready(r).imports.single()
+        assertEquals(MockImportStatus.FAILED,job.status)
         assertTrue(job.images.single().lines.isEmpty())
-        assertEquals(0, r.publishAddOnly(id, job.reviewVersion))
-        assertTrue(r.preview("fixture-bar", 0)!!.visibleMenu.isEmpty())
+        rejects {r.publishAddOnly(id,job.reviewVersion)}
+        assertTrue(r.preview("fixture-bar",0)!!.visibleMenu.isEmpty())
+    }
+
+    @Test fun partiallyExtractedMultiPhotoImportIsFailedNotReadyForReview() {
+        val r=repo()
+        val id=r.queuePhotoImport("fixture-bar",listOf(
+            MockPhoto("first","content://fixture/first",MockPhotoKind.MENU_CAPTURE),
+            MockPhoto("missing","content://fixture/missing",MockPhotoKind.MENU_CAPTURE)))
+        r.finishPhotoImport(id,OwnerMockFixtures.imageFixtures(
+            mapOf("content://fixture/first" to listOf(
+                MockExtractedLine("one","위스키12",MockLineKind.PRODUCT,
+                    options=listOf(serving("one-serving",30,19000)))
+            ))))
+        val job=ready(r).imports.single()
+        assertEquals(MockImportStatus.FAILED,job.status)
+        assertEquals(1,job.images.first().lines.size)
+        assertTrue(job.images.last().lines.isEmpty())
+        rejects {r.publishAddOnly(id,job.reviewVersion)}
+    }
+
+    @Test fun nonProductExtractionMustBeExplicitlyReviewedBeforePublishing() {
+        val r=repo()
+        catalog(r)
+        val id=r.startPhotoImport("fixture-bar",listOf("content://nonproduct"),
+            OwnerMockFixtures.imageFixtures(mapOf("content://nonproduct" to listOf(
+                MockExtractedLine("header","영업 안내",MockLineKind.NON_PRODUCT)
+            ))))
+        val job=ready(r).imports.single()
+        assertEquals(MockImportStatus.READY_FOR_REVIEW,job.status)
+        rejects {r.publishAddOnly(id,job.reviewVersion)}
+        r.decideLine(id,job.images.single().lines.single().extractedItemId,
+            job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))
+        assertEquals(0,r.publishAddOnly(id,job.reviewVersion))
     }
 
     @Test fun conflictingTwoPhotoPricesForOneOptionAreRejectedAtomically() {
@@ -1030,4 +1065,179 @@ class LocalOwnerMockRepositoryTest {
         rejects { r.selectBar("fixture-bar") }
         assertEquals("fixture-bar", ready(r).selectedBarId)
     }
+
+    @Test fun resetPhotoReviewClearsDecisionsAndBumpsVersionWithoutTouchingPostedMenu() {
+        val store=InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
+        val r=repo(store)
+        catalog(r)
+        r.saveMenuItem(MockBarMenuItem("existing","fixture-bar","product-12",
+            listOf(serving("existing-option",30,12000))))
+        val importId=r.startPhotoImport("fixture-bar",listOf("content://fixture"),
+            MockPhotoExtractionSource {listOf(MockExtractedLine("fixture-line","Bottle 16",
+                MockLineKind.PRODUCT,suggestedProductId="product-16",
+                options=listOf(serving("extracted",30,19000))))})
+        val before=ready(r).imports.last()
+        val originalLine=before.images.single().lines.single()
+        r.decideLine(importId,originalLine.extractedItemId,before.reviewVersion,
+            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,productId="product-16"))
+        r.resetPhotoReview(importId,before.reviewVersion)
+        val after=ready(repo(store)).imports.last()
+        assertEquals(before.reviewVersion+1,after.reviewVersion)
+        assertEquals(originalLine.extractedItemId,after.images.single().lines.single().extractedItemId)
+        assertEquals(originalLine.options.map{it.optionId},
+            after.images.single().lines.single().options.map{it.optionId})
+        assertEquals(null,after.images.single().lines.single().decision)
+        assertEquals(12000,ready(r).menuItems.single().options.single().priceKrw)
+        rejects {r.decideLine(importId,originalLine.extractedItemId,before.reviewVersion,
+            MockReviewDecision(MockDecisionKind.EXCLUDE))}
+    }
+
+    @Test fun cancelAllUnpublishedRetryImportsPreservesExistingPublishedItems() {
+        val r=repo()
+        catalog(r)
+        r.saveMenuItem(MockBarMenuItem("existing","fixture-bar","product-12",
+            listOf(serving("existing-option",30,12000))))
+        val first=r.queuePhotoImport("fixture-bar",
+            listOf(MockPhoto("p1","content://p1",MockPhotoKind.MENU_CAPTURE)))
+        assertEquals(MockImportStatus.FAILED,
+            r.finishPhotoImport(first,MockPhotoExtractionSource {emptyList()}))
+        val retry=r.retryFailedPhotoImport(first)
+        assertEquals(MockImportStatus.READY_FOR_REVIEW,
+            r.finishPhotoImport(retry,MockPhotoExtractionSource { listOf(
+                MockExtractedLine("demo","Bottle 16",MockLineKind.PRODUCT,
+                    suggestedProductId="product-16",
+                    options=listOf(serving("o",30,19000))) ) }))
+        r.discardPhotoImport(retry)
+        assertTrue(ready(r).imports.isEmpty())
+        assertEquals(12000,ready(r).menuItems.single().options.single().priceKrw)
+        val fresh=r.queuePhotoImport("fixture-bar",
+            listOf(MockPhoto("p2","content://p2",MockPhotoKind.MENU_CAPTURE)))
+        assertTrue(ready(r).imports.any{it.menuImportId==fresh})
+    }
+
+    @Test fun explicitAutoMatchedBottleRequiresReviewAndPublishesWithBottleLabel() {
+        val r=repo()
+        catalog(r)
+        val importId=r.queuePhotoImport("fixture-bar",listOf(
+            MockPhoto("p-auto","content://auto",MockPhotoKind.MENU_CAPTURE)))
+        r.finishPhotoImport(importId,MockPhotoExtractionSource { listOf(
+            MockExtractedLine("auto-lagavulin","라가불린 16년",MockLineKind.PRODUCT,
+                suggestedProductId="product-16",
+                options=listOf(MockMenuOption("bottle",label="Bottle",priceKrw=280000)),
+                mockAutoAccepted=true),
+            MockExtractedLine("manual-hakushu","하쿠슈 DR",MockLineKind.PRODUCT,
+                suggestedProductId="product-12",
+                options=listOf(serving("glass",30,19000)))
+        )})
+        val job=ready(r).imports.last()
+        val lines=job.images.single().lines
+        assertEquals(null,lines.first().decision)
+        assertEquals(true,lines.first().mockAutoAccepted)
+        assertEquals(null,lines.last().decision)
+        r.decideLine(importId,lines.last().extractedItemId,job.reviewVersion,
+            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                productId="product-12",correctedOptions=lines.last().options))
+        r.resetPhotoReview(importId,job.reviewVersion)
+        val restarted=ready(r).imports.last()
+        assertEquals(null,restarted.images.single().lines.first().decision)
+        assertEquals(null,restarted.images.single().lines.last().decision)
+        r.decideLine(importId,restarted.images.single().lines.last().extractedItemId,
+            restarted.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))
+        rejects { r.publishAddOnly(importId,restarted.reviewVersion) }
+        r.decideLine(importId,restarted.images.single().lines.first().extractedItemId,
+            restarted.reviewVersion,MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                productId="product-16",correctedOptions=restarted.images.single().lines.first().options))
+        assertEquals(1,r.publishAddOnly(importId,restarted.reviewVersion))
+        val added=ready(r).menuItems.single()
+        assertEquals("product-16",added.productId)
+        assertEquals("Bottle",added.options.single().label)
+        assertEquals(280000,added.options.single().priceKrw)
+    }
+
+    @Test fun duplicateCatalogProductAndZeroAbvFailAtLineDecision() {
+        val r=repo()
+        r.saveBrand(MockBrand("existing-brand","Signatory"))
+        r.saveCatalogProduct(MockCatalogProduct("existing-product","existing-brand","Caol Ila 13년"))
+        val id=r.startPhotoImport("fixture-bar",listOf("content://draft"),
+            MockPhotoExtractionSource {listOf(MockExtractedLine("draft","Caol Ila",
+                MockLineKind.PRODUCT,options=listOf(serving("o",30,20000))))})
+        val job=ready(r).imports.last()
+        val line=job.images.single().lines.single()
+        fun submit(draft:MockNewProductDraft)=r.decideLine(id,line.extractedItemId,
+            job.reviewVersion,MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
+                correctedOptions=line.options,newProduct=draft))
+        rejects {submit(MockNewProductDraft("Caol Ila 13년",brandId="existing-brand"))}
+        rejects {submit(MockNewProductDraft("Caol Ila New",brandId="existing-brand",
+            abvPercent=0.0))}
+        assertEquals(null,ready(r).imports.last().images.single().lines.single().decision)
+        submit(MockNewProductDraft("Caol Ila New",brandId="existing-brand",abvPercent=46.0))
+        assertEquals(MockDecisionKind.CREATE_PRODUCT,
+            ready(r).imports.last().images.single().lines.single().decision?.kind)
+    }
+
+    @Test fun productEditionIsPartOfCanonicalNameAndIdentity() {
+        val first=MockNewProductDraft(name="Caol Ila 13년",
+            brandName="Signatory",editionName="Vintage Edition",ageYears=13)
+        val second=first.copy(editionName="Cask Strength")
+        assertEquals("Caol Ila 13년 Vintage Edition",canonicalReviewProductName(first))
+        assertEquals("Caol Ila 13년 Cask Strength",canonicalReviewProductName(second))
+        assertEquals("Caol Ila 13년 Vintage Edition",
+            canonicalReviewProductName(first.copy(name="Caol Ila 13년 Vintage Edition")))
+    }
+
+    @Test fun duplicateBrandAndOverlengthNamesAreRejectedDuringReview() {
+        val r=repo()
+        r.saveBrand(MockBrand("existing-brand","Signatory"))
+        val id=r.startPhotoImport("fixture-bar",listOf("content://draft"),
+            MockPhotoExtractionSource {listOf(MockExtractedLine("draft","Caol Ila",
+                MockLineKind.PRODUCT, options=listOf(serving("o",30,20000))))})
+        val job=ready(r).imports.last()
+        val line=job.images.single().lines.single()
+        fun submit(draft:MockNewProductDraft)=r.decideLine(id,line.extractedItemId,
+            job.reviewVersion,MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
+                correctedOptions=line.options,newProduct=draft))
+        rejects {submit(MockNewProductDraft("Caol Ila 13년",brandName=" Signatory ")) }
+        rejects {submit(MockNewProductDraft("Caol Ila 13년",brandName="x".repeat(121))) }
+        submit(MockNewProductDraft("Caol Ila 13년",brandId="existing-brand"))
+        assertEquals(MockDecisionKind.CREATE_PRODUCT,
+            ready(r).imports.last().images.single().lines.single().decision?.kind)
+    }
+
+    @Test fun duplicateNewProductLinesPublishOneCatalogRowAndActualCount() {
+        val r=repo()
+        val id=r.startPhotoImport("fixture-bar",listOf("content://draft"),
+            MockPhotoExtractionSource {listOf(
+                MockExtractedLine("first","Caol Ila 30ml",MockLineKind.PRODUCT,
+                    options=listOf(serving("o1",30,20000))),
+                MockExtractedLine("second","Caol Ila 60ml",MockLineKind.PRODUCT,
+                    options=listOf(serving("o2",60,38000))))})
+        val job=ready(r).imports.last()
+        val draft=MockNewProductDraft(name="Caol Ila 13년",brandName="Signatory",
+            ageYears=13,editionName="Vintage Edition")
+        job.images.single().lines.forEach {line ->
+            r.decideLine(id,line.extractedItemId,job.reviewVersion,
+                MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
+                    correctedOptions=line.options,newProduct=draft))
+        }
+        assertEquals(1,r.publishAddOnly(id,job.reviewVersion))
+        val updated=ready(r)
+        assertEquals(1,updated.imports.last().publishedAddedCount)
+        assertEquals(1,updated.imports.last().publishedNewProductCount)
+        assertEquals("Caol Ila 13년 Vintage Edition",updated.products.single().displayName)
+        assertEquals(2,updated.menuItems.single().options.size)
+    }
+
+    @Test fun discardRetryChainNeverErasesOldFailureBeforeAppliedImport() {
+        val old=MockMenuImport("old","fixture-bar",MockImportStatus.FAILED,1,emptyList())
+        val applied=MockMenuImport("applied","fixture-bar",MockImportStatus.APPLIED,1,emptyList())
+        val retry=MockMenuImport("retry","fixture-bar",MockImportStatus.FAILED,1,emptyList())
+        val pending=MockMenuImport("pending","fixture-bar",MockImportStatus.PROCESSING,1,emptyList())
+        val snapshot=OwnerMockFixtures.registeredBar().copy(
+            imports=listOf(old,applied,retry,pending))
+        assertEquals(setOf("retry","pending"),unpublishedRetryChainIds(snapshot,"pending"))
+        val r=repo(InMemoryMockOwnerStateStore(snapshot))
+        r.discardPhotoImport("pending")
+        assertEquals(listOf("old","applied"),ready(r).imports.map{it.menuImportId})
+    }
+
 }

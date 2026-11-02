@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -175,6 +176,16 @@ internal fun OwnerManualMenuScreen(
     val bar = snapshot?.bars?.firstOrNull { it.barId == snapshot.selectedBarId }
         ?: snapshot?.bars?.firstOrNull()
     val items = snapshot?.menuItems?.filter { it.barId == bar?.barId }.orEmpty()
+    // Only the latest import may be resumed/cancelled. An earlier FAILED attempt
+    // remains archival and must not resurrect after a later APPLIED import.
+    val latestPhotoJob = snapshot?.imports?.lastOrNull { it.barId==bar?.barId }
+    val activeJob = latestPhotoJob?.takeIf { it.status in listOf(
+        MockImportStatus.UPLOADED,MockImportStatus.PROCESSING,
+        MockImportStatus.READY_FOR_REVIEW,MockImportStatus.FAILED) }
+    // A failed import is terminal: direct editing becomes available immediately.
+    val activePhotoImport = activeJob?.status in listOf(
+        MockImportStatus.UPLOADED,MockImportStatus.PROCESSING,
+        MockImportStatus.READY_FOR_REVIEW)
     val products = snapshot?.products.orEmpty()
     val brands = (snapshot?.brands.orEmpty() + htmlBrands).distinctBy { it.brandId }
     // A deleted local product retains its ID; offer it again only for this bar,
@@ -192,9 +203,12 @@ internal fun OwnerManualMenuScreen(
     val candidates = (products.filter { it.catalogMatched } + htmlCatalog +
         deletedLocalCandidates + activeLocalCandidates).distinctBy { it.productId }
 
+    val photoContext=LocalContext.current
+    val photoStore=remember(photoContext) { OwnerMenuPhotoStore(photoContext) }
     val outsideFocus = LocalFocusManager.current
     val outsideKeyboard = LocalSoftwareKeyboardController.current
     var screen by rememberSaveable(bar?.barId) { mutableStateOf("list") }
+    var cancelPhotoConfirm by rememberSaveable(bar?.barId) { mutableStateOf(false) }
     var query by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var openCategories by rememberSaveable(bar?.barId) { mutableStateOf(listOf("위스키")) }
     var selectedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
@@ -256,6 +270,7 @@ internal fun OwnerManualMenuScreen(
     fun save() {
         if (bar == null) return
         try {
+            require(!activePhotoImport) { "ACTIVE_IMPORT_EXISTS" }
             val name = itemName.trim()
             val old = items.firstOrNull { it.barMenuItemId == editId }
             val persisted = products.firstOrNull { it.productId == old?.productId }
@@ -393,6 +408,33 @@ internal fun OwnerManualMenuScreen(
         } catch (e: Exception) { error = e.message ?: "저장하지 못했어요." }
     }
 
+    if(cancelPhotoConfirm && activeJob!=null) {
+        AlertDialog(
+            onDismissRequest={cancelPhotoConfirm=false},
+            title={Text("메뉴판 사진 등록을 취소할까요?")},
+            text={Text("선택한 사진과 검수한 내용이 모두 삭제돼요.")},
+            confirmButton={TextButton(onClick={
+                // Never erase a photo still referenced by any published job.
+                val removedIds=unpublishedRetryChainIds(
+                    requireNotNull(snapshot),activeJob.menuImportId)
+                val removed=snapshot.imports.filter {it.menuImportId in removedIds}
+                val retainedUris=snapshot?.imports.orEmpty().filterNot {
+                    it in removed
+                }.flatMap{it.images.map {image->image.sourceUri}}.toSet()
+                val photoCopies=removed.flatMap{it.images}.distinctBy{it.sourceUri}
+                    .filter {it.sourceUri !in retainedUris}
+                    .map {MockPhoto(it.imageId,it.sourceUri,MockPhotoKind.MENU_CAPTURE)}
+                runCatching {viewModel.discardPhotoImport(activeJob.menuImportId)}
+                    .onSuccess {
+                        cancelPhotoConfirm=false;error=null;screen="list"
+                        // File.unlink is cheap (no image decoding); perform before
+                        // leaving this composition so navigation cannot cancel cleanup.
+                        photoCopies.forEach(photoStore::delete)
+                    }.onFailure {error=it.message}
+            }){Text("작업 취소하기",color=Color(0xFFFFB4AB))}},
+            dismissButton={TextButton(onClick={cancelPhotoConfirm=false}){Text("돌아가기")}}
+        )
+    }
     if (confirm != null) {
         val action = requireNotNull(confirm)
         val target = items.firstOrNull { it.barMenuItemId == action.removePrefix("stock:") }
@@ -431,7 +473,7 @@ internal fun OwnerManualMenuScreen(
         }) {
         V4Toolbar(null, ::back)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
+            .padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             when {
                 state == MockOwnerLoadState.Loading ->
                     Text("메뉴 정보 불러오는 중", color = V4Color.sub)
@@ -441,50 +483,57 @@ internal fun OwnerManualMenuScreen(
                 }
                 bar == null -> Text("관리할 매장이 없어요.", color = V4Color.sub)
                 screen == "list" -> {
-                    Text("메뉴 관리", color = V4Color.text, fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif, fontSize = 24.sp,
-                        modifier = Modifier.padding(bottom = 6.dp))
-                    Text("최근 갱신 " + ownerDisplayDate(bar.lastMenuPublishedAtEpochMs),
-                        color = V4Color.sub, fontSize = 12.sp)
-                    Text("사진으로 메뉴 추가", color = V4Color.text,
-                        fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    val job = snapshot?.imports?.lastOrNull { it.barId == bar.barId }
-                    Row(Modifier.fillMaxWidth()
-                        .background(V4Color.surface, RoundedCornerShape(11.dp))
-                        .padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.Top) {
-                        BmIcon(BmIconId.REVIEW, null, Modifier.size(25.dp), tint = V4Color.primary)
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(when(job?.status) {
-                                MockImportStatus.PROCESSING -> "메뉴판 분석 중"
-                                MockImportStatus.READY_FOR_REVIEW -> "추가할 메뉴 확인 준비됨"
-                                MockImportStatus.FAILED -> "메뉴판 분석 실패"
-                                else -> "메뉴판 사진으로 추가"
-                            }, color = V4Color.text, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                            Text("필요할 때 메뉴를 추가하고 확인하세요.",
-                                color = V4Color.sub, fontSize = 11.sp)
-                            ManualSmallButton(
-                                if (job?.status == MockImportStatus.READY_FOR_REVIEW) "추가할 메뉴 확인하기"
-                                else if (job?.status == MockImportStatus.PROCESSING ||
-                                    job?.status == MockImportStatus.FAILED) "작업 확인하기"
-                                else "메뉴판 사진으로 추가하기",
-                                onClick = {
-                                    val status = job?.status
-                                    if (status == MockImportStatus.PROCESSING ||
-                                        status == MockImportStatus.READY_FOR_REVIEW ||
-                                        status == MockImportStatus.FAILED) onExistingJob(status)
-                                    else onNewPhoto()
-                                })
+                    Text("메뉴 관리", color=V4Color.text,fontWeight=FontWeight.Bold,
+                        fontFamily=FontFamily.Serif,fontSize=24.sp)
+                    Text("사진으로 메뉴 추가",color=V4Color.text,
+                        fontWeight=FontWeight.Bold,fontSize=16.sp)
+                    Row(Modifier.fillMaxWidth().background(V4Color.surface,
+                        RoundedCornerShape(11.dp)).manualTap {
+                            val status=activeJob?.status
+                            if(status!=null) onExistingJob(status) else onNewPhoto()
+                        }.padding(horizontal=12.dp,vertical=12.dp),
+                        verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.spacedBy(9.dp)) {
+                        BmIcon(BmIconId.REVIEW,null,Modifier.size(24.dp),tint=V4Color.primary)
+                        Text(when(activeJob?.status) {
+                            MockImportStatus.PROCESSING,MockImportStatus.UPLOADED ->
+                                "메뉴판 분석 중 · 작업 확인하기"
+                            MockImportStatus.READY_FOR_REVIEW ->
+                                if(activeJob.images.flatMap { it.lines }
+                                        .filter {it.kind==MockLineKind.PRODUCT}
+                                        .all {it.decision!=null}) "메뉴 게시 이어서 하기"
+                                else "추가할 메뉴 확인하기"
+                            MockImportStatus.FAILED -> "메뉴판 분석 실패 · 다시 확인하기"
+                            else -> "메뉴판 사진으로 추가하기"
+                        },color=V4Color.text,
+                            fontWeight=FontWeight.Bold,fontSize=13.sp,
+                            modifier=Modifier.weight(1f))
+                        if(activeJob!=null) {
+                            Box(Modifier
+                                .background(Color(0xFF693630),RoundedCornerShape(7.dp))
+                                .border(1.dp,Color(0xFF7B453E),RoundedCornerShape(7.dp))
+                                .manualTap { cancelPhotoConfirm=true }
+                                .padding(horizontal=11.dp,vertical=5.dp)) {
+                                Text("취소하기",color=Color(0xFFFFE8E5),fontSize=11.sp,
+                                    fontWeight=FontWeight.SemiBold)
+                            }
                         }
+                        Text("›",color=V4Color.sub,fontSize=20.sp)
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically) {
                         Text("현재 게시 메뉴", color = V4Color.text, fontWeight = FontWeight.Bold,
                             fontSize = 16.sp)
-                        Text("+ 직접 추가", Modifier.manualTap { edit(null) }
+                        Text("+ 직접 추가", Modifier.manualTap {
+                            if (activePhotoImport) error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                            else edit(null)
+                        }
                             .testTag("manual-menu-add"), color = V4Color.primary, fontSize = 12.sp)
                     }
+                    if (activePhotoImport) Text(
+                        "메뉴판 사진 등록 작업 중에는 메뉴를 수정할 수 없어요.",
+                        color = V4Color.primary, fontSize = 12.sp)
+                    error?.let { Text(it, color = Color(0xFFFFB4AB), fontSize = 12.sp) }
                     V4SearchField(query, { query = it }, "manual-menu-search", "메뉴명·브랜드 검색")
                     val entries = items.map { item ->
                         val p = products.firstOrNull { it.productId == item.productId }
@@ -494,20 +543,26 @@ internal fun OwnerManualMenuScreen(
                         manualMenuMatches(item, p, brand, query)
                     }
                     Row(Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically) {
-                        Text(if (query.isEmpty()) "전체 " + items.size + "개" else
-                            visible.size.toString() + "개 검색됨", color = V4Color.sub, fontSize = 11.sp)
-                        Text("메뉴를 선택해서 편집하세요", color = V4Color.sub, fontSize = 11.sp)
+                        horizontalArrangement=Arrangement.SpaceBetween,
+                        verticalAlignment=Alignment.CenterVertically) {
+                        Row(horizontalArrangement=Arrangement.spacedBy(9.dp),
+                            verticalAlignment=Alignment.CenterVertically) {
+                            Text(if(query.isEmpty()) "전체 " + items.size + "개" else
+                                visible.size.toString() + "개 검색됨",
+                                color=V4Color.sub,fontSize=11.sp)
+                            Text("최근 갱신 "+ownerDisplayDate(bar.lastMenuPublishedAtEpochMs),
+                                color=V4Color.primary,fontSize=11.sp)
+                        }
+                        Text("메뉴를 선택해서 편집하세요",color=V4Color.sub,fontSize=11.sp)
                     }
                     if (visible.isEmpty()) Text(if (query.isEmpty()) "등록된 메뉴가 없어요."
                         else "검색 결과가 없어요.", color = V4Color.sub)
                     val shownCategories = MANUAL_MENU_CATEGORIES + visible.mapNotNull { (_, p, _) ->
-                        p?.let { manualMenuCategoryLabel(it.category) }
+                        p?.let(::ownerV4Category)
                     }.distinct().filterNot { it in MANUAL_MENU_CATEGORIES }
                     shownCategories.forEach { cat ->
                         val rows = visible.filter { (_, p, _) ->
-                            p != null && manualMenuCategoryLabel(p.category) == cat
+                            p != null && ownerV4Category(p) == cat
                         }
                         if (rows.isNotEmpty()) {
                             val open = query.isNotBlank() || cat in openCategories
@@ -541,8 +596,16 @@ internal fun OwnerManualMenuScreen(
                                                 nowEpochMs, selectedId == item.barMenuItemId,
                                                 onSelect = { selectedId = if (selectedId == item.barMenuItemId)
                                                     null else item.barMenuItemId },
-                                                onEdit = { edit(item) },
-                                                onStock = { confirm = "stock:" + item.barMenuItemId })
+                                                onEdit = {
+                                                     if (activePhotoImport)
+                                                         error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                                     else edit(item)
+                                                 },
+                                                onStock = {
+                                                     if (activePhotoImport)
+                                                         error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                                     else confirm = "stock:" + item.barMenuItemId
+                                                 })
                                             if (index < entry.value.lastIndex)
                                                 HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                                         }
@@ -558,15 +621,19 @@ internal fun OwnerManualMenuScreen(
                     }
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     Box(Modifier.fillMaxWidth().height(43.dp)
-                        .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(8.dp))
-                        .manualTap { confirm = "reset" }
+                        .background(Color(0xFF693630),RoundedCornerShape(7.dp))
+                        .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(7.dp))
+                        .manualTap {
+                            if (activePhotoImport) error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                            else confirm = "reset"
+                        }
                         .testTag("manual-menu-reset"), contentAlignment = Alignment.Center) {
                         Row(horizontalArrangement = Arrangement.spacedBy(9.dp),
                             verticalAlignment = Alignment.CenterVertically) {
                             BmIcon(BmIconId.ERROR, null, Modifier.size(17.dp),
-                                tint = Color(0xFFFFB4AB))
-                            Text("전체 메뉴 초기화", color = Color(0xFFFFB4AB),
-                                fontSize = 12.sp)
+                                tint = Color(0xFFFFE8E5))
+                            Text("전체 메뉴 초기화", color = Color(0xFFFFE8E5),
+                                fontSize = 12.sp,fontWeight=FontWeight.SemiBold)
                         }
                     }
                 }
@@ -583,7 +650,9 @@ internal fun OwnerManualMenuScreen(
                                 saleOption = 0; error = null; screen = "promo"
                             }
                             if (editId != null) ManualTopButton("삭제", true) {
-                                confirm = "delete"
+                                if (activePhotoImport)
+                                    error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                else confirm = "delete"
                             }
                         }
                     }

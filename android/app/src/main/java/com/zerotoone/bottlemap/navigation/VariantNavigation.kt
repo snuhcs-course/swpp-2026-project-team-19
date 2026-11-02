@@ -6,7 +6,6 @@ import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
-import com.zerotoone.bottlemap.data.owner.openSingleBarManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -24,6 +23,9 @@ import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerComponentGallery
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoSelectionScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoJobScreen
+import com.zerotoone.bottlemap.ui.owner.OwnerPhotoStage8Screen
 import com.zerotoone.bottlemap.ui.owner.OwnerOperatingQuickScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuQuickEntryScreen
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
@@ -54,16 +56,9 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 is MockOwnerLoadState.Empty -> mockState.snapshot
                 else -> null
             }
-            val directManager = snapshot?.openSingleBarManager() == true
-            LaunchedEffect(directManager) {
-                if (directManager) {
-                    navController.navigate(OwnerPage.MGR_HOME.route) {
-                        popUpTo(OwnerRoutes.ENTRY) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-            }
-            if (!directManager) OwnerOnboardingScreen(
+            // Always show the owned-bar list. One or many bars use the same flow;
+            // the user explicitly selects which bar to manage.
+            OwnerOnboardingScreen(
                 viewModel = ownerViewModel,
                 onBack = { navController.popBackStack() },
                 onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
@@ -118,13 +113,13 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onMenu = { navController.navigate(OwnerPage.MGR_MENU.route) },
                         onAddBar = { navController.navigate(OwnerRoutes.ADD_BAR) },
                         onJob = { status ->
-                            navController.navigate(
-                                if (status == MockImportStatus.READY_FOR_REVIEW)
-                                    OwnerPage.MGR_REVIEW.route
-                                else if (status == MockImportStatus.APPLIED)
-                                    OwnerPage.MGR_MENU.route
-                                else OwnerPage.MGR_JOB.route
-                            )
+                            navController.currentBackStackEntry?.savedStateHandle
+                                ?.set("resumeOwnerImport",status==MockImportStatus.READY_FOR_REVIEW)
+                            navController.navigate(when(status) {
+                                MockImportStatus.APPLIED -> OwnerPage.MGR_MENU.route
+                                MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW.route
+                                else -> OwnerPage.MGR_JOB.route
+                            })
                         },
                     )
                     OwnerPage.MGR_STATUS -> OwnerOperatingQuickScreen(
@@ -158,11 +153,42 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onBack = { navController.popBackStack() },
                         onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
                         onExistingJob = { status ->
-                            navController.navigate(
-                                if (status == MockImportStatus.READY_FOR_REVIEW)
-                                    OwnerPage.MGR_REVIEW.route else OwnerPage.MGR_JOB.route
-                            )
+                            navController.currentBackStackEntry?.savedStateHandle
+                                ?.set("resumeOwnerImport",status==MockImportStatus.READY_FOR_REVIEW)
+                            navController.navigate(if(status==MockImportStatus.READY_FOR_REVIEW)
+                                OwnerPage.MGR_REVIEW.route else OwnerPage.MGR_JOB.route)
                         },
+                    )
+                    OwnerPage.MGR_PHOTO -> OwnerMenuPhotoSelectionScreen(
+                        state = mockState, viewModel = data,
+                        onBack = { navController.popBackStack() },
+                        onJob = { navController.navigate(OwnerPage.MGR_JOB.route) }
+                    )
+                    OwnerPage.MGR_JOB -> OwnerMenuPhotoJobScreen(
+                        state = mockState, viewModel = data,
+                        onHome = {
+                            navController.navigate(OwnerPage.MGR_MENU.route) {
+                                popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        },
+                        onRetryPhotos = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
+                        onReview = {
+                            navController.navigate(OwnerPage.MGR_REVIEW.route) {
+                                popUpTo(OwnerPage.MGR_JOB.route) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                    OwnerPage.MGR_REVIEW -> OwnerPhotoStage8Screen(
+                        state = mockState, vm = data,
+                        resumeFromMenu = navController.previousBackStackEntry?.savedStateHandle
+                            ?.get<Boolean>("resumeOwnerImport") == true,
+                        onBack = { navController.popBackStack() },
+                        onHome = { navController.navigate(OwnerPage.MGR_MENU.route) {
+                            popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
+                            launchSingleTop = true
+                        } }
                     )
                     else -> OwnerSkeletonScreen(
                         page = page,

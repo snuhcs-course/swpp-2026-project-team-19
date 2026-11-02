@@ -95,6 +95,8 @@ data class MockCatalogProduct(
     // Local manual-menu state only. Never infer a verified catalog match from a name.
     val catalogMatched: Boolean = true,
     val otherAlcoholKind: String? = null,
+    val abvPercent: Double? = null, // local review draft; not a backend DTO
+    val isActive: Boolean = true,
 )
 
 data class MockDiscount(
@@ -148,13 +150,26 @@ data class MockOperatingException(
     val closesNextDay: Boolean = false, // local-only overnight temporary hours
 )
 
-enum class MockImportStatus { PROCESSING, READY_FOR_REVIEW, FAILED, APPLIED }
+enum class MockImportStatus { UPLOADED, PROCESSING, READY_FOR_REVIEW, FAILED, APPLIED, CANCELED }
 enum class MockLineKind { PRODUCT, NON_PRODUCT, UNKNOWN }
-enum class MockDecisionKind { SELECT_PRODUCT, EXCLUDE, CONFIRM_NON_PRODUCT }
+enum class MockDecisionKind { SELECT_PRODUCT, CREATE_PRODUCT, EXCLUDE, CONFIRM_NON_PRODUCT }
+/** Explicitly owner-entered mock catalog draft, never inferred from the OCR text. */
+data class MockNewProductDraft(
+    val name: String,
+    val brandId: String? = null,
+    val brandName: String? = null,
+    val category: String = "whisky",
+    val ageYears: Int? = null,
+    val editionName: String? = null,
+    val abvPercent: Double? = null,
+    val otherAlcoholKind: String? = null,
+)
 data class MockReviewDecision(
     val kind: MockDecisionKind,
     val productId: String? = null,
     val correctedOptions: List<MockMenuOption>? = null,
+    val newProduct: MockNewProductDraft? = null,
+    val displayNameOverride: String? = null,
 )
 
 data class MockExtractedLine(
@@ -165,6 +180,11 @@ data class MockExtractedLine(
     val candidateProductIds: List<String> = emptyList(),
     val options: List<MockMenuOption> = emptyList(),
     val decision: MockReviewDecision? = null,
+    // Stage 8: this option's 0 price means manual entry is required, never 0 KRW.
+    val needsPriceEntry: Boolean = false,
+    val sourceBox: List<Int>? = null, // EXIF-normalized 0..1000 coordinates, null means unknown
+    // Explicit local fixture-only exact catalog match. No OCR or backend inference.
+    val mockAutoAccepted: Boolean = false,
 )
 data class MockPhotoExtraction(
     val imageId: String,
@@ -179,6 +199,10 @@ data class MockMenuImport(
     val reviewVersion: Int,
     val images: List<MockPhotoExtraction>,
     val failureReason: String? = null,
+    // Local Mock publication result: deduplicated actual new bar menu rows.
+    val publishedAddedCount: Int? = null,
+    // Actual number of distinct canonical products created during this Mock publish.
+    val publishedNewProductCount: Int? = null,
 )
 
 /**
