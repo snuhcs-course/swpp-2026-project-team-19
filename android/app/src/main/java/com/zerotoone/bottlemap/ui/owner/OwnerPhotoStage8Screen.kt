@@ -365,6 +365,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
             } else if((screen=="edit" || screen=="new") && pair!=null) {
                 val line=pair.second
+                var categoryPicker by remember {mutableStateOf(false)}
                 var photoOpen by remember {mutableStateOf(false)}
                 St8RecognizedStrip(pair.first,line){photoOpen=true}
                 if(photoOpen)Stage8SourcePhoto(pair.first,line.sourceBox){photoOpen=false}
@@ -372,7 +373,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     verticalAlignment=Alignment.CenterVertically) {
                     Text(if(screen=="edit")"가격과 용량을 확인해 주세요" else "새로 등록할게요",
                         color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold)
-                    OutlinedButton(onClick={chosenCategory="otherAlcohol"},
+                    OutlinedButton(onClick={categoryPicker=true},
                         modifier=Modifier.height(34.dp),
                         contentPadding=PaddingValues(horizontal=10.dp),
                         border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line),
@@ -382,19 +383,23 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                 }
                 var name by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.name.orEmpty())
+                    mutableStateOf(line.decision?.newProduct?.name ?: 
+                        if(line.sourceText=="시그나토리 쿨일라13")"Caol Ila" else "")
                 }
                 var brand by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.brandName.orEmpty())
+                    mutableStateOf(line.decision?.newProduct?.brandName ?: 
+                        if(line.sourceText=="시그나토리 쿨일라13")"Signatory Vintage" else "")
                 }
                 var brandId by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.brandId)
                 }
                 var age by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.ageYears?.toString().orEmpty())
+                    mutableStateOf(line.decision?.newProduct?.ageYears?.toString() ?:
+                        if(line.sourceText=="시그나토리 쿨일라13")"13" else "")
                 }
                 var noAge by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.newProduct?.ageYears==null)
+                    mutableStateOf(line.decision?.newProduct?.ageYears==null &&
+                        line.sourceText!="시그나토리 쿨일라13")
                 }
                 var edition by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.editionName.orEmpty())
@@ -492,6 +497,18 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         }
                     }
                 }
+                if(categoryPicker)AlertDialog(onDismissRequest={categoryPicker=false},
+                    title={Text("메뉴 종류를 선택해 주세요")},
+                    text={Column {
+                        listOf("cocktail" to "칵테일","food" to "안주",
+                            "otherAlcohol" to "기타 주류").forEach { (value,title)->
+                            TextButton(onClick={chosenCategory=value;categoryPicker=false}) {
+                                Text(title)
+                            }
+                        }
+                    }},confirmButton={TextButton(onClick={categoryPicker=false}) {
+                        Text("닫기")
+                    }})
                 val originals=line.decision?.correctedOptions ?: line.options.ifEmpty {
                     listOf(MockMenuOption("local-review-option-"+line.extractedItemId,priceKrw=0))
                 }
