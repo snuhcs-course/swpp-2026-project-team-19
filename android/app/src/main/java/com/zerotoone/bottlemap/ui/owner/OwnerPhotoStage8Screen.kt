@@ -239,7 +239,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 }
 /** The v4 HTML #i-edit geometry, not a rotated rectangle approximation. */
-@Composable private fun V4PencilIcon(modifier: Modifier = Modifier.size(22.dp),
+@Composable internal fun V4PencilIcon(modifier: Modifier = Modifier.size(22.dp),
     color: Color=V4Color.primary) {
     Canvas(modifier) {
         val u=size.width/24f
