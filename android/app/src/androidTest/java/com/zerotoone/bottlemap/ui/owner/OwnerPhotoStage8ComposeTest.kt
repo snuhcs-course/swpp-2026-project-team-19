@@ -7,6 +7,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.longClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zerotoone.bottlemap.data.owner.*
 import org.junit.Rule
@@ -79,7 +81,7 @@ class OwnerPhotoStage8ComposeTest {
         showLine(MockExtractedLine("raw", "위스키 미확인", MockLineKind.PRODUCT,
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=14000))))
         compose.onNodeWithText("‹ 이전").performClick()
-        compose.onNodeWithText("나중에 하기").performClick()
+        compose.onNodeWithText("1줄 확인").performTouchInput {longClick()}
         compose.onNodeWithText("1줄 남았어요").assertExists()
         compose.onNodeWithText("1줄 이어서 확인").assertExists()
     }
