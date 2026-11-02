@@ -50,6 +50,10 @@ interface OwnerMockRepository {
     fun queuePhotoImport(barId: String, photos: List<MockPhoto>): String
     fun finishPhotoImport(importId: String, source: MockPhotoExtractionSource): MockImportStatus
     fun cancelPhotoImport(importId: String)
+    /** Removes only a pending local import and its draft decisions, never posted menus. */
+    fun discardPhotoImport(importId: String)
+    /** Starts a new review of the same OCR fixture, preserving images and their stable IDs. */
+    fun resetPhotoReview(importId: String, expectedVersion: Int)
     fun retryFailedPhotoImport(importId: String): String
     fun decideLine(importId: String, extractedItemId: String, expectedVersion: Int, decision: MockReviewDecision)
     fun publishAddOnly(importId: String, expectedVersion: Int): Int
@@ -650,6 +654,39 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             s.copy(imports = s.imports.map {
                 if (it.menuImportId == importId) it.copy(status = MockImportStatus.CANCELED)
                 else it
+            }) to Unit
+        }
+    }
+
+    override fun discardPhotoImport(importId: String) {
+        change { state ->
+            val job = state.imports.firstOrNull { it.menuImportId == importId }
+                ?: error("Unknown import")
+            require(job.status in listOf(MockImportStatus.UPLOADED,
+                MockImportStatus.PROCESSING,MockImportStatus.READY_FOR_REVIEW,
+                MockImportStatus.FAILED,MockImportStatus.CANCELED)) {
+                "INVALID_IMPORT_STATE"
+            }
+            state.copy(imports=state.imports.filterNot {
+                it.menuImportId==importId
+            }) to Unit
+        }
+    }
+
+    override fun resetPhotoReview(importId: String, expectedVersion: Int) {
+        change { state ->
+            val job = state.imports.firstOrNull { it.menuImportId == importId }
+                ?: error("Unknown import")
+            require(job.status==MockImportStatus.READY_FOR_REVIEW) {
+                "INVALID_IMPORT_STATE"
+            }
+            require(job.reviewVersion==expectedVersion) { "REVIEW_OUTDATED" }
+            val reset=job.copy(reviewVersion=job.reviewVersion+1,
+                images=job.images.map { photo ->
+                    photo.copy(lines=photo.lines.map{it.copy(decision=null)})
+                })
+            state.copy(imports=state.imports.map {
+                if(it.menuImportId==importId)reset else it
             }) to Unit
         }
     }
