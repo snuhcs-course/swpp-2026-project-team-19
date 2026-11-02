@@ -80,6 +80,34 @@ class OwnerRegistrationV4ComposeTest {
         compose.onNodeWithText("매장 이름을\n알려주세요").assertExists()
     }
 
+    @Test fun registrationMenuUsesPr96HorizontalPhotoSourceDialogWithoutChangingText() {
+        val photo=MockPhoto("preexisting","content://mock/preexisting",
+            MockPhotoKind.MENU_CAPTURE)
+        val draft=MockRegistrationDraft(resumePageKey="MENUS",initialMenuPhotos=listOf(photo))
+        show(MockOwnerSnapshot(registrationDraft=draft))
+        compose.waitUntil(4000) {
+            compose.onAllNodesWithText("메뉴판 사진을\\n올려 주세요")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("메뉴판 순서대로 올려 주세요").assertExists()
+        compose.onNodeWithText("AI가 메뉴를 읽어 두면, 승인된 뒤에 확인만 하고 공개할 수 있어요.").assertExists()
+        compose.onNodeWithTag("registration-menu-photo-1").assertExists()
+        compose.onNodeWithTag("registration-add-menu").performClick()
+        compose.onNodeWithText("사진을 어떻게 추가할까요?").assertExists()
+        compose.onNodeWithTag("stage7-source-camera").assertExists()
+        compose.onNodeWithTag("stage7-source-gallery").assertExists()
+    }
+
+    @Test fun whiskeyLoadingReusesAnimatedPr96Canvas() {
+        compose.setContent {
+            MaterialTheme {
+                RegistrationCenterContent("사업자 정보를\\n확인하고 있어요",
+                    "국세청 정보와 비교하고 있어요.",loading=true)
+            }
+        }
+        compose.onNodeWithTag("registration-processing-glass").assertExists()
+    }
+
     @Test fun completeReviewSubmitsMockPendingApplicationWithoutNtsNetworkCall() {
         val gallery=MockPhoto("cover","content://mock/cover",MockPhotoKind.BAR_GALLERY)
         val menu=MockPhoto("menu","content://mock/menu",MockPhotoKind.MENU_CAPTURE)
