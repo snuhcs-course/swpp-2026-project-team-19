@@ -182,9 +182,9 @@ data class MockExtractedLine(
     val decision: MockReviewDecision? = null,
     // Stage 8: this option's 0 price means manual entry is required, never 0 KRW.
     val needsPriceEntry: Boolean = false,
+    val sourceBox: List<Int>? = null, // EXIF-normalized 0..1000 coordinates, null means unknown
     // Explicit local fixture-only exact catalog match. No OCR or backend inference.
     val mockAutoAccepted: Boolean = false,
-    val sourceBox: List<Int>? = null, // EXIF-normalized 0..1000 coordinates, null means unknown
 )
 data class MockPhotoExtraction(
     val imageId: String,
