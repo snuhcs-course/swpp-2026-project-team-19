@@ -165,6 +165,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var choosingOther by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
     var catalogQuery by rememberSaveable(job?.menuImportId) { mutableStateOf("") }
     var demoPublishError by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
+    var pendingNewDraft by remember { mutableStateOf<MockNewProductDraft?>(null) }
     val pair=all.getOrNull(position)
     LaunchedEffect(pair?.second?.extractedItemId) {
         selectedProductId=pair?.second?.decision?.productId
@@ -545,30 +546,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         if(chosenCategory=="otherAlcohol") St8NewField(
                             "기타 주류 세부 종류",subtype,{subtype=it},
                             placeholder="예: 맥주, 사케, 와인")
-                        var extra by rememberSaveable(line.extractedItemId) {mutableStateOf(false)}
-                        TextButton(onClick={extra=!extra}) {
-                            Text(if(extra)"추가 정보 접기" else "추가 정보 입력",color=V4Color.sub)
-                        }
-                        if(extra) {
-                            St8NewField("매장 표시명 (선택)",displayOverride,
-                                {displayOverride=it})
-                            St8NewField("도수 (%) (선택)",alcohol,{alcohol=it})
-                            var expanded by remember {mutableStateOf(false)}
-                            TextButton(onClick={expanded=true}) {
-                                Text("분류: "+chosenCategory+" ▾",color=V4Color.primary)
-                            }
-                            if(expanded) AlertDialog(onDismissRequest={expanded=false},
-                                title={Text("분류")},text={Column {
-                                    listOf("whisky","cocktail","food","otherAlcohol",
-                                        "gin","brandy","rum","wine").forEach {kind->
-                                        TextButton(onClick={chosenCategory=kind;expanded=false}) {
-                                            Text(kind)
-                                        }
-                                    }
-                                }},confirmButton={TextButton(onClick={expanded=false}) {
-                                    Text("닫기")
-                                }})
-                        }
+
                     }
                     Row(Modifier.fillMaxWidth().border(1.dp,V4Color.line,
                         RoundedCornerShape(16.dp)).padding(13.dp),
@@ -586,6 +564,34 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         }
                     }
                 }
+                if(screen=="new") {
+                    St8Button("새 제품으로 등록") {
+                        val ageValue=if(noAge)null else age.toIntOrNull()
+                        if(name.trim().isBlank() || (brandId==null && brand.isBlank()) ||
+                            !noAge && ageValue !in 0..200) {
+                            error="병입사, 증류소, 숙성 연수를 확인해 주세요."
+                        } else {
+                            val draft=MockNewProductDraft(
+                                name=listOfNotNull(name.trim(),
+                                    ageValue?.let{it.toString()+"년"}).joinToString(" "),
+                                brandId=brandId,
+                                brandName=if(brandId==null)brand.trim() else null,
+                                ageYears=ageValue,
+                                editionName=edition.trim().ifBlank{null},
+                                category=chosenCategory)
+                            if(line.options.isEmpty() || line.options.any{it.priceKrw<=0}) {
+                                pendingNewDraft=draft
+                                screen="price"
+                            } else runCatching {
+                                vm.review(job.menuImportId,line.extractedItemId,
+                                    job.reviewVersion,MockReviewDecision(
+                                        MockDecisionKind.CREATE_PRODUCT,
+                                        correctedOptions=line.options,
+                                        newProduct=draft))
+                            }.onSuccess {error=null;next()}.onFailure {error=it.message}
+                        }
+                    }
+                }
                 if(categoryPicker)AlertDialog(onDismissRequest={categoryPicker=false},
                     title={Text("메뉴 종류를 선택해 주세요")},
                     text={Column {
@@ -598,6 +604,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }},confirmButton={TextButton(onClick={categoryPicker=false}) {
                         Text("닫기")
                     }})
+                if(screen=="edit") {
                 val originals=line.decision?.correctedOptions ?: line.options.ifEmpty {
                     listOf(MockMenuOption("local-review-option-"+line.extractedItemId,priceKrw=0))
                 }
@@ -674,6 +681,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             job.reviewVersion,decision)}.onSuccess{error=null;next()}
                             .onFailure{error=it.message}
                     }
+                }
                 }
             } else if(screen=="publish") {
                 Text(if(counts!!.remaining==0)"검수를 마쳤어요" else "검수 미완료",
