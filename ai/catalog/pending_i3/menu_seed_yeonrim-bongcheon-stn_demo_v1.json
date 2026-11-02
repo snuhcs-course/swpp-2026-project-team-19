@@ -1,0 +1,996 @@
+{
+ "version": "menu_seed_demo_v1",
+ "menu_board_id": "e430b30f-a8a5-50e1-b085-378a065fac49",
+ "bar_id": "74dabf2b-7001-5959-a38e-31ea8eca2ede",
+ "bar_key": "yeonrim-bongcheon-stn",
+ "purpose": "Demo (2026-11-03, I3 heuristic evaluation): pre-published menu from human-reviewed labels so customer search works. Not pipeline output.",
+ "source": "eval/labels_i3_v1.json + eval/match_gold_i3_v1.json; unknown and non_whisky lines skipped; both: lines give each named product the line's options; new: products from catalog_v2_service_i3_additions.json",
+ "entries": [
+  {
+   "product_id": "c8442eac-7d04-5a03-af5d-3485b1f2bdf3",
+   "product_key": "smoky-scot",
+   "display_name": "스모키 스캇",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 10000,
+     "sort_order": 1,
+     "id": "1c367468-b65e-5d97-9885-394ce115dfef"
+    }
+   ],
+   "sort_order": 1,
+   "bar_menu_item_id": "bd22af7b-ede7-54de-932a-fb0d452ebc69",
+   "menu_board_entry_id": "6556c62d-fc19-5176-b722-d6666836b559"
+  },
+  {
+   "product_id": "1e7a47f7-726c-5598-b833-e8375e07b236",
+   "product_key": "johnnie-walker-black",
+   "display_name": "조니워커 블랙",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 10000,
+     "sort_order": 1,
+     "id": "fb1c6f65-7805-5eb5-9830-c8dcdb0b44a2"
+    }
+   ],
+   "sort_order": 2,
+   "bar_menu_item_id": "997c15b0-081e-5e19-a204-547196e68d1c",
+   "menu_board_entry_id": "dca88978-019f-5f4a-abfd-3ee8512b6e97"
+  },
+  {
+   "product_id": "8886fde4-53a8-5a6b-a5c8-13d5ac1a55d9",
+   "product_key": "talisker-10",
+   "display_name": "탈리스커 10",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 13000,
+     "sort_order": 1,
+     "id": "07be0a97-be43-5ae9-944b-56ff4004fc0f"
+    }
+   ],
+   "sort_order": 3,
+   "bar_menu_item_id": "f5c47eee-1a1e-51e8-90dc-f4b031203b21",
+   "menu_board_entry_id": "d682dd6f-4a62-5ac0-aa2b-96c916946ad9"
+  },
+  {
+   "product_id": "dbc5af99-05b2-5538-a5ef-8aa53cdc660b",
+   "product_key": "laphroaig-10",
+   "display_name": "라프로익 10",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 13000,
+     "sort_order": 1,
+     "id": "51418087-8168-56df-a59f-eb28b8e03327"
+    }
+   ],
+   "sort_order": 4,
+   "bar_menu_item_id": "e6b1fb86-8e03-5306-b0a5-da42fc3854db",
+   "menu_board_entry_id": "c273edfe-9ffd-5454-99c5-93348b94b982"
+  },
+  {
+   "product_id": "deabfe81-7c98-54c8-96d6-fd839a61b3e2",
+   "product_key": "bowmore-12",
+   "display_name": "보모어 12",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 13000,
+     "sort_order": 1,
+     "id": "cc0e2cd3-8d54-5c20-a956-ec39a8ec8c17"
+    }
+   ],
+   "sort_order": 5,
+   "bar_menu_item_id": "ab6f3180-3eba-5342-bbac-83320de9bc47",
+   "menu_board_entry_id": "9a42913e-64bc-572f-b8ab-af69ed4cfa2c"
+  },
+  {
+   "product_id": "9d214c20-c4a6-5db2-9627-c10b4c5ebb69",
+   "product_key": "caol-ila-12",
+   "display_name": "쿨일라 12",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 14000,
+     "sort_order": 1,
+     "id": "c0356ff3-65e7-58a3-a1e7-5a707a6a7efb"
+    }
+   ],
+   "sort_order": 6,
+   "bar_menu_item_id": "3cb97a9f-a13e-56ca-a7f3-a5eea3eadfa7",
+   "menu_board_entry_id": "4a499b14-9858-5765-9976-a2b972bcea11"
+  },
+  {
+   "product_id": "c0b8a5b4-0201-5d26-9615-889592acca06",
+   "product_key": "kilchoman-machir-bay",
+   "display_name": "킬호만 마키어베이",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 14000,
+     "sort_order": 1,
+     "id": "6f32aea0-856d-5a67-9495-5abef635360a"
+    }
+   ],
+   "sort_order": 7,
+   "bar_menu_item_id": "da01de03-3567-574c-8224-afaac862ca8f",
+   "menu_board_entry_id": "de2f7de5-d795-5e30-87f1-b43b50a0c29d"
+  },
+  {
+   "product_id": "2863a517-df5c-5a4b-93a7-61ea6df1553d",
+   "product_key": "yoichi-single-malt",
+   "display_name": "니카 싱글몰트 요이치",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "0d444ef6-2b95-5b9b-9a58-a676fcc80709"
+    }
+   ],
+   "sort_order": 8,
+   "bar_menu_item_id": "f92c2d8a-cf83-5416-b802-58ded343b3e8",
+   "menu_board_entry_id": "cf05f9af-622c-5665-b5a7-d92c8d018332"
+  },
+  {
+   "product_id": "583b633a-c820-574d-8f77-521d6ac268b2",
+   "product_key": "ardbeg-10",
+   "display_name": "아드벡 10",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "0608b04c-7a85-56e5-9b8e-3ad9de9b9d0c"
+    }
+   ],
+   "sort_order": 9,
+   "bar_menu_item_id": "3fd8ca9e-756e-5003-96a7-2b59c8997177",
+   "menu_board_entry_id": "aa93621c-f028-5cdd-901e-6c7ac0f6196b"
+  },
+  {
+   "product_id": "938bf4dc-4f00-5924-ab81-75ed37a5939c",
+   "product_key": "oban-14",
+   "display_name": "오반 14",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 18000,
+     "sort_order": 1,
+     "id": "250f0178-32dd-5123-b6d6-965f37895dfb"
+    }
+   ],
+   "sort_order": 10,
+   "bar_menu_item_id": "8d0c2312-c423-5c23-bc2c-34396eccc3a9",
+   "menu_board_entry_id": "2e0955aa-4e8f-54db-bee4-688f96f95a83"
+  },
+  {
+   "product_id": "d5dbc07a-b7f6-5b4b-8476-a0043fd27487",
+   "product_key": "elements-of-islay-peat-full-proof",
+   "display_name": "엘리먼츠 오브 아일라 FP",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "4256eb86-707a-5577-88ed-7bdd7936d233"
+    }
+   ],
+   "sort_order": 11,
+   "bar_menu_item_id": "2439b7a3-8180-5a7f-8cfd-7b2c0e7beb08",
+   "menu_board_entry_id": "4e1ed774-435a-5693-bba4-51825484cd46"
+  },
+  {
+   "product_id": "e9496ce0-b752-55b5-9b6b-913708ab629c",
+   "product_key": "mac-talla-mara-cs",
+   "display_name": "막탈라 마라 CS",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "df73a161-84a3-5940-86e3-d1b0cfe23cce"
+    }
+   ],
+   "sort_order": 12,
+   "bar_menu_item_id": "6ffff0a8-b82c-5084-93a1-c1e246d9dfc2",
+   "menu_board_entry_id": "29e89452-1069-5dc1-aeaf-aab7cea758ac"
+  },
+  {
+   "product_id": "e3b37fa7-db17-5fb3-a0f0-03c59c6b29f8",
+   "product_key": "port-charlotte-10",
+   "display_name": "포트샬롯 10",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 20000,
+     "sort_order": 1,
+     "id": "b9a626ac-3f00-5562-b2f1-033ae273fc7a"
+    }
+   ],
+   "sort_order": 13,
+   "bar_menu_item_id": "300d6473-1bfd-58dd-a263-275c809faf64",
+   "menu_board_entry_id": "ddcd8b2e-52e5-540a-a61c-9be2439c7ecb"
+  },
+  {
+   "product_id": "a1affae2-c364-598a-b4f9-d5e227d35e96",
+   "product_key": "laphroaig-15",
+   "display_name": "라프로익 15",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "a2674e45-0af9-5b52-b031-f1df4363ad6c"
+    }
+   ],
+   "sort_order": 14,
+   "bar_menu_item_id": "7d3f2234-f7b1-58d1-8f25-0b2bdee973a4",
+   "menu_board_entry_id": "e0054d8a-2fa8-5572-9d34-969faef12d8c"
+  },
+  {
+   "product_id": "08cd7921-e646-5b8e-96dc-9b6a25c03bb6",
+   "product_key": "lagavulin-16",
+   "display_name": "라가불린 16",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "9d56f740-c5f4-5fa4-96c1-73f389365155"
+    }
+   ],
+   "sort_order": 15,
+   "bar_menu_item_id": "8fb90449-11c9-5af9-a57e-4d3a04f7d095",
+   "menu_board_entry_id": "4f996ab6-e555-5125-86ed-00091f179bdd"
+  },
+  {
+   "product_id": "512a9037-d050-5199-9745-5dd10b06bb36",
+   "product_key": "ardbeg-corryvreckan",
+   "display_name": "아드벡 코리브레칸",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "840884ff-7f06-54d2-955e-e65e054494bf"
+    }
+   ],
+   "sort_order": 16,
+   "bar_menu_item_id": "14ce17d9-a292-53dc-a1a2-45bc35b869f5",
+   "menu_board_entry_id": "6d276f29-c60f-587f-9a89-8eeeff9d609b"
+  },
+  {
+   "product_id": "acf28eeb-b565-50d2-9519-5d7d379bb0e2",
+   "product_key": "bowmore-18",
+   "display_name": "보모어 18",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "1ed7e049-cbd1-5811-845c-dbf4f57a5d35"
+    }
+   ],
+   "sort_order": 17,
+   "bar_menu_item_id": "7ba84167-e639-52cd-ac0d-c50f78d77744",
+   "menu_board_entry_id": "bafde6f1-508a-5d5f-aac5-de48826e0ff3"
+  },
+  {
+   "product_id": "f99d8cfe-6063-54e4-82fa-89d58af1342f",
+   "product_key": "elijah-craig-small-batch",
+   "display_name": "일라이저 크레이그",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 10000,
+     "sort_order": 1,
+     "id": "d993d7a9-8a6e-5880-9097-9533308fcdd7"
+    }
+   ],
+   "sort_order": 18,
+   "bar_menu_item_id": "af6d8820-fca1-5b8b-97c8-b0f5fa5c521a",
+   "menu_board_entry_id": "ca17e809-4467-502f-ba75-c9bb0b1a5a24"
+  },
+  {
+   "product_id": "71893b96-ebbc-54f3-8fc4-26887de5012d",
+   "product_key": "buffalo-trace",
+   "display_name": "버팔로 트레이스",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 10000,
+     "sort_order": 1,
+     "id": "987025df-2049-5d15-b744-16c7c8bdfdaa"
+    }
+   ],
+   "sort_order": 19,
+   "bar_menu_item_id": "1bdcffa3-f4aa-5715-8e4c-8431a881bbe2",
+   "menu_board_entry_id": "dd39c748-1714-5557-848c-5b032bb9e95d"
+  },
+  {
+   "product_id": "f95e81a0-b8f5-5cb3-adb0-998b5956f588",
+   "product_key": "makers-mark",
+   "display_name": "메이커스 마크",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 10000,
+     "sort_order": 1,
+     "id": "b428d914-549f-5503-b065-b4edfe0f1b4f"
+    }
+   ],
+   "sort_order": 20,
+   "bar_menu_item_id": "db59487b-96ea-580f-8dab-d9bd8b8f7ca9",
+   "menu_board_entry_id": "cfc634aa-0ce3-53c8-b550-648975698333"
+  },
+  {
+   "product_id": "f626dbc2-6a44-5e95-83b4-35af8023e497",
+   "product_key": "wild-turkey-101-8",
+   "display_name": "와일드터키 101",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 10000,
+     "sort_order": 1,
+     "id": "49b850d2-8966-5df5-b994-3830b4afdacc"
+    }
+   ],
+   "sort_order": 21,
+   "bar_menu_item_id": "49e92e51-1c8f-5f4d-b7b8-1c973ea8067b",
+   "menu_board_entry_id": "2451eaf9-353c-50a2-9551-f76fbc2364f9"
+  },
+  {
+   "product_id": "d097d4a5-7c64-567d-b160-2c8d92b45434",
+   "product_key": "1792-small-batch",
+   "display_name": "1792 스몰배치",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 10000,
+     "sort_order": 1,
+     "id": "47cbb083-9d9a-5dcf-b75b-f4c0e4757b6d"
+    }
+   ],
+   "sort_order": 22,
+   "bar_menu_item_id": "cd0ac46f-3517-5f33-91be-682a673040e6",
+   "menu_board_entry_id": "a55bd458-9f58-577c-b730-7c086516ec74"
+  },
+  {
+   "product_id": "ccf8c7b3-4b19-5ef2-8056-f714c4c2d468",
+   "product_key": "knob-creek",
+   "display_name": "납크릭",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 11000,
+     "sort_order": 1,
+     "id": "44eae55e-051f-51db-8a3b-2ff8a6bd88c9"
+    }
+   ],
+   "sort_order": 23,
+   "bar_menu_item_id": "4353657b-4443-59d3-8440-a3ed7adba6a5",
+   "menu_board_entry_id": "6fc13f05-7d91-527d-9144-e163da1bbf0b"
+  },
+  {
+   "product_id": "6af57867-35f8-54ea-8f77-4de179f5368f",
+   "product_key": "basil-haydens",
+   "display_name": "베이즐 헤이든",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 12000,
+     "sort_order": 1,
+     "id": "4a03c574-4e95-5b35-9f07-af7993db35c4"
+    }
+   ],
+   "sort_order": 24,
+   "bar_menu_item_id": "f285829f-a49d-5172-9008-e9525e2178b6",
+   "menu_board_entry_id": "2b7dffbd-507a-5b33-b92b-c2e9b001a3e3"
+  },
+  {
+   "product_id": "a342821c-15b8-5db7-bb72-6fbb058f6dd4",
+   "product_key": "woodford-reserve",
+   "display_name": "우드포드 리저브",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 12000,
+     "sort_order": 1,
+     "id": "8b41d35f-bb6f-5426-8d0f-e5ea1110d550"
+    }
+   ],
+   "sort_order": 25,
+   "bar_menu_item_id": "7aeb5f55-7103-580b-a5c7-80efc3296662",
+   "menu_board_entry_id": "792c8250-a7b4-5db1-a75f-28c813921861"
+  },
+  {
+   "product_id": "cadd2c4a-0ac9-555b-a1be-33742d66d8c6",
+   "product_key": "eagle-rare-10",
+   "display_name": "이글레어 10",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 13000,
+     "sort_order": 1,
+     "id": "34ba14fb-ebd2-5411-a918-d1054d0f447f"
+    }
+   ],
+   "sort_order": 26,
+   "bar_menu_item_id": "05fd7f62-75b5-5af1-a3dd-70d38b579b2e",
+   "menu_board_entry_id": "694abdfa-ec80-5031-abcc-33f0449d33b0"
+  },
+  {
+   "product_id": "1db104ff-ae93-5d1c-88ef-11a21cec0d1d",
+   "product_key": "four-roses-single-barrel",
+   "display_name": "포로지스 싱글배럴",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 14000,
+     "sort_order": 1,
+     "id": "26902563-fab1-5b6c-bc1c-0d919bc609c4"
+    }
+   ],
+   "sort_order": 27,
+   "bar_menu_item_id": "2e71f9a0-68a9-51c9-86f8-e8830ac99149",
+   "menu_board_entry_id": "54eac0f2-4f53-5162-b60e-72e88364f36d"
+  },
+  {
+   "product_id": "e542add8-783a-53b6-9c5f-c0064e512334",
+   "product_key": "wild-turkey-rare-breed",
+   "display_name": "와일드터키 레어브리드",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 14000,
+     "sort_order": 1,
+     "id": "eb04e6cd-fc47-5493-9c7d-1baab99f58b6"
+    }
+   ],
+   "sort_order": 28,
+   "bar_menu_item_id": "9effadf1-de2c-5c8b-ad94-3c8132aa04b9",
+   "menu_board_entry_id": "cf5db28e-691d-55ce-847f-d14ef007d6d8"
+  },
+  {
+   "product_id": "05a76c38-1069-58a7-8334-fdc7e51433d5",
+   "product_key": "makers-mark-cask-strength",
+   "display_name": "메이커스 마크 cs",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 14000,
+     "sort_order": 1,
+     "id": "fe6a90a8-9b8f-5712-b155-7f37db79cf91"
+    }
+   ],
+   "sort_order": 29,
+   "bar_menu_item_id": "19cf6366-07eb-520d-a604-273c7bbe44a7",
+   "menu_board_entry_id": "7a5c8981-5efc-527e-886a-89b7c15acf07"
+  },
+  {
+   "product_id": "0c5e090d-5461-5e0a-b164-b33da68b96db",
+   "product_key": "russells-reserve-single-barrel",
+   "display_name": "러셀 싱글배럴",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 15000,
+     "sort_order": 1,
+     "id": "7cde8268-7a5a-5f15-bece-a1a279ae7360"
+    }
+   ],
+   "sort_order": 30,
+   "bar_menu_item_id": "18549314-aaa7-5a62-852c-9782d6254598",
+   "menu_board_entry_id": "52131b37-d777-57a0-ac7f-428894376c30"
+  },
+  {
+   "product_id": "9f65684c-081b-5408-86e4-b0c2a7307820",
+   "product_key": "1792-full-proof",
+   "display_name": "1792 풀 프루프",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "2135c090-c76b-5da0-a3fa-a7e0c9532e55"
+    }
+   ],
+   "sort_order": 31,
+   "bar_menu_item_id": "59113e33-b7d7-535a-a95f-fd75150c456e",
+   "menu_board_entry_id": "8a28e656-27d4-5d32-a4e9-3535f5071585"
+  },
+  {
+   "product_id": "9abe3f23-4d5f-519e-9a12-3be06f709e14",
+   "product_key": "rowans-creek",
+   "display_name": "로완스크릭",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "6519424f-7533-5edd-abf2-49ac29958c77"
+    }
+   ],
+   "sort_order": 32,
+   "bar_menu_item_id": "80b8b1d9-15d2-5964-ad7e-052c9bf8e752",
+   "menu_board_entry_id": "6e61b54a-d07d-565b-b059-af41e7eeec52"
+  },
+  {
+   "product_id": "dc975d98-67de-5deb-b0db-e210a2cf5320",
+   "product_key": "sagamore-double-oak-rye",
+   "display_name": "사가모어 더블오크",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "44a791ac-4648-52b0-84ca-0a62c1eff275"
+    }
+   ],
+   "sort_order": 33,
+   "bar_menu_item_id": "ee48c1db-fb34-5148-8ef4-fcd2d399133c",
+   "menu_board_entry_id": "1c48d6e4-b0d7-54b7-8735-0745e0a91f0b"
+  },
+  {
+   "product_id": "5d724848-d758-59ad-b4bd-14b4e4b850f1",
+   "product_key": "woodford-reserve-double-oaked",
+   "display_name": "우포리 더블오크",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "fc690bc7-2376-5498-b1d7-31245773568e"
+    }
+   ],
+   "sort_order": 34,
+   "bar_menu_item_id": "0e4e4901-2ffd-5f73-b646-881e6e0549ab",
+   "menu_board_entry_id": "26132647-5d89-5206-9aee-0514db8e3a59"
+  },
+  {
+   "product_id": "b66aac77-d894-5f0c-97eb-d8971207e003",
+   "product_key": "noahs-mill",
+   "display_name": "노아스밀",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 20000,
+     "sort_order": 1,
+     "id": "431e7095-57aa-5172-8978-250fb7c6e7d3"
+    }
+   ],
+   "sort_order": 35,
+   "bar_menu_item_id": "1467c1fc-4f5e-5afd-85eb-ce284a925aa5",
+   "menu_board_entry_id": "60358fc7-d5a5-5c74-bc9f-159eb30e3c39"
+  },
+  {
+   "product_id": "267e4a32-091f-5d9b-a19a-ec5098c1fb4e",
+   "product_key": "bookers",
+   "display_name": "부커스",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "a4a3c7ba-2a04-5e7b-a6b7-d45ff3663754"
+    }
+   ],
+   "sort_order": 36,
+   "bar_menu_item_id": "3891f85e-ab12-533c-b884-8f4d4a70f396",
+   "menu_board_entry_id": "b32277a4-63b5-5764-a733-ed7d83989155"
+  },
+  {
+   "product_id": "110acc0a-35af-583a-b8e9-7f9a6490c4d5",
+   "product_key": "barrell-seagrass",
+   "display_name": "배럴 시그래스",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 23000,
+     "sort_order": 1,
+     "id": "3ba9421d-70db-588d-a367-4a2f2150a96d"
+    }
+   ],
+   "sort_order": 37,
+   "bar_menu_item_id": "4917751d-3e23-53e3-a154-389c88a769ea",
+   "menu_board_entry_id": "21f446ec-a87b-5fc2-a75e-4492612978c2"
+  },
+  {
+   "product_id": "504c7a9c-f7d0-5902-9fd2-652fdd0e884f",
+   "product_key": "monkey-shoulder",
+   "display_name": "몽키숄더",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 10000,
+     "sort_order": 1,
+     "id": "97ee1ce7-dcc8-53bb-99b8-b87b4fdbf68c"
+    }
+   ],
+   "sort_order": 38,
+   "bar_menu_item_id": "2ad1a7ef-07bd-5af6-a3b0-5a18ae9b0a3e",
+   "menu_board_entry_id": "bc3fbbab-76d6-5ed8-8002-a552518b2ce9"
+  },
+  {
+   "product_id": "ec660a60-db4b-5562-ad97-d0349b0be56b",
+   "product_key": "glenmorangie-original",
+   "display_name": "글렌모렌지 12",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 12000,
+     "sort_order": 1,
+     "id": "f88162f5-b629-54cc-b5f0-d119218661d6"
+    }
+   ],
+   "sort_order": 39,
+   "bar_menu_item_id": "415c2340-8150-53bb-844a-9a0efa8a9139",
+   "menu_board_entry_id": "ffffef59-ae98-58ab-8366-c697a1060a4b"
+  },
+  {
+   "product_id": "e5de7281-878c-59d1-9504-6f057c69e860",
+   "product_key": "glendronach-12",
+   "display_name": "글렌드로낙 12",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 14000,
+     "sort_order": 1,
+     "id": "b92a278d-53a5-5ffb-a658-116c30461331"
+    }
+   ],
+   "sort_order": 40,
+   "bar_menu_item_id": "b204cbd3-058e-56da-8b43-346483624e2d",
+   "menu_board_entry_id": "92221974-c770-509e-91b3-3aff69579960"
+  },
+  {
+   "product_id": "a8468157-2112-5ccf-8ce4-3fff0a63f325",
+   "product_key": "glenfiddich-12-sherry-cask-finish",
+   "display_name": "글렌피딕 12 쉐리",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 14000,
+     "sort_order": 1,
+     "id": "bc2c183e-46c8-5a88-8964-744274935afa"
+    }
+   ],
+   "sort_order": 41,
+   "bar_menu_item_id": "0ab233ec-8928-5392-b595-5214afa65ec7",
+   "menu_board_entry_id": "44b2a7c4-8daf-5858-8ecf-da2eed1b174e"
+  },
+  {
+   "product_id": "ee5db3dd-cd58-5d2d-b70d-ae95964f96fc",
+   "product_key": "balvenie-12-doublewood",
+   "display_name": "발베니 12 더블오크",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 15000,
+     "sort_order": 1,
+     "id": "5da892e7-475d-5b33-b850-ed9a58e327fd"
+    }
+   ],
+   "sort_order": 42,
+   "bar_menu_item_id": "a13f4678-4fa3-5b80-ad4c-f0da112516e0",
+   "menu_board_entry_id": "9270cdd7-8630-58c8-a686-bd80efac29aa"
+  },
+  {
+   "product_id": "e575169b-7f33-585c-9238-1d02b475ea18",
+   "product_key": "clynelish-14",
+   "display_name": "클라이넬리쉬 14",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 15000,
+     "sort_order": 1,
+     "id": "e4b13186-2f60-5eb9-8918-88c69608e052"
+    }
+   ],
+   "sort_order": 43,
+   "bar_menu_item_id": "726ebcf3-9232-5e72-a1f8-0d459da331d8",
+   "menu_board_entry_id": "cbb8d8ff-3d4c-5d9f-ab17-47a1a92e3319"
+  },
+  {
+   "product_id": "854c6973-b222-5298-b1fe-4fa0ef6264f8",
+   "product_key": "macallan-12-sherry-oak",
+   "display_name": "맥켈란 12 쉐리",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "fee52416-8fa4-5ebc-a59e-0ba3984f6744"
+    }
+   ],
+   "sort_order": 44,
+   "bar_menu_item_id": "b831379a-63e8-5205-b703-c2e6433b9565",
+   "menu_board_entry_id": "677daac8-d11c-5857-9cce-2d6461fa79d7"
+  },
+  {
+   "product_id": "1e71c22c-2bba-5ae0-8798-d054d062da6d",
+   "product_key": "glenallachie-12",
+   "display_name": "글렌알라키 12",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "4ea96444-fb1a-580b-9e4f-325e2f0f9a7d"
+    }
+   ],
+   "sort_order": 45,
+   "bar_menu_item_id": "695ef15a-12d1-574e-a659-a9540f43a835",
+   "menu_board_entry_id": "f17a06d0-2928-54b1-b51a-6fa79d6e4aec"
+  },
+  {
+   "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+   "product_key": "dalmore-12",
+   "display_name": "달모어 12",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "7335e433-27d9-53c9-aa45-91b1d9cb6572"
+    }
+   ],
+   "sort_order": 46,
+   "bar_menu_item_id": "1e510cb8-cc75-59df-b16a-551447d5763d",
+   "menu_board_entry_id": "4dabb981-1f95-531b-90f7-8724e44b62d9"
+  },
+  {
+   "product_id": "8c8191a6-0bae-5f5f-b803-9c7ee6798542",
+   "product_key": "glenfiddich-15",
+   "display_name": "글렌피딕 15",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "fb5522db-a461-5675-b061-642a0117b907"
+    }
+   ],
+   "sort_order": 47,
+   "bar_menu_item_id": "f3e54dce-1462-512f-ada0-c675be65877d",
+   "menu_board_entry_id": "3b6bb8f8-13c6-5abe-b555-eb3d135ffa66"
+  },
+  {
+   "product_id": "2be391ea-979a-54b6-a992-c753ba9966cc",
+   "product_key": "glenlivet-15",
+   "display_name": "글렌리벳 15",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "1d5835ff-bfe0-5f62-9c7e-7b7482bf6ea8"
+    }
+   ],
+   "sort_order": 48,
+   "bar_menu_item_id": "4d64e52f-ec39-52a3-bb91-3be7719f5f21",
+   "menu_board_entry_id": "fc334cf1-703f-5001-b3bb-58c31c1fbac9"
+  },
+  {
+   "product_id": "3f4d6495-d607-5334-b11d-7801deacfd32",
+   "product_key": "glen-grant-15",
+   "display_name": "글렌그란트 15",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 18000,
+     "sort_order": 1,
+     "id": "fdff673d-d7b9-54e5-9d8d-e1b95102a0ef"
+    }
+   ],
+   "sort_order": 49,
+   "bar_menu_item_id": "393d27c2-6e0d-5e86-a205-8041688a6f33",
+   "menu_board_entry_id": "a12a8ebd-e159-5d06-8d7b-af99a1cb718f"
+  },
+  {
+   "product_id": "3eff6768-0c6e-58c1-8fd1-a0c0ce70fe69",
+   "product_key": "glenfarclas-105",
+   "display_name": "글렌파클라스 105",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "dbfb6063-9bfb-5531-898a-a3adff4c5c67"
+    }
+   ],
+   "sort_order": 50,
+   "bar_menu_item_id": "686e2485-6d77-5531-91c6-d631a0047b55",
+   "menu_board_entry_id": "0da3414c-a6f2-562e-b4b9-c96383815993"
+  },
+  {
+   "product_id": "75a08856-45bc-5331-9886-d4ec462938c3",
+   "product_key": "glencadam-15",
+   "display_name": "글렌카담 15",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "ded7c9f3-8f1a-5205-ab38-72342f830046"
+    }
+   ],
+   "sort_order": 51,
+   "bar_menu_item_id": "5d5e7d01-0765-57de-8ad4-78fe1cd39d2d",
+   "menu_board_entry_id": "020b9919-f53e-51c7-82af-8304aa7bbaf3"
+  },
+  {
+   "product_id": "a478dd0c-092f-52df-865e-aee679f885f7",
+   "product_key": "amrut-indian-cs",
+   "display_name": "암룻 인디언 cs",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "c9cd1bde-c469-53b5-bbf4-d6df8d7ee6d1"
+    }
+   ],
+   "sort_order": 52,
+   "bar_menu_item_id": "cdcfa017-72dd-5296-aa97-cba238faacc0",
+   "menu_board_entry_id": "3abb36da-00b0-55e9-9db6-2d24148ac585"
+  },
+  {
+   "product_id": "58b6da39-cc5a-52ca-a299-d75bbee54ff8",
+   "product_key": "arran-sherry-cask",
+   "display_name": "아란 쉐리 캐스크",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "499342a3-1a00-5819-813c-50bc6483a33e"
+    }
+   ],
+   "sort_order": 53,
+   "bar_menu_item_id": "86fee8a6-9315-5690-ba69-8f2d12216b38",
+   "menu_board_entry_id": "f5dcecbf-5589-51bb-a477-9b8692e09e0b"
+  },
+  {
+   "product_id": "02b97506-8686-575a-9480-5416552683b7",
+   "product_key": "hibiki-japanese-harmony",
+   "display_name": "히비키 하모니",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 20000,
+     "sort_order": 1,
+     "id": "070b4aa7-ccb1-56ed-8b48-3ac311e1a494"
+    }
+   ],
+   "sort_order": 54,
+   "bar_menu_item_id": "450a94c2-e9b5-5042-96c1-f147d2451700",
+   "menu_board_entry_id": "edb4c3be-d5a6-5d4f-a456-97ebb262b0b6"
+  },
+  {
+   "product_id": "54abee4e-7e03-5d52-852a-2ca1b288df26",
+   "product_key": "glenallachie-15",
+   "display_name": "글렌알라키 15",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 24000,
+     "sort_order": 1,
+     "id": "333cc899-52fe-58c5-820c-d7cae0a9cd99"
+    }
+   ],
+   "sort_order": 55,
+   "bar_menu_item_id": "e924d180-d9c5-5623-91d2-dc61b9e8e5f0",
+   "menu_board_entry_id": "3d31ae9c-9cce-5bfc-bb48-fd1d96da8512"
+  },
+  {
+   "product_id": "b7c26636-4251-5ac9-999a-3c7d9341e402",
+   "product_key": "aberlour-abunadh",
+   "display_name": "아벨라워 아부나흐",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 25000,
+     "sort_order": 1,
+     "id": "baad60b1-6c96-5ef8-b743-a095ac0d9f89"
+    }
+   ],
+   "sort_order": 56,
+   "bar_menu_item_id": "95496ffb-64bc-5f08-b72a-df5763fc1130",
+   "menu_board_entry_id": "4cb40045-8163-5e70-bf87-0f5750d0cf5e"
+  },
+  {
+   "product_id": "5abd8f59-de4e-5399-9099-bb3274e46ad8",
+   "product_key": "yamazaki-12",
+   "display_name": "야마자키 12",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 33000,
+     "sort_order": 1,
+     "id": "3f36c0bb-0529-58ac-9d7e-354462976f86"
+    }
+   ],
+   "sort_order": 57,
+   "bar_menu_item_id": "7d0c8a93-aee7-5e1d-99ef-eec29b1482ae",
+   "menu_board_entry_id": "d5e19bab-f0d6-5442-a583-65cae420e5ef"
+  },
+  {
+   "product_id": "a1d82f86-d995-58a4-bb88-a009c422b090",
+   "product_key": "glenmorangie-signet",
+   "display_name": "글렌모렌지 시그넷",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 33000,
+     "sort_order": 1,
+     "id": "1d57c393-c5bf-5707-8388-5810c348638b"
+    }
+   ],
+   "sort_order": 58,
+   "bar_menu_item_id": "b813d34e-93ed-5d03-be81-437672e51fb2",
+   "menu_board_entry_id": "906d7ec8-800c-5141-b32d-4606f8bb6883"
+  }
+ ]
+}
