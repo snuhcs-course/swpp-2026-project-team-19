@@ -134,13 +134,6 @@ Enum search_source {
   popular
 }
 
-Enum search_match_type {
-  brand
-  alias_exact
-  partial
-  none
-}
-
 Enum operating_exception_kind {
   closed_today
   custom_hours
@@ -753,24 +746,37 @@ Table menu_entry_options {
   '''
 }
 
-Table search_logs {
-  id uuid [pk]
-  searched_at timestamptz [not null]
-  normalized_query varchar(200) [not null, note: 'The query after the shared normalization; the raw input is not kept']
-  match_type search_match_type [not null]
-  source search_source [not null, default: 'input', note: 'Where the search started; all sources count toward the ranking for now']
-  matched_product_ids "uuid[]" [not null, default: '{}', note: 'Every matchedProducts productId of the response; empty for none. No foreign key']
-  result_count integer [not null, note: 'Result rows before the limit was applied']
+Table product_search_counts {
+  search_date date [not null, note: 'Seoul local date of the search']
+  product_id uuid [not null, note: 'No foreign key so the counts survive catalogue changes']
+  source search_source [not null]
+  search_count integer [not null, note: 'At least 1']
 
   indexes {
-    (match_type, searched_at)
-    searched_at
+    (search_date, product_id, source) [pk]
   }
 
   Note: '''
-  One row per customer product search (GET /api/search/bars) that returned 200, including searches with no match.
-  It is used to rank "요즘 많이 찾는 위스키" (API spec 3.17) and to find queries the catalogue does not cover.
-  It never stores a location, user, IP address, device, or token. Rows older than 90 days are deleted.
+  Daily count of customer product searches (GET /api/search/bars) that resolved to exactly one product:
+  a productId search, or an alias_exact search with one matched product (API spec 3.10.6).
+  Used to rank "요즘 많이 찾는 위스키" (API spec 3.17). No query text, time of day, location, user, IP, device, or token.
+  Rows older than 90 days are deleted.
+  '''
+}
+
+Table unmatched_search_queries {
+  search_date date [not null, note: 'Seoul local date of the search']
+  normalized_query varchar(200) [not null, note: 'The query after the shared normalization; the raw input is not kept']
+  search_count integer [not null, note: 'At least 1']
+
+  indexes {
+    (search_date, normalized_query) [pk]
+  }
+
+  Note: '''
+  Daily count of query searches that matched no product, used to find products the catalogue is missing (API spec 3.10.6).
+  Queries with "@" or 7 or more consecutive digits are not stored. At most 1,000 new rows per date.
+  No read API. Rows older than 30 days are deleted.
   '''
 }
 
