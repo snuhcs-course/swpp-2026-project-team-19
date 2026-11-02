@@ -666,9 +666,9 @@ fun OwnerOnboardingScreen(
                                     save(draft.copy(storePhone=""));forward(RegPage.MENUS)
                                 }.padding(8.dp))
                         }
-                        RegistrationInput(formatOwnerPhone(draft.storePhone),{
-                            save(draft.copy(storePhone=ownerPhoneDigits(it)))
-                        },"02-000-0000",keyboard=KeyboardType.Phone,tag="registration-store-phone")
+                        RegistrationPhoneInput(draft.storePhone,{
+                            save(draft.copy(storePhone=it))
+                        },"02-000-0000",tag="registration-store-phone")
                         Text("지역번호나 0507 안심번호도 넣을 수 있어요.",
                             fontSize=12.sp,color=RegistrationV4.secondary)
                     }
@@ -745,9 +745,9 @@ fun OwnerOnboardingScreen(
                                     }.padding(8.dp))
                             }
                         }
-                        RegistrationInput(formatOwnerPhone(draft.contactPhone),{
-                            save(draft.copy(contactPhone=ownerPhoneDigits(it)))
-                        },"010-0000-0000",keyboard=KeyboardType.Phone,tag="registration-contact")
+                        RegistrationPhoneInput(draft.contactPhone,{
+                            save(draft.copy(contactPhone=it))
+                        },"010-0000-0000",tag="registration-contact")
                     }
                     RegPage.REVIEW -> {
                         OwnerV4Question("이렇게\n신청할게요","한 번 더 확인하고 신청해 주세요.")
