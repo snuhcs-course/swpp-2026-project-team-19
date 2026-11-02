@@ -119,7 +119,7 @@ internal fun RegistrationButton(title:String,enabled:Boolean=true,onClick:()->Un
 @Composable
 internal fun RegistrationGlyph(kind:String,modifier:Modifier=Modifier,color:Color=RegistrationV4.primary,size:Dp=22.dp) {
     Canvas(modifier.size(size)) {
-        val w=size.width; val h=size.height
+        val w=this.size.width; val h=this.size.height
         val path=Path()
         fun stroke() { drawPath(path,color,style=Stroke(1.65.dp.toPx(),
             cap=StrokeCap.Round,join=StrokeJoin.Round)) }
