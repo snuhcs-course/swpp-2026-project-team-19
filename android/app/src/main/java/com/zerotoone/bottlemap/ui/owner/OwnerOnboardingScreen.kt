@@ -354,8 +354,7 @@ fun OwnerOnboardingScreen(
                             },
                             onManage={ bar ->
                                 viewModel.selectBar(bar.barId)
-                                if(snapshot.hasPublishedInitialReview(bar.barId))onManagerPreview()
-                                else onFirstReview()
+                                onManagerPreview()
                             },
                             onViewApplication={ id ->
                                 activeApplicationId=id;go(RegPage.VIEW_APPLICATION)
