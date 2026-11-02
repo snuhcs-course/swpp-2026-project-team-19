@@ -1154,6 +1154,27 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(280000,added.options.single().priceKrw)
     }
 
+    @Test fun duplicateCatalogProductAndZeroAbvFailAtLineDecision() {
+        val r=repo()
+        r.saveBrand(MockBrand("existing-brand","Signatory"))
+        r.saveCatalogProduct(MockCatalogProduct("existing-product","existing-brand","Caol Ila 13년"))
+        val id=r.startPhotoImport("fixture-bar",listOf("content://draft"),
+            MockPhotoExtractionSource {listOf(MockExtractedLine("draft","Caol Ila",
+                MockLineKind.PRODUCT,options=listOf(serving("o",30,20000))))})
+        val job=ready(r).imports.last()
+        val line=job.images.single().lines.single()
+        fun submit(draft:MockNewProductDraft)=r.decideLine(id,line.extractedItemId,
+            job.reviewVersion,MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
+                correctedOptions=line.options,newProduct=draft))
+        rejects {submit(MockNewProductDraft("Caol Ila 13년",brandId="existing-brand"))}
+        rejects {submit(MockNewProductDraft("Caol Ila New",brandId="existing-brand",
+            abvPercent=0.0))}
+        assertEquals(null,ready(r).imports.last().images.single().lines.single().decision)
+        submit(MockNewProductDraft("Caol Ila New",brandId="existing-brand",abvPercent=46.0))
+        assertEquals(MockDecisionKind.CREATE_PRODUCT,
+            ready(r).imports.last().images.single().lines.single().decision?.kind)
+    }
+
     @Test fun productEditionIsPartOfCanonicalNameAndIdentity() {
         val first=MockNewProductDraft(name="Caol Ila 13년",
             brandName="Signatory",editionName="Vintage Edition",ageYears=13)
