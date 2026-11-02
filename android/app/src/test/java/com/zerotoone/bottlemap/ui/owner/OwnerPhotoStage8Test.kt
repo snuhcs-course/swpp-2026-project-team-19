@@ -43,7 +43,7 @@ class OwnerPhotoStage8Test {
         r.decideLine(id,ids[1],job.reviewVersion,MockReviewDecision(
             MockDecisionKind.CREATE_PRODUCT,
             correctedOptions=listOf(job.images[1].lines[0].options[0].copy(priceKrw=18000)),
-            newProduct=MockNewProductDraft("User confirmed new","",brandName="New brand")))
+            newProduct=MockNewProductDraft(name="User confirmed new",brandName="New brand")))
         r.decideLine(id,ids[2],job.reviewVersion,
             MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))
         val after=ready(LocalOwnerMockRepository(store)).imports.single()
