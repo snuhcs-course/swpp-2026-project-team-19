@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Fill
@@ -135,18 +136,24 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         }
     }
 }
+/** The v4 HTML #i-edit geometry, not a rotated rectangle approximation. */
 @Composable private fun V4PencilIcon(modifier: Modifier = Modifier.size(22.dp),
     color: Color=V4Color.primary) {
     Canvas(modifier) {
         val u=size.width/24f
-        drawLine(color,Offset(5f*u,17f*u),Offset(17f*u,5f*u),
-            strokeWidth=2.1f*u,cap=androidx.compose.ui.graphics.StrokeCap.Round)
-        drawLine(color,Offset(7.5f*u,19f*u),Offset(19.5f*u,7f*u),
-            strokeWidth=2.1f*u,cap=androidx.compose.ui.graphics.StrokeCap.Round)
-        drawLine(color,Offset(5f*u,17f*u),Offset(7.5f*u,19f*u),
-            strokeWidth=2.1f*u)
-        drawLine(color,Offset(17f*u,5f*u),Offset(19.5f*u,7f*u),
-            strokeWidth=2.1f*u)
+        val pencil=Path().apply {
+            moveTo(4f*u,20f*u)
+            lineTo(8f*u,20f*u)
+            lineTo(19f*u,9f*u)
+            lineTo(15f*u,5f*u)
+            lineTo(4f*u,16f*u)
+            close()
+            moveTo(13f*u,7f*u)
+            lineTo(17f*u,11f*u)
+        }
+        drawPath(pencil,color,style=Stroke(
+            width=1.8f*u,cap=androidx.compose.ui.graphics.StrokeCap.Round,
+            join=androidx.compose.ui.graphics.StrokeJoin.Round))
     }
 }
 @Composable private fun V4PriceBadge(label: String, color:Color=V4Color.primary) {
@@ -200,6 +207,23 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 color=V4Color.text,fontWeight=FontWeight.Bold,fontSize=14.sp)
             Text("확인을 다 끝낸 뒤 완료 화면에서 바로 갈 수 있어요.",
                 color=V4Color.sub,fontSize=11.sp)
+        }
+    }
+}
+/** Secondary review actions sit below the source excerpt, never in the bottom CTA. */
+@Composable private fun St8ReviewShortcuts(exclude:()->Unit) {
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.End,
+        verticalAlignment=Alignment.CenterVertically) {
+        listOf("위스키가 아니에요","이번 줄 제외").forEach { label ->
+            OutlinedButton(onClick=exclude,modifier=Modifier.height(34.dp),
+                contentPadding=PaddingValues(horizontal=10.dp,vertical=0.dp),
+                shape=RoundedCornerShape(100),
+                border=BorderStroke(1.dp,V4Color.line),
+                colors=ButtonDefaults.outlinedButtonColors(
+                    containerColor=V4Color.surface,contentColor=V4Color.sub)) {
+                Text(label,fontSize=11.sp,maxLines=1)
+            }
+            if(label=="위스키가 아니에요")Spacer(Modifier.width(7.dp))
         }
     }
 }
@@ -545,25 +569,15 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 St8RecognizedStrip(photo,line){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 var categoryPopup by remember {mutableStateOf(false)}
-                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
-                    verticalAlignment=Alignment.CenterVertically) {
-                    Text(if(line.candidateProductIds.size>1)"어느 메뉴인가요?"
-                        else "이 메뉴가 맞나요?",
-                        color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold,
-                        modifier=Modifier.weight(1f))
-                    OutlinedButton(onClick={
-                        runCatching {vm.review(job.menuImportId,line.extractedItemId,
-                            job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
-                            .onSuccess {error=null;next()}.onFailure {error=it.message}
-                    },
-                        modifier=Modifier.height(34.dp),
-                        contentPadding=PaddingValues(horizontal=10.dp,vertical=1.dp),
-                        border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line),
-                        colors=ButtonDefaults.outlinedButtonColors(
-                            containerColor=V4Color.surface,contentColor=V4Color.sub)) {
-                        Text("위스키가 아니에요",fontSize=11.sp)
-                    }
+                St8ReviewShortcuts {
+                    runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                        job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
+                        .onSuccess{pendingNewDraft=null;error=null;next()}
+                        .onFailure{error=it.message}
                 }
+                Text(if(line.candidateProductIds.size>1)"어느 메뉴인가요?"
+                    else "이 메뉴가 맞나요?",
+                    color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold)
                 val candidates=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
                     .distinct().mapNotNull{id->s.products.firstOrNull{
                         it.productId==id && it.isActive}}
@@ -606,8 +620,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         }
                     }
                 }
-                if(!choosingOther && candidates.isEmpty()) Text(
-                    "일치하는 상품 후보가 없어요.",color=V4Color.sub,fontSize=13.sp)
                 if(candidates.size>1 || candidates.isEmpty())
                     St8Secondary("⌕  목록에 없어요") {
                         catalogQuery="잭다니엘"
@@ -619,24 +631,15 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 var photoOpen by remember {mutableStateOf(false)}
                 St8RecognizedStrip(pair.first,line){photoOpen=true}
                 if(photoOpen)Stage8SourcePhoto(pair.first,line.sourceBox){photoOpen=false}
-                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
-                    verticalAlignment=Alignment.CenterVertically) {
-                    Text(if(screen=="edit")"가격과 용량을 확인해 주세요" else "새로 등록할게요",
-                        color=V4Color.text,fontSize=22.sp,fontWeight=FontWeight.Bold,
-                        modifier=Modifier.weight(1f))
-                    OutlinedButton(onClick={
-                        runCatching{vm.review(job.menuImportId,line.extractedItemId,
-                            job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
-                            .onSuccess {error=null;next()}.onFailure {error=it.message}
-                    },
-                        modifier=Modifier.height(34.dp),
-                        contentPadding=PaddingValues(horizontal=10.dp),
-                        border=androidx.compose.foundation.BorderStroke(1.dp,V4Color.line),
-                        colors=ButtonDefaults.outlinedButtonColors(
-                            containerColor=V4Color.surface,contentColor=V4Color.sub)) {
-                        Text("위스키가 아니에요",fontSize=11.sp)
-                    }
+                St8ReviewShortcuts {
+                    runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                        job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
+                        .onSuccess{pendingNewDraft=null;error=null;next()}
+                        .onFailure{error=it.message}
                 }
+                Text(if(screen=="edit")"가격과 용량을 확인해 주세요"
+                    else "새로 등록할게요",color=V4Color.text,fontSize=22.sp,
+                    fontWeight=FontWeight.Bold)
                 var name by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(line.decision?.newProduct?.name ?: 
                         if(line.sourceText=="시그나토리 쿨일라13")"Caol Ila" else "")
@@ -853,22 +856,14 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 St8RecognizedStrip(photo,line,
                     s.bars.firstOrNull{it.barId==barId}?.defaultPourMl){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
-                Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,
-                    horizontalArrangement=Arrangement.SpaceBetween) {
-                    Text("가격을 못 읽었어요",color=V4Color.text,
-                        fontSize=23.sp,fontWeight=FontWeight.Bold,
-                        modifier=Modifier.weight(1f))
-                    OutlinedButton(onClick={
-                        runCatching{vm.review(job.menuImportId,line.extractedItemId,
-                            job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
-                            .onSuccess{pendingNewDraft=null;error=null;next()}
-                            .onFailure{error=it.message}
-                    },modifier=Modifier.height(34.dp),
-                        contentPadding=PaddingValues(horizontal=9.dp,vertical=0.dp),
-                        border=BorderStroke(1.dp,V4Color.line)) {
-                        Text("위스키가 아니에요",color=V4Color.sub,fontSize=11.sp)
-                    }
+                St8ReviewShortcuts {
+                    runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                        job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
+                        .onSuccess{pendingNewDraft=null;error=null;next()}
+                        .onFailure{error=it.message}
                 }
+                Text("가격을 못 읽었어요",color=V4Color.text,
+                    fontSize=23.sp,fontWeight=FontWeight.Bold)
                 St8Card {
                     Row(verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(11.dp)) {
@@ -1224,16 +1219,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                 }
             }
-            if(screen in listOf("line","new","price","catalog","edit") && pair!=null) {
-                TextButton(onClick={
-                    runCatching{vm.review(job.menuImportId,pair.second.extractedItemId,
-                        job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
-                        .onSuccess{pendingNewDraft=null;error=null;next()}
-                        .onFailure{error=it.message}
-                },modifier=Modifier.fillMaxWidth()) {
-                    Text("이 줄은 올리지 않기",color=V4Color.sub,fontSize=12.sp)
-                }
-            }
+
         }
     }
 }
