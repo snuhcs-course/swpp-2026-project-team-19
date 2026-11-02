@@ -664,8 +664,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         s.brands.filter { brand.isNotBlank() &&
                             it.name.contains(brand,ignoreCase=true) }.take(5).forEach{existing->
                             TextButton(onClick={brand=existing.name;brandId=existing.brandId}) {
-                                Text((if(brandId==existing.brandId)"✓ " else "")+
-                                    "기존 병입사: "+existing.name,color=V4Color.primary)
+                                Row(verticalAlignment=Alignment.CenterVertically,
+                                    horizontalArrangement=Arrangement.spacedBy(5.dp)) {
+                                    if(brandId==existing.brandId)
+                                        V4StrokeCheck(Modifier.size(15.dp),V4Color.primary)
+                                    Text("기존 병입사: "+existing.name,color=V4Color.primary)
+                                }
                             }
                         }
                         HorizontalDivider(color=V4Color.line)
@@ -783,9 +787,13 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     .distinct().filter{id->s.products.any{it.productId==id && it.isActive}}
                 if(screen=="edit")candidates.forEach{id->
                     TextButton(onClick={selectedProductId=id}){
-                        Text((if(selectedProductId==id)"✓ " else "")+
-                            (s.products.firstOrNull{it.productId==id}?.displayName ?: id),
-                            color=V4Color.primary)
+                        Row(verticalAlignment=Alignment.CenterVertically,
+                            horizontalArrangement=Arrangement.spacedBy(5.dp)) {
+                            if(selectedProductId==id)
+                                V4StrokeCheck(Modifier.size(15.dp),V4Color.primary)
+                            Text(s.products.firstOrNull{it.productId==id}?.displayName ?: id,
+                                color=V4Color.primary)
+                        }
                     }
                 }
                 St8Button("확인하고 다음으로",enabled=originals.isNotEmpty()){
