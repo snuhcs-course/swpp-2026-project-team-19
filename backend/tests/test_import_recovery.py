@@ -20,6 +20,7 @@ from app.services.menu_import_processing import (
     recover_imports,
 )
 from app.services.menu_import_upload import ImageUpload, create_menu_import
+from tests.auth_support import TEMPORARY_OPERATOR
 from tests.factories import make_bar
 
 JPEG = b"\xff\xd8\xff\xe0" + b"jpeg-body"
@@ -53,6 +54,7 @@ def new_import(db_session, storage, *, images: int = 3, key: str = "key-1") -> M
         db_session,
         storage,
         MockMenuExtractor(),
+        principal=TEMPORARY_OPERATOR,
         bar=make_bar(db_session, key),
         idempotency_key=key,
         mode=ImportMode.FULL_REPLACE,

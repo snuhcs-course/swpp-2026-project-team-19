@@ -3,15 +3,18 @@ one SERIALIZABLE transaction (API spec 8, flow doc 17).
 
 Steps, all rolled back together on any error:
 
-1. lock the import; an `applied` import returns its stored result (a retried request)
+1. lock the bar row, then the import (spec 3.14.1: every request that changes a bar's menu
+   takes the bar row first, so they run one after another); check the caller again under the
+   lock; an `applied` import returns its stored result (a retried request)
 2. check the status and reviewVersion
 3. rebuild the draft; if the board changed since it was made, store the new draft with a new
    reviewVersion and answer REVIEW_OUTDATED (the only write that is kept on an error)
 4. validate the decisions (menu_review_validation)
 5. create brands, products and aliases (menu_review_catalog)
 6. record the decisions on extracted_items and extracted_options
-7. publish the board (menu_publish) and record the applied changes in menu_import_changes
-8. mark the import applied
+7. publish the board (menu_publish): raise its version and stamp it with the time taken after
+   the lock; record the applied changes in menu_import_changes
+8. mark the import applied at the same time
 
 A serialization failure reruns everything from step 1, up to three attempts in total
 (app.services.serializable).
@@ -25,6 +28,7 @@ from sqlalchemy.orm import Session
 from app.core.errors import ApiError
 from app.core.security import Principal
 from app.models import (
+    Bar,
     Brand,
     ExtractedItem,
     ExtractionRun,
@@ -47,6 +51,7 @@ from app.schemas.menu_review import (
     ReviewResult,
     SelectExistingProduct,
 )
+from app.services.bar_access import can_manage_bar, forbidden
 from app.services.menu_draft import build_draft, replace_draft
 from app.services.menu_publish import AppliedChange, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
@@ -208,7 +213,16 @@ def _draft_keys(changes) -> set[tuple]:
 def _apply_once(
     session: Session, import_id: UUID, request: ReviewAndApplyRequest, principal: Principal
 ) -> ReviewAppliedResponse:
-    # The route has checked that the import exists; this transaction locks it again.
+    # The route has checked that the import exists. Lock its bar before the import, the order every
+    # menu request uses, so this cannot deadlock with a manual edit or an upload.
+    bar_id = session.scalar(select(MenuImport.bar_id).where(MenuImport.id == import_id))
+    session.execute(select(Bar.id).where(Bar.id == bar_id).with_for_update())
+    # The route checked the caller before the lock; an owner revoked meanwhile is refused here.
+    if not can_manage_bar(session, principal, bar_id):
+        raise forbidden()
+    # clock_timestamp(), not now(): a publish that waited for the lock must not look older than a
+    # request that committed while it waited (spec 3.14.1).
+    published_at = session.scalar(select(func.clock_timestamp()))
     menu_import = session.scalar(select(MenuImport).where(MenuImport.id == import_id).with_for_update())
     if menu_import.status == ImportStatus.APPLIED:
         return applied_response(session, menu_import)
@@ -235,11 +249,11 @@ def _apply_once(
     for entry in review.items:
         _record_item(entry, catalog)
     board, plan = review_plan(session, menu_import.bar_id, menu_import.mode, review, catalog)
-    write_board(session, board, menu_import.bar_id, menu_import.id, plan.entries)
+    write_board(session, board, menu_import.bar_id, menu_import.id, plan.entries, published_at=published_at)
     _record_changes(session, menu_import, review, plan.changes)
     menu_import.status = ImportStatus.APPLIED
-    menu_import.review_confirmed_at = func.now()
-    menu_import.completed_at = func.now()
+    menu_import.review_confirmed_at = published_at
+    menu_import.completed_at = published_at
     session.flush()
     session.refresh(menu_import)
     return applied_response(session, menu_import)

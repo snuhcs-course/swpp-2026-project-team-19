@@ -1,3 +1,5 @@
+from contextlib import nullcontext
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from uuid import uuid4
 
@@ -5,11 +7,14 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.exc import OperationalError
 
+from app.core.errors import ApiError
+from app.core.security import Principal
 from app.models import (
     Brand,
     ExtractedItem,
     ImportStatus,
     MatchMethod,
+    MenuBoard,
     MenuChangeDecision,
     MenuChangeType,
     MenuEntryOption,
@@ -17,9 +22,13 @@ from app.models import (
     MenuImportChange,
     Product,
     ReviewStatus,
+    UserType,
 )
+from app.schemas.menu_review import ReviewAndApplyRequest
 from app.services import menu_review_apply, serializable
-from tests.factories import make_bar
+from app.services.menu_review_apply import review_and_apply
+from tests.factories import make_bar, make_owner, make_user
+from tests.sql_support import recorded_statements
 from tests.review_support import JPEG, make_glenfiddich, upload_sample_review, valid_body
 
 
@@ -345,6 +354,72 @@ class _SerializationFailure(Exception):
 
 def conflict_error():
     return OperationalError("UPDATE ...", {}, _SerializationFailure())
+
+
+def test_a_publish_raises_the_menu_version_and_stamps_one_time(client, db_session, sample, operator, glenfiddich):
+    body = applied(client, sample, valid_body(sample, glenfiddich), operator)
+
+    menu = client.get(f"/api/bars/{sample.bar.id}/menu").json()
+    assert menu["menuVersion"] == 2
+    assert menu["publishedAt"] == body["appliedAt"]
+    db_session.expire_all()
+    assert sample.menu_import.completed_at == sample.menu_import.review_confirmed_at
+
+
+def discounted(option):
+    return option["discount"]["discountedPriceKrw"] if option["discount"] else None
+
+
+def test_a_publish_keeps_a_discount_only_where_the_option_is_unchanged(
+    client, db_session, sample, operator, glenfiddich
+):
+    now = datetime.now(timezone.utc)
+    starts, ends = now - timedelta(days=1), now + timedelta(days=14)
+    for option in db_session.scalars(select(MenuEntryOption)):
+        option.discount_price_krw = option.price_krw - 1000
+        option.discount_starts_at, option.discount_ends_at = starts, ends
+    db_session.flush()
+
+    applied(client, sample, valid_body(sample, glenfiddich), operator)
+
+    menu = client.get(f"/api/bars/{sample.bar.id}/menu").json()
+    # The 12's 15 ml went from 8000 to 9000, so its discount is dropped; its 30 ml kept 17000.
+    assert [
+        (i["displayName"], [(o["pourMl"], o["priceKrw"], discounted(o)) for o in i["options"]])
+        for i in menu["items"]
+    ] == [
+        ("글렌피딕 12년", [(15, 9000, None), (30, 17000, 16000)]),
+        ("Unknown Distillery 25", [(None, 45000, None)]),
+    ]
+
+
+def test_the_bar_row_is_locked_before_the_import(client, db_session, sample, operator, glenfiddich):
+    with recorded_statements(db_session) as statements:
+        applied(client, sample, valid_body(sample, glenfiddich), operator)
+
+    locks = [i for i, sql in enumerate(statements) if "FOR UPDATE" in sql]
+    assert ["FROM bars" in statements[i] for i in locks[:2]] == [True, False]
+    assert "FROM menu_imports" in statements[locks[1]]
+    stamp = next(i for i, sql in enumerate(statements) if "clock_timestamp()" in sql)
+    assert locks[0] < stamp < locks[1]
+
+
+def test_an_owner_revoked_before_the_lock_is_forbidden(db_session, sample, glenfiddich):
+    """The route let the owner in; the transaction checks again once the bar row is locked."""
+    reviewer = make_user(db_session, "reviewer-subject", user_type=UserType.OPERATOR)
+    ownership = make_owner(db_session, make_user(db_session, "owner-subject"), sample.bar, reviewer)
+    ownership.revoked_at, ownership.revoked_by_user_id = datetime.now(timezone.utc), reviewer.id
+    db_session.flush()
+    owner = Principal(kind="supabase", subject="owner-subject", claims={})
+    request = ReviewAndApplyRequest.model_validate(valid_body(sample, glenfiddich))
+
+    with pytest.raises(ApiError) as caught:
+        review_and_apply(lambda: nullcontext(db_session), sample.menu_import.id, request, owner)
+
+    assert (caught.value.status_code, caught.value.code) == (403, "FORBIDDEN")
+    db_session.expire_all()
+    assert sample.menu_import.status == ImportStatus.READY_FOR_REVIEW
+    assert db_session.get(MenuBoard, sample.board.id).version == 1
 
 
 def test_a_temporary_operator_without_a_users_row_creates_catalog_rows_without_a_creator(

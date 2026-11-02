@@ -1,8 +1,8 @@
 """Accept a menu photo upload: validate, deduplicate retries, store images, and create the import rows.
 
-Order of checks: bar → image count, size and type → idempotency key → one unfinished import
-per bar (with the bar row locked) → store images → insert rows. Processing is scheduled by
-the caller after the commit.
+Order of checks: bar → image count, size and type → idempotency key → bar row lock → the bar
+and the caller again → one unfinished import per bar → store images → insert rows. Processing
+is scheduled by the caller after the commit.
 """
 
 import hashlib
@@ -19,14 +19,18 @@ from sqlalchemy.orm import Session
 from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.core.errors import ApiError
+from app.core.security import Principal
 from app.models import (
     Bar,
+    BarStatus,
     ExtractionRun,
     ImportMode,
     ImportStatus,
     MenuImage,
     MenuImport,
 )
+from app.services.bar_access import can_manage_bar, forbidden
+from app.services.bar_menu import bar_not_found
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +181,7 @@ def create_menu_import(
     storage: ImageStorage,
     extractor: MenuExtractor,
     *,
+    principal: Principal,
     bar: Bar,
     idempotency_key: str,
     mode: ImportMode,
@@ -195,8 +200,14 @@ def create_menu_import(
     if existing is not None:
         return _replay_or_reject(existing, fingerprint), False
 
-    # Lock the bar so two uploads for it cannot both pass the unfinished-import check.
-    session.execute(select(Bar.id).where(Bar.id == bar.id).with_for_update())
+    # Lock the bar so two uploads for it cannot both pass the unfinished-import check, and so the
+    # import is ordered with manual edits and review publishes (spec 3.14.1). The bar may have been
+    # deactivated, or the owner revoked, after the route checked them, so check both again.
+    status = session.scalar(select(Bar.status).where(Bar.id == bar.id).with_for_update())
+    if status != BarStatus.ACTIVE:
+        raise bar_not_found(str(bar.id))
+    if not can_manage_bar(session, principal, bar.id):
+        raise forbidden()
     unfinished = session.scalar(
         select(MenuImport)
         .where(MenuImport.bar_id == bar.id, MenuImport.status.in_(UNFINISHED_STATUSES))

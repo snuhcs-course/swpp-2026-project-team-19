@@ -1,12 +1,14 @@
 import re
+from datetime import datetime, timezone
 from uuid import uuid4
 
 import pytest
 from sqlalchemy import func, select
 
-from app.models import BarStatus, ExtractionApproach, ImportStatus, MenuImport
+from app.models import BarStatus, ExtractionApproach, ImportStatus, MenuImport, UserType
 from app.services import menu_import_upload
-from tests.factories import make_bar
+from tests.factories import make_bar, make_owner, make_user
+from tests.sql_support import recorded_statements
 
 JPEG = b"\xff\xd8\xff\xe0" + b"jpeg-body"
 PNG = b"\x89PNG\r\n\x1a\n" + b"png-body"
@@ -155,6 +157,57 @@ def test_missing_or_inactive_bar_returns_not_found(client, db_session, image_sto
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "BAR_NOT_FOUND"
+
+
+def after_the_route_check(monkeypatch, change):
+    """Run `change` after the route has checked the bar and the caller, before the bar row lock."""
+    real = menu_import_upload._find_by_key
+
+    def find_then_change(session, key):
+        change()
+        return real(session, key)
+
+    monkeypatch.setattr(menu_import_upload, "_find_by_key", find_then_change)
+
+
+def test_a_bar_deactivated_after_the_route_check_is_not_found(
+    client, db_session, image_storage, operator, bar, monkeypatch
+):
+    after_the_route_check(monkeypatch, lambda: setattr(bar, "status", BarStatus.INACTIVE))
+
+    response = upload(client, bar.id, operator)
+
+    assert (response.status_code, response.json()["error"]["code"]) == (404, "BAR_NOT_FOUND")
+    assert import_count(db_session) == 0
+    assert list(image_storage.root.rglob("*.*")) == []
+
+
+def test_an_owner_revoked_after_the_route_check_is_forbidden(
+    client, db_session, image_storage, supabase, bar, monkeypatch
+):
+    reviewer = make_user(db_session, "reviewer-subject", user_type=UserType.OPERATOR)
+    ownership = make_owner(db_session, make_user(db_session, "owner-subject"), bar, reviewer)
+
+    def revoke():
+        ownership.revoked_at = datetime.now(timezone.utc)
+        ownership.revoked_by_user_id = reviewer.id
+
+    after_the_route_check(monkeypatch, revoke)
+
+    response = upload(client, bar.id, {"Authorization": f"Bearer {supabase.token(sub='owner-subject')}"})
+
+    assert (response.status_code, response.json()["error"]["code"]) == (403, "FORBIDDEN")
+    assert import_count(db_session) == 0
+
+
+def test_the_bar_row_is_locked_before_the_unfinished_import_check(client, db_session, image_storage, operator, bar):
+    with recorded_statements(db_session) as statements:
+        assert upload(client, bar.id, operator).status_code == 202
+
+    lock = next(i for i, sql in enumerate(statements) if "FOR UPDATE" in sql)
+    assert "FROM bars" in statements[lock]
+    unfinished = next(i for i, sql in enumerate(statements) if "FROM menu_imports" in sql and "status IN" in sql)
+    assert lock < unfinished
 
 
 def test_customer_is_forbidden_and_anonymous_is_unauthenticated(client, image_storage, token_for, bar):

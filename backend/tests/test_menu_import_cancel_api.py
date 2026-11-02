@@ -25,6 +25,7 @@ from app.services import menu_import_processing
 from app.services.menu_import_cancel import cancel_menu_import
 from app.services.menu_import_processing import process_menu_import, start_processing
 from app.services.menu_import_upload import ImageUpload, create_menu_import
+from tests.auth_support import TEMPORARY_OPERATOR
 from tests.factories import make_bar
 
 JPEG = b"\xff\xd8\xff\xe0" + b"jpeg-body"
@@ -46,6 +47,7 @@ def new_import(db_session, storage, *, status=ImportStatus.UPLOADED, images=2, k
         db_session,
         storage,
         MockMenuExtractor(),
+        principal=TEMPORARY_OPERATOR,
         bar=make_bar(db_session, key),
         idempotency_key=key,
         mode=ImportMode.FULL_REPLACE,

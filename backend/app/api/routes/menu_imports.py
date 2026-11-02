@@ -80,11 +80,13 @@ def upload_menu_import(
     llm_layer: LLMLayerConfig | None = Depends(get_matching_llm_layer),
     session_factory: SessionFactory = Depends(get_session_factory),
     bar: Bar = Depends(require_active_bar_manager),
+    principal: Principal = Depends(get_current_user),
 ) -> MenuImportAcceptedResponse:
     menu_import, created = create_menu_import(
         session,
         storage,
         extractor,
+        principal=principal,
         bar=bar,
         idempotency_key=idempotency_key,
         mode=mode,
