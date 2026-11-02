@@ -236,18 +236,24 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 }
 @Composable private fun St8ReviewPager(
-    index:Int, total:Int, remaining:Int, previous:()->Unit,next:()->Unit
+    index:Int, total:Int, remaining:Int, previous:()->Unit,next:()->Unit,
+    onLater:()->Unit
 ) {
     HorizontalDivider(color=V4Color.line,modifier=Modifier.padding(top=3.dp))
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
         verticalAlignment=Alignment.CenterVertically) {
-        if(index>0)TextButton(onClick=previous) {
-            Text("‹ 이전",color=V4Color.primary)
-        } else Spacer(Modifier.width(68.dp))
-        Text("남은 확인 ${remaining}개",color=V4Color.primary,fontSize=12.sp)
-        if(index<total-1)TextButton(onClick=next) {
-            Text("다음 ›",color=V4Color.primary)
-        } else Spacer(Modifier.width(68.dp))
+        if(index>0) TextButton(onClick=previous) {
+            Text("‹ 이전",color=V4Color.text)
+        } else Spacer(Modifier.width(61.dp))
+        Box(Modifier.border(1.dp,V4Color.primary,RoundedCornerShape(100))
+            .clickable(onClick=onLater)
+            .padding(horizontal=12.dp,vertical=7.dp)) {
+            Text("나중에 하기",color=V4Color.primary,fontWeight=FontWeight.Bold,
+                fontSize=13.sp)
+        }
+        if(index<total-1) TextButton(onClick=next) {
+            Text("다음 ›",color=V4Color.text)
+        } else Spacer(Modifier.width(61.dp))
     }
 }
 @Composable private fun St8Bottle() {
@@ -383,7 +389,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     if(showRestartWarning) AlertDialog(
         onDismissRequest={showRestartWarning=false},
         title={Text("처음부터 검수할까요?")},
-        text={Text("기존 검수 결과를 모두 초기화하고 AI 검수 요약부터 다시 시작해요. 게시된 메뉴와 사진은 그대로 유지돼요.")},
+        text={Text("기존 검수 결과를 모두 초기화해요.")},
         confirmButton={TextButton(onClick={
             showRestartWarning=false
             runCatching {job?.let {vm.resetPhotoReview(it.menuImportId,it.reviewVersion)}}
@@ -396,10 +402,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     screen="summary"
                 }.onFailure {error=it.message}
         }){Text("처음부터 검수")}},
-        dismissButton={TextButton(onClick={showRestartWarning=false}){Text("취소")}}
+        dismissButton={TextButton(onClick={showRestartWarning=false}){Text("취소",color=V4Color.text)}}
     )
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        val back: () -> Unit = { backPage() }
+        val back: () -> Unit = { if(screen=="summary") onHome() else backPage() }
         if(screen=="catalog") {
             Row(Modifier.fillMaxWidth().height(66.dp)
                 .padding(start=17.dp,end=14.dp,top=10.dp,bottom=0.dp),
@@ -1133,7 +1139,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 "summary"->{
                     St8Button(if(counts!!.reviewed>0)counts.remaining.toString()+"줄 이어서 확인"
                         else counts.remaining.toString()+"줄 확인 시작",
-                        enabled=counts.remaining>0) {next()}
+                        enabled=counts.remaining>0) {
+                            val first=all.indexOfFirst {it.second.decision==null}
+                            if(first>=0)visitLine(first)
+                        }
                     if(counts.remaining==0)St8Button("검수 결과 확인"){visit("publish")}
                     TextButton(onClick=onHome,modifier=Modifier.fillMaxWidth()){
                         Text("나중에 하기",color=V4Color.sub)
@@ -1175,12 +1184,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         }
                     }
                     St8ReviewPager(pageIndex(),reviewPositions.size,counts!!.remaining,
-                        previous={previousPage()},next={followingPage()})
+                    previous={previousPage()},next={followingPage()},onLater=onHome)
                 }
                 "price"->St8ReviewPager(pageIndex(),reviewPositions.size,counts!!.remaining,
-                    previous={previousPage()},next={followingPage()})
+                    previous={previousPage()},next={followingPage()},onLater=onHome)
                 "edit","new"->St8ReviewPager(pageIndex(),reviewPositions.size,counts!!.remaining,
-                    previous={previousPage()},next={followingPage()})
+                    previous={previousPage()},next={followingPage()},onLater=onHome)
                 "incomplete"->{
                     St8Button("${counts!!.remaining}줄 이어서 확인",enabled=counts.remaining>0){
                         val pos=all.indexOfFirst {it.second.decision==null}
