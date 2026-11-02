@@ -121,10 +121,13 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onMenu = { navController.navigate(OwnerPage.MGR_MENU.route) },
                         onAddBar = { navController.navigate(OwnerRoutes.ADD_BAR) },
                         onJob = { status ->
-                            navController.navigate(
-                                if (status == MockImportStatus.APPLIED) OwnerPage.MGR_MENU.route
-                                else OwnerPage.MGR_JOB.route
-                            )
+                            navController.currentBackStackEntry?.savedStateHandle
+                                ?.set("resumeOwnerImport",status==MockImportStatus.READY_FOR_REVIEW)
+                            navController.navigate(when(status) {
+                                MockImportStatus.APPLIED -> OwnerPage.MGR_MENU.route
+                                MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW.route
+                                else -> OwnerPage.MGR_JOB.route
+                            })
                         },
                     )
                     OwnerPage.MGR_STATUS -> OwnerOperatingQuickScreen(
@@ -158,9 +161,10 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onBack = { navController.popBackStack() },
                         onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
                         onExistingJob = { status ->
-                            navController.navigate(
-                                OwnerPage.MGR_JOB.route
-                            )
+                            navController.currentBackStackEntry?.savedStateHandle
+                                ?.set("resumeOwnerImport",status==MockImportStatus.READY_FOR_REVIEW)
+                            navController.navigate(if(status==MockImportStatus.READY_FOR_REVIEW)
+                                OwnerPage.MGR_REVIEW.route else OwnerPage.MGR_JOB.route)
                         },
                     )
                     OwnerPage.MGR_PHOTO -> OwnerMenuPhotoSelectionScreen(
@@ -181,6 +185,8 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     )
                     OwnerPage.MGR_REVIEW -> OwnerPhotoStage8Screen(
                         state = mockState, vm = data,
+                        resumeFromMenu = navController.previousBackStackEntry?.savedStateHandle
+                            ?.get<Boolean>("resumeOwnerImport") == true,
                         onBack = { navController.popBackStack() },
                         onHome = { navController.navigate(OwnerPage.MGR_MENU.route) {
                             popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
