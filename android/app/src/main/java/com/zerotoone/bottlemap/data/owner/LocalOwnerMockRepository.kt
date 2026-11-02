@@ -667,8 +667,11 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
                 MockImportStatus.FAILED,MockImportStatus.CANCELED)) {
                 "INVALID_IMPORT_STATE"
             }
+            // Retry-from-failure creates a new import while leaving the previous failed
+            // attempt for diagnostics. Canceling a registration must clear that entire
+            // unpublished chain; APPLIED history and posted menu rows stay untouched.
             state.copy(imports=state.imports.filterNot {
-                it.menuImportId==importId
+                it.barId==job.barId && it.status!=MockImportStatus.APPLIED
             }) to Unit
         }
     }
