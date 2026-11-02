@@ -84,6 +84,33 @@ internal fun stage8ConfirmedAutoMatch(line: MockExtractedLine): Boolean =
         line.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
         line.decision.productId == line.suggestedProductId
 
+/** Post-review existing-menu rows depend on the owner's final choice, not OCR suggestions. */
+internal fun stage8ConfirmedExistingLines(
+    job: MockMenuImport, snapshot: MockOwnerSnapshot,
+): List<MockExtractedLine> {
+    val existingIds = snapshot.menuItems.filter { it.barId == job.barId }
+        .map { it.productId }.toSet()
+    return job.images.flatMap { it.lines }.filter { line ->
+        line.kind == MockLineKind.PRODUCT &&
+            line.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
+            line.decision.productId in existingIds
+    }
+}
+
+/** Completed import compares the final owner-entered price with the retained bar price. */
+internal fun stage8RetainedPriceMismatchCount(
+    job: MockMenuImport, snapshot: MockOwnerSnapshot,
+): Int = job.images.flatMap { it.lines }.count { line ->
+    val decision = line.decision
+    if (decision?.kind != MockDecisionKind.SELECT_PRODUCT) return@count false
+    val barPrice = snapshot.menuItems.firstOrNull {
+        it.barId == job.barId && it.productId == decision.productId
+    }?.options?.firstOrNull()?.priceKrw
+    val imported = (decision.correctedOptions ?: line.options)
+        .firstOrNull()?.priceKrw
+    barPrice != null && imported != null && imported > 0 && barPrice != imported
+}
+
 /** Match the repository's add-only product grouping for pre-publish counts.
  * This is a display preview only; the repository remains the final oracle.
  */
@@ -610,8 +637,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
             } else if(screen=="auto" || screen=="existing") {
                 Text(if(screen=="auto")"새로 더할 메뉴 "+counts!!.newCandidates+"줄"
-                    else if(counts!!.existing==0)"이미 있는 메뉴 5줄 · UI 예시"
-                    else "이미 있는 메뉴 "+counts.existing+"줄",
+                    else "이미 있는 메뉴 "+counts!!.existing+"줄",
                     color=V4Color.text,fontSize=24.sp,fontWeight=FontWeight.Bold)
                 val existingIds=s.menuItems.filter {it.barId==job.barId}.map{it.productId}.toSet()
                 val subset=all.withIndex().filter{(_,entry)->
@@ -672,6 +698,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         .background(V4Color.surface,RoundedCornerShape(14.dp))
                         .border(1.dp,V4Color.line,RoundedCornerShape(14.dp))
                         .clickable {
+                            // Switching away from "new product" must not publish a stale draft.
+                            pendingNewDraftEncoded=null
+                            pendingNewDraftLineId=null
                             selectedProductId=product.productId
                             val line=pair.second
                             if(line.options.isEmpty() || line.options.any{it.priceKrw<=0}) {
@@ -1106,14 +1135,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         HorizontalDivider(color=V4Color.line)
                     }
                     Spacer(Modifier.height(4.dp))
-                    Text("이미 있는 메뉴 ${counts.existing}줄",
+                    val confirmedExisting=stage8ConfirmedExistingLines(job,s)
+                    Text("이미 있는 메뉴 ${confirmedExisting.size}줄",
                         color=V4Color.primary,fontSize=12.sp,fontWeight=FontWeight.Bold)
-                    val existingIds=s.menuItems.filter{it.barId==job.barId}
-                        .map{it.productId}.toSet()
-                    all.filter {(_,line)->
-                        line.suggestedProductId in existingIds ||
-                            line.candidateProductIds.any{it in existingIds}
-                    }.forEach {(_,line)->
+                    confirmedExisting.forEach {line->
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
                             Text(line.sourceText,color=V4Color.text,fontSize=12.sp,
                                 modifier=Modifier.weight(1f))
@@ -1171,14 +1196,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         Text("${skipped}개",color=V4Color.text,fontWeight=FontWeight.Bold)
                     }
                 }
-                val changed=all.count { (_,line)->
-                    val productId=line.decision?.productId ?: line.suggestedProductId
-                    val barPrice=s.menuItems.firstOrNull{
-                        it.barId==job.barId && it.productId==productId
-                    }?.options?.firstOrNull()?.priceKrw
-                    val imported=line.options.firstOrNull()?.priceKrw
-                    barPrice!=null && imported!=null && imported>0 && barPrice!=imported
-                }
+                val changed=stage8RetainedPriceMismatchCount(job,s)
                 Row(Modifier.fillMaxWidth()
                     .border(1.dp,Color(0xFF75583D),RoundedCornerShape(12.dp))
                     .background(Color(0xFF302822),RoundedCornerShape(12.dp))
