@@ -641,9 +641,18 @@ extracted_options #2
 
 이 절은 모든 `extracted_items`의 역할을 검수하고, 그중 AI가 `extracted_line_type = product`로 분류한 항목에 최초 상품 매칭을 수행하는 과정을 한눈에 보기 위한 요약이다. 운영자는 최초 역할과 상품 매칭 결과를 모두 최종 판단한다. 각 단계의 상세 규칙과 저장 필드는 7장부터 18장까지 설명한다.
 
-> **현재 구현 (I2-A18, I2-A22):** 백엔드는 아래 정확 일치(8장) 다음에 단계 규칙 S1(이름 변형), S2(브랜드+연수·에디션), S2b(기본 상품), S3(숫자가 있는 이름의 1글자 오타)를 실행한다(`backend/app/matching/staged.py`). 11장의 점수 계산과 12장의 LLM 재정렬은 서버에 없고, 그 대신 아래 LLM 매칭 층이 있다. 따라서 `exact_match`는 정확 별칭 일치뿐 아니라 이 규칙들이 상품 하나를 확정한 경우에도 나오며, 어느 규칙인지는 후보 `evidence.rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)로 구분한다. 한 줄에 다른 브랜드의 두 상품이 있으면(S1) 두 상품을 후보로 남긴 `ambiguous`로 저장한다.
+> **현재 구현 (I2-A18, I2-A22):** 백엔드는 아래 정확 일치(8장) 다음에 단계 규칙 S1(이름 변형), S2(브랜드+연수·에디션), S2b(기본 상품), S3(숫자가 있는 이름의 1글자 오타)를 실행한다(`backend/app/matching/staged.py`). 11장의 점수 계산과 12장의 LLM 재정렬은 서버에 없고, 그 대신 아래 LLM 매칭 층과 임베딩 후보 단계가 있다. 따라서 `exact_match`는 정확 별칭 일치뿐 아니라 이 규칙들이 상품 하나를 확정한 경우에도 나오며, 어느 규칙인지는 후보 `evidence.rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)로 구분한다. 한 줄에 다른 브랜드의 두 상품이 있으면(S1) 두 상품을 후보로 남긴 `ambiguous`로 저장한다.
 >
 > **LLM 매칭 층 (I3, 기본 꺼짐):** `MATCHING_LLM_ENABLED=true`(와 `GEMINI_API_KEY`)이면 S1~S3가 확정하지 못한 줄에 I2 평가에서 채택한 M3a를 합치기 방식으로 실행한다(`backend/app/matching/llm_layer.py`, `ai/match_llm/m3.py`와 같은 규칙·프롬프트·모델 `gemini-3.1-flash-lite`). 사진마다 한 번 LLM이 대상 줄을 영문(병입사·증류소·브랜드, 연수, 에디션 토큰)으로 풀어 쓰면, 그 이름으로 S1~S3를 다시 돌리고 표준명 핵심 토큰이 모두 맞는 상품도 찾는다. 후보마다 거부권(`bottler_missing`, `age_mismatch`, `alias_of_other`, `edition_mismatch`)을 검사해 걸리면 버린다. 남은 LLM 후보는 `method = llm`, `evidence.rule = M3a`로 S1~S3 후보 앞에 두고 그 줄은 항상 `ambiguous`다. 자동 확정·게시는 하지 않는다. LLM 후보가 하나이고 S1~S3 후보가 없었거나 그 안에 있을 때만 `evidence.confirmRecommended`를 붙여 업주가 한 번에 확인하게 한다(P29). LLM 호출 실패·시간 초과·형식이 틀린 응답·키 없음, 또는 등록 작업당 호출 상한(`MATCHING_LLM_MAX_CALLS`, 기본 30) 초과면 그 줄은 S1~S3 결과 그대로이고 등록 작업은 실패하지 않는다. M3b(브랜드 상품 목록에서 LLM이 고르기)는 평가에서 채택하지 않아 `MATCHING_LLM_M3B_ENABLED=true`일 때만 실행한다.
+
+> **임베딩 후보 단계 (I3-P40, 기본 꺼짐):** `EMBEDDING_ENABLED=true`이면 매칭의 마지막 단계로 S1~S3와 (켜져 있으면) LLM 매칭 층이 끝난 결과에 임베딩 후보를 적용한다(`backend/app/matching/embedding.py`, 결정 근거 `ai/docs/p24_embedding_decision.md`의 정책 `unmatched_k5+rerank_only`). 순서는 규칙 → LLM 층 → 임베딩이다.
+>
+> - **대상과 정책:** `exact_match`와 한 줄 두 상품(`multi`) 줄, 그리고 `confirmRecommended` 후보가 있는 `ambiguous` 줄은 건드리지 않는다. 여전히 `unmatched`인 줄에는 유사도가 하한 이상인 상품을 최대 5개 `method = embedding` 후보로 붙이고 그 줄은 `ambiguous`가 된다. 하한을 넘는 상품이 없으면 `unmatched` 그대로다. `confirmRecommended`가 없는 `ambiguous` 줄은 후보를 더하지 않고 기존 후보(규칙·LLM)만 임베딩 유사도 순서로 다시 정렬한다(임베딩 상위 10개에 없는 후보는 원래 순서대로 뒤에 둔다). 후보가 하나인 `ambiguous` 줄에는 아무것도 더하지 않는다. 임베딩은 줄을 확정하지 않고 `confirmRecommended`도 붙이지 않는다.
+> - **무엇을 비교하나:** 활성 상품마다 표시명과 모든 별칭 원문(검색에 안 쓰는 별칭 포함, 규칙 매칭이 보는 것과 같음)을 임베딩하고, 상품 점수는 그 텍스트들 중 최고 유사도다. 질의는 그 줄의 추출 상품명(`extracted_product_name`)이다. 1단계 모델 `tfidf`는 문자 1~3-gram TF-IDF(소문자, 공백 제거, sublinear tf, smooth idf, 코사인)로 P24 하네스(`ai/eval/p24_embedding_compare.py`의 `CharTfidf`)와 같은 계산이다. 7장의 정규화는 쓰지 않는다(하네스와 같게 두어야 하한 0.38이 그대로 맞는다).
+> - **하한:** `EMBEDDING_MIN_SIMILARITY`(모델마다 기본값, `tfidf` 0.38). 하한은 새 후보에만 적용하고 재정렬에는 적용하지 않는다. 모델마다 유사도 척도가 달라 모델을 바꾸면 하한도 같이 바꾼다.
+> - **evidence:** 새 후보는 `{"rule": "embedding", "embeddingSimilarity": 0.912, "matchedText": "<맞은 표시명 또는 별칭 원문>", "model": "tfidf-char"}`이고 `score`는 유사도(소수 넷째 자리)다. 재정렬한 줄의 후보에는 `"rerankedBy": "embedding"`과, 임베딩 순위에 있던 상품이면 `embeddingSimilarity`를 더한다. `method`는 바꾸지 않는다(규칙 후보는 `alias`, LLM 후보는 `llm` 그대로).
+> - **인덱스:** API 프로세스 메모리에 두고(테이블·마이그레이션 없음) 첫 등록 작업 때 만든다. 매번 활성 상품 수·최근 `products.updated_at`·그 별칭 수·최근 별칭 `created_at`을 읽어 달라졌으면(검수 반영으로 상품·별칭이 생기거나 상품이 비활성화되면) 다시 만든다. 서버를 다시 시작해도 다시 만든다.
+> - **실패:** 임베딩 단계의 예외는 로그만 남기고 그 앞 단계 결과를 그대로 저장한다. 등록 작업은 실패하지 않는다.
 
 > **안전 규칙과 위스키 용어 사전 (I3-A4):** (1) S3는 숫자 앞 이름(앞의 `더`/`The`와 문장부호 제외)이 3음절 이하 한글일 때 1음절 차이로 확정하지 않고 후보도 내지 않는다(`달모어 18` ≠ `보모어 18`, `더 달무어 18`, `아드백-10`). (2) S2가 에디션 토큰으로 상품 하나를 골랐어도 그 상품의 `edition_name`에 줄에 없는 단어가 있으면(cask·oak·finish 같은 중립어 제외) 확정하지 않고 그 상품 하나를 확인 권장(`confirmRecommended`)으로 남기며, 빠진 단어를 evidence `editionOnlyInProduct`에 적는다(`anCnoc Sherry` → anCnoc Peated Sherry Cask). 줄에 사전이 모르는 한글 단어가 있으면(`비노 바리끄`) 사전에 있는 영어 단어만 빠진 것으로 센다. 줄에 연수가 아닌 숫자(연도, `#2`, `16.2`. 도수·용량·잔·가격 표기인 `46%`, `700 ml`, `16,000원`은 제외)가 있으면, 이름에 숫자가 있는데 줄의 숫자가 하나도 없는 상품은 후보에서 뺀다(`클래식컷 2025` ≠ Classic Cut 2020). (3) 줄에 다시 쓴 브랜드명(`Aberlour 12 (아벨라워)`, `(컴파스 박스)`처럼 두 토큰에 걸쳐도)은 에디션 토큰이 아니고, 브랜드명뿐인 이름 변형은 다른 이름이 아무것도 못 찾을 때만 쓴다. 연수가 없을 때 확인할 수 없는 짧은 영문자 토큰(`DR`)은 상품을 지우지 않는다(숫자는 지운다). (4) S1–S3가 확정하지 못한 줄은 `backend/app/matching/vocab_ko_en.json`의 한글 위스키 용어를 영어로 바꿔(셰리 캐스크 → sherry cask, 더블우드 → double wood) 한 번 더 찾고, 확정되거나, 후보가 없던 줄에 후보가 생기고 1순위 후보에 맞는 에디션 토큰이 있을 때만(브랜드+연수만 맞는 목록은 버림) 그 결과를 쓴다. 이때 후보 evidence `vocabulary`에 바꾼 이름이 들어가고 `rule`은 그 후보를 찾은 단계 그대로다. 사전의 영어 단어는 카탈로그 에디션·표준명에서만 골랐고, 한글 표기를 만든 경위와 한계는 파일의 `about`에 있다.
 
@@ -987,6 +996,8 @@ brand_aliases
 현재 기본값은 `whisky`다. 위스키 메뉴 처리 중에는 같은 카테고리의 상품을 우선 후보로 사용한다. `category`를 문자열 Enum 테이블 중 무엇으로 구현할지는 아직 미확정이다.
 
 ## 11 후보 점수 계산 및 순위 결정
+
+> **현재 구현:** 이 장의 가중 종합 점수는 구현하지 않았다. 서버의 임베딩 유사도는 6장 "현재 구현"의 임베딩 후보 단계(I3-P40, 기본 꺼짐)에서만 쓰며, 규칙·LLM이 남긴 `unmatched` 줄에 `method = embedding` 후보를 붙이고 `ambiguous` 줄을 재정렬한다. evidence 키는 이 장의 이름(`embeddingSimilarity`)을 따른다.
 
 8장의 별칭 조회와 9장의 브랜드 판별로 만든 후보에서 10장의 속성 충돌 검사를 통과한 상품들을 평가하고 순위를 정하는 단계다. `product_aliases.normalized_alias`가 정확히 하나의 상품과 일치하고 속성 충돌도 없을 때만 단일 후보로 처리하며, 이 계산을 생략한다.
 
