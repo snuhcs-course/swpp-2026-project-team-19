@@ -85,7 +85,7 @@ class OwnerPhotoStage7ComposeTest {
         }
     }
 
-    @Test fun readyImportRemainsUnpublishedAndCanBeCanceledFromJobScreen() {
+    @Test fun readyImportImmediatelyRoutesToReviewWithoutIntermediaryPage() {
         val r = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         val importId = r.queuePhotoImport("fixture-bar", listOf(
@@ -95,17 +95,20 @@ class OwnerPhotoStage7ComposeTest {
                 options = listOf(MockMenuOption("opt", pourMl = 30, priceKrw = 17000)))
         ) })
         val vm = OwnerMockViewModel(r)
+        var opened=false
         compose.setContent { MaterialTheme {
-            OwnerMenuPhotoJobScreen(vm.state.collectAsState().value, vm, {}, {})
+            OwnerMenuPhotoJobScreen(vm.state.collectAsState().value, vm, {}, {},
+                onReview={opened=true})
         } }
-        compose.onNodeWithText("메뉴 확인 준비").assertExists()
-        compose.onNodeWithText("메뉴 등록 작업 취소").performClick()
-        compose.onNodeWithText("작업 취소").performClick()
+        compose.onNodeWithText("메뉴 확인 준비").assertDoesNotExist()
+        compose.onNodeWithText("메뉴 등록 작업 취소").assertDoesNotExist()
+        compose.waitForIdle()
         compose.runOnIdle {
+            assertTrue(opened)
             val state = (vm.state.value as MockOwnerLoadState.Ready).snapshot
-            assertEquals(MockImportStatus.CANCELED, state.imports.single().status)
+            assertEquals(MockImportStatus.READY_FOR_REVIEW, state.imports.single().status)
             assertEquals(0, state.menuItems.size)
-            assertFalse(state.imports.single().images.single().lines.isEmpty())
         }
     }
+
 }
