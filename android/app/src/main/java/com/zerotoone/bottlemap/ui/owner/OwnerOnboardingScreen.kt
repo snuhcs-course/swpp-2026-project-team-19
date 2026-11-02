@@ -340,7 +340,7 @@ fun OwnerOnboardingScreen(
                 else -> when(screen){
                     RegPage.HOME -> {
                         OwnerRegistrationDashboard(
-                            snapshot=requireNotNull(snapshot), debug=com.zerotoone.bottlemap.BuildConfig.DEBUG,
+                            snapshot=requireNotNull(snapshot), debug=false,
                             onRegister={
                                 val saved=snapshot?.registrationDraft
                                 if(saved!=null) {
@@ -442,21 +442,6 @@ fun OwnerOnboardingScreen(
                         OwnerV4Summary("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
                         OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
                         OwnerV4Summary("개업일",draft.openingDateIso.replace("-",".")){go(RegPage.DATE)}
-                        if(com.zerotoone.bottlemap.BuildConfig.DEBUG){
-                            Text("Mock 확인 결과 선택",style=MaterialTheme.typography.labelLarge)
-                            Row(Modifier.horizontalScroll(rememberScrollState())){
-                                VerifyFixture.entries.forEach{ kind ->
-                                    TextButton(onClick={verify=kind}){
-                                        Text(when(kind){
-                                            VerifyFixture.MATCHED->"일치"
-                                            VerifyFixture.FAILED->"불일치"
-                                            VerifyFixture.UNAVAILABLE->"확인 불가"
-                                            VerifyFixture.LIMITED->"횟수 초과"
-                                        })
-                                    }
-                                }
-                            }
-                        }
                     }
                     RegPage.VERIFYING -> {
                         OwnerLoading("사업자 정보 확인 중 · Mock")
@@ -508,12 +493,6 @@ fun OwnerOnboardingScreen(
                                 }){Text("아니에요")}
                             }
                         }
-                        if(com.zerotoone.bottlemap.BuildConfig.DEBUG&&candidates.isEmpty())
-                            TextButton(onClick={
-                                viewModel.seedExistingCandidateForFixture(MockBar(newDebugCandidateId(),
-                                    draft.proposedBarName.ifBlank{"몰트 앤 무드"},
-                                    "서울특별시 관악구 봉천로 12길 8"))
-                            }){Text("테스트: 같은 이름의 기존 매장 준비 (Mock)")}
                     }
                     RegPage.BARPHOTO -> {
                         OwnerV4Question("매장 사진을\n올려 주세요",
