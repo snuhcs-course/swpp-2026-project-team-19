@@ -66,8 +66,9 @@ internal class OwnerMenuPhotoStore(context: Context) {
      * ImageDecoder applies source orientation before conversion.
      */
     private fun convertHeicToJpeg(uri: Uri, output: File): Long {
-        require(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            "이 기기에서 HEIC 사진을 변환할 수 없어요. JPEG로 변환해 다시 선택해 주세요."
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            throw IllegalArgumentException(
+                "이 기기에서 HEIC 사진을 변환할 수 없어요. JPEG로 변환해 다시 선택해 주세요.")
         }
         val bitmap = try {
             ImageDecoder.decodeBitmap(ImageDecoder.createSource(app.contentResolver,uri)) {
