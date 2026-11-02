@@ -644,23 +644,49 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.REVIEW -> {
                         OwnerV4Question("이렇게\n신청할게요","한 번 더 확인하고 신청해 주세요.")
-                        OwnerStatusLabel("Mock 정보 확인 · 실제 국세청 인증 아님",
-                            OwnerStatusTone.ATTENTION)
-                        Text("사업자 정보",style=MaterialTheme.typography.titleMedium)
-                        OwnerV4Summary("등록번호",bnFormat(draft.businessNumberDigits),null)
-                        OwnerV4Summary("대표자",draft.representativeName,null)
-                        OwnerV4Summary("개업일",draft.openingDateIso.replace("-","."),null)
-                        Text("매장 정보",style=MaterialTheme.typography.titleMedium)
-                        OwnerV4Summary("이름",draft.proposedBarName){edit(RegPage.BARNAME)}
-                        if(draft.kind==MockApplicationKind.NEW_BAR){
-                            OwnerV4Summary("대표 사진",draft.applicantGallery.size.toString()+"장"){edit(RegPage.BARPHOTO)}
-                            OwnerV4Summary("주소",listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
-                                .filter{it.isNotBlank()}.joinToString(" ")){edit(RegPage.ADDRESS)}
-                            OwnerV4Summary("매장 전화",draft.storePhone.ifBlank{"없음"}){edit(RegPage.BARPHONE)}
+                        Spacer(Modifier.height(8.dp))
+                        Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                            Row(verticalAlignment=Alignment.CenterVertically,
+                                horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                Text("사업자 정보",color=RegistrationV4.secondary,fontSize=14.sp)
+                                Box(Modifier.background(Color(0xFF244C38),RoundedCornerShape(20.dp))
+                                    .padding(horizontal=8.dp,vertical=3.dp)) {
+                                    Text("확인 완료",color=Color(0xFFB9DFC8),fontSize=12.sp)
+                                }
+                            }
+                            OwnerV4Summary("등록번호",bnFormat(draft.businessNumberDigits),null)
+                            OwnerV4Summary("대표자",draft.representativeName,null)
+                            OwnerV4Summary("개업일",draft.openingDateIso.replace("-","."),null)
                         }
-                        OwnerV4Summary("메뉴판",draft.initialMenuPhotos.size.toString()+"장"){edit(RegPage.MENUS)}
-                        OwnerV4Summary("연락처",formatOwnerPhone(draft.contactPhone)){edit(RegPage.CONTACT)}
-                        OwnerV4Panel("운영팀 승인 전에는 매장과 메뉴가 손님에게 보이지 않아요.")
+                        Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                            Text("매장 정보",color=RegistrationV4.secondary,fontSize=14.sp)
+                            OwnerV4Summary("이름",draft.proposedBarName){edit(RegPage.BARNAME)}
+                            if(draft.kind==MockApplicationKind.NEW_BAR) {
+                                OwnerV4Summary("사진",draft.applicantGallery.size.toString()+"장"){edit(RegPage.BARPHOTO)}
+                                OwnerV4Summary("주소",listOf(
+                                    draft.proposedBarAddress,draft.proposedBarAddressDetail)
+                                    .filter{it.isNotBlank()}.joinToString(" ")){edit(RegPage.ADDRESS)}
+                                OwnerV4Summary("전화번호",formatOwnerPhone(draft.storePhone)
+                                    .ifBlank{"없음"}+"\n손님에게 보여요"){edit(RegPage.BARPHONE)}
+                            }
+                        }
+                        Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                            Text("메뉴판",color=RegistrationV4.secondary,fontSize=14.sp)
+                            OwnerV4Summary("사진",draft.initialMenuPhotos.size.toString()+"장"){edit(RegPage.MENUS)}
+                        }
+                        Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                            Text("신청자",color=RegistrationV4.secondary,fontSize=14.sp)
+                            OwnerV4Summary("연락처",formatOwnerPhone(draft.contactPhone)
+                                +"\n운영팀만 봐요"){edit(RegPage.CONTACT)}
+                        }
+                        Row(Modifier.fillMaxWidth()
+                            .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
+                            .padding(12.dp),horizontalArrangement=Arrangement.spacedBy(12.dp),
+                            verticalAlignment=Alignment.Top) {
+                            Text("ⓘ",color=RegistrationV4.primary,fontSize=18.sp)
+                            Text("운영팀 승인 전에는 매장과 메뉴가 손님에게 보이지 않아요.",
+                                color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=20.sp)
+                        }
                     }
                     RegPage.DONE -> RegistrationCenterContent("신청을 마쳤어요",
                         "운영팀이 실제 매장인지 확인한 뒤 승인해요. 진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
