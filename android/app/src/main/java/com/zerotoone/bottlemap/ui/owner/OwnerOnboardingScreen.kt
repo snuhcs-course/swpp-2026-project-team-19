@@ -232,8 +232,7 @@ fun OwnerOnboardingScreen(
 
     LaunchedEffect(screen) {
         if(screen==RegPage.READING){
-            delay(400)
-            // Explicit deterministic DEMO fixture; never claim results were derived from the photo.
+            delay(1400) // ACTION_FIRST v4 HTML reading animation            // Explicit deterministic DEMO fixture; never claim results were derived from the photo.
             val current=(viewModel.state.value as? MockOwnerLoadState.Ready)?.snapshot?.registrationDraft
                 ?: (viewModel.state.value as? MockOwnerLoadState.Empty)?.snapshot?.registrationDraft
                 ?: draft
@@ -241,7 +240,7 @@ fun OwnerOnboardingScreen(
                 openingDateIso="2019-05-14",proposedBarName="몰트 앤 무드"))
             go(RegPage.BIZCHECK)
         } else if(screen==RegPage.VERIFYING){
-            delay(350);go(RegPage.VERIFIED)
+            delay(1300);go(RegPage.VERIFIED) // ACTION_FIRST v4 HTML verifying animation
         }
     }
     LaunchedEffect(snapshot?.registrationDraft!=null,startRegistration) {
