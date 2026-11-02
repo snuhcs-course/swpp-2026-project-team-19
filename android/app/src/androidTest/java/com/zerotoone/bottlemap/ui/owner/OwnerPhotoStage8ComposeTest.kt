@@ -81,7 +81,7 @@ class OwnerPhotoStage8ComposeTest {
     @Test fun pdf92PartialReviewAllowsResumeWithoutPublishing() {
         showLine(MockExtractedLine("raw", "위스키 미확인", MockLineKind.PRODUCT,
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=14000))))
-        compose.onNodeWithText("‹ 이전").performClick()
+        compose.onNodeWithText("←").performClick()
         compose.onNodeWithText("1줄 확인").performTouchInput {longClick()}
         compose.onNodeWithText("1줄 남았어요").assertExists()
         compose.onNodeWithText("1줄 이어서 확인").assertExists()
@@ -104,6 +104,7 @@ class OwnerPhotoStage8ComposeTest {
         )
         showLines(list)
         compose.onNodeWithText("이 메뉴가 맞나요?").assertExists()
+        compose.onNodeWithText("‹ 이전").assertDoesNotExist()
         compose.onNodeWithText("다음 ›").performClick()
         compose.onNodeWithText("새로 등록할게요").assertExists()
         compose.onNodeWithText("이 메뉴가 맞나요?").assertDoesNotExist()
@@ -114,6 +115,7 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("새로 등록할게요").assertExists()
         compose.onNodeWithText("‹ 이전").performClick()
         compose.onNodeWithText("이 메뉴가 맞나요?").assertExists()
+        compose.onNodeWithText("‹ 이전").assertDoesNotExist()
     }
 
     @Test fun allReviewTypesHaveCompactTopExclusionAndCatalogDoesNot() {
@@ -123,6 +125,28 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("이번 줄 제외").assertExists()
         compose.onNodeWithText("다른 메뉴예요").performClick()
         compose.onNodeWithText("이번 줄 제외").assertDoesNotExist()
+    }
+
+    @Test fun singleReviewPageHidesBothPreviousAndNext() {
+        showLine(MockExtractedLine("single","하쿠슈DR",MockLineKind.PRODUCT,
+            suggestedProductId="demo-canonical",
+            options=listOf(MockMenuOption("one",label="잔",pourMl=30,priceKrw=19000))))
+        compose.onNodeWithText("‹ 이전").assertDoesNotExist()
+        compose.onNodeWithText("다음 ›").assertDoesNotExist()
+    }
+
+    @Test fun finalReviewPageHidesNextButRetainsPrevious() {
+        showLines(listOf(
+            MockExtractedLine("one","하쿠슈DR",MockLineKind.PRODUCT,
+                suggestedProductId="demo-canonical",
+                options=listOf(MockMenuOption("o1",label="잔",pourMl=30,priceKrw=19000))),
+            MockExtractedLine("two","러셀",MockLineKind.PRODUCT,
+                candidateProductIds=listOf("demo-canonical"),
+                options=listOf(MockMenuOption("o2",label="잔",pourMl=30,priceKrw=15000)))
+        ))
+        compose.onNodeWithText("다음 ›").performClick()
+        compose.onNodeWithText("‹ 이전").assertExists()
+        compose.onNodeWithText("다음 ›").assertDoesNotExist()
     }
 
 }
