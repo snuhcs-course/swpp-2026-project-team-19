@@ -65,8 +65,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var position by rememberSaveable(job?.menuImportId){mutableIntStateOf(0)}
     var error by rememberSaveable {mutableStateOf<String?>(null)}
     var publishConfirmed by rememberSaveable {mutableStateOf(false)}
+    var selectedProductId by rememberSaveable(job?.menuImportId) { mutableStateOf<String?>(null) }
     val pair=all.getOrNull(position)
     fun next() {
+        selectedProductId=null
         val target=all.indices.firstOrNull{it>position && all[it].second.decision==null}
             ?: all.indices.firstOrNull{all[it].second.decision==null}
         if(target==null)screen="publish" else {position=target;screen="line"}
@@ -166,18 +168,16 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         Text(s.brands.firstOrNull{it.brandId==product.brandId}?.name.orEmpty(),
                             color=V4Color.sub,fontSize=12.sp)
                         St8Button("맞아요") {
+                            selectedProductId=product.productId
                             screen="edit"
                         }
                     }
                 }
                 if(candidates.isEmpty())Text("일치하는 상품 후보가 없어요.",
                     color=V4Color.sub,fontSize=13.sp)
-                var selectedProduct by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(line.decision?.productId ?: candidates.firstOrNull()?.productId)
-                }
                 candidates.forEach{p->
-                    TextButton(onClick={selectedProduct=p.productId;screen="edit"}){
-                        Text(if(selectedProduct==p.productId)"✓ "+p.displayName else p.displayName,
+                    TextButton(onClick={selectedProductId=p.productId;screen="edit"}){
+                        Text(if(selectedProductId==p.productId)"✓ "+p.displayName else p.displayName,
                             color=V4Color.primary)
                     }
                 }
@@ -267,12 +267,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 val candidates=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
                     .distinct().filter{id->s.products.any{it.productId==id && it.isActive}}
-                var selectedProduct by rememberSaveable(line.extractedItemId){
-                    mutableStateOf(line.decision?.productId ?: candidates.firstOrNull())
-                }
                 if(screen=="edit")candidates.forEach{id->
-                    TextButton(onClick={selectedProduct=id}){
-                        Text((if(selectedProduct==id)"✓ " else "")+
+                    TextButton(onClick={selectedProductId=id}){
+                        Text((if(selectedProductId==id)"✓ " else "")+
                             (s.products.firstOrNull{it.productId==id}?.displayName ?: id),
                             color=V4Color.primary)
                     }
@@ -288,7 +285,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         error="가격·용량·중복 옵션을 확인해 주세요."
                     } else {
                         val decision=if(screen=="edit")MockReviewDecision(
-                            MockDecisionKind.SELECT_PRODUCT,productId=selectedProduct,
+                            MockDecisionKind.SELECT_PRODUCT,productId=selectedProductId ?: line.decision?.productId ?: candidates.firstOrNull(),
                             correctedOptions=resolved)
                         else MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
                             correctedOptions=resolved,newProduct=MockNewProductDraft(
