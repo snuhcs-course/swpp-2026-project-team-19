@@ -388,9 +388,18 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             position=target
         }
     }
+    fun destinationFor(line:MockExtractedLine):String {
+        val knownIds=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
+        val available=knownIds.any { id->
+            s?.products?.any {it.productId==id && it.isActive}==true
+        }
+        // Stale or inactive catalog IDs must never be auto-selected.
+        return if(line.kind==MockLineKind.PRODUCT && knownIds.isNotEmpty() &&
+            !available) "catalog" else stage8ReviewDestination(line)
+    }
     fun visitLine(target:Int) {
         all.getOrNull(target)?.second?.takeUnless {it.mockAutoAccepted}
-            ?.let {visit(stage8ReviewDestination(it),target)}
+            ?.let {visit(destinationFor(it),target)}
     }
     fun backPage() {
         val last=pageHistory.lastOrNull()
@@ -405,7 +414,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     LaunchedEffect(job?.menuImportId,position,screen) {
         if(screen=="line") {
             pair?.second?.let { line ->
-                val destination=stage8ReviewDestination(line)
+                val destination=destinationFor(line)
                 if(destination!="line")screen=destination
             }
         }
@@ -690,7 +699,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         }
                     }
                 }
-                if(candidates.size>1)
+                if(candidates.size!=1)
                     St8Secondary("⌕  목록에 없어요") {
                         catalogQuery=""
                         visit("catalog")
