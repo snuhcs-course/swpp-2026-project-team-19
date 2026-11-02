@@ -935,12 +935,12 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                 }?.displayName ?: line.sourceText
                             Text(name,color=V4Color.text,fontSize=12.sp,
                                 modifier=Modifier.weight(1f))
-                            Text(when(line.decision?.kind){
+                            V4ReviewStateBadge(when(line.decision?.kind){
                                 MockDecisionKind.SELECT_PRODUCT->"확인됨"
                                 MockDecisionKind.CREATE_PRODUCT->"신규 등록"
                                 MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT->"건너뜀"
                                 else->"확인 필요"
-                            },color=V4Color.sub,fontSize=10.sp)
+                            })
                         }
                         HorizontalDivider(color=V4Color.line)
                     }
@@ -956,7 +956,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
                             Text(line.sourceText,color=V4Color.text,fontSize=12.sp,
                                 modifier=Modifier.weight(1f))
-                            Text("건너뜀",color=V4Color.sub,fontSize=10.sp)
+                            V4ReviewStateBadge("건너뜀")
                         }
                         HorizontalDivider(color=V4Color.line)
                     }
