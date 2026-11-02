@@ -201,6 +201,8 @@ data class MockMenuImport(
     val failureReason: String? = null,
     // Local Mock publication result: deduplicated actual new bar menu rows.
     val publishedAddedCount: Int? = null,
+    // Actual number of distinct canonical products created during this Mock publish.
+    val publishedNewProductCount: Int? = null,
 )
 
 /**
