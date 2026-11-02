@@ -373,7 +373,11 @@ fun OwnerOnboardingScreen(
         confirmButton={TextButton(onClick={showAddressSheet=false}){Text("닫기")}})
 
     Column(Modifier.fillMaxSize().background(RegistrationV4.bg).imePadding()) {
-        if(screen!=RegPage.DONE) RegistrationBackBar(if(screen==RegPage.HOME)onBack else ::back)
+        if(screen!=RegPage.DONE) {
+            if(screen==RegPage.HOME || screen==RegPage.VIEW_APPLICATION)
+                OwnerHeader("내 매장 관리",if(screen==RegPage.HOME)onBack else ::back)
+            else RegistrationBackBar(::back)
+        }
         if(stage!=0) RegistrationProgress(stage)
         val centered=screen in listOf(RegPage.READING,RegPage.VERIFYING,
             RegPage.VERIFIED,RegPage.DONE)
