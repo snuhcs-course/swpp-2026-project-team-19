@@ -29,6 +29,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -100,8 +101,8 @@ internal fun RegistrationButton(title:String,enabled:Boolean=true,onClick:()->Un
     }
 }
 @Composable
-internal fun RegistrationGlyph(kind:String,modifier:Modifier=Modifier,color:Color=RegistrationV4.primary) {
-    Canvas(modifier.size(22.dp)) {
+internal fun RegistrationGlyph(kind:String,modifier:Modifier=Modifier,color:Color=RegistrationV4.primary,size:Dp=22.dp) {
+    Canvas(modifier.size(size)) {
         val w=size.width; val h=size.height
         val path=Path()
         fun stroke() { drawPath(path,color,style=Stroke(1.65.dp.toPx(),
@@ -159,6 +160,28 @@ internal fun RegistrationGlyph(kind:String,modifier:Modifier=Modifier,color:Colo
             "plus" -> {
                 path.moveTo(w*.5f,h*.17f);path.lineTo(w*.5f,h*.83f)
                 path.moveTo(w*.17f,h*.5f);path.lineTo(w*.83f,h*.5f);stroke()
+            }
+            "store" -> {
+                path.moveTo(w*.13f,h*.38f);path.lineTo(w*.22f,h*.16f)
+                path.lineTo(w*.78f,h*.16f);path.lineTo(w*.88f,h*.38f)
+                path.lineTo(w*.84f,h*.49f);path.lineTo(w*.18f,h*.49f);path.close()
+                path.moveTo(w*.24f,h*.49f);path.lineTo(w*.24f,h*.86f)
+                path.lineTo(w*.76f,h*.86f);path.lineTo(w*.76f,h*.49f)
+                path.moveTo(w*.41f,h*.86f);path.lineTo(w*.41f,h*.65f)
+                path.lineTo(w*.60f,h*.65f);path.lineTo(w*.60f,h*.86f);stroke()
+            }
+            "user" -> {
+                drawCircle(color,w*.17f,center=androidx.compose.ui.geometry.Offset(w*.5f,h*.29f),
+                    style=Stroke(1.65.dp.toPx()))
+                path.moveTo(w*.20f,h*.84f)
+                path.quadraticTo(w*.21f,h*.55f,w*.5f,h*.57f)
+                path.quadraticTo(w*.79f,h*.55f,w*.80f,h*.84f);stroke()
+            }
+            "info" -> {
+                drawCircle(color,w*.38f,center=androidx.compose.ui.geometry.Offset(w*.5f,h*.5f),
+                    style=Stroke(1.65.dp.toPx()))
+                path.moveTo(w*.5f,h*.46f);path.lineTo(w*.5f,h*.72f);stroke()
+                drawCircle(color,w*.045f,center=androidx.compose.ui.geometry.Offset(w*.5f,h*.30f))
             }
             "remove" -> {
                 path.moveTo(w*.25f,h*.25f);path.lineTo(w*.75f,h*.75f)
@@ -322,7 +345,7 @@ internal fun RegistrationRow(label:String,value:String,onEdit:(()->Unit)?=null) 
 internal fun RegistrationSuccessMark() {
     Box(Modifier.size(64.dp).background(RegistrationV4.primary,CircleShape),
         contentAlignment=Alignment.Center) {
-        RegistrationGlyph("check",Modifier.size(32.dp),RegistrationV4.onPrimary)
+        RegistrationGlyph("check",color=RegistrationV4.onPrimary,size=32.dp)
     }
 }
 
@@ -361,8 +384,8 @@ internal fun RegistrationCenterContent(
         }
         Spacer(Modifier.height(8.dp))
         Text(title,color=RegistrationV4.text,
-            fontSize=24.sp,lineHeight=32.sp,fontWeight=FontWeight.Bold,
-            textAlign=TextAlign.Center)
+            style=androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+            lineHeight=32.sp,textAlign=TextAlign.Center)
         Text(subtitle,color=RegistrationV4.secondary,
             fontSize=14.sp,lineHeight=21.sp,textAlign=TextAlign.Center)
     }
@@ -372,17 +395,19 @@ internal fun RegistrationCenterContent(
 internal fun RegistrationHint(text:String) {
     Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.Top,
         horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-        RegistrationGlyph("check",Modifier.size(16.dp),Color(0xFFB9DFC8))
+        RegistrationGlyph("check",color=Color(0xFFB9DFC8),size=16.dp)
         Text(text,color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=20.sp)
     }
 }
 @Composable
 internal fun RegistrationVisibility(public:Boolean) {
-    Box(Modifier.background(if(public)Color(0xFF503C29) else RegistrationV4.elevated,
-        RoundedCornerShape(20.dp))
-        .padding(horizontal=8.dp,vertical=5.dp)) {
-        Text(if(public)"▣ 손님에게 보여요" else "♙ 운영팀만 봐요",
-            color=if(public)Color(0xFFF7DFBF) else RegistrationV4.secondary,
-            fontSize=12.sp,lineHeight=18.sp)
+    Row(Modifier.background(if(public)Color(0xFF503C29) else RegistrationV4.elevated,
+        RoundedCornerShape(20.dp)).padding(horizontal=8.dp,vertical=5.dp),
+        verticalAlignment=Alignment.CenterVertically,
+        horizontalArrangement=Arrangement.spacedBy(4.dp)) {
+        val color=if(public)Color(0xFFF7DFBF) else RegistrationV4.secondary
+        RegistrationGlyph(if(public)"store" else "user",color=color,size=16.dp)
+        Text(if(public)"손님에게 보여요" else "운영팀만 봐요",
+            color=color,fontSize=12.sp,lineHeight=18.sp)
     }
 }
