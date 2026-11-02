@@ -436,9 +436,11 @@ fun OwnerOnboardingScreen(
                             if(inputMethod=="photo")"사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요."
                             else "국세청에 등록된 정보와 같은지 확인해요.")
                         Spacer(Modifier.height(8.dp))
-                        OwnerV4Summary("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
-                        OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
-                        OwnerV4Summary("개업일",draft.openingDateIso.replace("-",".")){go(RegPage.DATE)}
+                        Column(Modifier.fillMaxWidth()) {
+                            OwnerV4Summary("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
+                            OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
+                            OwnerV4Summary("개업일",draft.openingDateIso.replace("-",".")){go(RegPage.DATE)}
+                        }
                     }
                     RegPage.VERIFYING -> RegistrationCenterContent(
                         "사업자 정보를\n확인하고 있어요","국세청 정보와 비교하고 있어요.",loading=true)
