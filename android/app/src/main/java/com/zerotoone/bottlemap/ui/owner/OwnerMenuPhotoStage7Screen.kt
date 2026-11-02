@@ -443,7 +443,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
                             }
                         }
                         if (picture != null)
-                            Image(picture, "메뉴판 사진 ${index+1}",
+                            Image(requireNotNull(picture), "메뉴판 사진 ${index+1}",
                                 Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                         else Text("사진을 읽을 수 없어요", Modifier.align(Alignment.Center),
                             color = V4Color.background, fontSize = 10.sp)
