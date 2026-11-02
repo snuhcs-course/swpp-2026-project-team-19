@@ -1151,4 +1151,69 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(280000,added.options.single().priceKrw)
     }
 
+    @Test fun productEditionIsPartOfCanonicalNameAndIdentity() {
+        val first=MockNewProductDraft(name="Caol Ila 13년",
+            brandName="Signatory",editionName="Vintage Edition",ageYears=13)
+        val second=first.copy(editionName="Cask Strength")
+        assertEquals("Caol Ila 13년 Vintage Edition",canonicalReviewProductName(first))
+        assertEquals("Caol Ila 13년 Cask Strength",canonicalReviewProductName(second))
+        assertEquals("Caol Ila 13년 Vintage Edition",
+            canonicalReviewProductName(first.copy(name="Caol Ila 13년 Vintage Edition")))
+    }
+
+    @Test fun duplicateBrandAndOverlengthNamesAreRejectedDuringReview() {
+        val r=repo()
+        r.saveBrand(MockBrand("existing-brand","Signatory"))
+        val id=r.startPhotoImport("fixture-bar",listOf("content://draft"),
+            MockPhotoExtractionSource {listOf(MockExtractedLine("draft","Caol Ila",
+                MockLineKind.PRODUCT, options=listOf(serving("o",30,20000))))})
+        val job=ready(r).imports.last()
+        val line=job.images.single().lines.single()
+        fun submit(draft:MockNewProductDraft)=r.decideLine(id,line.extractedItemId,
+            job.reviewVersion,MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
+                correctedOptions=line.options,newProduct=draft))
+        rejects {submit(MockNewProductDraft("Caol Ila 13년",brandName=" Signatory ")) }
+        rejects {submit(MockNewProductDraft("Caol Ila 13년",brandName="x".repeat(121))) }
+        submit(MockNewProductDraft("Caol Ila 13년",brandId="existing-brand"))
+        assertEquals(MockDecisionKind.CREATE_PRODUCT,
+            ready(r).imports.last().images.single().lines.single().decision?.kind)
+    }
+
+    @Test fun duplicateNewProductLinesPublishOneCatalogRowAndActualCount() {
+        val r=repo()
+        val id=r.startPhotoImport("fixture-bar",listOf("content://draft"),
+            MockPhotoExtractionSource {listOf(
+                MockExtractedLine("first","Caol Ila 30ml",MockLineKind.PRODUCT,
+                    options=listOf(serving("o1",30,20000))),
+                MockExtractedLine("second","Caol Ila 60ml",MockLineKind.PRODUCT,
+                    options=listOf(serving("o2",60,38000))))})
+        val job=ready(r).imports.last()
+        val draft=MockNewProductDraft(name="Caol Ila 13년",brandName="Signatory",
+            ageYears=13,editionName="Vintage Edition")
+        job.images.single().lines.forEach {line ->
+            r.decideLine(id,line.extractedItemId,job.reviewVersion,
+                MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
+                    correctedOptions=line.options,newProduct=draft))
+        }
+        assertEquals(1,r.publishAddOnly(id,job.reviewVersion))
+        val updated=ready(r)
+        assertEquals(1,updated.imports.last().publishedAddedCount)
+        assertEquals(1,updated.imports.last().publishedNewProductCount)
+        assertEquals("Caol Ila 13년 Vintage Edition",updated.products.single().displayName)
+        assertEquals(2,updated.menuItems.single().options.size)
+    }
+
+    @Test fun discardRetryChainNeverErasesOldFailureBeforeAppliedImport() {
+        val old=MockMenuImport("old","fixture-bar",MockImportStatus.FAILED,1,emptyList())
+        val applied=MockMenuImport("applied","fixture-bar",MockImportStatus.APPLIED,1,emptyList())
+        val retry=MockMenuImport("retry","fixture-bar",MockImportStatus.FAILED,1,emptyList())
+        val pending=MockMenuImport("pending","fixture-bar",MockImportStatus.PROCESSING,1,emptyList())
+        val snapshot=OwnerMockFixtures.registeredBar().copy(
+            imports=listOf(old,applied,retry,pending))
+        assertEquals(setOf("retry","pending"),unpublishedRetryChainIds(snapshot,"pending"))
+        val r=repo(InMemoryMockOwnerStateStore(snapshot))
+        r.discardPhotoImport("pending")
+        assertEquals(listOf("old","applied"),ready(r).imports.map{it.menuImportId})
+    }
+
 }
