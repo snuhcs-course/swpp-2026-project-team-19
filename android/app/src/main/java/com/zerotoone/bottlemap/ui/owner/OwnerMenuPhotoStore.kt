@@ -52,6 +52,14 @@ internal fun removeInterruptedMenuPhotoArtifacts(dir: File, activePaths: Set<Str
             file.absolutePath !in activePaths && file.delete()
     }
 
+/** Delete only abandoned app-owned camera output files, never a live capture. */
+internal fun removeAbandonedOwnerCaptures(dir: File, protectedPaths: Set<String>): Int =
+    dir.listFiles().orEmpty().count { file ->
+        file.isFile && file.name.startsWith("menu-capture-") &&
+            file.extension == "jpg" && file.absolutePath !in protectedPaths &&
+            file.delete()
+    }
+
 internal class OwnerMenuPhotoStore(context: Context) {
     private companion object {
         // Shared by store instances in this process so a screen re-entry cannot
