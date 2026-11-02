@@ -14,7 +14,8 @@
     "bars_v3 (2026-11-03): bars_v2 entries unchanged (beck, forest stay inactive). I3 bars whose address AND coordinates are confirmed are in `bars`; the others are in `pending_bars`, which scripts/seed_catalog.py does not read (latitude/longitude are NOT NULL), so they are not loaded until someone fills in the coordinates from Kakao Map and moves the entry into `bars`.",
     "tale-of-tails: label '테일오브테일즈'. Name and road address from DiningCode (테일오브테일스, 서울특별시 관악구 행운1길 2, 070-8867-6957) and Polle (테일 오브 테일스 낙성대점, 서울 관악구 행운1길 2 1층). Coordinates from a Google Places record of the bar itself ('테일 오브 테일스 (Bar. Tale Of Tales)', 행운1길 2, same phone; collected 2026-04-12, published in the GitHub dataset hyeonsang010716/seoul-hotspot-data). Cross-check: the Google record for 행운1길 4 in the same dataset is 20 m away. Kakao place id and Kakao place name not checked: verify on Kakao Map before the demo.",
     "yeonrim-snu-stn: road address from a Trip.com post ('서울대입구 분위기 좋은 카페 바 연림', 서울 관악구 행운1길 56 지하1층) and the footer of a public GitHub project that gives 연림's address (서울특별시 관악구 행운1길 56 지하1층 연림). The branch name is the team's; 행운1길 56 is about 400 m from 서울대입구역 and 1.4 km from 봉천역, so this is the 서울대입구역 branch, but no source names the branch. Coordinates are the building's, from a Naver Map place record (posExact=1) of another business in the same building (행운1길 56, 봉천동 66-117), not from a record of 연림 itself. Phone null (no business number found). Verify on Kakao Map before the demo.",
-    "pending (coordinates null, not loaded): yeonrim-bongcheon-stn, so-that, nest, muyong-yuyong (no reliable address found by web search either); little-gallery (DiningCode: 서울특별시 관악구 장군봉2길 6 1층, 0507-1470-8313) and cheongchun-whisky (DiningCode/Polle/Daangn: 장군봉2길 13 1층, 0507-1336-2867) have an address but no coordinate source for that address. Coordinates were not estimated from neighbouring buildings."
+    "pending (coordinates null, not loaded): yeonrim-bongcheon-stn, so-that, nest, muyong-yuyong (no reliable address found by web search either); little-gallery (DiningCode: 서울특별시 관악구 장군봉2길 6 1층, 0507-1470-8313) and cheongchun-whisky (DiningCode/Polle/Daangn: 장군봉2길 13 1층, 0507-1336-2867) have an address but no coordinate source for that address. Coordinates were not estimated from neighbouring buildings.",
+    "Coordinates and addresses of the eight I3 bars come from the Kakao Map place records (searched 2026-11-03); personal mobile numbers are left out."
   ],
   "bars": [
     {
@@ -106,11 +107,11 @@
       "key": "tale-of-tails",
       "name": "테일오브테일스",
       "address": "서울 관악구 행운1길 2 1층",
-      "latitude": 37.479681,
-      "longitude": 126.959019,
+      "latitude": 37.47973712,
+      "longitude": 126.95898217,
       "phone": "070-8867-6957",
       "status": "active",
-      "kakao_place_id": null,
+      "kakao_place_id": "1212231318",
       "label_bar_name": "테일오브테일즈"
     },
     {
@@ -118,37 +119,35 @@
       "key": "yeonrim-snu-stn",
       "name": "연림 서울대입구역점",
       "address": "서울 관악구 행운1길 56 지하1층",
-      "latitude": 37.481205,
-      "longitude": 126.95698,
-      "phone": null,
+      "latitude": 37.4811672,
+      "longitude": 126.95696324,
+      "phone": "0502-5553-9160",
       "status": "active",
-      "kakao_place_id": null,
+      "kakao_place_id": "1485827425",
       "label_bar_name": "연림 서울대입구역점"
-    }
-  ],
-  "pending_bars": [
+    },
     {
       "id": "74dabf2b-7001-5959-a38e-31ea8eca2ede",
       "key": "yeonrim-bongcheon-stn",
       "name": "연림 봉천역점",
-      "address": null,
-      "latitude": null,
-      "longitude": null,
+      "address": "서울 관악구 봉천로 360-2 2층",
+      "latitude": 37.4838223,
+      "longitude": 126.94003812,
       "phone": null,
       "status": "active",
-      "kakao_place_id": null,
+      "kakao_place_id": "451014266",
       "label_bar_name": "연림 봉천역점"
     },
     {
       "id": "5138de5c-ea73-513a-97a7-366ea0f0c8a4",
       "key": "little-gallery",
       "name": "리틀 갤러리",
-      "address": "서울 관악구 장군봉2길 6 1층",
-      "latitude": null,
-      "longitude": null,
-      "phone": "0507-1470-8313",
+      "address": "서울 관악구 장군봉2길 6",
+      "latitude": 37.48248603,
+      "longitude": 126.9398956,
+      "phone": null,
       "status": "active",
-      "kakao_place_id": null,
+      "kakao_place_id": "1390610566",
       "label_bar_name": "리틀 갤러리"
     },
     {
@@ -156,48 +155,49 @@
       "key": "cheongchun-whisky",
       "name": "청춘위스키",
       "address": "서울 관악구 장군봉2길 13 1층",
-      "latitude": null,
-      "longitude": null,
-      "phone": "0507-1336-2867",
+      "latitude": 37.48250834,
+      "longitude": 126.93946933,
+      "phone": null,
       "status": "active",
-      "kakao_place_id": null,
+      "kakao_place_id": "253922723",
       "label_bar_name": "청춘위스키 봉천"
     },
     {
       "id": "91f022e4-bfa8-5835-b7ff-1fcbeff8c925",
       "key": "so-that",
       "name": "쏘댓",
-      "address": null,
-      "latitude": null,
-      "longitude": null,
-      "phone": null,
+      "address": "서울 관악구 중앙2길 16 1층 4호",
+      "latitude": 37.48449801,
+      "longitude": 126.95398882,
+      "phone": "0502-5551-6169",
       "status": "active",
-      "kakao_place_id": null,
+      "kakao_place_id": "615290600",
       "label_bar_name": "쏘댓page2"
     },
     {
       "id": "8d14fd32-8c64-5115-a33c-6d00a7187683",
       "key": "nest",
       "name": "네스트",
-      "address": null,
-      "latitude": null,
-      "longitude": null,
+      "address": "서울 관악구 봉천로 457-1",
+      "latitude": 37.48257404,
+      "longitude": 126.95095877,
       "phone": null,
       "status": "active",
-      "kakao_place_id": null,
+      "kakao_place_id": "939617811",
       "label_bar_name": "네스트"
     },
     {
       "id": "e8c54478-2e70-564e-a74b-3cf22e5b9ddc",
       "key": "muyong-yuyong",
       "name": "무용의 유용",
-      "address": null,
-      "latitude": null,
-      "longitude": null,
-      "phone": null,
+      "address": "서울 관악구 행운1길 40 1층 107호",
+      "latitude": 37.48065378,
+      "longitude": 126.95738864,
+      "phone": "0507-1363-2995",
       "status": "active",
-      "kakao_place_id": null,
+      "kakao_place_id": "253378495",
       "label_bar_name": "무용의 유용"
     }
-  ]
+  ],
+  "pending_bars": []
 }
