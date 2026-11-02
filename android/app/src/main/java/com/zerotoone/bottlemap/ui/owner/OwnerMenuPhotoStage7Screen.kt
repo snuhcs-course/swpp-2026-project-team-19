@@ -53,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -142,6 +143,35 @@ private fun MenuPhotoSecondary(label: String, onClick: () -> Unit) {
  * Draw the glass-and-liquid illustration from Action-first p82 with native
  * vector primitives; do not ship a bitmap screenshot of the reference.
  */
+/** Hand-drawn thin-outline camera from v4 PDF p83, not a platform emoji. */
+@Composable private fun MenuPhotoCameraIcon() {
+    Canvas(Modifier.size(24.dp).testTag("stage7-retry-camera-icon")) {
+        val unit = size.width / 24f
+        val outline = Path().apply {
+            moveTo(3f*unit, 8f*unit)
+            lineTo(7f*unit, 8f*unit)
+            lineTo(9f*unit, 5f*unit)
+            lineTo(15f*unit, 5f*unit)
+            lineTo(17f*unit, 8f*unit)
+            lineTo(21f*unit, 8f*unit)
+            quadraticBezierTo(22f*unit, 8f*unit, 22f*unit, 9f*unit)
+            lineTo(22f*unit, 19f*unit)
+            quadraticBezierTo(22f*unit, 20f*unit, 21f*unit, 20f*unit)
+            lineTo(3f*unit, 20f*unit)
+            quadraticBezierTo(2f*unit, 20f*unit, 2f*unit, 19f*unit)
+            lineTo(2f*unit, 9f*unit)
+            quadraticBezierTo(2f*unit, 8f*unit, 3f*unit, 8f*unit)
+            close()
+        }
+        val c = Color(0xFF211A14)
+        drawPath(outline,c,style=Stroke(width=1.65f*unit,cap=StrokeCap.Round,
+            join=StrokeJoin.Round))
+        drawCircle(c,radius=3.5f*unit,
+            center=Offset(12f*unit,14f*unit),
+            style=Stroke(width=1.65f*unit))
+    }
+}
+
 @Composable
 private fun MenuPhotoProcessingIllustration() {
     // ACTION_FIRST v4: the wave moves inside a clipped glass, not the glass itself.
@@ -306,9 +336,24 @@ internal fun OwnerMenuPhotoSelectionScreen(
                         .testTag("stage7-photo-add"),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("▣", color = V4Color.sub, fontSize = 18.sp)
-                        Text("사진 추가", color = V4Color.text, fontSize = 12.sp)
-                        Text("${photos.size} / 15", color = V4Color.sub, fontSize = 11.sp)
+                        Text("+", color = V4Color.primary, fontSize = 28.sp,
+                            fontWeight = FontWeight.Light, lineHeight = 28.sp)
+                        Text("사진 추가", color = V4Color.sub, fontSize = 13.sp)
+                    }
+                }
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                Text("메뉴판 순서대로 올려주세요.", color = V4Color.sub, fontSize = 12.sp)
+                Text("${photos.size}/15", color = V4Color.sub, fontSize = 12.sp)
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
+                listOf("한 장에 한 면씩, 글자와 가격이 잘리지 않게",
+                    "빛 반사 없이 정면에서").forEach { guidance ->
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(11.dp)) {
+                        Text("✓", color = Color(0xFFB9DFC8), fontSize = 16.sp)
+                        Text(guidance, color = V4Color.sub, fontSize = 13.sp)
                     }
                 }
             }
@@ -457,7 +502,8 @@ internal fun OwnerMenuPhotoJobScreen(
             .padding(horizontal = 18.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (job?.status == MockImportStatus.FAILED)
-                MenuPhotoPrimary("📷 사진 다시 올리기", tag = "stage7-failed-retry",
+                MenuPhotoPrimary("사진 다시 올리기", tag = "stage7-failed-retry",
+                    leadingIcon = { MenuPhotoCameraIcon() },
                     onClick = onRetryPhotos)
             if (job?.status == MockImportStatus.READY_FOR_REVIEW) {
                 MenuPhotoPrimary("검수 결과 확인하기", onClick = onReview)
