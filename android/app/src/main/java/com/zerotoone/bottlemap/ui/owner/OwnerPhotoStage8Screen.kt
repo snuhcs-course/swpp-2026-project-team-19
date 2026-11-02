@@ -316,7 +316,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     val all=job?.images?.flatMap { photo ->
         photo.lines.filter{it.kind!=MockLineKind.NON_PRODUCT}.map { photo to it }
     }.orEmpty()
-    val reviewPositions=all.indices.toList()
+    val reviewPositions=all.indices.filter {!all[it].second.mockAutoAccepted}
     val counts=if(job!=null && s!=null)stage8Counts(job,s) else null
     val focusManager=LocalFocusManager.current
     val keyboardController=LocalSoftwareKeyboardController.current
@@ -345,7 +345,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         }
     }
     fun visitLine(target:Int) {
-        all.getOrNull(target)?.second?.let {visit(stage8ReviewDestination(it),target)}
+        all.getOrNull(target)?.second?.takeUnless {it.mockAutoAccepted}
+            ?.let {visit(stage8ReviewDestination(it),target)}
     }
     fun pageIndex()=reviewPositions.indexOf(position)
     fun previousPage() {
