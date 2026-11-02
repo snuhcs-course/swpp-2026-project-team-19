@@ -3,6 +3,8 @@ package com.zerotoone.bottlemap.ui.owner
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -72,6 +74,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         OutlinedTextField(value=value,onValueChange={
             change(if(digits)it.filter(Char::isDigit) else it)
         },modifier=Modifier.fillMaxWidth(),singleLine=true,
+            keyboardOptions=KeyboardOptions(keyboardType=if(digits)
+                KeyboardType.Number else KeyboardType.Text),
             placeholder={Text(placeholder,fontSize=15.sp)},
             colors=OutlinedTextFieldDefaults.colors(
                 focusedTextColor=V4Color.text,unfocusedTextColor=V4Color.text,
@@ -438,6 +442,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             OutlinedTextField(age,{
                                 age=it.filter(Char::isDigit);if(age.isNotEmpty())noAge=false
                             },enabled=!noAge,placeholder={Text("예: 13")},
+                                keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Number),
                                 modifier=Modifier.width(105.dp),singleLine=true,
                                 colors=OutlinedTextFieldDefaults.colors(
                                     focusedTextColor=V4Color.text,
@@ -576,7 +581,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         else MockReviewDecision(MockDecisionKind.CREATE_PRODUCT,
                             correctedOptions=resolved,displayNameOverride=displayOverride.trim().ifBlank{null},
                             newProduct=MockNewProductDraft(
-                                name=name.trim(),brandId=brandId,brandName=if(brandId==null)brand.trim() else null,
+                                name=listOfNotNull(name.trim(),
+                                    age.takeIf { !noAge && it.isNotBlank() &&
+                                        !name.contains(it+"년") }?.let{it+"년"}).joinToString(" "),
+                                brandId=brandId,brandName=if(brandId==null)brand.trim() else null,
                                 category=chosenCategory,
                                 ageYears=if(noAge)null else age.toIntOrNull(),
                                 editionName=edition.trim().ifBlank{null},
