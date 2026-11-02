@@ -19,14 +19,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.*
 
-internal data class Stage8Counts(val photos: Int, val lines: Int, val reviewed: Int, val existing: Int) {
+internal data class Stage8Counts(val photos: Int, val lines: Int, val reviewed: Int, val existing: Int,
+    val newCandidates: Int) {
     val remaining: Int get() = lines - reviewed
 }
 internal fun stage8Counts(job: MockMenuImport, s: MockOwnerSnapshot): Stage8Counts {
     val ids=s.menuItems.filter { it.barId==job.barId }.map { it.productId }.toSet()
     val lines=job.images.flatMap { it.lines }
     return Stage8Counts(job.images.size,lines.size,lines.count { it.decision!=null },
-        lines.count {it.suggestedProductId in ids || it.candidateProductIds.any { id->id in ids }})
+        lines.count {it.kind == MockLineKind.PRODUCT &&
+            (it.suggestedProductId in ids || it.candidateProductIds.any { id->id in ids }) &&
+            it.decision?.kind !in listOf(MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)},
+        lines.count {it.kind == MockLineKind.PRODUCT &&
+            it.suggestedProductId !in ids && it.candidateProductIds.none { id->id in ids } &&
+            it.decision?.kind !in listOf(MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)})
 }
 private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     is MockOwnerLoadState.Ready->s.snapshot
@@ -76,7 +82,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         V4Toolbar(null, {
             when(screen) {
-                "line","publish" -> screen="summary"
+                "line","publish","auto","existing" -> screen="summary"
                 "done"->onHome()
                 else->onBack()
             }
@@ -120,15 +126,43 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     Text("잔 옵션에 수동으로 적용한 경우에만 저장돼요.",color=V4Color.sub,fontSize=12.sp)
                 }
                 St8Card {
-                    Text("자동 인식 신규 메뉴 "+(counts.lines-counts.existing)+"줄 ›",
-                        color=V4Color.text,fontWeight=FontWeight.Bold)
+                    Text("자동 인식 신규 메뉴 "+counts.newCandidates+"줄 ›",
+                        color=V4Color.text,fontWeight=FontWeight.Bold,
+                        modifier=Modifier.fillMaxWidth().clickable {screen="auto"})
                 }
                 St8Card {
                     Text("이미 등록된 메뉴 "+counts.existing+"줄 ›",
-                        color=V4Color.text,fontWeight=FontWeight.Bold)
+                        color=V4Color.text,fontWeight=FontWeight.Bold,
+                        modifier=Modifier.fillMaxWidth().clickable {screen="existing"})
                 }
                 Text("확인한 줄 "+counts.reviewed+"개 · 남은 줄 "+counts.remaining+"개",
                     color=V4Color.sub,fontSize=12.sp)
+            } else if(screen=="auto" || screen=="existing") {
+                Text(if(screen=="auto")"새로 더할 메뉴 "+counts!!.newCandidates+"줄"
+                    else "이미 있는 메뉴 "+counts!!.existing+"줄",
+                    color=V4Color.text,fontSize=24.sp,fontWeight=FontWeight.Bold)
+                val existingIds=s.menuItems.filter {it.barId==job.barId}.map{it.productId}.toSet()
+                val subset=all.withIndex().filter{(_,entry)->
+                    val line=entry.second
+                    val known=line.suggestedProductId in existingIds ||
+                        line.candidateProductIds.any{it in existingIds}
+                    line.kind==MockLineKind.PRODUCT &&
+                        line.decision?.kind !in listOf(
+                            MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT) &&
+                        if(screen=="existing")known else !known
+                }
+                if(subset.isEmpty())Text("해당하는 메뉴가 없어요.",color=V4Color.sub)
+                subset.forEach{entry->
+                    Column(Modifier.fillMaxWidth().clickable{
+                        position=entry.index;screen="line"
+                    }.padding(vertical=10.dp)) {
+                        Text(entry.value.second.sourceText,color=V4Color.text,fontSize=15.sp)
+                        Text("메뉴판 "+entry.value.first.imageOrder+" · "+
+                            (if(entry.value.second.decision==null)"확인 필요" else "확인됨"),
+                            color=V4Color.sub,fontSize=12.sp)
+                        HorizontalDivider(color=V4Color.line)
+                    }
+                }
             } else if(screen=="line" && pair!=null) {
                 val (photo,line)=pair
                 Text((position+1).toString()+" / "+counts!!.lines,
@@ -332,6 +366,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         Text("나중에 하기",color=V4Color.sub)
                     }
                 }
+                "auto","existing"->St8Button("요약으로") {screen="summary"}
                 "line"->{
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){
                         TextButton(onClick={if(position>0)position-- else screen="summary"}){
