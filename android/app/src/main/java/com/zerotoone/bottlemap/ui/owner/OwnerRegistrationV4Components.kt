@@ -169,9 +169,10 @@ internal fun RegistrationGlyph(kind:String,modifier:Modifier=Modifier,color:Colo
 }
 @Composable
 internal fun RegistrationIntro() {
+    Column(Modifier.fillMaxWidth()) {
     RegistrationHeading("매장 등록은\n이렇게 진행돼요",
         "10분 정도 걸려요. 중간에 멈춰도 입력한 내용은 남아 있어요.")
-    Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(32.dp))
     val steps=listOf(
         "사업자 정보 확인" to "사업자등록번호, 대표자 성명, 개업일",
         "매장 정보 입력" to "이름, 사진, 주소, 연락처",
@@ -181,8 +182,8 @@ internal fun RegistrationIntro() {
     Column(Modifier.fillMaxWidth().testTag("registration-intro-steps")) {
         steps.forEachIndexed { i,(title,subtitle)->
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                Box(Modifier.width(32.dp).height(72.dp),contentAlignment=Alignment.TopCenter) {
-                    if(i<3) Box(Modifier.width(2.dp).height(55.dp).offset(y=32.dp)
+                Box(Modifier.width(32.dp).height(64.dp),contentAlignment=Alignment.TopCenter) {
+                    if(i<3) Box(Modifier.width(2.dp).height(32.dp).offset(y=32.dp)
                         .background(RegistrationV4.border))
                     Box(Modifier.size(32.dp).background(RegistrationV4.elevated,CircleShape),
                         contentAlignment=Alignment.Center) {
@@ -211,6 +212,7 @@ internal fun RegistrationIntro() {
                 Text(text,fontSize=14.sp,lineHeight=21.sp,color=RegistrationV4.secondary)
             }
         }
+    }
     }
 }
 @Composable
