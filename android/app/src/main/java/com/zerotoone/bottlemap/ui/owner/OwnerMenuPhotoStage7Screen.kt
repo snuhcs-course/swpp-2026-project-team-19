@@ -422,7 +422,8 @@ internal fun OwnerMenuPhotoJobScreen(
                             MockBrand("demo-brand-hakushu", "Suntory"),
                             MockBrand("demo-brand-russells", "Russell's Reserve"),
                             MockBrand("demo-brand-lagavulin", "Lagavulin"),
-                            MockBrand("demo-brand-bookers", "Booker's")
+                            MockBrand("demo-brand-bookers", "Booker's"),
+                            MockBrand("demo-brand-jack", "Jack Daniel's")
                         )
                         val products = listOf(
                             MockCatalogProduct("demo-hakushu-dr", "demo-brand-hakushu",
@@ -433,7 +434,10 @@ internal fun OwnerMenuPhotoJobScreen(
                                 "Russell's Reserve Single Barrel Rye"),
                             MockCatalogProduct("demo-lagavulin-16", "demo-brand-lagavulin",
                                 "Lagavulin 16", ageYears = 16),
-                            MockCatalogProduct("demo-bookers", "demo-brand-bookers", "Booker's")
+                            MockCatalogProduct("demo-bookers", "demo-brand-bookers", "Booker's"),
+                            MockCatalogProduct("demo-jack-old", "demo-brand-jack", "Jack Daniel's Old No.7"),
+                            MockCatalogProduct("demo-jack-proof", "demo-brand-jack", "Jack Daniel's Single Barrel 100 Proof"),
+                            MockCatalogProduct("demo-jack-gentleman", "demo-brand-jack", "Jack Daniel's Gentleman Jack")
                         )
                         val existingSnapshot = photoBar(state)
                         brands.filter { b ->
@@ -468,7 +472,7 @@ internal fun OwnerMenuPhotoJobScreen(
                                     MockMenuOption("demo-bookers-15", label = "15ml",
                                         pourMl = 15, priceKrw = 18000),
                                     MockMenuOption("demo-bookers-30", label = "30ml",
-                                        pourMl = 30, priceKrw = 32000))),
+                                        pourMl = 30, priceKrw = 0))),
                             MockExtractedLine("demo-lagavulin", "라가불린 16년",
                                 MockLineKind.PRODUCT, suggestedProductId = "demo-lagavulin-16",
                                 options = listOf(MockMenuOption("demo-lagavulin-bottle",
