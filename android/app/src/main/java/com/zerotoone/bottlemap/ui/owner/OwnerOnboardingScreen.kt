@@ -74,6 +74,7 @@ private fun dateInput(raw:String):String {
         else -> n.take(4)+"-"+n.substring(4,6)+"-"+n.drop(6)
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OwnerOnboardingScreen(
     viewModel: OwnerMockViewModel,
