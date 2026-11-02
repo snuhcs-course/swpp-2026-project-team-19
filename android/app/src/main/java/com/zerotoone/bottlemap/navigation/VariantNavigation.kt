@@ -173,7 +173,12 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                             }
                         },
                         onRetryPhotos = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
-                        onReview = { navController.navigate(OwnerPage.MGR_REVIEW.route) }
+                        onReview = {
+                            navController.navigate(OwnerPage.MGR_REVIEW.route) {
+                                popUpTo(OwnerPage.MGR_JOB.route) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
                     )
                     OwnerPage.MGR_REVIEW -> OwnerPhotoStage8Screen(
                         state = mockState, vm = data,
