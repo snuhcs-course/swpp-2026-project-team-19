@@ -269,7 +269,9 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     St8Field("도수 (선택)",alcohol,{alcohol=it})
                     if(category=="otherAlcohol")St8Field("기타 주류 종류",subtype,{subtype=it})
                 }
-                val originals=line.decision?.correctedOptions ?: line.options
+                val originals=line.decision?.correctedOptions ?: line.options.ifEmpty {
+                    listOf(MockMenuOption("local-review-option-"+line.extractedItemId,priceKrw=0))
+                }
                 var labels by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(originals.map{it.label.orEmpty()})
                 }
