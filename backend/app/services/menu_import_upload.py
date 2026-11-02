@@ -172,6 +172,24 @@ def _replay_or_reject(existing: MenuImport, fingerprint: str) -> MenuImport:
     return existing
 
 
+def check_no_unfinished_import(session: Session, bar_id: UUID) -> None:
+    """409 ACTIVE_IMPORT_EXISTS when the bar has an unfinished import. The caller holds the bar row lock,
+    so none can be created until it commits (spec 3.14.1)."""
+    unfinished = session.scalar(
+        select(MenuImport)
+        .where(MenuImport.bar_id == bar_id, MenuImport.status.in_(UNFINISHED_STATUSES))
+        .order_by(MenuImport.created_at.desc())
+        .limit(1)
+    )
+    if unfinished is not None:
+        raise ApiError(
+            409,
+            "ACTIVE_IMPORT_EXISTS",
+            "이 업장에 진행 중인 메뉴 등록 작업이 있습니다.",
+            details={"menuImportId": str(unfinished.id), "status": unfinished.status.value},
+        )
+
+
 def _find_by_key(session: Session, idempotency_key: str) -> MenuImport | None:
     return session.scalar(select(MenuImport).where(MenuImport.idempotency_key == idempotency_key))
 
@@ -208,19 +226,7 @@ def create_menu_import(
         raise bar_not_found(str(bar.id))
     if not can_manage_bar(session, principal, bar.id):
         raise forbidden()
-    unfinished = session.scalar(
-        select(MenuImport)
-        .where(MenuImport.bar_id == bar.id, MenuImport.status.in_(UNFINISHED_STATUSES))
-        .order_by(MenuImport.created_at.desc())
-        .limit(1)
-    )
-    if unfinished is not None:
-        raise ApiError(
-            409,
-            "ACTIVE_IMPORT_EXISTS",
-            "이 업장에 진행 중인 메뉴 등록 작업이 있습니다.",
-            details={"menuImportId": str(unfinished.id), "status": unfinished.status.value},
-        )
+    check_no_unfinished_import(session, bar.id)
 
     import_id = uuid4()
     keys = [f"menus/{bar.id}/{import_id}/page-{order}.{image.extension}" for order, image in enumerate(images, start=1)]

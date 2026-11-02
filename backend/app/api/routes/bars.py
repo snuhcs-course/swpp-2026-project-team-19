@@ -1,20 +1,24 @@
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
 
-from app.api.permissions import require_bar_manager
+from app.api.permissions import BarId, managed_bar, require_bar_manager
 from app.core.security import Principal, get_current_user, get_optional_user, require_operator
-from app.db.session import get_session
+from app.db.session import get_serializable_session_factory, get_session
 from app.models import Bar
 from app.schemas.bar import BarDetail, BarListResponse, BarUpdateInput
-from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
+from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.menu import BarMenuResponse
+from app.schemas.menu_edit import MenuItemAddRequest, MenuItemUpdateRequest, MenuResetRequest
 from app.schemas.menu_import import MenuImportListResponse
 from app.services.bar_access import can_manage_bar, is_operator
 from app.services.bar_admin import BarStatusFilter, ImportStatusFilter, list_bars, list_menu_imports
 from app.services.bar_detail import get_bar_detail, update_bar
 from app.services.bar_menu import get_bar_menu
+from app.services.menu_edit import add_menu_item, check_request, delete_menu_item, reset_menu, update_menu_item
+from app.services.serializable import SessionFactory
 
 router = APIRouter(prefix="/api/bars", tags=["bars"])
 
@@ -190,3 +194,176 @@ def edit_bar(
     bar: Bar = Depends(require_bar_manager),
 ) -> BarDetail:
     return update_bar(session, bar, body, operator=is_operator(session, principal))
+
+
+# ---- manual menu edits (spec 3.14) ----
+
+_EDIT_RULES = (
+    "Operator or the bar's owner. The change is published at once, with no review, and the response is "
+    "the whole menu as in `GET /api/bars/{barId}/menu`, so the app needs no reload.\n\n"
+    "- Send the `menuVersion` of the menu the edit was made on; a different one changes nothing and "
+    "answers `409 MENU_OUTDATED`. A successful edit raises it by 1. A request retried after it succeeded "
+    "gets `MENU_OUTDATED` too: reload the menu to see whether it was applied.\n"
+    "- No edit is accepted while the bar has an unfinished import (`409 ACTIVE_IMPORT_EXISTS`).\n"
+    "- Only the requested item changes; other items keep their options and discounts.\n"
+    "- Checks, first failure answering: token, request (`422`), bar (`404`), caller (`403`), then under "
+    "the bar row lock: inactive bar (`404`), unfinished import, `menuVersion`, then the item."
+)
+_OPTION_RULES = (
+    "**Options**: 1 to 3, in display order. `optionLabel` 1-100 characters or null, `pourMl` 1-32767 or "
+    "null (stored as sent), `priceKrw` 1-99,999,999. `discount` is optional: `discountedPriceKrw` lower "
+    "than `priceKrw`, `startsAt` and `endsAt` with a time zone, `endsAt` after `startsAt` and after now."
+)
+_EDIT_COMMON_ERRORS = (
+    (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+    (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
+    (
+        503,
+        "`TEMPORARY_WRITE_CONFLICT`: conflicted with concurrent writes three times; send the same request "
+        "again. " + AUTH_UNAVAILABLE_DESCRIPTION,
+    ),
+)
+_EDIT_CONFLICTS = (
+    "`ACTIVE_IMPORT_EXISTS` (`details.menuImportId`, `details.status`); `MENU_OUTDATED` "
+    "(`details.submittedMenuVersion`, `details.currentMenuVersion`)"
+)
+_OPTION_CODES = (
+    "`TOO_SHORT` or `TOO_LONG` (`options`), `DUPLICATE_OPTION_VALUES` (same label and pour size), "
+    "`DISCOUNT_NOT_LOWER`, `END_BEFORE_START`, `DISCOUNT_ENDED`, `TIMEZONE_AWARE`"
+)
+_ITEM_NOT_FOUND = (
+    "`MENU_ITEM_NOT_FOUND` (`details.barMenuItemId`): the item is not on the current menu, or a malformed id"
+)
+BarMenuItemId = Annotated[str, Path(alias="barMenuItemId", description="The item's `barMenuItemId` (UUID)")]
+
+
+@router.post(
+    "/{barId}/menu/items",
+    status_code=201,
+    response_model=BarMenuResponse,
+    summary="Add a menu item",
+    description=(
+        _EDIT_RULES
+        + "\n\nSend `productId` (an active product) or `newProduct` (a product not in the catalog, as a "
+        "review's `create_product`), not both. A new product is checked for duplicates as in a review and "
+        "records who created it; it is used by search and matching at once. A product already on the menu "
+        "is `409 MENU_ITEM_EXISTS`: edit that item instead. The item goes to the end of the menu; a product "
+        "the bar sold before gets its old `barMenuItemId` back. `displayName` null means the product's name. "
+        "Find the added item in the response by `productId`. The first add to a bar without a menu sends "
+        "`menuVersion: null` and creates the menu at version 1.\n\n" + _OPTION_RULES
+    ),
+    responses=error_responses(
+        *_EDIT_COMMON_ERRORS,
+        (404, "`BAR_NOT_FOUND`: no such bar, a malformed id, or an inactive bar."),
+        (
+            409,
+            _EDIT_CONFLICTS + "; `MENU_ITEM_EXISTS` (`details.barMenuItemId`); `DUPLICATE_BRAND_FOUND` / "
+            "`DUPLICATE_PRODUCT_FOUND` (`details.existingBrand` / `existingProduct`; use it, or search the "
+            "catalog when `existingProduct.isActive` is false).",
+        ),
+        (
+            422,
+            "`VALIDATION_FAILED`: field rules, " + _OPTION_CODES + ", `EXACTLY_ONE_REQUIRED` (`productId`), "
+            "`NOT_NORMALIZABLE` (a new name with no usable characters), `PRODUCT_NOT_FOUND`, "
+            "`PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`.",
+        ),
+    ),
+)
+def add_bar_menu_item(
+    bar_id: BarId,
+    body: MenuItemAddRequest,
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    session_factory: SessionFactory = Depends(get_serializable_session_factory),
+) -> BarMenuResponse:
+    check_request(body, datetime.now(timezone.utc))
+    bar = managed_bar(session, principal, bar_id)
+    return add_menu_item(session_factory, principal, bar.id, body)
+
+
+@router.put(
+    "/{barId}/menu/items/{barMenuItemId}",
+    response_model=BarMenuResponse,
+    summary="Edit a menu item",
+    description=(
+        _EDIT_RULES
+        + "\n\nReplaces the item's menu name and all of its options; the product and the position stay. "
+        "To keep a discount, send the `discount` from the menu back; leaving it out removes it. On "
+        "`DISCOUNT_ENDED`, drop that discount and send again. To link another product, delete the item and "
+        "add the product.\n\n" + _OPTION_RULES
+    ),
+    responses=error_responses(
+        *_EDIT_COMMON_ERRORS,
+        (404, "`BAR_NOT_FOUND`: no such bar, a malformed id, or an inactive bar; " + _ITEM_NOT_FOUND + "."),
+        (409, _EDIT_CONFLICTS + "."),
+        (422, "`VALIDATION_FAILED`: field rules, " + _OPTION_CODES + "."),
+    ),
+)
+def edit_bar_menu_item(
+    bar_id: BarId,
+    bar_menu_item_id: BarMenuItemId,
+    body: MenuItemUpdateRequest,
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    session_factory: SessionFactory = Depends(get_serializable_session_factory),
+) -> BarMenuResponse:
+    check_request(body, datetime.now(timezone.utc))
+    bar = managed_bar(session, principal, bar_id)
+    return update_menu_item(session_factory, principal, bar.id, bar_menu_item_id, body)
+
+
+@router.delete(
+    "/{barId}/menu/items/{barMenuItemId}",
+    response_model=BarMenuResponse,
+    summary="Delete a menu item",
+    description=(
+        _EDIT_RULES
+        + "\n\nTakes the item off the menu; the other items keep their `sortOrder`, so the order may have a "
+        "gap. Its `barMenuItemId` stays and comes back when the same product is added again. Deleting the "
+        "last item keeps the menu with `items: []`."
+    ),
+    responses=error_responses(
+        *_EDIT_COMMON_ERRORS,
+        (404, "`BAR_NOT_FOUND`: no such bar, a malformed id, or an inactive bar; " + _ITEM_NOT_FOUND + "."),
+        (409, _EDIT_CONFLICTS + "."),
+        (422, "`VALIDATION_FAILED`: `menuVersion` `MISSING` or not an integer."),
+    ),
+)
+def delete_bar_menu_item(
+    bar_id: BarId,
+    bar_menu_item_id: BarMenuItemId,
+    menu_version: Annotated[int, Query(alias="menuVersion", description="`menuVersion` of the menu")],
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    session_factory: SessionFactory = Depends(get_serializable_session_factory),
+) -> BarMenuResponse:
+    bar = managed_bar(session, principal, bar_id)
+    return delete_menu_item(session_factory, principal, bar.id, bar_menu_item_id, menu_version)
+
+
+@router.post(
+    "/{barId}/menu/reset",
+    response_model=BarMenuResponse,
+    summary="Empty the menu",
+    description=(
+        _EDIT_RULES
+        + "\n\nTakes every item off the menu, with their discounts. The menu stays, with `menuBoardId` and "
+        "`publishedAt` and `items: []`. A bar without a menu (`menuVersion: null`) changes nothing and "
+        "answers `200`. There is no undo: confirm with the user first."
+    ),
+    responses=error_responses(
+        *_EDIT_COMMON_ERRORS,
+        (404, "`BAR_NOT_FOUND`: no such bar, a malformed id, or an inactive bar."),
+        (409, _EDIT_CONFLICTS + "."),
+        (422, "`VALIDATION_FAILED`: `menuVersion` `MISSING`, or neither an integer nor null."),
+    ),
+)
+def reset_bar_menu(
+    bar_id: BarId,
+    body: MenuResetRequest,
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    session_factory: SessionFactory = Depends(get_serializable_session_factory),
+) -> BarMenuResponse:
+    bar = managed_bar(session, principal, bar_id)
+    return reset_menu(session_factory, principal, bar.id, body)

@@ -33,6 +33,18 @@ def _bar(session: Session, bar_id: str) -> Bar | None:
         return None
 
 
+def managed_bar(session: Session, principal: Principal, bar_id: str) -> Bar:
+    """The bar, for an operator or its current owner; inactive bars included. A route calls this from
+    its body, rather than through require_bar_manager, when request validation (`422`) must come before
+    `404` and `403` (spec 3.14.1): FastAPI runs dependencies before it validates the body."""
+    bar = _bar(session, bar_id)
+    if bar is None:
+        raise bar_not_found(bar_id)
+    if not can_manage_bar(session, principal, bar.id):
+        raise forbidden()
+    return bar
+
+
 def require_bar_manager(
     bar_id: BarId,
     # Declared before the session so a request without a valid token never opens a database session.
@@ -40,12 +52,7 @@ def require_bar_manager(
     session: Session = Depends(get_session),
 ) -> Bar:
     """The bar, for an operator or its current owner; inactive bars included."""
-    bar = _bar(session, bar_id)
-    if bar is None:
-        raise bar_not_found(bar_id)
-    if not can_manage_bar(session, principal, bar.id):
-        raise forbidden()
-    return bar
+    return managed_bar(session, principal, bar_id)
 
 
 def require_active_bar_manager(
