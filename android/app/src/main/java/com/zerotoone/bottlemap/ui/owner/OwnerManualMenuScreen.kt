@@ -19,6 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -181,7 +186,10 @@ internal fun OwnerManualMenuScreen(
     val activeJob = latestPhotoJob?.takeIf { it.status in listOf(
         MockImportStatus.UPLOADED,MockImportStatus.PROCESSING,
         MockImportStatus.READY_FOR_REVIEW,MockImportStatus.FAILED) }
-    val activePhotoImport = activeJob != null
+    // A failed import is terminal: direct editing becomes available immediately.
+    val activePhotoImport = activeJob?.status in listOf(
+        MockImportStatus.UPLOADED,MockImportStatus.PROCESSING,
+        MockImportStatus.READY_FOR_REVIEW)
     val products = snapshot?.products.orEmpty()
     val brands = (snapshot?.brands.orEmpty() + htmlBrands).distinctBy { it.brandId }
     // A deleted local product retains its ID; offer it again only for this bar,
@@ -199,6 +207,9 @@ internal fun OwnerManualMenuScreen(
     val candidates = (products.filter { it.catalogMatched } + htmlCatalog +
         deletedLocalCandidates + activeLocalCandidates).distinctBy { it.productId }
 
+    val photoContext=LocalContext.current
+    val photoStore=remember(photoContext) { OwnerMenuPhotoStore(photoContext) }
+    val cancelScope=rememberCoroutineScope()
     val outsideFocus = LocalFocusManager.current
     val outsideKeyboard = LocalSoftwareKeyboardController.current
     var screen by rememberSaveable(bar?.barId) { mutableStateOf("list") }
@@ -408,9 +419,25 @@ internal fun OwnerManualMenuScreen(
             title={Text("메뉴판 사진 등록을 취소할까요?")},
             text={Text("선택한 사진과 검수한 내용이 모두 삭제돼요.")},
             confirmButton={TextButton(onClick={
+                // Never erase a photo still referenced by any published job.
+                val removed=snapshot?.imports.orEmpty().filter {
+                    it.barId==activeJob.barId && it.status!=MockImportStatus.APPLIED
+                }
+                val retainedUris=snapshot?.imports.orEmpty().filterNot {
+                    it in removed
+                }.flatMap{it.images.map {image->image.sourceUri}}.toSet()
+                val photoCopies=removed.flatMap{it.images}.distinctBy{it.sourceUri}
+                    .filter {it.sourceUri !in retainedUris}
+                    .map {MockPhoto(it.imageId,it.sourceUri,MockPhotoKind.MENU_CAPTURE)}
                 runCatching {viewModel.discardPhotoImport(activeJob.menuImportId)}
-                    .onSuccess {cancelPhotoConfirm=false;error=null;screen="list"}
-                    .onFailure {error=it.message}
+                    .onSuccess {
+                        cancelPhotoConfirm=false;error=null;screen="list"
+                        cancelScope.launch {
+                            withContext(Dispatchers.IO) {
+                                photoCopies.forEach(photoStore::delete)
+                            }
+                        }
+                    }.onFailure {error=it.message}
             }){Text("작업 취소하기",color=Color(0xFFFFB4AB))}},
             dismissButton={TextButton(onClick={cancelPhotoConfirm=false}){Text("돌아가기")}}
         )
