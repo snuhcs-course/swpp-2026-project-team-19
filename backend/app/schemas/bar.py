@@ -32,7 +32,12 @@ class BarListResponse(BaseModel):
 
 class CurrentMenu(BaseModel):
     menuBoardId: UUID
-    publishedAt: UtcDateTime = Field(description="When the current menu was last published")
+    menuVersion: int = Field(description="As `menuVersion` of the bar menu; send it with the sales info confirmation")
+    publishedAt: UtcDateTime = Field(description="When a review publish or a manual edit last changed the menu")
+    confirmedAt: UtcDateTime | None = Field(
+        description="When an owner or operator last confirmed the menu is still accurate; null when never. "
+        "The owner home's last update is the later of this and `publishedAt`"
+    )
 
 
 class BarOwnerSummary(BaseModel):

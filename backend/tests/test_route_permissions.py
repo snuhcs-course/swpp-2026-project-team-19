@@ -135,6 +135,21 @@ BAR_MANAGER = [
         (404, "BAR_NOT_FOUND"),
         (409, "ACTIVE_IMPORT_EXISTS"),
     ),
+    # Accepted during an import; the target bar has no menu, so a manager stops at the item or the menu.
+    ManagerRoute(
+        "put",
+        "/api/bars/{barId}/menu/items/{barMenuItemId}/sold-out",
+        {"json": {"soldOut": True}},
+        (404, "BAR_NOT_FOUND"),
+        (404, "MENU_ITEM_NOT_FOUND"),
+    ),
+    ManagerRoute(
+        "post",
+        "/api/bars/{barId}/menu/confirm",
+        {"json": {"menuVersion": None}},
+        (404, "BAR_NOT_FOUND"),
+        (409, "NO_PUBLISHED_MENU"),
+    ),
 ]
 # Operators and the owner of at least one bar.
 CATALOG = [

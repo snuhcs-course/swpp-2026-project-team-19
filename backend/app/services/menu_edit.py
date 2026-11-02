@@ -93,7 +93,7 @@ def check_request(body: MenuItemAddRequest | MenuItemUpdateRequest, now: datetim
 # ---- 3. inside the transaction ----
 
 
-def _menu_outdated(submitted: int | None, current: int | None) -> ApiError:
+def menu_outdated(submitted: int | None, current: int | None) -> ApiError:
     return ApiError(
         409,
         "MENU_OUTDATED",
@@ -108,15 +108,20 @@ def _item_not_found(bar_menu_item_id: str) -> ApiError:
     )
 
 
-def _open_board(session: Session, principal: Principal, bar_id: UUID, menu_version: int | None) -> MenuBoard | None:
-    """Lock the bar row and run the checks every edit shares; the bar's board, or None without one."""
+def lock_managed_bar(session: Session, principal: Principal, bar_id: UUID) -> None:
+    """Lock the bar row, then check what the route checked before the lock (spec 3.14.1): the bar is
+    active (else 404 BAR_NOT_FOUND) and the caller may manage it (else 403). Used by every request
+    that changes or confirms a bar's menu."""
     status = session.scalar(select(Bar.status).where(Bar.id == bar_id).with_for_update())
     if status != BarStatus.ACTIVE:
         raise bar_not_found(str(bar_id))
     if not can_manage_bar(session, principal, bar_id):
         raise forbidden()
-    check_no_unfinished_import(session, bar_id)
-    board = session.scalar(
+
+
+def current_board(session: Session, bar_id: UUID) -> MenuBoard | None:
+    """The bar's board with its entries, their options and bar menu items; None without one."""
+    return session.scalar(
         select(MenuBoard)
         .where(MenuBoard.bar_id == bar_id)
         .options(
@@ -124,13 +129,25 @@ def _open_board(session: Session, principal: Principal, bar_id: UUID, menu_versi
             selectinload(MenuBoard.entries).selectinload(MenuBoardEntry.bar_menu_item),
         )
     )
+
+
+def check_menu_version(board: MenuBoard | None, menu_version: int | None) -> None:
     current = board.version if board is not None else None
     if menu_version != current:
-        raise _menu_outdated(menu_version, current)
+        raise menu_outdated(menu_version, current)
+
+
+def _open_board(session: Session, principal: Principal, bar_id: UUID, menu_version: int | None) -> MenuBoard | None:
+    """Lock the bar row and run the checks every edit shares; the bar's board, or None without one."""
+    lock_managed_bar(session, principal, bar_id)
+    check_no_unfinished_import(session, bar_id)
+    board = current_board(session, bar_id)
+    check_menu_version(board, menu_version)
     return board
 
 
-def _entry(board: MenuBoard | None, bar_menu_item_id: str) -> MenuBoardEntry:
+def board_entry(board: MenuBoard | None, bar_menu_item_id: str) -> MenuBoardEntry:
+    """The board's entry of a bar menu item; 404 MENU_ITEM_NOT_FOUND when it is not on the board."""
     try:
         item_id = UUID(bar_menu_item_id)
     except ValueError:
@@ -231,7 +248,7 @@ def _update_once(
     session: Session, principal: Principal, bar_id: UUID, bar_menu_item_id: str, body: MenuItemUpdateRequest
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
-    entry = _entry(board, bar_menu_item_id)
+    entry = board_entry(board, bar_menu_item_id)
     entry.display_name = body.displayName
     # Delete the old options before inserting the new ones, which reuse their sort orders.
     entry.options.clear()
@@ -246,7 +263,7 @@ def _delete_once(
     board = _open_board(session, principal, bar_id, menu_version)
     # The entry and its options go; the bar menu item stays for a later add of the same product, back
     # on sale. The other entries keep their sort orders, so the order may have a gap.
-    entry = _entry(board, bar_menu_item_id)
+    entry = board_entry(board, bar_menu_item_id)
     board.entries.remove(entry)
     clear_sold_out(session, {entry.bar_menu_item_id})
     return _publish(session, board)

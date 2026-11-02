@@ -81,7 +81,12 @@ def test_the_owner_reads_the_bar_with_its_management_state(client, db_session, b
     assert body["barId"] == str(bar.id)
     assert (body["name"], body["latitude"], body["longitude"]) == ("관악 위스키 바", 37.478321, 126.951234)
     assert body["activeMenuImport"] == {"menuImportId": str(menu_import.id), "status": "ready_for_review"}
-    assert body["currentMenu"] == {"menuBoardId": str(board.id), "publishedAt": rfc3339(board.published_at)}
+    assert body["currentMenu"] == {
+        "menuBoardId": str(board.id),
+        "menuVersion": 1,
+        "publishedAt": rfc3339(board.published_at),
+        "confirmedAt": None,
+    }
     assert body["owner"]["email"] == "owner@example.com"
     assert body["owner"]["displayName"] == "김사장"
 
