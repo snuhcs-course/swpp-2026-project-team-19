@@ -78,6 +78,28 @@ internal fun stage8Counts(job: MockMenuImport, s: MockOwnerSnapshot): Stage8Coun
             it.suggestedProductId !in ids && it.candidateProductIds.none { id->id in ids } &&
             it.decision?.kind !in listOf(MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)})
 }
+/** Match the repository's add-only product grouping for pre-publish counts.
+ * This is a display preview only; the repository remains the final oracle.
+ */
+internal fun stage8ExpectedAddedCount(job: MockMenuImport, snapshot: MockOwnerSnapshot): Int {
+    val existing=snapshot.menuItems.filter {it.barId==job.barId}
+        .map {it.productId}.toSet()
+    return job.images.flatMap {it.lines}.mapNotNull {line ->
+        val decision=line.decision ?: return@mapNotNull null
+        when(decision.kind) {
+            MockDecisionKind.SELECT_PRODUCT -> decision.productId?.takeUnless {
+                it in existing
+            }?.let {listOf("existing",it)}
+            MockDecisionKind.CREATE_PRODUCT -> decision.newProduct?.let {draft ->
+                listOf("new",draft.brandId?.let {"id:$it"} ?:
+                    "name:${draft.brandName?.trim()?.lowercase().orEmpty()}",
+                    draft.category,canonicalReviewProductName(draft).lowercase(),
+                    draft.editionName?.trim()?.lowercase().orEmpty())
+            }
+            else -> null
+        }
+    }.distinct().size
+}
 // One source of truth for EVERY entry into an extracted line (start/next/previous/back).
 // A price-less known product is a price-entry page; an unmatched line is a new product.
 internal fun stage8ReviewDestination(line: MockExtractedLine): String = when {
@@ -1038,10 +1060,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 St8PublishSteps(3)
                 Text("확인한 메뉴판 내용",color=V4Color.text,
                     fontSize=23.sp,fontWeight=FontWeight.Bold)
-                Text("읽은 ${counts!!.lines}줄 · 새로 추가 ${all.count {
-                    it.second.decision?.kind in listOf(
-                        MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)
-                }}개 · 건너뜀 ${all.count {
+                Text("읽은 ${counts!!.lines}줄 · 새로 추가 ${stage8ExpectedAddedCount(job,s)}개 · 건너뜀 ${all.count {
                     it.second.decision?.kind in listOf(
                         MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)
                 }}개",color=V4Color.sub,fontSize=12.sp)
@@ -1103,8 +1122,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 Text("검수 완료",color=V4Color.sub,fontSize=12.sp)
                 Text("메뉴 게시",color=V4Color.text,fontSize=26.sp,
                     fontWeight=FontWeight.Bold)
-                val selected=all.count {it.second.decision?.kind in listOf(
-                    MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}
+                val selected=stage8ExpectedAddedCount(job,s)
                 val skipped=all.count {it.second.decision?.kind in listOf(
                     MockDecisionKind.EXCLUDE,MockDecisionKind.CONFIRM_NON_PRODUCT)}
                 St8CountCard("새로 추가",selected,"건너뜀",skipped,"개")
@@ -1268,8 +1286,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 }
                 "results"->St8Button("돌아가기"){visit("publish")}
                 "publish"->{
-                    val accepted=all.count{it.second.decision?.kind in listOf(
-                        MockDecisionKind.SELECT_PRODUCT,MockDecisionKind.CREATE_PRODUCT)}
+                    val accepted=stage8ExpectedAddedCount(job,s)
                     St8Button("+  메뉴 ${accepted}개 게시",enabled=counts!!.remaining==0){
                         runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
                             .onSuccess{error=null;visit("done")}
