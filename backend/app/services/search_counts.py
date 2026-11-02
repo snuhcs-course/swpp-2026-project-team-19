@@ -73,6 +73,9 @@ def _count_unmatched(session: Session, today: date, normalized: str) -> None:
         return
     # Held until commit. Each statement below sees the rows other searches committed before we got it.
     session.execute(select(func.pg_advisory_xact_lock(UNMATCHED_QUERY_LOCK_KEY)))
+    # A concurrent search may have created this query's row while we waited; past the cap it still counts.
+    if session.execute(update(table).where(key).values(search_count=table.c.search_count + 1)).rowcount:
+        return
     created = session.scalar(select(func.count()).select_from(table).where(table.c.search_date == today))
     if created >= MAX_NEW_UNMATCHED_QUERIES_PER_DAY:
         return

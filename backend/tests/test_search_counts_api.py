@@ -9,7 +9,11 @@ from sqlalchemy.exc import OperationalError
 
 from app.models import ProductSearchCount, SearchSource, UnmatchedSearchQuery
 from app.services.request_limits import kst_date
-from app.services.search_counts import MAX_NEW_UNMATCHED_QUERIES_PER_DAY, is_storable_unmatched_query
+from app.services.search_counts import (
+    MAX_NEW_UNMATCHED_QUERIES_PER_DAY,
+    _count_unmatched,
+    is_storable_unmatched_query,
+)
 from tests.factories import make_bar, make_brand, make_product, publish_menu
 from tests.sql_support import recorded_statements
 
@@ -155,6 +159,25 @@ def test_at_most_1000_new_unmatched_queries_a_day(client, db_session):
     rows = {row[1]: row[2] for row in unmatched_counts(db_session) if row[0] == today()}
     assert len(rows) == MAX_NEW_UNMATCHED_QUERIES_PER_DAY
     assert (rows["새검색어"], rows["q0"], "또다른검색어" in rows) == (2, 2, False)
+
+
+def test_a_query_created_while_waiting_for_the_cap_lock_still_counts(db_session, monkeypatch):
+    add_unmatched(db_session, today(), MAX_NEW_UNMATCHED_QUERIES_PER_DAY - 1)
+    execute = db_session.execute
+
+    def concurrent_search_wins(statement, *args, **kwargs):
+        result = execute(statement, *args, **kwargs)
+        if "pg_advisory_xact_lock" in str(statement):
+            # Another search created the 1,000th row, this query, before we got the lock.
+            db_session.add(UnmatchedSearchQuery(search_date=today(), normalized_query="새검색어", search_count=1))
+            db_session.flush()
+        return result
+
+    monkeypatch.setattr(db_session, "execute", concurrent_search_wins)
+    _count_unmatched(db_session, today(), "새검색어")
+
+    rows = {row[1]: row[2] for row in unmatched_counts(db_session) if row[0] == today()}
+    assert (len(rows), rows["새검색어"]) == (MAX_NEW_UNMATCHED_QUERIES_PER_DAY, 2)
 
 
 def test_only_a_new_unmatched_query_takes_the_daily_cap_lock(client, db_session):
