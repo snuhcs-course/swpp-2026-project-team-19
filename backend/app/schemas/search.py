@@ -45,9 +45,10 @@ class SearchResultItem(BaseModel):
 
 
 class SearchBarsResponse(BaseModel):
-    query: str = Field(description="The query after trimming")
-    matchType: Literal["alias_exact", "brand", "partial", "none"] = Field(
-        description="The resolution step that produced the products"
+    query: str | None = Field(description="The query after trimming; null for a productId search")
+    matchType: Literal["alias_exact", "brand", "partial", "product", "none"] = Field(
+        description="The resolution step that produced the products; `product` for a productId search "
+        "that found its product"
     )
     matchedProducts: list[MatchedProductResponse] = Field(
         description="Every product the query resolved to, including ones no bar sells now. "
@@ -113,4 +114,22 @@ class NearbyBarItem(BaseModel):
 class NearbyBarsResponse(BaseModel):
     items: list[NearbyBarItem] = Field(
         description="Every active bar within the radius, nearest first; ties by barId. Never truncated."
+    )
+
+
+class PopularProductItem(BaseModel):
+    productId: UUID = Field(description="Search it with `GET /api/search/bars?productId=...&source=popular`")
+    displayName: str = Field(description="Canonical product name, shown on the card")
+    brandName: str
+    ageYears: int | None
+    editionName: str | None
+    barCount: int = Field(
+        description="Active bars selling it now, not sold out; the number of bars its productId search "
+        "shows. At least 1."
+    )
+
+
+class PopularProductsResponse(BaseModel):
+    items: list[PopularProductItem] = Field(
+        description="Ranked products, at most `limit`; empty when no bar sells any product"
     )
