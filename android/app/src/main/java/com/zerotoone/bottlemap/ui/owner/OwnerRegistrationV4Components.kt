@@ -284,7 +284,7 @@ internal fun RegistrationInput(
     value:String,onChange:(String)->Unit,placeholder:String,
     modifier:Modifier=Modifier,label:String?=null,
     keyboard:KeyboardType=KeyboardType.Text,readonly:Boolean=false,
-    onClick:(()->Unit)?=null,tag:String?=null,
+    onClick:(()->Unit)?=null,tag:String?=null,highlight:Boolean=false,
 ) {
     var focused by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     Column(modifier.fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(8.dp)) {
@@ -304,7 +304,7 @@ internal fun RegistrationInput(
                 modifier=Modifier.fillMaxWidth().heightIn(min=56.dp)
                     .then(if(tag!=null)Modifier.testTag(tag) else Modifier)
                     .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
-                    .border(1.dp,if(focused)RegistrationV4.primary else RegistrationV4.border,
+                    .border(1.dp,if(focused||highlight)RegistrationV4.primary else RegistrationV4.border,
                         RoundedCornerShape(12.dp))
                     .onFocusChanged { focused=it.isFocused }
                     .padding(horizontal=16.dp),
