@@ -557,8 +557,8 @@ fun OwnerOnboardingScreen(
                         Box(Modifier.fillMaxWidth().aspectRatio(4f/3f)
                             .clip(RoundedCornerShape(16.dp))
                             .background(RegistrationV4.surface)
-                            .then(if(cover==null)Modifier.border(
-                                1.dp,RegistrationV4.muted,RoundedCornerShape(16.dp)) else Modifier)
+                            .then(if(cover==null)Modifier.registrationDashedBorder(16.dp)
+                                else Modifier)
                             .ownerQuietClick {
                                 coverPicker.launch(PickVisualMediaRequest(
                                     ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -635,8 +635,7 @@ fun OwnerOnboardingScreen(
                                     Box(Modifier.weight(1f).aspectRatio(3f/4f)
                                         .clip(RoundedCornerShape(12.dp))
                                         .then(if(index==photoItems.size && photoItems.size<15)
-                                            Modifier.border(1.dp,RegistrationV4.muted,
-                                                RoundedCornerShape(12.dp)) else Modifier)
+                                            Modifier.registrationDashedBorder(12.dp) else Modifier)
                                         .background(RegistrationV4.surface),
                                         contentAlignment=Alignment.Center) {
                                         when {
