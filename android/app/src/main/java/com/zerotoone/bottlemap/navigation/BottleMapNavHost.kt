@@ -29,6 +29,7 @@ import com.zerotoone.bottlemap.ui.common.DelayedLoading
 
 private const val SEARCH_VALIDATION_ERROR_KEY = "searchValidationErrorCode"
 private const val REFRESH_AFTER_MISSING_BAR_KEY = "refreshAfterMissingBar"
+private const val REFRESH_AFTER_MISSING_PRODUCT_KEY = "refreshAfterMissingProduct"
 
 private object Routes {
     const val CUSTOMER_GRAPH = "customer"
@@ -135,7 +136,14 @@ private fun NavGraphBuilder.customerGraph(
         startDestination = Routes.CUSTOMER_SEARCH,
     ) {
         composable(Routes.CUSTOMER_SEARCH) { backStackEntry ->
+            val refreshPopular=backStackEntry.savedStateHandle
+                .getStateFlow(REFRESH_AFTER_MISSING_PRODUCT_KEY,false)
+                .collectAsStateWithLifecycle().value
             CustomerP18Home(
+                refreshAfterMissingProduct=refreshPopular,
+                onMissingProductRefreshConsumed={
+                    backStackEntry.savedStateHandle[REFRESH_AFTER_MISSING_PRODUCT_KEY]=false
+                },
                 onSearch = onOpenResults,
                 onPopular = onOpenProduct,
                 onAccount = onOpenAccount,
@@ -192,7 +200,18 @@ private fun NavGraphBuilder.customerGraph(
                 },
             ),
         ) { entry ->
+            val refreshMissingBar=entry.savedStateHandle
+                .getStateFlow(REFRESH_AFTER_MISSING_BAR_KEY,false)
+                .collectAsStateWithLifecycle().value
             CustomerP18Results(
+                refreshAfterMissingBar=refreshMissingBar,
+                onMissingBarRefreshConsumed={
+                    entry.savedStateHandle[REFRESH_AFTER_MISSING_BAR_KEY]=false
+                },
+                onMissingProduct={
+                    navController.getBackStackEntry(Routes.CUSTOMER_SEARCH)
+                        .savedStateHandle[REFRESH_AFTER_MISSING_PRODUCT_KEY]=true
+                },
                 initialQuery = entry.arguments?.getString(Routes.CUSTOMER_QUERY_ARGUMENT)
                     ?.takeIf { it.isNotBlank() },
                 initialProductId = entry.arguments?.getString(Routes.CUSTOMER_PRODUCT_ARGUMENT)
