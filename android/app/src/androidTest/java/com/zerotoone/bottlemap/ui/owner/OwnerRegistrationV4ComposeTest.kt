@@ -107,16 +107,16 @@ class OwnerRegistrationV4ComposeTest {
         compose.onNodeWithTag("registration-processing-glass").assertExists()
     }
 
-    @Test fun allNineExceptionAndApplicationMockScreensAreIndividuallyPreviewable() {
-        val page=androidx.compose.runtime.mutableIntStateOf(21)
-        compose.setContent {
-            MaterialTheme {
-                OwnerRegistrationQaPreview(page.intValue,onBack={},onAction={})
-            }
-        }
-        for(target in 21..29) {
-            compose.runOnIdle { page.intValue=target }
-            compose.onNodeWithTag("registration-qa-preview-${target}").assertExists()
+    @Test fun realVerificationErrorComposablesRetainAllThreeOutcomes() {
+        val outcome=androidx.compose.runtime.mutableStateOf(OwnerVerifyOutcome.MISMATCH)
+        compose.setContent { MaterialTheme { RegistrationVerifyException(outcome.value) } }
+        for((state,tag) in listOf(
+            OwnerVerifyOutcome.MISMATCH to "registration-verify-mismatch",
+            OwnerVerifyOutcome.UNAVAILABLE to "registration-verify-unavailable",
+            OwnerVerifyOutcome.LIMIT to "registration-verify-limit"
+        )) {
+            compose.runOnIdle { outcome.value=state }
+            compose.onNodeWithTag(tag).assertExists()
         }
     }
 
@@ -130,42 +130,6 @@ class OwnerRegistrationV4ComposeTest {
         compose.onNodeWithText("읽지 못했어요").assertExists()
         compose.onNodeWithText("읽지 못한 항목은 직접 입력해 주세요.").assertExists()
         compose.onNodeWithText("입력").assertExists()
-    }
-
-    @Test fun managerFixturesDistinguishPendingRejectedApprovedAndMulti() {
-        val pending=ownerQaPreviewSnapshot(21)
-        val rejected=ownerQaPreviewSnapshot(22)
-        val approved=ownerQaPreviewSnapshot(28)
-        val multiple=ownerQaPreviewSnapshot(29)
-        org.junit.Assert.assertEquals(MockApplicationStatus.PENDING,
-            pending.applications.single().status)
-        org.junit.Assert.assertEquals(MockApplicationStatus.REJECTED,
-            rejected.applications.single().status)
-        org.junit.Assert.assertEquals(1,approved.bars.size)
-        org.junit.Assert.assertEquals(1,multiple.bars.size)
-        org.junit.Assert.assertEquals(1,multiple.applications.size)
-    }
-
-    @Test fun exceptionCatalogProvidesAllNinePagesWithoutMutatingDraft() {
-        // The catalog is a Debug-only preview, not a simulated NTS/backend response.
-        compose.setContent {
-            MaterialTheme {
-                OwnerRegistrationQaCatalog(onChoose={})
-            }
-        }
-        for(page in 21..29) compose.onNodeWithTag("registration-qa-page-$page").assertExists()
-    }
-
-    @Test fun correctedOcrPartialFixtureShowsMissingOpeningDateAndDisabledSubmit() {
-        compose.setContent {
-            MaterialTheme {
-                OwnerRegistrationQaPreview(page=26,onBack={},onAction={})
-            }
-        }
-        compose.onNodeWithText("읽지 못했어요").assertExists()
-        compose.onNodeWithText("읽지 못한 항목은 직접 입력해 주세요.").assertExists()
-        compose.onNodeWithText("확인하기").assertExists()
-        compose.onNodeWithTag("registration-qa-preview-26").assertExists()
     }
 
     @Test fun dismissedApplicationSheetUsesApprovedShortCopy() {
