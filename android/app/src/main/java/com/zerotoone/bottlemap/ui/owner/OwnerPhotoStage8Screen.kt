@@ -40,6 +40,9 @@ import org.json.JSONObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+// The owner photo-review flow uses 30 ml when a bar has no configured serving size.
+private const val DEFAULT_OWNER_POUR_ML = 30
+
 /** Only save the owner-confirmed product draft, not inferred OCR data. */
 private fun encodeReviewDraft(draft: MockNewProductDraft): String = JSONObject().apply {
     put("name",draft.name)
@@ -607,13 +610,21 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 Text(counts.remaining.toString()+"줄 확인",color=V4Color.text,
                     fontWeight=FontWeight.Bold,fontSize=26.sp)
                 val bar=s.bars.firstOrNull{it.barId==barId}
+                LaunchedEffect(bar?.barId,bar?.defaultPourMl) {
+                    if(bar!=null && bar.defaultPourMl==null) {
+                        runCatching {vm.saveBar(bar.copy(defaultPourMl=DEFAULT_OWNER_POUR_ML))}
+                            .onFailure {error=it.message}
+                    }
+                }
                 St8Card {
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
                         Text("기본 잔 용량",color=V4Color.text,fontWeight=FontWeight.Bold)
-                        Text(bar?.defaultPourMl?.let { it.toString()+"ml" } ?: "미설정",
+                        Text("${bar?.defaultPourMl ?: DEFAULT_OWNER_POUR_ML}ml",
                             color=V4Color.sub,fontSize=12.sp)
                     }
-                    var pour by rememberSaveable(barId){mutableStateOf(bar?.defaultPourMl?.toString().orEmpty())}
+                    var pour by rememberSaveable(barId){
+                        mutableStateOf((bar?.defaultPourMl ?: DEFAULT_OWNER_POUR_ML).toString())
+                    }
                     Row(verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(7.dp)) {
                         OutlinedTextField(pour,{pour=it.filter(Char::isDigit).take(3)},
@@ -626,8 +637,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             Box(Modifier.size(width=43.dp,height=26.dp)
                                 .border(1.dp,V4Color.line,RoundedCornerShape(7.dp))
                                 .clickable {
-                                    val n=pour.toIntOrNull()
-                                    if(bar!=null && (pour.isBlank() || n!=null && n in 1..999)){
+                                    val n=if(pour.isBlank())DEFAULT_OWNER_POUR_ML else pour.toIntOrNull()
+                                    if(bar!=null && n!=null && n in 1..999){
                                         vm.saveBar(bar.copy(defaultPourMl=n));error=null
                                         focusManager.clearFocus()
                                         keyboardController?.hide()
@@ -638,6 +649,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             }
                         }
                     }
+                    Text("설정하지 않으면 30ml가 자동으로 적용돼요.",
+                        color=V4Color.sub,fontSize=11.sp)
                     Text("용량 표시가 없는 잔에 적용해요.",color=V4Color.sub,fontSize=11.sp)
                 }
                 St8Card {
@@ -972,6 +985,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         St8Field("용량 (ml, 없으면 빈칸)",pours[i],{v->
                             pours=pours.toMutableList().apply{set(i,v)}},digits=true)
                         val base=s.bars.firstOrNull{it.barId==barId}?.defaultPourMl
+                            ?: DEFAULT_OWNER_POUR_ML
                         if(base!=null && pours[i].isBlank() &&
                             labels[i].trim() !in listOf("병","Bottle")){
                             TextButton(onClick={pours=pours.toMutableList().apply{
@@ -1038,7 +1052,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 val (photo,line)=pair
                 var openPhoto by remember {mutableStateOf(false)}
                 St8RecognizedStrip(photo,line,
-                    defaultPourMl=s.bars.firstOrNull{it.barId==barId}?.defaultPourMl,
+                    defaultPourMl=s.bars.firstOrNull{it.barId==barId}?.defaultPourMl
+                        ?: DEFAULT_OWNER_POUR_ML,
                     onLater=onHome){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 St8ReviewHeading("가격을 못 읽었어요") {runCatching{vm.review(job.menuImportId,line.extractedItemId,
@@ -1066,7 +1081,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                     options.forEachIndexed { i,o ->
                         Text((o.label ?: "잔")+" · "+((o.pourMl ?:
-                            s.bars.firstOrNull{it.barId==barId}?.defaultPourMl)?.let{"${it}ml"}
+                            (s.bars.firstOrNull{it.barId==barId}?.defaultPourMl
+                                ?: DEFAULT_OWNER_POUR_ML))?.let{"${it}ml"}
                             ?: "용량 미표기")+" 가격",color=V4Color.sub,fontSize=13.sp)
                         OutlinedTextField(prices.getOrElse(i){""},{
                             val filtered=it.filter(Char::isDigit).take(10)
@@ -1080,8 +1096,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         prices.all{it.toIntOrNull()?.let {p->p>0}==true}) {
                         val corrected=options.mapIndexed{i,o->
                             o.copy(priceKrw=prices[i].toInt(),
-                                pourMl=o.pourMl ?: s.bars.firstOrNull{it.barId==barId}
-                                    ?.defaultPourMl?.takeIf{ ml->
+                                pourMl=o.pourMl ?: (s.bars.firstOrNull{it.barId==barId}
+                                    ?.defaultPourMl ?: DEFAULT_OWNER_POUR_ML).takeIf{ ml->
                                         o.label?.trim() !in listOf("병","Bottle") && ml in 1..999})
                         }
                         val d=if(pendingNewDraft!=null)MockReviewDecision(
