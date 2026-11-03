@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -102,9 +103,16 @@ internal fun P18SearchField(
     query: String, onQuery: (String) -> Unit, onSubmit: () -> Unit,
     placeholder: String = "위스키 이름", modifier: Modifier = Modifier,
     focused: Boolean = true,
+    focusRequestToken: Int = 0,
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
+    LaunchedEffect(focusRequestToken) {
+        if (focusRequestToken > 0) {
+            focusRequester.requestFocus()
+            keyboard?.show()
+        }
+    }
     Row(modifier.height(56.dp)
         .background(P18Surface, RoundedCornerShape(12.dp))
         .border(if (focused) 1.5.dp else 1.dp,
