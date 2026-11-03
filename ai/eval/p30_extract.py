@@ -438,8 +438,9 @@ def check_ocr_cache(record: dict, photo: Photo, data_dir: Path) -> dict:
         raise Stop(f"{photo.file}: OCR cache was made from another photo (source_sha256 differs)"
                    + regenerate_hint(photo, data_dir))
     cached = meta.get("sent_sha256")
-    if cached is None:
-        return {"image_check": "unverified (cache has no sent_sha256)"}
+    if cached is None:  # without the digest nothing ties this OCR response to the photo
+        raise Stop(f"{photo.file}: OCR cache has no sent_sha256, so it cannot be checked against the photo"
+                   + regenerate_hint(photo, data_dir))
     if cached == photo.sent_sha256:
         return {"image_check": "same image"}
     if not photo.reencoded:
@@ -751,6 +752,14 @@ def run_command(args: argparse.Namespace, secrets: Secrets, clients: Clients | N
         print(f"STOP: {stop}")
         return EXIT_PREFLIGHT
 
+    unfinished = [j for j in RUNS if any(not (out / f"{p.stem}_r{j}.json").exists() for p in photos)]
+    for k in args.runs:
+        earlier = [j for j in unfinished if j < k and j not in args.runs]
+        if earlier:
+            print(f"STOP: r{k} asked for, but r{earlier[0]} is not complete; the freeze runs r1, then r2, then r3 "
+                  f"(finish r{earlier[0]} first, or add it before r{k} in --runs)")
+            return EXIT_PREFLIGHT
+
     todo = plan(photos, args.runs, out, data_dir)
     print(f"photos verified: {len(photos)} (SHA-256 = {args.hashes.name}); frozen code and prompt {PROMPT_VERSION}, "
           f"scoring code, label/gold/hash files (raw bytes) and matching files (4.5) OK")
@@ -907,6 +916,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args = ap.parse_args(argv)
     if any(k not in RUNS for k in args.runs) or len(set(args.runs)) != len(args.runs):
         ap.error("--runs: distinct numbers from 1, 2, 3 (the freeze has r1-r3 only)")
+    if args.runs != sorted(args.runs):
+        ap.error("--runs: in increasing order (the freeze runs r1, then r2, then r3)")
     return args
 
 

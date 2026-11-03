@@ -35,7 +35,7 @@ PowerShell, 레포 루트에서. 브랜치 `feature/i3-p30-extraction-runner`(�
 ```
 git pull
 python -m venv .venv-ai
-.venv-ai\Scripts\python -m pip install -r ai/requirements.txt
+.\.venv-ai\Scripts\python -m pip install -r ai/requirements.txt
 ```
 
 **줄 끝(CRLF) 맞추기.** `score.py`(라벨)와 `i3_match_eval.py`(2층 정답, 결과 JSON의 `catalog_file_sha256`·`llm_layer_sha256`)는 파일의 **원본 바이트** SHA-256을 동결 값과 비교한다. Windows에서 `core.autocrlf=true`로 받은 파일은 줄 끝이 CRLF라 내용이 같아도 해시가 달라진다. `.gitattributes`가 라벨·정답·해시 파일 3개를 항상 LF로 받게 하지만, 이미 CRLF로 받아 둔 파일은 다시 받아야 바뀐다. 한 번만 아래를 돌린다(PowerShell, 레포 루트). 이 파일들에 커밋하지 않은 변경이 있으면 지워지므로, 동결 파일은 고치지 않은 상태여야 한다.
@@ -74,7 +74,7 @@ git status --short -- "${frozen[@]}"
 - 다음 절의 `--check`가 이것을 확인한다. 줄 끝만 다르면 `CRLF line ends (Windows core.autocrlf=true ...)`로 멈추고, 그때는 위 명령을 다시 돌린다.
 
 - `.env`(레포 루트)에 `GEMINI_API_KEY`, `CLOVA_OCR_INVOKE_URL`, `CLOVA_OCR_SECRET`이 있어야 한다. `BOTTLEMAP_DATA_DIR`이 없으면 `../bottlemap-p14/data`를 쓴다(다른 평가 스크립트와 같음). 사진은 `<data>/eval_photos_i3/`, `photo_map.json`도 거기.
-- 아래 명령은 모두 `.venv-ai\Scripts\python`으로 돌린다. 여기서는 `python`으로 적는다.
+- 아래 명령은 모두 `.\.venv-ai\Scripts\python`으로 돌린다(PowerShell은 PATH 밖의 실행 파일에 `.\`가 필요하다). 여기서는 `python`으로 적는다.
 
 ## 2. 추출 r1 → r2 → r3
 
@@ -96,7 +96,7 @@ python ai/eval/p30_extract.py --out ai/runs/2026-10-30_p30/hybrid_i3 --runs 3 --
 
 - `--max-calls`: 명령 하나의 Gemini 호출 상한(서버 재시도 포함). 회차당 33회 + 재시도 여유 12. 닿으면 그 사진을 쓰지 않고 멈춘다. CLOVA 상한은 `--max-clova-calls`(기본 33)이고 서버 `call_ocr`의 재시도(최대 3번)도 HTTP 요청마다 하나씩 센다. 재시도 중에 닿으면 그 사진을 쓰지 않고 멈춘다.
 - 실행 폴더 이름은 첫날 날짜로 고정한다. 다른 날 이어서 돌려도 같은 `--out`을 쓴다.
-- `--runs`는 1, 2, 3만 받는다(동결 r1–r3). 다른 숫자는 인자 오류로 바로 끝난다.
+- `--runs`는 1, 2, 3만, 오름차순으로 받는다(동결 r1–r3). 다른 숫자나 순서는 인자 오류로 바로 끝난다. 앞 회차가 다 끝나지 않았으면(같은 명령의 `--runs`에 앞 회차를 먼저 넣은 경우는 제외) 뒤 회차는 API 호출 없이 멈춘다: r1 → r2 → r3 순서를 지킨다.
 - 사진 사이 간격 4.5초(`--min-interval`, 분당 한도용). 구성과는 무관하다.
 
 **종료 코드와 이어서 하기**

@@ -551,7 +551,7 @@ def test_percentile_and_parse_args():
 def test_runs_outside_1_to_3_are_refused(runs):
     with pytest.raises(SystemExit):
         p30.parse_args(["--out", "x", "--runs", *runs])
-    assert p30.parse_args(["--out", "x", "--runs", "3", "1"]).runs == [3, 1]
+    assert p30.parse_args(["--out", "x", "--runs", "1", "3"]).runs == [1, 3]
 
 
 @pytest.mark.parametrize("key", ["config", "photos", "frozen_code"])
@@ -659,3 +659,33 @@ def test_frozen_pins_agree_with_the_scripts_and_the_checkout():
             rules[path] = attrs
     assert {path for path, attrs in rules.items() if "eol=lf" in attrs} == set(p30.FROZEN_RAW)
     assert all("text" in rules[path] for path in p30.FROZEN_RAW)
+
+
+def test_ocr_cache_without_sent_sha256_stops(setup, capsys):
+    path = setup.data / "ocr_cache" / "901_a_01__table-off.json"
+    record = json.loads(path.read_text(encoding="utf-8"))
+    del record["meta"]["sent_sha256"]
+    path.write_text(json.dumps(record), encoding="utf-8")
+    code, gemini, clova = run(setup, "--runs", "1")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == [] and clova.requests == []
+    assert "901_a_01.png: OCR cache has no sent_sha256" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("runs", [["2"], ["3"], ["1", "3"]])
+def test_later_run_before_earlier_runs_are_complete_stops(setup, capsys, runs):
+    code, gemini, clova = run(setup, "--runs", *runs)
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == [] and clova.requests == []
+    assert "is not complete" in capsys.readouterr().out
+    assert not (setup.out / "manifest.json").exists()
+
+
+def test_runs_out_of_order_are_an_argument_error(setup):
+    with pytest.raises(SystemExit):
+        p30.parse_args(["--out", str(setup.out), "--runs", "3", "1"])
+
+
+def test_runs_in_order_in_one_command_and_after_earlier_runs_finished(setup):
+    code, _, _ = run(setup, "--runs", "1", "2")
+    assert code == p30.EXIT_OK
+    code, gemini, _ = run(setup, "--runs", "3")
+    assert code == p30.EXIT_OK and len(gemini.requests) == 3
