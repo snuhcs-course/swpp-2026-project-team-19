@@ -275,12 +275,16 @@ fun OwnerOnboardingScreen(
     val stage=regStage(screen)
     val cta=when(screen){
         RegPage.INTRO->"시작하기"
-        RegPage.BN,RegPage.REP,RegPage.DATE,RegPage.VERIFIED,
+        RegPage.BN,RegPage.REP,RegPage.DATE,
         RegPage.BARNAME,RegPage.BARPHOTO,RegPage.ADDRESS,RegPage.BARPHONE,
         RegPage.MENUS,RegPage.CONTACT->"다음"
-        RegPage.BIZCHECK->if(inputMethod=="photo" &&
-            (draft.businessNumberDigits.isBlank() || draft.representativeName.isBlank() ||
-                draft.openingDateIso.isBlank()))"국세청에 확인하기" else "확인하기"
+        RegPage.BIZCHECK->"확인하기"
+        RegPage.VERIFIED->when(verify) {
+            VerifyFixture.FAILED->"다시 확인하기"
+            VerifyFixture.UNAVAILABLE->"계속하기"
+            VerifyFixture.LIMITED->"돌아가기"
+            VerifyFixture.MATCHED->"다음"
+        }
         RegPage.REVIEW->"신청하기"
         RegPage.DONE->"확인"
         else->null
@@ -313,7 +317,7 @@ fun OwnerOnboardingScreen(
             RegPage.VERIFIED->when(verify){
                 VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->forward(RegPage.BARNAME)
                 VerifyFixture.FAILED->go(RegPage.BIZCHECK)
-                VerifyFixture.LIMITED->{history=emptyList();screen=RegPage.HOME}
+                VerifyFixture.LIMITED->{history=emptyList();onBack()}
             }
             RegPage.BARNAME->forward(RegPage.BARPHOTO)
             RegPage.BARPHOTO->forward(RegPage.ADDRESS)
@@ -487,9 +491,9 @@ fun OwnerOnboardingScreen(
                             onCancel={id->cancelId=id},
                             onDismiss={id->dismissId=id},
                             onReapply={app->
-                                save(MockRegistrationDraft(kind=app.kind,existingBarId=app.barId,
-                                    proposedBarName=app.proposedBarName,
-                                    proposedBarAddress=app.proposedBarAddress.orEmpty()))
+                                save(reapplicationDraftFromRejected(app))
+                                editingReview=false
+                                history=emptyList()
                                 go(RegPage.INTRO)
                             },
                             onReject={id->viewModel.closeApplicationForFixture(id,MockApplicationStatus.REJECTED)},
@@ -795,71 +799,64 @@ fun OwnerOnboardingScreen(
                     RegPage.REVIEW -> {
                         OwnerV4Question("이렇게\n신청할게요","한 번 더 확인하고 신청해 주세요.")
                         Spacer(Modifier.height(8.dp))
-                        Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                            Row(verticalAlignment=Alignment.CenterVertically,
-                                horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                                Text("사업자 정보",color=RegistrationV4.secondary,fontSize=14.sp)
-                                Box(Modifier.background(Color(0xFF244C38),RoundedCornerShape(20.dp))
-                                    .padding(horizontal=8.dp,vertical=3.dp)) {
-                                    Text("확인 완료",color=Color(0xFFB9DFC8),fontSize=12.sp)
-                                }
+                        RegistrationReviewDetails(
+                            values=RegistrationReviewValues(
+                                number=bnFormat(draft.businessNumberDigits),
+                                representative=draft.representativeName,
+                                openingDate=draft.openingDateIso.replace("-","."),
+                                name=draft.proposedBarName,
+                                representativePhotoCount=if(draft.kind==MockApplicationKind.NEW_BAR)
+                                    draft.applicantGallery.size else null,
+                                address=if(draft.kind==MockApplicationKind.NEW_BAR)
+                                    listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
+                                        .filter {it.isNotBlank()}.joinToString(" ") else null,
+                                phone=if(draft.kind==MockApplicationKind.NEW_BAR)
+                                    formatOwnerPhone(draft.storePhone) else null,
+                                menuPhotoCount=draft.initialMenuPhotos.size,
+                                contact=formatOwnerPhone(draft.contactPhone)
+                            ),
+                            readOnly=false,onEdit={ key ->
+                                edit(when(key) {
+                                    "barname"->RegPage.BARNAME
+                                    "barphoto"->RegPage.BARPHOTO
+                                    "address"->RegPage.ADDRESS
+                                    "barphone"->RegPage.BARPHONE
+                                    "menus"->RegPage.MENUS
+                                    else->RegPage.CONTACT
+                                })
                             }
-                            OwnerV4Summary("등록번호",bnFormat(draft.businessNumberDigits),null)
-                            OwnerV4Summary("대표자",draft.representativeName,null)
-                            OwnerV4Summary("개업일",draft.openingDateIso.replace("-","."),null)
-                        }
-                        Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                            Text("매장 정보",color=RegistrationV4.secondary,fontSize=14.sp)
-                            OwnerV4Summary("이름",draft.proposedBarName){edit(RegPage.BARNAME)}
-                            if(draft.kind==MockApplicationKind.NEW_BAR) {
-                                OwnerV4Summary("대표 사진",draft.applicantGallery.size.toString()+"장"){edit(RegPage.BARPHOTO)}
-                                OwnerV4Summary("주소",listOf(
-                                    draft.proposedBarAddress,draft.proposedBarAddressDetail)
-                                    .filter{it.isNotBlank()}.joinToString(" ")){edit(RegPage.ADDRESS)}
-                                OwnerV4Summary("전화번호",formatOwnerPhone(draft.storePhone)
-                                    .ifBlank{"없음"}){edit(RegPage.BARPHONE)}
-                            }
-                        }
-                        Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                            Text("메뉴판",color=RegistrationV4.secondary,fontSize=14.sp)
-                            OwnerV4Summary("",draft.initialMenuPhotos.size.toString()+"장"){edit(RegPage.MENUS)}
-                        }
-                        Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                            OwnerV4Summary("연락처",formatOwnerPhone(draft.contactPhone)){edit(RegPage.CONTACT)}
-                        }
-                        Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
-                            .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
-                            .padding(horizontal=16.dp,vertical=8.dp),
-                            horizontalArrangement=Arrangement.spacedBy(12.dp),
-                            verticalAlignment=Alignment.CenterVertically) {
-                            Text("ⓘ",color=RegistrationV4.primary,fontSize=18.sp)
-                            Text("운영팀 승인 전에는 매장과 메뉴가 손님에게 보이지 않아요.",
-                                color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=20.sp)
-                        }
+                        )
                     }
                     RegPage.DONE -> RegistrationCenterContent("신청을 마쳤어요",
                         "운영팀이 실제 매장인지 확인한 뒤 승인해요.\n진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
                     RegPage.QA_LIST,RegPage.QA_PREVIEW -> Unit
                     RegPage.VIEW_APPLICATION -> {
-                        OwnerV4Question("신청한 내용",
-                            "검토 중인 신청은 수정할 수 없어요.")
-                        val application=snapshot?.applications?.firstOrNull{
+                        OwnerV4Question("신청한 내용","검토 중에는 내용을 수정할 수 없어요.")
+                        val application=snapshot?.applications?.firstOrNull {
                             it.applicationId==activeApplicationId
                         }
-                        if(application==null)Text("신청을 찾지 못했어요.")
-                        else{
-                            OwnerV4Summary("매장명",application.proposedBarName,null)
-                            OwnerV4Summary("등록번호",application.businessNumberDigits.orEmpty(),null)
-                            OwnerV4Summary("대표자",application.representativeName.orEmpty(),null)
-                            OwnerV4Summary("개업일",application.openingDateIso.orEmpty(),null)
-                            if(application.kind==MockApplicationKind.NEW_BAR){
-                                OwnerV4Summary("주소",application.proposedBarAddress.orEmpty(),null)
-                                OwnerV4Summary("매장 전화",application.storePhone?:"없음",null)
-                            }
-                            OwnerV4Summary("메뉴판",application.registrationPhotos.count{
-                                it.kind==MockPhotoKind.MENU_CAPTURE
-                            }.toString()+"장",null)
-                            OwnerV4Summary("연락처",application.contactPhone.orEmpty(),null)
+                        if(application==null) Text("신청을 찾지 못했어요.")
+                        else {
+                            Spacer(Modifier.height(8.dp))
+                            RegistrationReviewDetails(
+                                values=RegistrationReviewValues(
+                                    number=bnFormat(application.businessNumberDigits.orEmpty()),
+                                    representative=application.representativeName.orEmpty(),
+                                    openingDate=application.openingDateIso.orEmpty().replace("-","."),
+                                    name=application.proposedBarName,
+                                    representativePhotoCount=if(application.kind==MockApplicationKind.NEW_BAR)
+                                        application.registrationPhotos.count {it.kind==MockPhotoKind.BAR_GALLERY}
+                                        else null,
+                                    address=application.proposedBarAddress,
+                                    phone=if(application.kind==MockApplicationKind.NEW_BAR)
+                                        formatOwnerPhone(application.storePhone.orEmpty()) else null,
+                                    menuPhotoCount=application.registrationPhotos.count {
+                                        it.kind==MockPhotoKind.MENU_CAPTURE
+                                    },
+                                    contact=formatOwnerPhone(application.contactPhone.orEmpty())
+                                ),
+                                readOnly=true,onEdit={}
+                            )
                         }
                     }
                 }
