@@ -1239,7 +1239,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                 }
                 val changed=stage8RetainedPriceMismatchCount(job,s)
-                Row(Modifier.fillMaxWidth()
+                if(changed>0) Row(Modifier.fillMaxWidth()
                     .border(1.dp,Color(0xFF75583D),RoundedCornerShape(12.dp))
                     .background(Color(0xFF302822),RoundedCornerShape(12.dp))
                     .clickable(onClick=onHome).padding(15.dp),
@@ -1249,7 +1249,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)) {
                         Text("메뉴판과 가격이 다른 메뉴 ${changed}개",
                             color=V4Color.text,fontWeight=FontWeight.Bold,fontSize=14.sp)
-                        Text("지금 메뉴 가격을 그대로 두었어요. 눌러서 바꿀 수 있어요.",
+                        Text("자동 반영하지 못한 가격이에요. 눌러서 직접 수정해 주세요.",
                             color=V4Color.sub,fontSize=12.sp)
                     }
                     Text("›",color=V4Color.sub,fontSize=21.sp)
@@ -1358,7 +1358,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         publishScope.launch {
                             try {
                                 vm.publishPhotoImportLive(job.menuImportId,job.reviewVersion)
-                                error=null
+                                error=vm.photoPublishWarning()
                                 visit("done")
                             } catch(cancelled: CancellationException) {
                                 throw cancelled
@@ -1390,7 +1390,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         publishScope.launch {
                             try {
                                 vm.publishPhotoImportLive(job.menuImportId,job.reviewVersion)
-                                error=null
+                                error=vm.photoPublishWarning()
                                 visit("done")
                             } catch(cancelled: CancellationException) {
                                 throw cancelled
