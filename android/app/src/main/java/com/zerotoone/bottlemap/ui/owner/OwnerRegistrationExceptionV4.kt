@@ -221,6 +221,11 @@ internal fun ownerQaPreviewSnapshot(page:Int):MockOwnerSnapshot {
 
 @Composable
 internal fun OwnerRegistrationQaPreview(page:Int,onBack:()->Unit,onAction:()->Unit){
+    var sheet by remember(page) {mutableStateOf<RegistrationApplicationSheet?>(null)}
+    sheet?.let { kind ->
+        RegistrationApplicationConfirmSheet(kind=kind,onClose={sheet=null},
+            onConfirm={sheet=null}) // Preview only: real actions stay on OwnerOnboardingScreen.
+    }
     val managerPage=page in listOf(21,22,28,29)
     Column(Modifier.fillMaxSize().background(RegistrationV4.bg)
         .testTag("registration-qa-preview-$page")) {
@@ -242,7 +247,9 @@ internal fun OwnerRegistrationQaPreview(page:Int,onBack:()->Unit,onAction:()->Un
                 OwnerRegistrationDashboard(
                     snapshot=ownerQaPreviewSnapshot(page),debug=false,
                     onRegister=onAction,onManage={onAction()},onViewApplication={onAction()},
-                    onCancel={onAction()},onDismiss={onAction()},onReapply={onAction()},
+                    onCancel={sheet=RegistrationApplicationSheet.CANCEL},
+                    onDismiss={sheet=RegistrationApplicationSheet.DISMISS},
+                    onReapply={onAction()},
                     onReject={onAction()},onApprove={onAction()}
                 )
             }
