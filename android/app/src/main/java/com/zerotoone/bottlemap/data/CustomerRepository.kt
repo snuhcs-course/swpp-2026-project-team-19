@@ -4,6 +4,7 @@ import com.zerotoone.bottlemap.network.ApiClient
 import com.zerotoone.bottlemap.network.BarMenuResponseDto
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.SearchBarsResponseDto
+import com.zerotoone.bottlemap.network.PopularProductsResponseDto
 
 /** Existing network implementation behind a minimal test seam; not a new architecture. */
 interface CustomerSearchSource {
@@ -14,7 +15,32 @@ interface CustomerBarDetailSource {
     suspend fun getPublishedBarMenu(barId: String): BarMenuResponseDto
 }
 
-class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource {
+/**
+ * P18 discovery network seam: preserves the public API contract while keeping
+ * Retrofit out of UI ViewModels. Small fakes can implement this in local tests.
+ */
+interface CustomerDiscoverySource {
+    suspend fun popularProducts(limit:Int = 10):PopularProductsResponseDto
+    suspend fun searchProduct(
+        query:String?,productId:String?,source:String,
+        latitude:Double?=null,longitude:Double?=null,
+    ):SearchBarsResponseDto
+}
+
+class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource, CustomerDiscoverySource {
+    override suspend fun popularProducts(limit:Int):PopularProductsResponseDto =
+        ApiClient.call { ApiClient.api.popularProducts(limit=limit) }
+
+    override suspend fun searchProduct(
+        query:String?,productId:String?,source:String,latitude:Double?,longitude:Double?,
+    ):SearchBarsResponseDto = ApiClient.call {
+        ApiClient.api.searchProductP18(
+            query=query?.takeIf(String::isNotBlank),
+            productId=productId?.takeIf(String::isNotBlank),
+            latitude=latitude,longitude=longitude,source=source,
+        )
+    }
+
     override suspend fun getPublishedBarMenu(barId: String): BarMenuResponseDto {
         val auth = AppAuth.gateway
         val token = auth.currentAccessTokenOrNull()
