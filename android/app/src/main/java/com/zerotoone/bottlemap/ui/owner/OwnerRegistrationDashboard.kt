@@ -1,120 +1,210 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.*
-import com.zerotoone.bottlemap.ui.common.*
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-/** ACTION_FIRST v4: approved bars and active applications share the same management list. */
+/** Approved ACTION_FIRST v4 HTML/PDF pp.21,22,28,29. Pure Mock snapshot display. */
 @Composable
 internal fun OwnerRegistrationDashboard(
     snapshot: MockOwnerSnapshot,
-    debug: Boolean,
     onRegister: () -> Unit,
     onManage: (MockBar) -> Unit,
     onViewApplication: (String) -> Unit,
     onCancel: (String) -> Unit,
     onDismiss: (String) -> Unit,
     onReapply: (MockOwnerApplication) -> Unit,
-    onReject: (String) -> Unit,
-    onApprove: (MockOwnerApplication) -> Unit,
 ) {
-    val now = rememberOwnerNow()
-    val bars = snapshot.bars
-    val applications = snapshot.applications
-        .filterNot { it.applicationId in snapshot.dismissedApplicationIds }
-        .filterNot { it.status == MockApplicationStatus.APPROVED && bars.any { bar -> bar.barId == it.barId } }
-
-    if (bars.isEmpty() && applications.isEmpty()) {
-        Text("매장 등록은\n이렇게 진행돼요", style = MaterialTheme.typography.headlineSmall)
-        Text("사업자 정보 확인, 매장 정보 입력, 메뉴판 사진, 운영팀 승인 순서예요.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text("중간에 멈춰도 입력한 내용은 기기에 남아 있어요.")
-        OwnerActionButton("시작하기", onRegister, Modifier.fillMaxWidth())
+    val visible=snapshot.applications.filterNot {
+        it.applicationId in snapshot.dismissedApplicationIds
+    }.filterNot {
+        it.status==MockApplicationStatus.APPROVED &&
+            snapshot.bars.any { b -> b.barId==it.barId }
+    }
+    if(snapshot.bars.isEmpty() && visible.isEmpty()){
+        RegistrationIntro()
+        Spacer(Modifier.height(16.dp))
+        RegistrationButton("시작하기",onClick=onRegister)
         return
     }
-
-    if (bars.isNotEmpty()) {
-        Text("내 매장", style = MaterialTheme.typography.titleMedium)
-        bars.forEach { bar ->
-            Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface,
-                RoundedCornerShape(16.dp)).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(bar.name, style = MaterialTheme.typography.titleLarge)
-                // Same persisted bar exception and weekly schedule as management home.
-                val temporary = homeOperatingException(bar, now)
-                // Match the home-card headline; keep current open/closed as separate detail.
-                val operatingLabel = registrationOperatingLabel(temporary, now)
-                OwnerStatusLabel(operatingLabel,
-                    if (temporary != null) OwnerStatusTone.ATTENTION else OwnerStatusTone.SUCCESS)
-                if (bar.weeklyHours.isNotEmpty()) {
-                    Text(homeOperatingState(bar, now), style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if(snapshot.bars.isNotEmpty()){
+        snapshot.bars.forEach { bar ->
+            Column(Modifier.fillMaxWidth()
+                .background(RegistrationV4.surface,RoundedCornerShape(16.dp))
+                .padding(16.dp),verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                    Text(bar.name,Modifier.weight(1f),fontSize=16.sp,lineHeight=24.sp,
+                        color=RegistrationV4.text,fontWeight=FontWeight.SemiBold)
+                    RegistrationDashboardBadge(
+                        if(snapshot.hasPublishedInitialReview(bar.barId))"승인됨" else "메뉴 확인 필요",
+                        "approved")
                 }
-                if (!snapshot.hasPublishedInitialReview(bar.barId)) {
-                    OwnerStatusLabel("메뉴 확인 필요", OwnerStatusTone.ATTENTION)
-                }
-                Text(bar.address, style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-                OwnerActionButton("매장 관리하기", { onManage(bar) }, Modifier.fillMaxWidth())
+                Text(bar.address,color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=21.sp)
+                Spacer(Modifier.height(8.dp))
+                RegistrationDashboardAction(
+                    if(snapshot.hasPublishedInitialReview(bar.barId)) "매장 관리하기"
+                    else "메뉴 검수하기",
+                    primary=true,onClick={onManage(bar)}
+                )
             }
         }
     }
-    if (applications.isNotEmpty()) {
-        Text("신청", style = MaterialTheme.typography.titleMedium)
-        applications.forEach { application ->
-            Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface,
-                RoundedCornerShape(16.dp)).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(application.proposedBarName, style = MaterialTheme.typography.titleLarge)
-                OwnerStatusLabel(when(application.status) {
-                    MockApplicationStatus.PENDING -> "검토 중"
-                    MockApplicationStatus.APPROVED -> "승인됨"
-                    MockApplicationStatus.REJECTED -> "승인되지 않음"
-                    MockApplicationStatus.CANCELED -> "취소됨"
-                }, if(application.status==MockApplicationStatus.REJECTED) OwnerStatusTone.ERROR
-                    else OwnerStatusTone.ATTENTION)
-                when(application.status) {
+    if(visible.isNotEmpty()){
+        visible.forEach { app ->
+            Column(Modifier.fillMaxWidth()
+                .background(RegistrationV4.surface,RoundedCornerShape(16.dp))
+                .padding(16.dp).testTag("registration-dashboard-application"),
+                verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                    Text(app.proposedBarName,Modifier.weight(1f),color=RegistrationV4.text,
+                        fontSize=16.sp,lineHeight=24.sp,fontWeight=FontWeight.SemiBold)
+                    val label=when(app.status){
+                        MockApplicationStatus.PENDING -> "검토 중"
+                        MockApplicationStatus.REJECTED -> "승인되지 않음"
+                        MockApplicationStatus.APPROVED -> "승인됨"
+                        MockApplicationStatus.CANCELED -> "취소됨"
+                    }
+                    RegistrationDashboardBadge(label,when(app.status){
+                        MockApplicationStatus.REJECTED -> "rejected"
+                        MockApplicationStatus.APPROVED -> "approved"
+                        else -> "pending"
+                    })
+                }
+                // An older Mock fixture may have no timestamp. Never fabricate a
+                // submission or review date, or call submission date review date.
+                val reviewTime = if(app.status==MockApplicationStatus.REJECTED)
+                    app.reviewedAtEpochMs else null
+                val displayedTime=reviewTime ?: app.submittedAtEpochMs.takeIf { it>0L }
+                val date=displayedTime?.let {
+                    SimpleDateFormat("M월 d일",Locale.KOREAN).format(Date(it))
+                }
+                val message=when {
+                    date==null -> "신청일 정보 없음"
+                    reviewTime!=null -> "${date}에 검토했어요"
+                    else -> "${date}에 신청했어요"
+                }
+                Text(message,color=RegistrationV4.secondary,
+                    fontSize=14.sp,lineHeight=21.sp)
+                when(app.status){
                     MockApplicationStatus.PENDING -> {
-                        Text("신청 완료  ·  운영팀 확인 중  ·  승인 대기",
-                            style = MaterialTheme.typography.bodySmall)
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextButton(onClick={onViewApplication(application.applicationId)}) {
-                                Text("신청 내용 보기")
-                            }
-                            TextButton(onClick={onCancel(application.applicationId)}) {
-                                Text("신청 취소")
+                        Spacer(Modifier.height(12.dp))
+                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                            listOf("신청 완료","운영팀 확인 중","승인").forEachIndexed { i,name ->
+                                Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                                    Box(Modifier.fillMaxWidth().height(3.dp)
+                                        .background(if(i<2)RegistrationV4.primary
+                                            else RegistrationV4.border))
+                                    Text(name,color=when(i){
+                                        0->RegistrationV4.text;1->RegistrationV4.primary
+                                        else->RegistrationV4.secondary
+                                    },fontSize=12.sp,lineHeight=18.sp,
+                                        fontWeight=if(i==1)FontWeight.SemiBold else FontWeight.Normal)
+                                }
                             }
                         }
-                        if(debug) {
-                            Text("운영팀 Fixture · Mock 전용", style = MaterialTheme.typography.labelSmall)
-                            Row {
-                                TextButton(onClick={onReject(application.applicationId)}) { Text("거절") }
-                                TextButton(onClick={onApprove(application)}) { Text("승인") }
+                        Spacer(Modifier.height(4.dp))
+                        Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                            Box(Modifier.weight(1f)) {
+                                RegistrationDashboardAction("신청 내용 보기",onClick={
+                                    onViewApplication(app.applicationId)
+                                })
+                            }
+                            Box(Modifier.weight(1f)) {
+                                RegistrationDashboardAction("신청 취소",onClick={
+                                    onCancel(app.applicationId)
+                                })
                             }
                         }
                     }
                     MockApplicationStatus.REJECTED -> {
-                        Text(application.rejectionReason ?: "Mock 심사 거절 사유 없음")
-                        Row {
-                            TextButton(onClick={onReapply(application)}) { Text("다시 신청하기") }
-                            TextButton(onClick={onDismiss(application.applicationId)}) { Text("목록에서 지우기") }
+                        Spacer(Modifier.height(8.dp))
+                        Column(Modifier.fillMaxWidth()
+                            .background(RegistrationV4.bg,RoundedCornerShape(12.dp))
+                            .padding(12.dp),verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                            Text("운영팀이 남긴 이유",color=RegistrationV4.secondary,
+                                fontSize=12.sp,lineHeight=18.sp)
+                            Text(app.rejectionReason
+                                ?: "사업자 주소에서 매장을 확인할 수 없었어요. 주소를 다시 확인해 주세요.",
+                                color=RegistrationV4.text,fontSize=14.sp,lineHeight=21.sp)
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                            Box(Modifier.weight(1f)){
+                                RegistrationDashboardAction("다시 신청하기",primary=true,
+                                    onClick={onReapply(app)})
+                            }
+                            Box(Modifier.weight(1f)){
+                                RegistrationDashboardAction("목록에서 지우기",
+                                    onClick={onDismiss(app.applicationId)})
+                            }
                         }
                     }
                     MockApplicationStatus.CANCELED ->
-                        Text("신청이 취소되었습니다. 다른 매장을 다시 등록할 수 있어요.")
+                        Text("신청이 취소됐어요.",fontSize=14.sp,
+                            color=RegistrationV4.secondary)
                     MockApplicationStatus.APPROVED ->
-                        Text("승인된 매장의 메뉴 확인이 필요합니다.")
+                        RegistrationDashboardAction("매장 관리하기",onClick={
+                            snapshot.bars.firstOrNull{it.barId==app.barId}?.let(onManage)
+                        })
                 }
             }
         }
     }
-    OwnerActionButton("다른 매장 등록하기", onRegister, Modifier.fillMaxWidth(), secondary=true)
+    Box(Modifier.fillMaxWidth().padding(top=4.dp)
+        .border(1.dp,Color(0xFF786A60),RoundedCornerShape(12.dp))
+        .ownerQuietClick(onClick=onRegister).testTag("registration-dashboard-add"),
+        contentAlignment=Alignment.Center){
+        Row(Modifier.heightIn(min=48.dp),verticalAlignment=Alignment.CenterVertically,
+            horizontalArrangement=Arrangement.spacedBy(8.dp)){
+            RegistrationGlyph("plus",color=RegistrationV4.primary,size=16.dp)
+            Text("다른 매장 등록하기",fontSize=14.sp,color=RegistrationV4.text)
+        }
+    }
+}
+
+@Composable
+private fun RegistrationDashboardBadge(label:String,kind:String) {
+    val bg=when(kind){
+        "approved"->Color(0xFF244C38)
+        "rejected"->Color(0xFF8E3736)
+        else->Color(0xFF503C29)
+    }
+    val fg=when(kind){
+        "approved"->Color(0xFFB9DFC8)
+        "rejected"->Color(0xFFFFD8CC)
+        else->Color(0xFFF7DFBF)
+    }
+    Box(Modifier.background(bg,RoundedCornerShape(50))
+        .padding(horizontal=8.dp,vertical=2.dp)) {
+        Text(label,color=fg,fontSize=12.sp,lineHeight=18.sp,
+            fontWeight=FontWeight.SemiBold)
+    }
+}
+@Composable
+private fun RegistrationDashboardAction(
+    label:String,primary:Boolean=false,onClick:()->Unit
+){
+    Box(Modifier.fillMaxWidth().heightIn(min=48.dp)
+        .background(if(primary)RegistrationV4.primary else RegistrationV4.elevated,
+            RoundedCornerShape(12.dp)).ownerQuietClick(onClick=onClick),
+        contentAlignment=Alignment.Center) {
+        Text(label,fontSize=14.sp,lineHeight=20.sp,fontWeight=FontWeight.SemiBold,
+            color=if(primary)RegistrationV4.onPrimary else RegistrationV4.text)
+    }
 }

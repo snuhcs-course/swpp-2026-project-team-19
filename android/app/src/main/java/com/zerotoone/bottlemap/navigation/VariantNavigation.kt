@@ -20,7 +20,6 @@ import androidx.navigation.navArgument
 import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
-import com.zerotoone.bottlemap.ui.owner.OwnerComponentGallery
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoSelectionScreen
@@ -61,12 +60,15 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
             OwnerOnboardingScreen(
                 viewModel = ownerViewModel,
                 onBack = { navController.popBackStack() },
-                onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
-                onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
-                onComponents = { navController.navigate(OwnerRoutes.COMPONENTS) },
-                onLegacyDebugUpload = OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
-                    { navController.navigate(route) }
+                onFirstReview = { status ->
+                    val next=when(status) {
+                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
+                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
+                        else -> OwnerPage.MGR_PHOTO
+                    }
+                    navController.navigate(next.route)
                 },
+                onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
             )
             }
         }
@@ -78,17 +80,17 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 viewModel = viewModel(factory = OwnerMockViewModel.Factory(
                     OwnerMockRuntime.repository(LocalContext.current))),
                 onBack = { navController.popBackStack() },
-                onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
+                onFirstReview = { status ->
+                    val next=when(status) {
+                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
+                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
+                        else -> OwnerPage.MGR_PHOTO
+                    }
+                    navController.navigate(next.route)
+                },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
             )
-            }
-        }
-        composable(OwnerRoutes.COMPONENTS) {
-                CompositionLocalProvider(
-                    LocalRippleConfiguration provides null,
-                ) {
-            OwnerComponentGallery(onBack = { navController.popBackStack() })
             }
         }
         OwnerPage.entries.forEach { page ->

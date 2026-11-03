@@ -478,6 +478,29 @@ class LocalOwnerMockRepositoryTest {
         assertEquals(null, ready(restored).registrationDraft)
     }
 
+    @Test fun locallySubmittedApplicationPersistsActualSubmissionTimeAcrossRestart() {
+        val store=InMemoryMockOwnerStateStore()
+        val r=repo(store)
+        r.saveRegistrationDraft(MockRegistrationDraft(
+            proposedBarName="Submission time bar",proposedBarAddress="Test street 12"))
+        val before=System.currentTimeMillis()
+        val applicationId=r.submitRegistrationDraftForFixture()
+        val after=System.currentTimeMillis()
+        val submitted=ready(repo(store)).applications.single {
+            it.applicationId==applicationId
+        }
+        assertTrue(submitted.submittedAtEpochMs>=before)
+        assertTrue(submitted.submittedAtEpochMs<=after)
+        assertEquals(null,submitted.reviewedAtEpochMs)
+        val reviewStart=System.currentTimeMillis()
+        r.closeApplicationForFixture(applicationId,MockApplicationStatus.REJECTED)
+        val reviewEnd=System.currentTimeMillis()
+        val rejected=ready(repo(store)).applications.single { it.applicationId==applicationId }
+        assertTrue(rejected.reviewedAtEpochMs!!>=reviewStart)
+        assertTrue(rejected.reviewedAtEpochMs!!<=reviewEnd)
+        assertEquals(submitted.submittedAtEpochMs,rejected.submittedAtEpochMs)
+    }
+
     @Test fun generatedApplicationIdDoesNotCollideWithPreviouslyRegisteredFixtures() {
         val store = InMemoryMockOwnerStateStore()
         val r = repo(store)
