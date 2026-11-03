@@ -81,7 +81,7 @@ private fun dateInput(raw:String):String {
 fun OwnerOnboardingScreen(
     viewModel: OwnerMockViewModel,
     onBack: () -> Unit,
-    onFirstReview: () -> Unit,
+    onFirstReview: (MockImportStatus?) -> Unit,
     onManagerPreview: () -> Unit,
     startRegistration: Boolean = false,
     onComponents: (() -> Unit)? = null,
@@ -483,7 +483,9 @@ fun OwnerOnboardingScreen(
                             },
                             onManage={ bar ->
                                 viewModel.selectBar(bar.barId)
-                                onManagerPreview()
+                                if(!snapshot.hasPublishedInitialReview(bar.barId)) {
+                                    onFirstReview(snapshot.imports.lastOrNull{it.barId==bar.barId}?.status)
+                                } else onManagerPreview()
                             },
                             onViewApplication={ id ->
                                 activeApplicationId=id;go(RegPage.VIEW_APPLICATION)
