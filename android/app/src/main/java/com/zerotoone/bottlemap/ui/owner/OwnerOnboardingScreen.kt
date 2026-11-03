@@ -278,7 +278,9 @@ fun OwnerOnboardingScreen(
         RegPage.BN,RegPage.REP,RegPage.DATE,RegPage.VERIFIED,
         RegPage.BARNAME,RegPage.BARPHOTO,RegPage.ADDRESS,RegPage.BARPHONE,
         RegPage.MENUS,RegPage.CONTACT->"다음"
-        RegPage.BIZCHECK->"확인하기"
+        RegPage.BIZCHECK->if(inputMethod=="photo" &&
+            (draft.businessNumberDigits.isBlank() || draft.representativeName.isBlank() ||
+                draft.openingDateIso.isBlank()))"국세청에 확인하기" else "확인하기"
         RegPage.REVIEW->"신청하기"
         RegPage.DONE->"확인"
         else->null
@@ -566,16 +568,33 @@ fun OwnerOnboardingScreen(
                         OwnerV4Previous("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
                     }
                     RegPage.BIZCHECK -> {
-                        OwnerV4Question(
-                            if(inputMethod=="photo")"읽은 내용이\n맞는지 확인해 주세요"
-                            else "이 정보로\n확인할게요",
-                            if(inputMethod=="photo")"사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요."
-                            else "국세청에 등록된 정보와 같은지 확인해요.")
-                        Spacer(Modifier.height(0.dp))
-                        Column(Modifier.fillMaxWidth()) {
-                            OwnerV4Summary("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
-                            OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
-                            OwnerV4Summary("개업일",draft.openingDateIso.replace("-",".")){go(RegPage.DATE)}
+                        val ocrPartial=inputMethod=="photo" &&
+                            (draft.businessNumberDigits.isBlank() ||
+                                draft.representativeName.isBlank() || draft.openingDateIso.isBlank())
+                        if(ocrPartial) {
+                            RegistrationOcrPartialReview(
+                                bnFormat(draft.businessNumberDigits),
+                                draft.representativeName,
+                                onEdit={ target ->
+                                    go(when(target){
+                                        "bn"->RegPage.BN
+                                        "rep"->RegPage.REP
+                                        else->RegPage.DATE
+                                    })
+                                })
+                        } else {
+                            OwnerV4Question(
+                                if(inputMethod=="photo")"읽은 내용이\n맞는지 확인해 주세요"
+                                else "이 정보로\n확인할게요",
+                                if(inputMethod=="photo")
+                                    "사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요."
+                                else "국세청에 등록된 정보와 같은지 확인해요.")
+                            Spacer(Modifier.height(0.dp))
+                            Column(Modifier.fillMaxWidth()) {
+                                OwnerV4Summary("사업자등록번호",bnFormat(draft.businessNumberDigits)){go(RegPage.BN)}
+                                OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
+                                OwnerV4Summary("개업일",draft.openingDateIso.replace("-",".")){go(RegPage.DATE)}
+                            }
                         }
                     }
                     RegPage.VERIFYING -> RegistrationCenterContent(
