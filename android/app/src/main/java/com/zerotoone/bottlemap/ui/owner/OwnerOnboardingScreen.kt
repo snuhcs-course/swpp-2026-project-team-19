@@ -76,9 +76,6 @@ private fun dateInput(raw:String):String {
         else -> n.take(4)+"-"+n.substring(4,6)+"-"+n.drop(6)
     }
 }
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-
 /** Only local fixture onboarding should bypass the Owner dashboard automatically. */
 internal fun shouldAutoOpenOwnerRegistrationIntro(
     usesProductionOwnerApi: Boolean,
@@ -90,6 +87,8 @@ internal fun shouldAutoOpenOwnerRegistrationIntro(
     !usesProductionOwnerApi && !startRegistration &&
         barCount==0 && applicationCount==0 && !hasDraft
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun OwnerOnboardingScreen(
     viewModel: OwnerMockViewModel,
     onBack: () -> Unit,
