@@ -304,7 +304,8 @@ internal fun OwnerManualMenuScreen(
             val persisted = products.firstOrNull { it.productId == old?.productId }
             val linked = if (old != null) persisted
                 else candidates.firstOrNull { it.productId == linkedId }
-            if(old==null && linked==null && category=="위스키") {
+            if(old==null && linked==null && category=="위스키" &&
+                viewModel.usesProductionOwnerApi()) {
                 val suggestedBrand=manualBrandProposal(
                     brands,name,brandName,rejectedBrandId)
                 require(suggestedBrand==null || confirmedBrandId!=null) {
