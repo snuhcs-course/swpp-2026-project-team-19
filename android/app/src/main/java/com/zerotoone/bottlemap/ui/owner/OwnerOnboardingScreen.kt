@@ -768,7 +768,7 @@ fun OwnerOnboardingScreen(
                             Text("매장 정보",color=RegistrationV4.secondary,fontSize=14.sp)
                             OwnerV4Summary("이름",draft.proposedBarName){edit(RegPage.BARNAME)}
                             if(draft.kind==MockApplicationKind.NEW_BAR) {
-                                OwnerV4Summary("사진",draft.applicantGallery.size.toString()+"장"){edit(RegPage.BARPHOTO)}
+                                OwnerV4Summary("대표 사진",draft.applicantGallery.size.toString()+"장"){edit(RegPage.BARPHOTO)}
                                 OwnerV4Summary("주소",listOf(
                                     draft.proposedBarAddress,draft.proposedBarAddressDetail)
                                     .filter{it.isNotBlank()}.joinToString(" ")){edit(RegPage.ADDRESS)}
@@ -778,15 +778,14 @@ fun OwnerOnboardingScreen(
                         }
                         Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
                             Text("메뉴판",color=RegistrationV4.secondary,fontSize=14.sp)
-                            OwnerV4Summary("사진",draft.initialMenuPhotos.size.toString()+"장"){edit(RegPage.MENUS)}
+                            OwnerV4Summary("",draft.initialMenuPhotos.size.toString()+"장"){edit(RegPage.MENUS)}
                         }
                         Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                            Text("신청자",color=RegistrationV4.secondary,fontSize=14.sp)
                             OwnerV4Summary("연락처",formatOwnerPhone(draft.contactPhone)){edit(RegPage.CONTACT)}
                         }
-                        Row(Modifier.fillMaxWidth().heightIn(min=72.dp)
+                        Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
                             .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
-                            .padding(horizontal=16.dp,vertical=12.dp),
+                            .padding(horizontal=16.dp,vertical=8.dp),
                             horizontalArrangement=Arrangement.spacedBy(12.dp),
                             verticalAlignment=Alignment.CenterVertically) {
                             Text("ⓘ",color=RegistrationV4.primary,fontSize=18.sp)
@@ -795,7 +794,7 @@ fun OwnerOnboardingScreen(
                         }
                     }
                     RegPage.DONE -> RegistrationCenterContent("신청을 마쳤어요",
-                        "운영팀이 실제 매장인지 확인한 뒤 승인해요. 진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
+                        "운영팀이 실제 매장인지 확인한 뒤 승인해요.\n진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
                     RegPage.VIEW_APPLICATION -> {
                         OwnerV4Question("신청한 내용",
                             "검토 중인 신청은 수정할 수 없어요.")
