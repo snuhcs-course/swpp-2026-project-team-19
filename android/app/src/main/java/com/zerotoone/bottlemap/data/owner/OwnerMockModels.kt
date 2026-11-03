@@ -2,8 +2,9 @@ package com.zerotoone.bottlemap.data.owner
 
 /**
  * LOCAL MOCK DOMAIN ONLY, not API DTOs. Contract: docs/frontend_backend_api_spec.md.
- * The unagreed fields (photos, tags, schedules, discounts, stock and manual menu CRUD)
- * must never be serialized as requests to the current backend.
+ * Most features now have HTTP counterparts, but these local models are never
+ * wire DTOs: map only fields confirmed in the latest repo contract explicitly.
+ * See android/OWNER_REGISTRATION_API_INTEGRATION_HANDOFF.md.
  */
 data class MockOwnerSnapshot(
     val bars: List<MockBar> = emptyList(),
@@ -29,11 +30,11 @@ data class MockBar(
     val latitude: Double? = null,
     val longitude: Double? = null,
     val description: String? = null, // C38 unagreed
-    val gallery: List<MockPhoto> = emptyList(), // C39 unagreed; first = cover in mock
-    val tags: List<String> = emptyList(), // C40 unagreed
-    val weeklyHours: List<MockWeeklyHours> = emptyList(), // C41 unagreed
-    val exceptions: List<MockOperatingException> = emptyList(), // C42 unagreed
-    val defaultPourMl: Int? = null, // R16 unagreed
+    val gallery: List<MockPhoto> = emptyList(), // local photo references, not API photo URLs; first = cover in Mock
+    val tags: List<String> = emptyList(), // local representation; map explicitly to API §3.7
+    val weeklyHours: List<MockWeeklyHours> = emptyList(), // local representation; map explicitly to API §3.7
+    val exceptions: List<MockOperatingException> = emptyList(), // local representation; map explicitly to API §3.15
+    val defaultPourMl: Int? = null, // local representation; map explicitly to API §3.7
     val lastVerifiedAtEpochMs: Long? = null, // Owner confirmed the currently sold menu
     val lastMenuPublishedAtEpochMs: Long? = null, // Independent from owner verification; local Mock only
 )
@@ -72,15 +73,15 @@ data class MockOwnerApplication(
     val barId: String? = null,
     val proposedBarAddress: String? = null, // new_bar only; null for existing_bar
     val representativeName: String? = null,
-    // Mock-only application snapshot: preserve the submitted registration number,
-    // NOT a newly agreed Backend field. Never store production applicant PII here.
+    // Local copy of the submitted number. API §3.11.1 has a separate
+    // businessRegistrationNumber field; never store production applicant PII here.
     val businessNumberDigits: String? = null,
     val openingDateIso: String? = null,
     val contactPhone: String? = null,
     val storePhone: String? = null, // local-only public phone
-    val rejectionReason: String? = null, // Mock-only operator fixture reason
-    val submittedAtEpochMs: Long = 0L,
-    val registrationPhotos: List<MockPhoto> = emptyList(), // C05 unagreed
+    val rejectionReason: String? = null, // Local fixture; API §3.11.1 also has rejectionReason
+    val submittedAtEpochMs: Long = 0L, // local time; API uses createdAt/reviewedAt RFC 3339
+    val registrationPhotos: List<MockPhoto> = emptyList(), // Mock union; API §3.11.15 is menuPhotos only
 )
 
 /** Product ID is a catalog identity, never a menu row ID. */
