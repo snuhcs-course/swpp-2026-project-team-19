@@ -28,6 +28,7 @@ import com.zerotoone.bottlemap.data.owner.MockMenuOption
 import com.zerotoone.bottlemap.data.owner.manualMenuShortName
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
+import com.zerotoone.bottlemap.ui.common.servingDisplayLabel
 
 /** All three surfaces use the same fixed slots, so adding a discount cannot shift ml or price. */
 internal fun ownerOptionDiscountActive(option: MockMenuOption, atEpochMs: Long): Boolean =
@@ -158,7 +159,7 @@ internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut
                     maxLines = 1)
             }
         }
-        Text(option.pourMl?.toString()?.plus("ml") ?: option.label.orEmpty(),
+        Text(servingDisplayLabel(option.pourMl, option.label),
             modifier = Modifier.width(30.dp), color = textColor,
             fontSize = 10.sp, maxLines = 1, textAlign = TextAlign.End)
         Text("%,d원".format(option.displayPrice(atEpochMs)),
