@@ -16,6 +16,91 @@ interface OwnerApi {
     @POST("api/auth/temp-login")
     suspend fun temporaryLogin(): TemporaryLoginResponseDto
 
+    /** Production owner routes: the Supabase user is never an operator fixture. */
+    @GET("api/me/bars")
+    suspend fun getMyBars(@Header("Authorization") authorization: String): MyOwnedBarsDto
+
+    @GET("api/me/owner-applications")
+    suspend fun getMyOwnerApplications(
+        @Header("Authorization") authorization: String,
+    ): MyOwnerApplicationsDto
+
+    @GET("api/bars/{barId}")
+    suspend fun getOwnedBar(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+    ): OwnedBarDto
+
+    @retrofit2.http.PATCH("api/bars/{barId}")
+    suspend fun updateOwnedBar(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): OwnedBarDto
+
+    @GET("api/bars/{barId}/menu")
+    suspend fun getOwnedMenu(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+    ): BarMenuResponseDto
+
+    @POST("api/bars/{barId}/menu/items")
+    suspend fun addOwnedMenuItem(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): BarMenuResponseDto
+
+    @retrofit2.http.PUT("api/bars/{barId}/menu/items/{itemId}")
+    suspend fun updateOwnedMenuItem(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Path("itemId") itemId: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): BarMenuResponseDto
+
+    @retrofit2.http.DELETE("api/bars/{barId}/menu/items/{itemId}")
+    suspend fun removeOwnedMenuItem(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Path("itemId") itemId: String,
+        @Query("menuVersion") menuVersion: Int,
+    ): BarMenuResponseDto
+
+    @POST("api/bars/{barId}/menu/reset")
+    suspend fun resetOwnedMenu(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): BarMenuResponseDto
+
+    @retrofit2.http.PUT("api/bars/{barId}/menu/items/{itemId}/sold-out")
+    suspend fun setOwnedItemSoldOut(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Path("itemId") itemId: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): BarMenuResponseDto
+
+    @POST("api/bars/{barId}/menu/confirm")
+    suspend fun confirmOwnedMenu(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): OwnedBarDto
+
+    @POST("api/owner-applications")
+    suspend fun applyForBar(
+        @Header("Authorization") authorization: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): OwnerApplicationDto
+
+    @POST("api/owner-applications/{applicationId}/cancel")
+    suspend fun cancelApplication(
+        @Header("Authorization") authorization: String,
+        @Path("applicationId") applicationId: String,
+    ): OwnerApplicationDto
+
     @GET("api/bars")
     suspend fun getBars(
         @Header("Authorization") authorization: String,
