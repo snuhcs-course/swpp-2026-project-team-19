@@ -164,7 +164,7 @@ class OwnerRegistrationV4ComposeTest {
         }
         compose.onNodeWithText("읽지 못했어요").assertExists()
         compose.onNodeWithText("읽지 못한 항목은 직접 입력해 주세요.").assertExists()
-        compose.onNodeWithText("국세청에 확인하기").assertExists()
+        compose.onNodeWithText("확인하기").assertExists()
         compose.onNodeWithTag("registration-qa-preview-26").assertExists()
     }
 
