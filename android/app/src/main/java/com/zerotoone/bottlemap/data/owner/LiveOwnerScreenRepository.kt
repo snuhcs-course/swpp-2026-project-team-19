@@ -35,6 +35,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val writeMutex = Mutex()
     private val generation = AtomicInteger(0)
     private val versionByBar = mutableMapOf<String, Int?>()
+    @Volatile private var lastReadySnapshot = MockOwnerSnapshot()
+
+    private fun publishSnapshot(value: MockOwnerSnapshot) {
+        lastReadySnapshot = value
+        local.replaceFromBackend(value)
+    }
     override val state = local.state
 
     init { retryLoad() }
@@ -42,7 +48,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private fun snapshot(): MockOwnerSnapshot = when (val s = state.value) {
         is MockOwnerLoadState.Ready -> s.snapshot
         is MockOwnerLoadState.Empty -> s.snapshot
-        else -> MockOwnerSnapshot()
+        else -> lastReadySnapshot
     }
     private fun timestamp(s: String?): Long? = s?.let {
         runCatching { Instant.parse(it).toEpochMilli() }.getOrNull()
@@ -134,7 +140,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val token = AppAuth.gateway.currentAccessTokenOrNull()
         if(token == null) {
             versionByBar.clear()
-            local.replaceFromBackend(MockOwnerSnapshot())
+            publishSnapshot(MockOwnerSnapshot())
             return
         }
         val old = snapshot()
@@ -160,7 +166,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val mappedBars = bars.map(::toBar)
         val selected = old.selectedBarId?.takeIf { id -> mappedBars.any { it.barId == id } }
             ?: mappedBars.firstOrNull()?.barId
-        local.replaceFromBackend(old.copy(
+        publishSnapshot(old.copy(
             bars = mappedBars, applications = applications.map(::toApplication),
             menuItems = rows, brands = brands, products = products,
             selectedBarId = selected,
@@ -168,6 +174,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     }
 
     override fun retryLoad() {
+        lastReadySnapshot = snapshot()
         val requested = generation.incrementAndGet()
         local.serverLoading()
         scope.launch {
@@ -359,7 +366,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             com.zerotoone.bottlemap.network.ApiClient.api.searchBarNames(trimmed, limit=20)
         }
         val before=snapshot()
-        local.replaceFromBackend(before.copy(existingBarCandidates=matches.items
+        publishSnapshot(before.copy(existingBarCandidates=matches.items
             .filter { !it.hasOwner }
             .map {
                 MockBar(it.barId,it.name,it.address,
@@ -372,7 +379,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         if(trimmed.isEmpty() || trimmed.length > 100) return
         val results = remote.searchCatalogProducts(trimmed)
         val before = snapshot()
-        local.replaceFromBackend(before.copy(
+        publishSnapshot(before.copy(
             products = (before.products + results.map { item ->
                 MockCatalogProduct(item.productId, item.brandId, item.displayName,
                     item.category, item.ageYears, item.editionName,
@@ -404,7 +411,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             },
         )
         val before = snapshot()
-        local.replaceFromBackend(before.copy(
+        publishSnapshot(before.copy(
             imports = before.imports.filterNot { it.menuImportId == job.menuImportId } + job))
         return accepted.menuImportId
     }
@@ -490,7 +497,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             images = images,
             failureReason = dto.failure?.message,
         )
-        local.replaceFromBackend(before.copy(
+        publishSnapshot(before.copy(
             imports = before.imports.filterNot { it.menuImportId == importId } + job,
             brands = (before.brands + extraBrands).distinctBy { it.brandId },
             products = (before.products + extraProducts).distinctBy { it.productId },
@@ -589,7 +596,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 itemDecisions = itemDecisions,
                 changeDecisions = changes,
             ))
-        local.replaceFromBackend(current.copy(imports = current.imports.map {
+        publishSnapshot(current.copy(imports = current.imports.map {
             if(it.menuImportId == importId) it.copy(status = MockImportStatus.APPLIED,
                 publishedAddedCount = result.result.added,
                 publishedNewProductCount = result.result.createdProducts)
