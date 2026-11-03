@@ -585,7 +585,17 @@ private fun p18CardMarkerStyle(
     selected:Boolean, name:String, secondary:String?, density:Float,
 ):LabelStyle {
     val d=density.coerceAtLeast(.5f)
-    val width=(148f*d).toInt().coerceAtLeast(1)
+    // Fit to the actual two-line text instead of reserving a wide right-side gutter.
+    val measure=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize=11f*d
+        isFakeBoldText=true
+    }
+    val visibleTextPx=maxOf(
+        minOf(measure.measureText(name),101f*d),
+        secondary?.let { minOf(measure.measureText(it),101f*d) } ?: 0f,
+    )
+    val width=((43f+visibleTextPx/d+8f).coerceIn(98f,148f)*d)
+        .toInt().coerceAtLeast(1)
     val height=(48f*d).toInt().coerceAtLeast(1)
     val image=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
     val canvas=Canvas(image)
@@ -618,13 +628,13 @@ private fun p18CardMarkerStyle(
         while(t.isNotEmpty() && paint.measureText(t)>maxWidth) t=t.dropLast(1)
         return if(t!=text) t.dropLast(1)+"…" else t
     }
-    canvas.drawText(trim(name,101f*d,letters),43f*d,20f*d,letters)
+    canvas.drawText(trim(name,(width/d-51f)*d,letters),43f*d,20f*d,letters)
     if(!secondary.isNullOrBlank()) {
         val sub=Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color=Color.rgb(199,187,176)
             textSize=11f*d
         }
-        canvas.drawText(trim(secondary,101f*d,sub),43f*d,35f*d,sub)
+        canvas.drawText(trim(secondary,(width/d-51f)*d,sub),43f*d,35f*d,sub)
     }
     return LabelStyle.from(image).setAnchorPoint(.5f,1f)
 }
