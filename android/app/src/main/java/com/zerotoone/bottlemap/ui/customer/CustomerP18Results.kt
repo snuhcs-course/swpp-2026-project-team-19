@@ -260,6 +260,7 @@ internal fun CustomerP18Results(
     var chosenId by rememberSaveable(initialQuery,initialProductId) {mutableStateOf<String?>(null)}
     var mapMode by rememberSaveable(initialQuery,initialProductId) {mutableStateOf(false)}
     var selectedBarId by rememberSaveable(initialQuery,initialProductId) {mutableStateOf<String?>(null)}
+    var mapCamera by remember { mutableStateOf<DiscoveryCamera?>(null) }
     var showSort by remember {mutableStateOf(false)}
     var sort by rememberSaveable {mutableStateOf(P18Sort.UPDATED)}
     LaunchedEffect(userLocation) { if(userLocation!=null)sort=P18Sort.DISTANCE }
@@ -395,6 +396,7 @@ internal fun CustomerP18Results(
                 if(mapMode) {
                     P18ResultsMap(ready,items,product?.displayName.orEmpty(),
                         ::navigateBack, {mapMode=false},selectedBarId,userLocation!=null,
+                        mapCamera,{mapCamera=it},
                         onSelect={id->if(selectedBarId==id)onOpenBar(id,product?.productId)
                             else selectedBarId=id},
                         onOpenBar={onOpenBar(it,product?.productId)})
@@ -448,6 +450,7 @@ internal fun CustomerP18Results(
 private fun P18ResultsMap(
     response:SearchBarsResponseDto, items:List<SearchResultDto>,name:String,
     onBack:()->Unit,onList:()->Unit,selected:String?,hasLocation:Boolean,
+    initialCamera:DiscoveryCamera?,onCamera:(DiscoveryCamera)->Unit,
     onSelect:(String)->Unit,onOpenBar:(String)->Unit,
 ) {
     val selectedItem=items.firstOrNull{it.barId==selected} ?: items.firstOrNull()
@@ -462,10 +465,11 @@ private fun P18ResultsMap(
         if(center!=null) NearbyKakaoMap(
             origin=center, bars=pins,selectedBarId=selectedItem?.barId,
             focusTarget=pins.firstOrNull{it.barId==selectedItem?.barId},
-            focusBarId=null,initialCamera=null,listCovered=false,
+            focusBarId=null,initialCamera=initialCamera,listCovered=false,
             searchedPlace=null,focusSearchedPlace=null,
             onSearchedPlaceFocusApplied={},onFocusApplied={},
-            onCameraChanged={_,_->},onMapCameraMoving={},
+            onCameraChanged={center,zoom->onCamera(DiscoveryCamera(center,zoom))},
+            onMapCameraMoving={},
             onMapViewportUnavailable={},viewportRetryToken=0,
             onSelectBar=onSelect,onViewportChanged={},recenterToken=0,
             onMapViewChanged={mapView=it},modifier=Modifier.fillMaxSize(),
