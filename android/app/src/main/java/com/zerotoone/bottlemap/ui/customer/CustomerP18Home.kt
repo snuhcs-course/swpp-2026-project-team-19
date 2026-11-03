@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -193,13 +194,17 @@ internal fun CustomerP18Home(
                                 .clickable { onPopular(product.productId) }
                                 .testTag("customer-popular-${product.productId}")
                                 .padding(start=12.dp,end=12.dp,top=14.dp,bottom=12.dp),
+                                horizontalAlignment=Alignment.CenterHorizontally,
                                 verticalArrangement=Arrangement.spacedBy(10.dp)) {
                                 P18Bottle(product.displayName)
-                                Column(verticalArrangement=Arrangement.spacedBy(2.dp)) {
+                                Column(horizontalAlignment=Alignment.CenterHorizontally,
+                                    verticalArrangement=Arrangement.spacedBy(2.dp)) {
                                     Text(product.displayName,color=P18Text,fontSize=14.sp,
-                                        lineHeight=20.sp,fontWeight=FontWeight.SemiBold)
+                                        lineHeight=20.sp,fontWeight=FontWeight.SemiBold,
+                                        textAlign=TextAlign.Center)
                                     Text("매장 ${product.barCount}곳",color=P18Muted,
-                                        fontSize=12.sp,lineHeight=18.sp)
+                                        fontSize=12.sp,lineHeight=18.sp,
+                                        textAlign=TextAlign.Center)
                                 }
                             }
                         }
