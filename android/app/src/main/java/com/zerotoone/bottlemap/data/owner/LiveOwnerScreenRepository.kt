@@ -166,10 +166,24 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val mappedBars = bars.map(::toBar)
         val selected = old.selectedBarId?.takeIf { id -> mappedBars.any { it.barId == id } }
             ?: mappedBars.firstOrNull()?.barId
+        // Owner application approval can start a menu import before this device uploads photos.
+        // A processing placeholder directs the existing job screen to poll the server.
+        val importedJobs = bars.mapNotNull { bar ->
+            bar.activeMenuImport?.let { pending ->
+                old.imports.firstOrNull { it.menuImportId == pending.menuImportId }
+                    ?: MockMenuImport(
+                        menuImportId = pending.menuImportId, barId = bar.barId,
+                        status = MockImportStatus.PROCESSING,
+                        reviewVersion = 1, images = emptyList(),
+                    )
+            }
+        }
         publishSnapshot(old.copy(
             bars = mappedBars, applications = applications.map(::toApplication),
             menuItems = rows, brands = brands, products = products,
             selectedBarId = selected,
+            imports = (old.imports + importedJobs)
+                .distinctBy { it.menuImportId },
         ))
     }
 
@@ -713,12 +727,33 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         error("사진 업로드 API 연결 전에는 가짜 작업을 만들지 않습니다.")
     override fun finishPhotoImport(importId: String, source: MockPhotoExtractionSource): MockImportStatus =
         MockImportStatus.PROCESSING
-    override fun cancelPhotoImport(importId: String) =
-        error("사진 업로드 취소 API 연결이 필요합니다.")
-    override fun discardPhotoImport(importId: String) =
-        error("서버 작업 취소 API 연결이 필요합니다.")
-    override fun resetPhotoReview(importId: String, expectedVersion: Int) =
-        error("사진 검수 초기화 API는 제공되지 않습니다.")
+    override fun cancelPhotoImport(importId: String) {
+        write {
+            remote.cancelMenuImport(importId)
+            val before = snapshot()
+            publishSnapshot(before.copy(imports = before.imports.map {
+                if(it.menuImportId == importId)
+                    it.copy(status = MockImportStatus.CANCELED) else it
+            }))
+        }
+    }
+    override fun discardPhotoImport(importId: String) = cancelPhotoImport(importId)
+    override fun resetPhotoReview(importId: String, expectedVersion: Int) {
+        val before = snapshot()
+        val job = before.imports.firstOrNull { it.menuImportId == importId }
+            ?: error("메뉴판 작업을 찾지 못했어요.")
+        require(job.reviewVersion == expectedVersion) { "REVIEW_OUTDATED" }
+        val reset = job.copy(images = job.images.map { image ->
+            image.copy(lines = image.lines.map { line ->
+                if(line.mockAutoAccepted || (line.kind == MockLineKind.NON_PRODUCT &&
+                    line.decision?.kind == MockDecisionKind.CONFIRM_NON_PRODUCT)) line
+                else line.copy(decision = null)
+            })
+        })
+        publishSnapshot(before.copy(imports = before.imports.map {
+            if(it.menuImportId == importId) reset else it
+        }))
+    }
     override fun retryFailedPhotoImport(importId: String): String =
         error("사진을 다시 선택해 등록해 주세요.")
     override fun decideLine(
