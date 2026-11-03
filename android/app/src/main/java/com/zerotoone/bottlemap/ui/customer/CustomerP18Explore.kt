@@ -10,6 +10,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -179,7 +180,7 @@ internal fun CustomerP18Explore(
             Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
         if(fine||coarse)scope.launch {
             runCatching{AndroidNearbyLocationSource(context).currentLocation()}
-                .onSuccess{location=it;recenterToken++}
+                .onSuccess{viewModel.setLocation(it);goToGwanak=false;recenterToken++}
                 .onFailure{errorLocation=true}
         } else launcher.launch(arrayOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -270,8 +271,7 @@ internal fun CustomerP18Explore(
                             "지금은 관악구 매장부터 모으고 있어요.",
                             "관악구로 이동",BmIconId.BAR_PIN,
                             {listVisible=false;goToGwanak=true;recenterToken++},
-                            modifier=Modifier.weight(1f),
-                    focusRequestToken=searchFocusRequest)
+                            modifier=Modifier.weight(1f))
                         else LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
                             items(ordered,key={it.barId}){bar->
                                 P18BrowseRow(bar,location,
@@ -420,7 +420,8 @@ internal fun CustomerP18Explore(
             if(searchVisible) {
                 P18SearchField(searchText,{searchText=it},
                     {searchViewModel.search(searchText)},placeholder="역 · 매장 이름 · 주소",
-                    modifier=Modifier.weight(1f))
+                    modifier=Modifier.weight(1f),
+                    focusRequestToken=searchFocusRequest)
             } else {
                 Row(Modifier.weight(1f).height(48.dp)
                     .background(if(listVisible)P18Surface else P18Bg,RoundedCornerShape(12.dp))
