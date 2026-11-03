@@ -48,8 +48,14 @@ internal fun ownerPhoneEdit(
     var position=incoming.text.take(incoming.selection.end).count(Char::isDigit)
     // Android IMEs delete the hyphen without deleting a digit. Treat Backspace
     // on that separator as deleting the preceding digit, not as an inert edit.
-    if(digits==before && incoming.text.length<previous.text.length &&
-        previous.text.contains('-') && incoming.text.count{it=='-'}<previous.text.count{it=='-'}) {
+    val backspaceAt = previous.selection.start - 1
+    val deletedSeparator =
+        previous.selection.collapsed && incoming.selection.collapsed &&
+        backspaceAt >= 0 && previous.text[backspaceAt] == '-' &&
+        incoming.text.length == previous.text.length - 1 &&
+        incoming.selection.start == backspaceAt &&
+        incoming.text == previous.text.removeRange(backspaceAt, backspaceAt + 1)
+    if(digits==before && deletedSeparator) {
         val remove=(position-1).coerceAtLeast(0)
         if(remove<digits.length) {
             digits=digits.removeRange(remove,remove+1)
