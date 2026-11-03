@@ -444,7 +444,7 @@ fun OwnerOnboardingScreen(
                 OwnerHeader("내 매장 관리",if(screen==RegPage.HOME)onBack else ::back)
             else RegistrationBackBar(::back)
         }
-        if(stage!=0) RegistrationProgress(stage)
+        if(stage!=0) RegistrationProgress(stage,onDebugQa={go(RegPage.QA_LIST)})
         val centered=screen in listOf(RegPage.READING,RegPage.VERIFYING,
             RegPage.VERIFIED,RegPage.DONE)
         Column(Modifier.fillMaxWidth().weight(1f)
