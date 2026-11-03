@@ -35,6 +35,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -139,6 +146,16 @@ internal fun CustomerP18BarDetail(
     highlightProductId:String?,
 ) {
     val context=LocalContext.current
+    val clipboard=LocalClipboardManager.current
+    val scroll=rememberScrollState()
+    val anchorPx=with(LocalDensity.current){160.dp.roundToPx()}
+    var highlightTarget by remember(bar.barId,highlightProductId) {
+        mutableIntStateOf(-1)
+    }
+    LaunchedEffect(highlightTarget) {
+        if(highlightProductId!=null && highlightTarget>=0)
+            scroll.animateScrollTo(highlightTarget)
+    }
     var photoIndex by rememberSaveable(bar.barId) {mutableIntStateOf(0)}
     var photoFull by rememberSaveable {mutableStateOf(false)}
     var hoursVisible by remember {mutableStateOf(false)}
@@ -194,13 +211,14 @@ internal fun CustomerP18BarDetail(
         }
     }
     Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-bar-detail")) {
-        Row(Modifier.fillMaxWidth().height(50.dp).padding(start=6.dp,end=16.dp),
+        Row(Modifier.fillMaxWidth().height(72.dp).padding(start=8.dp,end=20.dp),
             verticalAlignment=Alignment.CenterVertically) {P18Back(onBack)}
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        Column(Modifier.fillMaxSize().verticalScroll(scroll)
             .padding(start=20.dp,end=20.dp,top=13.dp,bottom=24.dp),
-            verticalArrangement=Arrangement.spacedBy(10.dp)) {
+            verticalArrangement=Arrangement.spacedBy(12.dp)) {
             Text(bar.name,fontSize=22.sp,lineHeight=30.sp,
-                style=MaterialTheme.typography.headlineSmall,color=P18Text)
+                fontFamily=MaterialTheme.typography.headlineSmall.fontFamily,
+                fontWeight=FontWeight.Bold,color=P18Text)
             var dragDistance by remember {mutableStateOf(0f)}
             Box(Modifier.fillMaxWidth().height(185.dp)
                 .clip(RoundedCornerShape(11.dp))
@@ -344,6 +362,12 @@ internal fun CustomerP18BarDetail(
                             val highlighted=highlightProductId!=null &&
                                 highlightProductId==item.productId
                             Row(Modifier.fillMaxWidth()
+                                .onGloballyPositioned { coords ->
+                                    if(highlighted && highlightTarget<0)
+                                        highlightTarget=(scroll.value+
+                                            coords.positionInRoot().y.toInt()-anchorPx)
+                                            .coerceAtLeast(0)
+                                }
                                 .then(if(highlighted)Modifier.background(P18Elevated,
                                     RoundedCornerShape(10.dp))
                                     .border(1.5.dp,P18Gold,RoundedCornerShape(10.dp))
@@ -364,7 +388,8 @@ internal fun CustomerP18BarDetail(
                                     if(highlighted) Box(Modifier.background(P18Gold,
                                         RoundedCornerShape(20.dp))
                                         .padding(horizontal=6.dp,vertical=1.dp)) {
-                                        Text("찾은 메뉴",fontSize=10.sp,
+                                        Text("찾은 메뉴",fontSize=10.5.sp,lineHeight=15.sp,
+                                             fontWeight=FontWeight.Bold,
                                             color=BottleMapPalette.onPrimary)
                                     }
                                 }
