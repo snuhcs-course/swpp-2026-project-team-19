@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.AndroidNearbyLocationSource
+import com.zerotoone.bottlemap.data.distanceMeters
 import com.zerotoone.bottlemap.data.Repositories
 import com.zerotoone.bottlemap.data.MapBar
 import com.zerotoone.bottlemap.data.NearbyCoordinate
@@ -66,6 +67,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -82,6 +84,7 @@ internal class P18SearchViewModel : ViewModel() {
     private var job: Job? = null
     private var version = 0L
     private var lastKey: String? = null
+    private var activeQuery:String? = null
     // Keep the full brand candidate list independently of selected-product responses.
     private val _suggestions = MutableStateFlow<SearchBarsResponseDto?>(null)
     val suggestions = _suggestions.asStateFlow()
@@ -106,6 +109,12 @@ internal class P18SearchViewModel : ViewModel() {
     fun clearLocation() { _location.value = null }
     fun load(query: String?, productId: String?, source: String,
              location: NearbyCoordinate? = null, force: Boolean = false) {
+        // Never reuse candidates from a different search term. A product-id
+        // follow-up intentionally preserves the original brand candidates.
+        if(productId==null && !query.isNullOrBlank() && activeQuery!=query) {
+            activeQuery=query
+            _suggestions.value=null
+        }
         val key = listOf(query, productId, source, location?.latitude, location?.longitude).joinToString("|")
         if (!force && key == lastKey) return
         lastKey=key
@@ -122,7 +131,9 @@ internal class P18SearchViewModel : ViewModel() {
                         source=source)
                 }
                 if (request==version) {
-                    if (query != null && productId == null && result.matchedProducts.isNotEmpty()) {
+                    if (query != null && productId == null) {
+                        // Retain even a legitimate empty match; never fall back
+                        // to an unrelated product-id response as "unknown whisky".
                         _suggestions.value = result
                     }
                     mutable.value=P18SearchState.Ready(result)
@@ -143,7 +154,20 @@ internal class P18SearchViewModel : ViewModel() {
 }
 
 internal enum class P18Sort(val label: String) {
-    DISTANCE("가까운 순"), PRICE("가격순"), UPDATED("최근 갱신 순")
+    PRICE("가격순"), DISTANCE("가까운 순"), UPDATED("최근 갱신 순")
+}
+
+/** The user's approved default/picker order, filtered by available metadata. */
+internal fun p18AvailableSorts(hasLocation:Boolean,allowPrice:Boolean):List<P18Sort> =
+    P18Sort.entries.filter {
+        (it!=P18Sort.PRICE || allowPrice) &&
+        (it!=P18Sort.DISTANCE || hasLocation)
+    }
+
+internal fun p18DisplayDistance(row:SearchResultDto,location:NearbyCoordinate?):Int? {
+    if(location==null || !location.isValid())return null
+    val target=NearbyCoordinate(row.latitude,row.longitude)
+    return if(target.isValid()) distanceMeters(location,target).roundToInt() else null
 }
 
 internal fun p18Sorted(
@@ -224,8 +248,7 @@ internal fun P18SortPicker(
             verticalArrangement=Arrangement.spacedBy(2.dp)) {
             Text("정렬",color=P18Text,fontSize=20.sp,fontWeight=FontWeight.SemiBold,
                 modifier=Modifier.padding(bottom=12.dp))
-            P18Sort.entries.filter {(it!=P18Sort.DISTANCE || hasLocation) &&
-                (it!=P18Sort.PRICE || allowPrice) }.forEach { item ->
+            p18AvailableSorts(hasLocation,allowPrice).forEach { item ->
                 Row(Modifier.fillMaxWidth().height(56.dp)
                     .clickable{onChoose(item)},verticalAlignment=Alignment.CenterVertically,
                     horizontalArrangement=Arrangement.SpaceBetween) {
@@ -279,16 +302,18 @@ internal fun CustomerP18Results(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    var initialResponse by remember(initialQuery,initialProductId) {
-        mutableStateOf<SearchBarsResponseDto?>(null)
-    }
     var chosenId by rememberSaveable(initialQuery,initialProductId) {mutableStateOf<String?>(null)}
     var mapMode by rememberSaveable(initialQuery,initialProductId) {mutableStateOf(false)}
     var selectedBarId by rememberSaveable(initialQuery,initialProductId) {mutableStateOf<String?>(null)}
     var mapCamera by remember { mutableStateOf<DiscoveryCamera?>(null) }
     var showSort by remember {mutableStateOf(false)}
-    var sort by rememberSaveable {mutableStateOf(P18Sort.UPDATED)}
-    LaunchedEffect(userLocation) { if(userLocation!=null)sort=P18Sort.DISTANCE }
+    // An explicit sort is sticky; GPS arriving MUST NOT silently override it.
+    var selectedSort by rememberSaveable(initialQuery,initialProductId) {
+        mutableStateOf<P18Sort?>(null)
+    }
+    var firstDefaultSort by rememberSaveable(initialQuery,initialProductId) {
+        mutableStateOf<P18Sort?>(null)
+    }
     fun reload() {
         viewModel.load(if(chosenId==null)initialQuery else null,
             chosenId ?: initialProductId, if(chosenId==null)source else "input",
@@ -317,19 +342,48 @@ internal fun CustomerP18Results(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION))
     }
-    LaunchedEffect(initialQuery,initialProductId,chosenId,userLocation) {
-        viewModel.load(if(chosenId==null) initialQuery else null,
+    // Search once per QUERY/PRODUCT selection, not once per GPS update.
+    // Newly obtained GPS drives a local haversine distance for rendered bars.
+    // This prevents a second Loading state, sort flip and stale 03-e1.
+    LaunchedEffect(initialQuery,initialProductId,chosenId,source) {
+        viewModel.load(if(chosenId==null)initialQuery else null,
             chosenId ?: initialProductId,
-            if(chosenId==null)source else "input",userLocation)
+            if(chosenId==null)source else "input",location=null)
     }
     val ready=(state as? P18SearchState.Ready)?.response
-    if(ready!=null && chosenId==null && initialResponse==null) initialResponse=ready
-    val original=suggestions ?: initialResponse ?: ready
+    val original=when {
+        initialQuery!=null -> suggestions?.takeIf {it.query==initialQuery}
+            ?: ready?.takeIf {it.query==initialQuery}
+        initialProductId!=null -> ready?.takeIf {
+            it.matchType=="product" || it.matchType=="none"
+        }
+        else -> null
+    }
     val choices=original?.matchedProducts.orEmpty()
     val canSkip=initialProductId!=null || (original!=null &&
         original.matchType=="alias_exact" && choices.size==1)
     val choose=chosenId==null && !canSkip && choices.isNotEmpty() &&
         (choices.size>1 || original?.matchType!="alias_exact")
+    val result=when {
+        chosenId!=null -> ready?.takeIf {
+            it.matchType=="product" &&
+                it.matchedProducts.any{product->product.productId==chosenId}
+        }
+        initialProductId!=null -> ready?.takeIf {
+            it.matchType=="product" &&
+                it.matchedProducts.any{product->product.productId==initialProductId}
+        }
+        canSkip -> original
+        else -> null
+    }
+    val allowsPrice=result?.items?.any{it.options.isNotEmpty()}==true
+    val availableSorts=p18AvailableSorts(userLocation!=null,allowsPrice)
+    val sort=selectedSort?.takeIf{it in availableSorts}
+        ?:firstDefaultSort?.takeIf{it in availableSorts}
+        ?:availableSorts.first()
+    LaunchedEffect(result,availableSorts) {
+        if(result!=null && firstDefaultSort==null)firstDefaultSort=availableSorts.first()
+    }
     fun navigateBack() {
         if (chosenId != null) {
             chosenId = null
@@ -342,11 +396,12 @@ internal fun CustomerP18Results(
         }
     }
     BackHandler(enabled=true) { navigateBack() }
-    if(showSort) P18SortPicker(sort,userLocation!=null,allowPrice=true,
-        onChoose={sort=it;showSort=false},onClose={showSort=false})
+    if(showSort) P18SortPicker(sort,userLocation!=null,allowPrice=allowsPrice,
+        onChoose={selectedSort=it;showSort=false},onClose={showSort=false})
     Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-results")) {
         when {
-            state is P18SearchState.Loading && original==null -> {
+            state is P18SearchState.Loading &&
+                (original==null || chosenId!=null || initialProductId!=null) -> {
                 P18LoadingScene("위스키 찾는 중",::navigateBack,Modifier.weight(1f))
             }
             state is P18SearchState.Error -> {
@@ -355,7 +410,8 @@ internal fun CustomerP18Results(
                     "연결을 확인하고 다시 시도해 주세요.","다시 시도",
                     BmIconId.ERROR,::reload,primary=true,modifier=Modifier.weight(1f),topInset=120)
             }
-            original!=null && original.matchedProducts.isEmpty() -> {
+            chosenId==null && initialProductId==null &&
+                original!=null && original.matchedProducts.isEmpty() -> {
                 P18SearchTopBar(::navigateBack,chooseQuery,{chooseQuery=it},
                     {if(chooseQuery.isNotBlank())onSearchAgain(chooseQuery)},
                     editable=true,focusRequestToken=focusRequest)
@@ -403,9 +459,9 @@ internal fun CustomerP18Results(
             chosenId!=null && state is P18SearchState.Loading -> {
                 P18LoadingScene("위스키 찾는 중",::navigateBack,Modifier.weight(1f))
             }
-            ready!=null && ready.items.isEmpty() -> {
+            result!=null && result.items.isEmpty() -> {
                 P18SearchTopBar(::navigateBack,chooseQuery)
-                val productName = ready.matchedProducts.firstOrNull()?.displayName
+                val productName = result.matchedProducts.firstOrNull()?.displayName
                     ?: choices.firstOrNull{it.productId==chosenId}?.displayName.orEmpty()
                 P18FailureBody("아직 파는 매장이 없어요",
                     "등록된 매장 메뉴판에서\n이 위스키를 찾지 못했어요.",
@@ -413,18 +469,24 @@ internal fun CustomerP18Results(
                     icon=BmIconId.EMPTY,onAction=::navigateBack,
                     modifier=Modifier.weight(1f),productName=productName,topInset=96)
             }
-            ready!=null -> {
+            result!=null -> {
                 val selectedProductId = chosenId ?: initialProductId
-                val product=ready.matchedProducts.firstOrNull { it.productId == selectedProductId }
+                val product=result.matchedProducts.firstOrNull { it.productId == selectedProductId }
                     ?: choices.firstOrNull { it.productId == selectedProductId }
-                    ?: ready.matchedProducts.firstOrNull() ?: choices.firstOrNull()
-                val items=p18Sorted(ready.items,sort,userLocation!=null)
+                    ?: result.matchedProducts.firstOrNull() ?: choices.firstOrNull()
+                // API only includes distance when lat/lng were sent. Use the
+                // same haversine formula on published coordinates if GPS arrives
+                // later, without redoing the entire search or changing the sort.
+                val distanceRows=result.items.map{row->
+                    row.copy(distanceMeters=p18DisplayDistance(row,userLocation))
+                }
+                val items=p18Sorted(distanceRows,sort,userLocation!=null)
                 if(mapMode) {
                     val focusedBarId=selectedBarId ?: items.firstOrNull()?.barId
                     LaunchedEffect(focusedBarId) {
                         if(focusedBarId!=null)viewModel.loadBarTags(focusedBarId)
                     }
-                    P18ResultsMap(ready,items,product?.displayName.orEmpty(),
+                    P18ResultsMap(result,items,product?.displayName.orEmpty(),
                         ::navigateBack, {mapMode=false},selectedBarId,userLocation,
                         knownTags[focusedBarId].orEmpty(),mapCamera,{mapCamera=it},
                         onSelect={id->if(selectedBarId==id)onOpenBar(id,product?.productId)
@@ -457,8 +519,7 @@ internal fun CustomerP18Results(
                     Row(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,top=12.dp,bottom=4.dp),
                         verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.SpaceBetween) {
-                        P18SortTrigger((if(userLocation==null && sort==P18Sort.DISTANCE)
-                            P18Sort.UPDATED else sort).label,{showSort=true})
+                        P18SortTrigger(sort.label,{showSort=true})
                         P18ModeButton("지도",{mapMode=true})
                     }
                     LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
