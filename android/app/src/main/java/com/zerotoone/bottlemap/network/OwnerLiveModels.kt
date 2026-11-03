@@ -66,3 +66,5 @@ data class OwnerCatalogProductDto(
     val isActive: Boolean = true,
 )
 data class OwnerCatalogProductsDto(val items: List<OwnerCatalogProductDto> = emptyList())
+
+data class OwnedPhotoListDto(val photos: List<BarPhotoDto> = emptyList())
