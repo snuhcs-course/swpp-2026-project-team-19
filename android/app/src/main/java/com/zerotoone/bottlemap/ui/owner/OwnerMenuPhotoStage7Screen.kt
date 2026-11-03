@@ -76,6 +76,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
+import com.zerotoone.bottlemap.data.owner.importPhotoCount
+import com.zerotoone.bottlemap.data.owner.importCompletedPhotoCount
 import com.zerotoone.bottlemap.data.owner.MockMenuImport
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.MockPhoto
@@ -620,13 +622,16 @@ internal fun OwnerMenuPhotoSelectionScreen(
                 tag = "stage7-photo-submit") {
                 if (bar != null) {
                     busy = true
-                    try {
-                        viewModel.queuePhotoImport(bar.barId, photos)
-                        error = null
-                        onJob()
-                    } catch (e: Exception) {
-                        error = e.message ?: "사진을 제출하지 못했어요."
-                    } finally { busy = false }
+                    scope.launch {
+                        try {
+                            // Wait for server 202 before advancing to the processing screen.
+                            viewModel.submitPhotoImportLive(bar.barId, photos)
+                            error = null
+                            onJob()
+                        } catch (e: Exception) {
+                            error = e.message ?: "사진을 제출하지 못했어요."
+                        } finally { busy = false }
+                    }
                 }
             }
         }
@@ -645,14 +650,31 @@ internal fun OwnerMenuPhotoJobScreen(
     val job = latestImport(state)
     val active = activeImport(job)
     var error by rememberSaveable { mutableStateOf<String?>(null) }
-    // The persisted PROCESSING job is recoverable after leaving the screen.
-    // This is a documented Mock-only resolution, NOT a real OCR server call.
+    // Poll server imports until ready. Only direct Mock tests use extraction fixtures.
     LaunchedEffect(job?.menuImportId, job?.status) {
-        if (job != null && job.status in listOf(
+        if(job != null && job.status in listOf(
                 MockImportStatus.UPLOADED, MockImportStatus.PROCESSING)) {
-            delay(900)
-            runCatching { viewModel.finishPhotoImport(job.menuImportId, fixture) }
-                .onFailure { error = it.message }
+            if(viewModel.usesProductionOwnerApi()) {
+                try {
+                    var waiting = true
+                    var attempts = 0
+                    while(waiting && attempts++ < 180) {
+                        delay(2_000)
+                        val current = viewModel.pollPhotoImportLive(job.menuImportId)
+                        waiting = current in listOf(
+                            MockImportStatus.UPLOADED, MockImportStatus.PROCESSING)
+                    }
+                    if(waiting) error="분석 시간이 길어지고 있어요. 나갔다가 다시 확인해 주세요."
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: Exception) {
+                    error=e.message ?: "메뉴판 분석 상태를 불러오지 못했어요."
+                }
+            } else {
+                delay(900)
+                runCatching { viewModel.finishPhotoImport(job.menuImportId, fixture) }
+                    .onFailure { error = it.message }
+            }
         }
     }
     // READY_FOR_REVIEW goes straight into Stage 8. There is no intermediary
@@ -731,9 +753,9 @@ internal fun OwnerMenuPhotoJobScreen(
                     MockImportStatus.FAILED ->
                         "사진 분석을 완료하지 못했어요.\n메뉴판을 화면에 꽉 채우고, 흔들리지 않게 다시 찍어주세요."
                     MockImportStatus.PROCESSING, MockImportStatus.UPLOADED ->
-                        "사진 ${job.images.size}장 중 0장을 읽었어요"
+                        "사진 ${importPhotoCount(job)}장 중 ${importCompletedPhotoCount(job)}장을 읽었어요"
                     MockImportStatus.READY_FOR_REVIEW ->
-                        "${job.images.size}장의 사진이 작업 ${job.menuImportId}에 연결됐어요."
+                        "${importPhotoCount(job)}장의 사진이 작업 ${job.menuImportId}에 연결됐어요."
                     else -> "매장 관리로 돌아갈 수 있어요."
                 }, color = if (job?.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.UPLOADED)) V4Color.text else V4Color.sub,
                     fontWeight = if (job?.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.UPLOADED)) FontWeight.Bold else FontWeight.Normal,

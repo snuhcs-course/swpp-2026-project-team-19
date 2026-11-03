@@ -51,3 +51,22 @@ internal fun formatOwnerPhone(value: String): String {
     val middle = if (remaining.length >= 8) 4 else 3
     return digits.substring(0, prefix) + "-" + remaining.substring(0, middle) + "-" + remaining.substring(middle)
 }
+
+/**
+ * Local format checks only. These cannot establish NTS registration identity.
+ * POST /api/owner-applications is the first and only applicant NTS call.
+ */
+internal fun ownerRegistrationPrecheckError(
+    businessNumber: String,
+    representativeName: String,
+    openingDate: String,
+    nowMillis: Long = System.currentTimeMillis(),
+): String? = when {
+    !validBusinessRegistrationNumber(businessNumber) ->
+        "사업자등록번호와 검사 숫자를 확인해 주세요."
+    representativeName.trim().isEmpty() || representativeName.trim().length > 100 ->
+        "사업자등록증의 대표자 이름을 확인해 주세요."
+    !validOpeningDate(openingDate, nowMillis) ->
+        "개업일을 YYYY-MM-DD 형식으로 확인해 주세요."
+    else -> null
+}

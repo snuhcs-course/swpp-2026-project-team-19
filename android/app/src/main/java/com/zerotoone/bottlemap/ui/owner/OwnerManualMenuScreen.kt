@@ -19,6 +19,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -187,7 +191,8 @@ internal fun OwnerManualMenuScreen(
         MockImportStatus.UPLOADED,MockImportStatus.PROCESSING,
         MockImportStatus.READY_FOR_REVIEW)
     val products = snapshot?.products.orEmpty()
-    val brands = (snapshot?.brands.orEmpty() + htmlBrands).distinctBy { it.brandId }
+    val brands = (snapshot?.brands.orEmpty() +
+        if(viewModel.usesProductionOwnerApi()) emptyList() else htmlBrands).distinctBy { it.brandId }
     // A deleted local product retains its ID; offer it again only for this bar,
     // via the same explicit "맞아요" confirmation as canonical catalog entries.
     val deletedLocalCandidates = products.filter { product ->
@@ -200,7 +205,8 @@ internal fun OwnerManualMenuScreen(
     val activeLocalCandidates = products.filter { product ->
         !product.catalogMatched && items.any { it.productId == product.productId }
     }
-    val candidates = (products.filter { it.catalogMatched } + htmlCatalog +
+    val candidates = (products.filter { it.catalogMatched && it.isActive } +
+        (if(viewModel.usesProductionOwnerApi()) emptyList() else htmlCatalog) +
         deletedLocalCandidates + activeLocalCandidates).distinctBy { it.productId }
 
     val photoContext=LocalContext.current
@@ -216,7 +222,25 @@ internal fun OwnerManualMenuScreen(
     var linkedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var rejectedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var itemName by rememberSaveable(bar?.barId) { mutableStateOf("") }
+    LaunchedEffect(screen, itemName) {
+        if(screen=="item" && itemName.trim().length>=2 && viewModel.usesProductionOwnerApi()) {
+            kotlinx.coroutines.delay(300)
+            runCatching { viewModel.searchCatalogLive(itemName) }
+        }
+    }
     var brandName by rememberSaveable(bar?.barId) { mutableStateOf("") }
+    var confirmedBrandId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
+    var rejectedBrandId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
+    LaunchedEffect(screen,itemName,brandName,editId,linkedId) {
+        if(screen=="item" && editId==null && linkedId==null &&
+            viewModel.usesProductionOwnerApi()) {
+            val lookup=manualBrandSearchQuery(itemName,brandName)
+            if(lookup.length>=2) {
+                kotlinx.coroutines.delay(300)
+                runCatching { viewModel.searchCatalogBrandsLive(lookup) }
+            }
+        }
+    }
     var category by rememberSaveable(bar?.barId) { mutableStateOf("위스키") }
     var alcoholKind by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var categoryMenuExpanded by rememberSaveable(bar?.barId) { mutableStateOf(false) }
@@ -229,6 +253,8 @@ internal fun OwnerManualMenuScreen(
     var calendarTarget by rememberSaveable { mutableStateOf<String?>(null) }
     var promoOptionExpanded by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var saving by rememberSaveable(bar?.barId) { mutableStateOf(false) }
+    val saveScope = rememberCoroutineScope()
     val draftOptions = decodedOptions(optionText)
     fun setOptions(v: List<DraftOption>) { optionText = encodedOptions(v) }
     fun changeOption(index: Int, transform: (DraftOption) -> DraftOption) {
@@ -241,6 +267,8 @@ internal fun OwnerManualMenuScreen(
         rejectedId = null
         itemName = item?.displayNameOverride ?: p?.displayName.orEmpty()
         brandName = brands.firstOrNull { it.brandId == p?.brandId }?.name.orEmpty()
+        confirmedBrandId = if(item!=null) p?.brandId else null
+        rejectedBrandId = null
         category = p?.let { manualMenuCategoryLabel(it.category) } ?: "위스키"
         alcoholKind = p?.otherAlcoholKind.orEmpty()
         // Photo-imported listings may contain more than three options. Allow editing
@@ -268,7 +296,7 @@ internal fun OwnerManualMenuScreen(
     BackHandler(screen != "list") { back() }
 
     fun save() {
-        if (bar == null) return
+        if (bar == null || saving) return
         try {
             require(!activePhotoImport) { "ACTIVE_IMPORT_EXISTS" }
             val name = itemName.trim()
@@ -276,6 +304,17 @@ internal fun OwnerManualMenuScreen(
             val persisted = products.firstOrNull { it.productId == old?.productId }
             val linked = if (old != null) persisted
                 else candidates.firstOrNull { it.productId == linkedId }
+            if(old==null && linked==null && category=="위스키" &&
+                viewModel.usesProductionOwnerApi()) {
+                val suggestedBrand=manualBrandProposal(
+                    brands,name,brandName,rejectedBrandId)
+                require(suggestedBrand==null || confirmedBrandId!=null) {
+                    "기존 브랜드가 있어요. '맞아요'를 눌러 선택해 주세요."
+                }
+                require(confirmedBrandId!=null || brandName.isNotBlank()) {
+                    "브랜드를 입력하고 기존 브랜드가 있는지 확인해 주세요."
+                }
+            }
             val savedName = old?.displayNameOverride ?: persisted?.displayName
             val confirmedExistingName = old == null && candidates.any {
                 it.productId == linkedId && it.displayName == name &&
@@ -377,8 +416,11 @@ internal fun OwnerManualMenuScreen(
                     val fallbackBrand = brandName.trim().ifEmpty {
                         if (whisky) "기타 브랜드" else category
                     }
-                    val reusedBrandId = snapshot?.brands?.firstOrNull {
-                        it.name.trim() == fallbackBrand
+                    val reusedBrandId = confirmedBrandId?.takeIf { id ->
+                        brands.any { it.brandId==id }
+                    } ?: brands.firstOrNull {
+                        normalizeOwnerCatalogName(it.name)==
+                            normalizeOwnerCatalogName(fallbackBrand)
                     }?.brandId ?: manualId("local-brand-")
                     MockCatalogProduct(
                         manualId("local-unverified-"), reusedBrandId, name,
@@ -395,16 +437,28 @@ internal fun OwnerManualMenuScreen(
                 ?: MockBrand(p.brandId, brandName.trim().ifEmpty {
                     if (whisky) "기타 브랜드" else category
                 })
-            viewModel.saveManualMenuItem(
-                MockBarMenuItem(old?.barMenuItemId ?: manualId("local-menu-"),
-                    bar.barId, p.productId, options, soldOut = old?.soldOut ?: false,
-                    displayNameOverride = if ((p.catalogMatched || sharedLocal) &&
-                        name != p.displayName) name else null),
-                if (products.none { it.productId == p.productId } ||
-                    (linked != null && !linked.catalogMatched && !sharedLocal)) p else null,
-                brand
-            )
-            screen = "list"; selectedId = null; editId = null; error = null
+            val stagedItem = MockBarMenuItem(old?.barMenuItemId ?: manualId("local-menu-"),
+                bar.barId, p.productId, options, soldOut = old?.soldOut ?: false,
+                displayNameOverride = if ((p.catalogMatched || sharedLocal) &&
+                    name != p.displayName) name else null)
+            val stagedProduct = if (products.none { it.productId == p.productId } ||
+                (linked != null && !linked.catalogMatched && !sharedLocal)) p else null
+            if(viewModel.usesProductionOwnerApi()) {
+                saving = true
+                saveScope.launch {
+                    try {
+                        viewModel.saveManualMenuItemLive(stagedItem, stagedProduct, brand)
+                        screen = "list"; selectedId = null; editId = null; error = null
+                    } catch(cancelled: CancellationException) {
+                        throw cancelled
+                    } catch(e: Exception) {
+                        error = e.message ?: "메뉴를 저장하지 못했어요. 다시 시도해 주세요."
+                    } finally { saving = false }
+                }
+            } else {
+                viewModel.saveManualMenuItem(stagedItem, stagedProduct, brand)
+                screen = "list"; selectedId = null; editId = null; error = null
+            }
         } catch (e: Exception) { error = e.message ?: "저장하지 못했어요." }
     }
 
@@ -424,13 +478,23 @@ internal fun OwnerManualMenuScreen(
                 val photoCopies=removed.flatMap{it.images}.distinctBy{it.sourceUri}
                     .filter {it.sourceUri !in retainedUris}
                     .map {MockPhoto(it.imageId,it.sourceUri,MockPhotoKind.MENU_CAPTURE)}
-                runCatching {viewModel.discardPhotoImport(activeJob.menuImportId)}
-                    .onSuccess {
-                        cancelPhotoConfirm=false;error=null;screen="list"
-                        // File.unlink is cheap (no image decoding); perform before
-                        // leaving this composition so navigation cannot cancel cleanup.
-                        photoCopies.forEach(photoStore::delete)
-                    }.onFailure {error=it.message}
+                if(!saving) {
+                    saving=true
+                    saveScope.launch {
+                        try {
+                            viewModel.cancelPhotoImportLive(activeJob.menuImportId)
+                            cancelPhotoConfirm=false
+                            error=null
+                            screen="list"
+                            // Only delete local photos after server confirmed the cancellation.
+                            photoCopies.forEach(photoStore::delete)
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
+                        } catch(e: Exception) {
+                            error=e.message ?: "사진 등록 작업을 취소하지 못했어요."
+                        } finally { saving=false }
+                    }
+                }
             }){Text("작업 취소하기",color=Color(0xFFFFB4AB))}},
             dismissButton={TextButton(onClick={cancelPhotoConfirm=false}){Text("돌아가기")}}
         )
@@ -450,15 +514,29 @@ internal fun OwnerManualMenuScreen(
                 else -> "품절 메뉴는 고객에게 숨겨지며 판매 재개 시 다시 공개됩니다."
             }); error?.let { Text(it, color = Color(0xFFFFB4AB)) } } },
             confirmButton = { TextButton(onClick = {
-                try {
-                    when(action) {
-                        "delete" -> editId?.let { viewModel.deleteMenuItem(it) }
-                        "reset" -> bar?.barId?.let { viewModel.clearMenuForBar(it) }
-                        else -> target?.let { viewModel.setSoldOut(it.barMenuItemId, !it.soldOut) }
+                if(!saving) {
+                    saving=true
+                    saveScope.launch {
+                        try {
+                            when(action) {
+                                "delete" -> editId?.let { viewModel.deleteMenuItemLive(it) }
+                                "reset" -> bar?.barId?.let { viewModel.clearMenuForBarLive(it) }
+                                else -> target?.let {
+                                    viewModel.setSoldOutLive(it.barMenuItemId, !it.soldOut)
+                                }
+                            }
+                            confirm=null
+                            error=null
+                            selectedId=null
+                            screen="list"
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
+                        } catch(e: Exception) {
+                            error=e.message ?: "서버 변경에 실패했어요."
+                        } finally { saving=false }
                     }
-                    confirm = null; error = null; selectedId = null; screen = "list"
-                } catch (e: Exception) { error = e.message }
-            }) { Text(when(action) {
+                }
+            }, enabled = !saving) { Text(when(action) {
                 "delete" -> "삭제하기"; "reset" -> "초기화"; else -> "상태 변경"
             }) } },
             dismissButton = { TextButton(onClick = { confirm = null; error = null }) { Text("취소") } }
@@ -663,23 +741,14 @@ internal fun OwnerManualMenuScreen(
                         if (editId == null) rejectedId = null
                     }, placeholder = "예: 라가불린 10년", testTag = "manual-menu-name")
                     if (editId == null) {
-                        val suggested = candidates.firstOrNull { p ->
-                            itemName.isNotBlank() &&
-                                p.displayName.replace(" ", "").contains(
-                                    itemName.trim().replace(" ", ""), ignoreCase = true) &&
-                                // Digitless catalog names must match exactly before
-                                // offering explicit canonical product confirmation.
-                                ((p.catalogMatched && itemName.any(Char::isDigit)) ||
-                                    p.displayName.replace(" ", "").equals(
-                                        itemName.trim().replace(" ", ""), ignoreCase = true)) &&
-                                p.productId != rejectedId &&
-                                manualMenuCategoryLabel(p.category) == category
-                        }
+                        val suggested=manualProductProposal(
+                            candidates,itemName,category,confirmedBrandId,rejectedId)
                         if (suggested != null && linkedId != suggested.productId) {
                             Text("“" + suggested.displayName + "”이 맞나요?", color = V4Color.text)
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 ManualButton("맞아요", {
                                     linkedId = suggested.productId
+                                    confirmedBrandId = suggested.brandId
                                     itemName = suggested.displayName
                                     brandName = brands.firstOrNull {
                                         it.brandId == suggested.brandId }?.name.orEmpty()
@@ -689,6 +758,38 @@ internal fun OwnerManualMenuScreen(
                                 ManualButton("아니에요", { rejectedId = suggested.productId },
                                     modifier = Modifier.weight(1f), secondary = true)
                             }
+                        }
+                        if(linkedId == null) {
+                            V4FormField("브랜드",brandName,{
+                                brandName=it.take(100)
+                                confirmedBrandId=null
+                                rejectedBrandId=null
+                            },placeholder="예: 글렌피딕",testTag="manual-menu-brand")
+                            val suggestedBrand=manualBrandProposal(
+                                brands,itemName,brandName,rejectedBrandId)
+                            if(suggestedBrand!=null &&
+                                confirmedBrandId!=suggestedBrand.brandId) {
+                                Text("“" + suggestedBrand.name + "” 브랜드가 맞나요?",
+                                    color=V4Color.text)
+                                Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                    ManualButton("맞아요",{
+                                        confirmedBrandId=suggestedBrand.brandId
+                                        brandName=suggestedBrand.name
+                                        saveScope.launch {
+                                            runCatching {
+                                                if(viewModel.usesProductionOwnerApi())
+                                                    viewModel.searchCatalogLive(suggestedBrand.name)
+                                            }
+                                        }
+                                    },modifier=Modifier.weight(1f))
+                                    ManualButton("아니에요",{
+                                        rejectedBrandId=suggestedBrand.brandId
+                                    },modifier=Modifier.weight(1f),secondary=true)
+                                }
+                            }
+                            if(confirmedBrandId!=null)
+                                Text("기존 브랜드를 선택했어요.",color=V4Color.primary,
+                                    fontSize=12.sp)
                         }
                         if (linkedId != null) {
                             val old = existingBarProductMenu(items, bar.barId, requireNotNull(linkedId))
@@ -825,8 +926,8 @@ internal fun OwnerManualMenuScreen(
                     }
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     error?.let { Text(it, color = Color(0xFFFFB4AB)) }
-                    ManualButton(if (editId == null) "메뉴 추가" else "저장하기",
-                        ::save, modifier = Modifier.testTag("manual-menu-save"))
+                    ManualButton(if(saving) "저장 중..." else if (editId == null) "메뉴 추가"
+                        else "저장하기", ::save, modifier = Modifier.testTag("manual-menu-save"))
                 }
                 screen == "promo" -> {
                     Text("할인 설정", color = V4Color.text, fontFamily = FontFamily.Serif,

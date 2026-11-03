@@ -86,7 +86,11 @@ data class MockOwnerApplication(
 )
 
 /** Product ID is a catalog identity, never a menu row ID. */
-data class MockBrand(val brandId: String, val name: String)
+data class MockBrand(
+    val brandId: String, val name: String,
+    // Matched search spelling, e.g. Korean alias for an English catalog brand.
+    val matchedAlias: String? = null,
+)
 data class MockCatalogProduct(
     val productId: String,
     val brandId: String,
@@ -187,6 +191,7 @@ data class MockExtractedLine(
     val sourceBox: List<Int>? = null, // EXIF-normalized 0..1000 coordinates, null means unknown
     // Explicit local fixture-only exact catalog match. No OCR or backend inference.
     val mockAutoAccepted: Boolean = false,
+    val priceConflict: Boolean = false,
 )
 data class MockPhotoExtraction(
     val imageId: String,
@@ -200,6 +205,10 @@ data class MockMenuImport(
     val status: MockImportStatus,
     val reviewVersion: Int,
     val images: List<MockPhotoExtraction>,
+    // Populated by the backend import list/processing response, even after process death.
+    val imageCount: Int = 0,
+    /** Number of images whose AI extraction has actually finished on the server. */
+    val completedImages: Int = 0,
     val failureReason: String? = null,
     // Local Mock publication result: deduplicated actual new bar menu rows.
     val publishedAddedCount: Int? = null,

@@ -38,13 +38,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.zerotoone.bottlemap.data.owner.*
+import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.ui.common.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
-/** ACTION_FIRST v4 mock form; no real OCR, NTS, operator approval or upload API. */
+/** ACTION_FIRST v4 registration UI; live mode uses the current application APIs. */
 private enum class RegPage {
     HOME, INTRO, METHOD, READING, BN, REP, DATE, BIZCHECK, VERIFYING, VERIFIED,
     BARNAME, BARPHOTO, ADDRESS, BARPHONE, MENUS, CONTACT, REVIEW, DONE, VIEW_APPLICATION
@@ -74,6 +76,17 @@ private fun dateInput(raw:String):String {
         else -> n.take(4)+"-"+n.substring(4,6)+"-"+n.drop(6)
     }
 }
+/** Only local fixture onboarding should bypass the Owner dashboard automatically. */
+internal fun shouldAutoOpenOwnerRegistrationIntro(
+    usesProductionOwnerApi: Boolean,
+    startRegistration: Boolean,
+    barCount: Int,
+    applicationCount: Int,
+    hasDraft: Boolean,
+): Boolean =
+    !usesProductionOwnerApi && !startRegistration &&
+        barCount==0 && applicationCount==0 && !hasDraft
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OwnerOnboardingScreen(
@@ -93,6 +106,7 @@ fun OwnerOnboardingScreen(
     val bars=snapshot?.bars.orEmpty()
     val candidates=snapshot?.existingBarCandidates.orEmpty()
     val ctx=LocalContext.current
+    val submitScope=rememberCoroutineScope()
     var screen by rememberSaveable { mutableStateOf(if(startRegistration)RegPage.INTRO else RegPage.HOME) }
     var history by rememberSaveable { mutableStateOf(listOf<String>()) }
     var inputMethod by rememberSaveable { mutableStateOf("manual") }
@@ -107,6 +121,12 @@ fun OwnerOnboardingScreen(
     var editingReview by rememberSaveable { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    var submittedNewBar by rememberSaveable { mutableStateOf(false) }
+
+    fun historyFor(page: String, kind: MockApplicationKind): List<String> =
+        registrationHistoryFor(page,kind).filterNot {
+            viewModel.usesProductionOwnerApi() && it=="VERIFIED"
+        }
 
     fun latestDraft(): MockRegistrationDraft? = when(val now=viewModel.state.value) {
         is MockOwnerLoadState.Ready -> now.snapshot.registrationDraft
@@ -135,7 +155,7 @@ fun OwnerOnboardingScreen(
     }
     fun back() {
         val stack=if(history.isEmpty() && registrationCheckpointable(screen.name))
-            registrationHistoryFor(screen.name,draft.kind) else history
+            historyFor(screen.name,draft.kind) else history
         if(stack.isEmpty()) {
             if(bars.isNotEmpty())showDashboard() else onBack()
         } else {
@@ -229,15 +249,39 @@ fun OwnerOnboardingScreen(
 
     LaunchedEffect(screen) {
         if(screen==RegPage.READING){
-            delay(1400) // ACTION_FIRST v4 HTML reading animation            // Explicit deterministic DEMO fixture; never claim results were derived from the photo.
-            val current=(viewModel.state.value as? MockOwnerLoadState.Ready)?.snapshot?.registrationDraft
-                ?: (viewModel.state.value as? MockOwnerLoadState.Empty)?.snapshot?.registrationDraft
-                ?: draft
-            save(current.copy(businessNumberDigits="1234567891",representativeName="김민준",
-                openingDateIso="2019-05-14",proposedBarName="몰트 앤 무드"))
-            go(RegPage.BIZCHECK)
+            val current=latestDraft() ?: draft
+            val uri=current.certificatePhoto?.uri
+            try {
+                val extracted=uri?.let { viewModel.readBusinessCertificateLive(it) }
+                if(extracted!=null) {
+                    save(current.copy(
+                        businessNumberDigits=extracted.businessRegistrationNumber
+                            ?.filter(Char::isDigit) ?: current.businessNumberDigits,
+                        representativeName=extracted.representativeName ?: current.representativeName,
+                        openingDateIso=extracted.openingDate ?: current.openingDateIso,
+                        proposedBarName=extracted.businessName ?: current.proposedBarName,
+                        proposedBarAddress=extracted.address ?: current.proposedBarAddress,
+                    ))
+                } else {
+                    // Retain deterministic screenshots for direct MockRepository tests only.
+                    delay(1400)
+                    save(current.copy(businessNumberDigits="1234567891",
+                        representativeName="김민준",openingDateIso="2019-05-14",
+                        proposedBarName="몰트 앤 무드"))
+                }
+                go(RegPage.BIZCHECK)
+            } catch(e: Exception) {
+                go(RegPage.BIZCHECK)
+                error=e.message ?: "사업자등록증을 읽지 못했어요. 직접 입력해 주세요."
+            }
         } else if(screen==RegPage.VERIFYING){
-            delay(1300);go(RegPage.VERIFIED) // ACTION_FIRST v4 HTML verifying animation
+            // The actual NTS verification happens on POST /api/owner-applications.
+            delay(350)
+            // The direct Mock UI test retains its explicit demo verification flow.
+            // Live NTS validation happens only on application POST, never here.
+            verify=if(viewModel.usesProductionOwnerApi()) VerifyFixture.UNAVAILABLE
+                else VerifyFixture.MATCHED
+            go(RegPage.VERIFIED)
         }
     }
     LaunchedEffect(snapshot?.registrationDraft!=null,startRegistration) {
@@ -248,24 +292,49 @@ fun OwnerOnboardingScreen(
             (screen==RegPage.HOME || (startRegistration && screen==RegPage.INTRO))){
             val target=registrationResumePage(draft)
             screen=RegPage.valueOf(target)
-            history=registrationHistoryFor(target,draft.kind)
+            history=historyFor(target,draft.kind)
         }
     }
 
     LaunchedEffect(snapshot?.bars?.size,snapshot?.applications?.size,startRegistration) {
-        if(!startRegistration && snapshot!=null &&
-            snapshot.bars.isEmpty() && snapshot.applications.isEmpty() &&
-            snapshot.registrationDraft==null && screen==RegPage.HOME){
-            // HTML v4: no redundant entry page before the registration introduction.
+        if(snapshot!=null && screen==RegPage.HOME &&
+            shouldAutoOpenOwnerRegistrationIntro(
+                usesProductionOwnerApi=viewModel.usesProductionOwnerApi(),
+                startRegistration=startRegistration,
+                barCount=snapshot.bars.size,
+                applicationCount=snapshot.applications.size,
+                hasDraft=snapshot.registrationDraft!=null,
+            )){
+            // Local fixture only. A production Owner may briefly have 0 cached bars
+            // while GET /api/me/bars is still loading; never navigate on that state.
             screen=RegPage.INTRO
         }
     }
+    LaunchedEffect(snapshot?.bars?.size,snapshot?.registrationDraft,startRegistration) {
+        if(viewModel.usesProductionOwnerApi() && !startRegistration &&
+            snapshot?.bars?.isNotEmpty()==true && snapshot.registrationDraft==null &&
+            screen==RegPage.INTRO && history.isEmpty()){
+            // Recover a previously saved transient Intro once owned bars arrive.
+            screen=RegPage.HOME
+        }
+    }
 
+    LaunchedEffect(screen, draft.proposedBarName) {
+        if(screen==RegPage.BARNAME && draft.proposedBarName.trim().length>=2 &&
+            viewModel.usesProductionOwnerApi()) {
+            delay(300)
+            runCatching {
+                viewModel.searchExistingBarCandidatesLive(draft.proposedBarName)
+            }.onFailure { error=it.message ?: "기존 매장을 검색하지 못했어요." }
+        }
+    }
     val exactMatches=candidates.filter{
         draft.proposedBarName.isNotBlank() &&
             it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
     }
     val validContact=draft.contactPhone.isNotBlank()&&validOwnerPhone(draft.contactPhone)
+    val businessPrecheck=ownerRegistrationPrecheckError(
+        draft.businessNumberDigits, draft.representativeName, draft.openingDateIso)
     val stage=regStage(screen)
     val cta=when(screen){
         RegPage.INTRO->"시작하기"
@@ -287,8 +356,7 @@ fun OwnerOnboardingScreen(
         RegPage.BN->validBusinessRegistrationNumber(draft.businessNumberDigits)
         RegPage.REP->draft.representativeName.trim().length in 1..100
         RegPage.DATE->validOpeningDate(draft.openingDateIso)
-        RegPage.BIZCHECK->validBusinessRegistrationNumber(draft.businessNumberDigits)&&
-            draft.representativeName.trim().length in 1..100&&validOpeningDate(draft.openingDateIso)
+        RegPage.BIZCHECK->businessPrecheck==null
         RegPage.BARNAME->draft.proposedBarName.trim().length in 1..150&&exactMatches.isEmpty()
         RegPage.BARPHOTO->draft.applicantGallery.isNotEmpty()
         RegPage.ADDRESS->draft.proposedBarAddress.isNotBlank() &&
@@ -298,7 +366,7 @@ fun OwnerOnboardingScreen(
         RegPage.MENUS->draft.initialMenuPhotos.isNotEmpty()
         RegPage.CONTACT->validContact
         RegPage.REVIEW->validContact&&draft.initialMenuPhotos.isNotEmpty()&&
-            validBusinessRegistrationNumber(draft.businessNumberDigits)
+            businessPrecheck==null
         else->true
     }
     fun primaryAction(){
@@ -307,7 +375,42 @@ fun OwnerOnboardingScreen(
             RegPage.BN->forward(if(inputMethod=="photo")RegPage.BIZCHECK else RegPage.REP)
             RegPage.REP->forward(if(inputMethod=="photo")RegPage.BIZCHECK else RegPage.DATE)
             RegPage.DATE->forward(RegPage.BIZCHECK)
-            RegPage.BIZCHECK->go(RegPage.VERIFYING)
+            RegPage.BIZCHECK->if(viewModel.usesProductionOwnerApi()) {
+                if(!busy) {
+                    busy=true
+                    submitScope.launch {
+                        try {
+                            verify=when(viewModel.verifyBusinessBeforeApplicationLive(
+                                draft.businessNumberDigits,draft.representativeName,
+                                draft.openingDateIso)) {
+                                "matched" -> VerifyFixture.MATCHED
+                                "not_matched" -> VerifyFixture.FAILED
+                                else -> VerifyFixture.UNAVAILABLE
+                            }
+                            go(RegPage.VERIFIED)
+                        } catch(e: BottleMapApiException) {
+                            when {
+                                e.httpStatus==404 && e.code=="HTTP_404" -> {
+                                    // The existing POST still performs NTS verification.
+                                    verify=VerifyFixture.UNAVAILABLE
+                                    go(RegPage.VERIFIED)
+                                }
+                                e.code=="RATE_LIMITED" -> {
+                                    verify=VerifyFixture.LIMITED
+                                    go(RegPage.VERIFIED)
+                                }
+                                e.code=="BUSINESS_VERIFICATION_UNAVAILABLE" -> {
+                                    verify=VerifyFixture.UNAVAILABLE
+                                    go(RegPage.VERIFIED)
+                                }
+                                else -> error=e.message ?: "사업자 정보를 확인하지 못했어요."
+                            }
+                        } catch(e: Exception) {
+                            error=e.message ?: "사업자 정보를 확인하지 못했어요."
+                        } finally { busy=false }
+                    }
+                }
+            } else go(RegPage.VERIFYING)
             RegPage.VERIFIED->when(verify){
                 VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->forward(RegPage.BARNAME)
                 VerifyFixture.FAILED->go(RegPage.BIZCHECK)
@@ -322,9 +425,33 @@ fun OwnerOnboardingScreen(
             RegPage.REVIEW->{
                 if(!busy){
                     busy=true
-                    try{viewModel.submitRegistrationDraftForFixture();history=emptyList();screen=RegPage.DONE}
-                    catch(e:Exception){error=e.message}
-                    finally{busy=false}
+                    submitScope.launch {
+                        try {
+                            viewModel.submitRegistrationDraftLive()
+                            submittedNewBar=draft.kind==MockApplicationKind.NEW_BAR
+                            history=emptyList()
+                            screen=RegPage.DONE
+                            error=null
+                        } catch(e: Exception) {
+                            val code=(e as? BottleMapApiException)?.code
+                            when(code) {
+                                "BUSINESS_VERIFICATION_FAILED" -> {
+                                    go(RegPage.BIZCHECK)
+                                    error="국세청 정보와 일치하지 않아요. 사업자번호·대표자명·개업일을 수정해 주세요."
+                                }
+                                "INVALID_BUSINESS_NUMBER","DATE_IN_FUTURE" -> {
+                                    go(RegPage.BIZCHECK)
+                                    error=ownerRegistrationPrecheckError(
+                                        draft.businessNumberDigits,
+                                        draft.representativeName,draft.openingDateIso)
+                                        ?: "사업자등록번호와 개업일을 다시 확인해 주세요."
+                                }
+                                "RATE_LIMITED" ->
+                                    error="오늘 사업자 정보 확인 횟수를 모두 사용했어요. 내일 다시 신청해 주세요."
+                                else -> error=e.message ?: "신청을 접수하지 못했어요."
+                            }
+                        } finally { busy=false }
+                    }
                 }
             }
             RegPage.DONE->onBack()
@@ -337,9 +464,18 @@ fun OwnerOnboardingScreen(
         onClose={cancelId=null},
         onConfirm={
             cancelId?.let { id ->
-                runCatching {
-                    viewModel.closeApplicationForFixture(id,MockApplicationStatus.CANCELED)
-                }.onSuccess {cancelId=null}.onFailure {error=it.message}
+                if(!busy) {
+                    busy=true
+                    submitScope.launch {
+                        try {
+                            viewModel.cancelOwnerApplicationLive(id)
+                            cancelId=null
+                            error=null
+                        } catch(e: Exception) {
+                            error=e.message ?: "신청을 취소하지 못했어요."
+                        } finally {busy=false}
+                    }
+                }
             }
         }
     )
@@ -426,7 +562,8 @@ fun OwnerOnboardingScreen(
                 TextButton(onClick=::showDashboard) { Text("내 매장 목록으로 돌아가기") }
             }
             when(val s=state){
-                MockOwnerLoadState.Loading -> OwnerLoading("Mock 저장소 불러오는 중")
+                MockOwnerLoadState.Loading -> OwnerLoading(
+                    if(viewModel.usesProductionOwnerApi()) "매장 정보를 불러오는 중" else "Mock 저장소 불러오는 중")
                 is MockOwnerLoadState.Error -> {
                     Text(s.message,color=MaterialTheme.colorScheme.error)
                     OwnerActionButton("다시 시도",viewModel::retry)
@@ -439,7 +576,7 @@ fun OwnerOnboardingScreen(
                                 val saved=snapshot?.registrationDraft
                                 if(saved!=null) {
                                     val target=RegPage.valueOf(registrationResumePage(saved))
-                                    history=registrationHistoryFor(target.name,saved.kind)
+                                    history=historyFor(target.name,saved.kind)
                                     screen=target
                                     error=null
                                 } else {
@@ -448,7 +585,7 @@ fun OwnerOnboardingScreen(
                             },
                             onManage={ bar ->
                                 viewModel.selectBar(bar.barId)
-                                if(!snapshot.hasPublishedInitialReview(bar.barId)) {
+                                if(!viewModel.usesProductionOwnerApi() && !snapshot.hasPublishedInitialReview(bar.barId)) {
                                     onFirstReview(snapshot.imports.lastOrNull{it.barId==bar.barId}?.status)
                                 } else onManagerPreview()
                             },
@@ -484,8 +621,9 @@ fun OwnerOnboardingScreen(
                     RegPage.BN -> {
                         OwnerV4Question("사업자등록번호를\n알려주세요")
                         Spacer(Modifier.height(0.dp))
-                        RegistrationInput(bnFormat(draft.businessNumberDigits),{},"000-00-00000",
-                            readonly=true,tag="registration-business-number")
+                        RegistrationInput(bnFormat(draft.businessNumberDigits),{ entered ->
+                            save(draft.copy(businessNumberDigits=entered.filter(Char::isDigit).take(10)))
+                        },"000-00-00000",tag="registration-business-number",highlight=true)
                         Text("숫자 10자리. 하이픈은 자동으로 들어가요.",
                             fontSize=12.sp,color=RegistrationV4.secondary)
                         if(draft.businessNumberDigits.length==10 &&
@@ -505,8 +643,15 @@ fun OwnerOnboardingScreen(
                     RegPage.DATE -> {
                         OwnerV4Question("개업일을\n알려주세요","사업자등록증의 개업연월일이에요.")
                         Spacer(Modifier.height(0.dp))
-                        RegistrationInput(draft.openingDateIso.replace("-","."),{},"YYYY.MM.DD",
-                            readonly=true,tag="registration-opening-date")
+                        RegistrationInput(draft.openingDateIso.replace("-","."),{ entered ->
+                            val digits=entered.filter(Char::isDigit).take(8)
+                            val formatted=when {
+                                digits.length<=4 -> digits
+                                digits.length<=6 -> digits.take(4)+"-"+digits.drop(4)
+                                else -> digits.take(4)+"-"+digits.slice(4..5)+"-"+digits.drop(6)
+                            }
+                            save(draft.copy(openingDateIso=formatted))
+                        },"YYYY.MM.DD",tag="registration-opening-date",highlight=true)
                         if(draft.openingDateIso.length==10 && !validOpeningDate(draft.openingDateIso))
                             Text("날짜를 다시 확인해 주세요. 오늘 이후 날짜는 넣을 수 없어요.",
                                 fontSize=12.sp,color=RegistrationV4.error)
@@ -534,7 +679,9 @@ fun OwnerOnboardingScreen(
                             OwnerV4Question(
                                 if(inputMethod=="photo")"읽은 내용이\n맞는지 확인해 주세요"
                                 else "이 정보로\n확인할게요",
-                                if(inputMethod=="photo")
+                                if(viewModel.usesProductionOwnerApi())
+                                    "입력 형식을 먼저 확인해요. 국세청 검증은 신청할 때 진행돼요."
+                                else if(inputMethod=="photo")
                                     "사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요."
                                 else "국세청에 등록된 정보와 같은지 확인해요.")
                             Spacer(Modifier.height(0.dp))
@@ -543,6 +690,10 @@ fun OwnerOnboardingScreen(
                                 OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
                                 OwnerV4Summary("개업일",draft.openingDateIso.replace("-",".")){go(RegPage.DATE)}
                             }
+                        }
+                        if(viewModel.usesProductionOwnerApi()) {
+                            RegistrationHint(
+                                "사업자 정보를 확인해 주세요. 국세청 확인 결과를 다음 화면에서 안내해요.")
                         }
                     }
                     RegPage.VERIFYING -> RegistrationCenterContent(
@@ -565,7 +716,7 @@ fun OwnerOnboardingScreen(
                             val edited=updatedBarNameDraft(draft,it)
                             if(needsNewBarDetailsAfterClaimEdit(editingReview,draft.kind,edited.kind)) {
                                 editingReview=false
-                                history=registrationHistoryFor(RegPage.BARNAME.name,edited.kind)
+                                history=historyFor(RegPage.BARNAME.name,edited.kind)
                             }
                             save(edited)
                         },"예: 몰트 앤 무드",tag="registration-bar-name",highlight=true)
@@ -580,7 +731,7 @@ fun OwnerOnboardingScreen(
                                     if(needsNewBarDetailsAfterClaimEdit(
                                             editingReview,draft.kind,MockApplicationKind.NEW_BAR)) {
                                         editingReview=false
-                                        history=registrationHistoryFor(
+                                        history=historyFor(
                                             RegPage.BARNAME.name,MockApplicationKind.NEW_BAR)
                                     }
                                     save(draft.copy(kind=MockApplicationKind.NEW_BAR,existingBarId=null))
@@ -590,7 +741,9 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.BARPHOTO -> {
                         OwnerV4Question("매장 사진을\n올려 주세요",
-                            "갤러리에서 사진을 선택해 주세요. 등록한 사진은 대표 사진으로 지정돼요.")
+                            if(viewModel.usesProductionOwnerApi())
+                                "대표 사진을 골라 주세요. 신청 시 전송하고 승인되면 첫 매장 사진이 돼요."
+                            else "갤러리에서 사진을 선택해 주세요. 등록한 사진은 대표 사진으로 지정돼요.")
                         Spacer(Modifier.height(0.dp))
                         val cover=draft.applicantGallery.firstOrNull()
                         Box(Modifier.fillMaxWidth().aspectRatio(4f/3f)
@@ -740,6 +893,9 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.REVIEW -> {
                         OwnerV4Question("이렇게\n신청할게요","한 번 더 확인하고 신청해 주세요.")
+                        if(viewModel.usesProductionOwnerApi()) {
+                            RegistrationHint("국세청 정보 확인은 '신청하기'를 누를 때 진행돼요.")
+                        }
                         Spacer(Modifier.height(8.dp))
                         RegistrationReviewDetails(
                             values=RegistrationReviewValues(
@@ -769,8 +925,14 @@ fun OwnerOnboardingScreen(
                             }
                         )
                     }
-                    RegPage.DONE -> RegistrationCenterContent("신청을 마쳤어요",
-                        "운영팀이 실제 매장인지 확인한 뒤 승인해요.\n진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
+                    RegPage.DONE -> {
+                        RegistrationCenterContent("신청을 마쳤어요",
+                            "운영팀이 실제 매장인지 확인한 뒤 승인해요.\n진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
+                        if(viewModel.usesProductionOwnerApi() && submittedNewBar) {
+                            RegistrationHint(
+                                "대표 사진은 승인 후 자동 등록돼요. 승인될 때까지 앱 데이터와 사진을 삭제하지 마세요.")
+                        }
+                    }
                     RegPage.VIEW_APPLICATION -> {
                         OwnerV4Question("신청한 내용","검토 중에는 내용을 수정할 수 없어요.")
                         val application=snapshot?.applications?.firstOrNull {

@@ -28,13 +28,55 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun retry() = repository.retryLoad()
     fun register(application: MockOwnerApplication) = repository.registerApplication(application)
     fun saveRegistrationDraft(draft: MockRegistrationDraft?) = repository.saveRegistrationDraft(draft)
+    /** Production registration stays suspend so UI waits for both submission and menu-photo upload. */
+    suspend fun verifyBusinessBeforeApplicationLive(
+        registrationNumber: String, representativeName: String, openingDate: String,
+    ): String =
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.verifyBusinessBeforeApplicationLive(
+                registrationNumber,representativeName,openingDate)
+        else "matched"
+
+    suspend fun submitRegistrationDraftLive() {
+        if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.submitRegistrationDraftLive()
+        else repository.submitRegistrationDraftForFixture()
+    }
+
+    suspend fun readBusinessCertificateLive(uri: String):
+        com.zerotoone.bottlemap.network.OwnerCertificateOcrDto? =
+        if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.readBusinessCertificateLive(uri)
+        else null
+
     fun approveForFixture(id: String, bar: MockBar) = repository.approveForFixture(id, bar)
     fun seedExistingCandidateForFixture(bar: MockBar) = repository.seedExistingCandidateForFixture(bar)
     fun submitRegistrationDraftForFixture() = repository.submitRegistrationDraftForFixture()
     fun closeApplicationForFixture(id: String, status: MockApplicationStatus) = repository.closeApplicationForFixture(id, status)
+    suspend fun cancelOwnerApplicationLive(id: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.cancelOwnerApplicationLive(id)
+        else repository.closeApplicationForFixture(id, MockApplicationStatus.CANCELED)
+    }
     fun dismissRejectedForFixture(id: String) = repository.dismissRejectedForFixture(id)
     fun saveBar(bar: MockBar) = repository.saveBar(bar)
+    suspend fun saveBarLive(bar: MockBar) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.saveBarLive(bar)
+        else repository.saveBar(bar)
+    }
     fun confirmMenuInformation(barId: String, atEpochMs: Long) = repository.confirmMenuInformation(barId, atEpochMs)
+    suspend fun applyOperatingExceptionLive(barId: String, exception: MockOperatingException) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.applyOperatingExceptionLive(barId, exception)
+        else repository.applyOperatingException(barId, exception)
+    }
+    suspend fun cancelOperatingExceptionLive(barId: String, exceptionId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.cancelOperatingExceptionLive(barId)
+        else repository.cancelOperatingException(barId, exceptionId)
+    }
+
     fun applyOperatingException(barId: String, exception: MockOperatingException) = repository.applyOperatingException(barId, exception)
     fun cancelOperatingException(barId: String, exceptionId: String) = repository.cancelOperatingException(barId, exceptionId)
     fun selectBar(barId: String) = repository.selectBar(barId)
@@ -45,9 +87,82 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
         item: MockBarMenuItem, newProduct: MockCatalogProduct? = null,
         newBrand: MockBrand? = null,
     ) = repository.saveManualMenuItem(item, newProduct, newBrand)
+    suspend fun saveManualMenuItemLive(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
+    ) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.saveManualMenuItemLive(item, newProduct, newBrand)
+        else repository.saveManualMenuItem(item, newProduct, newBrand)
+    }
+    suspend fun setSoldOutLive(itemId: String, soldOut: Boolean) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.setSoldOutLive(itemId, soldOut)
+        else repository.setSoldOut(itemId, soldOut)
+    }
+    suspend fun deleteMenuItemLive(itemId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.deleteMenuItemLive(itemId)
+        else repository.deleteMenuItem(itemId)
+    }
+    suspend fun clearMenuForBarLive(barId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.clearMenuForBarLive(barId)
+        else repository.clearMenuForBar(barId)
+    }
+    suspend fun confirmMenuInformationLive(barId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.confirmMenuInformationLive(barId)
+        else repository.confirmMenuInformation(barId, System.currentTimeMillis())
+    }
+    suspend fun cancelPhotoImportLive(importId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.cancelPhotoImportLive(importId)
+        else repository.discardPhotoImport(importId)
+    }
+
     fun setSoldOut(itemId: String, soldOut: Boolean) = repository.setSoldOut(itemId, soldOut)
     fun deleteMenuItem(id: String) = repository.deleteMenuItem(id)
     fun clearMenuForBar(barId: String) = repository.clearMenuForBar(barId)
+    suspend fun searchExistingBarCandidatesLive(query: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.searchExistingBarCandidatesLive(query)
+    }
+
+    suspend fun searchCatalogBrandsLive(query: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.searchCatalogBrandsLive(query)
+    }
+
+    suspend fun searchCatalogLive(query: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.searchCatalogLive(query)
+    }
+
+    fun usesProductionOwnerApi(): Boolean =
+        repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository
+    fun pendingRepresentativePhotoWarning(): String? =
+        (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            ?.pendingCoverWarning
+
+    suspend fun submitPhotoImportLive(barId: String, photos: List<MockPhoto>): String =
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.submitPhotoImportLive(barId, photos)
+        else repository.queuePhotoImport(barId, photos)
+
+    suspend fun pollPhotoImportLive(importId: String): MockImportStatus =
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.pollPhotoImportLive(importId)
+        else error("Local fixture must be supplied for Mock polling")
+
+    fun photoPublishWarning(): String? =
+        (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            ?.lastPublishWarning
+
+    suspend fun publishPhotoImportLive(importId: String, version: Int): Int =
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.publishPhotoImportLive(importId, version)
+        else repository.publishAddOnly(importId, version)
+
     fun queuePhotoImport(barId: String, photos: List<MockPhoto>): String =
         repository.queuePhotoImport(barId, photos)
     fun finishPhotoImport(id: String, source: MockPhotoExtractionSource): MockImportStatus =

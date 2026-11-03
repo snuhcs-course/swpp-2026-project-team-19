@@ -39,6 +39,8 @@ import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 
 private fun selectedOwnerBar(state: MockOwnerLoadState): Pair<MockOwnerSnapshot, MockBar>? {
     val snapshot = when (state) {
@@ -88,6 +90,33 @@ internal fun OwnerStoredPhoto(
             try {
                 val resolver = context.contentResolver
                 val parsedUri = Uri.parse(uri)
+                if(parsedUri.scheme == "https" || parsedUri.scheme == "http") {
+                    val connection = java.net.URL(uri).openConnection() as java.net.HttpURLConnection
+                    connection.connectTimeout = 10_000
+                    connection.readTimeout = 15_000
+                    connection.instanceFollowRedirects = false
+                    try {
+                        if(connection.responseCode == 200) {
+                            val body = connection.inputStream.use { input ->
+                                val output = java.io.ByteArrayOutputStream()
+                                val buffer = ByteArray(16_384)
+                                var length = 0
+                                while(true) {
+                                    val n = input.read(buffer)
+                                    if(n < 0) break
+                                    length += n
+                                    if(length > 8 * 1024 * 1024) break
+                                    output.write(buffer, 0, n)
+                                }
+                                if(length > 8 * 1024 * 1024) null else output.toByteArray()
+                            }
+                            return@withContext body?.let {
+                                BitmapFactory.decodeByteArray(it, 0, it.size)?.asImageBitmap()
+                            }
+                        }
+                    } finally { connection.disconnect() }
+                    return@withContext null
+                }
                 val orientation = resolver.openInputStream(parsedUri)?.use { stream ->
                     runCatching {
                         ExifInterface(stream).getAttributeInt(
@@ -170,6 +199,8 @@ fun OwnerBarInfoEditorScreen(
         mutableStateOf(bar?.defaultPourMl?.toString().orEmpty())
     }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var saving by rememberSaveable { mutableStateOf(false) }
+    val saveScope=rememberCoroutineScope()
     var showDiscard by rememberSaveable { mutableStateOf(false) }
     val dirty = bar != null && (
         name != bar.name || intro != bar.description.orEmpty() ||
@@ -231,12 +262,19 @@ fun OwnerBarInfoEditorScreen(
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 OwnerActionButton("변경 저장", {
-                    try {
-                        viewModel.saveBar(withBarInfo(bar, name, intro, address, phone, pour))
-                        error = null
-                        onBack()
-                    } catch (e: Exception) {
-                        error = e.message ?: "저장하지 못했어요. 다시 시도해 주세요."
+                    if(!saving) {
+                        saving=true
+                        saveScope.launch {
+                            try {
+                                viewModel.saveBarLive(withBarInfo(bar, name, intro, address, phone, pour))
+                                error=null
+                                onBack()
+                            } catch(cancelled: CancellationException) {
+                                throw cancelled
+                            } catch(e: Exception) {
+                                error=e.message ?: "저장하지 못했어요. 다시 시도해 주세요."
+                            } finally { saving=false }
+                        }
                     }
                 }, Modifier.fillMaxWidth().testTag("owner-info-save"), enabled = inputError == null)
                 OwnerActionButton("취소", ::back, Modifier.fillMaxWidth(), secondary = true)
@@ -265,6 +303,8 @@ fun OwnerBarPhotoEditorScreen(
     var expandedId by rememberSaveable { mutableStateOf<String?>(null) }
     var deleteId by rememberSaveable { mutableStateOf<String?>(null) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var saving by rememberSaveable { mutableStateOf(false) }
+    val saveScope=rememberCoroutineScope()
     var discard by rememberSaveable { mutableStateOf(false) }
     val dirty = bar != null && photos != bar.gallery
     fun back() {
@@ -365,12 +405,19 @@ fun OwnerBarPhotoEditorScreen(
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 OwnerActionButton("사진 저장", {
-                    try {
-                        viewModel.saveBar(bar.copy(gallery = photos))
-                        error = null
-                        onBack()
-                    } catch (e: Exception) {
-                        error = e.message ?: "사진을 저장하지 못했어요."
+                    if(!saving) {
+                        saving=true
+                        saveScope.launch {
+                            try {
+                                viewModel.saveBarLive(bar.copy(gallery = photos))
+                                error=null
+                                onBack()
+                            } catch(cancelled: CancellationException) {
+                                throw cancelled
+                            } catch(e: Exception) {
+                                error=e.message ?: "사진을 저장하지 못했어요."
+                            } finally { saving=false }
+                        }
                     }
                 }, Modifier.fillMaxWidth().testTag("owner-photo-save"))
                 OwnerActionButton("취소", ::back, Modifier.fillMaxWidth(), secondary = true)
@@ -388,6 +435,8 @@ fun OwnerBarTagsEditorScreen(
     var tags by rememberSaveable(bar?.barId) { mutableStateOf(bar?.tags.orEmpty()) }
     var query by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var saving by rememberSaveable { mutableStateOf(false) }
+    val saveScope=rememberCoroutineScope()
     var discard by rememberSaveable { mutableStateOf(false) }
     val dirty = bar != null && tags != bar.tags
     fun back() { if (dirty) discard = true else onBack() }
@@ -436,12 +485,19 @@ fun OwnerBarTagsEditorScreen(
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 OwnerActionButton("태그 저장", {
-                    try {
-                        viewModel.saveBar(bar.copy(tags = tags))
-                        error = null
-                        onBack()
-                    } catch (e: Exception) {
-                        error = e.message ?: "태그를 저장하지 못했어요."
+                    if(!saving) {
+                        saving=true
+                        saveScope.launch {
+                            try {
+                                viewModel.saveBarLive(bar.copy(tags = tags))
+                                error=null
+                                onBack()
+                            } catch(cancelled: CancellationException) {
+                                throw cancelled
+                            } catch(e: Exception) {
+                                error=e.message ?: "태그를 저장하지 못했어요."
+                            } finally { saving=false }
+                        }
                     }
                 }, Modifier.fillMaxWidth().testTag("owner-tag-save"))
                 OwnerActionButton("취소", ::back, Modifier.fillMaxWidth(), secondary = true)
@@ -481,6 +537,8 @@ fun OwnerBarHoursEditorScreen(
     var copyingDay by rememberSaveable { mutableIntStateOf(0) }
     var copyDays by rememberSaveable { mutableStateOf<List<Int>>(emptyList()) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var saving by rememberSaveable { mutableStateOf(false) }
+    val saveScope=rememberCoroutineScope()
     var discard by rememberSaveable { mutableStateOf(false) }
     val dirty = bar != null && hours != bar.weeklyHours
     fun back() { if (dirty) discard = true else onBack() }
@@ -610,12 +668,19 @@ fun OwnerBarHoursEditorScreen(
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 OwnerActionButton("영업시간 저장", {
-                    try {
-                        viewModel.saveBar(withWeeklyHours(bar, hours))
-                        error = null
-                        onBack()
-                    } catch (e: Exception) {
-                        error = e.message ?: "영업시간을 저장하지 못했어요."
+                    if(!saving) {
+                        saving=true
+                        saveScope.launch {
+                            try {
+                                viewModel.saveBarLive(withWeeklyHours(bar, hours))
+                                error=null
+                                onBack()
+                            } catch(cancelled: CancellationException) {
+                                throw cancelled
+                            } catch(e: Exception) {
+                                error=e.message ?: "영업시간을 저장하지 못했어요."
+                            } finally { saving=false }
+                        }
                     }
                 }, Modifier.fillMaxWidth().testTag("owner-hours-save"), enabled = validation == null)
                 OwnerActionButton("취소", ::back, Modifier.fillMaxWidth(), secondary = true)

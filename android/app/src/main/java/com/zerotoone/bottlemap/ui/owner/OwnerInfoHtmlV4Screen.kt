@@ -40,6 +40,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -138,6 +141,8 @@ fun OwnerInfoHtmlV4Screen(
     var query by rememberSaveable { mutableStateOf("") }
     var mapVisible by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var saving by rememberSaveable { mutableStateOf(false) }
+    val saveScope=rememberCoroutineScope()
     var discardPrompt by rememberSaveable { mutableStateOf(false) }
     val hasEdits = bar != null && (
         name != bar.name || intro != bar.description.orEmpty() ||
@@ -384,13 +389,20 @@ fun OwnerInfoHtmlV4Screen(
                         style = MaterialTheme.typography.bodySmall)
                 }
                 Button(onClick = {
-                    try {
-                        val modified = withBarInfo(bar, name, intro, address, phone, pour)
-                            .copy(tags = selectedTags)
-                        viewModel.saveBar(withWeeklyHours(modified, weekly))
-                        onBack()
-                    } catch (e: Exception) {
-                        error = e.message ?: "저장에 실패했습니다. 다시 시도해 주세요."
+                    if(!saving) {
+                        val modified=withBarInfo(bar,name,intro,address,phone,pour)
+                            .copy(tags=selectedTags)
+                        saving=true
+                        saveScope.launch {
+                            try {
+                                viewModel.saveBarLive(withWeeklyHours(modified,weekly))
+                                onBack()
+                            } catch(cancelled: CancellationException) {
+                                throw cancelled
+                            } catch(e: Exception) {
+                                error=e.message ?: "저장에 실패했습니다. 다시 시도해 주세요."
+                            } finally { saving=false }
+                        }
                     }
                 }, modifier = Modifier.fillMaxWidth().height(56.dp)
                     .testTag("owner-info-save"), enabled = validation == null,
