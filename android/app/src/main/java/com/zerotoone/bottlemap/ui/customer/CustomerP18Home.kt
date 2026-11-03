@@ -36,7 +36,6 @@ import com.zerotoone.bottlemap.network.PopularProductDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import com.zerotoone.bottlemap.ui.common.BmIconId
-import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
