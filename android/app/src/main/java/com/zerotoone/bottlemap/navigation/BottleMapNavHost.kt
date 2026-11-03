@@ -127,14 +127,10 @@ private fun NavGraphBuilder.customerGraph(
                 onMap = onOpenNearby,
             )
         }
-        composable(Routes.CUSTOMER_NEARBY) { backStackEntry ->
-            val nearbyOwner = remember(backStackEntry, navController) {
-                navController.getBackStackEntry(Routes.CUSTOMER_GRAPH)
-            }
-            NearbyBarsScreen(
-                onBack = onBack,
-                onOpenBarDetail = { id -> onOpenBarDetail(id,null) },
-                viewModel = nearbyBarsViewModel(nearbyOwner),
+        composable(Routes.CUSTOMER_NEARBY) {
+            com.zerotoone.bottlemap.ui.customer.CustomerP18Explore(
+                onBack=onBack,
+                onOpenBar={id->onOpenBarDetail(id,null)},
             )
         }
         composable(Routes.CUSTOMER_ACCOUNT) {
