@@ -14,6 +14,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -159,7 +160,6 @@ fun AccountScreen(
 private fun AccountNavRow(label:String,onClick:()->Unit) {
     Row(Modifier.fillMaxWidth().height(56.dp).clickable(onClick=onClick)
         .testTag("customer-account-${label}")
-        .border(width=0.dp,color=P18Line)
         .padding(horizontal=0.dp),
         verticalAlignment=Alignment.CenterVertically,
         horizontalArrangement=Arrangement.SpaceBetween) {
@@ -180,32 +180,38 @@ fun GoogleLoginScreen(
 ) {
     Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-google-login")) {
         AccountHeader("로그인",onBack)
-        Column(Modifier.fillMaxSize().padding(horizontal=20.dp,vertical=24.dp),
+        Column(Modifier.fillMaxSize().padding(horizontal=20.dp,vertical=12.dp),
             verticalArrangement=Arrangement.spacedBy(20.dp)) {
             Text("Google 계정으로 선택적으로 로그인해요.",
                 style=MaterialTheme.typography.headlineSmall,fontSize=24.sp,
-                lineHeight=32.sp,color=P18Text)
-            Text("",
-                fontSize=14.sp,lineHeight=21.sp,color=P18Muted)
-            when(state) {
-                AuthUiState.Initializing, AuthUiState.SigningIn -> {
-                    Row(verticalAlignment=Alignment.CenterVertically,
-                        horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                        CircularProgressIndicator(Modifier.size(24.dp),color=P18Gold)
-                        Text("로그인 중이에요",color=P18Muted)
-                    }
+                lineHeight=34.sp,color=P18Text)
+            if(state is AuthUiState.SignInError) {
+                Row(verticalAlignment=Alignment.Top,
+                    horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                    BmIcon(BmIconId.ERROR,null,Modifier.size(18.dp),
+                        tint=Color(0xFFFFB4AB))
+                    Text("로그인을 완료하지 못했습니다. 설정과 네트워크를 확인한 뒤 다시 시도해 주세요.",
+                        fontSize=14.sp,lineHeight=21.sp,color=Color(0xFFFFB4AB))
                 }
-                is AuthUiState.SignInError -> {
-                    Text("로그인을 완료하지 못했습니다.",color=P18Text,fontSize=18.sp,
-                        fontWeight=FontWeight.Bold)
-                    Text(state.message,color=P18Muted,fontSize=14.sp)
-                }
-                else -> Unit
             }
-            GoogleSignInButton(viewModel=authViewModel,
-                enabled=state is AuthUiState.Guest || state is AuthUiState.SignInError)
-            P18Action("취소하고 Guest로 계속",onContinueGuest,
-                modifier=Modifier.fillMaxWidth())
+            if(state is AuthUiState.Initializing || state is AuthUiState.SigningIn) {
+                Row(verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                    CircularProgressIndicator(Modifier.size(24.dp),color=P18Gold)
+                    Text("로그인 중이에요",color=P18Muted)
+                }
+            }
+            Column(verticalArrangement=Arrangement.spacedBy(12.dp)) {
+                GoogleSignInButton(viewModel=authViewModel,
+                    enabled=state is AuthUiState.Guest || state is AuthUiState.SignInError)
+                Box(Modifier.fillMaxWidth().height(52.dp)
+                    .border(1.dp,com.zerotoone.bottlemap.ui.theme.BottleMapPalette.outline,
+                        RoundedCornerShape(12.dp))
+                    .clickable(onClick=onContinueGuest),contentAlignment=Alignment.Center) {
+                    Text("취소하고 Guest로 계속",color=P18Text,fontSize=15.sp,
+                        fontWeight=FontWeight.SemiBold)
+                }
+            }
         }
     }
 }
@@ -213,12 +219,13 @@ fun GoogleLoginScreen(
 /** Explicit P18 correction: back icon consumes 48dp at the exact original x=8. */
 @Composable
 private fun AccountHeader(title:String,onBack:()->Unit) {
-    Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
-        .padding(start=8.dp,end=20.dp,top=8.dp),
+    Row(Modifier.fillMaxWidth().height(72.dp)
+        .padding(start=8.dp,end=20.dp,top=8.dp,bottom=8.dp),
         verticalAlignment=Alignment.CenterVertically,
         horizontalArrangement=Arrangement.spacedBy(4.dp)) {
         P18Back(onBack)
         Text(title,color=P18Text,fontSize=18.sp,lineHeight=26.sp,
+            fontFamily=MaterialTheme.typography.headlineSmall.fontFamily,
             fontWeight=FontWeight.Bold)
     }
 }
