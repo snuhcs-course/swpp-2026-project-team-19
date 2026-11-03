@@ -147,6 +147,15 @@ internal class P18ExploreViewModel(
     }
 }
 
+/** Native map must contain ZERO bar labels when API bounds are unsupported. */
+internal fun p18VisibleBars(
+    state:P18ExploreState,previous:List<MapBar>,
+):List<MapBar> = when(state) {
+    P18ExploreState.TooWide -> emptyList()
+    is P18ExploreState.Ready -> state.bars
+    else -> previous
+}
+
 private fun p18BrowseOrdered(bars:List<MapBar>,sort:P18Sort,origin:NearbyCoordinate?)
     :List<MapBar> = when {
     sort==P18Sort.DISTANCE && origin!=null ->
@@ -193,8 +202,7 @@ internal fun CustomerP18Explore(
     if(freshBars != null) lastVisibleBars = freshBars
     // TooWide means "no markers in this camera viewport", not merely a
     // disabled API request. Clear the native label layer through the bar diff.
-    val bars=if(state is P18ExploreState.TooWide) emptyList()
-        else freshBars ?: lastVisibleBars
+    val bars=p18VisibleBars(state,lastVisibleBars)
     val ordered=p18BrowseOrdered(bars,sort,location)
     val chosen=bars.firstOrNull{it.barId==selectedId}
     val carouselState=rememberLazyListState()
