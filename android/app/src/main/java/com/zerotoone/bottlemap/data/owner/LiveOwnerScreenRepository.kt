@@ -148,6 +148,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         rejectionReason = app.rejectionReason,
         submittedAtEpochMs = timestamp(app.createdAt) ?: 0L,
         reviewedAtEpochMs = timestamp(app.reviewedAt),
+        registrationPhotos = listOfNotNull(app.coverPhoto?.let { photo ->
+            MockPhoto("server-pending-cover",photo.imageUrl,MockPhotoKind.BAR_GALLERY)
+        }),
     )
 
     private fun menuRows(barId: String, menu: BarMenuResponseDto): List<MockBarMenuItem> =
@@ -215,7 +218,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             for(application in coverApplications) {
                 val businessNumber = requireNotNull(application.businessRegistrationNumber)
                 pendingCoverStore.attach(subject, businessNumber, application.applicationId)
-                if(application.status == "canceled" || application.status == "rejected")
+                if(application.coverPhoto != null ||
+                    application.status == "canceled" || application.status == "rejected")
                     pendingCoverStore.remove(subject, application.applicationId, businessNumber)
             }
         }
@@ -614,6 +618,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         refresh()
     }
 
+    suspend fun verifyBusinessBeforeApplicationLive(
+        registrationNumber: String, representativeName: String, openingDate: String,
+    ): String = remote.verifyBusinessRegistration(
+        registrationNumber, representativeName, openingDate,
+    ).result
+
     suspend fun submitRegistrationDraftLive() {
         val draft = snapshot().registrationDraft
             ?: error("등록 신청 정보를 먼저 입력해 주세요.")
@@ -656,8 +666,25 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val applicationId = pendingApplicationId ?: existing?.applicationId
             ?: remote.submitOwnerApplication(body).applicationId
         pendingApplicationId = applicationId
-        if(draft.kind == MockApplicationKind.NEW_BAR) withContext(Dispatchers.IO) {
-            pendingCoverStore.attach(ownerSubject, draft.businessNumberDigits, applicationId)
+        if(draft.kind == MockApplicationKind.NEW_BAR) {
+            withContext(Dispatchers.IO) {
+                pendingCoverStore.attach(ownerSubject,draft.businessNumberDigits,applicationId)
+            }
+            val bytes=withContext(Dispatchers.IO) {
+                pendingCoverStore.read(ownerSubject,applicationId)
+            } ?: error("선택한 대표 사진을 찾지 못했어요.")
+            try {
+                remote.uploadApplicationCoverPhoto(applicationId,
+                    com.zerotoone.bottlemap.data.PreparedMenuImage(
+                        filename="owner-cover.jpg",mimeType="image/jpeg",bytes=bytes))
+                withContext(Dispatchers.IO) {
+                    pendingCoverStore.remove(ownerSubject,applicationId,draft.businessNumberDigits)
+                }
+            } catch(e: com.zerotoone.bottlemap.network.BottleMapApiException) {
+                // Old servers have no cover upload route: retain private staged JPEG
+                // for the existing after-approval attachment fallback.
+                if(e.httpStatus != 404 || e.code != "HTTP_404") throw e
+            }
         }
         if(draft.initialMenuPhotos.isNotEmpty()) {
             val preparer = ImageUploadPreparer(app.contentResolver)

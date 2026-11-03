@@ -114,6 +114,31 @@ class OwnerRepository {
         com.zerotoone.bottlemap.network.OwnedBarDto =
         withOwnerAuth { OwnerEndpoint.api.confirmOwnedMenu(it, barId, mapOf("menuVersion" to version)) }
 
+    suspend fun verifyBusinessRegistration(
+        registrationNumber: String, representativeName: String, openingDate: String,
+    ): com.zerotoone.bottlemap.network.OwnerBusinessVerificationDto =
+        withOwnerAuth { authorization ->
+            OwnerEndpoint.api.verifyBusinessRegistration(authorization, mapOf(
+                "businessRegistrationNumber" to registrationNumber,
+                "representativeName" to representativeName,
+                "openingDate" to openingDate,
+            ))
+        }
+
+    suspend fun uploadApplicationCoverPhoto(
+        applicationId: String, image: PreparedMenuImage,
+    ): com.zerotoone.bottlemap.network.OwnerApplicationDto =
+        withOwnerAuth { authorization ->
+            OwnerEndpoint.api.uploadApplicationCoverPhoto(
+                authorization, applicationId,
+                MultipartBody.Part.createFormData("image",image.filename,
+                    image.bytes.toRequestBody(image.mimeType.toMediaType())))
+        }
+
+    suspend fun removeApplicationCoverPhoto(applicationId: String):
+        com.zerotoone.bottlemap.network.OwnerApplicationDto =
+        withOwnerAuth { OwnerEndpoint.api.removeApplicationCoverPhoto(it,applicationId) }
+
     suspend fun submitOwnerApplication(body: Map<String, Any?>):
         com.zerotoone.bottlemap.network.OwnerApplicationDto =
         withOwnerAuth { OwnerEndpoint.api.applyForBar(it, body) }

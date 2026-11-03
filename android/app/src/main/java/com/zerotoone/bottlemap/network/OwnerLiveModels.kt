@@ -32,6 +32,14 @@ data class OwnerApplicationBarDto(
 data class OwnerApplicationProposedBarDto(
     val name: String, val address: String, val phone: String? = null,
 )
+data class OwnerBusinessVerificationDto(val result: String)
+
+data class OwnerApplicationCoverPhotoDto(
+    val imageUrl: String,
+    val thumbnailUrl: String,
+    val imageUrlExpiresAt: String? = null,
+)
+
 data class OwnerApplicationDto(
     val applicationId: String,
     val applicationType: String,
@@ -46,6 +54,7 @@ data class OwnerApplicationDto(
     val openingDate: String? = null,
     val contactPhone: String? = null,
     val applicantNote: String? = null,
+    val coverPhoto: OwnerApplicationCoverPhotoDto? = null,
 )
 data class MyOwnerApplicationsDto(val items: List<OwnerApplicationDto> = emptyList())
 

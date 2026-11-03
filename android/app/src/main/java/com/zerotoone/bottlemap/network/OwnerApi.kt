@@ -132,6 +132,26 @@ interface OwnerApi {
         @Body body: Map<String, @JvmSuppressWildcards Any?>,
     ): OwnedBarDto
 
+    @POST("api/owner-applications/business-verification")
+    suspend fun verifyBusinessRegistration(
+        @Header("Authorization") authorization: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): OwnerBusinessVerificationDto
+
+    @Multipart
+    @retrofit2.http.PUT("api/owner-applications/{applicationId}/cover-photo")
+    suspend fun uploadApplicationCoverPhoto(
+        @Header("Authorization") authorization: String,
+        @Path("applicationId") applicationId: String,
+        @Part image: MultipartBody.Part,
+    ): OwnerApplicationDto
+
+    @retrofit2.http.DELETE("api/owner-applications/{applicationId}/cover-photo")
+    suspend fun removeApplicationCoverPhoto(
+        @Header("Authorization") authorization: String,
+        @Path("applicationId") applicationId: String,
+    ): OwnerApplicationDto
+
     @POST("api/owner-applications")
     suspend fun applyForBar(
         @Header("Authorization") authorization: String,

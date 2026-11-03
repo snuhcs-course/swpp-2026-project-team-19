@@ -350,8 +350,42 @@ fun OwnerOnboardingScreen(
             RegPage.BN->forward(if(inputMethod=="photo")RegPage.BIZCHECK else RegPage.REP)
             RegPage.REP->forward(if(inputMethod=="photo")RegPage.BIZCHECK else RegPage.DATE)
             RegPage.DATE->forward(RegPage.BIZCHECK)
-            RegPage.BIZCHECK->if(viewModel.usesProductionOwnerApi())
-                forward(RegPage.BARNAME) else go(RegPage.VERIFYING)
+            RegPage.BIZCHECK->if(viewModel.usesProductionOwnerApi()) {
+                if(!busy) {
+                    busy=true
+                    submitScope.launch {
+                        try {
+                            verify=when(viewModel.verifyBusinessBeforeApplicationLive(
+                                draft.businessNumberDigits,draft.representativeName,
+                                draft.openingDateIso)) {
+                                "matched" -> VerifyFixture.MATCHED
+                                "not_matched" -> VerifyFixture.FAILED
+                                else -> VerifyFixture.UNAVAILABLE
+                            }
+                            go(RegPage.VERIFIED)
+                        } catch(e: BottleMapApiException) {
+                            when {
+                                e.httpStatus==404 && e.code=="HTTP_404" -> {
+                                    // The existing POST still performs NTS verification.
+                                    verify=VerifyFixture.UNAVAILABLE
+                                    go(RegPage.VERIFIED)
+                                }
+                                e.code=="RATE_LIMITED" -> {
+                                    verify=VerifyFixture.LIMITED
+                                    go(RegPage.VERIFIED)
+                                }
+                                e.code=="BUSINESS_VERIFICATION_UNAVAILABLE" -> {
+                                    verify=VerifyFixture.UNAVAILABLE
+                                    go(RegPage.VERIFIED)
+                                }
+                                else -> error=e.message ?: "사업자 정보를 확인하지 못했어요."
+                            }
+                        } catch(e: Exception) {
+                            error=e.message ?: "사업자 정보를 확인하지 못했어요."
+                        } finally { busy=false }
+                    }
+                }
+            } else go(RegPage.VERIFYING)
             RegPage.VERIFIED->when(verify){
                 VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->forward(RegPage.BARNAME)
                 VerifyFixture.FAILED->go(RegPage.BIZCHECK)
@@ -634,7 +668,7 @@ fun OwnerOnboardingScreen(
                         }
                         if(viewModel.usesProductionOwnerApi()) {
                             RegistrationHint(
-                                "사업자등록번호·개업일은 형식만 확인했어요. 실제 국세청 조회는 마지막 신청 단계에서 진행돼요.")
+                                "사업자 정보를 확인해 주세요. 국세청 확인 결과를 다음 화면에서 안내해요.")
                         }
                     }
                     RegPage.VERIFYING -> RegistrationCenterContent(
@@ -683,7 +717,7 @@ fun OwnerOnboardingScreen(
                     RegPage.BARPHOTO -> {
                         OwnerV4Question("매장 사진을\n올려 주세요",
                             if(viewModel.usesProductionOwnerApi())
-                                "대표 사진을 골라 주세요. 승인 후 이 기기에서 매장 사진으로 자동 등록해요."
+                                "대표 사진을 골라 주세요. 신청 시 전송하고 승인되면 첫 매장 사진이 돼요."
                             else "갤러리에서 사진을 선택해 주세요. 등록한 사진은 대표 사진으로 지정돼요.")
                         Spacer(Modifier.height(0.dp))
                         val cover=draft.applicantGallery.firstOrNull()
