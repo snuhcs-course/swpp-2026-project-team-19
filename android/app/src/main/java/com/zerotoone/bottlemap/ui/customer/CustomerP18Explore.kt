@@ -188,8 +188,18 @@ internal fun CustomerP18Explore(
     var selectedId by rememberSaveable {mutableStateOf<String?>(null)}
     var showSort by remember {mutableStateOf(false)}
     var userSelectedSort by rememberSaveable {mutableStateOf<P18Sort?>(null)}
+    var pendingDistanceSort by rememberSaveable {mutableStateOf(false)}
     val location by viewModel.location.collectAsStateWithLifecycle()
-    val sort=userSelectedSort ?: if(location!=null)P18Sort.DISTANCE else P18Sort.UPDATED
+    // Never claim "가까운 순" unless the distance can actually be computed.
+    val sort=userSelectedSort?.takeUnless {
+        it==P18Sort.DISTANCE && location==null
+    } ?: if(location!=null)P18Sort.DISTANCE else P18Sort.UPDATED
+    LaunchedEffect(location) {
+        if(location!=null && pendingDistanceSort) {
+            userSelectedSort=P18Sort.DISTANCE
+            pendingDistanceSort=false
+        }
+    }
     val tags by viewModel.tags.collectAsStateWithLifecycle()
     var zoomTarget by remember {mutableStateOf<String?>(null)}
     var locationDenied by remember {mutableStateOf(false)}
@@ -229,6 +239,20 @@ internal fun CustomerP18Explore(
         if(listVisible) viewModel.loadTags(ordered.map{it.barId}.take(12))
         else selectedId?.let{viewModel.loadTags(listOf(it))}
     }
+    // A newly entered NavHost destination may already be RESUMED; an
+    // ON_RESUME-only observer would then miss the first granted location.
+    LaunchedEffect(viewModel) {
+        val allowed=ContextCompat.checkSelfPermission(context,
+            Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context,
+            Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
+        if(allowed && viewModel.location.value==null) {
+            try {
+                viewModel.setLocation(AndroidNearbyLocationSource(context).currentLocation())
+            } catch(cancelled:CancellationException) {throw cancelled}
+            catch(_:Exception) { /* No prompt or map recenter on first entry. */ }
+        }
+    }
     DisposableEffect(lifecycleOwner,viewModel,context) {
         val observer=LifecycleEventObserver { _,event->
             if(event==Lifecycle.Event.ON_RESUME) {
@@ -251,8 +275,8 @@ internal fun CustomerP18Explore(
         if(permissions.values.any{it})scope.launch {
             runCatching{AndroidNearbyLocationSource(context).currentLocation()}
                 .onSuccess{viewModel.setLocation(it);goToGwanak=false;recenterToken++}
-                .onFailure{errorLocation=true}
-        } else locationDenied=true
+                .onFailure{errorLocation=true;pendingDistanceSort=false}
+        } else {pendingDistanceSort=false;locationDenied=true}
     }
     fun requestCurrentLocation() {
         val fine=ContextCompat.checkSelfPermission(context,
@@ -262,7 +286,7 @@ internal fun CustomerP18Explore(
         if(fine||coarse)scope.launch {
             runCatching{AndroidNearbyLocationSource(context).currentLocation()}
                 .onSuccess{viewModel.setLocation(it);goToGwanak=false;recenterToken++}
-                .onFailure{errorLocation=true}
+                .onFailure{errorLocation=true;pendingDistanceSort=false}
         } else launcher.launch(arrayOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION))
@@ -270,9 +294,9 @@ internal fun CustomerP18Explore(
     if(showSort) P18SortPicker(sort,hasLocation=true,allowPrice=false,
         onChoose={choice->
             if(choice==P18Sort.DISTANCE && location==null) {
-                userSelectedSort=P18Sort.DISTANCE
+                pendingDistanceSort=true
                 requestCurrentLocation()
-            } else userSelectedSort=choice
+            } else {userSelectedSort=choice;pendingDistanceSort=false}
             showSort=false
         },onClose={showSort=false})
     if(locationDenied || errorLocation) ModalBottomSheet(
