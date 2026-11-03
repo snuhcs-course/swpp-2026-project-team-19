@@ -323,7 +323,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
         verticalAlignment=Alignment.CenterVertically) {
         Text(title,modifier=Modifier.weight(1f),color=V4Color.text,
             fontSize=20.sp,fontWeight=FontWeight.Bold,maxLines=2)
-        listOf("위스키가 아니에요","이번 줄 제외").forEach { label ->
+        listOf("위스키가 아니에요","메뉴 전체 제외").forEach { label ->
             Box(Modifier.height(30.dp).border(1.dp,V4Color.primary,
                 RoundedCornerShape(100)).clickable(onClick=exclude)
                 .padding(horizontal=7.dp),contentAlignment=Alignment.Center) {
@@ -1067,7 +1067,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         ?: DEFAULT_OWNER_POUR_ML,
                     onLater=onHome){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
-                St8ReviewHeading("가격을 못 읽었어요") {runCatching{vm.review(job.menuImportId,line.extractedItemId,
+                St8ReviewHeading(if(line.priceConflict)
+                    "사진마다 가격이 달라요" else "가격을 못 읽었어요") {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                         .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
                         .onFailure{error=it.message}}

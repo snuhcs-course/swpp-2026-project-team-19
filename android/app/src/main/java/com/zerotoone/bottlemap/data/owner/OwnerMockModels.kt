@@ -187,6 +187,7 @@ data class MockExtractedLine(
     val sourceBox: List<Int>? = null, // EXIF-normalized 0..1000 coordinates, null means unknown
     // Explicit local fixture-only exact catalog match. No OCR or backend inference.
     val mockAutoAccepted: Boolean = false,
+    val priceConflict: Boolean = false,
 )
 data class MockPhotoExtraction(
     val imageId: String,

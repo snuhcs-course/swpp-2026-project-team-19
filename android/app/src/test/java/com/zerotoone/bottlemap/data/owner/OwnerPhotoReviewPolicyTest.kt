@@ -53,6 +53,7 @@ class OwnerPhotoReviewPolicyTest {
 
     @Test fun alreadyUnmatchedOrUnpricedLinesRemainOwnerReview() {
         val unresolved=exact("unmatched",17000).copy(
+            sourceText="이름을 알 수 없는 제품",
             suggestedProductId=null, decision=null, mockAutoAccepted=false)
         val unpriced=exact("unpriced",0).copy(decision=null,mockAutoAccepted=false,
             needsPriceEntry=true)
@@ -101,6 +102,49 @@ class OwnerPhotoReviewPolicyTest {
         assertEquals(3,importPhotoCount(restored.copy(images=listOf(image(1)))))
         assertEquals(4,importPhotoCount(restored.copy(images=listOf(
             image(1),image(2),image(3),image(4)))))
+    }
+
+    @Test fun rejectsBothThirtyAndSixtyMlRowsAsOneProduct() {
+        val source=listOf(image(1,exact("thirty",17000,30),
+            exact("sixty",28000,60)))
+        val job=MockMenuImport("job","bar",MockImportStatus.READY_FOR_REVIEW,1,source)
+        assertEquals(listOf("thirty","sixty"),
+            relatedPhotoProductLineIds(job,"thirty"))
+    }
+
+    @Test fun excludesSameUnnamedProductByVolumeFreeSourceName() {
+        val first=exact("thirty",17000).copy(
+            sourceText="글렌피딕 12년 30ml 17,000",suggestedProductId=null,
+            candidateProductIds=emptyList(),decision=null,mockAutoAccepted=false)
+        val second=exact("sixty",29000,60).copy(
+            sourceText="글렌피딕 12년 60ml 29,000",suggestedProductId=null,
+            candidateProductIds=emptyList(),decision=null,mockAutoAccepted=false)
+        val other=exact("other",25000).copy(
+            sourceText="글렌피딕 15년 30ml 25,000",suggestedProductId=null,
+            candidateProductIds=emptyList(),decision=null,mockAutoAccepted=false)
+        val job=MockMenuImport("job","bar",MockImportStatus.READY_FOR_REVIEW,1,
+            listOf(image(1,first,second,other)))
+        assertEquals(listOf("thirty","sixty"),
+            relatedPhotoProductLineIds(job,"thirty"))
+    }
+
+    @Test fun priceConflictAlsoDetectedWhenNotAutoAccepted() {
+        val one=exact("one",17000).copy(mockAutoAccepted=false,decision=null)
+        val two=exact("two",19000).copy(mockAutoAccepted=false,decision=null)
+        val revised=requirePhotoPriceReviewOnConflict(listOf(
+            image(1,one),image(2,two)))
+        assertTrue(revised.flatMap { it.lines }.all { it.priceConflict })
+        assertTrue(revised.flatMap { it.lines }.all { it.needsPriceEntry })
+    }
+
+    @Test fun conflictingPricesDetectedAcrossDifferentOptionLabels() {
+        val one=exact("one",17000).copy(options=listOf(
+            MockMenuOption("opt1",label="잔 30ml",pourMl=30,priceKrw=17000)))
+        val two=exact("two",19000).copy(options=listOf(
+            MockMenuOption("opt2",label="Whisky",pourMl=30,priceKrw=19000)))
+        val revised=requirePhotoPriceReviewOnConflict(listOf(image(1,one),image(2,two)))
+        assertEquals(0,revised[0].lines[0].options[0].priceKrw)
+        assertEquals(0,revised[1].lines[0].options[0].priceKrw)
     }
 
 }

@@ -1257,7 +1257,14 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     ) {
         // Stage 8 edits are an uncommitted local review draft, not a server-side action.
         // The server accepts the complete set of decisions at review-and-apply.
-        local.decideLine(importId, extractedItemId, expectedVersion, decision)
+        val job=snapshot().imports.firstOrNull { it.menuImportId==importId }
+            ?: error("메뉴판 작업이 없어요.")
+        val targets=if(decision.kind==MockDecisionKind.EXCLUDE)
+            relatedPhotoProductLineIds(job,extractedItemId)
+        else listOf(extractedItemId)
+        targets.forEach { id ->
+            local.decideLine(importId,id,expectedVersion,decision)
+        }
         lastReadySnapshot = snapshot()
     }
     override fun publishAddOnly(importId: String, expectedVersion: Int): Int =
