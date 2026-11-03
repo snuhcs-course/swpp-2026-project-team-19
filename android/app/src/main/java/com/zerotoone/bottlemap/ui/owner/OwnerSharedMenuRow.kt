@@ -59,7 +59,7 @@ internal fun OwnerMenuFlatRow(
     // Imported menus may carry four or more existing portions. They remain visible
     // even though the direct editor limits new entries to three portions.
     // Selection never changes the height for a given menu item.
-    val rowHeight = maxOf(74, item.options.size * 17 + 12).dp
+    val rowHeight = maxOf(66, item.options.size * 16 + 10).dp
     // The v4 slot remains 129dp for ordinary prices. Longer existing prices
     // and larger text scales get the real measured space they need. Stage 7
     // prevents NEW extracted prices above eight digits; legacy rows remain legible.
