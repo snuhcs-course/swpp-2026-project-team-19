@@ -5,7 +5,7 @@
 
 Policy "unmatched_k5+rerank_only" of the P24 decision, which its offline harness evaluated
 (ai/docs/p24_embedding_decision.md and ai/eval/p24_embedding_compare.py `apply_policy`, both in
-PR #78, I3-P24, not merged yet; the numbers this step relies on are in docs/menu_ai_matching_flow.md
+#78, I3-P24; the numbers this step relies on are in docs/menu_ai_matching_flow.md
 6, "임베딩 후보 단계"):
 
   exact_match / multi                      unchanged

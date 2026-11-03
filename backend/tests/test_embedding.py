@@ -127,7 +127,7 @@ def test_tfidf_on_an_empty_catalog_returns_empty_rows():
 
 
 def test_tfidf_weights_follow_the_p24_harness():
-    """Smooth idf, sublinear tf and cosine over 1-3-grams, as CharTfidf in ai/eval/p24_embedding_compare.py (PR #78)."""
+    """Smooth idf, sublinear tf and cosine over 1-3-grams, as CharTfidf in ai/eval/p24_embedding_compare.py (#78)."""
     import math
 
     index = CharTfidfProvider().build_index(["ab", "ac"])
