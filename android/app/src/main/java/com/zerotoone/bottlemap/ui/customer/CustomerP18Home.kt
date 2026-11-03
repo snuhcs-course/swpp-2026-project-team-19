@@ -27,6 +27,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -102,6 +106,15 @@ internal fun CustomerP18Home(
 ) {
     val context = LocalContext.current
     var search by rememberSaveable { mutableStateOf("") }
+    // Home must always show an empty query after returning from any other route.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) search = ""
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     var recent by remember { mutableStateOf(readP18Recents(context)) }
     val popular by popularViewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(popularViewModel) { popularViewModel.load() }
