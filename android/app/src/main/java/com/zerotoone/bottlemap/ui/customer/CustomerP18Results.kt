@@ -633,6 +633,7 @@ private fun P18ResultsMap(
             onSelectBar=onSelect,onViewportChanged={},recenterToken=0,
             onMapViewChanged={mapView=it},modifier=Modifier.fillMaxSize(),
             p18Markers=true,showOriginMarker=userLocation!=null,
+            markerDataRevision=at.epochSecond/30L,
             userLocation=userLocation,
             p18MarkerSubtitle={id->
                 items.firstOrNull{it.barId==id}?.let{row->
