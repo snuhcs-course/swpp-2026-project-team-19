@@ -229,6 +229,18 @@ internal fun OwnerManualMenuScreen(
         }
     }
     var brandName by rememberSaveable(bar?.barId) { mutableStateOf("") }
+    var confirmedBrandId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
+    var rejectedBrandId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
+    LaunchedEffect(screen,itemName,brandName,editId,linkedId) {
+        if(screen=="item" && editId==null && linkedId==null &&
+            viewModel.usesProductionOwnerApi()) {
+            val lookup=manualBrandSearchQuery(itemName,brandName)
+            if(lookup.length>=2) {
+                kotlinx.coroutines.delay(300)
+                runCatching { viewModel.searchCatalogBrandsLive(lookup) }
+            }
+        }
+    }
     var category by rememberSaveable(bar?.barId) { mutableStateOf("위스키") }
     var alcoholKind by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var categoryMenuExpanded by rememberSaveable(bar?.barId) { mutableStateOf(false) }
@@ -255,6 +267,8 @@ internal fun OwnerManualMenuScreen(
         rejectedId = null
         itemName = item?.displayNameOverride ?: p?.displayName.orEmpty()
         brandName = brands.firstOrNull { it.brandId == p?.brandId }?.name.orEmpty()
+        confirmedBrandId = if(item!=null) p?.brandId else null
+        rejectedBrandId = null
         category = p?.let { manualMenuCategoryLabel(it.category) } ?: "위스키"
         alcoholKind = p?.otherAlcoholKind.orEmpty()
         // Photo-imported listings may contain more than three options. Allow editing
@@ -290,6 +304,16 @@ internal fun OwnerManualMenuScreen(
             val persisted = products.firstOrNull { it.productId == old?.productId }
             val linked = if (old != null) persisted
                 else candidates.firstOrNull { it.productId == linkedId }
+            if(old==null && linked==null && category=="위스키") {
+                val suggestedBrand=manualBrandProposal(
+                    brands,name,brandName,rejectedBrandId)
+                require(suggestedBrand==null || confirmedBrandId!=null) {
+                    "기존 브랜드가 있어요. '맞아요'를 눌러 선택해 주세요."
+                }
+                require(confirmedBrandId!=null || brandName.isNotBlank()) {
+                    "브랜드를 입력하고 기존 브랜드가 있는지 확인해 주세요."
+                }
+            }
             val savedName = old?.displayNameOverride ?: persisted?.displayName
             val confirmedExistingName = old == null && candidates.any {
                 it.productId == linkedId && it.displayName == name &&
@@ -391,8 +415,11 @@ internal fun OwnerManualMenuScreen(
                     val fallbackBrand = brandName.trim().ifEmpty {
                         if (whisky) "기타 브랜드" else category
                     }
-                    val reusedBrandId = snapshot?.brands?.firstOrNull {
-                        it.name.trim() == fallbackBrand
+                    val reusedBrandId = confirmedBrandId?.takeIf { id ->
+                        brands.any { it.brandId==id }
+                    } ?: brands.firstOrNull {
+                        normalizeOwnerCatalogName(it.name)==
+                            normalizeOwnerCatalogName(fallbackBrand)
                     }?.brandId ?: manualId("local-brand-")
                     MockCatalogProduct(
                         manualId("local-unverified-"), reusedBrandId, name,
@@ -713,23 +740,14 @@ internal fun OwnerManualMenuScreen(
                         if (editId == null) rejectedId = null
                     }, placeholder = "예: 라가불린 10년", testTag = "manual-menu-name")
                     if (editId == null) {
-                        val suggested = candidates.firstOrNull { p ->
-                            itemName.isNotBlank() &&
-                                p.displayName.replace(" ", "").contains(
-                                    itemName.trim().replace(" ", ""), ignoreCase = true) &&
-                                // Digitless catalog names must match exactly before
-                                // offering explicit canonical product confirmation.
-                                ((p.catalogMatched && itemName.any(Char::isDigit)) ||
-                                    p.displayName.replace(" ", "").equals(
-                                        itemName.trim().replace(" ", ""), ignoreCase = true)) &&
-                                p.productId != rejectedId &&
-                                manualMenuCategoryLabel(p.category) == category
-                        }
+                        val suggested=manualProductProposal(
+                            candidates,itemName,category,confirmedBrandId,rejectedId)
                         if (suggested != null && linkedId != suggested.productId) {
                             Text("“" + suggested.displayName + "”이 맞나요?", color = V4Color.text)
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 ManualButton("맞아요", {
                                     linkedId = suggested.productId
+                                    confirmedBrandId = suggested.brandId
                                     itemName = suggested.displayName
                                     brandName = brands.firstOrNull {
                                         it.brandId == suggested.brandId }?.name.orEmpty()
@@ -739,6 +757,38 @@ internal fun OwnerManualMenuScreen(
                                 ManualButton("아니에요", { rejectedId = suggested.productId },
                                     modifier = Modifier.weight(1f), secondary = true)
                             }
+                        }
+                        if(linkedId == null) {
+                            V4FormField("브랜드",brandName,{
+                                brandName=it.take(100)
+                                confirmedBrandId=null
+                                rejectedBrandId=null
+                            },placeholder="예: 글렌피딕",testTag="manual-menu-brand")
+                            val suggestedBrand=manualBrandProposal(
+                                brands,itemName,brandName,rejectedBrandId)
+                            if(suggestedBrand!=null &&
+                                confirmedBrandId!=suggestedBrand.brandId) {
+                                Text("“" + suggestedBrand.name + "” 브랜드가 맞나요?",
+                                    color=V4Color.text)
+                                Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                    ManualButton("맞아요",{
+                                        confirmedBrandId=suggestedBrand.brandId
+                                        brandName=suggestedBrand.name
+                                        saveScope.launch {
+                                            runCatching {
+                                                if(viewModel.usesProductionOwnerApi())
+                                                    viewModel.searchCatalogLive(suggestedBrand.name)
+                                            }
+                                        }
+                                    },modifier=Modifier.weight(1f))
+                                    ManualButton("아니에요",{
+                                        rejectedBrandId=suggestedBrand.brandId
+                                    },modifier=Modifier.weight(1f),secondary=true)
+                                }
+                            }
+                            if(confirmedBrandId!=null)
+                                Text("기존 브랜드를 선택했어요.",color=V4Color.primary,
+                                    fontSize=12.sp)
                         }
                         if (linkedId != null) {
                             val old = existingBarProductMenu(items, bar.barId, requireNotNull(linkedId))
