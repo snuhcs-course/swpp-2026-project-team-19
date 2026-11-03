@@ -466,13 +466,25 @@ Content-Type: application/json
 
 | 필드 | 필수 | 규칙 |
 |---|---|---|
-| `displayName` | 예 | 앞뒤 공백을 지운 뒤 1~20자 |
+| `displayName` | 예 | 앞뒤 공백을 지운 뒤 1~20자. 줄바꿈과 제어 문자는 받지 않는다 |
 
-검증 오류는 `422 VALIDATION_FAILED`이며 `fieldErrors[].path`는 `displayName`이다. 값이 없으면 `MISSING`, 공백뿐이면 `BLANK`, 20자를 넘으면 `STRING_TOO_LONG`이다.
+- 글자 수는 유니코드 문자(code point) 단위로 센다. 한글 한 글자와 이모지 하나가 모두 1자다. Kotlin의 `String.length`는 이모지 같은 문자를 2로 세므로, 프론트엔드가 길이를 미리 검사할 때는 `codePointCount`를 쓴다.
+- 요청 본문에는 `displayName`만 보낸다. 다른 필드(`email`, `userType` 등)를 보내면 아무것도 바꾸지 않고 `422`이며 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 이 API로 `email`, `authSubject`, `userType`은 변경할 수 없다.
+- 표시 이름을 지우는 기능은 없다. `null`이나 문자열이 아닌 값을 보내면 `STRING_TYPE`이다.
+- 지금과 같은 이름을 보내면 아무것도 바꾸지 않고 `200 OK`로 현재 사용자를 돌려준다. `updatedAt`은 저장된 값이 실제로 바뀔 때만 바뀌므로 그대로다(3.2).
+- `displayName`만 바꾸며 token의 `email`로 맞추지 않는다. `email` 동기화는 `GET /api/me`만 한다(3.2). 여기서 바꾼 `displayName`은 이후 `GET /api/me`의 동기화로 덮어쓰지 않는다.
+- 응답은 `200 OK`이며 형식은 `GET /api/me`와 같다. 프론트엔드는 이 응답으로 화면의 사용자 정보를 바꾼다.
 
-이 API로 `email`, `authSubject`, `userType`은 변경할 수 없다. 여기서 바꾼 `displayName`은 이후 `GET /api/me`의 동기화로 덮어쓰지 않는다(3.2). 응답 형식은 `GET /api/me`와 같다.
+이 API는 사용자를 생성하지 않는다. token은 유효하지만 `users` 행이 없으면 `404 USER_NOT_FOUND`를 반환한다. 프론트엔드는 `GET /api/me`를 호출해 사용자를 만든 뒤 같은 요청을 다시 보낸다.
 
-이 API는 사용자를 생성하지 않는다. token은 유효하지만 `users` 행이 없으면 `404 USER_NOT_FOUND`를 반환한다. 프론트엔드는 `GET /api/me`를 호출해 사용자를 만든 뒤 같은 요청을 다시 보낸다. 인증 오류는 3.1.5를 따른다.
+백엔드는 인증(`401`, 3.1.5), 요청 형식(`422`), `users` 행(`404 USER_NOT_FOUND`) 순서로 확인한다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `404` | `USER_NOT_FOUND` | `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도 |
+| `422` | `VALIDATION_FAILED` | `fieldErrors[].path = displayName`: 값이 없음(`MISSING`), 빈 문자열이거나 공백뿐(`BLANK`), 20자 초과(`STRING_TOO_LONG`), 문자열이 아님(`STRING_TYPE`), 줄바꿈이나 제어 문자(`INVALID_CHARACTER`). 다른 필드를 보냄(`EXTRA_FORBIDDEN`, `path`는 보낸 필드 이름) | 입력란 아래에 안내. `EXTRA_FORBIDDEN`과 `STRING_TYPE`은 앱 버그 |
+| `503` | `SERVICE_UNAVAILABLE` | 3.1.5 | 3.1.5 |
 
 ### 3.4 업장 목록과 검색
 
