@@ -251,7 +251,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             }
             val approved = s.applications.map {
                 if (it.applicationId == applicationId)
-                    it.copy(status = MockApplicationStatus.APPROVED, barId = bar.barId) else it
+                    it.copy(status = MockApplicationStatus.APPROVED, barId = bar.barId,
+                        reviewedAtEpochMs = System.currentTimeMillis()) else it
             }
             s.copy(
                 applications = approved,
@@ -270,7 +271,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             s.copy(applications = s.applications.map {
                 if (it.applicationId == applicationId) it.copy(status = status,
                     rejectionReason = if (status == MockApplicationStatus.REJECTED)
-                        "Mock 운영팀: 매장 정보를 다시 확인해 주세요." else it.rejectionReason) else it
+                        "Mock 운영팀: 매장 정보를 다시 확인해 주세요." else it.rejectionReason,
+                    reviewedAtEpochMs = if (status == MockApplicationStatus.REJECTED)
+                        System.currentTimeMillis() else it.reviewedAtEpochMs) else it
             }) to Unit
         }
     }
