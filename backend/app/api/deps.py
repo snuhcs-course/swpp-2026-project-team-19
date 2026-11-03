@@ -125,8 +125,11 @@ def get_matching_llm_layer() -> MatchingLayerConfig | None:
         # Imported here so a server with the layer off does not load the Gemini SDK for it.
         from app.adapters.gemini_tool_llm import GeminiToolLLM
 
-        return ToolLayerConfig(llm=GeminiToolLLM(api_key, TOOLS_MODEL, TOOLS_THINKING_LEVEL),
-                               max_calls=settings.max_calls)
+        def make_tool_llm() -> GeminiToolLLM:
+            return GeminiToolLLM(api_key, TOOLS_MODEL, TOOLS_THINKING_LEVEL)
+
+        # A new client per import and after an abandoned turn (tool_config.CappedToolLLM).
+        return ToolLayerConfig(llm=make_tool_llm(), max_calls=settings.max_calls, make_llm=make_tool_llm)
     # Imported here so a server with the layer off does not load the Gemini SDK for it.
     from app.adapters.gemini_matching_llm import GeminiMatchingLLM
 

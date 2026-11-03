@@ -419,11 +419,13 @@ def _run_tool_layer(
     """MATCHING_LLM_MODE=tools: one conversation per image in menu order, then the lines in menu order.
 
     Each conversation turn is a request toward the import's cap (`CappedToolLLM`); a photo whose
-    conversation fails, runs out of turns or hits the cap keeps its rule results.
+    conversation fails, runs out of turns, hits the cap or runs past its wall-clock limits
+    (`tool_config.TURN_TIMEOUT_S`, `PHOTO_TIMEOUT_S`) keeps its rule results.
     """
-    llm = CappedToolLLM(config.llm, config.max_calls)
+    llm = CappedToolLLM(config.llm, config.max_calls, make_llm=config.make_llm)
     engine = ToolEngine(llm, lines, catalog.meta)
     for image in lines:
+        llm.start_photo()
         engine.translate(image, targets.get(image, set()), catalog)
     resolved = dict(results)
     for item_id, image, name in unconfirmed:

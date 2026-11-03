@@ -1,5 +1,6 @@
 import json
 import logging
+import threading
 from contextlib import nullcontext
 from decimal import Decimal
 from pathlib import Path
@@ -815,6 +816,47 @@ def test_tool_conversation_without_an_answer_keeps_the_rule_results(
 
     assert len(llm.histories) == 6  # tool_layer.MAX_TURNS
     assert (item.initial_resolution_status, item.candidates) == (ResolutionStatus.UNMATCHED, [])
+
+
+def test_hung_tool_call_is_abandoned_and_its_photo_keeps_the_rule_results(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_tool_layer, monkeypatch, caplog
+):
+    """A stalled SDK call does not hold the import: the turn is abandoned after TURN_TIMEOUT_S, that
+    photo keeps its rule results, the next photo is matched, and the late answer changes nothing."""
+    monkeypatch.setattr(tool_config, "TURN_TIMEOUT_S", 0.2)
+    release, late = threading.Event(), threading.Event()
+
+    class HangsOnTheFirstTurn(FakeToolLLM):
+        def step(self, system, history, tools):
+            if not self.histories:
+                self.histories.append([dict(m) for m in history])
+                release.wait(10)
+                try:
+                    return super().step(system, history, tools)  # a matching answer, too late
+                finally:
+                    late.set()
+            return super().step(system, history, tools)
+
+    menu_lines("카올 일라 12")
+    use_tool_layer(HangsOnTheFirstTurn({"카올 일라 12": CAOL_ILA_12_TOOLS}))
+
+    with caplog.at_level(logging.WARNING, logger="app.matching.tool_config"):
+        import_id = upload(client, make_bar(db_session), operator, filenames=("sample.jpg", "sample-2.jpg"))
+
+    menu_import = load_import(db_session, import_id)
+    assert menu_import.status == ImportStatus.READY_FOR_REVIEW
+    hung, answered = items_of(menu_import)
+    assert (hung.initial_resolution_status, hung.candidates) == (ResolutionStatus.UNMATCHED, [])
+    assert answered.initial_resolution_status == ResolutionStatus.AMBIGUOUS
+    assert [c.evidence["rule"] for c in answered.candidates] == ["TOOLS"]
+    assert "abandoned: no response within 0 s" in caplog.text
+
+    release.set()
+    assert late.wait(5)
+    menu_import = load_import(db_session, import_id)
+    hung, answered = items_of(menu_import)
+    assert (hung.initial_resolution_status, hung.candidates) == (ResolutionStatus.UNMATCHED, [])
+    assert [c.evidence["rule"] for c in answered.candidates] == ["TOOLS"]
 
 
 @pytest.mark.parametrize("broken", ["CatalogSnapshot", "ToolEngine"])

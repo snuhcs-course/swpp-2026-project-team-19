@@ -247,6 +247,10 @@ def test_mode_tools_runs_the_tool_layer_on_the_frozen_model(env, value):
     assert isinstance(layer.llm, GeminiToolLLM)
     # i3_eval_freeze.md 4.10
     assert (layer.llm.model, layer.llm.thinking_level) == ("gemini-3.1-flash-lite", "low")
+    # A new adapter (and client) per import and after an abandoned turn, on the same model.
+    fresh = layer.make_llm()
+    assert isinstance(fresh, GeminiToolLLM) and fresh is not layer.llm
+    assert (fresh.model, fresh.thinking_level) == ("gemini-3.1-flash-lite", "low")
 
 
 def test_mode_tools_stays_off_without_the_switch_or_the_key(env, caplog):
