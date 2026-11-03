@@ -147,4 +147,13 @@ class OwnerPhotoReviewPolicyTest {
         assertEquals(0,revised[1].lines[0].options[0].priceKrw)
     }
 
+    @Test fun photoProcessingUsesServerCompletedCountNotHardcodedZero() {
+        val job=MockMenuImport("job","bar",MockImportStatus.PROCESSING,1,
+            images=emptyList(),imageCount=3,completedImages=2)
+        assertEquals(3,importPhotoCount(job))
+        assertEquals(2,importCompletedPhotoCount(job))
+        assertEquals(3,importCompletedPhotoCount(job.copy(completedImages=5)))
+        assertEquals(0,importCompletedPhotoCount(job.copy(completedImages=0)))
+    }
+
 }

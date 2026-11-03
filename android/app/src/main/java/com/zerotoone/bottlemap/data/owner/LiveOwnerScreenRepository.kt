@@ -322,6 +322,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     status = displayStatus,
                     reviewVersion = maxOf(1,historical.reviewVersion),
                     imageCount = maxOf(historical.imageCount,previous?.imageCount ?: 0),
+                    completedImages = previous?.completedImages ?: 0,
                 )
             }
         }
@@ -846,6 +847,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             images = priceCheckedImages,
             imageCount = maxOf(old?.imageCount ?: 0,dto.progress?.totalImages ?: 0,
                 priceCheckedImages.size),
+            completedImages = dto.progress?.completedImages ?: old?.completedImages ?: 0,
             failureReason = dto.failure?.message,
         )
         publishSnapshot(before.copy(

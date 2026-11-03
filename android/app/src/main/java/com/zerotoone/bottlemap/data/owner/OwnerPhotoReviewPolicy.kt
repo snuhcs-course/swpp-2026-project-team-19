@@ -119,3 +119,7 @@ internal fun conflictingReviewedPhotoPrices(job: MockMenuImport): Set<String> {
 /** The import list provides imageCount even when recovered jobs have no photo objects. */
 internal fun importPhotoCount(job: MockMenuImport): Int =
     maxOf(job.imageCount,job.images.size)
+
+/** Use the server's completedImages, bounded by the import's actual image count. */
+internal fun importCompletedPhotoCount(job: MockMenuImport): Int =
+    job.completedImages.coerceIn(0, importPhotoCount(job))

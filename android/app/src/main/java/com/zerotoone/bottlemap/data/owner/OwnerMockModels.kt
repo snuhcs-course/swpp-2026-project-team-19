@@ -203,6 +203,8 @@ data class MockMenuImport(
     val images: List<MockPhotoExtraction>,
     // Populated by the backend import list/processing response, even after process death.
     val imageCount: Int = 0,
+    /** Number of images whose AI extraction has actually finished on the server. */
+    val completedImages: Int = 0,
     val failureReason: String? = null,
     // Local Mock publication result: deduplicated actual new bar menu rows.
     val publishedAddedCount: Int? = null,
