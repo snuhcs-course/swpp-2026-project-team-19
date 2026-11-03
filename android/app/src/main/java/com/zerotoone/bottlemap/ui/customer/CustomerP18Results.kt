@@ -387,7 +387,10 @@ internal fun CustomerP18Results(
                     modifier=Modifier.weight(1f),productName=productName,topInset=96)
             }
             ready!=null -> {
-                val product=ready.matchedProducts.firstOrNull() ?: choices.firstOrNull()
+                val selectedProductId = chosenId ?: initialProductId
+                val product=ready.matchedProducts.firstOrNull { it.productId == selectedProductId }
+                    ?: choices.firstOrNull { it.productId == selectedProductId }
+                    ?: ready.matchedProducts.firstOrNull() ?: choices.firstOrNull()
                 val items=p18Sorted(ready.items,sort,userLocation!=null)
                 if(mapMode) {
                     P18ResultsMap(ready,items,product?.displayName.orEmpty(),
