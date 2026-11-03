@@ -26,6 +26,7 @@ import com.zerotoone.bottlemap.data.owner.MockBar
 import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
 import com.zerotoone.bottlemap.data.owner.MockBrand
 import com.zerotoone.bottlemap.data.owner.MockPreview
+import com.zerotoone.bottlemap.ui.customer.P18DetailCategoryChevron
 
 internal fun ownerV4Category(category: String): String = when (category.lowercase()) {
     "whisky", "whiskey" -> "위스키"
@@ -96,7 +97,7 @@ internal fun OwnerPreviewV4Menu(
                     Text(category, color = V4Color.text,
                         fontWeight = FontWeight.Bold, fontSize = 14.sp,
                         modifier = Modifier.weight(1f))
-                    Text(if (open) "⌃" else "⌄", color = V4Color.sub, fontSize = 15.sp)
+                    P18DetailCategoryChevron(open=open)
                 }
                 if (open) {
                     val byBrand = if (category == "위스키" || category == "브랜디") {
