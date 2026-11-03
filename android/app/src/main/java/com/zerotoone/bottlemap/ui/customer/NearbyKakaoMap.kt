@@ -107,6 +107,8 @@ fun NearbyKakaoMap(
     /** No blue "current location" for a default map center or bar coordinate. */
     showOriginMarker: Boolean = true,
     p18MarkerSubtitle: (String) -> String? = { null },
+    /** Data-only marker refresh: discount boundary updates without moving camera. */
+    markerDataRevision:Long=0L,
     /** Browse-only: title immediately above map pin, no information bubble. */
     p18SimplePins: Boolean = false,
     /** Exact prior Customer/Owner inline pin; unlike 05 Explore pins. */
@@ -152,7 +154,7 @@ fun NearbyKakaoMap(
         }
 
         // In-place, idempotent diff; no duplicate labels across map pans or API replies.
-        LaunchedEffect(nativeMap, bars) {
+        LaunchedEffect(nativeMap, bars,markerDataRevision) {
             val map = nativeMap ?: return@LaunchedEffect
             val layer = map.labelManager?.layer ?: return@LaunchedEffect
             val current = bars.filter { it.barId.isNotBlank() && it.location.isValid() &&
