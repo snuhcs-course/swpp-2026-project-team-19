@@ -53,6 +53,8 @@ import com.zerotoone.bottlemap.network.SearchResultDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import com.zerotoone.bottlemap.ui.common.BmIconId
+import com.zerotoone.bottlemap.ui.common.GlassFillLoading
+import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -217,6 +219,7 @@ internal fun CustomerP18Results(
     var selectedBarId by rememberSaveable(initialQuery,initialProductId) {mutableStateOf<String?>(null)}
     var showSort by remember {mutableStateOf(false)}
     var sort by rememberSaveable {mutableStateOf(P18Sort.UPDATED)}
+    LaunchedEffect(userLocation) { if(userLocation!=null)sort=P18Sort.DISTANCE }
     fun reload() {
         viewModel.load(if(chosenId==null)initialQuery else null,
             chosenId ?: initialProductId, if(chosenId==null)source else "input",
@@ -270,7 +273,10 @@ internal fun CustomerP18Results(
                     verticalAlignment=Alignment.CenterVertically) {
                     P18Back(::navigateBack)
                 }
-                Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) {
+                Column(Modifier.fillMaxSize(),verticalArrangement=Arrangement.Center,
+                    horizontalAlignment=Alignment.CenterHorizontally) {
+                    GlassFillLoading()
+                    Spacer(Modifier.height(20.dp))
                     Text("‘${initialQuery ?: "위스키"}’ 찾는 중",color=P18Text,
                         fontSize=20.sp,fontWeight=FontWeight.SemiBold)
                 }
