@@ -97,6 +97,24 @@ data class BarMenuOptionDto(
     val pourMl: Int?,
     val priceKrw: Int,
     val sortOrder: Int,
+    val discount: BarMenuDiscountDto? = null,
+)
+data class BarMenuDiscountDto(
+    val discountedPriceKrw: Int,
+    val startsAt: String,
+    val endsAt: String,
+)
+data class BarPhotoDto(
+    val photoId: String, val imageUrl: String, val thumbnailUrl: String,
+)
+data class BarWeeklyHoursDto(
+    val dayOfWeek: Int, val closed: Boolean,
+    val openTime: String? = null, val closeTime: String? = null,
+)
+data class BarOperatingExceptionDto(
+    val kind: String, val startDate: String, val endDate: String,
+    val openTime: String? = null, val closeTime: String? = null,
+    val note: String? = null,
 )
 
 data class BarMenuItemDto(
@@ -107,6 +125,11 @@ data class BarMenuItemDto(
     val displayName: String,
     val sortOrder: Int,
     val options: List<BarMenuOptionDto>,
+    val productName: String? = null,
+    val brandId: String? = null,
+    val brandName: String? = null,
+    val category: String = "whisky",
+    val soldOut: Boolean = false,
 )
 
 data class BarMenuResponseDto(
@@ -119,6 +142,12 @@ data class BarMenuResponseDto(
     val menuBoardId: String?,
     val publishedAt: String?,
     val items: List<BarMenuItemDto>,
+    val description: String? = null,
+    val tags: List<String> = emptyList(),
+    val weeklyHours: List<BarWeeklyHoursDto> = emptyList(),
+    val operatingException: BarOperatingExceptionDto? = null,
+    val photos: List<BarPhotoDto> = emptyList(),
+    val menuVersion: Int? = null,
 )
 
 // Backend PR #54: GET /api/search/bar-names (public).
