@@ -1,11 +1,12 @@
+from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, File, Path, Query
+from fastapi import APIRouter, Body, Depends, File, Path, Query, Response
 from sqlalchemy.orm import Session
 
 from app.adapters.storage import ImageStorage
-from app.api.deps import get_base_url, get_image_storage
+from app.api.deps import get_base_url, get_clock, get_image_storage
 from app.api.permissions import BarId, managed_bar, require_bar_manager
 from app.api.routes.menu_imports import UploadedImage
 from app.core.security import Principal, get_current_user, get_optional_user, require_operator
@@ -27,6 +28,7 @@ from app.services.bar_access import can_manage_bar, is_operator
 from app.services.bar_admin import BarStatusFilter, ImportStatusFilter, list_bars, list_menu_imports
 from app.services.bar_detail import get_bar_detail, update_bar
 from app.services.bar_menu import get_bar_menu
+from app.services.bar_owner_removal import remove_owner
 from app.services.bar_photo_image import MAX_LONG_EDGE, MAX_PHOTO_BYTES, THUMBNAIL_LONG_EDGE, single_upload
 from app.services.bar_photos import MAX_PHOTOS, add_photo, check_photo_order, delete_photo, reorder_photos
 from app.services.menu_edit import add_menu_item, check_request, delete_menu_item, reset_menu, update_menu_item
@@ -233,6 +235,41 @@ def edit_bar(
     base_url: str = Depends(get_base_url),
 ) -> BarDetail:
     return update_bar(session, bar, body, operator=is_operator(session, principal), base_url=base_url)
+
+
+@router.delete(
+    "/{barId}/owner",
+    status_code=204,
+    response_class=Response,
+    summary="Remove the bar's owner",
+    description=(
+        "Operator only; inactive bars too. Ends the current owner's ownership of the bar: from their next "
+        "request they no longer manage it. The record is kept with when and by whom it was revoked, the "
+        "approved application stays approved, and the former owner may apply again. The bar's unfinished "
+        "menu import, if any, stays for an operator or the next owner.\n\n"
+        "- Done under the bar row lock, like menu changes and approvals: a request of the former owner that "
+        "takes the lock afterwards gets `403`.\n"
+        "- Checks in order: operator, the caller's users row (the revoker is recorded), the bar, its current "
+        "owner. Sending it again after a success is `BAR_OWNER_NOT_FOUND`."
+    ),
+    responses=error_responses(
+        *_OPERATOR_ERRORS,
+        (
+            404,
+            "`USER_NOT_FOUND`: the operator has no users row (only a temporary-login operator can lack one; "
+            "call `GET /api/me` and retry). `BAR_NOT_FOUND`: no such bar or a malformed id. "
+            "`BAR_OWNER_NOT_FOUND`: the bar has no current owner.",
+        ),
+    ),
+)
+def remove_bar_owner(
+    bar_id: BarId,
+    operator: Principal = Depends(require_operator),
+    session: Session = Depends(get_session),
+    clock: Callable[[], datetime] = Depends(get_clock),
+) -> Response:
+    remove_owner(session, operator, bar_id, now=clock())
+    return Response(status_code=204)
 
 
 # ---- the temporary closure (spec 3.15.2 to 3.15.4) ----

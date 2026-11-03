@@ -60,7 +60,7 @@ Customer (guest or Google sign-in)
 
 ### CI/CD
 - **Backend CI/CD:** tests on PostgreSQL; the check fails if line + branch coverage of `backend/app` is below 98%. `main` is deployed to the server after the tests pass
-- **Android CI:** lint, unit tests, and debug APK builds for both flavors (Iteration 2 historical result). Iteration 3 CI runs a unified Debug variant.
+- **Android CI:** lint, unit tests, and debug APK builds for both flavors (Iteration 2 historical result). Iteration 3 CI runs a unified Debug variant. Pull requests build it with the local-backend default and no keys; a merge to `main` builds `bottlemap-prod-debug-apk` against the deployed server, with the build settings and the team's registered debug keystore taken from Actions secrets
 - **AI CI:** AI unit tests with per-component coverage and a check that fails when tests are deleted or skipped
 
 ## Tech Stack

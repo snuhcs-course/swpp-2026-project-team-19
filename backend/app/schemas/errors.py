@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
 
@@ -46,3 +47,36 @@ def error_responses(*entries: tuple[int, str]) -> dict[int | str, dict[str, Any]
     for status, description in entries:
         responses[status] = {"model": ErrorResponse, "description": description}
     return responses
+
+
+INVALID_REQUEST_DESCRIPTION = (
+    "`INVALID_REQUEST`: a JSON body that cannot be read, or a multipart body whose structure is broken. "
+    "Answered before authentication; an app bug, not a user error."
+)
+
+
+def document_invalid_request(app: FastAPI) -> None:
+    """Add the `400 INVALID_REQUEST` of app.core.errors to every operation that takes a request body.
+
+    Any such route can answer it, before its own checks, so it is added to the generated document
+    once here instead of to each route's `responses=`.
+    """
+    generate = app.openapi
+
+    def openapi() -> dict[str, Any]:
+        if app.openapi_schema is not None:
+            return app.openapi_schema
+        schema = generate()
+        for operations in schema["paths"].values():
+            for operation in operations.values():
+                if "requestBody" in operation:
+                    operation["responses"].setdefault(
+                        "400",
+                        {
+                            "description": INVALID_REQUEST_DESCRIPTION,
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}},
+                        },
+                    )
+        return schema
+
+    app.openapi = openapi

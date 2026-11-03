@@ -51,12 +51,9 @@ from app.services.bar_menu import bar_not_found
 from app.services.image_links import ImageLinks
 from app.services.menu_import_upload import ImageUpload, check_images
 from app.services.request_limits import BUSINESS_VERIFICATION, DailyRequestLimiter, acquire_or_raise, kst_date
+from app.services.users import user_not_found
 
 logger = logging.getLogger(__name__)
-
-
-def user_not_found() -> ApiError:
-    return ApiError(404, "USER_NOT_FOUND", "사용자 정보가 없습니다. 다시 시도해 주세요.")
 
 
 def application_not_found() -> ApiError:
