@@ -110,6 +110,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         proposedBarName = app.proposedBar?.name ?: app.bar?.name.orEmpty(),
         barId = app.bar?.barId,
         proposedBarAddress = app.proposedBar?.address,
+        representativeName = app.representativeName,
+        businessNumberDigits = app.businessRegistrationNumber,
+        openingDateIso = app.openingDate,
+        contactPhone = app.contactPhone,
+        storePhone = app.proposedBar?.phone,
         rejectionReason = app.rejectionReason,
         submittedAtEpochMs = timestamp(app.createdAt) ?: 0L,
         reviewedAtEpochMs = timestamp(app.reviewedAt),
@@ -413,6 +418,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     }
 
     /** Called asynchronously by the existing registration form; never show success before HTTP 201 + photo PUT. */
+    suspend fun cancelOwnerApplicationLive(applicationId: String) {
+        remote.cancelOwnerApplication(applicationId)
+        refresh()
+    }
+
     suspend fun submitRegistrationDraftLive() {
         val draft = snapshot().registrationDraft
             ?: error("등록 신청 정보를 먼저 입력해 주세요.")
