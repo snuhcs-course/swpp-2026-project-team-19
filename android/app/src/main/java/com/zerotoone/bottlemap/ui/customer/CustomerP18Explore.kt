@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
@@ -190,7 +191,10 @@ internal fun CustomerP18Explore(
     var lastVisibleBars by remember(viewModel) { mutableStateOf<List<MapBar>>(emptyList()) }
     val freshBars=(state as? P18ExploreState.Ready)?.bars
     if(freshBars != null) lastVisibleBars = freshBars
-    val bars=freshBars ?: lastVisibleBars
+    // TooWide means "no markers in this camera viewport", not merely a
+    // disabled API request. Clear the native label layer through the bar diff.
+    val bars=if(state is P18ExploreState.TooWide) emptyList()
+        else freshBars ?: lastVisibleBars
     val ordered=p18BrowseOrdered(bars,sort,location)
     val chosen=bars.firstOrNull{it.barId==selectedId}
     val carouselState=rememberLazyListState()
@@ -428,10 +432,14 @@ internal fun CustomerP18Explore(
                                         }
                                     }
                                 }
-                                Text("보기",Modifier.clickable { onOpenBar(bar.barId) }
-                                    .padding(horizontal=4.dp,vertical=11.dp),
-                                    fontSize=11.sp,color=P18Gold,
-                                    fontWeight=FontWeight.SemiBold)
+                                Box(Modifier.size(40.dp)
+                                    .clickable { onOpenBar(bar.barId) },
+                                    contentAlignment=Alignment.Center) {
+                                    // White right-pointing arrow, replacing "보기".
+                                    BmIcon(BmIconId.BACK,"매장 상세 보기",
+                                        Modifier.size(21.dp).graphicsLayer { rotationZ=180f },
+                                        tint=Color.White)
+                                }
                             }
                         }
                     }
@@ -445,12 +453,12 @@ internal fun CustomerP18Explore(
                     chosen!=null -> 102.dp
                     else -> 12.dp
                 },end=12.dp)
-                .size(48.dp)
+                .size(42.dp)
                 .background(androidx.compose.ui.graphics.Color.White,CircleShape)
                 .border(1.5.dp,Color.Black,CircleShape)
                 .clickable(onClick=::requestCurrentLocation)
                 .testTag("customer-map-recenter"),contentAlignment=Alignment.Center) {
-                BmIcon(BmIconId.LOCATION,"내 위치로",Modifier.size(23.dp),tint=Color.Black)
+                BmIcon(BmIconId.LOCATION,"내 위치로",Modifier.size(21.dp),tint=Color.Black)
             }
         }
         if(searchVisible) {
