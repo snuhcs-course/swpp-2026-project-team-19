@@ -55,6 +55,14 @@ class OwnerRepository {
         )
     }
 
+    suspend fun setOperatingException(barId: String, body: Map<String, Any?>):
+        com.zerotoone.bottlemap.network.OwnedBarDto =
+        withOwnerAuth { OwnerEndpoint.api.setOperatingException(it, barId, body) }
+
+    suspend fun removeOperatingException(barId: String):
+        com.zerotoone.bottlemap.network.OwnedBarDto =
+        withOwnerAuth { OwnerEndpoint.api.removeOperatingException(it, barId) }
+
     suspend fun getOwnedMenu(barId: String): com.zerotoone.bottlemap.network.BarMenuResponseDto =
         withOwnerAuth { OwnerEndpoint.api.getOwnedMenu(it, barId) }
 
