@@ -672,7 +672,7 @@ fun OwnerOnboardingScreen(
                                     if(needsNewBarDetailsAfterClaimEdit(
                                             editingReview,draft.kind,MockApplicationKind.NEW_BAR)) {
                                         editingReview=false
-                                        history=registrationHistoryFor(
+                                        history=historyFor(
                                             RegPage.BARNAME.name,MockApplicationKind.NEW_BAR)
                                     }
                                     save(draft.copy(kind=MockApplicationKind.NEW_BAR,existingBarId=null))
