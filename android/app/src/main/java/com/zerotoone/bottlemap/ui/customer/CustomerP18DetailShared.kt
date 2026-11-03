@@ -42,17 +42,19 @@ import java.time.ZonedDateTime
 
 /** Same 22dp centered chevron and gold 2dp round strokes as the Owner hours toggle. */
 @Composable
-internal fun P18DetailCategoryChevron(open:Boolean) {
+internal fun P18DetailCategoryChevron(
+    open:Boolean,modifier:Modifier=Modifier,color:Color=P18Gold,
+) {
     // Mirror vertically around its own CENTER. Rotating 180 degrees used to
     // make the arms travel sideways and looked unlike the hours toggle.
     val flip by animateFloatAsState(
         targetValue=if(open)-1f else 1f,
         animationSpec=tween(durationMillis=160),label="categoryChevronFlip")
-    Canvas(Modifier.size(22.dp).graphicsLayer { scaleY=flip }) {
+    Canvas(modifier.size(22.dp).graphicsLayer { scaleY=flip }) {
         val w=2.dp.toPx()
-        drawLine(P18Gold,Offset(size.width*.18f,size.height*.35f),
+        drawLine(color,Offset(size.width*.18f,size.height*.35f),
             Offset(size.width*.5f,size.height*.65f),strokeWidth=w,cap=StrokeCap.Round)
-        drawLine(P18Gold,Offset(size.width*.5f,size.height*.65f),
+        drawLine(color,Offset(size.width*.5f,size.height*.65f),
             Offset(size.width*.82f,size.height*.35f),strokeWidth=w,cap=StrokeCap.Round)
     }
 }
@@ -149,7 +151,7 @@ internal fun P18InlineBarMap(
                 onMapViewportUnavailable={},viewportRetryToken=0,
                 onSelectBar={},onViewportChanged={},recenterToken=0,
                 onMapViewChanged={},modifier=Modifier.fillMaxSize(),
-                p18SimplePins=false,showOriginMarker=false,
+                p18InlinePins=true,showOriginMarker=false,
             )
         }
     }
