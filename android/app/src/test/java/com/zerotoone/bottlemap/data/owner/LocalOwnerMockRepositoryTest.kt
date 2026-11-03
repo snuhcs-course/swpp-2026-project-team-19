@@ -491,6 +491,14 @@ class LocalOwnerMockRepositoryTest {
         }
         assertTrue(submitted.submittedAtEpochMs>=before)
         assertTrue(submitted.submittedAtEpochMs<=after)
+        assertEquals(null,submitted.reviewedAtEpochMs)
+        val reviewStart=System.currentTimeMillis()
+        r.closeApplicationForFixture(applicationId,MockApplicationStatus.REJECTED)
+        val reviewEnd=System.currentTimeMillis()
+        val rejected=ready(repo(store)).applications.single { it.applicationId==applicationId }
+        assertTrue(rejected.reviewedAtEpochMs!!>=reviewStart)
+        assertTrue(rejected.reviewedAtEpochMs!!<=reviewEnd)
+        assertEquals(submitted.submittedAtEpochMs,rejected.submittedAtEpochMs)
     }
 
     @Test fun generatedApplicationIdDoesNotCollideWithPreviouslyRegisteredFixtures() {
