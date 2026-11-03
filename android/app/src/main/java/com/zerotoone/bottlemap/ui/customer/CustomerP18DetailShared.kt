@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
@@ -186,10 +187,18 @@ internal fun P18OwnerParityMenuRow(
         if(highlighted) {
             // Extend the highlight BEYOND the fixed content slots, not into them.
             // Avoids a gold border visually colliding with price/volume or bottle.
-            Box(Modifier.offset(x=(-8).dp).width(maxWidth+16.dp)
-                .fillMaxHeight()
-                .background(P18Elevated,RoundedCornerShape(9.dp))
-                .border(1.5.dp,P18Gold,RoundedCornerShape(9.dp)))
+            Box(Modifier.fillMaxSize().drawBehind {
+                // Draw past both sides of the row's layout bounds without
+                // reducing the content's own width/price slots.
+                val extend=8.dp.toPx()
+                val shape=CornerRadius(9.dp.toPx())
+                val bounds=Size(size.width+2*extend,size.height)
+                val origin=Offset(-extend,0f)
+                drawRoundRect(P18Elevated,topLeft=origin,size=bounds,
+                    cornerRadius=shape)
+                drawRoundRect(P18Gold,topLeft=origin,size=bounds,
+                    cornerRadius=shape,style=Stroke(width=1.5.dp.toPx()))
+            })
         } else Box(Modifier.fillMaxSize().background(P18Bg))
         Row(Modifier.fillMaxSize().padding(horizontal=4.dp),
             verticalAlignment=Alignment.CenterVertically,
