@@ -75,6 +75,7 @@ import java.time.format.DateTimeFormatter
 internal sealed interface P18SearchState {
     data object Loading : P18SearchState
     data class Ready(val response: SearchBarsResponseDto) : P18SearchState
+    data class InvalidQuery(val fieldCode:String) : P18SearchState
     data class Error(val message: String) : P18SearchState
 }
 
@@ -140,11 +141,17 @@ internal class P18SearchViewModel(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                if (request==version) {
-                    val msg=if(error is BottleMapApiException &&
-                        error.code=="NETWORK_ERROR") "연결을 확인하고 다시 시도해 주세요."
-                        else "연결을 확인하고 다시 시도해 주세요."
-                    mutable.value=P18SearchState.Error(msg)
+                if(request==version) {
+                    val invalid = (error as? BottleMapApiException)
+                        ?.takeIf{it.code=="VALIDATION_FAILED"}
+                        ?.fieldErrors?.firstOrNull{
+                            it.path=="query" && it.code in setOf(
+                                "MISSING","BLANK","STRING_TOO_LONG","NOT_SEARCHABLE")
+                        }?.code
+                    mutable.value=if(invalid!=null)
+                        P18SearchState.InvalidQuery(invalid)
+                    else P18SearchState.Error(
+                        "연결을 확인하고 다시 시도해 주세요.")
                 }
             }
         }
@@ -300,6 +307,9 @@ internal fun CustomerP18Results(
     initialQuery:String?, initialProductId:String?, source:String,
     onBack:()->Unit, onOpenBar:(String,String?)->Unit,
     onSearchAgain:(String)->Unit = {},
+    refreshAfterMissingBar:Boolean=false,
+    onMissingBarRefreshConsumed:()->Unit={},
+    onMissingProduct:()->Unit={},
     viewModel:P18SearchViewModel=viewModel(),
 ) {
     val context=LocalContext.current
@@ -369,8 +379,16 @@ internal fun CustomerP18Results(
     }
     fun reload() {
         viewModel.load(if(chosenId==null)initialQuery else null,
-            chosenId ?: initialProductId, if(chosenId==null)source else "input",
-            userLocation,force=true)
+            chosenId ?: initialProductId,source,
+            location=null,force=true)
+    }
+    // BAR_NOT_FOUND on the detail destination explicitly invalidates the
+    // retained results, but ordinary Back continues to preserve UI state.
+    LaunchedEffect(refreshAfterMissingBar) {
+        if(refreshAfterMissingBar) {
+            onMissingBarRefreshConsumed()
+            reload()
+        }
     }
     val locationLauncher=rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()) { grants ->
@@ -392,7 +410,7 @@ internal fun CustomerP18Results(
     LaunchedEffect(initialQuery,initialProductId,chosenId,source) {
         viewModel.load(if(chosenId==null)initialQuery else null,
             chosenId ?: initialProductId,
-            if(chosenId==null)source else "input",location=null)
+            source,location=null)
     }
     val ready=(state as? P18SearchState.Ready)?.response
     val original=p18OriginalResponse(initialQuery,initialProductId,suggestions,ready)
@@ -438,14 +456,16 @@ internal fun CustomerP18Results(
             }
             (chosenId!=null || initialProductId!=null) &&
                 state is P18SearchState.Ready && ready?.matchType=="none" -> {
+                LaunchedEffect(ready) { onMissingProduct() }
                 P18SearchTopBar(::navigateBack,chooseQuery)
                 P18FailureBody("상품 정보를 찾을 수 없어요",
                     "현재 등록된 상품이 아닙니다.\\n다른 위스키를 선택해 주세요.",
                     "다른 위스키 보기",icon=BmIconId.EMPTY,
                     onAction=::navigateBack,modifier=Modifier.weight(1f))
             }
-            chosenId==null && initialProductId==null &&
-                original!=null && original.matchedProducts.isEmpty() -> {
+            state is P18SearchState.InvalidQuery ||
+                (chosenId==null && initialProductId==null &&
+                    original!=null && original.matchedProducts.isEmpty()) -> {
                 P18SearchTopBar(::navigateBack,chooseQuery,{chooseQuery=it},
                     {if(chooseQuery.isNotBlank())onSearchAgain(chooseQuery)},
                     editable=true,focusRequestToken=focusRequest)
