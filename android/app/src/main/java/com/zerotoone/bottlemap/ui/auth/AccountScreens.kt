@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,9 +29,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zerotoone.bottlemap.data.owner.OwnerMockRuntime
-import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
-import com.zerotoone.bottlemap.data.owner.MockApplicationStatus
+import com.zerotoone.bottlemap.data.OwnerRepository
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
 import com.zerotoone.bottlemap.ui.customer.P18Bg
@@ -57,21 +56,26 @@ fun AccountScreen(
     onRetryAccount: () -> Unit,
     onOpenOwner: () -> Unit = {},
 ) {
-    val ownerState by OwnerMockRuntime.repository(LocalContext.current).state.collectAsState()
-    val owned=when(val s=ownerState) {
-        is MockOwnerLoadState.Ready -> s.snapshot
-        is MockOwnerLoadState.Empty -> s.snapshot
-        else -> null
+    // Owner access is based on the authenticated server account, never demo fixture data.
+    val signedInUser=(state as? AuthUiState.SignedIn)?.user
+    val ownerStatus by produceState<Pair<Boolean, Boolean>?>(
+        initialValue=null, key1=signedInUser?.userId,
+    ) {
+        value=null
+        if(signedInUser!=null) {
+            value=runCatching {
+                val owner=OwnerRepository()
+                val bars=owner.getOwnedBars()
+                val applications=owner.getMyApplications()
+                bars.isNotEmpty() to applications.any { it.status=="pending" || it.status=="rejected" }
+            }.getOrNull()
+        }
     }
-    val hasArea=owned?.let{s-> s.bars.isNotEmpty() || s.applications.any {
-        it.applicationId !in s.dismissedApplicationIds &&
-            it.status in listOf(MockApplicationStatus.PENDING,MockApplicationStatus.REJECTED)
-    }}==true
+    val hasArea=ownerStatus?.let { it.first || it.second } == true
     val subtitle=when {
-        owned?.bars?.isNotEmpty()==true->"매장을 관리해 주세요"
-        owned?.applications?.any{it.status==MockApplicationStatus.PENDING}==true->
-            "검토 중인 신청이 있어요"
-        else->"매장 등록 상태를 확인하세요"
+        ownerStatus?.first==true -> "매장을 관리해 주세요"
+        ownerStatus?.second==true -> "매장 등록 신청 상태를 확인하세요"
+        else -> "매장 등록 상태를 확인하세요"
     }
     var infoDialog by remember {mutableStateOf<String?>(null)}
     if(infoDialog!=null) AlertDialog(onDismissRequest={infoDialog=null},
