@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.AndroidNearbyLocationSource
+import com.zerotoone.bottlemap.data.Repositories
 import com.zerotoone.bottlemap.data.MapBar
 import com.zerotoone.bottlemap.data.NearbyCoordinate
 import com.zerotoone.bottlemap.network.ApiClient
@@ -83,6 +84,20 @@ internal class P18SearchViewModel : ViewModel() {
     // Keep the full brand candidate list independently of selected-product responses.
     private val _suggestions = MutableStateFlow<SearchBarsResponseDto?>(null)
     val suggestions = _suggestions.asStateFlow()
+    private val mutableBarTags=MutableStateFlow<Map<String,List<String>>>(emptyMap())
+    val barTags=mutableBarTags.asStateFlow()
+    private val tagRequests=mutableSetOf<String>()
+    fun loadBarTags(id:String) {
+        if(id.isBlank() || !tagRequests.add(id))return
+        viewModelScope.launch {
+            try {
+                val detail=Repositories.customer.getPublishedBarMenu(id)
+                if(detail.barId==id)mutableBarTags.value=
+                    mutableBarTags.value+(id to detail.tags.take(2))
+            } catch(cancelled:CancellationException){throw cancelled}
+            catch(_:Exception){ /* Tag metadata is optional; don't block results. */ }
+        }
+    }
     // The result destination's ViewModel survives a detail push/pop.
     private val _location = MutableStateFlow<NearbyCoordinate?>(null)
     val location = _location.asStateFlow()
@@ -234,6 +249,7 @@ internal fun CustomerP18Results(
     val scope=rememberCoroutineScope()
     val userLocation by viewModel.location.collectAsStateWithLifecycle()
     val suggestions by viewModel.suggestions.collectAsStateWithLifecycle()
+    val knownTags by viewModel.barTags.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     var chooseQuery by rememberSaveable(initialQuery) { mutableStateOf(initialQuery.orEmpty()) }
@@ -399,9 +415,13 @@ internal fun CustomerP18Results(
                     ?: ready.matchedProducts.firstOrNull() ?: choices.firstOrNull()
                 val items=p18Sorted(ready.items,sort,userLocation!=null)
                 if(mapMode) {
+                    val focusedBarId=selectedBarId ?: items.firstOrNull()?.barId
+                    LaunchedEffect(focusedBarId) {
+                        if(focusedBarId!=null)viewModel.loadBarTags(focusedBarId)
+                    }
                     P18ResultsMap(ready,items,product?.displayName.orEmpty(),
                         ::navigateBack, {mapMode=false},selectedBarId,userLocation,
-                        mapCamera,{mapCamera=it},
+                        knownTags[focusedBarId].orEmpty(),mapCamera,{mapCamera=it},
                         onSelect={id->if(selectedBarId==id)onOpenBar(id,product?.productId)
                             else selectedBarId=id},
                         onOpenBar={onOpenBar(it,product?.productId)})
@@ -455,7 +475,7 @@ internal fun CustomerP18Results(
 private fun P18ResultsMap(
     response:SearchBarsResponseDto, items:List<SearchResultDto>,name:String,
     onBack:()->Unit,onList:()->Unit,selected:String?,userLocation:NearbyCoordinate?,
-    initialCamera:DiscoveryCamera?,onCamera:(DiscoveryCamera)->Unit,
+    selectedTags:List<String>,initialCamera:DiscoveryCamera?,onCamera:(DiscoveryCamera)->Unit,
     onSelect:(String)->Unit,onOpenBar:(String)->Unit,
 ) {
     val selectedItem=items.firstOrNull{it.barId==selected} ?: items.firstOrNull()
@@ -529,6 +549,16 @@ private fun P18ResultsMap(
                             if(userLocation!=null && selectedItem.distanceMeters!=null)
                                 Text(p18Distance(selectedItem.distanceMeters),
                                     color=P18Muted,fontSize=12.sp)
+                        }
+                        if(selectedTags.isNotEmpty()) Row(
+                            horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                            selectedTags.take(2).forEach { tag ->
+                                Box(Modifier.background(P18Elevated,RoundedCornerShape(50))
+                                    .border(1.dp,P18Line,RoundedCornerShape(50))
+                                    .padding(horizontal=8.dp,vertical=2.dp)) {
+                                    Text(tag,color=P18Text,fontSize=11.sp)
+                                }
+                            }
                         }
                         val serving=p18Representative(selectedItem.options)
                         if(serving!=null) Row(
