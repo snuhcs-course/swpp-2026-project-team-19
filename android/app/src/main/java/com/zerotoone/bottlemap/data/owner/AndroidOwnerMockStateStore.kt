@@ -35,7 +35,7 @@ object OwnerMockRuntime {
     @Volatile private var instance: OwnerMockRepository? = null
 
     fun repository(context: Context): OwnerMockRepository = instance ?: synchronized(this) {
-        instance ?: LocalOwnerMockRepository(AndroidOwnerMockStateStore(context)).also {
+        instance ?: LiveOwnerScreenRepository(context.applicationContext).also {
             instance = it
         }
     }
