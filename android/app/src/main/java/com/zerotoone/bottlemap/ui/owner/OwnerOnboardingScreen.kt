@@ -37,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.ui.common.*
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +48,8 @@ import java.util.UUID
 /** ACTION_FIRST v4 mock form; no real OCR, NTS, operator approval or upload API. */
 private enum class RegPage {
     HOME, INTRO, METHOD, READING, BN, REP, DATE, BIZCHECK, VERIFYING, VERIFIED,
-    BARNAME, BARPHOTO, ADDRESS, BARPHONE, MENUS, CONTACT, REVIEW, DONE, VIEW_APPLICATION
+    BARNAME, BARPHOTO, ADDRESS, BARPHONE, MENUS, CONTACT, REVIEW, DONE, VIEW_APPLICATION,
+    QA_LIST, QA_PREVIEW
 }
 private enum class VerifyFixture { MATCHED, FAILED, UNAVAILABLE, LIMITED }
 private fun regStage(page: RegPage): Int = when(page) {
@@ -99,6 +101,7 @@ fun OwnerOnboardingScreen(
     var history by rememberSaveable { mutableStateOf(listOf<String>()) }
     var inputMethod by rememberSaveable { mutableStateOf("manual") }
     var verify by rememberSaveable { mutableStateOf(VerifyFixture.MATCHED) }
+    var qaPage by rememberSaveable { mutableIntStateOf(21) }
     var showCertificateSheet by remember { mutableStateOf(false) }
     var certificateCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
     var showAddressSheet by remember { mutableStateOf(false) }
@@ -415,6 +418,24 @@ fun OwnerOnboardingScreen(
         },
         confirmButton={TextButton(onClick={showAddressSheet=false}){Text("닫기")}})
 
+    // Visible entry is strictly Debug-only, never a real Owner API/bypass.
+    if(screen==RegPage.QA_LIST && BuildConfig.DEBUG) {
+        Column(Modifier.fillMaxSize().background(RegistrationV4.bg)) {
+            RegistrationBackBar(::back)
+            OwnerRegistrationQaCatalog { page ->
+                qaPage=page
+                go(RegPage.QA_PREVIEW)
+            }
+        }
+        return
+    }
+    if(screen==RegPage.QA_PREVIEW && BuildConfig.DEBUG) {
+        OwnerRegistrationQaPreview(qaPage,onBack=::back,onAction={
+            // Preview controls never submit a fixture or overwrite a genuine Draft.
+            back()
+        })
+        return
+    }
     Column(Modifier.fillMaxSize().background(RegistrationV4.bg).imePadding()) {
         if(screen!=RegPage.DONE) {
             if(screen==RegPage.HOME || screen==RegPage.VIEW_APPLICATION)
@@ -483,6 +504,14 @@ fun OwnerOnboardingScreen(
                                 }catch(e:Exception){error=e.message}
                             }
                         )
+                        if(BuildConfig.DEBUG) {
+                            Text("신청·예외 화면 QA (Mock)",
+                                modifier=Modifier.fillMaxWidth().heightIn(min=48.dp)
+                                    .ownerQuietClick{go(RegPage.QA_LIST)}
+                                    .testTag("registration-qa-entry")
+                                    .padding(vertical=12.dp),
+                                color=RegistrationV4.primary,fontSize=14.sp)
+                        }
                         if(onComponents!=null)OwnerActionButton("공통 컴포넌트 점검",onComponents,
                             Modifier.fillMaxWidth(),secondary=true)
                         if(onLegacyDebugUpload!=null)OwnerActionButton("개발자 도구 · 기존 메뉴 업로드 테스트",
@@ -555,12 +584,9 @@ fun OwnerOnboardingScreen(
                         when(verify){
                             VerifyFixture.MATCHED->RegistrationCenterContent(
                                 "사업자 정보가\n확인됐어요","이제 매장 정보를 알려주세요.")
-                            VerifyFixture.FAILED->RegistrationCenterContent(
-                                "사업자 정보가\n맞지 않아요","사업자 정보를 다시 확인해 주세요.",success=false)
-                            VerifyFixture.UNAVAILABLE->RegistrationCenterContent(
-                                "지금은 국세청 확인이\n어려워요","운영팀이 나중에 다시 확인해요.",success=false)
-                            VerifyFixture.LIMITED->RegistrationCenterContent(
-                                "오늘 확인 횟수를\n모두 썼어요","입력한 내용은 그대로 남아 있어요.",success=false)
+                            VerifyFixture.FAILED->RegistrationVerifyException(OwnerVerifyOutcome.MISMATCH)
+                            VerifyFixture.UNAVAILABLE->RegistrationVerifyException(OwnerVerifyOutcome.UNAVAILABLE)
+                            VerifyFixture.LIMITED->RegistrationVerifyException(OwnerVerifyOutcome.LIMIT)
                         }
                     }
 
@@ -576,15 +602,14 @@ fun OwnerOnboardingScreen(
                             }
                             save(edited)
                         },"예: 몰트 앤 무드",tag="registration-bar-name",highlight=true)
-                        exactMatches.forEach{ candidate ->
-                            OwnerV4Panel("BottleMap에 이미 등록된 매장\n"+candidate.name+"\n"+candidate.address)
-                            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
-                                TextButton(onClick={
+                        exactMatches.forEach { candidate ->
+                            RegistrationExistingBarCard(candidate.name,candidate.address,
+                                onMine={
                                     save(draft.copy(kind=MockApplicationKind.EXISTING_BAR,
                                         existingBarId=candidate.barId,proposedBarName=candidate.name))
-                                    go(RegPage.MENUS) // Existing bar already has cover, address and public phone.
-                                }){Text("우리 매장예요")}
-                                TextButton(onClick={
+                                    go(RegPage.MENUS)
+                                },
+                                onOther={
                                     if(needsNewBarDetailsAfterClaimEdit(
                                             editingReview,draft.kind,MockApplicationKind.NEW_BAR)) {
                                         editingReview=false
@@ -593,8 +618,7 @@ fun OwnerOnboardingScreen(
                                     }
                                     save(draft.copy(kind=MockApplicationKind.NEW_BAR,existingBarId=null))
                                     go(RegPage.BARPHOTO)
-                                }){Text("아니에요")}
-                            }
+                                })
                         }
                     }
                     RegPage.BARPHOTO -> {
