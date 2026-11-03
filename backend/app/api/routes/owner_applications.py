@@ -19,7 +19,7 @@ from app.api.routes.bars import Cursor, Limit
 from app.api.routes.menu_imports import UploadedImage
 from app.core.security import Principal, get_current_user, require_operator, user_type_of
 from app.db.session import get_session, get_session_factory
-from app.matching.llm_layer import LLMLayerConfig
+from app.matching.tool_config import MatchingLayerConfig
 from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.owner_application import (
     ApproveInput,
@@ -321,7 +321,7 @@ def approve_owner_application(
     session: Session = Depends(get_session),
     links: ImageLinks = Depends(get_image_links),
     extractor: MenuExtractor = Depends(get_menu_extractor),
-    llm_layer: LLMLayerConfig | None = Depends(get_matching_llm_layer),
+    llm_layer: MatchingLayerConfig | None = Depends(get_matching_llm_layer),
     session_factory: SessionFactory = Depends(get_session_factory),
     clock: Callable[[], datetime] = Depends(get_clock),
 ) -> OwnerApplicationResponse:

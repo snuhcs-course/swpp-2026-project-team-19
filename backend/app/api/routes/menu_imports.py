@@ -11,7 +11,7 @@ from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_ext
 from app.api.permissions import require_active_bar_manager, require_import_manager
 from app.core.security import Principal, get_current_user
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
-from app.matching.llm_layer import LLMLayerConfig
+from app.matching.tool_config import MatchingLayerConfig
 from app.models import Bar, ImportMode
 from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.menu_import import ImportCanceledResponse, MenuImportAcceptedResponse, MenuImportStatusResponse
@@ -77,7 +77,7 @@ def upload_menu_import(
     session: Session = Depends(get_session),
     storage: ImageStorage = Depends(get_image_storage),
     extractor: MenuExtractor = Depends(get_menu_extractor),
-    llm_layer: LLMLayerConfig | None = Depends(get_matching_llm_layer),
+    llm_layer: MatchingLayerConfig | None = Depends(get_matching_llm_layer),
     session_factory: SessionFactory = Depends(get_session_factory),
     bar: Bar = Depends(require_active_bar_manager),
     principal: Principal = Depends(get_current_user),

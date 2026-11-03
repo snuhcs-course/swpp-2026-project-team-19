@@ -14,6 +14,7 @@ from app.core.errors import register_error_handlers
 from app.core.security import warn_if_temporary_login_is_on
 from app.core.version import get_version
 from app.db.session import get_session_factory
+from app.matching.embedding import get_embedding_step
 from app.services.menu_import_processing import find_unfinished_imports, recover_imports
 
 logger = logging.getLogger(__name__)
@@ -54,8 +55,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # the first upload. The local defaults need nothing.
     get_menu_extractor()
     get_image_storage()
-    # An invalid MATCHING_LLM_MAX_CALLS stops the server; a missing key only logs a warning.
+    # An invalid MATCHING_LLM_MAX_CALLS or MATCHING_LLM_MODE stops the server; a missing key only logs a warning.
     get_matching_llm_layer()
+    # Invalid EMBEDDING_* settings stop the server, even while the step is off. The index is built on first use.
+    get_embedding_step()
     # Invalid Supabase auth settings (e.g. HS256 allowed) stop the server; an unset SUPABASE_URL does not.
     load_supabase_auth_settings()
     # Leave a trace in the server log while anyone can get a token from POST /api/auth/temp-login.
