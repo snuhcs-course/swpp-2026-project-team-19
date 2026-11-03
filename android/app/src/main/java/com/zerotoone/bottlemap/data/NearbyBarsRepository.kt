@@ -48,6 +48,7 @@ data class MapBar(
     override val address: String,
     override val location: NearbyCoordinate,
     val menuUpdatedAt: String? = null,
+    val coverThumbnailUrl: String? = null,
 ) : BarPin
 
 const val NEARBY_CAROUSEL_RADIUS_METERS = 1000

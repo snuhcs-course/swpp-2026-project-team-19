@@ -1,7 +1,17 @@
 package com.zerotoone.bottlemap.ui.auth
 
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,6 +51,13 @@ internal fun GoogleSignInButton(
 
     Button(
         enabled = enabled,
+        modifier = Modifier.fillMaxWidth().heightIn(min=56.dp)
+            .testTag("customer-google-button"),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFFC99D6B),
+            contentColor = Color(0xFF211A14),
+        ),
         onClick = {
             if (!viewModel.beginGoogleSignIn()) return@Button
             if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isBlank()) {
@@ -92,6 +109,12 @@ internal fun GoogleSignInButton(
             }
         },
     ) {
-        Text("Google 계정으로 계속")
+        Row(horizontalArrangement=Arrangement.spacedBy(10.dp),
+            verticalAlignment=Alignment.CenterVertically) {
+            Text("G",fontSize=23.sp,fontWeight=FontWeight.Bold,
+                color=Color(0xFF4285F4))
+            Text("Google 계정으로 계속",fontSize=16.sp,
+                fontWeight=FontWeight.SemiBold,color=Color(0xFF211E1B))
+        }
     }
 }

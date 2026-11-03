@@ -66,6 +66,9 @@ import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.ui.common.OwnerHeader
 import com.zerotoone.bottlemap.ui.common.OwnerLoading
 import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
+import com.zerotoone.bottlemap.ui.customer.P18InlineBarMap
+import com.zerotoone.bottlemap.ui.customer.P18Back
+import com.zerotoone.bottlemap.ui.customer.P18ScrollTopButton
 
 /**
  * Customer-side MOCK preview, not the API-backed customer detail screen.
@@ -131,10 +134,15 @@ fun OwnerPreviewHtmlV4Screen(
             }
         }
     }
-    Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        V4Toolbar(null, onBack)
+    val previewScroll=rememberScrollState()
+    Box(Modifier.fillMaxSize().background(V4Color.background)) {
+      Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().height(72.dp).padding(start=8.dp),
+            verticalAlignment=Alignment.CenterVertically) {
+            P18Back(onBack)
+        }
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            Modifier.fillMaxSize().verticalScroll(previewScroll)
                 .padding(horizontal = BottleMapSpacing.screenHorizontal),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -324,26 +332,10 @@ fun OwnerPreviewHtmlV4Screen(
                         Column(Modifier.fillMaxWidth().background(V4Color.surface,
                             RoundedCornerShape(9.dp)).padding(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Box(Modifier.fillMaxWidth().height(190.dp)
-                                .clip(RoundedCornerShape(9.dp))
-                                .background(Color(0xFF7D7060)), contentAlignment = Alignment.Center) {
-                                Canvas(Modifier.fillMaxSize()) {
-                                    drawLine(Color(0xFFD8D0C6),
-                                        Offset(size.width * -.1f, size.height * 1.18f),
-                                        Offset(size.width * 1.1f, size.height * -.1f),
-                                        strokeWidth = 34.dp.toPx())
-                                    drawLine(Color(0xFFD8D0C6),
-                                        Offset(size.width * .45f, size.height * -.2f),
-                                        Offset(size.width * .28f, size.height * 1.2f),
-                                        strokeWidth = 24.dp.toPx())
-                                }
-                                Box(Modifier.background(V4Color.background, RoundedCornerShape(50))
-                                    .border(2.dp, V4Color.primary, RoundedCornerShape(50))
-                                    .padding(horizontal = 11.dp, vertical = 6.dp)) {
-                                    Text(bar.name, color = V4Color.text, fontSize = 12.sp,
-                                        fontWeight = FontWeight.Medium)
-                                }
-                            }
+                            // Same real Kakao map as Customer detail, supplied with
+                            // the locally edited Owner bar's coordinates.
+                            P18InlineBarMap(bar.barId,bar.name,bar.address,
+                                bar.latitude,bar.longitude)
                             Row(Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(9.dp),
                                 verticalAlignment = Alignment.CenterVertically) {
@@ -380,6 +372,9 @@ fun OwnerPreviewHtmlV4Screen(
                 Spacer(Modifier.height(20.dp))
             }
         }
+      }
+      P18ScrollTopButton(previewScroll,Modifier.align(Alignment.BottomEnd)
+          .padding(end=16.dp,bottom=18.dp))
     }
 }
 

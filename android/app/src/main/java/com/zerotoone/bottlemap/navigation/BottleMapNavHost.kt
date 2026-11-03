@@ -21,14 +21,15 @@ import com.zerotoone.bottlemap.ui.auth.GoogleLoginScreen
 import com.zerotoone.bottlemap.ui.customer.BarDetailScreen
 import com.zerotoone.bottlemap.ui.customer.BarDetailViewModel
 import com.zerotoone.bottlemap.ui.customer.BarLocationMapScreen
-import com.zerotoone.bottlemap.ui.customer.SearchResultsScreen
-import com.zerotoone.bottlemap.ui.customer.SearchScreen
+import com.zerotoone.bottlemap.ui.customer.CustomerP18Home
+import com.zerotoone.bottlemap.ui.customer.CustomerP18Results
 import com.zerotoone.bottlemap.ui.customer.NearbyBarsScreen
 import com.zerotoone.bottlemap.ui.customer.nearbyBarsViewModel
 import com.zerotoone.bottlemap.ui.common.DelayedLoading
 
 private const val SEARCH_VALIDATION_ERROR_KEY = "searchValidationErrorCode"
 private const val REFRESH_AFTER_MISSING_BAR_KEY = "refreshAfterMissingBar"
+private const val REFRESH_AFTER_MISSING_PRODUCT_KEY = "refreshAfterMissingProduct"
 
 private object Routes {
     const val CUSTOMER_GRAPH = "customer"
@@ -38,12 +39,15 @@ private object Routes {
     const val CUSTOMER_LOGIN = "customer/login"
     const val CUSTOMER_SEARCH_RESULTS = "customer/search-results"
     const val CUSTOMER_QUERY_ARGUMENT = "query"
+    const val CUSTOMER_PRODUCT_ARGUMENT = "productId"
+    const val CUSTOMER_SOURCE_ARGUMENT = "source"
     const val BAR_ID_ARGUMENT = "barId"
-    const val CUSTOMER_BAR_DETAIL_ROUTE = "customer/bar-detail/{" + BAR_ID_ARGUMENT + "}"
+    const val CUSTOMER_BAR_DETAIL_ROUTE =
+        "customer/bar-detail/{" + BAR_ID_ARGUMENT + "}?productId={" + CUSTOMER_PRODUCT_ARGUMENT + "}"
     const val CUSTOMER_BAR_MAP = "customer/bar-map"
     const val CUSTOMER_BAR_MAP_ROUTE = CUSTOMER_BAR_MAP + "/{" + BAR_ID_ARGUMENT + "}"
     const val CUSTOMER_SEARCH_RESULTS_ROUTE =
-        CUSTOMER_SEARCH_RESULTS + "?" + CUSTOMER_QUERY_ARGUMENT + "={" + CUSTOMER_QUERY_ARGUMENT + "}"
+        CUSTOMER_SEARCH_RESULTS + "?query={query}&productId={productId}&source={source}"
 
 
 }
@@ -61,14 +65,27 @@ fun BottleMapNavHost() {
         customerGraph(
             navController = navController,
             authViewModel = authViewModel,
-            onOpenAccount = { navController.navigate(Routes.CUSTOMER_ACCOUNT) },
-            onOpenNearby = { navController.navigate(Routes.CUSTOMER_NEARBY) },
-            onOpenResults = { query ->
-                val encodedQuery = Uri.encode(query)
-                navController.navigate(
-                    Routes.CUSTOMER_SEARCH_RESULTS + "?" +
-                        Routes.CUSTOMER_QUERY_ARGUMENT + "=" + encodedQuery,
-                )
+            onOpenAccount = {
+                if (navController.currentDestination?.route == Routes.CUSTOMER_SEARCH)
+                    navController.navigate(Routes.CUSTOMER_ACCOUNT) { launchSingleTop = true }
+            },
+            onOpenNearby = {
+                if (navController.currentDestination?.route == Routes.CUSTOMER_SEARCH)
+                    navController.navigate(Routes.CUSTOMER_NEARBY) { launchSingleTop = true }
+            },
+            onOpenResults = { query, source ->
+                if (navController.currentDestination?.route == Routes.CUSTOMER_SEARCH)
+                    navController.navigate(
+                        Routes.CUSTOMER_SEARCH_RESULTS + "?query=" + Uri.encode(query) +
+                            "&productId=&source=" + Uri.encode(source)
+                    ) { launchSingleTop = true }
+            },
+            onOpenProduct = { productId ->
+                if (navController.currentDestination?.route == Routes.CUSTOMER_SEARCH)
+                    navController.navigate(
+                        Routes.CUSTOMER_SEARCH_RESULTS + "?query=&productId=" +
+                            Uri.encode(productId) + "&source=popular"
+                    ) { launchSingleTop = true }
             },
             onBack = { navController.popBackStack() },
             onInvalidQuery = { fieldCode ->
@@ -76,8 +93,16 @@ fun BottleMapNavHost() {
                     .savedStateHandle[SEARCH_VALIDATION_ERROR_KEY] = fieldCode
                 navController.popBackStack()
             },
-            onOpenBarDetail = { barId ->
-                navController.navigate("customer/bar-detail/" + Uri.encode(barId))
+            onOpenBarDetail = { barId, productId ->
+                // Ignore stale events from a destination already leaving the back stack.
+                if (navController.currentDestination?.route in setOf(
+                        Routes.CUSTOMER_SEARCH_RESULTS_ROUTE, Routes.CUSTOMER_NEARBY
+                    )) {
+                    navController.navigate("customer/bar-detail/" + Uri.encode(barId) +
+                        "?productId=" + Uri.encode(productId.orEmpty())) {
+                        launchSingleTop = true
+                    }
+                }
             },
             onOpenBarMap = { barId ->
                 navController.navigate(Routes.CUSTOMER_BAR_MAP + "/" + Uri.encode(barId))
@@ -98,10 +123,11 @@ private fun NavGraphBuilder.customerGraph(
     authViewModel: AuthViewModel,
     onOpenAccount: () -> Unit,
     onOpenNearby: () -> Unit,
-    onOpenResults: (String) -> Unit,
+    onOpenResults: (String, String) -> Unit,
+    onOpenProduct: (String) -> Unit,
     onBack: () -> Unit,
     onInvalidQuery: (String) -> Unit,
-    onOpenBarDetail: (String) -> Unit,
+    onOpenBarDetail: (String, String?) -> Unit,
     onOpenBarMap: (String) -> Unit,
     onMissingBarReturn: () -> Unit,
 ) {
@@ -110,40 +136,33 @@ private fun NavGraphBuilder.customerGraph(
         startDestination = Routes.CUSTOMER_SEARCH,
     ) {
         composable(Routes.CUSTOMER_SEARCH) { backStackEntry ->
-            val nearbyOwner = remember(backStackEntry, navController) {
-                navController.getBackStackEntry(Routes.CUSTOMER_GRAPH)
-            }
-            val nearbyViewModel = nearbyBarsViewModel(nearbyOwner)
-            val validationErrorCode = backStackEntry.savedStateHandle
-                .getStateFlow<String?>(SEARCH_VALIDATION_ERROR_KEY, null)
+            val refreshPopular=backStackEntry.savedStateHandle
+                .getStateFlow(REFRESH_AFTER_MISSING_PRODUCT_KEY,false)
                 .collectAsStateWithLifecycle().value
-            SearchScreen(
-                onOpenResults = onOpenResults,
-                onOpenAccount = onOpenAccount,
-                onOpenNearby = onOpenNearby,
-                nearbyViewModel = nearbyViewModel,
-                serverValidationErrorCode = validationErrorCode,
-                onClearServerValidation = {
-                    backStackEntry.savedStateHandle[SEARCH_VALIDATION_ERROR_KEY] = null
+            CustomerP18Home(
+                refreshAfterMissingProduct=refreshPopular,
+                onMissingProductRefreshConsumed={
+                    backStackEntry.savedStateHandle[REFRESH_AFTER_MISSING_PRODUCT_KEY]=false
                 },
+                onSearch = onOpenResults,
+                onPopular = onOpenProduct,
+                onAccount = onOpenAccount,
+                onMap = onOpenNearby,
             )
         }
-        composable(Routes.CUSTOMER_NEARBY) { backStackEntry ->
-            val nearbyOwner = remember(backStackEntry, navController) {
-                navController.getBackStackEntry(Routes.CUSTOMER_GRAPH)
-            }
-            NearbyBarsScreen(
-                onBack = onBack,
-                onOpenBarDetail = onOpenBarDetail,
-                viewModel = nearbyBarsViewModel(nearbyOwner),
+        composable(Routes.CUSTOMER_NEARBY) {
+            com.zerotoone.bottlemap.ui.customer.CustomerP18Explore(
+                onBack={ if (navController.currentDestination?.route==Routes.CUSTOMER_NEARBY) onBack() },
+                onOpenBar={id->onOpenBarDetail(id,null)},
             )
         }
         composable(Routes.CUSTOMER_ACCOUNT) {
             val state = authViewModel.state.collectAsStateWithLifecycle().value
             AccountScreen(
                 state = state,
-                onBack = onBack,
-                onOpenLogin = { navController.navigate(Routes.CUSTOMER_LOGIN) },
+                onBack = { if (navController.currentDestination?.route==Routes.CUSTOMER_ACCOUNT) onBack() },
+                onOpenLogin = { if (navController.currentDestination?.route==Routes.CUSTOMER_ACCOUNT)
+                    navController.navigate(Routes.CUSTOMER_LOGIN) { launchSingleTop=true } },
                 onLogout = authViewModel::logout,
                 onRetryAccount = authViewModel::retryAccountSync,
                 onOpenOwner = { navController.navigate(OwnerRoutes.GRAPH) },
@@ -157,7 +176,7 @@ private fun NavGraphBuilder.customerGraph(
             GoogleLoginScreen(
                 state = state,
                 authViewModel = authViewModel,
-                onBack = onBack,
+                onBack = { if (navController.currentDestination?.route==Routes.CUSTOMER_LOGIN) onBack() },
                 onContinueGuest = {
                     authViewModel.continueAsGuest()
                     navController.popBackStack()
@@ -171,35 +190,64 @@ private fun NavGraphBuilder.customerGraph(
                     type = NavType.StringType
                     defaultValue = ""
                 },
-            ),
-        ) { backStackEntry ->
-            val refreshAfterMissingBar = backStackEntry.savedStateHandle
-                .getStateFlow(REFRESH_AFTER_MISSING_BAR_KEY, false)
-                .collectAsStateWithLifecycle().value
-            SearchResultsScreen(
-                refreshAfterMissingBar = refreshAfterMissingBar,
-                onRefreshHandled = {
-                    backStackEntry.savedStateHandle[REFRESH_AFTER_MISSING_BAR_KEY] = false
+                navArgument(Routes.CUSTOMER_PRODUCT_ARGUMENT) {
+                    type = NavType.StringType
+                    defaultValue = ""
                 },
-                query = backStackEntry.arguments
-                    ?.getString(Routes.CUSTOMER_QUERY_ARGUMENT)
-                    .orEmpty(),
-                onBack = onBack,
-                onInvalidQuery = onInvalidQuery,
-                onOpenBarDetail = onOpenBarDetail,
+                navArgument(Routes.CUSTOMER_SOURCE_ARGUMENT) {
+                    type = NavType.StringType
+                    defaultValue = "input"
+                },
+            ),
+        ) { entry ->
+            val refreshMissingBar=entry.savedStateHandle
+                .getStateFlow(REFRESH_AFTER_MISSING_BAR_KEY,false)
+                .collectAsStateWithLifecycle().value
+            CustomerP18Results(
+                refreshAfterMissingBar=refreshMissingBar,
+                onMissingBarRefreshConsumed={
+                    entry.savedStateHandle[REFRESH_AFTER_MISSING_BAR_KEY]=false
+                },
+                onMissingProduct={
+                    navController.getBackStackEntry(Routes.CUSTOMER_SEARCH)
+                        .savedStateHandle[REFRESH_AFTER_MISSING_PRODUCT_KEY]=true
+                },
+                initialQuery = entry.arguments?.getString(Routes.CUSTOMER_QUERY_ARGUMENT)
+                    ?.takeIf { it.isNotBlank() },
+                initialProductId = entry.arguments?.getString(Routes.CUSTOMER_PRODUCT_ARGUMENT)
+                    ?.takeIf { it.isNotBlank() },
+                source = entry.arguments?.getString(Routes.CUSTOMER_SOURCE_ARGUMENT) ?: "input",
+                onBack = { if (navController.currentDestination?.route==Routes.CUSTOMER_SEARCH_RESULTS_ROUTE) onBack() },
+                onOpenBar = onOpenBarDetail,
+                onSearchAgain = { updated ->
+                    if (navController.currentDestination?.route==Routes.CUSTOMER_SEARCH_RESULTS_ROUTE) {
+                        navController.navigate(Routes.CUSTOMER_SEARCH_RESULTS +
+                            "?query=" + Uri.encode(updated) + "&productId=&source=input") {
+                            popUpTo(Routes.CUSTOMER_SEARCH_RESULTS_ROUTE) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                },
             )
         }
         composable(
             route = Routes.CUSTOMER_BAR_DETAIL_ROUTE,
-            arguments = listOf(navArgument(Routes.BAR_ID_ARGUMENT) {
-                type = NavType.StringType
-            }),
+            arguments = listOf(
+                navArgument(Routes.BAR_ID_ARGUMENT) { type = NavType.StringType },
+                navArgument(Routes.CUSTOMER_PRODUCT_ARGUMENT) {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+            ),
         ) { backStackEntry ->
             BarDetailScreen(
                 barId = backStackEntry.arguments?.getString(Routes.BAR_ID_ARGUMENT).orEmpty(),
-                onBack = onBack,
-                onBackAndRefreshResults = onMissingBarReturn,
+                onBack = { if(navController.currentDestination?.route==Routes.CUSTOMER_BAR_DETAIL_ROUTE) onBack() },
+                onBackAndRefreshResults = { if(navController.currentDestination?.route==Routes.CUSTOMER_BAR_DETAIL_ROUTE)
+                    onMissingBarReturn() },
                 onOpenMap = onOpenBarMap,
+                highlightProductId = backStackEntry.arguments
+                    ?.getString(Routes.CUSTOMER_PRODUCT_ARGUMENT)?.takeIf {it.isNotBlank()},
             )
         }
         composable(
@@ -233,7 +281,7 @@ private fun NavGraphBuilder.customerGraph(
                 BarLocationMapScreen(
                     barId = barId,
                     detailState = detailState,
-                    onBack = onBack,
+                    onBack = { if(navController.currentDestination?.route==Routes.CUSTOMER_BAR_MAP_ROUTE) onBack() },
                     onRetryDetail = detailViewModel::retry,
                 )
             } else {

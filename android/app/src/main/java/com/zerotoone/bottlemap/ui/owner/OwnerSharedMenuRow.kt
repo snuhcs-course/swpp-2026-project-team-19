@@ -28,6 +28,7 @@ import com.zerotoone.bottlemap.data.owner.MockMenuOption
 import com.zerotoone.bottlemap.data.owner.manualMenuShortName
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
+import com.zerotoone.bottlemap.ui.common.servingDisplayLabel
 
 /** All three surfaces use the same fixed slots, so adding a discount cannot shift ml or price. */
 internal fun ownerOptionDiscountActive(option: MockMenuOption, atEpochMs: Long): Boolean =
@@ -58,7 +59,7 @@ internal fun OwnerMenuFlatRow(
     // Imported menus may carry four or more existing portions. They remain visible
     // even though the direct editor limits new entries to three portions.
     // Selection never changes the height for a given menu item.
-    val rowHeight = maxOf(74, item.options.size * 17 + 12).dp
+    val rowHeight = maxOf(66, item.options.size * 16 + 10).dp
     // The v4 slot remains 129dp for ordinary prices. Longer existing prices
     // and larger text scales get the real measured space they need. Stage 7
     // prevents NEW extracted prices above eight digits; legacy rows remain legible.
@@ -158,7 +159,7 @@ internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut
                     maxLines = 1)
             }
         }
-        Text(option.pourMl?.toString()?.plus("ml") ?: option.label.orEmpty(),
+        Text(servingDisplayLabel(option.pourMl, option.label),
             modifier = Modifier.width(30.dp), color = textColor,
             fontSize = 10.sp, maxLines = 1, textAlign = TextAlign.End)
         Text("%,d원".format(option.displayPrice(atEpochMs)),
