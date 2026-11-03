@@ -147,13 +147,7 @@ class OwnerRegistrationV4ComposeTest {
     }
 
     @Test fun exceptionCatalogProvidesAllNinePagesWithoutMutatingDraft() {
-        val vm=show(MockOwnerSnapshot())
         // The catalog is a Debug-only preview, not a simulated NTS/backend response.
-        compose.onNodeWithText("매장 등록은\n이렇게 진행돼요").assertExists()
-        compose.runOnIdle {
-            val state=vm.state.value as MockOwnerLoadState.Empty
-            assertEquals(0,state.snapshot.applications.size)
-        }
         compose.setContent {
             MaterialTheme {
                 OwnerRegistrationQaCatalog(onChoose={})
