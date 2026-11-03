@@ -22,15 +22,12 @@ import java.util.Locale
 @Composable
 internal fun OwnerRegistrationDashboard(
     snapshot: MockOwnerSnapshot,
-    debug: Boolean,
     onRegister: () -> Unit,
     onManage: (MockBar) -> Unit,
     onViewApplication: (String) -> Unit,
     onCancel: (String) -> Unit,
     onDismiss: (String) -> Unit,
     onReapply: (MockOwnerApplication) -> Unit,
-    onReject: (String) -> Unit,
-    onApprove: (MockOwnerApplication) -> Unit,
 ) {
     val visible=snapshot.applications.filterNot {
         it.applicationId in snapshot.dismissedApplicationIds
@@ -124,14 +121,6 @@ internal fun OwnerRegistrationDashboard(
                                 RegistrationDashboardAction("신청 취소",onClick={
                                     onCancel(app.applicationId)
                                 })
-                            }
-                        }
-                        if(debug){
-                            Row {
-                                RegistrationDashboardAction("Mock 거절",onClick={
-                                    onReject(app.applicationId)
-                                })
-                                RegistrationDashboardAction("Mock 승인",onClick={onApprove(app)})
                             }
                         }
                     }
