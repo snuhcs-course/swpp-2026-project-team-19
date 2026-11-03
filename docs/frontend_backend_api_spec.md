@@ -114,7 +114,7 @@ GET 주변 업장 조회 (위치 + 반경)
 | `POST /api/owner-applications/{applicationId}/cancel`, `PUT /api/owner-applications/{applicationId}/menu-photos` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
 | `GET /api/owner-applications`, `POST .../approve`, `POST .../reject`, `POST .../verify-business` | | | | O |
 | `DELETE /api/bars/{barId}/owner` | | | | O |
-| `GET /api/bars`, `POST /api/bars` | | | | O |
+| `GET /api/bars`, `POST /api/bars`(지금은 구현하지 않음, 3.5) | | | | O |
 | `GET /api/bars/{barId}` | | | O | O |
 | `PATCH /api/bars/{barId}` | | | O (`status` 제외) | O |
 | `GET /api/bars/{barId}/menu-imports`, `POST /api/bars/{barId}/menu-imports` | | | O | O |
@@ -212,7 +212,7 @@ ignore
 | `GET` | `/api/me` | 로그인 사용자와 권한 조회 및 최초 사용자 동기화 |
 | `PATCH` | `/api/me` | 로그인 사용자 표시 이름 수정 |
 | `GET` | `/api/bars` | 운영 대상 업장 목록 및 검색 |
-| `POST` | `/api/bars` | 업장 생성 |
+| `POST` | `/api/bars` | 업장 생성. 지금은 구현하지 않는다(3.5) |
 | `GET` | `/api/bars/{barId}` | 관리자용(operator, 업주) 업장 상세와 관리 상태 조회 |
 | `PATCH` | `/api/bars/{barId}` | 업장 정보 또는 활성 상태 수정 |
 | `GET` | `/api/bars/{barId}/menu-imports` | 업장의 진행 중·과거 메뉴 등록 작업 조회 |
@@ -516,7 +516,9 @@ Authorization: Bearer <access-token>
 
 ### 3.5 업장 생성
 
-operator가 업장을 직접 만드는 API다. 업주가 있는 업장은 업주의 `new_bar` 신청과 승인(3.11)으로 만드는 것을 기본으로 한다.
+operator가 업장을 직접 만드는 API다.
+
+> **지금은 구현하지 않는다.** 업장은 업주의 `new_bar` 신청을 operator가 승인할 때(3.11.7) 만든다. 업장 등록은 이 신청과 승인을 기본으로 하므로 operator가 직접 만드는 API는 당장 만들지 않으며, 백엔드에도 없다(호출하면 `405 METHOD_NOT_ALLOWED`). 아래 요청과 응답은 나중에 구현할 때를 위한 초안이다. 업장 필드 규칙은 업장 수정(3.7)과 신청 승인(3.11.7)이 함께 쓰므로 지금도 유효하다.
 
 ```http
 POST /api/bars
@@ -544,7 +546,7 @@ Content-Type: application/json
 | `longitude` | 예 | -180~180. 소수점 아래 6자리까지 저장한다 |
 | `phone` | 아니오 | 30자 이하. 없거나 공백뿐이면 `null` |
 
-좌표는 서버가 주소로 계산하지 않는다. 프론트엔드는 지도에서 업장 위치를 고르는 화면을 제공하고, 고른 좌표를 주소와 함께 보낸다. operator의 업장 생성, 신청 승인(3.11.7)과 업장 수정(3.7)이 같은 화면을 쓴다.
+좌표는 서버가 주소로 계산하지 않는다. 프론트엔드는 지도에서 업장 위치를 고르는 화면을 제공하고, 고른 좌표를 주소와 함께 보낸다. 신청 승인(3.11.7)과 업장 수정(3.7)이 같은 화면을 쓴다.
 
 ```http
 HTTP/1.1 201 Created
@@ -563,7 +565,7 @@ Location: /api/bars/22222222-2222-4222-8222-222222222222
 
 ### 3.6 업장 상세 조회
 
-operator와 업주의 업장 관리 화면용 API다. 업장 정보와 관리 상태(진행 중인 메뉴 등록 작업, 현재 메뉴판 요약, 업주)를 반환하며 메뉴 항목은 포함하지 않는다. 메뉴 항목은 3.9로 조회한다. 업장 생성 직후(3.5의 `Location`), 업장 수정 뒤 재조회, 관리 화면 직접 진입에 사용한다.
+operator와 업주의 업장 관리 화면용 API다. 업장 정보와 관리 상태(진행 중인 메뉴 등록 작업, 현재 메뉴판 요약, 업주)를 반환하며 메뉴 항목은 포함하지 않는다. 메뉴 항목은 3.9로 조회한다. 업장 수정 뒤 재조회와 관리 화면 직접 진입에 사용한다.
 
 operator와 해당 업장의 현재 업주만 호출할 수 있다. 비활성 업장도 `200 OK`로 반환한다.
 
@@ -1230,7 +1232,7 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 
 업주는 `user_type`이 아니라 사용자와 업장의 관계다. 로그인한 사용자가 업주 신청을 내고 operator가 승인하면, 그 사용자는 해당 업장의 업주가 된다. 업주가 되어도 `userType`은 바뀌지 않는다(보통 `customer`). 업주가 할 수 있는 일은 2.2의 권한 표를 따른다.
 
-서비스 규모가 커지면 업장 등록은 operator가 하나씩 입력하는 방식(3.5)이 아니라, 업주가 `new_bar` 신청으로 직접 등록하고 operator가 승인하는 방식을 기본으로 한다.
+업장 등록은 operator가 하나씩 입력하는 방식이 아니라, 업주가 `new_bar` 신청으로 직접 등록하고 operator가 승인하는 방식으로 한다. operator가 업장을 직접 만드는 API(3.5)는 지금은 구현하지 않는다.
 
 - 한 업장에는 현재 업주가 최대 한 명이다. 한 사용자는 여러 업장의 업주가 될 수 있다.
 - 신청은 두 종류다. `existing_bar`는 이미 등록된 업장의 업주 신청이고, `new_bar`는 아직 없는 업장을 등록하면서 업주가 되는 신청이다.
