@@ -1,4 +1,6 @@
 import json
+import logging
+import threading
 from contextlib import nullcontext
 from decimal import Decimal
 from pathlib import Path
@@ -16,7 +18,9 @@ from app.adapters.extraction import (
 from app.adapters.matching_llm import MatchingLLMError
 from app.api.deps import get_matching_llm_layer, get_menu_extractor
 from app.main import app
+from app.matching import tool_config
 from app.matching.llm_layer import LLMLayerConfig
+from app.matching.tool_config import ToolLayerConfig
 from app.models import (
     ExtractedItem,
     ImportMode,
@@ -626,3 +630,274 @@ def test_m3b_runs_only_when_enabled(client, db_session, image_storage, operator,
 
     assert ["lines" in p for p in llm.payloads] == [True, False]  # M3a, then M3b (which says "unsure")
     assert (item.initial_resolution_status, item.candidates) == (ResolutionStatus.UNMATCHED, [])
+
+
+# ---- I3-E10: MATCHING_LLM_MODE=tools, the tool-calling layer; the model is always a fake ----
+
+
+class FakeToolLLM:
+    """Turn 1 searches the query `by_name` gives each target line it knows; turn 2 submits the first
+    result of each search (product_id "" when there was none) with the other fields of `by_name`.
+    A photo with no known target line submits nothing in turn 1.
+
+    `answer` (an exception) is raised on every turn instead; `on_call` runs before each turn.
+    """
+
+    def __init__(self, by_name=None, answer=None, on_call=None):
+        self.by_name = by_name or {}
+        self.answer = answer
+        self.on_call = on_call
+        self.histories = []
+
+    def step(self, system, history, tools):
+        self.histories.append([dict(m) for m in history])
+        if self.on_call is not None:
+            self.on_call()
+        if self.answer is not None:
+            raise self.answer
+        lines = json.loads(history[0]["text"])["lines"]
+        known = [line for line in lines if line["target"] and line["name"] in self.by_name]
+        if not known:
+            return {"calls": [tool_call("submit_answers", answers=[])], "usage": {}}
+        if len(history) == 1:
+            return {"calls": [tool_call("search_catalog", query=self.by_name[line["name"]]["query"])
+                              for line in known], "usage": {}}
+        found = [r["response"]["results"] for r in history[-1]["responses"]]
+        answers = []
+        for line, results in zip(known, found):
+            fields = {k: v for k, v in self.by_name[line["name"]].items() if k != "query"}
+            answers.append({"line": line["line"], "product_id": results[0]["product_id"] if results else "",
+                            "sure": True, "bottler_en": "", "distillery_en": "", "brand_en": "", "age": 0,
+                            "edition_tokens_en": [], "kind": "whisky", **fields})
+        return {"calls": [tool_call("submit_answers", answers=answers)], "usage": {}}
+
+    def first_messages(self):
+        return [json.loads(h[0]["text"]) for h in self.histories if len(h) == 1]
+
+
+def tool_call(name, **args):
+    return {"name": name, "args": args, "sig": None}
+
+
+CAOL_ILA_12_TOOLS = {"query": "Caol Ila 12", "brand_en": "Caol Ila", "age": 12}
+
+
+@pytest.fixture
+def use_tool_layer(monkeypatch):
+    monkeypatch.setattr(tool_config, "sleep", lambda seconds: None)
+
+    def use(llm, max_calls=30):
+        app.dependency_overrides[get_matching_llm_layer] = lambda: ToolLayerConfig(llm, max_calls)
+        return llm
+
+    yield use
+    app.dependency_overrides.pop(get_matching_llm_layer, None)
+
+
+def test_tool_candidates_are_ambiguous_and_never_selected(
+    client, db_session, image_storage, operator, caol_ila, use_extractor, use_tool_layer
+):
+    payload = {"items": [product_line(1, "Caol Ila 18"), product_line(2, "카올 일라 12"), product_line(3, "하이볼"),
+                         {**product_line(4, "x"), "productName": None}]}
+
+    class LinesExtractor(MockMenuExtractor):
+        def extract(self, image, content_type, filename):
+            return ExtractionResult(items=parse_extraction_response(payload), raw_output=payload)
+
+    use_extractor(LinesExtractor())
+    llm = use_tool_layer(FakeToolLLM({"카올 일라 12": CAOL_ILA_12_TOOLS,
+                                      "하이볼": {"query": "하이볼", "kind": "non_whisky"}}))
+
+    import_id = upload(client, make_bar(db_session), operator)
+
+    menu_import = load_import(db_session, import_id)
+    assert menu_import.status == ImportStatus.READY_FOR_REVIEW
+    # One conversation per photo (search, then submit), opened with the same lines as M3a.
+    assert len(llm.histories) == 2
+    assert llm.first_messages() == [{"lines": [{"line": 1, "name": "Caol Ila 18", "target": False},
+                                               {"line": 2, "name": "카올 일라 12", "target": True},
+                                               {"line": 3, "name": "하이볼", "target": True}]}]
+    exact, llm_line, non_whisky, nameless = items_of(menu_import)
+    assert [i.initial_resolution_status for i in (exact, llm_line, non_whisky, nameless)] == [
+        ResolutionStatus.EXACT_MATCH, ResolutionStatus.AMBIGUOUS, ResolutionStatus.UNMATCHED, ResolutionStatus.UNMATCHED]
+    assert candidates_of(llm_line) == [(caol_ila[12].id, 1, MatchMethod.LLM, Decimal("0.500000"), {
+        "rule": "TOOLS", "via": ["tools"], "sure": True, "confirmRecommended": True})]
+    assert non_whisky.candidates == [] and nameless.candidates == []
+    assert llm_line.selected_product_id is None and llm_line.review_status.value == "pending"
+    assert (MenuChangeType.ADD, llm_line.id, None) in changes_of(db_session, menu_import)
+
+    [image] = client.get(f"/api/menu-imports/{import_id}", headers=operator).json()["images"]
+    item = image["items"][1]
+    assert (item["initialResolutionStatus"], item["proposedProductId"]) == ("ambiguous", str(caol_ila[12].id))
+    [candidate] = item["candidates"]
+    assert (candidate["matchMethod"], candidate["score"], candidate["evidence"]["rule"]) == ("llm", 0.5, "TOOLS")
+    assert candidate["evidence"]["confirmRecommended"] is True
+
+
+def test_tool_pick_is_vetoed_like_m3a(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_tool_layer
+):
+    menu_lines("카올 일라 12년")  # the printed age is 12; the model picks the 18
+    use_tool_layer(FakeToolLLM({"카올 일라 12년": {"query": "Caol Ila 18", "brand_en": "Caol Ila", "age": 12}}))
+
+    [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
+
+    assert (item.initial_resolution_status, item.candidates) == (ResolutionStatus.UNMATCHED, [])
+
+
+def test_tool_candidates_come_before_the_rule_candidates(
+    client, db_session, image_storage, operator, glenfiddich, menu_lines, use_tool_layer
+):
+    sherry = make_product(db_session, glenfiddich[12].brand, "Glenfiddich 12 Sherry Cask", age_years=12,
+                          edition_name="Sherry Cask")
+    menu_lines("글렌피딕 12년 싱글몰트")  # S2: brand + age, two products of that age
+    use_tool_layer(FakeToolLLM({"글렌피딕 12년 싱글몰트": {"query": "Glenfiddich 12", "brand_en": "Glenfiddich",
+                                                         "age": 12}}))
+
+    [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
+
+    assert item.initial_resolution_status == ResolutionStatus.AMBIGUOUS
+    (llm_id, _, llm_method, _, llm_evidence), (rule_id, rank, rule_method, _, rule_evidence) = candidates_of(item)
+    assert (llm_id, llm_method, llm_evidence["rule"], llm_evidence["confirmRecommended"]) == (
+        glenfiddich[12].id, MatchMethod.LLM, "TOOLS", True)
+    assert (rule_id, rank, rule_method, rule_evidence["rule"]) == (sherry.id, 2, MatchMethod.ALIAS, "S2")
+
+
+def test_call_cap_bounds_the_conversation_turns(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_tool_layer, caplog
+):
+    menu_lines("카올 일라 12", "카올 일라 12")  # the same name twice on each photo
+    llm = use_tool_layer(FakeToolLLM({"카올 일라 12": CAOL_ILA_12_TOOLS}), max_calls=3)
+
+    with caplog.at_level(logging.INFO, logger="app.services.menu_import_processing"):
+        items = items_of(load_import(
+            db_session, upload(client, make_bar(db_session), operator, filenames=("sample.jpg", "sample-2.jpg"))))
+
+    # Photo 1 takes two turns; photo 2 gets its first turn and the cap stops its second, so it has no answer.
+    assert len(llm.histories) == 3
+    assert [[c.method for c in item.candidates] for item in items[:2]] == [[MatchMethod.LLM], [MatchMethod.LLM]]
+    assert [(item.initial_resolution_status, item.candidates) for item in items[2:]] == [
+        (ResolutionStatus.UNMATCHED, [])] * 2
+    assert "'cap_reached': 1" in caplog.text and "'requests': 3" in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("answer", "turns"), [(RuntimeError("API down"), 1), (TimeoutError(), 2), (MatchingLLMError("x"), 1)]
+)
+def test_tool_failure_keeps_the_rule_results(
+    client, db_session, image_storage, operator, glenfiddich, menu_lines, use_tool_layer, answer, turns
+):
+    menu_lines("글렌피딕 12년 싱글몰트", "글렌피딕 18년")
+    llm = use_tool_layer(FakeToolLLM(answer=answer))
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    # A timeout is tried once more; other errors are not.
+    assert len(llm.histories) == turns and menu_import.status == ImportStatus.READY_FOR_REVIEW
+    rule_line, unknown = items_of(menu_import)
+    assert rule_line.initial_resolution_status == ResolutionStatus.AMBIGUOUS
+    assert [(c.product_id, c.method, c.evidence["rule"]) for c in rule_line.candidates] == [
+        (glenfiddich[12].id, MatchMethod.ALIAS, "S2")]
+    assert (unknown.initial_resolution_status, unknown.candidates) == (ResolutionStatus.UNMATCHED, [])
+
+
+def test_tool_conversation_without_an_answer_keeps_the_rule_results(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_tool_layer
+):
+    class Endless(FakeToolLLM):
+        def step(self, system, history, tools):
+            super().step(system, history, tools)
+            return {"calls": [tool_call("search_catalog", query="Caol Ila")], "usage": {}}
+
+    menu_lines("카올 일라 12")
+    llm = use_tool_layer(Endless())
+
+    [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
+
+    assert len(llm.histories) == 6  # tool_layer.MAX_TURNS
+    assert (item.initial_resolution_status, item.candidates) == (ResolutionStatus.UNMATCHED, [])
+
+
+def test_hung_tool_call_is_abandoned_and_its_photo_keeps_the_rule_results(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_tool_layer, monkeypatch, caplog
+):
+    """A stalled SDK call does not hold the import: the turn is abandoned after TURN_TIMEOUT_S, that
+    photo keeps its rule results, the next photo is matched, and the late answer changes nothing."""
+    monkeypatch.setattr(tool_config, "TURN_TIMEOUT_S", 0.2)
+    release, late = threading.Event(), threading.Event()
+
+    class HangsOnTheFirstTurn(FakeToolLLM):
+        def step(self, system, history, tools):
+            if not self.histories:
+                self.histories.append([dict(m) for m in history])
+                release.wait(10)
+                try:
+                    return super().step(system, history, tools)  # a matching answer, too late
+                finally:
+                    late.set()
+            return super().step(system, history, tools)
+
+    menu_lines("카올 일라 12")
+    use_tool_layer(HangsOnTheFirstTurn({"카올 일라 12": CAOL_ILA_12_TOOLS}))
+
+    with caplog.at_level(logging.WARNING, logger="app.matching.tool_config"):
+        import_id = upload(client, make_bar(db_session), operator, filenames=("sample.jpg", "sample-2.jpg"))
+
+    menu_import = load_import(db_session, import_id)
+    assert menu_import.status == ImportStatus.READY_FOR_REVIEW
+    hung, answered = items_of(menu_import)
+    assert (hung.initial_resolution_status, hung.candidates) == (ResolutionStatus.UNMATCHED, [])
+    assert answered.initial_resolution_status == ResolutionStatus.AMBIGUOUS
+    assert [c.evidence["rule"] for c in answered.candidates] == ["TOOLS"]
+    assert "abandoned: no response within 0 s" in caplog.text
+
+    release.set()
+    assert late.wait(5)
+    menu_import = load_import(db_session, import_id)
+    hung, answered = items_of(menu_import)
+    assert (hung.initial_resolution_status, hung.candidates) == (ResolutionStatus.UNMATCHED, [])
+    assert [c.evidence["rule"] for c in answered.candidates] == ["TOOLS"]
+
+
+@pytest.mark.parametrize("broken", ["CatalogSnapshot", "ToolEngine"])
+def test_bug_in_the_tool_layer_keeps_the_rule_results(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_tool_layer, monkeypatch, caplog, broken
+):
+    def bug(*args, **kwargs):
+        raise KeyError("bug")
+
+    monkeypatch.setattr(menu_import_processing, broken, bug)
+    menu_lines("Caol Ila 18", "카올 일라 12")
+    use_tool_layer(FakeToolLLM({"카올 일라 12": CAOL_ILA_12_TOOLS}))
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    assert menu_import.status == ImportStatus.READY_FOR_REVIEW
+    assert [i.initial_resolution_status for i in items_of(menu_import)] == [
+        ResolutionStatus.EXACT_MATCH, ResolutionStatus.UNMATCHED]
+    assert "the LLM matching layer failed; keeping the rule results" in caplog.text
+
+
+def test_no_transaction_is_open_during_tool_calls(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_tool_layer
+):
+    in_transaction = []
+    menu_lines("카올 일라 12")
+    use_tool_layer(FakeToolLLM({"카올 일라 12": CAOL_ILA_12_TOOLS},
+                               on_call=lambda: in_transaction.append(db_session.in_transaction())))
+
+    upload(client, make_bar(db_session), operator, filenames=("sample.jpg", "sample-2.jpg"))
+
+    assert in_transaction == [False] * 4
+
+
+def test_no_tool_call_when_every_line_is_confirmed(
+    client, db_session, image_storage, operator, caol_ila, menu_lines, use_tool_layer
+):
+    menu_lines("Caol Ila 18", "쿨일라 12년")
+    llm = use_tool_layer(FakeToolLLM())
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    assert llm.histories == []
+    assert {i.initial_resolution_status for i in items_of(menu_import)} == {ResolutionStatus.EXACT_MATCH}

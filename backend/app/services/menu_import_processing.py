@@ -7,8 +7,12 @@ the remaining images are not extracted, since the import cannot be reviewed anyw
 
 Matching runs the rule stages S1–S3 and, when the LLM matching layer is configured
 (MATCHING_LLM_ENABLED, see `app.api.deps.get_matching_llm_layer`), the M3 layer on the lines
-they did not confirm. The layer only adds candidates: its lines are ambiguous, and any
-failure in it leaves the rule results as they were.
+they did not confirm, or with MATCHING_LLM_MODE=tools the tool-calling layer (E10,
+`app.matching.tool_layer`). The layer only adds candidates: its lines are ambiguous, and any
+failure in it leaves the rule results as they were. Last, when EMBEDDING_ENABLED=true, the
+embedding step (`app.matching.embedding`) works on those results: lines still unmatched get up to
+five similar products as ambiguous candidates, and ambiguous lines without a confirmRecommended
+candidate are reordered. It never confirms, and a failure in it keeps the earlier results too.
 
 Processing runs inside the API process, so a restart stops it. At start-up the unfinished
 imports (`uploaded`, `processing`) are resumed: an image's items are committed together with
@@ -36,8 +40,11 @@ from app.adapters.extraction import ExtractedItemData, ExtractionError, MenuExtr
 from app.adapters.storage import ImageStorage
 from app.matching import ExtractedProduct, ResolutionResult
 from app.matching.db_catalog import CatalogSnapshot, DbCatalog
-from app.matching.llm_layer import CONFIRMED, LLMLayerConfig, M3Engine
+from app.matching.embedding import EmbeddingStep, get_embedding_step, summarize
+from app.matching.llm_layer import CONFIRMED, M3Engine
 from app.matching.staged import resolve_product_staged
+from app.matching.tool_config import CappedToolLLM, MatchingLayerConfig, ToolLayerConfig
+from app.matching.tool_layer import ToolEngine
 from app.models import (
     ExtractedItem,
     ExtractedOption,
@@ -72,7 +79,7 @@ def start_processing(
     session_factory: SessionFactory,
     storage: ImageStorage,
     extractor: MenuExtractor,
-    llm_layer: LLMLayerConfig | None = None,
+    llm_layer: MatchingLayerConfig | None = None,
 ) -> None:
     """Called after the import rows are committed, so the job never sees uncommitted rows.
 
@@ -96,7 +103,7 @@ def process_menu_import(
     extractor: MenuExtractor,
     import_id: UUID,
     *,
-    llm_layer: LLMLayerConfig | None = None,
+    llm_layer: MatchingLayerConfig | None = None,
 ) -> None:
     with session_factory() as session:
         menu_import = session.get(MenuImport, import_id)
@@ -152,7 +159,7 @@ def recover_imports(
     storage: ImageStorage,
     extractor: MenuExtractor,
     *,
-    llm_layer: LLMLayerConfig | None = None,
+    llm_layer: MatchingLayerConfig | None = None,
 ) -> None:
     """Resume the given interrupted imports one by one; one that cannot be resumed does not stop the rest."""
     for import_id in import_ids:
@@ -279,7 +286,7 @@ def _store_item(session: Session, run: ExtractionRun, data: ExtractedItemData) -
 MATCHING_STAGES = frozenset({"S1", "S2", "S2b", "S3"})
 
 
-def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: LLMLayerConfig | None = None) -> None:
+def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: MatchingLayerConfig | None = None) -> None:
     catalog = DbCatalog(session)
     items = product_items(session, menu_import)
     results = {
@@ -300,6 +307,9 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: LLM
         results = _apply_llm_layer(session, menu_import.id, items, results, llm_layer)
         # The layer ended the read transaction, which expired the loaded rows; load them again.
         items = product_items(session, menu_import)
+    embedding = get_embedding_step()
+    if embedding is not None:
+        results = _apply_embedding(session, menu_import.id, items, results, embedding)
     for item in items:
         result = results[item.id]
         # "multi" (one line naming two products) has no stored status: the line stays ambiguous
@@ -326,9 +336,9 @@ def _apply_llm_layer(
     import_id: UUID,
     items: list[ExtractedItem],
     results: dict[UUID, ResolutionResult],
-    llm_layer: LLMLayerConfig,
+    llm_layer: MatchingLayerConfig,
 ) -> dict[UUID, ResolutionResult]:
-    """Run M3 on the lines S1–S3 did not confirm; on any failure return `results` unchanged.
+    """Run M3 (or the tool layer) on the lines S1–S3 did not confirm; on any failure return `results` unchanged.
 
     Lines are the product names of one image (one extraction run) in menu order, each name
     once; M3a is called for every image first, then lines are resolved in menu order (with
@@ -353,12 +363,16 @@ def _apply_llm_layer(
         # Nothing is written yet; end the read transaction so it is not held during the model calls.
         session.commit()
 
-        engine = M3Engine(llm_layer.llm, lines, catalog.meta, max_calls=llm_layer.max_calls)
-        for image in lines:
-            engine.translate(image, targets.get(image, set()))
-        resolved = dict(results)
-        for item_id, image, name in unconfirmed:
-            resolved[item_id] = engine.resolve(image, name, catalog, results[item_id], use_m3b=llm_layer.use_m3b)
+        if isinstance(llm_layer, ToolLayerConfig):
+            resolved, stats = _run_tool_layer(llm_layer, lines, targets, unconfirmed, catalog, results)
+        else:
+            engine = M3Engine(llm_layer.llm, lines, catalog.meta, max_calls=llm_layer.max_calls)
+            for image in lines:
+                engine.translate(image, targets.get(image, set()))
+            resolved = dict(results)
+            for item_id, image, name in unconfirmed:
+                resolved[item_id] = engine.resolve(image, name, catalog, results[item_id], use_m3b=llm_layer.use_m3b)
+            stats = dict(engine.stats)
     except Exception:
         logger.exception("Menu import %s: the LLM matching layer failed; keeping the rule results", import_id)
         session.rollback()
@@ -366,6 +380,54 @@ def _apply_llm_layer(
     changed = sum(resolved[item_id] is not results[item_id] for item_id, _, _ in unconfirmed)
     logger.info(
         "Menu import %s: LLM matching layer gave candidates to %d of %d unconfirmed lines (requests: %s)",
-        import_id, changed, len(unconfirmed), dict(engine.stats) or "none",
+        import_id, changed, len(unconfirmed), stats or "none",
     )
     return resolved
+
+
+def _apply_embedding(
+    session: Session,
+    import_id: UUID,
+    items: list[ExtractedItem],
+    results: dict[UUID, ResolutionResult],
+    embedding: EmbeddingStep,
+) -> dict[UUID, ResolutionResult]:
+    """Run the embedding step on the results of the earlier steps (rules, then the LLM layer if it ran);
+    on any failure return `results` unchanged. Only reads: nothing is written before this point."""
+    try:
+        resolved = embedding.apply(session, {item.id: item.extracted_product_name for item in items}, results)
+    except Exception:
+        logger.exception("Menu import %s: the embedding step failed; keeping the earlier results", import_id)
+        # Only reads happened in this transaction; the rows reload on their next access.
+        session.rollback()
+        return results
+    logger.info(
+        "Menu import %s: embedding step (%s, floor %s): %s",
+        import_id, embedding.provider.model_id, embedding.min_similarity, summarize(results, resolved),
+    )
+    return resolved
+
+
+def _run_tool_layer(
+    config: ToolLayerConfig,
+    lines: dict[str, list[str]],
+    targets: dict[str, set[str]],
+    unconfirmed: list[tuple[UUID, str, str]],
+    catalog: CatalogSnapshot,
+    results: dict[UUID, ResolutionResult],
+) -> tuple[dict[UUID, ResolutionResult], dict]:
+    """MATCHING_LLM_MODE=tools: one conversation per image in menu order, then the lines in menu order.
+
+    Each conversation turn is a request toward the import's cap (`CappedToolLLM`); a photo whose
+    conversation fails, runs out of turns, hits the cap or runs past its wall-clock limits
+    (`tool_config.TURN_TIMEOUT_S`, `PHOTO_TIMEOUT_S`) keeps its rule results.
+    """
+    llm = CappedToolLLM(config.llm, config.max_calls, make_llm=config.make_llm)
+    engine = ToolEngine(llm, lines, catalog.meta)
+    for image in lines:
+        llm.start_photo()
+        engine.translate(image, targets.get(image, set()), catalog)
+    resolved = dict(results)
+    for item_id, image, name in unconfirmed:
+        resolved[item_id] = engine.resolve(image, name, catalog, results[item_id])
+    return resolved, {"mode": "tools", "requests": llm.calls, **dict(llm.stats), "photos": dict(engine.stats)}

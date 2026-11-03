@@ -40,6 +40,17 @@ data class NearbyBarsResponseDto(
     val items: List<NearbyBarItemDto>,
 )
 
+// API spec §3.17: display-only popular whisky cards (not an OCR or catalog guess).
+data class PopularProductDto(
+    val productId: String,
+    val displayName: String,
+    val brandName: String,
+    val ageYears: Int? = null,
+    val editionName: String? = null,
+    val barCount: Int,
+)
+data class PopularProductsResponseDto(val items: List<PopularProductDto> = emptyList())
+
 data class MatchedProductDto(
     val productId: String,
     val displayName: String,
@@ -54,6 +65,7 @@ data class SearchOptionDto(
     val pourMl: Int? = null,
     val priceKrw: Int,
     val sortOrder: Int,
+    val discount: BarMenuDiscountDto? = null,
 )
 
 data class SearchResultDto(
@@ -68,10 +80,11 @@ data class SearchResultDto(
     val menuDisplayName: String,
     val options: List<SearchOptionDto> = emptyList(),
     val menuUpdatedAt: String,
+    val coverThumbnailUrl: String? = null,
 )
 
 data class SearchBarsResponseDto(
-    val query: String,
+    val query: String?,
     val matchType: String,
     val matchedProducts: List<MatchedProductDto> = emptyList(),
     val items: List<SearchResultDto> = emptyList(),
@@ -86,6 +99,24 @@ data class BarMenuOptionDto(
     val pourMl: Int?,
     val priceKrw: Int,
     val sortOrder: Int,
+    val discount: BarMenuDiscountDto? = null,
+)
+data class BarMenuDiscountDto(
+    val discountedPriceKrw: Int,
+    val startsAt: String,
+    val endsAt: String,
+)
+data class BarPhotoDto(
+    val photoId: String, val imageUrl: String, val thumbnailUrl: String,
+)
+data class BarWeeklyHoursDto(
+    val dayOfWeek: Int, val closed: Boolean,
+    val openTime: String? = null, val closeTime: String? = null,
+)
+data class BarOperatingExceptionDto(
+    val kind: String, val startDate: String, val endDate: String,
+    val openTime: String? = null, val closeTime: String? = null,
+    val note: String? = null,
 )
 
 data class BarMenuItemDto(
@@ -96,6 +127,11 @@ data class BarMenuItemDto(
     val displayName: String,
     val sortOrder: Int,
     val options: List<BarMenuOptionDto>,
+    val productName: String? = null,
+    val brandId: String? = null,
+    val brandName: String? = null,
+    val category: String = "whisky",
+    val soldOut: Boolean = false,
 )
 
 data class BarMenuResponseDto(
@@ -108,6 +144,12 @@ data class BarMenuResponseDto(
     val menuBoardId: String?,
     val publishedAt: String?,
     val items: List<BarMenuItemDto>,
+    val description: String? = null,
+    val tags: List<String> = emptyList(),
+    val weeklyHours: List<BarWeeklyHoursDto> = emptyList(),
+    val operatingException: BarOperatingExceptionDto? = null,
+    val photos: List<BarPhotoDto> = emptyList(),
+    val menuVersion: Int? = null,
 )
 
 // Backend PR #54: GET /api/search/bar-names (public).
@@ -133,6 +175,7 @@ data class MapBarItemDto(
     val latitude: Double,
     val longitude: Double,
     val menuUpdatedAt: String?,
+    val coverThumbnailUrl: String? = null,
 )
 
 data class MapBarsResponseDto(

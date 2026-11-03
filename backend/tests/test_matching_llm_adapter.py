@@ -8,12 +8,16 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.adapters.gemini_matching_llm import MAX_ATTEMPTS, REQUEST_TIMEOUT_S, GeminiMatchingLLM
+from app.adapters.gemini_tool_llm import GeminiToolLLM
 from app.adapters.matching_llm import MatchingLLMError, MatchingLLMSettings, load_matching_llm_settings
+from app.adapters.matching_llm_mode import load_matching_llm_mode
 from app.api import deps
 from app.extraction import gemini
-from app.matching.llm_layer import Pick, Translation
+from app.matching.llm_layer import LLMLayerConfig, Pick, Translation
+from app.matching.tool_config import ToolLayerConfig
 
-MATCHING_ENV = ("GEMINI_API_KEY", "MATCHING_LLM_ENABLED", "MATCHING_LLM_MAX_CALLS", "MATCHING_LLM_M3B_ENABLED")
+MATCHING_ENV = ("GEMINI_API_KEY", "MATCHING_LLM_ENABLED", "MATCHING_LLM_MAX_CALLS", "MATCHING_LLM_M3B_ENABLED",
+                "MATCHING_LLM_MODE")
 
 
 class FakeClient:
@@ -212,3 +216,81 @@ def test_server_starts_with_the_layer_on_but_no_key(env, caplog):
         assert client.get("/openapi.json").status_code == 200
 
     assert "the LLM matching layer is off" in caplog.text
+
+
+# ---- MATCHING_LLM_MODE (m3a | tools) ----
+
+
+@pytest.mark.parametrize("value", [None, "", "m3a", "M3A"])
+def test_mode_m3a_is_the_default(env, value):
+    if value is not None:
+        env.setenv("MATCHING_LLM_MODE", value)
+    env.setenv("GEMINI_API_KEY", "secret-test-key")
+    env.setenv("MATCHING_LLM_ENABLED", "true")
+
+    assert load_matching_llm_mode() == "m3a"
+    layer = deps.get_matching_llm_layer()
+    assert isinstance(layer, LLMLayerConfig) and isinstance(layer.llm, GeminiMatchingLLM)
+    assert (layer.max_calls, layer.use_m3b) == (30, False)
+
+
+@pytest.mark.parametrize("value", ["tools", " Tools "])
+def test_mode_tools_runs_the_tool_layer_on_the_frozen_model(env, value):
+    env.setenv("MATCHING_LLM_MODE", value)
+    env.setenv("GEMINI_API_KEY", "secret-test-key")
+    env.setenv("MATCHING_LLM_ENABLED", "true")
+    env.setenv("MATCHING_LLM_MAX_CALLS", "90")
+
+    layer = deps.get_matching_llm_layer()
+
+    assert isinstance(layer, ToolLayerConfig) and layer.max_calls == 90
+    assert isinstance(layer.llm, GeminiToolLLM)
+    # i3_eval_freeze.md 4.10
+    assert (layer.llm.model, layer.llm.thinking_level) == ("gemini-3.1-flash-lite", "low")
+    # A new adapter (and client) per import and after an abandoned turn, on the same model.
+    fresh = layer.make_llm()
+    assert isinstance(fresh, GeminiToolLLM) and fresh is not layer.llm
+    assert (fresh.model, fresh.thinking_level) == ("gemini-3.1-flash-lite", "low")
+
+
+def test_mode_tools_stays_off_without_the_switch_or_the_key(env, caplog):
+    env.setenv("MATCHING_LLM_MODE", "tools")
+    env.setenv("GEMINI_API_KEY", "secret-test-key")
+    assert deps.get_matching_llm_layer() is None
+
+    deps.get_matching_llm_layer.cache_clear()
+    env.delenv("GEMINI_API_KEY")
+    env.setenv("MATCHING_LLM_ENABLED", "true")
+    with caplog.at_level(logging.WARNING, logger="app.api.deps"):
+        assert deps.get_matching_llm_layer() is None
+    assert "GEMINI_API_KEY is not set" in caplog.text
+
+
+def test_mode_tools_ignores_m3b_with_a_warning(env, caplog):
+    env.setenv("MATCHING_LLM_MODE", "tools")
+    env.setenv("GEMINI_API_KEY", "secret-test-key")
+    env.setenv("MATCHING_LLM_ENABLED", "true")
+    env.setenv("MATCHING_LLM_M3B_ENABLED", "true")
+
+    with caplog.at_level(logging.WARNING, logger="app.api.deps"):
+        assert isinstance(deps.get_matching_llm_layer(), ToolLayerConfig)
+
+    assert "MATCHING_LLM_M3B_ENABLED=true is ignored with MATCHING_LLM_MODE=tools" in caplog.text
+
+
+@pytest.mark.parametrize("value", ["tool", "m3b", "embedding", "true"])
+def test_unknown_mode_is_rejected_even_with_the_layer_off(env, value):
+    env.setenv("MATCHING_LLM_MODE", value)
+
+    with pytest.raises(RuntimeError, match="MATCHING_LLM_MODE must be one of m3a, tools"):
+        deps.get_matching_llm_layer()
+
+
+def test_server_start_fails_with_an_unknown_mode(env):
+    from app.main import app
+
+    env.setenv("MATCHING_LLM_MODE", "tool")
+
+    with pytest.raises(RuntimeError, match="MATCHING_LLM_MODE"):
+        with TestClient(app):
+            pass

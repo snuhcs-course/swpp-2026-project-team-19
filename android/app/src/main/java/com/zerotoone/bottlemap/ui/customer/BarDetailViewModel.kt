@@ -5,6 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.CustomerBarDetailSource
 import com.zerotoone.bottlemap.data.Repositories
 import com.zerotoone.bottlemap.network.BarMenuResponseDto
+import com.zerotoone.bottlemap.network.BarPhotoDto
+import com.zerotoone.bottlemap.network.BarWeeklyHoursDto
+import com.zerotoone.bottlemap.network.BarOperatingExceptionDto
+import com.zerotoone.bottlemap.network.BarMenuDiscountDto
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import java.text.NumberFormat
 import java.util.Locale
@@ -47,6 +51,11 @@ data class BarDetailUiModel(
     val longitude: Double?,
     val publishedAtText: String?,
     val items: List<BarMenuItemUiModel>,
+    val description: String? = null,
+    val tags: List<String> = emptyList(),
+    val weeklyHours: List<BarWeeklyHoursDto> = emptyList(),
+    val operatingException: BarOperatingExceptionDto? = null,
+    val photos: List<BarPhotoDto> = emptyList(),
 )
 
 data class BarMenuItemUiModel(
@@ -55,10 +64,16 @@ data class BarMenuItemUiModel(
     // This is the published menu label, NOT the canonical catalog product name.
     val menuDisplayName: String,
     val options: List<BarMenuOptionUiModel>,
+    val brandName: String? = null,
+    val category: String = "whisky",
 )
 
 data class BarMenuOptionUiModel(
     val text: String,
+    val pourMl: Int? = null,
+    val label: String? = null,
+    val priceKrw: Int? = null,
+    val discount: BarMenuDiscountDto? = null,
 )
 
 class BarDetailViewModel(
@@ -152,11 +167,18 @@ internal fun BarMenuResponseDto.toBarDetailUiState(): BarDetailUiState {
         latitude = latitude,
         longitude = longitude,
         publishedAtText = publishedAt?.let(::formatMenuTimestamp),
-        items = items.map { item ->
+        description = description,
+        tags = tags,
+        weeklyHours = weeklyHours,
+        operatingException = operatingException,
+        photos = photos,
+        items = items.filterNot { it.soldOut }.map { item ->
             BarMenuItemUiModel(
                 menuBoardEntryId = item.menuBoardEntryId,
                 productId = item.productId,
                 menuDisplayName = item.displayName,
+                brandName = item.brandName,
+                category = item.category,
                 options = item.options.map { option ->
                     BarMenuOptionUiModel(
                         text = formatBarMenuOption(
@@ -164,12 +186,16 @@ internal fun BarMenuResponseDto.toBarDetailUiState(): BarDetailUiState {
                             option.pourMl,
                             option.priceKrw,
                         ),
+                        pourMl = option.pourMl,
+                        label = option.optionLabel,
+                        priceKrw = option.priceKrw,
+                        discount = option.discount,
                     )
                 },
             )
         },
     )
-    if (items.isNotEmpty()) return BarDetailUiState.Success(bar)
+    if (bar.items.isNotEmpty()) return BarDetailUiState.Success(bar)
     return BarDetailUiState.Empty(
         bar = bar,
         reason = if (menuBoardId == null) {

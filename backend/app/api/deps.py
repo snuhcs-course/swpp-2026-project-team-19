@@ -15,8 +15,10 @@ from app.adapters.business_verification import BusinessVerifier
 from app.adapters.certificate_ocr import CertificateOcr
 from app.adapters.extraction import MenuExtractor, MockMenuExtractor
 from app.adapters.matching_llm import load_matching_llm_settings
+from app.adapters.matching_llm_mode import TOOLS_MODEL, TOOLS_THINKING_LEVEL, load_matching_llm_mode
 from app.adapters.storage import ImageStorage, LocalImageStorage, S3ImageStorage
 from app.matching.llm_layer import LLMLayerConfig
+from app.matching.tool_config import MatchingLayerConfig, ToolLayerConfig
 from app.services.image_links import ImageLinks
 from app.services.request_limits import DailyRequestLimiter, InMemoryDailyLimiter, utc_now
 
@@ -97,21 +99,37 @@ def get_menu_extractor() -> MenuExtractor:
 
 
 @lru_cache(maxsize=1)
-def get_matching_llm_layer() -> LLMLayerConfig | None:
+def get_matching_llm_layer() -> MatchingLayerConfig | None:
     """The LLM matching layer for menu import, or None when it is off (the default).
 
     MATCHING_LLM_ENABLED=true turns it on with GEMINI_API_KEY; MATCHING_LLM_MAX_CALLS caps the
     model requests per import (default 30) and MATCHING_LLM_M3B_ENABLED=true adds M3b. Without
     a key the layer stays off with a warning instead of stopping the server: imports then keep
     the rule results, as they would after a failed call.
+
+    MATCHING_LLM_MODE picks the layer: m3a (default, `LLMLayerConfig`) or tools (E10,
+    `ToolLayerConfig`; every conversation turn counts toward MATCHING_LLM_MAX_CALLS, and M3b
+    does not apply).
     """
     settings = load_matching_llm_settings()  # RuntimeError for an invalid cap stops the server
+    mode = load_matching_llm_mode()  # and for an unknown mode, even with the layer off
     if not settings.enabled:
         return None
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         logger.warning("MATCHING_LLM_ENABLED=true but GEMINI_API_KEY is not set; the LLM matching layer is off")
         return None
+    if mode == "tools":
+        if settings.m3b_enabled:
+            logger.warning("MATCHING_LLM_M3B_ENABLED=true is ignored with MATCHING_LLM_MODE=tools")
+        # Imported here so a server with the layer off does not load the Gemini SDK for it.
+        from app.adapters.gemini_tool_llm import GeminiToolLLM
+
+        def make_tool_llm() -> GeminiToolLLM:
+            return GeminiToolLLM(api_key, TOOLS_MODEL, TOOLS_THINKING_LEVEL)
+
+        # A new client per import and after an abandoned turn (tool_config.CappedToolLLM).
+        return ToolLayerConfig(llm=make_tool_llm(), max_calls=settings.max_calls, make_llm=make_tool_llm)
     # Imported here so a server with the layer off does not load the Gemini SDK for it.
     from app.adapters.gemini_matching_llm import GeminiMatchingLLM
 
