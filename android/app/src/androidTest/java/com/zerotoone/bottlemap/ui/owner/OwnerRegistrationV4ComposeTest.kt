@@ -146,6 +146,34 @@ class OwnerRegistrationV4ComposeTest {
         org.junit.Assert.assertEquals(1,multiple.applications.size)
     }
 
+    @Test fun exceptionCatalogProvidesAllNinePagesWithoutMutatingDraft() {
+        val vm=show(MockOwnerSnapshot())
+        // The catalog is a Debug-only preview, not a simulated NTS/backend response.
+        compose.onNodeWithText("매장 등록은\n이렇게 진행돼요").assertExists()
+        compose.runOnIdle {
+            val state=vm.state.value as MockOwnerLoadState.Empty
+            assertEquals(0,state.snapshot.applications.size)
+        }
+        compose.setContent {
+            MaterialTheme {
+                OwnerRegistrationQaCatalog(onChoose={})
+            }
+        }
+        for(page in 21..29) compose.onNodeWithTag("registration-qa-page-$page").assertExists()
+    }
+
+    @Test fun correctedOcrPartialFixtureShowsMissingOpeningDateAndDisabledSubmit() {
+        compose.setContent {
+            MaterialTheme {
+                OwnerRegistrationQaPreview(page=26,onBack={},onAction={})
+            }
+        }
+        compose.onNodeWithText("읽지 못했어요").assertExists()
+        compose.onNodeWithText("읽지 못한 항목은 직접 입력해 주세요.").assertExists()
+        compose.onNodeWithText("국세청에 확인하기").assertExists()
+        compose.onNodeWithTag("registration-qa-preview-26").assertExists()
+    }
+
     @Test fun completeReviewSubmitsMockPendingApplicationWithoutNtsNetworkCall() {
         val gallery=MockPhoto("cover","content://mock/cover",MockPhotoKind.BAR_GALLERY)
         val menu=MockPhoto("menu","content://mock/menu",MockPhotoKind.MENU_CAPTURE)
