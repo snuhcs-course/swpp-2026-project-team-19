@@ -52,6 +52,7 @@ def schema():
             "/api/owner-applications/business-certificate-ocr",
             {"400", "401", "413", "415", "422", "429", "500", "503"},
         ),
+        ("post", "/api/owner-applications/business-verification", {"401", "422", "429", "500", "503"}),
         (
             "put",
             "/api/owner-applications/{applicationId}/cover-photo",

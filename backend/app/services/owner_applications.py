@@ -2,7 +2,8 @@
 
 Applying checks, in the spec's order, the fields, the caller's users row, the claimed bar and its
 owner, the caller's pending applications, and last the NTS business check, which calls an external
-API. A mismatch creates nothing; a check that cannot be made stores `unavailable`. The partial
+API unless the caller matched the same values in the check before applying (business_check.py). A
+mismatch creates nothing; a check that cannot be made stores `unavailable`. The partial
 unique indexes catch a duplicate that a concurrent request created after the pending check.
 
 Menu photos, and the cover photo of a new_bar application, are attached after the application exists
@@ -22,9 +23,9 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.adapters.business_verification import BusinessVerificationUnavailable, BusinessVerifier
+from app.adapters.business_verification import BusinessVerifier
 from app.adapters.storage import ImageStorage
-from app.core.errors import ApiError, validation_failed
+from app.core.errors import ApiError
 from app.core.security import Principal, user_type_of
 from app.models import (
     Bar,
@@ -54,7 +55,8 @@ from app.services.bar_photo_image import process_photo
 from app.services.bar_photos import PHOTO_CONTENT_TYPE
 from app.services.image_links import ImageLinks
 from app.services.menu_import_upload import ImageUpload, check_images
-from app.services.request_limits import BUSINESS_VERIFICATION, DailyRequestLimiter, acquire_or_raise, kst_date
+from app.services.business_check import RecentBusinessChecks, call_nts, check_opening_date
+from app.services.request_limits import DailyRequestLimiter
 from app.services.users import user_not_found
 
 logger = logging.getLogger(__name__)
@@ -71,10 +73,10 @@ def submit_application(
     *,
     verifier: BusinessVerifier | None,
     limiter: DailyRequestLimiter,
+    recent: RecentBusinessChecks,
     now: datetime,
 ) -> BarOwnerApplication:
-    if request.openingDate > kst_date(now):
-        raise validation_failed("openingDate", "DATE_IN_FUTURE", "개업일자는 오늘 이후일 수 없습니다.")
+    check_opening_date(request, now)
     applicant = _caller(session, principal)
     if applicant is None:
         raise user_not_found()
@@ -83,8 +85,12 @@ def submit_application(
     if (existing := _pending_duplicate(session, applicant_id, request, bar_id)) is not None:
         raise _application_exists(existing)
 
-    result, business_status = BusinessVerificationResult.UNAVAILABLE, None
-    if verifier is not None:
+    result, business_status, checked_at = BusinessVerificationResult.UNAVAILABLE, None, now
+    if (match := recent.recall(principal.subject, request, now)) is not None:
+        # A match from the check before applying (3.11.16): NTS is not asked again or counted.
+        result, business_status = BusinessVerificationResult.MATCHED, match.business_status
+        checked_at = match.checked_at
+    elif verifier is not None:
         # End the read transaction so the connection goes back to the pool while NTS answers (up to
         # two 5 s tries). The bar or its owner may change meanwhile, so they are checked again; a
         # duplicate application created meanwhile is caught by the partial unique index below.
@@ -100,7 +106,7 @@ def submit_application(
         opening_date=request.openingDate,
         business_verification_result=result,
         business_status=business_status,
-        business_checked_at=now,
+        business_checked_at=checked_at,
         contact_phone=request.contactPhone,
         applicant_note=request.applicantNote,
     )
@@ -488,10 +494,8 @@ def _check_business(
 ) -> tuple[BusinessVerificationResult, BusinessStatus | None]:
     """The NTS check of spec 3.11.2, counted against today's limit. Without a verifier nothing is
     called or counted, and the caller stores `unavailable`."""
-    acquire_or_raise(limiter, principal.subject, BUSINESS_VERIFICATION, now)
-    try:
-        check = verifier.verify(request.businessRegistrationNumber, request.representativeName, request.openingDate)
-    except BusinessVerificationUnavailable:
+    check = call_nts(principal, request, verifier, limiter, now)
+    if check is None:
         return BusinessVerificationResult.UNAVAILABLE, None
     if not check.matched:
         raise ApiError(

@@ -13,6 +13,7 @@ from app.api.deps import (
     get_image_links,
     get_matching_llm_layer,
     get_menu_extractor,
+    get_recent_business_checks,
     get_request_limiter,
 )
 from app.api.routes.bars import Cursor, Limit
@@ -23,6 +24,8 @@ from app.matching.tool_config import MatchingLayerConfig
 from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.owner_application import (
     ApproveInput,
+    BusinessCheckResponse,
+    BusinessFieldsInput,
     OwnerApplicationInput,
     OwnerApplicationListResponse,
     OwnerApplicationPage,
@@ -31,6 +34,7 @@ from app.schemas.owner_application import (
 )
 from app.services import menu_import_upload as upload
 from app.services.bar_photo_image import MAX_LONG_EDGE, MAX_PHOTO_BYTES, THUMBNAIL_LONG_EDGE, single_upload
+from app.services.business_check import RECENT_CHECK_TTL, RecentBusinessChecks, check_business
 from app.services.image_links import ImageLinks
 from app.services.menu_import_processing import SessionFactory, start_processing
 from app.services.menu_import_upload import ImageUpload
@@ -68,6 +72,45 @@ _NOT_PENDING = "`INVALID_APPLICATION_STATE`: the application is not `pending`; `
 
 
 @router.post(
+    "/owner-applications/business-verification",
+    response_model=BusinessCheckResponse,
+    summary="Check the business registration with NTS before applying",
+    description=(
+        "Any signed-in user; no `users` row is needed. Checks only whether `businessRegistrationNumber`, "
+        "`representativeName` and `openingDate` match NTS records, with the field rules of "
+        "`POST /api/owner-applications`. Creates nothing, and returns no business status.\n\n"
+        "- `result` is `matched`, `not_matched`, or `unavailable` when NTS could not be asked (including a server "
+        "without the NTS key).\n"
+        f"- Counted together with applying: at most {DAILY_LIMIT} NTS checks per user (token `sub`) per day, reset "
+        "at midnight KST; only requests that call NTS count.\n"
+        f"- A `matched` result is remembered for {RECENT_CHECK_TTL.seconds // 60} minutes: applying with the same "
+        "three values in that time uses it instead of calling NTS, and is not counted.\n"
+        "- The values are not logged."
+    ),
+    responses=error_responses(
+        _UNAUTHENTICATED,
+        (
+            422,
+            "`VALIDATION_FAILED`: see `fieldErrors`; `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, or another field "
+            "(`EXTRA_FORBIDDEN`).",
+        ),
+        (429, "`RATE_LIMITED`: today's NTS checks are used up; `details.retryAfter` is the next reset (UTC)."),
+        AUTH_UNAVAILABLE,
+    ),
+)
+def check_owner_application_business(
+    request: BusinessFieldsInput,
+    principal: Principal = Depends(get_current_user),
+    verifier: BusinessVerifier | None = Depends(get_business_verifier),
+    limiter: DailyRequestLimiter = Depends(get_request_limiter),
+    recent: RecentBusinessChecks = Depends(get_recent_business_checks),
+    clock: Callable[[], datetime] = Depends(get_clock),
+) -> BusinessCheckResponse:
+    result = check_business(principal, request, verifier=verifier, limiter=limiter, recent=recent, now=clock())
+    return BusinessCheckResponse(result=result)
+
+
+@router.post(
     "/owner-applications",
     status_code=status.HTTP_201_CREATED,
     response_model=OwnerApplicationResponse,
@@ -80,8 +123,11 @@ _NOT_PENDING = "`INVALID_APPLICATION_STATE`: the application is not `pending`; `
         "A mismatch creates nothing (`422 BUSINESS_VERIFICATION_FAILED`). When NTS cannot be reached or the "
         "server has no NTS key, the application is created with the result `unavailable` for an operator "
         "to check again.\n"
-        f"- At most {DAILY_LIMIT} NTS checks per user (token `sub`) per day, reset at midnight KST; only "
-        "requests that call NTS count.\n"
+        f"- At most {DAILY_LIMIT} NTS checks per user (token `sub`) per day, counted together with "
+        "`POST /api/owner-applications/business-verification`, reset at midnight KST; only requests that call "
+        "NTS count.\n"
+        "- A `matched` result of that check for the same three values in the last "
+        f"{RECENT_CHECK_TTL.seconds // 60} minutes is used instead of calling NTS, and is not counted.\n"
         "- `Location` is the new application. `businessVerification` is null unless the caller is an operator."
     ),
     responses=error_responses(
@@ -115,10 +161,13 @@ def create_owner_application(
     session: Session = Depends(get_session),
     verifier: BusinessVerifier | None = Depends(get_business_verifier),
     limiter: DailyRequestLimiter = Depends(get_request_limiter),
+    recent: RecentBusinessChecks = Depends(get_recent_business_checks),
     clock: Callable[[], datetime] = Depends(get_clock),
     links: ImageLinks = Depends(get_image_links),
 ) -> OwnerApplicationResponse:
-    application = submit_application(session, principal, request, verifier=verifier, limiter=limiter, now=clock())
+    application = submit_application(
+        session, principal, request, verifier=verifier, limiter=limiter, recent=recent, now=clock()
+    )
     response.headers["Location"] = f"/api/owner-applications/{application.id}"
     operator = user_type_of(principal, session) == "operator"
     return application_responses(session, [application], links, show_verification=operator)[0]

@@ -36,14 +36,14 @@ class ProposedBarInput(_Strict):
     phone: str | None = Field(default=None, max_length=30)
 
 
-class _ApplicationInput(_Strict):
+class BusinessFieldsInput(_Strict):
+    """The three values the NTS check compares; alone, the body of the check before applying (spec 3.11.16)."""
+
     businessRegistrationNumber: str = Field(
         description="10 digits; hyphens and spaces are removed. The last digit must be the NTS check digit"
     )
     representativeName: str = Field(min_length=1, max_length=100, description="As on the certificate")
     openingDate: date = Field(description="`YYYY-MM-DD`, as on the certificate; not after today (KST)")
-    contactPhone: str = Field(min_length=1, max_length=30, description="For the operator to reach the applicant")
-    applicantNote: str | None = Field(default=None, max_length=500, description="Blank is stored as null")
 
     @field_validator("businessRegistrationNumber")
     @classmethod
@@ -63,6 +63,11 @@ class _ApplicationInput(_Strict):
         if not DATE_TEXT.fullmatch(value):
             raise PydanticCustomError("date_from_datetime_parsing", "Input should be a valid date in YYYY-MM-DD format")
         return value
+
+
+class _ApplicationInput(BusinessFieldsInput):
+    contactPhone: str = Field(min_length=1, max_length=30, description="For the operator to reach the applicant")
+    applicantNote: str | None = Field(default=None, max_length=500, description="Blank is stored as null")
 
     @field_validator("applicantNote")
     @classmethod
@@ -186,6 +191,12 @@ class OwnerApplicationResponse(BaseModel):
     reviewedAt: UtcDateTime | None = Field(description="When approved or rejected")
     createdAt: UtcDateTime
     updatedAt: UtcDateTime
+
+
+class BusinessCheckResponse(BaseModel):
+    result: VerificationResult = Field(
+        description="`matched`, `not_matched`, or `unavailable` when NTS could not be asked; nothing else is told"
+    )
 
 
 class OwnerApplicationListResponse(BaseModel):

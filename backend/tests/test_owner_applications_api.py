@@ -21,6 +21,7 @@ from app.models import (
     OwnerApplicationStatus,
     UserType,
 )
+from app.services.business_check import RecentBusinessChecks
 from app.services.request_limits import BUSINESS_VERIFICATION, DAILY_LIMIT, InMemoryDailyLimiter
 from tests.factories import BUSINESS_NUMBER, make_application, make_bar, make_owner, make_user
 
@@ -58,9 +59,13 @@ def verifier():
 def limiter():
     fresh = InMemoryDailyLimiter()
     app.dependency_overrides[deps.get_request_limiter] = lambda: fresh
+    # No match from the check before applying carries over from another test.
+    recent = RecentBusinessChecks()
+    app.dependency_overrides[deps.get_recent_business_checks] = lambda: recent
     app.dependency_overrides[deps.get_clock] = lambda: lambda: NOW
     yield fresh
     app.dependency_overrides.pop(deps.get_request_limiter, None)
+    app.dependency_overrides.pop(deps.get_recent_business_checks, None)
     app.dependency_overrides.pop(deps.get_clock, None)
 
 

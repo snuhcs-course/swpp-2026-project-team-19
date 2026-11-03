@@ -19,6 +19,7 @@ from app.adapters.matching_llm_mode import TOOLS_MODEL, TOOLS_THINKING_LEVEL, lo
 from app.adapters.storage import ImageStorage, LocalImageStorage, S3ImageStorage
 from app.matching.llm_layer import LLMLayerConfig
 from app.matching.tool_config import MatchingLayerConfig, ToolLayerConfig
+from app.services.business_check import RecentBusinessChecks
 from app.services.image_links import ImageLinks
 from app.services.request_limits import DailyRequestLimiter, InMemoryDailyLimiter, utc_now
 
@@ -169,6 +170,12 @@ def get_business_verifier() -> BusinessVerifier | None:
 def get_request_limiter() -> DailyRequestLimiter:
     """The one per-process limiter of spec 3.11.14 (the API runs as a single process)."""
     return InMemoryDailyLimiter()
+
+
+@lru_cache(maxsize=1)
+def get_recent_business_checks() -> RecentBusinessChecks:
+    """The per-process store of recent matches from the check before applying (spec 3.11.16)."""
+    return RecentBusinessChecks()
 
 
 def get_clock() -> Callable[[], datetime]:
