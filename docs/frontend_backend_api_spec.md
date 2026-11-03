@@ -341,7 +341,7 @@ POST /api/auth/temp-login
 - 클라이언트 요청이나 token claim(`user_metadata` 포함)으로 `userType`을 바꿀 수 없다. 권한은 매 요청 BottleMap DB의 `users.user_type`에서 읽는다.
 - `operator` 전환은 이후 별도 기능으로 정의하며 이 문서의 범위가 아니다. 그전까지 로컬에서 operator API를 시험할 때는 임시 로그인과 `TEMP_AUTH_USER_TYPE=operator`를 사용한다. 배포 서버에서는 백엔드 담당자가 DB의 `users.user_type`을 직접 고쳐야만 operator 역할이 부여되며, 바꾼 역할은 해당 사용자의 다음 요청부터 반영된다.
 - 업주는 `userType`이 아니라 업장별 관계다. 신청과 승인은 3.11, 권한은 2.2를 따른다.
-- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`, 그리고 임시 로그인 operator의 업주 신청 승인·거절은 `404 USER_NOT_FOUND`다(3.3, 3.11.2, 3.11.7).
+- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`, 그리고 임시 로그인 operator의 업주 신청 승인, 거절과 업주 해제는 `404 USER_NOT_FOUND`다(3.3, 3.11.2, 3.11.7, 3.11.10).
 
 #### 3.1.5 인증 오류와 프론트엔드 처리
 
@@ -1669,11 +1669,22 @@ DELETE /api/bars/{barId}/owner
 Authorization: Bearer <access-token>
 ```
 
-operator만 호출할 수 있다. 업장의 현재 업주 관계를 해제하고 `204 No Content`를 반환한다. 기록은 지우지 않고 해제 시각을 남긴다. 해제된 사용자는 다음 요청부터 그 업장의 업주 권한이 없다. 업장에 진행 중인 메뉴 등록 작업은 그대로 남으며 operator나 새 업주가 이어서 처리할 수 있다.
+operator만 호출할 수 있다. 요청 본문은 없다. 업장의 현재 업주 관계를 해제하고 `204 No Content`를 반환한다. 기록은 지우지 않고 해제 시각과 해제한 operator를 남긴다. 승인한 업주 신청은 `approved`로 남는다. 해제된 사용자는 다음 요청부터 그 업장의 업주 권한이 없으며, 같은 업장에 다시 업주 신청을 낼 수 있다(3.11.2). 비활성 업장도 해제할 수 있다. 업장에 진행 중인 메뉴 등록 작업은 그대로 남으며 operator나 새 업주가 이어서 처리할 수 있다.
+
+- 해제는 업장 행을 잠근 뒤 한다(3.14.1). 업장 행을 잠그는 요청(메뉴 등록 작업 생성, 검수 반영, 메뉴 직접 편집, 품절, 판매 정보 확인, 임시 휴무, 매장 사진)은 잠근 뒤 업주 권한을 다시 확인하므로, 해제보다 늦게 잠금을 잡은 이전 업주의 요청은 `403 FORBIDDEN`이다. 같은 업장의 `existing_bar` 신청 승인(3.11.7)과도 차례로 처리된다.
+- 이미 해제한 업장에 다시 보내면 `404 BAR_OWNER_NOT_FOUND`다. 프론트엔드는 응답을 받지 못해 다시 보낸 요청이 이 오류를 받으면 업장 상세(3.6)를 다시 불러 `owner = null`인지 확인한다.
+
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다.
+
+1. 호출자가 operator인지 (`403 FORBIDDEN`, 2.2)
+2. 호출자의 `users` 행 (`404 USER_NOT_FOUND`). 해제한 operator를 기록해야 하기 때문이다. 3.11.7과 같다
+3. 업장 (`404 BAR_NOT_FOUND`)
+4. 업장 행을 잠근 뒤 현재 업주 (`404 BAR_OWNER_NOT_FOUND`)
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `404` | `USER_NOT_FOUND` | 호출한 operator의 `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
 | `404` | `BAR_OWNER_NOT_FOUND` | 업장에 현재 업주가 없음 | 업장 상세(3.6) 재조회 |
 
@@ -3453,7 +3464,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `404` | `MENU_IMPORT_NOT_FOUND` | 등록 작업이 없음 | 작업 목록 이동 |
 | `404` | `MENU_ITEM_NOT_FOUND` | 직접 수정, 삭제할 항목이 현재 메뉴판에 없음. `details.barMenuItemId` (3.14) | 메뉴 다시 조회 |
 | `404` | `PHOTO_NOT_FOUND` | 삭제하거나 조회할 매장 사진이 없음. `details.photoId` (3.16) | 업장 상세 다시 조회 |
-| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인·거절(3.11.7, 3.11.8) 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
+| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인과 거절(3.11.7, 3.11.8), 업주 해제(3.11.10) 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
 | `405` | `METHOD_NOT_ALLOWED` | 경로는 있지만 허용하지 않는 HTTP 메서드 | 요청 메서드 확인 |
 | `409` | `BAR_OWNER_EXISTS` | 이미 현재 업주가 있는 업장에 신청 또는 승인 (3.11) | 안내. operator는 해당 신청을 거절 |
