@@ -115,8 +115,16 @@ internal fun P18PreviewCopy(onClick:()->Unit,enabled:Boolean=true) {
 /** Real Kakao native map using the coordinates from the *published* bar-detail API. */
 @Composable
 internal fun P18PublishedBarMap(bar:BarDetailUiModel) {
-    val location=bar.latitude?.let { lat ->
-        bar.longitude?.let { lng -> NearbyCoordinate(lat,lng) }
+    P18InlineBarMap(bar.barId,bar.name,bar.address,bar.latitude,bar.longitude)
+}
+
+/** A single map implementation shared by live Customer detail and local Owner preview. */
+@Composable
+internal fun P18InlineBarMap(
+    barId:String, name:String, address:String,latitude:Double?,longitude:Double?,
+) {
+    val location=latitude?.let { lat ->
+        longitude?.let { lng -> NearbyCoordinate(lat,lng) }
     }?.takeIf { it.isValid() }
     Box(Modifier.fillMaxWidth().height(190.dp)
         .background(P18Soft,RoundedCornerShape(9.dp))
@@ -127,8 +135,8 @@ internal fun P18PublishedBarMap(bar:BarDetailUiModel) {
         } else {
             NearbyKakaoMap(
                 origin=location,
-                bars=listOf(MapBar(bar.barId,bar.name,bar.address,location)),
-                selectedBarId=bar.barId,focusTarget=null,focusBarId=null,
+                bars=listOf(MapBar(barId,name,address,location)),
+                selectedBarId=barId,focusTarget=null,focusBarId=null,
                 initialCamera=null,listCovered=false,
                 searchedPlace=null,focusSearchedPlace=null,
                 onSearchedPlaceFocusApplied={},onFocusApplied={},
