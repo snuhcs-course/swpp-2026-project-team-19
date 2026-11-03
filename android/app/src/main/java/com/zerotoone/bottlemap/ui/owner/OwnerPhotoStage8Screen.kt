@@ -1417,10 +1417,38 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     val result by produceState<Pair<Boolean,androidx.compose.ui.graphics.ImageBitmap?>>(
         initialValue=false to null,key1=photo.sourceUri) {
         val loaded=withContext(Dispatchers.IO) {
-            runCatching {OwnerMenuPhotoStore(context).preview(
-                MockPhoto(photo.imageId,photo.sourceUri,MockPhotoKind.MENU_CAPTURE),
-                size=1600
-            )?.asImageBitmap()}.getOrNull()
+            runCatching {
+                if(photo.sourceUri.startsWith("https://") ||
+                    photo.sourceUri.startsWith("http://")) {
+                    val connection=java.net.URL(photo.sourceUri).openConnection()
+                        as java.net.HttpURLConnection
+                    connection.connectTimeout=10_000
+                    connection.readTimeout=20_000
+                    connection.instanceFollowRedirects=false
+                    try {
+                        if(connection.responseCode!=200) null else {
+                            val bytes=connection.inputStream.use { input ->
+                                val output=java.io.ByteArrayOutputStream()
+                                val buffer=ByteArray(16_384)
+                                var size=0
+                                while(true) {
+                                    val count=input.read(buffer)
+                                    if(count<0)break
+                                    size+=count
+                                    if(size>10*1024*1024)break
+                                    output.write(buffer,0,count)
+                                }
+                                if(size>10*1024*1024) null else output.toByteArray()
+                            }
+                            bytes?.let { android.graphics.BitmapFactory.decodeByteArray(
+                                it,0,it.size)?.asImageBitmap() }
+                        }
+                    } finally {connection.disconnect()}
+                } else OwnerMenuPhotoStore(context).preview(
+                    MockPhoto(photo.imageId,photo.sourceUri,MockPhotoKind.MENU_CAPTURE),
+                    size=1600
+                )?.asImageBitmap()
+            }.getOrNull()
         }
         value=true to loaded
     }
