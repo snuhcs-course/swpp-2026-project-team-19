@@ -422,7 +422,16 @@ private fun P18ResultsMap(
             onCameraChanged={_,_->},onMapCameraMoving={},
             onMapViewportUnavailable={},viewportRetryToken=0,
             onSelectBar=onSelect,onViewportChanged={},recenterToken=0,
-            onMapViewChanged={mapView=it},modifier=Modifier.fillMaxSize())
+            onMapViewChanged={mapView=it},modifier=Modifier.fillMaxSize(),
+            p18Markers=true,showOriginMarker=false,
+            p18MarkerSubtitle={id->
+                items.firstOrNull{it.barId==id}?.let{row->
+                    p18Representative(row.options)?.let{ option->
+                        p18Price(option.priceKrw)+" · "+
+                            (option.pourMl?.let{"${it}ml"}?:option.optionLabel.orEmpty())
+                    }
+                }
+            })
         else Box(Modifier.fillMaxSize().background(P18Surface),
             contentAlignment=Alignment.Center) {
             Text("지도의 매장 위치를 불러오지 못했어요",color=P18Text)
