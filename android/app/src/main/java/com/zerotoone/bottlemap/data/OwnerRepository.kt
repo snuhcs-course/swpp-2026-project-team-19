@@ -34,6 +34,10 @@ class OwnerRepository {
         }
     }
 
+    suspend fun searchCatalogProducts(query: String):
+        List<com.zerotoone.bottlemap.network.OwnerCatalogProductDto> =
+        withOwnerAuth { OwnerEndpoint.api.searchOwnerCatalogProducts(it, query).items }
+
     suspend fun getOwnedBars(): List<com.zerotoone.bottlemap.network.OwnedBarDto> =
         withOwnerAuth { authorization ->
             OwnerEndpoint.api.getMyBars(authorization).items
