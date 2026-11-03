@@ -40,6 +40,17 @@ data class NearbyBarsResponseDto(
     val items: List<NearbyBarItemDto>,
 )
 
+// API spec §3.17: display-only popular whisky cards (not an OCR or catalog guess).
+data class PopularProductDto(
+    val productId: String,
+    val displayName: String,
+    val brandName: String,
+    val ageYears: Int? = null,
+    val editionName: String? = null,
+    val barCount: Int,
+)
+data class PopularProductsResponseDto(val items: List<PopularProductDto> = emptyList())
+
 data class MatchedProductDto(
     val productId: String,
     val displayName: String,
