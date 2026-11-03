@@ -109,9 +109,9 @@ GET 주변 업장 조회 (위치 + 반경)
 | `GET /api/bars/{barId}/menu` | 활성 업장만 | 활성 업장만 | O | O |
 | `GET /api/bar-photos/{photoId}`, `GET /api/bar-photos/{photoId}/thumbnail` | O | O | O | O |
 | `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
-| `POST /api/owner-applications`, `GET /api/me/owner-applications`, `POST /api/owner-applications/business-certificate-ocr` | | O | O | O |
+| `POST /api/owner-applications`, `GET /api/me/owner-applications`, `POST /api/owner-applications/business-certificate-ocr`, `POST /api/owner-applications/business-verification` | | O | O | O |
 | `GET /api/owner-applications/{applicationId}` | | 본인 신청만 | 본인 신청만 | O |
-| `POST /api/owner-applications/{applicationId}/cancel`, `PUT /api/owner-applications/{applicationId}/menu-photos` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
+| `POST /api/owner-applications/{applicationId}/cancel`, `PUT /api/owner-applications/{applicationId}/menu-photos`, `PUT`과 `DELETE /api/owner-applications/{applicationId}/cover-photo` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
 | `GET /api/owner-applications`, `POST .../approve`, `POST .../reject`, `POST .../verify-business` | | | | O |
 | `DELETE /api/bars/{barId}/owner` | | | | O |
 | `GET /api/bars`, `POST /api/bars`(지금은 구현하지 않음, 3.5) | | | | O |
@@ -242,11 +242,14 @@ ignore
 | `GET` | `/api/bar-photos/{photoId}/thumbnail` | 매장 사진 썸네일 파일 (공개) |
 | `GET` | `/api/search/bar-names` | 업장 이름·주소 검색. 업주 신청과 고객 지도 검색용 (공개) |
 | `POST` | `/api/owner-applications/business-certificate-ocr` | 사업자등록증 사진에서 신청 항목 읽기 |
+| `POST` | `/api/owner-applications/business-verification` | 신청 전 사업자등록 정보 확인. 신청은 만들지 않는다 |
 | `POST` | `/api/owner-applications` | 업주 신청과 사업자등록 정보 1차 검증 |
 | `GET` | `/api/me/owner-applications` | 내 업주 신청 목록 |
 | `GET` | `/api/owner-applications/{applicationId}` | 업주 신청 상세 |
 | `POST` | `/api/owner-applications/{applicationId}/cancel` | 업주 신청 취소 |
 | `PUT` | `/api/owner-applications/{applicationId}/menu-photos` | 업주 신청의 메뉴판 사진 올리기 (전체 교체) |
+| `PUT` | `/api/owner-applications/{applicationId}/cover-photo` | 새 업장 신청의 대표 사진 올리기 (교체) |
+| `DELETE` | `/api/owner-applications/{applicationId}/cover-photo` | 새 업장 신청의 대표 사진 삭제 |
 | `GET` | `/api/owner-applications` | operator의 업주 신청 목록 |
 | `POST` | `/api/owner-applications/{applicationId}/approve` | 업주 신청 승인 |
 | `POST` | `/api/owner-applications/{applicationId}/reject` | 업주 신청 거절 |
@@ -1263,8 +1266,10 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 - 신청은 두 종류다. `existing_bar`는 이미 등록된 업장의 업주 신청이고, `new_bar`는 아직 없는 업장을 등록하면서 업주가 되는 신청이다.
 - 신청자는 사업자등록번호, 대표자명, 개업일자와 연락처를 제출한다. 사업자등록증 사진을 올리면 앞의 세 값을 읽어 입력란을 미리 채울 수 있다(3.11.12).
 - 신청을 만든 뒤 메뉴판 사진을 올린다(3.11.15). 승인하면 백엔드가 이 사진으로 메뉴 등록 작업을 만들어 AI 분석을 미리 시작하므로, 업주는 처음 업장 관리에 들어갔을 때 바로 검수할 수 있다(3.11.7).
+- `new_bar` 신청은 매장 대표 사진 한 장을 함께 올릴 수 있다(선택, 3.11.17). operator가 신청을 볼 때 실제 매장인지 확인하는 데 쓰고, 승인하면 새 업장의 첫 매장 사진(3.16)이 된다.
 - 백엔드는 신청을 받을 때 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자가 서로 맞는지 1차 검증한다(3.11.2). 맞지 않으면 신청을 만들지 않고 신청자가 입력을 고치게 한다. 검증 서비스에 연결하지 못하면 신청은 받고 결과를 `unavailable`로 남긴다.
-- 외부 API를 부르는 두 요청은 사용자마다 하루 5회로 제한한다: 신청할 때의 국세청 진위확인(3.11.2)과 사업자등록증 OCR(3.11.12). 남의 사업자등록번호로 대표자명과 개업일자를 맞춰 보는 시도와 외부 API 호출 한도 소진을 막기 위해서다. 규칙은 3.11.14에 있다.
+- 신청서의 나머지를 채우기 전에 세 값만 먼저 확인할 수도 있다(3.11.16). 확인 결과가 맞으면 백엔드가 잠시 기억했다가, 같은 값으로 신청하면 국세청을 다시 부르지 않고 그 결과를 쓴다.
+- 외부 API를 부르는 요청은 사용자마다 하루 5회로 제한한다: 국세청 진위확인(신청할 때 3.11.2와 신청 전 확인 3.11.16을 합쳐서)과 사업자등록증 OCR(3.11.12). 남의 사업자등록번호로 대표자명과 개업일자를 맞춰 보는 시도와 외부 API 호출 한도 소진을 막기 위해서다. 규칙은 3.11.14에 있다.
 - operator는 웹 대시보드에서 신청과 검증 결과를 보고, 실제 매장이 있는지 확인한 뒤 승인하거나 거절한다.
 - 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자 본인과 operator에게만 보여 준다. 검증 결과 중 신청자에게는 사업자 상태(`businessStatus`)만 보여 준다. 백엔드는 이 값들을 로그에 남기지 않는다.
 - 신청 결과는 알림으로 보내지 않는다. 신청자는 3.11.3으로 상태를 확인한다.
@@ -1275,8 +1280,11 @@ GET /api/me                                  (users 행이 없으면 먼저 생�
 GET /api/search/bar-names?query=...          (기존 업장 신청이면 업장 선택, 3.11.11)
 POST /api/owner-applications/business-certificate-ocr
                                              (선택. 사업자등록증 사진으로 입력란 채우기, 3.11.12)
+POST /api/owner-applications/business-verification
+                                             (선택. 세 값만 먼저 국세청에 확인, 3.11.16)
 POST /api/owner-applications                 → 1차 검증 후 pending
                                                (정보가 맞지 않으면 422, 입력을 고쳐 다시 신청)
+PUT /api/owner-applications/{id}/cover-photo → 매장 대표 사진 저장 (선택, new_bar만, 3.11.17)
 PUT /api/owner-applications/{id}/menu-photos → 메뉴판 사진 저장 (pending일 때 전체 교체, 3.11.15)
 GET /api/me/owner-applications               → 상태 확인
 POST /api/owner-applications/{id}/cancel     → canceled (pending일 때만)
@@ -1288,7 +1296,8 @@ POST /api/owner-applications/{id}/verify-business
 실제 매장이 있는지 확인
 POST /api/owner-applications/{id}/approve    → approved, 업주 관계 생성 (new_bar는 업장도 생성)
                                                신청 메뉴판 사진이 있으면 메뉴 등록 작업을 만들고 AI 분석 시작
-POST /api/owner-applications/{id}/reject     → rejected, 신청 메뉴판 사진 삭제
+                                               new_bar 대표 사진은 새 업장의 첫 매장 사진이 됨
+POST /api/owner-applications/{id}/reject     → rejected, 신청 메뉴판 사진과 대표 사진 삭제
 
 [승인 후 업주]
 GET /api/me/bars                             → 내가 관리하는 업장
@@ -1364,6 +1373,7 @@ closed      폐업자
       "imageUrlExpiresAt": "2026-10-14T03:15:00Z"
     }
   ],
+  "coverPhoto": null,
   "rejectionReason": null,
   "reviewedAt": null,
   "createdAt": "2026-10-14T03:00:00Z",
@@ -1397,6 +1407,9 @@ closed      폐업자
 | `menuPhotos[].imageOrder` | 정수 | 아니오 | 1부터 시작하는 순서 |
 | `menuPhotos[].imageUrl` | 문자열 | 아니오 | 짧은 만료 시간을 가진 서명 URL. 신청자 본인과 operator만 받는다. 만료되었거나 이미지 로딩이 `403`으로 실패하면 신청 상세(3.11.4)를 다시 조회해 새 URL을 받는다 |
 | `menuPhotos[].imageUrlExpiresAt` | RFC 3339 문자열 | 예 | `imageUrl` 만료 시각. 만료되지 않는 URL(로컬 저장소)이면 `null` |
+| `coverPhoto` | 객체 | 예 | `new_bar` 신청의 매장 대표 사진(3.11.17). 올리지 않았거나, `existing_bar`이거나, 신청이 `pending`이 아니면 `null`이다. 승인되면 업장의 매장 사진(3.16)으로 옮겨지므로 `bar.barId`의 업장 상세(3.6)에서 본다 |
+| `coverPhoto.imageUrl`, `coverPhoto.thumbnailUrl` | 문자열 | 아니오 | 다시 인코딩한 사진과 썸네일(3.16.2)의 서명 URL. `menuPhotos[].imageUrl`처럼 신청자 본인과 operator만 받으며, 만료되면 신청 상세(3.11.4)를 다시 조회한다 |
+| `coverPhoto.imageUrlExpiresAt` | RFC 3339 문자열 | 예 | 두 URL의 만료 시각. 만료되지 않는 URL(로컬 저장소)이면 `null` |
 | `rejectionReason` | 문자열 | 예 | `rejected`일 때만 값이 있다 |
 | `reviewedAt` | RFC 3339 문자열 | 예 | 승인 또는 거절 시각. 그 전에는 `null` |
 | `createdAt`, `updatedAt` | RFC 3339 문자열 | 아니오 | |
@@ -1467,8 +1480,9 @@ Content-Type: application/json
 2. `users` 행 (`404 USER_NOT_FOUND`)
 3. `existing_bar`의 업장과 현재 업주 (`404 BAR_NOT_FOUND`, `409 BAR_OWNER_EXISTS`)
 4. 본인의 대기 중 신청 (`409 OWNER_APPLICATION_EXISTS`). DB의 부분 unique 인덱스로도 보장하므로, 동시에 들어온 같은 신청은 행을 만들 때 하나만 성공하고 나머지는 `409 OWNER_APPLICATION_EXISTS`가 된다. 이때 진위확인 호출 횟수는 이미 쓴 것으로 센다
-5. 오늘의 진위확인 횟수 (`429 RATE_LIMITED`, 3.11.14)
-6. 국세청 진위확인 API로 `businessRegistrationNumber`, `representativeName`, `openingDate` 검증
+5. 최근 확인 결과: 같은 사용자가 30분 안에 신청 전 확인(3.11.16)에서 같은 세 값으로 `matched`를 받았으면, 6, 7단계를 건너뛰고 그 결과로 신청을 만든다. 국세청을 부르지 않으므로 횟수도 세지 않는다. `businessVerification.checkedAt`과 `businessStatus`는 그 확인의 값이다
+6. 오늘의 진위확인 횟수 (`429 RATE_LIMITED`, 3.11.14)
+7. 국세청 진위확인 API로 `businessRegistrationNumber`, `representativeName`, `openingDate` 검증
    - 맞음: 신청을 만들고 `businessVerification.result = matched`, `businessStatus`에 사업자 상태를 저장한다.
    - 맞지 않음: 신청을 만들지 않고 `422 BUSINESS_VERIFICATION_FAILED`를 반환한다.
    - 검증 서비스 오류, 시간 초과, 호출 한도 초과, 또는 서버에 검증 설정이 없음: 신청을 만들고 `businessVerification.result = unavailable`, `businessStatus = null`로 저장한다. operator가 나중에 다시 검증한다(3.11.13).
@@ -1519,7 +1533,7 @@ POST /api/owner-applications/{applicationId}/cancel
 Authorization: Bearer <access-token>
 ```
 
-신청자 본인만 호출할 수 있다. 요청 본문은 없다. `pending`이면 `canceled`로 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다. 신청의 메뉴판 사진(3.11.15)은 삭제되므로 응답의 `menuPhotos`는 `[]`다.
+신청자 본인만 호출할 수 있다. 요청 본문은 없다. `pending`이면 `canceled`로 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다. 신청의 메뉴판 사진(3.11.15)과 대표 사진(3.11.17)은 삭제되므로 응답의 `menuPhotos`는 `[]`, `coverPhoto`는 `null`이다.
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
@@ -1572,7 +1586,7 @@ Content-Type: application/json
 operator만 호출할 수 있다. 사업자등록 정보 검증 결과가 `matched`가 아니어도 승인할 수 있다. 판단은 operator가 하며, 대시보드는 `unavailable`인 신청을 먼저 다시 검증(3.11.13)하도록 안내한다.
 
 - `existing_bar`: 요청 본문이 없거나 `{}`다.
-- `new_bar`: operator가 확인한 업장 정보를 보낸다. 프론트엔드는 `proposedBar`를 초기값으로 채우고, operator가 주소를 확인해 좌표를 입력한다. 필드 규칙은 3.5와 같다. `description`, `defaultPourMl`, `tags`, `weeklyHours`는 받지 않으며(`EXTRA_FORBIDDEN`, 3.7), 만든 업장은 `description`과 `defaultPourMl`이 `null`, `tags`와 `weeklyHours`가 `[]`다. 업주가 승인 뒤 3.7로 정한다. 임시 휴무와 매장 사진도 승인 뒤 3.15, 3.16으로 정한다.
+- `new_bar`: operator가 확인한 업장 정보를 보낸다. 프론트엔드는 `proposedBar`를 초기값으로 채우고, operator가 주소를 확인해 좌표를 입력한다. 필드 규칙은 3.5와 같다. `description`, `defaultPourMl`, `tags`, `weeklyHours`는 받지 않으며(`EXTRA_FORBIDDEN`, 3.7), 만든 업장은 `description`과 `defaultPourMl`이 `null`, `tags`와 `weeklyHours`가 `[]`다. 업주가 승인 뒤 3.7로 정한다. 임시 휴무도 승인 뒤 3.15로 정한다. 매장 사진은 신청의 대표 사진(3.11.17)이 있으면 그 한 장으로 시작하고, 나머지는 승인 뒤 3.16으로 올린다.
 
 ```json
 {
@@ -1590,6 +1604,7 @@ operator만 호출할 수 있다. 사업자등록 정보 검증 결과가 `match
 
 - `existing_bar`: 업장 행을 잠그고 현재 업주가 없는지 다시 확인한 뒤 업주 관계를 만든다. 신청 뒤 업장이 비활성화되었어도 승인할 수 있다.
 - `new_bar`: `bar`로 `status = active`인 업장을 만들고 업주 관계를 만든다. 만든 업장은 응답의 `bar`에 담긴다. 메뉴가 없으므로 상품 검색에는 메뉴를 반영한 뒤부터 나온다.
+- `new_bar`에 대표 사진(3.11.17)이 있으면 같은 트랜잭션에서 그 사진을 새 업장의 첫 매장 사진(3.16, 대표 사진)으로 만든다. 파일은 다시 저장하지 않고 신청 때 저장한 두 파일을 그대로 쓰며, 업로드한 사람은 신청자다. 승인 응답의 `coverPhoto`는 `null`이고, 사진은 업장 상세(3.6)와 업장 목록의 `coverThumbnailUrl`에 나온다. 이때부터 공개 URL(3.16.5)로 누구나 볼 수 있다.
 - 공통: 신청에 메뉴판 사진(3.11.15)이 있고 업장에 미완료 메뉴 등록 작업(4.3)이 없으면, 같은 트랜잭션에서 그 사진들로 메뉴 등록 작업을 만든다. 사진 순서가 `imageOrder`이고, `mode`는 업장에 현재 메뉴판이 없으면 `full_replace`, 있으면 `partial_update`이며, `ownerNote`는 `null`이다. 트랜잭션을 커밋한 뒤 4장의 업로드와 같은 AI 처리를 시작한다. 검수에서 확정하기 전에는 메뉴가 게시되지 않는다(8장).
 - 사진이 없거나 업장에 이미 미완료 작업이 있으면 작업을 만들지 않고 승인만 한다. 미완료 작업은 operator가 업장에 먼저 올린 작업이나 해제된 이전 업주의 작업처럼 드문 경우에만 있으며, 새 업주가 그 작업을 이어서 처리하거나 취소(5.7)한 뒤 다시 올린다.
 
@@ -1627,7 +1642,7 @@ Content-Type: application/json
 }
 ```
 
-operator만 호출할 수 있다. `reason`은 필수이며 앞뒤 공백을 지운 뒤 1~500자다. 신청자에게 그대로 보여 준다. 사업자등록 정보 검증 결과와 관계없이 거절할 수 있다. 신청의 메뉴판 사진(3.11.15)은 삭제한다. `200 OK`, 본문은 `OwnerApplication`(`status = rejected`, `menuPhotos = []`)이다. 오류는 3.11.7의 `403`, `404`(`USER_NOT_FOUND` 포함), `409 INVALID_APPLICATION_STATE`와 같고, `422 VALIDATION_FAILED`는 `reason`이 없거나(`MISSING`), 공백뿐이거나(`BLANK`), 500자를 넘을 때(`STRING_TOO_LONG`)다.
+operator만 호출할 수 있다. `reason`은 필수이며 앞뒤 공백을 지운 뒤 1~500자다. 신청자에게 그대로 보여 준다. 사업자등록 정보 검증 결과와 관계없이 거절할 수 있다. 신청의 메뉴판 사진(3.11.15)과 대표 사진(3.11.17)은 삭제한다. `200 OK`, 본문은 `OwnerApplication`(`status = rejected`, `menuPhotos = []`, `coverPhoto = null`)이다. 오류는 3.11.7의 `403`, `404`(`USER_NOT_FOUND` 포함), `409 INVALID_APPLICATION_STATE`와 같고, `422 VALIDATION_FAILED`는 `reason`이 없거나(`MISSING`), 공백뿐이거나(`BLANK`), 500자를 넘을 때(`STRING_TOO_LONG`)다.
 
 #### 3.11.9 내가 관리하는 업장 목록
 
@@ -1826,12 +1841,12 @@ operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 �
 
 | 대상 | 한도 | 세는 요청 |
 |---|---|---|
-| 업주 신청의 국세청 진위확인 (3.11.2) | 사용자마다 하루 5회 | 3.11.2의 1~5단계를 통과해 국세청 API를 실제로 호출한 요청. 결과(`matched`, `not_matched`, `unavailable`)와 관계없이 센다. 서버에 검증 설정이 없어 호출하지 않은 요청은 세지 않는다 |
+| 국세청 진위확인: 업주 신청(3.11.2)과 신청 전 확인(3.11.16) | 사용자마다 두 API를 합쳐 하루 5회 | 국세청 API를 실제로 호출한 요청. 3.11.2는 1~6단계를, 3.11.16은 요청 형식 검사를 통과한 요청이다. 결과(`matched`, `not_matched`, `unavailable`)와 관계없이 센다. 서버에 검증 설정이 없어 호출하지 않은 요청과, 최근 확인 결과를 써서 호출하지 않은 신청(3.11.2의 5단계)은 세지 않는다 |
 | 사업자등록증 OCR (3.11.12) | 사용자마다 하루 5회 | `413`, `415`, `422` 검사를 통과해 CLOVA OCR을 실제로 호출한 요청. 읽은 항목이 없어도, 호출이 실패해 `503`이 되어도 센다. 서버에 OCR 설정이 없어 호출하지 않은 요청은 세지 않는다 |
 
 - 사용자는 token의 `sub`(3.1.2)로 구분한다. OCR은 `users` 행이 없어도 호출할 수 있으므로 `users.id`가 아니라 `sub`로 센다.
 - 임시 로그인(3.1.3) 토큰은 모두 `sub`가 같으므로 한도 하나를 함께 쓴다. 임시 로그인은 로컬 개발에서만 쓰므로 이 한계를 받아들인다.
-- 두 한도는 따로 센다. operator의 다시 검증(3.11.13)은 제한하지 않는다.
+- 진위확인과 OCR 한도는 따로 센다. 진위확인은 신청과 신청 전 확인을 한 한도로 센다. 국세청이 알려 주는 것은 두 API가 같으므로(세 값이 맞는지), 신청 전 확인을 따로 세면 남의 번호를 맞춰 볼 기회가 늘어나기 때문이다. operator의 다시 검증(3.11.13)은 제한하지 않는다.
 - 하루는 한국 시간(KST) 자정에 초기화된다.
 - 한도를 넘으면 외부 API를 호출하지 않고 `429 RATE_LIMITED`를 반환한다. `details.retryAfter`에 다음 초기화 시각(RFC 3339, UTC)을 담는다.
 
@@ -1890,6 +1905,98 @@ Content-Type: multipart/form-data
 | `422` | `VALIDATION_FAILED` | `images`가 없음 | `fieldErrors` 표시 |
 
 신청은 만들어졌지만 사진 업로드가 실패하면, 프론트엔드는 신청을 다시 만들지 않고 같은 `applicationId`로 이 API만 다시 호출한다. 다시 신청하면 `409 OWNER_APPLICATION_EXISTS`(3.11.2)가 되며 `details.applicationId`로 기존 신청을 찾을 수 있다.
+
+#### 3.11.16 신청 전 사업자등록 정보 확인
+
+신청서의 나머지(업장, 연락처, 사진)를 채우기 전에 사업자등록번호, 대표자명, 개업일자가 국세청 정보와 맞는지만 확인한다. 신청은 만들지 않으며 선택 기능이다. 이 API를 부르지 않아도 3.11.2가 같은 검증을 한다.
+
+```http
+POST /api/owner-applications/business-verification
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "businessRegistrationNumber": "123-45-67891",
+  "representativeName": "김사장",
+  "openingDate": "2020-03-02"
+}
+```
+
+세 필드의 규칙은 3.11.2와 같다(`INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `STRING_TOO_SHORT` 등). 다른 필드는 `EXTRA_FORBIDDEN`이다.
+
+로그인한 사용자 누구나 호출할 수 있고 `users` 행이 없어도 된다(3.11.12와 같다). 사업자등록번호, 대표자명, 개업일자는 3.11의 다른 API처럼 로그에 남기지 않는다.
+
+`200 OK`
+
+```json
+{ "result": "matched" }
+```
+
+| `result` | 뜻 | 프론트엔드 처리 |
+|---|---|---|
+| `matched` | 세 값이 국세청 정보와 맞음 | 다음 단계로 진행. 30분 안에 같은 값으로 신청하면 국세청을 다시 부르지 않는다(3.11.2의 5단계) |
+| `not_matched` | 맞지 않음. 국세청은 어느 값이 틀렸는지 알려 주지 않는다 | 세 값을 사업자등록증과 같게 입력했는지 확인하라고 안내하고, 입력값을 유지한 채 수정하게 한다 |
+| `unavailable` | 검증 서비스 오류, 시간 초과, 호출 한도 초과, 또는 서버에 검증 설정이 없음 | 확인하지 못했다고 안내하고 그대로 진행하게 한다. 신청(3.11.2)이 다시 확인하며, 그때도 확인하지 못하면 operator가 나중에 확인한다 |
+
+- 사업자 상태(`businessStatus`)는 돌려주지 않는다. 신청자는 신청한 뒤 3.11.1의 `businessStatus`로 본다.
+- **횟수**: 국세청을 부른 요청은 신청(3.11.2)과 같은 진위확인 한도에 센다(3.11.14). 결과와 관계없이 세며, 서버에 검증 설정이 없어 부르지 않은 요청은 세지 않는다. 한도를 넘으면 국세청을 부르지 않고 `429 RATE_LIMITED`다.
+- **신청에서 다시 쓰는 결과**: `matched`이면 백엔드가 사용자(token의 `sub`)와 세 값, 사업자 상태, 확인 시각을 30분 동안 서버 메모리에 기억한다. 같은 사용자가 그동안 같은 세 값으로 신청하면 이 결과를 쓴다. `not_matched`와 `unavailable`은 기억하지 않으므로, 그 값으로 신청하면 국세청을 다시 부른다. 횟수 기록(3.11.14)처럼 서버가 재시작되면 잊으며, 그때는 신청이 국세청을 다시 부르고 횟수도 하나 더 센다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `422` | `VALIDATION_FAILED` | 3.11.2의 세 필드 규칙 위반, 다른 필드(`EXTRA_FORBIDDEN`) | `fieldErrors` 표시 |
+| `429` | `RATE_LIMITED` | 오늘 진위확인을 5회 했음(3.11.14). `details.retryAfter`에 다음 초기화 시각 | 내일 다시 시도하라고 안내. 오늘 신청해도 같은 한도에 걸린다 |
+
+#### 3.11.17 새 업장 신청 대표 사진
+
+```http
+PUT /api/owner-applications/{applicationId}/cover-photo
+Authorization: Bearer <access-token>
+Content-Type: multipart/form-data
+```
+
+```http
+DELETE /api/owner-applications/{applicationId}/cover-photo
+Authorization: Bearer <access-token>
+```
+
+신청자 본인만 호출할 수 있다. `new_bar` 신청(3.11.2)이 `201`로 만들어진 뒤 매장 대표 사진 한 장을 저장하거나(`PUT`) 지운다(`DELETE`). 선택 사항이다. operator는 신청 상세의 `coverPhoto`(3.11.1)로 사진을 보고 실제 매장인지 확인하며, 승인하면 새 업장의 첫 매장 사진이 된다(3.11.7).
+
+| `PUT` 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `image` | 이미지 파일 | 예 | 사진 한 장 |
+
+- **업로드 검사와 처리**는 매장 사진 추가(3.16.2)와 같다: JPEG와 PNG, 2MB 이하, 긴 변 2048px 이하, 메타데이터를 뺀 JPEG로 다시 인코딩, 긴 변 480px 썸네일. 안드로이드 앱이 올리기 전에 줄이고 압축하는 규칙도 같다.
+- **한 장**: 이미 사진이 있으면 새 사진으로 바꾸고 이전 파일은 지운다. 같은 요청을 다시 보내도 결과가 같으므로 `Idempotency-Key`는 받지 않는다.
+- **삭제**: `DELETE`는 사진을 지운다. 사진이 없어도 `200`이다(같은 요청을 다시 보내도 결과가 같다).
+- **상태**: `pending`일 때만 바꿀 수 있다. 신청 행을 잠그므로 승인, 거절, 취소와 동시에 들어오면 둘 중 하나만 성공한다(3.11.15와 같다).
+- **저장소**: 메뉴판 사진과 같은 비공개 저장소에 둔다. 승인 전에는 공개 URL(3.16.5)이 없고, 신청자 본인과 operator만 `coverPhoto`의 서명 URL로 본다.
+- **정리**: 신청이 거절되거나 취소되면 파일을 지운다(3.11.5, 3.11.8). 승인되면 파일을 그대로 새 업장의 매장 사진으로 쓴다(3.11.7).
+
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다. `DELETE`는 1단계와 5단계가 없다.
+
+1. 요청 형식 (`422 VALIDATION_FAILED`, `image`가 없으면 `MISSING`, 두 개 이상이면 `TOO_LONG`)
+2. 신청과 신청자 (`404 OWNER_APPLICATION_NOT_FOUND`)
+3. 신청 종류 (`409 INVALID_APPLICATION_TYPE`)
+4. 신청 상태 (`409 INVALID_APPLICATION_STATE`)
+5. 사진 (3.16.2와 같다): 크기(`413 UPLOAD_TOO_LARGE`), 형식(`415 UNSUPPORTED_IMAGE_TYPE`), 가로세로(`422 IMAGE_DIMENSIONS_TOO_LARGE`)
+
+`200 OK`, 본문은 `OwnerApplication`(3.11.1)이며 `coverPhoto`에 저장한 사진이 들어 있다(`DELETE`는 `null`).
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없거나, 본인의 신청이 아니거나, `applicationId`가 UUID 형식이 아님 | 신청 목록 재조회 |
+| `409` | `INVALID_APPLICATION_TYPE` | `existing_bar` 신청. `details.applicationType` | 기존 업장의 사진은 승인 뒤 3.16으로 올린다 |
+| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회. 승인되었으면 사진은 3.16으로 바꾼다 |
+| `413` | `UPLOAD_TOO_LARGE` | 사진이 2MB를 넘음. `details.maxImageBytes = 2097152` | 품질을 낮춰 다시 압축해 올림 |
+| `415` | `UNSUPPORTED_IMAGE_TYPE` | 3.16.6과 같다 | JPEG로 바꿔 다시 올림 |
+| `422` | `VALIDATION_FAILED` | `image` 없음이나 두 개 이상, 긴 변 2048px 초과(`IMAGE_DIMENSIONS_TOO_LARGE`) | `fieldErrors` 표시. `IMAGE_DIMENSIONS_TOO_LARGE`이면 줄여서 다시 올림 |
+
+신청 순서는 3.11.2로 신청을 만든 뒤 이 API와 3.11.15를 호출하는 것이다. 신청은 만들어졌지만 사진 업로드가 실패하면, 신청을 다시 만들지 않고 같은 `applicationId`로 이 API만 다시 호출한다.
 
 ### 3.12 내 주변 업장 조회
 
@@ -2494,6 +2601,7 @@ Authorization: Bearer <access-token>
 - **장수**: 업장당 최대 15장이다. 메뉴판 사진의 15장(4.1)과는 따로 센다.
 - **대표 사진**: 표시 순서의 첫 사진이 대표 사진이다. 대표 여부를 따로 저장하지 않으며, 대표 사진을 바꾸려면 그 사진을 맨 앞으로 옮긴다(3.16.4). 대표 사진을 지우면 다음 사진이 대표가 된다. 업장 목록 API(3.4, 3.10, 3.11.11, 3.12, 3.13)는 업장마다 대표 사진의 썸네일 URL만 `coverThumbnailUrl`로 준다. 목록은 업장이 많아(지도는 1,000곳이 넘을 수 있다) 원본을 쓰면 내려받는 양과 메모리가 너무 크기 때문이다.
 - **사진이 없을 때**: 0장도 허용하며 마지막 사진도 지울 수 있다. 프론트엔드는 `photos = []`이면 기본 이미지를 보여 준다.
+- **신청에서 온 사진**: `new_bar` 신청에 대표 사진(3.11.17)이 있었으면 승인할 때 그 사진이 첫 사진이 된다(3.11.7). 그 뒤에는 다른 사진과 같이 지우고 옮길 수 있다.
 - **응답**: 추가, 삭제, 순서 변경의 성공 응답 본문은 `{ "photos": [...] }`이며 3.6의 `photos`와 같은 형식이다. 프론트엔드는 이 응답으로 화면을 바꾸고 따로 다시 조회하지 않아도 된다.
 - **동시 요청**: 추가, 삭제, 순서 변경은 업장 행을 잠그고 처리하므로 한 업장에서는 하나씩 차례로 반영된다.
 - **저장소**: 메뉴판 사진과 같은 저장소(개발 환경은 로컬 파일, 배포 서버는 비공개 S3 버킷)에 사진마다 다시 인코딩한 사진과 썸네일 두 파일을 둔다(3.16.2). 버킷은 공개하지 않으며, 서버가 파일을 읽어 3.16.5로 전달한다.
@@ -3483,7 +3591,8 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `405` | `METHOD_NOT_ALLOWED` | 경로는 있지만 허용하지 않는 HTTP 메서드 | 요청 메서드 확인 |
 | `409` | `BAR_OWNER_EXISTS` | 이미 현재 업주가 있는 업장에 신청 또는 승인 (3.11) | 안내. operator는 해당 신청을 거절 |
 | `409` | `OWNER_APPLICATION_EXISTS` | 같은 업장, 또는 같은 사업자등록번호의 `new_bar`에 본인의 대기 중 신청이 있음 (3.11.2) | `details.applicationId`의 신청으로 이동 |
-| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소·다시 검증 (3.11) | 신청 상세 재조회 |
+| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소·다시 검증, 사진 변경 (3.11) | 신청 상세 재조회 |
+| `409` | `INVALID_APPLICATION_TYPE` | `existing_bar` 신청에 대표 사진을 올리거나 지움. `details.applicationType` (3.11.17) | 기존 업장의 사진은 승인 뒤 3.16으로 올림 |
 | `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 키에 다른 요청 내용 | 새 키로 명시적 재요청 |
 | `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있는데 새 작업을 올리거나(4.4) 메뉴를 직접 편집함(3.14). `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 다시 요청 |
 | `409` | `MENU_OUTDATED` | 직접 편집이나 판매 정보 확인(3.14.9) 요청의 `menuVersion`이 현재 메뉴판 버전과 다름. `details.submittedMenuVersion`, `details.currentMenuVersion` (3.14) | 메뉴 다시 조회 후 다시 저장 |
@@ -3500,7 +3609,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | 지원하지 않는 이미지 형식 | 지원 형식 안내 |
 | `422` | `VALIDATION_FAILED` | 필드 값이나 옵션 구성이 잘못됨 | `fieldErrors` 표시 |
 | `422` | `BUSINESS_VERIFICATION_FAILED` | 업주 신청의 사업자등록번호, 대표자명, 개업일자가 국세청 정보와 맞지 않음 (3.11.2) | 입력값을 유지한 채 수정 안내 |
-| `429` | `RATE_LIMITED` | 업주 신청의 진위확인 또는 사업자등록증 OCR을 오늘 5회 했음. `details.retryAfter`에 다음 초기화 시각 (3.11.14) | 내일 다시 시도 안내. OCR은 직접 입력 안내 |
+| `429` | `RATE_LIMITED` | 진위확인(업주 신청과 신청 전 확인 합산) 또는 사업자등록증 OCR을 오늘 5회 했음. `details.retryAfter`에 다음 초기화 시각 (3.11.14) | 내일 다시 시도 안내. OCR은 직접 입력 안내 |
 | `503` | `OCR_UNAVAILABLE` | 사업자등록증 사진을 읽는 OCR 설정이 없거나 호출 실패 (3.11.12) | 직접 입력 안내 |
 | `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | operator의 다시 검증에서 국세청 API에 연결하지 못함 (3.11.13) | 잠시 후 재시도 안내 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 (검수 제출, 메뉴 직접 편집) | 잠시 후 같은 요청 재시도 |

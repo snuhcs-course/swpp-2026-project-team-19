@@ -200,6 +200,9 @@ Table bar_owner_applications {
   business_checked_at timestamptz [not null, note: 'When the stored result was obtained; a failed operator recheck changes nothing']
   contact_phone varchar(30) [not null]
   applicant_note varchar(500)
+  cover_photo_storage_key varchar(500) [note: 'new_bar only, optional: the re-encoded cover photo, owner-applications/<applicationId>/cover/<uuid>.jpg']
+  cover_photo_thumbnail_storage_key varchar(500) [note: 'Its 480 px thumbnail; set exactly when cover_photo_storage_key is']
+  cover_photo_sha256 char(64) [note: 'SHA-256 of the uploaded bytes; becomes bar_photos.content_sha256 on approval']
   status owner_application_status [not null, default: 'pending']
   reviewed_by_user_id uuid [ref: > users.id, note: 'The operator who approved or rejected it; set with reviewed_at exactly when approved or rejected']
   reviewed_at timestamptz
@@ -234,6 +237,10 @@ Table bar_owner_applications {
   The applicant may attach menu photos (bar_owner_application_menu_images). On approval, if there are
   photos and the bar has no unfinished menu import, the same transaction creates a menu import from them
   and AI processing starts after the commit.
+  A new_bar application may also carry one cover photo (the cover_photo_* columns, all set or all null),
+  processed like a bar photo. Only a pending new_bar application has one (CHECK): approving moves it to
+  the new bar as its first bar_photos row, pointing at the same files, and clears the columns; rejecting
+  or canceling clears them and deletes the files after the commit.
   '''
 }
 
@@ -320,8 +327,8 @@ Table bar_operating_exceptions {
 Table bar_photos {
   id uuid [pk]
   bar_id uuid [not null, ref: > bars.id]
-  storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>.jpg: the re-encoded JPEG without metadata']
-  thumbnail_storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>-thumb.jpg: 480 px on the long edge']
+  storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>.jpg, or the cover photo key of the new_bar application it came from: the re-encoded JPEG without metadata']
+  thumbnail_storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>-thumb.jpg, or as above: 480 px on the long edge']
   content_sha256 char(64) [not null, note: 'SHA-256 of the uploaded bytes before re-encoding; the same photo cannot be added twice to a bar']
   sort_order smallint [not null, note: '1 = cover photo; contiguous from 1 within a bar']
   uploaded_by_user_id uuid [ref: > users.id, note: 'null for a temporary-login operator without a users row']
@@ -337,6 +344,7 @@ Table bar_photos {
   The server re-encodes every upload to a JPEG without metadata (EXIF, XMP, GPS) and makes a thumbnail; the uploaded
   file itself is not kept. The bucket stays private: GET /api/bar-photos/{photoId} and its /thumbnail read the files
   and serve them with a one-day cache lifetime. Deleting a photo deletes the row and then both stored files.
+  Approving a new_bar application with a cover photo creates the new bar's first row from it.
   '''
 }
 
