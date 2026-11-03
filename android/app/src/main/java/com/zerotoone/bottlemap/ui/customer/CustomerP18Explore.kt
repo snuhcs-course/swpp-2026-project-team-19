@@ -610,14 +610,19 @@ private fun P18BrowseTag(tag:String) {
 
 @Composable
 private fun P18PlaceNoMatches() {
-    Row(Modifier.fillMaxWidth().heightIn(min=62.dp)
-        .padding(horizontal=12.dp,vertical=12.dp),
-        verticalAlignment=Alignment.CenterVertically,
-        horizontalArrangement=Arrangement.Center) {
-        BmIcon(BmIconId.BAR_PIN,null,Modifier.size(20.dp),tint=P18Muted)
-        Spacer(Modifier.width(8.dp))
-        Text("장소를 찾지 못했어요.",fontSize=14.sp,color=P18Text,
-            fontWeight=FontWeight.SemiBold,textAlign=TextAlign.Center)
+    Column(Modifier.fillMaxWidth().padding(horizontal=12.dp,vertical=14.dp),
+        horizontalAlignment=Alignment.CenterHorizontally,
+        verticalArrangement=Arrangement.spacedBy(7.dp)) {
+        Row(verticalAlignment=Alignment.CenterVertically,
+            horizontalArrangement=Arrangement.Center) {
+            BmIcon(BmIconId.BAR_PIN,null,Modifier.size(20.dp),tint=P18Muted)
+            Spacer(Modifier.width(8.dp))
+            Text("장소를 찾지 못했어요.",fontSize=14.sp,color=P18Text,
+                fontWeight=FontWeight.SemiBold,textAlign=TextAlign.Center)
+        }
+        Text("역 이름, 매장 이름, 주소로 다시 찾아보세요.",
+            color=P18Muted,fontSize=12.sp,lineHeight=18.sp,
+            textAlign=TextAlign.Center)
     }
 }
 
