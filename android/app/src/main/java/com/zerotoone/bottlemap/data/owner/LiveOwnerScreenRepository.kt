@@ -208,6 +208,57 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
 
     override fun selectBar(barId: String) = local.selectBar(barId)
 
+    /** Server limits gallery to a 2048 px JPEG under 2 MB, not menu's 10 MB. */
+    private suspend fun prepareGalleryPhoto(uri: String):
+        com.zerotoone.bottlemap.data.PreparedMenuImage {
+        val prepared = ImageUploadPreparer(app.contentResolver).prepare(Uri.parse(uri))
+        val decoded = android.graphics.BitmapFactory.decodeByteArray(
+            prepared.bytes, 0, prepared.bytes.size)
+            ?: error("매장 사진을 읽을 수 없어요.")
+        val maxEdge = maxOf(decoded.width, decoded.height)
+        val finalBitmap = if(maxEdge > 2048) {
+            val ratio = 2048f / maxEdge
+            android.graphics.Bitmap.createScaledBitmap(decoded,
+                maxOf(1,(decoded.width * ratio).toInt()),
+                maxOf(1,(decoded.height * ratio).toInt()), true)
+        } else decoded
+        try {
+            for(quality in listOf(85, 75, 65, 55, 45)) {
+                val output = java.io.ByteArrayOutputStream()
+                if(finalBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG,
+                    quality, output)) {
+                    val result = output.toByteArray()
+                    if(result.size in 1..(2*1024*1024)) {
+                        return com.zerotoone.bottlemap.data.PreparedMenuImage(
+                            filename = "owner-bar-photo.jpg", mimeType = "image/jpeg", bytes = result)
+                    }
+                }
+            }
+        } finally {
+            if(finalBitmap !== decoded) finalBitmap.recycle()
+            decoded.recycle()
+        }
+        error("매장 사진을 2MB 이하로 압축하지 못했어요.")
+    }
+
+    private suspend fun syncGallery(barId: String, old: List<MockPhoto>, now: List<MockPhoto>) {
+        val oldIds = old.map { it.photoId }.toSet()
+        val newIds = now.map { it.photoId }.toSet()
+        for(photo in old) {
+            if(photo.photoId !in newIds) remote.deleteBarPhoto(barId, photo.photoId)
+        }
+        val mappedIds = mutableMapOf<String, String>()
+        for(photo in now) {
+            if(photo.photoId in oldIds) mappedIds[photo.photoId] = photo.photoId
+            else {
+                val result = remote.addBarPhoto(barId, prepareGalleryPhoto(photo.uri))
+                mappedIds[photo.photoId] = result.photos.lastOrNull()?.photoId
+                    ?: error("업로드한 사진의 ID를 확인하지 못했어요.")
+            }
+        }
+        remote.reorderBarPhotos(barId, now.map { mappedIds.getValue(it.photoId) })
+    }
+
     override fun saveBar(bar: MockBar) {
         val old = snapshot().bars.firstOrNull { it.barId == bar.barId }
             ?: error("매장 정보를 먼저 불러와 주세요.")
@@ -228,7 +279,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 mapOf("dayOfWeek" to it.isoDayOfWeek, "closed" to it.closed,
                     "openTime" to time(it.openMinutes), "closeTime" to time(it.closeMinutes))
             }
-        if(changes.isNotEmpty()) write { remote.updateBar(bar.barId, changes) }
+        if(changes.isNotEmpty() || old.gallery != bar.gallery) write {
+            if(changes.isNotEmpty()) remote.updateBar(bar.barId, changes)
+            if(old.gallery != bar.gallery) syncGallery(bar.barId, old.gallery, bar.gallery)
+        }
     }
 
     override fun saveManualMenuItem(
