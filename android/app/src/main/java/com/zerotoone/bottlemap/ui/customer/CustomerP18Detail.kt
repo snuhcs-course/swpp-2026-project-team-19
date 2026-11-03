@@ -108,7 +108,7 @@ internal fun p18BusinessStatus(
 }
 
 @Composable
-private fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier) {
+internal fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier) {
     val bitmap by produceState<androidx.compose.ui.graphics.ImageBitmap?>(null,url) {
         value=if(url.isNullOrBlank())null else withContext(Dispatchers.IO) {
             runCatching {
@@ -385,8 +385,9 @@ internal fun CustomerP18BarDetail(
                                                 color=P18Text,modifier=Modifier.width(44.dp),
                                                 textAlign=TextAlign.End)
                                             Column(horizontalAlignment=Alignment.End) {
-                                                val cost=if(active) option.discount?.discountedPriceKrw
-                                                    else option.priceKrw
+                                                val cost=option.priceKrw?.let {
+                                            p18EffectivePrice(it,option.discount,at.toInstant())
+                                        }
                                                 Text(cost?.let(::p18Price) ?: option.text,
                                                     fontSize=11.sp,color=P18Muted)
                                                 if(active && option.priceKrw!=null)
