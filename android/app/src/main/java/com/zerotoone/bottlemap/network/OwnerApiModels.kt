@@ -83,6 +83,7 @@ data class ReviewItemDto(
     val extractedItemId: String,
     val itemOrder: Int,
     val rawText: String,
+    val sourceBox: List<Int>? = null,
     val extractedLineType: String,
     val correctedLineType: String? = null,
     val effectiveLineType: String,

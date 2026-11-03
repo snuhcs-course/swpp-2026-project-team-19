@@ -88,6 +88,33 @@ internal fun OwnerStoredPhoto(
             try {
                 val resolver = context.contentResolver
                 val parsedUri = Uri.parse(uri)
+                if(parsedUri.scheme == "https" || parsedUri.scheme == "http") {
+                    val connection = java.net.URL(uri).openConnection() as java.net.HttpURLConnection
+                    connection.connectTimeout = 10_000
+                    connection.readTimeout = 15_000
+                    connection.instanceFollowRedirects = false
+                    try {
+                        if(connection.responseCode == 200) {
+                            val body = connection.inputStream.use { input ->
+                                val output = java.io.ByteArrayOutputStream()
+                                val buffer = ByteArray(16_384)
+                                var length = 0
+                                while(true) {
+                                    val n = input.read(buffer)
+                                    if(n < 0) break
+                                    length += n
+                                    if(length > 8 * 1024 * 1024) break
+                                    output.write(buffer, 0, n)
+                                }
+                                if(length > 8 * 1024 * 1024) null else output.toByteArray()
+                            }
+                            return@withContext body?.let {
+                                BitmapFactory.decodeByteArray(it, 0, it.size)?.asImageBitmap()
+                            }
+                        }
+                    } finally { connection.disconnect() }
+                    return@withContext null
+                }
                 val orientation = resolver.openInputStream(parsedUri)?.use { stream ->
                     runCatching {
                         ExifInterface(stream).getAttributeInt(

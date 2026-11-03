@@ -118,6 +118,23 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         }
     }
 
+    /**
+     * Server-backed Owner adapter only: atomically substitute a fresh server snapshot
+     * into an in-memory screen model. Production data is NEVER written to Mock prefs.
+     */
+    internal fun replaceFromBackend(snapshot: MockOwnerSnapshot) = synchronized(lock) {
+        store.write(snapshot)
+        current.value = snapshot.asLoadState()
+    }
+
+    internal fun serverLoading() = synchronized(lock) {
+        current.value = MockOwnerLoadState.Loading
+    }
+
+    internal fun serverError(message: String) = synchronized(lock) {
+        current.value = MockOwnerLoadState.Error(message)
+    }
+
     private fun requireNoActiveImport(s: MockOwnerSnapshot, barId: String) {
         require(s.imports.none { it.barId == barId &&
             it.status in listOf(MockImportStatus.UPLOADED, MockImportStatus.PROCESSING,

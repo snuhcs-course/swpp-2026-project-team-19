@@ -19,6 +19,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -187,7 +191,8 @@ internal fun OwnerManualMenuScreen(
         MockImportStatus.UPLOADED,MockImportStatus.PROCESSING,
         MockImportStatus.READY_FOR_REVIEW)
     val products = snapshot?.products.orEmpty()
-    val brands = (snapshot?.brands.orEmpty() + htmlBrands).distinctBy { it.brandId }
+    val brands = (snapshot?.brands.orEmpty() +
+        if(viewModel.usesProductionOwnerApi()) emptyList() else htmlBrands).distinctBy { it.brandId }
     // A deleted local product retains its ID; offer it again only for this bar,
     // via the same explicit "맞아요" confirmation as canonical catalog entries.
     val deletedLocalCandidates = products.filter { product ->
@@ -200,7 +205,8 @@ internal fun OwnerManualMenuScreen(
     val activeLocalCandidates = products.filter { product ->
         !product.catalogMatched && items.any { it.productId == product.productId }
     }
-    val candidates = (products.filter { it.catalogMatched } + htmlCatalog +
+    val candidates = (products.filter { it.catalogMatched && it.isActive } +
+        (if(viewModel.usesProductionOwnerApi()) emptyList() else htmlCatalog) +
         deletedLocalCandidates + activeLocalCandidates).distinctBy { it.productId }
 
     val photoContext=LocalContext.current
@@ -216,6 +222,12 @@ internal fun OwnerManualMenuScreen(
     var linkedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var rejectedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var itemName by rememberSaveable(bar?.barId) { mutableStateOf("") }
+    LaunchedEffect(screen, itemName) {
+        if(screen=="item" && itemName.trim().length>=2 && viewModel.usesProductionOwnerApi()) {
+            kotlinx.coroutines.delay(300)
+            runCatching { viewModel.searchCatalogLive(itemName) }
+        }
+    }
     var brandName by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var category by rememberSaveable(bar?.barId) { mutableStateOf("위스키") }
     var alcoholKind by rememberSaveable(bar?.barId) { mutableStateOf("") }
@@ -229,6 +241,8 @@ internal fun OwnerManualMenuScreen(
     var calendarTarget by rememberSaveable { mutableStateOf<String?>(null) }
     var promoOptionExpanded by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var saving by rememberSaveable(bar?.barId) { mutableStateOf(false) }
+    val saveScope = rememberCoroutineScope()
     val draftOptions = decodedOptions(optionText)
     fun setOptions(v: List<DraftOption>) { optionText = encodedOptions(v) }
     fun changeOption(index: Int, transform: (DraftOption) -> DraftOption) {
@@ -268,7 +282,7 @@ internal fun OwnerManualMenuScreen(
     BackHandler(screen != "list") { back() }
 
     fun save() {
-        if (bar == null) return
+        if (bar == null || saving) return
         try {
             require(!activePhotoImport) { "ACTIVE_IMPORT_EXISTS" }
             val name = itemName.trim()
@@ -395,16 +409,28 @@ internal fun OwnerManualMenuScreen(
                 ?: MockBrand(p.brandId, brandName.trim().ifEmpty {
                     if (whisky) "기타 브랜드" else category
                 })
-            viewModel.saveManualMenuItem(
-                MockBarMenuItem(old?.barMenuItemId ?: manualId("local-menu-"),
-                    bar.barId, p.productId, options, soldOut = old?.soldOut ?: false,
-                    displayNameOverride = if ((p.catalogMatched || sharedLocal) &&
-                        name != p.displayName) name else null),
-                if (products.none { it.productId == p.productId } ||
-                    (linked != null && !linked.catalogMatched && !sharedLocal)) p else null,
-                brand
-            )
-            screen = "list"; selectedId = null; editId = null; error = null
+            val stagedItem = MockBarMenuItem(old?.barMenuItemId ?: manualId("local-menu-"),
+                bar.barId, p.productId, options, soldOut = old?.soldOut ?: false,
+                displayNameOverride = if ((p.catalogMatched || sharedLocal) &&
+                    name != p.displayName) name else null)
+            val stagedProduct = if (products.none { it.productId == p.productId } ||
+                (linked != null && !linked.catalogMatched && !sharedLocal)) p else null
+            if(viewModel.usesProductionOwnerApi()) {
+                saving = true
+                saveScope.launch {
+                    try {
+                        viewModel.saveManualMenuItemLive(stagedItem, stagedProduct, brand)
+                        screen = "list"; selectedId = null; editId = null; error = null
+                    } catch(cancelled: CancellationException) {
+                        throw cancelled
+                    } catch(e: Exception) {
+                        error = e.message ?: "메뉴를 저장하지 못했어요. 다시 시도해 주세요."
+                    } finally { saving = false }
+                }
+            } else {
+                viewModel.saveManualMenuItem(stagedItem, stagedProduct, brand)
+                screen = "list"; selectedId = null; editId = null; error = null
+            }
         } catch (e: Exception) { error = e.message ?: "저장하지 못했어요." }
     }
 
@@ -825,8 +851,8 @@ internal fun OwnerManualMenuScreen(
                     }
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     error?.let { Text(it, color = Color(0xFFFFB4AB)) }
-                    ManualButton(if (editId == null) "메뉴 추가" else "저장하기",
-                        ::save, modifier = Modifier.testTag("manual-menu-save"))
+                    ManualButton(if(saving) "저장 중..." else if (editId == null) "메뉴 추가"
+                        else "저장하기", ::save, modifier = Modifier.testTag("manual-menu-save"))
                 }
                 screen == "promo" -> {
                     Text("할인 설정", color = V4Color.text, fontFamily = FontFamily.Serif,
