@@ -73,6 +73,15 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/** Reject only backend-confirmed query input failures; do not relabel network faults. */
+internal fun p18QueryValidationCode(error:Exception):String? =
+    (error as? BottleMapApiException)
+        ?.takeIf{it.code=="VALIDATION_FAILED"}
+        ?.fieldErrors?.firstOrNull{
+            it.path=="query" && it.code in setOf(
+                "MISSING","BLANK","STRING_TOO_LONG","NOT_SEARCHABLE")
+        }?.code
+
 internal sealed interface P18SearchState {
     data object Loading : P18SearchState
     data class Ready(val response: SearchBarsResponseDto) : P18SearchState
@@ -143,12 +152,7 @@ internal class P18SearchViewModel(
                 throw cancelled
             } catch (error: Exception) {
                 if(request==version) {
-                    val invalid = (error as? BottleMapApiException)
-                        ?.takeIf{it.code=="VALIDATION_FAILED"}
-                        ?.fieldErrors?.firstOrNull{
-                            it.path=="query" && it.code in setOf(
-                                "MISSING","BLANK","STRING_TOO_LONG","NOT_SEARCHABLE")
-                        }?.code
+                    val invalid=p18QueryValidationCode(error)
                     mutable.value=if(invalid!=null)
                         P18SearchState.InvalidQuery(invalid)
                     else P18SearchState.Error(
