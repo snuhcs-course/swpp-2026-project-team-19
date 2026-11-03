@@ -59,6 +59,22 @@ class OwnerRepository {
         )
     }
 
+    suspend fun addBarPhoto(barId: String, prepared: PreparedMenuImage):
+        com.zerotoone.bottlemap.network.OwnedPhotoListDto =
+        withOwnerAuth { token ->
+            OwnerEndpoint.api.addOwnedBarPhoto(token, barId,
+                MultipartBody.Part.createFormData("image", prepared.filename,
+                    prepared.bytes.toRequestBody(prepared.mimeType.toMediaType())))
+        }
+
+    suspend fun deleteBarPhoto(barId: String, photoId: String):
+        com.zerotoone.bottlemap.network.OwnedPhotoListDto =
+        withOwnerAuth { OwnerEndpoint.api.deleteOwnedBarPhoto(it, barId, photoId) }
+
+    suspend fun reorderBarPhotos(barId: String, ids: List<String>):
+        com.zerotoone.bottlemap.network.OwnedPhotoListDto =
+        withOwnerAuth { OwnerEndpoint.api.reorderOwnedBarPhotos(it, barId, mapOf("photoIds" to ids)) }
+
     suspend fun setOperatingException(barId: String, body: Map<String, Any?>):
         com.zerotoone.bottlemap.network.OwnedBarDto =
         withOwnerAuth { OwnerEndpoint.api.setOperatingException(it, barId, body) }
