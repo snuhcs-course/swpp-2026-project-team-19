@@ -241,13 +241,19 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     it.menuImportId == historical.menuImportId
                 }
                 val serverStatus = menuImportStatus(historical.status)
+                // List responses omit extracted items. A recovered ready import must
+                // open the polling screen once to fetch complete Stage 8 review data,
+                // not show a 0-line publish screen after process recreation.
+                val displayStatus = if(serverStatus == MockImportStatus.READY_FOR_REVIEW &&
+                    previous?.images.isNullOrEmpty()) MockImportStatus.PROCESSING
+                    else serverStatus
                 (previous ?: MockMenuImport(
                     menuImportId = historical.menuImportId, barId = bar.barId,
-                    status = serverStatus,
+                    status = displayStatus,
                     reviewVersion = maxOf(1,historical.reviewVersion),
                     images = emptyList(),
                 )).copy(
-                    status = serverStatus,
+                    status = displayStatus,
                     reviewVersion = maxOf(1,historical.reviewVersion),
                 )
             }
