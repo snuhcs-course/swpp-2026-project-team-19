@@ -182,10 +182,10 @@ fun GoogleLoginScreen(
         AccountHeader("로그인",onBack)
         Column(Modifier.fillMaxSize().padding(horizontal=20.dp,vertical=24.dp),
             verticalArrangement=Arrangement.spacedBy(20.dp)) {
-            Text("Google 계정으로\n로그인해 주세요",
+            Text("Google 계정으로 선택적으로 로그인해요.",
                 style=MaterialTheme.typography.headlineSmall,fontSize=24.sp,
                 lineHeight=32.sp,color=P18Text)
-            Text("로그인하지 않아도 위스키 검색과 지도를 이용할 수 있어요.",
+            Text("",
                 fontSize=14.sp,lineHeight=21.sp,color=P18Muted)
             when(state) {
                 AuthUiState.Initializing, AuthUiState.SigningIn -> {
@@ -196,7 +196,7 @@ fun GoogleLoginScreen(
                     }
                 }
                 is AuthUiState.SignInError -> {
-                    Text("로그인하지 못했어요",color=P18Text,fontSize=18.sp,
+                    Text("로그인을 완료하지 못했습니다.",color=P18Text,fontSize=18.sp,
                         fontWeight=FontWeight.Bold)
                     Text(state.message,color=P18Muted,fontSize=14.sp)
                 }
@@ -204,7 +204,7 @@ fun GoogleLoginScreen(
             }
             GoogleSignInButton(viewModel=authViewModel,
                 enabled=state is AuthUiState.Guest || state is AuthUiState.SignInError)
-            P18Action("나중에 할게요",onContinueGuest,
+            P18Action("취소하고 Guest로 계속",onContinueGuest,
                 modifier=Modifier.fillMaxWidth())
         }
     }
