@@ -1,6 +1,8 @@
 package com.zerotoone.bottlemap.data.owner
 
 import android.content.Context
+import android.net.Uri
+import com.zerotoone.bottlemap.data.ImageUploadPreparer
 import com.zerotoone.bottlemap.data.AppAuth
 import com.zerotoone.bottlemap.data.OwnerRepository
 import com.zerotoone.bottlemap.network.BarMenuResponseDto
@@ -25,7 +27,9 @@ import kotlinx.coroutines.sync.withLock
  * Never persist fetched personal or owner data into local Mock preferences.
  */
 class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
+    private val app = context.applicationContext
     private val local = LocalOwnerMockRepository(InMemoryMockOwnerStateStore())
+    private var pendingApplicationId: String? = null
     private val remote = OwnerRepository()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val writeMutex = Mutex()
@@ -297,6 +301,55 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
 
     override fun confirmMenuInformation(barId: String, confirmedAtEpochMs: Long) {
         write { remote.confirmMenu(barId, versionByBar[barId]) }
+    }
+
+    /** Called asynchronously by the existing registration form; never show success before HTTP 201 + photo PUT. */
+    suspend fun submitRegistrationDraftLive() {
+        val draft = snapshot().registrationDraft
+            ?: error("등록 신청 정보를 먼저 입력해 주세요.")
+        val body = mutableMapOf<String, Any?>(
+            "applicationType" to if(draft.kind == MockApplicationKind.EXISTING_BAR)
+                "existing_bar" else "new_bar",
+            "businessRegistrationNumber" to draft.businessNumberDigits,
+            "representativeName" to draft.representativeName,
+            "openingDate" to draft.openingDateIso,
+            "contactPhone" to draft.contactPhone,
+        )
+        if(draft.kind == MockApplicationKind.EXISTING_BAR) {
+            body["barId"] = requireNotNull(draft.existingBarId)
+        } else {
+            body["proposedBar"] = mapOf(
+                "name" to draft.proposedBarName,
+                "address" to listOf(draft.proposedBarAddress, draft.proposedBarAddressDetail)
+                    .filter { it.isNotBlank() }.joinToString(" "),
+                "phone" to draft.storePhone.takeIf { it.isNotBlank() },
+            )
+        }
+        // If POST succeeded but the image PUT failed, retry the same pending application.
+        val existing = remote.getMyApplications().firstOrNull {
+            it.status == "pending" &&
+                it.businessRegistrationNumber == draft.businessNumberDigits &&
+                it.applicationType == body["applicationType"]
+        }
+        val applicationId = pendingApplicationId ?: existing?.applicationId
+            ?: remote.submitOwnerApplication(body).applicationId
+        pendingApplicationId = applicationId
+        if(draft.initialMenuPhotos.isNotEmpty()) {
+            val preparer = ImageUploadPreparer(app.contentResolver)
+            val images = draft.initialMenuPhotos.map { photo ->
+                preparer.prepare(Uri.parse(photo.uri))
+            }
+            remote.uploadApplicationMenuPhotos(applicationId, images)
+        }
+        pendingApplicationId = null
+        local.saveRegistrationDraft(null)
+        refresh()
+    }
+
+    suspend fun readBusinessCertificateLive(uri: String):
+        com.zerotoone.bottlemap.network.OwnerCertificateOcrDto {
+        val prepared = ImageUploadPreparer(app.contentResolver).prepare(Uri.parse(uri))
+        return remote.readBusinessCertificate(prepared)
     }
 
     // Local-only interactions that have no published server equivalent must not fake a save.
