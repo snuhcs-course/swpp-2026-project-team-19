@@ -1,4 +1,5 @@
-"""The bar owner tables enforce the rules of docs/schema_guide.md 5.3 to 5.5 in the database."""
+"""The bar owner tables enforce the rules of docs/schema_guide.md 5.3 to 5.5 in the database,
+including the cover photo of a new_bar application (5.3)."""
 
 from datetime import datetime, timezone
 
@@ -15,7 +16,14 @@ from app.models import (
     OwnerApplicationStatus,
     OwnerApplicationType,
 )
-from tests.factories import make_application, make_application_menu_image, make_bar, make_owner, make_user
+from tests.factories import (
+    make_application,
+    make_application_menu_image,
+    make_bar,
+    make_owner,
+    make_user,
+    set_cover_photo,
+)
 
 NOW = datetime(2026, 10, 28, 3, tzinfo=timezone.utc)
 
@@ -99,6 +107,64 @@ def test_matched_rows_keep_a_business_status(db_session):
     application.business_verification_result = BusinessVerificationResult.MATCHED
     application.business_status = BusinessStatus.CLOSED
     db_session.flush()
+
+
+def test_a_pending_new_bar_application_may_have_a_cover_photo(db_session):
+    application = make_application(db_session, make_user(db_session))
+
+    set_cover_photo(db_session, application)
+    db_session.refresh(application)
+
+    assert application.cover_photo_sha256 == "c" * 64
+
+
+@pytest.mark.parametrize(
+    "column", ["cover_photo_storage_key", "cover_photo_thumbnail_storage_key", "cover_photo_sha256"]
+)
+def test_a_cover_photo_needs_all_three_columns(db_session, column):
+    application = make_application(db_session, make_user(db_session))
+    set_cover_photo(db_session, application)
+
+    setattr(application, column, None)
+    with pytest.raises(IntegrityError):
+        db_session.flush()
+
+
+def test_an_existing_bar_application_has_no_cover_photo(db_session):
+    application = make_application(db_session, make_user(db_session), make_bar(db_session))
+
+    with pytest.raises(IntegrityError):
+        set_cover_photo(db_session, application)
+
+
+@pytest.mark.parametrize("status", [OwnerApplicationStatus.REJECTED, OwnerApplicationStatus.CANCELED])
+def test_a_closed_application_keeps_no_cover_photo(db_session, status):
+    operator = make_user(db_session, "operator-subject")
+    application = make_application(db_session, make_user(db_session))
+    set_cover_photo(db_session, application)
+
+    application.status = status
+    if status == OwnerApplicationStatus.REJECTED:
+        application.rejection_reason = "No"
+        application.reviewed_by_user_id = operator.id
+        application.reviewed_at = NOW
+    with pytest.raises(IntegrityError):
+        db_session.flush()
+
+
+def test_an_approved_application_keeps_no_cover_photo(db_session):
+    operator = make_user(db_session, "operator-subject")
+    application = make_application(
+        db_session,
+        make_user(db_session),
+        make_bar(db_session),
+        application_type=OwnerApplicationType.NEW_BAR,
+        status=OwnerApplicationStatus.APPROVED,
+        reviewer=operator,
+    )
+
+    with pytest.raises(IntegrityError):
+        set_cover_photo(db_session, application)
 
 
 def test_an_approved_new_bar_application_holds_the_created_bar(db_session):

@@ -206,6 +206,15 @@ def make_application_menu_image(
     return image
 
 
+def set_cover_photo(session: Session, application: BarOwnerApplication, content_sha256: str = "c" * 64) -> None:
+    """Give `application` a cover photo; no file is stored."""
+    prefix = f"owner-applications/{application.id}/cover/{uuid4()}"
+    application.cover_photo_storage_key = f"{prefix}.jpg"
+    application.cover_photo_thumbnail_storage_key = f"{prefix}-thumb.jpg"
+    application.cover_photo_sha256 = content_sha256
+    session.flush()
+
+
 def make_bar_photo(session: Session, bar: Bar, sort_order: int = 1, content_sha256: str | None = None) -> BarPhoto:
     """A photo row of `bar`; no file is stored. The hash defaults to one per position."""
     photo_id = uuid4()

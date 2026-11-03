@@ -87,6 +87,17 @@ class BarOwnerApplication(Base):
             "business_status IS NULL OR business_verification_result = 'matched'",
             name="ck_bar_owner_applications_business_status",
         ),
+        # The cover photo is all three columns or none, and only a pending new_bar application has one:
+        # approval moves it to bar_photos, rejection and cancellation delete it.
+        CheckConstraint(
+            "(cover_photo_storage_key IS NULL) = (cover_photo_thumbnail_storage_key IS NULL)"
+            " AND (cover_photo_storage_key IS NULL) = (cover_photo_sha256 IS NULL)",
+            name="ck_bar_owner_applications_cover_photo_complete",
+        ),
+        CheckConstraint(
+            "cover_photo_storage_key IS NULL OR (application_type = 'new_bar' AND status = 'pending')",
+            name="ck_bar_owner_applications_cover_photo_pending_new_bar",
+        ),
         Index("ix_bar_owner_applications_status_created_at", "status", "created_at"),
         Index("ix_bar_owner_applications_applicant_user_id_created_at", "applicant_user_id", "created_at"),
         Index("ix_bar_owner_applications_bar_id", "bar_id"),
@@ -130,6 +141,11 @@ class BarOwnerApplication(Base):
     business_checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     contact_phone: Mapped[str] = mapped_column(String(30), nullable=False)
     applicant_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # The re-encoded cover photo of a new_bar application and its thumbnail (spec 3.11.17).
+    cover_photo_storage_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    cover_photo_thumbnail_storage_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # Of the uploaded bytes; becomes bar_photos.content_sha256 on approval.
+    cover_photo_sha256: Mapped[str | None] = mapped_column(CHAR(64), nullable=True)
     status: Mapped[OwnerApplicationStatus] = mapped_column(
         _pg_enum(OwnerApplicationStatus, "owner_application_status"),
         nullable=False,
