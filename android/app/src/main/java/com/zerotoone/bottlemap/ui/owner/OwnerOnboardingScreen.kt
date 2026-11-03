@@ -750,10 +750,20 @@ fun OwnerOnboardingScreen(
                                         .ownerQuietClick {
                                             save(draft.copy(initialMenuPhotos=photoItems.filterIndexed {
                                                 i,_->i!=index }))
-                                            // Remove only the app-owned capture, never a gallery URI.
-                                            val stored=Uri.parse(photo.uri).path.orEmpty()
-                                            if(stored.contains("/owner-menu-captures/registration-menu-"))
-                                                File(stored).delete()
+                                            // Never delete a capture retained by a submitted
+                                            // application, another job or the persisted draft.
+                                            val persisted=latestDraft()
+                                            val retainedByDraft=persisted?.initialMenuPhotos
+                                                ?.any { it.photoId==photo.photoId } == true
+                                            val retainedByApplication=snapshot?.applications.orEmpty()
+                                                .any { app -> app.registrationPhotos.any {
+                                                    it.uri==photo.uri
+                                                } }
+                                            val retainedByImport=snapshot?.imports.orEmpty().any { job ->
+                                                job.images.any { it.sourceUri==photo.uri }
+                                            }
+                                            if(!retainedByDraft && !retainedByApplication && !retainedByImport)
+                                                deleteOwnedRegistrationMenuCapture(ctx,Uri.parse(photo.uri))
                                         }.testTag("registration-remove-menu-$index")
                                         .padding(horizontal=7.dp),
                                         color=RegistrationV4.text,fontSize=15.sp)
