@@ -127,6 +127,9 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
 
     fun usesProductionOwnerApi(): Boolean =
         repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository
+    fun pendingRepresentativePhotoWarning(): String? =
+        (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            ?.pendingCoverWarning
 
     suspend fun submitPhotoImportLive(barId: String, photos: List<MockPhoto>): String =
         if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)

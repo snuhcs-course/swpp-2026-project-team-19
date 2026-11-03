@@ -169,6 +169,10 @@ fun OwnerManagementHomeScreen(
                 }
                 else -> {
                     val (snapshot, bar) = selected
+                    viewModel.pendingRepresentativePhotoWarning()?.let { warning ->
+                        Text(warning, color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall)
+                    }
                     val exception = homeOperatingException(bar, now)
                     val job = latestOwnerImport(snapshot.imports, bar.barId)
                     val hasPublishedMenu = snapshot.menuItems.any { it.barId == bar.barId }
