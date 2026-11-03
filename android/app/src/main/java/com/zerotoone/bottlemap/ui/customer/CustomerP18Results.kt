@@ -236,6 +236,7 @@ internal fun CustomerP18Results(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     var chooseQuery by rememberSaveable(initialQuery) { mutableStateOf(initialQuery.orEmpty()) }
+    var focusRequest by remember { mutableIntStateOf(0) }
     var exiting by remember { mutableStateOf(false) }
     DisposableEffect(lifecycleOwner, viewModel, context) {
         val observer = LifecycleEventObserver { _, event ->
@@ -329,10 +330,11 @@ internal fun CustomerP18Results(
             }
             original!=null && original.matchedProducts.isEmpty() -> {
                 P18SearchTopBar(::navigateBack,chooseQuery,{chooseQuery=it},
-                    {if(chooseQuery.isNotBlank())onSearchAgain(chooseQuery)},editable=true)
+                    {if(chooseQuery.isNotBlank())onSearchAgain(chooseQuery)},
+                    editable=true,focusRequestToken=focusRequest)
                 P18FailureBody("어떤 위스키인지\n알아보지 못했어요",
                     "영어 이름이나 다른 표기로\n다시 찾아보세요.",
-                    "검색어 고치기",icon=BmIconId.SEARCH,onAction=onBack,
+                    "검색어 고치기",icon=BmIconId.SEARCH,onAction={focusRequest++},
                     modifier=Modifier.weight(1f))
             }
             choose -> {
@@ -510,7 +512,7 @@ private fun P18ResultsMap(
 @Composable
 private fun P18SearchTopBar(
     onBack:()->Unit, query:String="", onQuery:(String)->Unit={}, onSubmit:()->Unit={},
-    editable:Boolean=false,
+    editable:Boolean=false, focusRequestToken:Int=0,
 ) {
     Row(Modifier.fillMaxWidth().heightIn(min=72.dp)
         .padding(start=8.dp,end=20.dp,top=8.dp,bottom=8.dp),
@@ -518,7 +520,8 @@ private fun P18SearchTopBar(
         horizontalArrangement=Arrangement.spacedBy(4.dp)) {
         P18Back(onBack)
         if(query.isNotEmpty() || editable) {
-            P18SearchField(query,onQuery,onSubmit,modifier=Modifier.weight(1f))
+            P18SearchField(query,onQuery,onSubmit,
+                modifier=Modifier.weight(1f),focusRequestToken=focusRequestToken)
         }
     }
 }
