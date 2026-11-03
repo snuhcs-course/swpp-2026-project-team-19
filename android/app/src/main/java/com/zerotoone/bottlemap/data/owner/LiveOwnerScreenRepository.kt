@@ -37,6 +37,32 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         private set
     private val generation = AtomicInteger(0)
     private val versionByBar = mutableMapOf<String, Int?>()
+    private var sessionSubject: String? = null
+    private var pendingPhotoRetry: Pair<List<String>, String>? = null
+    private var pendingPhotoRetryBarId: String? = null
+
+    /** This is a cache-partition key only, not an authorization check. */
+    private fun sessionKey(accessToken: String): String {
+        val subject = runCatching {
+            val part = accessToken.split('.').getOrNull(1) ?: return@runCatching null
+            val decoded = android.util.Base64.decode(part,
+                android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or
+                    android.util.Base64.NO_PADDING)
+            org.json.JSONObject(String(decoded, Charsets.UTF_8)).optString("sub")
+                .takeIf { it.isNotBlank() }
+        }.getOrNull()
+        return subject ?: accessToken.hashCode().toString()
+    }
+
+    private fun menuImportStatus(value: String): MockImportStatus = when(value) {
+        "uploaded" -> MockImportStatus.UPLOADED
+        "processing" -> MockImportStatus.PROCESSING
+        "ready_for_review" -> MockImportStatus.READY_FOR_REVIEW
+        "failed" -> MockImportStatus.FAILED
+        "applied" -> MockImportStatus.APPLIED
+        "canceled" -> MockImportStatus.CANCELED
+        else -> error("알 수 없는 서버 작업 상태: $value")
+    }
     @Volatile private var lastReadySnapshot = MockOwnerSnapshot()
 
     private fun publishSnapshot(value: MockOwnerSnapshot) {
@@ -146,9 +172,24 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private suspend fun refresh() {
         val token = AppAuth.gateway.currentAccessTokenOrNull()
         if(token == null) {
+            sessionSubject = null
+            pendingPhotoRetry = null
+            pendingPhotoRetryBarId = null
+            pendingApplicationId = null
             versionByBar.clear()
             publishSnapshot(MockOwnerSnapshot())
             return
+        }
+        val subject = sessionKey(token)
+        if(subject != sessionSubject) {
+            // The singleton is shared across sign-in sessions. Never retain another
+            // Owner's bars, imports, registration photos or unsent decisions.
+            sessionSubject = subject
+            pendingPhotoRetry = null
+            pendingPhotoRetryBarId = null
+            pendingApplicationId = null
+            versionByBar.clear()
+            publishSnapshot(MockOwnerSnapshot())
         }
         val old = snapshot()
         val bars = remote.getOwnedBars().map { bar ->
@@ -158,6 +199,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             }.getOrDefault(bar) else bar
         }
         val applications = remote.getMyApplications()
+        val importHistory = bars.associate { bar ->
+            bar.barId to remote.getMenuImports(bar.barId).items
+        }
         val menus = bars.associate { bar ->
             bar.barId to remote.getOwnedMenu(bar.barId)
         }
@@ -178,24 +222,43 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val mappedBars = bars.map(::toBar)
         val selected = old.selectedBarId?.takeIf { id -> mappedBars.any { it.barId == id } }
             ?: mappedBars.firstOrNull()?.barId
-        // Owner application approval can start a menu import before this device uploads photos.
-        // A processing placeholder directs the existing job screen to poll the server.
-        val importedJobs = bars.mapNotNull { bar ->
-            bar.activeMenuImport?.let { pending ->
-                old.imports.firstOrNull { it.menuImportId == pending.menuImportId }
-                    ?: MockMenuImport(
-                        menuImportId = pending.menuImportId, barId = bar.barId,
-                        status = MockImportStatus.PROCESSING,
-                        reviewVersion = 1, images = emptyList(),
-                    )
+        // Restore the complete latest import history after process recreation, including
+        // failed and ready_for_review jobs. The server list is newest first; the
+        // existing screens select the last job, so reverse it into chronological order.
+        val importedJobs = bars.flatMap { bar ->
+            val histories = importHistory[bar.barId].orEmpty().asReversed().toMutableList()
+            val active = bar.activeMenuImport
+            if(active != null && histories.none { it.menuImportId == active.menuImportId }) {
+                histories.add(com.zerotoone.bottlemap.network.MenuImportListItemDto(
+                    menuImportId = active.menuImportId,
+                    mode = "partial_update", status = active.status,
+                    imageCount = 0, reviewVersion = 0,
+                    createdAt = "1970-01-01T00:00:00Z",
+                ))
+            }
+            histories.map { historical ->
+                val previous = old.imports.firstOrNull {
+                    it.menuImportId == historical.menuImportId
+                }
+                val serverStatus = menuImportStatus(historical.status)
+                (previous ?: MockMenuImport(
+                    menuImportId = historical.menuImportId, barId = bar.barId,
+                    status = serverStatus,
+                    reviewVersion = maxOf(1,historical.reviewVersion),
+                    images = emptyList(),
+                )).copy(
+                    status = serverStatus,
+                    reviewVersion = maxOf(1,historical.reviewVersion),
+                )
             }
         }
+        // Never publish a response from a former session after account switch.
+        if(AppAuth.gateway.currentAccessTokenOrNull()?.let(::sessionKey) != subject) return
         publishSnapshot(old.copy(
             bars = mappedBars, applications = applications.map(::toApplication),
             menuItems = rows, brands = brands, products = products,
             selectedBarId = selected,
-            imports = (old.imports + importedJobs)
-                .distinctBy { it.menuImportId },
+            imports = importedJobs,
         ))
     }
 
@@ -508,13 +571,22 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         require(photos.isNotEmpty()) { "메뉴판 사진을 선택해 주세요." }
         val preparer = ImageUploadPreparer(app.contentResolver)
         val images = photos.map { photo -> preparer.prepare(Uri.parse(photo.uri)) }
+        val fingerprint = photos.map { it.uri }
+        val key = if(pendingPhotoRetryBarId == barId &&
+            pendingPhotoRetry?.first == fingerprint)
+            requireNotNull(pendingPhotoRetry).second
+        else java.util.UUID.randomUUID().toString()
+        pendingPhotoRetryBarId = barId
+        pendingPhotoRetry = fingerprint to key
         val accepted = remote.uploadMenuImport(
             barId = barId,
             images = images,
             // Existing backend supports partial_update; never request full_replace.
             mode = "partial_update",
-            idempotencyKey = java.util.UUID.randomUUID().toString(),
+            idempotencyKey = key,
         )
+        pendingPhotoRetry = null
+        pendingPhotoRetryBarId = null
         val job = MockMenuImport(
             menuImportId = accepted.menuImportId, barId = barId,
             status = MockImportStatus.PROCESSING, reviewVersion = 1,
@@ -533,15 +605,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val dto = remote.getMenuImport(importId)
         val before = snapshot()
         val old = before.imports.firstOrNull { it.menuImportId == importId }
-        val status = when(dto.status) {
-            "uploaded" -> MockImportStatus.UPLOADED
-            "processing" -> MockImportStatus.PROCESSING
-            "ready_for_review" -> MockImportStatus.READY_FOR_REVIEW
-            "applied" -> MockImportStatus.APPLIED
-            "failed" -> MockImportStatus.FAILED
-            "canceled" -> MockImportStatus.CANCELED
-            else -> error("알 수 없는 서버 작업 상태: ${dto.status}")
-        }
+        val status = menuImportStatus(dto.status)
         val extraBrands = dto.images.flatMap { image ->
             image.items.flatMap { item -> item.candidates.map { candidate ->
                 MockBrand(candidate.brandId, candidate.brandName)

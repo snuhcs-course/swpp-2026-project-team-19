@@ -147,6 +147,12 @@ class OwnerRepository {
             OwnerEndpoint.api.cancelMenuImport(authorization, menuImportId)
         }
 
+    suspend fun getMenuImports(barId: String):
+        com.zerotoone.bottlemap.network.MenuImportListResponseDto =
+        withOwnerAuth { authorization ->
+            OwnerEndpoint.api.getMenuImports(authorization, barId, status = "all", limit = 20)
+        }
+
     suspend fun getMenuImport(menuImportId: String): MenuImportStatusDto =
         withOwnerAuth { authorization ->
             OwnerEndpoint.api.getMenuImport(
