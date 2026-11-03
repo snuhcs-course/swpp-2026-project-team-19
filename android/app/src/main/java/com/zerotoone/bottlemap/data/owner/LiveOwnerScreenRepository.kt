@@ -930,6 +930,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val original = remote.getMenuImport(importId)
         require(original.status == "ready_for_review") { "검수할 수 없는 서버 작업이에요." }
         require(original.reviewVersion == version) { "REVIEW_OUTDATED" }
+        require(conflictingReviewedPhotoPrices(job).isEmpty()) {
+            "같은 메뉴·용량에 다른 가격을 입력했어요. 가격을 하나로 맞춘 후 게시해 주세요."
+        }
         val decisions = job.images.flatMap { it.lines }.associateBy { it.extractedItemId }
         val missingOptionLineIds = original.images.flatMap { it.items }
             .filter { it.options.isEmpty() }.mapTo(mutableSetOf()) { it.extractedItemId }

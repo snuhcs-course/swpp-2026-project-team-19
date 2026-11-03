@@ -76,4 +76,22 @@ class OwnerPhotoReviewPolicyTest {
         assertEquals(listOf(0,24000),lines[0].options.map { it.priceKrw })
         assertEquals(listOf(0,24000),lines[1].options.map { it.priceKrw })
     }
+    @Test fun manuallyReviewedDifferentPricesMustNotPublishInPhotoOrder() {
+        val first=exact("one",17000).copy(mockAutoAccepted=false,
+            decision=MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                productId="product-glenfiddich",
+                correctedOptions=listOf(MockMenuOption("one",label="잔",pourMl=30,priceKrw=17000))))
+        val second=exact("two",19000).copy(mockAutoAccepted=false,
+            decision=MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                productId="product-glenfiddich",
+                correctedOptions=listOf(MockMenuOption("two",label="잔",pourMl=30,priceKrw=19000))))
+        val job=MockMenuImport("job","bar",MockImportStatus.READY_FOR_REVIEW,1,
+            listOf(image(1,first),image(2,second)))
+        assertEquals(setOf("product-glenfiddich"),conflictingReviewedPhotoPrices(job))
+        assertTrue(conflictingReviewedPhotoPrices(job.copy(images=listOf(
+            image(1,first),image(2,second.copy(
+                decision=second.decision?.copy(correctedOptions=listOf(
+                    MockMenuOption("two",label="잔",pourMl=30,priceKrw=17000)))))))).isEmpty())
+    }
+
 }

@@ -50,3 +50,24 @@ internal fun requirePhotoPriceReviewOnConflict(
         })
     }
 }
+
+/**
+ * Never let photo ordering choose a price silently after owner review.
+ * The same existing product / pour size must have one agreed final price
+ * across all photos before the first irreversible publish API call.
+ */
+internal fun conflictingReviewedPhotoPrices(job: MockMenuImport): Set<String> {
+    val prices = mutableMapOf<Pair<String, String>, MutableSet<Int>>()
+    job.images.flatMap { it.lines }.forEach { line ->
+        val decision = line.decision ?: return@forEach
+        if(decision.kind != MockDecisionKind.SELECT_PRODUCT) return@forEach
+        val productId = decision.productId ?: return@forEach
+        (decision.correctedOptions ?: line.options).forEach { option ->
+            if(option.priceKrw > 0) prices
+                .getOrPut(productId to option.identityKey()) { mutableSetOf() }
+                .add(option.priceKrw)
+        }
+    }
+    return prices.filterValues { it.size > 1 }
+        .keys.mapTo(mutableSetOf()) { it.first }
+}
