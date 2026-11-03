@@ -43,6 +43,7 @@ fun BarDetailScreen(
     onBackAndRefreshResults: () -> Unit = onBack,
     onOpenMap: (String) -> Unit = {},
     viewModel: BarDetailViewModel = viewModel(),
+    highlightProductId: String? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(barId) { viewModel.load(barId) }
@@ -56,13 +57,21 @@ fun BarDetailScreen(
     }
 
     I2CustomerSearchTheme {
-        BarDetailContent(
-            state = state,
-            onBack = onBack,
-            onBackAndRefreshResults = onBackAndRefreshResults,
-            onRetry = viewModel::retry,
-            onOpenMap = onOpenMap,
-        )
+        when(val current=state) {
+            is BarDetailUiState.Success -> CustomerP18BarDetail(
+                bar=current.bar, empty=null, onBack=onBack,
+                highlightProductId=highlightProductId)
+            is BarDetailUiState.Empty -> CustomerP18BarDetail(
+                bar=current.bar, empty=current.reason, onBack=onBack,
+                highlightProductId=highlightProductId)
+            else -> BarDetailContent(
+                state = state,
+                onBack = onBack,
+                onBackAndRefreshResults = onBackAndRefreshResults,
+                onRetry = viewModel::retry,
+                onOpenMap = onOpenMap,
+            )
+        }
     }
 }
 
