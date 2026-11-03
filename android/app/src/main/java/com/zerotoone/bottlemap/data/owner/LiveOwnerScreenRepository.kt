@@ -354,10 +354,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         remote.reorderBarPhotos(barId, now.map { mappedIds.getValue(it.photoId) })
     }
 
-    override fun saveBar(bar: MockBar) {
-        val old = snapshot().bars.firstOrNull { it.barId == bar.barId }
-            ?: error("매장 정보를 먼저 불러와 주세요.")
-        local.saveBar(bar)
+    private suspend fun persistBar(old: MockBar, bar: MockBar) {
         val changes = mutableMapOf<String, Any?>()
         if(old.name != bar.name) changes["name"] = bar.name
         if(old.address != bar.address) {
@@ -374,10 +371,22 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 mapOf("dayOfWeek" to it.isoDayOfWeek, "closed" to it.closed,
                     "openTime" to time(it.openMinutes), "closeTime" to time(it.closeMinutes))
             }
-        if(changes.isNotEmpty() || old.gallery != bar.gallery) write {
-            if(changes.isNotEmpty()) remote.updateBar(bar.barId, changes)
-            if(old.gallery != bar.gallery) syncGallery(bar.barId, old.gallery, bar.gallery)
-        }
+        if(changes.isNotEmpty()) remote.updateBar(bar.barId, changes)
+        if(old.gallery != bar.gallery) syncGallery(bar.barId, old.gallery, bar.gallery)
+    }
+
+    override fun saveBar(bar: MockBar) {
+        val old = snapshot().bars.firstOrNull { it.barId == bar.barId }
+            ?: error("매장 정보를 먼저 불러와 주세요.")
+        local.saveBar(bar)
+        write { persistBar(old,bar) }
+    }
+
+    /** Used by save buttons: return only after the server commits and the UI refreshes. */
+    suspend fun saveBarLive(bar: MockBar) = confirmedWrite {
+        val old = snapshot().bars.firstOrNull { it.barId == bar.barId }
+            ?: error("매장 정보를 먼저 불러와 주세요.")
+        persistBar(old,bar)
     }
 
     private suspend fun sendManualItemToServer(

@@ -52,6 +52,11 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     }
     fun dismissRejectedForFixture(id: String) = repository.dismissRejectedForFixture(id)
     fun saveBar(bar: MockBar) = repository.saveBar(bar)
+    suspend fun saveBarLive(bar: MockBar) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.saveBarLive(bar)
+        else repository.saveBar(bar)
+    }
     fun confirmMenuInformation(barId: String, atEpochMs: Long) = repository.confirmMenuInformation(barId, atEpochMs)
     fun applyOperatingException(barId: String, exception: MockOperatingException) = repository.applyOperatingException(barId, exception)
     fun cancelOperatingException(barId: String, exceptionId: String) = repository.cancelOperatingException(barId, exceptionId)

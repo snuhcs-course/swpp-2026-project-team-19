@@ -31,6 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -68,15 +71,23 @@ fun OwnerPhotoHtmlV4Screen(
     var menuPhotoId by rememberSaveable { mutableStateOf<String?>(null) }
     var deletePhotoId by rememberSaveable { mutableStateOf<String?>(null) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var saving by rememberSaveable { mutableStateOf(false) }
+    val saveScope=rememberCoroutineScope()
     val context = LocalContext.current
     fun commit(photos: List<MockPhoto>) {
         val current = bar ?: return
-        try {
-            viewModel.saveBar(current.copy(gallery = photos))
-            error = null
-            menuPhotoId = null
-        } catch (e: Exception) {
-            error = e.message ?: "사진을 저장하지 못했어요. 다시 시도해 주세요."
+        if(saving) return
+        saving=true
+        saveScope.launch {
+            try {
+                viewModel.saveBarLive(current.copy(gallery = photos))
+                error=null
+                menuPhotoId=null
+            } catch(cancelled: CancellationException) {
+                throw cancelled
+            } catch(e: Exception) {
+                error=e.message ?: "사진을 저장하지 못했어요. 다시 시도해 주세요."
+            } finally { saving=false }
         }
     }
     val picker = rememberLauncherForActivityResult(
