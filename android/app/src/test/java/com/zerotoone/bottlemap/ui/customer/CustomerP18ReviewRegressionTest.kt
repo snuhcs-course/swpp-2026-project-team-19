@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.ui.customer
 
+import com.zerotoone.bottlemap.network.BottleMapApiException
+import com.zerotoone.bottlemap.network.FieldErrorDto
 import com.zerotoone.bottlemap.network.BarMenuDiscountDto
 import com.zerotoone.bottlemap.network.BarOperatingExceptionDto
 import com.zerotoone.bottlemap.network.BarWeeklyHoursDto
@@ -17,6 +19,19 @@ import java.time.ZonedDateTime
  */
 class CustomerP18ReviewRegressionTest {
     private val kst=ZoneId.of("Asia/Seoul")
+
+    @Test fun backendNotSearchableQueryUsesExistingCorrectionState() {
+        val invalid=BottleMapApiException(
+            httpStatus=422,code="VALIDATION_FAILED",message="input error",
+            fieldErrors=listOf(FieldErrorDto("query","NOT_SEARCHABLE","invalid")))
+        assertEquals("NOT_SEARCHABLE",p18QueryValidationCode(invalid))
+        val otherField=BottleMapApiException(
+            httpStatus=422,code="VALIDATION_FAILED",message="other error",
+            fieldErrors=listOf(FieldErrorDto("lat","GREATER_THAN_EQUAL","invalid")))
+        assertNull(p18QueryValidationCode(otherField))
+        assertNull(p18QueryValidationCode(BottleMapApiException(
+            code="NETWORK_ERROR",message="offline")))
+    }
 
     @Test fun yesterdayClosureNoteMustNotPersistIntoNormalOpenHours() {
         val hours=listOf(BarWeeklyHoursDto(2,false,"12:00","22:00"))
