@@ -83,7 +83,7 @@ internal fun RegistrationBackBar(back:()->Unit) {
     }
 }
 @Composable
-internal fun RegistrationProgress(stage:Int,onDebugQa:(()->Unit)?=null) {
+internal fun RegistrationProgress(stage:Int) {
     Row(Modifier.fillMaxWidth().padding(horizontal=20.dp),horizontalArrangement=Arrangement.spacedBy(4.dp)) {
         repeat(4) { i ->
             Box(Modifier.weight(1f).height(3.dp)
@@ -93,9 +93,7 @@ internal fun RegistrationProgress(stage:Int,onDebugQa:(()->Unit)?=null) {
     }
     Text("$stage/4 "+listOf("사업자 정보","매장 정보","메뉴판","확인")[stage-1],
         color=RegistrationV4.secondary,fontSize=12.sp,lineHeight=18.sp,
-        modifier=Modifier.padding(start=20.dp,top=8.dp)
-            .then(if(com.zerotoone.bottlemap.BuildConfig.DEBUG && onDebugQa!=null)
-                Modifier.ownerQuietClick(onClick=onDebugQa) else Modifier))
+        modifier=Modifier.padding(start=20.dp,top=8.dp))
 }
 @Composable
 internal fun RegistrationHeading(title:String, subtitle:String?=null) {
