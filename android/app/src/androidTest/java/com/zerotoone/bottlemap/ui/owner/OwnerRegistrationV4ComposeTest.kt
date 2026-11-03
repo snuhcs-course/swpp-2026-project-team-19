@@ -70,7 +70,7 @@ class OwnerRegistrationV4ComposeTest {
             assertEquals("김민준",draft.representativeName)
             assertEquals("2019-05-14",draft.openingDateIso)
         }
-        compose.onNodeWithText("국세청에 확인하기").performClick()
+        compose.onNodeWithText("확인하기").performClick()
         compose.waitUntil(5000) {
             compose.onAllNodesWithText("사업자 정보가\n확인됐어요")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -166,6 +166,32 @@ class OwnerRegistrationV4ComposeTest {
         compose.onNodeWithText("읽지 못한 항목은 직접 입력해 주세요.").assertExists()
         compose.onNodeWithText("확인하기").assertExists()
         compose.onNodeWithTag("registration-qa-preview-26").assertExists()
+    }
+
+    @Test fun dismissedApplicationSheetUsesApprovedShortCopy() {
+        compose.setContent {
+            MaterialTheme {
+                RegistrationApplicationConfirmSheet(
+                    kind=RegistrationApplicationSheet.DISMISS,
+                    onClose={},onConfirm={}
+                )
+            }
+        }
+        compose.onNodeWithText("같은 매장은 언제든 다시 신청할 수 있어요.").assertExists()
+        compose.onNodeWithTag("registration-dismiss-sheet").assertExists()
+        compose.onNodeWithText("지우기").assertExists()
+    }
+
+    @Test fun editableReviewShowsCompactEditControlsWhileDetailsRemainReadOnly() {
+        val triggered=androidx.compose.runtime.mutableStateOf(false)
+        compose.setContent {
+            MaterialTheme {
+                RegistrationRow("대표 사진","1장",onEdit={triggered.value=true})
+            }
+        }
+        compose.onNodeWithTag("registration-review-edit").assertExists()
+        compose.onNodeWithText("수정").performClick()
+        compose.runOnIdle { org.junit.Assert.assertTrue(triggered.value) }
     }
 
     @Test fun completeReviewSubmitsMockPendingApplicationWithoutNtsNetworkCall() {
