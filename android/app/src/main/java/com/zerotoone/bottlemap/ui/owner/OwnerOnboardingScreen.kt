@@ -819,6 +819,7 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.DONE -> RegistrationCenterContent("신청을 마쳤어요",
                         "운영팀이 실제 매장인지 확인한 뒤 승인해요.\n진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
+                    RegPage.QA_LIST,RegPage.QA_PREVIEW -> Unit
                     RegPage.VIEW_APPLICATION -> {
                         OwnerV4Question("신청한 내용",
                             "검토 중인 신청은 수정할 수 없어요.")
