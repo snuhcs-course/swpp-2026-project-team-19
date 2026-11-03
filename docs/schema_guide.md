@@ -61,15 +61,15 @@
 
 ### 3.4 업주 등록과 승인
 
-1. 로그인한 사용자가 업주 신청을 낸다. 기존 업장이면 `bar_id`를, 새 업장이면 업장명·주소·전화번호를 적고, 사업자등록번호, 대표자명, 개업일자와 연락처를 함께 적는다. 사업자등록증 사진을 올리면 OCR로 읽은 값이 입력란에 미리 채워진다. 사진은 저장하지 않는다.
-2. 백엔드가 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자를 1차 검증한다. 맞지 않으면 행을 만들지 않고 신청자가 입력을 고친다. 맞으면 `business_verification_result = matched`와 사업자 상태를, 검증 서비스에 연결하지 못하면 `unavailable`을 저장하고 `bar_owner_applications`에 `pending`으로 저장한다.
-3. 신청자가 메뉴판 사진을 올린다. 사진은 객체 저장소에, 위치는 `bar_owner_application_menu_images`에 저장한다. `pending`인 동안 다시 올리면 전체를 교체한다.
+1. 로그인한 사용자가 업주 신청을 낸다. 기존 업장이면 `bar_id`를, 새 업장이면 업장명·주소·전화번호를 적고, 사업자등록번호, 대표자명, 개업일자와 연락처를 함께 적는다. 사업자등록증 사진을 올리면 OCR로 읽은 값이 입력란에 미리 채워진다. 사진은 저장하지 않는다. 신청 전에 세 값만 국세청에 먼저 확인할 수도 있으며, 이 확인은 DB에 저장하지 않는다(맞으면 서버 메모리에 30분 기억).
+2. 백엔드가 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자를 1차 검증한다. 같은 사용자가 30분 안에 같은 값으로 신청 전 확인에서 `matched`를 받았으면 그 결과를 쓴다. 맞지 않으면 행을 만들지 않고 신청자가 입력을 고친다. 맞으면 `business_verification_result = matched`와 사업자 상태를, 검증 서비스에 연결하지 못하면 `unavailable`을 저장하고 `bar_owner_applications`에 `pending`으로 저장한다.
+3. 신청자가 메뉴판 사진을 올린다. 사진은 객체 저장소에, 위치는 `bar_owner_application_menu_images`에 저장한다. `pending`인 동안 다시 올리면 전체를 교체한다. 새 업장 신청은 매장 대표 사진 한 장도 올릴 수 있으며, 매장 사진처럼 다시 인코딩해 저장하고 위치를 신청의 `cover_photo_*` 컬럼에 둔다.
 4. 운영자가 웹 대시보드에서 대기 중인 신청과 검증 결과, 메뉴판 사진을 보고 실제 매장이 있는지 확인한다. `unavailable`이면 다시 검증한다.
 5. 승인하면 같은 트랜잭션에서 다음을 처리한다.
    - 기존 업장: 현재 업주가 없는지 다시 확인하고 `bar_owners` 행을 만든다.
-   - 새 업장: 운영자가 확인한 업장 정보(좌표 포함)로 `bars` 행을 만들고, 신청의 `bar_id`에 저장한 뒤 `bar_owners` 행을 만든다.
+   - 새 업장: 운영자가 확인한 업장 정보(좌표 포함)로 `bars` 행을 만들고, 신청의 `bar_id`에 저장한 뒤 `bar_owners` 행을 만든다. 대표 사진이 있으면 같은 파일을 가리키는 `bar_photos` 행(`sort_order = 1`)을 만들고 신청의 `cover_photo_*`를 비운다.
    - 신청 메뉴판 사진이 있고 업장에 미완료 메뉴 등록 작업이 없으면, 그 사진으로 `menu_imports`와 `menu_images`를 만든다(8.1). 커밋한 뒤 AI 처리를 시작하므로 업주가 처음 들어왔을 때 검수가 준비되어 있다.
-6. 거절하면 사유를 `rejection_reason`에 남긴다. 신청자는 대기 중인 신청을 직접 취소할 수 있다. 거절되거나 취소되면 신청 메뉴판 사진의 행과 파일을 삭제한다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
+6. 거절하면 사유를 `rejection_reason`에 남긴다. 신청자는 대기 중인 신청을 직접 취소할 수 있다. 거절되거나 취소되면 신청 메뉴판 사진의 행과 파일, 대표 사진의 컬럼과 파일을 삭제한다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
 7. 승인된 업주는 자기 업장의 정보 수정과 메뉴 등록·검수·반영을 할 수 있다. 권한은 매 요청 `bar_owners`에서 확인하므로 승인이나 해제가 다음 요청부터 반영된다.
 8. 운영자는 업주 관계를 해제할 수 있다. 행을 지우지 않고 `revoked_at`을 기록한다.
 
@@ -309,6 +309,9 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `business_checked_at` | `timestamptz`, NOT NULL | `2026-10-14T03:00:00Z` | 저장된 검증 결과를 얻은 시각이다. 신청할 때 `unavailable`이 되었으면 그 시도 시각이다. 운영자의 다시 검증이 실패하면 결과와 함께 바뀌지 않는다. |
 | `contact_phone` | `varchar(30)`, NOT NULL | `010-1234-5678` | 운영자가 확인을 위해 연락할 번호다. 업장 전화번호와 다를 수 있다. |
 | `applicant_note` | `varchar(500)`, nullable | `대표 본인입니다` | 신청자가 남긴 메모다. |
+| `cover_photo_storage_key` | `varchar(500)`, nullable | `owner-applications/cccc.../cover/abcd....jpg` | `new_bar` 신청의 매장 대표 사진이다. 매장 사진(5.8)처럼 다시 인코딩한 JPEG의 위치다. 운영자가 실제 매장인지 확인할 때 보고, 승인되면 새 업장의 첫 `bar_photos` 행이 같은 파일을 가리킨다. |
+| `cover_photo_thumbnail_storage_key` | `varchar(500)`, nullable | `owner-applications/cccc.../cover/abcd...-thumb.jpg` | 대표 사진의 긴 변 480px 썸네일 위치다. |
+| `cover_photo_sha256` | `char(64)`, nullable | SHA-256 16진수 문자열 | 업로드한 원본 바이트의 SHA-256이다. 승인할 때 `bar_photos.content_sha256`이 된다. |
 | `status` | `owner_application_status`, NOT NULL, 기본 `pending` | `pending` | 신청 처리 상태다. |
 | `reviewed_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 승인하거나 거절한 운영자다. 권한을 준 결정이므로 누가 했는지 남긴다. |
 | `reviewed_at` | `timestamptz`, nullable | `2026-10-14T05:00:00Z` | 승인 또는 거절 시각이다. |
@@ -325,6 +328,8 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 - `business_status`는 `business_verification_result = matched`일 때만 값이 있을 수 있다.
 - 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자와 운영자에게만 보여 주며 공개 API에 포함하지 않고 로그에도 남기지 않는다. 검증 결과 중 신청자에게는 `business_status`만 보여 준다. 실제 값은 저장소에 커밋하지 않는다.
 - 사업자등록증 사진과 OCR로 읽은 값은 저장하지 않는다. 신청자가 확인한 값만 신청으로 저장된다. 메뉴판 사진은 5.5에 따로 저장한다.
+- `cover_photo_*` 세 컬럼은 함께 값이 있거나 함께 `null`이다. 값은 `application_type = new_bar`이고 `status = pending`일 때만 있을 수 있다(CHECK). 승인하면 사진을 `bar_photos`로 옮기고, 거절하거나 취소하면 커밋 뒤 파일을 지우며, 어느 경우든 컬럼을 비운다. 사진이 한 장이라 별도 테이블 대신 컬럼으로 둔다.
+- 신청 전 사업자등록 정보 확인(API 명세 3.11.16)의 결과는 DB에 저장하지 않는다. 신청이 그 결과를 쓰면 `business_checked_at`은 그 확인 시각이다.
 
 ### 5.4 bar_owners
 
@@ -420,7 +425,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 |---|---|---|---|
 | `id` | `uuid`, PK | 사진 ID | 공개 경로 `GET /api/bar-photos/{photoId}`의 ID다. |
 | `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | |
-| `storage_key` | `varchar(500)`, NOT NULL | `bars/2222.../photos/1212....jpg` | 서버가 다시 인코딩한 사진의 저장소 위치다. 메타데이터를 뺀 JPEG이며, 받은 원본은 저장하지 않는다. |
+| `storage_key` | `varchar(500)`, NOT NULL | `bars/2222.../photos/1212....jpg` | 서버가 다시 인코딩한 사진의 저장소 위치다. 메타데이터를 뺀 JPEG이며, 받은 원본은 저장하지 않는다. 새 업장 신청의 대표 사진에서 온 행은 신청 때 저장한 위치(`owner-applications/...`)를 그대로 쓴다. |
 | `thumbnail_storage_key` | `varchar(500)`, NOT NULL | `bars/2222.../photos/1212...-thumb.jpg` | 긴 변 480px 썸네일의 저장소 위치다. 업장 목록 API의 `coverThumbnailUrl`과 격자 화면이 쓴다. |
 | `content_sha256` | `char(64)`, NOT NULL | SHA-256 16진수 문자열 | 업로드한 원본 바이트의 SHA-256이다(다시 인코딩한 파일이 아니다). 같은 사진을 두 번 올리지 않게 막고, 응답을 받지 못해 다시 보낸 업로드도 이 값으로 걸러진다. |
 | `sort_order` | `smallint`, NOT NULL | `1` | 표시 순서이며 1이 대표 사진이다. 업장 안에서 1부터 빈틈없이 이어진다. |
@@ -951,6 +956,7 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 한 사용자는 같은 업장에 `status = pending`인 `existing_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending' AND application_type = 'existing_bar'`)로 보장한다.
 - 한 사용자는 같은 사업자등록번호로 `status = pending`인 `new_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `business_registration_number` WHERE `status = 'pending' AND application_type = 'new_bar'`)로 보장한다.
 - `bar_owner_applications.business_registration_number`는 숫자 10자리여야 한다.
+- `bar_owner_applications`의 `cover_photo_storage_key`, `cover_photo_thumbnail_storage_key`, `cover_photo_sha256`은 함께 값이 있거나 함께 `null`이고, 값이 있으면 `application_type = 'new_bar' AND status = 'pending'`이어야 한다. 두 CHECK 제약으로 보장한다.
 - `bars.tags`는 5개 이하여야 한다(`cardinality(tags) <= 5`).
 - `bar_weekly_hours.day_of_week`는 1부터 7이고, `is_closed`이면 두 시각이 `null`, 아니면 둘 다 값이 있고 서로 달라야 한다.
 - `bar_operating_exceptions`는 `end_date >= start_date`이고, `vacation`이 아니면 두 날짜가 같으며, `custom_hours`일 때만 두 시각이 있고 서로 달라야 한다.
