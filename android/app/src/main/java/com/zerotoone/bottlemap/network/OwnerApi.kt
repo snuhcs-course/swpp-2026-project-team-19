@@ -38,6 +38,19 @@ interface OwnerApi {
         @Body body: Map<String, @JvmSuppressWildcards Any?>,
     ): OwnedBarDto
 
+    @retrofit2.http.PUT("api/bars/{barId}/operating-exception")
+    suspend fun setOperatingException(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): OwnedBarDto
+
+    @retrofit2.http.DELETE("api/bars/{barId}/operating-exception")
+    suspend fun removeOperatingException(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+    ): OwnedBarDto
+
     @GET("api/bars/{barId}/menu")
     suspend fun getOwnedMenu(
         @Header("Authorization") authorization: String,
