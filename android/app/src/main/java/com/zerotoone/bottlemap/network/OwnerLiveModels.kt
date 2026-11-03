@@ -53,3 +53,16 @@ data class OwnerCertificateOcrDto(
     val businessName: String? = null,
     val address: String? = null,
 )
+
+data class OwnerCatalogProductDto(
+    val productId: String,
+    val displayName: String,
+    val brandId: String,
+    val brandName: String,
+    val category: String,
+    val ageYears: Int? = null,
+    val editionName: String? = null,
+    val abv: Double? = null,
+    val isActive: Boolean = true,
+)
+data class OwnerCatalogProductsDto(val items: List<OwnerCatalogProductDto> = emptyList())
