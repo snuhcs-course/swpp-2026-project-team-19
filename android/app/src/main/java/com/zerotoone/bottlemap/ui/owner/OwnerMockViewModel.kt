@@ -91,6 +91,10 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
             repository.pollPhotoImportLive(importId)
         else error("Local fixture must be supplied for Mock polling")
 
+    fun photoPublishWarning(): String? =
+        (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            ?.lastPublishWarning
+
     suspend fun publishPhotoImportLive(importId: String, version: Int): Int =
         if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
             repository.publishPhotoImportLive(importId, version)
