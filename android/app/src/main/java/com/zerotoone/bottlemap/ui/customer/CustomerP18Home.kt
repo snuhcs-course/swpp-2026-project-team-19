@@ -106,6 +106,8 @@ internal fun CustomerP18Home(
     onPopular: (String) -> Unit,
     onAccount: () -> Unit,
     onMap: () -> Unit,
+    refreshAfterMissingProduct:Boolean=false,
+    onMissingProductRefreshConsumed:()->Unit={},
     popularViewModel: P18PopularViewModel = viewModel(),
 ) {
     val context = LocalContext.current
@@ -122,6 +124,14 @@ internal fun CustomerP18Home(
     var recent by remember { mutableStateOf(readP18Recents(context)) }
     val popular by popularViewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(popularViewModel) { popularViewModel.load() }
+    // Only a previously displayed popular product that became inactive forces
+    // a refresh; ordinary Home re-entry must NOT blank or reload the cards.
+    LaunchedEffect(refreshAfterMissingProduct) {
+        if(refreshAfterMissingProduct) {
+            onMissingProductRefreshConsumed()
+            popularViewModel.load(force=true)
+        }
+    }
     fun launch(term: String, source: String) {
         val trimmed = term.trim()
         if (trimmed.isBlank() || trimmed.length > 100) return
