@@ -36,7 +36,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.zerotoone.bottlemap.network.ApiClient
+import com.zerotoone.bottlemap.data.CustomerDiscoverySource
+import com.zerotoone.bottlemap.data.Repositories
 import com.zerotoone.bottlemap.network.PopularProductDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
@@ -54,7 +55,9 @@ internal sealed interface P18PopularState {
 }
 
 /** Live §3.17 popular API, isolated failure cannot block the home screen. */
-internal class P18PopularViewModel: ViewModel() {
+internal class P18PopularViewModel(
+    private val repository:CustomerDiscoverySource=Repositories.customer,
+): ViewModel() {
     private val mutable = MutableStateFlow<P18PopularState>(P18PopularState.Loading)
     val state = mutable.asStateFlow()
     private var initialized = false
@@ -65,7 +68,7 @@ internal class P18PopularViewModel: ViewModel() {
         viewModelScope.launch {
             try {
                 mutable.value = P18PopularState.Ready(
-                    ApiClient.call { ApiClient.api.popularProducts(limit = 10) }.items)
+                    repository.popularProducts(limit=10).items)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) { mutable.value = P18PopularState.Error }
