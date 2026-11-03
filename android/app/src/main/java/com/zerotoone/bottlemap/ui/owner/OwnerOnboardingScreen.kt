@@ -575,6 +575,7 @@ fun OwnerOnboardingScreen(
                             RegistrationOcrPartialReview(
                                 bnFormat(draft.businessNumberDigits),
                                 draft.representativeName,
+                                draft.openingDateIso.replace("-","."),
                                 onEdit={ target ->
                                     go(when(target){
                                         "bn"->RegPage.BN
