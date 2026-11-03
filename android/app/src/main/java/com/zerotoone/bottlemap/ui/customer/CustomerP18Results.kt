@@ -326,8 +326,7 @@ internal fun CustomerP18Results(
     Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-results")) {
         when {
             state is P18SearchState.Loading && original==null -> {
-                P18SearchTopBar(::navigateBack,initialQuery.orEmpty())
-                P18LoadingBody("‘${initialQuery ?: "위스키"}’ 찾는 중",Modifier.weight(1f))
+                P18LoadingScene("위스키 찾는 중",::navigateBack,Modifier.weight(1f))
             }
             state is P18SearchState.Error -> {
                 P18SearchTopBar(::navigateBack, chooseQuery)
@@ -341,7 +340,8 @@ internal fun CustomerP18Results(
                     editable=true,focusRequestToken=focusRequest)
                 P18FailureBody("어떤 위스키인지\n알아보지 못했어요",
                     "영어 이름이나 다른 표기로\n다시 찾아보세요.",
-                    "검색어 고치기",icon=BmIconId.SEARCH,onAction={focusRequest++},
+                    "검색어 고치기",icon=BmIconId.SEARCH,
+                    onAction={chooseQuery="";focusRequest++},
                     modifier=Modifier.weight(1f))
             }
             choose -> {
@@ -380,8 +380,7 @@ internal fun CustomerP18Results(
                 }
             }
             chosenId!=null && state is P18SearchState.Loading -> {
-                P18SearchTopBar(::navigateBack,chooseQuery)
-                P18LoadingBody("위스키 찾는 중",Modifier.weight(1f))
+                P18LoadingScene("위스키 찾는 중",::navigateBack,Modifier.weight(1f))
             }
             ready!=null && ready.items.isEmpty() -> {
                 P18SearchTopBar(::navigateBack,chooseQuery)
@@ -446,8 +445,7 @@ internal fun CustomerP18Results(
                 }
             }
             else -> {
-                P18SearchTopBar(::navigateBack,chooseQuery)
-                P18LoadingBody("위스키 찾는 중",Modifier.weight(1f))
+                P18LoadingScene("위스키 찾는 중",::navigateBack,Modifier.weight(1f))
             }
         }
     }
