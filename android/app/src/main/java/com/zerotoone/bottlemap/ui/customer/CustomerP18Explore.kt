@@ -273,6 +273,13 @@ internal fun CustomerP18Explore(
         mapView?.let{if(listVisible)hideNearbyNativeSurface(it)
             else showNearbyNativeSurface(it)}
     }
+    // Live dropdown suggestions stay on top of the existing map; no new route.
+    LaunchedEffect(searchVisible,searchText) {
+        if(searchVisible && searchText.trim().length>=2) {
+            kotlinx.coroutines.delay(450)
+            searchViewModel.search(searchText.trim())
+        }
+    }
     Box(Modifier.fillMaxSize().background(P18Bg).testTag("customer-map-explore")) {
         NearbyKakaoMap(origin=if(goToGwanak)P18DefaultMapCenter else
             location?:P18DefaultMapCenter,
@@ -407,8 +414,12 @@ internal fun CustomerP18Explore(
             }
         }
         if(searchVisible) {
-            Column(Modifier.fillMaxSize().background(P18Bg)
-                .padding(top=76.dp).testTag("customer-map-place-search")) {
+            Column(Modifier.align(Alignment.TopCenter).fillMaxWidth()
+                .padding(start=12.dp,end=12.dp,top=76.dp)
+                .heightIn(max=430.dp)
+                .background(P18Bg,RoundedCornerShape(12.dp))
+                .border(1.dp,P18Line,RoundedCornerShape(12.dp))
+                .testTag("customer-map-place-search")) {
                 when(val result=placeState) {
                     MapPlaceSearchState.Idle -> Text("역, 매장 이름 또는 주소를 입력해 주세요.",
                         Modifier.padding(20.dp),color=P18Muted,fontSize=14.sp)
@@ -416,17 +427,13 @@ internal fun CustomerP18Explore(
                         contentAlignment=Alignment.Center) {
                         CircularProgressIndicator(color=P18Gold)
                     }
-                    is MapPlaceSearchState.Error -> P18FailureBody(
-                        "그 장소를 찾지 못했어요",
-                        "역 이름, 매장 이름, 주소로\n다시 찾아보세요.",
-                        "검색어 고치기",BmIconId.BAR_PIN,
-                        {searchViewModel.dismissResults();searchFocusRequest++})
+                    is MapPlaceSearchState.Error -> P18PlaceNoMatches(
+                        {searchText="";searchViewModel.dismissResults();searchFocusRequest++})
                     is MapPlaceSearchState.Results -> {
-                        if(result.places.isEmpty())P18FailureBody("그 장소를 찾지 못했어요",
-                            "역 이름, 매장 이름, 주소로\n다시 찾아보세요.",
-                            "검색어 고치기",BmIconId.BAR_PIN,
-                            {searchViewModel.dismissResults();searchFocusRequest++})
-                        else LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
+                        if(result.places.isEmpty())P18PlaceNoMatches(
+                            {searchText="";searchViewModel.dismissResults();searchFocusRequest++})
+                        else LazyColumn(Modifier.fillMaxWidth().heightIn(max=350.dp)
+                            .padding(horizontal=12.dp)) {
                             val registered=result.places.filter{it.barId!=null}
                             val locations=result.places.filter{it.barId==null}
                             listOf("등록된 매장" to registered,"장소" to locations).forEach{ (header,places)->
@@ -438,6 +445,7 @@ internal fun CustomerP18Explore(
                                             .clickable{
                                                 if(searchViewModel.select(place)) {
                                                     searchVisible=false;listVisible=false
+                                                    keyboard?.hide()
                                                 }
                                             }.padding(vertical=8.dp),
                                             verticalAlignment=Alignment.CenterVertically,
@@ -471,14 +479,15 @@ internal fun CustomerP18Explore(
             horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             P18Back(::back,dark=!listVisible)
             if(searchVisible) {
-                P18SearchField(searchText,{searchText=it},
+                P18SearchField(searchText,{searchText=it;searchViewModel.dismissResults()},
                     {searchViewModel.search(searchText)},placeholder="역 · 매장 이름 · 주소",
                     modifier=Modifier.weight(1f),
                     focusRequestToken=searchFocusRequest)
             } else {
                 Row(Modifier.weight(1f).height(48.dp)
                     .background(if(listVisible)P18Surface else P18Bg,RoundedCornerShape(12.dp))
-                    .clickable{searchVisible=true;searchViewModel.dismissResults()}
+                    .clickable{searchVisible=true;searchFocusRequest++;
+                        searchViewModel.dismissResults()}
                     .padding(horizontal=12.dp),
                     verticalAlignment=Alignment.CenterVertically,
                     horizontalArrangement=Arrangement.spacedBy(8.dp)) {
@@ -550,5 +559,22 @@ private fun P18BrowseTag(tag:String) {
         .padding(horizontal=8.dp,vertical=3.dp)) {
         Text(tag,color=P18Text,fontSize=11.sp,maxLines=1,
             overflow=TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
+private fun P18PlaceNoMatches(onEdit:()->Unit) {
+    Column(Modifier.fillMaxWidth().padding(horizontal=16.dp,vertical=16.dp),
+        verticalArrangement=Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment=Alignment.CenterVertically,
+            horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            BmIcon(BmIconId.BAR_PIN,null,Modifier.size(20.dp),tint=P18Muted)
+            Text("그 장소를 찾지 못했어요",fontSize=15.sp,color=P18Text,
+                fontWeight=FontWeight.SemiBold)
+        }
+        Text("역 이름, 매장 이름, 주소로 다시 찾아보세요.",
+            fontSize=13.sp,lineHeight=19.sp,color=P18Muted)
+        Text("검색어 고치기",Modifier.clickable(onClick=onEdit).padding(vertical=8.dp),
+            fontSize=14.sp,color=P18Gold,fontWeight=FontWeight.SemiBold)
     }
 }
