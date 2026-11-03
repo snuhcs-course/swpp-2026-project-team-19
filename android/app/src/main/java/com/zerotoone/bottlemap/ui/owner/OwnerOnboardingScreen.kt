@@ -376,9 +376,18 @@ fun OwnerOnboardingScreen(
         onClose={cancelId=null},
         onConfirm={
             cancelId?.let { id ->
-                runCatching {
-                    viewModel.closeApplicationForFixture(id,MockApplicationStatus.CANCELED)
-                }.onSuccess {cancelId=null}.onFailure {error=it.message}
+                if(!busy) {
+                    busy=true
+                    submitScope.launch {
+                        try {
+                            viewModel.cancelOwnerApplicationLive(id)
+                            cancelId=null
+                            error=null
+                        } catch(e: Exception) {
+                            error=e.message ?: "신청을 취소하지 못했어요."
+                        } finally {busy=false}
+                    }
+                }
             }
         }
     )
