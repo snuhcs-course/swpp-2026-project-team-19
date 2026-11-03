@@ -1,7 +1,7 @@
 """Bars with their management state (API spec 3.6), editing a bar (3.7), and the bars the caller owns (3.11.9).
 
-`bar_details` loads the unfinished imports, current menus, current owners, weekly hours and
-operating exceptions of many bars with one query each, so a list of bars costs the same few
+`bar_details` loads the unfinished imports, current menus, current owners, weekly hours,
+operating exceptions and photos of many bars with one query each, so a list of bars costs the same few
 queries as one bar.
 """
 
@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from app.core.errors import validation_failed_fields
 from app.core.security import Principal
 from app.models import Bar, BarOwner, BarStatus, MenuBoard, MenuImport, User
-from app.schemas.bar import ActiveMenuImport, BarDetail, BarOwnerSummary, BarUpdateInput, CurrentMenu
+from app.schemas.bar import ActiveMenuImport, BarDetail, BarOwnerSummary, BarPhotoResponse, BarUpdateInput, CurrentMenu
 from app.schemas.bar_hours import OperatingException, WeeklyHours
 from app.services.bar_access import forbidden
 from app.services.bar_hours import (
@@ -25,10 +25,11 @@ from app.services.bar_hours import (
     weekly_hours_by_bar,
     weekly_hours_errors,
 )
+from app.services.bar_photo_links import photos_by_bar
 from app.services.menu_import_upload import UNFINISHED_STATUSES
 
 
-def my_bars(session: Session, principal: Principal) -> list[BarDetail]:
+def my_bars(session: Session, principal: Principal, *, base_url: str) -> list[BarDetail]:
     """Bars the caller currently owns, by name; empty for a caller without a users row. Operators get
     only bars they own themselves, not every bar (that is 3.4)."""
     bars = session.scalars(
@@ -38,15 +39,15 @@ def my_bars(session: Session, principal: Principal) -> list[BarDetail]:
         .where(User.auth_subject == principal.subject, BarOwner.revoked_at.is_(None))
         .order_by(Bar.name, Bar.id)
     ).all()
-    return bar_details(session, bars)
+    return bar_details(session, bars, base_url=base_url)
 
 
-def get_bar_detail(session: Session, bar: Bar) -> BarDetail:
+def get_bar_detail(session: Session, bar: Bar, *, base_url: str) -> BarDetail:
     """One bar, inactive ones included (3.6)."""
-    return bar_details(session, [bar])[0]
+    return bar_details(session, [bar], base_url=base_url)[0]
 
 
-def update_bar(session: Session, bar: Bar, patch: BarUpdateInput, *, operator: bool) -> BarDetail:
+def update_bar(session: Session, bar: Bar, patch: BarUpdateInput, *, operator: bool, base_url: str) -> BarDetail:
     """Change the fields that were sent (3.7). Only an operator may change `status`."""
     sent = patch.model_fields_set
     if "status" in sent and not operator:
@@ -91,10 +92,10 @@ def update_bar(session: Session, bar: Bar, patch: BarUpdateInput, *, operator: b
             bar.updated_at = func.clock_timestamp()
     # A value equal to the stored one is no change, so `updatedAt` moves only when something changed.
     session.commit()
-    return bar_details(session, [bar])[0]
+    return bar_details(session, [bar], base_url=base_url)[0]
 
 
-def bar_details(session: Session, bars: Sequence[Bar]) -> list[BarDetail]:
+def bar_details(session: Session, bars: Sequence[Bar], *, base_url: str) -> list[BarDetail]:
     if not bars:
         return []
     bar_ids = [bar.id for bar in bars]
@@ -116,9 +117,16 @@ def bar_details(session: Session, bars: Sequence[Bar]) -> list[BarDetail]:
     }
     hours = weekly_hours_by_bar(session, bar_ids)
     exceptions = operating_exceptions_by_bar(session, bar_ids, seoul_today())
+    photos = photos_by_bar(session, bar_ids, base_url)
     return [
         _detail(
-            bar, hours[bar.id], exceptions.get(bar.id), unfinished.get(bar.id), boards.get(bar.id), owners.get(bar.id)
+            bar,
+            hours[bar.id],
+            exceptions.get(bar.id),
+            photos[bar.id],
+            unfinished.get(bar.id),
+            boards.get(bar.id),
+            owners.get(bar.id),
         )
         for bar in bars
     ]
@@ -128,6 +136,7 @@ def _detail(
     bar: Bar,
     hours: list[WeeklyHours],
     operating_exception: OperatingException | None,
+    photos: list[BarPhotoResponse],
     menu_import: MenuImport | None,
     board: MenuBoard | None,
     owner: tuple[BarOwner, User] | None,
@@ -144,6 +153,7 @@ def _detail(
         tags=list(bar.tags),
         weeklyHours=hours,
         operatingException=operating_exception,
+        photos=photos,
         status=bar.status.value,
         activeMenuImport=(
             ActiveMenuImport(menuImportId=menu_import.id, status=menu_import.status.value)

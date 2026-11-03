@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.schemas.bar import COVER_THUMBNAIL_DESCRIPTION
 from app.schemas.common import Latitude, Longitude, UtcDateTime
 from app.schemas.menu import DiscountResponse
 
@@ -34,6 +35,7 @@ class SearchResultItem(BaseModel):
     address: str
     latitude: Latitude
     longitude: Longitude
+    coverThumbnailUrl: str | None = Field(description=COVER_THUMBNAIL_DESCRIPTION)
     distanceMeters: int | None = Field(
         description="Straight-line distance from lat/lng in whole meters; null when no location was sent"
     )
@@ -67,6 +69,7 @@ class BarNameItem(BaseModel):
     address: str
     latitude: Latitude
     longitude: Longitude
+    coverThumbnailUrl: str | None = Field(description=COVER_THUMBNAIL_DESCRIPTION)
     hasOwner: bool = Field(
         description="True when the bar has a current owner; an owner application for it would be "
         "`409 BAR_OWNER_EXISTS`"
@@ -84,6 +87,7 @@ class MapBarItem(BaseModel):
     address: str
     latitude: Latitude
     longitude: Longitude
+    coverThumbnailUrl: str | None = Field(description=COVER_THUMBNAIL_DESCRIPTION)
     menuUpdatedAt: UtcDateTime | None = Field(
         description="When this bar's current menu was published, as in GET /api/search/nearby-bars; "
         "null when the bar has never had a published menu, set even when that menu has no items"
@@ -102,6 +106,7 @@ class NearbyBarItem(BaseModel):
     address: str
     latitude: Latitude
     longitude: Longitude
+    coverThumbnailUrl: str | None = Field(description=COVER_THUMBNAIL_DESCRIPTION)
     distanceMeters: int = Field(
         description="Straight-line (haversine) distance from lat/lng in whole meters; at most `radiusMeters`"
     )

@@ -26,6 +26,7 @@ DETAIL_FIELDS = {
     "tags",
     "weeklyHours",
     "operatingException",
+    "photos",
     "status",
     "activeMenuImport",
     "currentMenu",

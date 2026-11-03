@@ -52,7 +52,7 @@ def _check_dates(body: OperatingExceptionInput, today: date) -> None:
 
 
 def apply_operating_exception(
-    session: Session, principal: Principal, bar: Bar, body: OperatingExceptionInput
+    session: Session, principal: Principal, bar: Bar, body: OperatingExceptionInput, *, base_url: str
 ) -> BarDetail:
     """Replace the bar's closure with the request's (3.15.2); the bar as in spec 3.6."""
     today = seoul_today()
@@ -83,12 +83,12 @@ def apply_operating_exception(
         current.created_at = func.clock_timestamp()
     # Also ends the transaction of an unchanged retry, releasing the lock.
     session.commit()
-    return get_bar_detail(session, bar)
+    return get_bar_detail(session, bar, base_url=base_url)
 
 
-def cancel_operating_exception(session: Session, principal: Principal, bar: Bar) -> BarDetail:
+def cancel_operating_exception(session: Session, principal: Principal, bar: Bar, *, base_url: str) -> BarDetail:
     """Delete the bar's closure, if any (3.15.3); the bar as in spec 3.6."""
     lock_bar_for_manager(session, principal, bar.id)
     session.execute(delete(BarOperatingException).where(BarOperatingException.bar_id == bar.id))
     session.commit()
-    return get_bar_detail(session, bar)
+    return get_bar_detail(session, bar, base_url=base_url)

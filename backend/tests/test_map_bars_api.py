@@ -11,7 +11,7 @@ from tests.test_search_api import ANY_AUTHORIZATION
 
 URL = "/api/search/map-bars"
 AREA = {"south": 37.47, "west": 126.94, "north": 37.49, "east": 126.97}
-ITEM_FIELDS = {"barId", "name", "address", "latitude", "longitude", "menuUpdatedAt"}
+ITEM_FIELDS = {"barId", "name", "address", "latitude", "longitude", "coverThumbnailUrl", "menuUpdatedAt"}
 
 
 def map_bars(client, headers=None, **area) -> list[dict]:
@@ -51,6 +51,7 @@ def test_returns_every_active_bar_inside_the_area_with_its_fields(client, db_ses
             "address": "Seorosang address",
             "latitude": 37.477648,
             "longitude": 126.963763,
+            "coverThumbnailUrl": None,
             "menuUpdatedAt": "2026-10-04T09:15:30.123456Z",
         },
         str(without_menu.id): {
@@ -59,6 +60,7 @@ def test_returns_every_active_bar_inside_the_area_with_its_fields(client, db_ses
             "address": "Malt House address",
             "latitude": 37.479874,
             "longitude": 126.954512,
+            "coverThumbnailUrl": None,
             "menuUpdatedAt": None,
         },
     }

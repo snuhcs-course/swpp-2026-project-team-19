@@ -367,6 +367,7 @@ BAR_FIELDS = {
     "tags",
     "weeklyHours",
     "operatingException",
+    "photos",
     "menuBoardId",
     "menuVersion",
     "publishedAt",

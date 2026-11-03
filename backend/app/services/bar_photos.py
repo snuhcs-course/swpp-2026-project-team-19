@@ -8,8 +8,6 @@ only after the commit, and a file that cannot be removed is only logged.
 """
 
 import logging
-from collections import defaultdict
-from collections.abc import Sequence
 from uuid import UUID, uuid4
 
 from sqlalchemy import func, select, update
@@ -22,6 +20,7 @@ from app.models import BarPhoto
 from app.schemas.bar import BarPhotoResponse
 from app.services.bar_access import lock_bar_for_manager
 from app.services.bar_photo_image import process_photo
+from app.services.bar_photo_links import photos_by_bar
 from app.services.menu_import_upload import ImageUpload
 from app.services.users import caller_user_id
 
@@ -33,22 +32,6 @@ PHOTO_CONTENT_TYPE = "image/jpeg"
 
 def photo_not_found(photo_id: str) -> ApiError:
     return ApiError(404, "PHOTO_NOT_FOUND", "사진을 찾을 수 없습니다.", details={"photoId": photo_id})
-
-
-def photo_response(photo_id: UUID, base_url: str) -> BarPhotoResponse:
-    """The fixed URLs of spec 3.16.5, on the address the request came in on."""
-    image_url = f"{base_url.rstrip('/')}/api/bar-photos/{photo_id}"
-    return BarPhotoResponse(photoId=photo_id, imageUrl=image_url, thumbnailUrl=f"{image_url}/thumbnail")
-
-
-def photos_by_bar(session: Session, bar_ids: Sequence[UUID], base_url: str) -> dict[UUID, list[BarPhotoResponse]]:
-    """Each bar's photos in display order, with one query; a bar without photos maps to []."""
-    photos: dict[UUID, list[BarPhotoResponse]] = defaultdict(list)
-    for bar_id, photo_id in session.execute(
-        select(BarPhoto.bar_id, BarPhoto.id).where(BarPhoto.bar_id.in_(bar_ids)).order_by(BarPhoto.sort_order)
-    ):
-        photos[bar_id].append(photo_response(photo_id, base_url))
-    return photos
 
 
 def _photos_of(session: Session, bar_id: UUID, base_url: str) -> list[BarPhotoResponse]:

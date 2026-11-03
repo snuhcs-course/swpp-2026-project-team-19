@@ -268,7 +268,9 @@ def test_an_owner_revoked_before_the_lock_is_forbidden(db_session, bar, owner_us
     caller = Principal(kind="supabase", subject=OWNER_SUBJECT, claims={})
 
     with pytest.raises(ApiError) as caught:
-        apply_operating_exception(db_session, caller, bar, ClosedTodayInput(kind="closed_today", date=day()))
+        apply_operating_exception(
+            db_session, caller, bar, ClosedTodayInput(kind="closed_today", date=day()), base_url=""
+        )
 
     assert (caught.value.status_code, caught.value.code) == (403, "FORBIDDEN")
     assert stored(db_session, bar) is None

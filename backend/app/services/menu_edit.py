@@ -174,7 +174,7 @@ def _options(options: list[MenuOptionInput]) -> list[MenuEntryOption]:
     ]
 
 
-def _publish(session: Session, board: MenuBoard, *, created: bool = False) -> BarMenuResponse:
+def _publish(session: Session, board: MenuBoard, base_url: str, *, created: bool = False) -> BarMenuResponse:
     """Raise the version (a board created by this edit starts at 1), stamp the time, and answer the
     whole menu (spec 3.9) as it now is."""
     # clock_timestamp(), not now(): an edit that waited for the bar lock must not look older than a
@@ -184,7 +184,7 @@ def _publish(session: Session, board: MenuBoard, *, created: bool = False) -> Ba
         board.version += 1
     session.flush()
     session.expire_all()
-    return get_bar_menu(session, str(board.bar_id), can_manage=lambda bar: True)
+    return get_bar_menu(session, str(board.bar_id), can_manage=lambda bar: True, base_url=base_url)
 
 
 def _product_for(session: Session, body: MenuItemAddRequest, principal: Principal) -> Product:
@@ -209,7 +209,9 @@ def _product_for(session: Session, body: MenuItemAddRequest, principal: Principa
     return session.get(Product, product_id)
 
 
-def _add_once(session: Session, principal: Principal, bar_id: UUID, body: MenuItemAddRequest) -> BarMenuResponse:
+def _add_once(
+    session: Session, principal: Principal, bar_id: UUID, body: MenuItemAddRequest, base_url: str
+) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
     product = _product_for(session, body, principal)
     entries = board.entries if board is not None else []
@@ -241,11 +243,16 @@ def _add_once(session: Session, principal: Principal, bar_id: UUID, body: MenuIt
             options=_options(body.options),
         )
     )
-    return _publish(session, board, created=created)
+    return _publish(session, board, base_url, created=created)
 
 
 def _update_once(
-    session: Session, principal: Principal, bar_id: UUID, bar_menu_item_id: str, body: MenuItemUpdateRequest
+    session: Session,
+    principal: Principal,
+    bar_id: UUID,
+    bar_menu_item_id: str,
+    body: MenuItemUpdateRequest,
+    base_url: str,
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
     entry = board_entry(board, bar_menu_item_id)
@@ -254,11 +261,11 @@ def _update_once(
     entry.options.clear()
     session.flush()
     entry.options.extend(_options(body.options))
-    return _publish(session, board)
+    return _publish(session, board, base_url)
 
 
 def _delete_once(
-    session: Session, principal: Principal, bar_id: UUID, bar_menu_item_id: str, menu_version: int
+    session: Session, principal: Principal, bar_id: UUID, bar_menu_item_id: str, menu_version: int, base_url: str
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, menu_version)
     # The entry and its options go; the bar menu item stays for a later add of the same product, back
@@ -266,17 +273,19 @@ def _delete_once(
     entry = board_entry(board, bar_menu_item_id)
     board.entries.remove(entry)
     clear_sold_out(session, {entry.bar_menu_item_id})
-    return _publish(session, board)
+    return _publish(session, board, base_url)
 
 
-def _reset_once(session: Session, principal: Principal, bar_id: UUID, body: MenuResetRequest) -> BarMenuResponse:
+def _reset_once(
+    session: Session, principal: Principal, bar_id: UUID, body: MenuResetRequest, base_url: str
+) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
     if board is None:
         # Nothing to empty: the answer is the menu as it is, with nothing changed.
-        return get_bar_menu(session, str(bar_id), can_manage=lambda bar: True)
+        return get_bar_menu(session, str(bar_id), can_manage=lambda bar: True, base_url=base_url)
     clear_sold_out(session, {entry.bar_menu_item_id for entry in board.entries})
     board.entries.clear()
-    return _publish(session, board)
+    return _publish(session, board, base_url)
 
 
 def _run(session_factory: SessionFactory, bar_id: UUID, label: str, work) -> BarMenuResponse:
@@ -289,9 +298,11 @@ def _run(session_factory: SessionFactory, bar_id: UUID, label: str, work) -> Bar
 
 
 def add_menu_item(
-    session_factory: SessionFactory, principal: Principal, bar_id: UUID, body: MenuItemAddRequest
+    session_factory: SessionFactory, principal: Principal, bar_id: UUID, body: MenuItemAddRequest, *, base_url: str
 ) -> BarMenuResponse:
-    return _run(session_factory, bar_id, "menu add", lambda session: _add_once(session, principal, bar_id, body))
+    return _run(
+        session_factory, bar_id, "menu add", lambda session: _add_once(session, principal, bar_id, body, base_url)
+    )
 
 
 def update_menu_item(
@@ -300,27 +311,37 @@ def update_menu_item(
     bar_id: UUID,
     bar_menu_item_id: str,
     body: MenuItemUpdateRequest,
+    *,
+    base_url: str,
 ) -> BarMenuResponse:
     return _run(
         session_factory,
         bar_id,
         "menu edit",
-        lambda session: _update_once(session, principal, bar_id, bar_menu_item_id, body),
+        lambda session: _update_once(session, principal, bar_id, bar_menu_item_id, body, base_url),
     )
 
 
 def delete_menu_item(
-    session_factory: SessionFactory, principal: Principal, bar_id: UUID, bar_menu_item_id: str, menu_version: int
+    session_factory: SessionFactory,
+    principal: Principal,
+    bar_id: UUID,
+    bar_menu_item_id: str,
+    menu_version: int,
+    *,
+    base_url: str,
 ) -> BarMenuResponse:
     return _run(
         session_factory,
         bar_id,
         "menu delete",
-        lambda session: _delete_once(session, principal, bar_id, bar_menu_item_id, menu_version),
+        lambda session: _delete_once(session, principal, bar_id, bar_menu_item_id, menu_version, base_url),
     )
 
 
 def reset_menu(
-    session_factory: SessionFactory, principal: Principal, bar_id: UUID, body: MenuResetRequest
+    session_factory: SessionFactory, principal: Principal, bar_id: UUID, body: MenuResetRequest, *, base_url: str
 ) -> BarMenuResponse:
-    return _run(session_factory, bar_id, "menu reset", lambda session: _reset_once(session, principal, bar_id, body))
+    return _run(
+        session_factory, bar_id, "menu reset", lambda session: _reset_once(session, principal, bar_id, body, base_url)
+    )

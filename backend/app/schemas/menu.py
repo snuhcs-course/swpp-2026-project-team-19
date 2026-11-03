@@ -2,6 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.schemas.bar import BarPhotoResponse
 from app.schemas.bar_hours import OperatingException, WeeklyHours
 from app.schemas.common import Latitude, Longitude, UtcDateTime
 
@@ -58,6 +59,9 @@ class BarMenuResponse(BaseModel):
     operatingException: OperatingException | None = Field(
         description="The temporary closure, also one not started yet or one that ended yesterday (for the status "
         "early that morning); null when none. The open status is computed by the app (spec 3.15.5)"
+    )
+    photos: list[BarPhotoResponse] = Field(
+        description="Bar photos in display order; the first is the cover. Empty when none: show the default image"
     )
     menuBoardId: UUID | None = Field(description="null when the bar has no published menu")
     menuVersion: int | None = Field(

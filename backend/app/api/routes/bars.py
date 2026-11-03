@@ -80,8 +80,9 @@ def read_bars(
     cursor: Cursor = None,
     session: Session = Depends(get_session),
     _operator: Principal = Depends(require_operator),
+    base_url: str = Depends(get_base_url),
 ) -> BarListResponse:
-    return list_bars(session, query=query, status=status, limit=limit, cursor=cursor)
+    return list_bars(session, query=query, status=status, limit=limit, cursor=cursor, base_url=base_url)
 
 
 @router.get(
@@ -150,9 +151,13 @@ def read_bar_menu(
     bar_id: Annotated[str, Path(alias="barId", description="Bar id (UUID)")],
     session: Session = Depends(get_session),
     user: Principal | None = Depends(get_optional_user),
+    base_url: str = Depends(get_base_url),
 ) -> BarMenuResponse:
     return get_bar_menu(
-        session, bar_id, can_manage=lambda bar: user is not None and can_manage_bar(session, user, bar.id)
+        session,
+        bar_id,
+        can_manage=lambda bar: user is not None and can_manage_bar(session, user, bar.id),
+        base_url=base_url,
     )
 
 
@@ -170,8 +175,9 @@ def read_bar_menu(
 def read_bar(
     session: Session = Depends(get_session),
     bar: Bar = Depends(require_bar_manager),
+    base_url: str = Depends(get_base_url),
 ) -> BarDetail:
-    return get_bar_detail(session, bar)
+    return get_bar_detail(session, bar, base_url=base_url)
 
 
 @router.patch(
@@ -224,8 +230,9 @@ def edit_bar(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
     bar: Bar = Depends(require_bar_manager),
+    base_url: str = Depends(get_base_url),
 ) -> BarDetail:
-    return update_bar(session, bar, body, operator=is_operator(session, principal))
+    return update_bar(session, bar, body, operator=is_operator(session, principal), base_url=base_url)
 
 
 # ---- the temporary closure (spec 3.15.2 to 3.15.4) ----
@@ -271,8 +278,9 @@ def put_operating_exception(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
     bar: Bar = Depends(require_bar_manager),
+    base_url: str = Depends(get_base_url),
 ) -> BarDetail:
-    return apply_operating_exception(session, principal, bar, body)
+    return apply_operating_exception(session, principal, bar, body, base_url=base_url)
 
 
 @router.delete(
@@ -290,8 +298,9 @@ def delete_operating_exception(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
     bar: Bar = Depends(require_bar_manager),
+    base_url: str = Depends(get_base_url),
 ) -> BarDetail:
-    return cancel_operating_exception(session, principal, bar)
+    return cancel_operating_exception(session, principal, bar, base_url=base_url)
 
 
 # ---- manual menu edits (spec 3.14) ----
@@ -373,10 +382,11 @@ def add_bar_menu_item(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
     session_factory: SessionFactory = Depends(get_serializable_session_factory),
+    base_url: str = Depends(get_base_url),
 ) -> BarMenuResponse:
     check_request(body, datetime.now(timezone.utc))
     bar = managed_bar(session, principal, bar_id)
-    return add_menu_item(session_factory, principal, bar.id, body)
+    return add_menu_item(session_factory, principal, bar.id, body, base_url=base_url)
 
 
 @router.put(
@@ -404,10 +414,11 @@ def edit_bar_menu_item(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
     session_factory: SessionFactory = Depends(get_serializable_session_factory),
+    base_url: str = Depends(get_base_url),
 ) -> BarMenuResponse:
     check_request(body, datetime.now(timezone.utc))
     bar = managed_bar(session, principal, bar_id)
-    return update_menu_item(session_factory, principal, bar.id, bar_menu_item_id, body)
+    return update_menu_item(session_factory, principal, bar.id, bar_menu_item_id, body, base_url=base_url)
 
 
 @router.delete(
@@ -434,9 +445,10 @@ def delete_bar_menu_item(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
     session_factory: SessionFactory = Depends(get_serializable_session_factory),
+    base_url: str = Depends(get_base_url),
 ) -> BarMenuResponse:
     bar = managed_bar(session, principal, bar_id)
-    return delete_menu_item(session_factory, principal, bar.id, bar_menu_item_id, menu_version)
+    return delete_menu_item(session_factory, principal, bar.id, bar_menu_item_id, menu_version, base_url=base_url)
 
 
 @router.post(
@@ -462,9 +474,10 @@ def reset_bar_menu(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
     session_factory: SessionFactory = Depends(get_serializable_session_factory),
+    base_url: str = Depends(get_base_url),
 ) -> BarMenuResponse:
     bar = managed_bar(session, principal, bar_id)
-    return reset_menu(session_factory, principal, bar.id, body)
+    return reset_menu(session_factory, principal, bar.id, body, base_url=base_url)
 
 
 # ---- sold-out and the sales info confirmation (spec 3.14.8, 3.14.9) ----
@@ -504,9 +517,10 @@ def mark_bar_menu_item_sold_out(
     body: SoldOutRequest,
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> BarMenuResponse:
     bar = managed_bar(session, principal, bar_id)
-    return set_sold_out(session, principal, bar.id, bar_menu_item_id, body.soldOut)
+    return set_sold_out(session, principal, bar.id, bar_menu_item_id, body.soldOut, base_url=base_url)
 
 
 @router.post(
@@ -542,9 +556,10 @@ def confirm_bar_menu(
     body: MenuConfirmRequest,
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> BarDetail:
     bar = managed_bar(session, principal, bar_id)
-    return confirm_menu(session, principal, bar.id, body.menuVersion)
+    return confirm_menu(session, principal, bar.id, body.menuVersion, base_url=base_url)
 
 
 # ---- photos (spec 3.16) ----

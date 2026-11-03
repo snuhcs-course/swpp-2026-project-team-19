@@ -9,6 +9,7 @@ from app.core.errors import ApiError
 from app.models import Bar, BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
 from app.schemas.menu import BarMenuResponse, DiscountResponse, MenuItemResponse, MenuOptionResponse
 from app.services.bar_hours import operating_exceptions_by_bar, seoul_today, weekly_hours_by_bar
+from app.services.bar_photo_links import photos_by_bar
 
 
 def bar_not_found(bar_id: str) -> ApiError:
@@ -27,7 +28,9 @@ def discount_response(option: MenuEntryOption, now: datetime) -> DiscountRespons
     )
 
 
-def get_bar_menu(session: Session, bar_id: str, *, can_manage: Callable[[Bar], bool]) -> BarMenuResponse:
+def get_bar_menu(
+    session: Session, bar_id: str, *, can_manage: Callable[[Bar], bool], base_url: str
+) -> BarMenuResponse:
     """The bar and its current menu board, as the caller may see it (spec 3.9). Unless can_manage(bar),
     an inactive bar looks missing and sold-out items are left out; a manager gets them in place with
     `soldOut = true`. can_manage is asked at most once and only when the answer matters, so a public
@@ -99,6 +102,7 @@ def get_bar_menu(session: Session, bar_id: str, *, can_manage: Callable[[Bar], b
         tags=list(bar.tags),
         weeklyHours=weekly_hours_by_bar(session, [bar.id])[bar.id],
         operatingException=operating_exceptions_by_bar(session, [bar.id], seoul_today()).get(bar.id),
+        photos=photos_by_bar(session, [bar.id], base_url)[bar.id],
         menuBoardId=board.id if board else None,
         menuVersion=board.version if board else None,
         publishedAt=board.published_at if board else None,

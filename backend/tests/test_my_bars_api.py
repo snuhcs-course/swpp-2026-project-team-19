@@ -61,6 +61,7 @@ def test_lists_my_bars_with_their_management_state(client, db_session, supabase)
         "tags": [],
         "weeklyHours": [],
         "operatingException": None,
+        "photos": [],
         "status": "active",
         "activeMenuImport": {"menuImportId": str(unfinished.id), "status": "ready_for_review"},
         "currentMenu": {

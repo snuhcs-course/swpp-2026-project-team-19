@@ -1,4 +1,5 @@
-"""The bar photo APIs (API spec 3.16): add, delete, reorder, and the public photo files.
+"""The bar photo APIs (API spec 3.16): add, delete, reorder, the public photo files, and the photos in
+the bar responses (`photos` of 3.6, 3.9, 3.11.9; `coverThumbnailUrl` of 3.4, 3.10, 3.11.11, 3.12, 3.13).
 
 Who may call them is in test_route_permissions.py; how a photo is checked and re-encoded is in
 test_bar_photo_image.py. The test session never commits, so the deferred position constraint is
@@ -19,7 +20,7 @@ from app.core.security import Principal
 from app.models import BarOwner, BarPhoto, BarStatus, UserType
 from app.services.bar_photos import add_photo
 from app.services.menu_import_upload import ImageUpload
-from tests.factories import make_bar, make_bar_photo, make_owner, make_user
+from tests.factories import make_bar, make_bar_photo, make_brand, make_owner, make_product, make_user, publish_menu
 from tests.sql_support import recorded_statements
 
 OWNER_SUBJECT = "owner-subject"
@@ -496,3 +497,61 @@ def test_a_photo_without_its_file_is_not_found(client, db_session, image_storage
 
     assert error(response)[:2] == (404, "PHOTO_NOT_FOUND")
     assert f"Bar photo {photo.id} has no file at {photo.storage_key}" in caplog.text
+
+
+# ---- the photos in the bar responses ----
+
+
+def test_the_bar_responses_send_the_photos_in_order(client, db_session, owner, bar):
+    photos = [make_bar_photo(db_session, bar, order) for order in (2, 1, 3)]
+    expected = response_photos(*(str(photo.id) for photo in sorted(photos, key=lambda photo: photo.sort_order)))
+
+    assert client.get(f"/api/bars/{bar.id}", headers=owner).json()["photos"] == expected
+    assert client.patch(f"/api/bars/{bar.id}", headers=owner, json={}).json()["photos"] == expected
+    assert client.get("/api/me/bars", headers=owner).json()["items"][0]["photos"] == expected
+    # Public, as the customer bar detail.
+    assert client.get(f"/api/bars/{bar.id}/menu").json()["photos"] == expected
+
+
+def test_a_bar_without_photos_sends_an_empty_list(client, db_session, operator, bar):
+    assert client.get(f"/api/bars/{bar.id}", headers=operator).json()["photos"] == []
+    assert client.get(f"/api/bars/{bar.id}/menu").json()["photos"] == []
+
+
+def test_the_urls_follow_the_address_the_request_came_in_on(client, db_session, bar):
+    photo = make_bar_photo(db_session, bar)
+
+    body = client.get(f"/api/bars/{bar.id}/menu", headers={"Host": "10.0.2.2:8000"}).json()
+
+    assert body["photos"][0]["thumbnailUrl"] == f"http://10.0.2.2:8000/api/bar-photos/{photo.id}/thumbnail"
+
+
+@pytest.fixture
+def two_bars_on_sale(db_session):
+    """Two active bars side by side selling the same product, the first with photos, the second without."""
+    product = make_product(db_session, make_brand(db_session, "Glenfiddich"), "Glenfiddich 12")
+    with_photos = make_bar(db_session, "A Bar", latitude="37.478000")
+    without_photos = make_bar(db_session, "B Bar", latitude="37.478100")
+    for each in (with_photos, without_photos):
+        publish_menu(db_session, each, [(product, "Glenfiddich 12", [(None, 30, 12000)])])
+    make_bar_photo(db_session, with_photos, 2)
+    cover = make_bar_photo(db_session, with_photos, 1)
+    return product, {str(with_photos.id): f"{BASE}/{cover.id}/thumbnail", str(without_photos.id): None}
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        pytest.param("/api/bars", id="3.4 bar list"),
+        pytest.param("/api/search/bars?productId={product_id}", id="3.10 search"),
+        pytest.param("/api/search/bar-names?query=Bar", id="3.11.11 bar names"),
+        pytest.param("/api/search/nearby-bars?lat=37.478&lng=126.951", id="3.12 nearby"),
+        pytest.param("/api/search/map-bars?south=37.47&west=126.94&north=37.49&east=126.96", id="3.13 map"),
+    ],
+)
+def test_the_bar_lists_send_the_cover_thumbnail(client, operator, two_bars_on_sale, url):
+    product, expected = two_bars_on_sale
+
+    items = client.get(url.format(product_id=product.id), headers=operator).json()["items"]
+
+    assert {item["barId"]: item["coverThumbnailUrl"] for item in items} == expected
