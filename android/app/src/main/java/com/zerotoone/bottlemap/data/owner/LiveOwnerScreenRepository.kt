@@ -589,10 +589,30 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         error("브랜드는 메뉴 저장 시 함께 등록해 주세요.")
     override fun saveCatalogProduct(product: MockCatalogProduct) =
         error("상품은 메뉴 저장 시 함께 등록해 주세요.")
-    override fun applyOperatingException(barId: String, exception: MockOperatingException) =
-        error("임시 영업시간 변경은 API 연결이 필요합니다.")
-    override fun cancelOperatingException(barId: String, exceptionId: String) =
-        error("임시 영업시간 취소는 API 연결이 필요합니다.")
+    override fun applyOperatingException(barId: String, exception: MockOperatingException) {
+        val fields = mutableMapOf<String, Any?>("note" to exception.note)
+        when(exception.kind) {
+            MockExceptionKind.CLOSED_TODAY -> {
+                fields["kind"] = "closed_today"
+                fields["date"] = date(exception.fromEpochDay)
+            }
+            MockExceptionKind.CUSTOM_HOURS -> {
+                fields["kind"] = "custom_hours"
+                fields["date"] = date(exception.fromEpochDay)
+                fields["openTime"] = time(exception.openMinutes)
+                fields["closeTime"] = time(exception.closeMinutes)
+            }
+            MockExceptionKind.VACATION -> {
+                fields["kind"] = "vacation"
+                fields["startDate"] = date(exception.fromEpochDay)
+                fields["endDate"] = date(exception.toEpochDay)
+            }
+        }
+        write { remote.setOperatingException(barId, fields) }
+    }
+    override fun cancelOperatingException(barId: String, exceptionId: String) {
+        write { remote.removeOperatingException(barId) }
+    }
     override fun startPhotoImport(
         barId: String, selectedUris: List<String>, fixture: MockPhotoExtractionSource,
     ): String = error("서버 사진 업로드를 사용해 주세요.")
