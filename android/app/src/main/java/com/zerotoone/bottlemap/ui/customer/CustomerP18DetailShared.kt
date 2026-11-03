@@ -183,7 +183,7 @@ internal fun P18OwnerParityMenuRow(
     }
     // Owner's currently published menu and Customer use the same compact row.
     val rowHeight=maxOf(66,item.options.size*16+10).dp
-    BoxWithConstraints(Modifier.fillMaxWidth().height(rowHeight)) {
+    Box(Modifier.fillMaxWidth().height(rowHeight)) {
         if(highlighted) {
             // Extend the highlight BEYOND the fixed content slots, not into them.
             // Avoids a gold border visually colliding with price/volume or bottle.
