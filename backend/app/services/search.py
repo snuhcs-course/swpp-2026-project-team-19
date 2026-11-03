@@ -18,6 +18,7 @@ from app.schemas.search import (
     SearchResultItem,
 )
 from app.services.bar_menu import discount_response
+from app.services.bar_photo_links import cover_photo_id, cover_thumbnail_url
 from app.services.request_limits import kst_date
 from app.services.search_counts import record_product_search, record_unmatched_search
 from app.services.search_query import QueryResolution, resolve_search_query
@@ -88,8 +89,11 @@ def on_sale(statement: Select) -> Select:
 
 
 def _selling_entries(session: Session, product_ids: list[UUID]):
-    """(entry with options, product_id, bar, published_at) for products on sale on an active bar's current board."""
-    query = on_sale(select(MenuBoardEntry, BarMenuItem.product_id, Bar, MenuBoard.published_at)).where(
+    """(entry with options, product_id, bar, published_at, cover photo id or None) for products on sale on an
+    active bar's current board."""
+    query = on_sale(
+        select(MenuBoardEntry, BarMenuItem.product_id, Bar, MenuBoard.published_at, cover_photo_id())
+    ).where(
         BarMenuItem.product_id.in_(product_ids)
     )
     return session.execute(query.options(selectinload(MenuBoardEntry.options))).all()
@@ -118,6 +122,7 @@ def search_bars(
     lng: float | None = None,
     limit: int = 50,
     source: SearchSource = SearchSource.INPUT,
+    base_url: str,
 ) -> SearchBarsResponse:
     """Search by `query` or by `product_id` (exactly one), then count the search (spec 3.10.6)."""
     trimmed = validate_search_input(query, product_id, lat, lng)
@@ -140,6 +145,7 @@ def search_bars(
             address=bar.address,
             latitude=float(bar.latitude),
             longitude=float(bar.longitude),
+            coverThumbnailUrl=cover_thumbnail_url(cover_id, base_url),
             distanceMeters=(
                 distance_meters(lat, lng, float(bar.latitude), float(bar.longitude)) if lat is not None else None
             ),
@@ -158,7 +164,7 @@ def search_bars(
             ],
             menuUpdatedAt=published_at,
         )
-        for entry, product_id, bar, published_at in rows
+        for entry, product_id, bar, published_at, cover_id in rows
     ]
     items.sort(
         key=lambda item: _sort_key(

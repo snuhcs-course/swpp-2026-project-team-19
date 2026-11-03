@@ -61,6 +61,15 @@ def get_image_links(request: Request, storage: ImageStorage = Depends(get_image_
     return ImageLinks(storage, str(request.base_url))
 
 
+def get_base_url(request: Request) -> str:
+    """The address the request came in on, for absolute URLs such as the bar photo URLs (spec 3.16.5).
+
+    Behind the deployed proxy it is the public https address (uvicorn trusts its forwarded headers);
+    on an emulator it is 10.0.2.2, so the URLs open on the device that asked.
+    """
+    return str(request.base_url)
+
+
 @lru_cache(maxsize=1)
 def get_menu_extractor() -> MenuExtractor:
     kind = os.getenv("MENU_EXTRACTOR", "mock")

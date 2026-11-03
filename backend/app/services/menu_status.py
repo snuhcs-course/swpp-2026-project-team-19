@@ -32,7 +32,7 @@ def _locked_now(session: Session):
 
 
 def set_sold_out(
-    session: Session, principal: Principal, bar_id: UUID, bar_menu_item_id: str, sold_out: bool
+    session: Session, principal: Principal, bar_id: UUID, bar_menu_item_id: str, sold_out: bool, *, base_url: str
 ) -> BarMenuResponse:
     """Mark an item on the board sold out or back on sale; the menu as its managers see it (spec 3.9).
     Setting the value it already has changes nothing, and an item stays sold out from the first mark."""
@@ -44,14 +44,16 @@ def set_sold_out(
     elif item.sold_out_at is None:
         item.sold_out_at = _locked_now(session)
     session.commit()
-    return get_bar_menu(session, str(bar_id), can_manage=lambda bar: True)
+    return get_bar_menu(session, str(bar_id), can_manage=lambda bar: True, base_url=base_url)
 
 
 def _no_published_menu() -> ApiError:
     return ApiError(409, "NO_PUBLISHED_MENU", "확인할 메뉴가 없습니다. 먼저 메뉴를 등록해 주세요.")
 
 
-def confirm_menu(session: Session, principal: Principal, bar_id: UUID, menu_version: int | None) -> BarDetail:
+def confirm_menu(
+    session: Session, principal: Principal, bar_id: UUID, menu_version: int | None, *, base_url: str
+) -> BarDetail:
     """Record that the caller confirmed the menu they saw is still accurate; the bar as in spec 3.6."""
     lock_managed_bar(session, principal, bar_id)
     board = session.scalar(select(MenuBoard).where(MenuBoard.bar_id == bar_id))
@@ -63,4 +65,4 @@ def confirm_menu(session: Session, principal: Principal, bar_id: UUID, menu_vers
     board.confirmed_at = _locked_now(session)
     board.confirmed_by_user_id = caller_user_id(session, principal)
     session.commit()
-    return get_bar_detail(session, session.get(Bar, bar_id))
+    return get_bar_detail(session, session.get(Bar, bar_id), base_url=base_url)

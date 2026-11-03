@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.errors import validation_failed
 from app.models import Bar
 from app.schemas.search import MapBarItem, MapBarsResponse
+from app.services.bar_photo_links import cover_thumbnail_url
 from app.services.nearby_bars import active_bars_with_menu_time
 
 MAX_SPAN_DEGREES = 0.2
@@ -32,7 +33,9 @@ def validate_area(south: float, west: float, north: float, east: float) -> None:
         raise validation_failed("east", "BOUNDS_TOO_LARGE", too_large)
 
 
-def find_map_bars(session: Session, south: float, west: float, north: float, east: float) -> MapBarsResponse:
+def find_map_bars(
+    session: Session, south: float, west: float, north: float, east: float, *, base_url: str
+) -> MapBarsResponse:
     validate_area(south, west, north, east)
     query = (
         active_bars_with_menu_time()
@@ -47,8 +50,9 @@ def find_map_bars(session: Session, south: float, west: float, north: float, eas
                 address=address,
                 latitude=float(latitude),
                 longitude=float(longitude),
+                coverThumbnailUrl=cover_thumbnail_url(cover_id, base_url),
                 menuUpdatedAt=published_at,
             )
-            for bar_id, name, address, latitude, longitude, published_at in session.execute(query)
+            for bar_id, name, address, latitude, longitude, published_at, cover_id in session.execute(query)
         ]
     )

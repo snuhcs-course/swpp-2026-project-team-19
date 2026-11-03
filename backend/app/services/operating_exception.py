@@ -10,7 +10,6 @@ closure changes nothing and skips the date checks, so a request retried after mi
 """
 
 from datetime import date, time
-from uuid import UUID
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
@@ -20,19 +19,12 @@ from app.core.security import Principal
 from app.models import Bar, BarOperatingException, OperatingExceptionKind
 from app.schemas.bar import BarDetail
 from app.schemas.bar_hours import ClosedTodayInput, CustomHoursInput, OperatingExceptionInput, VacationInput
-from app.services.bar_access import can_manage_bar, forbidden
+from app.services.bar_access import lock_bar_for_manager
 from app.services.bar_detail import get_bar_detail
 from app.services.bar_hours import seoul_today
 from app.services.users import caller_user_id
 
 _Values = tuple[OperatingExceptionKind, date, date, time | None, time | None, str | None]
-
-
-def _lock_managed_bar(session: Session, principal: Principal, bar_id: UUID) -> None:
-    """Lock the bar row, then check the caller again; unlike menu edits, an inactive bar is accepted."""
-    session.execute(select(Bar.id).where(Bar.id == bar_id).with_for_update())
-    if not can_manage_bar(session, principal, bar_id):
-        raise forbidden()
 
 
 def check_request(body: OperatingExceptionInput) -> None:
@@ -60,12 +52,12 @@ def _check_dates(body: OperatingExceptionInput, today: date) -> None:
 
 
 def apply_operating_exception(
-    session: Session, principal: Principal, bar: Bar, body: OperatingExceptionInput
+    session: Session, principal: Principal, bar: Bar, body: OperatingExceptionInput, *, base_url: str
 ) -> BarDetail:
     """Replace the bar's closure with the request's (3.15.2); the bar as in spec 3.6."""
     today = seoul_today()
     check_request(body)
-    _lock_managed_bar(session, principal, bar.id)
+    lock_bar_for_manager(session, principal, bar.id)
     values = _values(body)
     current = session.scalar(select(BarOperatingException).where(BarOperatingException.bar_id == bar.id))
     stored = (
@@ -91,12 +83,12 @@ def apply_operating_exception(
         current.created_at = func.clock_timestamp()
     # Also ends the transaction of an unchanged retry, releasing the lock.
     session.commit()
-    return get_bar_detail(session, bar)
+    return get_bar_detail(session, bar, base_url=base_url)
 
 
-def cancel_operating_exception(session: Session, principal: Principal, bar: Bar) -> BarDetail:
+def cancel_operating_exception(session: Session, principal: Principal, bar: Bar, *, base_url: str) -> BarDetail:
     """Delete the bar's closure, if any (3.15.3); the bar as in spec 3.6."""
-    _lock_managed_bar(session, principal, bar.id)
+    lock_bar_for_manager(session, principal, bar.id)
     session.execute(delete(BarOperatingException).where(BarOperatingException.bar_id == bar.id))
     session.commit()
-    return get_bar_detail(session, bar)
+    return get_bar_detail(session, bar, base_url=base_url)

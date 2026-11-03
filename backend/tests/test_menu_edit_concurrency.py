@@ -115,7 +115,7 @@ def test_a_delete_that_waited_for_a_sold_out_mark_puts_the_item_back_on_sale(
         try:
             outcome.append(
                 menu_edit.delete_menu_item(
-                    lambda: Session(serializable_engine), TEMPORARY_OPERATOR, bar_id, str(item_id), 1
+                    lambda: Session(serializable_engine), TEMPORARY_OPERATOR, bar_id, str(item_id), 1, base_url=""
                 )
             )
         except Exception as error:  # noqa: BLE001 - recorded for the assertions below
@@ -171,7 +171,7 @@ def test_two_bars_adding_the_same_new_brand_create_it_once(db_engine, two_bars, 
     def add(bar_id):
         try:
             outcomes[bar_id] = menu_edit.add_menu_item(
-                lambda: Session(serializable_engine), TEMPORARY_OPERATOR, bar_id, body
+                lambda: Session(serializable_engine), TEMPORARY_OPERATOR, bar_id, body, base_url=""
             )
         except Exception as error:  # noqa: BLE001 - recorded for the assertions below
             outcomes[bar_id] = error

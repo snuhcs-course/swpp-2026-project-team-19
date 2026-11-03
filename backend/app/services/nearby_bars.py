@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Bar, BarStatus, MenuBoard
 from app.schemas.search import NearbyBarItem, NearbyBarsResponse
+from app.services.bar_photo_links import cover_photo_id, cover_thumbnail_url
 from app.services.search import EARTH_RADIUS_METERS, distance_meters
 
 DEFAULT_RADIUS_METERS = 500
@@ -49,17 +50,17 @@ def bounding_box(lat: float, lng: float, radius_meters: float) -> BoundingBox:
 
 
 def active_bars_with_menu_time() -> Select:
-    """(id, name, address, latitude, longitude, published_at or None) of every active bar; callers
-    add the area. Also used by the map-area query (spec 3.13)."""
+    """(id, name, address, latitude, longitude, published_at or None, cover photo id or None) of every
+    active bar; callers add the area. Also used by the map-area query (spec 3.13)."""
     return (
-        select(Bar.id, Bar.name, Bar.address, Bar.latitude, Bar.longitude, MenuBoard.published_at)
+        select(Bar.id, Bar.name, Bar.address, Bar.latitude, Bar.longitude, MenuBoard.published_at, cover_photo_id())
         .outerjoin(MenuBoard, MenuBoard.bar_id == Bar.id)  # at most one board per bar
         .where(Bar.status == BarStatus.ACTIVE)
     )
 
 
 def find_nearby_bars(
-    session: Session, lat: float, lng: float, radius_meters: int = DEFAULT_RADIUS_METERS
+    session: Session, lat: float, lng: float, radius_meters: int = DEFAULT_RADIUS_METERS, *, base_url: str
 ) -> NearbyBarsResponse:
     box = bounding_box(lat, lng, radius_meters)
     query = active_bars_with_menu_time().where(Bar.latitude.between(box.min_lat, box.max_lat))
@@ -67,7 +68,7 @@ def find_nearby_bars(
         query = query.where(Bar.longitude.between(box.min_lng, box.max_lng))
 
     items = []
-    for bar_id, name, address, bar_lat, bar_lng, published_at in session.execute(query):
+    for bar_id, name, address, bar_lat, bar_lng, published_at, cover_id in session.execute(query):
         distance = distance_meters(lat, lng, float(bar_lat), float(bar_lng))
         if distance <= radius_meters:
             items.append(
@@ -77,6 +78,7 @@ def find_nearby_bars(
                     address=address,
                     latitude=float(bar_lat),
                     longitude=float(bar_lng),
+                    coverThumbnailUrl=cover_thumbnail_url(cover_id, base_url),
                     distanceMeters=distance,
                     menuUpdatedAt=published_at,
                 )

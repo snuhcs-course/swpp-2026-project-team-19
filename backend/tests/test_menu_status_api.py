@@ -255,7 +255,7 @@ def test_an_owner_revoked_before_the_sold_out_lock_is_forbidden(client, db_sessi
     owner = revoked_owner(db_session, bar)
 
     with pytest.raises(ApiError) as caught:
-        set_sold_out(db_session, owner, bar.id, twelve, True)
+        set_sold_out(db_session, owner, bar.id, twelve, True, base_url="")
 
     assert (caught.value.status_code, caught.value.code) == (403, "FORBIDDEN")
 
@@ -392,7 +392,7 @@ def test_an_owner_revoked_before_the_confirmation_lock_is_forbidden(db_session, 
     owner = revoked_owner(db_session, bar)
 
     with pytest.raises(ApiError) as caught:
-        confirm_menu(db_session, owner, bar.id, 4)
+        confirm_menu(db_session, owner, bar.id, 4, base_url="")
 
     assert (caught.value.status_code, caught.value.code) == (403, "FORBIDDEN")
 

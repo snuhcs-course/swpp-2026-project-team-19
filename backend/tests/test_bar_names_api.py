@@ -10,7 +10,7 @@ from tests.sql_support import recorded_statements
 from tests.test_search_api import ANY_AUTHORIZATION
 
 URL = "/api/search/bar-names"
-ITEM_FIELDS = {"barId", "name", "address", "latitude", "longitude", "hasOwner"}
+ITEM_FIELDS = {"barId", "name", "address", "latitude", "longitude", "coverThumbnailUrl", "hasOwner"}
 
 
 def find(client, query, headers=None, **params) -> dict:
@@ -38,6 +38,7 @@ def test_finds_a_bar_by_part_of_its_name_with_every_field(client, db_session):
                 "address": "위스키복춘 address",
                 "latitude": 37.478225,
                 "longitude": 126.96294,
+                "coverThumbnailUrl": None,
                 "hasOwner": False,
             }
         ],

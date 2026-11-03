@@ -60,7 +60,7 @@ class ManagerRoute:
         return f"{self.method.upper()} {self.path}"
 
     def url(self, bar_id: str = MISSING_ID, menu_import_id: str = MISSING_ID) -> str:
-        return self.path.format(barId=bar_id, menuImportId=menu_import_id, barMenuItemId=MISSING_ID)
+        return self.path.format(barId=bar_id, menuImportId=menu_import_id, barMenuItemId=MISSING_ID, photoId=MISSING_ID)
 
 
 UPLOAD = {
@@ -159,6 +159,19 @@ BAR_MANAGER = [
         (200, None),
     ),
     ManagerRoute("delete", "/api/bars/{barId}/operating-exception", {}, (404, "BAR_NOT_FOUND"), (200, None)),
+    # Photos: a manager's upload of a file that is not an image stops at its type, so nothing is stored.
+    ManagerRoute(
+        "post",
+        "/api/bars/{barId}/photos",
+        {"files": [("image", ("photo.jpg", b"not an image", "image/jpeg"))]},
+        (404, "BAR_NOT_FOUND"),
+        (415, "UNSUPPORTED_IMAGE_TYPE"),
+    ),
+    ManagerRoute("delete", "/api/bars/{barId}/photos/{photoId}", {}, (404, "BAR_NOT_FOUND"), (404, "PHOTO_NOT_FOUND")),
+    # The target bar has no photos.
+    ManagerRoute(
+        "put", "/api/bars/{barId}/photos/order", {"json": {"photoIds": []}}, (404, "BAR_NOT_FOUND"), (200, None)
+    ),
 ]
 # Operators and the owner of at least one bar.
 CATALOG = [
@@ -181,7 +194,7 @@ SIGNED_IN = {
 }
 # No token needed; tested in test_search_api.py, test_nearby_bars_api.py, test_map_bars_api.py,
 # test_bar_names_api.py, test_popular_products_api.py, test_bar_menu_api.py (which also covers
-# inactive bars for owners) and test_auth_api.py.
+# inactive bars for owners), test_bar_photos_api.py and test_auth_api.py.
 PUBLIC = {
     ("get", "/api/search/bars"),
     ("get", "/api/search/nearby-bars"),
@@ -189,6 +202,8 @@ PUBLIC = {
     ("get", "/api/search/bar-names"),
     ("get", "/api/search/popular-products"),
     ("get", "/api/bars/{barId}/menu"),
+    ("get", "/api/bar-photos/{photoId}"),
+    ("get", "/api/bar-photos/{photoId}/thumbnail"),
     ("post", "/api/auth/temp-login"),
 }
 

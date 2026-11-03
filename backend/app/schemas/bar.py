@@ -16,7 +16,36 @@ class ActiveMenuImport(BaseModel):
     status: Literal["uploaded", "processing", "ready_for_review"]
 
 
-class BarListItem(BaseModel):
+class BarPhotoResponse(BaseModel):
+    photoId: UUID
+    imageUrl: str = Field(
+        description="Absolute URL of the photo (`GET /api/bar-photos/{photoId}`); never expires, and its content "
+        "never changes. For the full-screen view and the gallery"
+    )
+    thumbnailUrl: str = Field(
+        description="Absolute URL of the thumbnail, 480 px on the long edge. For lists, grids and small cards"
+    )
+
+
+class BarPhotosResponse(BaseModel):
+    photos: list[BarPhotoResponse] = Field(description="In display order; the first is the cover. Empty when none")
+
+
+class PhotoOrderRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    photoIds: list[UUID] = Field(description="Every photo of the bar, each once, in the new order; the first is the cover")
+
+
+COVER_THUMBNAIL_DESCRIPTION = (
+    "Absolute URL of the cover photo's thumbnail (`thumbnailUrl` of the bar's first photo); a fixed URL that "
+    "never expires. null when the bar has no photos: show the default image"
+)
+
+
+class BarSummary(BaseModel):
+    """The fields shared by the bar list (3.4) and the bar with its management state (3.6)."""
+
     barId: UUID
     name: str
     address: str
@@ -27,6 +56,10 @@ class BarListItem(BaseModel):
     activeMenuImport: ActiveMenuImport | None = Field(
         description="The bar's unfinished import, to continue it without another request; null when none"
     )
+
+
+class BarListItem(BarSummary):
+    coverThumbnailUrl: str | None = Field(description=COVER_THUMBNAIL_DESCRIPTION)
 
 
 class BarListResponse(BaseModel):
@@ -51,7 +84,7 @@ class BarOwnerSummary(BaseModel):
     ownerSince: UtcDateTime = Field(description="When the owner application was approved")
 
 
-class BarDetail(BarListItem):
+class BarDetail(BarSummary):
     """A bar with its management state (API spec 3.6); also the items of GET /api/me/bars (3.11.9)."""
 
     description: str | None = Field(description="One-line introduction, may contain line breaks; null when none")
@@ -65,6 +98,9 @@ class BarDetail(BarListItem):
     )
     operatingException: OperatingException | None = Field(
         description="The temporary closure, also one not started yet or one that ended yesterday; null when none"
+    )
+    photos: list[BarPhotoResponse] = Field(
+        description="Bar photos in display order; the first is the cover. Empty when none: show the default image"
     )
     currentMenu: CurrentMenu | None = Field(description="The published menu; null when none has been published")
     owner: BarOwnerSummary | None = Field(description="The current owner; null when none")

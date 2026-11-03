@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_base_url
 from app.db.session import get_session
 from app.schemas.errors import error_responses
 from app.models import SearchSource
@@ -91,9 +92,17 @@ def read_search_bars(
         ),
     ] = "input",
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> SearchBarsResponse:
     return search_bars(
-        session, query, product_id=product_id, lat=lat, lng=lng, limit=limit, source=SearchSource(source)
+        session,
+        query,
+        product_id=product_id,
+        lat=lat,
+        lng=lng,
+        limit=limit,
+        source=SearchSource(source),
+        base_url=base_url,
     )
 
 
@@ -161,8 +170,9 @@ def read_nearby_bars(
         int, Query(alias="radiusMeters", ge=1, le=MAX_RADIUS_METERS, description="Radius in meters")
     ] = DEFAULT_RADIUS_METERS,
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> NearbyBarsResponse:
-    return find_nearby_bars(session, lat, lng, radius_meters)
+    return find_nearby_bars(session, lat, lng, radius_meters, base_url=base_url)
 
 
 @router.get(
@@ -192,8 +202,9 @@ def read_bar_names(
     query: Annotated[str, Query(description="Part of a bar name or address; 1-100 characters after trimming")],
     limit: Annotated[int, Query(ge=1, le=MAX_LIMIT, description="Maximum number of bars")] = DEFAULT_LIMIT,
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> BarNamesResponse:
-    return search_bar_names(session, query, limit)
+    return search_bar_names(session, query, limit, base_url=base_url)
 
 
 @router.get(
@@ -226,5 +237,6 @@ def read_map_bars(
     north: Annotated[float, Query(ge=-90, le=90, description="Northern edge latitude (WGS84)")],
     east: Annotated[float, Query(ge=-180, le=180, description="Eastern edge longitude (WGS84)")],
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> MapBarsResponse:
-    return find_map_bars(session, south, west, north, east)
+    return find_map_bars(session, south, west, north, east, base_url=base_url)

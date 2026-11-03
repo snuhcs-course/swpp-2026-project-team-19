@@ -698,7 +698,7 @@ def test_an_owner_revoked_before_the_lock_is_forbidden(db_session, bar, glenfidd
     body = MenuItemAddRequest.model_validate({"menuVersion": 4, "productId": str(uuid4()), "options": [option()]})
 
     with pytest.raises(ApiError) as caught:
-        menu_edit.add_menu_item(lambda: nullcontext(db_session), owner, bar.id, body)
+        menu_edit.add_menu_item(lambda: nullcontext(db_session), owner, bar.id, body, base_url="")
 
     assert (caught.value.status_code, caught.value.code) == (403, "FORBIDDEN")
 
@@ -727,8 +727,8 @@ def test_repeated_conflicts_are_503_and_roll_everything_back(client, db_session,
     count = db_session.scalar(select(func.count()).select_from(Product))
     real = menu_edit._publish
 
-    def publish_then_conflict(session, board, **kwargs):
-        real(session, board, **kwargs)
+    def publish_then_conflict(session, board, *args, **kwargs):
+        real(session, board, *args, **kwargs)
         raise OperationalError("UPDATE ...", {}, _SerializationFailure())
 
     monkeypatch.setattr(menu_edit, "_publish", publish_then_conflict)

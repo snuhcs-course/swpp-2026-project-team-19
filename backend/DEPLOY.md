@@ -133,7 +133,7 @@ uv run --no-sync --env-file .env python scripts/reset_demo.py            # shows
 uv run --no-sync --env-file .env python scripts/reset_demo.py --apply
 ```
 
-It deletes every menu import with its photos in S3, every menu board, and the bars, brands, products, and aliases added after seeding, then seeds the catalog and the Seorosang menu again. The first line of its output names the database, so check that it is RDS.
+It deletes every menu import with its photos in S3, every menu board, every bar photo with its files in S3, and the bars, brands, products, and aliases added after seeding, then seeds the catalog and the Seorosang menu again. The first line of its output names the database, so check that it is RDS.
 
 ## 4. Redeploy
 

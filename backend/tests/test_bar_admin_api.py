@@ -62,6 +62,7 @@ def test_bar_list(client, db_session, operator):
         "phone": "02-000-0000",
         "status": "active",
         "activeMenuImport": {"menuImportId": str(pending.id), "status": "ready_for_review"},
+        "coverThumbnailUrl": None,
     }
     # An applied import is not an active one.
     assert body["items"][1]["activeMenuImport"] is None
