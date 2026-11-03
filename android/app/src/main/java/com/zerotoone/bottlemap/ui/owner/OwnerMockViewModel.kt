@@ -58,6 +58,13 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
         item: MockBarMenuItem, newProduct: MockCatalogProduct? = null,
         newBrand: MockBrand? = null,
     ) = repository.saveManualMenuItem(item, newProduct, newBrand)
+    suspend fun saveManualMenuItemLive(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
+    ) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.saveManualMenuItemLive(item, newProduct, newBrand)
+        else repository.saveManualMenuItem(item, newProduct, newBrand)
+    }
     fun setSoldOut(itemId: String, soldOut: Boolean) = repository.setSoldOut(itemId, soldOut)
     fun deleteMenuItem(id: String) = repository.deleteMenuItem(id)
     fun clearMenuForBar(barId: String) = repository.clearMenuForBar(barId)
