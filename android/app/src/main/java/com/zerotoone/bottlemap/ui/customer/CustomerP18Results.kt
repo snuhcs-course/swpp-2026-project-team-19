@@ -1,0 +1,458 @@
+
+package com.zerotoone.bottlemap.ui.customer
+
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewModelScope
+import com.zerotoone.bottlemap.data.AndroidNearbyLocationSource
+import com.zerotoone.bottlemap.data.MapBar
+import com.zerotoone.bottlemap.data.NearbyCoordinate
+import com.zerotoone.bottlemap.network.ApiClient
+import com.zerotoone.bottlemap.network.BottleMapApiException
+import com.zerotoone.bottlemap.network.MatchedProductDto
+import com.zerotoone.bottlemap.network.SearchBarsResponseDto
+import com.zerotoone.bottlemap.network.SearchResultDto
+import com.zerotoone.bottlemap.ui.common.BmIcon
+import com.zerotoone.bottlemap.ui.common.BmIconId
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
+internal sealed interface P18SearchState {
+    data object Loading : P18SearchState
+    data class Ready(val response: SearchBarsResponseDto) : P18SearchState
+    data class Error(val message: String) : P18SearchState
+}
+
+internal class P18SearchViewModel : ViewModel() {
+    private val mutable = MutableStateFlow<P18SearchState>(P18SearchState.Loading)
+    val state = mutable.asStateFlow()
+    private var job: Job? = null
+    private var version = 0L
+    private var lastKey: String? = null
+    fun load(query: String?, productId: String?, source: String,
+             location: NearbyCoordinate? = null, force: Boolean = false) {
+        val key = listOf(query, productId, source, location?.latitude, location?.longitude).joinToString("|")
+        if (!force && key == lastKey) return
+        lastKey=key
+        job?.cancel()
+        val request = ++version
+        mutable.value = P18SearchState.Loading
+        job=viewModelScope.launch {
+            try {
+                val result=ApiClient.call {
+                    ApiClient.api.searchProductP18(
+                        query=query?.takeIf {it.isNotBlank()},
+                        productId=productId?.takeIf {it.isNotBlank()},
+                        latitude=location?.latitude, longitude=location?.longitude,
+                        source=source)
+                }
+                if (request==version) mutable.value=P18SearchState.Ready(result)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                if (request==version) {
+                    val msg=if(error is BottleMapApiException &&
+                        error.code=="NETWORK_ERROR") "연결을 확인하고 다시 시도해 주세요."
+                        else "연결을 확인하고 다시 시도해 주세요."
+                    mutable.value=P18SearchState.Error(msg)
+                }
+            }
+        }
+    }
+    fun retry() { lastKey=null }
+}
+
+internal enum class P18Sort(val label: String) {
+    DISTANCE("가까운 순"), PRICE("가격순"), UPDATED("최근 갱신 순")
+}
+
+internal fun p18Sorted(
+    rows: List<SearchResultDto>, sort: P18Sort, hasLocation: Boolean
+): List<SearchResultDto> = when(sort) {
+    P18Sort.DISTANCE -> if(hasLocation)
+        rows.sortedWith(compareBy<SearchResultDto> {it.distanceMeters ?: Int.MAX_VALUE}
+            .thenBy {it.barName}) else rows
+    P18Sort.PRICE -> rows.sortedWith(compareBy<SearchResultDto> {
+        p18Representative(it.options)?.priceKrw ?: Int.MAX_VALUE
+    }.thenBy{it.barName})
+    P18Sort.UPDATED -> rows.sortedWith(compareByDescending<SearchResultDto> {
+        runCatching {Instant.parse(it.menuUpdatedAt)}.getOrNull() ?: Instant.EPOCH
+    }.thenBy {it.barName})
+}
+
+private val p18Date = DateTimeFormatter.ofPattern("M월 d일")
+    .withZone(ZoneId.of("Asia/Seoul"))
+internal fun p18MenuUpdated(date: String): String =
+    runCatching { p18Date.format(Instant.parse(date)) }.getOrDefault("갱신일 확인 불가")
+
+@Composable
+internal fun P18BarRow(
+    row: SearchResultDto, showDistance: Boolean, onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val serving=p18Representative(row.options)
+    Row(modifier.fillMaxWidth().heightIn(min=104.dp)
+        .clickable(onClick=onClick).padding(vertical=12.dp),
+        horizontalArrangement=Arrangement.spacedBy(12.dp),
+        verticalAlignment=Alignment.CenterVertically) {
+        Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                Text(row.barName,color=P18Text,fontSize=16.sp,lineHeight=23.sp,
+                    fontWeight=FontWeight.SemiBold,
+                    modifier=Modifier.weight(1f,false),maxLines=1,
+                    overflow=TextOverflow.Ellipsis)
+                if(showDistance && row.distanceMeters!=null) {
+                    Text(p18Distance(row.distanceMeters),color=P18Muted,fontSize=12.sp)
+                }
+            }
+            Row(verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                if(serving!=null) {
+                    Text(p18Price(serving.priceKrw),color=P18Text,
+                        fontWeight=FontWeight.SemiBold,fontSize=16.sp)
+                    Text(serving.pourMl?.let{"${it}ml"} ?: serving.optionLabel.orEmpty(),
+                        color=P18Muted,fontSize=13.sp)
+                } else Text("가격·용량 정보 없음",color=P18Muted,fontSize=13.sp)
+            }
+            Text("메뉴 ${p18MenuUpdated(row.menuUpdatedAt)} 기준",
+                color=P18Muted,fontSize=12.sp,lineHeight=18.sp)
+        }
+        P18Photo()
+    }
+}
+
+internal fun p18Distance(distance: Int): String =
+    if (distance < 1000) "${distance}m"
+    else String.format(java.util.Locale.KOREA,"%.1fkm",distance/1000.0)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun P18SortPicker(
+    sort:P18Sort, hasLocation:Boolean, allowPrice:Boolean,
+    onChoose:(P18Sort)->Unit, onClose:()->Unit,
+) {
+    ModalBottomSheet(onDismissRequest=onClose,
+        containerColor=P18Surface,contentColor=P18Text) {
+        Column(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,bottom=24.dp),
+            verticalArrangement=Arrangement.spacedBy(2.dp)) {
+            Text("정렬",color=P18Text,fontSize=20.sp,fontWeight=FontWeight.SemiBold,
+                modifier=Modifier.padding(bottom=12.dp))
+            P18Sort.entries.filter {(it!=P18Sort.DISTANCE || hasLocation) &&
+                (it!=P18Sort.PRICE || allowPrice) }.forEach { item ->
+                Row(Modifier.fillMaxWidth().height(56.dp)
+                    .clickable{onChoose(item)},verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.SpaceBetween) {
+                    Text(item.label,color=if(sort==item)P18Gold else P18Text,fontSize=16.sp)
+                    if(item==sort) Text("✓",color=P18Gold,fontSize=18.sp)
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            P18Action("닫기",onClose,modifier=Modifier.fillMaxWidth())
+        }
+    }
+}
+
+@Composable
+internal fun CustomerP18Results(
+    initialQuery:String?, initialProductId:String?, source:String,
+    onBack:()->Unit, onOpenBar:(String,String?)->Unit,
+    viewModel:P18SearchViewModel=viewModel(),
+) {
+    val context=LocalContext.current
+    val scope=rememberCoroutineScope()
+    var userLocation by remember {mutableStateOf<NearbyCoordinate?>(null)}
+    var requestedLocation by rememberSaveable {mutableStateOf(false)}
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    var initialResponse by remember(initialQuery,initialProductId) {
+        mutableStateOf<SearchBarsResponseDto?>(null)
+    }
+    var chosenId by rememberSaveable(initialQuery,initialProductId) {mutableStateOf<String?>(null)}
+    var mapMode by rememberSaveable(initialQuery,initialProductId) {mutableStateOf(false)}
+    var selectedBarId by rememberSaveable(initialQuery,initialProductId) {mutableStateOf<String?>(null)}
+    var showSort by remember {mutableStateOf(false)}
+    var sort by rememberSaveable {mutableStateOf(P18Sort.UPDATED)}
+    fun reload() {
+        viewModel.load(if(chosenId==null)initialQuery else null,
+            chosenId ?: initialProductId, if(chosenId==null)source else "input",
+            userLocation,force=true)
+    }
+    val locationLauncher=rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+        requestedLocation=true
+        if(grants.values.any{it}) {
+            scope.launch {
+                runCatching {AndroidNearbyLocationSource(context).currentLocation()}
+                    .onSuccess {userLocation=it}
+            }
+        }
+    }
+    fun requestLocation() {
+        val granted=ContextCompat.checkSelfPermission(context,
+            Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context,
+                Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
+        if(granted) scope.launch {
+            runCatching {AndroidNearbyLocationSource(context).currentLocation()}
+                .onSuccess{userLocation=it}
+        } else locationLauncher.launch(arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION))
+    }
+    LaunchedEffect(initialQuery,initialProductId,chosenId,userLocation) {
+        viewModel.load(if(chosenId==null) initialQuery else null,
+            chosenId ?: initialProductId,
+            if(chosenId==null)source else "input",userLocation)
+    }
+    val ready=(state as? P18SearchState.Ready)?.response
+    if(ready!=null && chosenId==null && initialResponse==null) initialResponse=ready
+    val original=initialResponse ?: ready
+    val choices=original?.matchedProducts.orEmpty()
+    val canSkip=initialProductId!=null || (original!=null &&
+        original.matchType=="alias_exact" && choices.size==1)
+    val choose=chosenId==null && !canSkip && choices.isNotEmpty() &&
+        (choices.size>1 || original?.matchType!="alias_exact")
+    fun navigateBack() {
+        if(chosenId!=null) {chosenId=null;mapMode=false}
+        else onBack()
+    }
+    if(showSort) P18SortPicker(sort,userLocation!=null,allowPrice=true,
+        onChoose={sort=it;showSort=false},onClose={showSort=false})
+    Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-results")) {
+        when {
+            state is P18SearchState.Loading && original==null -> {
+                Row(Modifier.fillMaxWidth().height(56.dp),
+                    verticalAlignment=Alignment.CenterVertically) {
+                    P18Back(::navigateBack)
+                }
+                Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) {
+                    Text("‘${initialQuery ?: "위스키"}’ 찾는 중",color=P18Text,
+                        fontSize=20.sp,fontWeight=FontWeight.SemiBold)
+                }
+            }
+            state is P18SearchState.Error -> {
+                Row(Modifier.fillMaxWidth().height(56.dp)) {P18Back(::navigateBack)}
+                P18Message("검색하지 못했어요",
+                    "연결을 확인하고 다시 시도해 주세요.","다시 시도",::reload,
+                    modifier=Modifier.weight(1f))
+            }
+            original!=null && original.matchedProducts.isEmpty() -> {
+                Row(Modifier.fillMaxWidth().height(56.dp)) {P18Back(::navigateBack)}
+                P18Message("어떤 위스키인지\n알아보지 못했어요",
+                    "영어 이름이나 다른 표기로\n다시 찾아보세요.",
+                    "검색어 고치기",onBack,modifier=Modifier.weight(1f))
+            }
+            choose -> {
+                Row(Modifier.fillMaxWidth().heightIn(min=72.dp)
+                    .padding(start=8.dp,end=20.dp),
+                    verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(4.dp)) {
+                    P18Back(::navigateBack)
+                    Box(Modifier.weight(1f)){
+                        P18SearchField(initialQuery.orEmpty(),{},onBack,
+                            modifier=Modifier.fillMaxWidth())
+                    }
+                }
+                Text("어떤 ${initialQuery.orEmpty()}인가요?",
+                    modifier=Modifier.padding(start=20.dp,end=20.dp,top=8.dp,bottom=12.dp),
+                    style=MaterialTheme.typography.headlineSmall,
+                    fontSize=24.sp,lineHeight=32.sp,color=P18Text)
+                LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
+                    items(choices,key={it.productId}) { product ->
+                        Row(Modifier.fillMaxWidth().heightIn(min=72.dp)
+                            .clickable { chosenId=product.productId;mapMode=false }
+                            .testTag("customer-choice-${product.productId}"),
+                            verticalAlignment=Alignment.CenterVertically,
+                            horizontalArrangement=Arrangement.spacedBy(14.dp)) {
+                            P18Bottle(product.displayName,24.dp,38.dp)
+                            Text(product.displayName,Modifier.weight(1f),fontSize=16.sp,
+                                fontWeight=FontWeight.SemiBold,color=P18Text)
+                            Text(if(product.resultCount==0)"파는 매장 없음"
+                                else "매장 ${product.resultCount}곳",
+                                color=P18Muted,fontSize=13.sp)
+                            Text("›",color=P18Muted,fontSize=20.sp)
+                        }
+                        Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
+                    }
+                }
+            }
+            chosenId!=null && state is P18SearchState.Loading -> {
+                Row(Modifier.fillMaxWidth().height(56.dp)){P18Back(::navigateBack)}
+                Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) {
+                    Text("위스키 찾는 중",color=P18Text)
+                }
+            }
+            ready!=null && ready.items.isEmpty() -> {
+                Row(Modifier.fillMaxWidth().height(56.dp)){P18Back(::navigateBack)}
+                P18Message("${ready.matchedProducts.firstOrNull()?.displayName.orEmpty()}\n아직 파는 매장이 없어요",
+                    "등록된 매장 메뉴판에서\n이 위스키를 찾지 못했어요.",
+                    "다른 위스키 보기",::navigateBack,modifier=Modifier.weight(1f))
+            }
+            ready!=null -> {
+                val product=ready.matchedProducts.firstOrNull() ?: choices.firstOrNull()
+                val items=p18Sorted(ready.items,sort,userLocation!=null)
+                if(mapMode) {
+                    P18ResultsMap(ready,items,product?.displayName.orEmpty(),
+                        ::navigateBack, {mapMode=false},selectedBarId,
+                        onSelect={id->if(selectedBarId==id)onOpenBar(id,product?.productId)
+                            else selectedBarId=id},
+                        onOpenBar={onOpenBar(it,product?.productId)})
+                } else {
+                    Row(Modifier.fillMaxWidth().height(56.dp)
+                        .padding(start=8.dp,end=12.dp),verticalAlignment=Alignment.CenterVertically){
+                        P18Back(::navigateBack)
+                        Text(if(initialProductId!=null)"" else "‘${initialQuery.orEmpty()}’ 검색",
+                            color=P18Muted,fontSize=14.sp)
+                    }
+                    Row(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,top=4.dp),
+                        horizontalArrangement=Arrangement.spacedBy(12.dp),
+                        verticalAlignment=Alignment.CenterVertically) {
+                        P18Bottle(product?.displayName.orEmpty())
+                        Column {
+                            Text(product?.displayName.orEmpty(),color=P18Gold,
+                                fontWeight=FontWeight.SemiBold,fontSize=14.sp)
+                            Text("파는 매장 ${items.size}곳",color=P18Text,
+                                style=MaterialTheme.typography.headlineSmall,fontSize=24.sp)
+                        }
+                    }
+                    if(userLocation==null) {
+                        Row(Modifier.fillMaxWidth().padding(horizontal=20.dp,vertical=10.dp)
+                            .background(P18Surface,RoundedCornerShape(12.dp))
+                            .padding(horizontal=12.dp,vertical=8.dp),
+                            verticalAlignment=Alignment.CenterVertically) {
+                            Text("위치를 켜면 거리와 가까운 순을 볼 수 있어요",
+                                Modifier.weight(1f),color=P18Muted,fontSize=12.sp,lineHeight=18.sp)
+                            TextButton(onClick=::requestLocation) {Text("위치 켜기",color=P18Gold)}
+                        }
+                    }
+                    Row(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,top=12.dp,bottom=4.dp),
+                        verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.SpaceBetween) {
+                        Box(Modifier.height(48.dp).clickable{showSort=true},
+                            contentAlignment=Alignment.Center) {
+                            Text((if(userLocation==null && sort==P18Sort.DISTANCE)
+                                P18Sort.UPDATED else sort).label+"⌄",fontSize=14.sp,color=P18Text)
+                        }
+                        P18Action("지도",{mapMode=true},modifier=Modifier)
+                    }
+                    LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
+                        items(items,key={it.barId+it.productId}) {row->
+                            P18BarRow(row,userLocation!=null,
+                                onClick={onOpenBar(row.barId,product?.productId)})
+                            Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
+                        }
+                    }
+                }
+            }
+            else -> {
+                Row(Modifier.fillMaxWidth().height(56.dp)){P18Back(::navigateBack)}
+                Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) {
+                    Text("위스키를 찾는 중",color=P18Muted)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun P18ResultsMap(
+    response:SearchBarsResponseDto, items:List<SearchResultDto>,name:String,
+    onBack:()->Unit,onList:()->Unit,selected:String?,
+    onSelect:(String)->Unit,onOpenBar:(String)->Unit,
+) {
+    val selectedItem=items.firstOrNull{it.barId==selected} ?: items.firstOrNull()
+    val pins=items.mapNotNull { item ->
+        val center=NearbyCoordinate(item.latitude,item.longitude)
+        if(!center.isValid()) null else MapBar(item.barId,item.barName,item.address,
+            center,item.menuUpdatedAt)
+    }
+    val center=pins.firstOrNull()?.location
+    var mapView by remember {mutableStateOf<com.kakao.vectormap.MapView?>(null)}
+    Box(Modifier.fillMaxSize().testTag("customer-results-map")) {
+        if(center!=null) NearbyKakaoMap(
+            origin=center, bars=pins,selectedBarId=selectedItem?.barId,
+            focusTarget=pins.firstOrNull{it.barId==selectedItem?.barId},
+            focusBarId=null,initialCamera=null,listCovered=false,
+            searchedPlace=null,focusSearchedPlace=null,
+            onSearchedPlaceFocusApplied={},onFocusApplied={},
+            onCameraChanged={_,_->},onMapCameraMoving={},
+            onMapViewportUnavailable={},viewportRetryToken=0,
+            onSelectBar=onSelect,onViewportChanged={},recenterToken=0,
+            onMapViewChanged={mapView=it},modifier=Modifier.fillMaxSize())
+        else Box(Modifier.fillMaxSize().background(P18Surface),
+            contentAlignment=Alignment.Center) {
+            Text("지도의 매장 위치를 불러오지 못했어요",color=P18Text)
+        }
+        Row(Modifier.fillMaxWidth().padding(start=12.dp,end=12.dp,top=12.dp),
+            verticalAlignment=Alignment.CenterVertically,
+            horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            P18Back(onBack,dark=true)
+            Row(Modifier.weight(1f).height(48.dp)
+                .background(P18Bg,RoundedCornerShape(12.dp))
+                .padding(horizontal=12.dp),
+                verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                P18Bottle(name,16.dp,26.dp)
+                Text(name,Modifier.weight(1f),color=P18Text,
+                    fontSize=15.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
+                Text("${items.size}곳",color=P18Muted,fontSize=13.sp)
+            }
+            P18Action("목록",onList)
+        }
+        if(selectedItem!=null) {
+            Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                .background(P18Bg,RoundedCornerShape(topStart=24.dp,topEnd=24.dp))
+                .clickable { onOpenBar(selectedItem.barId) }
+                .padding(start=20.dp,end=20.dp,top=10.dp,bottom=24.dp),
+                horizontalAlignment=Alignment.CenterHorizontally) {
+                Box(Modifier.width(36.dp).height(4.dp)
+                    .background(BottleMapPalette.outline,RoundedCornerShape(4.dp)))
+                P18BarRow(selectedItem,false,{onOpenBar(selectedItem.barId)})
+            }
+        }
+    }
+}
