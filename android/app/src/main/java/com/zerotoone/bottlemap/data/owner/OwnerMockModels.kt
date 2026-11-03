@@ -82,6 +82,7 @@ data class MockOwnerApplication(
     val rejectionReason: String? = null, // Local fixture; API §3.11.1 also has rejectionReason
     val submittedAtEpochMs: Long = 0L, // local time; API uses createdAt/reviewedAt RFC 3339
     val registrationPhotos: List<MockPhoto> = emptyList(), // Mock union; API §3.11.15 is menuPhotos only
+    val reviewedAtEpochMs: Long? = null, // local analog of API §3.11.1 reviewedAt (not wire DTO)
 )
 
 /** Product ID is a catalog identity, never a menu row ID. */
