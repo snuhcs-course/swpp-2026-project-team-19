@@ -189,10 +189,10 @@ internal fun CustomerP18BarDetail(
         }
     }
     Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-bar-detail")) {
-        Row(Modifier.fillMaxWidth().height(72.dp).padding(start=8.dp,end=20.dp),
+        Row(Modifier.fillMaxWidth().height(56.dp).padding(start=8.dp,end=20.dp),
             verticalAlignment=Alignment.CenterVertically) {P18Back(onBack)}
         Column(Modifier.fillMaxSize().verticalScroll(scroll)
-            .padding(start=20.dp,end=20.dp,top=13.dp,bottom=24.dp),
+            .padding(start=20.dp,end=20.dp,top=0.dp,bottom=24.dp),
             verticalArrangement=Arrangement.spacedBy(12.dp)) {
             Text(bar.name,fontSize=22.sp,lineHeight=30.sp,
                 fontFamily=MaterialTheme.typography.headlineSmall.fontFamily,
@@ -251,8 +251,21 @@ internal fun CustomerP18BarDetail(
                     Text(open.text,color=if(open.open)BottleMapPalette.success else P18Muted,
                         fontSize=14.sp,fontWeight=FontWeight.Bold)
                     open.next?.let {Text(it,fontSize=11.sp,color=P18Muted)}
-                    P18SortTrigger("",{hoursVisible=!hoursVisible},
-                        Modifier.width(32.dp))
+                    Canvas(Modifier.size(22.dp)
+                        .clickable { hoursVisible=!hoursVisible }
+                        .testTag("customer-hours-toggle")) {
+                        val leftY=if(hoursVisible) .65f else .35f
+                        val centerY=if(hoursVisible) .35f else .65f
+                        val stroke=2.dp.toPx()
+                        drawLine(P18Gold,
+                            Offset(size.width*.18f,size.height*leftY),
+                            Offset(size.width*.50f,size.height*centerY),
+                            strokeWidth=stroke,cap=androidx.compose.ui.graphics.StrokeCap.Round)
+                        drawLine(P18Gold,
+                            Offset(size.width*.50f,size.height*centerY),
+                            Offset(size.width*.82f,size.height*leftY),
+                            strokeWidth=stroke,cap=androidx.compose.ui.graphics.StrokeCap.Round)
+                    }
                 }
                 P18DetailSmallButton("지도",BmIconId.MAP){mapVisible=!mapVisible}
                 Spacer(Modifier.width(6.dp))
