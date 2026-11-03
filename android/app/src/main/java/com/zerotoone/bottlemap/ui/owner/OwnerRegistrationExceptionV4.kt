@@ -318,7 +318,7 @@ internal fun RegistrationApplicationConfirmSheet(
                 color=RegistrationV4.text,fontSize=20.sp,lineHeight=28.sp,
                 fontWeight=FontWeight.SemiBold)
             Text(if(dismiss)
-                "목록에서만 사라지고, 운영팀이 검토한 기록은 남아요. 같은 매장은 언제든 다시 신청할 수 있어요."
+                "같은 매장은 언제든 다시 신청할 수 있어요."
                 else "취소하면 처음부터 다시 신청해야 해요.",
                 color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=21.sp)
             Spacer(Modifier.heightIn(min=4.dp))
