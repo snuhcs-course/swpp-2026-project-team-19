@@ -46,6 +46,28 @@ interface OwnerApi {
         @Body body: Map<String, @JvmSuppressWildcards Any?>,
     ): OwnedBarDto
 
+    @Multipart
+    @POST("api/bars/{barId}/photos")
+    suspend fun addOwnedBarPhoto(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Part image: MultipartBody.Part,
+    ): OwnedPhotoListDto
+
+    @retrofit2.http.DELETE("api/bars/{barId}/photos/{photoId}")
+    suspend fun deleteOwnedBarPhoto(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Path("photoId") photoId: String,
+    ): OwnedPhotoListDto
+
+    @retrofit2.http.PUT("api/bars/{barId}/photos/order")
+    suspend fun reorderOwnedBarPhotos(
+        @Header("Authorization") authorization: String,
+        @Path("barId") barId: String,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): OwnedPhotoListDto
+
     @retrofit2.http.PUT("api/bars/{barId}/operating-exception")
     suspend fun setOperatingException(
         @Header("Authorization") authorization: String,
