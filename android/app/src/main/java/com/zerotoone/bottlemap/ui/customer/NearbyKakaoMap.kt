@@ -556,8 +556,8 @@ private fun p18CardMarkerStyle(
     selected:Boolean, name:String, secondary:String?, density:Float,
 ):LabelStyle {
     val d=density.coerceAtLeast(.5f)
-    val width=(164f*d).toInt().coerceAtLeast(1)
-    val height=(56f*d).toInt().coerceAtLeast(1)
+    val width=(148f*d).toInt().coerceAtLeast(1)
+    val height=(48f*d).toInt().coerceAtLeast(1)
     val image=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
     val canvas=Canvas(image)
     val bg=Paint(Paint.ANTI_ALIAS_FLAG).apply { color=Color.rgb(33,30,27) }
@@ -569,7 +569,7 @@ private fun p18CardMarkerStyle(
     val rect=android.graphics.RectF(1f*d,1f*d,(width/d-1f)*d,(height/d-1f)*d)
     canvas.drawRoundRect(rect,11f*d,11f*d,bg)
     canvas.drawRoundRect(rect,11f*d,11f*d,border)
-    val photo=android.graphics.RectF(7f*d,8f*d,45f*d,46f*d)
+    val photo=android.graphics.RectF(6f*d,7f*d,38f*d,39f*d)
     canvas.drawRoundRect(photo,8f*d,8f*d,Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color=Color.rgb(64,56,50)
     })
@@ -578,24 +578,24 @@ private fun p18CardMarkerStyle(
         style=Paint.Style.STROKE
         strokeWidth=1.5f*d
     }
-    canvas.drawRect(19f*d,20f*d,34f*d,34f*d,icon)
-    canvas.drawCircle(29f*d,24f*d,2f*d,icon)
+    canvas.drawRect(15f*d,17f*d,30f*d,31f*d,icon)
+    canvas.drawCircle(25f*d,21f*d,2f*d,icon)
     val letters=Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color=Color.rgb(242,237,232);isFakeBoldText=true
-        textSize=12f*d
+        textSize=11f*d
     }
     fun trim(text:String,maxWidth:Float,paint:Paint):String {
         var t=text
         while(t.isNotEmpty() && paint.measureText(t)>maxWidth) t=t.dropLast(1)
         return if(t!=text) t.dropLast(1)+"…" else t
     }
-    canvas.drawText(trim(name,104f*d,letters),52f*d,23f*d,letters)
+    canvas.drawText(trim(name,101f*d,letters),43f*d,20f*d,letters)
     if(!secondary.isNullOrBlank()) {
         val sub=Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color=Color.rgb(199,187,176)
-            textSize=12f*d
+            textSize=11f*d
         }
-        canvas.drawText(trim(secondary,104f*d,sub),52f*d,40f*d,sub)
+        canvas.drawText(trim(secondary,101f*d,sub),43f*d,35f*d,sub)
     }
     return LabelStyle.from(image).setAnchorPoint(.5f,1f)
 }
