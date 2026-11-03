@@ -191,8 +191,9 @@ internal fun CustomerP18BarDetail(
             }
         }
     }
-    Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-bar-detail")) {
-        Row(Modifier.fillMaxWidth().height(56.dp).padding(start=8.dp,end=20.dp),
+    Box(Modifier.fillMaxSize().background(P18Bg).testTag("customer-bar-detail")) {
+      Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().height(72.dp).padding(start=8.dp,end=20.dp),
             verticalAlignment=Alignment.CenterVertically) {P18Back(onBack)}
         Column(Modifier.fillMaxSize().verticalScroll(scroll)
             .padding(start=20.dp,end=20.dp,top=0.dp,bottom=24.dp),
@@ -411,6 +412,9 @@ internal fun CustomerP18BarDetail(
                 Spacer(Modifier.height(8.dp))
             }
         }
+      }
+      P18ScrollTopButton(scroll,Modifier.align(Alignment.BottomEnd)
+          .padding(end=16.dp,bottom=18.dp))
     }
 }
 
