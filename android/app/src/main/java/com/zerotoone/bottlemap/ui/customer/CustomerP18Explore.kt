@@ -263,8 +263,9 @@ internal fun CustomerP18Explore(
                     is P18ExploreState.Ready -> {
                         if(ordered.isEmpty()) P18FailureBody("이 지역에는 아직 등록된 매장이 없어요",
                             "지금은 관악구 매장부터 모으고 있어요.",
-                            "관악구로 이동",{listVisible=false;goToGwanak=true;recenterToken++},
-                            icon=BmIconId.BAR_PIN,modifier=Modifier.weight(1f))
+                            "관악구로 이동",BmIconId.BAR_PIN,
+                            {listVisible=false;goToGwanak=true;recenterToken++},
+                            modifier=Modifier.weight(1f))
                         else LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
                             items(ordered,key={it.barId}){bar->
                                 P18BrowseRow(bar,location,
