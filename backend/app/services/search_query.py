@@ -1,7 +1,9 @@
 """Resolve a customer search query to catalog products (API spec, section 3.10.1).
 
 The steps run in order and stop at the first one that finds an active product:
-brand -> alias_exact -> partial -> none. No embedding or LLM is used at search time.
+brand -> alias_exact -> partial -> similar -> none. No model or LLM is called at search time.
+`similar` (app.services.search_similar) runs only when SEARCH_SIMILAR_ENABLED=true and the first
+three found nothing; it ranks products by an in-process character TF-IDF of the query.
 
 The brand step comes first so that a brand name always shows the whole brand. A flagship
 product often has the brand name as an alias too (Royal Brackla 12 as "Royal Brackla"); with
@@ -11,6 +13,7 @@ whose alias equals the query still come first, and a product of another brand wi
 included, so the brand step never hides an exact product match.
 """
 
+import logging
 from dataclasses import dataclass, field
 from typing import Literal
 from uuid import UUID
@@ -20,9 +23,12 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.normalize import normalize
 from app.models import BrandAlias, Product, ProductAlias
+from app.services.search_similar import get_similar_products
+
+logger = logging.getLogger(__name__)
 
 # "product" is a productId search that found its product; it runs none of the steps (app.services.search).
-MatchType = Literal["alias_exact", "brand", "partial", "product", "none"]
+MatchType = Literal["alias_exact", "brand", "partial", "similar", "product", "none"]
 
 PARTIAL_LIMIT = 10
 
@@ -32,7 +38,8 @@ class QueryResolution:
     normalized_query: str | None  # None for a productId search
     match_type: MatchType
     # Each with `brand` loaded. Sorted by display name, except that exact product-alias matches come
-    # first in the brand step and partial matches are sorted closest alias first.
+    # first in the brand step, partial matches are sorted closest alias first, and similar products
+    # most similar first.
     products: list[Product]
     # Products with a searchable alias equal to the query: all of them for alias_exact, the ones
     # the brand step puts first, none for partial. Callers list their rows first too.
@@ -90,4 +97,20 @@ def resolve_search_query(session: Session, query: str) -> QueryResolution:
     partial = _partial(session, normalized)
     if partial:
         return QueryResolution(normalized, "partial", partial)
+    similar = _similar(session, query)
+    if similar:
+        return QueryResolution(normalized, "similar", similar)
     return QueryResolution(normalized, "none", [])
+
+
+def _similar(session: Session, query: str) -> list[Product]:
+    """The similar products of the query as typed (not normalized, see app.services.search_similar);
+    [] while the step is off. A failure is logged and the search answers `none` as without the step."""
+    finder = get_similar_products()
+    if finder is None:
+        return []
+    try:
+        return finder.find(session, query)
+    except Exception:
+        logger.exception("Similar-products search failed; answering none")
+        return []

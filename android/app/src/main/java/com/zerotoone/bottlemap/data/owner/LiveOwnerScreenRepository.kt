@@ -600,13 +600,15 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 },
             )
         } else old?.images.orEmpty()
+        val priceCheckedImages = if(status == MockImportStatus.READY_FOR_REVIEW)
+            requirePhotoPriceReviewOnConflict(images) else images
         val job = (old ?: MockMenuImport(
             menuImportId = importId, barId = dto.barId ?: before.selectedBarId.orEmpty(),
             status = status, reviewVersion = dto.reviewVersion ?: 1, images = images,
         )).copy(
             status = status,
             reviewVersion = dto.reviewVersion ?: old?.reviewVersion ?: 1,
-            images = images,
+            images = priceCheckedImages,
             failureReason = dto.failure?.message,
         )
         publishSnapshot(before.copy(

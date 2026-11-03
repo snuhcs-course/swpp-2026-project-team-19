@@ -49,7 +49,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 ) {
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                 OwnerMockRuntime.repository(LocalContext.current)))
-            LaunchedEffect(ownerViewModel) { ownerViewModel.retry() }
             val mockState = ownerViewModel.state.collectAsStateWithLifecycle().value
             val snapshot = when (mockState) {
                 is MockOwnerLoadState.Ready -> mockState.snapshot

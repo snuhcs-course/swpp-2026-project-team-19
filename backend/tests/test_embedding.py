@@ -127,7 +127,7 @@ def test_tfidf_on_an_empty_catalog_returns_empty_rows():
 
 
 def test_tfidf_weights_follow_the_p24_harness():
-    """Smooth idf, sublinear tf and cosine over 1-3-grams, as CharTfidf in ai/eval/p24_embedding_compare.py (PR #78)."""
+    """Smooth idf, sublinear tf and cosine over 1-3-grams, as CharTfidf in ai/eval/p24_embedding_compare.py (#78)."""
     import math
 
     index = CharTfidfProvider().build_index(["ab", "ac"])
@@ -297,6 +297,13 @@ def test_index_search_ranks_products_per_name():
     assert index.search(["q", "other"]) == [[Ranked(B, 0.9, "b alias"), Ranked(A, 0.5, "a")],
                                             [Ranked(A, 0.0, "a"), Ranked(B, 0.0, "b")]]
     assert provider.builds == [["a", "b", "b alias"]]
+
+
+def test_product_similarities_give_each_product_its_best_text():
+    provider = FakeEmbeddingProvider({("q", "a"): 0.5, ("q", "b alias"): 0.9, ("q", "b"): 0.2})
+    index = EmbeddingIndex(provider, [("a", A), ("b", B), ("b alias", B), ("c", C)], version=(1,))
+
+    assert index.product_similarities("q") == {A: 0.5, B: 0.9, C: 0.0}
 
 
 def test_apply_without_target_lines_does_not_touch_the_catalog():

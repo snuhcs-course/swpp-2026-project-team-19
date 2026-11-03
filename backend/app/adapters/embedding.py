@@ -2,7 +2,7 @@
 
 The step is off unless EMBEDDING_ENABLED=true. A provider turns the catalog texts into an index
 (`TextIndex`) that scores menu line names against every text by cosine similarity. The P24
-decision memo (ai/docs/p24_embedding_decision.md, "P40 서버 단계 어댑터 제안"; in PR #78, I3-P24,
+decision memo (ai/docs/p24_embedding_decision.md, "P40 서버 단계 어댑터 제안"; #78, I3-P24,
 not merged yet) plans two providers behind this interface, so changing one for the other is a
 setting (EMBEDDING_MODEL) plus its floor:
 
@@ -11,7 +11,7 @@ setting (EMBEDDING_MODEL) plus its floor:
   e5     stage 2, later: multilingual-e5-small int8 (ONNX) once the server has the memory.
 
 `CharTfidfProvider` is the P24 harness's `CharTfidf` (ai/eval/p24_embedding_compare.py, also in
-PR #78) with the same n-gram range, text folding and weighting, so the offline numbers and the 0.38
+#78) with the same n-gram range, text folding and weighting, so the offline numbers and the 0.38
 floor describe what the server runs. The numbers the server relies on are summarised in
 docs/menu_ai_matching_flow.md 6 ("임베딩 후보 단계"). Tests use fakes.
 """
@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 # The similarity floor per model: candidates below it are dropped. Each model has its own scale
-# (P24 dev values, PR #78: TF-IDF 0.38, e5-small int8 about 0.91), so the floor goes with the model.
+# (P24 dev values, #78: TF-IDF 0.38, e5-small int8 about 0.91), so the floor goes with the model.
 DEFAULT_MIN_SIMILARITY = {"tfidf": 0.38}
 SUPPORTED_MODELS = tuple(DEFAULT_MIN_SIMILARITY)
 

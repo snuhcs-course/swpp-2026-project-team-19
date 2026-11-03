@@ -200,7 +200,8 @@ def _count_search(
     session: Session, today: date, resolution: QueryResolution, trimmed: str | None, source: SearchSource
 ) -> None:
     """Only searches that resolved to one product count for it; brand, partial and several exact
-    matches would raise several products at once (spec 3.10.6)."""
+    matches would raise several products at once (spec 3.10.6). Similar products count nowhere, like
+    partial: they are not the product typed, and the query was not unrecognized either."""
     if resolution.match_type == "product" or (
         resolution.match_type == "alias_exact" and len(resolution.products) == 1
     ):

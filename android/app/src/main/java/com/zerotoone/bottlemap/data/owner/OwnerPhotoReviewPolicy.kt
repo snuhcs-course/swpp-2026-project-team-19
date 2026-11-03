@@ -1,0 +1,52 @@
+package com.zerotoone.bottlemap.data.owner
+
+/**
+ * Owner photo policy: conflicting prices for one canonical product and one
+ * option identity must be entered by the owner, not resolved by photo order.
+ *
+ * A server exact-match identity is accepted; only its conflicting prices lose
+ * auto-acceptance. Each affected line keeps the real extractedOptionId so that
+ * the current review-and-apply contract can accept correctedPriceKrw.
+ */
+internal fun requirePhotoPriceReviewOnConflict(
+    images: List<MockPhotoExtraction>,
+): List<MockPhotoExtraction> {
+    val pricesByOption = mutableMapOf<Pair<String, String>, MutableSet<Int>>()
+    images.flatMap { it.lines }.filter { line ->
+        line.kind == MockLineKind.PRODUCT &&
+            line.mockAutoAccepted &&
+            line.suggestedProductId != null &&
+            line.decision?.kind == MockDecisionKind.SELECT_PRODUCT
+    }.forEach { line ->
+        val productId = requireNotNull(line.suggestedProductId)
+        line.options.forEach { option ->
+            if (option.priceKrw > 0) pricesByOption
+                .getOrPut(productId to option.identityKey()) { mutableSetOf() }
+                .add(option.priceKrw)
+        }
+    }
+    val conflicts = pricesByOption.filterValues { it.size > 1 }.keys
+    if(conflicts.isEmpty()) return images
+    return images.map { image ->
+        image.copy(lines = image.lines.map { line ->
+            val productId = line.suggestedProductId
+            if(productId == null || !line.mockAutoAccepted ||
+                line.decision?.kind != MockDecisionKind.SELECT_PRODUCT) line
+            else {
+                val conflictingOptions = line.options.map { option ->
+                    if((productId to option.identityKey()) in conflicts)
+                        option.copy(priceKrw = 0) else option
+                }
+                if(conflictingOptions == line.options) line else line.copy(
+                    options = conflictingOptions,
+                    decision = null,
+                    needsPriceEntry = true,
+                    mockAutoAccepted = false,
+                    // Exact-match products don't need to be re-matched:
+                    // route directly to the existing price input page.
+                    candidateProductIds = listOf(productId),
+                )
+            }
+        })
+    }
+}

@@ -259,7 +259,10 @@ fun OwnerOnboardingScreen(
         } else if(screen==RegPage.VERIFYING){
             // The actual NTS verification happens on POST /api/owner-applications.
             delay(350)
-            verify=VerifyFixture.UNAVAILABLE
+            // The direct Mock UI test retains its explicit demo verification flow.
+            // Live NTS validation happens only on application POST, never here.
+            verify=if(viewModel.usesProductionOwnerApi()) VerifyFixture.UNAVAILABLE
+                else VerifyFixture.MATCHED
             go(RegPage.VERIFIED)
         }
     }
@@ -474,7 +477,8 @@ fun OwnerOnboardingScreen(
                 TextButton(onClick=::showDashboard) { Text("내 매장 목록으로 돌아가기") }
             }
             when(val s=state){
-                MockOwnerLoadState.Loading -> OwnerLoading("Mock 저장소 불러오는 중")
+                MockOwnerLoadState.Loading -> OwnerLoading(
+                    if(viewModel.usesProductionOwnerApi()) "매장 정보를 불러오는 중" else "Mock 저장소 불러오는 중")
                 is MockOwnerLoadState.Error -> {
                     Text(s.message,color=MaterialTheme.colorScheme.error)
                     OwnerActionButton("다시 시도",viewModel::retry)

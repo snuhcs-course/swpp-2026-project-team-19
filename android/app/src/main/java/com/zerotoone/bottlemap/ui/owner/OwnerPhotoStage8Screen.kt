@@ -39,11 +39,6 @@ import com.zerotoone.bottlemap.data.owner.*
 import org.json.JSONObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.CancellationException
-
-// The owner photo-review flow uses 30 ml when a bar has no configured serving size.
-private const val DEFAULT_OWNER_POUR_ML = 30
 
 /** Only save the owner-confirmed product draft, not inferred OCR data. */
 private fun encodeReviewDraft(draft: MockNewProductDraft): String = JSONObject().apply {
@@ -442,8 +437,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     val counts=if(job!=null && s!=null)stage8Counts(job,s) else null
     val focusManager=LocalFocusManager.current
     val keyboardController=LocalSoftwareKeyboardController.current
-    val publishScope=rememberCoroutineScope()
-    var publishing by rememberSaveable { mutableStateOf(false) }
     var screen by rememberSaveable(job?.menuImportId) {
         mutableStateOf(if(resumeFromMenu) {
             if(all.isNotEmpty() && all.all{it.second.decision!=null}) "publish"
@@ -458,13 +451,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var chosenCategory by rememberSaveable(job?.menuImportId) { mutableStateOf("whisky") }
     var choosingOther by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
     var catalogQuery by rememberSaveable(job?.menuImportId) { mutableStateOf("") }
-    LaunchedEffect(screen, catalogQuery) {
-        if(screen=="catalog" && catalogQuery.trim().length>=2 && vm.usesProductionOwnerApi()) {
-            kotlinx.coroutines.delay(300)
-            runCatching { vm.searchCatalogLive(catalogQuery) }
-        }
-    }
-
     var pendingNewDraftEncoded by rememberSaveable(job?.menuImportId) {
         mutableStateOf<String?>(null)
     }
@@ -621,21 +607,13 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 Text(counts.remaining.toString()+"줄 확인",color=V4Color.text,
                     fontWeight=FontWeight.Bold,fontSize=26.sp)
                 val bar=s.bars.firstOrNull{it.barId==barId}
-                LaunchedEffect(bar?.barId,bar?.defaultPourMl) {
-                    if(bar!=null && bar.defaultPourMl==null) {
-                        runCatching {vm.saveBar(bar.copy(defaultPourMl=DEFAULT_OWNER_POUR_ML))}
-                            .onFailure {error=it.message}
-                    }
-                }
                 St8Card {
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
                         Text("기본 잔 용량",color=V4Color.text,fontWeight=FontWeight.Bold)
-                        Text("${bar?.defaultPourMl ?: DEFAULT_OWNER_POUR_ML}ml",
+                        Text(bar?.defaultPourMl?.let { it.toString()+"ml" } ?: "미설정",
                             color=V4Color.sub,fontSize=12.sp)
                     }
-                    var pour by rememberSaveable(barId){
-                        mutableStateOf((bar?.defaultPourMl ?: DEFAULT_OWNER_POUR_ML).toString())
-                    }
+                    var pour by rememberSaveable(barId){mutableStateOf(bar?.defaultPourMl?.toString().orEmpty())}
                     Row(verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(7.dp)) {
                         OutlinedTextField(pour,{pour=it.filter(Char::isDigit).take(3)},
@@ -648,8 +626,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             Box(Modifier.size(width=43.dp,height=26.dp)
                                 .border(1.dp,V4Color.line,RoundedCornerShape(7.dp))
                                 .clickable {
-                                    val n=if(pour.isBlank())DEFAULT_OWNER_POUR_ML else pour.toIntOrNull()
-                                    if(bar!=null && n!=null && n in 1..999){
+                                    val n=pour.toIntOrNull()
+                                    if(bar!=null && (pour.isBlank() || n!=null && n in 1..999)){
                                         vm.saveBar(bar.copy(defaultPourMl=n));error=null
                                         focusManager.clearFocus()
                                         keyboardController?.hide()
@@ -660,8 +638,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             }
                         }
                     }
-                    Text("설정하지 않으면 30ml가 자동으로 적용돼요.",
-                        color=V4Color.sub,fontSize=11.sp)
                     Text("용량 표시가 없는 잔에 적용해요.",color=V4Color.sub,fontSize=11.sp)
                 }
                 St8Card {
@@ -996,7 +972,6 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         St8Field("용량 (ml, 없으면 빈칸)",pours[i],{v->
                             pours=pours.toMutableList().apply{set(i,v)}},digits=true)
                         val base=s.bars.firstOrNull{it.barId==barId}?.defaultPourMl
-                            ?: DEFAULT_OWNER_POUR_ML
                         if(base!=null && pours[i].isBlank() &&
                             labels[i].trim() !in listOf("병","Bottle")){
                             TextButton(onClick={pours=pours.toMutableList().apply{
@@ -1063,8 +1038,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 val (photo,line)=pair
                 var openPhoto by remember {mutableStateOf(false)}
                 St8RecognizedStrip(photo,line,
-                    defaultPourMl=s.bars.firstOrNull{it.barId==barId}?.defaultPourMl
-                        ?: DEFAULT_OWNER_POUR_ML,
+                    defaultPourMl=s.bars.firstOrNull{it.barId==barId}?.defaultPourMl,
                     onLater=onHome){openPhoto=true}
                 if(openPhoto)Stage8SourcePhoto(photo,line.sourceBox){openPhoto=false}
                 St8ReviewHeading("가격을 못 읽었어요") {runCatching{vm.review(job.menuImportId,line.extractedItemId,
@@ -1092,8 +1066,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                     options.forEachIndexed { i,o ->
                         Text((o.label ?: "잔")+" · "+((o.pourMl ?:
-                            (s.bars.firstOrNull{it.barId==barId}?.defaultPourMl
-                                ?: DEFAULT_OWNER_POUR_ML))?.let{"${it}ml"}
+                            s.bars.firstOrNull{it.barId==barId}?.defaultPourMl)?.let{"${it}ml"}
                             ?: "용량 미표기")+" 가격",color=V4Color.sub,fontSize=13.sp)
                         OutlinedTextField(prices.getOrElse(i){""},{
                             val filtered=it.filter(Char::isDigit).take(10)
@@ -1107,8 +1080,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         prices.all{it.toIntOrNull()?.let {p->p>0}==true}) {
                         val corrected=options.mapIndexed{i,o->
                             o.copy(priceKrw=prices[i].toInt(),
-                                pourMl=o.pourMl ?: (s.bars.firstOrNull{it.barId==barId}
-                                    ?.defaultPourMl ?: DEFAULT_OWNER_POUR_ML).takeIf{ ml->
+                                pourMl=o.pourMl ?: s.bars.firstOrNull{it.barId==barId}
+                                    ?.defaultPourMl?.takeIf{ ml->
                                         o.label?.trim() !in listOf("병","Bottle") && ml in 1..999})
                         }
                         val d=if(pendingNewDraft!=null)MockReviewDecision(
@@ -1239,7 +1212,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                 }
                 val changed=stage8RetainedPriceMismatchCount(job,s)
-                if(changed>0) Row(Modifier.fillMaxWidth()
+                Row(Modifier.fillMaxWidth()
                     .border(1.dp,Color(0xFF75583D),RoundedCornerShape(12.dp))
                     .background(Color(0xFF302822),RoundedCornerShape(12.dp))
                     .clickable(onClick=onHome).padding(15.dp),
@@ -1249,7 +1222,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)) {
                         Text("메뉴판과 가격이 다른 메뉴 ${changed}개",
                             color=V4Color.text,fontWeight=FontWeight.Bold,fontSize=14.sp)
-                        Text("자동 반영하지 못한 가격이에요. 눌러서 직접 수정해 주세요.",
+                        Text("지금 메뉴 가격을 그대로 두었어요. 눌러서 바꿀 수 있어요.",
                             color=V4Color.sub,fontSize=12.sp)
                     }
                     Text("›",color=V4Color.sub,fontSize=21.sp)
@@ -1352,21 +1325,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 "results"->St8Button("돌아가기"){visit("publish")}
                 "publish"->{
                     val accepted=stage8ExpectedAddedCount(job,s)
-                    St8Button(if(publishing)"메뉴 게시 중..." else "+  메뉴 ${accepted}개 게시",
-                        enabled=counts!!.remaining==0 && !publishing){
-                        publishing=true
-                        publishScope.launch {
-                            try {
-                                vm.publishPhotoImportLive(job.menuImportId,job.reviewVersion)
-                                error=vm.photoPublishWarning()
-                                visit("done")
-                            } catch(cancelled: CancellationException) {
-                                throw cancelled
-                            } catch(e: Exception) {
-                                error=e.message ?: "메뉴 게시에 실패했어요."
-                                visit("publishFailed")
-                            } finally { publishing=false }
-                        }
+                    St8Button("+  메뉴 ${accepted}개 게시",enabled=counts!!.remaining==0){
+                        runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
+                            .onSuccess{error=null;visit("done")}
+                            .onFailure{error=it.message;visit("publishFailed")}
                     }
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                         Box(Modifier.weight(1f)) {
@@ -1384,21 +1346,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                 }
                 "publishFailed"->{
-                    St8Button(if(publishing)"다시 게시하는 중..." else "+  다시 시도",
-                        enabled=!publishing) {
-                        publishing=true
-                        publishScope.launch {
-                            try {
-                                vm.publishPhotoImportLive(job.menuImportId,job.reviewVersion)
-                                error=vm.photoPublishWarning()
-                                visit("done")
-                            } catch(cancelled: CancellationException) {
-                                throw cancelled
-                            } catch(e: Exception) {
-                                error=e.message ?: "메뉴 게시에 실패했어요."
-                                visit("publishFailed")
-                            } finally { publishing=false }
-                        }
+                    St8Button("+  다시 시도") {
+                        runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
+                            .onSuccess{error=null;visit("done")}
+                            .onFailure{error=it.message;visit("publishFailed")}
                     }
                     TextButton(onClick=onHome,modifier=Modifier.fillMaxWidth()) {
                         Text("나중에 하기",color=V4Color.sub)
@@ -1417,38 +1368,10 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     val result by produceState<Pair<Boolean,androidx.compose.ui.graphics.ImageBitmap?>>(
         initialValue=false to null,key1=photo.sourceUri) {
         val loaded=withContext(Dispatchers.IO) {
-            runCatching {
-                if(photo.sourceUri.startsWith("https://") ||
-                    photo.sourceUri.startsWith("http://")) {
-                    val connection=java.net.URL(photo.sourceUri).openConnection()
-                        as java.net.HttpURLConnection
-                    connection.connectTimeout=10_000
-                    connection.readTimeout=20_000
-                    connection.instanceFollowRedirects=false
-                    try {
-                        if(connection.responseCode!=200) null else {
-                            val bytes=connection.inputStream.use { input ->
-                                val output=java.io.ByteArrayOutputStream()
-                                val buffer=ByteArray(16_384)
-                                var size=0
-                                while(true) {
-                                    val count=input.read(buffer)
-                                    if(count<0)break
-                                    size+=count
-                                    if(size>10*1024*1024)break
-                                    output.write(buffer,0,count)
-                                }
-                                if(size>10*1024*1024) null else output.toByteArray()
-                            }
-                            bytes?.let { android.graphics.BitmapFactory.decodeByteArray(
-                                it,0,it.size)?.asImageBitmap() }
-                        }
-                    } finally {connection.disconnect()}
-                } else OwnerMenuPhotoStore(context).preview(
-                    MockPhoto(photo.imageId,photo.sourceUri,MockPhotoKind.MENU_CAPTURE),
-                    size=1600
-                )?.asImageBitmap()
-            }.getOrNull()
+            runCatching {OwnerMenuPhotoStore(context).preview(
+                MockPhoto(photo.imageId,photo.sourceUri,MockPhotoKind.MENU_CAPTURE),
+                size=1600
+            )?.asImageBitmap()}.getOrNull()
         }
         value=true to loaded
     }
