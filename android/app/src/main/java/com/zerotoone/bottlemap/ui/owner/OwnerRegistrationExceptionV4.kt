@@ -205,7 +205,14 @@ internal fun OwnerRegistrationQaPreview(page:Int,onBack:()->Unit,onAction:()->Un
     val managerPage=page in listOf(21,22,28,29)
     Column(Modifier.fillMaxSize().background(RegistrationV4.bg)
         .testTag("registration-qa-preview-$page")) {
-        if(managerPage) OwnerHeader("내 매장 관리",onBack)
+        if(managerPage) {
+            Row(Modifier.fillMaxWidth().height(52.dp),
+                verticalAlignment=Alignment.CenterVertically) {
+                Box(Modifier.width(56.dp)) { RegistrationBackBar(onBack) }
+                Text("내 매장 관리",color=RegistrationV4.text,
+                    fontSize=16.sp,fontWeight=FontWeight.SemiBold)
+            }
+        }
         else RegistrationBackBar(onBack)
         val stage=when(page) { 23,24,25,26->1; 27->2; else->0 }
         if(stage>0)RegistrationProgress(stage)
