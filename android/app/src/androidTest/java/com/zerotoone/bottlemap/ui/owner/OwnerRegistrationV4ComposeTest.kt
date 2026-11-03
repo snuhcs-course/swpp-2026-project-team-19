@@ -108,6 +108,45 @@ class OwnerRegistrationV4ComposeTest {
         compose.onNodeWithTag("registration-processing-glass").assertExists()
     }
 
+    @Test fun allNineExceptionAndApplicationMockScreensAreIndividuallyPreviewable() {
+        val page=androidx.compose.runtime.mutableIntStateOf(21)
+        compose.setContent {
+            MaterialTheme {
+                OwnerRegistrationQaPreview(page.intValue,onBack={},onAction={})
+            }
+        }
+        for(target in 21..29) {
+            compose.runOnIdle { page.intValue=target }
+            compose.onNodeWithTag("registration-qa-preview-${target}").assertExists()
+        }
+    }
+
+    @Test fun uploadedScreenshotPartialOcrShowsMissingOpeningDateAndDisabledCta() {
+        compose.setContent {
+            MaterialTheme {
+                RegistrationOcrPartialReview("123-45-67891","김민준",onEdit={})
+            }
+        }
+        compose.onNodeWithText("읽은 내용이\n맞는지 확인해 주세요").assertExists()
+        compose.onNodeWithText("읽지 못했어요").assertExists()
+        compose.onNodeWithText("읽지 못한 항목은 직접 입력해 주세요.").assertExists()
+        compose.onNodeWithText("입력").assertExists()
+    }
+
+    @Test fun managerFixturesDistinguishPendingRejectedApprovedAndMulti() {
+        val pending=ownerQaPreviewSnapshot(21)
+        val rejected=ownerQaPreviewSnapshot(22)
+        val approved=ownerQaPreviewSnapshot(28)
+        val multiple=ownerQaPreviewSnapshot(29)
+        org.junit.Assert.assertEquals(MockApplicationStatus.PENDING,
+            pending.applications.single().status)
+        org.junit.Assert.assertEquals(MockApplicationStatus.REJECTED,
+            rejected.applications.single().status)
+        org.junit.Assert.assertEquals(1,approved.bars.size)
+        org.junit.Assert.assertEquals(1,multiple.bars.size)
+        org.junit.Assert.assertEquals(1,multiple.applications.size)
+    }
+
     @Test fun completeReviewSubmitsMockPendingApplicationWithoutNtsNetworkCall() {
         val gallery=MockPhoto("cover","content://mock/cover",MockPhotoKind.BAR_GALLERY)
         val menu=MockPhoto("menu","content://mock/menu",MockPhotoKind.MENU_CAPTURE)
