@@ -97,10 +97,16 @@ internal fun p18BusinessStatus(
         return runCatching {LocalTime.parse(requireNotNull(item.openTime)) to
             LocalTime.parse(requireNotNull(item.closeTime))}.getOrNull()
     }
-    val note=if(covered(day) || covered(prev)) exception?.note else null
+    val old=effective(prev)
+    // Yesterday's exception note carries into today only while its actual
+    // overnight custom-hours interval is still active, not for closures.
+    val overnightExceptionStillActive=covered(prev) &&
+        exception?.kind=="custom_hours" &&
+        old!=null && old.second<old.first && now<old.second
+    val note=if(covered(day) || overnightExceptionStillActive)
+        exception?.note else null
     if(covered(day) && exception?.kind!="custom_hours")
         return P18BusinessStatus("임시 휴무",note=note)
-    val old=effective(prev)
     if(old!=null && old.second<old.first && now<old.second)
         return P18BusinessStatus("영업 중","종료 ${old.second}",note,true)
     val current=effective(day)
