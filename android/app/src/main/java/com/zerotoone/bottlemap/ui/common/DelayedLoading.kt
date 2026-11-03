@@ -17,7 +17,7 @@ import kotlinx.coroutines.delay
  * composition, its timer is cancelled and it cannot surface an old spinner.
  * Actual errors, empty results and retry controls must render immediately.
  */
-internal const val LOADING_FEEDBACK_DELAY_MS = 300L
+internal const val LOADING_FEEDBACK_DELAY_MS = 500L
 
 @Composable
 fun DelayedLoading(
