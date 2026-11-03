@@ -131,7 +131,7 @@ GET 주변 업장 조회 (위치 + 반경)
 
 `/admin/`은 operator 웹 대시보드의 정적 파일(HTML, JS, CSS)이며 API 계약이 아니다. 페이지가 브라우저에서 Supabase Google 로그인을 하고 3.11의 API를 그대로 호출하므로, 권한은 위 표와 같다(operator만 신청 목록을 보고 승인·거절한다). `/admin/config.js`는 페이지에 공개 설정만 준다: Supabase 프로젝트 URL과 publishable key, 그리고 `new_bar` 승인 화면의 지도와 주소 검색에 쓰는 Kakao JavaScript 키(등록한 도메인에서만 동작). 좌표는 브라우저에서 Kakao Maps JavaScript SDK로 찾으며 백엔드 API는 쓰지 않는다. 승인 요청(3.11.7)의 `latitude`, `longitude`는 지금과 같다.
 
-인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다.
+인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다. 단, 요청 본문을 JSON이나 multipart로 읽을 수 없으면 이 순서와 관계없이 먼저 `400 INVALID_REQUEST`다(9.2).
 
 1. token이 유효한가 (아니면 `401`, 3.1.5)
 2. operator 전용 API는 호출자가 operator인가 (아니면 `403 FORBIDDEN`). 대상이 있는지는 그다음에 확인하므로, operator가 아닌 호출자는 없는 `barId`나 `menuImportId`를 보내도 `403`이다. 업장 정보는 공개 API로 이미 볼 수 있어 존재 여부를 숨길 필요가 없다.
@@ -3493,9 +3493,8 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `500` | `INTERNAL_ERROR` | 예상하지 못한 서버 오류(DB 연결 실패, 코드 오류 등). 모든 API에서 생길 수 있다. 원인은 응답에 담지 않고 서버 로그에만 남긴다 | 잠시 후 재시도 안내 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버의 인증 설정 누락 또는 오류, Supabase JWKS 조회 실패 (3.1.5) | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않음 |
 
-라우팅이나 인증 단계에서 생긴 HTTP 오류 중 위 표에 없는 상태 코드는 같은 공통 형식에 `code = HTTP_ERROR`로 반환한다. 프론트엔드는 HTTP 상태 코드 기준의 일반 오류 메시지를 보여 준다.
-
-> **현재 구현과의 차이 (수정 예정):** 지금 백엔드는 JSON 형식이 깨진 요청에 `400 INVALID_REQUEST` 대신 `422 VALIDATION_FAILED`를 반환한다. 이때 `fieldErrors[].code`는 `JSON_INVALID`이고 `path`는 필드 이름이 아니라 문자 위치(예: `[1]`)다. FastAPI가 JSON 해석 실패를 입력 검증 오류로 처리하기 때문이며, 위 표대로 `400 INVALID_REQUEST`를 반환하도록 백엔드를 고칠 예정이다.
+- `400 INVALID_REQUEST`는 요청 본문을 JSON이나 multipart로 읽을 수 없을 때이며 `fieldErrors`는 비어 있다. JSON으로 읽었지만 필드 값이 규칙에 맞지 않으면 `422 VALIDATION_FAILED`다. 서버는 요청 본문을 다른 검사보다 먼저 읽으므로, 이 오류는 인증(`401`)과 각 API의 확인 순서보다 먼저 나온다. 앱이 만든 요청에서는 생기지 않으므로 앱 버그로 본다.
+- 라우팅이나 인증 단계에서 생긴 HTTP 오류 중 위 표에 없는 상태 코드도 같은 공통 형식으로 반환한다. 없는 경로는 `404 NOT_FOUND`, 경로는 있지만 메서드가 다르면 `405 METHOD_NOT_ALLOWED`, 그 밖은 `code = HTTP_ERROR`다. 프론트엔드는 HTTP 상태 코드 기준의 일반 오류 메시지를 보여 준다.
 
 ### 9.3 필드 검증 오류 예시
 
