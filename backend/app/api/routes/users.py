@@ -4,11 +4,12 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_base_url
 from app.core.security import Principal, get_current_user
 from app.db.session import get_session
+from app.models import User
 from app.schemas.bar import MyBarsResponse
 from app.schemas.errors import AUTH_UNAVAILABLE, error_responses
-from app.schemas.user import CurrentUserResponse
+from app.schemas.user import CurrentUserResponse, CurrentUserUpdateInput
 from app.services.bar_detail import my_bars
-from app.services.users import sync_current_user
+from app.services.users import sync_current_user, update_display_name
 
 router = APIRouter(prefix="/api", tags=["users"])
 
@@ -32,14 +33,37 @@ def read_current_user(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
 ) -> CurrentUserResponse:
-    user = sync_current_user(session, principal)
-    return CurrentUserResponse(
-        userId=user.id,
-        email=user.email,
-        displayName=user.display_name,
-        userType=user.user_type.value,
-        updatedAt=user.updated_at,
-    )
+    return _current_user_response(sync_current_user(session, principal))
+
+
+@router.patch(
+    "/me",
+    response_model=CurrentUserResponse,
+    summary="Change my display name",
+    description=(
+        "Any signed-in user with a users row. Only `displayName` can change; it is trimmed, then must be "
+        "1-20 characters (code points) on one line. Sending the current name changes nothing, `updatedAt` "
+        "included. The email is not synced here (only `GET /api/me` does), and a name set here is not "
+        "overwritten by it later. The response is the same as `GET /api/me`."
+    ),
+    responses=error_responses(
+        (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+        (404, "`USER_NOT_FOUND`: no users row; call `GET /api/me` and retry. This API never creates the user."),
+        (
+            422,
+            "`VALIDATION_FAILED`: `displayName` `MISSING`, `BLANK` (empty or only spaces), `STRING_TOO_LONG`, "
+            "`STRING_TYPE` (null or not a string) or `INVALID_CHARACTER` (line break or control character); "
+            "any other field `EXTRA_FORBIDDEN`, with that field as the path.",
+        ),
+        AUTH_UNAVAILABLE,
+    ),
+)
+def update_current_user(
+    body: CurrentUserUpdateInput,
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> CurrentUserResponse:
+    return _current_user_response(update_display_name(session, principal, body.displayName))
 
 
 @router.get(
@@ -60,3 +84,13 @@ def read_my_bars(
     base_url: str = Depends(get_base_url),
 ) -> MyBarsResponse:
     return MyBarsResponse(items=my_bars(session, principal, base_url=base_url))
+
+
+def _current_user_response(user: User) -> CurrentUserResponse:
+    return CurrentUserResponse(
+        userId=user.id,
+        email=user.email,
+        displayName=user.display_name,
+        userType=user.user_type.value,
+        updatedAt=user.updated_at,
+    )

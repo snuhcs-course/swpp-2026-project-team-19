@@ -1,9 +1,9 @@
-"""The BottleMap user behind a verified token (API spec, section 3.2).
+"""The BottleMap user behind a verified token (API spec, sections 3.2 and 3.3).
 
 `GET /api/me` is the only place that creates users. The first call stores the token's subject
 as `auth_subject` with user type customer (a temporary user takes TEMP_AUTH_USER_TYPE instead).
 Later calls keep the email in step with the token but never overwrite the display name, which
-the user may have changed.
+the user may have changed with `PATCH /api/me`.
 """
 
 from typing import Any
@@ -14,11 +14,16 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.errors import ApiError
 from app.core.security import Principal
 from app.models import User, UserType
+from app.schemas.user import MAX_DISPLAY_NAME_LENGTH
 
-MAX_DISPLAY_NAME_LENGTH = 20
 MAX_EMAIL_LENGTH = 255
+
+
+def user_not_found() -> ApiError:
+    return ApiError(404, "USER_NOT_FOUND", "사용자 정보가 없습니다. 다시 시도해 주세요.")
 
 
 def caller_user_id(session: Session, principal: Principal) -> UUID | None:
@@ -47,6 +52,19 @@ def sync_current_user(session: Session, principal: Principal) -> User:
         # A temporary user's role follows TEMP_AUTH_USER_TYPE (API spec, section 3.1.3).
         user.user_type = UserType(principal.user_type)
     _set_email(session, user, email_from(principal.claims))
+    session.commit()
+    return user
+
+
+def update_display_name(session: Session, principal: Principal, display_name: str) -> User:
+    """Change the caller's display name (spec 3.3). Never creates the user: a caller without a row gets
+    USER_NOT_FOUND and calls GET /api/me first. The email is left as it is; only GET /api/me syncs it."""
+    user = session.scalar(select(User).where(User.auth_subject == principal.subject))
+    if user is None:
+        raise user_not_found()
+    # The same name leaves the row unchanged, so updated_at keeps its value.
+    if user.display_name != display_name:
+        user.display_name = display_name
     session.commit()
     return user
 

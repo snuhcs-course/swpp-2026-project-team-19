@@ -14,6 +14,7 @@ from app.core.errors import register_error_handlers
 from app.core.security import warn_if_temporary_login_is_on
 from app.core.version import get_version
 from app.db.session import get_session_factory
+from app.schemas.errors import document_invalid_request
 from app.matching.embedding import get_embedding_step
 from app.services.menu_import_processing import find_unfinished_imports, recover_imports
 
@@ -77,3 +78,4 @@ app = FastAPI(title="BottleMap API", version="0.1.0", lifespan=lifespan)
 register_error_handlers(app)
 app.include_router(api_router)
 mount_admin(app)
+document_invalid_request(app)

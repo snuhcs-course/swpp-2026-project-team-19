@@ -173,7 +173,8 @@ Table bars {
   updated_at timestamptz [not null]
 
   Note: '''
-  Bars are created by project operators, or by an operator approving a new_bar owner application.
+  Bars are created by an operator approving a new_bar owner application, or by the seed scripts for
+  development and demo data. Direct creation by an operator (API spec 3.5) is not planned for now.
   The schema does not retain which operator originally created a bar.
   The bar's approved owner, if any, is the bar_owners row whose revoked_at is null.
   default_pour_ml only pre-fills glass-option inputs in the owner's menu edit and review screens.

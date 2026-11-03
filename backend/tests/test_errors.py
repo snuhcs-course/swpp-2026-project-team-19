@@ -3,7 +3,7 @@ import importlib
 import pytest
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.testclient import TestClient
-from pydantic import BaseModel
+from pydantic import BaseModel, Json
 from sqlalchemy.exc import OperationalError
 
 from app.core.errors import ApiError, field_path, register_error_handlers
@@ -16,6 +16,10 @@ class Option(BaseModel):
 
 class Payload(BaseModel):
     items: list[Option]
+
+
+class Settings(BaseModel):
+    raw: Json[dict]
 
 
 def make_client() -> TestClient:
@@ -32,6 +36,10 @@ def make_client() -> TestClient:
 
     @app.post("/items")
     def create(payload: Payload):
+        return {}
+
+    @app.post("/settings")
+    def save(settings: Settings):
         return {}
 
     @app.get("/teapot")
@@ -82,6 +90,41 @@ def test_body_field_paths_use_index_notation():
     response = make_client().post("/items", json={"items": [{"price": 1}, {"price": "x"}]})
 
     assert [e["path"] for e in response.json()["error"]["fieldErrors"]] == ["items[1].price"]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [b"{", b'{"items": [', b"not json", b'{"items": []} trailing'],
+    ids=["unclosed object", "unclosed array", "not json", "text after the object"],
+)
+def test_a_body_that_is_not_json_is_an_invalid_request(body):
+    response = make_client().post("/items", content=body, headers={"Content-Type": "application/json"})
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "error": {
+            "code": "INVALID_REQUEST",
+            "message": "요청 형식이 올바르지 않습니다.",
+            "details": None,
+            "fieldErrors": [],
+        }
+    }
+
+
+def test_a_json_text_field_that_does_not_parse_is_still_a_field_error():
+    # Pydantic's own json_invalid points at the field; only an unreadable body is a malformed request.
+    response = make_client().post("/settings", json={"raw": "{"})
+
+    assert response.status_code == 422
+    assert [(e["path"], e["code"]) for e in response.json()["error"]["fieldErrors"]] == [("raw", "JSON_INVALID")]
+
+
+def test_a_malformed_json_body_is_rejected_before_authentication():
+    # FastAPI reads the body before it runs the dependencies, so no token is checked yet (spec 9.2).
+    response = TestClient(main_app).patch("/api/me", content=b"{", headers={"Content-Type": "application/json"})
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "INVALID_REQUEST"
 
 
 def test_http_exception_without_known_code_falls_back():

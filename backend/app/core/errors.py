@@ -94,7 +94,16 @@ async def _api_error(_: Request, exc: ApiError) -> JSONResponse:
     return error_response(exc.status_code, exc.code, exc.message, exc.details, exc.field_errors)
 
 
+def _is_unreadable_json(error: dict[str, Any]) -> bool:
+    """FastAPI reports a body it cannot parse as JSON as this one validation error, located at
+    ("body", <character position>). It is a malformed request, not an invalid field (spec 9.2)."""
+    loc = tuple(error["loc"])
+    return error["type"] == "json_invalid" and len(loc) == 2 and loc[0] == "body" and isinstance(loc[1], int)
+
+
 async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
+    if any(_is_unreadable_json(error) for error in exc.errors()):
+        return error_response(400, "INVALID_REQUEST", "요청 형식이 올바르지 않습니다.")
     field_errors = [
         {"path": field_path(tuple(error["loc"])), "code": error["type"].upper(), "message": error["msg"]}
         for error in exc.errors()

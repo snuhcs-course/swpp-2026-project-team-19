@@ -114,7 +114,7 @@ GET 주변 업장 조회 (위치 + 반경)
 | `POST /api/owner-applications/{applicationId}/cancel`, `PUT /api/owner-applications/{applicationId}/menu-photos` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
 | `GET /api/owner-applications`, `POST .../approve`, `POST .../reject`, `POST .../verify-business` | | | | O |
 | `DELETE /api/bars/{barId}/owner` | | | | O |
-| `GET /api/bars`, `POST /api/bars` | | | | O |
+| `GET /api/bars`, `POST /api/bars`(지금은 구현하지 않음, 3.5) | | | | O |
 | `GET /api/bars/{barId}` | | | O | O |
 | `PATCH /api/bars/{barId}` | | | O (`status` 제외) | O |
 | `GET /api/bars/{barId}/menu-imports`, `POST /api/bars/{barId}/menu-imports` | | | O | O |
@@ -131,7 +131,7 @@ GET 주변 업장 조회 (위치 + 반경)
 
 `/admin/`은 operator 웹 대시보드의 정적 파일(HTML, JS, CSS)이며 API 계약이 아니다. 페이지가 브라우저에서 Supabase Google 로그인을 하고 3.11의 API를 그대로 호출하므로, 권한은 위 표와 같다(operator만 신청 목록을 보고 승인·거절한다). `/admin/config.js`는 페이지에 공개 설정만 준다: Supabase 프로젝트 URL과 publishable key, 그리고 `new_bar` 승인 화면의 지도와 주소 검색에 쓰는 Kakao JavaScript 키(등록한 도메인에서만 동작). 좌표는 브라우저에서 Kakao Maps JavaScript SDK로 찾으며 백엔드 API는 쓰지 않는다. 승인 요청(3.11.7)의 `latitude`, `longitude`는 지금과 같다.
 
-인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다.
+인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다. 단, JSON 본문을 읽을 수 없거나 multipart 본문의 구조(경계 문자열 등)가 깨졌으면 이 순서와 관계없이 먼저 `400 INVALID_REQUEST`다(9.2).
 
 1. token이 유효한가 (아니면 `401`, 3.1.5)
 2. operator 전용 API는 호출자가 operator인가 (아니면 `403 FORBIDDEN`). 대상이 있는지는 그다음에 확인하므로, operator가 아닌 호출자는 없는 `barId`나 `menuImportId`를 보내도 `403`이다. 업장 정보는 공개 API로 이미 볼 수 있어 존재 여부를 숨길 필요가 없다.
@@ -212,7 +212,7 @@ ignore
 | `GET` | `/api/me` | 로그인 사용자와 권한 조회 및 최초 사용자 동기화 |
 | `PATCH` | `/api/me` | 로그인 사용자 표시 이름 수정 |
 | `GET` | `/api/bars` | 운영 대상 업장 목록 및 검색 |
-| `POST` | `/api/bars` | 업장 생성 |
+| `POST` | `/api/bars` | 업장 생성. 지금은 구현하지 않는다(3.5) |
 | `GET` | `/api/bars/{barId}` | 관리자용(operator, 업주) 업장 상세와 관리 상태 조회 |
 | `PATCH` | `/api/bars/{barId}` | 업장 정보 또는 활성 상태 수정 |
 | `GET` | `/api/bars/{barId}/menu-imports` | 업장의 진행 중·과거 메뉴 등록 작업 조회 |
@@ -341,7 +341,7 @@ POST /api/auth/temp-login
 - 클라이언트 요청이나 token claim(`user_metadata` 포함)으로 `userType`을 바꿀 수 없다. 권한은 매 요청 BottleMap DB의 `users.user_type`에서 읽는다.
 - `operator` 전환은 이후 별도 기능으로 정의하며 이 문서의 범위가 아니다. 그전까지 로컬에서 operator API를 시험할 때는 임시 로그인과 `TEMP_AUTH_USER_TYPE=operator`를 사용한다. 배포 서버에서는 백엔드 담당자가 DB의 `users.user_type`을 직접 고쳐야만 operator 역할이 부여되며, 바꾼 역할은 해당 사용자의 다음 요청부터 반영된다.
 - 업주는 `userType`이 아니라 업장별 관계다. 신청과 승인은 3.11, 권한은 2.2를 따른다.
-- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`, 그리고 임시 로그인 operator의 업주 신청 승인·거절은 `404 USER_NOT_FOUND`다(3.3, 3.11.2, 3.11.7).
+- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`, 그리고 임시 로그인 operator의 업주 신청 승인, 거절과 업주 해제는 `404 USER_NOT_FOUND`다(3.3, 3.11.2, 3.11.7, 3.11.10).
 
 #### 3.1.5 인증 오류와 프론트엔드 처리
 
@@ -466,13 +466,25 @@ Content-Type: application/json
 
 | 필드 | 필수 | 규칙 |
 |---|---|---|
-| `displayName` | 예 | 앞뒤 공백을 지운 뒤 1~20자 |
+| `displayName` | 예 | 앞뒤 공백을 지운 뒤 1~20자. 줄바꿈과 제어 문자는 받지 않는다 |
 
-검증 오류는 `422 VALIDATION_FAILED`이며 `fieldErrors[].path`는 `displayName`이다. 값이 없으면 `MISSING`, 공백뿐이면 `BLANK`, 20자를 넘으면 `STRING_TOO_LONG`이다.
+- 글자 수는 유니코드 문자(code point) 단위로 센다. 한글 한 글자와 이모지 하나가 모두 1자다. Kotlin의 `String.length`는 이모지 같은 문자를 2로 세므로, 프론트엔드가 길이를 미리 검사할 때는 `codePointCount`를 쓴다.
+- 요청 본문에는 `displayName`만 보낸다. 다른 필드(`email`, `userType` 등)를 보내면 아무것도 바꾸지 않고 `422`이며 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 이 API로 `email`, `authSubject`, `userType`은 변경할 수 없다.
+- 표시 이름을 지우는 기능은 없다. `null`이나 문자열이 아닌 값을 보내면 `STRING_TYPE`이다.
+- 지금과 같은 이름을 보내면 아무것도 바꾸지 않고 `200 OK`로 현재 사용자를 돌려준다. `updatedAt`은 저장된 값이 실제로 바뀔 때만 바뀌므로 그대로다(3.2).
+- `displayName`만 바꾸며 token의 `email`로 맞추지 않는다. `email` 동기화는 `GET /api/me`만 한다(3.2). 여기서 바꾼 `displayName`은 이후 `GET /api/me`의 동기화로 덮어쓰지 않는다.
+- 응답은 `200 OK`이며 형식은 `GET /api/me`와 같다. 프론트엔드는 이 응답으로 화면의 사용자 정보를 바꾼다.
 
-이 API로 `email`, `authSubject`, `userType`은 변경할 수 없다. 여기서 바꾼 `displayName`은 이후 `GET /api/me`의 동기화로 덮어쓰지 않는다(3.2). 응답 형식은 `GET /api/me`와 같다.
+이 API는 사용자를 생성하지 않는다. token은 유효하지만 `users` 행이 없으면 `404 USER_NOT_FOUND`를 반환한다. 프론트엔드는 `GET /api/me`를 호출해 사용자를 만든 뒤 같은 요청을 다시 보낸다.
 
-이 API는 사용자를 생성하지 않는다. token은 유효하지만 `users` 행이 없으면 `404 USER_NOT_FOUND`를 반환한다. 프론트엔드는 `GET /api/me`를 호출해 사용자를 만든 뒤 같은 요청을 다시 보낸다. 인증 오류는 3.1.5를 따른다.
+백엔드는 인증(`401`, 3.1.5), 요청 형식(`422`), `users` 행(`404 USER_NOT_FOUND`) 순서로 확인한다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `404` | `USER_NOT_FOUND` | `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도 |
+| `422` | `VALIDATION_FAILED` | `fieldErrors[].path = displayName`: 값이 없음(`MISSING`), 빈 문자열이거나 공백뿐(`BLANK`), 20자 초과(`STRING_TOO_LONG`), 문자열이 아님(`STRING_TYPE`), 줄바꿈이나 제어 문자(`INVALID_CHARACTER`). 다른 필드를 보냄(`EXTRA_FORBIDDEN`, `path`는 보낸 필드 이름) | 입력란 아래에 안내. `EXTRA_FORBIDDEN`과 `STRING_TYPE`은 앱 버그 |
+| `503` | `SERVICE_UNAVAILABLE` | 3.1.5 | 3.1.5 |
 
 ### 3.4 업장 목록과 검색
 
@@ -516,7 +528,9 @@ Authorization: Bearer <access-token>
 
 ### 3.5 업장 생성
 
-operator가 업장을 직접 만드는 API다. 업주가 있는 업장은 업주의 `new_bar` 신청과 승인(3.11)으로 만드는 것을 기본으로 한다.
+operator가 업장을 직접 만드는 API다.
+
+> **지금은 구현하지 않는다.** 업장은 업주의 `new_bar` 신청을 operator가 승인할 때(3.11.7) 만든다. 업장 등록은 이 신청과 승인을 기본으로 하므로 operator가 직접 만드는 API는 당장 만들지 않으며, 백엔드에도 없다(호출하면 `405 METHOD_NOT_ALLOWED`). 아래 요청과 응답은 나중에 구현할 때를 위한 초안이다. 업장 필드 규칙은 업장 수정(3.7)과 신청 승인(3.11.7)이 함께 쓰므로 지금도 유효하다.
 
 ```http
 POST /api/bars
@@ -544,7 +558,7 @@ Content-Type: application/json
 | `longitude` | 예 | -180~180. 소수점 아래 6자리까지 저장한다 |
 | `phone` | 아니오 | 30자 이하. 없거나 공백뿐이면 `null` |
 
-좌표는 서버가 주소로 계산하지 않는다. 프론트엔드는 지도에서 업장 위치를 고르는 화면을 제공하고, 고른 좌표를 주소와 함께 보낸다. operator의 업장 생성, 신청 승인(3.11.7)과 업장 수정(3.7)이 같은 화면을 쓴다.
+좌표는 서버가 주소로 계산하지 않는다. 프론트엔드는 지도에서 업장 위치를 고르는 화면을 제공하고, 고른 좌표를 주소와 함께 보낸다. 신청 승인(3.11.7)과 업장 수정(3.7)이 같은 화면을 쓴다.
 
 ```http
 HTTP/1.1 201 Created
@@ -563,7 +577,7 @@ Location: /api/bars/22222222-2222-4222-8222-222222222222
 
 ### 3.6 업장 상세 조회
 
-operator와 업주의 업장 관리 화면용 API다. 업장 정보와 관리 상태(진행 중인 메뉴 등록 작업, 현재 메뉴판 요약, 업주)를 반환하며 메뉴 항목은 포함하지 않는다. 메뉴 항목은 3.9로 조회한다. 업장 생성 직후(3.5의 `Location`), 업장 수정 뒤 재조회, 관리 화면 직접 진입에 사용한다.
+operator와 업주의 업장 관리 화면용 API다. 업장 정보와 관리 상태(진행 중인 메뉴 등록 작업, 현재 메뉴판 요약, 업주)를 반환하며 메뉴 항목은 포함하지 않는다. 메뉴 항목은 3.9로 조회한다. 업장 수정 뒤 재조회와 관리 화면 직접 진입에 사용한다.
 
 operator와 해당 업장의 현재 업주만 호출할 수 있다. 비활성 업장도 `200 OK`로 반환한다.
 
@@ -1230,7 +1244,7 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 
 업주는 `user_type`이 아니라 사용자와 업장의 관계다. 로그인한 사용자가 업주 신청을 내고 operator가 승인하면, 그 사용자는 해당 업장의 업주가 된다. 업주가 되어도 `userType`은 바뀌지 않는다(보통 `customer`). 업주가 할 수 있는 일은 2.2의 권한 표를 따른다.
 
-서비스 규모가 커지면 업장 등록은 operator가 하나씩 입력하는 방식(3.5)이 아니라, 업주가 `new_bar` 신청으로 직접 등록하고 operator가 승인하는 방식을 기본으로 한다.
+업장 등록은 operator가 하나씩 입력하는 방식이 아니라, 업주가 `new_bar` 신청으로 직접 등록하고 operator가 승인하는 방식으로 한다. operator가 업장을 직접 만드는 API(3.5)는 지금은 구현하지 않는다.
 
 - 한 업장에는 현재 업주가 최대 한 명이다. 한 사용자는 여러 업장의 업주가 될 수 있다.
 - 신청은 두 종류다. `existing_bar`는 이미 등록된 업장의 업주 신청이고, `new_bar`는 아직 없는 업장을 등록하면서 업주가 되는 신청이다.
@@ -1655,11 +1669,22 @@ DELETE /api/bars/{barId}/owner
 Authorization: Bearer <access-token>
 ```
 
-operator만 호출할 수 있다. 업장의 현재 업주 관계를 해제하고 `204 No Content`를 반환한다. 기록은 지우지 않고 해제 시각을 남긴다. 해제된 사용자는 다음 요청부터 그 업장의 업주 권한이 없다. 업장에 진행 중인 메뉴 등록 작업은 그대로 남으며 operator나 새 업주가 이어서 처리할 수 있다.
+operator만 호출할 수 있다. 요청 본문은 없다. 업장의 현재 업주 관계를 해제하고 `204 No Content`를 반환한다. 기록은 지우지 않고 해제 시각과 해제한 operator를 남긴다. 승인한 업주 신청은 `approved`로 남는다. 해제된 사용자는 다음 요청부터 그 업장의 업주 권한이 없으며, 같은 업장에 다시 업주 신청을 낼 수 있다(3.11.2). 비활성 업장도 해제할 수 있다. 업장에 진행 중인 메뉴 등록 작업은 그대로 남으며 operator나 새 업주가 이어서 처리할 수 있다.
+
+- 해제는 업장 행을 잠근 뒤 한다(3.14.1). 업장 행을 잠그는 요청(메뉴 등록 작업 생성, 검수 반영, 메뉴 직접 편집, 품절, 판매 정보 확인, 임시 휴무, 매장 사진)은 잠근 뒤 업주 권한을 다시 확인하므로, 해제보다 늦게 잠금을 잡은 이전 업주의 요청은 `403 FORBIDDEN`이다. 같은 업장의 `existing_bar` 신청 승인(3.11.7)과도 차례로 처리된다.
+- 이미 해제한 업장에 다시 보내면 `404 BAR_OWNER_NOT_FOUND`다. 프론트엔드는 응답을 받지 못해 다시 보낸 요청이 이 오류를 받으면 업장 상세(3.6)를 다시 불러 `owner = null`인지 확인한다.
+
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다.
+
+1. 호출자가 operator인지 (`403 FORBIDDEN`, 2.2)
+2. 호출자의 `users` 행 (`404 USER_NOT_FOUND`). 해제한 operator를 기록해야 하기 때문이다. 3.11.7과 같다
+3. 업장 (`404 BAR_NOT_FOUND`)
+4. 업장 행을 잠근 뒤 현재 업주 (`404 BAR_OWNER_NOT_FOUND`)
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `404` | `USER_NOT_FOUND` | 호출한 operator의 `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
 | `404` | `BAR_OWNER_NOT_FOUND` | 업장에 현재 업주가 없음 | 업장 상세(3.6) 재조회 |
 
@@ -3440,7 +3465,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `404` | `MENU_IMPORT_NOT_FOUND` | 등록 작업이 없음 | 작업 목록 이동 |
 | `404` | `MENU_ITEM_NOT_FOUND` | 직접 수정, 삭제할 항목이 현재 메뉴판에 없음. `details.barMenuItemId` (3.14) | 메뉴 다시 조회 |
 | `404` | `PHOTO_NOT_FOUND` | 삭제하거나 조회할 매장 사진이 없음. `details.photoId` (3.16) | 업장 상세 다시 조회 |
-| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인·거절(3.11.7, 3.11.8) 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
+| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인과 거절(3.11.7, 3.11.8), 업주 해제(3.11.10) 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
 | `405` | `METHOD_NOT_ALLOWED` | 경로는 있지만 허용하지 않는 HTTP 메서드 | 요청 메서드 확인 |
 | `409` | `BAR_OWNER_EXISTS` | 이미 현재 업주가 있는 업장에 신청 또는 승인 (3.11) | 안내. operator는 해당 신청을 거절 |
@@ -3469,9 +3494,8 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `500` | `INTERNAL_ERROR` | 예상하지 못한 서버 오류(DB 연결 실패, 코드 오류 등). 모든 API에서 생길 수 있다. 원인은 응답에 담지 않고 서버 로그에만 남긴다 | 잠시 후 재시도 안내 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버의 인증 설정 누락 또는 오류, Supabase JWKS 조회 실패 (3.1.5) | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않음 |
 
-라우팅이나 인증 단계에서 생긴 HTTP 오류 중 위 표에 없는 상태 코드는 같은 공통 형식에 `code = HTTP_ERROR`로 반환한다. 프론트엔드는 HTTP 상태 코드 기준의 일반 오류 메시지를 보여 준다.
-
-> **현재 구현과의 차이 (수정 예정):** 지금 백엔드는 JSON 형식이 깨진 요청에 `400 INVALID_REQUEST` 대신 `422 VALIDATION_FAILED`를 반환한다. 이때 `fieldErrors[].code`는 `JSON_INVALID`이고 `path`는 필드 이름이 아니라 문자 위치(예: `[1]`)다. FastAPI가 JSON 해석 실패를 입력 검증 오류로 처리하기 때문이며, 위 표대로 `400 INVALID_REQUEST`를 반환하도록 백엔드를 고칠 예정이다.
+- `400 INVALID_REQUEST`는 JSON 본문을 읽을 수 없거나 multipart 본문의 구조(경계 문자열 등)가 깨졌을 때이며 `fieldErrors`는 비어 있다. JSON으로 읽었지만 필드 값이 규칙에 맞지 않으면 `422 VALIDATION_FAILED`다. 끝이 잘린 multipart 본문은 읽을 수 있는 부분까지만 읽히므로, 빠진 필드가 `422`의 `MISSING`으로 나올 수 있다. 서버는 요청 본문을 다른 검사보다 먼저 읽으므로, 이 오류는 인증(`401`)과 각 API의 확인 순서보다 먼저 나온다. 앱이 만든 요청에서는 생기지 않으므로 앱 버그로 본다.
+- 라우팅이나 인증 단계에서 생긴 HTTP 오류 중 위 표에 없는 상태 코드도 같은 공통 형식으로 반환한다. 없는 경로는 `404 NOT_FOUND`, 경로는 있지만 메서드가 다르면 `405 METHOD_NOT_ALLOWED`, 그 밖은 `code = HTTP_ERROR`다. 프론트엔드는 HTTP 상태 코드 기준의 일반 오류 메시지를 보여 준다.
 
 ### 9.3 필드 검증 오류 예시
 

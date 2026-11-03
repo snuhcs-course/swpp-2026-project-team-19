@@ -340,7 +340,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `revoked_at` | `timestamptz`, nullable | `null` | 운영자가 관계를 해제한 시각이다. `null`이면 현재 업주다. |
 | `revoked_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 관계를 해제한 운영자다. |
 
-**핵심 제약:** 한 업장에는 현재 업주(`revoked_at`이 `null`인 행)가 최대 한 명이다. PostgreSQL 부분 unique 인덱스(`bar_id` WHERE `revoked_at IS NULL`)와 승인 시 업장 행 잠금으로 보장한다. 해제는 행을 지우지 않고 `revoked_at`을 기록해 이력을 남기며, `revoked_at`과 `revoked_by_user_id`는 함께 값이 있거나 함께 `null`이다. 업주가 되어도 `users.user_type`은 바뀌지 않는다.
+**핵심 제약:** 한 업장에는 현재 업주(`revoked_at`이 `null`인 행)가 최대 한 명이다. PostgreSQL 부분 unique 인덱스(`bar_id` WHERE `revoked_at IS NULL`)와 승인, 해제 시 업장 행 잠금으로 보장한다. 해제는 행을 지우지 않고 `revoked_at`을 기록해 이력을 남기며, `revoked_at`과 `revoked_by_user_id`는 함께 값이 있거나 함께 `null`이다. 업주가 되어도 `users.user_type`은 바뀌지 않는다.
 
 **필요한 이유:** 업주 권한은 업장마다 다르므로 전역 `user_type`으로 표현할 수 없다. 신청과 관계를 나누면 신청 이력(증빙, 거절 사유)과 현재 권한을 따로 관리할 수 있고, 권한 검사는 작은 관계 테이블만 조회하면 된다.
 
