@@ -759,7 +759,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     override fun decideLine(
         importId: String, extractedItemId: String, expectedVersion: Int,
         decision: MockReviewDecision,
-    ) = error("서버 사진 검수를 완료해야 합니다.")
+    ) {
+        // Stage 8 edits are an uncommitted local review draft, not a server-side action.
+        // The server accepts the complete set of decisions at review-and-apply.
+        local.decideLine(importId, extractedItemId, expectedVersion, decision)
+        lastReadySnapshot = snapshot()
+    }
     override fun publishAddOnly(importId: String, expectedVersion: Int): Int =
         error("서버 사진 검수를 완료해야 합니다.")
     override fun preview(barId: String, nowEpochMs: Long): MockPreview? =
