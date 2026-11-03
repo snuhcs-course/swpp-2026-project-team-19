@@ -115,7 +115,8 @@ internal fun p18BusinessStatus(
 }
 
 @Composable
-internal fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier) {
+internal fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier,
+    contentScale:ContentScale=ContentScale.Crop) {
     val bitmap by produceState<androidx.compose.ui.graphics.ImageBitmap?>(null,url) {
         value=if(url.isNullOrBlank())null else withContext(Dispatchers.IO) {
             runCatching {
@@ -131,7 +132,7 @@ internal fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier) {
         }
     }
     if(bitmap!=null) Image(requireNotNull(bitmap),null,
-        modifier=modifier,contentScale=ContentScale.Crop)
+        modifier=modifier,contentScale=contentScale)
     else Box(modifier.background(P18Soft),contentAlignment=Alignment.Center) {
         BmIcon(BmIconId.BAR,"매장 사진 없음",Modifier.size(32.dp),tint=P18Muted)
     }
@@ -216,7 +217,8 @@ internal fun CustomerP18BarDetail(
                 }
                 .clickable(enabled=photos.isNotEmpty()){photoFull=true},
                 contentAlignment=Alignment.Center) {
-                P18RemoteBarPhoto(selectedPhoto?.imageUrl,Modifier.fillMaxSize())
+                P18RemoteBarPhoto(selectedPhoto?.imageUrl,Modifier.fillMaxSize(),
+                    contentScale=ContentScale.Fit)
                 if(photos.isNotEmpty()) Text("${photoIndex+1}/${photos.size}",
                     Modifier.align(Alignment.BottomEnd).padding(10.dp)
                         .background(P18Bg.copy(alpha=.85f),RoundedCornerShape(6.dp))
@@ -251,7 +253,7 @@ internal fun CustomerP18BarDetail(
                 Row(Modifier.weight(1f),verticalAlignment=Alignment.CenterVertically,
                     horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     Text(open.text,color=if(open.open)BottleMapPalette.success else P18Muted,
-                        fontSize=14.sp,fontWeight=FontWeight.Bold)
+                        fontSize=12.sp,fontWeight=FontWeight.Bold)
                     open.next?.let {Text(it,fontSize=11.sp,color=P18Muted)}
                     Canvas(Modifier.size(22.dp)
                         .clickable { expanded=p18NextExpandedPanel(expanded,"hours") }
