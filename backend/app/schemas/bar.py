@@ -16,6 +16,27 @@ class ActiveMenuImport(BaseModel):
     status: Literal["uploaded", "processing", "ready_for_review"]
 
 
+class BarPhotoResponse(BaseModel):
+    photoId: UUID
+    imageUrl: str = Field(
+        description="Absolute URL of the photo (`GET /api/bar-photos/{photoId}`); never expires, and its content "
+        "never changes. For the full-screen view and the gallery"
+    )
+    thumbnailUrl: str = Field(
+        description="Absolute URL of the thumbnail, 480 px on the long edge. For lists, grids and small cards"
+    )
+
+
+class BarPhotosResponse(BaseModel):
+    photos: list[BarPhotoResponse] = Field(description="In display order; the first is the cover. Empty when none")
+
+
+class PhotoOrderRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    photoIds: list[UUID] = Field(description="Every photo of the bar, each once, in the new order; the first is the cover")
+
+
 class BarListItem(BaseModel):
     barId: UUID
     name: str

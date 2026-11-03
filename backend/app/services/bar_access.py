@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
 from app.core.security import Principal, user_type_of
-from app.models import BarOwner, User
+from app.models import Bar, BarOwner, User
 
 
 def forbidden() -> ApiError:
@@ -40,3 +40,11 @@ def owns_any_bar(session: Session, principal: Principal) -> bool:
 
 def can_manage_bar(session: Session, principal: Principal, bar_id: UUID) -> bool:
     return is_operator(session, principal) or owns_bar(session, principal, bar_id)
+
+
+def lock_bar_for_manager(session: Session, principal: Principal, bar_id: UUID) -> None:
+    """Lock the bar row, then check the caller again, for changes that take turns per bar (spec 3.15, 3.16).
+    An owner revoked meanwhile is refused; unlike menu edits, an inactive bar is accepted."""
+    session.execute(select(Bar.id).where(Bar.id == bar_id).with_for_update())
+    if not can_manage_bar(session, principal, bar_id):
+        raise forbidden()

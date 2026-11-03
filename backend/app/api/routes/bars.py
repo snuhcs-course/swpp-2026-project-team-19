@@ -1,14 +1,17 @@
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Path, Query
+from fastapi import APIRouter, Body, Depends, File, Path, Query
 from sqlalchemy.orm import Session
 
+from app.adapters.storage import ImageStorage
+from app.api.deps import get_base_url, get_image_storage
 from app.api.permissions import BarId, managed_bar, require_bar_manager
+from app.api.routes.menu_imports import UploadedImage
 from app.core.security import Principal, get_current_user, get_optional_user, require_operator
 from app.db.session import get_serializable_session_factory, get_session
 from app.models import Bar
-from app.schemas.bar import BarDetail, BarListResponse, BarUpdateInput
+from app.schemas.bar import BarDetail, BarListResponse, BarPhotosResponse, BarUpdateInput, PhotoOrderRequest
 from app.schemas.bar_hours import OperatingExceptionInput
 from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.schemas.menu import BarMenuResponse
@@ -24,7 +27,10 @@ from app.services.bar_access import can_manage_bar, is_operator
 from app.services.bar_admin import BarStatusFilter, ImportStatusFilter, list_bars, list_menu_imports
 from app.services.bar_detail import get_bar_detail, update_bar
 from app.services.bar_menu import get_bar_menu
+from app.services.bar_photo_image import MAX_LONG_EDGE, MAX_PHOTO_BYTES, THUMBNAIL_LONG_EDGE, single_upload
+from app.services.bar_photos import MAX_PHOTOS, add_photo, check_photo_order, delete_photo, reorder_photos
 from app.services.menu_edit import add_menu_item, check_request, delete_menu_item, reset_menu, update_menu_item
+from app.services.menu_import_upload import ImageUpload
 from app.services.menu_status import confirm_menu, set_sold_out
 from app.services.operating_exception import apply_operating_exception, cancel_operating_exception
 from app.services.serializable import SessionFactory
@@ -539,3 +545,125 @@ def confirm_bar_menu(
 ) -> BarDetail:
     bar = managed_bar(session, principal, bar_id)
     return confirm_menu(session, principal, bar.id, body.menuVersion)
+
+
+# ---- photos (spec 3.16) ----
+
+_PHOTO_RULES = (
+    "Operator or the bar's owner; inactive bars too. The response is the bar's photos in display order, the "
+    "first being the cover, as `photos` of `GET /api/bars/{barId}`, so the app needs no reload. Changes to one "
+    "bar's photos are applied one at a time."
+)
+PhotoId = Annotated[str, Path(alias="photoId", description="Photo id (UUID)")]
+
+
+@router.post(
+    "/{barId}/photos",
+    status_code=201,
+    response_model=BarPhotosResponse,
+    summary="Add a bar photo",
+    description=(
+        _PHOTO_RULES
+        + f"\n\n- One JPEG or PNG in `image`, at most {MAX_PHOTO_BYTES // 2**20} MB and {MAX_LONG_EDGE} px on the "
+        "long edge. The type is read from the file content; a declared image type that disagrees is rejected. "
+        "The app shrinks and compresses photos to JPEG before uploading.\n"
+        "- The server re-encodes the photo as a JPEG without metadata (EXIF orientation applied; EXIF, XMP and "
+        f"location removed; transparent areas white) and makes a {THUMBNAIL_LONG_EDGE} px thumbnail. The uploaded "
+        "file is not kept.\n"
+        f"- The photo goes last; on a bar without photos it becomes the cover. At most {MAX_PHOTOS} per bar.\n"
+        "- A file already added to the bar (same bytes) is `409 PHOTO_EXISTS`, so a retried request never adds "
+        "a second copy; no `Idempotency-Key` is taken.\n"
+        "- Checks, first failure answering: token, request (`422`), bar (`404`), caller (`403`), size (`413`) "
+        "and type (`415`), dimensions (`422`), decoding (`415`), then under the bar row lock: the same photo "
+        "(`409 PHOTO_EXISTS`), the count (`409 PHOTO_LIMIT_REACHED`)."
+    ),
+    responses=error_responses(
+        *_MANAGER_ERRORS,
+        (404, "`BAR_NOT_FOUND`: no such bar or a malformed id."),
+        (
+            409,
+            "`PHOTO_EXISTS`: the bar has this file already, `details.photoId`; `PHOTO_LIMIT_REACHED`: the bar has "
+            f"{MAX_PHOTOS} photos, `details.maxPhotos`.",
+        ),
+        (413, f"`UPLOAD_TOO_LARGE`: over {MAX_PHOTO_BYTES // 2**20} MB; `details.maxImageBytes`."),
+        (415, "`UNSUPPORTED_IMAGE_TYPE`: not JPEG or PNG, a declared type that disagrees, or a file that does not decode."),
+        (
+            422,
+            "`VALIDATION_FAILED`: `image` `MISSING` or more than one (`TOO_LONG`), or `IMAGE_DIMENSIONS_TOO_LARGE` "
+            f"(long edge over {MAX_LONG_EDGE} px).",
+        ),
+    ),
+)
+def add_bar_photo(
+    bar_id: BarId,
+    image: Annotated[list[UploadedImage], File(description="One JPEG or PNG photo")],
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    storage: ImageStorage = Depends(get_image_storage),
+    base_url: str = Depends(get_base_url),
+) -> BarPhotosResponse:
+    upload = single_upload([ImageUpload(item.filename, item.content_type, item.file) for item in image])
+    bar = managed_bar(session, principal, bar_id)
+    return BarPhotosResponse(photos=add_photo(session, storage, principal, bar.id, upload, base_url))
+
+
+@router.delete(
+    "/{barId}/photos/{photoId}",
+    response_model=BarPhotosResponse,
+    summary="Delete a bar photo",
+    description=(
+        _PHOTO_RULES
+        + "\n\nThe photos after it move forward; deleting the cover makes the next photo the cover, and the last "
+        "photo can be deleted too. There is no undo. Its URLs answer `404` at once, but devices and caches that "
+        "fetched them may keep them for up to a day. A retried request gets `404 PHOTO_NOT_FOUND`: reload the bar."
+    ),
+    responses=error_responses(
+        *_MANAGER_ERRORS,
+        (
+            404,
+            "`BAR_NOT_FOUND`: no such bar or a malformed id; `PHOTO_NOT_FOUND`: not a photo of this bar, already "
+            "deleted, or a malformed id, `details.photoId`.",
+        ),
+    ),
+)
+def delete_bar_photo(
+    photo_id: PhotoId,
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    storage: ImageStorage = Depends(get_image_storage),
+    base_url: str = Depends(get_base_url),
+    bar: Bar = Depends(require_bar_manager),
+) -> BarPhotosResponse:
+    return BarPhotosResponse(photos=delete_photo(session, storage, principal, bar.id, photo_id, base_url))
+
+
+@router.put(
+    "/{barId}/photos/order",
+    response_model=BarPhotosResponse,
+    summary="Reorder the bar photos and choose the cover",
+    description=(
+        _PHOTO_RULES
+        + "\n\nSend every photo of the bar once, in the new order; the first becomes the cover. Ids that differ "
+        "from the bar's photos (one added or deleted on another device) change nothing and answer "
+        "`409 PHOTOS_OUTDATED` with the current photos in `details.photos`. Sending the same order again gives "
+        "the same result.\n\n"
+        "Checks, first failure answering: token, request (`422`), bar (`404`), caller (`403`), then under the "
+        "bar row lock: the ids (`409`)."
+    ),
+    responses=error_responses(
+        *_MANAGER_ERRORS,
+        (404, "`BAR_NOT_FOUND`: no such bar or a malformed id."),
+        (409, "`PHOTOS_OUTDATED`: the ids are not the bar's photos; `details.photos` has the current ones."),
+        (422, "`VALIDATION_FAILED`: `photoIds` `MISSING` or not UUIDs, or `DUPLICATE_ITEM` (`photoIds[i]`)."),
+    ),
+)
+def reorder_bar_photos(
+    bar_id: BarId,
+    body: PhotoOrderRequest,
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
+) -> BarPhotosResponse:
+    check_photo_order(body.photoIds)
+    bar = managed_bar(session, principal, bar_id)
+    return BarPhotosResponse(photos=reorder_photos(session, principal, bar.id, body.photoIds, base_url))
