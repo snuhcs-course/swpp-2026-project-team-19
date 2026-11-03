@@ -352,6 +352,221 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         return remote.readBusinessCertificate(prepared)
     }
 
+    /** Uploads actual Stage 7 image bytes before navigation; no local fixture job. */
+    suspend fun submitPhotoImportLive(barId: String, photos: List<MockPhoto>): String {
+        require(photos.isNotEmpty()) { "메뉴판 사진을 선택해 주세요." }
+        val preparer = ImageUploadPreparer(app.contentResolver)
+        val images = photos.map { photo -> preparer.prepare(Uri.parse(photo.uri)) }
+        val accepted = remote.uploadMenuImport(
+            barId = barId,
+            images = images,
+            // Existing backend supports partial_update; never request full_replace.
+            mode = "partial_update",
+            idempotencyKey = java.util.UUID.randomUUID().toString(),
+        )
+        val job = MockMenuImport(
+            menuImportId = accepted.menuImportId, barId = barId,
+            status = MockImportStatus.PROCESSING, reviewVersion = 1,
+            images = photos.mapIndexed { index, photo ->
+                MockPhotoExtraction(photo.photoId, photo.uri, index + 1, emptyList())
+            },
+        )
+        val before = snapshot()
+        local.replaceFromBackend(before.copy(
+            imports = before.imports.filterNot { it.menuImportId == job.menuImportId } + job))
+        return accepted.menuImportId
+    }
+
+    /** Poll only real server statuses; the backend controls the OCR/matching pipeline. */
+    suspend fun pollPhotoImportLive(importId: String): MockImportStatus {
+        val dto = remote.getMenuImport(importId)
+        val before = snapshot()
+        val old = before.imports.firstOrNull { it.menuImportId == importId }
+        val status = when(dto.status) {
+            "uploaded" -> MockImportStatus.UPLOADED
+            "processing" -> MockImportStatus.PROCESSING
+            "ready_for_review" -> MockImportStatus.READY_FOR_REVIEW
+            "applied" -> MockImportStatus.APPLIED
+            "failed" -> MockImportStatus.FAILED
+            "canceled" -> MockImportStatus.CANCELED
+            else -> error("알 수 없는 서버 작업 상태: ${dto.status}")
+        }
+        val extraBrands = dto.images.flatMap { image ->
+            image.items.flatMap { item -> item.candidates.map { candidate ->
+                MockBrand(candidate.brandId, candidate.brandName)
+            } }
+        }.distinctBy { it.brandId }
+        val extraProducts = dto.images.flatMap { image ->
+            image.items.flatMap { item -> item.candidates.map { c ->
+                MockCatalogProduct(c.productId, c.brandId, c.displayName,
+                    c.category, c.ageYears, c.editionName, abvPercent = c.abv)
+            } }
+        }.distinctBy { it.productId }
+        val images = if(dto.status == "ready_for_review") dto.images.map { image ->
+            val prior = old?.images?.firstOrNull { it.imageOrder == image.imageOrder }
+            MockPhotoExtraction(
+                imageId = image.imageId,
+                sourceUri = prior?.sourceUri ?: image.imageUrl,
+                imageOrder = image.imageOrder,
+                lines = image.items.map { item ->
+                    val kind = when(item.effectiveLineType) {
+                        "product" -> MockLineKind.PRODUCT
+                        "unknown" -> MockLineKind.UNKNOWN
+                        else -> MockLineKind.NON_PRODUCT
+                    }
+                    val options = item.options.map { option ->
+                        MockMenuOption(
+                            optionId = option.extractedOptionId,
+                            label = option.extractedOptionLabel,
+                            pourMl = option.extractedPourMl
+                                ?: if(option.extractedOptionLabel?.lowercase() in
+                                    listOf("bottle", "병")) null else
+                                    before.bars.firstOrNull { it.barId == (old?.barId ?: dto.barId) }
+                                        ?.defaultPourMl ?: 30,
+                            priceKrw = option.extractedPriceKrw ?: 0,
+                        )
+                    }
+                    val exact = item.initialResolutionStatus == "exact_match" &&
+                        item.proposedProductId != null && kind == MockLineKind.PRODUCT &&
+                        options.isNotEmpty() && options.all { it.priceKrw > 0 }
+                    val automatic = when {
+                        kind == MockLineKind.NON_PRODUCT ->
+                            MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT)
+                        exact -> MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                            productId = item.proposedProductId, correctedOptions = options)
+                        else -> null
+                    }
+                    MockExtractedLine(
+                        extractedItemId = item.extractedItemId,
+                        sourceText = item.rawText,
+                        kind = kind, suggestedProductId = item.proposedProductId,
+                        candidateProductIds = item.candidates.map { it.productId },
+                        options = options, decision = automatic,
+                        needsPriceEntry = options.isEmpty() || options.any { it.priceKrw <= 0 },
+                        sourceBox = item.sourceBox,
+                        mockAutoAccepted = exact,
+                    )
+                },
+            )
+        } else old?.images.orEmpty()
+        val job = (old ?: MockMenuImport(
+            menuImportId = importId, barId = dto.barId ?: before.selectedBarId.orEmpty(),
+            status = status, reviewVersion = dto.reviewVersion ?: 1, images = images,
+        )).copy(
+            status = status,
+            reviewVersion = dto.reviewVersion ?: old?.reviewVersion ?: 1,
+            images = images,
+            failureReason = dto.failure?.message,
+        )
+        local.replaceFromBackend(before.copy(
+            imports = before.imports.filterNot { it.menuImportId == importId } + job,
+            brands = (before.brands + extraBrands).distinctBy { it.brandId },
+            products = (before.products + extraProducts).distinctBy { it.productId },
+        ))
+        return status
+    }
+
+    private fun reviewOptions(
+        item: com.zerotoone.bottlemap.network.ReviewItemDto,
+        decision: MockReviewDecision,
+    ): List<Map<String, Any?>> {
+        val corrected = decision.correctedOptions ?: return emptyList()
+        val byId = item.options.associateBy { it.extractedOptionId }
+        return corrected.mapNotNull { option ->
+            val extracted = byId[option.optionId] ?: return@mapNotNull null
+            val edits = mutableMapOf<String, Any?>("extractedOptionId" to option.optionId)
+            if(option.priceKrw != extracted.extractedPriceKrw)
+                edits["correctedPriceKrw"] = option.priceKrw
+            if(option.pourMl != extracted.extractedPourMl && option.pourMl != null)
+                edits["correctedPourMl"] = option.pourMl
+            if(option.label != extracted.extractedOptionLabel && option.label != null)
+                edits["correctedOptionLabel"] = option.label
+            edits
+        }
+    }
+
+    /** Apply all item decisions in one backend transaction, and never accept removals. */
+    suspend fun publishPhotoImportLive(importId: String, version: Int): Int {
+        val current = snapshot()
+        val job = current.imports.firstOrNull { it.menuImportId == importId }
+            ?: error("메뉴판 작업이 없어요.")
+        val original = remote.getMenuImport(importId)
+        require(original.status == "ready_for_review") { "검수할 수 없는 서버 작업이에요." }
+        require(original.reviewVersion == version) { "REVIEW_OUTDATED" }
+        val decisions = job.images.flatMap { it.lines }.associateBy { it.extractedItemId }
+        val itemDecisions = original.images.flatMap { it.items }.map { item ->
+            val chosen = decisions[item.extractedItemId]?.decision
+                ?: error("확인하지 않은 메뉴가 있어요.")
+            when(chosen.kind) {
+                MockDecisionKind.SELECT_PRODUCT -> mapOf(
+                    "action" to "select_existing_product",
+                    "extractedItemId" to item.extractedItemId,
+                    "finalLineType" to "product",
+                    "productId" to chosen.productId,
+                    "optionDecisions" to reviewOptions(item, chosen),
+                )
+                MockDecisionKind.CREATE_PRODUCT -> {
+                    val draft = requireNotNull(chosen.newProduct)
+                    val brand = if(draft.brandId != null)
+                        mapOf("type" to "existing", "brandId" to draft.brandId)
+                    else mapOf("type" to "new",
+                        "canonicalName" to requireNotNull(draft.brandName),
+                        "aliases" to emptyList<Any>())
+                    mapOf(
+                        "action" to "create_product",
+                        "extractedItemId" to item.extractedItemId,
+                        "finalLineType" to "product",
+                        "brand" to brand,
+                        "product" to mapOf(
+                            "category" to draft.category,
+                            "displayName" to draft.name,
+                            "ageYears" to draft.ageYears,
+                            "editionName" to draft.editionName,
+                            "abv" to draft.abvPercent,
+                        ),
+                        "optionDecisions" to reviewOptions(item, chosen),
+                    )
+                }
+                MockDecisionKind.CONFIRM_NON_PRODUCT -> mapOf(
+                    "action" to "confirm_non_product",
+                    "extractedItemId" to item.extractedItemId,
+                    "finalLineType" to (if(item.effectiveLineType=="product") "unknown"
+                        else item.effectiveLineType),
+                )
+                MockDecisionKind.EXCLUDE -> mapOf(
+                    "action" to "reject",
+                    "extractedItemId" to item.extractedItemId,
+                    "finalLineType" to item.effectiveLineType,
+                )
+            }
+        }
+        val positiveItems = job.images.flatMap { it.lines }.filter {
+            it.decision?.kind in listOf(MockDecisionKind.SELECT_PRODUCT,
+                MockDecisionKind.CREATE_PRODUCT)
+        }.map { it.extractedItemId }.toSet()
+        val changes = original.proposedChanges.map {
+            com.zerotoone.bottlemap.network.ChangeDecisionDto(
+                changeId = it.changeId,
+                decision = if(it.changeType == "remove" ||
+                    it.extractedItemId !in positiveItems) "ignore" else "apply",
+            )
+        }
+        val result = remote.reviewAndApply(importId,
+            com.zerotoone.bottlemap.network.ReviewAndApplyRequestDto(
+                reviewVersion = version,
+                itemDecisions = itemDecisions,
+                changeDecisions = changes,
+            ))
+        local.replaceFromBackend(current.copy(imports = current.imports.map {
+            if(it.menuImportId == importId) it.copy(status = MockImportStatus.APPLIED,
+                publishedAddedCount = result.result.added,
+                publishedNewProductCount = result.result.createdProducts)
+            else it
+        }))
+        refresh()
+        return result.result.added
+    }
+
     // Local-only interactions that have no published server equivalent must not fake a save.
     override fun registerApplication(application: MockOwnerApplication) =
         error("신청서는 서버 등록을 사용해야 합니다.")
