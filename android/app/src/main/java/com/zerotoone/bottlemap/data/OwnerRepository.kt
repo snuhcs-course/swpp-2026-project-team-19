@@ -114,6 +114,11 @@ class OwnerRepository {
         com.zerotoone.bottlemap.network.OwnerApplicationDto =
         withOwnerAuth { OwnerEndpoint.api.cancelApplication(it, applicationId) }
 
+    suspend fun cancelMenuImport(menuImportId: String): MenuImportStatusDto =
+        withOwnerAuth { authorization ->
+            OwnerEndpoint.api.cancelMenuImport(authorization, menuImportId)
+        }
+
     suspend fun getMenuImport(menuImportId: String): MenuImportStatusDto =
         withOwnerAuth { authorization ->
             OwnerEndpoint.api.getMenuImport(
