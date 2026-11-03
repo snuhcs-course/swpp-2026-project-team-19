@@ -146,7 +146,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             return
         }
         val old = snapshot()
-        val bars = remote.getOwnedBars()
+        val bars = remote.getOwnedBars().map { bar ->
+            // Existing unconfigured bars follow the Android decision: persist 30 ml.
+            if(bar.defaultPourMl == null) runCatching {
+                remote.updateBar(bar.barId, mapOf("defaultPourMl" to 30))
+            }.getOrDefault(bar) else bar
+        }
         val applications = remote.getMyApplications()
         val menus = bars.associate { bar ->
             bar.barId to remote.getOwnedMenu(bar.barId)
