@@ -41,5 +41,15 @@ data class OwnerApplicationDto(
     val rejectionReason: String? = null,
     val createdAt: String,
     val reviewedAt: String? = null,
+    val businessRegistrationNumber: String? = null,
 )
 data class MyOwnerApplicationsDto(val items: List<OwnerApplicationDto> = emptyList())
+
+/** OCR prefill only; the backend verifies the business fields at application submission. */
+data class OwnerCertificateOcrDto(
+    val businessRegistrationNumber: String? = null,
+    val representativeName: String? = null,
+    val openingDate: String? = null,
+    val businessName: String? = null,
+    val address: String? = null,
+)
