@@ -55,8 +55,8 @@ internal fun GoogleSignInButton(
             .testTag("customer-google-button"),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFF6F3EE),
-            contentColor = Color(0xFF211E1B),
+            containerColor = Color(0xFFC99D6B),
+            contentColor = Color(0xFF211A14),
         ),
         onClick = {
             if (!viewModel.beginGoogleSignIn()) return@Button
