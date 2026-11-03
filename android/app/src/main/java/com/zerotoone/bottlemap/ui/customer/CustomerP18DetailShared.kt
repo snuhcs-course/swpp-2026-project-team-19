@@ -42,10 +42,12 @@ import java.time.ZonedDateTime
 /** Same 22dp centered chevron and gold 2dp round strokes as the Owner hours toggle. */
 @Composable
 internal fun P18DetailCategoryChevron(open:Boolean) {
-    val rotation by animateFloatAsState(
-        targetValue=if(open)180f else 0f,
-        animationSpec=tween(durationMillis=160),label="categoryChevron")
-    Canvas(Modifier.size(22.dp).graphicsLayer { rotationZ=rotation }) {
+    // Mirror vertically around its own CENTER. Rotating 180 degrees used to
+    // make the arms travel sideways and looked unlike the hours toggle.
+    val flip by animateFloatAsState(
+        targetValue=if(open)-1f else 1f,
+        animationSpec=tween(durationMillis=160),label="categoryChevronFlip")
+    Canvas(Modifier.size(22.dp).graphicsLayer { scaleY=flip }) {
         val w=2.dp.toPx()
         drawLine(P18Gold,Offset(size.width*.18f,size.height*.35f),
             Offset(size.width*.5f,size.height*.65f),strokeWidth=w,cap=StrokeCap.Round)
@@ -178,12 +180,17 @@ internal fun P18OwnerParityMenuRow(
     val priceWidth=with(density) {
         maxOf(129.dp,measuredPricePx.toDp()+27.dp+30.dp+10.dp)
     }
-    val rowHeight=maxOf(74,item.options.size*17+12).dp
-    Box(Modifier.fillMaxWidth().height(rowHeight)
-        .then(if(highlighted)Modifier
-            .background(P18Elevated,RoundedCornerShape(9.dp))
-            .border(1.5.dp,P18Gold,RoundedCornerShape(9.dp))
-            else Modifier.background(P18Bg))) {
+    // Owner's currently published menu and Customer use the same compact row.
+    val rowHeight=maxOf(66,item.options.size*16+10).dp
+    BoxWithConstraints(Modifier.fillMaxWidth().height(rowHeight)) {
+        if(highlighted) {
+            // Extend the highlight BEYOND the fixed content slots, not into them.
+            // Avoids a gold border visually colliding with price/volume or bottle.
+            Box(Modifier.offset(x=(-8).dp).width(maxWidth+16.dp)
+                .fillMaxHeight()
+                .background(P18Elevated,RoundedCornerShape(9.dp))
+                .border(1.5.dp,P18Gold,RoundedCornerShape(9.dp)))
+        } else Box(Modifier.fillMaxSize().background(P18Bg))
         Row(Modifier.fillMaxSize().padding(horizontal=4.dp),
             verticalAlignment=Alignment.CenterVertically,
             horizontalArrangement=Arrangement.spacedBy(7.dp)) {
