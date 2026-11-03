@@ -120,7 +120,9 @@ internal fun p18Sorted(
         rows.sortedWith(compareBy<SearchResultDto> {it.distanceMeters ?: Int.MAX_VALUE}
             .thenBy {it.barName}) else rows
     P18Sort.PRICE -> rows.sortedWith(compareBy<SearchResultDto> {
-        p18Representative(it.options)?.priceKrw ?: Int.MAX_VALUE
+        p18Representative(it.options)?.let { option ->
+            p18EffectivePrice(option.priceKrw,option.discount)
+        } ?: Int.MAX_VALUE
     }.thenBy{it.barName})
     P18Sort.UPDATED -> rows.sortedWith(compareByDescending<SearchResultDto> {
         runCatching {Instant.parse(it.menuUpdatedAt)}.getOrNull() ?: Instant.EPOCH
@@ -156,7 +158,8 @@ internal fun P18BarRow(
             Row(verticalAlignment=Alignment.CenterVertically,
                 horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                 if(serving!=null) {
-                    Text(p18Price(serving.priceKrw),color=P18Text,
+                    Text(p18Price(p18EffectivePrice(serving.priceKrw,serving.discount)),
+                        color=P18Text,
                         fontWeight=FontWeight.SemiBold,fontSize=16.sp)
                     Text(serving.pourMl?.let{"${it}ml"} ?: serving.optionLabel.orEmpty(),
                         color=P18Muted,fontSize=13.sp)
@@ -165,7 +168,10 @@ internal fun P18BarRow(
             Text("메뉴 ${p18MenuUpdated(row.menuUpdatedAt)} 기준",
                 color=P18Muted,fontSize=12.sp,lineHeight=18.sp)
         }
-        P18Photo()
+        if(!row.coverThumbnailUrl.isNullOrBlank())
+            P18RemoteBarPhoto(row.coverThumbnailUrl,Modifier.size(64.dp)
+                .background(P18Soft,RoundedCornerShape(12.dp)))
+        else P18Photo()
     }
 }
 
@@ -434,7 +440,7 @@ private fun P18ResultsMap(
             p18MarkerSubtitle={id->
                 items.firstOrNull{it.barId==id}?.let{row->
                     p18Representative(row.options)?.let{ option->
-                        p18Price(option.priceKrw)+" · "+
+                        p18Price(p18EffectivePrice(option.priceKrw,option.discount))+" · "+
                             (option.pourMl?.let{"${it}ml"}?:option.optionLabel.orEmpty())
                     }
                 }
