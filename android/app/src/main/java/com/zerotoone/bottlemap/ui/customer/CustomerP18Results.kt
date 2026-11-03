@@ -486,7 +486,7 @@ private fun P18ResultsMap(
             contentAlignment=Alignment.Center) {
             Text("지도의 매장 위치를 불러오지 못했어요",color=P18Text)
         }
-        Row(Modifier.fillMaxWidth().padding(start=12.dp,end=12.dp,top=12.dp),
+        Row(Modifier.fillMaxWidth().padding(start=8.dp,end=12.dp,top=12.dp),
             verticalAlignment=Alignment.CenterVertically,
             horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             P18Back(onBack,dark=true)
