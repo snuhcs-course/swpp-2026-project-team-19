@@ -204,9 +204,15 @@ internal fun CustomerP18Explore(
             onMapCameraMoving=viewModel::moving,
             onMapViewportUnavailable=viewModel::unavailable,viewportRetryToken=0,
             onSelectBar={id->if(selectedId==id)onOpenBar(id) else selectedId=id},
-            onViewportChanged=viewModel::load,
+            onViewportChanged={viewport->viewModel.load(viewport)},
             recenterToken=recenterToken,onMapViewChanged={mapView=it},
-            modifier=Modifier.fillMaxSize())
+            modifier=Modifier.fillMaxSize(),p18Markers=true,
+            showOriginMarker=location!=null,
+            p18MarkerSubtitle={id->
+                bars.firstOrNull{it.barId==id}?.let{bar->
+                    location?.let{p18Distance(distanceMeters(it,bar.location).toInt())}
+                }
+            })
         if(listVisible && !searchVisible) {
             Column(Modifier.fillMaxSize().background(P18Bg)
                 .padding(top=72.dp).testTag("customer-map-list")) {
