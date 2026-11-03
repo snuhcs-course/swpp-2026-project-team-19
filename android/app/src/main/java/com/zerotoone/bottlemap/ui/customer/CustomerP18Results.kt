@@ -318,6 +318,30 @@ internal fun CustomerP18Results(
     var focusRequest by remember { mutableIntStateOf(0) }
     var locationFailed by rememberSaveable { mutableStateOf(false) }
     var exiting by remember { mutableStateOf(false) }
+    var locationJob by remember { mutableStateOf<Job?>(null) }
+    // An initial ON_RESUME + a permission callback must not run two competing
+    // GPS requests whose success/failure arrives in the opposite order.
+    fun acquireLocation() {
+        if(locationJob?.isActive==true)return
+        locationFailed=false
+        locationJob=scope.launch {
+            try {
+                val coordinate=AndroidNearbyLocationSource(context).currentLocation()
+                viewModel.setLocation(coordinate)
+                locationFailed=false
+            } catch(cancelled:CancellationException) {
+                throw cancelled
+            } catch(_:Exception) {
+                locationFailed=true
+            }
+        }
+    }
+    // NavHost can enter an already RESUMED lifecycle without an ON_RESUME
+    // callback after this composable's observer is registered.
+    LaunchedEffect(initialQuery,initialProductId) {
+        if(locationPermissionGranted && viewModel.location.value==null)
+            acquireLocation()
+    }
     DisposableEffect(lifecycleOwner, viewModel, context) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -326,11 +350,7 @@ internal fun CustomerP18Results(
                     ContextCompat.checkSelfPermission(context,
                     Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
                 if (!allowed) viewModel.clearLocation()
-                if (allowed && viewModel.location.value == null) scope.launch {
-                    runCatching { AndroidNearbyLocationSource(context).currentLocation() }
-                        .onSuccess { viewModel.setLocation(it);locationFailed=false }
-                        .onFailure { locationFailed=true }
-                }
+                if (allowed && viewModel.location.value == null) acquireLocation()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -355,24 +375,15 @@ internal fun CustomerP18Results(
     }
     val locationLauncher=rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()) { grants ->
-        if(grants.values.any{it}) {
-            scope.launch {
-                runCatching {AndroidNearbyLocationSource(context).currentLocation()}
-                    .onSuccess { viewModel.setLocation(it);locationFailed=false }
-                    .onFailure { locationFailed=true }
-            }
-        }
+        if(grants.values.any{it}) acquireLocation()
     }
     fun requestLocation() {
         val granted=ContextCompat.checkSelfPermission(context,
             Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
-        if(granted) scope.launch {
-            runCatching {AndroidNearbyLocationSource(context).currentLocation()}
-                .onSuccess { viewModel.setLocation(it);locationFailed=false }
-                .onFailure { locationFailed=true }
-        } else locationLauncher.launch(arrayOf(
+        if(granted) acquireLocation()
+        else locationLauncher.launch(arrayOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION))
     }
