@@ -41,6 +41,7 @@ import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.ui.common.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
@@ -93,6 +94,7 @@ fun OwnerOnboardingScreen(
     val bars=snapshot?.bars.orEmpty()
     val candidates=snapshot?.existingBarCandidates.orEmpty()
     val ctx=LocalContext.current
+    val submitScope=rememberCoroutineScope()
     var screen by rememberSaveable { mutableStateOf(if(startRegistration)RegPage.INTRO else RegPage.HOME) }
     var history by rememberSaveable { mutableStateOf(listOf<String>()) }
     var inputMethod by rememberSaveable { mutableStateOf("manual") }
@@ -229,15 +231,36 @@ fun OwnerOnboardingScreen(
 
     LaunchedEffect(screen) {
         if(screen==RegPage.READING){
-            delay(1400) // ACTION_FIRST v4 HTML reading animation            // Explicit deterministic DEMO fixture; never claim results were derived from the photo.
-            val current=(viewModel.state.value as? MockOwnerLoadState.Ready)?.snapshot?.registrationDraft
-                ?: (viewModel.state.value as? MockOwnerLoadState.Empty)?.snapshot?.registrationDraft
-                ?: draft
-            save(current.copy(businessNumberDigits="1234567891",representativeName="김민준",
-                openingDateIso="2019-05-14",proposedBarName="몰트 앤 무드"))
-            go(RegPage.BIZCHECK)
+            val current=latestDraft() ?: draft
+            val uri=current.certificatePhoto?.uri
+            try {
+                val extracted=uri?.let { viewModel.readBusinessCertificateLive(it) }
+                if(extracted!=null) {
+                    save(current.copy(
+                        businessNumberDigits=extracted.businessRegistrationNumber
+                            ?.filter(Char::isDigit) ?: current.businessNumberDigits,
+                        representativeName=extracted.representativeName ?: current.representativeName,
+                        openingDateIso=extracted.openingDate ?: current.openingDateIso,
+                        proposedBarName=extracted.businessName ?: current.proposedBarName,
+                        proposedBarAddress=extracted.address ?: current.proposedBarAddress,
+                    ))
+                } else {
+                    // Retain deterministic screenshots for direct MockRepository tests only.
+                    delay(1400)
+                    save(current.copy(businessNumberDigits="1234567891",
+                        representativeName="김민준",openingDateIso="2019-05-14",
+                        proposedBarName="몰트 앤 무드"))
+                }
+                go(RegPage.BIZCHECK)
+            } catch(e: Exception) {
+                go(RegPage.BIZCHECK)
+                error=e.message ?: "사업자등록증을 읽지 못했어요. 직접 입력해 주세요."
+            }
         } else if(screen==RegPage.VERIFYING){
-            delay(1300);go(RegPage.VERIFIED) // ACTION_FIRST v4 HTML verifying animation
+            // The actual NTS verification happens on POST /api/owner-applications.
+            delay(350)
+            verify=VerifyFixture.UNAVAILABLE
+            go(RegPage.VERIFIED)
         }
     }
     LaunchedEffect(snapshot?.registrationDraft!=null,startRegistration) {
@@ -322,9 +345,16 @@ fun OwnerOnboardingScreen(
             RegPage.REVIEW->{
                 if(!busy){
                     busy=true
-                    try{viewModel.submitRegistrationDraftForFixture();history=emptyList();screen=RegPage.DONE}
-                    catch(e:Exception){error=e.message}
-                    finally{busy=false}
+                    submitScope.launch {
+                        try {
+                            viewModel.submitRegistrationDraftLive()
+                            history=emptyList()
+                            screen=RegPage.DONE
+                            error=null
+                        } catch(e: Exception) {
+                            error=e.message ?: "신청을 접수하지 못했어요."
+                        } finally { busy=false }
+                    }
                 }
             }
             RegPage.DONE->onBack()
