@@ -627,7 +627,7 @@ fun OwnerOnboardingScreen(
                         Spacer(Modifier.height(0.dp))
                         RegistrationInput(draft.proposedBarAddress,{
                             save(draft.copy(proposedBarAddress=it.take(500)))
-                        },"도로명 주소 또는 건물명과 주소를 직접 입력해 주세요",
+                        },"도로명 주소 또는 건물명 입력",
                             label="주소",tag="registration-address")
                         RegistrationInput(draft.proposedBarAddressDetail,{
                             save(draft.copy(proposedBarAddressDetail=it))
