@@ -58,6 +58,7 @@ import com.zerotoone.bottlemap.network.SearchBarsResponseDto
 import com.zerotoone.bottlemap.network.SearchResultDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
+import com.zerotoone.bottlemap.ui.common.servingDisplayLabel
 import com.zerotoone.bottlemap.ui.common.BmIconId
 import com.zerotoone.bottlemap.ui.common.GlassFillLoading
 import kotlinx.coroutines.CancellationException
@@ -193,7 +194,7 @@ internal fun P18BarRow(
                     Text(p18Price(p18EffectivePrice(serving.priceKrw,serving.discount)),
                         color=P18Text,
                         fontWeight=FontWeight.SemiBold,fontSize=16.sp)
-                    Text(serving.pourMl?.let{"${it}ml"} ?: serving.optionLabel.orEmpty(),
+                    Text(servingDisplayLabel(serving.pourMl,serving.optionLabel),
                         color=P18Muted,fontSize=13.sp)
                 } else Text("가격·용량 정보 없음",color=P18Muted,fontSize=13.sp)
             }
@@ -252,6 +253,10 @@ internal fun CustomerP18Results(
     val knownTags by viewModel.barTags.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val locationPermissionGranted = ContextCompat.checkSelfPermission(context,
+        Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(context,
+            Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
     var chooseQuery by rememberSaveable(initialQuery) { mutableStateOf(initialQuery.orEmpty()) }
     var focusRequest by remember { mutableIntStateOf(0) }
     var locationFailed by rememberSaveable { mutableStateOf(false) }
@@ -443,7 +448,8 @@ internal fun CustomerP18Results(
                                 style=MaterialTheme.typography.headlineSmall,fontSize=24.sp)
                         }
                     }
-                    if(userLocation==null) {
+                    if(userLocation==null &&
+                        (!locationPermissionGranted || locationFailed)) {
                         P18LocationBanner(::requestLocation,
                             Modifier.padding(horizontal=20.dp,vertical=10.dp),
                             locationFailed=locationFailed)
@@ -504,7 +510,7 @@ private fun P18ResultsMap(
                 items.firstOrNull{it.barId==id}?.let{row->
                     p18Representative(row.options)?.let{ option->
                         p18Price(p18EffectivePrice(option.priceKrw,option.discount))+" · "+
-                            (option.pourMl?.let{"${it}ml"}?:option.optionLabel.orEmpty())
+                            (servingDisplayLabel(option.pourMl,option.optionLabel))
                     }
                 }
             })
@@ -566,7 +572,7 @@ private fun P18ResultsMap(
                             verticalAlignment=Alignment.CenterVertically) {
                             Text(p18Price(p18EffectivePrice(serving.priceKrw,serving.discount)),
                                 color=P18Text,fontSize=16.sp,fontWeight=FontWeight.SemiBold)
-                            Text(serving.pourMl?.let{"${it}ml"}?:serving.optionLabel.orEmpty(),
+                            Text(servingDisplayLabel(serving.pourMl,serving.optionLabel),
                                 color=P18Muted,fontSize=13.sp)
                         }
                         Text("메뉴 ${p18MenuUpdated(selectedItem.menuUpdatedAt)} 기준",
