@@ -230,15 +230,19 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
       # Debug builds are signed with this keystore. Its SHA-1 (Google sign-in) and key hash
       # (Kakao Map) are already registered; a runner would otherwise create a new key each run.
+      # AGP 9 uses $XDG_CONFIG_HOME/.android before ~/.android when that folder exists, as it can
+      # on GitHub runners, so ANDROID_USER_HOME, which AGP checks first, points at the keystore.
       - name: Restore registered debug keystore
         shell: bash
         env:
           ANDROID_DEBUG_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
         run: |
-          keystore="${ANDROID_USER_HOME:-$HOME/.android}/debug.keystore"
-          mkdir -p "$(dirname "$keystore")"
+          android_user_home="${ANDROID_USER_HOME:-$HOME/.android}"
+          keystore="$android_user_home/debug.keystore"
+          mkdir -p "$android_user_home"
           printf '%s' "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$keystore"
           chmod 600 "$keystore"
+          echo "ANDROID_USER_HOME=$android_user_home" >> "$GITHUB_ENV"
           echo "DEBUG_KEYSTORE=$keystore" >> "$GITHUB_ENV"
       - name: Build debug APK for the deployed server
         env:
