@@ -20,45 +20,58 @@ def schema():
         ("get", "/api/search/bar-names", {"422", "500"}),
         ("get", "/api/search/map-bars", {"422", "500"}),
         ("get", "/api/search/popular-products", {"422", "500"}),
+        ("patch", "/api/me", {"400", "401", "404", "422", "500", "503"}),
         ("get", "/api/bars/{barId}/menu", {"401", "404", "422", "500"}),
         ("get", "/api/bars", {"401", "403", "422", "500", "503"}),
+        ("delete", "/api/bars/{barId}/owner", {"401", "403", "404", "422", "500", "503"}),
         ("get", "/api/bars/{barId}/menu-imports", {"401", "403", "404", "422", "500", "503"}),
         (
             "post",
             "/api/bars/{barId}/menu-imports",
-            {"401", "403", "404", "409", "413", "415", "422", "500", "503"},
+            {"400", "401", "403", "404", "409", "413", "415", "422", "500", "503"},
         ),
         ("get", "/api/menu-imports/{menuImportId}", {"401", "403", "404", "422", "500", "503"}),
         (
             "post",
             "/api/menu-imports/{menuImportId}/review-and-apply",
-            {"401", "403", "404", "409", "422", "500", "503"},
+            {"400", "401", "403", "404", "409", "422", "500", "503"},
         ),
         ("get", "/api/catalog/brands", {"401", "403", "422", "500", "503"}),
         ("get", "/api/catalog/products", {"401", "403", "422", "500", "503"}),
         (
             "post",
             "/api/bars/{barId}/photos",
-            {"401", "403", "404", "409", "413", "415", "422", "500", "503"},
+            {"400", "401", "403", "404", "409", "413", "415", "422", "500", "503"},
         ),
         ("delete", "/api/bars/{barId}/photos/{photoId}", {"401", "403", "404", "422", "500", "503"}),
-        ("put", "/api/bars/{barId}/photos/order", {"401", "403", "404", "409", "422", "500", "503"}),
+        ("put", "/api/bars/{barId}/photos/order", {"400", "401", "403", "404", "409", "422", "500", "503"}),
         ("get", "/api/bar-photos/{photoId}", {"404", "422", "500"}),
         ("get", "/api/bar-photos/{photoId}/thumbnail", {"404", "422", "500"}),
         (
             "post",
             "/api/owner-applications/business-certificate-ocr",
-            {"401", "413", "415", "422", "429", "500", "503"},
+            {"400", "401", "413", "415", "422", "429", "500", "503"},
         ),
     ],
 )
 def test_error_responses_use_the_common_format(schema, method, path, statuses):
     responses = schema["paths"][path][method]["responses"]
 
-    documented = {status for status in responses if status not in {"200", "201", "202"}}
+    documented = {status for status in responses if status not in {"200", "201", "202", "204"}}
     assert documented == statuses
     for status in statuses:
         assert responses[status]["content"]["application/json"]["schema"] == {"$ref": ERROR_REF}
+
+
+def test_every_operation_with_a_body_documents_invalid_request(schema):
+    """A body that cannot be read is 400 INVALID_REQUEST on any route that takes one (spec 9.2)."""
+    operations = [operation for path in schema["paths"].values() for operation in path.values()]
+    with_body = [operation for operation in operations if "requestBody" in operation]
+
+    assert with_body
+    for operation in with_body:
+        assert operation["responses"]["400"]["content"]["application/json"]["schema"] == {"$ref": ERROR_REF}
+    assert not any("400" in operation["responses"] for operation in operations if "requestBody" not in operation)
 
 
 def test_timestamps_are_documented_as_date_time(schema):

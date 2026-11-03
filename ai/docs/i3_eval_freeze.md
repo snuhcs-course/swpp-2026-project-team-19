@@ -37,6 +37,7 @@
 |---|---|---|
 | 하이브리드 추출 (CLOVA OCR + `gemini-3.5-flash-lite`, thinking medium, 프롬프트 `hybrid-v1`) = 배포 서버 설정 | `5d49c8a` (프롬프트 `77695dc`) | `backend/app/extraction/hybrid.py`, `backend/app/extraction/hybrid_prompt_v1.md` |
 | 채점 | `5d49c8a`의 채점 로직 (이 PR은 `score.py`에 `--set i3` 라벨 세트만 추가) | `ai/eval/score.py`, `ai/eval/e2e_match.py` |
+- **#77 이후 `hybrid.py`:** #77(`af4aadf`)은 `hybrid.py` 모듈 docstring 한 줄만 바꿨다(docstring을 뺀 AST는 `5d49c8a`와 같다). 같은 동결 코드로 보고, `p30_extract.py`는 그 파일의 SHA-256(`0c9debfe…`, CRLF는 LF로 읽음)만 `FROZEN_CODE_EQUIVALENT`로 추가로 받는다. 그 밖의 변경은 docstring만 바꿔도 멈춘다.
 
 - **반복:** 33장 전부 × 3회(r1–r3). 결과를 보고 재실행하거나 회차를 고르지 않는다. API 오류로 응답이 없을 때만 기존 재시도 정책을 따른다. 대표값은 3회 평균이고, 최솟값과 최댓값도 같이 적는다.
 - **지표와 합격 기준** (Requirements NFR, "by Iteration 3"):

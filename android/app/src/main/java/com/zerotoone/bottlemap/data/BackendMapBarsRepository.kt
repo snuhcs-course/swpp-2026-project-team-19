@@ -96,6 +96,7 @@ internal fun MapBarsResponseDto.toMapBars(): List<MapBar> {
         val coord = NearbyCoordinate(dto.latitude, dto.longitude)
         require(coord.isValid()) { "Map bar invalid coordinates" }
         if (!ids.add(dto.barId)) return@mapNotNull null
-        MapBar(dto.barId, dto.name, dto.address, coord, dto.menuUpdatedAt)
+        MapBar(dto.barId, dto.name, dto.address, coord, dto.menuUpdatedAt,
+            dto.coverThumbnailUrl)
     }
 }

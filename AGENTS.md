@@ -4,7 +4,7 @@ Instructions for AI coding agents working in this repository, shared by the Andr
 
 BottleMap is an Android app that finds bars serving a specific whisky. Bar owners or operators upload a menu photo, AI extracts the menu, items are matched to a whisky catalogue, a person reviews and publishes the result, and customers search the published menus.
 
-Bar owners onboard themselves: they log in with Google, apply to own an existing bar or to register a new one, and an operator approves the application. Operators can still create bars directly, but as the service grows, bars are expected to come in through owner applications rather than one by one from operators.
+Bar owners onboard themselves: they log in with Google, apply to own an existing bar or to register a new one, and an operator approves the application. Bars come in through these applications rather than one by one from operators; a direct bar-creation API for operators (spec 3.5) is not planned for now.
 
 ## Repository layout
 

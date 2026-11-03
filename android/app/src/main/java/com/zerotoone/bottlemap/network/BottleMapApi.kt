@@ -47,6 +47,21 @@ interface BottleMapApi {
         @Query("radiusMeters") radiusMeters: Int = 500,
     ): NearbyBarsResponseDto
 
+    // Confirmed API spec §3.17: public, guest-safe, search-count-ranked cards.
+    @GET("api/search/popular-products")
+    suspend fun popularProducts(@Query("limit") limit: Int = 10): PopularProductsResponseDto
+
+    // §3.10: only one of query/productId is sent. No extra ad-hoc endpoint.
+    @GET("api/search/bars")
+    suspend fun searchProductP18(
+        @Query("query") query: String? = null,
+        @Query("productId") productId: String? = null,
+        @Query("lat") latitude: Double? = null,
+        @Query("lng") longitude: Double? = null,
+        @Query("source") source: String = "input",
+        @Query("limit") limit: Int = 50,
+    ): SearchBarsResponseDto
+
     @GET("api/search/bars")
     suspend fun searchBars(
         @Query("query") query: String,

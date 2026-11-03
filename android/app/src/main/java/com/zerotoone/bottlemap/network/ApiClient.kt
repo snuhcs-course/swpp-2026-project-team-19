@@ -42,7 +42,8 @@ object ApiClient {
         // Backend access logs are a separate concern (API spec 3.12.3).
         .addInterceptor { chain ->
             if (chain.request().url.encodedPath == "/api/search/nearby-bars" ||
-                chain.request().url.encodedPath == "/api/search/map-bars"
+                chain.request().url.encodedPath == "/api/search/map-bars" ||
+                chain.request().url.encodedPath == "/api/search/bars"
             ) {
                 chain.proceed(chain.request())
             } else {

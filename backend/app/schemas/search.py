@@ -48,9 +48,10 @@ class SearchResultItem(BaseModel):
 
 class SearchBarsResponse(BaseModel):
     query: str | None = Field(description="The query after trimming; null for a productId search")
-    matchType: Literal["alias_exact", "brand", "partial", "product", "none"] = Field(
+    matchType: Literal["alias_exact", "brand", "partial", "similar", "product", "none"] = Field(
         description="The resolution step that produced the products; `product` for a productId search "
-        "that found its product"
+        "that found its product. `similar` (only while the server has SEARCH_SIMILAR_ENABLED) means no "
+        "alias matched and the products are the most similar names, not the product the customer typed"
     )
     matchedProducts: list[MatchedProductResponse] = Field(
         description="Every product the query resolved to, including ones no bar sells now. "

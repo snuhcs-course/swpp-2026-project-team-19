@@ -189,3 +189,18 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 - **출처 태그:** 생성기가 그대로 다시 만든 표기인데 카탈로그에는 한 바의 메뉴 표기(`menu:<바>`)로만 있던 별칭 74개에는 새 행 대신 `sources`에 이 출처만 더했습니다. 바 하나를 뺀 평가(`--exclude-alias-source menu:<바>`)에서 생성으로도 나오는 표기가 빠지지 않게 하려는 것이고, 적재기는 `sources`를 읽지 않으므로 DB에는 영향이 없습니다.
 - **검증:** 상품 간·브랜드 간 정규화 충돌 0, 같은 상품 안 정규화 중복 210(변화 없음, 적재 시 skip), id 유일. 시드 dry-run(v2.2 적재 후): brand_aliases inserted 37, product_aliases inserted 1261. `test_db_catalog`의 219개 라벨 결과(정확 215, 미매칭 4)는 그대로입니다.
 - **dev 측정 (바 하나씩 뺀 카탈로그, 위스키복춘·서로상·미라보·수이·오드비 835줄):** 메뉴 가져오기의 매칭 규칙(S1–S3)으로 정확 일치 723 → 734(새 행만으로는 725), 정확 별칭 일치만으로는 181 → 216(늘어난 35줄은 모두 출처 태그가 붙은 표기). 새 오매칭 0, 맞던 줄이 틀려진 경우 0. 남은 미매칭은 대부분 단어를 줄인 표기(`조니블루`, `러셀 싱글베럴`), 오탈자(`컨타루반`), 번역(`사부로마루5 교황`)이라 음역 변형 생성으로는 잡히지 않습니다.
+
+## 14. I3 테스트 바 데모 데이터 (2026-11-03)
+
+휴리스틱 평가에서 고객 검색·지도에 I3 테스트 바 8곳이 보이도록, 사람이 검수한 I3 정답(`eval/labels_i3_v1.json`, `eval/match_gold_i3_v1.json`)으로 게시 메뉴를 만들었습니다. 만드는 법은 I2 데모 메뉴(`build_menu_seeds_demo.py`)와 같고, 생성기는 `build_menu_seeds_demo_i3.py`입니다 (`cd backend && uv run --no-sync python ../ai/catalog/build_menu_seeds_demo_i3.py`). 평가 동결 파일(`catalog_v2_service.json`, `ai/eval/`, `eval/`, `backend/app/matching/`)은 바꾸지 않았습니다.
+
+| 파일 | 내용 | 적재 |
+|---|---|---|
+| `catalog_v2_service_i3_additions.json` | 서비스 카탈로그에 없는 I3 정답 새 상품 61개(새 브랜드 30개). 평가 `--catalog full`이 더하는 상품과 같고, 별칭은 표준 영문명 하나(새 브랜드는 영문 브랜드명 하나). id는 8장 규칙 | O (`seed_catalog.py` 기본값) |
+| `bars_v3.json` | `bars`: v2 7곳 + 좌표를 확인한 I3 바 2곳(테일오브테일스, 연림 서울대입구역점). `pending_bars`: 좌표를 확인하지 못한 6곳 (좌표 null, 적재 안 함) | O (`bars`만) |
+| `menu_seed_<bar>_demo_v1.json` | 적재 가능한 I3 바 2곳의 게시 메뉴 | O (Seed catalog `demo-menus-*`) |
+| `pending_i3/menu_seed_<bar>_demo_v1.json` | 보류 6곳의 게시 메뉴. `demo-menus-*`의 glob에 걸리지 않는 위치 | X |
+
+- **줄 처리:** `unknown`·`non_whisky` 줄은 건너뜁니다. `both:` 줄(한 줄에 상품 두세 개, 예: `Wild Turkey 81 / 101`)은 각 상품에 그 줄의 옵션을 줍니다(I2 데모에는 없던 경우). 가격이 null인 줄은 옵션 없이 항목만 둡니다.
+- **보류 바를 넣는 법:** 카카오맵에서 주소·좌표를 확인해 `pending_bars`의 항목을 `bars`로 옮기고 생성기를 다시 돌리면 메뉴 파일이 `ai/catalog/`로 나옵니다(`pending_i3/`의 옛 파일은 지움).
+- **적재 순서:** 배포 후 Seed catalog `dry-run` → `apply` → `demo-menus-dry-run` → `demo-menus-apply`. `demo-menus-*`는 기존 데모 4곳(위스키복춘, 미라보, 수이, 오드비)의 메뉴판도 다시 덮어씁니다.

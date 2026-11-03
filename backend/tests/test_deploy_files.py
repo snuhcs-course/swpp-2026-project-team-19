@@ -30,6 +30,7 @@ def test_production_env_template_is_plain_key_value():
 
     assert values["IMAGE_STORAGE"] == "s3"
     assert values["POSTGRES_SSLMODE"] == "require"
+    assert (values["MATCHING_LLM_ENABLED"], values["MATCHING_LLM_MODE"]) == ("false", "m3a")
 
 
 @pytest.fixture

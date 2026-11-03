@@ -99,7 +99,6 @@ fun OwnerOnboardingScreen(
     var verify by rememberSaveable { mutableStateOf(VerifyFixture.MATCHED) }
     var showCertificateSheet by remember { mutableStateOf(false) }
     var certificateCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
-    var showAddressSheet by remember { mutableStateOf(false) }
     var showMenuPhotoSource by remember { mutableStateOf(false) }
     var menuCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
     var cancelId by remember { mutableStateOf<String?>(null) }
@@ -408,22 +407,6 @@ fun OwnerOnboardingScreen(
             menuPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
     )
-    if(showAddressSheet)AlertDialog(onDismissRequest={showAddressSheet=false},
-        title={Text("주소 검색 · Mock 예시")},
-        text={
-            Column {
-                listOf("서울특별시 관악구 봉천로 12길 8",
-                    "서울특별시 관악구 봉천로 12길 10").forEach{ addr->
-                    TextButton(onClick={
-                        save(draft.copy(proposedBarAddress=addr))
-                        showAddressSheet=false
-                    }){Text(addr)}
-                }
-                Text("실제 주소 검색 API는 연결되지 않았습니다.")
-            }
-        },
-        confirmButton={TextButton(onClick={showAddressSheet=false}){Text("닫기")}})
-
     Column(Modifier.fillMaxSize().background(RegistrationV4.bg).imePadding()) {
         if(screen!=RegPage.DONE) {
             if(screen==RegPage.HOME || screen==RegPage.VIEW_APPLICATION)
@@ -642,21 +625,10 @@ fun OwnerOnboardingScreen(
                         OwnerV4Question("매장 주소를\n알려주세요",
                             "손님이 지도에서 찾을 수 있게 정확히 입력해 주세요.")
                         Spacer(Modifier.height(0.dp))
-                        Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
-                            Text("주소",color=RegistrationV4.secondary,fontSize=12.sp)
-                            Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
-                                .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
-                                .border(1.dp,RegistrationV4.border,RoundedCornerShape(12.dp))
-                                .ownerQuietClick{showAddressSheet=true}
-                                .padding(horizontal=16.dp),
-                                verticalAlignment=Alignment.CenterVertically,
-                                horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                                RegistrationGlyph("search",color=RegistrationV4.text)
-                                Text(draft.proposedBarAddress.ifEmpty{"도로명, 건물명으로 검색"},
-                                    color=if(draft.proposedBarAddress.isEmpty())RegistrationV4.muted
-                                    else RegistrationV4.text,fontSize=16.sp)
-                            }
-                        }
+                        RegistrationInput(draft.proposedBarAddress,{
+                            save(draft.copy(proposedBarAddress=it.take(500)))
+                        },"도로명 주소 또는 건물명 입력",
+                            label="주소",tag="registration-address")
                         RegistrationInput(draft.proposedBarAddressDetail,{
                             save(draft.copy(proposedBarAddressDetail=it))
                         },"예: 2층",label="상세 주소",tag="registration-address-detail")

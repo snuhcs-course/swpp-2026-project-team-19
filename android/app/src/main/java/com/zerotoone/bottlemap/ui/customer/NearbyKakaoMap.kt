@@ -102,6 +102,21 @@ fun NearbyKakaoMap(
     onMapViewChanged: (MapView?) -> Unit,
     onMapTouch: () -> Unit = {},
     modifier: Modifier = Modifier,
+    /** P18 discovery and product maps use the compact HTML card marker. */
+    p18Markers: Boolean = false,
+    /** No blue "current location" for a default map center or bar coordinate. */
+    showOriginMarker: Boolean = true,
+    p18MarkerSubtitle: (String) -> String? = { null },
+    /** Data-only marker refresh: discount boundary updates without moving camera. */
+    markerDataRevision:Long=0L,
+    /** Browse-only: title immediately above map pin, no information bubble. */
+    p18SimplePins: Boolean = false,
+    /** Exact prior Customer/Owner inline pin; unlike 05 Explore pins. */
+    p18InlinePins: Boolean = false,
+    /** Explicit user's GPS coordinate, independent of the initial map camera. */
+    userLocation: NearbyCoordinate? = null,
+    /** A deliberate selected-card tap may zoom; normal pin selection never moves the camera. */
+    focusZoomLevel: Int? = null,
 ) {
     if (BuildConfig.KAKAO_NATIVE_APP_KEY.isBlank()) {
         Text("Kakao Native App Key 설정이 필요합니다.", modifier = modifier.padding(16.dp))
@@ -114,6 +129,7 @@ fun NearbyKakaoMap(
         var nativeMap by remember { mutableStateOf<KakaoMap?>(null) }
         val markers = remember { linkedMapOf<String, Pair<NearbyCoordinate, Label>>() }
         var placeLabel by remember { mutableStateOf<Label?>(null) }
+        var userLabel by remember { mutableStateOf<Label?>(null) }
         var requestViewportSnapshot by remember { mutableStateOf<(() -> Unit)?>(null) }
         val currentSelect = rememberUpdatedState(onSelectBar)
         val currentMoving = rememberUpdatedState(onMapCameraMoving)
@@ -124,6 +140,7 @@ fun NearbyKakaoMap(
         val currentMapTouch = rememberUpdatedState(onMapTouch)
         val currentCovered = rememberUpdatedState(listCovered)
         val ctx = LocalContext.current
+        val markerDensity = ctx.resources.displayMetrics.density
         val owner = LocalLifecycleOwner.current
         val view = remember {
             try { MapView(ctx) } catch (_: Exception) { null }
@@ -137,7 +154,7 @@ fun NearbyKakaoMap(
         }
 
         // In-place, idempotent diff; no duplicate labels across map pans or API replies.
-        LaunchedEffect(nativeMap, bars) {
+        LaunchedEffect(nativeMap, bars,markerDataRevision) {
             val map = nativeMap ?: return@LaunchedEffect
             val layer = map.labelManager?.layer ?: return@LaunchedEffect
             val current = bars.filter { it.barId.isNotBlank() && it.location.isValid() &&
@@ -154,17 +171,53 @@ fun NearbyKakaoMap(
                     val label = layer.addLabel(
                         LabelOptions.from(id,
                             LatLng.from(bar.location.latitude, bar.location.longitude))
-                            .setStyles(nearbyMarkerStyle(id == selectedBarId))
+                            .setStyles(when {
+                                p18SimplePins -> p18SimpleMarkerStyle(id == selectedBarId,
+                                    bar.name,markerDensity)
+                                p18InlinePins -> p18InlineMarkerStyle(id == selectedBarId,
+                                    bar.name,markerDensity)
+                                p18Markers -> p18CardMarkerStyle(id == selectedBarId,bar.name,
+                                    p18MarkerSubtitle(id),markerDensity)
+                                else -> nearbyMarkerStyle(id == selectedBarId,markerDensity)
+                            })
                             .setClickable(true)
                             .setTag(id)
-                            .setTexts(LabelTextBuilder().setTexts(bar.name)),
+                            .apply {
+                                if(!p18Markers && !p18SimplePins && !p18InlinePins)
+                                    setTexts(LabelTextBuilder().setTexts(bar.name))
+                            },
                     )
                     if (label != null) markers[id] = bar.location to label
                 }
             }
             markers.forEach { (id, stored) ->
-                stored.second.setStyles(nearbyMarkerStyle(id == selectedBarId))
+                stored.second.setStyles(when {
+                    p18SimplePins -> p18SimpleMarkerStyle(id == selectedBarId,
+                        current[id]?.name ?: id,markerDensity)
+                    p18InlinePins -> p18InlineMarkerStyle(id == selectedBarId,
+                        current[id]?.name ?: id,markerDensity)
+                    p18Markers -> p18CardMarkerStyle(id == selectedBarId,
+                        current[id]?.name ?: id,p18MarkerSubtitle(id),markerDensity)
+                    else -> nearbyMarkerStyle(id == selectedBarId,markerDensity)
+                })
                 stored.second.invalidate()
+            }
+        }
+
+        // GPS permission may be granted after native map initialization.
+        // Keep blue dot in sync with GPS and remove it promptly if permission is revoked.
+        LaunchedEffect(nativeMap, showOriginMarker, userLocation, origin) {
+            userLabel?.remove()
+            userLabel = null
+            val map = nativeMap ?: return@LaunchedEffect
+            val point = if(showOriginMarker) (userLocation ?: origin) else null
+            if(point != null && point.isValid()) {
+                userLabel = map.labelManager?.layer?.addLabel(
+                    LabelOptions.from("__user_location__",
+                        LatLng.from(point.latitude,point.longitude))
+                        .setStyles(userLocationStyle())
+                        .setClickable(false),
+                )
             }
         }
 
@@ -201,7 +254,16 @@ fun NearbyKakaoMap(
         // new nearby HTTP result.
         LaunchedEffect(nativeMap, selectedBarId) {
             if (nativeMap != null) markers.forEach { (id, pair) ->
-                pair.second.setStyles(nearbyMarkerStyle(id == selectedBarId))
+                pair.second.setStyles(when {
+                    p18SimplePins -> p18SimpleMarkerStyle(id == selectedBarId,
+                        bars.firstOrNull{it.barId==id}?.name ?: id,markerDensity)
+                    p18InlinePins -> p18InlineMarkerStyle(id == selectedBarId,
+                        bars.firstOrNull{it.barId==id}?.name ?: id,markerDensity)
+                    p18Markers -> p18CardMarkerStyle(id == selectedBarId,
+                        bars.firstOrNull{it.barId==id}?.name ?: id,
+                        p18MarkerSubtitle(id),markerDensity)
+                    else -> nearbyMarkerStyle(id == selectedBarId,markerDensity)
+                })
                 pair.second.invalidate()
             }
         }
@@ -215,6 +277,7 @@ fun NearbyKakaoMap(
             currentMoving.value()
             map.moveCamera(CameraUpdateFactory.newCenterPosition(
                 LatLng.from(target.location.latitude, target.location.longitude),
+                focusZoomLevel?.coerceIn(6,21) ?: map.zoomLevel,
             ))
             requestViewportSnapshot?.invoke()
             onFocusApplied()
@@ -355,12 +418,6 @@ fun NearbyKakaoMap(
                                     try {
                                         val layer = map.labelManager?.layer
                                             ?: throw IllegalStateException("No Kakao label layer")
-                                        layer.addLabel(
-                                            LabelOptions.from("__user_location__",
-                                                LatLng.from(origin.latitude, origin.longitude))
-                                                .setStyles(userLocationStyle())
-                                                .setClickable(false),
-                                        )
                                         map.setOnLabelClickListener(
                                             object : KakaoMap.OnLabelClickListener {
                                                 override fun onLabelClicked(
@@ -502,30 +559,201 @@ private fun userLocationStyle(): LabelStyle {
     return LabelStyle.from(bitmap).setAnchorPoint(0.5f, 0.5f)
 }
 
-/** Shared icon anchor (bottom-center): no position drift when zooming. */
-private fun nearbyMarkerStyle(selected: Boolean): LabelStyle {
-    val pin = Bitmap.createBitmap(40, 52, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(pin)
-    val path = Path().apply {
-        moveTo(20f, 51f)
-        cubicTo(10f, 38f, 4f, 26f, 4f, 20f)
-        cubicTo(4f, 10f, 11f, 4f, 20f, 4f)
-        cubicTo(29f, 4f, 36f, 10f, 36f, 20f)
-        cubicTo(36f, 26f, 30f, 38f, 20f, 51f)
-        close()
+/**
+ * All non-Explore native map pins use the exact geometry of the Owner
+ * customer-preview's location icon. Explore's selected/unselected drop is
+ * intentionally the ONLY exception.
+ */
+private fun nearbyMarkerStyle(selected:Boolean,density:Float):LabelStyle {
+    val d=density.coerceAtLeast(.5f)
+    val width=(28f*d).toInt().coerceAtLeast(1)
+    val height=(28f*d).toInt().coerceAtLeast(1)
+    val image=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+    val canvas=Canvas(image)
+    val u=d
+    val tint=if(selected) Color.rgb(201,157,107) else Color.rgb(199,187,176)
+    val paint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=tint
+        style=Paint.Style.STROKE
+        strokeWidth=1.8f*d
+        strokeCap=Paint.Cap.ROUND
+        strokeJoin=Paint.Join.ROUND
     }
-    canvas.drawPath(
-        path,
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = if (selected) Color.rgb(214, 183, 126) else Color.rgb(63, 91, 122)
-        },
-    )
-    canvas.drawCircle(
-        20f, 20f, 6f,
-        Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE },
-    )
-    return LabelStyle.from(pin)
-        .setAnchorPoint(0.5f, 1.0f)
-        .setTextStyles(18, Color.WHITE, 2, Color.rgb(12, 22, 38))
+    val path=Path().apply {
+        moveTo(14*u,24*u)
+        cubicTo(11*u,20*u,6*u,15*u,6*u,11*u)
+        cubicTo(6*u,6*u,9*u,4*u,14*u,4*u)
+        cubicTo(19*u,4*u,22*u,6*u,22*u,11*u)
+        cubicTo(22*u,15*u,17*u,20*u,14*u,24*u)
+    }
+    canvas.drawPath(path,paint)
+    canvas.drawCircle(14*u,11*u,2.5f*u,paint)
+    return LabelStyle.from(image).setAnchorPoint(.5f,1f)
+        .setTextStyles(18,Color.WHITE,2,Color.rgb(12,22,38))
 }
 
+/** Search-result map: content-width speech balloon, compact text, no image.
+ * The right inset is always 5dp; grow with the full price/volume text rather
+ * than cropping it to a fixed marker size. A tail points at the bar coordinate.
+ */
+private fun p18CardMarkerStyle(
+    selected: Boolean, name: String, secondary: String?, density: Float,
+): LabelStyle {
+    val d = density.coerceAtLeast(.5f)
+    val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(242, 237, 232)
+        isFakeBoldText = true
+        textSize = 10f*d
+    }
+    val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(207, 194, 184)
+        textSize = 10f*d
+    }
+    val maxTextWidth = 246f*d
+    fun fitText(raw: String, paint: Paint): String {
+        if(paint.measureText(raw)<=maxTextWidth)return raw
+        var shortened=raw
+        while(shortened.isNotEmpty() && paint.measureText(shortened+"…")>maxTextWidth)
+            shortened=shortened.dropLast(1)
+        return shortened+"…"
+    }
+    val first=fitText(name,titlePaint)
+    val second=secondary?.takeIf(String::isNotBlank)?.let{fitText(it,valuePaint)}
+    val width=(maxOf(titlePaint.measureText(first),
+        valuePaint.measureText(second.orEmpty())) + 10f*d).toInt()
+        .coerceAtLeast((32f*d).toInt())
+    val bubbleHeight=if(second!=null)35f*d else 23f*d
+    val height=(bubbleHeight+9f*d).toInt().coerceAtLeast(1)
+    val bitmap=Bitmap.createBitmap(width.coerceAtLeast(1),height,
+        Bitmap.Config.ARGB_8888)
+    val canvas=Canvas(bitmap)
+    val fill=Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.rgb(48,42,37)}
+    val border=Paint(Paint.ANTI_ALIAS_FLAG).apply{
+        color=if(selected)Color.rgb(201,157,107) else Color.rgb(164,125,82)
+        style=Paint.Style.STROKE
+        strokeWidth=(if(selected)1.6f else 1.2f)*d
+        strokeJoin=Paint.Join.ROUND
+    }
+    val bounds=android.graphics.RectF(1.2f*d,1.2f*d,
+        width-1.2f*d,bubbleHeight)
+    canvas.drawRoundRect(bounds,9f*d,9f*d,fill)
+    canvas.drawRoundRect(bounds,9f*d,9f*d,border)
+    val cx=width/2f
+    val tail=Path().apply {
+        moveTo(cx-5f*d,bubbleHeight-1f*d)
+        lineTo(cx,(bubbleHeight+8f*d))
+        lineTo(cx+5f*d,bubbleHeight-1f*d)
+        close()
+    }
+    canvas.drawPath(tail,fill)
+    canvas.drawPath(tail,border)
+    // Cover the tail/bubble seam to avoid a horizontal stroke through the pointer.
+    canvas.drawRect(cx-4f*d,bubbleHeight-2.5f*d,
+        cx+4f*d,bubbleHeight+.6f*d,fill)
+    canvas.drawText(first,5f*d,15.0f*d,titlePaint)
+    if(second!=null)canvas.drawText(second,5f*d,28.0f*d,valuePaint)
+    return LabelStyle.from(bitmap).setAnchorPoint(.5f,1f)
+}
+
+/** Browse-only marker inspired by the approved two-state pin reference:
+ * unselected = small dark pin/amber drop, selected = large amber pin/dark drop.
+ * Other surfaces use the regular Owner-preview location glyph.
+ */
+private fun p18SimpleMarkerStyle(selected:Boolean,name:String,density:Float):LabelStyle {
+    val d=density.coerceAtLeast(.5f)
+    val textPaint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(33,26,18)
+        textAlign=Paint.Align.CENTER
+        textSize=10f*d
+        isFakeBoldText=true
+    }
+    val displayName=name.take(20)+(if(name.length>20)"…" else "")
+    val width=(maxOf(38f,textPaint.measureText(displayName)/d+14f)*d)
+        .toInt().coerceAtLeast(1)
+    val pinWidth=if(selected)15f*d else 10.5f*d
+    val pinTop=22f*d
+    val pinBottom=if(selected)46f*d else 40f*d
+    val height=(pinBottom+1f*d).toInt().coerceAtLeast(1)
+    val bitmap=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+    val canvas=Canvas(bitmap)
+    val cx=width/2f
+    val gold=Paint(Paint.ANTI_ALIAS_FLAG).apply {color=Color.rgb(201,157,107)}
+    val edge=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(16,14,13)
+        strokeWidth=1.8f*d
+        style=Paint.Style.STROKE
+        strokeJoin=Paint.Join.ROUND
+    }
+    canvas.drawRoundRect(android.graphics.RectF(d,d,width-d,20f*d),
+        6f*d,6f*d,gold)
+    canvas.drawText(displayName,cx,14f*d,textPaint)
+    val w=pinWidth/2f
+    val pin=Path().apply {
+        moveTo(cx,pinBottom)
+        cubicTo(cx-w*.25f,pinBottom-4f*d,cx-w,pinTop+10f*d,cx-w,pinTop+8f*d)
+        cubicTo(cx-w,pinTop-2f*d,cx+w,pinTop-2f*d,cx+w,pinTop+8f*d)
+        cubicTo(cx+w,pinTop+10f*d,cx+w*.25f,pinBottom-4f*d,cx,pinBottom)
+        close()
+    }
+    val pinFill=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=if(selected)Color.rgb(201,157,107) else Color.rgb(48,42,37)
+    }
+    canvas.drawPath(pin,pinFill)
+    canvas.drawPath(pin,edge)
+    val drop=Path().apply {
+        val cy=pinTop+(if(selected)7f else 6.5f)*d
+        val r=if(selected)3.1f*d else 2.2f*d
+        moveTo(cx,cy-r*1.2f)
+        cubicTo(cx-r*.2f,cy-r*.7f,cx-r,cy, cx-r,cy+r*.3f)
+        cubicTo(cx-r,cy+r*1.5f,cx+r,cy+r*1.5f,cx+r,cy+r*.3f)
+        cubicTo(cx+r,cy,cx+r*.2f,cy-r*.7f,cx,cy-r*1.2f)
+        close()
+    }
+    canvas.drawPath(drop,Paint(Paint.ANTI_ALIAS_FLAG).apply{
+        color=if(selected)Color.rgb(21,19,17) else Color.rgb(201,157,107)
+    })
+    return LabelStyle.from(bitmap).setAnchorPoint(.5f,1f)
+}
+
+/** Previous inline detail and Owner preview marker, restored independently of Explore. */
+private fun p18InlineMarkerStyle(selected: Boolean,name: String,density: Float): LabelStyle {
+    val d=density.coerceAtLeast(.5f)
+    val title=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(33,26,18)
+        textAlign=Paint.Align.CENTER
+        textSize=10f*d
+        isFakeBoldText=true
+    }
+    val displayName=name.take(16)+(if(name.length>16)"…" else "")
+    val width=(maxOf(32f,title.measureText(displayName)/d+14f)*d)
+        .toInt().coerceAtLeast(1)
+    val height=(36f*d).toInt().coerceAtLeast(1)
+    val bitmap=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+    val canvas=Canvas(bitmap)
+    val cx=width/2f
+    val amber=Paint(Paint.ANTI_ALIAS_FLAG).apply {color=Color.rgb(201,157,107)}
+    val chip=android.graphics.RectF(1f*d,1f*d,width-1f*d,19f*d)
+    canvas.drawRoundRect(chip,6f*d,6f*d,amber)
+    canvas.drawText(displayName,cx,13.6f*d,title)
+    // Quarter-scale teardrop relative to the original 30dp-wide map pin.
+    val pinFill=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=if(selected)Color.rgb(201,157,107) else Color.rgb(55,46,40)
+    }
+    val pinOutline=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(201,157,107)
+        style=Paint.Style.STROKE
+        strokeWidth=1f*d
+    }
+    val pin=Path().apply {
+        moveTo(cx,35f*d)
+        cubicTo(cx-1.2f*d,32f*d,cx-4.5f*d,29f*d,cx-4.5f*d,26f*d)
+        cubicTo(cx-4.5f*d,19f*d,cx+4.5f*d,19f*d,cx+4.5f*d,26f*d)
+        cubicTo(cx+4.5f*d,29f*d,cx+1.2f*d,32f*d,cx,35f*d)
+        close()
+    }
+    canvas.drawPath(pin,pinFill)
+    canvas.drawPath(pin,pinOutline)
+    canvas.drawCircle(cx,25.8f*d,1.4f*d,
+        Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.WHITE})
+    return LabelStyle.from(bitmap).setAnchorPoint(.5f,1f)
+}

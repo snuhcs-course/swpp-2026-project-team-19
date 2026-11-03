@@ -345,7 +345,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `revoked_at` | `timestamptz`, nullable | `null` | 운영자가 관계를 해제한 시각이다. `null`이면 현재 업주다. |
 | `revoked_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 관계를 해제한 운영자다. |
 
-**핵심 제약:** 한 업장에는 현재 업주(`revoked_at`이 `null`인 행)가 최대 한 명이다. PostgreSQL 부분 unique 인덱스(`bar_id` WHERE `revoked_at IS NULL`)와 승인 시 업장 행 잠금으로 보장한다. 해제는 행을 지우지 않고 `revoked_at`을 기록해 이력을 남기며, `revoked_at`과 `revoked_by_user_id`는 함께 값이 있거나 함께 `null`이다. 업주가 되어도 `users.user_type`은 바뀌지 않는다.
+**핵심 제약:** 한 업장에는 현재 업주(`revoked_at`이 `null`인 행)가 최대 한 명이다. PostgreSQL 부분 unique 인덱스(`bar_id` WHERE `revoked_at IS NULL`)와 승인, 해제 시 업장 행 잠금으로 보장한다. 해제는 행을 지우지 않고 `revoked_at`을 기록해 이력을 남기며, `revoked_at`과 `revoked_by_user_id`는 함께 값이 있거나 함께 `null`이다. 업주가 되어도 `users.user_type`은 바뀌지 않는다.
 
 **필요한 이유:** 업주 권한은 업장마다 다르므로 전역 `user_type`으로 표현할 수 없다. 신청과 관계를 나누면 신청 이력(증빙, 거절 사유)과 현재 권한을 따로 관리할 수 있고, 권한 검사는 작은 관계 테이블만 조회하면 된다.
 
@@ -602,7 +602,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 **핵심 제약:**
 
 - PK는 (`search_date`, `product_id`, `source`)다. 검색마다 행을 만들지 않고 이 행의 `search_count`를 1 올린다(없으면 1로 만든다).
-- `productId` 검색으로 상품을 찾았거나, `alias_exact`로 상품이 정확히 하나 일치한 검색만 센다. 브랜드, 부분 일치, 여러 상품이 일치한 검색은 세지 않는다.
+- `productId` 검색으로 상품을 찾았거나, `alias_exact`로 상품이 정확히 하나 일치한 검색만 센다. 브랜드, 부분 일치, 비슷한 상품(`similar`), 여러 상품이 일치한 검색은 세지 않는다.
 - 검색어, 시각, 위치, 사용자 ID, IP 주소, 기기 정보, token은 남기지 않는다.
 - 90일이 지난 행은 지운다. 오늘을 포함한 서울 날짜 90일의 행만 남긴다. 배치 작업은 두지 않고, 검색 집계가 이 테이블에 새 행을 만들 때 같은 트랜잭션에서 지운다. 검색이 없는 날에는 지우지 않으며 다음에 새 행을 만들 때 함께 지운다. 순위(API 명세 3.17.2)는 날짜로 30일만 더하므로 지우기 전의 행이 순위를 바꾸지 않는다.
 
@@ -610,7 +610,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 ### 7.6 unmatched_search_queries
 
-**역할:** 상품을 찾지 못한 검색어(`matchType = none`)를 서울 날짜별로 센다. 카탈로그에 빠진 상품이나 별칭을 찾는 데 쓴다.
+**역할:** 상품을 찾지 못한 검색어(`matchType = none`)를 서울 날짜별로 센다. 카탈로그에 빠진 상품이나 별칭을 찾는 데 쓴다. 고객 검색의 5단계 `similar`(API 명세 3.10.1, 기본 꺼짐)를 켜면 비슷한 상품을 돌려준 검색어는 `none`이 아니므로 여기에 남지 않는다.
 
 | 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
 |---|---|---|---|

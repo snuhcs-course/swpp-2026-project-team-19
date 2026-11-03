@@ -1,0 +1,7 @@
+# Frozen I3 evaluation files whose raw bytes are hashed (ai/docs/i3_eval_freeze.md 1장, 2장, 4.2;
+# ai/eval/p30_extract.py FROZEN_RAW). score.py and i3_match_eval.py compare the SHA-256 of the file
+# bytes, so a CRLF checkout (Windows core.autocrlf=true) would fail them. Always check these out with
+# LF, and never auto-merge them (a change to a frozen file is a conflict for a person to decide).
+eval/labels_i3_v1.json text eol=lf -merge
+eval/match_gold_i3_v1.json text eol=lf -merge
+ai/eval/i3_photo_sha256.json text eol=lf -merge

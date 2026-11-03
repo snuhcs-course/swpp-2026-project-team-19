@@ -5,7 +5,7 @@ The app embeds the official **KakaoMaps SDK v2 for Android, 2.15.2** (not a WebV
 ## Local credentials (never commit actual values)
 
 1. In [Kakao Developers](https://developers.kakao.com/), create or select the BottleMap app and enable Kakao Map.
-2. Register the Android package **`com.zerotoone.bottlemap`** and the **signing certificate key hash** for the APK being tested. Debug and release builds may have different key hashes.
+2. Register the Android package **`com.zerotoone.bottlemap`** and the **signing certificate key hash** for the APK being tested. Debug and release builds may have different key hashes. The `main` CI APK (`bottlemap-prod-debug-apk`) is signed with the team's registered debug keystore (`ANDROID_DEBUG_KEYSTORE_BASE64` Actions secret), so its key hash is the one already registered.
 3. Copy the **Native App Key** (not REST API or JavaScript key).
 4. Store it in your personal **`%USERPROFILE%\.gradle\gradle.properties`**, outside the repository:
 
