@@ -18,6 +18,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -100,6 +103,8 @@ internal fun P18SearchField(
     placeholder: String = "위스키 이름", modifier: Modifier = Modifier,
     focused: Boolean = true,
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
     Row(modifier.height(56.dp)
         .background(P18Surface, RoundedCornerShape(12.dp))
         .border(if (focused) 1.5.dp else 1.dp,
@@ -111,14 +116,26 @@ internal fun P18SearchField(
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
             if (query.isEmpty()) Text(placeholder, fontSize = 16.sp, color = BottleMapPalette.textMuted)
             BasicTextField(query, onValueChange = { onQuery(it.take(100)) },
-                modifier = Modifier.fillMaxWidth().testTag("customer-search-field"),
+                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester).testTag("customer-search-field"),
                 singleLine = true, textStyle = TextStyle(color = P18Text, fontSize = 16.sp),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { onSubmit() }))
         }
         if (query.isNotEmpty()) {
-            Box(Modifier.size(48.dp).clickable { onQuery("") }, contentAlignment = Alignment.Center) {
-                Text("×", color = P18Muted, fontSize = 24.sp)
+            Box(Modifier.size(48.dp).clickable {
+                onQuery("")
+                focusRequester.requestFocus()
+                keyboard?.show()
+            }, contentAlignment = Alignment.Center) {
+                Canvas(Modifier.size(20.dp)) {
+                    val width = 1.5.dp.toPx()
+                    drawLine(P18Muted, androidx.compose.ui.geometry.Offset(size.width*.23f,size.height*.23f),
+                        androidx.compose.ui.geometry.Offset(size.width*.77f,size.height*.77f),
+                        strokeWidth=width,cap=androidx.compose.ui.graphics.StrokeCap.Round)
+                    drawLine(P18Muted, androidx.compose.ui.geometry.Offset(size.width*.77f,size.height*.23f),
+                        androidx.compose.ui.geometry.Offset(size.width*.23f,size.height*.77f),
+                        strokeWidth=width,cap=androidx.compose.ui.graphics.StrokeCap.Round)
+                }
             }
         }
     }
