@@ -88,6 +88,8 @@ OPERATOR_ONLY = [
     ),
     # Records no reviewer, so a temporary-login operator needs no users row.
     Route("post", "/api/owner-applications/{applicationId}/verify-business", {}, (404, "OWNER_APPLICATION_NOT_FOUND")),
+    # Records who revoked the ownership, so a temporary-login operator needs a users row first.
+    Route("delete", "/api/bars/{barId}/owner", {}, (404, "BAR_NOT_FOUND"), (404, "USER_NOT_FOUND")),
 ]
 BAR_MANAGER = [
     ManagerRoute("get", "/api/bars/{barId}", {}, (404, "BAR_NOT_FOUND"), (200, None)),
