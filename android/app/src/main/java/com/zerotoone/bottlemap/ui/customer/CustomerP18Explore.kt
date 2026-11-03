@@ -28,6 +28,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.zerotoone.bottlemap.data.Repositories
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -115,6 +120,22 @@ internal class P18ExploreViewModel(
     private val _location=MutableStateFlow<NearbyCoordinate?>(null)
     val location=_location.asStateFlow()
     fun setLocation(point:NearbyCoordinate) { if(point.isValid()) _location.value=point }
+    fun clearLocation(){_location.value=null}
+    // GET map-bars does not include tags. Use the EXISTING published bar detail API.
+    private val tagData=MutableStateFlow<Map<String,List<String>>>(emptyMap())
+    val tags=tagData.asStateFlow()
+    private val requestedTagIds=mutableSetOf<String>()
+    fun loadTags(ids:List<String>) {
+        ids.take(12).filter{it.isNotBlank() && requestedTagIds.add(it)}.forEach{id->
+            viewModelScope.launch {
+                try {
+                    val response=Repositories.customer.getPublishedBarMenu(id)
+                    if(response.barId==id) tagData.value=tagData.value+(id to response.tags.take(2))
+                } catch(cancelled:CancellationException){throw cancelled}
+                catch(_:Exception){/* Optional tags never block map usage. */}
+            }
+        }
+    }
     var camera:DiscoveryCamera? = null
         private set
     fun rememberCamera(center:NearbyCoordinate,zoom:Int) {
@@ -141,6 +162,8 @@ internal fun CustomerP18Explore(
 ) {
     val context=LocalContext.current
     val scope=rememberCoroutineScope()
+    val lifecycleOwner=LocalLifecycleOwner.current
+    val keyboard=LocalSoftwareKeyboardController.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val placeState by searchViewModel.state.collectAsStateWithLifecycle()
     val selectedPlace by searchViewModel.selected.collectAsStateWithLifecycle()
@@ -153,6 +176,8 @@ internal fun CustomerP18Explore(
     var showSort by remember {mutableStateOf(false)}
     var sort by rememberSaveable {mutableStateOf(P18Sort.UPDATED)}
     val location by viewModel.location.collectAsStateWithLifecycle()
+    val tags by viewModel.tags.collectAsStateWithLifecycle()
+    var zoomTarget by remember {mutableStateOf<String?>(null)}
     var locationDenied by remember {mutableStateOf(false)}
     var recenterToken by remember {mutableIntStateOf(0)}
     var goToGwanak by remember {mutableStateOf(false)}
@@ -165,6 +190,27 @@ internal fun CustomerP18Explore(
     val bars=freshBars ?: lastVisibleBars
     val ordered=p18BrowseOrdered(bars,sort,location)
     val chosen=bars.firstOrNull{it.barId==selectedId}
+    LaunchedEffect(listVisible,selectedId,ordered.map{it.barId}) {
+        if(listVisible) viewModel.loadTags(ordered.map{it.barId}.take(12))
+        else selectedId?.let{viewModel.loadTags(listOf(it))}
+    }
+    DisposableEffect(lifecycleOwner,viewModel,context) {
+        val observer=LifecycleEventObserver { _,event->
+            if(event==Lifecycle.Event.ON_RESUME) {
+                val allowed=ContextCompat.checkSelfPermission(context,
+                    Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
+                if(!allowed)viewModel.clearLocation()
+                else if(viewModel.location.value==null)scope.launch {
+                    runCatching{AndroidNearbyLocationSource(context).currentLocation()}
+                        .onSuccess(viewModel::setLocation)
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose{lifecycleOwner.lifecycle.removeObserver(observer)}
+    }
     val launcher=rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
         if(permissions.values.any{it})scope.launch {
@@ -223,30 +269,29 @@ internal fun CustomerP18Explore(
         }
     }
     BackHandler {back()}
-    LaunchedEffect(listVisible,searchVisible,mapView) {
-        mapView?.let{if(listVisible||searchVisible)hideNearbyNativeSurface(it)
+    LaunchedEffect(listVisible,mapView) {
+        mapView?.let{if(listVisible)hideNearbyNativeSurface(it)
             else showNearbyNativeSurface(it)}
     }
     Box(Modifier.fillMaxSize().background(P18Bg).testTag("customer-map-explore")) {
         NearbyKakaoMap(origin=if(goToGwanak)P18DefaultMapCenter else
             location?:P18DefaultMapCenter,
             bars=bars,selectedBarId=selectedId,
-            focusTarget=chosen,focusBarId=null,initialCamera=viewModel.camera,
-            listCovered=listVisible||searchVisible,
+            focusTarget=chosen,focusBarId=zoomTarget,initialCamera=viewModel.camera,
+            listCovered=listVisible,
             searchedPlace=selectedPlace,focusSearchedPlace=focusPlace,
             onSearchedPlaceFocusApplied=searchViewModel::consumeFocus,
-            onFocusApplied={},onCameraChanged=viewModel::rememberCamera,
+            onFocusApplied={zoomTarget=null},onCameraChanged=viewModel::rememberCamera,
             onMapCameraMoving=viewModel::moving,
             onMapViewportUnavailable=viewModel::unavailable,viewportRetryToken=0,
-            onSelectBar={id->if(selectedId==id)onOpenBar(id) else selectedId=id},
+            onSelectBar={id->selectedId=id;viewModel.loadTags(listOf(id))},
             onViewportChanged={viewport->viewModel.load(viewport)},
             recenterToken=recenterToken,onMapViewChanged={mapView=it},
-            modifier=Modifier.fillMaxSize(),p18Markers=true,
-            showOriginMarker=location!=null,
-            p18MarkerSubtitle={id->
-                bars.firstOrNull{it.barId==id}?.let{bar->
-                    location?.let{p18Distance(distanceMeters(it,bar.location).toInt())}
-                }
+            modifier=Modifier.fillMaxSize(),p18SimplePins=true,
+            showOriginMarker=location!=null,userLocation=location,focusZoomLevel=17,
+            onMapTouch={
+                if(searchVisible){searchVisible=false;keyboard?.hide()
+                    searchViewModel.dismissResults()}
             })
         if(listVisible && !searchVisible) {
             Column(Modifier.fillMaxSize().background(P18Bg)
@@ -274,7 +319,7 @@ internal fun CustomerP18Explore(
                             modifier=Modifier.weight(1f))
                         else LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
                             items(ordered,key={it.barId}){bar->
-                                P18BrowseRow(bar,location,
+                                P18BrowseRow(bar,location,tags[bar.barId].orEmpty(),
                                     onClick={onOpenBar(bar.barId)})
                                 Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
                             }
