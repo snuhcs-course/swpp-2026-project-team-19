@@ -241,9 +241,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 val photo = remote.addBarPhoto(bar.barId,
                     com.zerotoone.bottlemap.data.PreparedMenuImage(
                         "owner-representative.jpg", "image/jpeg", jpeg))
+                val approved = requireNotNull(approvedApplication)
                 withContext(Dispatchers.IO) {
-                    pendingCoverStore.remove(subject, approvedApplication.applicationId,
-                        approvedApplication.businessRegistrationNumber)
+                    pendingCoverStore.remove(subject, approved.applicationId,
+                        approved.businessRegistrationNumber)
                 }
                 bar.copy(photos = photo.photos)
             } catch(cancelled: CancellationException) {
