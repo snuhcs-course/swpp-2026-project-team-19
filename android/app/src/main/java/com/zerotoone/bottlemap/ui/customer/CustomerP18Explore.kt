@@ -233,8 +233,12 @@ internal fun CustomerP18Explore(
             Manifest.permission.ACCESS_FINE_LOCATION))
     }
     LaunchedEffect(location) {if(location!=null)sort=P18Sort.DISTANCE}
-    if(showSort) P18SortPicker(sort,location!=null,allowPrice=false,
-        onChoose={sort=it;showSort=false},onClose={showSort=false})
+    if(showSort) P18SortPicker(sort,hasLocation=true,allowPrice=false,
+        onChoose={choice->
+            if(choice==P18Sort.DISTANCE && location==null) requestCurrentLocation()
+            else sort=choice
+            showSort=false
+        },onClose={showSort=false})
     if(locationDenied || errorLocation) ModalBottomSheet(
         onDismissRequest={locationDenied=false;errorLocation=false},
         containerColor=P18Surface,contentColor=P18Text) {
