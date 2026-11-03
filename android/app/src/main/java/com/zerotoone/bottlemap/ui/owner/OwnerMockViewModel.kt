@@ -45,6 +45,11 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun seedExistingCandidateForFixture(bar: MockBar) = repository.seedExistingCandidateForFixture(bar)
     fun submitRegistrationDraftForFixture() = repository.submitRegistrationDraftForFixture()
     fun closeApplicationForFixture(id: String, status: MockApplicationStatus) = repository.closeApplicationForFixture(id, status)
+    suspend fun cancelOwnerApplicationLive(id: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.cancelOwnerApplicationLive(id)
+        else repository.closeApplicationForFixture(id, MockApplicationStatus.CANCELED)
+    }
     fun dismissRejectedForFixture(id: String) = repository.dismissRejectedForFixture(id)
     fun saveBar(bar: MockBar) = repository.saveBar(bar)
     fun confirmMenuInformation(barId: String, atEpochMs: Long) = repository.confirmMenuInformation(barId, atEpochMs)
