@@ -183,7 +183,8 @@ CATALOG = [
 # Any signed-in user, with or without a users row; tested in test_users_api.py, test_me_update_api.py
 # (PATCH /api/me answers USER_NOT_FOUND without a row), test_auth_api.py, test_business_certificate_api.py,
 # test_my_bars_api.py, test_owner_applications_api.py (which also covers the applicant-or-operator rule of
-# GET /api/owner-applications/{applicationId}) and test_owner_application_menu_photos_api.py.
+# GET /api/owner-applications/{applicationId}), test_owner_application_menu_photos_api.py and
+# test_owner_application_cover_photo_api.py.
 SIGNED_IN = {
     ("get", "/api/me"),
     ("patch", "/api/me"),
@@ -193,6 +194,8 @@ SIGNED_IN = {
     ("get", "/api/owner-applications/{applicationId}"),
     ("post", "/api/owner-applications/{applicationId}/cancel"),
     ("put", "/api/owner-applications/{applicationId}/menu-photos"),
+    ("put", "/api/owner-applications/{applicationId}/cover-photo"),
+    ("delete", "/api/owner-applications/{applicationId}/cover-photo"),
     ("get", "/api/me/bars"),
 }
 # No token needed; tested in test_search_api.py, test_nearby_bars_api.py, test_map_bars_api.py,

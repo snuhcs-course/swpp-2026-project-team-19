@@ -472,8 +472,26 @@ function renderDetail() {
     ]),
   );
 
+  // Only a pending new_bar application has one; approval moves it to the bar's photos (3.11.17).
+  if (app.applicationType === "new_bar" && pending) {
+    children.push(el("h3", {}, "매장 대표 사진"));
+    const cover = app.coverPhoto;
+    children.push(
+      renderPhotos(app, cover ? [{ href: cover.imageUrl, src: cover.thumbnailUrl, alt: "매장 대표 사진" }] : []),
+    );
+  }
+
   children.push(el("h3", {}, `메뉴판 사진 (${app.menuPhotos.length})`));
-  children.push(renderPhotos(app));
+  children.push(
+    renderPhotos(
+      app,
+      app.menuPhotos.map((photo) => ({
+        href: photo.imageUrl,
+        src: photo.imageUrl,
+        alt: `메뉴판 사진 ${photo.imageOrder}`,
+      })),
+    ),
+  );
 
   if (pending) {
     children.push(el("h3", {}, "처리"));
@@ -482,18 +500,18 @@ function renderDetail() {
   $("detail").replaceChildren(...children);
 }
 
-function renderPhotos(app) {
-  if (!app.menuPhotos.length) return el("p", { class: "placeholder" }, "올린 사진이 없습니다.");
+function renderPhotos(app, photos) {
+  if (!photos.length) return el("p", { class: "placeholder" }, "올린 사진이 없습니다.");
   return el(
     "div",
     { class: "photos" },
-    app.menuPhotos.map((photo) =>
+    photos.map((photo) =>
       el(
         "a",
-        { href: photo.imageUrl, target: "_blank", rel: "noopener noreferrer" },
+        { href: photo.href, target: "_blank", rel: "noopener noreferrer" },
         el("img", {
-          src: photo.imageUrl,
-          alt: `메뉴판 사진 ${photo.imageOrder}`,
+          src: photo.src,
+          alt: photo.alt,
           loading: "lazy",
           // A signed URL may have expired; the detail API hands out fresh ones (3.11.1). Once per opening.
           onerror: () => {

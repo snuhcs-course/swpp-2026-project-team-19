@@ -147,6 +147,14 @@ class ApplicationMenuPhoto(BaseModel):
     imageUrlExpiresAt: UtcDateTime | None = Field(description="Null when the URL does not expire (local storage)")
 
 
+class ApplicationCoverPhoto(BaseModel):
+    imageUrl: str = Field(description="Short-lived signed URL of the re-encoded photo")
+    thumbnailUrl: str = Field(description="Short-lived signed URL of its thumbnail")
+    imageUrlExpiresAt: UtcDateTime | None = Field(
+        description="When both URLs expire; null when they do not (local storage)"
+    )
+
+
 class OwnerApplicationResponse(BaseModel):
     applicationId: UUID
     applicationType: ApplicationType
@@ -169,6 +177,10 @@ class OwnerApplicationResponse(BaseModel):
     applicantNote: str | None
     menuPhotos: list[ApplicationMenuPhoto] = Field(
         description="Menu photos in order (spec 3.11.15); empty when none were uploaded or after rejection or cancel"
+    )
+    coverPhoto: ApplicationCoverPhoto | None = Field(
+        description="The bar's cover photo of a pending new_bar application (spec 3.11.17); null otherwise. "
+        "Approval moves it to the new bar's photos"
     )
     rejectionReason: str | None = Field(description="Only when rejected")
     reviewedAt: UtcDateTime | None = Field(description="When approved or rejected")

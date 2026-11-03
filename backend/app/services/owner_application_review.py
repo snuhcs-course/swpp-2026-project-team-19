@@ -6,7 +6,8 @@ only one of them changes a pending application. Approving an existing_bar applic
 bar row and checks for a current owner; the partial unique index on bar_owners backs that up.
 
 When the application has menu photos, approval creates the bar's first menu import from them in the
-same transaction (spec 3.11.7). The caller starts processing after the commit, as for an upload.
+same transaction (spec 3.11.7). A new_bar application's cover photo becomes the new bar's first photo
+in the same transaction; rejecting deletes it like the menu photos. The caller starts processing after the commit, as for an upload.
 
 The NTS recheck holds no lock while NTS answers; it locks the row only to store the answer, so a
 decision made meanwhile wins and the answer is dropped.
@@ -31,6 +32,7 @@ from app.models import (
     BarOwner,
     BarOwnerApplication,
     BarOwnerApplicationMenuImage,
+    BarPhoto,
     BarStatus,
     BusinessVerificationResult,
     ImportMode,
@@ -47,6 +49,7 @@ from app.services.menu_import_upload import UNFINISHED_STATUSES, add_images, fin
 from app.services.owner_applications import (
     application_not_found,
     application_responses,
+    clear_cover_photo,
     delete_menu_photo_rows,
     delete_stored_files,
     invalid_application_state,
@@ -155,6 +158,7 @@ def approve_application(
         session.flush()
         application.bar_id = bar.id
 
+    _move_cover_photo(session, application, bar.id, now)
     application.status = OwnerApplicationStatus.APPROVED
     application.reviewed_by_user_id = reviewer.id
     application.reviewed_at = now
@@ -181,14 +185,15 @@ def reject_application(
     links: ImageLinks,
     now: datetime,
 ) -> OwnerApplicationResponse:
-    """Reject a pending application with a reason shown to the applicant, and delete its menu photos."""
+    """Reject a pending application with a reason shown to the applicant, and delete its menu and cover photos."""
     reviewer = _reviewer(session, principal)
     application = _pending_application(session, application_id)
+    # The cover photo first: only a pending application may hold one, and the query below flushes.
+    removed = clear_cover_photo(application) + delete_menu_photo_rows(session, application.id)
     application.status = OwnerApplicationStatus.REJECTED
     application.rejection_reason = request.reason
     application.reviewed_by_user_id = reviewer.id
     application.reviewed_at = now
-    removed = delete_menu_photo_rows(session, application.id)
     session.commit()
     delete_stored_files(links.storage, removed)
     return application_responses(session, [application], links, show_verification=True)[0]
@@ -246,6 +251,26 @@ def _pending_application(session: Session, application_id: str, *, lock: bool = 
     if application.status != OwnerApplicationStatus.PENDING:
         raise invalid_application_state(application)
     return application
+
+
+def _move_cover_photo(session: Session, application: BarOwnerApplication, bar_id: UUID, now: datetime) -> None:
+    """Make a new_bar application's cover photo the first photo of the bar its approval created
+    (spec 3.11.7). The bar photo points at the files the application stored; nothing is copied."""
+    if application.cover_photo_storage_key is None:
+        return
+    session.add(
+        BarPhoto(
+            bar_id=bar_id,
+            storage_key=application.cover_photo_storage_key,
+            thumbnail_storage_key=application.cover_photo_thumbnail_storage_key,
+            content_sha256=application.cover_photo_sha256,
+            sort_order=1,
+            uploaded_by_user_id=application.applicant_user_id,
+            created_at=now,
+        )
+    )
+    # The files now belong to the bar photo, so they are not deleted.
+    clear_cover_photo(application)
 
 
 def _initial_import(

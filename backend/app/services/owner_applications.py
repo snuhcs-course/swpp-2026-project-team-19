@@ -1,11 +1,12 @@
-"""Owner applications for applicants (API spec, sections 3.11.2 to 3.11.5 and 3.11.15).
+"""Owner applications for applicants (API spec, sections 3.11.2 to 3.11.5, 3.11.15 and 3.11.17).
 
 Applying checks, in the spec's order, the fields, the caller's users row, the claimed bar and its
 owner, the caller's pending applications, and last the NTS business check, which calls an external
 API. A mismatch creates nothing; a check that cannot be made stores `unavailable`. The partial
 unique indexes catch a duplicate that a concurrent request created after the pending check.
 
-Menu photos are attached after the application exists and replaced as a whole on each upload.
+Menu photos, and the cover photo of a new_bar application, are attached after the application exists
+and replaced as a whole on each upload.
 Storage and the database share no transaction, so new files are stored under fresh keys before
 the rows change and the files they replace are deleted only after the commit.
 """
@@ -40,6 +41,7 @@ from app.models import (
 from app.schemas.owner_application import (
     Applicant,
     ApplicationBar,
+    ApplicationCoverPhoto,
     ApplicationMenuPhoto,
     BusinessVerification,
     ExistingBarApplicationInput,
@@ -48,6 +50,8 @@ from app.schemas.owner_application import (
     ProposedBar,
 )
 from app.services.bar_menu import bar_not_found
+from app.services.bar_photo_image import process_photo
+from app.services.bar_photos import PHOTO_CONTENT_TYPE
 from app.services.image_links import ImageLinks
 from app.services.menu_import_upload import ImageUpload, check_images
 from app.services.request_limits import BUSINESS_VERIFICATION, DailyRequestLimiter, acquire_or_raise, kst_date
@@ -157,8 +161,9 @@ def cancel_application(
         raise application_not_found()
     if application.status != OwnerApplicationStatus.PENDING:
         raise invalid_application_state(application)
+    # The cover photo first: only a pending application may hold one, and the query below flushes.
+    removed = clear_cover_photo(application) + delete_menu_photo_rows(session, application.id)
     application.status = OwnerApplicationStatus.CANCELED
-    removed = delete_menu_photo_rows(session, application.id)
     session.commit()
     delete_stored_files(links.storage, removed)
     operator = user_type_of(principal, session) == "operator"
@@ -216,6 +221,66 @@ def replace_menu_photos(
     return application_responses(session, [application], links, show_verification=operator)[0]
 
 
+def replace_cover_photo(
+    session: Session, principal: Principal, application_id: str, upload: ImageUpload, links: ImageLinks
+) -> OwnerApplicationResponse:
+    """Store the cover photo of the caller's own pending new_bar application, replacing any (spec 3.11.17).
+
+    The application, its type and its status are checked before the photo, as the spec orders. The photo
+    is re-encoded like a bar photo (3.16.2) and stored without holding the row lock, as for menu photos.
+    """
+    application = _cover_photo_application(session, principal, application_id)
+    processed = process_photo(upload)
+    # End the read transaction so the connection goes back to the pool while the files are stored.
+    session.commit()
+
+    prefix = f"owner-applications/{application.id}/cover/{uuid4()}"
+    image_key, thumbnail_key = f"{prefix}.jpg", f"{prefix}-thumb.jpg"
+    saved: list[str] = []
+    try:
+        for key, data in ((image_key, processed.image), (thumbnail_key, processed.thumbnail)):
+            # Before the save: a save that fails may still have written the file.
+            saved.append(key)
+            links.storage.save(key, data, PHOTO_CONTENT_TYPE)
+        application = _cover_photo_application(session, principal, application_id, lock=True)
+        removed = clear_cover_photo(application)
+        application.cover_photo_storage_key = image_key
+        application.cover_photo_thumbnail_storage_key = thumbnail_key
+        application.cover_photo_sha256 = processed.content_sha256
+        session.commit()
+    except Exception:
+        session.rollback()
+        delete_stored_files(links.storage, saved)
+        raise
+    delete_stored_files(links.storage, removed)
+    return _own_response(session, principal, application, links)
+
+
+def delete_cover_photo(
+    session: Session, principal: Principal, application_id: str, links: ImageLinks
+) -> OwnerApplicationResponse:
+    """Remove the cover photo of the caller's own pending new_bar application; nothing to remove is fine."""
+    application = _cover_photo_application(session, principal, application_id, lock=True)
+    removed = clear_cover_photo(application)
+    session.commit()
+    delete_stored_files(links.storage, removed)
+    return _own_response(session, principal, application, links)
+
+
+def clear_cover_photo(application: BarOwnerApplication) -> list[str]:
+    """Empty the application's cover photo columns and return the storage keys they held. The caller
+    deletes the files after committing, or hands them to the bar photo it creates on approval."""
+    keys = [
+        key
+        for key in (application.cover_photo_storage_key, application.cover_photo_thumbnail_storage_key)
+        if key is not None
+    ]
+    application.cover_photo_storage_key = None
+    application.cover_photo_thumbnail_storage_key = None
+    application.cover_photo_sha256 = None
+    return keys
+
+
 def delete_menu_photo_rows(session: Session, application_id: UUID) -> list[str]:
     """Delete the application's menu photo rows and return their storage keys. The caller deletes
     the files with `delete_stored_files` after committing, so a rollback never loses a photo."""
@@ -267,7 +332,8 @@ def application_responses(
                 ApplicationMenuPhoto(imageOrder=image.image_order, imageUrl=url, imageUrlExpiresAt=expires_at)
             )
     return [
-        _response(application, users, bars, photos[application.id], show_verification) for application in applications
+        _response(application, users, bars, photos[application.id], links, show_verification)
+        for application in applications
     ]
 
 
@@ -276,6 +342,7 @@ def _response(
     users: dict[UUID, User],
     bars: dict[UUID, Bar],
     photos: list[ApplicationMenuPhoto],
+    links: ImageLinks,
     show_verification: bool,
 ) -> OwnerApplicationResponse:
     applicant = users[application.applicant_user_id]
@@ -309,11 +376,46 @@ def _response(
         contactPhone=application.contact_phone,
         applicantNote=application.applicant_note,
         menuPhotos=photos,
+        coverPhoto=_cover_photo(application, links),
         rejectionReason=application.rejection_reason,
         reviewedAt=application.reviewed_at,
         createdAt=application.created_at,
         updatedAt=application.updated_at,
     )
+
+
+def _cover_photo_application(
+    session: Session, principal: Principal, application_id: str, *, lock: bool = False
+) -> BarOwnerApplication:
+    """The caller's own pending new_bar application, checked in the order of spec 3.11.17."""
+    application = _find(session, application_id, lock=lock)
+    if application is None or not _is_applicant(session, principal, application):
+        raise application_not_found()
+    if application.application_type != OwnerApplicationType.NEW_BAR:
+        raise ApiError(
+            409,
+            "INVALID_APPLICATION_TYPE",
+            "새 업장 신청에만 대표 사진을 올릴 수 있습니다.",
+            details={"applicationType": application.application_type.value},
+        )
+    if application.status != OwnerApplicationStatus.PENDING:
+        raise invalid_application_state(application)
+    return application
+
+
+def _own_response(
+    session: Session, principal: Principal, application: BarOwnerApplication, links: ImageLinks
+) -> OwnerApplicationResponse:
+    operator = user_type_of(principal, session) == "operator"
+    return application_responses(session, [application], links, show_verification=operator)[0]
+
+
+def _cover_photo(application: BarOwnerApplication, links: ImageLinks) -> ApplicationCoverPhoto | None:
+    if application.cover_photo_storage_key is None:
+        return None
+    image_url, expires_at = links.url(application.cover_photo_storage_key)
+    thumbnail_url, _ = links.url(application.cover_photo_thumbnail_storage_key)
+    return ApplicationCoverPhoto(imageUrl=image_url, thumbnailUrl=thumbnail_url, imageUrlExpiresAt=expires_at)
 
 
 def _caller(session: Session, principal: Principal) -> User | None:

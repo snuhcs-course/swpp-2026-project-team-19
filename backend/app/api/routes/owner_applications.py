@@ -30,6 +30,7 @@ from app.schemas.owner_application import (
     RejectInput,
 )
 from app.services import menu_import_upload as upload
+from app.services.bar_photo_image import MAX_LONG_EDGE, MAX_PHOTO_BYTES, THUMBNAIL_LONG_EDGE, single_upload
 from app.services.image_links import ImageLinks
 from app.services.menu_import_processing import SessionFactory, start_processing
 from app.services.menu_import_upload import ImageUpload
@@ -45,8 +46,10 @@ from app.services.owner_application_review import (
 from app.services.owner_applications import (
     application_responses,
     cancel_application,
+    delete_cover_photo,
     get_application,
     list_my_applications,
+    replace_cover_photo,
     replace_menu_photos,
     submit_application,
 )
@@ -173,7 +176,7 @@ def read_owner_application(
     description=(
         "The applicant only; an operator may cancel only their own applications too. No request body. "
         "A `pending` application becomes `canceled`, a final status; the applicant may apply again. "
-        "Its menu photos are deleted. "
+        "Its menu photos and cover photo are deleted. "
         "`businessVerification` is null unless the caller is an operator."
     ),
     responses=error_responses(
@@ -230,6 +233,76 @@ def put_owner_application_menu_photos(
 ) -> OwnerApplicationResponse:
     uploads = [ImageUpload(image.filename, image.content_type, image.file) for image in images]
     return replace_menu_photos(session, principal, application_id, uploads, links)
+
+
+_COVER_PHOTO_NOT_FOUND = (
+    404,
+    "`OWNER_APPLICATION_NOT_FOUND`: no such application, someone else's, or `applicationId` is not a UUID.",
+)
+_COVER_PHOTO_CONFLICT = (
+    409,
+    "`INVALID_APPLICATION_TYPE`: an existing_bar application, `details.applicationType`; add bar photos after "
+    f"approval. {_NOT_PENDING}",
+)
+
+
+@router.put(
+    "/owner-applications/{applicationId}/cover-photo",
+    response_model=OwnerApplicationResponse,
+    summary="Set the cover photo of my pending new_bar application",
+    description=(
+        "The applicant only, while a `new_bar` application is `pending`. Optional. Replaces the cover photo, "
+        "if any; retrying the same request gives the same result. Operators see it as `coverPhoto` when "
+        "reviewing; approval makes it the new bar's first photo, rejecting or canceling deletes it.\n\n"
+        f"- One JPEG or PNG in `image`, at most {MAX_PHOTO_BYTES // 2**20} MB and {MAX_LONG_EDGE} px on the long "
+        "edge, checked and re-encoded like `POST /api/bars/{barId}/photos` (metadata removed, a "
+        f"{THUMBNAIL_LONG_EDGE} px thumbnail).\n"
+        "- `coverPhoto` in the response has short-lived URLs; fetch the application again when they expire.\n"
+        "- Checks, first failure answering: token, request (`422`), application (`404`), type and status "
+        "(`409`), size (`413`) and type (`415`), dimensions (`422`), decoding (`415`)."
+    ),
+    responses=error_responses(
+        _UNAUTHENTICATED,
+        _COVER_PHOTO_NOT_FOUND,
+        _COVER_PHOTO_CONFLICT,
+        (413, f"`UPLOAD_TOO_LARGE`: over {MAX_PHOTO_BYTES // 2**20} MB; `details.maxImageBytes`."),
+        (415, "`UNSUPPORTED_IMAGE_TYPE`: not JPEG or PNG, a declared type that disagrees, or a file that does not decode."),
+        (
+            422,
+            "`VALIDATION_FAILED`: `image` `MISSING` or more than one (`TOO_LONG`), or `IMAGE_DIMENSIONS_TOO_LARGE` "
+            f"(long edge over {MAX_LONG_EDGE} px).",
+        ),
+        AUTH_UNAVAILABLE,
+    ),
+)
+def put_owner_application_cover_photo(
+    application_id: Annotated[str, Path(alias="applicationId", description="Application id (UUID)")],
+    image: Annotated[list[UploadedImage], File(description="One JPEG or PNG photo")],
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    links: ImageLinks = Depends(get_image_links),
+) -> OwnerApplicationResponse:
+    upload = single_upload([ImageUpload(item.filename, item.content_type, item.file) for item in image])
+    return replace_cover_photo(session, principal, application_id, upload, links)
+
+
+@router.delete(
+    "/owner-applications/{applicationId}/cover-photo",
+    response_model=OwnerApplicationResponse,
+    summary="Remove the cover photo of my pending new_bar application",
+    description=(
+        "The applicant only, while a `new_bar` application is `pending`. Deletes the cover photo; an "
+        "application without one answers `200` too, so a retried request gets the same result."
+    ),
+    responses=error_responses(_UNAUTHENTICATED, _COVER_PHOTO_NOT_FOUND, _COVER_PHOTO_CONFLICT, AUTH_UNAVAILABLE),
+)
+def delete_owner_application_cover_photo(
+    application_id: Annotated[str, Path(alias="applicationId", description="Application id (UUID)")],
+    principal: Principal = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    links: ImageLinks = Depends(get_image_links),
+) -> OwnerApplicationResponse:
+    return delete_cover_photo(session, principal, application_id, links)
 
 
 @router.get(
@@ -291,7 +364,8 @@ def read_owner_applications(
         "bar from `bar` (prefill it from `proposedBar` and add the coordinates); makes the applicant the "
         "bar's owner from their next request; and, when the application has menu photos and the bar has no "
         "unfinished import, creates the bar's menu import from them (`full_replace` without a current menu, "
-        "`partial_update` with one). Extraction starts after the commit; nothing is published before the "
+        "`partial_update` with one); for `new_bar`, the application's cover photo becomes the bar's first "
+        "photo. Extraction starts after the commit; nothing is published before the "
         "owner's review. The owner finds the import as `activeMenuImport` of `GET /api/bars/{barId}`.\n\n"
         "- `existing_bar`: no body or `{}`. Allowed even if the bar was deactivated after applying.\n"
         "- Checks in order: operator, body fields, users row, application and status, `bar` for the "
@@ -347,7 +421,7 @@ def approve_owner_application(
     summary="Reject an owner application",
     description=(
         "Operator only, whatever the NTS check result. `reason` is shown to the applicant as it is. "
-        "The application's menu photos are deleted. The applicant may apply again."
+        "The application's menu photos and cover photo are deleted. The applicant may apply again."
     ),
     responses=error_responses(
         _UNAUTHENTICATED,

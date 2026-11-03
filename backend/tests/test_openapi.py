@@ -52,6 +52,12 @@ def schema():
             "/api/owner-applications/business-certificate-ocr",
             {"400", "401", "413", "415", "422", "429", "500", "503"},
         ),
+        (
+            "put",
+            "/api/owner-applications/{applicationId}/cover-photo",
+            {"401", "404", "409", "413", "415", "422", "500", "503"},
+        ),
+        ("delete", "/api/owner-applications/{applicationId}/cover-photo", {"401", "404", "409", "422", "500", "503"}),
     ],
 )
 def test_error_responses_use_the_common_format(schema, method, path, statuses):

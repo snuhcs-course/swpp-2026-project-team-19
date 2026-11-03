@@ -146,6 +146,7 @@ def test_applies_for_an_existing_bar(client, db_session, auth, applicant, verifi
         "contactPhone": "010-1234-5678",
         "applicantNote": "대표 본인입니다",
         "menuPhotos": [],
+        "coverPhoto": None,
         "rejectionReason": None,
         "reviewedAt": None,
         "createdAt": body["createdAt"],
