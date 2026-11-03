@@ -177,6 +177,23 @@ internal fun P18FailureBody(
                 P18Bottle(productName)
                 Text(productName,color=P18Muted,fontSize=14.sp,
                     fontWeight=FontWeight.SemiBold)
+            } else if(icon == BmIconId.SEARCH) {
+                // 03-e1: crossed magnifier, not a generic empty-state icon.
+                Canvas(Modifier.size(48.dp)) {
+                    val stroke=1.2.dp.toPx()
+                    val center=Offset(size.width*.42f,size.height*.44f)
+                    drawCircle(P18Muted,size.width*.27f,center,
+                        style=Stroke(width=stroke,cap=StrokeCap.Round))
+                    drawLine(P18Muted,Offset(size.width*.61f,size.height*.63f),
+                        Offset(size.width*.85f,size.height*.85f),
+                        strokeWidth=stroke,cap=StrokeCap.Round)
+                    drawLine(P18Muted,Offset(size.width*.33f,size.height*.34f),
+                        Offset(size.width*.51f,size.height*.52f),
+                        strokeWidth=stroke,cap=StrokeCap.Round)
+                    drawLine(P18Muted,Offset(size.width*.51f,size.height*.34f),
+                        Offset(size.width*.33f,size.height*.52f),
+                        strokeWidth=stroke,cap=StrokeCap.Round)
+                }
             } else BmIcon(icon,null,Modifier.size(48.dp),
                 tint=if(icon==BmIconId.ERROR) BottleMapPalette.error else P18Muted)
             Text(title,color=P18Text,
@@ -186,8 +203,20 @@ internal fun P18FailureBody(
                 textAlign=TextAlign.Center)
         }
         Box(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,bottom=24.dp,top=12.dp)) {
-            P18Action(button,onAction,primary=primary,
-                modifier=Modifier.fillMaxWidth().height(56.dp))
+            Row(Modifier.fillMaxWidth().height(56.dp)
+                .background(if(primary)P18Gold else P18Surface,RoundedCornerShape(12.dp))
+                .then(if(primary)Modifier else Modifier.border(1.dp,P18Line,RoundedCornerShape(12.dp)))
+                .clickable(onClick=onAction),
+                horizontalArrangement=Arrangement.spacedBy(8.dp,Alignment.CenterHorizontally),
+                verticalAlignment=Alignment.CenterVertically) {
+                if(primary && button=="다시 시도") {
+                    BmIcon(BmIconId.RETRY,null,Modifier.size(22.dp),
+                        tint=BottleMapPalette.onPrimary)
+                }
+                Text(button,fontSize=16.sp,lineHeight=23.sp,
+                    fontWeight=FontWeight.SemiBold,
+                    color=if(primary)BottleMapPalette.onPrimary else P18Text)
+            }
         }
     }
 }
