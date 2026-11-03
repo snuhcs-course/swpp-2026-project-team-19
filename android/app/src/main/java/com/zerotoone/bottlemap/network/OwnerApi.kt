@@ -144,6 +144,12 @@ interface OwnerApi {
         @Part("ownerNote") ownerNote: RequestBody? = null,
     ): MenuImportAcceptedDto
 
+    @POST("api/menu-imports/{menuImportId}/cancel")
+    suspend fun cancelMenuImport(
+        @Header("Authorization") authorization: String,
+        @Path("menuImportId") menuImportId: String,
+    ): MenuImportStatusDto
+
     @GET("api/menu-imports/{menuImportId}")
     suspend fun getMenuImport(
         @Header("Authorization") authorization: String,
