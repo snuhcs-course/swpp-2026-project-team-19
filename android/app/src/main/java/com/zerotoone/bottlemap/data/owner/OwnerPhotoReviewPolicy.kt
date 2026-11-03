@@ -4,9 +4,9 @@ package com.zerotoone.bottlemap.data.owner
 private fun candidateIdentity(line: MockExtractedLine): String? =
     line.decision?.productId ?: line.suggestedProductId ?: line.candidateProductIds.singleOrNull()
 
-private val reviewServingRegex = Regex("""(?i)\\b\\d{1,4}\\s*(?:ml|mℓ|㎖|밀리리터)\\b""")
-private val reviewPriceRegex = Regex("""(?:₩\\s*|￦\\s*)?\\d{1,3}(?:,\\d{3})+\\s*원?|\\b\\d{4,9}\\s*원""")
-private val reviewNonWordRegex = Regex("""[^\\p{L}\\p{N}]""")
+private val reviewServingRegex = Regex("""(?i)\b\d{1,4}\s*(?:ml|mℓ|㎖|밀리리터)\b""")
+private val reviewPriceRegex = Regex("""(?:₩\s*|￦\s*)?\d{1,3}(?:,\d{3})+\s*원?|\b\d{4,9}\s*원""")
+private val reviewNonWordRegex = Regex("""[^\p{L}\p{N}]""")
 
 /** Fallback only when canonical IDs are missing. Retain ages/editions. */
 private fun photoProductName(line: MockExtractedLine): String? {
