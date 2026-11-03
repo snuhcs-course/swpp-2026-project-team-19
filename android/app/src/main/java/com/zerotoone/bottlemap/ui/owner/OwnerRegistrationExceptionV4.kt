@@ -42,7 +42,7 @@ internal fun RegistrationVerifyException(outcome:OwnerVerifyOutcome) {
         OwnerVerifyOutcome.UNAVAILABLE ->
             "신청은 이어서 할 수 있어요. 운영팀이 나중에 다시 확인해요."
         OwnerVerifyOutcome.LIMIT ->
-            "사업자 정보 확인은 하루 5번까지 할 수 있어요. 내일 0시부터 다시 할 수 있고, 입력한 내용은 그대로 남아 있어요."
+            "사업자 정보 확인은 하루 5번까지 시도할 수 있어요.\n내일 0시부터 다시 진행해 주세요."
     }
     Column(Modifier.fillMaxWidth().testTag("registration-verify-${outcome.name.lowercase()}"),
         horizontalAlignment=Alignment.CenterHorizontally,
@@ -142,7 +142,7 @@ internal fun RegistrationExistingBarCard(
         Text(address,color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=20.sp)
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            RegistrationMiniAction("우리 매장예요",Modifier.weight(1f),primary=true,onClick=onMine)
+            RegistrationMiniAction("우리 매장이에요",Modifier.weight(1f),primary=true,onClick=onMine)
             RegistrationMiniAction("아니에요",Modifier.weight(1f),onClick=onOther)
         }
     }
@@ -200,9 +200,15 @@ internal fun ownerQaPreviewSnapshot(page:Int):MockOwnerSnapshot {
         21->MockOwnerSnapshot(applications=listOf(pending))
         22->MockOwnerSnapshot(applications=listOf(rejected))
         28->MockOwnerSnapshot(bars=listOf(bar))
-        29->MockOwnerSnapshot(bars=listOf(bar),
+        29->MockOwnerSnapshot(
+            bars=listOf(bar),
             applications=listOf(pending.copy(applicationId="qa-app-2",
-                proposedBarName="샤로수길 몰트하우스")))
+                proposedBarName="샤로수길 몰트하우스")),
+            imports=listOf(MockMenuImport("qa-import-1","qa-bar-1",
+                MockImportStatus.APPLIED,reviewVersion=1,images=emptyList())),
+            menuItems=listOf(MockBarMenuItem("qa-item-1","qa-bar-1","qa-product-1",
+                options=listOf(MockMenuOption("qa-option-1",priceKrw=12000))))
+        )
         else->MockOwnerSnapshot()
     }
 }
@@ -260,8 +266,8 @@ internal fun OwnerRegistrationQaPreview(page:Int,onBack:()->Unit,onAction:()->Un
                 }
             }
             val label=when(page){
-                23->"다시 확인하기";24->"계속하기";25->"마이페이지로 가기"
-                26->"국세청에 확인하기";27->"다음";else->"확인"
+                23->"다시 확인하기";24->"계속하기";25->"돌아가기"
+                26->"확인하기";27->"다음";else->"확인"
             }
             Box(Modifier.fillMaxWidth().padding(horizontal=20.dp,vertical=24.dp)) {
                 RegistrationButton(label,enabled=page!=26 && page!=27,onClick=onAction)
