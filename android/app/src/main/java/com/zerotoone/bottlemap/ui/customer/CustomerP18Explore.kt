@@ -317,7 +317,7 @@ internal fun CustomerP18Explore(
             onMapCameraMoving=viewModel::moving,
             onMapViewportUnavailable=viewModel::unavailable,viewportRetryToken=0,
             onSelectBar={id->
-                selectedId=if(selectedId==id)null else id
+                selectedId=p18ToggleSelectedBar(selectedId,id)
                 selectedId?.let{viewModel.loadTags(listOf(it))}
             },
             onViewportChanged={viewport->viewModel.load(viewport)},
@@ -612,3 +612,7 @@ private fun P18PlaceNoMatches() {
             fontWeight=FontWeight.SemiBold,textAlign=TextAlign.Center)
     }
 }
+
+/** Second tap on the same map pin clears selection and hides the bottom carousel. */
+internal fun p18ToggleSelectedBar(current:String?,tapped:String):String? =
+    if(current==tapped)null else tapped
