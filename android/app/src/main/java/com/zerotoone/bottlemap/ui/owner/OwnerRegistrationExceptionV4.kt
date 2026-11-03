@@ -84,9 +84,15 @@ internal fun RegistrationOcrPartialReview(
         "사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요.")
     Spacer(Modifier.height(16.dp))
     Column(Modifier.fillMaxWidth()) {
-        RegistrationPartialRow("사업자등록번호",business,"수정"){onEdit("bn")}
-        RegistrationPartialRow("대표자 성명",representative,"수정"){onEdit("rep")}
-        RegistrationPartialRow("개업일","읽지 못했어요","입력",error=true){onEdit("date")}
+        RegistrationPartialRow("사업자등록번호",
+            business.ifBlank{"읽지 못했어요"},if(business.isBlank())"입력" else "수정",
+            error=business.isBlank()){onEdit("bn")}
+        RegistrationPartialRow("대표자 성명",
+            representative.ifBlank{"읽지 못했어요"},if(representative.isBlank())"입력" else "수정",
+            error=representative.isBlank()){onEdit("rep")}
+        RegistrationPartialRow("개업일",
+            openingDate.ifBlank{"읽지 못했어요"},if(openingDate.isBlank())"입력" else "수정",
+            error=openingDate.isBlank()){onEdit("date")}
     }
     Row(Modifier.fillMaxWidth().padding(top=8.dp)
         .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
