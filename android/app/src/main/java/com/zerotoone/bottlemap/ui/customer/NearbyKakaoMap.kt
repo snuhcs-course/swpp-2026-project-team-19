@@ -577,95 +577,125 @@ private fun nearbyMarkerStyle(selected: Boolean): LabelStyle {
 }
 
 
-/** P18 HTML marker: 38x38 photo tile, 12sp labels and a restrained gold
- * selection border. Drawn in physical pixels from density for true dp sizing.
- * If no price/distance is provided, do not invent a secondary label.
+/** Search-result map: content-width speech balloon, compact text, no image.
+ * The right inset is always 5dp; grow with the full price/volume text rather
+ * than cropping it to a fixed marker size. A tail points at the bar coordinate.
  */
-/** Product search map: no picture, only two fully legible miniature text lines. */
 private fun p18CardMarkerStyle(
     selected: Boolean, name: String, secondary: String?, density: Float,
 ): LabelStyle {
-    val d=density.coerceAtLeast(.5f)
-    val namePaint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=Color.rgb(242,237,232)
-        isFakeBoldText=true
-        textSize=9.2f*d
+    val d = density.coerceAtLeast(.5f)
+    val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(242, 237, 232)
+        isFakeBoldText = true
+        textSize = 10f*d
     }
-    val pricePaint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=Color.rgb(205,194,184)
-        textSize=8.5f*d
+    val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(207, 194, 184)
+        textSize = 10f*d
     }
-    // Roughly half the original 148 x 48 marker's visual footprint.
-    val width=(minOf(110f,maxOf(78f,maxOf(
-        namePaint.measureText(name),pricePaint.measureText(secondary.orEmpty())
-    )/d+13f))*d).toInt().coerceAtLeast(1)
-    val height=(29f*d).toInt().coerceAtLeast(1)
-    val bitmap=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+    val maxTextWidth = 246f*d
+    fun fitText(raw: String, paint: Paint): String {
+        if(paint.measureText(raw)<=maxTextWidth)return raw
+        var shortened=raw
+        while(shortened.isNotEmpty() && paint.measureText(shortened+"…")>maxTextWidth)
+            shortened=shortened.dropLast(1)
+        return shortened+"…"
+    }
+    val first=fitText(name,titlePaint)
+    val second=secondary?.takeIf(String::isNotBlank)?.let{fitText(it,valuePaint)}
+    val width=(maxOf(titlePaint.measureText(first),
+        valuePaint.measureText(second.orEmpty())) + 10f*d).toInt()
+        .coerceAtLeast((32f*d).toInt())
+    val bubbleHeight=if(second!=null)35f*d else 23f*d
+    val height=(bubbleHeight+9f*d).toInt().coerceAtLeast(1)
+    val bitmap=Bitmap.createBitmap(width.coerceAtLeast(1),height,
+        Bitmap.Config.ARGB_8888)
     val canvas=Canvas(bitmap)
-    val bg=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=Color.rgb(33,30,27)
-    }
-    val frame=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=if(selected)Color.rgb(201,157,107) else Color.rgb(81,71,63)
+    val fill=Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.rgb(48,42,37)}
+    val border=Paint(Paint.ANTI_ALIAS_FLAG).apply{
+        color=if(selected)Color.rgb(201,157,107) else Color.rgb(164,125,82)
         style=Paint.Style.STROKE
-        strokeWidth=(if(selected)1.5f else 1f)*d
+        strokeWidth=(if(selected)1.6f else 1.2f)*d
+        strokeJoin=Paint.Join.ROUND
     }
-    val rect=android.graphics.RectF(d,d,width-d,height-d)
-    canvas.drawRoundRect(rect,7f*d,7f*d,bg)
-    canvas.drawRoundRect(rect,7f*d,7f*d,frame)
-    fun truncate(text:String,paint:Paint):String {
-        if(paint.measureText(text)<=width-10f*d)return text
-        var t=text
-        while(t.isNotEmpty() && paint.measureText(t+"…")>width-10f*d)
-            t=t.dropLast(1)
-        return t+"…"
+    val bounds=android.graphics.RectF(1.2f*d,1.2f*d,
+        width-1.2f*d,bubbleHeight)
+    canvas.drawRoundRect(bounds,9f*d,9f*d,fill)
+    canvas.drawRoundRect(bounds,9f*d,9f*d,border)
+    val cx=width/2f
+    val tail=Path().apply {
+        moveTo(cx-5f*d,bubbleHeight-1f*d)
+        lineTo(cx,(bubbleHeight+8f*d))
+        lineTo(cx+5f*d,bubbleHeight-1f*d)
+        close()
     }
-    canvas.drawText(truncate(name,namePaint),5f*d,12f*d,namePaint)
-    if(!secondary.isNullOrBlank()) {
-        canvas.drawText(truncate(secondary,pricePaint),5f*d,23f*d,pricePaint)
-    }
+    canvas.drawPath(tail,fill)
+    canvas.drawPath(tail,border)
+    // Cover the tail/bubble seam to avoid a horizontal stroke through the pointer.
+    canvas.drawRect(cx-4f*d,bubbleHeight-2.5f*d,
+        cx+4f*d,bubbleHeight+.6f*d,fill)
+    canvas.drawText(first,5f*d,15.0f*d,titlePaint)
+    if(second!=null)canvas.drawText(second,5f*d,28.0f*d,valuePaint)
     return LabelStyle.from(bitmap).setAnchorPoint(.5f,1f)
 }
 
-/** Browse: tiny pin, amber-backed bar-name chip with black text above it. */
-private fun p18SimpleMarkerStyle(selected: Boolean,name: String,density: Float): LabelStyle {
+/** Browse-only marker inspired by the approved two-state pin reference:
+ * unselected = small dark pin/amber drop, selected = large amber pin/dark drop.
+ * Other surfaces use the regular Owner-preview location glyph.
+ */
+private fun p18SimpleMarkerStyle(selected:Boolean,name:String,density:Float):LabelStyle {
     val d=density.coerceAtLeast(.5f)
-    val title=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    val textPaint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color=Color.rgb(33,26,18)
         textAlign=Paint.Align.CENTER
         textSize=10f*d
         isFakeBoldText=true
     }
-    val displayName=name.take(16)+(if(name.length>16)"…" else "")
-    val width=(maxOf(32f,title.measureText(displayName)/d+14f)*d)
+    val displayName=name.take(20)+(if(name.length>20)"…" else "")
+    val width=(maxOf(38f,textPaint.measureText(displayName)/d+14f)*d)
         .toInt().coerceAtLeast(1)
-    val height=(36f*d).toInt().coerceAtLeast(1)
+    val pinWidth=if(selected)30f*d else 21f*d
+    val pinTop=22f*d
+    val pinBottom=if(selected)66f*d else 54f*d
+    val height=(pinBottom+1f*d).toInt().coerceAtLeast(1)
     val bitmap=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
     val canvas=Canvas(bitmap)
     val cx=width/2f
-    val amber=Paint(Paint.ANTI_ALIAS_FLAG).apply {color=Color.rgb(201,157,107)}
-    val chip=android.graphics.RectF(1f*d,1f*d,width-1f*d,19f*d)
-    canvas.drawRoundRect(chip,6f*d,6f*d,amber)
-    canvas.drawText(displayName,cx,13.6f*d,title)
-    // Quarter-scale teardrop relative to the original 30dp-wide map pin.
-    val pinFill=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=if(selected)Color.rgb(201,157,107) else Color.rgb(55,46,40)
-    }
-    val pinOutline=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=Color.rgb(201,157,107)
+    val gold=Paint(Paint.ANTI_ALIAS_FLAG).apply {color=Color.rgb(201,157,107)}
+    val edge=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(16,14,13)
+        strokeWidth=1.8f*d
         style=Paint.Style.STROKE
-        strokeWidth=1f*d
+        strokeJoin=Paint.Join.ROUND
     }
+    canvas.drawRoundRect(android.graphics.RectF(d,d,width-d,20f*d),
+        6f*d,6f*d,gold)
+    canvas.drawText(displayName,cx,14f*d,textPaint)
+    val w=pinWidth/2f
     val pin=Path().apply {
-        moveTo(cx,35f*d)
-        cubicTo(cx-1.2f*d,32f*d,cx-4.5f*d,29f*d,cx-4.5f*d,26f*d)
-        cubicTo(cx-4.5f*d,19f*d,cx+4.5f*d,19f*d,cx+4.5f*d,26f*d)
-        cubicTo(cx+4.5f*d,29f*d,cx+1.2f*d,32f*d,cx,35f*d)
+        moveTo(cx,pinBottom)
+        cubicTo(cx-w*.25f,pinBottom-8f*d,cx-w,pinTop+19f*d,cx-w,pinTop+15f*d)
+        cubicTo(cx-w,pinTop-4f*d,cx+w,pinTop-4f*d,cx+w,pinTop+15f*d)
+        cubicTo(cx+w,pinTop+19f*d,cx+w*.25f,pinBottom-8f*d,cx,pinBottom)
         close()
     }
+    val pinFill=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=if(selected)Color.rgb(201,157,107) else Color.rgb(48,42,37)
+    }
     canvas.drawPath(pin,pinFill)
-    canvas.drawPath(pin,pinOutline)
-    canvas.drawCircle(cx,25.8f*d,1.4f*d,
-        Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.WHITE})
+    canvas.drawPath(pin,edge)
+    val drop=Path().apply {
+        val cy=pinTop+(if(selected)14f else 13f)*d
+        val r=if(selected)6.2f*d else 4.4f*d
+        moveTo(cx,cy-r*1.2f)
+        cubicTo(cx-r*.2f,cy-r*.7f,cx-r,cy, cx-r,cy+r*.3f)
+        cubicTo(cx-r,cy+r*1.5f,cx+r,cy+r*1.5f,cx+r,cy+r*.3f)
+        cubicTo(cx+r,cy,cx+r*.2f,cy-r*.7f,cx,cy-r*1.2f)
+        close()
+    }
+    canvas.drawPath(drop,Paint(Paint.ANTI_ALIAS_FLAG).apply{
+        color=if(selected)Color.rgb(21,19,17) else Color.rgb(201,157,107)
+    })
     return LabelStyle.from(bitmap).setAnchorPoint(.5f,1f)
 }
