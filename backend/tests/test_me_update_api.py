@@ -73,9 +73,8 @@ def test_a_later_get_me_keeps_the_new_name(client, supabase):
         (" " + "a" * 20 + " ", "a" * 20),
         # 20 code points, but 40 UTF-16 units (Kotlin's String.length).
         ("🥃" * 20, "🥃" * 20),
-        ("홍길동\n", "홍길동"),
     ],
-    ids=["one character", "20 Hangul", "20 after trimming", "20 emoji", "a trailing line break is trimmed"],
+    ids=["one character", "20 Hangul", "20 after trimming", "20 emoji"],
 )
 def test_names_up_to_20_characters_are_accepted(client, supabase, db_session, sent, saved):
     me(client, supabase.token(sub=SUBJECT))
@@ -154,6 +153,9 @@ def test_a_temporary_user_with_a_row_can_change_the_name(client, token_for):
         ({"displayName": 12}, [("displayName", "STRING_TYPE")]),
         ({"displayName": "홍\n길동"}, [("displayName", "INVALID_CHARACTER")]),
         ({"displayName": "홍\t길동"}, [("displayName", "INVALID_CHARACTER")]),
+        ({"displayName": "\n홍길동"}, [("displayName", "INVALID_CHARACTER")]),
+        ({"displayName": "홍길동\n"}, [("displayName", "INVALID_CHARACTER")]),
+        ({"displayName": "\t홍길동 "}, [("displayName", "INVALID_CHARACTER")]),
         ({"displayName": "새 이름", "email": "new@example.com"}, [("email", "EXTRA_FORBIDDEN")]),
         ({"displayName": "새 이름", "userType": "operator"}, [("userType", "EXTRA_FORBIDDEN")]),
     ],
@@ -168,6 +170,9 @@ def test_a_temporary_user_with_a_row_can_change_the_name(client, token_for):
         "a number",
         "a line break",
         "a tab",
+        "a leading line break",
+        "a trailing line break",
+        "a leading tab",
         "email",
         "userType",
     ],
