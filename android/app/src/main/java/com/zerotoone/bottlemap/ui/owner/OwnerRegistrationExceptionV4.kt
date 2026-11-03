@@ -78,7 +78,7 @@ internal fun RegistrationVerifyException(outcome:OwnerVerifyOutcome) {
 /** Page 26 source is the user's corrected screenshot, NOT the old PDF frame. */
 @Composable
 internal fun RegistrationOcrPartialReview(
-    business:String,representative:String,onEdit:(String)->Unit
+    business:String,representative:String,openingDate:String="",onEdit:(String)->Unit
 ) {
     RegistrationHeading("읽은 내용이\n맞는지 확인해 주세요",
         "사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요.")
