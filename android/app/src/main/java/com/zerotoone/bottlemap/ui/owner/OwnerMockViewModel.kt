@@ -61,6 +61,24 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun setSoldOut(itemId: String, soldOut: Boolean) = repository.setSoldOut(itemId, soldOut)
     fun deleteMenuItem(id: String) = repository.deleteMenuItem(id)
     fun clearMenuForBar(barId: String) = repository.clearMenuForBar(barId)
+    fun usesProductionOwnerApi(): Boolean =
+        repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository
+
+    suspend fun submitPhotoImportLive(barId: String, photos: List<MockPhoto>): String =
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.submitPhotoImportLive(barId, photos)
+        else repository.queuePhotoImport(barId, photos)
+
+    suspend fun pollPhotoImportLive(importId: String): MockImportStatus =
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.pollPhotoImportLive(importId)
+        else error("Local fixture must be supplied for Mock polling")
+
+    suspend fun publishPhotoImportLive(importId: String, version: Int): Int =
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.publishPhotoImportLive(importId, version)
+        else repository.publishAddOnly(importId, version)
+
     fun queuePhotoImport(barId: String, photos: List<MockPhoto>): String =
         repository.queuePhotoImport(barId, photos)
     fun finishPhotoImport(id: String, source: MockPhotoExtractionSource): MockImportStatus =
