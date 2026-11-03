@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.ui.owner
 
 import com.zerotoone.bottlemap.data.owner.MockBrand
 import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
+import com.zerotoone.bottlemap.data.owner.manualMenuCategoryLabel
 
 internal fun normalizeOwnerCatalogName(name: String): String =
     name.filter(Char::isLetterOrDigit).lowercase()
