@@ -88,11 +88,19 @@ internal fun OwnerRegistrationDashboard(
                 }
                 // An older Mock fixture may have no timestamp. Never fabricate a
                 // submission or review date, or call submission date review date.
-                val submitted = app.submittedAtEpochMs.takeIf { it > 0L }?.let {
+                val reviewTime = if(app.status==MockApplicationStatus.REJECTED)
+                    app.reviewedAtEpochMs else null
+                val displayedTime=reviewTime ?: app.submittedAtEpochMs.takeIf { it>0L }
+                val date=displayedTime?.let {
                     SimpleDateFormat("M월 d일",Locale.KOREAN).format(Date(it))
                 }
-                Text(if(submitted!=null) "${submitted}에 신청했어요" else "신청일 정보 없음",
-                    color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=21.sp)
+                val message=when {
+                    date==null -> "신청일 정보 없음"
+                    reviewTime!=null -> "${date}에 검토했어요"
+                    else -> "${date}에 신청했어요"
+                }
+                Text(message,color=RegistrationV4.secondary,
+                    fontSize=14.sp,lineHeight=21.sp)
                 when(app.status){
                     MockApplicationStatus.PENDING -> {
                         Spacer(Modifier.height(12.dp))
