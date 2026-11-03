@@ -153,6 +153,40 @@ internal class P18SearchViewModel : ViewModel() {
     fun retry() { lastKey=null }
 }
 
+/**
+ * The query that opened this destination owns its candidate response.
+ * Stale ViewModel data from a previous route or a productId lookup may never
+ * be interpreted as the current query's "unrecognized whisky" response.
+ */
+internal fun p18OriginalResponse(
+    query:String?,productId:String?,
+    candidates:SearchBarsResponseDto?,latest:SearchBarsResponseDto?,
+):SearchBarsResponseDto? = when {
+    query!=null -> candidates?.takeIf{it.query==query}
+        ?:latest?.takeIf{it.query==query}
+    productId!=null -> latest?.takeIf{
+        it.matchType=="product" || it.matchType=="none"
+    }
+    else -> null
+}
+
+/** Product-specific results may never take the place of brand candidates. */
+internal fun p18ResolvedResult(
+    chosenId:String?,initialProductId:String?,canSkip:Boolean,
+    original:SearchBarsResponseDto?,latest:SearchBarsResponseDto?,
+):SearchBarsResponseDto? = when {
+    chosenId!=null -> latest?.takeIf {
+        it.matchType=="product" &&
+            it.matchedProducts.any{product->product.productId==chosenId}
+    }
+    initialProductId!=null -> latest?.takeIf {
+        it.matchType=="product" &&
+            it.matchedProducts.any{product->product.productId==initialProductId}
+    }
+    canSkip -> original
+    else -> null
+}
+
 internal enum class P18Sort(val label: String) {
     PRICE("가격순"), DISTANCE("가까운 순"), UPDATED("최근 갱신 순")
 }
@@ -351,31 +385,13 @@ internal fun CustomerP18Results(
             if(chosenId==null)source else "input",location=null)
     }
     val ready=(state as? P18SearchState.Ready)?.response
-    val original=when {
-        initialQuery!=null -> suggestions?.takeIf {it.query==initialQuery}
-            ?: ready?.takeIf {it.query==initialQuery}
-        initialProductId!=null -> ready?.takeIf {
-            it.matchType=="product" || it.matchType=="none"
-        }
-        else -> null
-    }
+    val original=p18OriginalResponse(initialQuery,initialProductId,suggestions,ready)
     val choices=original?.matchedProducts.orEmpty()
     val canSkip=initialProductId!=null || (original!=null &&
         original.matchType=="alias_exact" && choices.size==1)
     val choose=chosenId==null && !canSkip && choices.isNotEmpty() &&
         (choices.size>1 || original?.matchType!="alias_exact")
-    val result=when {
-        chosenId!=null -> ready?.takeIf {
-            it.matchType=="product" &&
-                it.matchedProducts.any{product->product.productId==chosenId}
-        }
-        initialProductId!=null -> ready?.takeIf {
-            it.matchType=="product" &&
-                it.matchedProducts.any{product->product.productId==initialProductId}
-        }
-        canSkip -> original
-        else -> null
-    }
+    val result=p18ResolvedResult(chosenId,initialProductId,canSkip,original,ready)
     val allowsPrice=result?.items?.any{it.options.isNotEmpty()}==true
     val availableSorts=p18AvailableSorts(userLocation!=null,allowsPrice)
     val sort=selectedSort?.takeIf{it in availableSorts}
@@ -409,6 +425,14 @@ internal fun CustomerP18Results(
                 P18FailureBody("검색하지 못했어요",
                     "연결을 확인하고 다시 시도해 주세요.","다시 시도",
                     BmIconId.ERROR,::reload,primary=true,modifier=Modifier.weight(1f),topInset=120)
+            }
+            (chosenId!=null || initialProductId!=null) &&
+                state is P18SearchState.Ready && ready?.matchType=="none" -> {
+                P18SearchTopBar(::navigateBack,chooseQuery)
+                P18FailureBody("상품 정보를 찾을 수 없어요",
+                    "현재 등록된 상품이 아닙니다.\\n다른 위스키를 선택해 주세요.",
+                    "다른 위스키 보기",icon=BmIconId.EMPTY,
+                    onAction=::navigateBack,modifier=Modifier.weight(1f))
             }
             chosenId==null && initialProductId==null &&
                 original!=null && original.matchedProducts.isEmpty() -> {
