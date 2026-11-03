@@ -45,7 +45,6 @@ internal fun OwnerRegistrationDashboard(
         return
     }
     if(snapshot.bars.isNotEmpty()){
-        RegistrationDashboardSection("내 매장")
         snapshot.bars.forEach { bar ->
             Column(Modifier.fillMaxWidth()
                 .background(RegistrationV4.surface,RoundedCornerShape(16.dp))
@@ -60,12 +59,15 @@ internal fun OwnerRegistrationDashboard(
                 }
                 Text(bar.address,color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=21.sp)
                 Spacer(Modifier.height(8.dp))
-                RegistrationDashboardAction("매장 관리하기",primary=true,onClick={onManage(bar)})
+                RegistrationDashboardAction(
+                    if(snapshot.hasPublishedInitialReview(bar.barId)) "매장 관리하기"
+                    else "메뉴 검수하기",
+                    primary=true,onClick={onManage(bar)}
+                )
             }
         }
     }
     if(visible.isNotEmpty()){
-        RegistrationDashboardSection("신청")
         visible.forEach { app ->
             Column(Modifier.fillMaxWidth()
                 .background(RegistrationV4.surface,RoundedCornerShape(16.dp))
@@ -179,12 +181,6 @@ internal fun OwnerRegistrationDashboard(
             Text("다른 매장 등록하기",fontSize=14.sp,color=RegistrationV4.text)
         }
     }
-}
-
-@Composable
-private fun RegistrationDashboardSection(name:String) {
-    Text(name,color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=20.sp,
-        modifier=Modifier.padding(top=12.dp,bottom=4.dp))
 }
 
 @Composable
