@@ -158,11 +158,13 @@ internal fun CustomerP18BarDetail(
     }
     var photoIndex by rememberSaveable(bar.barId) {mutableIntStateOf(0)}
     var photoFull by rememberSaveable {mutableStateOf(false)}
-    var hoursVisible by remember {mutableStateOf(false)}
-    var mapVisible by rememberSaveable {mutableStateOf(false)}
-    var phoneVisible by rememberSaveable {mutableStateOf(false)}
+    // Owner customer-preview uses one exclusive panel: hours | address | phone.
+    var expanded by rememberSaveable(bar.barId) {mutableStateOf("")}
     var menuQuery by rememberSaveable(bar.barId) {mutableStateOf("")}
-    var collapsed by rememberSaveable(bar.barId) {mutableStateOf(setOf("cocktail","food"))}
+    var collapsed by rememberSaveable(bar.barId) {
+        mutableStateOf(setOf("cocktail","food","snack","brandy","gin","rum","wine",
+            "beer","otheralcohol","other"))
+    }
     var at by remember {mutableStateOf(ZonedDateTime.now(KST))}
     LaunchedEffect(bar.barId) { while(true) { at=ZonedDateTime.now(KST);delay(30000) } }
     val open=p18BusinessStatus(bar.weeklyHours,bar.operatingException,at)
@@ -252,10 +254,10 @@ internal fun CustomerP18BarDetail(
                         fontSize=14.sp,fontWeight=FontWeight.Bold)
                     open.next?.let {Text(it,fontSize=11.sp,color=P18Muted)}
                     Canvas(Modifier.size(22.dp)
-                        .clickable { hoursVisible=!hoursVisible }
+                        .clickable { expanded=if(expanded=="hours")"" else "hours" }
                         .testTag("customer-hours-toggle")) {
-                        val leftY=if(hoursVisible) .65f else .35f
-                        val centerY=if(hoursVisible) .35f else .65f
+                        val leftY=if(expanded=="hours") .65f else .35f
+                        val centerY=if(expanded=="hours") .35f else .65f
                         val stroke=2.dp.toPx()
                         drawLine(P18Gold,
                             Offset(size.width*.18f,size.height*leftY),
@@ -267,12 +269,16 @@ internal fun CustomerP18BarDetail(
                             strokeWidth=stroke,cap=androidx.compose.ui.graphics.StrokeCap.Round)
                     }
                 }
-                P18DetailSmallButton("지도",BmIconId.MAP){mapVisible=!mapVisible}
+                P18PreviewSmallButton("지도","location") {
+                    expanded=if(expanded=="address")"" else "address"
+                }
                 Spacer(Modifier.width(6.dp))
-                P18DetailSmallButton("전화",BmIconId.LOCATION){phoneVisible=!phoneVisible}
+                P18PreviewSmallButton("전화","phone") {
+                    expanded=if(expanded=="phone")"" else "phone"
+                }
             }
             open.note?.let {Text(it,color=P18Muted,fontSize=12.sp)}
-            if(hoursVisible) {
+            if(expanded=="hours") {
                 Column(Modifier.fillMaxWidth().background(P18Surface,RoundedCornerShape(9.dp))
                     .padding(horizontal=12.dp,vertical=10.dp),
                     verticalArrangement=Arrangement.spacedBy(8.dp)) {
@@ -291,50 +297,36 @@ internal fun CustomerP18BarDetail(
                     }
                 }
             }
-            if(mapVisible) {
-                Column(Modifier.fillMaxWidth().background(P18Surface,RoundedCornerShape(9.dp))
-                    .padding(12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-                    Box(Modifier.fillMaxWidth().height(190.dp)
-                        .clip(RoundedCornerShape(9.dp))
-                        .background(androidx.compose.ui.graphics.Color(0xFF7D7060)),
-                        contentAlignment=Alignment.Center) {
-                        Canvas(Modifier.fillMaxSize()) {
-                            drawLine(androidx.compose.ui.graphics.Color(0xFFD8D0C6),
-                                Offset(size.width*(-.1f),size.height*1.18f),
-                                Offset(size.width*1.1f,size.height*(-.1f)),
-                                strokeWidth=34.dp.toPx())
-                            drawLine(androidx.compose.ui.graphics.Color(0xFFD8D0C6),
-                                Offset(size.width*.45f,size.height*(-.2f)),
-                                Offset(size.width*.28f,size.height*1.2f),
-                                strokeWidth=24.dp.toPx())
-                        }
-                        Box(Modifier.background(P18Bg,RoundedCornerShape(50))
-                            .border(2.dp,P18Gold,RoundedCornerShape(50))
-                            .padding(horizontal=11.dp,vertical=6.dp)) {
-                            Text(bar.name,color=P18Text,fontSize=12.sp,fontWeight=FontWeight.Medium)
-                        }
-                    }
-                    Row(verticalAlignment=Alignment.CenterVertically,
-                        horizontalArrangement=Arrangement.spacedBy(9.dp)) {
-                        BmIcon(BmIconId.LOCATION,null,Modifier.size(17.dp),tint=P18Gold)
-                        Text(bar.address,Modifier.weight(1f),color=P18Text,fontSize=12.sp)
-                        Text("복사",Modifier.clickable {
+            if(expanded=="address") {
+                Column(Modifier.fillMaxWidth()
+                    .background(P18Surface,RoundedCornerShape(9.dp))
+                    .padding(12.dp),
+                    verticalArrangement=Arrangement.spacedBy(12.dp)) {
+                    P18PublishedBarMap(bar)
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement=Arrangement.spacedBy(9.dp),
+                        verticalAlignment=Alignment.CenterVertically) {
+                        P18PreviewGlyph("location",Modifier.size(17.dp),accent=true)
+                        Text(bar.address,color=P18Text,fontSize=12.sp,
+                            modifier=Modifier.weight(1f))
+                        P18PreviewCopy({
                             clipboard.setText(AnnotatedString(bar.address))
-                        },color=P18Gold,fontSize=12.sp)
+                        })
                     }
                 }
             }
-            if(phoneVisible) {
-                Row(Modifier.fillMaxWidth().background(P18Surface,RoundedCornerShape(9.dp))
+            if(expanded=="phone") {
+                Row(Modifier.fillMaxWidth()
+                    .background(P18Surface,RoundedCornerShape(9.dp))
                     .padding(horizontal=14.dp,vertical=12.dp),
                     horizontalArrangement=Arrangement.spacedBy(9.dp),
                     verticalAlignment=Alignment.CenterVertically) {
-                    BmIcon(BmIconId.LOCATION,null,Modifier.size(17.dp),tint=P18Gold)
-                    Text(bar.phone ?: "전화번호 정보 없음",Modifier.weight(1f),
-                        color=P18Text,fontSize=12.sp)
-                    if(!bar.phone.isNullOrBlank()) Text("복사",Modifier.clickable {
-                        clipboard.setText(AnnotatedString(bar.phone))
-                    },fontSize=12.sp,color=P18Gold)
+                    P18PreviewGlyph("phone",Modifier.size(17.dp),accent=true)
+                    Text(bar.phone ?: "전화번호 정보 없음",
+                        color=P18Text,fontSize=12.sp,modifier=Modifier.weight(1f))
+                    P18PreviewCopy({
+                        clipboard.setText(AnnotatedString(bar.phone.orEmpty()))
+                    },enabled=!bar.phone.isNullOrBlank())
                 }
             }
             Row(Modifier.fillMaxWidth().padding(top=6.dp),
@@ -356,114 +348,67 @@ internal fun CustomerP18BarDetail(
                     it.brandName.orEmpty().contains(menuQuery,true)
             }
             val categories=filtered.groupBy{it.category.ifBlank{"whisky"}}
-            categories.forEach { (category,menu)->
-                val label=when(category.lowercase(Locale.ROOT)) {
-                    "whisky"->"위스키"
+            categories.forEach { (category,menu) ->
+                val key=category.lowercase(Locale.ROOT)
+                val title=when(key) {
+                    "whisky","whiskey"->"위스키"
+                    "brandy"->"브랜디"
                     "cocktail"->"칵테일"
-                    "food"->"안주"
+                    "food","snack"->"안주"
+                    "otheralcohol"->"기타 주류"
+                    "gin"->"진"
+                    "rum"->"럼"
+                    "wine"->"와인"
+                    "beer"->"맥주"
+                    "other"->"기타"
                     else->category
                 }
-                Row(Modifier.fillMaxWidth().heightIn(min=35.dp)
-                    .background(P18Surface,RoundedCornerShape(7.dp))
+                val open=menuQuery.isNotBlank() || category !in collapsed
+                Row(Modifier.fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(P18Surface)
                     .clickable {
-                        collapsed=if(category in collapsed)collapsed-category
-                        else collapsed+category
-                    }.padding(horizontal=12.dp,vertical=6.dp),
-                    horizontalArrangement=Arrangement.SpaceBetween,
+                        collapsed=if(open)collapsed+category else collapsed-category
+                    }.padding(horizontal=12.dp,vertical=10.dp),
                     verticalAlignment=Alignment.CenterVertically) {
-                    Text(label,color=P18Text,fontSize=14.sp,fontWeight=FontWeight.Bold)
-                    Text(if(category in collapsed)"⌄" else "⌃",color=P18Muted)
+                    Text(title,color=P18Text,fontSize=14.sp,fontWeight=FontWeight.Bold,
+                        modifier=Modifier.weight(1f))
+                    P18DetailCategoryChevron(open=open)
                 }
-                if(category !in collapsed) {
-                    menu.groupBy{it.brandName.orEmpty()}.forEach { (brand,items)->
-                        if(brand.isNotBlank()) Text(brand,
-                            modifier=Modifier.padding(start=4.dp,top=6.dp),
-                            color=P18Gold,fontSize=13.sp,fontWeight=FontWeight.Bold)
-                        items.forEach { item ->
+                if(open) {
+                    val byBrand=if(key in listOf("whisky","whiskey","brandy")) {
+                        menu.groupBy{it.brandName?.takeIf(String::isNotBlank) ?: "기타 브랜드"}
+                    } else mapOf("" to menu)
+                    byBrand.entries.forEachIndexed { groupIndex,group ->
+                        if(key in listOf("whisky","whiskey","brandy")) {
+                            Text(group.key,
+                                modifier=Modifier.padding(start=4.dp,top=18.dp,bottom=8.dp),
+                                fontSize=13.sp,fontWeight=FontWeight.Bold,color=P18Gold)
+                        } else Spacer(Modifier.height(8.dp))
+                        group.value.forEachIndexed { index,item ->
                             val highlighted=highlightProductId!=null &&
                                 highlightProductId==item.productId
-                            Row(Modifier.fillMaxWidth()
+                            Box(Modifier.fillMaxWidth()
                                 .onGloballyPositioned { coords ->
                                     if(highlighted && highlightTarget<0)
                                         highlightTarget=(scroll.value+
                                             coords.positionInRoot().y.toInt()-anchorPx)
                                             .coerceAtLeast(0)
-                                }
-                                .then(if(highlighted)Modifier.background(P18Elevated,
-                                    RoundedCornerShape(10.dp))
-                                    .border(1.5.dp,P18Gold,RoundedCornerShape(10.dp))
-                                    else Modifier)
-                                .padding(horizontal=5.dp,vertical=9.dp),
-                                verticalAlignment=Alignment.CenterVertically,
-                                horizontalArrangement=Arrangement.spacedBy(9.dp)) {
-                                Box(Modifier.width(41.dp).height(53.dp)
-                                    .background(P18Soft,RoundedCornerShape(7.dp))
-                                    .border(1.dp,BottleMapPalette.outline,
-                                        RoundedCornerShape(7.dp)),contentAlignment=Alignment.Center) {
-                                    P18Bottle(item.menuDisplayName,24.dp,42.dp)
-                                }
-                                Column(Modifier.weight(1f),
-                                    verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                                    Text(item.menuDisplayName,color=P18Text,fontSize=12.sp,
-                                        fontWeight=FontWeight.Bold,lineHeight=16.sp)
-                                    if(highlighted) Box(Modifier.background(P18Gold,
-                                        RoundedCornerShape(20.dp))
-                                        .padding(horizontal=6.dp,vertical=1.dp)) {
-                                        Text("찾은 메뉴",fontSize=10.5.sp,lineHeight=15.sp,
-                                             fontWeight=FontWeight.Bold,
-                                            color=BottleMapPalette.onPrimary)
-                                    }
-                                }
-                                Column(Modifier.widthIn(min=116.dp),
-                                    verticalArrangement=Arrangement.spacedBy(3.dp)) {
-                                    item.options.forEach { option ->
-                                        val active=option.discount?.let {
-                                            runCatching {
-                                                val now=at.toInstant()
-                                                now>=Instant.parse(it.startsAt) &&
-                                                    now<Instant.parse(it.endsAt)
-                                            }.getOrDefault(false)
-                                        }==true
-                                        Row(horizontalArrangement=Arrangement.spacedBy(7.dp),
-                                            verticalAlignment=Alignment.CenterVertically) {
-                                            Text(option.pourMl?.let{"${it}ml"} ?:
-                                                option.label.orEmpty(),fontSize=11.sp,
-                                                color=P18Text,modifier=Modifier.width(44.dp),
-                                                textAlign=TextAlign.End)
-                                            Column(horizontalAlignment=Alignment.End) {
-                                                val cost=option.priceKrw?.let {
-                                            p18EffectivePrice(it,option.discount,at.toInstant())
-                                        }
-                                                Text(cost?.let(::p18Price) ?: option.text,
-                                                    fontSize=11.sp,color=P18Muted)
-                                                if(active && option.priceKrw!=null)
-                                                    Text(p18Price(option.priceKrw),
-                                                        textDecoration=TextDecoration.LineThrough,
-                                                        color=P18Muted,fontSize=9.sp)
-                                            }
-                                        }
-                                    }
-                                }
+                                }) {
+                                P18OwnerParityMenuRow(item,highlighted,at)
                             }
-                            Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
+                            if(index<group.value.lastIndex)
+                                Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
+                        }
+                        if(groupIndex<byBrand.size-1) {
+                            Spacer(Modifier.height(8.dp))
+                            Box(Modifier.fillMaxWidth().height(2.dp).background(P18Line))
                         }
                     }
                 }
+                Spacer(Modifier.height(8.dp))
             }
         }
     }
 }
 
-@Composable
-private fun P18DetailSmallButton(label:String,icon:BmIconId,onClick:()->Unit) {
-    Row(Modifier.heightIn(min=33.dp)
-        .background(P18Surface,RoundedCornerShape(7.dp))
-        .border(1.dp,P18Line,RoundedCornerShape(7.dp))
-        .clickable(onClick=onClick)
-        .padding(horizontal=7.dp,vertical=5.dp),
-        verticalAlignment=Alignment.CenterVertically,
-        horizontalArrangement=Arrangement.spacedBy(3.dp)) {
-        BmIcon(icon,null,Modifier.size(17.dp),tint=P18Text)
-        Text(label,color=P18Text,fontSize=11.sp)
-    }
-}
