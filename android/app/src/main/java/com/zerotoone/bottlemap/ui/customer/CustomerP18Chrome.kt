@@ -222,20 +222,23 @@ internal fun P18FailureBody(
 }
 
 @Composable
-internal fun P18LocationBanner(onEnable:()->Unit,modifier:Modifier=Modifier) {
+internal fun P18LocationBanner(onEnable:()->Unit,modifier:Modifier=Modifier,
+    locationFailed:Boolean=false) {
     Row(modifier.fillMaxWidth()
         .background(P18Surface,RoundedCornerShape(12.dp))
         .padding(start=14.dp,top=6.dp,bottom=6.dp,end=6.dp),
         verticalAlignment=Alignment.CenterVertically,
         horizontalArrangement=Arrangement.spacedBy(10.dp)) {
         BmIcon(BmIconId.BAR_PIN,null,Modifier.size(20.dp),tint=P18Muted)
-        Text("위치를 켜면 거리와 가까운 순을 볼 수 있어요",
+        Text(if(locationFailed)"현재 위치를 확인하지 못했어요. 다시 시도해 주세요."
+            else "위치를 켜면 거리와 가까운 순을 볼 수 있어요",
             Modifier.weight(1f),color=P18Text,fontSize=14.sp,lineHeight=20.sp)
         Box(Modifier.heightIn(min=48.dp)
             .background(P18Gold,RoundedCornerShape(10.dp))
             .clickable(onClick=onEnable).padding(horizontal=14.dp),
             contentAlignment=Alignment.Center) {
-            Text("위치 켜기",color=BottleMapPalette.onPrimary,fontSize=14.sp,
+            Text(if(locationFailed)"다시 시도" else "위치 켜기",
+                color=BottleMapPalette.onPrimary,fontSize=14.sp,
                 fontWeight=FontWeight.SemiBold)
         }
     }
