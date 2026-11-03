@@ -98,9 +98,26 @@ internal fun P18IceGlass(modifier: Modifier = Modifier) {
     }
 }
 
+/** Entire loading destination: only a fixed back affordance and a vertically centered glass/caption. */
+@Composable
+internal fun P18LoadingScene(text:String, onBack:()->Unit, modifier:Modifier=Modifier) {
+    Box(modifier.fillMaxSize().background(P18Bg).testTag("customer-loading-scene")) {
+        P18Back(onBack,modifier=Modifier.align(Alignment.TopStart)
+            .padding(start=8.dp,top=12.dp))
+        Column(Modifier.align(Alignment.Center),
+            horizontalAlignment=Alignment.CenterHorizontally,
+            verticalArrangement=Arrangement.spacedBy(16.dp)) {
+            P18IceGlass()
+            Text(text,color=P18Text,fontSize=16.sp,lineHeight=24.sp,
+                textAlign=TextAlign.Center)
+        }
+    }
+}
+
+/** Kept for in-place loading slots; full navigation loading uses [P18LoadingScene]. */
 @Composable
 internal fun P18LoadingBody(text:String, modifier:Modifier=Modifier) {
-    Column(modifier.fillMaxSize().padding(bottom=120.dp),
+    Column(modifier.fillMaxSize(),
         horizontalAlignment=Alignment.CenterHorizontally,
         verticalArrangement=Arrangement.Center) {
         P18IceGlass()
@@ -140,7 +157,7 @@ internal fun P18SortTrigger(label:String,onClick:()->Unit,modifier:Modifier=Modi
         .padding(end=8.dp),verticalAlignment=Alignment.CenterVertically,
         horizontalArrangement=Arrangement.spacedBy(6.dp)) {
         Text(label,color=P18Text,fontSize=14.sp,fontWeight=FontWeight.Medium)
-        Canvas(Modifier.size(width=17.dp,height=13.dp).offset(y=(-2).dp)) {
+        Canvas(Modifier.size(width=14.dp,height=11.dp)) {
             val w=1.7.dp.toPx()
             drawLine(P18Text,Offset(size.width*.12f,size.height*.30f),
                 Offset(size.width*.50f,size.height*.73f),strokeWidth=w,cap=StrokeCap.Round)
