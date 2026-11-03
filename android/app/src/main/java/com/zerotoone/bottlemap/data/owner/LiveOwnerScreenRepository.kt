@@ -255,6 +255,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             }
         }
         pendingCoverWarning = coverWarning
+        val locallyStagedCoverIds = withContext(Dispatchers.IO) {
+            coverApplications.filter { application ->
+                application.status == "pending" &&
+                    pendingCoverStore.read(subject, application.applicationId) != null
+            }.mapTo(mutableSetOf()) { it.applicationId }
+        }
         val importHistory = barsWithCovers.associate { bar ->
             bar.barId to remote.getMenuImports(bar.barId).items
         }
@@ -317,7 +323,13 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         // Never publish a response from a former session after account switch.
         if(AppAuth.gateway.currentAccessTokenOrNull()?.let(::sessionKey) != subject) return
         publishSnapshot(old.copy(
-            bars = mappedBars, applications = applications.map(::toApplication),
+            bars = mappedBars, applications = applications.map { application ->
+                val mapped = toApplication(application)
+                if(application.applicationId in locallyStagedCoverIds)
+                    mapped.copy(registrationPhotos = listOf(MockPhoto(
+                        "local-pending-cover", "", MockPhotoKind.BAR_GALLERY)))
+                else mapped
+            },
             menuItems = rows, brands = brands, products = products,
             selectedBarId = selected,
             imports = importedJobs,
