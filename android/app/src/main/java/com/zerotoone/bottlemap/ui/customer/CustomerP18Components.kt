@@ -124,44 +124,10 @@ internal fun P18SearchField(
     }
 }
 
-/** Recreates the HTML's compact brand-bottle silhouette; unrelated brands use neutral glass. */
+/** Exact P18 40×64 SVG geometry for the four source bottle variants. */
 @Composable
 internal fun P18Bottle(name: String, width: Dp = 40.dp, height: Dp = 64.dp) {
-    val n = name.lowercase(Locale.ROOT)
-    val body = when {
-        "glenfiddich" in n || "글렌피딕" in n -> Color(0xFF1F4A2E)
-        "laphroaig" in n || "라프로익" in n -> Color(0xFF4F7A2A)
-        "balvenie" in n || "발베니" in n -> Color(0xFFB0702A)
-        "macallan" in n || "맥캘란" in n -> Color(0xFF933C1C)
-        else -> Color(0xFF665038)
-    }
-    val top = when {
-        "glenfiddich" in n || "글렌피딕" in n -> Color(0xFF6F9079)
-        "laphroaig" in n || "라프로익" in n -> Color(0xFF9CC294)
-        "balvenie" in n || "발베니" in n -> Color(0xFFD2C6B2)
-        else -> Color(0xFFCFC4BB)
-    }
-    Canvas(Modifier.size(width = width, height = height).testTag("customer-bottle")) {
-        val sx = size.width / 40f
-        val sy = size.height / 64f
-        val outline = Path().apply {
-            moveTo(17f*sx,9f*sy); lineTo(23f*sx,9f*sy)
-            lineTo(23f*sx,16f*sy); cubicTo(23f*sx,19f*sy,30f*sx,20f*sy,30f*sx,25f*sy)
-            lineTo(29f*sx,59f*sy); quadraticTo(29f*sx,62f*sy,26f*sx,62f*sy)
-            lineTo(14f*sx,62f*sy); quadraticTo(11f*sx,62f*sy,11f*sx,59f*sy)
-            lineTo(10f*sx,25f*sy); cubicTo(10f*sx,20f*sy,17f*sx,19f*sy,17f*sx,16f*sy)
-            close()
-        }
-        drawPath(outline,body)
-        drawRect(top,topLeft=androidx.compose.ui.geometry.Offset(16.8f*sx,9f*sy),
-            size=androidx.compose.ui.geometry.Size(6.4f*sx,9f*sy))
-        drawRect(Color(0xFFF0E6CC),topLeft=androidx.compose.ui.geometry.Offset(12f*sx,35f*sy),
-            size=androidx.compose.ui.geometry.Size(16f*sx,20f*sy))
-        drawRect(Color(0xFFB06A35),topLeft=androidx.compose.ui.geometry.Offset(12f*sx,43f*sy),
-            size=androidx.compose.ui.geometry.Size(16f*sx,1f*sy))
-        drawRect(Color(0xFFD69458),topLeft=androidx.compose.ui.geometry.Offset(17f*sx,2f*sy),
-            size=androidx.compose.ui.geometry.Size(6f*sx,9f*sy))
-    }
+    P18ExactBottle(name,width,height)
 }
 
 internal fun p18Price(price: Int): String =
