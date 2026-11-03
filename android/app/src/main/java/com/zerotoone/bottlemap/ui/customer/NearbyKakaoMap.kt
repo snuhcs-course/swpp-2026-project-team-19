@@ -102,6 +102,11 @@ fun NearbyKakaoMap(
     onMapViewChanged: (MapView?) -> Unit,
     onMapTouch: () -> Unit = {},
     modifier: Modifier = Modifier,
+    /** P18 discovery and product maps use the compact HTML card marker. */
+    p18Markers: Boolean = false,
+    /** No blue "current location" for a default map center or bar coordinate. */
+    showOriginMarker: Boolean = true,
+    p18MarkerSubtitle: (String) -> String? = { null },
 ) {
     if (BuildConfig.KAKAO_NATIVE_APP_KEY.isBlank()) {
         Text("Kakao Native App Key 설정이 필요합니다.", modifier = modifier.padding(16.dp))
@@ -124,6 +129,7 @@ fun NearbyKakaoMap(
         val currentMapTouch = rememberUpdatedState(onMapTouch)
         val currentCovered = rememberUpdatedState(listCovered)
         val ctx = LocalContext.current
+        val markerDensity = ctx.resources.displayMetrics.density
         val owner = LocalLifecycleOwner.current
         val view = remember {
             try { MapView(ctx) } catch (_: Exception) { null }
@@ -154,16 +160,24 @@ fun NearbyKakaoMap(
                     val label = layer.addLabel(
                         LabelOptions.from(id,
                             LatLng.from(bar.location.latitude, bar.location.longitude))
-                            .setStyles(nearbyMarkerStyle(id == selectedBarId))
+                            .setStyles(if(p18Markers)
+                                p18CardMarkerStyle(id == selectedBarId,bar.name,
+                                    p18MarkerSubtitle(id),markerDensity)
+                                else nearbyMarkerStyle(id == selectedBarId))
                             .setClickable(true)
                             .setTag(id)
-                            .setTexts(LabelTextBuilder().setTexts(bar.name)),
+                            .apply {
+                                if(!p18Markers)setTexts(LabelTextBuilder().setTexts(bar.name))
+                            },
                     )
                     if (label != null) markers[id] = bar.location to label
                 }
             }
             markers.forEach { (id, stored) ->
-                stored.second.setStyles(nearbyMarkerStyle(id == selectedBarId))
+                stored.second.setStyles(if(p18Markers)
+                    p18CardMarkerStyle(id == selectedBarId,
+                        current[id]?.name ?: id,p18MarkerSubtitle(id),markerDensity)
+                    else nearbyMarkerStyle(id == selectedBarId))
                 stored.second.invalidate()
             }
         }
@@ -201,7 +215,11 @@ fun NearbyKakaoMap(
         // new nearby HTTP result.
         LaunchedEffect(nativeMap, selectedBarId) {
             if (nativeMap != null) markers.forEach { (id, pair) ->
-                pair.second.setStyles(nearbyMarkerStyle(id == selectedBarId))
+                pair.second.setStyles(if(p18Markers)
+                    p18CardMarkerStyle(id == selectedBarId,
+                        bars.firstOrNull{it.barId==id}?.name ?: id,
+                        p18MarkerSubtitle(id),markerDensity)
+                    else nearbyMarkerStyle(id == selectedBarId))
                 pair.second.invalidate()
             }
         }
@@ -355,7 +373,7 @@ fun NearbyKakaoMap(
                                     try {
                                         val layer = map.labelManager?.layer
                                             ?: throw IllegalStateException("No Kakao label layer")
-                                        layer.addLabel(
+                                        if(showOriginMarker) layer.addLabel(
                                             LabelOptions.from("__user_location__",
                                                 LatLng.from(origin.latitude, origin.longitude))
                                                 .setStyles(userLocationStyle())
@@ -529,3 +547,55 @@ private fun nearbyMarkerStyle(selected: Boolean): LabelStyle {
         .setTextStyles(18, Color.WHITE, 2, Color.rgb(12, 22, 38))
 }
 
+
+/** P18 HTML marker: 38x38 photo tile, 12sp labels and a restrained gold
+ * selection border. Drawn in physical pixels from density for true dp sizing.
+ * If no price/distance is provided, do not invent a secondary label.
+ */
+private fun p18CardMarkerStyle(
+    selected:Boolean, name:String, secondary:String?, density:Float,
+):LabelStyle {
+    val d=density.coerceAtLeast(.5f)
+    val width=(164f*d).toInt().coerceAtLeast(1)
+    val height=(56f*d).toInt().coerceAtLeast(1)
+    val image=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+    val canvas=Canvas(image)
+    val bg=Paint(Paint.ANTI_ALIAS_FLAG).apply { color=Color.rgb(33,30,27) }
+    val border=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=if(selected)Color.rgb(201,157,107) else Color.rgb(81,71,63)
+        style=Paint.Style.STROKE
+        strokeWidth=(if(selected)2f else 1f)*d
+    }
+    val rect=android.graphics.RectF(1f*d,1f*d,(width/d-1f)*d,(height/d-1f)*d)
+    canvas.drawRoundRect(rect,11f*d,11f*d,bg)
+    canvas.drawRoundRect(rect,11f*d,11f*d,border)
+    val photo=android.graphics.RectF(7f*d,8f*d,45f*d,46f*d)
+    canvas.drawRoundRect(photo,8f*d,8f*d,Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(64,56,50)
+    })
+    val icon=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(199,187,176)
+        style=Paint.Style.STROKE
+        strokeWidth=1.5f*d
+    }
+    canvas.drawRect(19f*d,20f*d,34f*d,34f*d,icon)
+    canvas.drawCircle(29f*d,24f*d,2f*d,icon)
+    val letters=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(242,237,232);isFakeBoldText=true
+        textSize=12f*d
+    }
+    fun trim(text:String,maxWidth:Float,paint:Paint):String {
+        var t=text
+        while(t.isNotEmpty() && paint.measureText(t)>maxWidth) t=t.dropLast(1)
+        return if(t!=text) t.dropLast(1)+"…" else t
+    }
+    canvas.drawText(trim(name,104f*d,letters),52f*d,23f*d,letters)
+    if(!secondary.isNullOrBlank()) {
+        val sub=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color=Color.rgb(199,187,176)
+            textSize=12f*d
+        }
+        canvas.drawText(trim(secondary,104f*d,sub),52f*d,40f*d,sub)
+    }
+    return LabelStyle.from(image).setAnchorPoint(.5f,1f)
+}
