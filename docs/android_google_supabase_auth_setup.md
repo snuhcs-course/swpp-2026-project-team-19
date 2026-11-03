@@ -16,7 +16,7 @@
    .\gradlew.bat :app:signingReport
    ```
 
-   Copy `SHA1:` under the **debug** variant to the Google Android OAuth client. This is the **colon-separated SHA-1**, not Kakao's Base64 key hash. Different PCs can have different debug signing certificates.
+   Copy `SHA1:` under the **debug** variant to the Google Android OAuth client. This is the **colon-separated SHA-1**, not Kakao's Base64 key hash. Different PCs can have different debug signing certificates. The `main` CI APK (`bottlemap-prod-debug-apk`) is signed with the team's registered debug keystore from the `ANDROID_DEBUG_KEYSTORE_BASE64` Actions secret; if that keystore changes, update the secret and this client's SHA-1 together.
 
 ## 2. Supabase Dashboard
 
