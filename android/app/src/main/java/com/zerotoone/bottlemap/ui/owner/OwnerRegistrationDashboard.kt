@@ -89,15 +89,13 @@ internal fun OwnerRegistrationDashboard(
                         else -> "pending"
                     })
                 }
-                val date=when {
-                    app.submittedAtEpochMs>0 ->
-                        SimpleDateFormat("M월 d일",Locale.KOREAN).format(Date(app.submittedAtEpochMs))
-                    app.status==MockApplicationStatus.REJECTED -> "10월 30일"
-                    else -> "10월 28일"
+                // An older Mock fixture may have no timestamp. Never fabricate a
+                // submission or review date, or call submission date review date.
+                val submitted = app.submittedAtEpochMs.takeIf { it > 0L }?.let {
+                    SimpleDateFormat("M월 d일",Locale.KOREAN).format(Date(it))
                 }
-                Text(date + if(app.status==MockApplicationStatus.REJECTED)"에 검토했어요" else
-                    "에 신청했어요",color=RegistrationV4.secondary,
-                    fontSize=14.sp,lineHeight=21.sp)
+                Text(if(submitted!=null) "${submitted}에 신청했어요" else "신청일 정보 없음",
+                    color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=21.sp)
                 when(app.status){
                     MockApplicationStatus.PENDING -> {
                         Spacer(Modifier.height(12.dp))
