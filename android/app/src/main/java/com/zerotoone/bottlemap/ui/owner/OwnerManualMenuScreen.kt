@@ -187,7 +187,8 @@ internal fun OwnerManualMenuScreen(
         MockImportStatus.UPLOADED,MockImportStatus.PROCESSING,
         MockImportStatus.READY_FOR_REVIEW)
     val products = snapshot?.products.orEmpty()
-    val brands = (snapshot?.brands.orEmpty() + htmlBrands).distinctBy { it.brandId }
+    val brands = (snapshot?.brands.orEmpty() +
+        if(viewModel.usesProductionOwnerApi()) emptyList() else htmlBrands).distinctBy { it.brandId }
     // A deleted local product retains its ID; offer it again only for this bar,
     // via the same explicit "맞아요" confirmation as canonical catalog entries.
     val deletedLocalCandidates = products.filter { product ->
@@ -200,7 +201,8 @@ internal fun OwnerManualMenuScreen(
     val activeLocalCandidates = products.filter { product ->
         !product.catalogMatched && items.any { it.productId == product.productId }
     }
-    val candidates = (products.filter { it.catalogMatched } + htmlCatalog +
+    val candidates = (products.filter { it.catalogMatched && it.isActive } +
+        (if(viewModel.usesProductionOwnerApi()) emptyList() else htmlCatalog) +
         deletedLocalCandidates + activeLocalCandidates).distinctBy { it.productId }
 
     val photoContext=LocalContext.current
@@ -216,6 +218,12 @@ internal fun OwnerManualMenuScreen(
     var linkedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var rejectedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var itemName by rememberSaveable(bar?.barId) { mutableStateOf("") }
+    LaunchedEffect(screen, itemName) {
+        if(screen=="item" && itemName.trim().length>=2 && viewModel.usesProductionOwnerApi()) {
+            kotlinx.coroutines.delay(300)
+            runCatching { viewModel.searchCatalogLive(itemName) }
+        }
+    }
     var brandName by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var category by rememberSaveable(bar?.barId) { mutableStateOf("위스키") }
     var alcoholKind by rememberSaveable(bar?.barId) { mutableStateOf("") }
