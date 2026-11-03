@@ -1,6 +1,7 @@
 """p30_extract.py with made-up photos, a fake Gemini client and a fake CLOVA client (no API call,
 never the I3 photos or labels)."""
 
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -177,7 +178,8 @@ def test_three_runs_write_records_score_py_and_e2e_match_read(setup, monkeypatch
 
     m = manifest(setup.out)
     assert m["config"]["model"] == "gemini-3.5-flash-lite" and m["config"]["prompt_sha256"] == p30.PROMPT_SHA256
-    assert m["frozen_code"] == p30.FROZEN_CODE
+    assert m["frozen_code"] == p30.check_frozen_code(p30.REPO_ROOT)  # the actual file hashes
+    assert p30.frozen_code_pins(m["frozen_code"]) == p30.FROZEN_CODE
     assert m["photos"]["901_a_01.png"]["sha256"] == sha((setup.photo_dir / "901_a_01.png").read_bytes())
     assert set(m["ocr_caches"]) == set(setup.files)
     cmd = m["commands"][-1]
@@ -229,6 +231,70 @@ def test_frozen_code_change_stops(setup, monkeypatch):
     monkeypatch.setitem(p30.FROZEN_CODE, "backend/app/extraction/hybrid.py", "0" * 64)
     code, gemini, _ = run(setup)
     assert code == p30.EXIT_PREFLIGHT and gemini.requests == []
+
+
+HYBRID = "backend/app/extraction/hybrid.py"
+DOC_5D49C8A = "(no DB column for it yet: ai/docs/p35_backend_notes.md)"
+DOC_77 = "(the review API returns the box as `sourceBox`)"
+
+
+def code_without_docstrings(source: str) -> str:
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        body = getattr(node, "body", None)
+        if (isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and body
+                and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant)
+                and isinstance(body[0].value.value, str)):
+            node.body = body[1:]
+    return ast.dump(tree)
+
+
+def test_hybrid_docstring_change_of_77_passes_and_any_other_change_stops(tmp_path):
+    current = (REPO_ROOT / HYBRID).read_text(encoding="utf-8")
+    assert DOC_77 in current
+    frozen = current.replace(DOC_77, DOC_5D49C8A)
+    other_doc = current.replace(DOC_77, "(edited docstring)")
+    code_change = current.replace('PROMPT_VERSION = "hybrid-v1"', 'PROMPT_VERSION = "hybrid-v2"')
+    assert code_change != current
+
+    def digest(text: str) -> str:
+        (tmp_path / "hybrid.py").write_text(text, encoding="utf-8", newline="")
+        return p30.sha256_text_file(tmp_path / "hybrid.py")
+
+    def stops(text: str) -> bool:
+        return p30.frozen_code_pins({HYBRID: digest(text)})[HYBRID] != p30.FROZEN_CODE[HYBRID]
+
+    # undoing #77's one line gives the 5d49c8a blob, and #77 changed no code
+    assert digest(frozen) == p30.FROZEN_CODE[HYBRID]
+    assert p30.FROZEN_CODE_EQUIVALENT[HYBRID][digest(current)][0] == p30.FROZEN_CODE[HYBRID]
+    assert code_without_docstrings(current) == code_without_docstrings(frozen)
+    assert not stops(frozen) and not stops(current) and not stops(current.replace("\n", "\r\n"))
+    # only those exact bytes are accepted: another docstring edit or a code change stops
+    assert code_without_docstrings(other_doc) == code_without_docstrings(frozen) and stops(other_doc)
+    assert code_without_docstrings(code_change) != code_without_docstrings(frozen) and stops(code_change)
+
+
+def test_checkout_hybrid_passes_only_through_its_listed_equivalent(setup, monkeypatch, capsys):
+    assert p30.check_frozen_code(p30.REPO_ROOT)
+    code, gemini, _ = run(setup, "--check")
+    assert code == p30.EXIT_OK
+    monkeypatch.setitem(p30.FROZEN_CODE_EQUIVALENT, HYBRID, {})
+    capsys.readouterr()
+    code, gemini, clova = run(setup, "--check")
+    assert code == p30.EXIT_PREFLIGHT and gemini.requests == [] and clova.requests == []
+    assert f"frozen extraction files changed (no API call made): {HYBRID}" in capsys.readouterr().out
+
+
+def test_manifest_with_the_5d49c8a_hybrid_resumes_after_77(setup, capsys):
+    run(setup, "--runs", "1")
+    m = manifest(setup.out)
+    assert m["frozen_code_equivalent"] == json.loads(json.dumps(p30.FROZEN_CODE_EQUIVALENT))
+    m["frozen_code"][HYBRID] = p30.FROZEN_CODE[HYBRID]  # a run started before main had #77
+    (setup.out / "manifest.json").write_text(json.dumps(m), encoding="utf-8")
+    capsys.readouterr()
+    code, gemini, clova = run(setup, "--check")
+    assert code == p30.EXIT_OK and gemini.requests == [] and clova.requests == []
+    assert "manifest: 1 earlier command(s)" in capsys.readouterr().out
 
 
 def test_ocr_cache_of_another_image_stops(setup, capsys):

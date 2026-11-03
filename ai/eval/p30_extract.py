@@ -10,8 +10,9 @@ Configuration (frozen, not read from the environment): the deployed server's cod
 from this checkout and called unchanged: CLOVA OCR lines + the photo -> `gemini-3.5-flash-lite`,
 thinking medium, with the server's retry policy (`app.extraction.gemini.call_with_retries`:
 6 attempts, backoff 5-60 s on timeouts and HTTP 429/5xx, request 300 s, wall 330 s). Before
-anything else the frozen extraction files (FROZEN_CODE) and the scoring code (FROZEN_EVAL:
-score.py, e2e_match.py) are checked against their SHA-256, the photo hash file
+anything else the frozen extraction files (FROZEN_CODE, or a listed docstring-only version in
+FROZEN_CODE_EQUIVALENT) and the scoring code (FROZEN_EVAL: score.py, e2e_match.py) are checked
+against their SHA-256, the photo hash file
 ai/eval/i3_photo_sha256.json against its frozen SHA-256, and every photo against that file. The
 label, gold and photo hash files (FROZEN_RAW) and the matching components of the freeze 4.5
 (FROZEN_MATCHING) are checked on their raw bytes, as score.py and i3_match_eval.py hash them, so a
@@ -106,6 +107,18 @@ FROZEN_CODE = {
     "backend/app/extraction/schema.py": "dd2e22724ac259f7040bee577148df31b60e91257b5c073da84b82d076fa4d64",
     "backend/app/extraction/errors.py": "072d276d56d8f26fd44b8fba3882e754f10cf63d92fb77e029b2e5a486142a1c",
     "backend/app/extraction/clova.py": "ecb321607e56a1779bef6a2a2dc0c91be38d74ecac3ac0e56778f30863c2985c",
+}
+# Later versions of a FROZEN_CODE file that change no code: their exact SHA-256 (CRLF read as LF) ->
+# (the frozen SHA-256 they stand for, why). Accepted only while that frozen SHA-256 is the pin; any
+# other change still stops. hybrid.py: #77 (af4aadf) changed one line of the
+# module docstring ("(no DB column for it yet: ai/docs/p35_backend_notes.md)" -> "(the review API
+# returns the box as `sourceBox`)"); its AST without docstrings is that of 5d49c8a (checked by
+# test_p30_extract.py). An exact pin, not an AST digest: ast.dump differs between Python versions.
+FROZEN_CODE_EQUIVALENT = {
+    "backend/app/extraction/hybrid.py": {
+        "0c9debfece06b86a32e6426b4f60506e280d643db37bd40a86e066a6cf3dee6a": (
+            "d242aff830181225d0b792f7e74c0292ce0ea4c0b7355af30b8891fb43eb5da9", "#77 (af4aadf): module docstring only"),
+    },
 }
 # The scoring and end-to-end line pairing code the freeze fixes (3장 "채점", 4.2 "종단 줄 맞추기"):
 # score.py as committed in the freeze (15b1eff: the 5d49c8a logic plus the `--set i3` label set
@@ -314,10 +327,16 @@ def verify_photos(photo_dir: Path, hashes_path: Path) -> list[Photo]:
     return photos
 
 
+def frozen_code_pins(digests: dict[str, str]) -> dict[str, str]:
+    """`digests` with each FROZEN_CODE_EQUIVALENT version replaced by the frozen SHA-256 it stands for."""
+    return {rel: FROZEN_CODE_EQUIVALENT.get(rel, {}).get(d, (d,))[0] for rel, d in digests.items()}
+
+
 def check_frozen_code(repo: Path) -> dict[str, str]:
-    """Frozen extraction files, prompt, and the scoring code (FROZEN_EVAL). Raises Stop on a change."""
+    """Frozen extraction files, prompt, and the scoring code (FROZEN_EVAL). Raises Stop on a change.
+    Returns the actual SHA-256 of the FROZEN_CODE files (for the manifest)."""
     actual = {rel: sha256_text_file(repo / rel) for rel in FROZEN_CODE}
-    diff = [rel for rel, digest in actual.items() if digest != FROZEN_CODE[rel]]
+    diff = [rel for rel, digest in frozen_code_pins(actual).items() if digest != FROZEN_CODE[rel]]
     if diff:
         raise Stop(f"frozen extraction files changed (no API call made): {', '.join(diff)}")
     scoring = {rel: sha256_text_file(repo / rel) if (repo / rel).exists() else None for rel in FROZEN_EVAL}
@@ -667,6 +686,7 @@ def load_manifest(out: Path, config: dict, frozen: dict, photos: list[Photo]) ->
                        "resumed. Restore that manifest.json or use a new, empty --out")
         return {"task": "P30 extraction, I3 test set (33 photos x r1-r3)", "config": config, "frozen_code": frozen,
                 "frozen_code_reference": "5d49c8a (clova.py: 1e149d4, deadline_s path only)",
+                "frozen_code_equivalent": FROZEN_CODE_EQUIVALENT,
                 "frozen_eval": FROZEN_EVAL, "frozen_eval_reference": "score.py: 15b1eff, e2e_match.py: 5d49c8a",
                 "frozen_raw": FROZEN_RAW, "frozen_matching": FROZEN_MATCHING,
                 "frozen_matching_reference": "ai/docs/i3_eval_freeze.md 4.5 (file SHA-256, raw bytes)",
@@ -674,7 +694,10 @@ def load_manifest(out: Path, config: dict, frozen: dict, photos: list[Photo]) ->
                 "photo_hashes_file_sha256": None, "photos": inputs, "ocr_caches": {}, "commands": []}
     manifest = json.loads(path.read_text(encoding="utf-8"))
     for key, value in (("config", config), ("frozen_code", frozen), ("photos", inputs)):
-        if manifest.get(key) != value:
+        stored = manifest.get(key)
+        if key == "frozen_code" and isinstance(stored, dict):  # a docstring-only version is the same code
+            stored, value = frozen_code_pins(stored), frozen_code_pins(value)
+        if stored != value:
             raise Stop(f"{path}: '{key}' differs from this command's; use a new --out for another configuration")
     return manifest
 
