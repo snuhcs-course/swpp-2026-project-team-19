@@ -85,8 +85,15 @@ fun BottleMapNavHost() {
                 navController.popBackStack()
             },
             onOpenBarDetail = { barId, productId ->
-                navController.navigate("customer/bar-detail/" + Uri.encode(barId) +
-                    "?productId=" + Uri.encode(productId.orEmpty()))
+                // Ignore stale events from a destination already leaving the back stack.
+                if (navController.currentDestination?.route in setOf(
+                        Routes.CUSTOMER_SEARCH_RESULTS_ROUTE, Routes.CUSTOMER_NEARBY
+                    )) {
+                    navController.navigate("customer/bar-detail/" + Uri.encode(barId) +
+                        "?productId=" + Uri.encode(productId.orEmpty())) {
+                        launchSingleTop = true
+                    }
+                }
             },
             onOpenBarMap = { barId ->
                 navController.navigate(Routes.CUSTOMER_BAR_MAP + "/" + Uri.encode(barId))
@@ -129,7 +136,7 @@ private fun NavGraphBuilder.customerGraph(
         }
         composable(Routes.CUSTOMER_NEARBY) {
             com.zerotoone.bottlemap.ui.customer.CustomerP18Explore(
-                onBack=onBack,
+                onBack={ if (navController.currentDestination?.route==Routes.CUSTOMER_NEARBY) onBack() },
                 onOpenBar={id->onOpenBarDetail(id,null)},
             )
         }
@@ -137,8 +144,9 @@ private fun NavGraphBuilder.customerGraph(
             val state = authViewModel.state.collectAsStateWithLifecycle().value
             AccountScreen(
                 state = state,
-                onBack = onBack,
-                onOpenLogin = { navController.navigate(Routes.CUSTOMER_LOGIN) },
+                onBack = { if (navController.currentDestination?.route==Routes.CUSTOMER_ACCOUNT) onBack() },
+                onOpenLogin = { if (navController.currentDestination?.route==Routes.CUSTOMER_ACCOUNT)
+                    navController.navigate(Routes.CUSTOMER_LOGIN) { launchSingleTop=true } },
                 onLogout = authViewModel::logout,
                 onRetryAccount = authViewModel::retryAccountSync,
                 onOpenOwner = { navController.navigate(OwnerRoutes.GRAPH) },
@@ -152,7 +160,7 @@ private fun NavGraphBuilder.customerGraph(
             GoogleLoginScreen(
                 state = state,
                 authViewModel = authViewModel,
-                onBack = onBack,
+                onBack = { if (navController.currentDestination?.route==Routes.CUSTOMER_LOGIN) onBack() },
                 onContinueGuest = {
                     authViewModel.continueAsGuest()
                     navController.popBackStack()
@@ -182,8 +190,17 @@ private fun NavGraphBuilder.customerGraph(
                 initialProductId = entry.arguments?.getString(Routes.CUSTOMER_PRODUCT_ARGUMENT)
                     ?.takeIf { it.isNotBlank() },
                 source = entry.arguments?.getString(Routes.CUSTOMER_SOURCE_ARGUMENT) ?: "input",
-                onBack = onBack,
+                onBack = { if (navController.currentDestination?.route==Routes.CUSTOMER_SEARCH_RESULTS_ROUTE) onBack() },
                 onOpenBar = onOpenBarDetail,
+                onSearchAgain = { updated ->
+                    if (navController.currentDestination?.route==Routes.CUSTOMER_SEARCH_RESULTS_ROUTE) {
+                        navController.navigate(Routes.CUSTOMER_SEARCH_RESULTS +
+                            "?query=" + Uri.encode(updated) + "&productId=&source=input") {
+                            popUpTo(Routes.CUSTOMER_SEARCH_RESULTS_ROUTE) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                },
             )
         }
         composable(
@@ -198,8 +215,9 @@ private fun NavGraphBuilder.customerGraph(
         ) { backStackEntry ->
             BarDetailScreen(
                 barId = backStackEntry.arguments?.getString(Routes.BAR_ID_ARGUMENT).orEmpty(),
-                onBack = onBack,
-                onBackAndRefreshResults = onMissingBarReturn,
+                onBack = { if(navController.currentDestination?.route==Routes.CUSTOMER_BAR_DETAIL_ROUTE) onBack() },
+                onBackAndRefreshResults = { if(navController.currentDestination?.route==Routes.CUSTOMER_BAR_DETAIL_ROUTE)
+                    onMissingBarReturn() },
                 onOpenMap = onOpenBarMap,
                 highlightProductId = backStackEntry.arguments
                     ?.getString(Routes.CUSTOMER_PRODUCT_ARGUMENT)?.takeIf {it.isNotBlank()},
@@ -236,7 +254,7 @@ private fun NavGraphBuilder.customerGraph(
                 BarLocationMapScreen(
                     barId = barId,
                     detailState = detailState,
-                    onBack = onBack,
+                    onBack = { if(navController.currentDestination?.route==Routes.CUSTOMER_BAR_MAP_ROUTE) onBack() },
                     onRetryDetail = detailViewModel::retry,
                 )
             } else {
