@@ -352,6 +352,21 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         return remote.readBusinessCertificate(prepared)
     }
 
+    suspend fun searchExistingBarCandidatesLive(query: String) {
+        val trimmed=query.trim()
+        if(trimmed.length < 2 || trimmed.length > 100) return
+        val matches=com.zerotoone.bottlemap.network.ApiClient.call {
+            com.zerotoone.bottlemap.network.ApiClient.api.searchBarNames(trimmed, limit=20)
+        }
+        val before=snapshot()
+        local.replaceFromBackend(before.copy(existingBarCandidates=matches.items
+            .filter { !it.hasOwner }
+            .map {
+                MockBar(it.barId,it.name,it.address,
+                    latitude=it.latitude, longitude=it.longitude)
+            }))
+    }
+
     suspend fun searchCatalogLive(query: String) {
         val trimmed = query.trim()
         if(trimmed.isEmpty() || trimmed.length > 100) return
