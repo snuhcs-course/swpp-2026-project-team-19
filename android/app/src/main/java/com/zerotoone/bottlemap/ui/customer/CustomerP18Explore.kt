@@ -15,6 +15,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -190,6 +192,25 @@ internal fun CustomerP18Explore(
     val bars=freshBars ?: lastVisibleBars
     val ordered=p18BrowseOrdered(bars,sort,location)
     val chosen=bars.firstOrNull{it.barId==selectedId}
+    val carouselState=rememberLazyListState()
+    LaunchedEffect(selectedId,ordered.map{it.barId}) {
+        val index=ordered.indexOfFirst{it.barId==selectedId}
+        if(index>=0 && index!=carouselState.firstVisibleItemIndex)
+            carouselState.animateScrollToItem(index)
+    }
+    LaunchedEffect(carouselState,ordered.map{it.barId}) {
+        snapshotFlow { carouselState.isScrollInProgress to carouselState.firstVisibleItemIndex }
+            .collect { (scrolling,index) ->
+                if(!scrolling && selectedId!=null) {
+                    ordered.getOrNull(index)?.barId?.let { id ->
+                        if(id!=selectedId) {
+                            selectedId=id
+                            viewModel.loadTags(listOf(id))
+                        }
+                    }
+                }
+            }
+    }
     LaunchedEffect(listVisible,selectedId,ordered.map{it.barId}) {
         if(listVisible) viewModel.loadTags(ordered.map{it.barId}.take(12))
         else selectedId?.let{viewModel.loadTags(listOf(it))}
@@ -295,7 +316,10 @@ internal fun CustomerP18Explore(
             onFocusApplied={zoomTarget=null},onCameraChanged=viewModel::rememberCamera,
             onMapCameraMoving=viewModel::moving,
             onMapViewportUnavailable=viewModel::unavailable,viewportRetryToken=0,
-            onSelectBar={id->selectedId=id;viewModel.loadTags(listOf(id))},
+            onSelectBar={id->
+                selectedId=if(selectedId==id)null else id
+                selectedId?.let{viewModel.loadTags(listOf(it))}
+            },
             onViewportChanged={viewport->viewModel.load(viewport)},
             recenterToken=recenterToken,onMapViewChanged={mapView=it},
             modifier=Modifier.fillMaxSize(),p18SimplePins=true,
@@ -370,34 +394,46 @@ internal fun CustomerP18Explore(
                 else Unit
                 else -> Unit
             }
-            // A selected marker reveals a compact card; no card before first pin tap.
+            // A selected pin reveals a horizontally swipeable strip of 3/4-width
+            // photo/name/tag cards, centered near the bottom, otherwise fully hidden.
             if(chosen!=null) {
-                Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                    .padding(start=12.dp,end=12.dp,bottom=8.dp)
-                    .background(P18Bg,RoundedCornerShape(14.dp))
-                    .border(1.dp,P18Line,RoundedCornerShape(14.dp))
-                    .clickable { zoomTarget=chosen.barId }
-                    .padding(horizontal=12.dp,vertical=9.dp),
-                    verticalAlignment=Alignment.CenterVertically,
-                    horizontalArrangement=Arrangement.spacedBy(10.dp)) {
-                    if(!chosen.coverThumbnailUrl.isNullOrBlank())
-                        P18RemoteBarPhoto(chosen.coverThumbnailUrl,Modifier.size(60.dp))
-                    else P18Photo(size=60.dp)
-                    Column(Modifier.weight(1f),
-                        verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                        Text(chosen.name,color=P18Text,fontSize=16.sp,
-                            fontWeight=FontWeight.SemiBold,maxLines=1,
-                            overflow=TextOverflow.Ellipsis)
-                        Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
-                            tags[chosen.barId].orEmpty().take(2).forEach { tag ->
-                                P18BrowseTag(tag)
+                BoxWithConstraints(Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                    .padding(bottom=8.dp)) {
+                    val cardWidth=maxWidth*.75f
+                    LazyRow(Modifier.fillMaxWidth(),state=carouselState,
+                        contentPadding=PaddingValues(horizontal=(maxWidth-cardWidth)/2),
+                        horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                        items(ordered,key={it.barId}) { bar ->
+                            Row(Modifier.width(cardWidth).heightIn(min=80.dp)
+                                .background(P18Bg,RoundedCornerShape(14.dp))
+                                .border(1.dp,P18Line,RoundedCornerShape(14.dp))
+                                .clickable {
+                                    selectedId=bar.barId
+                                    zoomTarget=bar.barId
+                                }
+                                .padding(horizontal=9.dp,vertical=7.dp),
+                                verticalAlignment=Alignment.CenterVertically,
+                                horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                if(!bar.coverThumbnailUrl.isNullOrBlank())
+                                    P18RemoteBarPhoto(bar.coverThumbnailUrl,Modifier.size(54.dp))
+                                else P18Photo(size=54.dp)
+                                Column(Modifier.weight(1f),
+                                    verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                                    Text(bar.name,color=P18Text,fontSize=14.sp,
+                                        fontWeight=FontWeight.SemiBold,maxLines=1,
+                                        overflow=TextOverflow.Ellipsis)
+                                    Row(horizontalArrangement=Arrangement.spacedBy(4.dp)) {
+                                        tags[bar.barId].orEmpty().take(2).forEach{tag->
+                                            P18BrowseTag(tag)
+                                        }
+                                    }
+                                }
+                                Text("보기",Modifier.clickable { onOpenBar(bar.barId) }
+                                    .padding(horizontal=4.dp,vertical=11.dp),
+                                    fontSize=11.sp,color=P18Gold,
+                                    fontWeight=FontWeight.SemiBold)
                             }
                         }
-                    }
-                    Box(Modifier.size(width=56.dp,height=44.dp)
-                        .clickable{onOpenBar(chosen.barId)},contentAlignment=Alignment.Center) {
-                        Text("매장 보기",fontSize=12.sp,color=P18Gold,
-                            fontWeight=FontWeight.SemiBold)
                     }
                 }
             }
@@ -411,10 +447,10 @@ internal fun CustomerP18Explore(
                 },end=12.dp)
                 .size(48.dp)
                 .background(androidx.compose.ui.graphics.Color.White,CircleShape)
-                .border(1.5.dp,P18Gold,CircleShape)
+                .border(1.5.dp,Color.Black,CircleShape)
                 .clickable(onClick=::requestCurrentLocation)
                 .testTag("customer-map-recenter"),contentAlignment=Alignment.Center) {
-                BmIcon(BmIconId.LOCATION,"내 위치로",Modifier.size(23.dp),tint=P18Gold)
+                BmIcon(BmIconId.LOCATION,"내 위치로",Modifier.size(23.dp),tint=Color.Black)
             }
         }
         if(searchVisible) {
@@ -431,11 +467,9 @@ internal fun CustomerP18Explore(
                         contentAlignment=Alignment.Center) {
                         CircularProgressIndicator(color=P18Gold)
                     }
-                    is MapPlaceSearchState.Error -> P18PlaceNoMatches(
-                        {searchText="";searchViewModel.dismissResults();searchFocusRequest++})
+                    is MapPlaceSearchState.Error -> P18PlaceNoMatches()
                     is MapPlaceSearchState.Results -> {
-                        if(result.places.isEmpty())P18PlaceNoMatches(
-                            {searchText="";searchViewModel.dismissResults();searchFocusRequest++})
+                        if(result.places.isEmpty())P18PlaceNoMatches()
                         else LazyColumn(Modifier.fillMaxWidth().heightIn(max=350.dp)
                             .padding(horizontal=12.dp)) {
                             val registered=result.places.filter{it.barId!=null}
@@ -567,18 +601,14 @@ private fun P18BrowseTag(tag:String) {
 }
 
 @Composable
-private fun P18PlaceNoMatches(onEdit:()->Unit) {
-    Column(Modifier.fillMaxWidth().padding(horizontal=16.dp,vertical=16.dp),
-        verticalArrangement=Arrangement.spacedBy(8.dp)) {
-        Row(verticalAlignment=Alignment.CenterVertically,
-            horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            BmIcon(BmIconId.BAR_PIN,null,Modifier.size(20.dp),tint=P18Muted)
-            Text("그 장소를 찾지 못했어요",fontSize=15.sp,color=P18Text,
-                fontWeight=FontWeight.SemiBold)
-        }
-        Text("역 이름, 매장 이름, 주소로 다시 찾아보세요.",
-            fontSize=13.sp,lineHeight=19.sp,color=P18Muted)
-        Text("검색어 고치기",Modifier.clickable(onClick=onEdit).padding(vertical=8.dp),
-            fontSize=14.sp,color=P18Gold,fontWeight=FontWeight.SemiBold)
+private fun P18PlaceNoMatches() {
+    Row(Modifier.fillMaxWidth().heightIn(min=62.dp)
+        .padding(horizontal=12.dp,vertical=12.dp),
+        verticalAlignment=Alignment.CenterVertically,
+        horizontalArrangement=Arrangement.Center) {
+        BmIcon(BmIconId.BAR_PIN,null,Modifier.size(20.dp),tint=P18Muted)
+        Spacer(Modifier.width(8.dp))
+        Text("장소를 찾지 못했어요.",fontSize=14.sp,color=P18Text,
+            fontWeight=FontWeight.SemiBold,textAlign=TextAlign.Center)
     }
 }
