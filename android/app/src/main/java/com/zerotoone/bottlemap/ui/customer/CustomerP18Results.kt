@@ -52,7 +52,7 @@ import com.zerotoone.bottlemap.data.distanceMeters
 import com.zerotoone.bottlemap.data.Repositories
 import com.zerotoone.bottlemap.data.MapBar
 import com.zerotoone.bottlemap.data.NearbyCoordinate
-import com.zerotoone.bottlemap.network.ApiClient
+import com.zerotoone.bottlemap.data.CustomerDiscoverySource
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.MatchedProductDto
 import com.zerotoone.bottlemap.network.SearchBarsResponseDto
@@ -78,7 +78,9 @@ internal sealed interface P18SearchState {
     data class Error(val message: String) : P18SearchState
 }
 
-internal class P18SearchViewModel : ViewModel() {
+internal class P18SearchViewModel(
+    private val repository:CustomerDiscoverySource=Repositories.customer,
+) : ViewModel() {
     private val mutable = MutableStateFlow<P18SearchState>(P18SearchState.Loading)
     val state = mutable.asStateFlow()
     private var job: Job? = null
@@ -123,13 +125,10 @@ internal class P18SearchViewModel : ViewModel() {
         mutable.value = P18SearchState.Loading
         job=viewModelScope.launch {
             try {
-                val result=ApiClient.call {
-                    ApiClient.api.searchProductP18(
-                        query=query?.takeIf {it.isNotBlank()},
-                        productId=productId?.takeIf {it.isNotBlank()},
-                        latitude=location?.latitude, longitude=location?.longitude,
-                        source=source)
-                }
+                val result=repository.searchProduct(
+                    query=query,productId=productId,source=source,
+                    latitude=location?.latitude,longitude=location?.longitude,
+                )
                 if (request==version) {
                     if (query != null && productId == null) {
                         // Retain even a legitimate empty match; never fall back
