@@ -110,6 +110,12 @@ fun OwnerOnboardingScreen(
     var editingReview by rememberSaveable { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    var submittedNewBar by rememberSaveable { mutableStateOf(false) }
+
+    fun historyFor(page: String, kind: MockApplicationKind): List<String> =
+        registrationHistoryFor(page,kind).filterNot {
+            viewModel.usesProductionOwnerApi() && it=="VERIFIED"
+        }
 
     fun latestDraft(): MockRegistrationDraft? = when(val now=viewModel.state.value) {
         is MockOwnerLoadState.Ready -> now.snapshot.registrationDraft
@@ -138,7 +144,7 @@ fun OwnerOnboardingScreen(
     }
     fun back() {
         val stack=if(history.isEmpty() && registrationCheckpointable(screen.name))
-            registrationHistoryFor(screen.name,draft.kind) else history
+            historyFor(screen.name,draft.kind) else history
         if(stack.isEmpty()) {
             if(bars.isNotEmpty())showDashboard() else onBack()
         } else {
@@ -275,7 +281,7 @@ fun OwnerOnboardingScreen(
             (screen==RegPage.HOME || (startRegistration && screen==RegPage.INTRO))){
             val target=registrationResumePage(draft)
             screen=RegPage.valueOf(target)
-            history=registrationHistoryFor(target,draft.kind)
+            history=historyFor(target,draft.kind)
         }
     }
 
@@ -363,6 +369,7 @@ fun OwnerOnboardingScreen(
                     submitScope.launch {
                         try {
                             viewModel.submitRegistrationDraftLive()
+                            submittedNewBar=draft.kind==MockApplicationKind.NEW_BAR
                             history=emptyList()
                             screen=RegPage.DONE
                             error=null
@@ -510,7 +517,7 @@ fun OwnerOnboardingScreen(
                                 val saved=snapshot?.registrationDraft
                                 if(saved!=null) {
                                     val target=RegPage.valueOf(registrationResumePage(saved))
-                                    history=registrationHistoryFor(target.name,saved.kind)
+                                    history=historyFor(target.name,saved.kind)
                                     screen=target
                                     error=null
                                 } else {
@@ -650,7 +657,7 @@ fun OwnerOnboardingScreen(
                             val edited=updatedBarNameDraft(draft,it)
                             if(needsNewBarDetailsAfterClaimEdit(editingReview,draft.kind,edited.kind)) {
                                 editingReview=false
-                                history=registrationHistoryFor(RegPage.BARNAME.name,edited.kind)
+                                history=historyFor(RegPage.BARNAME.name,edited.kind)
                             }
                             save(edited)
                         },"예: 몰트 앤 무드",tag="registration-bar-name",highlight=true)
@@ -862,8 +869,7 @@ fun OwnerOnboardingScreen(
                     RegPage.DONE -> {
                         RegistrationCenterContent("신청을 마쳤어요",
                             "운영팀이 실제 매장인지 확인한 뒤 승인해요.\n진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
-                        if(viewModel.usesProductionOwnerApi() &&
-                            draft.kind==MockApplicationKind.NEW_BAR) {
+                        if(viewModel.usesProductionOwnerApi() && submittedNewBar) {
                             RegistrationHint(
                                 "대표 사진은 승인 후 자동 등록돼요. 승인될 때까지 앱 데이터와 사진을 삭제하지 마세요.")
                         }
