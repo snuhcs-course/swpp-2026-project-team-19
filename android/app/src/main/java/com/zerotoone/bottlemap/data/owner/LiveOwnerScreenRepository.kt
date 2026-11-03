@@ -352,6 +352,23 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         return remote.readBusinessCertificate(prepared)
     }
 
+    suspend fun searchCatalogLive(query: String) {
+        val trimmed = query.trim()
+        if(trimmed.isEmpty() || trimmed.length > 100) return
+        val results = remote.searchCatalogProducts(trimmed)
+        val before = snapshot()
+        local.replaceFromBackend(before.copy(
+            products = (before.products + results.map { item ->
+                MockCatalogProduct(item.productId, item.brandId, item.displayName,
+                    item.category, item.ageYears, item.editionName,
+                    abvPercent = item.abv, isActive = item.isActive)
+            }).distinctBy { it.productId },
+            brands = (before.brands + results.map {
+                MockBrand(it.brandId, it.brandName)
+            }).distinctBy { it.brandId },
+        ))
+    }
+
     /** Uploads actual Stage 7 image bytes before navigation; no local fixture job. */
     suspend fun submitPhotoImportLive(barId: String, photos: List<MockPhoto>): String {
         require(photos.isNotEmpty()) { "메뉴판 사진을 선택해 주세요." }
