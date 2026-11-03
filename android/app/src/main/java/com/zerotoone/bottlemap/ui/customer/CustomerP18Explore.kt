@@ -16,7 +16,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -104,6 +110,15 @@ internal class P18ExploreViewModel(
     }}
     fun unavailable() {job?.cancel();++seq;mutable.value=P18ExploreState.Error}
     fun retry() {lastBounds?.let{load(MapViewport(it),true)}}
+    // Both location and camera survive a Bar Detail push/pop.
+    private val _location=MutableStateFlow<NearbyCoordinate?>(null)
+    val location=_location.asStateFlow()
+    fun setLocation(point:NearbyCoordinate) { if(point.isValid()) _location.value=point }
+    var camera:DiscoveryCamera? = null
+        private set
+    fun rememberCamera(center:NearbyCoordinate,zoom:Int) {
+        if(center.isValid()&&zoom in 1..21)camera=DiscoveryCamera(center,zoom)
+    }
 }
 
 private fun p18BrowseOrdered(bars:List<MapBar>,sort:P18Sort,origin:NearbyCoordinate?)
@@ -135,9 +150,10 @@ internal fun CustomerP18Explore(
     var selectedId by rememberSaveable {mutableStateOf<String?>(null)}
     var showSort by remember {mutableStateOf(false)}
     var sort by rememberSaveable {mutableStateOf(P18Sort.UPDATED)}
-    var location by remember {mutableStateOf<NearbyCoordinate?>(null)}
+    val location by viewModel.location.collectAsStateWithLifecycle()
     var locationDenied by remember {mutableStateOf(false)}
     var recenterToken by remember {mutableIntStateOf(0)}
+    var goToGwanak by remember {mutableStateOf(false)}
     var errorLocation by remember {mutableStateOf(false)}
     var mapView by remember {mutableStateOf<com.kakao.vectormap.MapView?>(null)}
     val bars=(state as? P18ExploreState.Ready)?.bars.orEmpty()
@@ -147,7 +163,7 @@ internal fun CustomerP18Explore(
         ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
         if(permissions.values.any{it})scope.launch {
             runCatching{AndroidNearbyLocationSource(context).currentLocation()}
-                .onSuccess{location=it;recenterToken++}
+                .onSuccess{viewModel.setLocation(it);goToGwanak=false;recenterToken++}
                 .onFailure{errorLocation=true}
         } else locationDenied=true
     }
@@ -167,22 +183,33 @@ internal fun CustomerP18Explore(
     LaunchedEffect(location) {if(location!=null)sort=P18Sort.DISTANCE}
     if(showSort) P18SortPicker(sort,location!=null,allowPrice=false,
         onChoose={sort=it;showSort=false},onClose={showSort=false})
-    if(locationDenied || errorLocation) AlertDialog(
+    if(locationDenied || errorLocation) ModalBottomSheet(
         onDismissRequest={locationDenied=false;errorLocation=false},
-        title={Text("현재 위치를 찾을 수 없어요")},
-        text={Text(if(locationDenied)
-            "위치 권한을 허용하면 내 위치로 지도를 옮길 수 있어요."
-            else "위치 서비스를 확인하고 다시 시도해 주세요.")},
-        confirmButton={TextButton(onClick={
-            if(locationDenied) {
-                context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply{
-                    data=Uri.parse("package:"+context.packageName)
-                })
-            }else requestCurrentLocation()
-            locationDenied=false;errorLocation=false
-        }) {Text(if(locationDenied)"설정 열기" else "다시 시도")}},
-        dismissButton={TextButton(onClick={locationDenied=false;errorLocation=false}) {
-            Text("닫기") }})
+        containerColor=P18Surface,contentColor=P18Text) {
+        Column(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,bottom=24.dp),
+            verticalArrangement=Arrangement.spacedBy(16.dp)) {
+            Text(if(errorLocation)"위치 서비스가 꺼져 있어요" else "위치 권한이 꺼져 있어요",
+                fontSize=20.sp,lineHeight=28.sp,fontWeight=FontWeight.SemiBold,color=P18Text)
+            Text(if(errorLocation)
+                "위치 설정을 확인하면 가까운 매장과 거리를 볼 수 있어요. 위치 없이도 지도를 움직여 찾을 수 있어요."
+                else "설정에서 위치를 허용하면 가까운 매장과 거리를 볼 수 있어요. 위치 없이도 지도를 움직여 찾을 수 있어요.",
+                fontSize=14.sp,lineHeight=21.sp,color=P18Muted)
+            P18Action(if(errorLocation)"위치 설정 열기" else "설정 열기",{
+                context.startActivity(if(errorLocation)
+                    Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS) else
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        if(!errorLocation)data=Uri.parse("package:"+context.packageName)
+                    })
+                locationDenied=false;errorLocation=false
+            },primary=true,modifier=Modifier.fillMaxWidth().height(56.dp))
+            Box(Modifier.fillMaxWidth().height(48.dp).clickable {
+                locationDenied=false;errorLocation=false
+            },contentAlignment=Alignment.Center) {
+                Text("위치 없이 둘러보기",color=P18Muted,fontSize=14.sp,
+                    fontWeight=FontWeight.Medium)
+            }
+        }
+    }
     fun back() {
         when {
             searchVisible -> {searchVisible=false;searchViewModel.dismissResults()}
@@ -190,18 +217,19 @@ internal fun CustomerP18Explore(
         }
     }
     BackHandler {back()}
-    LaunchedEffect(listVisible,mapView) {
+    LaunchedEffect(listVisible,searchVisible,mapView) {
         mapView?.let{if(listVisible||searchVisible)hideNearbyNativeSurface(it)
             else showNearbyNativeSurface(it)}
     }
     Box(Modifier.fillMaxSize().background(P18Bg).testTag("customer-map-explore")) {
-        NearbyKakaoMap(origin=location?:P18DefaultMapCenter,
+        NearbyKakaoMap(origin=if(goToGwanak)P18DefaultMapCenter else
+            location?:P18DefaultMapCenter,
             bars=bars,selectedBarId=selectedId,
-            focusTarget=chosen,focusBarId=null,initialCamera=null,
+            focusTarget=chosen,focusBarId=null,initialCamera=viewModel.camera,
             listCovered=listVisible||searchVisible,
             searchedPlace=selectedPlace,focusSearchedPlace=focusPlace,
             onSearchedPlaceFocusApplied=searchViewModel::consumeFocus,
-            onFocusApplied={},onCameraChanged={_,_->},
+            onFocusApplied={},onCameraChanged=viewModel::rememberCamera,
             onMapCameraMoving=viewModel::moving,
             onMapViewportUnavailable=viewModel::unavailable,viewportRetryToken=0,
             onSelectBar={id->if(selectedId==id)onOpenBar(id) else selectedId=id},
@@ -222,22 +250,21 @@ internal fun CustomerP18Explore(
                     verticalAlignment=Alignment.CenterVertically) {
                     Text("이 지도 영역의 매장 ${ordered.size}곳",fontSize=18.sp,
                         fontWeight=FontWeight.SemiBold,color=P18Text)
-                    Text( (if(location==null)P18Sort.UPDATED else sort).label+"⌄",
-                        Modifier.heightIn(min=48.dp).clickable{showSort=true}
-                            .padding(vertical=12.dp),
-                        fontSize=14.sp,color=P18Text)
+                    P18SortTrigger((if(location==null)P18Sort.UPDATED else sort).label,
+                        {showSort=true})
                 }
                 when(state) {
-                    P18ExploreState.TooWide->P18Message("지도를 조금 더 확대해 주세요",
-                        "확대하면 이 영역의 매장을 보여 드려요.","지도 보기",
-                        {listVisible=false},Modifier.weight(1f))
-                    P18ExploreState.Error->P18Message("매장을 불러오지 못했어요",
+                    P18ExploreState.TooWide->P18FailureBody("지도를 확대하면 매장이 보여요",
+                        "지도를 조금 더 확대해 주세요.","지도 보기",
+                        BmIconId.SEARCH,{listVisible=false},Modifier.weight(1f))
+                    P18ExploreState.Error->P18FailureBody("매장을 불러오지 못했어요",
                         "연결을 확인하고 다시 시도해 주세요.","다시 시도",
-                        viewModel::retry,Modifier.weight(1f))
+                        BmIconId.ERROR,viewModel::retry,Modifier.weight(1f),primary=true)
                     is P18ExploreState.Ready -> {
-                        if(ordered.isEmpty()) P18Message("이 지도 영역에는 매장이 없어요",
-                            "지도를 움직이거나 확대해서 다시 찾아보세요.",
-                            "지도로 돌아가기",{listVisible=false},Modifier.weight(1f))
+                        if(ordered.isEmpty()) P18FailureBody("이 지역에는 아직 등록된 매장이 없어요",
+                            "지금은 관악구 매장부터 모으고 있어요.",
+                            "관악구로 이동",{listVisible=false;goToGwanak=true;recenterToken++},
+                            icon=BmIconId.BAR_PIN,modifier=Modifier.weight(1f))
                         else LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
                             items(ordered,key={it.barId}){bar->
                                 P18BrowseRow(bar,location,
@@ -254,27 +281,28 @@ internal fun CustomerP18Explore(
         }
         if(!listVisible && !searchVisible) {
             when(state) {
-                P18ExploreState.TooWide, P18ExploreState.Error -> {
-                    Column(Modifier.align(Alignment.BottomCenter)
-                        .padding(bottom=160.dp,start=20.dp,end=20.dp)
-                        .background(P18Bg,RoundedCornerShape(14.dp))
-                        .padding(16.dp),
-                        horizontalAlignment=Alignment.CenterHorizontally) {
-                        Text(if(state is P18ExploreState.TooWide)
-                            "지도를 확대하면 매장을 볼 수 있어요"
-                            else "이 지도 영역의 매장을 불러오지 못했어요",
-                            color=P18Text,fontSize=14.sp)
-                        if(state is P18ExploreState.Error) TextButton(onClick=viewModel::retry) {
-                            Text("다시 시도",color=P18Gold)
-                        }
+                P18ExploreState.TooWide -> {
+                    Row(Modifier.align(Alignment.TopCenter).padding(top=84.dp)
+                        .background(P18Bg,RoundedCornerShape(24.dp))
+                        .padding(horizontal=16.dp,vertical=10.dp),
+                        verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                        BmIcon(BmIconId.SEARCH,null,Modifier.size(18.dp),tint=P18Gold)
+                        Text("지도를 확대하면 매장이 보여요",color=P18Text,fontSize=14.sp)
                     }
                 }
+                P18ExploreState.Error -> {
+                    P18MapErrorCard("매장을 불러오지 못했어요",
+                        "연결을 확인하고 다시 시도해 주세요.",
+                        "다시 시도",viewModel::retry,
+                        Modifier.align(Alignment.BottomCenter).padding(16.dp))
+                }
                 is P18ExploreState.Ready -> if(bars.isEmpty()) {
-                    Text("이 지도 영역에는 매장이 없어요",
-                        Modifier.align(Alignment.BottomCenter).padding(bottom=150.dp)
-                            .background(P18Bg,RoundedCornerShape(12.dp))
-                            .padding(16.dp),
-                        color=P18Text,fontSize=14.sp)
+                    P18MapErrorCard("이 지역에는 아직 등록된 매장이 없어요",
+                        "지금은 관악구 매장부터 모으고 있어요.",
+                        "관악구로 이동",{goToGwanak=true;recenterToken++},
+                        Modifier.align(Alignment.BottomCenter).padding(16.dp),
+                        error=false)
                 }
                 else {
                     LazyRow(Modifier.align(Alignment.BottomCenter)
@@ -282,17 +310,17 @@ internal fun CustomerP18Explore(
                         horizontalArrangement=Arrangement.spacedBy(8.dp),
                         contentPadding=PaddingValues(horizontal=16.dp)) {
                         items(ordered,key={it.barId}){bar->
-                            Row(Modifier.width(285.dp).heightIn(min=106.dp)
-                                .background(P18Bg,RoundedCornerShape(14.dp))
+                            Row(Modifier.width(265.dp).heightIn(min=88.dp)
+                                .background(P18Bg,RoundedCornerShape(12.dp))
                                 .clickable {
                                     if(selectedId==bar.barId)onOpenBar(bar.barId)
                                     else selectedId=bar.barId
-                                }.padding(12.dp),
+                                }.padding(horizontal=10.dp,vertical=8.dp),
                                 verticalAlignment=Alignment.CenterVertically,
                                 horizontalArrangement=Arrangement.spacedBy(12.dp)) {
                                 if(!bar.coverThumbnailUrl.isNullOrBlank())
-                                    P18RemoteBarPhoto(bar.coverThumbnailUrl,Modifier.size(64.dp))
-                                else P18Photo()
+                                    P18RemoteBarPhoto(bar.coverThumbnailUrl,Modifier.size(54.dp))
+                                else P18Photo(size=54.dp)
                                 Column(Modifier.weight(1f)) {
                                     Text(bar.name,color=P18Text,fontSize=16.sp,
                                         fontWeight=FontWeight.SemiBold,maxLines=1,
@@ -311,11 +339,11 @@ internal fun CustomerP18Explore(
                 else -> Unit
             }
             Box(Modifier.align(Alignment.BottomEnd)
-                .padding(bottom=150.dp,end=16.dp)
-                .size(48.dp).background(P18Bg,RoundedCornerShape(50))
+                .padding(bottom=126.dp,end=16.dp)
+                .size(48.dp)
                 .clickable(onClick=::requestCurrentLocation)
                 .testTag("customer-map-recenter"),contentAlignment=Alignment.Center) {
-                BmIcon(BmIconId.LOCATION,"내 위치로",Modifier.size(23.dp),tint=P18Text)
+                BmIcon(BmIconId.LOCATION,"내 위치로",Modifier.size(23.dp),tint=P18Gold)
             }
         }
         if(searchVisible) {
@@ -328,27 +356,50 @@ internal fun CustomerP18Explore(
                         contentAlignment=Alignment.Center) {
                         CircularProgressIndicator(color=P18Gold)
                     }
-                    is MapPlaceSearchState.Error -> P18Message(
-                        "장소를 찾지 못했어요",result.message,
-                        "다시 찾기",{searchViewModel.search(searchText)})
+                    is MapPlaceSearchState.Error -> P18FailureBody(
+                        "그 장소를 찾지 못했어요",
+                        "역 이름, 매장 이름, 주소로\n다시 찾아보세요.",
+                        "검색어 고치기",BmIconId.BAR_PIN,
+                        {searchText="";searchViewModel.dismissResults()})
                     is MapPlaceSearchState.Results -> {
-                        if(result.places.isEmpty())P18Message("장소를 찾지 못했어요",
-                            "다른 이름이나 주소로 찾아보세요.","다시 찾기",
-                            {searchViewModel.search(searchText)})
+                        if(result.places.isEmpty())P18FailureBody("그 장소를 찾지 못했어요",
+                            "역 이름, 매장 이름, 주소로\n다시 찾아보세요.",
+                            "검색어 고치기",BmIconId.BAR_PIN,
+                            {searchText="";searchViewModel.dismissResults()})
                         else LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
-                            items(result.places){place->
-                                Column(Modifier.fillMaxWidth().heightIn(min=64.dp)
-                                    .clickable{
-                                        if(searchViewModel.select(place)) {
-                                            searchVisible=false
-                                            listVisible=false
+                            val registered=result.places.filter{it.barId!=null}
+                            val locations=result.places.filter{it.barId==null}
+                            listOf("등록된 매장" to registered,"장소" to locations).forEach{ (header,places)->
+                                if(places.isNotEmpty()) {
+                                    item {Text(header,Modifier.padding(top=20.dp,bottom=4.dp),
+                                        color=P18Muted,fontSize=14.sp)}
+                                    items(places){place->
+                                        Row(Modifier.fillMaxWidth().heightIn(min=64.dp)
+                                            .clickable{
+                                                if(searchViewModel.select(place)) {
+                                                    searchVisible=false;listVisible=false
+                                                }
+                                            }.padding(vertical=8.dp),
+                                            verticalAlignment=Alignment.CenterVertically,
+                                            horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                                            Box(Modifier.size(40.dp)
+                                                .background(P18Surface,RoundedCornerShape(12.dp)),
+                                                contentAlignment=Alignment.Center) {
+                                                BmIcon(if(place.barId!=null)BmIconId.GLASS
+                                                    else BmIconId.BAR_PIN,null,Modifier.size(22.dp),
+                                                    tint=P18Muted)
+                                            }
+                                            Column(Modifier.weight(1f),
+                                                verticalArrangement=Arrangement.spacedBy(1.dp)) {
+                                                Text(place.name,color=P18Text,fontSize=16.sp,
+                                                    fontWeight=FontWeight.SemiBold)
+                                                Text(place.address,color=P18Muted,fontSize=13.sp,
+                                                    maxLines=1,overflow=TextOverflow.Ellipsis)
+                                            }
                                         }
-                                    }.padding(vertical=10.dp)) {
-                                    Text(place.name,color=P18Text,fontSize=16.sp,
-                                        fontWeight=FontWeight.SemiBold)
-                                    Text(place.address,color=P18Muted,fontSize=13.sp)
+                                        Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
+                                    }
                                 }
-                                Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
                             }
                         }
                     }
@@ -374,8 +425,8 @@ internal fun CustomerP18Explore(
                     Text("역 · 매장 이름 · 주소",color=BottleMapPalette.textMuted,
                         fontSize=15.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
                 }
-                P18Action(if(listVisible)"지도" else "목록",
-                    {listVisible=!listVisible})
+                P18ModeButton(if(listVisible)"지도" else "목록",
+                    {listVisible=!listVisible},dark=!listVisible)
             }
         }
     }
@@ -404,5 +455,29 @@ private fun P18BrowseRow(bar:MapBar,origin:NearbyCoordinate?,onClick:()->Unit) {
         if(!bar.coverThumbnailUrl.isNullOrBlank())
             P18RemoteBarPhoto(bar.coverThumbnailUrl,Modifier.size(64.dp))
         else P18Photo()
+    }
+}
+
+@Composable
+private fun P18MapErrorCard(
+    title:String,description:String,action:String,onAction:()->Unit,
+    modifier:Modifier=Modifier,error:Boolean=true,
+) {
+    Column(modifier.fillMaxWidth()
+        .background(P18Bg,RoundedCornerShape(16.dp))
+        .border(1.dp,P18Line,RoundedCornerShape(16.dp))
+        .padding(16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
+        Row(verticalAlignment=Alignment.Top,
+            horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+            if(error)BmIcon(BmIconId.ERROR,null,Modifier.size(22.dp),
+                tint=BottleMapPalette.error)
+            Column(verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                Text(title,color=P18Text,fontSize=16.sp,
+                    lineHeight=24.sp,fontWeight=FontWeight.SemiBold)
+                Text(description,color=P18Muted,fontSize=14.sp,lineHeight=20.sp)
+            }
+        }
+        P18Action(action,onAction,primary=true,
+            modifier=Modifier.fillMaxWidth().height(48.dp))
     }
 }
