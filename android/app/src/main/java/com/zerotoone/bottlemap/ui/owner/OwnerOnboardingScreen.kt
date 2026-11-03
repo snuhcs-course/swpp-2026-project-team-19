@@ -487,7 +487,7 @@ fun OwnerOnboardingScreen(
                             },
                             onManage={ bar ->
                                 viewModel.selectBar(bar.barId)
-                                if(!snapshot.hasPublishedInitialReview(bar.barId)) {
+                                if(!viewModel.usesProductionOwnerApi() && !snapshot.hasPublishedInitialReview(bar.barId)) {
                                     onFirstReview(snapshot.imports.lastOrNull{it.barId==bar.barId}?.status)
                                 } else onManagerPreview()
                             },
@@ -523,8 +523,9 @@ fun OwnerOnboardingScreen(
                     RegPage.BN -> {
                         OwnerV4Question("사업자등록번호를\n알려주세요")
                         Spacer(Modifier.height(0.dp))
-                        RegistrationInput(bnFormat(draft.businessNumberDigits),{},"000-00-00000",
-                            readonly=true,tag="registration-business-number")
+                        RegistrationInput(bnFormat(draft.businessNumberDigits),{ entered ->
+                            save(draft.copy(businessNumberDigits=entered.filter(Char::isDigit).take(10)))
+                        },"000-00-00000",tag="registration-business-number",highlight=true)
                         Text("숫자 10자리. 하이픈은 자동으로 들어가요.",
                             fontSize=12.sp,color=RegistrationV4.secondary)
                         if(draft.businessNumberDigits.length==10 &&
@@ -544,8 +545,15 @@ fun OwnerOnboardingScreen(
                     RegPage.DATE -> {
                         OwnerV4Question("개업일을\n알려주세요","사업자등록증의 개업연월일이에요.")
                         Spacer(Modifier.height(0.dp))
-                        RegistrationInput(draft.openingDateIso.replace("-","."),{},"YYYY.MM.DD",
-                            readonly=true,tag="registration-opening-date")
+                        RegistrationInput(draft.openingDateIso.replace("-","."),{ entered ->
+                            val digits=entered.filter(Char::isDigit).take(8)
+                            val formatted=when {
+                                digits.length<=4 -> digits
+                                digits.length<=6 -> digits.take(4)+"-"+digits.drop(4)
+                                else -> digits.take(4)+"-"+digits.slice(4..5)+"-"+digits.drop(6)
+                            }
+                            save(draft.copy(openingDateIso=formatted))
+                        },"YYYY.MM.DD",tag="registration-opening-date",highlight=true)
                         if(draft.openingDateIso.length==10 && !validOpeningDate(draft.openingDateIso))
                             Text("날짜를 다시 확인해 주세요. 오늘 이후 날짜는 넣을 수 없어요.",
                                 fontSize=12.sp,color=RegistrationV4.error)
