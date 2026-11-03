@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
+import com.zerotoone.bottlemap.ui.common.LOADING_FEEDBACK_DELAY_MS
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import kotlin.math.min
 
@@ -111,7 +112,7 @@ internal fun P18LoadingScene(text:String, onBack:()->Unit, modifier:Modifier=Mod
     var showProgress by remember(text) { mutableStateOf(false) }
     LaunchedEffect(text) {
         showProgress=false
-        delay(500L)
+        delay(LOADING_FEEDBACK_DELAY_MS)
         showProgress=true
     }
     Box(modifier.fillMaxSize().background(P18Bg).testTag("customer-loading-scene")) {
