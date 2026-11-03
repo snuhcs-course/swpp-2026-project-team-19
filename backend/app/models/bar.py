@@ -1,7 +1,7 @@
-"""Bars, their regular opening hours and their temporary closures (API spec 3.6, 3.7, 3.15).
+"""Bars, their regular opening hours, their temporary closures and their photos (API spec 3.6, 3.7, 3.15, 3.16).
 
-The tables follow docs/schema_draft.dbml; the CHECK constraints are the rules of
-docs/schema_guide.md 5.2, 5.6 and 5.7.
+The tables follow docs/schema_draft.dbml; the constraints are the rules of
+docs/schema_guide.md 5.2, 5.6, 5.7 and 5.8.
 """
 
 from datetime import date, datetime, time
@@ -10,6 +10,7 @@ from enum import Enum
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    CHAR,
     Boolean,
     CheckConstraint,
     Date,
@@ -20,6 +21,7 @@ from sqlalchemy import (
     SmallInteger,
     String,
     Time,
+    UniqueConstraint,
     func,
     text,
 )
@@ -139,6 +141,36 @@ class BarOperatingException(Base):
     note: Mapped[str | None] = mapped_column(String(100), nullable=True)
     # Null for a temporary-login operator without a users row.
     created_by_user_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class BarPhoto(Base):
+    """A gallery photo shown to customers, at most 15 per bar (checked by the API under the bar row lock).
+
+    Stores the keys of the re-encoded JPEG and its thumbnail, never the uploaded file. The first photo
+    (`sort_order` 1) is the cover; positions run from 1 without gaps.
+    """
+
+    __tablename__ = "bar_photos"
+    __table_args__ = (
+        UniqueConstraint("bar_id", "content_sha256", name="uq_bar_photos_content_sha256"),
+        # Checked at commit, so a reorder can swap positions in one transaction.
+        UniqueConstraint(
+            "bar_id", "sort_order", name="uq_bar_photos_sort_order", deferrable=True, initially="DEFERRED"
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    bar_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("bars.id"), nullable=False)
+    storage_key: Mapped[str] = mapped_column(String(500), nullable=False)
+    thumbnail_storage_key: Mapped[str] = mapped_column(String(500), nullable=False)
+    # Of the uploaded bytes before re-encoding, so the same file cannot be added twice to a bar.
+    content_sha256: Mapped[str] = mapped_column(CHAR(64), nullable=False)
+    sort_order: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    # Null for a temporary-login operator without a users row.
+    uploaded_by_user_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

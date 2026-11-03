@@ -1,6 +1,6 @@
 """SQLAlchemy model package. Import models here for Alembic autogeneration."""
 
-from app.models.bar import Bar, BarOperatingException, BarStatus, BarWeeklyHours, OperatingExceptionKind
+from app.models.bar import Bar, BarOperatingException, BarPhoto, BarStatus, BarWeeklyHours, OperatingExceptionKind
 from app.models.catalog import Brand, BrandAlias, Product, ProductAlias
 from app.models.menu import BarMenuItem, MenuBoard, MenuBoardEntry, MenuEntryOption
 from app.models.menu_import import (
@@ -41,6 +41,7 @@ __all__ = [
     "BarOwner",
     "BarOwnerApplication",
     "BarOwnerApplicationMenuImage",
+    "BarPhoto",
     "BarStatus",
     "BarWeeklyHours",
     "Brand",

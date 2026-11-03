@@ -2,6 +2,7 @@
 
 from datetime import date, datetime, timezone
 from decimal import Decimal
+from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
@@ -12,6 +13,7 @@ from app.models import (
     BarOwner,
     BarOwnerApplication,
     BarOwnerApplicationMenuImage,
+    BarPhoto,
     BarStatus,
     Brand,
     BrandAlias,
@@ -202,6 +204,22 @@ def make_application_menu_image(
     session.add(image)
     session.flush()
     return image
+
+
+def make_bar_photo(session: Session, bar: Bar, sort_order: int = 1, content_sha256: str | None = None) -> BarPhoto:
+    """A photo row of `bar`; no file is stored. The hash defaults to one per position."""
+    photo_id = uuid4()
+    photo = BarPhoto(
+        id=photo_id,
+        bar_id=bar.id,
+        storage_key=f"bars/{bar.id}/photos/{photo_id}.jpg",
+        thumbnail_storage_key=f"bars/{bar.id}/photos/{photo_id}-thumb.jpg",
+        content_sha256=content_sha256 or f"{sort_order:064x}",
+        sort_order=sort_order,
+    )
+    session.add(photo)
+    session.flush()
+    return photo
 
 
 def make_owner(session: Session, user: User, bar: Bar, reviewer: User) -> BarOwner:
