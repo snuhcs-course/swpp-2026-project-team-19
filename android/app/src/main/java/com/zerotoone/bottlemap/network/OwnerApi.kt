@@ -95,6 +95,21 @@ interface OwnerApi {
         @Body body: Map<String, @JvmSuppressWildcards Any?>,
     ): OwnerApplicationDto
 
+    @Multipart
+    @retrofit2.http.PUT("api/owner-applications/{applicationId}/menu-photos")
+    suspend fun uploadApplicationMenuPhotos(
+        @Header("Authorization") authorization: String,
+        @Path("applicationId") applicationId: String,
+        @Part images: List<MultipartBody.Part>,
+    ): OwnerApplicationDto
+
+    @Multipart
+    @POST("api/owner-applications/business-certificate-ocr")
+    suspend fun readBusinessCertificate(
+        @Header("Authorization") authorization: String,
+        @Part image: MultipartBody.Part,
+    ): OwnerCertificateOcrDto
+
     @POST("api/owner-applications/{applicationId}/cancel")
     suspend fun cancelApplication(
         @Header("Authorization") authorization: String,
