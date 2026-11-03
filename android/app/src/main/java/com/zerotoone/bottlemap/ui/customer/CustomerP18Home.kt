@@ -36,6 +36,7 @@ import com.zerotoone.bottlemap.network.PopularProductDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import com.zerotoone.bottlemap.ui.common.BmIconId
+import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -81,7 +82,7 @@ internal fun rememberP18Search(context: Context, input: String): List<String> {
     val normalized = input.trim().take(100)
     if (normalized.isBlank()) return readP18Recents(context)
     val next = (listOf(normalized) + readP18Recents(context).filterNot { it == normalized }).take(8)
-    val json = JSONArray().apply { next.forEach(::put) }.toString()
+    val json = JSONArray().apply { next.forEach { put(it) } }.toString()
     context.getSharedPreferences("bottlemap-search-history", Context.MODE_PRIVATE)
         .edit().putString(RECENT_KEY,json).apply()
     return next
@@ -147,7 +148,8 @@ internal fun CustomerP18Home(
                 } else {
                     Text("이렇게 찾아보세요",fontSize=14.sp,color=P18Muted)
                 }
-                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                     val examples = if (recent.isEmpty()) listOf("글렌피딕","Glenfiddich 12") else recent.take(3)
                     examples.forEach { term ->
                         Box(Modifier.height(40.dp)
