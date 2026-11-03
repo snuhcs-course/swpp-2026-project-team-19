@@ -581,106 +581,91 @@ private fun nearbyMarkerStyle(selected: Boolean): LabelStyle {
  * selection border. Drawn in physical pixels from density for true dp sizing.
  * If no price/distance is provided, do not invent a secondary label.
  */
+/** Product search map: no picture, only two fully legible miniature text lines. */
 private fun p18CardMarkerStyle(
-    selected:Boolean, name:String, secondary:String?, density:Float,
-):LabelStyle {
+    selected: Boolean, name: String, secondary: String?, density: Float,
+): LabelStyle {
     val d=density.coerceAtLeast(.5f)
-    // Fit to the actual two-line text instead of reserving a wide right-side gutter.
-    val measure=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize=11f*d
+    val namePaint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(242,237,232)
         isFakeBoldText=true
+        textSize=9.2f*d
     }
-    val visibleTextPx=maxOf(
-        minOf(measure.measureText(name),101f*d),
-        secondary?.let { minOf(measure.measureText(it),101f*d) } ?: 0f,
-    )
-    val width=((43f+visibleTextPx/d+8f).coerceIn(98f,148f)*d)
-        .toInt().coerceAtLeast(1)
-    val height=(48f*d).toInt().coerceAtLeast(1)
-    val image=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
-    val canvas=Canvas(image)
-    val bg=Paint(Paint.ANTI_ALIAS_FLAG).apply { color=Color.rgb(33,30,27) }
-    val border=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    val pricePaint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(205,194,184)
+        textSize=8.5f*d
+    }
+    // Roughly half the original 148 x 48 marker's visual footprint.
+    val width=(minOf(110f,maxOf(78f,maxOf(
+        namePaint.measureText(name),pricePaint.measureText(secondary.orEmpty())
+    )/d+13f))*d).toInt().coerceAtLeast(1)
+    val height=(29f*d).toInt().coerceAtLeast(1)
+    val bitmap=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+    val canvas=Canvas(bitmap)
+    val bg=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(33,30,27)
+    }
+    val frame=Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color=if(selected)Color.rgb(201,157,107) else Color.rgb(81,71,63)
         style=Paint.Style.STROKE
-        strokeWidth=(if(selected)2f else 1f)*d
+        strokeWidth=(if(selected)1.5f else 1f)*d
     }
-    val rect=android.graphics.RectF(1f*d,1f*d,(width/d-1f)*d,(height/d-1f)*d)
-    canvas.drawRoundRect(rect,11f*d,11f*d,bg)
-    canvas.drawRoundRect(rect,11f*d,11f*d,border)
-    val photo=android.graphics.RectF(6f*d,7f*d,38f*d,39f*d)
-    canvas.drawRoundRect(photo,8f*d,8f*d,Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=Color.rgb(64,56,50)
-    })
-    val icon=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=Color.rgb(199,187,176)
-        style=Paint.Style.STROKE
-        strokeWidth=1.5f*d
-    }
-    canvas.drawRect(15f*d,17f*d,30f*d,31f*d,icon)
-    canvas.drawCircle(25f*d,21f*d,2f*d,icon)
-    val letters=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=Color.rgb(242,237,232);isFakeBoldText=true
-        textSize=11f*d
-    }
-    fun trim(text:String,maxWidth:Float,paint:Paint):String {
+    val rect=android.graphics.RectF(d,d,width-d,height-d)
+    canvas.drawRoundRect(rect,7f*d,7f*d,bg)
+    canvas.drawRoundRect(rect,7f*d,7f*d,frame)
+    fun truncate(text:String,paint:Paint):String {
+        if(paint.measureText(text)<=width-10f*d)return text
         var t=text
-        while(t.isNotEmpty() && paint.measureText(t)>maxWidth) t=t.dropLast(1)
-        return if(t!=text) t.dropLast(1)+"…" else t
+        while(t.isNotEmpty() && paint.measureText(t+"…")>width-10f*d)
+            t=t.dropLast(1)
+        return t+"…"
     }
-    canvas.drawText(trim(name,(width/d-51f)*d,letters),43f*d,20f*d,letters)
+    canvas.drawText(truncate(name,namePaint),5f*d,12f*d,namePaint)
     if(!secondary.isNullOrBlank()) {
-        val sub=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color=Color.rgb(199,187,176)
-            textSize=11f*d
-        }
-        canvas.drawText(trim(secondary,(width/d-51f)*d,sub),43f*d,35f*d,sub)
+        canvas.drawText(truncate(secondary,pricePaint),5f*d,23f*d,pricePaint)
     }
-    return LabelStyle.from(image).setAnchorPoint(.5f,1f)
+    return LabelStyle.from(bitmap).setAnchorPoint(.5f,1f)
 }
 
-/** Browse markers show a pin and a title above it, not a rectangular card. */
+/** Browse: tiny pin, amber-backed bar-name chip with black text above it. */
 private fun p18SimpleMarkerStyle(selected: Boolean,name: String,density: Float): LabelStyle {
     val d=density.coerceAtLeast(.5f)
     val title=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=Color.rgb(242,237,232)
+        color=Color.rgb(33,26,18)
         textAlign=Paint.Align.CENTER
-        textSize=12f*d
+        textSize=10f*d
         isFakeBoldText=true
     }
-    val displayName=name.take(18)+(if(name.length>18)"…" else "")
-    val width=(kotlin.math.max(48f,title.measureText(displayName)/d+12f)*d)
+    val displayName=name.take(16)+(if(name.length>16)"…" else "")
+    val width=(maxOf(32f,title.measureText(displayName)/d+14f)*d)
         .toInt().coerceAtLeast(1)
-    val height=(65f*d).toInt().coerceAtLeast(1)
+    val height=(36f*d).toInt().coerceAtLeast(1)
     val bitmap=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
     val canvas=Canvas(bitmap)
     val cx=width/2f
-    val halo=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=Color.rgb(33,30,27)
-        style=Paint.Style.STROKE
-        strokeWidth=3f*d
-        strokeJoin=Paint.Join.ROUND
+    val amber=Paint(Paint.ANTI_ALIAS_FLAG).apply {color=Color.rgb(201,157,107)}
+    val chip=android.graphics.RectF(1f*d,1f*d,width-1f*d,19f*d)
+    canvas.drawRoundRect(chip,6f*d,6f*d,amber)
+    canvas.drawText(displayName,cx,13.6f*d,title)
+    // Quarter-scale teardrop relative to the original 30dp-wide map pin.
+    val pinFill=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=if(selected)Color.rgb(201,157,107) else Color.rgb(55,46,40)
     }
-    canvas.drawText(displayName,cx,13f*d,halo)
-    canvas.drawText(displayName,cx,13f*d,title)
-    val fill=Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color=if(selected)Color.rgb(201,157,107) else Color.rgb(64,56,50)
-    }
-    val border=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    val pinOutline=Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color=Color.rgb(201,157,107)
         style=Paint.Style.STROKE
-        strokeWidth=1.8f*d
+        strokeWidth=1f*d
     }
     val pin=Path().apply {
-        moveTo(cx,61f*d)
-        cubicTo(cx-4f*d,52f*d,cx-15f*d,45f*d,cx-15f*d,35f*d)
-        cubicTo(cx-15f*d,15f*d,cx+15f*d,15f*d,cx+15f*d,35f*d)
-        cubicTo(cx+15f*d,45f*d,cx+4f*d,52f*d,cx,61f*d)
+        moveTo(cx,35f*d)
+        cubicTo(cx-1.2f*d,32f*d,cx-4.5f*d,29f*d,cx-4.5f*d,26f*d)
+        cubicTo(cx-4.5f*d,19f*d,cx+4.5f*d,19f*d,cx+4.5f*d,26f*d)
+        cubicTo(cx+4.5f*d,29f*d,cx+1.2f*d,32f*d,cx,35f*d)
         close()
     }
-    canvas.drawPath(pin,fill)
-    canvas.drawPath(pin,border)
-    canvas.drawCircle(cx,35f*d,5f*d,
-        Paint(Paint.ANTI_ALIAS_FLAG).apply { color=Color.WHITE })
+    canvas.drawPath(pin,pinFill)
+    canvas.drawPath(pin,pinOutline)
+    canvas.drawCircle(cx,25.8f*d,1.4f*d,
+        Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.WHITE})
     return LabelStyle.from(bitmap).setAnchorPoint(.5f,1f)
 }
