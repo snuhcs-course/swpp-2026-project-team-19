@@ -195,7 +195,7 @@ internal fun BarMenuResponseDto.toBarDetailUiState(): BarDetailUiState {
             )
         },
     )
-    if (items.isNotEmpty()) return BarDetailUiState.Success(bar)
+    if (bar.items.isNotEmpty()) return BarDetailUiState.Success(bar)
     return BarDetailUiState.Empty(
         bar = bar,
         reason = if (menuBoardId == null) {
