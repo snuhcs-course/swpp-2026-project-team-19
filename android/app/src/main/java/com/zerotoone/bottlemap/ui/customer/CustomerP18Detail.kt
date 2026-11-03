@@ -168,28 +168,6 @@ internal fun CustomerP18BarDetail(
     val open=p18BusinessStatus(bar.weeklyHours,bar.operatingException,at)
     val photos=bar.photos
     val selectedPhoto=photos.getOrNull(if(photos.isEmpty())0 else photoIndex.mod(photos.size))
-    if(hoursVisible) ModalBottomSheet(onDismissRequest={hoursVisible=false},
-        containerColor=P18Surface,contentColor=P18Text) {
-        Column(Modifier.fillMaxWidth().padding(horizontal=20.dp,vertical=12.dp),
-            verticalArrangement=Arrangement.spacedBy(12.dp)) {
-            Text("영업시간",fontSize=20.sp,fontWeight=FontWeight.Bold,color=P18Text)
-            val names=listOf("월","화","수","목","금","토","일")
-            (1..7).forEach { d ->
-                val h=bar.weeklyHours.firstOrNull{it.dayOfWeek==d}
-                Row(Modifier.fillMaxWidth().heightIn(min=36.dp),
-                    horizontalArrangement=Arrangement.SpaceBetween) {
-                    Text(names[d-1],color=P18Muted,fontSize=14.sp)
-                    Text(when {
-                        h==null->"정보 없음"
-                        h.closed->"휴무"
-                        else->"${h.openTime} ~ ${if(h.closeTime.orEmpty()<h.openTime.orEmpty())"익일 " else ""}${h.closeTime}"
-                    },color=P18Text,fontSize=14.sp)
-                }
-            }
-            P18Action("닫기",{hoursVisible=false},modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(12.dp))
-        }
-    }
     if(photoFull && selectedPhoto!=null) Dialog(onDismissRequest={photoFull=false},
         properties=DialogProperties(usePlatformDefaultWidth=false)) {
         Column(Modifier.fillMaxWidth().fillMaxHeight(.82f)
@@ -273,48 +251,78 @@ internal fun CustomerP18BarDetail(
                     Text(open.text,color=if(open.open)BottleMapPalette.success else P18Muted,
                         fontSize=14.sp,fontWeight=FontWeight.Bold)
                     open.next?.let {Text(it,fontSize=11.sp,color=P18Muted)}
-                    Text("⌄",Modifier.size(32.dp).clickable{hoursVisible=true},
-                        color=P18Gold,textAlign=TextAlign.Center)
+                    P18SortTrigger("",{hoursVisible=!hoursVisible},
+                        Modifier.width(32.dp))
                 }
-                P18Action("지도",{mapVisible=!mapVisible})
+                P18DetailSmallButton("지도",BmIconId.MAP){mapVisible=!mapVisible}
                 Spacer(Modifier.width(6.dp))
-                if(!bar.phone.isNullOrBlank()) P18Action("전화",{
-                    phoneVisible=!phoneVisible
-                })
+                P18DetailSmallButton("전화",BmIconId.LOCATION){phoneVisible=!phoneVisible}
             }
             open.note?.let {Text(it,color=P18Muted,fontSize=12.sp)}
-            if(phoneVisible && !bar.phone.isNullOrBlank()) {
-                Row(Modifier.fillMaxWidth().heightIn(min=48.dp)
-                    .background(P18Surface,RoundedCornerShape(10.dp))
-                    .padding(horizontal=12.dp),
-                    horizontalArrangement=Arrangement.SpaceBetween,
-                    verticalAlignment=Alignment.CenterVertically) {
-                    Text(bar.phone,color=P18Text,fontSize=14.sp)
-                    TextButton(onClick={
-                        val dial=Intent(Intent.ACTION_DIAL,Uri.parse("tel:"+bar.phone))
-                        runCatching {context.startActivity(dial)}
-                    }) {Text("전화 걸기",color=P18Gold)}
+            if(hoursVisible) {
+                Column(Modifier.fillMaxWidth().background(P18Surface,RoundedCornerShape(9.dp))
+                    .padding(horizontal=12.dp,vertical=10.dp),
+                    verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                    val days=listOf("월","화","수","목","금","토","일")
+                    days.forEachIndexed { index,label ->
+                        val h=bar.weeklyHours.firstOrNull{it.dayOfWeek==index+1}
+                        Row(Modifier.fillMaxWidth(),
+                            horizontalArrangement=Arrangement.SpaceBetween) {
+                            Text(label,color=P18Muted,fontSize=11.sp,fontWeight=FontWeight.Bold)
+                            Text(when {
+                                h==null->"미설정"
+                                h.closed->"휴무"
+                                else->"${h.openTime} – ${if(h.closeTime.orEmpty()<h.openTime.orEmpty())"익일 " else ""}${h.closeTime}"
+                            },color=P18Text,fontSize=11.sp)
+                        }
+                    }
                 }
             }
             if(mapVisible) {
-                val location=bar.latitude?.let{lat->
-                    bar.longitude?.let{lng->NearbyCoordinate(lat,lng)}
-                }?.takeIf{it.isValid()}
-                if(location!=null) {
-                    NearbyKakaoMap(origin=location,
-                        bars=listOf(MapBar(bar.barId,bar.name,bar.address,location)),
-                        selectedBarId=bar.barId,focusTarget=null,focusBarId=null,
-                        initialCamera=null,listCovered=false,searchedPlace=null,
-                        focusSearchedPlace=null,onSearchedPlaceFocusApplied={},
-                        onFocusApplied={},onCameraChanged={_,_->},
-                        onMapCameraMoving={},onMapViewportUnavailable={},
-                        viewportRetryToken=0,onSelectBar={},
-                        onViewportChanged={},recenterToken=0,
-                        onMapViewChanged={},
-                        modifier=Modifier.fillMaxWidth().height(230.dp)
-                            .clip(RoundedCornerShape(12.dp)))
+                Column(Modifier.fillMaxWidth().background(P18Surface,RoundedCornerShape(9.dp))
+                    .padding(12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
+                    Box(Modifier.fillMaxWidth().height(190.dp)
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(androidx.compose.ui.graphics.Color(0xFF7D7060)),
+                        contentAlignment=Alignment.Center) {
+                        Canvas(Modifier.fillMaxSize()) {
+                            drawLine(androidx.compose.ui.graphics.Color(0xFFD8D0C6),
+                                Offset(size.width*(-.1f),size.height*1.18f),
+                                Offset(size.width*1.1f,size.height*(-.1f)),
+                                strokeWidth=34.dp.toPx())
+                            drawLine(androidx.compose.ui.graphics.Color(0xFFD8D0C6),
+                                Offset(size.width*.45f,size.height*(-.2f)),
+                                Offset(size.width*.28f,size.height*1.2f),
+                                strokeWidth=24.dp.toPx())
+                        }
+                        Box(Modifier.background(P18Bg,RoundedCornerShape(50))
+                            .border(2.dp,P18Gold,RoundedCornerShape(50))
+                            .padding(horizontal=11.dp,vertical=6.dp)) {
+                            Text(bar.name,color=P18Text,fontSize=12.sp,fontWeight=FontWeight.Medium)
+                        }
+                    }
+                    Row(verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.spacedBy(9.dp)) {
+                        BmIcon(BmIconId.LOCATION,null,Modifier.size(17.dp),tint=P18Gold)
+                        Text(bar.address,Modifier.weight(1f),color=P18Text,fontSize=12.sp)
+                        Text("복사",Modifier.clickable {
+                            clipboard.setText(AnnotatedString(bar.address))
+                        },color=P18Gold,fontSize=12.sp)
+                    }
                 }
-                Text(bar.address,color=P18Muted,fontSize=13.sp)
+            }
+            if(phoneVisible) {
+                Row(Modifier.fillMaxWidth().background(P18Surface,RoundedCornerShape(9.dp))
+                    .padding(horizontal=14.dp,vertical=12.dp),
+                    horizontalArrangement=Arrangement.spacedBy(9.dp),
+                    verticalAlignment=Alignment.CenterVertically) {
+                    BmIcon(BmIconId.LOCATION,null,Modifier.size(17.dp),tint=P18Gold)
+                    Text(bar.phone ?: "전화번호 정보 없음",Modifier.weight(1f),
+                        color=P18Text,fontSize=12.sp)
+                    if(!bar.phone.isNullOrBlank()) Text("복사",Modifier.clickable {
+                        clipboard.setText(AnnotatedString(bar.phone))
+                    },fontSize=12.sp,color=P18Gold)
+                }
             }
             Row(Modifier.fillMaxWidth().padding(top=6.dp),
                 horizontalArrangement=Arrangement.SpaceBetween,
@@ -430,5 +438,19 @@ internal fun CustomerP18BarDetail(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun P18DetailSmallButton(label:String,icon:BmIconId,onClick:()->Unit) {
+    Row(Modifier.heightIn(min=33.dp)
+        .background(P18Surface,RoundedCornerShape(7.dp))
+        .border(1.dp,P18Line,RoundedCornerShape(7.dp))
+        .clickable(onClick=onClick)
+        .padding(horizontal=7.dp,vertical=5.dp),
+        verticalAlignment=Alignment.CenterVertically,
+        horizontalArrangement=Arrangement.spacedBy(3.dp)) {
+        BmIcon(icon,null,Modifier.size(17.dp),tint=P18Text)
+        Text(label,color=P18Text,fontSize=11.sp)
     }
 }
