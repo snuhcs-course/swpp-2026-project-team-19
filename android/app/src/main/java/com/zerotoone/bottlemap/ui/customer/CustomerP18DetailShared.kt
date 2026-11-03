@@ -148,7 +148,7 @@ internal fun P18InlineBarMap(
                 onMapViewportUnavailable={},viewportRetryToken=0,
                 onSelectBar={},onViewportChanged={},recenterToken=0,
                 onMapViewChanged={},modifier=Modifier.fillMaxSize(),
-                p18SimplePins=true,showOriginMarker=false,
+                p18SimplePins=false,showOriginMarker=false,
             )
         }
     }
