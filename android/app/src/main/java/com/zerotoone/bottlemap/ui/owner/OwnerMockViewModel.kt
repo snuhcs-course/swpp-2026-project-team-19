@@ -58,6 +58,17 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
         else repository.saveBar(bar)
     }
     fun confirmMenuInformation(barId: String, atEpochMs: Long) = repository.confirmMenuInformation(barId, atEpochMs)
+    suspend fun applyOperatingExceptionLive(barId: String, exception: MockOperatingException) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.applyOperatingExceptionLive(barId, exception)
+        else repository.applyOperatingException(barId, exception)
+    }
+    suspend fun cancelOperatingExceptionLive(barId: String, exceptionId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.cancelOperatingExceptionLive(barId)
+        else repository.cancelOperatingException(barId, exceptionId)
+    }
+
     fun applyOperatingException(barId: String, exception: MockOperatingException) = repository.applyOperatingException(barId, exception)
     fun cancelOperatingException(barId: String, exceptionId: String) = repository.cancelOperatingException(barId, exceptionId)
     fun selectBar(barId: String) = repository.selectBar(barId)

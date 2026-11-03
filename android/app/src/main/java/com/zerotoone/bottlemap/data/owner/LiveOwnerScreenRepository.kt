@@ -1087,7 +1087,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         error("브랜드는 메뉴 저장 시 함께 등록해 주세요.")
     override fun saveCatalogProduct(product: MockCatalogProduct) =
         error("상품은 메뉴 저장 시 함께 등록해 주세요.")
-    override fun applyOperatingException(barId: String, exception: MockOperatingException) {
+    private fun operatingExceptionBody(exception: MockOperatingException):
+        Map<String, Any?> {
         val fields = mutableMapOf<String, Any?>("note" to exception.note)
         when(exception.kind) {
             MockExceptionKind.CLOSED_TODAY -> {
@@ -1106,11 +1107,22 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 fields["endDate"] = date(exception.toEpochDay)
             }
         }
-        write { remote.setOperatingException(barId, fields) }
+        return fields
+    }
+
+    suspend fun applyOperatingExceptionLive(barId: String, exception: MockOperatingException) =
+        confirmedWrite { remote.setOperatingException(barId, operatingExceptionBody(exception)) }
+
+    suspend fun cancelOperatingExceptionLive(barId: String) =
+        confirmedWrite { remote.removeOperatingException(barId) }
+
+    override fun applyOperatingException(barId: String, exception: MockOperatingException) {
+        write { remote.setOperatingException(barId, operatingExceptionBody(exception)) }
     }
     override fun cancelOperatingException(barId: String, exceptionId: String) {
         write { remote.removeOperatingException(barId) }
     }
+
     override fun startPhotoImport(
         barId: String, selectedUris: List<String>, fixture: MockPhotoExtractionSource,
     ): String = error("서버 사진 업로드를 사용해 주세요.")

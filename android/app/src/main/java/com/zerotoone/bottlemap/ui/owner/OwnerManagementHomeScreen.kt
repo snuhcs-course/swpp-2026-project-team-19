@@ -147,6 +147,7 @@ fun OwnerManagementHomeScreen(
     val selected = activeBar(state)
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var confirmingMenu by rememberSaveable { mutableStateOf(false) }
+    var changingException by rememberSaveable { mutableStateOf(false) }
     val ownerScope=rememberCoroutineScope()
     val now = rememberOwnerNow()
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -237,11 +238,19 @@ fun OwnerManagementHomeScreen(
                                                     Box(
                                                         Modifier.align(Alignment.CenterEnd)
                                                             .offset(x = 8.dp).size(36.dp)
-                                                            .ownerQuietClick {
-                                                                try {
-                                                                    viewModel.cancelOperatingException(bar.barId, exception.exceptionId)
-                                                                    error = null
-                                                                } catch (e: Exception) { error = e.message }
+                                                            .ownerQuietClick(enabled = !changingException) {
+                                                                changingException=true
+                                                                ownerScope.launch {
+                                                                    try {
+                                                                        viewModel.cancelOperatingExceptionLive(
+                                                                            bar.barId, exception.exceptionId)
+                                                                        error=null
+                                                                    } catch(cancelled: CancellationException) {
+                                                                        throw cancelled
+                                                                    } catch(e: Exception) {
+                                                                        error=e.message ?: "임시 영업 상태를 해제하지 못했어요."
+                                                                    } finally { changingException=false }
+                                                                }
                                                             },
                                                         contentAlignment = Alignment.Center
                                                     ) {
@@ -414,6 +423,8 @@ fun OwnerOperatingQuickScreen(
     var endDay by rememberSaveable { mutableLongStateOf(Long.MIN_VALUE) }
     var dateTarget by rememberSaveable { mutableStateOf("start") }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var applying by rememberSaveable { mutableStateOf(false) }
+    val exceptionScope=rememberCoroutineScope()
     val today = ownerToday(System.currentTimeMillis()).toEpochDay()
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -583,20 +594,30 @@ fun OwnerOperatingQuickScreen(
                                 require(choice != "hours" || openMinutes != closeMinutes) {
                                     "영업 시작과 종료 시각이 같을 수 없어요."
                                 }
-                                viewModel.applyOperatingException(
-                                    bar.barId, MockOperatingException(
-                                        exceptionId = "quick-" + UUID.randomUUID().toString(),
-                                        kind = kind,
-                                        fromEpochDay = if (choice == "range") startDay else applyDay,
-                                        toEpochDay = if (choice == "range") endDay else applyDay,
-                                        note = note.trim().ifBlank { null },
-                                        openMinutes = if (choice == "hours") openMinutes else null,
-                                        closeMinutes = if (choice == "hours") closeMinutes else null,
-                                        closesNextDay = choice == "hours" && closeMinutes < openMinutes
-                                    )
+                                val exception=MockOperatingException(
+                                    exceptionId = "quick-" + UUID.randomUUID().toString(),
+                                    kind = kind,
+                                    fromEpochDay = if (choice == "range") startDay else applyDay,
+                                    toEpochDay = if (choice == "range") endDay else applyDay,
+                                    note = note.trim().ifBlank { null },
+                                    openMinutes = if (choice == "hours") openMinutes else null,
+                                    closeMinutes = if (choice == "hours") closeMinutes else null,
+                                    closesNextDay = choice == "hours" && closeMinutes < openMinutes
                                 )
-                                error = null
-                                onBack()
+                                if(!applying) {
+                                    applying=true
+                                    exceptionScope.launch {
+                                        try {
+                                            viewModel.applyOperatingExceptionLive(bar.barId, exception)
+                                            error=null
+                                            onBack()
+                                        } catch(cancelled: CancellationException) {
+                                            throw cancelled
+                                        } catch(e: Exception) {
+                                            error=e.message ?: "일정을 저장하지 못했어요."
+                                        } finally { applying=false }
+                                    }
+                                }
                             } catch (e: Exception) {
                                 error = e.message ?: "일정을 저장하지 못했어요."
                             }
