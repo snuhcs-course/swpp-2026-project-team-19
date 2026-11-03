@@ -42,6 +42,10 @@ data class OwnerApplicationDto(
     val createdAt: String,
     val reviewedAt: String? = null,
     val businessRegistrationNumber: String? = null,
+    val representativeName: String? = null,
+    val openingDate: String? = null,
+    val contactPhone: String? = null,
+    val applicantNote: String? = null,
 )
 data class MyOwnerApplicationsDto(val items: List<OwnerApplicationDto> = emptyList())
 
