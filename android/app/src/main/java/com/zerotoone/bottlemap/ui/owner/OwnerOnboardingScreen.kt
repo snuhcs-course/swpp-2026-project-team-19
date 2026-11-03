@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.zerotoone.bottlemap.data.owner.*
+import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.ui.common.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -45,7 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
-/** ACTION_FIRST v4 mock form; no real OCR, NTS, operator approval or upload API. */
+/** ACTION_FIRST v4 registration UI; live mode uses the current application APIs. */
 private enum class RegPage {
     HOME, INTRO, METHOD, READING, BN, REP, DATE, BIZCHECK, VERIFYING, VERIFIED,
     BARNAME, BARPHOTO, ADDRESS, BARPHONE, MENUS, CONTACT, REVIEW, DONE, VIEW_APPLICATION
@@ -301,6 +302,8 @@ fun OwnerOnboardingScreen(
             it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
     }
     val validContact=draft.contactPhone.isNotBlank()&&validOwnerPhone(draft.contactPhone)
+    val businessPrecheck=ownerRegistrationPrecheckError(
+        draft.businessNumberDigits, draft.representativeName, draft.openingDateIso)
     val stage=regStage(screen)
     val cta=when(screen){
         RegPage.INTRO->"시작하기"
@@ -322,8 +325,7 @@ fun OwnerOnboardingScreen(
         RegPage.BN->validBusinessRegistrationNumber(draft.businessNumberDigits)
         RegPage.REP->draft.representativeName.trim().length in 1..100
         RegPage.DATE->validOpeningDate(draft.openingDateIso)
-        RegPage.BIZCHECK->validBusinessRegistrationNumber(draft.businessNumberDigits)&&
-            draft.representativeName.trim().length in 1..100&&validOpeningDate(draft.openingDateIso)
+        RegPage.BIZCHECK->businessPrecheck==null
         RegPage.BARNAME->draft.proposedBarName.trim().length in 1..150&&exactMatches.isEmpty()
         RegPage.BARPHOTO->draft.applicantGallery.isNotEmpty()
         RegPage.ADDRESS->draft.proposedBarAddress.isNotBlank() &&
@@ -333,7 +335,7 @@ fun OwnerOnboardingScreen(
         RegPage.MENUS->draft.initialMenuPhotos.isNotEmpty()
         RegPage.CONTACT->validContact
         RegPage.REVIEW->validContact&&draft.initialMenuPhotos.isNotEmpty()&&
-            validBusinessRegistrationNumber(draft.businessNumberDigits)
+            businessPrecheck==null
         else->true
     }
     fun primaryAction(){
@@ -342,7 +344,8 @@ fun OwnerOnboardingScreen(
             RegPage.BN->forward(if(inputMethod=="photo")RegPage.BIZCHECK else RegPage.REP)
             RegPage.REP->forward(if(inputMethod=="photo")RegPage.BIZCHECK else RegPage.DATE)
             RegPage.DATE->forward(RegPage.BIZCHECK)
-            RegPage.BIZCHECK->go(RegPage.VERIFYING)
+            RegPage.BIZCHECK->if(viewModel.usesProductionOwnerApi())
+                forward(RegPage.BARNAME) else go(RegPage.VERIFYING)
             RegPage.VERIFIED->when(verify){
                 VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->forward(RegPage.BARNAME)
                 VerifyFixture.FAILED->go(RegPage.BIZCHECK)
@@ -364,7 +367,23 @@ fun OwnerOnboardingScreen(
                             screen=RegPage.DONE
                             error=null
                         } catch(e: Exception) {
-                            error=e.message ?: "신청을 접수하지 못했어요."
+                            val code=(e as? BottleMapApiException)?.code
+                            when(code) {
+                                "BUSINESS_VERIFICATION_FAILED" -> {
+                                    go(RegPage.BIZCHECK)
+                                    error="국세청 정보와 일치하지 않아요. 사업자번호·대표자명·개업일을 수정해 주세요."
+                                }
+                                "INVALID_BUSINESS_NUMBER","DATE_IN_FUTURE" -> {
+                                    go(RegPage.BIZCHECK)
+                                    error=ownerRegistrationPrecheckError(
+                                        draft.businessNumberDigits,
+                                        draft.representativeName,draft.openingDateIso)
+                                        ?: "사업자등록번호와 개업일을 다시 확인해 주세요."
+                                }
+                                "RATE_LIMITED" ->
+                                    error="오늘 사업자 정보 확인 횟수를 모두 사용했어요. 내일 다시 신청해 주세요."
+                                else -> error=e.message ?: "신청을 접수하지 못했어요."
+                            }
                         } finally { busy=false }
                     }
                 }
@@ -594,7 +613,9 @@ fun OwnerOnboardingScreen(
                             OwnerV4Question(
                                 if(inputMethod=="photo")"읽은 내용이\n맞는지 확인해 주세요"
                                 else "이 정보로\n확인할게요",
-                                if(inputMethod=="photo")
+                                if(viewModel.usesProductionOwnerApi())
+                                    "입력 형식을 먼저 확인해요. 국세청 검증은 신청할 때 진행돼요."
+                                else if(inputMethod=="photo")
                                     "사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요."
                                 else "국세청에 등록된 정보와 같은지 확인해요.")
                             Spacer(Modifier.height(0.dp))
@@ -603,6 +624,10 @@ fun OwnerOnboardingScreen(
                                 OwnerV4Summary("대표자 성명",draft.representativeName){go(RegPage.REP)}
                                 OwnerV4Summary("개업일",draft.openingDateIso.replace("-",".")){go(RegPage.DATE)}
                             }
+                        }
+                        if(viewModel.usesProductionOwnerApi()) {
+                            RegistrationHint(
+                                "사업자등록번호·개업일은 형식만 확인했어요. 실제 국세청 조회는 마지막 신청 단계에서 진행돼요.")
                         }
                     }
                     RegPage.VERIFYING -> RegistrationCenterContent(
@@ -650,7 +675,9 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.BARPHOTO -> {
                         OwnerV4Question("매장 사진을\n올려 주세요",
-                            "갤러리에서 사진을 선택해 주세요. 등록한 사진은 대표 사진으로 지정돼요.")
+                            if(viewModel.usesProductionOwnerApi())
+                                "대표 사진을 골라 주세요. 승인 후 이 기기에서 매장 사진으로 자동 등록해요."
+                            else "갤러리에서 사진을 선택해 주세요. 등록한 사진은 대표 사진으로 지정돼요.")
                         Spacer(Modifier.height(0.dp))
                         val cover=draft.applicantGallery.firstOrNull()
                         Box(Modifier.fillMaxWidth().aspectRatio(4f/3f)
@@ -800,6 +827,9 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.REVIEW -> {
                         OwnerV4Question("이렇게\n신청할게요","한 번 더 확인하고 신청해 주세요.")
+                        if(viewModel.usesProductionOwnerApi()) {
+                            RegistrationHint("국세청 정보 확인은 '신청하기'를 누를 때 진행돼요.")
+                        }
                         Spacer(Modifier.height(8.dp))
                         RegistrationReviewDetails(
                             values=RegistrationReviewValues(
@@ -829,8 +859,15 @@ fun OwnerOnboardingScreen(
                             }
                         )
                     }
-                    RegPage.DONE -> RegistrationCenterContent("신청을 마쳤어요",
-                        "운영팀이 실제 매장인지 확인한 뒤 승인해요.\n진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
+                    RegPage.DONE -> {
+                        RegistrationCenterContent("신청을 마쳤어요",
+                            "운영팀이 실제 매장인지 확인한 뒤 승인해요.\n진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
+                        if(viewModel.usesProductionOwnerApi() &&
+                            draft.kind==MockApplicationKind.NEW_BAR) {
+                            RegistrationHint(
+                                "대표 사진은 승인 후 자동 등록돼요. 승인될 때까지 앱 데이터와 사진을 삭제하지 마세요.")
+                        }
+                    }
                     RegPage.VIEW_APPLICATION -> {
                         OwnerV4Question("신청한 내용","검토 중에는 내용을 수정할 수 없어요.")
                         val application=snapshot?.applications?.firstOrNull {
