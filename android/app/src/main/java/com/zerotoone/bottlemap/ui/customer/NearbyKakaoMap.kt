@@ -172,7 +172,7 @@ fun NearbyKakaoMap(
                                     bar.name,markerDensity)
                                 p18Markers -> p18CardMarkerStyle(id == selectedBarId,bar.name,
                                     p18MarkerSubtitle(id),markerDensity)
-                                else -> nearbyMarkerStyle(id == selectedBarId)
+                                else -> nearbyMarkerStyle(id == selectedBarId,markerDensity)
                             })
                             .setClickable(true)
                             .setTag(id)
@@ -190,7 +190,7 @@ fun NearbyKakaoMap(
                         current[id]?.name ?: id,markerDensity)
                     p18Markers -> p18CardMarkerStyle(id == selectedBarId,
                         current[id]?.name ?: id,p18MarkerSubtitle(id),markerDensity)
-                    else -> nearbyMarkerStyle(id == selectedBarId)
+                    else -> nearbyMarkerStyle(id == selectedBarId,markerDensity)
                 })
                 stored.second.invalidate()
             }
@@ -252,7 +252,7 @@ fun NearbyKakaoMap(
                     p18Markers -> p18CardMarkerStyle(id == selectedBarId,
                         bars.firstOrNull{it.barId==id}?.name ?: id,
                         p18MarkerSubtitle(id),markerDensity)
-                    else -> nearbyMarkerStyle(id == selectedBarId)
+                    else -> nearbyMarkerStyle(id == selectedBarId,markerDensity)
                 })
                 pair.second.invalidate()
             }
@@ -549,33 +549,38 @@ private fun userLocationStyle(): LabelStyle {
     return LabelStyle.from(bitmap).setAnchorPoint(0.5f, 0.5f)
 }
 
-/** Shared icon anchor (bottom-center): no position drift when zooming. */
-private fun nearbyMarkerStyle(selected: Boolean): LabelStyle {
-    val pin = Bitmap.createBitmap(40, 52, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(pin)
-    val path = Path().apply {
-        moveTo(20f, 51f)
-        cubicTo(10f, 38f, 4f, 26f, 4f, 20f)
-        cubicTo(4f, 10f, 11f, 4f, 20f, 4f)
-        cubicTo(29f, 4f, 36f, 10f, 36f, 20f)
-        cubicTo(36f, 26f, 30f, 38f, 20f, 51f)
-        close()
+/**
+ * All non-Explore native map pins use the exact geometry of the Owner
+ * customer-preview's location icon. Explore's selected/unselected drop is
+ * intentionally the ONLY exception.
+ */
+private fun nearbyMarkerStyle(selected:Boolean,density:Float):LabelStyle {
+    val d=density.coerceAtLeast(.5f)
+    val width=(28f*d).toInt().coerceAtLeast(1)
+    val height=(28f*d).toInt().coerceAtLeast(1)
+    val image=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+    val canvas=Canvas(image)
+    val u=d
+    val tint=if(selected) Color.rgb(201,157,107) else Color.rgb(199,187,176)
+    val paint=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=tint
+        style=Paint.Style.STROKE
+        strokeWidth=1.8f*d
+        strokeCap=Paint.Cap.ROUND
+        strokeJoin=Paint.Join.ROUND
     }
-    canvas.drawPath(
-        path,
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = if (selected) Color.rgb(214, 183, 126) else Color.rgb(63, 91, 122)
-        },
-    )
-    canvas.drawCircle(
-        20f, 20f, 6f,
-        Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE },
-    )
-    return LabelStyle.from(pin)
-        .setAnchorPoint(0.5f, 1.0f)
-        .setTextStyles(18, Color.WHITE, 2, Color.rgb(12, 22, 38))
+    val path=Path().apply {
+        moveTo(14*u,24*u)
+        cubicTo(11*u,20*u,6*u,15*u,6*u,11*u)
+        cubicTo(6*u,6*u,9*u,4*u,14*u,4*u)
+        cubicTo(19*u,4*u,22*u,6*u,22*u,11*u)
+        cubicTo(22*u,15*u,17*u,20*u,14*u,24*u)
+    }
+    canvas.drawPath(path,paint)
+    canvas.drawCircle(14*u,11*u,2.5f*u,paint)
+    return LabelStyle.from(image).setAnchorPoint(.5f,1f)
+        .setTextStyles(18,Color.WHITE,2,Color.rgb(12,22,38))
 }
-
 
 /** Search-result map: content-width speech balloon, compact text, no image.
  * The right inset is always 5dp; grow with the full price/volume text rather
