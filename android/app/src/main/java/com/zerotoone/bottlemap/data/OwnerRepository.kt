@@ -34,6 +34,10 @@ class OwnerRepository {
         }
     }
 
+    suspend fun searchCatalogBrands(query: String):
+        List<com.zerotoone.bottlemap.network.OwnerCatalogBrandDto> =
+        withOwnerAuth { OwnerEndpoint.api.searchOwnerCatalogBrands(it, query).items }
+
     suspend fun searchCatalogProducts(query: String):
         List<com.zerotoone.bottlemap.network.OwnerCatalogProductDto> =
         withOwnerAuth { OwnerEndpoint.api.searchOwnerCatalogProducts(it, query).items }

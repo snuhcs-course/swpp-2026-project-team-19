@@ -128,6 +128,11 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
             repository.searchExistingBarCandidatesLive(query)
     }
 
+    suspend fun searchCatalogBrandsLive(query: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.searchCatalogBrandsLive(query)
+    }
+
     suspend fun searchCatalogLive(query: String) {
         if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
             repository.searchCatalogLive(query)

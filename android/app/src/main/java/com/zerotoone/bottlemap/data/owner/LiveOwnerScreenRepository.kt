@@ -720,6 +720,20 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             }))
     }
 
+    suspend fun searchCatalogBrandsLive(query: String) {
+        val trimmed=query.trim()
+        if(trimmed.length<2 || trimmed.length>100) return
+        val matches=remote.searchCatalogBrands(trimmed)
+        val mapped=matches.map {
+            MockBrand(it.brandId,it.canonicalName,it.matchedAlias)
+        }
+        val ids=mapped.mapTo(mutableSetOf()) { it.brandId }
+        val previous=snapshot()
+        publishSnapshot(previous.copy(
+            brands=previous.brands.filterNot { it.brandId in ids } + mapped
+        ))
+    }
+
     suspend fun searchCatalogLive(query: String) {
         val trimmed = query.trim()
         if(trimmed.isEmpty() || trimmed.length > 100) return

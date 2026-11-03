@@ -67,6 +67,14 @@ data class OwnerCertificateOcrDto(
     val address: String? = null,
 )
 
+/** Existing catalog brands survive deleting the last menu row. */
+data class OwnerCatalogBrandDto(
+    val brandId: String,
+    val canonicalName: String,
+    val matchedAlias: String,
+)
+data class OwnerCatalogBrandsDto(val items: List<OwnerCatalogBrandDto> = emptyList())
+
 data class OwnerCatalogProductDto(
     val productId: String,
     val displayName: String,

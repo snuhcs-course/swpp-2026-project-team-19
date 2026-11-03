@@ -17,6 +17,13 @@ interface OwnerApi {
     suspend fun temporaryLogin(): TemporaryLoginResponseDto
 
     /** Production owner routes: the Supabase user is never an operator fixture. */
+    @GET("api/catalog/brands")
+    suspend fun searchOwnerCatalogBrands(
+        @Header("Authorization") authorization: String,
+        @Query("query") query: String,
+        @Query("limit") limit: Int = 20,
+    ): OwnerCatalogBrandsDto
+
     @GET("api/catalog/products")
     suspend fun searchOwnerCatalogProducts(
         @Header("Authorization") authorization: String,

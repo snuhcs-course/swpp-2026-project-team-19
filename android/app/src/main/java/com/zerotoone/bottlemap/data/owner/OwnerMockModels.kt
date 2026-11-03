@@ -86,7 +86,11 @@ data class MockOwnerApplication(
 )
 
 /** Product ID is a catalog identity, never a menu row ID. */
-data class MockBrand(val brandId: String, val name: String)
+data class MockBrand(
+    val brandId: String, val name: String,
+    // Matched search spelling, e.g. Korean alias for an English catalog brand.
+    val matchedAlias: String? = null,
+)
 data class MockCatalogProduct(
     val productId: String,
     val brandId: String,
