@@ -14,6 +14,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -101,15 +106,25 @@ internal fun P18IceGlass(modifier: Modifier = Modifier) {
 /** Entire loading destination: only a fixed back affordance and a vertically centered glass/caption. */
 @Composable
 internal fun P18LoadingScene(text:String, onBack:()->Unit, modifier:Modifier=Modifier) {
+    // Keep quick (<500ms) requests visually silent; disposal on success
+    // cancels this timer and prevents a late loading flash.
+    var showProgress by remember(text) { mutableStateOf(false) }
+    LaunchedEffect(text) {
+        showProgress=false
+        delay(500L)
+        showProgress=true
+    }
     Box(modifier.fillMaxSize().background(P18Bg).testTag("customer-loading-scene")) {
         P18Back(onBack,modifier=Modifier.align(Alignment.TopStart)
             .padding(start=8.dp,top=12.dp))
-        Column(Modifier.align(Alignment.Center),
-            horizontalAlignment=Alignment.CenterHorizontally,
-            verticalArrangement=Arrangement.spacedBy(16.dp)) {
-            P18IceGlass()
-            Text(text,color=P18Text,fontSize=16.sp,lineHeight=24.sp,
-                textAlign=TextAlign.Center)
+        if(showProgress) {
+            Column(Modifier.align(Alignment.Center),
+                horizontalAlignment=Alignment.CenterHorizontally,
+                verticalArrangement=Arrangement.spacedBy(16.dp)) {
+                P18IceGlass()
+                Text(text,color=P18Text,fontSize=16.sp,lineHeight=24.sp,
+                    textAlign=TextAlign.Center)
+            }
         }
     }
 }
