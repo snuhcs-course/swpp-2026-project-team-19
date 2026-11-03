@@ -306,8 +306,8 @@ fun OwnerOnboardingScreen(
     fun primaryAction(){
         when(screen){
             RegPage.INTRO->go(RegPage.METHOD)
-            RegPage.BN->forward(RegPage.REP)
-            RegPage.REP->forward(RegPage.DATE)
+            RegPage.BN->forward(if(inputMethod=="photo")RegPage.BIZCHECK else RegPage.REP)
+            RegPage.REP->forward(if(inputMethod=="photo")RegPage.BIZCHECK else RegPage.DATE)
             RegPage.DATE->forward(RegPage.BIZCHECK)
             RegPage.BIZCHECK->go(RegPage.VERIFYING)
             RegPage.VERIFIED->when(verify){
