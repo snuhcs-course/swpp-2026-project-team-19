@@ -458,6 +458,13 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     var chosenCategory by rememberSaveable(job?.menuImportId) { mutableStateOf("whisky") }
     var choosingOther by rememberSaveable(job?.menuImportId) { mutableStateOf(false) }
     var catalogQuery by rememberSaveable(job?.menuImportId) { mutableStateOf("") }
+    LaunchedEffect(screen, catalogQuery) {
+        if(screen=="catalog" && catalogQuery.trim().length>=2 && vm.usesProductionOwnerApi()) {
+            kotlinx.coroutines.delay(300)
+            runCatching { vm.searchCatalogLive(catalogQuery) }
+        }
+    }
+
     var pendingNewDraftEncoded by rememberSaveable(job?.menuImportId) {
         mutableStateOf<String?>(null)
     }
