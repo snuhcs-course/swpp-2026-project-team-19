@@ -64,19 +64,27 @@ fun BottleMapNavHost() {
         customerGraph(
             navController = navController,
             authViewModel = authViewModel,
-            onOpenAccount = { navController.navigate(Routes.CUSTOMER_ACCOUNT) },
-            onOpenNearby = { navController.navigate(Routes.CUSTOMER_NEARBY) },
+            onOpenAccount = {
+                if (navController.currentDestination?.route == Routes.CUSTOMER_SEARCH)
+                    navController.navigate(Routes.CUSTOMER_ACCOUNT) { launchSingleTop = true }
+            },
+            onOpenNearby = {
+                if (navController.currentDestination?.route == Routes.CUSTOMER_SEARCH)
+                    navController.navigate(Routes.CUSTOMER_NEARBY) { launchSingleTop = true }
+            },
             onOpenResults = { query, source ->
-                navController.navigate(
-                    Routes.CUSTOMER_SEARCH_RESULTS + "?query=" + Uri.encode(query) +
-                        "&productId=&source=" + Uri.encode(source),
-                )
+                if (navController.currentDestination?.route == Routes.CUSTOMER_SEARCH)
+                    navController.navigate(
+                        Routes.CUSTOMER_SEARCH_RESULTS + "?query=" + Uri.encode(query) +
+                            "&productId=&source=" + Uri.encode(source)
+                    ) { launchSingleTop = true }
             },
             onOpenProduct = { productId ->
-                navController.navigate(
-                    Routes.CUSTOMER_SEARCH_RESULTS + "?query=&productId=" +
-                        Uri.encode(productId) + "&source=popular",
-                )
+                if (navController.currentDestination?.route == Routes.CUSTOMER_SEARCH)
+                    navController.navigate(
+                        Routes.CUSTOMER_SEARCH_RESULTS + "?query=&productId=" +
+                            Uri.encode(productId) + "&source=popular"
+                    ) { launchSingleTop = true }
             },
             onBack = { navController.popBackStack() },
             onInvalidQuery = { fieldCode ->
