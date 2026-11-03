@@ -52,10 +52,17 @@ class OwnerRegistrationReapplicationTest {
         }
     }
 
-    @Test fun approvedPreviewHasPublishedMenuWhileNewlyApprovedPreviewRequiresReview() {
-        val unreviewed=ownerQaPreviewSnapshot(28)
-        val reviewed=ownerQaPreviewSnapshot(29)
-        assertFalse(unreviewed.hasPublishedInitialReview("qa-bar-1"))
-        assertTrue(reviewed.hasPublishedInitialReview("qa-bar-1"))
+    @Test fun approvedBarRequiresPublishedImportAndMenuBeforeManaging() {
+        val bar=MockBar("bar-1","몰트 앤 무드","서울특별시 관악구 관악로 1")
+        val newlyApproved=MockOwnerSnapshot(bars=listOf(bar))
+        val publishedImport=MockMenuImport("import-1","bar-1",
+            MockImportStatus.APPLIED,reviewVersion=1,images=emptyList())
+        val menu=MockBarMenuItem("item-1","bar-1","product-1",
+            options=listOf(MockMenuOption("option-1",priceKrw=12000)))
+        assertFalse(newlyApproved.hasPublishedInitialReview(bar.barId))
+        assertFalse(newlyApproved.copy(imports=listOf(publishedImport))
+            .hasPublishedInitialReview(bar.barId))
+        assertTrue(newlyApproved.copy(imports=listOf(publishedImport),
+            menuItems=listOf(menu)).hasPublishedInitialReview(bar.barId))
     }
 }
