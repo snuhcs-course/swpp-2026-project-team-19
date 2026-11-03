@@ -413,7 +413,7 @@ internal fun CustomerP18Explore(
                 }
             }
         }
-        Row(Modifier.fillMaxWidth().padding(start=12.dp,end=12.dp,top=12.dp),
+        Row(Modifier.fillMaxWidth().padding(start=8.dp,end=12.dp,top=12.dp),
             verticalAlignment=Alignment.CenterVertically,
             horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             P18Back(::back,dark=!listVisible)
