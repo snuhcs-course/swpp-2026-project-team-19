@@ -317,6 +317,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 )).copy(
                     status = displayStatus,
                     reviewVersion = maxOf(1,historical.reviewVersion),
+                    imageCount = maxOf(historical.imageCount,previous?.imageCount ?: 0),
                 )
             }
         }
@@ -732,6 +733,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val job = MockMenuImport(
             menuImportId = accepted.menuImportId, barId = barId,
             status = MockImportStatus.PROCESSING, reviewVersion = 1,
+            imageCount = accepted.imageCount,
             images = photos.mapIndexed { index, photo ->
                 MockPhotoExtraction(photo.photoId, photo.uri, index + 1, emptyList())
             },
@@ -815,6 +817,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             status = status,
             reviewVersion = dto.reviewVersion ?: old?.reviewVersion ?: 1,
             images = priceCheckedImages,
+            imageCount = maxOf(old?.imageCount ?: 0,dto.progress?.totalImages ?: 0,
+                priceCheckedImages.size),
             failureReason = dto.failure?.message,
         )
         publishSnapshot(before.copy(

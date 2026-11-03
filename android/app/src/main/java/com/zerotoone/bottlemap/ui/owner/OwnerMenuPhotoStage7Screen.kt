@@ -76,6 +76,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
+import com.zerotoone.bottlemap.data.owner.importPhotoCount
 import com.zerotoone.bottlemap.data.owner.MockMenuImport
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.MockPhoto
@@ -751,9 +752,9 @@ internal fun OwnerMenuPhotoJobScreen(
                     MockImportStatus.FAILED ->
                         "사진 분석을 완료하지 못했어요.\n메뉴판을 화면에 꽉 채우고, 흔들리지 않게 다시 찍어주세요."
                     MockImportStatus.PROCESSING, MockImportStatus.UPLOADED ->
-                        "사진 ${job.images.size}장 중 0장을 읽었어요"
+                        "사진 ${importPhotoCount(job)}장 중 0장을 읽었어요"
                     MockImportStatus.READY_FOR_REVIEW ->
-                        "${job.images.size}장의 사진이 작업 ${job.menuImportId}에 연결됐어요."
+                        "${importPhotoCount(job)}장의 사진이 작업 ${job.menuImportId}에 연결됐어요."
                     else -> "매장 관리로 돌아갈 수 있어요."
                 }, color = if (job?.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.UPLOADED)) V4Color.text else V4Color.sub,
                     fontWeight = if (job?.status in listOf(MockImportStatus.PROCESSING, MockImportStatus.UPLOADED)) FontWeight.Bold else FontWeight.Normal,

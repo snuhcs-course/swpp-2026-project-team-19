@@ -71,3 +71,7 @@ internal fun conflictingReviewedPhotoPrices(job: MockMenuImport): Set<String> {
     return prices.filterValues { it.size > 1 }
         .keys.mapTo(mutableSetOf()) { it.first }
 }
+
+/** The import list provides imageCount even when recovered jobs have no photo objects. */
+internal fun importPhotoCount(job: MockMenuImport): Int =
+    maxOf(job.imageCount,job.images.size)

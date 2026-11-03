@@ -94,4 +94,13 @@ class OwnerPhotoReviewPolicyTest {
                     MockMenuOption("two",label="잔",pourMl=30,priceKrw=17000)))))))).isEmpty())
     }
 
+    @Test fun restoredProcessingJobUsesServerImageCount() {
+        val restored=MockMenuImport("job","bar",MockImportStatus.PROCESSING,1,
+            images=emptyList(),imageCount=3)
+        assertEquals(3,importPhotoCount(restored))
+        assertEquals(3,importPhotoCount(restored.copy(images=listOf(image(1)))))
+        assertEquals(4,importPhotoCount(restored.copy(images=listOf(
+            image(1),image(2),image(3),image(4)))))
+    }
+
 }
