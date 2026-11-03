@@ -444,9 +444,8 @@ internal fun CustomerP18Explore(
                                     .clickable { onOpenBar(bar.barId) },
                                     contentAlignment=Alignment.Center) {
                                     // White right-pointing arrow, replacing "보기".
-                                    BmIcon(BmIconId.BACK,"매장 상세 보기",
-                                        Modifier.size(21.dp).graphicsLayer { rotationZ=180f },
-                                        tint=Color.White)
+                                    P18DetailCategoryChevron(open=false,color=Color.White,
+                                        modifier=Modifier.graphicsLayer { rotationZ=-90f })
                                 }
                             }
                         }
