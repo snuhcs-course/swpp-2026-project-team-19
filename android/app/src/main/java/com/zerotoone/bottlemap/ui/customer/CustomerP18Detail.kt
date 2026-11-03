@@ -82,13 +82,13 @@ internal fun p18BusinessStatus(
     fun effective(date:LocalDate):Pair<LocalTime,LocalTime>? {
         if(covered(date) && exception!=null) {
             if(exception.kind!="custom_hours")return null
-            return runCatching {LocalTime.parse(exception.openTime) to
-                LocalTime.parse(exception.closeTime)}.getOrNull()
+            return runCatching {LocalTime.parse(requireNotNull(exception.openTime)) to
+                LocalTime.parse(requireNotNull(exception.closeTime))}.getOrNull()
         }
         val item=hours.firstOrNull{it.dayOfWeek==date.dayOfWeek.value}
         if(item==null || item.closed)return null
-        return runCatching {LocalTime.parse(item.openTime) to
-            LocalTime.parse(item.closeTime)}.getOrNull()
+        return runCatching {LocalTime.parse(requireNotNull(item.openTime)) to
+            LocalTime.parse(requireNotNull(item.closeTime))}.getOrNull()
     }
     val note=if(covered(day) || covered(prev)) exception?.note else null
     if(covered(day) && exception?.kind!="custom_hours")
