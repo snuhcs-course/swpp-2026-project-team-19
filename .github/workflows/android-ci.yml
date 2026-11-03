@@ -278,9 +278,11 @@ jobs:
             exit 1
           fi
           expected="$(awk '$1 == "SHA1:" {print $2}' <<<"$cert" | tr -d ':' | tr 'A-F' 'a-f')"
-          actual="$("$apksigner" verify --print-certs "$apk" | awk -F': ' '/certificate SHA-1 digest/ {print $2}')"
+          # apksigner 37 prints "V2 Signer: certificate SHA-1 digest: <hex>"; older versions print
+          # "Signer #1 certificate SHA-1 digest: <hex>". Fingerprints of the public certificate are not secret.
+          actual="$("$apksigner" verify --print-certs "$apk" | sed -n 's/.*certificate SHA-1 digest: //p' | sort -u | paste -sd ' ' -)"
           if [ -z "$expected" ] || [ "$actual" != "$expected" ]; then
-            echo "::error::APK is not signed with the registered debug keystore"
+            echo "::error::APK is not signed with the registered debug keystore (APK SHA-1: ${actual:-none}, keystore SHA-1: ${expected:-none})"
             exit 1
           fi
           echo "APK is signed with the registered debug keystore"
