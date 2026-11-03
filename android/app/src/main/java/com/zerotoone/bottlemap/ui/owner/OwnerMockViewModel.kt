@@ -28,6 +28,19 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun retry() = repository.retryLoad()
     fun register(application: MockOwnerApplication) = repository.registerApplication(application)
     fun saveRegistrationDraft(draft: MockRegistrationDraft?) = repository.saveRegistrationDraft(draft)
+    /** Production registration stays suspend so UI waits for both submission and menu-photo upload. */
+    suspend fun submitRegistrationDraftLive() {
+        if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.submitRegistrationDraftLive()
+        else repository.submitRegistrationDraftForFixture()
+    }
+
+    suspend fun readBusinessCertificateLive(uri: String):
+        com.zerotoone.bottlemap.network.OwnerCertificateOcrDto? =
+        if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.readBusinessCertificateLive(uri)
+        else null
+
     fun approveForFixture(id: String, bar: MockBar) = repository.approveForFixture(id, bar)
     fun seedExistingCandidateForFixture(bar: MockBar) = repository.seedExistingCandidateForFixture(bar)
     fun submitRegistrationDraftForFixture() = repository.submitRegistrationDraftForFixture()
