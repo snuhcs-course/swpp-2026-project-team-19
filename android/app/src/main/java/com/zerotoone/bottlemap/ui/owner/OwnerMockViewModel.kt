@@ -70,6 +70,32 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
             repository.saveManualMenuItemLive(item, newProduct, newBrand)
         else repository.saveManualMenuItem(item, newProduct, newBrand)
     }
+    suspend fun setSoldOutLive(itemId: String, soldOut: Boolean) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.setSoldOutLive(itemId, soldOut)
+        else repository.setSoldOut(itemId, soldOut)
+    }
+    suspend fun deleteMenuItemLive(itemId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.deleteMenuItemLive(itemId)
+        else repository.deleteMenuItem(itemId)
+    }
+    suspend fun clearMenuForBarLive(barId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.clearMenuForBarLive(barId)
+        else repository.clearMenuForBar(barId)
+    }
+    suspend fun confirmMenuInformationLive(barId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.confirmMenuInformationLive(barId)
+        else repository.confirmMenuInformation(barId, System.currentTimeMillis())
+    }
+    suspend fun cancelPhotoImportLive(importId: String) {
+        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.cancelPhotoImportLive(importId)
+        else repository.discardPhotoImport(importId)
+    }
+
     fun setSoldOut(itemId: String, soldOut: Boolean) = repository.setSoldOut(itemId, soldOut)
     fun deleteMenuItem(id: String) = repository.deleteMenuItem(id)
     fun clearMenuForBar(barId: String) = repository.clearMenuForBar(barId)

@@ -457,6 +457,45 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
 
     override fun saveMenuItem(item: MockBarMenuItem) = saveManualMenuItem(item, null, null)
 
+    private suspend fun confirmedWrite(operation: suspend () -> Unit) {
+        writeMutex.withLock {
+            try {
+                operation()
+                refresh()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch(error: Exception) {
+                runCatching { refresh() }
+                throw error
+            }
+        }
+    }
+
+    suspend fun setSoldOutLive(itemId: String, value: Boolean) = confirmedWrite {
+        val item = snapshot().menuItems.firstOrNull { it.barMenuItemId == itemId }
+            ?: error("메뉴가 없어요.")
+        remote.setSoldOut(item.barId, itemId, value)
+    }
+
+    suspend fun deleteMenuItemLive(itemId: String) = confirmedWrite {
+        val item = snapshot().menuItems.firstOrNull { it.barMenuItemId == itemId }
+            ?: error("메뉴가 없어요.")
+        remote.deleteMenuItem(item.barId, itemId,
+            versionByBar[item.barId] ?: error("메뉴 버전을 불러와 주세요."))
+    }
+
+    suspend fun clearMenuForBarLive(barId: String) = confirmedWrite {
+        remote.resetMenu(barId, versionByBar[barId])
+    }
+
+    suspend fun confirmMenuInformationLive(barId: String) = confirmedWrite {
+        remote.confirmMenu(barId, versionByBar[barId])
+    }
+
+    suspend fun cancelPhotoImportLive(importId: String) = confirmedWrite {
+        remote.cancelMenuImport(importId)
+    }
+
     override fun setSoldOut(barMenuItemId: String, value: Boolean) {
         val row = snapshot().menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
             ?: error("메뉴가 없어요.")

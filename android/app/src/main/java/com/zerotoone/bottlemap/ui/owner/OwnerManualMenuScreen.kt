@@ -450,13 +450,23 @@ internal fun OwnerManualMenuScreen(
                 val photoCopies=removed.flatMap{it.images}.distinctBy{it.sourceUri}
                     .filter {it.sourceUri !in retainedUris}
                     .map {MockPhoto(it.imageId,it.sourceUri,MockPhotoKind.MENU_CAPTURE)}
-                runCatching {viewModel.discardPhotoImport(activeJob.menuImportId)}
-                    .onSuccess {
-                        cancelPhotoConfirm=false;error=null;screen="list"
-                        // File.unlink is cheap (no image decoding); perform before
-                        // leaving this composition so navigation cannot cancel cleanup.
-                        photoCopies.forEach(photoStore::delete)
-                    }.onFailure {error=it.message}
+                if(!saving) {
+                    saving=true
+                    saveScope.launch {
+                        try {
+                            viewModel.cancelPhotoImportLive(activeJob.menuImportId)
+                            cancelPhotoConfirm=false
+                            error=null
+                            screen="list"
+                            // Only delete local photos after server confirmed the cancellation.
+                            photoCopies.forEach(photoStore::delete)
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
+                        } catch(e: Exception) {
+                            error=e.message ?: "사진 등록 작업을 취소하지 못했어요."
+                        } finally { saving=false }
+                    }
+                }
             }){Text("작업 취소하기",color=Color(0xFFFFB4AB))}},
             dismissButton={TextButton(onClick={cancelPhotoConfirm=false}){Text("돌아가기")}}
         )
@@ -476,15 +486,29 @@ internal fun OwnerManualMenuScreen(
                 else -> "품절 메뉴는 고객에게 숨겨지며 판매 재개 시 다시 공개됩니다."
             }); error?.let { Text(it, color = Color(0xFFFFB4AB)) } } },
             confirmButton = { TextButton(onClick = {
-                try {
-                    when(action) {
-                        "delete" -> editId?.let { viewModel.deleteMenuItem(it) }
-                        "reset" -> bar?.barId?.let { viewModel.clearMenuForBar(it) }
-                        else -> target?.let { viewModel.setSoldOut(it.barMenuItemId, !it.soldOut) }
+                if(!saving) {
+                    saving=true
+                    saveScope.launch {
+                        try {
+                            when(action) {
+                                "delete" -> editId?.let { viewModel.deleteMenuItemLive(it) }
+                                "reset" -> bar?.barId?.let { viewModel.clearMenuForBarLive(it) }
+                                else -> target?.let {
+                                    viewModel.setSoldOutLive(it.barMenuItemId, !it.soldOut)
+                                }
+                            }
+                            confirm=null
+                            error=null
+                            selectedId=null
+                            screen="list"
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
+                        } catch(e: Exception) {
+                            error=e.message ?: "서버 변경에 실패했어요."
+                        } finally { saving=false }
                     }
-                    confirm = null; error = null; selectedId = null; screen = "list"
-                } catch (e: Exception) { error = e.message }
-            }) { Text(when(action) {
+                }
+            }, enabled = !saving) { Text(when(action) {
                 "delete" -> "삭제하기"; "reset" -> "초기화"; else -> "상태 변경"
             }) } },
             dismissButton = { TextButton(onClick = { confirm = null; error = null }) { Text("취소") } }

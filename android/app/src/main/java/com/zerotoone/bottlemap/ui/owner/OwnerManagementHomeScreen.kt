@@ -14,6 +14,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.IntSize
@@ -143,6 +146,8 @@ fun OwnerManagementHomeScreen(
 ) {
     val selected = activeBar(state)
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var confirmingMenu by rememberSaveable { mutableStateOf(false) }
+    val ownerScope=rememberCoroutineScope()
     val now = rememberOwnerNow()
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         V4Toolbar(null, onBack)
@@ -307,11 +312,18 @@ fun OwnerManagementHomeScreen(
                                 // prevents the border from appearing to touch the gauge.
                                 Box(
                                     Modifier.height(42.dp)
-                                        .ownerQuietClick(enabled = hasPublishedMenu) {
-                                            try {
-                                                viewModel.confirmMenuInformation(bar.barId, System.currentTimeMillis())
-                                                error = null
-                                            } catch (e: Exception) { error = e.message }
+                                        .ownerQuietClick(enabled = hasPublishedMenu && !confirmingMenu) {
+                                            confirmingMenu=true
+                                            ownerScope.launch {
+                                                try {
+                                                    viewModel.confirmMenuInformationLive(bar.barId)
+                                                    error=null
+                                                } catch(cancelled: CancellationException) {
+                                                    throw cancelled
+                                                } catch(e: Exception) {
+                                                    error=e.message ?: "메뉴 확인 정보를 저장하지 못했어요."
+                                                } finally { confirmingMenu=false }
+                                            }
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {
