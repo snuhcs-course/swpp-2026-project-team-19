@@ -3,14 +3,18 @@
     step = get_embedding_step()          # None while EMBEDDING_ENABLED is not true
     results = step.apply(session, names, results)
 
-Policy "unmatched_k5+rerank_only" of the P24 decision (ai/docs/p24_embedding_decision.md),
-which the offline harness (ai/eval/p24_embedding_compare.py, `apply_policy`) evaluated:
+Policy "unmatched_k5+rerank_only" of the P24 decision, which its offline harness evaluated
+(ai/docs/p24_embedding_decision.md and ai/eval/p24_embedding_compare.py `apply_policy`, both in
+PR #78, I3-P24, not merged yet; the numbers this step relies on are in docs/menu_ai_matching_flow.md
+6, "임베딩 후보 단계"):
 
   exact_match / multi                      unchanged
   ambiguous with a confirmRecommended      unchanged
-  other ambiguous lines                    the same candidates, reordered by embedding similarity
-                                           (candidates the index does not rank keep their order,
-                                           after the others); nothing is added
+  other ambiguous lines                    the same candidates, reordered by embedding similarity,
+                                           highest first; equal similarities keep their incoming
+                                           (rule / LLM) order, and candidates the index does not rank
+                                           or ranks at 0 (no shared n-gram, so no preference) keep
+                                           their order, after the others; nothing is added
   unmatched                                up to MAX_NEW products with similarity >= the floor
                                            (EMBEDDING_MIN_SIMILARITY), method "embedding"; the line
                                            becomes ambiguous. Below the floor it stays unmatched.
@@ -95,8 +99,7 @@ def apply_policy(base: ResolutionResult, ranking: Sequence[Ranked], *, min_simil
         return ResolutionResult(status="ambiguous", candidates=candidates, proposed_product_id=candidates[0].product_id)
     if any(c.evidence.get("confirmRecommended") for c in base.candidates):
         return base
-    order = {r.product_id: position for position, r in enumerate(ranking)}
-    reordered = sorted(base.candidates, key=lambda c: order.get(c.product_id, len(order)))  # stable
+    reordered = sorted(base.candidates, key=lambda c: _rerank_key(c, ranking))
     if [c.product_id for c in reordered] == [c.product_id for c in base.candidates]:
         return base
     similarity = {r.product_id: round(r.similarity, 3) for r in ranking}
@@ -105,6 +108,17 @@ def apply_policy(base: ResolutionResult, ranking: Sequence[Ranked], *, min_simil
         for rank, c in enumerate(reordered, start=1)
     )
     return replace(base, candidates=candidates, proposed_product_id=candidates[0].product_id)
+
+
+def _rerank_key(candidate: Candidate, ranking: Sequence[Ranked]) -> tuple[int, float]:
+    """Sort key for reordering an ambiguous line: by similarity only, so with Python's stable sort a tie
+    keeps the incoming (rule / LLM) order instead of the ranking's text order, and the proposed
+    product does not change on a tie. A candidate outside the ranking, or ranked at similarity 0,
+    gives no preference and stays in the last group."""
+    similarity = next((r.similarity for r in ranking if r.product_id == candidate.product_id), None)
+    if similarity is None or similarity <= 0:
+        return (1, 0.0)
+    return (0, -similarity)
 
 
 def _reranked(evidence: dict[str, Any], similarity: float | None) -> dict[str, Any]:

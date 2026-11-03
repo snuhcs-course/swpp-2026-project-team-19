@@ -127,7 +127,7 @@ def test_tfidf_on_an_empty_catalog_returns_empty_rows():
 
 
 def test_tfidf_weights_follow_the_p24_harness():
-    """Smooth idf, sublinear tf and cosine over 1-3-grams, as CharTfidf in ai/eval/p24_embedding_compare.py."""
+    """Smooth idf, sublinear tf and cosine over 1-3-grams, as CharTfidf in ai/eval/p24_embedding_compare.py (PR #78)."""
     import math
 
     index = CharTfidfProvider().build_index(["ab", "ac"])
@@ -235,6 +235,49 @@ def test_ambiguous_line_already_in_embedding_order_is_unchanged():
     base = ResolutionResult(status="ambiguous", candidates=(rule_candidate(A, 1), rule_candidate(B, 2)),
                             proposed_product_id=A)
     assert apply_policy(base, FULL, min_similarity=0.0, model_id="m") is base
+
+
+def test_all_zero_similarities_keep_the_rule_order_and_the_proposed_product():
+    # Ranked in text order (C before B); with no similarity at all that is no preference.
+    zeros = [Ranked(C, 0.0, "a"), Ranked(B, 0.0, "b"), Ranked(A, 0.0, "c")]
+    base = ResolutionResult(status="ambiguous", candidates=(rule_candidate(B, 1), rule_candidate(C, 2)),
+                            proposed_product_id=B)
+
+    assert apply_policy(base, zeros, min_similarity=0.0, model_id="m") is base
+
+
+def test_zero_similarity_candidates_stay_with_the_unranked_ones_in_their_order():
+    unranked = uuid4()
+    base = ResolutionResult(status="ambiguous", candidates=(
+        rule_candidate(unranked, 1), rule_candidate(B, 2), rule_candidate(C, 3)), proposed_product_id=unranked)
+
+    result = apply_policy(base, [Ranked(C, 0.4, "c"), Ranked(B, 0.0, "b")], min_similarity=0.0, model_id="m")
+
+    assert [c.product_id for c in result.candidates] == [C, unranked, B]
+    assert result.proposed_product_id == C
+
+
+def test_partial_ties_keep_the_incoming_order_within_the_tie():
+    # D ranks above B and C, which tie; the ranking lists C before B (by text), the rules B before C.
+    tied = [Ranked(D, 0.8, "d"), Ranked(C, 0.5, "a"), Ranked(B, 0.5, "z"), Ranked(A, 0.2, "y")]
+    base = ResolutionResult(status="ambiguous", candidates=(
+        rule_candidate(A, 1), rule_candidate(B, 2), rule_candidate(C, 3), rule_candidate(D, 4)), proposed_product_id=A)
+
+    result = apply_policy(base, tied, min_similarity=0.0, model_id="m")
+
+    assert [(c.product_id, c.rank) for c in result.candidates] == [(D, 1), (B, 2), (C, 3), (A, 4)]
+    assert result.proposed_product_id == D
+
+
+def test_a_tie_at_the_top_keeps_the_proposed_product():
+    tied = [Ranked(C, 0.6, "a"), Ranked(B, 0.6, "b"), Ranked(A, 0.1, "c")]
+    base = ResolutionResult(status="ambiguous", candidates=(
+        rule_candidate(B, 1), rule_candidate(A, 2), rule_candidate(C, 3)), proposed_product_id=B)
+
+    result = apply_policy(base, tied, min_similarity=0.0, model_id="m")
+
+    assert [c.product_id for c in result.candidates] == [B, C, A]
+    assert result.proposed_product_id == B
 
 
 def test_summary_counts_filled_unmatched_and_reordered_lines():
