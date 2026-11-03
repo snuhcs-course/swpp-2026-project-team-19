@@ -205,6 +205,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         val application = MockOwnerApplication(
             applicationId = id, kind = draft.kind,
             status = MockApplicationStatus.PENDING,
+            submittedAtEpochMs = System.currentTimeMillis(),
             // A claim references the selected bar; no proposedBar name is required by API 3.11.2.
             proposedBarName = existingBar?.name ?: draft.proposedBarName,
             barId = existingBar?.barId,
