@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -107,6 +108,12 @@ internal fun P18SearchField(
 ) {
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    fun submit() {
+        keyboard?.hide()
+        focusManager.clearFocus()
+        onSubmit()
+    }
     LaunchedEffect(focusRequestToken) {
         if (focusRequestToken > 0) {
             focusRequester.requestFocus()
@@ -120,14 +127,14 @@ internal fun P18SearchField(
         .padding(start = 13.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        BmIcon(BmIconId.SEARCH, null, Modifier.size(24.dp), tint = P18Muted)
+        BmIcon(BmIconId.SEARCH, null, Modifier.size(24.dp).clickable { submit() }, tint = P18Muted)
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
             if (query.isEmpty()) Text(placeholder, fontSize = 16.sp, color = BottleMapPalette.textMuted)
             BasicTextField(query, onValueChange = { onQuery(it.take(100)) },
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester).testTag("customer-search-field"),
                 singleLine = true, textStyle = TextStyle(color = P18Text, fontSize = 16.sp),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { onSubmit() }))
+                keyboardActions = KeyboardActions(onSearch = { submit() }))
         }
         if (query.isNotEmpty()) {
             Box(Modifier.size(48.dp).clickable {
