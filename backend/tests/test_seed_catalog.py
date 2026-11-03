@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.models import Bar, Brand, BrandAlias, Product
-from scripts.seed_catalog import load
+from scripts.seed_catalog import load, merge_catalogs
 from tests.factories import make_brand
 
 
@@ -92,3 +92,23 @@ def test_coordinates_out_of_range_are_rejected(db_session, latitude, longitude):
         load(db_session.connection(), *seeds(latitude=latitude, longitude=longitude), dry_run=False)
 
     assert counts(db_session) == before
+
+
+def test_merge_catalogs_appends_brands_and_products_in_order():
+    first, _ = seeds("First Brand")
+    second, _ = seeds("Second Brand")
+    first["version"], second["version"] = "a", "b"
+
+    merged = merge_catalogs([first, second])
+
+    assert merged["version"] == "a + b"
+    assert [b["canonical_name"] for b in merged["brands"]] == ["First Brand", "Second Brand"]
+    assert [p["display_name"] for p in merged["products"]] == ["First Brand 12", "Second Brand 12"]
+
+
+def test_merge_catalogs_rejects_a_repeated_id():
+    catalog, _ = seeds()
+    catalog["version"] = "a"
+
+    with pytest.raises(SystemExit, match="repeat brands ids"):
+        merge_catalogs([catalog, catalog])

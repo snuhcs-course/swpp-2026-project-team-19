@@ -1,0 +1,1378 @@
+{
+ "version": "menu_seed_demo_v1",
+ "menu_board_id": "6c4d47c4-c821-5dee-86cb-369f244e6bb1",
+ "bar_id": "5138de5c-ea73-513a-97a7-366ea0f0c8a4",
+ "bar_key": "little-gallery",
+ "purpose": "Demo (2026-11-03, I3 heuristic evaluation): pre-published menu from human-reviewed labels so customer search works. Not pipeline output.",
+ "source": "eval/labels_i3_v1.json + eval/match_gold_i3_v1.json; unknown and non_whisky lines skipped; both: lines give each named product the line's options; new: products from catalog_v2_service_i3_additions.json",
+ "entries": [
+  {
+   "product_id": "867b8eed-281f-5c71-bf2e-051cf1a277a7",
+   "product_key": "angels-envy",
+   "display_name": "앤젤스 엔비 포트 캐스크 피니시 / Angel's Envy Port Cask Finish",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "10532a9b-855d-570c-a00e-b56e3a80b9a6"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 280000,
+     "sort_order": 2,
+     "id": "c205e665-77c6-57ff-bbd6-251c5fca2739"
+    }
+   ],
+   "sort_order": 1,
+   "bar_menu_item_id": "adce163d-5b7a-54fb-8f38-de6c5c53804f",
+   "menu_board_entry_id": "aca4dfe2-62b3-5dec-b944-6553282d9228"
+  },
+  {
+   "product_id": "450912c8-c451-5b18-8a9c-67b5aabea5be",
+   "product_key": "wild-turkey-81",
+   "display_name": "와일드 터키 버번 / Wild Turkey Bourbon",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 11000,
+     "sort_order": 1,
+     "id": "45dcb23a-3ee9-595a-9091-29c56a043e7b"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 170000,
+     "sort_order": 2,
+     "id": "ef1988df-bc6f-5240-8d88-6a69a4d3c24d"
+    }
+   ],
+   "sort_order": 2,
+   "bar_menu_item_id": "7670714f-d89d-5e7a-a1c3-8fad6ef9f7e1",
+   "menu_board_entry_id": "28965459-44c1-5989-ac1e-3ecca290fb3e"
+  },
+  {
+   "product_id": "f626dbc2-6a44-5e95-83b4-35af8023e497",
+   "product_key": "wild-turkey-101-8",
+   "display_name": "와인드 터키 101 프루프 / Wild Turkey 101 proof",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 13000,
+     "sort_order": 1,
+     "id": "526c5eb2-073d-5ce9-a68a-b2e4f037192a"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 190000,
+     "sort_order": 2,
+     "id": "d66780b9-30e1-58bf-83a3-c4828ff09552"
+    }
+   ],
+   "sort_order": 3,
+   "bar_menu_item_id": "b11a8de0-eaf8-5930-8b88-359741adcc41",
+   "menu_board_entry_id": "145207b0-c59d-5fcb-a56f-e9c82cab344b"
+  },
+  {
+   "product_id": "e542add8-783a-53b6-9c5f-c0064e512334",
+   "product_key": "wild-turkey-rare-breed",
+   "display_name": "와일드 터키 레어브리드 / Wild Turkey Rare Breed",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "906de79d-ec72-554d-950f-4e9e766cbd3c"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 260000,
+     "sort_order": 2,
+     "id": "2fc517da-e2ff-513d-93fb-8d34deebd7b0"
+    }
+   ],
+   "sort_order": 4,
+   "bar_menu_item_id": "a92bded3-93bf-576a-be43-5e3b31969fd3",
+   "menu_board_entry_id": "18edd73a-b42e-5248-8017-d04a9dbf4d7b"
+  },
+  {
+   "product_id": "f95e81a0-b8f5-5cb3-adb0-998b5956f588",
+   "product_key": "makers-mark",
+   "display_name": "메이커스 마크 / Maker's Mark",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 13000,
+     "sort_order": 1,
+     "id": "89ee1194-1a6f-5fee-95ce-3b54c94b70af"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 170000,
+     "sort_order": 2,
+     "id": "c3e5956a-9c29-5680-a536-e07be6fa473a"
+    }
+   ],
+   "sort_order": 5,
+   "bar_menu_item_id": "6221e4b7-f8f5-5320-b3ac-a46a12e05ceb",
+   "menu_board_entry_id": "76ad1f97-89c0-5269-b177-839a21a28b28"
+  },
+  {
+   "product_id": "7faa0f75-2b5f-544a-a6d6-e992157cbdd4",
+   "product_key": "jack-daniels-old-no7",
+   "display_name": "잭다니엘 올드 넘버 7 / Jack Daniels Old No. 7",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 9000,
+     "sort_order": 1,
+     "id": "c452b522-4184-5e20-8ab9-4c059dbb9e1a"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 130000,
+     "sort_order": 2,
+     "id": "db12e4c5-459f-5b54-8833-b69804b137bd"
+    }
+   ],
+   "sort_order": 6,
+   "bar_menu_item_id": "c3910c88-10a3-5ccf-ac45-ca53d25ef466",
+   "menu_board_entry_id": "6b907b54-fabf-52c1-88e7-612c2677bfc3"
+  },
+  {
+   "product_id": "fd3e7097-ce94-5d2c-b53f-c49d86a1e1b9",
+   "product_key": "jim-beam-white",
+   "display_name": "짐빔 / Jim Beam",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 7000,
+     "sort_order": 1,
+     "id": "02322735-8068-53d5-8ff3-f89b5a98927d"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 110000,
+     "sort_order": 2,
+     "id": "c2f12c13-f687-50d3-b0ba-c0af8e4ca92e"
+    }
+   ],
+   "sort_order": 7,
+   "bar_menu_item_id": "263029d6-b0cd-551c-9e77-b4bf00bb08c1",
+   "menu_board_entry_id": "9a488e04-eebf-56c7-80f0-5d924fbba5e6"
+  },
+  {
+   "product_id": "22fb35cf-50eb-52b3-8f11-3be058ee321f",
+   "product_key": "lagavulin-8",
+   "display_name": "라가불린 8년 / Lagavulin 8yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 21000,
+     "sort_order": 1,
+     "id": "607edcc1-7800-5208-973a-cd4df8cabb82"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 370000,
+     "sort_order": 2,
+     "id": "b9778a4e-49f8-5894-b9d9-e609e87c3124"
+    }
+   ],
+   "sort_order": 8,
+   "bar_menu_item_id": "d311d21d-11c8-5d3c-8f26-0a5960c0a36b",
+   "menu_board_entry_id": "1e6392b7-277f-5037-ab9c-c709ad76578e"
+  },
+  {
+   "product_id": "08cd7921-e646-5b8e-96dc-9b6a25c03bb6",
+   "product_key": "lagavulin-16",
+   "display_name": "라가불린 16년 / Lagavulin 16yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 32000,
+     "sort_order": 1,
+     "id": "16ff3e18-7f7c-5c90-b270-fee132c63b2a"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 480000,
+     "sort_order": 2,
+     "id": "fde3a15e-7c24-50fe-a3a2-54781cb938ac"
+    }
+   ],
+   "sort_order": 9,
+   "bar_menu_item_id": "fb9838f2-5bba-5d72-a8f6-29ade7eede4f",
+   "menu_board_entry_id": "bede9a50-25c6-57b5-8985-50faa2161599"
+  },
+  {
+   "product_id": "dbc5af99-05b2-5538-a5ef-8aa53cdc660b",
+   "product_key": "laphroaig-10",
+   "display_name": "라프로익 10년 / Laphroaig 10yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "7a6f84d4-6ec9-5f14-ac57-7a38140c0e9b"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 260000,
+     "sort_order": 2,
+     "id": "8fa22c47-2563-5363-a257-0da2af9127f1"
+    }
+   ],
+   "sort_order": 10,
+   "bar_menu_item_id": "65dbfd71-1449-56ba-87aa-eaf78f563aef",
+   "menu_board_entry_id": "7dab5a53-16ca-5e87-92b4-dea56187d5bd"
+  },
+  {
+   "product_id": "4658648a-d8cb-54da-ad58-f506a5cac3ef",
+   "product_key": "laphroaig-quarter-cask",
+   "display_name": "라프로익 쿼터 캐스크 / Laphroaig Quarter Cask",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 18000,
+     "sort_order": 1,
+     "id": "020339e9-f089-53e5-97de-e08d89ed7f85"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 290000,
+     "sort_order": 2,
+     "id": "7bc81140-9fce-5a6e-9e3f-492374475898"
+    }
+   ],
+   "sort_order": 11,
+   "bar_menu_item_id": "78ed877a-2e9a-5328-8669-180594daf17e",
+   "menu_board_entry_id": "9cc3a1db-9670-5d9d-a856-746ad05b2c77"
+  },
+  {
+   "product_id": "583b633a-c820-574d-8f77-521d6ac268b2",
+   "product_key": "ardbeg-10",
+   "display_name": "아드벡 10년 / Ardbeg 10yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "48939875-ffb6-55ce-87f1-fb5b6aa1bf06"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 310000,
+     "sort_order": 2,
+     "id": "be7b3b0d-15ee-5806-95e1-e3b1cbd1bd64"
+    }
+   ],
+   "sort_order": 12,
+   "bar_menu_item_id": "528ed940-ae03-533d-805d-7cd61e182bab",
+   "menu_board_entry_id": "4ccfc61a-e22e-5cd2-9250-8fc9b99e8082"
+  },
+  {
+   "product_id": "a7d15e7d-18f7-5fab-9cd3-c1cce827c828",
+   "product_key": "ardbeg-uigeadail",
+   "display_name": "아드벡 우거다일 / Ardbeg Uigeadail",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 25000,
+     "sort_order": 1,
+     "id": "e8dc99e0-983b-5535-88ef-173a15e24a4b"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 380000,
+     "sort_order": 2,
+     "id": "1dfe368d-2d12-5d0d-a7f1-bd34d7099167"
+    }
+   ],
+   "sort_order": 13,
+   "bar_menu_item_id": "092931b7-412b-56f7-addb-9478c1572a92",
+   "menu_board_entry_id": "e06c6a45-d234-5e91-9b46-480cd0468df5"
+  },
+  {
+   "product_id": "512a9037-d050-5199-9745-5dd10b06bb36",
+   "product_key": "ardbeg-corryvreckan",
+   "display_name": "아드벡 코리브레칸 / Ardbeg Corryvreckan",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 29000,
+     "sort_order": 1,
+     "id": "dec58f69-217c-5c9b-8007-bde9c81401c4"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 490000,
+     "sort_order": 2,
+     "id": "90cf7056-3032-5f94-bcc7-f0ddefa80861"
+    }
+   ],
+   "sort_order": 14,
+   "bar_menu_item_id": "6a24c52d-f83a-5394-9dfe-e45d0db42b4c",
+   "menu_board_entry_id": "a1b961c2-74f4-5065-bb0a-511c87c2846d"
+  },
+  {
+   "product_id": "deabfe81-7c98-54c8-96d6-fd839a61b3e2",
+   "product_key": "bowmore-12",
+   "display_name": "보모어 12년 / Bowmore 12yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "d7f51062-fcfe-5952-97d8-0ae386b8a0b6"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 260000,
+     "sort_order": 2,
+     "id": "7d219324-ca1c-573f-87bb-df3a554d53e6"
+    }
+   ],
+   "sort_order": 15,
+   "bar_menu_item_id": "685696ff-b5a3-5de8-8661-ff4213736cc6",
+   "menu_board_entry_id": "da4c00d7-59d4-5997-809e-09cc5a2d199f"
+  },
+  {
+   "product_id": "8886fde4-53a8-5a6b-a5c8-13d5ac1a55d9",
+   "product_key": "talisker-10",
+   "display_name": "탈리스커 10년 / Talisker 10yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 16000,
+     "sort_order": 1,
+     "id": "f694f374-d8c5-5971-88f5-6d8fe4c3af02"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 260000,
+     "sort_order": 2,
+     "id": "6e66bebf-56f4-5465-95df-1da03f5c0401"
+    }
+   ],
+   "sort_order": 16,
+   "bar_menu_item_id": "95379e82-8f7e-5fd1-91bd-f28bdf1e072d",
+   "menu_board_entry_id": "77a5d775-18bc-5a34-b17d-29aa29929573"
+  },
+  {
+   "product_id": "2863a517-df5c-5a4b-93a7-61ea6df1553d",
+   "product_key": "yoichi-single-malt",
+   "display_name": "닛카 요이치 / Nikka Yoichi",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "ed79d75c-c118-5cdb-865e-99ed55c7923d"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 290000,
+     "sort_order": 2,
+     "id": "6f7aa874-dfd6-539b-994e-10b83828ca79"
+    }
+   ],
+   "sort_order": 17,
+   "bar_menu_item_id": "3fae428a-4731-5414-9bd6-e383575ec64a",
+   "menu_board_entry_id": "378bf113-e15a-5722-bbf5-e26137d6cd62"
+  },
+  {
+   "product_id": "d0fdb8e7-24df-595c-b1c2-651f2678ae48",
+   "product_key": "miyagikyo-single-malt",
+   "display_name": "닛카 미야기쿄 / Nikka Miyagikyo",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "37e56548-995d-5942-a17d-d788affd33ca"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 330000,
+     "sort_order": 2,
+     "id": "b35e5043-ec15-5d04-9abe-8ecb778c1ecb"
+    }
+   ],
+   "sort_order": 18,
+   "bar_menu_item_id": "ab2e05f9-a7c8-5995-a5dc-194366c5ef49",
+   "menu_board_entry_id": "7bb1fd1a-1fb4-5bf0-bbf3-e8f434cac88e"
+  },
+  {
+   "product_id": "bafb2303-f946-5eb2-aee4-5bf82df4ec61",
+   "product_key": "ballantines-10",
+   "display_name": "발렌타인 10년 / Ballantine's 10yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 11000,
+     "sort_order": 1,
+     "id": "3a54df1a-3331-50af-bfc6-f009f6fa5230"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 170000,
+     "sort_order": 2,
+     "id": "0e235988-88f6-5ccf-93c8-7aacf8fa47c3"
+    }
+   ],
+   "sort_order": 19,
+   "bar_menu_item_id": "8c347d44-463f-5055-b708-1721ac6c3356",
+   "menu_board_entry_id": "51ebd704-4d1a-593d-ae5b-bd672a162573"
+  },
+  {
+   "product_id": "3d128d7e-6e27-5d9d-9804-a20cfad797b8",
+   "product_key": "ballantines-21",
+   "display_name": "발렌타인 21년 / Ballantine's 21yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 32000,
+     "sort_order": 1,
+     "id": "b154257c-cbae-5eb9-a9f0-740acb7caf89"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 530000,
+     "sort_order": 2,
+     "id": "96c1b52a-3f38-50c4-bd83-151ceb947053"
+    }
+   ],
+   "sort_order": 20,
+   "bar_menu_item_id": "98bd70c2-cd77-53e4-ae13-f9f38473a87b",
+   "menu_board_entry_id": "55e8f5e7-4c56-5458-94fe-56744e9e2f34"
+  },
+  {
+   "product_id": "504c7a9c-f7d0-5902-9fd2-652fdd0e884f",
+   "product_key": "monkey-shoulder",
+   "display_name": "몽키 숄더 / Monkey Shoulder",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 13000,
+     "sort_order": 1,
+     "id": "6cc32d0e-27f1-540f-961a-3af699625ac8"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 170000,
+     "sort_order": 2,
+     "id": "125691c2-4615-5c49-952c-ad4a59f3ab4c"
+    }
+   ],
+   "sort_order": 21,
+   "bar_menu_item_id": "27b7ac1a-79bd-55b9-a41a-2221f8722620",
+   "menu_board_entry_id": "f759ac0c-880f-51fb-9a83-2ecc713e1cf6"
+  },
+  {
+   "product_id": "1e7a47f7-726c-5598-b833-e8375e07b236",
+   "product_key": "johnnie-walker-black",
+   "display_name": "조니워커 블랙 라벨 / Johnnie Walker Black Label",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 11000,
+     "sort_order": 1,
+     "id": "1889769e-5506-59a4-a234-0570dc5b0574"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 170000,
+     "sort_order": 2,
+     "id": "e77c528d-b0d5-5342-8092-643914951d03"
+    }
+   ],
+   "sort_order": 22,
+   "bar_menu_item_id": "df7ce155-a5be-5322-8648-9be8bb570e8a",
+   "menu_board_entry_id": "8f848bf6-bd8b-5f26-88b6-776844b8eadf"
+  },
+  {
+   "product_id": "8c0844c8-a712-543f-8f77-5a2a08fb912f",
+   "product_key": "johnnie-walker-double-black",
+   "display_name": "조니워커 더블 블랙 / Johnnie Walker Double Black",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 12000,
+     "sort_order": 1,
+     "id": "2fec519c-cf05-5e44-b987-fa668b6ed090"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 180000,
+     "sort_order": 2,
+     "id": "3b1fa6a4-2403-5d95-ab30-b616ea66d22a"
+    }
+   ],
+   "sort_order": 23,
+   "bar_menu_item_id": "277089b8-0e35-5159-860f-47ab94c5e08e",
+   "menu_board_entry_id": "6677f52a-0d1b-5b9b-859c-859c4a74f669"
+  },
+  {
+   "product_id": "085a5bf0-fe6c-5b00-90b0-5c7f4ab6b03d",
+   "product_key": "johnnie-walker-gold-reserve",
+   "display_name": "조니워커 골드 리저브 / Johnnie Walker Gold Reserve",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 15000,
+     "sort_order": 1,
+     "id": "0a276629-fe51-55f0-be72-c2369ee1ffde"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 250000,
+     "sort_order": 2,
+     "id": "44b9f562-5358-5660-8abb-50993bc18136"
+    }
+   ],
+   "sort_order": 24,
+   "bar_menu_item_id": "e9159c43-a1b7-5dca-896f-8dff350293c2",
+   "menu_board_entry_id": "80ba7a89-ca6e-5934-8fdf-20d4b6fd4573"
+  },
+  {
+   "product_id": "4caa69c4-d937-5703-b6d0-862a4d373e4e",
+   "product_key": "johnnie-walker-green",
+   "display_name": "조니워커 그린 라벨 / Johnnie Walker Green Label",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "5c3592eb-7b6d-5d0c-aeb9-85b4b9e179da"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 310000,
+     "sort_order": 2,
+     "id": "d3051498-593a-57d5-9a64-2b8081f3bf1e"
+    }
+   ],
+   "sort_order": 25,
+   "bar_menu_item_id": "571f14e3-03ce-5a96-a8f1-b17470a5b271",
+   "menu_board_entry_id": "3c8ba0a7-eef9-586d-91fc-6617744cd4f6"
+  },
+  {
+   "product_id": "7b18f29a-1d4f-5ba8-b389-d302dde596ff",
+   "product_key": "johnnie-walker-blue",
+   "display_name": "조니워커 블루 라벨 / Johnnie Walker Blue Label",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 53000,
+     "sort_order": 1,
+     "id": "f29f86a4-7618-58ec-9b6a-c6b7f4f9afcf"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 710000,
+     "sort_order": 2,
+     "id": "1a805994-6e6a-593e-9411-d7a88260ab3c"
+    }
+   ],
+   "sort_order": 26,
+   "bar_menu_item_id": "96dc4ef0-336c-5e4c-a464-6205673eeb2d",
+   "menu_board_entry_id": "583b7955-4a20-591d-8781-d8e8943a2987"
+  },
+  {
+   "product_id": "aa962c28-85d0-5985-806a-34791429e57a",
+   "product_key": "royal-salute-21",
+   "display_name": "로얄 살루트 21년 / Royal Salute 21yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 47000,
+     "sort_order": 1,
+     "id": "3f8b849d-bf46-572a-862a-baf46cc7599a"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 640000,
+     "sort_order": 2,
+     "id": "69876d1e-5e83-5d91-8c03-1165ccc288d8"
+    }
+   ],
+   "sort_order": 27,
+   "bar_menu_item_id": "6a90e796-a463-5446-a9cb-ee16953aa4af",
+   "menu_board_entry_id": "4cd1b02c-d15e-59ad-990e-e44197ead1c2"
+  },
+  {
+   "product_id": "00b4dec6-5de4-5643-bff9-bff60c04bbe3",
+   "product_key": "wildmoor-23-dark-moorland",
+   "display_name": "와일드무어 23년 다크 무어랜드 / Wildmoor 23yr Dark Moorland",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 38000,
+     "sort_order": 1,
+     "id": "21cad493-40ed-53f7-8801-363ab9f0d17c"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 650000,
+     "sort_order": 2,
+     "id": "e3d35197-c43e-5966-acfa-f35e4b140acd"
+    }
+   ],
+   "sort_order": 28,
+   "bar_menu_item_id": "2c216f40-13a5-5cb8-87cb-1b1425494655",
+   "menu_board_entry_id": "ed02c02b-6a72-5eb2-bf9d-a0e6f54ea5dd"
+  },
+  {
+   "product_id": "6eae2002-9b8d-5a7c-a027-976058cfaa58",
+   "product_key": "alfred-giraud-heritage",
+   "display_name": "알프레드지로 헤리티지 / Alfred Giraud Heritage",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 39000,
+     "sort_order": 1,
+     "id": "107ad112-66c9-54ef-841e-3402929866b0"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 540000,
+     "sort_order": 2,
+     "id": "2eeab39f-457c-5bc4-aaf1-39e5d292f1ef"
+    }
+   ],
+   "sort_order": 29,
+   "bar_menu_item_id": "8524cdbc-0a8c-5875-a312-177ed9755e80",
+   "menu_board_entry_id": "ecb711d3-fa27-5550-b87f-302fecc33bb1"
+  },
+  {
+   "product_id": "02b97506-8686-575a-9480-5416552683b7",
+   "product_key": "hibiki-japanese-harmony",
+   "display_name": "산토리 히비키 하모니 / Suntory Hibiki Harmony",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 35000,
+     "sort_order": 1,
+     "id": "b353b869-1ec9-506d-a928-698fa0f88f65"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 540000,
+     "sort_order": 2,
+     "id": "356550f2-471d-5c1c-a770-694305aeccfd"
+    }
+   ],
+   "sort_order": 30,
+   "bar_menu_item_id": "3963cd29-7a62-5575-8b3a-081856b78be4",
+   "menu_board_entry_id": "0964c158-74dc-55e6-af52-8ccdc80bda44"
+  },
+  {
+   "product_id": "633d794d-96af-5ed3-bd84-bbe357a9bca4",
+   "product_key": "suntory-kakubin",
+   "display_name": "산토리 위스키 카쿠빈 / Suntory Whisky Kakubin",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 8000,
+     "sort_order": 1,
+     "id": "8c6a4c04-5f6e-5133-9c6c-2c44ff85a471"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 120000,
+     "sort_order": 2,
+     "id": "6da20295-7419-52db-8833-148d55879d08"
+    }
+   ],
+   "sort_order": 31,
+   "bar_menu_item_id": "957b7080-ca23-501b-9143-52e36e8f1785",
+   "menu_board_entry_id": "e354b411-0b1e-5fb4-b32d-8143d661f539"
+  },
+  {
+   "product_id": "7b2c8afb-8edd-5016-b8a2-a6029dadbebe",
+   "product_key": "macallan-12-double-cask",
+   "display_name": "맥캘란 12년 더블 캐스크 / Macallan 12yr Double Cask",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "6582c922-c756-54a6-b9b6-d34ce3e2e154"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 290000,
+     "sort_order": 2,
+     "id": "2c51bb65-3d4b-56a1-834d-1bf23c8be22f"
+    }
+   ],
+   "sort_order": 32,
+   "bar_menu_item_id": "415d020f-bd53-531e-878e-0b181412c290",
+   "menu_board_entry_id": "18f851a1-5c35-5ddc-a88d-55c5140cdf64"
+  },
+  {
+   "product_id": "854c6973-b222-5298-b1fe-4fa0ef6264f8",
+   "product_key": "macallan-12-sherry-oak",
+   "display_name": "맥캘란 12년 셰리 캐스크 / Macallan 12yr Sherry Cask",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "8a47a7d0-3e59-5609-85b7-99d4a3e94e1c"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 340000,
+     "sort_order": 2,
+     "id": "d4cc4b07-55cd-5fc9-96ea-94dbd76b065e"
+    }
+   ],
+   "sort_order": 33,
+   "bar_menu_item_id": "3ed2224c-e45e-5551-a28f-23b69d62e487",
+   "menu_board_entry_id": "ea9d045d-120e-5cbc-96a0-7713c8cf3972"
+  },
+  {
+   "product_id": "30ac644f-a7ae-51a2-a3a8-cda1fe7d1d7f",
+   "product_key": "macallan-15-double-cask",
+   "display_name": "맥캘란 15년 더블 캐스크 / Macallan 15yr Double Cask",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 35000,
+     "sort_order": 1,
+     "id": "5a2294b9-f482-52e8-90e3-662a1502fb19"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 540000,
+     "sort_order": 2,
+     "id": "a234da6b-d6f7-5ef0-b40f-c96acb816496"
+    }
+   ],
+   "sort_order": 34,
+   "bar_menu_item_id": "3fdf65c4-39f3-5bd8-900b-a095e38ce29f",
+   "menu_board_entry_id": "8d28163c-9ef5-50e4-83af-1e77ef223361"
+  },
+  {
+   "product_id": "ee5db3dd-cd58-5d2d-b70d-ae95964f96fc",
+   "product_key": "balvenie-12-doublewood",
+   "display_name": "발베니 12년 / Balvenie 12yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 18000,
+     "sort_order": 1,
+     "id": "f156fbea-a971-5fec-a70f-101774fe8c67"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 290000,
+     "sort_order": 2,
+     "id": "432fcfe9-c816-5103-a989-11710a81170d"
+    }
+   ],
+   "sort_order": 35,
+   "bar_menu_item_id": "a02cd8de-ff5a-5423-a371-0a2d4f2724b2",
+   "menu_board_entry_id": "88b1103b-e979-5276-8d52-c5a82c164539"
+  },
+  {
+   "product_id": "9aacd9a4-764a-5087-ad74-9f6e27235b4d",
+   "product_key": "balvenie-14-caribbean",
+   "display_name": "발베니 14년 / Balvenie 14yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 27000,
+     "sort_order": 1,
+     "id": "511a356b-6212-5283-a0e5-80284684333c"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 450000,
+     "sort_order": 2,
+     "id": "6a288e7f-d4b2-5f0f-8553-68291110dbb8"
+    }
+   ],
+   "sort_order": 36,
+   "bar_menu_item_id": "4ddcf7a0-3f1a-5370-8f37-f0eea15bdbe0",
+   "menu_board_entry_id": "6bb45971-a2b5-55a6-bca7-2085f6684e5f"
+  },
+  {
+   "product_id": "00e6dc2c-4f52-5020-9a75-693a93872df0",
+   "product_key": "dalmore-12",
+   "display_name": "달모어 12년 / Dalmore 12yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 21000,
+     "sort_order": 1,
+     "id": "2d6d8a8c-537e-52ef-b9fa-061ce5687b45"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 370000,
+     "sort_order": 2,
+     "id": "ec7782d3-db78-5798-af9e-f7b9a9a20713"
+    }
+   ],
+   "sort_order": 37,
+   "bar_menu_item_id": "25af7a2b-b37a-5dab-a96e-c48d4d6c665c",
+   "menu_board_entry_id": "5219c325-c7f7-555c-89f5-84ef4616a847"
+  },
+  {
+   "product_id": "ee00403f-4ece-56ff-bbc6-7dfa4737ed62",
+   "product_key": "dalmore-15",
+   "display_name": "달모어 15년 / Dalmore 15yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 39000,
+     "sort_order": 1,
+     "id": "3229cf2c-92ed-5e55-95c6-f97f275bf834"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 590000,
+     "sort_order": 2,
+     "id": "de0cf27b-77e8-5815-8c2d-82aa73c82b4d"
+    }
+   ],
+   "sort_order": 38,
+   "bar_menu_item_id": "5b97319e-72dd-5594-ba8f-fcca4be63ee4",
+   "menu_board_entry_id": "2b0c151f-90e0-59ee-92ce-31c1d1e91025"
+  },
+  {
+   "product_id": "c78d15b5-46b1-589d-b3ee-a8e308dbea1c",
+   "product_key": "aberlour-12",
+   "display_name": "아벨라워 12년 더블 캐스크 / Aberlour 12yr Double Cask",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 18000,
+     "sort_order": 1,
+     "id": "6bf0717a-970f-590b-b70c-96069f1c8069"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 290000,
+     "sort_order": 2,
+     "id": "d8cc9759-0b98-5d24-a98f-f82f94bb3450"
+    }
+   ],
+   "sort_order": 39,
+   "bar_menu_item_id": "bdaa109c-ce35-5cc1-a8f9-53cc49b267e3",
+   "menu_board_entry_id": "78fe045a-e08f-5baf-8e4f-f6a7f7dfbc94"
+  },
+  {
+   "product_id": "b7c26636-4251-5ac9-999a-3c7d9341e402",
+   "product_key": "aberlour-abunadh",
+   "display_name": "아벨라워 아브나흐 / Aberlour A'bunadh",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 36000,
+     "sort_order": 1,
+     "id": "f351d147-7e28-57c2-9e11-dca858730540"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 570000,
+     "sort_order": 2,
+     "id": "b29616c1-5d07-53bc-a627-bcd246363340"
+    }
+   ],
+   "sort_order": 40,
+   "bar_menu_item_id": "7dceead2-848f-51dd-8101-1867826a23b2",
+   "menu_board_entry_id": "13547366-f489-54d6-8669-11f94394d011"
+  },
+  {
+   "product_id": "4a898091-d81b-55ac-ab1f-9103e787b1d8",
+   "product_key": "arran-10",
+   "display_name": "아란 10년 / Arran 10yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "0854ec94-3b85-5912-a437-8d30e7687c0c"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 300000,
+     "sort_order": 2,
+     "id": "f10551c9-069f-5665-a2e0-0cfbe8fa42a8"
+    }
+   ],
+   "sort_order": 41,
+   "bar_menu_item_id": "2e69da76-64c3-5a68-b3dc-bd3c50386c60",
+   "menu_board_entry_id": "b5daee88-a4f6-573d-927d-c00821f9c91e"
+  },
+  {
+   "product_id": "58b6da39-cc5a-52ca-a299-d75bbee54ff8",
+   "product_key": "arran-sherry-cask",
+   "display_name": "아란 쉐리캐스크 / Arran Sherry Cask",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 29000,
+     "sort_order": 1,
+     "id": "9e3e02fb-455e-568f-b885-3720033a1ccf"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 480000,
+     "sort_order": 2,
+     "id": "162e3771-c082-57c1-a0cc-c654193ae312"
+    }
+   ],
+   "sort_order": 42,
+   "bar_menu_item_id": "96133b72-2d57-517f-9b73-c6e99adcab65",
+   "menu_board_entry_id": "fcfc7379-46d6-5adb-b12e-bcb54d534c17"
+  },
+  {
+   "product_id": "938bf4dc-4f00-5924-ab81-75ed37a5939c",
+   "product_key": "oban-14",
+   "display_name": "오반 14년 / Oban 14yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "4e89d116-557c-551c-8047-8a52f9926aea"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 390000,
+     "sort_order": 2,
+     "id": "c3102bce-839e-5b58-8595-166a91613315"
+    }
+   ],
+   "sort_order": 43,
+   "bar_menu_item_id": "2e2da07c-47b4-5451-8f6f-7802baa10dda",
+   "menu_board_entry_id": "5a691584-0c86-58aa-98c1-a9630f323c56"
+  },
+  {
+   "product_id": "68dbee4d-dc5b-5bf7-84f7-a3faf4c24571",
+   "product_key": "cragganmore-12",
+   "display_name": "크라겐 모어 12년 / Cragganmore 12yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "741297d5-aa07-5ec7-88dd-a2a85add2f36"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 280000,
+     "sort_order": 2,
+     "id": "099f21f9-1fa7-5730-9407-55c98e659331"
+    }
+   ],
+   "sort_order": 44,
+   "bar_menu_item_id": "dbc6530d-ba20-56bf-981d-7805ec2049b4",
+   "menu_board_entry_id": "737045f8-6991-5c47-8b8e-b56d7fa6a2df"
+  },
+  {
+   "product_id": "3531ffb6-7204-58a6-841b-23b6e94c878d",
+   "product_key": "glenfiddich-12",
+   "display_name": "글렌피딕 12년 / Glenfiddich 12yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "ea84d039-40d2-5f9a-9507-fb85933478a9"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 280000,
+     "sort_order": 2,
+     "id": "a35c8894-c6d5-536e-a2db-6a4496f98aab"
+    }
+   ],
+   "sort_order": 45,
+   "bar_menu_item_id": "02bc1007-d529-5aae-8198-0f6f82d1136c",
+   "menu_board_entry_id": "a0c4f5ad-57da-53ae-a224-6248f93ce5e5"
+  },
+  {
+   "product_id": "8c8191a6-0bae-5f5f-b803-9c7ee6798542",
+   "product_key": "glenfiddich-15",
+   "display_name": "글렌피딕 15년 / Glenfiddich 15yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "d6528fc0-6991-563f-82bf-91a9a2675da3"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 390000,
+     "sort_order": 2,
+     "id": "9786f4e3-64f6-52bf-b750-aecb8072e3af"
+    }
+   ],
+   "sort_order": 46,
+   "bar_menu_item_id": "3c958a1e-5d59-5310-986d-add2ef3709b1",
+   "menu_board_entry_id": "49efc1c7-c21c-5be7-a187-c150f57d9ae8"
+  },
+  {
+   "product_id": "5ab69eb9-ac14-5e1a-980b-012a09acc148",
+   "product_key": "glenfiddich-18",
+   "display_name": "글렌피딕 18년 / Glenfiddich 18yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 35000,
+     "sort_order": 1,
+     "id": "40b8f990-c6ba-5159-b4ee-f0377bf3a9d6"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 540000,
+     "sort_order": 2,
+     "id": "ae5d71e6-33c7-5789-8a70-e13f4710a2a5"
+    }
+   ],
+   "sort_order": 47,
+   "bar_menu_item_id": "1ee9d688-acd1-57cf-8cf4-67d2fee32493",
+   "menu_board_entry_id": "86ee9b93-bcee-517f-aabe-ff6e94a2114f"
+  },
+  {
+   "product_id": "59218382-d515-5e3f-b066-1b8662e98f4d",
+   "product_key": "glenmorangie-quinta-ruban",
+   "display_name": "글랜모랜지 14년 / Glenmorangie 14yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 22000,
+     "sort_order": 1,
+     "id": "102f3c15-f891-5e7f-87fb-1bddb073ad4e"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 390000,
+     "sort_order": 2,
+     "id": "df55b0b0-12bf-544c-80ed-c23be1867acd"
+    }
+   ],
+   "sort_order": 48,
+   "bar_menu_item_id": "31d00670-d243-5f2d-81e0-6253da590b56",
+   "menu_board_entry_id": "1c2a1169-8619-59dd-8b74-ced19384d543"
+  },
+  {
+   "product_id": "a2688e71-6071-5151-acf9-af69db359d70",
+   "product_key": "glenmorangie-lasanta",
+   "display_name": "글렌모렌지 15년 / Glenmorangie 15yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 24000,
+     "sort_order": 1,
+     "id": "de85d747-a600-5c44-9d04-641606d129e2"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 420000,
+     "sort_order": 2,
+     "id": "5c9c8630-4124-5d86-8c95-3c8ab0ab0f4b"
+    }
+   ],
+   "sort_order": 49,
+   "bar_menu_item_id": "f419a5b2-c44b-537d-9509-d9fa6cd0c413",
+   "menu_board_entry_id": "ce8314a4-7846-534c-a228-9122a8c805ba"
+  },
+  {
+   "product_id": "55e09dbb-9496-5863-8f4e-c85ab200967c",
+   "product_key": "glenmorangie-nectar-dor",
+   "display_name": "글렌모렌지 16년 / Glenmorangie 16yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 26000,
+     "sort_order": 1,
+     "id": "4cfeb4bd-5fe1-5dd3-869e-04b08339aedc"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 450000,
+     "sort_order": 2,
+     "id": "d9067769-cbad-569f-92cd-0c453960e8e1"
+    }
+   ],
+   "sort_order": 50,
+   "bar_menu_item_id": "ab44d30f-9c17-505a-be48-d98db1c9413b",
+   "menu_board_entry_id": "7ee3c335-cc45-52fb-971f-5e31717275d3"
+  },
+  {
+   "product_id": "e5de7281-878c-59d1-9504-6f057c69e860",
+   "product_key": "glendronach-12",
+   "display_name": "글렌드로낙 12년 / Glendronach 12yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 18000,
+     "sort_order": 1,
+     "id": "53148d9c-c91f-5a13-9e05-12a35a0ea4a5"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 290000,
+     "sort_order": 2,
+     "id": "a40865da-4cfc-5aaa-801a-46410d7670cd"
+    }
+   ],
+   "sort_order": 51,
+   "bar_menu_item_id": "6e8631b0-730d-5ad9-8f46-dcaee7a98d1f",
+   "menu_board_entry_id": "0b9544b5-173a-5113-8e0e-1268e3710497"
+  },
+  {
+   "product_id": "3eff6768-0c6e-58c1-8fd1-a0c0ce70fe69",
+   "product_key": "glenfarclas-105",
+   "display_name": "글렌파글라스 105 캐스크 스트렝스 / Glenfarclas 105 Cask Strength",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 21000,
+     "sort_order": 1,
+     "id": "ebfa1132-6dd6-52d4-83dd-df368d892cdf"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 370000,
+     "sort_order": 2,
+     "id": "8f4f3d0c-97c0-56e0-97a5-cee858fd0933"
+    }
+   ],
+   "sort_order": 52,
+   "bar_menu_item_id": "3e0742da-a952-54d4-a6eb-222d199eb710",
+   "menu_board_entry_id": "61f833e6-4d00-59c8-84f9-86dde3d82c1a"
+  },
+  {
+   "product_id": "9df343da-2d54-546c-a9df-ef5b2a931625",
+   "product_key": "glenrothes-12",
+   "display_name": "글렌로티스 12년 / Glenrothes 12yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 18000,
+     "sort_order": 1,
+     "id": "09281857-3257-597b-9a09-276186e53694"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 290000,
+     "sort_order": 2,
+     "id": "5c1c3e47-ebcd-5382-afbb-085d00a521ca"
+    }
+   ],
+   "sort_order": 53,
+   "bar_menu_item_id": "1d50d3b4-0aa3-5758-a9e4-71fcfcdbdd88",
+   "menu_board_entry_id": "64aa36d0-d0b9-5353-b55f-f38b80d0c3d0"
+  },
+  {
+   "product_id": "4b7de0cc-a5a7-5cb3-9794-bc7bdec09e97",
+   "product_key": "royal-brackla-12",
+   "display_name": "로얄 브라클라 12년 / Royal Brackla 12yr",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 19000,
+     "sort_order": 1,
+     "id": "1b5db4fb-55d9-50c6-879e-13805856abbd"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 310000,
+     "sort_order": 2,
+     "id": "100dc2ab-55c2-51bc-ad2b-de6297d364d2"
+    }
+   ],
+   "sort_order": 54,
+   "bar_menu_item_id": "a9382087-62ea-5c95-95d5-dd5ac0846006",
+   "menu_board_entry_id": "664604d7-1b84-5ef8-b8a7-9602c2672d9b"
+  },
+  {
+   "product_id": "a5050e50-19f9-5b83-a032-b417638a474b",
+   "product_key": "kavalan-classic",
+   "display_name": "카발란 클래식 / Kavalan Classic",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 32000,
+     "sort_order": 1,
+     "id": "59d99e66-d5ea-5280-9fcd-01e9cd062633"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 480000,
+     "sort_order": 2,
+     "id": "fd986e71-291d-51a3-9ae6-deb744810fc4"
+    }
+   ],
+   "sort_order": 55,
+   "bar_menu_item_id": "0f51cc69-8ce9-59a9-ad27-79867b0575fc",
+   "menu_board_entry_id": "733dc937-54aa-5bc8-8668-fb6a02b690d5"
+  },
+  {
+   "product_id": "2010122c-76c9-53fe-af5b-0797ee3836f3",
+   "product_key": "kavalan-solist-port",
+   "display_name": "카발란 솔리스트 포트 캐스크 / Kavalan Solist Port Cask",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 54000,
+     "sort_order": 1,
+     "id": "81271f38-1080-5e64-ac12-7707451b70c6"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 730000,
+     "sort_order": 2,
+     "id": "a1bf1626-d9ef-5870-99fa-4cbb97f26d6a"
+    }
+   ],
+   "sort_order": 56,
+   "bar_menu_item_id": "fcc1c399-4c0f-5e82-b318-84614d3c1aab",
+   "menu_board_entry_id": "2051cce5-3ea1-58d6-a26d-8a56126f8278"
+  },
+  {
+   "product_id": "a8ceff55-e7f4-5b23-9e25-ed6c8f5c9abe",
+   "product_key": "limavady-single-barrel",
+   "display_name": "리마바디 / Limavady",
+   "options": [
+    {
+     "option_label": "잔",
+     "pour_ml": null,
+     "price_krw": 17000,
+     "sort_order": 1,
+     "id": "bbaef4ab-08bb-525a-92ac-6cd9860ea74e"
+    },
+    {
+     "option_label": "병",
+     "pour_ml": null,
+     "price_krw": 280000,
+     "sort_order": 2,
+     "id": "9bc28b97-863d-5eaa-a209-4fee40f692d8"
+    }
+   ],
+   "sort_order": 57,
+   "bar_menu_item_id": "332eca2c-4b7c-528e-9f2a-52007e8e7408",
+   "menu_board_entry_id": "6440edf8-3d9d-53bb-9af7-91e785285e7e"
+  }
+ ]
+}

@@ -6,6 +6,10 @@ are inserted with ON CONFLICT DO NOTHING: rows whose id already exists, or that
 normalize to a value the same brand or product already has, are skipped.
 Rows removed from the JSON are not deleted. Everything runs in one transaction.
 
+By default the catalog is catalog_v2_service.json plus catalog_v2_service_i3_additions.json (the
+products of the I3 demo menus), and the bars are bars_v3.json (its `bars`; `pending_bars` are not
+loaded). `--catalog` can be given several times; the files' brands and products are loaded together.
+
 With --dry-run the whole load runs and prints its counts, then rolls back, so a load that
 would fail (e.g. a brand name another brand already has) fails the same way without changes.
 
@@ -143,16 +147,40 @@ def load(conn: Connection, catalog: dict, bars: dict, *, dry_run: bool) -> None:
             print("dry run: rolled back, nothing changed. Run without --dry-run to apply.")
 
 
+DEFAULT_CATALOGS = [CATALOG_DIR / "catalog_v2_service.json", CATALOG_DIR / "catalog_v2_service_i3_additions.json"]
+
+
+def merge_catalogs(catalogs: list[dict]) -> dict:
+    """One catalog from several files: their brands and products, in order. Ids must not repeat."""
+    merged = {
+        "version": " + ".join(c["version"] for c in catalogs),
+        "brands": [b for c in catalogs for b in c["brands"]],
+        "products": [p for c in catalogs for p in c["products"]],
+    }
+    for name in ("brands", "products"):
+        ids = [row["id"] for row in merged[name]]
+        if len(ids) != len(set(ids)):
+            raise SystemExit(f"The catalog files repeat {name} ids.")
+    return merged
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--catalog", type=Path, default=CATALOG_DIR / "catalog_v2_service.json")
-    parser.add_argument("--bars", type=Path, default=CATALOG_DIR / "bars_v2.json")
+    parser.add_argument(
+        "--catalog",
+        type=Path,
+        action="append",
+        help="catalog file; repeat to load several (default: catalog_v2_service.json + catalog_v2_service_i3_additions.json)",
+    )
+    parser.add_argument("--bars", type=Path, default=CATALOG_DIR / "bars_v3.json")
     parser.add_argument("--dry-run", action="store_true", help="load and print the counts, then roll back")
     args = parser.parse_args()
 
-    catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
+    paths = args.catalog or DEFAULT_CATALOGS
+    catalog = merge_catalogs([json.loads(path.read_text(encoding="utf-8")) for path in paths])
     bars = json.loads(args.bars.read_text(encoding="utf-8"))
-    print(f"catalog: {args.catalog.name} ({catalog['version']})  bars: {args.bars.name} ({bars['version']})")
+    names = " + ".join(path.name for path in paths)
+    print(f"catalog: {names} ({catalog['version']})  bars: {args.bars.name} ({bars['version']})")
 
     with get_engine().begin() as conn:
         load(conn, catalog, bars, dry_run=args.dry_run)
