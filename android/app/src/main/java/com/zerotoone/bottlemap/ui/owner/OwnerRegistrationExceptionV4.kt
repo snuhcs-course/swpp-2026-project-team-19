@@ -9,6 +9,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -271,6 +277,57 @@ internal fun OwnerRegistrationQaPreview(page:Int,onBack:()->Unit,onAction:()->Un
             }
             Box(Modifier.fillMaxWidth().padding(horizontal=20.dp,vertical=24.dp)) {
                 RegistrationButton(label,enabled=page!=26 && page!=27,onClick=onAction)
+            }
+        }
+    }
+}
+
+/** Same approved v4 warning sheet for pending cancellation and rejected-card
+ * dismissal. Dismiss only hides the card locally, never deletes audit history. */
+internal enum class RegistrationApplicationSheet { CANCEL, DISMISS }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun RegistrationApplicationConfirmSheet(
+    kind:RegistrationApplicationSheet,
+    onClose:()->Unit,
+    onConfirm:()->Unit
+) {
+    val dismiss=kind==RegistrationApplicationSheet.DISMISS
+    ModalBottomSheet(
+        onDismissRequest=onClose,
+        containerColor=RegistrationV4.surface,
+        contentColor=RegistrationV4.text,
+        dragHandle={
+            Box(Modifier.padding(top=12.dp,bottom=16.dp)
+                .size(width=36.dp,height=4.dp)
+                .background(Color(0xFF786A60),RoundedCornerShape(4.dp)))
+        }
+    ) {
+        Column(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,bottom=24.dp)
+            .testTag(if(dismiss)"registration-dismiss-sheet" else "registration-cancel-sheet"),
+            verticalArrangement=Arrangement.spacedBy(8.dp)) {
+            Text(if(dismiss)"이 신청을 지울까요?" else "신청을 취소할까요?",
+                color=RegistrationV4.text,fontSize=20.sp,lineHeight=28.sp,
+                fontWeight=FontWeight.SemiBold)
+            Text(if(dismiss)
+                "목록에서만 사라지고, 운영팀이 검토한 기록은 남아요. 같은 매장은 언제든 다시 신청할 수 있어요."
+                else "취소하면 처음부터 다시 신청해야 해요.",
+                color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=21.sp)
+            Spacer(Modifier.heightIn(min=4.dp))
+            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                Box(Modifier.weight(1f).heightIn(min=56.dp)
+                    .background(RegistrationV4.elevated,RoundedCornerShape(12.dp))
+                    .ownerQuietClick(onClick=onClose),contentAlignment=Alignment.Center){
+                    Text("닫기",color=RegistrationV4.text,fontSize=16.sp,
+                        fontWeight=FontWeight.SemiBold)
+                }
+                Box(Modifier.weight(1f).heightIn(min=56.dp)
+                    .background(RegistrationV4.primary,RoundedCornerShape(12.dp))
+                    .ownerQuietClick(onClick=onConfirm),contentAlignment=Alignment.Center){
+                    Text(if(dismiss)"지우기" else "취소하기",color=RegistrationV4.onPrimary,
+                        fontSize=16.sp,fontWeight=FontWeight.SemiBold)
+                }
             }
         }
     }
