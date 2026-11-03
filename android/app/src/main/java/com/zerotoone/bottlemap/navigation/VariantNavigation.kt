@@ -20,7 +20,6 @@ import androidx.navigation.navArgument
 import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
-import com.zerotoone.bottlemap.ui.owner.OwnerComponentGallery
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoSelectionScreen
@@ -70,10 +69,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     navController.navigate(next.route)
                 },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
-                onComponents = { navController.navigate(OwnerRoutes.COMPONENTS) },
-                onLegacyDebugUpload = OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
-                    { navController.navigate(route) }
-                },
             )
             }
         }
@@ -96,13 +91,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
             )
-            }
-        }
-        composable(OwnerRoutes.COMPONENTS) {
-                CompositionLocalProvider(
-                    LocalRippleConfiguration provides null,
-                ) {
-            OwnerComponentGallery(onBack = { navController.popBackStack() })
             }
         }
         OwnerPage.entries.forEach { page ->
