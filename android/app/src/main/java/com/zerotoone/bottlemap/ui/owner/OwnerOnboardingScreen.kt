@@ -338,22 +338,27 @@ fun OwnerOnboardingScreen(
         }
     }
 
-    if(cancelId!=null)AlertDialog(onDismissRequest={cancelId=null},
-        title={Text("신청을 취소할까요?")},
-        text={Text("취소하면 처음부터 다시 신청해야 해요.")},
-        confirmButton={TextButton(onClick={
-            cancelId?.let{viewModel.closeApplicationForFixture(it,MockApplicationStatus.CANCELED)}
-            cancelId=null
-        }){Text("취소하기")}},
-        dismissButton={TextButton(onClick={cancelId=null}){Text("닫기")}})
-    if(dismissId!=null)AlertDialog(onDismissRequest={dismissId=null},
-        title={Text("이 신청을 지울까요?")},
-        text={Text("목록에서만 숨기고 Mock 신청 이력은 보존해요.")},
-        confirmButton={TextButton(onClick={
-            dismissId?.let{viewModel.dismissRejectedForFixture(it)}
-            dismissId=null
-        }){Text("지우기")}},
-        dismissButton={TextButton(onClick={dismissId=null}){Text("닫기")}})
+    if(cancelId!=null) RegistrationApplicationConfirmSheet(
+        kind=RegistrationApplicationSheet.CANCEL,
+        onClose={cancelId=null},
+        onConfirm={
+            cancelId?.let { id ->
+                runCatching {
+                    viewModel.closeApplicationForFixture(id,MockApplicationStatus.CANCELED)
+                }.onSuccess {cancelId=null}.onFailure {error=it.message}
+            }
+        }
+    )
+    if(dismissId!=null) RegistrationApplicationConfirmSheet(
+        kind=RegistrationApplicationSheet.DISMISS,
+        onClose={dismissId=null},
+        onConfirm={
+            dismissId?.let { id ->
+                runCatching {viewModel.dismissRejectedForFixture(id)}
+                    .onSuccess {dismissId=null}.onFailure {error=it.message}
+            }
+        }
+    )
     if(showCertificateSheet) ModalBottomSheet(
         onDismissRequest={showCertificateSheet=false},
         containerColor=RegistrationV4.surface,
