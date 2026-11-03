@@ -39,6 +39,8 @@ import com.zerotoone.bottlemap.data.owner.*
 import org.json.JSONObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 
 // The owner photo-review flow uses 30 ml when a bar has no configured serving size.
 private const val DEFAULT_OWNER_POUR_ML = 30
@@ -440,6 +442,8 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     val counts=if(job!=null && s!=null)stage8Counts(job,s) else null
     val focusManager=LocalFocusManager.current
     val keyboardController=LocalSoftwareKeyboardController.current
+    val publishScope=rememberCoroutineScope()
+    var publishing by rememberSaveable { mutableStateOf(false) }
     var screen by rememberSaveable(job?.menuImportId) {
         mutableStateOf(if(resumeFromMenu) {
             if(all.isNotEmpty() && all.all{it.second.decision!=null}) "publish"
@@ -1341,10 +1345,21 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 "results"->St8Button("돌아가기"){visit("publish")}
                 "publish"->{
                     val accepted=stage8ExpectedAddedCount(job,s)
-                    St8Button("+  메뉴 ${accepted}개 게시",enabled=counts!!.remaining==0){
-                        runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
-                            .onSuccess{error=null;visit("done")}
-                            .onFailure{error=it.message;visit("publishFailed")}
+                    St8Button(if(publishing)"메뉴 게시 중..." else "+  메뉴 ${accepted}개 게시",
+                        enabled=counts!!.remaining==0 && !publishing){
+                        publishing=true
+                        publishScope.launch {
+                            try {
+                                vm.publishPhotoImportLive(job.menuImportId,job.reviewVersion)
+                                error=null
+                                visit("done")
+                            } catch(cancelled: CancellationException) {
+                                throw cancelled
+                            } catch(e: Exception) {
+                                error=e.message ?: "메뉴 게시에 실패했어요."
+                                visit("publishFailed")
+                            } finally { publishing=false }
+                        }
                     }
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                         Box(Modifier.weight(1f)) {
@@ -1362,10 +1377,21 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     }
                 }
                 "publishFailed"->{
-                    St8Button("+  다시 시도") {
-                        runCatching{vm.publish(job.menuImportId,job.reviewVersion)}
-                            .onSuccess{error=null;visit("done")}
-                            .onFailure{error=it.message;visit("publishFailed")}
+                    St8Button(if(publishing)"다시 게시하는 중..." else "+  다시 시도",
+                        enabled=!publishing) {
+                        publishing=true
+                        publishScope.launch {
+                            try {
+                                vm.publishPhotoImportLive(job.menuImportId,job.reviewVersion)
+                                error=null
+                                visit("done")
+                            } catch(cancelled: CancellationException) {
+                                throw cancelled
+                            } catch(e: Exception) {
+                                error=e.message ?: "메뉴 게시에 실패했어요."
+                                visit("publishFailed")
+                            } finally { publishing=false }
+                        }
                     }
                     TextButton(onClick=onHome,modifier=Modifier.fillMaxWidth()) {
                         Text("나중에 하기",color=V4Color.sub)
