@@ -400,7 +400,7 @@ internal fun CustomerP18Results(
                 val items=p18Sorted(ready.items,sort,userLocation!=null)
                 if(mapMode) {
                     P18ResultsMap(ready,items,product?.displayName.orEmpty(),
-                        ::navigateBack, {mapMode=false},selectedBarId,userLocation!=null,
+                        ::navigateBack, {mapMode=false},selectedBarId,userLocation,
                         mapCamera,{mapCamera=it},
                         onSelect={id->if(selectedBarId==id)onOpenBar(id,product?.productId)
                             else selectedBarId=id},
@@ -454,7 +454,7 @@ internal fun CustomerP18Results(
 @Composable
 private fun P18ResultsMap(
     response:SearchBarsResponseDto, items:List<SearchResultDto>,name:String,
-    onBack:()->Unit,onList:()->Unit,selected:String?,hasLocation:Boolean,
+    onBack:()->Unit,onList:()->Unit,selected:String?,userLocation:NearbyCoordinate?,
     initialCamera:DiscoveryCamera?,onCamera:(DiscoveryCamera)->Unit,
     onSelect:(String)->Unit,onOpenBar:(String)->Unit,
 ) {
@@ -478,7 +478,8 @@ private fun P18ResultsMap(
             onMapViewportUnavailable={},viewportRetryToken=0,
             onSelectBar=onSelect,onViewportChanged={},recenterToken=0,
             onMapViewChanged={mapView=it},modifier=Modifier.fillMaxSize(),
-            p18Markers=true,showOriginMarker=false,
+            p18Markers=true,showOriginMarker=userLocation!=null,
+            userLocation=userLocation,
             p18MarkerSubtitle={id->
                 items.firstOrNull{it.barId==id}?.let{row->
                     p18Representative(row.options)?.let{ option->
@@ -511,11 +512,41 @@ private fun P18ResultsMap(
             Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()
                 .background(P18Bg,RoundedCornerShape(topStart=24.dp,topEnd=24.dp))
                 .clickable { onOpenBar(selectedItem.barId) }
-                .padding(start=20.dp,end=20.dp,top=10.dp,bottom=24.dp),
+                .padding(start=20.dp,end=20.dp,top=10.dp,bottom=10.dp),
                 horizontalAlignment=Alignment.CenterHorizontally) {
                 Box(Modifier.width(36.dp).height(4.dp)
                     .background(BottleMapPalette.outline,RoundedCornerShape(4.dp)))
-                P18BarRow(selectedItem,hasLocation,{onOpenBar(selectedItem.barId)})
+                Row(Modifier.fillMaxWidth().padding(top=8.dp,bottom=2.dp),
+                    verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                    Column(Modifier.weight(1f),
+                        verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment=Alignment.CenterVertically,
+                            horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                            Text(selectedItem.barName,Modifier.weight(1f,false),
+                                color=P18Text,fontSize=16.sp,fontWeight=FontWeight.SemiBold,
+                                maxLines=1,overflow=TextOverflow.Ellipsis)
+                            if(userLocation!=null && selectedItem.distanceMeters!=null)
+                                Text(p18Distance(selectedItem.distanceMeters),
+                                    color=P18Muted,fontSize=12.sp)
+                        }
+                        val serving=p18Representative(selectedItem.options)
+                        if(serving!=null) Row(
+                            horizontalArrangement=Arrangement.spacedBy(6.dp),
+                            verticalAlignment=Alignment.CenterVertically) {
+                            Text(p18Price(p18EffectivePrice(serving.priceKrw,serving.discount)),
+                                color=P18Text,fontSize=16.sp,fontWeight=FontWeight.SemiBold)
+                            Text(serving.pourMl?.let{"${it}ml"}?:serving.optionLabel.orEmpty(),
+                                color=P18Muted,fontSize=13.sp)
+                        }
+                        Text("메뉴 ${p18MenuUpdated(selectedItem.menuUpdatedAt)} 기준",
+                            color=P18Muted,fontSize=12.sp)
+                    }
+                    if(!selectedItem.coverThumbnailUrl.isNullOrBlank())
+                        P18RemoteBarPhoto(selectedItem.coverThumbnailUrl,
+                            Modifier.size(72.dp))
+                    else P18Photo(size=72.dp)
+                }
             }
         }
     }
