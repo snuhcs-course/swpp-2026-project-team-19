@@ -16,6 +16,7 @@ from app.core.version import get_version
 from app.db.session import get_session_factory
 from app.matching.embedding import get_embedding_step
 from app.services.menu_import_processing import find_unfinished_imports, recover_imports
+from app.services.search_similar import get_similar_products
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     get_matching_llm_layer()
     # Invalid EMBEDDING_* settings stop the server, even while the step is off. The index is built on first use.
     get_embedding_step()
+    # The same for SEARCH_SIMILAR_*; the search index is built by the first search that needs it.
+    get_similar_products()
     # Invalid Supabase auth settings (e.g. HS256 allowed) stop the server; an unset SUPABASE_URL does not.
     load_supabase_auth_settings()
     # Leave a trace in the server log while anyone can get a token from POST /api/auth/temp-login.

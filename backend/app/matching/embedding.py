@@ -31,6 +31,9 @@ The index lives in this process (no table, no migration). It is built on first u
 again when `catalog_version` changes, which a review that creates products or aliases does. Menu
 imports run in worker threads (background tasks, start-up recovery), so the check and the
 rebuild happen under a lock; a built index is never changed, only replaced.
+
+Customer search's similar-products step (app.services.search_similar) keeps its own index with the
+same `CatalogIndexCache`, built from display names and searchable aliases only.
 """
 
 import logging
@@ -128,11 +131,15 @@ def _reranked(evidence: dict[str, Any], similarity: float | None) -> dict[str, A
     return {**evidence, **extra}
 
 
-def catalog_version(session: Session) -> tuple[Any, ...]:
+def catalog_version(session: Session, *, searchable_only: bool = False) -> tuple[Any, ...]:
     """Changes when an active product or an alias of one is added, removed, deactivated, or a product
-    is updated (`products.updated_at`). One query; compared before every use of the index."""
+    is updated (`products.updated_at`). One query; compared before every use of the index.
+    `searchable_only` counts only the aliases customer search uses (`is_searchable`)."""
     active = Product.is_active
-    alias_rows = select(ProductAlias).join(Product, Product.id == ProductAlias.product_id).where(active).subquery()
+    alias_rows = select(ProductAlias).join(Product, Product.id == ProductAlias.product_id).where(active)
+    if searchable_only:
+        alias_rows = alias_rows.where(ProductAlias.is_searchable)
+    alias_rows = alias_rows.subquery()
     query = select(
         select(func.count()).where(active).select_from(Product).scalar_subquery(),
         select(func.max(Product.updated_at)).where(active).scalar_subquery(),
@@ -142,8 +149,9 @@ def catalog_version(session: Session) -> tuple[Any, ...]:
     return tuple(session.execute(query).one())
 
 
-def catalog_entries(session: Session) -> list[tuple[str, UUID]]:
-    """(text, product id) for every active product: its display name, then its alias texts, each text once."""
+def catalog_entries(session: Session, *, searchable_only: bool = False) -> list[tuple[str, UUID]]:
+    """(text, product id) for every active product: its display name, then its alias texts, each text once.
+    `searchable_only` leaves out the aliases customer search does not use (`is_searchable = false`)."""
     entries: dict[tuple[str, UUID], None] = {}
     for product_id, name in session.execute(
         select(Product.id, Product.display_name).where(Product.is_active).order_by(Product.id)
@@ -155,6 +163,8 @@ def catalog_entries(session: Session) -> list[tuple[str, UUID]]:
         .where(Product.is_active)
         .order_by(ProductAlias.product_id, ProductAlias.alias_text)
     )
+    if searchable_only:
+        query = query.where(ProductAlias.is_searchable)
     for text, product_id in session.execute(query):
         entries[(text, product_id)] = None
     return list(entries)
@@ -172,6 +182,47 @@ class EmbeddingIndex:
         rows = self._texts.similarities(names)
         return [rank_products(row, self.entries, top_n) for row in rows]
 
+    def product_similarities(self, name: str) -> dict[UUID, float]:
+        """Each indexed product's best similarity to `name` over its texts."""
+        [row] = self._texts.similarities([name])
+        best: dict[UUID, float] = {}
+        for score, (_, product_id) in zip(row, self.entries):
+            if score > best.get(product_id, -1.0):
+                best[product_id] = score
+        return best
+
+
+class CatalogIndexCache:
+    """The index of the current catalog in this process, built on first use and again when
+    `catalog_version` changes. Shared by the threads of the process, so it works under a lock.
+
+    `searchable_only` indexes what customer search may match (app.services.search_similar):
+    display names and searchable aliases only. The menu matching step indexes every alias.
+    """
+
+    def __init__(self, provider: EmbeddingProvider, *, searchable_only: bool = False) -> None:
+        self.provider = provider
+        self.searchable_only = searchable_only
+        self._index: EmbeddingIndex | None = None
+        self._lock = threading.Lock()
+
+    def get(self, session: Session) -> EmbeddingIndex:
+        """The index for the catalog the session sees, built again if the catalog changed since."""
+        with self._lock:
+            # The version is read before the texts, so an index is never newer than its version says;
+            # a catalog change between the two reads only causes one more rebuild.
+            version = catalog_version(session, searchable_only=self.searchable_only)
+            if self._index is None or self._index.version != version:
+                started = time.perf_counter()
+                entries = catalog_entries(session, searchable_only=self.searchable_only)
+                self._index = EmbeddingIndex(self.provider, entries, version)
+                logger.info(
+                    "Embedding index (%s%s) built: %d texts in %.2f s",
+                    self.provider.model_id, ", searchable only" if self.searchable_only else "",
+                    len(self._index.entries), time.perf_counter() - started,
+                )
+            return self._index
+
 
 class EmbeddingStep:
     """The configured step: the provider, the floor, and the current index of this process."""
@@ -179,23 +230,11 @@ class EmbeddingStep:
     def __init__(self, provider: EmbeddingProvider, min_similarity: float) -> None:
         self.provider = provider
         self.min_similarity = min_similarity
-        self._index: EmbeddingIndex | None = None
-        self._lock = threading.Lock()
+        self._cache = CatalogIndexCache(provider)
 
     def index(self, session: Session) -> EmbeddingIndex:
         """The index for the catalog the session sees, built again if the catalog changed since."""
-        with self._lock:
-            # The version is read before the texts, so an index is never newer than its version says;
-            # a catalog change between the two reads only causes one more rebuild.
-            version = catalog_version(session)
-            if self._index is None or self._index.version != version:
-                started = time.perf_counter()
-                self._index = EmbeddingIndex(self.provider, catalog_entries(session), version)
-                logger.info(
-                    "Embedding index (%s) built: %d texts in %.2f s",
-                    self.provider.model_id, len(self._index.entries), time.perf_counter() - started,
-                )
-            return self._index
+        return self._cache.get(session)
 
     def apply(
         self, session: Session, names: Mapping[UUID, str | None], results: Mapping[UUID, ResolutionResult]

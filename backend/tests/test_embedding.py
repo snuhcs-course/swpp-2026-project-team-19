@@ -299,6 +299,13 @@ def test_index_search_ranks_products_per_name():
     assert provider.builds == [["a", "b", "b alias"]]
 
 
+def test_product_similarities_give_each_product_its_best_text():
+    provider = FakeEmbeddingProvider({("q", "a"): 0.5, ("q", "b alias"): 0.9, ("q", "b"): 0.2})
+    index = EmbeddingIndex(provider, [("a", A), ("b", B), ("b alias", B), ("c", C)], version=(1,))
+
+    assert index.product_similarities("q") == {A: 0.5, B: 0.9, C: 0.0}
+
+
 def test_apply_without_target_lines_does_not_touch_the_catalog():
     step = EmbeddingStep(FakeEmbeddingProvider(), 0.38)
     results = {1: ResolutionResult(status="exact_match"), 2: ResolutionResult(status="unmatched")}
