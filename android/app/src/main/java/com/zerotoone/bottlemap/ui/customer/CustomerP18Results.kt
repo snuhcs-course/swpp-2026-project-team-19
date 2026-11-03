@@ -87,6 +87,7 @@ internal class P18SearchViewModel : ViewModel() {
     private val _location = MutableStateFlow<NearbyCoordinate?>(null)
     val location = _location.asStateFlow()
     fun setLocation(value: NearbyCoordinate) { if (value.isValid()) _location.value = value }
+    fun clearLocation() { _location.value = null }
     fun load(query: String?, productId: String?, source: String,
              location: NearbyCoordinate? = null, force: Boolean = false) {
         val key = listOf(query, productId, source, location?.latitude, location?.longitude).joinToString("|")
@@ -237,6 +238,7 @@ internal fun CustomerP18Results(
     val lifecycleOwner = LocalLifecycleOwner.current
     var chooseQuery by rememberSaveable(initialQuery) { mutableStateOf(initialQuery.orEmpty()) }
     var focusRequest by remember { mutableIntStateOf(0) }
+    var locationFailed by rememberSaveable { mutableStateOf(false) }
     var exiting by remember { mutableStateOf(false) }
     DisposableEffect(lifecycleOwner, viewModel, context) {
         val observer = LifecycleEventObserver { _, event ->
@@ -245,9 +247,11 @@ internal fun CustomerP18Results(
                     Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(context,
                     Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
+                if (!allowed) viewModel.clearLocation()
                 if (allowed && viewModel.location.value == null) scope.launch {
                     runCatching { AndroidNearbyLocationSource(context).currentLocation() }
-                        .onSuccess(viewModel::setLocation)
+                        .onSuccess { viewModel.setLocation(it);locationFailed=false }
+                        .onFailure { locationFailed=true }
                 }
             }
         }
@@ -274,7 +278,8 @@ internal fun CustomerP18Results(
         if(grants.values.any{it}) {
             scope.launch {
                 runCatching {AndroidNearbyLocationSource(context).currentLocation()}
-                    .onSuccess(viewModel::setLocation)
+                    .onSuccess { viewModel.setLocation(it);locationFailed=false }
+                    .onFailure { locationFailed=true }
             }
         }
     }
@@ -285,7 +290,8 @@ internal fun CustomerP18Results(
                 Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
         if(granted) scope.launch {
             runCatching {AndroidNearbyLocationSource(context).currentLocation()}
-                .onSuccess(viewModel::setLocation)
+                .onSuccess { viewModel.setLocation(it);locationFailed=false }
+                .onFailure { locationFailed=true }
         } else locationLauncher.launch(arrayOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION))
@@ -420,7 +426,8 @@ internal fun CustomerP18Results(
                     }
                     if(userLocation==null) {
                         P18LocationBanner(::requestLocation,
-                            Modifier.padding(horizontal=20.dp,vertical=10.dp))
+                            Modifier.padding(horizontal=20.dp,vertical=10.dp),
+                            locationFailed=locationFailed)
                     }
                     Row(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,top=12.dp,bottom=4.dp),
                         verticalAlignment=Alignment.CenterVertically,
