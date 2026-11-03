@@ -197,7 +197,8 @@ internal fun CustomerP18Explore(
     Box(Modifier.fillMaxSize().background(P18Bg).testTag("customer-map-explore")) {
         NearbyKakaoMap(origin=location?:P18DefaultMapCenter,
             bars=bars,selectedBarId=selectedId,
-            focusTarget=chosen,focusBarId=null,initialCamera=null,listCovered=listVisible,
+            focusTarget=chosen,focusBarId=null,initialCamera=null,
+            listCovered=listVisible||searchVisible,
             searchedPlace=selectedPlace,focusSearchedPlace=focusPlace,
             onSearchedPlaceFocusApplied=searchViewModel::consumeFocus,
             onFocusApplied={},onCameraChanged={_,_->},
@@ -289,7 +290,9 @@ internal fun CustomerP18Explore(
                                 }.padding(12.dp),
                                 verticalAlignment=Alignment.CenterVertically,
                                 horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                                P18Photo()
+                                if(!bar.coverThumbnailUrl.isNullOrBlank())
+                                    P18RemoteBarPhoto(bar.coverThumbnailUrl,Modifier.size(64.dp))
+                                else P18Photo()
                                 Column(Modifier.weight(1f)) {
                                     Text(bar.name,color=P18Text,fontSize=16.sp,
                                         fontWeight=FontWeight.SemiBold,maxLines=1,
@@ -398,6 +401,8 @@ private fun P18BrowseRow(bar:MapBar,origin:NearbyCoordinate?,onClick:()->Unit) {
             Text(bar.menuUpdatedAt?.let{"메뉴 ${p18MenuUpdated(it)} 기준"}
                 ?:"메뉴 정보 없음",fontSize=12.sp,color=P18Muted)
         }
-        P18Photo()
+        if(!bar.coverThumbnailUrl.isNullOrBlank())
+            P18RemoteBarPhoto(bar.coverThumbnailUrl,Modifier.size(64.dp))
+        else P18Photo()
     }
 }
