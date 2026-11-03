@@ -61,7 +61,14 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
             OwnerOnboardingScreen(
                 viewModel = ownerViewModel,
                 onBack = { navController.popBackStack() },
-                onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
+                onFirstReview = { status ->
+                    val next=when(status) {
+                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
+                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
+                        else -> OwnerPage.MGR_PHOTO
+                    }
+                    navController.navigate(next.route)
+                },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 onComponents = { navController.navigate(OwnerRoutes.COMPONENTS) },
                 onLegacyDebugUpload = OwnerRoutes.legacyDebugEntryRoute(BuildConfig.DEBUG)?.let { route ->
@@ -78,7 +85,14 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 viewModel = viewModel(factory = OwnerMockViewModel.Factory(
                     OwnerMockRuntime.repository(LocalContext.current))),
                 onBack = { navController.popBackStack() },
-                onFirstReview = { navController.navigate(OwnerPage.PHOTO_START.route) },
+                onFirstReview = { status ->
+                    val next=when(status) {
+                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
+                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
+                        else -> OwnerPage.MGR_PHOTO
+                    }
+                    navController.navigate(next.route)
+                },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
             )
