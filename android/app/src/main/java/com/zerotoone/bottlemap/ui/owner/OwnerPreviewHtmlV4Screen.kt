@@ -67,6 +67,8 @@ import com.zerotoone.bottlemap.ui.common.OwnerHeader
 import com.zerotoone.bottlemap.ui.common.OwnerLoading
 import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
 import com.zerotoone.bottlemap.ui.customer.P18InlineBarMap
+import com.zerotoone.bottlemap.ui.customer.P18Back
+import com.zerotoone.bottlemap.ui.customer.P18ScrollTopButton
 
 /**
  * Customer-side MOCK preview, not the API-backed customer detail screen.
@@ -132,10 +134,15 @@ fun OwnerPreviewHtmlV4Screen(
             }
         }
     }
-    Column(Modifier.fillMaxSize().background(V4Color.background)) {
-        V4Toolbar(null, onBack)
+    val previewScroll=rememberScrollState()
+    Box(Modifier.fillMaxSize().background(V4Color.background)) {
+      Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().height(72.dp).padding(start=8.dp),
+            verticalAlignment=Alignment.CenterVertically) {
+            P18Back(onBack)
+        }
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            Modifier.fillMaxSize().verticalScroll(previewScroll)
                 .padding(horizontal = BottleMapSpacing.screenHorizontal),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -365,6 +372,9 @@ fun OwnerPreviewHtmlV4Screen(
                 Spacer(Modifier.height(20.dp))
             }
         }
+      }
+      P18ScrollTopButton(previewScroll,Modifier.align(Alignment.BottomEnd)
+          .padding(end=16.dp,bottom=18.dp))
     }
 }
 
