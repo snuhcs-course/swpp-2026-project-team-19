@@ -4,21 +4,24 @@ Used to pick one's bar in an owner application and to find a bar on the customer
 is matched as typed (after trimming), ignoring letter case; `%` and `_` are plain characters.
 """
 
-from sqlalchemy import or_, select
+from sqlalchemy import exists, or_, select
 from sqlalchemy.orm import Session
 
-from app.models import Bar, BarStatus
+from app.models import Bar, BarOwner, BarStatus
 from app.schemas.search import BarNameItem, BarNamesResponse
+from app.services.bar_photo_links import cover_photo_id, cover_thumbnail_url
 from app.services.search import validate_query_text
 
 DEFAULT_LIMIT = 20
 MAX_LIMIT = 50
 
 
-def search_bar_names(session: Session, query: str, limit: int = DEFAULT_LIMIT) -> BarNamesResponse:
+def search_bar_names(session: Session, query: str, limit: int = DEFAULT_LIMIT, *, base_url: str) -> BarNamesResponse:
     text = validate_query_text(query)
+    # A current owner (revocation not set); a pending application does not count.
+    has_owner = exists().where(BarOwner.bar_id == Bar.id, BarOwner.revoked_at.is_(None))
     rows = session.execute(
-        select(Bar.id, Bar.name, Bar.address, Bar.latitude, Bar.longitude)
+        select(Bar.id, Bar.name, Bar.address, Bar.latitude, Bar.longitude, has_owner, cover_photo_id())
         .where(
             Bar.status == BarStatus.ACTIVE,
             or_(Bar.name.icontains(text, autoescape=True), Bar.address.icontains(text, autoescape=True)),
@@ -33,9 +36,9 @@ def search_bar_names(session: Session, query: str, limit: int = DEFAULT_LIMIT) -
             address=address,
             latitude=float(latitude),
             longitude=float(longitude),
-            # Bar owners (bar_owners) come in Iteration 3; until then no bar has one.
-            hasOwner=False,
+            coverThumbnailUrl=cover_thumbnail_url(cover_id, base_url),
+            hasOwner=owned,
         )
-        for bar_id, name, address, latitude, longitude in rows[:limit]
+        for bar_id, name, address, latitude, longitude, owned, cover_id in rows[:limit]
     ]
     return BarNamesResponse(items=items, truncated=len(rows) > limit)

@@ -11,12 +11,12 @@ from app.core.pagination import decode_cursor, encode_cursor
 from app.models import Bar, BarStatus, ImportStatus, MenuImage, MenuImport
 from app.schemas.bar import ActiveMenuImport, BarListItem, BarListResponse
 from app.schemas.menu_import import MenuImportListItem, MenuImportListResponse
-from app.services.bar_menu import bar_not_found
+from app.services.bar_photo_links import cover_photo_id, cover_thumbnail_url
 from app.services.menu_import_upload import UNFINISHED_STATUSES
 from app.services.search import validate_query_text
 
 BarStatusFilter = Literal["active", "inactive", "all"]
-ImportStatusFilter = Literal["active", "uploaded", "processing", "ready_for_review", "applied", "failed", "all"]
+ImportStatusFilter = Literal["active", "uploaded", "processing", "ready_for_review", "applied", "failed", "canceled", "all"]
 
 
 def _text(value) -> str:
@@ -42,9 +42,10 @@ def list_bars(
     status: BarStatusFilter = "active",
     limit: int = 20,
     cursor: str | None = None,
+    base_url: str,
 ) -> BarListResponse:
     """Bars sorted by name, then id. `query` matches part of the name or address, ignoring case."""
-    stmt = select(Bar)
+    stmt = select(Bar, cover_photo_id())
     if query is not None:
         text = validate_query_text(query)
         stmt = stmt.where(or_(Bar.name.icontains(text, autoescape=True), Bar.address.icontains(text, autoescape=True)))
@@ -52,8 +53,9 @@ def list_bars(
         stmt = stmt.where(Bar.status == BarStatus(status))
     if cursor is not None:
         stmt = stmt.where(tuple_(Bar.name, Bar.id) > tuple_(*decode_cursor(cursor, _bar_key)))
-    bars = list(session.scalars(stmt.order_by(Bar.name, Bar.id).limit(limit + 1)))
-    page, more = bars[:limit], len(bars) > limit
+    rows = session.execute(stmt.order_by(Bar.name, Bar.id).limit(limit + 1)).all()
+    page, more = [bar for bar, _ in rows[:limit]], len(rows) > limit
+    covers = {bar.id: cover_id for bar, cover_id in rows[:limit]}
 
     unfinished = dict(
         session.execute(
@@ -76,6 +78,7 @@ def list_bars(
                     if bar.id in unfinished
                     else None
                 ),
+                coverThumbnailUrl=cover_thumbnail_url(covers[bar.id], base_url),
             )
             for bar in page
         ],
@@ -85,20 +88,13 @@ def list_bars(
 
 def list_menu_imports(
     session: Session,
-    bar_id: str,
+    bar: Bar,
     *,
     status: ImportStatusFilter = "all",
     limit: int = 20,
     cursor: str | None = None,
 ) -> MenuImportListResponse:
     """A bar's imports, newest first. `active` means unfinished (uploaded, processing, ready_for_review)."""
-    try:
-        bar = session.get(Bar, UUID(bar_id))
-    except ValueError:
-        bar = None
-    if bar is None:
-        raise bar_not_found(bar_id)
-
     image_count = (
         select(func.count()).where(MenuImage.menu_import_id == MenuImport.id).correlate(MenuImport).scalar_subquery()
     )

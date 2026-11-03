@@ -38,6 +38,7 @@
 6. 백엔드가 상위 상품 후보를 임시 선택해 현재 메뉴판과의 변경 초안을 `menu_import_changes`에 저장한다.
 7. 운영자 또는 업주가 한 화면에서 항목 역할, 상품명, 가격·용량 옵션, 상품 연결, 신규 카탈로그 제안, 메뉴 변경 초안을 통합 검수한다. 신규 상품은 기존 `brand_id`를 선택하거나 신규 브랜드의 대표 이름과 별칭을 직접 확정해야 한다.
 8. 최종 제출 시 백엔드가 모든 결정을 재검증하고 diff를 다시 계산한 뒤 `bar_menu_items`, `menu_board_entries`, `menu_entry_options`에 원자적으로 반영한다.
+9. 미완료 등록 작업이 없을 때 운영자나 업주는 사진 없이 현재 메뉴판의 항목 하나를 추가, 수정, 삭제하거나 메뉴판을 비울 수 있다(API 명세 3.14). 이 직접 편집은 `menu_imports`를 만들지 않고 `menu_boards.version`을 확인한 뒤 올린다. 직접 추가에서 카탈로그에 없는 상품은 같은 트랜잭션에서 `brands`, `products`, 별칭으로 만든다.
 
 ### 3.2 고객 검색
 
@@ -62,13 +63,15 @@
 
 1. 로그인한 사용자가 업주 신청을 낸다. 기존 업장이면 `bar_id`를, 새 업장이면 업장명·주소·전화번호를 적고, 사업자등록번호, 대표자명, 개업일자와 연락처를 함께 적는다. 사업자등록증 사진을 올리면 OCR로 읽은 값이 입력란에 미리 채워진다. 사진은 저장하지 않는다.
 2. 백엔드가 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자를 1차 검증한다. 맞지 않으면 행을 만들지 않고 신청자가 입력을 고친다. 맞으면 `business_verification_result = matched`와 사업자 상태를, 검증 서비스에 연결하지 못하면 `unavailable`을 저장하고 `bar_owner_applications`에 `pending`으로 저장한다.
-3. 운영자가 웹 대시보드에서 대기 중인 신청과 검증 결과를 보고, 실제 매장이 있는지 확인한다. `unavailable`이면 다시 검증한다.
-4. 승인하면 같은 트랜잭션에서 다음을 처리한다.
+3. 신청자가 메뉴판 사진을 올린다. 사진은 객체 저장소에, 위치는 `bar_owner_application_menu_images`에 저장한다. `pending`인 동안 다시 올리면 전체를 교체한다.
+4. 운영자가 웹 대시보드에서 대기 중인 신청과 검증 결과, 메뉴판 사진을 보고 실제 매장이 있는지 확인한다. `unavailable`이면 다시 검증한다.
+5. 승인하면 같은 트랜잭션에서 다음을 처리한다.
    - 기존 업장: 현재 업주가 없는지 다시 확인하고 `bar_owners` 행을 만든다.
    - 새 업장: 운영자가 확인한 업장 정보(좌표 포함)로 `bars` 행을 만들고, 신청의 `bar_id`에 저장한 뒤 `bar_owners` 행을 만든다.
-5. 거절하면 사유를 `rejection_reason`에 남긴다. 신청자는 대기 중인 신청을 직접 취소할 수 있다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
-6. 승인된 업주는 자기 업장의 정보 수정과 메뉴 등록·검수·반영을 할 수 있다. 권한은 매 요청 `bar_owners`에서 확인하므로 승인이나 해제가 다음 요청부터 반영된다.
-7. 운영자는 업주 관계를 해제할 수 있다. 행을 지우지 않고 `revoked_at`을 기록한다.
+   - 신청 메뉴판 사진이 있고 업장에 미완료 메뉴 등록 작업이 없으면, 그 사진으로 `menu_imports`와 `menu_images`를 만든다(8.1). 커밋한 뒤 AI 처리를 시작하므로 업주가 처음 들어왔을 때 검수가 준비되어 있다.
+6. 거절하면 사유를 `rejection_reason`에 남긴다. 신청자는 대기 중인 신청을 직접 취소할 수 있다. 거절되거나 취소되면 신청 메뉴판 사진의 행과 파일을 삭제한다. 거절되거나 취소된 사용자는 새 신청을 낼 수 있다.
+7. 승인된 업주는 자기 업장의 정보 수정과 메뉴 등록·검수·반영을 할 수 있다. 권한은 매 요청 `bar_owners`에서 확인하므로 승인이나 해제가 다음 요청부터 반영된다.
+8. 운영자는 업주 관계를 해제할 수 있다. 행을 지우지 않고 `revoked_at`을 기록한다.
 
 구체적인 요청·응답 형식은 API 명세의 업주 신청과 승인 절을 따른다.
 
@@ -228,6 +231,24 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 휴업이나 폐업 사업자의 신청도 받으며, 승인 여부는 운영자가 판단한다.
 
+### 4.18 operating_exception_kind
+
+| 값 | 의미 |
+|---|---|
+| `closed_today` | 적용한 날 하루 임시 휴무 |
+| `custom_hours` | 적용한 날만 영업시간 변경. `open_time`, `close_time`이 필수다 |
+| `vacation` | `start_date`부터 `end_date`까지 임시 휴업 |
+
+### 4.19 search_source
+
+고객 검색을 어디서 시작했는지다(API 명세 3.10의 `source`).
+
+| 값 | 의미 |
+|---|---|
+| `input` | 검색창에 직접 입력. 기본값 |
+| `recent` | 기기에 저장된 최근 검색을 다시 누름 |
+| `popular` | 홈 화면의 요즘 많이 찾는 위스키 카드를 누름 |
+
 ## 5 Accounts and Bars
 
 ### 5.1 users
@@ -258,6 +279,9 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `latitude` | `decimal(9,6)`, NOT NULL, CHECK -90~90 | `37.478321` | WGS84 위도다. 지도 표시와 고객 위치와의 직선 거리 계산에 사용한다. |
 | `longitude` | `decimal(9,6)`, NOT NULL, CHECK -180~180 | `126.951234` | WGS84 경도다. 지도 표시와 고객 위치와의 직선 거리 계산에 사용한다. |
 | `phone` | `varchar(30)`, nullable | `02-1234-5678` | 업장 상세 정보로 제공할 수 있다. |
+| `description` | `varchar(100)`, nullable | `싱글몰트 위주의 조용한 바` | 업장 한 줄 소개다. 업주나 운영자가 업장 수정(API 명세 3.7)으로 정하고, 앞뒤 공백을 지운 값을 저장하며 공백뿐이면 null이다. 줄바꿈을 허용하고 이스케이프 없이 받은 그대로 저장한다. 업장을 만들 때(생성, 신청 승인)는 받지 않아 null이다. 고객 업장 상세(API 명세 3.9)에 나온다. |
+| `default_pour_ml` | `smallint`, nullable, CHECK 1~999 | `30` | 업주가 정한 매장 기본 잔 용량이다. 메뉴 직접 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데만 쓴다. 백엔드가 게시 메뉴에 자동으로 적용하지 않으며, 바꿔도 이미 게시된 옵션은 바뀌지 않는다. |
+| `tags` | `varchar(24)[]`, NOT NULL, 기본 `{}` | `{싱글몰트,조용한 분위기}` | 매장 태그를 표시 순서대로 저장한다. 최대 5개이고, 태그마다 앞뒤 공백을 지운 1~24자이며 줄바꿈과 제어 문자가 없고, 대소문자를 무시해도 서로 다르다. 업주나 운영자가 업장 수정(API 명세 3.7)으로 목록 전체를 바꾼다. 자유 입력이며 검색에는 쓰지 않는다. 검색에 쓰게 되면 별도 테이블이나 GIN 인덱스를 검토한다. |
 | `status` | `bar_status`, NOT NULL, 기본 `active` | `active` | 폐업 또는 서비스 제외 업장을 삭제하지 않고 비활성화한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:10:00Z` | 업장 등록 시점이다. |
 | `updated_at` | `timestamptz`, NOT NULL | `2026-09-28T04:10:00Z` | 주소 전화번호 등의 최종 변경 시점이다. |
@@ -300,7 +324,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 - `business_registration_number`는 숫자 10자리다. 검증번호(마지막 자리) 계산은 API가 확인한다.
 - `business_status`는 `business_verification_result = matched`일 때만 값이 있을 수 있다.
 - 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자와 운영자에게만 보여 주며 공개 API에 포함하지 않고 로그에도 남기지 않는다. 검증 결과 중 신청자에게는 `business_status`만 보여 준다. 실제 값은 저장소에 커밋하지 않는다.
-- 사업자등록증 사진과 OCR로 읽은 값은 저장하지 않는다. 신청자가 확인한 값만 신청으로 저장된다.
+- 사업자등록증 사진과 OCR로 읽은 값은 저장하지 않는다. 신청자가 확인한 값만 신청으로 저장된다. 메뉴판 사진은 5.5에 따로 저장한다.
 
 ### 5.4 bar_owners
 
@@ -320,6 +344,101 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 **필요한 이유:** 업주 권한은 업장마다 다르므로 전역 `user_type`으로 표현할 수 없다. 신청과 관계를 나누면 신청 이력(증빙, 거절 사유)과 현재 권한을 따로 관리할 수 있고, 권한 검사는 작은 관계 테이블만 조회하면 된다.
 
+### 5.5 bar_owner_application_menu_images
+
+**역할:** 업주 신청에 첨부한 메뉴판 사진의 저장소 위치를 저장한다. 승인할 때 이 사진으로 첫 메뉴 등록 작업을 만든다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 신청 사진 ID | |
+| `application_id` | `uuid`, NOT NULL, FK → `bar_owner_applications.id` | 신청 ID | 어느 신청의 사진인지 나타낸다. |
+| `storage_key` | `varchar(500)`, NOT NULL | `owner-applications/cccc.../page-1.jpg` | `menu_images`처럼 바이너리 대신 객체 저장소 위치를 저장한다. |
+| `original_filename` | `varchar(255)`, nullable | `IMG_20261030_190112.jpg` | 업로드 당시 파일명이다. |
+| `image_order` | `smallint`, NOT NULL | `1` | 여러 장 메뉴판의 순서다. 승인으로 만든 작업의 `menu_images.image_order`가 된다. |
+| `content_sha256` | `char(64)`, NOT NULL | SHA-256 16진수 문자열 | 원본 바이트의 SHA-256이다. 승인으로 만든 작업의 `request_fingerprint`(8.1)를 사진을 다시 읽지 않고 계산하기 위해 저장한다. |
+| `uploaded_at` | `timestamptz`, NOT NULL | `2026-10-30T10:01:00Z` | 업로드 시각이다. |
+
+**핵심 제약:**
+
+- 한 신청 안에서 `image_order`가 중복되지 않는다(unique).
+- 신청이 `pending`일 때만 행을 만들거나 바꾼다. 업로드할 때마다 전체를 교체하며, 교체된 행과 파일은 삭제한다. 업로드는 신청 행을 잠가 승인·거절·취소와 동시에 처리되지 않게 한다.
+- 신청이 거절되거나 취소되면 행과 파일을 삭제한다. 업주가 되지 않은 사람의 사진을 남기지 않기 위해서다. 파일 삭제는 DB 커밋 뒤에 하며, 실패하면 로그만 남긴다.
+- 승인되면 행을 지우지 않는다. 승인으로 만든 작업의 `menu_images`가 같은 `storage_key`를 가리키므로, 승인 뒤에는 파일을 지우지 않는다.
+- 사진은 신청자와 운영자에게만 서명 URL로 보여 주며 공개 API에 포함하지 않는다.
+
+**필요한 이유:** 새 업장 신청은 승인 전까지 업장이 없어 `menu_imports`(`bar_id` NOT NULL)를 만들 수 없다. 그래서 승인 전 사진은 신청에 묶어 두고, 승인할 때 업장이 정해지면 작업으로 옮긴다.
+
+### 5.6 bar_weekly_hours
+
+**역할:** 업장의 요일별 정규 영업시간을 저장한다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `bar_id` | `uuid`, NOT NULL, FK → `bars.id`, PK 일부 | 관악 위스키 바 ID | |
+| `day_of_week` | `smallint`, NOT NULL, PK 일부, CHECK 1~7 | `5` | ISO 8601 요일 번호(1 = 월요일). |
+| `is_closed` | `boolean`, NOT NULL | `false` | 정기 휴무일이면 `true`다. |
+| `open_time` | `time`, nullable | `18:00` | 영업 시작. 서울 현지 시각이며 5분 단위다. |
+| `close_time` | `time`, nullable | `02:00` | 영업 종료. `open_time`보다 이르면 다음 날 끝난다(자정 넘김). |
+
+**핵심 제약:**
+
+- 기본 키는 (`bar_id`, `day_of_week`)라서 요일마다 한 행, 영업 구간도 하나다.
+- `is_closed = true`이면 `open_time`, `close_time`이 모두 `null`이고, `false`이면 둘 다 값이 있고 서로 다르다.
+- 행이 없는 요일은 영업시간 정보가 없는 것이며 정기 휴무와 다르다.
+- 업장 수정(API 명세 3.7)의 `weeklyHours`로 업장의 행 전체를 한 번에 바꾼다.
+
+**필요한 이유:** 고객 화면이 영업 상태를 계산하려면(API 명세 3.15.5) 요일별 시각을 구조화된 값으로 가져야 한다. 요일을 행으로 나누면 CHECK 제약으로 규칙을 지킬 수 있다.
+
+### 5.7 bar_operating_exceptions
+
+**역할:** 정규 영업시간 대신 적용하는 임시 휴무나 오늘만의 영업시간 변경을 저장한다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | | |
+| `bar_id` | `uuid`, NOT NULL, UNIQUE, FK → `bars.id` | 관악 위스키 바 ID | 업장마다 하나만 있다. |
+| `kind` | `operating_exception_kind`, NOT NULL | `vacation` | 4.18 |
+| `start_date` | `date`, NOT NULL | `2026-11-10` | 서울 현지 날짜. `closed_today`와 `custom_hours`는 적용한 날이다. |
+| `end_date` | `date`, NOT NULL | `2026-11-12` | `start_date` 이후다. `vacation`이 아니면 `start_date`와 같다. |
+| `open_time`, `close_time` | `time`, nullable | `20:00`, `01:00` | `custom_hours`에서만 값이 있고 필수다. `close_time`이 더 이르면 다음 날 끝난다. |
+| `note` | `varchar(100)`, nullable | `내부 사정으로 늦게 엽니다` | 고객 안내 문구다. 앞뒤 공백을 지운 한 줄이며 공백뿐이면 `null`이다. |
+| `created_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 누가 적용했는지 남긴다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
+| `created_at` | `timestamptz`, NOT NULL | `2026-11-02T03:00:00Z` | 적용 시각이다. |
+
+**핵심 제약:**
+
+- 업장마다 최대 한 행(`bar_id` UNIQUE)이다. 새로 적용하면 기존 행을 바꾸고, 취소하면 지운다(API 명세 3.15.2, 3.15.3).
+- 끝난 행을 지우는 배치 작업은 없다. API는 `end_date` 다음 날까지 응답에 남기고(그날 새벽의 영업 상태 계산에 필요), 그 뒤에는 숨긴다(API 명세 3.15.4).
+
+**필요한 이유:** 관리 홈의 빠른 변경은 정규 영업시간을 건드리지 않고 정해진 날짜에만 적용되어야 하며, 날짜가 지나면 정규 영업시간으로 자동으로 돌아가야 한다.
+
+### 5.8 bar_photos
+
+**역할:** 고객 업장 상세에 보여 줄 매장 사진의 저장소 위치와 순서를 저장한다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 사진 ID | 공개 경로 `GET /api/bar-photos/{photoId}`의 ID다. |
+| `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | |
+| `storage_key` | `varchar(500)`, NOT NULL | `bars/2222.../photos/1212....jpg` | 서버가 다시 인코딩한 사진의 저장소 위치다. 메타데이터를 뺀 JPEG이며, 받은 원본은 저장하지 않는다. |
+| `thumbnail_storage_key` | `varchar(500)`, NOT NULL | `bars/2222.../photos/1212...-thumb.jpg` | 긴 변 480px 썸네일의 저장소 위치다. 업장 목록 API의 `coverThumbnailUrl`과 격자 화면이 쓴다. |
+| `content_sha256` | `char(64)`, NOT NULL | SHA-256 16진수 문자열 | 업로드한 원본 바이트의 SHA-256이다(다시 인코딩한 파일이 아니다). 같은 사진을 두 번 올리지 않게 막고, 응답을 받지 못해 다시 보낸 업로드도 이 값으로 걸러진다. |
+| `sort_order` | `smallint`, NOT NULL | `1` | 표시 순서이며 1이 대표 사진이다. 업장 안에서 1부터 빈틈없이 이어진다. |
+| `uploaded_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 누가 올렸는지 남긴다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
+| `created_at` | `timestamptz`, NOT NULL | `2026-11-02T03:00:00Z` | 올린 시각이다. |
+
+**핵심 제약:**
+
+- 업장당 최대 15장이고, 사진당 2MB 이하, 긴 변 2048px 이하다(API가 확인). 추가, 삭제, 순서 변경은 업장 행을 잠그고 처리해 장수와 순서를 지킨다.
+- (`bar_id`, `content_sha256`)은 unique다.
+- (`bar_id`, `sort_order`)도 unique라서 대표 사진(`sort_order = 1`)은 업장마다 하나뿐이다. 순서 변경이 한 트랜잭션 안에서 자리를 맞바꿀 수 있도록 커밋 때 검사하는(DEFERRABLE) 제약으로 만든다.
+- 대표 여부는 따로 저장하지 않고 `sort_order = 1`로 정한다. 업장 목록 API는 업장마다 이 행을 (`bar_id`, `sort_order`) 인덱스로 찾아 썸네일을 `coverThumbnailUrl`로 준다.
+- 삭제하면 행을 지운 뒤 DB 커밋 다음에 저장소의 두 파일(사진과 썸네일)을 지운다. 파일 삭제가 실패하면 로그만 남긴다.
+- 공개되는 파일에는 메타데이터(EXIF, XMP, GPS 좌표, 촬영 시각, 기기 정보)가 없다. 서버가 업로드마다 디코딩해 JPEG로 다시 인코딩하기 때문이다.
+- 저장소는 공개하지 않는다. API가 파일을 읽어 고정 URL로 전달하므로, 메뉴판 사진의 서명 URL과 달리 만료되지 않는다. 지운 사진이 오래 남지 않도록 캐시는 1일이다.
+
+**필요한 이유:** 메뉴판 사진(`menu_images`)은 AI 처리와 검수용이라 공개하지 않는다. 고객에게 보여 줄 사진은 공개 범위, 순서, 삭제 규칙이 달라 따로 저장한다.
+
 ## 6 Product Catalog
 
 ### 6.1 brands
@@ -330,10 +449,11 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 |---|---|---|---|
 | `id` | `uuid`, PK | 브랜드 Deanston의 ID | 상품이 브랜드명을 문자열로 반복하지 않고 같은 브랜드를 참조하게 한다. |
 | `canonical_name` | `varchar(120)`, NOT NULL, UNIQUE | `Deanston` | 운영자가 선택한 대표 브랜드명이다. 중복 브랜드 생성을 방지한다. |
+| `created_by_user_id` | `uuid`, nullable, FK → `users.id` | 브랜드를 만든 업주의 사용자 ID | 검수나 메뉴 직접 추가에서 브랜드를 만든 사용자다. 운영 대시보드에서 업주가 만든 카탈로그를 확인하는 데 쓴다. 시드로 넣은 브랜드는 null이다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:20:00Z` | 브랜드 등록 시점이다. |
 | `updated_at` | `timestamptz`, NOT NULL | `2026-09-28T03:20:00Z` | 대표명 등 최종 수정 시점이다. |
 
-**필요한 이유:** AI가 `Deanston`과 `딘스톤`을 같은 브랜드로 정규화한 뒤 연수 에디션을 비교하도록 만든다. MVP에서는 브랜드 최초 등록자를 별도로 추적하지 않는다.
+**필요한 이유:** AI가 `Deanston`과 `딘스톤`을 같은 브랜드로 정규화한 뒤 연수 에디션을 비교하도록 만든다.
 
 ### 6.2 brand_aliases
 
@@ -366,13 +486,14 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `edition_name` | `varchar(150)`, nullable | `Virgin Oak` | 같은 브랜드와 연수여도 다른 에디션을 구분한다. |
 | `abv` | `decimal(5,2)`, nullable | `46.30` | 상품 상세에 사용할 수 있는 도수다. MVP 병합의 핵심 키는 아니다. |
 | `is_active` | `boolean`, NOT NULL, 기본 true | `true` | 잘못 등록되거나 더 이상 사용할 수 없는 상품을 삭제하지 않고 비활성화한다. |
-| `created_from_extracted_item_id` | `uuid`, nullable, FK → `extracted_items.id` | 미등록 상품을 처음 발견한 추출 항목 ID | 메뉴 검수 중 새 상품 생성을 촉발한 원본 이미지와 AI 결과를 찾아가기 위한 출처다. 사전 등록하거나 운영자가 직접 추가한 상품은 null이다. |
+| `created_from_extracted_item_id` | `uuid`, nullable, FK → `extracted_items.id` | 미등록 상품을 처음 발견한 추출 항목 ID | 메뉴 검수 중 새 상품 생성을 촉발한 원본 이미지와 AI 결과를 찾아가기 위한 출처다. 사전 등록한 상품과 메뉴 직접 추가(API 명세 3.14.3)로 만든 상품은 null이다. |
+| `created_by_user_id` | `uuid`, nullable, FK → `users.id` | 상품을 만든 업주의 사용자 ID | 검수나 메뉴 직접 추가에서 상품을 만든 사용자다. 운영 대시보드에서 업주가 만든 상품을 골라 확인하는 데 쓴다. 시드로 넣은 상품은 null이다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:30:00Z` | 상품 등록 시점이다. |
 | `updated_at` | `timestamptz`, NOT NULL | `2026-09-28T03:35:00Z` | 상품 정보 최종 수정 시점이다. |
 
 **핵심 원칙:** 브랜드 연수 에디션이 충돌하면 자동 병합하지 않는다. `brand_id + age_years + edition_name`은 후보 생성에 사용하지만 강제 unique 키로 사용하지 않는다.
 
-`created_from_extracted_item_id`는 상품의 생성 출처를 나타내는 선택적 provenance 필드다. 예를 들어 AI가 메뉴 사진에서 기존 카탈로그에 없는 `Deanston Virgin Oak`를 추출하고 운영자가 검수 중 새 상품으로 등록하면, 그때의 `extracted_items.id`를 저장한다. 이 연결을 따라가면 원본 메뉴 이미지, 사용한 모델과 파이프라인, AI 원문, 운영자의 교정 결과를 확인할 수 있다. 이후 다른 메뉴에서 같은 상품이 다시 발견되더라도 이 값은 바꾸지 않으며, 모든 출현 기록을 모으는 용도로 사용하지 않는다. 상품 최초 등록자는 별도 컬럼으로 추적하지 않는다.
+`created_from_extracted_item_id`는 상품의 생성 출처를 나타내는 선택적 provenance 필드다. 예를 들어 AI가 메뉴 사진에서 기존 카탈로그에 없는 `Deanston Virgin Oak`를 추출하고 운영자가 검수 중 새 상품으로 등록하면, 그때의 `extracted_items.id`를 저장한다. 이 연결을 따라가면 원본 메뉴 이미지, 사용한 모델과 파이프라인, AI 원문, 운영자의 교정 결과를 확인할 수 있다. 이후 다른 메뉴에서 같은 상품이 다시 발견되더라도 이 값은 바꾸지 않으며, 모든 출현 기록을 모으는 용도로 사용하지 않는다. 상품을 처음 만든 사용자는 `created_by_user_id`에 남는다.
 
 ### 6.4 product_aliases
 
@@ -401,9 +522,10 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `id` | `uuid`, PK | A바의 Deanston 12 항목 ID | 업장과 상품 조합을 다른 테이블에서 안정적으로 참조한다. |
 | `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | 어느 업장의 항목인지 나타낸다. |
 | `product_id` | `uuid`, NOT NULL, FK → `products.id` | Deanston 12 상품 ID | 어떤 정규 상품인지 나타낸다. |
+| `sold_out_at` | `timestamptz`, nullable | `2026-11-02T12:00:00Z` | 품절로 표시한 시각이다. `null`이면 판매 중이다(API 명세 3.14.8). 품절 항목은 메뉴판에 남지만 손님의 업장 메뉴와 고객 검색에서는 빠지고, 업주와 운영자에게만 품절로 보인다. 항목이 현재 메뉴판에서 빠지면 `null`로 되돌려, 다시 추가했을 때 판매 중으로 시작한다. 메뉴판을 다시 써도 이 행은 남으므로 품절을 여기에 저장한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T04:30:00Z` | 업장 메뉴 항목 최초 생성 시점이다. |
 
-**핵심 원칙:** `(bar_id, product_id)`는 unique다. 현재 메뉴판에서 빠져도 행은 삭제하지 않는다. 현재 `menu_board_entries`에 연결되면 노출되고 연결되지 않으면 보관된 상태로 본다.
+**핵심 원칙:** `(bar_id, product_id)`는 unique다. 현재 메뉴판에서 빠져도 행은 삭제하지 않는다. 현재 `menu_board_entries`에 연결되면 메뉴판에 있는 것이고, 연결되지 않으면 보관된 상태로 본다. 메뉴판에 있는 항목도 품절(`sold_out_at`)이면 손님에게는 보이지 않고 업주와 운영자에게만 보인다(API 명세 3.14.8).
 
 **필요한 이유:** 메뉴판을 교체할 때마다 같은 업장 상품 행을 새로 만들지 않고 과거에 취급했던 항목을 재사용한다.
 
@@ -415,8 +537,11 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 |---|---|---|---|
 | `id` | `uuid`, PK | 현재 메뉴판 ID | 메뉴판 구성 항목들을 하나로 묶는다. |
 | `bar_id` | `uuid`, NOT NULL, UNIQUE, FK → `bars.id` | 관악 위스키 바 ID | 업장당 현재 메뉴판 하나를 보장한다. |
-| `last_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 마지막 일부 수정 작업 ID | 여러 부분 수정이 누적될 수 있으므로 가장 최근 반영 작업을 기록한다. |
-| `published_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 고객에게 보여줄 메뉴 최종 업데이트 날짜다. 검색 결과의 최신성 표시에 사용한다. |
+| `last_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 마지막 일부 수정 작업 ID | 여러 부분 수정이 누적될 수 있으므로 가장 최근 반영 작업을 기록한다. 메뉴 직접 편집은 이 값을 바꾸지 않는다. |
+| `version` | `integer`, NOT NULL, 기본 1 | `4` | 메뉴판 버전이다. 검수 반영과 직접 편집이 성공할 때마다 1씩 올린다. 직접 편집은 요청의 버전과 이 값이 다르면 거부해, 다른 사람의 변경을 덮어쓰지 않게 한다(API 명세 3.14.1). |
+| `published_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 고객에게 보여줄 메뉴 최종 업데이트 날짜다. 검수 반영과 직접 편집 모두 갱신한다. 검색 결과의 최신성 표시에 사용한다. 품절 표시와 판매 정보 확인은 바꾸지 않는다. 업장 행을 잠근 뒤의 실제 시각(`clock_timestamp()`)으로 찍어, 먼저 기록된 `confirmed_at`보다 이르게 찍히지 않게 한다(API 명세 3.14.1). |
+| `confirmed_at` | `timestamptz`, nullable | `2026-10-20T02:30:00Z` | 업주나 운영자가 "지금도 맞아요"로 판매 정보가 맞다고 마지막으로 확인한 시각이다(API 명세 3.14.9). 메뉴를 바꾸지 않으며 `version`도 올리지 않는다. 검수 반영이나 직접 편집으로 바뀌지 않는다. 업주 화면은 `published_at`과 이 값 중 늦은 시각을 "최근 갱신"으로 보여 준다. 고객 화면에는 나오지 않는다. |
+| `confirmed_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 확인한 사용자다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
 
 **필요한 이유:** 업장 메뉴 항목들의 현재 노출 묶음과 게시 메타데이터를 한 곳에서 관리한다.
 
@@ -443,16 +568,60 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 |---|---|---|---|
 | `id` | `uuid`, PK | 판매 옵션 ID | 같은 술의 여러 옵션을 개별 식별한다. |
 | `menu_board_entry_id` | `uuid`, NOT NULL, FK → `menu_board_entries.id` | Deanston 12 메뉴판 구성 ID | 어느 술의 판매 옵션인지 연결한다. |
-| `source_extracted_option_id` | `uuid`, nullable, FK → `extracted_options.id` | 30ml 가격을 추출한 옵션 ID | 어떤 AI 추출 옵션과 검수에서 게시 옵션이 만들어졌는지 추적한다. 수동 입력은 null일 수 있다. |
+| `source_extracted_option_id` | `uuid`, nullable, FK → `extracted_options.id` | 30ml 가격을 추출한 옵션 ID | 어떤 AI 추출 옵션과 검수에서 게시 옵션이 만들어졌는지 추적한다. 메뉴 직접 편집으로 입력한 옵션은 null이다. |
 | `option_label` | `varchar(100)`, nullable | `Large` | ml로 표현되지 않는 실제 메뉴의 옵션명을 보존한다. |
 | `pour_ml` | `smallint`, nullable | `30` | 제공 용량이다. 메뉴에 용량이 없으면 null이다. |
-| `price_krw` | `integer`, NOT NULL | `15000` | 고객 검색 결과에 표시할 원화 가격이다. |
+| `price_krw` | `integer`, NOT NULL | `15000` | 고객 검색 결과에 표시할 원화 정가다. 할인 중에도 정가를 저장한다. |
+| `discount_price_krw` | `integer`, nullable | `12000` | 기간 할인가다. 1 이상이고 `price_krw`보다 낮다. 할인이 없으면 null이다. |
+| `discount_starts_at`, `discount_ends_at` | `timestamptz`, nullable | `2026-11-01T09:00:00Z`, `2026-11-15T15:00:00Z` | 할인 기간이다. 시작 이상 종료 미만 동안 할인가로 판다. 할인가와 함께 셋 다 값이 있거나 셋 다 null이다. |
 | `sort_order` | `smallint`, NOT NULL | `2` | 한 술 안에서 옵션 표시 순서를 정한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T04:31:00Z` | 옵션 생성 시점이다. |
 
 **예시:** Deanston 12의 `menu_board_entries` 한 행 아래에 `15ml / 8,000원`과 `30ml / 15,000원` 두 행이 존재한다.
 
 **핵심 제약:** 한 메뉴판 구성 안에서 옵션 순서가 중복되지 않는다. 각 노출 항목에 옵션이 최소 하나 존재한다는 규칙은 애플리케이션 또는 최종 DDL에서 보장해야 한다.
+
+**할인 유지:** 옵션은 메뉴판을 게시할 때마다 새로 쓰므로 할인이 옵션 행과 함께 사라질 수 있다. 검수 반영은 표기, 용량, 정가가 모두 같은 새 옵션에 할인을 옮기고, 정가가 바뀌거나 옵션이 없어지면 할인을 버린다(API 명세 8.7). 직접 수정(API 명세 3.14.4)은 요청에 담긴 할인을 그대로 저장한다. 직접 추가, 수정, 삭제는 요청 대상이 아닌 항목의 옵션과 할인을 바꾸지 않으므로, 메뉴판을 다시 쓰는 방식으로 구현하면 다른 항목의 할인도 새 옵션에 그대로 옮겨야 한다(API 명세 3.14.1). 끝난 할인을 지우는 배치 작업은 없으며 API가 응답에서 뺀다.
+
+### 7.5 product_search_counts
+
+**역할:** 고객 상품 검색(API 명세 3.10) 중 상품 하나로 해석된 검색을 서울 날짜, 상품, 출처별로 센다. "요즘 많이 찾는 위스키"(API 명세 3.17)의 순위에 쓴다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `search_date` | `date`, NOT NULL | `2026-11-02` | 검색한 서울 날짜다. 시각은 남기지 않는다. 순위는 오늘을 포함한 30일만 더한다. |
+| `product_id` | `uuid`, NOT NULL | Glenfiddich 12 | 검색된 상품이다. 상품이 바뀌어도 집계가 남도록 외래키를 두지 않는다. |
+| `source` | `search_source`, NOT NULL | `popular` | 검색을 시작한 곳이다(4.19). 지금은 순위에서 구분하지 않지만, 카드를 누른 검색이 순위를 굳히면 `popular`를 빼고 더할 수 있게 남긴다. |
+| `search_count` | `integer`, NOT NULL | `12` | 그날 그 상품과 출처의 검색 수다. 1 이상이다. |
+
+**핵심 제약:**
+
+- PK는 (`search_date`, `product_id`, `source`)다. 검색마다 행을 만들지 않고 이 행의 `search_count`를 1 올린다(없으면 1로 만든다).
+- `productId` 검색으로 상품을 찾았거나, `alias_exact`로 상품이 정확히 하나 일치한 검색만 센다. 브랜드, 부분 일치, 여러 상품이 일치한 검색은 세지 않는다.
+- 검색어, 시각, 위치, 사용자 ID, IP 주소, 기기 정보, token은 남기지 않는다.
+- 90일이 지난 행은 지운다. 오늘을 포함한 서울 날짜 90일의 행만 남긴다. 배치 작업은 두지 않고, 검색 집계가 이 테이블에 새 행을 만들 때 같은 트랜잭션에서 지운다. 검색이 없는 날에는 지우지 않으며 다음에 새 행을 만들 때 함께 지운다. 순위(API 명세 3.17.2)는 날짜로 30일만 더하므로 지우기 전의 행이 순위를 바꾸지 않는다.
+
+**필요한 이유:** 인기 순위는 실제로 많이 검색된 상품이어야 하는데, 지금은 검색 기록이 어디에도 남지 않는다. 검색 한 번을 한 행으로 남기면 공개 API 호출만으로 행이 끝없이 늘고 개인을 알 수 있는 검색어가 쌓일 수 있으므로, 순위에 필요한 날짜별 숫자만 남긴다.
+
+### 7.6 unmatched_search_queries
+
+**역할:** 상품을 찾지 못한 검색어(`matchType = none`)를 서울 날짜별로 센다. 카탈로그에 빠진 상품이나 별칭을 찾는 데 쓴다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `search_date` | `date`, NOT NULL | `2026-11-02` | 검색한 서울 날짜다. |
+| `normalized_query` | `varchar(200)`, NOT NULL | `카발란솔리스트` | 공통 정규화를 거친 검색어다. 사용자가 입력한 원문은 남기지 않는다. |
+| `search_count` | `integer`, NOT NULL | `3` | 그날 그 검색어의 검색 수다. 1 이상이다. |
+
+**핵심 제약:**
+
+- PK는 (`search_date`, `normalized_query`)다.
+- 원문에 `@`가 있거나, 정규화한 검색어에서 `-`와 `.`을 뺀 값에 숫자가 7개 이상 이어지면 남기지 않는다. 이메일과 전화번호를 거르기 위해서다.
+- 정규화하면 200자를 넘는 검색어(NFKC 정규화로 길어진 경우)는 컬럼에 들어가지 않으므로 남기지 않는다.
+- 한 날짜에 새로 만드는 행은 1,000개까지다. 그 뒤로는 이미 있는 행만 센다. 공개 API를 반복 호출해도 행 수에 상한이 있다. 새 행을 만드는 검색만 트랜잭션 advisory lock을 잡고 그날의 행 수를 센 뒤 만들므로, 동시에 검색해도 1,000개를 넘지 않는다.
+- 30일이 지난 행은 지운다. 오늘을 포함한 서울 날짜 30일의 행만 남기며, `product_search_counts`처럼 새 행을 만들 때 같은 트랜잭션에서 지운다. 조회 API는 없고 팀원이 데이터베이스에서 직접 본다.
+
+**필요한 이유:** 고객이 찾았지만 카탈로그에 없는 위스키를 알아야 별칭과 상품을 보완할 수 있다. 검색어는 개인정보가 섞일 수 있는 유일한 값이므로 거르는 규칙, 행 수 상한, 짧은 보관 기간을 함께 둔다.
 
 ## 8 AI Menu Import
 
@@ -471,12 +640,15 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `review_version` | `integer`, NOT NULL, 기본 `0` | `3` | 통합 검수 응답을 다시 생성할 때 증가한다. 운영자가 본 버전과 제출 시점의 버전을 비교해 오래된 화면에서의 반영을 막는다. |
 | `owner_note` | `text`, nullable | `업장 허가 후 9월 메뉴 촬영` | 업장 허가 출처 특이사항 등의 운영 메모다. 현재 이름은 향후 업주 흐름을 고려한 표현이다. |
 | `review_confirmed_at` | `timestamptz`, nullable | `2026-09-28T04:30:00Z` | 항목·옵션·상품 매칭·신규 등록 제안·메뉴 diff를 한 번에 최종 승인한 시점이다. |
+| `recovery_count` | `smallint`, NOT NULL, 기본 `0` | `1` | 서버 재시작으로 끊긴 처리를 이어서 처리한 횟수다. 3번을 넘으면 더 이어서 처리하지 않고 `failed`로 바꾼다. 특정 사진 때문에 재시작이 반복되는 것을 막는다. 0 이상이어야 한다(CHECK). |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:40:00Z` | 등록 작업 시작 시점이다. |
 | `completed_at` | `timestamptz`, nullable | `2026-09-28T04:31:00Z` | 작업이 최종 상태(`applied`, `failed`, `canceled`)가 된 시점이다. 진행 중이면 null이다. |
 
 **필요한 이유:** 이미지 한 장이나 추출 항목 하나만으로는 전체 교체 일부 수정 최종 승인 상태를 표현할 수 없으므로 작업 단위가 필요하다.
 
 프론트엔드는 메뉴 등록을 시작할 때마다 새로운 `idempotency_key`를 생성해 요청 헤더로 보낸다. 백엔드는 `barId`, `mode`, `ownerNote`, 이미지 순서, 각 이미지 원본 바이트의 SHA-256을 안정적인 형식으로 조합하고 다시 SHA-256을 적용해 `request_fingerprint`를 계산한다. multipart boundary, 임시 URL, 업로드 시각처럼 재시도마다 달라질 수 있는 값은 계산에서 제외한다.
+
+업주 신청 승인으로 만든 작업(3.4)은 `idempotency_key = owner-application:<신청 ID>`로 저장한다. 신청 하나는 한 번만 승인되므로 키가 겹치지 않는다. `request_fingerprint`는 같은 공식으로 계산하되 `ownerNote`는 `null`이고, 이미지 해시는 `bar_owner_application_menu_images.content_sha256`을 쓴다. `menu_images`는 신청 사진과 같은 `storage_key`, `original_filename`, `image_order`로 만든다.
 
 같은 키가 다시 들어오면 새 요청의 fingerprint를 기존 행과 비교한다. fingerprint도 같으면 새 `menu_imports`, `menu_images`, `extraction_runs`를 만들지 않고 기존 작업을 반환한다. fingerprint가 다르면 프론트엔드가 하나의 키를 서로 다른 요청에 재사용한 것이므로 `409 Conflict`로 거부한다. 다른 키에 같은 fingerprint가 들어온 경우에는 별개의 명시적 등록 요청으로 허용한다.
 
@@ -734,6 +906,10 @@ A와 C는 사진에 없어도 remove 후보가 되지 않으며 현재 메뉴판
 | `users` | `bar_owner_applications` | 1:N | 한 사용자가 여러 업주 신청을 낼 수 있다. |
 | `bars` | `bar_owner_applications` | 1:N | 한 업장에 여러 사용자가 신청할 수 있다. 새 업장 신청은 승인 전까지 업장이 없다. |
 | `bar_owner_applications` | `bar_owners` | 1:0..1 | 승인된 신청 하나가 업주 관계 하나를 만든다. |
+| `bar_owner_applications` | `bar_owner_application_menu_images` | 1:N | 한 신청에 메뉴판 사진 여러 장을 첨부할 수 있다. 승인하면 첫 메뉴 등록 작업의 사진이 된다. |
+| `bars` | `bar_weekly_hours` | 1:0..7 | 요일마다 정규 영업시간이 최대 하나다. |
+| `bars` | `bar_operating_exceptions` | 1:0..1 | 업장에는 임시 휴무가 없거나 하나만 있다. |
+| `bars` | `bar_photos` | 1:N | 업장 하나에 매장 사진이 최대 15장이다. |
 | `bars` + `users` | `bar_owners` | N:M 해소 | 한 사용자는 여러 업장의 업주가 될 수 있고, 한 업장에는 현재 업주가 최대 한 명이다. |
 | `bars` | `menu_imports` | 1:N | 한 업장에 여러 메뉴 등록 작업이 누적된다. |
 | `menu_imports` | `menu_images` | 1:N | 한 번의 등록에 여러 사진을 올릴 수 있다. |
@@ -768,14 +944,23 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 노출되는 `menu_board_entries`에는 `menu_entry_options`가 최소 하나 있어야 한다.
 - 전체 교체 또는 일부 수정의 적용은 트랜잭션으로 처리해 메뉴판이 중간 상태로 노출되지 않게 한다.
 - 최종 확정은 신규 브랜드·상품 중복 재검사와 생성, 추출 결과 확정, diff 재계산, 현재 메뉴판 반영을 모두 포함한 하나의 `SERIALIZABLE` 트랜잭션으로 실행한다. 직렬화 충돌이면 전체를 롤백하고 처음부터 최대 3회 재시도한다. AI 호출과 객체 저장소 작업 같은 외부 부수 효과는 재시도될 수 있는 이 트랜잭션 안에서 실행하지 않는다.
+- `product_search_counts`는 90일, `unmatched_search_queries`는 30일이 지난 행을 지운다. 두 테이블에는 검색 시각, 위치, 사용자, IP, 기기 정보 컬럼을 두지 않는다. `unmatched_search_queries`는 한 날짜에 새 행을 1,000개까지만 만든다.
+- 메뉴판이나 메뉴 항목을 바꾸거나 그 상태를 확인해 기록하는 요청(등록 작업 생성, 검수 반영, 직접 편집, 품절 표시, 판매 정보 확인)은 모두 먼저 같은 `bars` 행을 `FOR UPDATE`로 잠그고 차례로 처리한다(API 명세 3.14.1). 잠그는 순서는 `bars` 다음 `menu_imports`다.
 - 한 업장에는 `uploaded`, `processing`, `ready_for_review` 상태의 `menu_imports`가 동시에 하나만 존재해야 한다. PostgreSQL 부분 unique 인덱스와 업장 행 잠금·트랜잭션 검사를 함께 사용해 보장한다.
 - 한 업장에는 `revoked_at IS NULL`인 `bar_owners`가 최대 하나여야 한다. PostgreSQL 부분 unique 인덱스로 보장한다.
 - 한 사용자는 같은 업장에 `status = pending`인 `existing_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending' AND application_type = 'existing_bar'`)로 보장한다.
 - 한 사용자는 같은 사업자등록번호로 `status = pending`인 `new_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `business_registration_number` WHERE `status = 'pending' AND application_type = 'new_bar'`)로 보장한다.
 - `bar_owner_applications.business_registration_number`는 숫자 10자리여야 한다.
+- `bars.tags`는 5개 이하여야 한다(`cardinality(tags) <= 5`).
+- `bar_weekly_hours.day_of_week`는 1부터 7이고, `is_closed`이면 두 시각이 `null`, 아니면 둘 다 값이 있고 서로 달라야 한다.
+- `bar_operating_exceptions`는 `end_date >= start_date`이고, `vacation`이 아니면 두 날짜가 같으며, `custom_hours`일 때만 두 시각이 있고 서로 달라야 한다.
+- 한 업장의 `bar_photos`에서 `content_sha256`이 중복되지 않아야 한다. unique 인덱스(`bar_id`, `content_sha256`)로 보장한다.
+- `menu_entry_options`의 할인 세 컬럼은 함께 값이 있거나 함께 null이고, `discount_price_krw`는 1 이상 `price_krw` 미만, `discount_ends_at`은 `discount_starts_at`보다 늦어야 한다.
+- 한 업장의 `bar_photos`에서 `sort_order`가 중복되지 않아야 한다. `DEFERRABLE INITIALLY DEFERRED` unique 제약(`bar_id`, `sort_order`)으로 보장한다.
+- 한 신청의 `bar_owner_application_menu_images`에서 `image_order`가 중복되지 않아야 한다. unique 인덱스(`application_id`, `image_order`)로 보장한다.
 - 외래키 삭제 정책은 이력 보존을 우선해 핵심 사용자 업장 상품 이미지에 `RESTRICT` 또는 soft delete를 검토한다.
 
-> **현재 구현과의 차이 (수정 예정):** 지금 Alembic 마이그레이션에는 업장 좌표 범위(`ck_bars_latitude_range`, `ck_bars_longitude_range`)를 제외한 위의 `CHECK` 제약과 부분 unique 인덱스가 없다. 그동안은 백엔드가 다음처럼 규칙을 지킨다. 위 제약을 추가하는 마이그레이션을 만들 예정이며, 그 전에 기존 데이터가 규칙을 어기지 않는지 확인한다.
+> **현재 구현과의 차이 (수정 예정):** 지금 Alembic 마이그레이션에는 업장 좌표 범위(`ck_bars_latitude_range`, `ck_bars_longitude_range`)와 `menu_entry_options`의 할인 제약(`ck_menu_entry_options_discount_*`)을 제외한 위의 `CHECK` 제약과 부분 unique 인덱스가 없다. 그동안은 백엔드가 다음처럼 규칙을 지킨다. 위 제약을 추가하는 마이그레이션을 만들 예정이며, 그 전에 기존 데이터가 규칙을 어기지 않는지 확인한다.
 >
 > - 가격·용량·연수·신뢰도·점수 범위: 요청 스키마와 추출 어댑터가 검사한다.
 > - `corrected_line_type`: 최초 분류와 같으면 백엔드가 `null`로 저장한다. `completed_at`은 백엔드가 항상 나중 시각으로 기록한다.

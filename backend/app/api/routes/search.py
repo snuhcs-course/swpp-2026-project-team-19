@@ -1,14 +1,28 @@
-from typing import Annotated
+from datetime import datetime, timezone
+from typing import Annotated, Literal
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_base_url
 from app.db.session import get_session
 from app.schemas.errors import error_responses
-from app.schemas.search import BarNamesResponse, MapBarsResponse, NearbyBarsResponse, SearchBarsResponse
+from app.models import SearchSource
+from app.schemas.search import (
+    BarNamesResponse,
+    MapBarsResponse,
+    NearbyBarsResponse,
+    PopularProductsResponse,
+    SearchBarsResponse,
+)
 from app.services.bar_name_search import DEFAULT_LIMIT, MAX_LIMIT, search_bar_names
 from app.services.map_bars import MAX_SPAN_DEGREES, find_map_bars
 from app.services.nearby_bars import DEFAULT_RADIUS_METERS, MAX_RADIUS_METERS, find_nearby_bars
+from app.services.popular_products import DEFAULT_LIMIT as POPULAR_DEFAULT_LIMIT
+from app.services.popular_products import MAX_LIMIT as POPULAR_MAX_LIMIT
+from app.services.popular_products import popular_products
+from app.services.request_limits import kst_date
 from app.services.search import search_bars
 
 router = APIRouter(prefix="/api/search", tags=["search"])
@@ -17,9 +31,11 @@ router = APIRouter(prefix="/api/search", tags=["search"])
 @router.get(
     "/bars",
     response_model=SearchBarsResponse,
-    summary="Bars currently selling the whisky a query names",
+    summary="Bars currently selling the whisky a query or a productId names",
     description=(
         "Public; no token is needed. The location is used only to compute distance and is not stored.\n\n"
+        "Send exactly one of `query` (the search box) and `productId` (a popular-whisky card, "
+        "`GET /api/search/popular-products`).\n\n"
         "**Query resolution.** The query is normalized with the same function used for catalog aliases "
         "(no embedding or LLM). Steps run in order and stop at the first that finds an active product:\n"
         "1. `brand`: a brand alias equals the query; all active products of that brand, even when a "
@@ -29,31 +45,98 @@ router = APIRouter(prefix="/api/search", tags=["search"])
         "3. `partial`: searchable product aliases containing the query; at most 10 products, "
         "those with the shortest matching alias first.\n"
         "4. `none`.\n\n"
-        "**Results.** One row per bar x product, for products on an active bar's current menu board. "
+        "A `productId` search skips these steps: `product` with that product when it is active, "
+        "otherwise `none` (also for an unknown id, never `404`). `query` is then null.\n\n"
+        "**Results.** One row per bar x product, for products on an active bar's current menu board and not sold out. "
         "Rows of products whose alias equals the query come first; within each group, sorted by "
         "`distanceMeters` when lat/lng are sent, otherwise by `menuUpdatedAt` (newest first); "
-        "ties by bar name, then product name. At most `limit` rows; `truncated` tells whether more matched.\n\n"
-        "**Empty results** are `200`: `matchedProducts: []` means the name was not recognized; "
-        "`items: []` with products means no bar currently sells them."
+        "ties by bar name, then product name. At most `limit` rows; `truncated` tells whether more matched. "
+        "`options[].discount` is the same as on the bar menu: only discounts that have not ended, and "
+        "`priceKrw` is always the list price.\n\n"
+        "**Empty results** are `200`: `matchedProducts: []` means the name was not recognized (or the "
+        "product of `productId` is gone); `items: []` with products means no bar currently sells them.\n\n"
+        "**Search counts.** A `200` search is counted per Seoul date for the popular whiskies: a `product` "
+        "search, or an `alias_exact` search with exactly one product, adds 1 for that product and `source`; "
+        "a `query` search with `none` adds 1 for the normalized query, unless it contains `@` or 7 or more "
+        "digits in a row. Nothing else is stored: no query text for found products, time of day, location, "
+        "user or token. A failed count does not fail the search. Calling again counts again, so show a "
+        "result already received instead of searching again."
     ),
     responses=error_responses(
         (
             422,
-            "`VALIDATION_FAILED` with one `fieldErrors` entry: `query` `MISSING`, `BLANK` (only spaces), "
-            "`STRING_TOO_LONG` (over 100 characters after trimming) or `NOT_SEARCHABLE` (nothing left "
-            "after normalization); `lat`/`lng` `LAT_LNG_REQUIRED_TOGETHER`, `GREATER_THAN_EQUAL` or "
-            "`LESS_THAN_EQUAL`; `limit` `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`.",
+            "`VALIDATION_FAILED`. Format and range errors come together: `productId` `UUID_PARSING`; "
+            "`source` `LITERAL_ERROR`; `lat`/`lng` `FLOAT_PARSING`, `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`; "
+            "`limit` `INT_PARSING`, `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`. Then one at a time: `productId` "
+            "`EXACTLY_ONE_REQUIRED` (both or neither of `query` and `productId`), `query` `BLANK` (only "
+            "spaces), `STRING_TOO_LONG` (over 100 characters after trimming), `lat`/`lng` "
+            "`LAT_LNG_REQUIRED_TOGETHER`, `query` `NOT_SEARCHABLE` (nothing left after normalization).",
         ),
     ),
 )
 def read_search_bars(
-    query: Annotated[str, Query(description="Whisky name; 1-100 characters after trimming")],
+    query: Annotated[
+        str | None, Query(description="Whisky name; 1-100 characters after trimming. Not with productId.")
+    ] = None,
+    product_id: Annotated[
+        UUID | None, Query(alias="productId", description="One product, from a popular-whisky card. Not with query.")
+    ] = None,
     lat: Annotated[float | None, Query(ge=-90, le=90, description="Customer latitude; send with lng")] = None,
     lng: Annotated[float | None, Query(ge=-180, le=180, description="Customer longitude; send with lat")] = None,
     limit: Annotated[int, Query(ge=1, le=100, description="Maximum number of result rows")] = 50,
+    source: Annotated[
+        Literal["input", "recent", "popular"],
+        Query(
+            description="Where the search started: the search box, a recent search, or a popular-whisky "
+            "card. Only for the search counts; the results do not depend on it."
+        ),
+    ] = "input",
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> SearchBarsResponse:
-    return search_bars(session, query, lat=lat, lng=lng, limit=limit)
+    return search_bars(
+        session,
+        query,
+        product_id=product_id,
+        lat=lat,
+        lng=lng,
+        limit=limit,
+        source=SearchSource(source),
+        base_url=base_url,
+    )
+
+
+@router.get(
+    "/popular-products",
+    response_model=PopularProductsResponse,
+    summary="The popular whiskies for the customer home screen",
+    description=(
+        "Public; the Authorization header is not read, so every caller gets the same result.\n\n"
+        "- Only active products that at least one active bar sells now, not sold out. `barCount` is the "
+        "number of those bars, the same bars a `productId` search shows.\n"
+        "- Products searched at least 3 times in the last 30 Seoul dates (today included, every `source`) "
+        "come first, most searched first; ties by `barCount` (most first), `displayName`, `productId`. "
+        "The rest of the list is filled with the other products by `barCount`, `displayName`, `productId`.\n"
+        "- Search counts are not sent.\n"
+        "- No product sold anywhere is `200` with `items: []`; hide the section then.\n"
+        "- Sent with `Cache-Control: public, max-age=600`."
+    ),
+    responses=error_responses(
+        (
+            422,
+            "`VALIDATION_FAILED`: `limit` `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL` or `INT_PARSING`.",
+        ),
+    ),
+)
+def read_popular_products(
+    response: Response,
+    limit: Annotated[
+        int, Query(ge=1, le=POPULAR_MAX_LIMIT, description="Maximum number of products")
+    ] = POPULAR_DEFAULT_LIMIT,
+    session: Session = Depends(get_session),
+) -> PopularProductsResponse:
+    response.headers["Cache-Control"] = "public, max-age=600"
+    return popular_products(session, kst_date(datetime.now(timezone.utc)), limit)
 
 
 @router.get(
@@ -87,8 +170,9 @@ def read_nearby_bars(
         int, Query(alias="radiusMeters", ge=1, le=MAX_RADIUS_METERS, description="Radius in meters")
     ] = DEFAULT_RADIUS_METERS,
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> NearbyBarsResponse:
-    return find_nearby_bars(session, lat, lng, radius_meters)
+    return find_nearby_bars(session, lat, lng, radius_meters, base_url=base_url)
 
 
 @router.get(
@@ -102,7 +186,7 @@ def read_nearby_bars(
         "It is not normalized: spaces count, and `%` and `_` are plain characters.\n"
         "- Only active bars, sorted by name (ties by `barId`), at most `limit`; `truncated` tells "
         "whether more matched. No paging.\n"
-        "- `hasOwner` is always false until bar owners exist (Iteration 3).\n"
+        "- `hasOwner` is true when the bar has a current owner; a pending application does not count.\n"
         "- No match is `200` with `items: []`."
     ),
     responses=error_responses(
@@ -118,8 +202,9 @@ def read_bar_names(
     query: Annotated[str, Query(description="Part of a bar name or address; 1-100 characters after trimming")],
     limit: Annotated[int, Query(ge=1, le=MAX_LIMIT, description="Maximum number of bars")] = DEFAULT_LIMIT,
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> BarNamesResponse:
-    return search_bar_names(session, query, limit)
+    return search_bar_names(session, query, limit, base_url=base_url)
 
 
 @router.get(
@@ -152,5 +237,6 @@ def read_map_bars(
     north: Annotated[float, Query(ge=-90, le=90, description="Northern edge latitude (WGS84)")],
     east: Annotated[float, Query(ge=-180, le=180, description="Eastern edge longitude (WGS84)")],
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> MapBarsResponse:
-    return find_map_bars(session, south, west, north, east)
+    return find_map_bars(session, south, west, north, east, base_url=base_url)

@@ -59,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -94,6 +95,11 @@ fun NearbyBarsScreen(
 ) {
     val context = LocalContext.current
     val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    fun dismissPlaceIme() {
+        focusManager.clearFocus()
+        keyboard?.hide()
+    }
     val lifecycle = LocalLifecycleOwner.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val origin by viewModel.origin.collectAsStateWithLifecycle()
@@ -122,6 +128,7 @@ fun NearbyBarsScreen(
     fun searchPlaces() {
         listVisible = false
         placeResultsVisible = true
+        focusManager.clearFocus()
         keyboard?.hide()
         placeSearchViewModel.search(placeQuery)
     }
@@ -131,6 +138,7 @@ fun NearbyBarsScreen(
             listVisible = false
             placeResultsVisible = false
             placeQuery = ""
+            focusManager.clearFocus()
             keyboard?.hide()
         }
     }
@@ -153,7 +161,7 @@ fun NearbyBarsScreen(
     BackHandler(enabled = !leaving && !placeResultsVisible, onBack = ::back)
     BackHandler(enabled = !leaving && placeResultsVisible) {
         placeResultsVisible = false
-        keyboard?.hide()
+        dismissPlaceIme()
     }
 
     fun updatePermissions() {
@@ -211,11 +219,13 @@ fun NearbyBarsScreen(
                     onMapViewportUnavailable = viewModel::onMapViewportUnavailable,
                     viewportRetryToken = viewportRetryToken,
                     onSelectBar = {
+                        dismissPlaceIme()
                         placeSearchViewModel.clear()
                         viewModel.selectBar(it)
                     },
                     onViewportChanged = { viewModel.onViewportChanged(it) },
                     recenterToken = recenterToken,
+                    onMapTouch = ::dismissPlaceIme,
                     onMapViewChanged = { attached ->
                         mapView = attached
                         if (leaving || listVisible) attached?.let(::hideNearbyNativeSurface)
@@ -270,8 +280,9 @@ fun NearbyBarsScreen(
                     NearbyFullList(
                         state = mapState,
                         bars = mapBars,
-                        onRetry = { viewportRetryToken++ },
+                        onRetry = { dismissPlaceIme(); viewportRetryToken++ },
                         onSelect = { barId ->
+                            dismissPlaceIme()
                             placeSearchViewModel.clear()
                             if (viewModel.selectBar(barId)) listVisible = false
                         },
@@ -329,7 +340,10 @@ fun NearbyBarsScreen(
                         }
                         if (selectedBar != null) {
                             Surface(
-                                onClick = { detail(selectedBar.barId) },
+                                onClick = {
+                                    dismissPlaceIme()
+                                    detail(selectedBar.barId)
+                                },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(18.dp),
                                 shadowElevation = 6.dp,
@@ -365,7 +379,7 @@ fun NearbyBarsScreen(
                 }
                 // Compact target-style location control near the bottom right.
                 Surface(
-                    onClick = { recenterToken++ },
+                    onClick = { dismissPlaceIme(); recenterToken++ },
                     modifier = Modifier.align(Alignment.BottomEnd)
                         .padding(end = 16.dp, bottom = 24.dp)
                         .size(52.dp),
@@ -382,7 +396,10 @@ fun NearbyBarsScreen(
 
             if (fix != null && !leaving) {
                 Surface(
-                    onClick = { listVisible = !listVisible },
+                    onClick = {
+                        dismissPlaceIme()
+                        listVisible = !listVisible
+                    },
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp),
                     shape = RoundedCornerShape(50.dp),
                     shadowElevation = 5.dp,

@@ -58,14 +58,16 @@ uv run --env-file .env alembic upgrade head
 
 Database tests are skipped unless `POSTGRES_TEST_DATABASE` (ending in `_test`) is set in `backend/.env`; a run with skipped database tests also drops below the coverage threshold. Tests always use the mock menu extractor and must never call the Gemini API or Supabase: auth tests sign their own tokens and serve the public keys from memory (the `supabase` fixture in `backend/tests/conftest.py`).
 
+Backend CI also fails when fewer tests ran than `min_tests` or a test was skipped that `allowed_skips` does not list (`backend/ci/test_policy.json`), and on a PR its report, posted as a PR comment, lists the tests the base has but the PR does not. To remove a test that is no longer needed, lower `min_tests` (or add the skip with a reason) in the same PR and say why in the PR description.
+
 ## API conventions (both sides)
 
-- JSON field names are `camelCase`. IDs are UUID strings, times are UTC RFC 3339 strings, prices are integer KRW, and a missing value is `null`, not an empty string.
+- JSON field names are `camelCase`. IDs are UUID strings, times are UTC RFC 3339 strings (except Seoul local opening hours and dates, `"HH:MM"` and `"YYYY-MM-DD"`, spec 3.15), prices are integer KRW, and a missing value is `null`, not an empty string.
 - Errors use one shape: `{"error": {"code", "message", ...}}`. Clients branch on `error.code`, not on the message text.
-- Auth is `Authorization: Bearer <token>` with a Supabase access token from Google login (spec 3.1). `POST /api/auth/temp-login` stays for local development, and for the demo server only until Google login works in the app. The backend accepts both kinds: Supabase tokens are verified with the project's public keys (`SUPABASE_URL`), and temp-login tokens only while `TEMP_AUTH_ENABLED=true`.
+- Auth is `Authorization: Bearer <token>` with a Supabase access token from Google login (spec 3.1). `POST /api/auth/temp-login` stays for local development only; the deployed server has it off (since 2026-11-02). The backend accepts both kinds: Supabase tokens are verified with the project's public keys (`SUPABASE_URL`), and temp-login tokens only while `TEMP_AUTH_ENABLED=true`.
 - Permissions come from the server, never from the client or the token's claims. A Supabase user's `users.user_type` (`customer` or `operator`) is read from the database on every request, and a user without a row is a customer; a temporary token takes its role from `TEMP_AUTH_USER_TYPE` on the server.
 - Being a bar owner is not a user type but a `bar_owners` row linking a user to one bar, created when an operator approves an owner application (spec 3.11).
-- Customer search (`GET /api/search/bars`), nearby bars (`GET /api/search/nearby-bars`), map bars (`GET /api/search/map-bars`), bar-name search (`GET /api/search/bar-names`), and bar menu (`GET /api/bars/{barId}/menu`) are public. Bar management, menu import, and review APIs are for operators and the bar's approved owner; the catalogue search APIs are for operators and owners. Approving owner applications is operator-only. The full table is in spec 2.2.
+- Customer search (`GET /api/search/bars`), nearby bars (`GET /api/search/nearby-bars`), map bars (`GET /api/search/map-bars`), bar-name search (`GET /api/search/bar-names`), popular whiskies (`GET /api/search/popular-products`), bar menu (`GET /api/bars/{barId}/menu`), and bar photo files (`GET /api/bar-photos/{photoId}` and its `/thumbnail`) are public. Bar management, menu import, and review APIs are for operators and the bar's approved owner; the catalogue search APIs are for operators and owners. Approving owner applications is operator-only. The full table is in spec 2.2.
 
 ## Android notes
 

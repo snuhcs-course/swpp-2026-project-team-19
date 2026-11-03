@@ -1,8 +1,8 @@
 """Accept a menu photo upload: validate, deduplicate retries, store images, and create the import rows.
 
-Order of checks: bar → image count, size and type → idempotency key → one unfinished import
-per bar (with the bar row locked) → store images → insert rows. Processing is scheduled by
-the caller after the commit.
+Order of checks: bar → image count, size and type → idempotency key → bar row lock → the bar
+and the caller again → one unfinished import per bar → store images → insert rows. Processing
+is scheduled by the caller after the commit.
 """
 
 import hashlib
@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.core.errors import ApiError
+from app.core.security import Principal
 from app.models import (
     Bar,
     BarStatus,
@@ -28,13 +29,16 @@ from app.models import (
     MenuImage,
     MenuImport,
 )
+from app.services.bar_access import can_manage_bar, forbidden
 from app.services.bar_menu import bar_not_found
 
 logger = logging.getLogger(__name__)
 
-MAX_IMAGES = 5
+MAX_IMAGES = 15
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
-MAX_TOTAL_BYTES = 30 * 1024 * 1024
+MAX_TOTAL_BYTES = 60 * 1024 * 1024
+# The original_filename columns are varchar(255); the name is only kept for reference, so a longer one is cut.
+MAX_FILENAME_LENGTH = 255
 UNFINISHED_STATUSES = (ImportStatus.UPLOADED, ImportStatus.PROCESSING, ImportStatus.READY_FOR_REVIEW)
 # Declared types that say nothing about the format, so only the detected type counts.
 _GENERIC_CONTENT_TYPES = {None, "", "application/octet-stream"}
@@ -48,7 +52,7 @@ class ImageUpload:
 
 
 @dataclass
-class _CheckedImage:
+class CheckedImage:
     filename: str | None
     data: bytes
     extension: str
@@ -86,11 +90,16 @@ def request_fingerprint(bar_id: UUID, mode: ImportMode, owner_note: str | None, 
     Values that differ between retries of the same request (multipart boundary, file names,
     upload time) are left out.
     """
+    return fingerprint_from_hashes(bar_id, mode, owner_note, [hashlib.sha256(data).hexdigest() for data in images])
+
+
+def fingerprint_from_hashes(bar_id: UUID, mode: ImportMode, owner_note: str | None, image_hashes: list[str]) -> str:
+    """`request_fingerprint` from the images' SHA-256 hex digests, for photos already stored."""
     canonical = {
         "barId": str(bar_id),
         "mode": mode.value,
         "ownerNote": owner_note,
-        "images": [hashlib.sha256(data).hexdigest() for data in images],
+        "images": image_hashes,
     }
     encoded = json.dumps(canonical, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
@@ -101,7 +110,9 @@ def _too_large(message: str) -> ApiError:
     return ApiError(413, "UPLOAD_TOO_LARGE", message, details=details)
 
 
-def _check_images(uploads: list[ImageUpload]) -> list[_CheckedImage]:
+def check_images(uploads: list[ImageUpload]) -> list[CheckedImage]:
+    """Read and check photos against the limits of spec 4.1. Shared with owner application menu photos
+    (spec 3.11.15), which follow the same limits."""
     if len(uploads) > MAX_IMAGES:
         raise _too_large(f"사진은 최대 {MAX_IMAGES}장까지 올릴 수 있습니다.")
     checked = []
@@ -122,8 +133,31 @@ def _check_images(uploads: list[ImageUpload]) -> list[_CheckedImage]:
                 "JPEG, PNG 사진만 올릴 수 있습니다.",
                 details={"imageOrder": order, "filename": upload.filename, "contentType": upload.content_type},
             )
-        checked.append(_CheckedImage(upload.filename, data, detected[0], detected[1]))
+        filename = upload.filename[:MAX_FILENAME_LENGTH] if upload.filename is not None else None
+        checked.append(CheckedImage(filename, data, detected[0], detected[1]))
     return checked
+
+
+def add_images(
+    session: Session, menu_import_id: UUID, images: list[tuple[str, str | None]], extractor: MenuExtractor
+) -> None:
+    """Add the import's image rows, (storage key, original file name) in display order, each with a
+    queued extraction run for `extractor`."""
+    for order, (key, filename) in enumerate(images, start=1):
+        menu_image = MenuImage(
+            menu_import_id=menu_import_id, storage_key=key, original_filename=filename, image_order=order
+        )
+        session.add(menu_image)
+        session.flush()
+        session.add(
+            ExtractionRun(
+                menu_image_id=menu_image.id,
+                approach=extractor.approach,
+                provider=extractor.provider,
+                model_name=extractor.model_name,
+                pipeline_version=extractor.pipeline_version,
+            )
+        )
 
 
 def _replay_or_reject(existing: MenuImport, fingerprint: str) -> MenuImport:
@@ -138,44 +172,12 @@ def _replay_or_reject(existing: MenuImport, fingerprint: str) -> MenuImport:
     return existing
 
 
-def _find_by_key(session: Session, idempotency_key: str) -> MenuImport | None:
-    return session.scalar(select(MenuImport).where(MenuImport.idempotency_key == idempotency_key))
-
-
-def create_menu_import(
-    session: Session,
-    storage: ImageStorage,
-    extractor: MenuExtractor,
-    *,
-    bar_id: str,
-    idempotency_key: str,
-    mode: ImportMode,
-    owner_note: str | None,
-    uploads: list[ImageUpload],
-) -> tuple[MenuImport, bool]:
-    """Returns the import and whether it was created now (False for a retried request)."""
-    try:
-        bar = session.get(Bar, UUID(bar_id))
-    except ValueError:
-        bar = None
-    if bar is None or bar.status != BarStatus.ACTIVE:
-        raise bar_not_found(bar_id)
-
-    # The API sends null, not an empty string, for "no value".
-    if owner_note is not None:
-        owner_note = owner_note.strip() or None
-    images = _check_images(uploads)
-    fingerprint = request_fingerprint(bar.id, mode, owner_note, [image.data for image in images])
-
-    existing = _find_by_key(session, idempotency_key)
-    if existing is not None:
-        return _replay_or_reject(existing, fingerprint), False
-
-    # Lock the bar so two uploads for it cannot both pass the unfinished-import check.
-    session.execute(select(Bar.id).where(Bar.id == bar.id).with_for_update())
+def check_no_unfinished_import(session: Session, bar_id: UUID) -> None:
+    """409 ACTIVE_IMPORT_EXISTS when the bar has an unfinished import. The caller holds the bar row lock,
+    so none can be created until it commits (spec 3.14.1)."""
     unfinished = session.scalar(
         select(MenuImport)
-        .where(MenuImport.bar_id == bar.id, MenuImport.status.in_(UNFINISHED_STATUSES))
+        .where(MenuImport.bar_id == bar_id, MenuImport.status.in_(UNFINISHED_STATUSES))
         .order_by(MenuImport.created_at.desc())
         .limit(1)
     )
@@ -186,6 +188,45 @@ def create_menu_import(
             "이 업장에 진행 중인 메뉴 등록 작업이 있습니다.",
             details={"menuImportId": str(unfinished.id), "status": unfinished.status.value},
         )
+
+
+def _find_by_key(session: Session, idempotency_key: str) -> MenuImport | None:
+    return session.scalar(select(MenuImport).where(MenuImport.idempotency_key == idempotency_key))
+
+
+def create_menu_import(
+    session: Session,
+    storage: ImageStorage,
+    extractor: MenuExtractor,
+    *,
+    principal: Principal,
+    bar: Bar,
+    idempotency_key: str,
+    mode: ImportMode,
+    owner_note: str | None,
+    uploads: list[ImageUpload],
+) -> tuple[MenuImport, bool]:
+    """Returns the import and whether it was created now (False for a retried request). The route
+    has checked that `bar` is active and that the caller may manage it."""
+    # The API sends null, not an empty string, for "no value".
+    if owner_note is not None:
+        owner_note = owner_note.strip() or None
+    images = check_images(uploads)
+    fingerprint = request_fingerprint(bar.id, mode, owner_note, [image.data for image in images])
+
+    existing = _find_by_key(session, idempotency_key)
+    if existing is not None:
+        return _replay_or_reject(existing, fingerprint), False
+
+    # Lock the bar so two uploads for it cannot both pass the unfinished-import check, and so the
+    # import is ordered with manual edits and review publishes (spec 3.14.1). The bar may have been
+    # deactivated, or the owner revoked, after the route checked them, so check both again.
+    status = session.scalar(select(Bar.status).where(Bar.id == bar.id).with_for_update())
+    if status != BarStatus.ACTIVE:
+        raise bar_not_found(str(bar.id))
+    if not can_manage_bar(session, principal, bar.id):
+        raise forbidden()
+    check_no_unfinished_import(session, bar.id)
 
     import_id = uuid4()
     keys = [f"menus/{bar.id}/{import_id}/page-{order}.{image.extension}" for order, image in enumerate(images, start=1)]
@@ -205,21 +246,7 @@ def create_menu_import(
             owner_note=owner_note,
         )
         session.add(menu_import)
-        for order, (key, image) in enumerate(zip(keys, images), start=1):
-            menu_image = MenuImage(
-                menu_import_id=import_id, storage_key=key, original_filename=image.filename, image_order=order
-            )
-            session.add(menu_image)
-            session.flush()
-            session.add(
-                ExtractionRun(
-                    menu_image_id=menu_image.id,
-                    approach=extractor.approach,
-                    provider=extractor.provider,
-                    model_name=extractor.model_name,
-                    pipeline_version=extractor.pipeline_version,
-                )
-            )
+        add_images(session, import_id, [(key, image.filename) for key, image in zip(keys, images)], extractor)
         session.commit()
     except Exception as error:
         # Storage and the database share no transaction: undo the stored images by hand.

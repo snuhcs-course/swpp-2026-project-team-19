@@ -48,7 +48,7 @@ TEMP_AUTH_USER_TYPE=operator \
 uv run uvicorn app.main:app --reload
 ```
 
-The role of a temporary token is `TEMP_AUTH_USER_TYPE` (`customer` or `operator`) at request time, so changing it applies to tokens already issued; the `user_type` claim in the token is ignored. The deployed server keeps temporary login on only until Google login works in the app. While it is on, the server logs a warning at start-up; [DEPLOY.md](DEPLOY.md#turning-off-temporary-login) describes how to turn it off.
+The role of a temporary token is `TEMP_AUTH_USER_TYPE` (`customer` or `operator`) at request time, so changing it applies to tokens already issued; the `user_type` claim in the token is ignored. The deployed server has temporary login off since 2026-11-02 and uses Google login only ([DEPLOY.md](DEPLOY.md#6-operations)). Whenever it is on, the server logs a warning at start-up.
 
 **Users and roles.** `GET /api/me` is the only API that creates users: the first call stores the token's subject as `users.auth_subject` with user type `customer` (a temporary user takes `TEMP_AUTH_USER_TYPE`), and later calls keep the email in step with the token. Operator routes (`require_operator`) read a Supabase user's role from `users.user_type` on every request; a user without a row is a customer. Token claims never grant a role.
 
@@ -196,6 +196,7 @@ Request and response details, error codes, and rules not covered by the API spec
 | `EXTRACTION_MAX_ATTEMPTS`, `EXTRACTION_REQUEST_TIMEOUT_S`, `EXTRACTION_WALL_TIMEOUT_S` | `6`, `300`, `330` | Optional retry and timeout settings for `gemini` (P14 values). |
 | `EXTRACTION_MODE` | `gemini` | With `MENU_EXTRACTOR=gemini`: `gemini` (photo only) or `hybrid` (CLOVA OCR lines + photo, frozen hybrid prompt v1; OCR line boxes kept in `raw_output`). If OCR fails, the photo goes through `gemini` and the fallback is logged. |
 | `CLOVA_OCR_INVOKE_URL`, `CLOVA_OCR_SECRET` | — | Required with `EXTRACTION_MODE=hybrid` (CLOVA General OCR). Also used by the business certificate OCR (`POST /api/owner-applications/business-certificate-ocr`), which answers `503 OCR_UNAVAILABLE` without them. Never commit the secret. |
+| `NTS_SERVICE_KEY` | — | data.go.kr service key for the NTS business registration check of owner applications (`POST /api/owner-applications` and the operator recheck `POST /api/owner-applications/{applicationId}/verify-business`). Without it, applications are accepted with the result `unavailable` and the recheck answers `503 BUSINESS_VERIFICATION_UNAVAILABLE`. Read on each request, so no restart is needed. Never commit it. |
 | `MATCHING_LLM_ENABLED` | `false` | `true` runs the LLM matching layer (M3a, `app/matching/llm_layer.py`, `gemini-3.1-flash-lite`) on the lines S1–S3 leave unconfirmed. Needs `GEMINI_API_KEY`; without it the layer stays off and a warning is logged at start-up. Its candidates are always `ambiguous`; a failed call keeps the rule result. |
 | `MATCHING_LLM_MAX_CALLS` | `30` | Model requests per menu import (one per photo for M3a, one per line for M3b); lines left after the cap keep the rule result. Invalid values stop the server at start-up. |
 | `MATCHING_LLM_M3B_ENABLED` | `false` | `true` adds M3b (the LLM picks one of the named brand's products), which was not adopted in the I2 evaluation. |
@@ -254,7 +255,7 @@ The response has the counts of added, updated, removed and ignored changes and o
 
 ### Resetting test data
 
-- `scripts/reset_demo.py` brings the whole database back to the state right after seeding, for example after rehearsing the demo. It deletes every menu import (applied ones too) with its photos, every menu board, and every bar, brand, product, and alias that is not in the seed files, then runs the catalog and Seorosang menu seeds again. Other bars are left without a menu, and users are kept. It shows what it would delete without `--apply`.
+- `scripts/reset_demo.py` brings the whole database back to the state right after seeding, for example after rehearsing the demo. It deletes every menu import (applied ones too) with its photos, every menu board, every bar's description, default pour, tags, hours, temporary closure, and photos with their files, and every bar, brand, product, and alias that is not in the seed files, then runs the catalog and Seorosang menu seeds again. Other bars are left without a menu, and users are kept. It shows what it would delete without `--apply`.
 
   ```sh
   uv run --env-file .env python scripts/reset_demo.py            # show what would be deleted

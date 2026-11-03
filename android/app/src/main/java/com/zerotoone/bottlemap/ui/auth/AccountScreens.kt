@@ -18,6 +18,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import com.zerotoone.bottlemap.data.owner.OwnerMockRuntime
+import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
+import com.zerotoone.bottlemap.data.owner.MockApplicationStatus
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +39,23 @@ fun AccountScreen(
     onOpenLogin: () -> Unit,
     onLogout: () -> Unit,
     onRetryAccount: () -> Unit,
+    onOpenOwner: () -> Unit = {},
 ) {
+    // Local Mock state is only for the v4 entry label. No Owner API is called here.
+    val ownerState by OwnerMockRuntime.repository(LocalContext.current).state.collectAsState()
+    val owned = when (val current = ownerState) {
+        is MockOwnerLoadState.Ready -> current.snapshot
+        is MockOwnerLoadState.Empty -> current.snapshot
+        else -> null
+    }
+    // v4: guest must use existing Google sign-in before entering Owner UI.
+    val openOwnerFromAccount = if (state is AuthUiState.SignedIn) onOpenOwner else onOpenLogin
+    val hasOwnerArea = owned?.let { snapshot ->
+        snapshot.bars.isNotEmpty() || snapshot.applications.any { app ->
+            app.applicationId !in snapshot.dismissedApplicationIds &&
+                app.status in listOf(MockApplicationStatus.PENDING, MockApplicationStatus.REJECTED)
+        }
+    } == true
     I2CustomerSearchTheme {
         Column(
             modifier = Modifier
@@ -108,6 +130,15 @@ fun AccountScreen(
                         OutlinedButton(onClick = onLogout, modifier = Modifier.fillMaxWidth()) {
                             Text("Guest로 계속")
                         }
+                    }
+                }
+                if (hasOwnerArea) {
+                    OutlinedButton(onClick = openOwnerFromAccount, modifier = Modifier.fillMaxWidth()) {
+                        Text("내 매장 관리")
+                    }
+                } else {
+                    TextButton(onClick = openOwnerFromAccount, modifier = Modifier.fillMaxWidth()) {
+                        Text("매장 사장님이신가요?  매장 등록하기")
                     }
                 }
                 Text(

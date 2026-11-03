@@ -25,6 +25,10 @@ jobs:
   backend-tests:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read
+      # Only to post the test report as a PR comment.
+      pull-requests: write
     defaults:
       run:
         working-directory: backend
@@ -67,22 +71,73 @@ jobs:
         run: uv sync --frozen
 
       - name: Run tests with coverage
-        run: uv run --no-sync pytest --cov --cov-report=term --cov-report=xml
+        # -rs lists skip reasons in the log; strict xfail makes a passing xfail test fail.
+        run: >-
+          uv run --no-sync pytest -rs -o xfail_strict=true
+          --cov --cov-report=term --cov-report=xml --junitxml=junit.xml
 
-      - name: Write coverage summary
+      - name: Collect the test lists of the PR and its base
+        # Only to list removed tests in the summary; a collection that fails just skips the comparison.
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_DIR: ${{ runner.temp }}/base
+        run: |
+          uv run --no-sync pytest --collect-only -q -p no:cacheprovider > head-tests.txt || rm -f head-tests.txt
+          if git fetch --quiet --depth=1 origin "$BASE_SHA" && git worktree add --quiet --detach "$BASE_DIR" "$BASE_SHA"; then
+            # The base's tests run with this PR's environment; only their IDs are needed.
+            (cd "$BASE_DIR/backend" && "$GITHUB_WORKSPACE/backend/.venv/bin/python" -m pytest --collect-only -q -p no:cacheprovider) \
+              > base-tests.txt || rm -f base-tests.txt
+          fi
+
+      - name: Check test count, skips and removed tests
+        # Fails when tests were deleted or skipped without being listed in backend/ci/test_policy.json.
+        if: ${{ !cancelled() }}
+        run: >-
+          uv run --no-sync python ci/check_test_report.py junit.xml --summary test-report.md
+          ${{ github.event_name == 'pull_request' && '--base-tests base-tests.txt --head-tests head-tests.txt' || '' }}
+
+      - name: Write the test report to the run summary
         if: ${{ !cancelled() }}
         run: |
           {
-            echo "## Backend coverage"
+            echo "<details><summary>Backend coverage</summary>"
+            echo
             uv run --no-sync coverage report --format=markdown
-          } >> "$GITHUB_STEP_SUMMARY"
+            echo
+            echo "</details>"
+          } >> test-report.md
+          cat test-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post the test report on the PR
+        # One comment per PR, updated on every run. A failure here never fails the tests.
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && hashFiles('backend/test-report.md') != '' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          marker="<!-- backend-test-report -->"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          body="$(printf '%s\n%s\n\n[Workflow run](%s) for %s\n' "$marker" "$(cat test-report.md)" "$run_url" "${HEAD_SHA::7}")"
+          comment_id="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | tail -n 1)"
+          if [ -n "$comment_id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" -f body="$body" > /dev/null
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" -f body="$body" > /dev/null
+          fi
 
       - name: Upload coverage report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: backend-coverage
-          path: backend/coverage.xml
+          path: |
+            backend/coverage.xml
+            backend/junit.xml
+            backend/test-report.md
           if-no-files-found: ignore
 
   deploy:

@@ -1,0 +1,300 @@
+package com.zerotoone.bottlemap.ui.owner
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
+import com.zerotoone.bottlemap.data.owner.MockImportStatus
+import com.zerotoone.bottlemap.data.owner.hasPublishedInitialReview
+import com.zerotoone.bottlemap.navigation.OwnerFlowGroup
+import com.zerotoone.bottlemap.navigation.OwnerPage
+import com.zerotoone.bottlemap.ui.common.OwnerActionButton
+import com.zerotoone.bottlemap.ui.common.OwnerCalendarDialog
+import com.zerotoone.bottlemap.ui.common.OwnerConfirmationDialog
+import com.zerotoone.bottlemap.ui.common.OwnerHeader
+import com.zerotoone.bottlemap.ui.common.OwnerLoading
+import com.zerotoone.bottlemap.ui.common.OwnerMenuRow
+import com.zerotoone.bottlemap.ui.common.OwnerPhotoThumbnail
+import com.zerotoone.bottlemap.ui.common.OwnerStatusLabel
+import com.zerotoone.bottlemap.ui.common.OwnerStatusTone
+import com.zerotoone.bottlemap.ui.common.OwnerTextInput
+import com.zerotoone.bottlemap.ui.common.OwnerTimeWheel
+import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
+
+/**
+ * Navigation-only shells. Nothing here reads/writes a bar or simulates successful API calls.
+ * The UI must visibly state that it is incomplete, even when the user enters from My Page.
+ */
+@Composable
+fun OwnerEntryScreen(
+    mockState: MockOwnerLoadState,
+    onRetry: () -> Unit,
+    onBack: () -> Unit,
+    onOpenGroup: (OwnerFlowGroup) -> Unit,
+    onComponents: () -> Unit,
+    onOpenLegacyUpload: (() -> Unit)? = null, // Only supplied for Debug navigation
+) {
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        OwnerHeader("매장 사장님", onBack)
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(BottleMapSpacing.screenHorizontal),
+            verticalArrangement = Arrangement.spacedBy(BottleMapSpacing.md),
+        ) {
+            OwnerStatusLabel("화면 연결 단계 · 실제 기능 미완성", OwnerStatusTone.ATTENTION)
+            OwnerMockStateLine(mockState, onRetry)
+            Text("Owner 화면 구조 미리보기", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                "현재는 화면 이동과 공통 컴포넌트만 연결되어 있습니다. 매장 조회, 신청, 저장, OCR, AI 검수, 게시는 동작하지 않습니다.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OwnerFlowGroup.entries.forEach { group ->
+                OwnerMenuRow(
+                    title = group.title,
+                    subtitle = "화면 흐름만 확인하기 · 데이터 미연결",
+                    onClick = { onOpenGroup(group) },
+                    trailing = "보기",
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+            OwnerMenuRow(
+                title = "UI 컴포넌트 점검",
+                subtitle = "버튼, 입력, 팝업, 시간·날짜, 썸네일, 로딩",
+                onClick = onComponents,
+                trailing = "보기",
+            )
+            if (onOpenLegacyUpload != null) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                OwnerMenuRow(
+                    title = "개발자 도구 · 기존 메뉴 업로드 테스트",
+                    subtitle = "Debug 전용 · 임시 Operator 인증의 과거 통합 테스트 화면",
+                    onClick = onOpenLegacyUpload,
+                    trailing = "테스트",
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OwnerSkeletonScreen(
+    page: OwnerPage,
+    mockState: MockOwnerLoadState,
+    onRetry: () -> Unit,
+    onBack: () -> Unit,
+    onNavigate: (OwnerPage) -> Unit,
+    onHome: () -> Unit,
+    onAddBar: (() -> Unit)? = null,
+    onFirstReview: (() -> Unit)? = null,
+    onLegacyDebugUpload: (() -> Unit)? = null,
+) {
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        OwnerHeader(page.title, onBack)
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(BottleMapSpacing.screenHorizontal),
+            verticalArrangement = Arrangement.spacedBy(BottleMapSpacing.md),
+        ) {
+            OwnerStatusLabel("미구현 · 이동 골격만 제공", OwnerStatusTone.ATTENTION)
+            OwnerMockStateLine(mockState, onRetry)
+            Text(page.group.title, style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary)
+            Text(page.title, style = MaterialTheme.typography.headlineSmall)
+            Text(
+                "최종 HTML 화면 (${page.htmlId})의 구성과 상태 로직은 아직 연결되지 않았습니다. " +
+                    "이 화면에서 입력·사진 선택·서버 저장·AI 처리·게시는 실행되지 않습니다.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (page == OwnerPage.MGR_HOME) {
+                val snap = when (mockState) {
+                    is MockOwnerLoadState.Ready -> mockState.snapshot
+                    is MockOwnerLoadState.Empty -> mockState.snapshot
+                    else -> null
+                }
+                val bar = snap?.bars?.firstOrNull { it.barId == snap.selectedBarId }
+                    ?: snap?.bars?.firstOrNull()
+                if (bar != null) {
+                    Text(bar.name, style = MaterialTheme.typography.headlineSmall)
+                    val posted = snap?.hasPublishedInitialReview(bar.barId) == true
+                    OwnerStatusLabel(
+                        if (posted) "정상 영업 · Mock 게시 메뉴 있음" else "메뉴 확인 필요 · 아직 공개 전",
+                        if (posted) OwnerStatusTone.SUCCESS else OwnerStatusTone.ATTENTION,
+                    )
+                    if (!posted && onFirstReview != null) OwnerActionButton(
+                        "최초 메뉴 검수로", onFirstReview, Modifier.fillMaxWidth()
+                    )
+                }
+                if (onAddBar != null) OwnerActionButton(
+                    "매장 추가", onAddBar, Modifier.fillMaxWidth(), secondary = true
+                )
+                if (onLegacyDebugUpload != null) OwnerActionButton(
+                    "개발자 도구 · 기존 메뉴 업로드 테스트", onLegacyDebugUpload,
+                    Modifier.fillMaxWidth(), secondary = true
+                )
+                Text("매장 관리 하위 화면 (Navigation 미리보기)", style = MaterialTheme.typography.titleLarge)
+                listOf(
+                    OwnerPage.MGR_INFO, OwnerPage.MGR_STATUS, OwnerPage.MGR_PHOTOS,
+                    OwnerPage.MGR_MENU, OwnerPage.MGR_PHOTO, OwnerPage.MGR_PREVIEW,
+                ).forEach { destination ->
+                    OwnerMenuRow(destination.title, "아직 기능 미구현", onClick = { onNavigate(destination) })
+                }
+            }
+            if (page == OwnerPage.PHOTO_START) {
+                val snap = when (mockState) {
+                    is MockOwnerLoadState.Ready -> mockState.snapshot
+                    is MockOwnerLoadState.Empty -> mockState.snapshot
+                    else -> null
+                }
+                val selected = snap?.selectedBarId ?: snap?.bars?.firstOrNull()?.barId
+                val job = snap?.imports?.lastOrNull { it.barId == selected }
+                if (job == null) {
+                    OwnerStatusLabel("초기 메뉴판 사진 없음", OwnerStatusTone.ATTENTION)
+                    Text("승인된 매장의 메뉴판 사진이 없습니다. 메뉴 등록은 다음 단계에서 구현합니다.")
+                } else {
+                    OwnerStatusLabel("메뉴 확인 필요 · 사진 ${job.images.size}장",OwnerStatusTone.ATTENTION)
+                    job.images.forEach { image ->
+                        Text("${image.imageOrder}번 메뉴판 사진: ${image.sourceUri.takeLast(64)}")
+                    }
+                    Text("사진 참조·순서는 보존되었습니다. 실제 AI 인식·검수·게시는 아직 미구현입니다.")
+                }
+            }
+            if (page == OwnerPage.MGR_JOB || page == OwnerPage.MGR_REVIEW) {
+                val snap = when (mockState) {
+                    is MockOwnerLoadState.Ready -> mockState.snapshot
+                    is MockOwnerLoadState.Empty -> mockState.snapshot
+                    else -> null
+                }
+                val barId = snap?.selectedBarId ?: snap?.bars?.firstOrNull()?.barId
+                val job = if (snap != null && barId != null) latestOwnerImport(snap.imports, barId) else null
+                if (job != null) {
+                    OwnerStatusLabel(ownerJobTitle(job.status),
+                        if (job.status == MockImportStatus.FAILED) OwnerStatusTone.ERROR
+                        else OwnerStatusTone.ATTENTION)
+                    Text("연결된 메뉴판 사진 ${job.images.size}장 · Mock 작업 ID ${job.menuImportId}")
+                    Text("현재 작업의 상태를 이어서 표시합니다. 실제 AI 검수 및 재시도 처리는 다음 단계에서 구현합니다.")
+                } else {
+                    Text("진행 중인 메뉴판 작업이 없어요.")
+                }
+            }
+            if (page == OwnerPage.MGR_INFO) {
+                listOf(OwnerPage.MGR_PHOTOS, OwnerPage.MGR_HOURS, OwnerPage.MGR_TAGS).forEach { destination ->
+                    OwnerMenuRow(destination.title, "아직 기능 미구현", onClick = { onNavigate(destination) })
+                }
+            }
+            if (page == OwnerPage.MGR_MENU) {
+                listOf(OwnerPage.MGR_ITEM, OwnerPage.MGR_PROMO, OwnerPage.MGR_PHOTO).forEach { destination ->
+                    OwnerMenuRow(destination.title, "아직 기능 미구현", onClick = { onNavigate(destination) })
+                }
+            }
+            // ACTION_FIRST v4: Customer preview is a manager-home header action only.
+            page.next()?.takeUnless { it == OwnerPage.MGR_PREVIEW }?.let { next ->
+                OwnerActionButton("다음 화면: ${next.title}", onClick = { onNavigate(next) }, modifier = Modifier.fillMaxWidth())
+            }
+            OwnerActionButton("Owner 화면 목록으로", onClick = onHome, secondary = true, modifier = Modifier.fillMaxWidth())
+        }
+    }
+}
+
+/** A stateful component showcase; all state is local to this design QA surface only. */
+@Composable
+fun OwnerComponentGallery(onBack: () -> Unit) {
+    var name by rememberSaveable { mutableStateOf("") }
+    var hour by rememberSaveable { mutableIntStateOf(18) }
+    var minute by rememberSaveable { mutableIntStateOf(0) }
+    var showConfirm by rememberSaveable { mutableStateOf(false) }
+    var showCalendar by rememberSaveable { mutableStateOf(false) }
+    var showLoading by rememberSaveable { mutableStateOf(false) }
+    var thumbnailVisible by rememberSaveable { mutableStateOf(true) }
+    var dateMillis by rememberSaveable { mutableLongStateOf(0L) }
+
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        OwnerHeader("공통 컴포넌트", onBack)
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(BottleMapSpacing.screenHorizontal),
+            verticalArrangement = Arrangement.spacedBy(BottleMapSpacing.md),
+        ) {
+            OwnerStatusLabel("UI 테스트 전용 · 서버 저장 없음", OwnerStatusTone.ATTENTION)
+            OwnerTextInput("매장 이름 (예시 입력)", value = name, onValueChange = { name = it })
+            OwnerMenuRow("메뉴 항목", "기본 행 컴포넌트 (서버 데이터 없음)", onClick = { showConfirm = true }, trailing = "선택")
+            Row(horizontalArrangement = Arrangement.spacedBy(BottleMapSpacing.xs)) {
+                OwnerStatusLabel("준비", OwnerStatusTone.NEUTRAL)
+                OwnerStatusLabel("완료", OwnerStatusTone.SUCCESS)
+                OwnerStatusLabel("오류", OwnerStatusTone.ERROR)
+            }
+            OwnerActionButton("기본 버튼", onClick = { showConfirm = true }, modifier = Modifier.fillMaxWidth())
+            OwnerActionButton("보조 버튼", onClick = { showCalendar = true },
+                secondary = true, modifier = Modifier.fillMaxWidth())
+            Text("시간 선택 (스크롤 가능)", style = MaterialTheme.typography.titleMedium)
+            Text("%02d:%02d".format(hour, minute), style = MaterialTheme.typography.titleLarge)
+            OwnerTimeWheel(hour = hour, minute = minute, onTimeChange = { h, m -> hour = h; minute = m })
+            Text("사진 썸네일 (이미지 미연결)", style = MaterialTheme.typography.titleMedium)
+            if (thumbnailVisible) {
+                OwnerPhotoThumbnail(contentDescription = "예시 사진 자리", painter = null,
+                    onRemove = { thumbnailVisible = false })
+            } else {
+                OwnerActionButton("썸네일 되돌리기", onClick = { thumbnailVisible = true }, secondary = true)
+            }
+            Text("날짜: " + if (dateMillis == 0L) "미선택" else dateMillis.toString(),
+                style = MaterialTheme.typography.bodyMedium)
+            TextButton(onClick = { showLoading = !showLoading }) {
+                Text(if (showLoading) "로딩 예시 숨기기" else "로딩 예시 보기")
+            }
+            if (showLoading) OwnerLoading("화면 로딩 예시 · 실제 작업 아님")
+        }
+    }
+    OwnerCalendarDialog(
+        visible = showCalendar, onDismiss = { showCalendar = false },
+        onSelectDateUtcMillis = { dateMillis = it },
+    )
+    OwnerConfirmationDialog(
+        visible = showConfirm,
+        title = "확인 팝업 예시",
+        message = "디자인 검증용이며 실제 변경 사항은 저장하지 않습니다.",
+        confirmLabel = "확인",
+        onConfirm = { showConfirm = false },
+        onDismiss = { showConfirm = false },
+    )
+}
+
+/** Minimal debug readout; all Owner shells observe the same persisted repository. */
+@Composable
+private fun OwnerMockStateLine(state: MockOwnerLoadState, onRetry: (() -> Unit)? = null) {
+    when (state) {
+        MockOwnerLoadState.Loading -> OwnerLoading("로컬 Mock 상태 불러오는 중")
+        is MockOwnerLoadState.Empty -> Text(
+            "Mock 데이터: 매장 0개 · 메뉴 0개 (초기 상태)",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        is MockOwnerLoadState.Ready -> Text(
+            "Mock 데이터: 매장 ${state.snapshot.bars.size}개 · 메뉴 ${state.snapshot.menuItems.size}개",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        is MockOwnerLoadState.Error -> {
+            Text("Mock 데이터 오류: ${state.message}", color = MaterialTheme.colorScheme.error)
+            if (onRetry != null) OwnerActionButton("다시 시도", onRetry, secondary = true)
+        }
+    }
+}

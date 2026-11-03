@@ -12,6 +12,7 @@ from tests.sql_support import recorded_statements
 
 T0 = datetime(2026, 10, 4, 9, 15, tzinfo=timezone.utc)
 ORIGIN = {"lat": 37.478, "lng": 126.951}
+PRODUCT_ID = "44444444-4444-4444-8444-444444444444"
 
 
 @pytest.fixture
@@ -58,13 +59,14 @@ def test_exact_alias_search_returns_bar_rows(client, db_session, glenfiddich):
             "address": "Seorosang address",
             "latitude": 37.477648,
             "longitude": 126.963763,
+            "coverThumbnailUrl": None,
             "distanceMeters": None,
             "productId": str(glenfiddich[12].id),
             "productDisplayName": "Glenfiddich 12",
             "menuDisplayName": "글렌피딕 12Y",
             "options": [
-                {"optionLabel": "잔", "pourMl": None, "priceKrw": 12000, "sortOrder": 1},
-                {"optionLabel": "병", "pourMl": None, "priceKrw": 200000, "sortOrder": 2},
+                {"optionLabel": "잔", "pourMl": None, "priceKrw": 12000, "discount": None, "sortOrder": 1},
+                {"optionLabel": "병", "pourMl": None, "priceKrw": 200000, "discount": None, "sortOrder": 2},
             ],
             "menuUpdatedAt": "2026-10-04T09:15:00Z",
         }
@@ -127,6 +129,72 @@ def test_inactive_bars_and_items_off_the_current_board_are_excluded(client, db_s
     assert body["matchedProducts"][0]["resultCount"] == 0
 
 
+# ---- productId search (spec 3.10.1): the popular-whisky cards ----
+
+
+def test_product_id_search_returns_only_that_product(client, db_session, glenfiddich):
+    # "Knob Creek" is a brand alias and a product name: a query would give the whole brand.
+    knob_creek = make_brand(db_session, "Knob Creek")
+    flagship = make_product(db_session, knob_creek, "Knob Creek")
+    rye = make_product(db_session, knob_creek, "Knob Creek Rye")
+    bar = make_bar(db_session, "Seorosang")
+    publish_menu(db_session, bar, [(flagship, "놉크릭", [("잔", 30, 15000)]), (rye, "놉크릭 라이", [("잔", 30, 16000)])])
+
+    assert search(client, query="Knob Creek")["matchType"] == "brand"
+    body = search(client, productId=str(flagship.id), source="popular")
+
+    assert (body["query"], body["matchType"], body["truncated"]) == (None, "product", False)
+    assert body["matchedProducts"] == [
+        {
+            "productId": str(flagship.id),
+            "displayName": "Knob Creek",
+            "brandName": "Knob Creek",
+            "ageYears": None,
+            "editionName": None,
+            "resultCount": 1,
+        }
+    ]
+    assert [(item["barId"], item["productId"], item["menuDisplayName"]) for item in body["items"]] == [
+        (str(bar.id), str(flagship.id), "놉크릭")
+    ]
+    assert set(body) == RESPONSE_FIELDS and set(body["items"][0]) == ITEM_FIELDS
+
+
+def test_product_id_search_follows_the_same_rules_as_a_query(client, db_session, glenfiddich):
+    near = make_bar(db_session, "Near", latitude="37.479000")
+    far = make_bar(db_session, "Far", latitude="37.489000")
+    closed = make_bar(db_session, "Closed", status=BarStatus.INACTIVE)
+    sold_out = make_bar(db_session, "Sold out")
+    for bar in (far, near, closed, sold_out):
+        publish_menu(db_session, bar, [(glenfiddich[12], "12", [(None, 30, 1)])])
+    item = db_session.scalar(select(BarMenuItem).where(BarMenuItem.bar_id == sold_out.id))
+    item.sold_out_at = T0
+    db_session.flush()
+
+    by_id = search(client, productId=str(glenfiddich[12].id), limit=1, **ORIGIN)
+    by_query = search(client, query="글렌피딕 12년", limit=1, **ORIGIN)
+
+    assert [i["barId"] for i in by_id["items"]] == [str(near.id)]
+    assert (by_id["truncated"], by_id["matchedProducts"][0]["resultCount"]) == (True, 2)
+    assert by_id["items"] == by_query["items"]
+
+
+def test_product_id_search_for_an_inactive_or_unknown_product_finds_nothing(client, db_session):
+    retired = make_product(db_session, make_brand(db_session, "Port Ellen"), "Port Ellen 1983", is_active=False)
+    publish_menu(db_session, make_bar(db_session), [(retired, "포트엘렌", [(None, 30, 1)])])
+
+    for product_id in (str(retired.id), PRODUCT_ID):
+        body = search(client, productId=product_id)
+        assert body == {"query": None, "matchType": "none", "matchedProducts": [], "items": [], "truncated": False}
+
+
+@pytest.mark.parametrize("source", ["input", "recent", "popular"])
+def test_source_does_not_change_the_results(client, db_session, glenfiddich, source):
+    publish_menu(db_session, make_bar(db_session), [(glenfiddich[12], "12", [(None, 30, 1)])])
+
+    assert search(client, query="글렌피딕", source=source) == search(client, query="글렌피딕")
+
+
 @pytest.fixture
 def yoichi(db_session):
     # "요이치" is the brand alias and also the alias of the flagship Single Malt, as in the service catalog.
@@ -135,6 +203,25 @@ def yoichi(db_session):
         "single malt": make_product(db_session, brand, "Yoichi Single Malt", aliases=("요이치",)),
         "10": make_product(db_session, brand, "Yoichi 10", aliases=("요이치 10년",), age_years=10),
     }
+
+
+def test_sold_out_items_are_left_out_for_every_caller(client, db_session, glenfiddich, token_for):
+    selling, sold_out = make_bar(db_session, "Selling"), make_bar(db_session, "Sold out")
+    for bar in (selling, sold_out):
+        publish_menu(db_session, bar, [(glenfiddich[12], "글렌피딕 12년", [("잔", 30, 17000)])])
+    item = db_session.scalar(select(BarMenuItem).where(BarMenuItem.bar_id == sold_out.id))
+    item.sold_out_at = T0
+    db_session.flush()
+    operator = {"Authorization": f"Bearer {token_for('operator')}"}
+
+    for headers in ({}, operator):
+        body = client.get("/api/search/bars", params={"query": "글렌피딕 12년"}, headers=headers).json()
+        assert [i["barId"] for i in body["items"]] == [str(selling.id)]
+        assert body["matchedProducts"][0]["resultCount"] == 1
+
+    item.sold_out_at = None
+    db_session.flush()
+    assert len(search(client, query="글렌피딕 12년")["items"]) == 2
 
 
 def test_brand_search_lists_the_exact_product_first(client, db_session, yoichi):
@@ -212,7 +299,13 @@ def test_query_of_exactly_100_characters_after_trimming_is_accepted(client, db_s
 @pytest.mark.parametrize(
     ("params", "path", "code"),
     [
-        ({}, "query", "MISSING"),
+        # Neither query nor productId (spec 3.10.5); query alone used to be MISSING.
+        ({}, "productId", "EXACTLY_ONE_REQUIRED"),
+        ({"query": "x", "productId": PRODUCT_ID}, "productId", "EXACTLY_ONE_REQUIRED"),
+        ({"query": "", "productId": PRODUCT_ID}, "productId", "EXACTLY_ONE_REQUIRED"),
+        ({"productId": "not-a-uuid"}, "productId", "UUID_PARSING"),
+        ({"query": "x", "source": "home"}, "source", "LITERAL_ERROR"),
+        ({"productId": PRODUCT_ID, "lat": 37.5}, "lng", "LAT_LNG_REQUIRED_TOGETHER"),
         ({"query": "   "}, "query", "BLANK"),
         ({"query": "가" * 101}, "query", "STRING_TOO_LONG"),
         ({"query": "!!!"}, "query", "NOT_SEARCHABLE"),
@@ -254,10 +347,33 @@ def test_options_carry_label_pour_size_and_price_as_written(client, db_session, 
 
     # Every option of the entry, with nulls kept as null rather than left out or emptied.
     assert item["options"] == [
-        {"optionLabel": "잔", "pourMl": 30, "priceKrw": 17000, "sortOrder": 1},
-        {"optionLabel": None, "pourMl": 15, "priceKrw": 9000, "sortOrder": 2},
-        {"optionLabel": "병", "pourMl": None, "priceKrw": 160000, "sortOrder": 3},
+        {"optionLabel": "잔", "pourMl": 30, "priceKrw": 17000, "discount": None, "sortOrder": 1},
+        {"optionLabel": None, "pourMl": 15, "priceKrw": 9000, "discount": None, "sortOrder": 2},
+        {"optionLabel": "병", "pourMl": None, "priceKrw": 160000, "discount": None, "sortOrder": 3},
     ]
+
+
+def test_options_carry_the_same_discounts_as_the_bar_menu(client, db_session, glenfiddich):
+    now = datetime.now(timezone.utc)
+    running = (14000, now - timedelta(days=1), now + timedelta(days=14))
+    ended = (150000, now - timedelta(days=14), now - timedelta(days=1))
+    bar = make_bar(db_session)
+    publish_menu(
+        db_session,
+        bar,
+        [(glenfiddich[12], "글렌피딕 12년", [("잔", 30, 17000, running), ("병", None, 160000, ended)])],
+    )
+
+    (item,) = search(client, query="Glenfiddich 12")["items"]
+    menu = client.get(f"/api/bars/{bar.id}/menu").json()
+
+    assert item["options"][0]["discount"] == {
+        "discountedPriceKrw": 14000,
+        "startsAt": running[1].isoformat().replace("+00:00", "Z"),
+        "endsAt": running[2].isoformat().replace("+00:00", "Z"),
+    }
+    assert item["options"][1]["discount"] is None
+    assert [o["discount"] for o in item["options"]] == [o["discount"] for o in menu["items"][0]["options"]]
 
 
 def test_options_follow_sort_order_not_insert_order(client, db_session, glenfiddich):
@@ -417,6 +533,7 @@ ITEM_FIELDS = {
     "address",
     "latitude",
     "longitude",
+    "coverThumbnailUrl",
     "distanceMeters",
     "productId",
     "productDisplayName",
@@ -424,7 +541,7 @@ ITEM_FIELDS = {
     "options",
     "menuUpdatedAt",
 }
-OPTION_FIELDS = {"optionLabel", "pourMl", "priceKrw", "sortOrder"}
+OPTION_FIELDS = {"optionLabel", "pourMl", "priceKrw", "discount", "sortOrder"}
 
 
 def test_every_field_is_sent_even_when_its_value_is_missing(client, db_session):
@@ -470,7 +587,9 @@ def statements_for_search(client, db_session, **params) -> list[str]:
     [{"query": "글렌피딕"}, {"query": "글렌피딕 12년", **ORIGIN}, {"query": "피딕", **ORIGIN}],
     ids=["brand", "exact alias with location", "partial"],
 )
-def test_the_number_of_queries_does_not_grow_with_the_results(client, db_session, glenfiddich, params):
+def test_the_number_of_queries_does_not_grow_with_the_results(client, db_session, glenfiddich, params, monkeypatch):
+    # Only the reads; the count write (a fixed few statements) is tested in test_search_counts_api.py.
+    monkeypatch.setattr("app.services.search._count_search", lambda *args: None)
     first = make_bar(db_session, "Bar 0")
     publish_menu(db_session, first, [(glenfiddich[12], "글렌피딕 12년", [("잔", 30, 17000)])])
     with_one_row = statements_for_search(client, db_session, **params)

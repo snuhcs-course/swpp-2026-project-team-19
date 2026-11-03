@@ -146,6 +146,7 @@ private fun NavGraphBuilder.customerGraph(
                 onOpenLogin = { navController.navigate(Routes.CUSTOMER_LOGIN) },
                 onLogout = authViewModel::logout,
                 onRetryAccount = authViewModel::retryAccountSync,
+                onOpenOwner = { navController.navigate(OwnerRoutes.GRAPH) },
             )
         }
         composable(Routes.CUSTOMER_LOGIN) {

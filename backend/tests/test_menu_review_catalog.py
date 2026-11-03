@@ -1,11 +1,13 @@
 import pytest
+from pydantic import TypeAdapter
 from sqlalchemy import select
 
 from app.core.errors import ApiError
 from app.models import Brand, BrandAlias, Product, ProductAlias
-from app.schemas.menu_review import ReviewAndApplyRequest
-from app.services.menu_review_catalog import create_catalog_entries
+from app.schemas.menu_review import BrandDecision, NewProduct, ProductAliasInput, ReviewAndApplyRequest
+from app.services.menu_review_catalog import create_catalog_entries, create_new_product
 from app.services.menu_review_validation import validate_review
+from tests.factories import make_product, make_user
 from tests.review_support import make_glenfiddich, upload_sample_review, valid_body
 
 
@@ -26,7 +28,7 @@ def sample(client, db_session, image_storage, operator, glenfiddich):
 
 def run(db_session, sample, body):
     review = validate_review(db_session, sample.menu_import, ReviewAndApplyRequest.model_validate(body))
-    return create_catalog_entries(db_session, sample.menu_import, review)
+    return create_catalog_entries(db_session, sample.menu_import, review, created_by_user_id=None)
 
 
 def conflict(db_session, sample, body):
@@ -188,3 +190,99 @@ def test_confirmed_aliases_are_added_once(db_session, sample, glenfiddich):
         ("글렌피딕 12년", "글렌피딕12"),
         ("글렌피딕 십이년", "글렌피딕십이년"),
     ]
+
+
+# ---- a manual add's new product (API spec 3.14.3) ----
+
+
+def new_product(db_session, brand: dict, product: dict, aliases=(), user=None):
+    return create_new_product(
+        db_session,
+        TypeAdapter(BrandDecision).validate_python(brand),
+        NewProduct.model_validate(product),
+        [ProductAliasInput.model_validate(alias) for alias in aliases],
+        created_by_user_id=user.id if user else None,
+    )
+
+
+def test_a_manual_add_creates_a_product_of_an_existing_brand_and_records_the_user(db_session, glenfiddich):
+    user = make_user(db_session)
+
+    product_id = new_product(
+        db_session,
+        {"type": "existing", "brandId": str(glenfiddich["brand"].id)},
+        {"displayName": "Glenfiddich Fire & Cane", "editionName": "Fire & Cane", "abv": 43.0},
+        [{"aliasText": "글렌피딕 파이어 앤 케인", "languageCode": "ko"}],
+        user,
+    )
+
+    product = db_session.get(Product, product_id)
+    assert (product.brand_id, product.category, product.created_by_user_id) == (
+        glenfiddich["brand"].id,
+        "whisky",
+        user.id,
+    )
+    assert product.created_from_extracted_item_id is None
+    assert [text for text, _ in aliases_of(db_session, ProductAlias, ProductAlias.product_id, product_id)] == [
+        "Glenfiddich Fire & Cane",
+        "글렌피딕 파이어 앤 케인",
+    ]
+
+
+def test_a_manual_add_creates_a_new_brand_with_its_creator(db_session, glenfiddich):
+    user = make_user(db_session)
+
+    product_id = new_product(
+        db_session, {"type": "new", "canonicalName": "Deanston"}, {"displayName": "Deanston Virgin Oak"}, user=user
+    )
+
+    brand = db_session.get(Product, product_id).brand
+    assert (brand.canonical_name, brand.created_by_user_id) == ("Deanston", user.id)
+
+
+def test_a_manual_add_of_an_existing_product_is_a_conflict_without_review_fields(db_session, glenfiddich):
+    with pytest.raises(ApiError) as caught:
+        new_product(
+            db_session,
+            {"type": "existing", "brandId": str(glenfiddich["brand"].id)},
+            {"displayName": "Glenfiddich 21 Year", "ageYears": 21},
+        )
+
+    assert (caught.value.status_code, caught.value.code) == (409, "DUPLICATE_PRODUCT_FOUND")
+    assert set(caught.value.details) == {"existingProduct"}
+    assert caught.value.details["existingProduct"]["isActive"] is False
+
+
+def test_a_manual_add_of_an_existing_brand_is_a_conflict_without_review_fields(db_session, glenfiddich):
+    with pytest.raises(ApiError) as caught:
+        new_product(db_session, {"type": "new", "canonicalName": "글렌피딕"}, {"displayName": "Glenfiddich 30"})
+
+    assert (caught.value.status_code, caught.value.code) == (409, "DUPLICATE_BRAND_FOUND")
+    assert caught.value.details == {
+        "existingBrand": {"brandId": str(glenfiddich["brand"].id), "canonicalName": "Glenfiddich"}
+    }
+
+
+def test_a_duplicate_matching_active_and_inactive_products_names_the_active_one(db_session, glenfiddich):
+    brand = glenfiddich["brand"]
+    # The inactive product sorts first by name, so only the active-first rule picks the other one.
+    make_product(db_session, brand, "Aaa Glenfiddich Select", aliases=("셀렉트",), is_active=False)
+    active = make_product(db_session, brand, "Glenfiddich Select", aliases=("셀렉트",))
+
+    with pytest.raises(ApiError) as caught:
+        new_product(db_session, {"type": "existing", "brandId": str(brand.id)}, {"displayName": "셀렉트"})
+
+    assert caught.value.details["existingProduct"]["productId"] == str(active.id)
+
+
+def test_a_duplicate_by_attributes_names_the_active_product_first(db_session, glenfiddich):
+    brand = glenfiddich["brand"]
+    make_product(db_session, brand, "Aaa Glenfiddich 40", age_years=40, is_active=False)
+    active = make_product(db_session, brand, "Glenfiddich 40", age_years=40)
+
+    with pytest.raises(ApiError) as caught:
+        new_product(
+            db_session, {"type": "existing", "brandId": str(brand.id)}, {"displayName": "Forty", "ageYears": 40}
+        )
+
+    assert caught.value.details["existingProduct"]["productId"] == str(active.id)

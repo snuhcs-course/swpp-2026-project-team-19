@@ -14,14 +14,20 @@ reviewer approved its removal.
   publishes its product again.
 - Order: full_replace follows the photos, then the entries kept from the old board in their
   old order. partial_update keeps the old order with updates in place and appends adds.
+- Every option row is rewritten, so a discount moves to the new option of the same product
+  with the same label, pour size and list price. A changed price or a dropped option drops it,
+  since the old discounted price may no longer fit (spec 8.7).
+- Sold-out lives on the bar menu item, so it stays on entries that remain and is cleared on
+  entries that leave the board (spec 3.14.8).
 
 `plan_publish` decides all of this from plain data; `write_board` stores the result.
 """
 
 from dataclasses import dataclass
+from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
@@ -219,14 +225,71 @@ def review_plan(
     return board, plan
 
 
-def write_board(
-    session: Session, board: MenuBoard | None, bar_id: UUID, menu_import_id: UUID, entries: list[BoardEntry]
-) -> MenuBoard:
-    """Replace the bar's board contents with `entries` and mark it published by the import."""
+def clear_sold_out(session: Session, bar_menu_item_ids: set[UUID]) -> None:
+    """Put items that leave the board back on sale, so the same product added again starts on sale.
+
+    An UPDATE that always touches the rows, rather than setting the attribute: a SERIALIZABLE request
+    reads from a snapshot taken before it waited for the bar lock, so it may not see a sold-out mark
+    committed meanwhile, and the ORM would skip a value it believes is already null. Touching the row
+    turns that race into a serialization failure, and the retry sees the mark.
+    """
+    if bar_menu_item_ids:
+        session.execute(
+            update(BarMenuItem)
+            .where(BarMenuItem.id.in_(bar_menu_item_ids))
+            .values(sold_out_at=None)
+        )
+
+
+def _discounts(board: MenuBoard | None) -> dict[tuple, tuple]:
+    """(discounted price, starts at, ends at) by (product, label, pour size, list price)."""
     if board is None:
-        board = MenuBoard(bar_id=bar_id, published_at=func.now())
+        return {}
+    return {
+        (entry.bar_menu_item.product_id, o.option_label, o.pour_ml, o.price_krw): (
+            o.discount_price_krw,
+            o.discount_starts_at,
+            o.discount_ends_at,
+        )
+        for entry in board.entries
+        for o in entry.options
+        if o.discount_price_krw is not None
+    }
+
+
+def _option(option: PublishedOption, sort_order: int, discount: tuple | None) -> MenuEntryOption:
+    discount_price_krw, starts_at, ends_at = discount or (None, None, None)
+    return MenuEntryOption(
+        option_label=option.label,
+        pour_ml=option.pour_ml,
+        price_krw=option.price_krw,
+        discount_price_krw=discount_price_krw,
+        discount_starts_at=starts_at,
+        discount_ends_at=ends_at,
+        sort_order=sort_order,
+        source_extracted_option_id=option.source_extracted_option_id,
+    )
+
+
+def write_board(
+    session: Session,
+    board: MenuBoard | None,
+    bar_id: UUID,
+    menu_import_id: UUID,
+    entries: list[BoardEntry],
+    *,
+    published_at: datetime,
+) -> MenuBoard:
+    """Replace the bar's board contents with `entries`, mark it published by the import at
+    `published_at`, and raise its version. The caller holds the bar row lock (spec 3.14.1)."""
+    discounts = _discounts(board)
+    old_item_ids = {entry.bar_menu_item_id for entry in board.entries} if board is not None else set()
+    if board is None:
+        board = MenuBoard(bar_id=bar_id, published_at=published_at, version=1)
         session.add(board)
-    board.published_at = func.now()
+    else:
+        board.version += 1
+    board.published_at = published_at
     board.last_import_id = menu_import_id
     # Delete the old entries before inserting new ones: the unit of work would otherwise
     # insert first and hit the unique sort_order and bar_menu_item constraints.
@@ -247,6 +310,7 @@ def write_board(
             session.add(item)
             session.flush()
             item_ids[entry.product_id] = item.id
+    clear_sold_out(session, old_item_ids - {item_ids[entry.product_id] for entry in entries})
 
     for sort_order, entry in enumerate(entries, start=1):
         board.entries.append(
@@ -255,13 +319,7 @@ def write_board(
                 display_name=entry.display_name,
                 sort_order=sort_order,
                 options=[
-                    MenuEntryOption(
-                        option_label=o.label,
-                        pour_ml=o.pour_ml,
-                        price_krw=o.price_krw,
-                        sort_order=option_order,
-                        source_extracted_option_id=o.source_extracted_option_id,
-                    )
+                    _option(o, option_order, discounts.get((entry.product_id, *o.key)))
                     for option_order, o in enumerate(entry.options, start=1)
                 ],
             )

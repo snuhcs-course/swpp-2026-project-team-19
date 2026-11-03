@@ -59,6 +59,8 @@
 3. 리뷰 API(`schemas/menu_review.py`)에 항목별 `sourceBox` 노출 → 안드로이드 업주 확인 화면에서 메뉴 줄을 잘라 보여줌.
 4. 기존 run은 `raw_output.itemSources`에서 채울 수 있다(선택, 일회성 스크립트).
 
+> 2026-10-29 (I3-P25): 3번만 했다. 새 컬럼 없이 검수 응답이 `extraction_runs.raw_output.itemSources`의 `box`를 항목별 `sourceBox`로 낸다(`app/services/menu_import_review.py` `source_boxes`). 기존 run에도 바로 적용되므로 4번은 필요 없다. 1·2번(컬럼)은 상자로 검색하거나 집계할 일이 생기면 한다.
+
 ## 3. 검증
 
 - 로컬: `backend/.venv` Python 3.12, `pytest` → **318 passed, 194 skipped**. 기존 288개 + 새 30개. 로컬에 PostgreSQL이 없어 DB 테스트 194개는 skip(`POSTGRES_TEST_DATABASE` 미설정). 바꾸기 전 기준도 288 passed, 194 skipped였다. **DB 테스트는 CI에서 확인해야 한다.**

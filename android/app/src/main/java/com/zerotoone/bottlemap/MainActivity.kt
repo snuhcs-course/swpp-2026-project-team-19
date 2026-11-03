@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.zerotoone.bottlemap.ui.common.dismissKeyboardOnOutsideTap
 import com.zerotoone.bottlemap.navigation.BottleMapNavHost
 import com.zerotoone.bottlemap.ui.theme.BottleMapTheme
 
@@ -19,7 +20,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             BottleMapTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding(),
+                    modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding()
+                        .dismissKeyboardOnOutsideTap(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     BottleMapNavHost()

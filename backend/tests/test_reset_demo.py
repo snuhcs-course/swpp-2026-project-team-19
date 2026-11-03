@@ -1,14 +1,19 @@
 """reset_demo.py brings a rehearsed database back to the state right after seeding."""
 
+import io
 from uuid import UUID, uuid4
 
 import pytest
+from PIL import Image
 from sqlalchemy import func, select
 
 from app.core.normalize import normalize
 from app.models import (
     Bar,
     BarMenuItem,
+    BarOperatingException,
+    BarPhoto,
+    BarWeeklyHours,
     Brand,
     BrandAlias,
     LineType,
@@ -49,7 +54,10 @@ def snapshot(session):
         return sorted(tuple(row) for row in session.execute(select(*columns)))
 
     return {
-        "bars": rows(Bar.id, Bar.name, Bar.address, Bar.status),
+        "bars": rows(Bar.id, Bar.name, Bar.address, Bar.status, Bar.description, Bar.default_pour_ml, Bar.tags),
+        "weekly hours": rows(BarWeeklyHours.bar_id, BarWeeklyHours.day_of_week),
+        "temporary closures": rows(BarOperatingException.bar_id),
+        "bar photos": rows(BarPhoto.id),
         "brands": rows(Brand.id, Brand.canonical_name),
         "brand aliases": rows(BrandAlias.id, BrandAlias.brand_id, BrandAlias.normalized_alias),
         "products": rows(Product.id, Product.display_name, Product.is_active, Product.created_from_extracted_item_id),
@@ -81,10 +89,18 @@ def upload(client, bar_id, headers, filename="sample.jpg"):
     return response.json()["menuImportId"]
 
 
+def bar_photo() -> bytes:
+    """A JPEG that decodes, as bar photos are re-encoded (menu photos are stored as sent)."""
+    out = io.BytesIO()
+    Image.new("RGB", (32, 32), "brown").save(out, format="JPEG")
+    return out.getvalue()
+
+
 def rehearse(client, session, operator, seeds):
     """What a rehearsal leaves: an applied import that created a brand and product and
     replaced the Seorosang menu, a failed import at another bar, an alias added to a seed
-    product, an edited seed product, and a bar that is not in the seed."""
+    product, an edited seed product, a seed bar's details, hours, closure and photo, and a bar that
+    is not in the seed, with hours, a closure and a photo of its own."""
     bar_ids = {b["key"]: UUID(b["id"]) for b in seeds.bars["bars"]}
     seorosang, bokchun = bar_ids["seorosang"], bar_ids["whisky-bokchun"]
     import_id = upload(client, seorosang, operator)
@@ -123,7 +139,18 @@ def rehearse(client, session, operator, seeds):
     product = session.scalars(select(Product).order_by(Product.display_name)).first()
     session.add(ProductAlias(product_id=product.id, alias_text="리허설 별칭", normalized_alias=normalize("리허설 별칭")))
     product.is_active = False
-    make_bar(session, "Rehearsal Bar")
+    details = {
+        "description": "리허설 소개",
+        "defaultPourMl": 30,
+        "tags": ["싱글몰트"],
+        "weeklyHours": [{"dayOfWeek": 5, "closed": False, "openTime": "18:00", "closeTime": "02:00"}],
+    }
+    closure = {"kind": "vacation", "startDate": "2099-01-01", "endDate": "2099-01-02"}
+    for bar_id in (seorosang, make_bar(session, "Rehearsal Bar").id):
+        assert client.patch(f"/api/bars/{bar_id}", json=details, headers=operator).status_code == 200
+        assert client.put(f"/api/bars/{bar_id}/operating-exception", json=closure, headers=operator).status_code == 200
+        photo = [("image", ("bar.jpg", bar_photo(), "image/jpeg"))]
+        assert client.post(f"/api/bars/{bar_id}/photos", files=photo, headers=operator).status_code == 201
     session.flush()
 
 
@@ -134,7 +161,8 @@ def test_reset_restores_the_freshly_seeded_state(client, db_session, image_stora
     db_session.expire_all()
     assert snapshot(db_session) != fresh
     stored = [p for p in image_storage.root.rglob("*") if p.is_file()]
-    assert len(stored) == 2
+    # Two menu photos, and two bar photos with their thumbnails.
+    assert len(stored) == 6
 
     keys = reset(db_session, seeds)
     db_session.flush()
@@ -166,6 +194,10 @@ def test_plan_counts_without_changing_anything(client, db_session, image_storage
     assert counts["brands not in the seed"] == 1
     assert counts["products not in the seed"] == 1
     assert counts["bars not in the seed"] == 1
+    assert counts["bar weekly hours"] == 2
+    assert counts["bar temporary closures"] == 2
+    assert counts["bar photos"] == 2
+    assert counts["bars with a description, default pour or tags (cleared)"] == 2
     # The created product's own aliases and the one added to a seed product.
     assert counts["product aliases not in the seed"] >= 2
 

@@ -32,25 +32,14 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", stringBuildConfigValue(kakaoNativeAppKey))
         buildConfigField("String", "SUPABASE_URL", stringBuildConfigValue(supabaseUrl))
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", stringBuildConfigValue(supabasePublishableKey))
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", stringBuildConfigValue(googleWebClientId))
     }
 
-    // A12/A13: compile Owner implementation only for developer variants.
-    flavorDimensions += "distribution"
-    productFlavors {
-        create("customer") {
-            dimension = "distribution"
-            buildConfigField("boolean", "DEVELOPER_BUILD", "false")
-        }
-        create("developer") {
-            dimension = "distribution"
-            buildConfigField("boolean", "DEVELOPER_BUILD", "true")
-        }
-    }
-
+    // One APK for customer and owner flows.
     buildTypes {
         debug {
             buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
@@ -78,7 +67,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    add("developerImplementation", libs.androidx.exifinterface)
+    implementation(libs.androidx.exifinterface)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -103,6 +92,11 @@ dependencies {
 
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

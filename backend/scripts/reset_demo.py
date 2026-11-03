@@ -3,6 +3,8 @@
 What a rehearsal leaves behind is removed:
 - every menu import, applied ones included, with all its rows and its photos;
 - every menu board and bar menu item;
+- every bar's description, default pour, tags, weekly hours, temporary closure and photos with their
+  files (the seed sets none);
 - every bar, brand, product, and alias whose id is not in the seed files, such as the
   products and aliases created while reviewing.
 
@@ -28,7 +30,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from uuid import UUID
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.orm import Session
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -40,6 +42,9 @@ from app.db.session import get_engine  # noqa: E402
 from app.models import (  # noqa: E402
     Bar,
     BarMenuItem,
+    BarOperatingException,
+    BarPhoto,
+    BarWeeklyHours,
     Brand,
     BrandAlias,
     MenuBoard,
@@ -91,6 +96,9 @@ NAMES = {
     Bar: "bars",
 }
 
+# Bars whose owner-set fields differ from the seed, which sets none of them.
+HAS_PROFILE = or_(Bar.description.is_not(None), Bar.default_pour_ml.is_not(None), func.cardinality(Bar.tags) > 0)
+
 
 def plan(session: Session, seeds: Seeds) -> list[tuple[str, int]]:
     """What a reset would delete, as (description, row count)."""
@@ -105,13 +113,17 @@ def plan(session: Session, seeds: Seeds) -> list[tuple[str, int]]:
         ("menu boards", count(MenuBoard)),
         ("menu board entries", count(MenuBoardEntry)),
         ("bar menu items", count(BarMenuItem)),
+        ("bar weekly hours", count(BarWeeklyHours)),
+        ("bar temporary closures", count(BarOperatingException)),
+        ("bar photos", count(BarPhoto)),
+        ("bars with a description, default pour or tags (cleared)", count(Bar, HAS_PROFILE)),
         *((f"{NAMES[model]} not in the seed", count(model, model.id.not_in(ids[model]))) for model in NOT_SEEDED),
     ]
 
 
 def reset(session: Session, seeds: Seeds) -> list[str]:
     """Delete what seeding did not create and load the seeds again, without committing.
-    Returns the storage keys of the deleted photos; delete the files after the commit."""
+    Returns the storage keys of the deleted menu and bar photos; delete the files after the commit."""
     ids = seeds.ids()
     session.execute(delete(MenuEntryOption))
     session.execute(delete(MenuBoardEntry))
@@ -121,6 +133,13 @@ def reset(session: Session, seeds: Seeds) -> list[str]:
     keys = delete_import_rows(session, list(session.scalars(select(MenuImport.id))))
     # After the imports: their proposed changes refer to bar menu items.
     session.execute(delete(BarMenuItem))
+    # Before the bars they belong to; the seed sets none of them.
+    session.execute(delete(BarWeeklyHours))
+    session.execute(delete(BarOperatingException))
+    for photo_keys in session.execute(select(BarPhoto.storage_key, BarPhoto.thumbnail_storage_key)):
+        keys.extend(photo_keys)
+    session.execute(delete(BarPhoto))
+    session.execute(update(Bar).where(HAS_PROFILE).values(description=None, default_pour_ml=None, tags=[]))
     for model in NOT_SEEDED:
         session.execute(delete(model).where(model.id.not_in(ids[model])))
 
@@ -167,7 +186,7 @@ def main() -> None:
         keys = reset(session, seeds)
         session.commit()
     failed = delete_photos(get_image_storage(), keys)
-    print(f"\nreset done: deleted {len(keys) - len(failed)} of {len(keys)} photo(s)")
+    print(f"\nreset done: deleted {len(keys) - len(failed)} of {len(keys)} photo file(s)")
 
 
 if __name__ == "__main__":

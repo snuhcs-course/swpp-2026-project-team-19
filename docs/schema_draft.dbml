@@ -128,6 +128,18 @@ Enum business_status {
   closed
 }
 
+Enum search_source {
+  input
+  recent
+  popular
+}
+
+Enum operating_exception_kind {
+  closed_today
+  custom_hours
+  vacation
+}
+
 Table users {
   id uuid [pk]
   auth_subject varchar(255) [not null, unique, note: 'Supabase Auth user ID (the access token sub, a UUID string)']
@@ -153,6 +165,9 @@ Table bars {
   latitude decimal(9,6) [not null, note: 'WGS84; CHECK between -90 and 90']
   longitude decimal(9,6) [not null, note: 'WGS84; CHECK between -180 and 180']
   phone varchar(30)
+  description varchar(100) [note: 'One-line introduction set by the owner or an operator; trimmed, null when blank']
+  default_pour_ml smallint [note: 'CHECK between 1 and 999; owner-chosen default glass size, null when unset']
+  tags "varchar(24)[]" [not null, default: '{}', note: 'Up to 5 owner-chosen tags in display order; trimmed, no line breaks or control characters, unique ignoring case']
   status bar_status [not null, default: 'active']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
@@ -161,6 +176,9 @@ Table bars {
   Bars are created by project operators, or by an operator approving a new_bar owner application.
   The schema does not retain which operator originally created a bar.
   The bar's approved owner, if any, is the bar_owners row whose revoked_at is null.
+  default_pour_ml only pre-fills glass-option inputs in the owner's menu edit and review screens.
+  The backend never applies it to stored menu options.
+  Tags are free text shown on the customer bar detail; they are not used by search.
   Coordinate storage may later change to a PostGIS geography or geometry type if spatial search requires it.
   '''
 }
@@ -212,6 +230,30 @@ Table bar_owner_applications {
   with a new row. Business registration numbers, representative names, opening dates and contact
   phones are visible only to the applicant and operators; the applicant sees only business_status
   of the check result. Certificate photos read by OCR are not stored.
+  The applicant may attach menu photos (bar_owner_application_menu_images). On approval, if there are
+  photos and the bar has no unfinished menu import, the same transaction creates a menu import from them
+  and AI processing starts after the commit.
+  '''
+}
+
+Table bar_owner_application_menu_images {
+  id uuid [pk]
+  application_id uuid [not null, ref: > bar_owner_applications.id]
+  storage_key varchar(500) [not null]
+  original_filename varchar(255)
+  image_order smallint [not null]
+  content_sha256 char(64) [not null, note: 'SHA-256 of the original bytes; used for the request_fingerprint of the menu import created on approval']
+  uploaded_at timestamptz [not null]
+
+  indexes {
+    (application_id, image_order) [unique]
+  }
+
+  Note: '''
+  Menu photos an applicant attached to an owner application, uploaded only while it is pending.
+  Each upload replaces the whole set. Rejecting or canceling the application deletes the rows and the
+  stored files. Approving keeps them, and the menu_images of the menu import created on approval point
+  to the same storage keys, so those files are never deleted after approval.
   '''
 }
 
@@ -237,13 +279,74 @@ Table bar_owners {
   '''
 }
 
+Table bar_weekly_hours {
+  bar_id uuid [not null, ref: > bars.id]
+  day_of_week smallint [not null, note: 'ISO 8601: 1 = Monday .. 7 = Sunday']
+  is_closed boolean [not null, note: 'Regular day off']
+  open_time time [note: 'Local Asia/Seoul time, 5-minute steps; null exactly when is_closed']
+  close_time time [note: 'Earlier than open_time means the shift ends the next day; never equal to open_time']
+
+  indexes {
+    (bar_id, day_of_week) [pk]
+  }
+
+  Note: '''
+  Regular opening hours, one shift per weekday. A weekday without a row has no information, which differs
+  from a day off. PATCH /api/bars/{barId} replaces all rows of the bar at once.
+  '''
+}
+
+Table bar_operating_exceptions {
+  id uuid [pk]
+  bar_id uuid [not null, unique, ref: - bars.id, note: 'At most one exception per bar; applying a new one replaces it']
+  kind operating_exception_kind [not null]
+  start_date date [not null, note: 'Local Asia/Seoul date. closed_today and custom_hours: the day it was applied']
+  end_date date [not null, note: 'CHECK end_date >= start_date; equal to start_date unless kind is vacation']
+  open_time time [note: 'custom_hours only, required there']
+  close_time time [note: 'custom_hours only, required there; earlier than open_time means it ends the next day']
+  note varchar(100) [note: 'Message shown to customers; trimmed, single line, null when blank']
+  created_by_user_id uuid [ref: > users.id, note: 'Who applied it; null for a temporary-login operator without a users row']
+  created_at timestamptz [not null]
+
+  Note: '''
+  A temporary closure or a change to today's hours. It overrides the regular hours of the dates it covers.
+  An expired row is not deleted by a job: the API keeps returning it through the day after end_date, which the
+  client needs for the early-morning status, and hides it after that. The next apply or cancel
+  replaces or deletes it.
+  '''
+}
+
+Table bar_photos {
+  id uuid [pk]
+  bar_id uuid [not null, ref: > bars.id]
+  storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>.jpg: the re-encoded JPEG without metadata']
+  thumbnail_storage_key varchar(500) [not null, note: 'bars/<barId>/photos/<photoId>-thumb.jpg: 480 px on the long edge']
+  content_sha256 char(64) [not null, note: 'SHA-256 of the uploaded bytes before re-encoding; the same photo cannot be added twice to a bar']
+  sort_order smallint [not null, note: '1 = cover photo; contiguous from 1 within a bar']
+  uploaded_by_user_id uuid [ref: > users.id, note: 'null for a temporary-login operator without a users row']
+  created_at timestamptz [not null]
+
+  indexes {
+    (bar_id, content_sha256) [unique]
+    (bar_id, sort_order) [unique, note: 'Deferrable, so a reorder can swap positions in one transaction']
+  }
+
+  Note: '''
+  Gallery photos shown to customers, at most 15 per bar, at most 2 MB and 2048 px on the long edge. Separate from menu photos, which are never public.
+  The server re-encodes every upload to a JPEG without metadata (EXIF, XMP, GPS) and makes a thumbnail; the uploaded
+  file itself is not kept. The bucket stays private: GET /api/bar-photos/{photoId} and its /thumbnail read the files
+  and serve them with a one-day cache lifetime. Deleting a photo deletes the row and then both stored files.
+  '''
+}
+
 Table brands {
   id uuid [pk]
   canonical_name varchar(120) [not null, unique]
+  created_by_user_id uuid [ref: > users.id, note: 'User who created the brand in a review or a manual menu add; null for seeded brands']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 
-  Note: 'Canonical brand record shared by all products from the same brand. The schema does not retain which operator originally created a brand.'
+  Note: 'Canonical brand record shared by all products from the same brand.'
 }
 
 Table brand_aliases {
@@ -279,6 +382,7 @@ Table products {
   abv decimal(5,2)
   is_active boolean [not null, default: true]
   created_from_extracted_item_id uuid [ref: > extracted_items.id]
+  created_by_user_id uuid [ref: > users.id, note: 'User who created the product in a review or a manual menu add; null for seeded products']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 
@@ -294,10 +398,10 @@ Table products {
   brand, age, edition, and full-product aliases. A conflicting age or edition must not be auto-merged.
   age_years is nullable for no-age-statement products, and edition_name distinguishes releases that
   share the same brand and age. ABV is optional metadata and is not an identity key in the MVP.
-  When no existing product matches, an operator may create a product during menu review and link its
-  originating extracted item. This optional link records only the item that triggered initial product
-  creation, not every later occurrence of the product. Manually pre-registered products have no source
-  item. The schema does not separately retain which operator originally created a product.
+  When no existing product matches, an operator or the bar's owner may create a product during menu review
+  and link its originating extracted item. This optional link records only the item that triggered initial
+  product creation, not every later occurrence of the product. A product created by a manual menu add has
+  no source item. Manually pre-registered products have neither a source item nor a creating user.
   '''
 }
 
@@ -334,6 +438,7 @@ Table menu_imports {
   review_version integer [not null, default: 0, note: 'Incremented whenever the consolidated review payload is regenerated']
   owner_note text
   review_confirmed_at timestamptz
+  recovery_count smallint [not null, default: 0, note: 'Times processing was resumed after a server restart; past 3 the import fails instead (CHECK >= 0)']
   created_at timestamptz [not null]
   completed_at timestamptz
 
@@ -553,6 +658,7 @@ Table bar_menu_items {
   id uuid [pk]
   bar_id uuid [not null, ref: > bars.id]
   product_id uuid [not null, ref: > products.id]
+  sold_out_at timestamptz [note: 'Set while the item is sold out; null when on sale. Cleared when the item leaves the current board']
   created_at timestamptz [not null]
 
   indexes {
@@ -563,8 +669,12 @@ Table bar_menu_items {
   Note: '''
   A row is one bar-specific menu item backed by a shared canonical product. It is not deleted merely
   because a later menu board omits it, and it can be reused if the product returns later.
-  Membership in the bar's current menu board is the single visibility rule: linked means visible;
-  unlinked means retained but not visible. No separate visibility status is stored.
+  Membership in the bar's current menu board decides whether the item is on the menu: linked means on the board;
+  unlinked means retained but not on the board. Customers see a linked item only while it is not sold out.
+  No separate visibility status is stored.
+  Sold-out is stock state: a sold-out item stays on the board, but customers and search do not see it;
+  only the owner and operators see it, marked as sold out.
+  It lives here because bar_menu_items rows survive board rewrites, while board entries do not.
   '''
 }
 
@@ -572,13 +682,17 @@ Table menu_boards {
   id uuid [pk]
   bar_id uuid [not null, unique, ref: > bars.id]
   last_import_id uuid [ref: > menu_imports.id]
+  version integer [not null, default: 1, note: 'Incremented on every review publish and manual edit; checked by manual edits']
   published_at timestamptz [not null]
+  confirmed_at timestamptz [note: 'Last time an owner or operator confirmed the menu is still accurate; publishing does not change it']
+  confirmed_by_user_id uuid [ref: > users.id, note: 'Who confirmed; null when never confirmed or for a temporary-login operator without a users row']
 
   Note: '''
   A menu board is the current grouping of bar menu items shown by a bar. Each bar has at most one current
   menu board. A full replacement rebuilds its entries, while a partial update changes only selected
-  entries. last_import_id identifies the latest change; each sales option can trace its own source
-  through source_extracted_option_id. The underlying bar_menu_items rows remain, and original images
+  entries. Manual edits change one entry or empty the board without an import. last_import_id identifies
+  the latest import publish and is unchanged by manual edits; each sales option can trace its own source
+  through source_extracted_option_id, which is null for options entered manually. The underlying bar_menu_items rows remain, and original images
   and AI processing records remain under the import workflow.
   '''
 }
@@ -609,7 +723,10 @@ Table menu_entry_options {
   source_extracted_option_id uuid [ref: > extracted_options.id]
   option_label varchar(100)
   pour_ml smallint
-  price_krw integer [not null]
+  price_krw integer [not null, note: 'List price, also while a discount is running']
+  discount_price_krw integer [note: 'CHECK between 1 and price_krw - 1; set together with both discount times or all null']
+  discount_starts_at timestamptz
+  discount_ends_at timestamptz [note: 'CHECK discount_ends_at > discount_starts_at; the discount applies in [starts_at, ends_at)']
   sort_order smallint [not null]
   created_at timestamptz [not null]
 
@@ -622,6 +739,44 @@ Table menu_entry_options {
   One row is one sales option, such as 15 ml at KRW 8,000 or 30 ml at KRW 15,000.
   Each visible menu-board entry must have at least one option. option_label supports non-volume
   labels found on a real menu while pour_ml remains nullable when the size is not stated.
+  An option has at most one time-limited discount. Options are rewritten on every publish, so a review publish
+  copies a discount to the new option with the same label, pour size and list price, and drops it otherwise.
+  A manual add, edit or delete changes only the requested item; other items keep their options and discounts.
+  An ended discount is not deleted by a job; the API omits it from responses.
+  '''
+}
+
+Table product_search_counts {
+  search_date date [not null, note: 'Seoul local date of the search']
+  product_id uuid [not null, note: 'No foreign key so the counts survive catalogue changes']
+  source search_source [not null]
+  search_count integer [not null, note: 'At least 1']
+
+  indexes {
+    (search_date, product_id, source) [pk]
+  }
+
+  Note: '''
+  Daily count of customer product searches (GET /api/search/bars) that resolved to exactly one product:
+  a productId search, or an alias_exact search with one matched product (API spec 3.10.6).
+  Used to rank "요즘 많이 찾는 위스키" (API spec 3.17). No query text, time of day, location, user, IP, device, or token.
+  Rows older than 90 days are deleted.
+  '''
+}
+
+Table unmatched_search_queries {
+  search_date date [not null, note: 'Seoul local date of the search']
+  normalized_query varchar(200) [not null, note: 'The query after the shared normalization; the raw input is not kept']
+  search_count integer [not null, note: 'At least 1']
+
+  indexes {
+    (search_date, normalized_query) [pk]
+  }
+
+  Note: '''
+  Daily count of query searches that matched no product, used to find products the catalogue is missing (API spec 3.10.6).
+  Queries with "@" or 7 or more consecutive digits are not stored. At most 1,000 new rows per date.
+  No read API. Rows older than 30 days are deleted.
   '''
 }
 
@@ -698,6 +853,7 @@ TableGroup "Accounts and Bars" {
   users
   bars
   bar_owner_applications
+  bar_owner_application_menu_images
   bar_owners
 }
 

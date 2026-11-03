@@ -38,8 +38,11 @@ class SampleReview:
     changes: dict[MenuChangeType, MenuImportChange]
 
 
-def upload_sample_review(client, session: Session, operator: dict, glenfiddich: dict) -> SampleReview:
-    bar = make_bar(session)
+def upload_sample_review(
+    client, session: Session, operator: dict, glenfiddich: dict, bar: Bar | None = None
+) -> SampleReview:
+    """Uploads as `operator` (any caller who may manage the bar), to a new bar unless one is given."""
+    bar = bar if bar is not None else make_bar(session)
     board = publish_menu(
         session,
         bar,

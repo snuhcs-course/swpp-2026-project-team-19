@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_base_url
 from app.core.security import Principal, get_current_user
 from app.db.session import get_session
 from app.schemas.bar import MyBarsResponse
@@ -56,5 +57,6 @@ def read_current_user(
 def read_my_bars(
     principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
 ) -> MyBarsResponse:
-    return MyBarsResponse(items=my_bars(session, principal))
+    return MyBarsResponse(items=my_bars(session, principal, base_url=base_url))

@@ -64,7 +64,7 @@ jobs:
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v5
       - name: Run Android lint
-        run: ./gradlew :app:lintCustomerDebug :app:lintDeveloperDebug --no-daemon
+        run: ./gradlew :app:lintDebug --no-daemon
       - name: Upload lint reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -96,7 +96,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
       - name: Run JUnit 4 local tests
         id: unit_test
-        run: ./gradlew :app:testCustomerDebugUnitTest :app:testDeveloperDebugUnitTest --no-daemon
+        run: ./gradlew :app:testDebugUnitTest --no-daemon
       - name: Summarize JUnit results and reject empty test runs
         if: always()
         shell: bash
@@ -105,12 +105,12 @@ jobs:
           import glob
           import os
           import xml.etree.ElementTree as ET
-          variants = ("CustomerDebug", "DeveloperDebug")
+          variants = ("Debug",)
           files = []
           for variant in variants:
               variant_files = glob.glob(f"android/app/build/test-results/test{variant}UnitTest/TEST-*.xml")
               if not variant_files and os.environ.get("CI_TESTS_RAN") == "true":
-                  raise SystemExit(f"No {variant} JUnit XML files; refusing an empty variant run")
+                  raise SystemExit(f"No {variant} JUnit XML files; refusing an empty test run")
               files.extend(variant_files)
           counts = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
           for file in files:
@@ -159,38 +159,26 @@ jobs:
       # Empty BuildConfig credentials are supported for compilation; this job never connects
       # to production Backend, Google, Supabase, or Kakao services.
       - name: Build debug APK
-        run: ./gradlew :app:assembleCustomerDebug :app:assembleDeveloperDebug --no-daemon
-      - name: Verify variant APK contents
+        run: ./gradlew :app:assembleDebug --no-daemon
+      - name: Verify unified APK contents
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           from zipfile import ZipFile
-          for variant in ("customer", "developer"):
-              apks = list(Path(f"android/app/build/outputs/apk/{variant}/debug").glob("*.apk"))
-              if len(apks) != 1:
-                  raise SystemExit(f"Expected one {variant} APK, found {apks}")
-              with ZipFile(apks[0]) as archive:
-                  dex = b"".join(archive.read(n) for n in archive.namelist() if n.endswith(".dex"))
-              owner_present = b"com/zerotoone/bottlemap/ui/owner/" in dex
-              if owner_present != (variant == "developer"):
-                  raise SystemExit(f"Owner class inclusion mismatch: {variant}: {owner_present}")
-              if variant == "customer" and b"ModeSelectionScreen" in dex:
-                  raise SystemExit("Customer APK contains developer role selection screen")
-              camera_storage = b"OwnerCameraPhotoStorage" in dex
-              if camera_storage != (variant == "developer"):
-                  raise SystemExit(f"Developer-only camera code inclusion mismatch: {variant}: {camera_storage}")
-              print(f"{variant}: owner compiled={owner_present}, APK={apks[0]}")
+          apks = list(Path("android/app/build/outputs/apk/debug").glob("*.apk"))
+          if len(apks) != 1:
+              raise SystemExit(f"Expected exactly one unified debug APK, found {apks}")
+          with ZipFile(apks[0]) as archive:
+              dex = b"".join(archive.read(n) for n in archive.namelist() if n.endswith(".dex"))
+          for name in (b"com/zerotoone/bottlemap/ui/owner/", b"OwnerCameraPhotoStorage", b"com/zerotoone/bottlemap/ui/customer/"):
+              if name not in dex:
+                  raise SystemExit(f"Unified APK missing required component: {name}")
+          print(f"Unified APK: {apks[0]}")
           PY
-      - name: Upload Customer debug APK
+      - name: Upload unified debug APK
         uses: actions/upload-artifact@v7
         with:
-          name: bottlemap-customer-debug-apk
-          path: android/app/build/outputs/apk/customer/debug/*.apk
-          if-no-files-found: error
-      - name: Upload Developer debug APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: bottlemap-developer-debug-apk
-          path: android/app/build/outputs/apk/developer/debug/*.apk
+          name: bottlemap-unified-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error

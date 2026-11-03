@@ -3,7 +3,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.schemas.bar import COVER_THUMBNAIL_DESCRIPTION
 from app.schemas.common import Latitude, Longitude, UtcDateTime
+from app.schemas.menu import DiscountResponse
 
 
 class MatchedProductResponse(BaseModel):
@@ -20,7 +22,10 @@ class MatchedProductResponse(BaseModel):
 class SearchOptionResponse(BaseModel):
     optionLabel: str | None = Field(description='Label from the menu such as "잔" or "병"; null when none')
     pourMl: int | None = Field(description="Pour size in ml; null when the menu does not state it")
-    priceKrw: int
+    priceKrw: int = Field(description="List price, also while a discount is running")
+    discount: DiscountResponse | None = Field(
+        description="The same as on the bar menu; null when there is no discount or it has ended"
+    )
     sortOrder: int = Field(description="Options are returned in this order")
 
 
@@ -30,6 +35,7 @@ class SearchResultItem(BaseModel):
     address: str
     latitude: Latitude
     longitude: Longitude
+    coverThumbnailUrl: str | None = Field(description=COVER_THUMBNAIL_DESCRIPTION)
     distanceMeters: int | None = Field(
         description="Straight-line distance from lat/lng in whole meters; null when no location was sent"
     )
@@ -41,9 +47,10 @@ class SearchResultItem(BaseModel):
 
 
 class SearchBarsResponse(BaseModel):
-    query: str = Field(description="The query after trimming")
-    matchType: Literal["alias_exact", "brand", "partial", "none"] = Field(
-        description="The resolution step that produced the products"
+    query: str | None = Field(description="The query after trimming; null for a productId search")
+    matchType: Literal["alias_exact", "brand", "partial", "product", "none"] = Field(
+        description="The resolution step that produced the products; `product` for a productId search "
+        "that found its product"
     )
     matchedProducts: list[MatchedProductResponse] = Field(
         description="Every product the query resolved to, including ones no bar sells now. "
@@ -62,9 +69,10 @@ class BarNameItem(BaseModel):
     address: str
     latitude: Latitude
     longitude: Longitude
+    coverThumbnailUrl: str | None = Field(description=COVER_THUMBNAIL_DESCRIPTION)
     hasOwner: bool = Field(
         description="True when the bar has a current owner; an owner application for it would be "
-        "`409 BAR_OWNER_EXISTS`. Always false until bar owners exist (Iteration 3)"
+        "`409 BAR_OWNER_EXISTS`"
     )
 
 
@@ -79,6 +87,7 @@ class MapBarItem(BaseModel):
     address: str
     latitude: Latitude
     longitude: Longitude
+    coverThumbnailUrl: str | None = Field(description=COVER_THUMBNAIL_DESCRIPTION)
     menuUpdatedAt: UtcDateTime | None = Field(
         description="When this bar's current menu was published, as in GET /api/search/nearby-bars; "
         "null when the bar has never had a published menu, set even when that menu has no items"
@@ -97,6 +106,7 @@ class NearbyBarItem(BaseModel):
     address: str
     latitude: Latitude
     longitude: Longitude
+    coverThumbnailUrl: str | None = Field(description=COVER_THUMBNAIL_DESCRIPTION)
     distanceMeters: int = Field(
         description="Straight-line (haversine) distance from lat/lng in whole meters; at most `radiusMeters`"
     )
@@ -109,4 +119,22 @@ class NearbyBarItem(BaseModel):
 class NearbyBarsResponse(BaseModel):
     items: list[NearbyBarItem] = Field(
         description="Every active bar within the radius, nearest first; ties by barId. Never truncated."
+    )
+
+
+class PopularProductItem(BaseModel):
+    productId: UUID = Field(description="Search it with `GET /api/search/bars?productId=...&source=popular`")
+    displayName: str = Field(description="Canonical product name, shown on the card")
+    brandName: str
+    ageYears: int | None
+    editionName: str | None
+    barCount: int = Field(
+        description="Active bars selling it now, not sold out; the number of bars its productId search "
+        "shows. At least 1."
+    )
+
+
+class PopularProductsResponse(BaseModel):
+    items: list[PopularProductItem] = Field(
+        description="Ranked products, at most `limit`; empty when no bar sells any product"
     )

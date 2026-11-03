@@ -18,7 +18,7 @@ How the backend runs for the demo: one EC2 instance serving the API over HTTPS, 
 
 Files used on the server are in [`deploy/`](deploy/): the systemd service, the Caddyfile, `env.production.example`, and `deploy.sh`.
 
-Never commit or paste secrets (the RDS password, `TEMP_AUTH_JWT_SECRET`, `GEMINI_API_KEY`); they live only in `backend/.env` on the server. Supabase secrets (the secret or `service_role` key, the Google client secret) are not needed and do not go on the server at all: the backend only reads the public `SUPABASE_URL`. The deploy key for automatic deployment lives only in GitHub secrets.
+Never commit or paste secrets (the RDS password, `GEMINI_API_KEY`, `NTS_SERVICE_KEY`); they live only in `backend/.env` on the server. Supabase secrets (the secret or `service_role` key, the Google client secret) are not needed and do not go on the server at all: the backend only reads the public `SUPABASE_URL`. The deploy key for automatic deployment lives only in GitHub secrets.
 
 ## 1. AWS resources (console)
 
@@ -73,8 +73,7 @@ source ~/.local/bin/env
 git clone https://github.com/snuhcs-course/swpp-2026-project-team-19.git
 cd ~/swpp-2026-project-team-19/backend
 cp deploy/env.production.example .env && chmod 600 .env
-openssl rand -hex 32      # paste as TEMP_AUTH_JWT_SECRET
-nano .env                 # POSTGRES_HOST (RDS endpoint), POSTGRES_PASSWORD, TEMP_AUTH_JWT_SECRET, SUPABASE_URL
+nano .env                 # POSTGRES_HOST (RDS endpoint), POSTGRES_PASSWORD, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, KAKAO_JAVASCRIPT_KEY
 ```
 
 `.env` must stay plain `KEY=VALUE` lines: systemd reads it too and takes everything after `=` literally, comments included.
@@ -117,7 +116,7 @@ From your PC, with `BASE=https://bottlemap.o-r.kr`:
 - `curl -i $BASE/api/me -H "Authorization: Bearer not-a-jwt"` returns `401 UNAUTHENTICATED` with `WWW-Authenticate: Bearer`.
 - On the server, `curl -sS <SUPABASE_URL>/auth/v1/.well-known/jwks.json` lists at least one key with `"alg": "ES256"`. An empty list means the Supabase project still signs with the legacy HS256 secret.
 - The full flow, as in the [README](README.md#menu-import-upload-review-publish):
-  1. `POST $BASE/api/auth/temp-login` for an operator token; `GET $BASE/api/bars` for a bar id.
+  1. Get an operator's access token: sign in at `$BASE/admin/` with an operator's Google account and run `(await supabaseClient.auth.getSession()).data.session.access_token` in the browser console. `GET $BASE/api/bars` with it for a bar id.
   2. Upload a photo named `sample.jpg` to that bar, then poll `GET $BASE/api/menu-imports/<id>` until `ready_for_review`.
   3. `imageUrl` is an `https://bottlemap-menu-photos.s3.ap-northeast-2.amazonaws.com/...` presigned URL that opens, and `imageUrlExpiresAt` is about 15 minutes later. The object appears in the S3 console under `menus/<barId>/<menuImportId>/`.
   4. Submit `review-and-apply`; the new menu shows in `GET $BASE/api/bars/<barId>/menu` and customer search.
@@ -134,7 +133,7 @@ uv run --no-sync --env-file .env python scripts/reset_demo.py            # shows
 uv run --no-sync --env-file .env python scripts/reset_demo.py --apply
 ```
 
-It deletes every menu import with its photos in S3, every menu board, and the bars, brands, products, and aliases added after seeding, then seeds the catalog and the Seorosang menu again. The first line of its output names the database, so check that it is RDS.
+It deletes every menu import with its photos in S3, every menu board, every bar photo with its files in S3, and the bars, brands, products, and aliases added after seeding, then seeds the catalog and the Seorosang menu again. The first line of its output names the database, so check that it is RDS.
 
 ## 4. Redeploy
 
@@ -221,23 +220,29 @@ The seed upserts by id: rows in the seed overwrite changes made to the same rows
 
 - **Logs:** `journalctl -u bottlemap-api -f` (API), `journalctl -u caddy -f` (HTTPS, proxy).
 - **Settings:** edit `backend/.env`, then `sudo systemctl restart bottlemap-api`.
+- **Restarts during menu processing:** menu photo processing runs inside the API process, so a restart (a deployment included) stops it. At start-up the service resumes the unfinished imports and logs `Recovering N menu imports interrupted by a restart`; an import resumed 3 times fails instead and logs `failed after 3 recoveries` (`journalctl -u bottlemap-api | grep -i "recover"`). The owner then uploads the photos again. Keep a single API process (no `--workers`): the recovery assumes nothing else is processing at start-up.
 - **Catalog changes:** load them with the Seed catalog workflow ([Loading the catalog seed](#loading-the-catalog-seed)).
 - **Real extraction:** set `MENU_EXTRACTOR=gemini` and `GEMINI_API_KEY` (a paid-tier key, so uploaded menu photos are not used for training) and restart. The settings are checked at start-up.
+- **Business registration check (NTS):** `NTS_SERVICE_KEY` in `.env` (a data.go.kr key for 국세청_사업자등록정보 진위확인 및 상태조회 서비스). Restart after setting it (the service reads `.env` only when it starts). Without it, owner applications are accepted with the result `unavailable` and `POST /api/owner-applications/{applicationId}/verify-business` answers `503`; once it is set, an operator rechecks those applications with that API. A wrong or unregistered key looks the same as an NTS outage (`unavailable`, `503`), so after setting it, recheck one pending application and see that it answers `200`; otherwise `journalctl -u bottlemap-api | grep "NTS business check"` shows the reason (e.g. `HTTP 401` for a wrong key).
 - **Google login (Supabase):** `SUPABASE_URL` in `.env`, then restart. If a real Google token gets `503`, check that `SUPABASE_URL` is set and look for `signing keys are unavailable` in `journalctl -u bottlemap-api`. A Free-plan Supabase project is paused after about a week without activity, and then every signed-in request gets `503`; check the project in the Supabase dashboard before a demo.
-- **Temporary login** is on for the demo, so anyone who reaches the server can get an operator token. While it is on, the service logs a warning at every start (`journalctl -u bottlemap-api | grep "Temporary login is on"`). Keep the server running only when needed, and turn it off as described below once Google login works in the app.
+- **Operator dashboard (`/admin`):** the web page where operators review owner applications, served by the API itself at `$BASE/admin/`. It signs in with Google through Supabase in the browser, so it needs, once:
+  1. `SUPABASE_PUBLISHABLE_KEY` in `.env` (Supabase dashboard > Project Settings > API Keys: the publishable key, or the legacy `anon` key). It is public by design and is sent to the browser; never put the secret or `service_role` key here. Without it the page cannot sign in.
+  2. Supabase dashboard > Authentication > URL Configuration: add `https://bottlemap.o-r.kr/admin/` to Redirect URLs (and `http://localhost:8000/admin/` for local development).
+  3. Google Cloud: the Web client used by Supabase lists `<SUPABASE_URL>/auth/v1/callback` under Authorized redirect URIs. The app's ID-token login does not use this redirect, so it may be missing.
+  4. For the map and address search in new_bar approvals: `KAKAO_JAVASCRIPT_KEY` in `.env` (Kakao Developers > the team's app > App Keys: the JavaScript key, from the same app as the Android native app key). It is public by design and is sent to the browser, so it works only on the domains registered under Platform > Web: register `https://bottlemap.o-r.kr` (and `http://localhost:8000` for local development), and keep the Kakao Map service enabled for the app. Never put the REST API or Admin key here. Without it, or on an unregistered domain, the approval form says so and the operator types the coordinates. On an unregistered domain the map still loads but the address search fails with `401`; locally, open `http://localhost:8000/admin/`, not `127.0.0.1` (uvicorn prints the latter), because Kakao treats them as different domains.
+  5. Restart after changing these keys (`sudo systemctl restart bottlemap-api`); the service reads `.env` only when it starts.
+  6. Check: open `$BASE/admin/`, sign in with an operator's Google account, and see the pending list. Open a pending `new_bar` application and press 주소로 좌표 찾기: the coordinates fill in and the map shows a marker. A signed-in user who is not an operator sees an access message; the APIs themselves refuse them (`403`).
+- **Temporary login** is off on the server since 2026-11-02 (`TEMP_AUTH_ENABLED=false`); everyone signs in with Google. Keep it off: while it is on, anyone who reaches the server gets an operator token. `curl -i -X POST $BASE/api/auth/temp-login` must return `404`, and the start log must not show `Temporary login is on` (`journalctl -u bottlemap-api | grep "Temporary login is on"`).
 - **Known limitation:** an import that is `processing` when the service restarts stays there; delete it with `reset_menu_imports.py` and upload again.
 - **Cost:** stop the EC2 and RDS instances when idle. A stopped RDS instance starts again by itself after 7 days, and the Elastic IP is billed while the instance is stopped.
 
-### Turning off temporary login
+### Adding an operator
 
-Do this once the app signs in with Google (P19) and `SUPABASE_URL` is set (section 3).
-
-1. Each team member who needs operator access signs in with Google in the app once, so `GET /api/me` creates their user.
+1. The person signs in with Google once, in the app or at `$BASE/admin/`, so `GET /api/me` creates their user.
 2. Give them the operator role. Until the API has a way to manage roles, this is done only by the backend owner changing `users.user_type` in the database by hand; the new role applies from the user's next request.
-3. Set `TEMP_AUTH_ENABLED=false` in `.env` and run `sudo systemctl restart bottlemap-api`.
-4. Check: `curl -i -X POST $BASE/api/auth/temp-login` returns `404`, the start log no longer shows the warning, and an operator signed in with Google can open `GET $BASE/api/bars`.
+3. Check: they reload `$BASE/admin/` and see the owner application list.
 
-Temporary tokens issued before stop working at once (`401`). The `local-dev-user` row stays in `users` and does no harm.
+`.env` is read only when the service starts, so any change to it, `TEMP_AUTH_ENABLED` included, needs `sudo systemctl restart bottlemap-api`. The `local-dev-user` row left from the temporary-login period stays in `users` and does no harm.
 
 ## 7. Teardown
 

@@ -206,6 +206,35 @@ def test_review_payload(client, db_session, image_storage, operator, glenfiddich
     assert {c["decision"] for c in body["proposedChanges"]} == {"pending"}
 
 
+def test_review_items_carry_the_hybrid_line_boxes(client, db_session, image_storage, operator):
+    import_id = upload(client, make_bar(db_session), operator)
+    db_session.expire_all()
+    run = db_session.get(MenuImport, import_id).images[0].extraction_run
+    # What the hybrid extractor stores (app/extraction/hybrid.py item_sources), plus entries to skip.
+    run.raw_output = {
+        **run.raw_output,
+        "itemSources": [
+            {"itemOrder": 2, "nameLines": ["L002"], "priceLines": ["L003"], "box": [100, 100, 880, 120]},
+            {"itemOrder": 3, "nameLines": [], "priceLines": [], "box": None},
+            {"itemOrder": 4, "nameLines": ["L007"], "priceLines": [], "box": [100, 300, 1200, 320]},
+        ],
+    }
+    db_session.flush()
+
+    [image] = get_import(client, import_id, operator)["images"]
+
+    assert [item["sourceBox"] for item in image["items"]] == [None, [100, 100, 880, 120], None, None, None]
+
+
+def test_review_items_without_line_boxes(client, db_session, image_storage, operator):
+    # The mock extractor, like Gemini-only extraction, keeps no OCR lines.
+    import_id = upload(client, make_bar(db_session), operator)
+
+    [image] = get_import(client, import_id, operator)["images"]
+
+    assert {item["sourceBox"] for item in image["items"]} == {None}
+
+
 def test_review_lists_items_of_every_image_in_order(client, db_session, image_storage, operator, glenfiddich):
     import_id = upload(client, make_bar(db_session), operator, filenames=("sample.jpg", "sample-2.jpg"))
 

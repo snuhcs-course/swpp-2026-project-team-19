@@ -19,6 +19,7 @@ def schema():
         ("get", "/api/search/nearby-bars", {"422", "500"}),
         ("get", "/api/search/bar-names", {"422", "500"}),
         ("get", "/api/search/map-bars", {"422", "500"}),
+        ("get", "/api/search/popular-products", {"422", "500"}),
         ("get", "/api/bars/{barId}/menu", {"401", "404", "422", "500"}),
         ("get", "/api/bars", {"401", "403", "422", "500", "503"}),
         ("get", "/api/bars/{barId}/menu-imports", {"401", "403", "404", "422", "500", "503"}),
@@ -37,6 +38,15 @@ def schema():
         ("get", "/api/catalog/products", {"401", "403", "422", "500", "503"}),
         (
             "post",
+            "/api/bars/{barId}/photos",
+            {"401", "403", "404", "409", "413", "415", "422", "500", "503"},
+        ),
+        ("delete", "/api/bars/{barId}/photos/{photoId}", {"401", "403", "404", "422", "500", "503"}),
+        ("put", "/api/bars/{barId}/photos/order", {"401", "403", "404", "409", "422", "500", "503"}),
+        ("get", "/api/bar-photos/{photoId}", {"404", "422", "500"}),
+        ("get", "/api/bar-photos/{photoId}/thumbnail", {"404", "422", "500"}),
+        (
+            "post",
             "/api/owner-applications/business-certificate-ocr",
             {"401", "413", "415", "422", "429", "500", "503"},
         ),
@@ -45,7 +55,7 @@ def schema():
 def test_error_responses_use_the_common_format(schema, method, path, statuses):
     responses = schema["paths"][path][method]["responses"]
 
-    documented = {status for status in responses if status not in {"200", "202"}}
+    documented = {status for status in responses if status not in {"200", "201", "202"}}
     assert documented == statuses
     for status in statuses:
         assert responses[status]["content"]["application/json"]["schema"] == {"$ref": ERROR_REF}
@@ -92,7 +102,13 @@ def test_menu_import_status_documents_every_response_shape(schema):
     success = schema["paths"]["/api/menu-imports/{menuImportId}"]["get"]["responses"]["200"]
     refs = {variant["$ref"].rsplit("/", 1)[-1] for variant in success["content"]["application/json"]["schema"]["anyOf"]}
 
-    assert refs == {"ImportProcessingResponse", "ImportFailedResponse", "ImportReviewResponse", "ImportAppliedResponse"}
+    assert refs == {
+        "ImportProcessingResponse",
+        "ImportFailedResponse",
+        "ImportReviewResponse",
+        "ImportAppliedResponse",
+        "ImportCanceledResponse",
+    }
 
 
 def test_upload_images_render_as_file_pickers(schema):

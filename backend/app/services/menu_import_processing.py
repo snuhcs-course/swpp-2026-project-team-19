@@ -9,6 +9,16 @@ Matching runs the rule stages S1–S3 and, when the LLM matching layer is config
 (MATCHING_LLM_ENABLED, see `app.api.deps.get_matching_llm_layer`), the M3 layer on the lines
 they did not confirm. The layer only adds candidates: its lines are ambiguous, and any
 failure in it leaves the rule results as they were.
+
+Processing runs inside the API process, so a restart stops it. At start-up the unfinished
+imports (`uploaded`, `processing`) are resumed: an image's items are committed together with
+its run's `succeeded`, so a `running` run left behind stored nothing and is queued again, and
+matching writes nothing until its final commit. An import is resumed at most MAX_RECOVERIES
+times, so an image that crashes the process cannot make it restart forever.
+
+An import can be canceled while it is processed (app.services.menu_import_cancel). Before each
+commit the job locks the import row, which the cancel locks too, and stops without writing if it
+is no longer `processing`; a canceled import is not resumed either.
 """
 
 import logging
@@ -19,6 +29,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from fastapi import BackgroundTasks
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.adapters.extraction import ExtractedItemData, ExtractionError, MenuExtractor
@@ -45,6 +56,9 @@ logger = logging.getLogger(__name__)
 
 SessionFactory = Callable[[], AbstractContextManager[Session]]
 
+MAX_RECOVERIES = 3
+_RESUMABLE = (ImportStatus.UPLOADED, ImportStatus.PROCESSING)
+
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
@@ -60,7 +74,15 @@ def start_processing(
     extractor: MenuExtractor,
     llm_layer: LLMLayerConfig | None = None,
 ) -> None:
-    """Called after the import rows are committed, so the job never sees uncommitted rows."""
+    """Called after the import rows are committed, so the job never sees uncommitted rows.
+
+    The import can be canceled once it is committed, so the row is locked and processing starts
+    only while it is still `uploaded`.
+    """
+    session.refresh(menu_import, with_for_update=True)
+    if menu_import.status != ImportStatus.UPLOADED:
+        session.commit()
+        return
     menu_import.status = ImportStatus.PROCESSING
     session.commit()
     background_tasks.add_task(
@@ -81,26 +103,107 @@ def process_menu_import(
         if menu_import is None or menu_import.status != ImportStatus.PROCESSING:
             return
         try:
-            if _extract_all(session, storage, extractor, menu_import):
-                _resolve_and_draft(session, menu_import, llm_layer)
-                menu_import.status = ImportStatus.READY_FOR_REVIEW
-            else:
-                menu_import.status = ImportStatus.FAILED
-                menu_import.completed_at = _now()
+            if not _extract_all(session, storage, extractor, menu_import):
+                return
+            _resolve_and_draft(session, menu_import, llm_layer)
+            if not _still_processing(session, import_id):
+                session.rollback()
+                return
+            menu_import.status = ImportStatus.READY_FOR_REVIEW
             session.commit()
         except Exception:
             # A bug must not leave the import in processing forever.
             logger.exception("Menu import %s failed during processing", import_id)
             session.rollback()
-            menu_import = session.get(MenuImport, import_id)
-            if menu_import is not None:
+            menu_import = session.get(MenuImport, import_id, with_for_update=True)
+            if menu_import is not None and menu_import.status == ImportStatus.PROCESSING:
                 menu_import.status = ImportStatus.FAILED
                 menu_import.completed_at = _now()
-                session.commit()
+            session.commit()
+
+
+def _still_processing(session: Session, import_id: UUID) -> bool:
+    """Lock the import row until the next commit and tell whether it is still `processing`.
+
+    Called before each commit of the job: a cancel locks the same row, so it either commits first
+    and the job stops here, or waits until the job's commit and sees what it wrote.
+    """
+    stmt = select(MenuImport.status).where(MenuImport.id == import_id).with_for_update()
+    return session.scalar(stmt) == ImportStatus.PROCESSING
+
+
+def find_unfinished_imports(session_factory: SessionFactory) -> list[UUID]:
+    """Imports a restart left `uploaded` or `processing`, oldest first.
+
+    Call it before the server takes requests: the API runs as one process, so at that point nothing
+    in it is processing, and an upload made after it cannot be mistaken for an interrupted one.
+    """
+    with session_factory() as session:
+        return list(
+            session.scalars(
+                select(MenuImport.id).where(MenuImport.status.in_(_RESUMABLE)).order_by(MenuImport.created_at)
+            )
+        )
+
+
+def recover_imports(
+    import_ids: list[UUID],
+    session_factory: SessionFactory,
+    storage: ImageStorage,
+    extractor: MenuExtractor,
+    *,
+    llm_layer: LLMLayerConfig | None = None,
+) -> None:
+    """Resume the given interrupted imports one by one; one that cannot be resumed does not stop the rest."""
+    for import_id in import_ids:
+        try:
+            if _prepare_resume(session_factory, import_id):
+                process_menu_import(session_factory, storage, extractor, import_id, llm_layer=llm_layer)
+        except Exception:
+            logger.exception("Menu import %s could not be recovered", import_id)
+
+
+def _prepare_resume(session_factory: SessionFactory, import_id: UUID) -> bool:
+    """Queue the interrupted run again and count the recovery, or fail the import past the limit.
+    Returns whether to process it now."""
+    with session_factory() as session:
+        menu_import = session.get(MenuImport, import_id, with_for_update=True)
+        if menu_import is None or menu_import.status not in _RESUMABLE:
+            # No longer unfinished since it was found.
+            return False
+        interrupted = [
+            image.extraction_run
+            for image in menu_import.images
+            if image.extraction_run is not None and image.extraction_run.status == PipelineStatus.RUNNING
+        ]
+        if menu_import.recovery_count >= MAX_RECOVERIES:
+            now = _now()
+            # A run interrupted again points at the image; without one the import fails as a whole.
+            for run in interrupted:
+                run.status = PipelineStatus.FAILED
+                run.raw_output = {"error": "Interrupted", "message": "The server restarted during extraction"}
+                run.completed_at = now
+            menu_import.status = ImportStatus.FAILED
+            menu_import.completed_at = now
+            session.commit()
+            logger.warning("Menu import %s failed after %d recoveries", import_id, MAX_RECOVERIES)
+            return False
+        menu_import.recovery_count += 1
+        for run in interrupted:
+            run.status = PipelineStatus.QUEUED
+            run.started_at = None
+        menu_import.status = ImportStatus.PROCESSING
+        session.commit()
+        logger.info(
+            "Resuming menu import %s (recovery %d of %d)", import_id, menu_import.recovery_count, MAX_RECOVERIES
+        )
+        return True
 
 
 def _extract_all(session: Session, storage: ImageStorage, extractor: MenuExtractor, menu_import: MenuImport) -> bool:
-    """Extract queued images in order. Returns False at the first failed image."""
+    """Extract queued images in order. Returns False when processing ended here: at the first failed
+    image, which fails the import, or when the import was canceled, which leaves it as it is."""
+    import_id = menu_import.id
     for image in menu_import.images:
         run = image.extraction_run
         if run.status != PipelineStatus.QUEUED:
@@ -108,6 +211,9 @@ def _extract_all(session: Session, storage: ImageStorage, extractor: MenuExtract
         # Read before the commit: after it, attribute access would open a new transaction and
         # hold it for the whole extraction call, which can take minutes with a real model.
         storage_key, filename = image.storage_key, image.original_filename
+        if not _still_processing(session, import_id):
+            session.rollback()
+            return False
         run.status = PipelineStatus.RUNNING
         run.started_at = _now()
         session.commit()
@@ -116,12 +222,21 @@ def _extract_all(session: Session, storage: ImageStorage, extractor: MenuExtract
             detected = detect_image_type(data)
             result = extractor.extract(data, detected[1] if detected else "application/octet-stream", filename)
         except (ExtractionError, OSError) as error:
+            # The cancel has already ended the run; the error is not stored.
+            if not _still_processing(session, import_id):
+                session.rollback()
+                return False
             run.status = PipelineStatus.FAILED
             run.raw_output = {"error": type(error).__name__, "message": str(error)}
             if isinstance(error, ExtractionError) and error.raw_output is not None:
                 run.raw_output["output"] = error.raw_output
             run.completed_at = _now()
+            menu_import.status = ImportStatus.FAILED
+            menu_import.completed_at = run.completed_at
             session.commit()
+            return False
+        if not _still_processing(session, import_id):
+            session.rollback()
             return False
         for item in result.items:
             _store_item(session, run, item)

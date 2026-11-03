@@ -46,6 +46,13 @@ def mock_extractor(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
 
 
 @pytest.fixture(autouse=True)
+def no_startup_recovery(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests that start the app (`with TestClient(app)`) must not resume imports in the database
+    configured in .env; test_import_recovery.py calls the recovery directly."""
+    monkeypatch.setattr("app.main.recover_unfinished_imports", lambda: None)
+
+
+@pytest.fixture(autouse=True)
 def no_nts_key(monkeypatch: pytest.MonkeyPatch) -> None:
     """Never call the NTS business check, even when .env has its key; tests fake the verifier."""
     monkeypatch.delenv("NTS_SERVICE_KEY", raising=False)

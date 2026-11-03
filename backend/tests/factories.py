@@ -2,6 +2,7 @@
 
 from datetime import date, datetime, timezone
 from decimal import Decimal
+from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
@@ -11,6 +12,8 @@ from app.models import (
     BarMenuItem,
     BarOwner,
     BarOwnerApplication,
+    BarOwnerApplicationMenuImage,
+    BarPhoto,
     BarStatus,
     Brand,
     BrandAlias,
@@ -97,12 +100,14 @@ def make_product(
 def publish_menu(
     session: Session,
     bar: Bar,
-    entries: list[tuple[Product, str, list[tuple[str | None, int | None, int]]]],
+    entries: list[tuple[Product, str, list[tuple]]],
     *,
     published_at: datetime | None = None,
+    version: int = 1,
 ) -> MenuBoard:
-    """entries: (product, menu display name, [(option label, pour ml, price krw), ...]) in menu order."""
-    board = MenuBoard(bar_id=bar.id, published_at=published_at or datetime.now(timezone.utc))
+    """entries: (product, menu display name, [(option label, pour ml, price krw), ...]) in menu order.
+    An option may add a fourth value, its discount: (discounted price krw, starts at, ends at)."""
+    board = MenuBoard(bar_id=bar.id, published_at=published_at or datetime.now(timezone.utc), version=version)
     session.add(board)
     session.flush()
     for entry_order, (product, display_name, options) in enumerate(entries, start=1):
@@ -114,13 +119,17 @@ def publish_menu(
         )
         session.add(entry)
         session.flush()
-        for option_order, (label, pour_ml, price_krw) in enumerate(options, start=1):
+        for option_order, (label, pour_ml, price_krw, *discount) in enumerate(options, start=1):
+            discount_price_krw, starts_at, ends_at = discount[0] if discount else (None, None, None)
             session.add(
                 MenuEntryOption(
                     menu_board_entry_id=entry.id,
                     option_label=label,
                     pour_ml=pour_ml,
                     price_krw=price_krw,
+                    discount_price_krw=discount_price_krw,
+                    discount_starts_at=starts_at,
+                    discount_ends_at=ends_at,
                     sort_order=option_order,
                 )
             )
@@ -180,6 +189,37 @@ def make_application(
     session.add(application)
     session.flush()
     return application
+
+
+def make_application_menu_image(
+    session: Session, application: BarOwnerApplication, image_order: int = 1
+) -> BarOwnerApplicationMenuImage:
+    """A menu photo row of `application`; no file is stored."""
+    image = BarOwnerApplicationMenuImage(
+        application_id=application.id,
+        storage_key=f"owner-applications/{application.id}/{image_order}.jpg",
+        image_order=image_order,
+        content_sha256="0" * 64,
+    )
+    session.add(image)
+    session.flush()
+    return image
+
+
+def make_bar_photo(session: Session, bar: Bar, sort_order: int = 1, content_sha256: str | None = None) -> BarPhoto:
+    """A photo row of `bar`; no file is stored. The hash defaults to one per position."""
+    photo_id = uuid4()
+    photo = BarPhoto(
+        id=photo_id,
+        bar_id=bar.id,
+        storage_key=f"bars/{bar.id}/photos/{photo_id}.jpg",
+        thumbnail_storage_key=f"bars/{bar.id}/photos/{photo_id}-thumb.jpg",
+        content_sha256=content_sha256 or f"{sort_order:064x}",
+        sort_order=sort_order,
+    )
+    session.add(photo)
+    session.flush()
+    return photo
 
 
 def make_owner(session: Session, user: User, bar: Bar, reviewer: User) -> BarOwner:

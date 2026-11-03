@@ -2,7 +2,7 @@
 
 ## 1. 목적과 범위
 
-이 문서는 메뉴판 사진 등록부터 통합 검수와 현재 메뉴판 반영까지, 그리고 고객의 상품 검색, 주변·지도 업장 조회와 업장 메뉴 조회에서 프론트엔드와 백엔드가 주고받는 HTTP API를 정의한다.
+이 문서는 메뉴판 사진 등록부터 통합 검수와 현재 메뉴판 반영까지, 현재 메뉴판의 직접 편집, 그리고 고객의 상품 검색, 주변·지도 업장 조회와 업장 메뉴 조회에서 프론트엔드와 백엔드가 주고받는 HTTP API를 정의한다.
 
 포함 범위:
 
@@ -13,7 +13,10 @@
 - 추출 항목·옵션·상품 후보·임시 diff 통합 조회
 - 검수 중 브랜드와 상품 검색
 - 모든 검수 결정의 일괄 제출과 메뉴 반영
+- 현재 메뉴판 항목의 직접 추가, 수정, 삭제와 초기화, 품절, 기간 할인, 판매 정보 확인
+- 매장 정보(한 줄 소개, 태그, 정규 영업시간), 임시 휴무, 매장 사진
 - 고객의 상품 검색, 주변·지도 업장 조회와 업장 상세 메뉴 조회
+- 고객 홈 화면의 "요즘 많이 찾는 위스키"와 이를 위한 검색 집계
 - 멱등성, 검수 버전 충돌과 공통 오류 응답
 
 제외 범위:
@@ -35,6 +38,15 @@ POST 메뉴 등록
 → 필요한 브랜드·상품 검색
 → POST review-and-apply 한 번 제출
 → applied
+```
+
+고객 홈 화면은 다음 흐름을 사용한다.
+
+```text
+GET 요즘 많이 찾는 위스키 (3.17)
+→ 검색창, 최근 검색(기기에 저장), 인기 위스키 카드, 지도로 보기 표시
+→ 검색하면 GET 상품 검색 (3.10, query), 카드를 고르면 같은 API를 productId로
+→ 지도로 보기를 고르면 지도 화면 (3.13)
 ```
 
 고객 검색은 다음 흐름을 사용한다.
@@ -76,7 +88,7 @@ GET 주변 업장 조회 (위치 + 반경)
 - 업로드 요청: `multipart/form-data`
 - 외부 API 필드명: `camelCase`
 - ID: 문자열로 표현한 UUID
-- 시각: UTC 기준 RFC 3339 문자열
+- 시각: UTC 기준 RFC 3339 문자열. 예외로 영업시간과 임시 휴무(3.15)의 시각과 날짜는 서울 현지 값을 `"HH:MM"`과 `"YYYY-MM-DD"` 문자열로 쓴다. 특정 순간이 아니라 매주 반복되는 시각이나 달력 날짜라서 UTC로 바꿀 수 없기 때문이다
 - 가격: 원 단위 정수
 - 좌표: WGS84 위도·경도를 십진 도 숫자로 표현한다. `latitude`는 -90~90, `longitude`는 -180~180이고 소수점 아래 6자리까지 저장한다. 응답의 업장 좌표는 `null`이 아니다(3.9.4)
 - 퍼센트·점수: 별도 표기가 없으면 `0.0`부터 `1.0`
@@ -93,24 +105,31 @@ GET 주변 업장 조회 (위치 + 반경)
 
 | API | 비로그인 | customer | 해당 업장의 업주 | operator |
 |---|---|---|---|---|
-| `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names` | O | O | O | O |
+| `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/search/popular-products` | O | O | O | O |
 | `GET /api/bars/{barId}/menu` | 활성 업장만 | 활성 업장만 | O | O |
+| `GET /api/bar-photos/{photoId}`, `GET /api/bar-photos/{photoId}/thumbnail` | O | O | O | O |
 | `GET /api/me`, `PATCH /api/me`, `GET /api/me/bars` | | O | O | O |
 | `POST /api/owner-applications`, `GET /api/me/owner-applications`, `POST /api/owner-applications/business-certificate-ocr` | | O | O | O |
 | `GET /api/owner-applications/{applicationId}` | | 본인 신청만 | 본인 신청만 | O |
-| `POST /api/owner-applications/{applicationId}/cancel` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
+| `POST /api/owner-applications/{applicationId}/cancel`, `PUT /api/owner-applications/{applicationId}/menu-photos` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
 | `GET /api/owner-applications`, `POST .../approve`, `POST .../reject`, `POST .../verify-business` | | | | O |
 | `DELETE /api/bars/{barId}/owner` | | | | O |
 | `GET /api/bars`, `POST /api/bars` | | | | O |
 | `GET /api/bars/{barId}` | | | O | O |
 | `PATCH /api/bars/{barId}` | | | O (`status` 제외) | O |
 | `GET /api/bars/{barId}/menu-imports`, `POST /api/bars/{barId}/menu-imports` | | | O | O |
+| `POST /api/bars/{barId}/menu/items`, `PUT .../menu/items/{barMenuItemId}`, `DELETE .../menu/items/{barMenuItemId}`, `POST /api/bars/{barId}/menu/reset` | | | O | O |
+| `PUT /api/bars/{barId}/menu/items/{barMenuItemId}/sold-out`, `POST /api/bars/{barId}/menu/confirm` | | | O | O |
+| `PUT /api/bars/{barId}/operating-exception`, `DELETE /api/bars/{barId}/operating-exception` | | | O | O |
+| `POST /api/bars/{barId}/photos`, `DELETE .../photos/{photoId}`, `PUT .../photos/order` | | | O | O |
 | `GET /api/menu-imports/{menuImportId}`, `POST .../review-and-apply`, `POST .../cancel` | | | 해당 업장의 작업만 | O |
 | `GET /api/catalog/brands`, `GET /api/catalog/products` | | | 업장이 하나 이상이면 O | O |
 | `POST /api/auth/temp-login` | 임시 로그인이 켜진 서버에서만 O (3.1.3) | 같음 | 같음 | 같음 |
 | `GET /health` | O | O | O | O |
 
-`/media/{key}`는 로컬 저장소를 쓰는 개발 환경에서만 있는 사진 파일 경로이며 API 계약이 아니다. 배포 서버(S3)에는 없다.
+`/media/{key}`는 로컬 저장소를 쓰는 개발 환경에서만 있는 사진 파일 경로이며 API 계약이 아니다. 배포 서버(S3)에는 없다. 매장 사진은 이 경로가 아니라 `GET /api/bar-photos/{photoId}`와 `GET /api/bar-photos/{photoId}/thumbnail`(3.16.5)로 전달하며, 이 경로는 모든 환경에 있다.
+
+`/admin/`은 operator 웹 대시보드의 정적 파일(HTML, JS, CSS)이며 API 계약이 아니다. 페이지가 브라우저에서 Supabase Google 로그인을 하고 3.11의 API를 그대로 호출하므로, 권한은 위 표와 같다(operator만 신청 목록을 보고 승인·거절한다). `/admin/config.js`는 페이지에 공개 설정만 준다: Supabase 프로젝트 URL과 publishable key, 그리고 `new_bar` 승인 화면의 지도와 주소 검색에 쓰는 Kakao JavaScript 키(등록한 도메인에서만 동작). 좌표는 브라우저에서 Kakao Maps JavaScript SDK로 찾으며 백엔드 API는 쓰지 않는다. 승인 요청(3.11.7)의 `latitude`, `longitude`는 지금과 같다.
 
 인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다.
 
@@ -118,7 +137,7 @@ GET 주변 업장 조회 (위치 + 반경)
 2. operator 전용 API는 호출자가 operator인가 (아니면 `403 FORBIDDEN`). 대상이 있는지는 그다음에 확인하므로, operator가 아닌 호출자는 없는 `barId`나 `menuImportId`를 보내도 `403`이다. 업장 정보는 공개 API로 이미 볼 수 있어 존재 여부를 숨길 필요가 없다.
 3. 요청한 `barId`, `menuImportId`, `applicationId`가 존재하는가 (아니면 각 API의 `404`)
 
-업주 권한(Iteration 3)이 들어오면 업장별 권한은 대상 업장을 알아야 판단할 수 있다. 그래서 업주도 호출할 수 있는 API는 3번을 먼저 확인한 뒤 "호출자가 operator이거나 대상 업장의 현재 업주인가"(아니면 `403`)를 확인한다.
+업장별 권한은 대상 업장을 알아야 판단할 수 있다. 그래서 업주도 호출할 수 있는 API는 3번을 먼저 확인한 뒤 "호출자가 operator이거나 대상 업장의 현재 업주인가"(아니면 `403`)를 확인한다. 이 API들에서는 operator나 업주가 아닌 호출자도 없는 `barId`나 `menuImportId`를 보내면 `404`를 받는다. 메뉴 등록 작업은 작업이 속한 업장의 업주인지 확인한다. 카탈로그 검색은 대상이 없으므로 현재 업주인 업장이 하나 이상인지 확인한다.
 
 업주 여부는 매 요청 DB에서 확인하므로 승인과 해제가 다음 요청부터 반영된다. 업주 신청은 다른 사람의 신청이 있는지 알리지 않도록 권한이 없을 때도 `404 OWNER_APPLICATION_NOT_FOUND`를 반환한다(3.11.4).
 
@@ -201,18 +220,33 @@ ignore
 | `GET` | `/api/search/bars` | 고객 상품 검색과 판매 업장 목록 조회 (공개) |
 | `GET` | `/api/search/nearby-bars` | 고객 위치 반경 안의 활성 업장 조회 (공개) |
 | `GET` | `/api/search/map-bars` | 지도 화면 영역 안의 활성 업장 조회 (공개) |
+| `GET` | `/api/search/popular-products` | 홈 화면의 요즘 많이 찾는 위스키 (공개) |
 | `POST` | `/api/bars/{barId}/menu-imports` | 사진 업로드와 AI 처리 작업 생성 |
 | `GET` | `/api/menu-imports/{menuImportId}` | 처리 상태 또는 통합 검수 데이터 조회 |
 | `GET` | `/api/catalog/brands` | 검수 중 기존 브랜드 검색 |
 | `GET` | `/api/catalog/products` | 검수 중 기존 상품 검색 |
 | `POST` | `/api/menu-imports/{menuImportId}/review-and-apply` | 전체 검수 결정 제출과 원자적 반영 |
 | `POST` | `/api/menu-imports/{menuImportId}/cancel` | 미완료 메뉴 등록 작업 취소 |
+| `POST` | `/api/bars/{barId}/menu/items` | 메뉴 항목 직접 추가 (필요하면 신규 상품 생성) |
+| `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}` | 메뉴 항목 직접 수정 |
+| `DELETE` | `/api/bars/{barId}/menu/items/{barMenuItemId}` | 메뉴 항목 직접 삭제 |
+| `POST` | `/api/bars/{barId}/menu/reset` | 메뉴판 초기화 |
+| `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}/sold-out` | 메뉴 항목 품절 표시와 해제 |
+| `POST` | `/api/bars/{barId}/menu/confirm` | 판매 정보 확인 ("지금도 맞아요") |
+| `PUT` | `/api/bars/{barId}/operating-exception` | 임시 휴무나 오늘 영업시간 변경 적용 (기존 것을 바꿈) |
+| `DELETE` | `/api/bars/{barId}/operating-exception` | 임시 휴무 취소 |
+| `POST` | `/api/bars/{barId}/photos` | 매장 사진 한 장 추가 |
+| `DELETE` | `/api/bars/{barId}/photos/{photoId}` | 매장 사진 삭제 |
+| `PUT` | `/api/bars/{barId}/photos/order` | 매장 사진 순서 변경 (첫 사진이 대표 사진) |
+| `GET` | `/api/bar-photos/{photoId}` | 매장 사진 파일 (공개) |
+| `GET` | `/api/bar-photos/{photoId}/thumbnail` | 매장 사진 썸네일 파일 (공개) |
 | `GET` | `/api/search/bar-names` | 업장 이름·주소 검색. 업주 신청과 고객 지도 검색용 (공개) |
 | `POST` | `/api/owner-applications/business-certificate-ocr` | 사업자등록증 사진에서 신청 항목 읽기 |
 | `POST` | `/api/owner-applications` | 업주 신청과 사업자등록 정보 1차 검증 |
 | `GET` | `/api/me/owner-applications` | 내 업주 신청 목록 |
 | `GET` | `/api/owner-applications/{applicationId}` | 업주 신청 상세 |
 | `POST` | `/api/owner-applications/{applicationId}/cancel` | 업주 신청 취소 |
+| `PUT` | `/api/owner-applications/{applicationId}/menu-photos` | 업주 신청의 메뉴판 사진 올리기 (전체 교체) |
 | `GET` | `/api/owner-applications` | operator의 업주 신청 목록 |
 | `POST` | `/api/owner-applications/{applicationId}/approve` | 업주 신청 승인 |
 | `POST` | `/api/owner-applications/{applicationId}/reject` | 업주 신청 거절 |
@@ -220,7 +254,7 @@ ignore
 | `GET` | `/api/me/bars` | 내가 업주인 업장 목록 |
 | `DELETE` | `/api/bars/{barId}/owner` | 업주 해제 |
 
-별도의 신규 브랜드·상품 생성 API는 두지 않는다. 신규 카탈로그 데이터는 `review-and-apply` 요청 안에서 제안하고 최종 트랜잭션에서 생성한다.
+별도의 신규 브랜드·상품 생성 API는 두지 않는다. 신규 카탈로그 데이터는 `review-and-apply` 요청(8.5, 8.6)이나 메뉴 항목 직접 추가 요청(3.14.3) 안에서 제안하고, 그 요청의 트랜잭션에서 생성한다.
 
 ### 3.1 로그인과 토큰 검증
 
@@ -228,7 +262,7 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 
 사용자는 다음과 같이 구분한다.
 
-- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/bars/{barId}/menu`)만 호출하며 `users` 행을 만들지 않는다.
+- **비로그인 사용자(익명 사용자)**: 로그인하지 않은 사용자다. `Authorization` 헤더 없이 공개 API(`GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/search/popular-products`, `GET /api/bars/{barId}/menu`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`)만 호출하며 `users` 행을 만들지 않는다.
 - **로그인 사용자**: Google 계정으로 로그인한 사용자다. 최초 `GET /api/me` 호출 때 `customer`로 생성된다.
 - Supabase의 익명 로그인(anonymous sign-in)은 사용하지 않는다. `is_anonymous = true`인 token은 `401`로 거부한다.
 
@@ -273,9 +307,9 @@ BottleMap은 로그인 API를 직접 제공하지 않는다. Google 로그인과
 
 #### 3.1.3 임시 로그인 (로컬 개발용)
 
-Supabase 연동 전과 로컬 개발을 위해 `POST /api/auth/temp-login`을 유지한다. 이 API는 명시적으로 활성화해야 하며, 고정된 `local-dev-user` subject로 짧은 만료 시간의 HS256 JWT를 발급한다. 이 token은 Supabase access token이 아니다.
+로컬 개발을 위해 `POST /api/auth/temp-login`을 유지한다. 이 API는 명시적으로 활성화해야 하며, 고정된 `local-dev-user` subject로 짧은 만료 시간의 HS256 JWT를 발급한다. 이 token은 Supabase access token이 아니다.
 
-배포 서버에서는 앱에서 Google 로그인이 가능해질 때까지만 데모용으로 켜 둘 수 있고, Google 로그인이 가능해지면 끈다(`TEMP_AUTH_ENABLED=false`). 켜져 있는 동안에는 서버에 접근하는 누구나 같은 임시 계정을 공유하며, `TEMP_AUTH_USER_TYPE=operator`이면 operator 권한을 얻는다. 켜져 있는 동안 서버는 시작할 때마다 경고 로그를 남긴다. 끄는 절차는 `backend/DEPLOY.md`를 따른다.
+배포 서버에서는 앱에서 Google 로그인이 가능해질 때까지만 데모용으로 켜 두었고, 2026-11-02에 껐다(`TEMP_AUTH_ENABLED=false`). 배포 서버에서는 다시 켜지 않는다. 켜져 있으면 서버에 접근하는 누구나 같은 임시 계정을 공유하며, `TEMP_AUTH_USER_TYPE=operator`이면 operator 권한을 얻는다. 켜져 있는 동안 서버는 시작할 때마다 경고 로그를 남긴다. 배포 서버 설정은 `backend/DEPLOY.md`를 따른다.
 
 개발 환경에서 `TEMP_AUTH_ENABLED=true`와 32자 이상의 로컬 `TEMP_AUTH_JWT_SECRET`을 설정한 뒤 호출한다. 요청 본문은 없으며, 응답은 세 시간 동안 유효한 bearer token이다.
 
@@ -307,7 +341,7 @@ POST /api/auth/temp-login
 - 클라이언트 요청이나 token claim(`user_metadata` 포함)으로 `userType`을 바꿀 수 없다. 권한은 매 요청 BottleMap DB의 `users.user_type`에서 읽는다.
 - `operator` 전환은 이후 별도 기능으로 정의하며 이 문서의 범위가 아니다. 그전까지 로컬에서 operator API를 시험할 때는 임시 로그인과 `TEMP_AUTH_USER_TYPE=operator`를 사용한다. 배포 서버에서는 백엔드 담당자가 DB의 `users.user_type`을 직접 고쳐야만 operator 역할이 부여되며, 바꾼 역할은 해당 사용자의 다음 요청부터 반영된다.
 - 업주는 `userType`이 아니라 업장별 관계다. 신청과 승인은 3.11, 권한은 2.2를 따른다.
-- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`는 `404 USER_NOT_FOUND`다(3.3, 3.11.2).
+- `GET /api/me`만 사용자를 생성한다. `users` 행이 없는 사용자가 다른 인증 API를 먼저 호출하면 `customer`와 같게 처리하므로, operator나 업주 권한이 필요한 API는 `403 FORBIDDEN`이다. `PATCH /api/me`와 `POST /api/owner-applications`, 그리고 임시 로그인 operator의 업주 신청 승인·거절은 `404 USER_NOT_FOUND`다(3.3, 3.11.2, 3.11.7).
 
 #### 3.1.5 인증 오류와 프론트엔드 처리
 
@@ -335,7 +369,7 @@ API 응답 401 UNAUTHENTICATED
 - 여러 요청이 동시에 `401`을 받아도 세션 갱신은 한 번만 하고, 나머지 요청은 그 결과를 기다려 재시도한다.
 - 공개 API 처리:
   - `GET /api/bars/{barId}/menu`는 `Authorization` 헤더가 있으면 token을 검증하고, 잘못된 token이면 `401`을 반환한다. 프론트엔드는 위 재시도 흐름을 똑같이 적용하되, 세션 갱신에 실패하면 로그인 화면으로 보내지 않고 로그아웃한 뒤 헤더 없이 비로그인 사용자로 다시 요청한다. 단, 서버가 지금 token을 확인할 수 없으면(위 표의 `503` 조건) 이 API는 `503` 대신 token이 없는 것처럼 비로그인 사용자로 처리한다. 공개 정보라서 Supabase 장애 중에도 로그인 사용자가 업장 상세를 볼 수 있게 하려는 것이다. 이때는 operator도 비활성 업장을 볼 수 없다(`404`).
-  - `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`는 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
+  - `GET /api/search/bars`, `GET /api/search/nearby-bars`, `GET /api/search/map-bars`, `GET /api/search/bar-names`, `GET /api/search/popular-products`, `GET /api/bar-photos/{photoId}`와 그 `/thumbnail`(3.16.5)은 `Authorization` 헤더를 읽지 않는다. 어떤 token을 보내도 결과가 같고, Supabase 장애 중에도 막히지 않는다.
 
 #### 3.1.6 백엔드 설정 항목
 
@@ -465,6 +499,7 @@ Authorization: Bearer <access-token>
       "longitude": 126.123456,
       "phone": "02-000-0000",
       "status": "active",
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "activeMenuImport": {
         "menuImportId": "77777777-7777-4777-8777-777777777777",
         "status": "ready_for_review"
@@ -476,6 +511,8 @@ Authorization: Bearer <access-token>
 ```
 
 `activeMenuImport`는 미완료 작업이 없으면 `null`이다. 목록 화면이 별도 요청 없이 기존 작업으로 진입할 수 있도록 제공한다.
+
+`coverThumbnailUrl`은 업장 대표 사진(3.16.1)의 썸네일 URL(`thumbnailUrl`)이며, 사진이 없으면 `null`이다. 3.10, 3.11.11, 3.12, 3.13의 `coverThumbnailUrl`과 같다.
 
 ### 3.5 업장 생성
 
@@ -514,7 +551,7 @@ HTTP/1.1 201 Created
 Location: /api/bars/22222222-2222-4222-8222-222222222222
 ```
 
-응답 본문은 3.6과 같은 형식이다. 새 업장이므로 `status = active`, `activeMenuImport = null`, `currentMenu = null`, `owner = null`이다.
+응답 본문은 3.6과 같은 형식이다. 새 업장이므로 `status = active`, `description = null`, `defaultPourMl = null`, `tags = []`, `weeklyHours = []`, `operatingException = null`, `photos = []`, `activeMenuImport = null`, `currentMenu = null`, `owner = null`이다.
 
 이름·주소가 비슷한 업장이 있어도 생성을 막지 않으며, 응답에 경고도 담지 않는다. 프론트엔드는 생성 전에 3.4로 같은 업장이 있는지 확인하게 한다.
 
@@ -545,6 +582,24 @@ Authorization: Bearer <access-token>
   "latitude": 37.478321,
   "longitude": 126.951234,
   "phone": "02-000-0000",
+  "description": "싱글몰트 위주의 조용한 바",
+  "defaultPourMl": 30,
+  "tags": ["싱글몰트", "조용한 분위기"],
+  "weeklyHours": [
+    { "dayOfWeek": 1, "closed": true, "openTime": null, "closeTime": null },
+    { "dayOfWeek": 5, "closed": false, "openTime": "18:00", "closeTime": "02:00" }
+  ],
+  "operatingException": {
+    "kind": "custom_hours",
+    "startDate": "2026-10-04",
+    "endDate": "2026-10-04",
+    "openTime": "20:00",
+    "closeTime": "23:00",
+    "note": "내부 사정으로 일찍 마감합니다"
+  },
+  "photos": [
+    { "photoId": "12121212-1212-4212-8212-121212121211", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail" }
+  ],
   "status": "active",
   "activeMenuImport": {
     "menuImportId": "77777777-7777-4777-8777-777777777777",
@@ -552,7 +607,9 @@ Authorization: Bearer <access-token>
   },
   "currentMenu": {
     "menuBoardId": "66666666-6666-4666-8666-666666666666",
-    "publishedAt": "2026-10-04T09:15:00Z"
+    "menuVersion": 4,
+    "publishedAt": "2026-10-04T09:15:00Z",
+    "confirmedAt": "2026-10-20T02:30:00Z"
   },
   "owner": {
     "userId": "11111111-1111-4111-8111-111111111111",
@@ -572,13 +629,24 @@ Authorization: Bearer <access-token>
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
 | `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
+| `description` | 문자열 | 예 | 한 줄 소개. 업주나 operator가 정한다(3.7). 고객 화면(3.9)에도 나온다. 없으면 `null` |
+| `defaultPourMl` | 정수 | 예 | 매장 기본 잔 용량(ml). 업주가 매장 정보에서 정한다(3.7). 메뉴 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데 쓴다(3.14.2). 서버가 메뉴에 자동으로 적용하지 않으며 고객 화면(3.9)에는 없다. 없으면 `null` |
+| `tags` | 문자열 배열 | 아니오 | 매장 태그. 업주나 operator가 정한 순서대로 최대 5개(3.7). 없으면 `[]` |
+| `weeklyHours` | 배열 | 아니오 | 정규 영업시간(3.15.1). 정한 요일만 `dayOfWeek` 오름차순으로 온다. 없으면 `[]` |
+| `operatingException` | 객체 | 예 | 임시 휴무(3.15.4). 앞으로 시작할 것과 어제 끝난 것도 들어 있으므로, 지금 적용 중인지는 프론트엔드가 판단한다. 없거나 끝난 지 하루가 지났으면 `null` |
+| `photos` | 배열 | 아니오 | 매장 사진(3.16). 표시 순서대로 오며 첫 사진이 대표 사진이다. 없으면 `[]` |
+| `photos[].photoId` | UUID 문자열 | 아니오 | |
+| `photos[].imageUrl` | 문자열 | 아니오 | 사진 파일의 절대 URL(3.16.5). 만료되지 않으며, 같은 `photoId`의 내용은 바뀌지 않는다. 전체 화면과 상세 갤러리에 쓴다 |
+| `photos[].thumbnailUrl` | 문자열 | 아니오 | 긴 변 480px 썸네일의 절대 URL(3.16.5). 목록, 격자, 작은 카드에 쓴다 |
 | `status` | `active` \| `inactive` | 아니오 | |
-| `activeMenuImport` | 객체 | 예 | 미완료 메뉴 등록 작업. 없으면 `null`. 3.4와 같다 |
+| `activeMenuImport` | 객체 | 예 | 미완료 메뉴 등록 작업. 없으면 `null`. 3.4와 같다. 있으면 메뉴 직접 편집을 할 수 없다(3.14.1) |
 | `activeMenuImport.menuImportId` | UUID 문자열 | 아니오 | `GET /api/menu-imports/{menuImportId}`로 이어서 진행한다 |
 | `activeMenuImport.status` | `uploaded` \| `processing` \| `ready_for_review` | 아니오 | |
 | `currentMenu` | 객체 | 예 | 현재 메뉴판 요약. 반영된 메뉴가 없으면 `null` |
 | `currentMenu.menuBoardId` | UUID 문자열 | 아니오 | |
+| `currentMenu.menuVersion` | 정수 | 아니오 | 메뉴판 버전(3.9의 `menuVersion`과 같다). 관리 홈의 판매 정보 확인(3.14.9)에 그대로 보낸다 |
 | `currentMenu.publishedAt` | RFC 3339 문자열 | 아니오 | 현재 메뉴판이 마지막으로 반영된 시각 |
+| `currentMenu.confirmedAt` | RFC 3339 문자열 | 예 | 업주나 operator가 판매 정보를 마지막으로 확인한 시각(3.14.9). 확인한 적이 없으면 `null`. 업주 화면의 "최근 갱신"은 `publishedAt`과 이 값 중 늦은 시각이다 |
 | `owner` | 객체 | 예 | 현재 업주(3.11). 없으면 `null` |
 | `owner.userId` | UUID 문자열 | 아니오 | |
 | `owner.email`, `owner.displayName` | 문자열 | 예 | 3.2와 같다 |
@@ -615,9 +683,17 @@ operator와 해당 업장의 현재 업주가 호출할 수 있다. 바꿀 필�
 | `name`, `address` | operator, 업주 | `null`을 보낼 수 없다 |
 | `latitude`, `longitude` | operator, 업주 | 둘을 함께 보낸다. 하나만 보내면 `LAT_LNG_REQUIRED_TOGETHER` |
 | `phone` | operator, 업주 | `null`을 보내면 연락처를 지운다 |
+| `description` | operator, 업주 | 한 줄 소개. 앞뒤 공백을 지운 뒤 100자 이하(줄바꿈도 한 글자로 센다). 공백뿐이면 `null`로 저장한다. `null`을 보내면 지운다. 줄바꿈을 허용하며, 서버는 HTML 이스케이프나 금칙어 검사 없이 받은 그대로 저장한다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
+| `defaultPourMl` | operator, 업주 | 1~999 정수. `null`을 보내면 지운다. 바꿔도 이미 게시된 메뉴의 용량은 바뀌지 않는다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
+| `tags` | operator, 업주 | 매장 태그 전체를 이 배열로 바꾼다. `[]`이면 모두 지우며 `null`은 보낼 수 없다. 최대 5개이고, 태그마다 앞뒤 공백을 지운 뒤 1~24자다. 줄바꿈과 제어 문자는 받지 않는다(`INVALID_CHARACTER`). 대소문자만 다른 태그도 같은 태그로 보며, 중복이면 `DUPLICATE_TAG`다. 서버는 앞뒤 공백만 지우고 대소문자와 순서는 받은 그대로 저장한다. 자유 입력이며 서버가 정한 태그 목록은 없다 |
+| `weeklyHours` | operator, 업주 | 정규 영업시간 전체를 이 배열로 바꾼다. 형식과 규칙은 3.15.1. `[]`이면 영업시간 정보가 없는 상태가 되며 `null`은 보낼 수 없다 |
 | `status` | operator만 | `active` 또는 `inactive`. 업주가 보내면 `403 FORBIDDEN` |
 
 - `address`를 바꿀 때는 `latitude`와 `longitude`도 함께 보낸다. 주소만 보내면 `422`이고 `fieldErrors[].code = COORDINATES_REQUIRED`다. 주소 없이 좌표만 바꿔 위치를 보정할 수는 있다.
+- `tags`와 `weeklyHours`도 `description`, `defaultPourMl`처럼 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 둘 다 `[]`이다.
+- 임시 휴무는 3.15.2, 매장 사진은 3.16으로 바꾼다. 이 API로 `operatingException`이나 `photos`를 보내면 `EXTRA_FORBIDDEN`이다.
+- 태그는 고객 검색(3.10, 3.12, 3.13)에 쓰지 않는다. 태그로 거르는 검색은 후속 작업이다.
+- 오류의 `fieldErrors[].path`는 `tags[2]`, `weeklyHours[1].closeTime`처럼 배열 위치를 가리킨다.
 - 빈 본문 `{}`이면 아무것도 바꾸지 않고 현재 값을 반환한다.
 - 응답은 `200 OK`이며 본문은 3.6과 같은 형식이다.
 
@@ -628,7 +704,7 @@ operator와 해당 업장의 현재 업주가 호출할 수 있다. 바꿀 필�
 | `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
 | `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님, 또는 업주가 `status`를 보냄 | 3.1.5 |
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
-| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `LAT_LNG_REQUIRED_TOGETHER`, `COORDINATES_REQUIRED` | `fieldErrors` 표시 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `LAT_LNG_REQUIRED_TOGETHER`, `COORDINATES_REQUIRED`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, 영업시간 규칙 위반(3.15.1) | `fieldErrors` 표시 |
 
 ### 3.8 업장별 메뉴 등록 작업 목록
 
@@ -695,21 +771,43 @@ GET /api/bars/{barId}/menu
   "latitude": 37.478321,
   "longitude": 126.951234,
   "phone": "02-000-0000",
+  "description": "싱글몰트 위주의 조용한 바",
+  "tags": ["싱글몰트", "조용한 분위기"],
+  "weeklyHours": [
+    { "dayOfWeek": 1, "closed": true, "openTime": null, "closeTime": null },
+    { "dayOfWeek": 5, "closed": false, "openTime": "18:00", "closeTime": "02:00" }
+  ],
+  "operatingException": null,
+  "photos": [
+    { "photoId": "12121212-1212-4212-8212-121212121211", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail" },
+    { "photoId": "12121212-1212-4212-8212-121212121212", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212/thumbnail" }
+  ],
   "menuBoardId": "66666666-6666-4666-8666-666666666666",
+  "menuVersion": 4,
   "publishedAt": "2026-10-04T09:15:00Z",
   "items": [
     {
       "menuBoardEntryId": "88888888-8888-4888-8888-888888888881",
       "barMenuItemId": "99999999-9999-4999-8999-999999999991",
       "productId": "44444444-4444-4444-8444-444444444444",
+      "productName": "Glenfiddich 12",
+      "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd2",
+      "brandName": "Glenfiddich",
+      "category": "whisky",
       "displayName": "글렌피딕 12년",
       "sortOrder": 1,
+      "soldOut": false,
       "options": [
         {
           "menuEntryOptionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
           "optionLabel": "잔",
           "pourMl": 30,
           "priceKrw": 17000,
+          "discount": {
+            "discountedPriceKrw": 14000,
+            "startsAt": "2026-11-01T09:00:00Z",
+            "endsAt": "2026-11-15T15:00:00Z"
+          },
           "sortOrder": 1
         },
         {
@@ -717,6 +815,7 @@ GET /api/bars/{barId}/menu
           "optionLabel": "병",
           "pourMl": null,
           "priceKrw": 160000,
+          "discount": null,
           "sortOrder": 2
         }
       ]
@@ -725,14 +824,20 @@ GET /api/bars/{barId}/menu
       "menuBoardEntryId": "88888888-8888-4888-8888-888888888882",
       "barMenuItemId": "99999999-9999-4999-8999-999999999992",
       "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+      "productName": "Deanston 12",
+      "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
+      "brandName": "Deanston",
+      "category": "whisky",
       "displayName": "Deanston 12",
       "sortOrder": 2,
+      "soldOut": false,
       "options": [
         {
           "menuEntryOptionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3",
           "optionLabel": null,
           "pourMl": 15,
           "priceKrw": 8000,
+          "discount": null,
           "sortOrder": 1
         }
       ]
@@ -748,30 +853,49 @@ GET /api/bars/{barId}/menu
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
 | `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
+| `description` | 문자열 | 예 | 한 줄 소개(3.6과 같다). 줄바꿈이 들어 있을 수 있다. 프론트엔드는 HTML로 해석하지 않고 일반 텍스트로 보여 주며, 표시할 줄 수를 제한할 수 있다. 없으면 `null` |
+| `tags` | 문자열 배열 | 아니오 | 매장 태그(3.6과 같다). 받은 순서대로 보여 준다. 없으면 `[]` |
+| `weeklyHours` | 배열 | 아니오 | 정규 영업시간(3.15.1). 없으면 `[]` |
+| `operatingException` | 객체 | 예 | 임시 휴무(3.15.4). `note`는 고객 안내 문구다. 어제 끝난 것도 영업 상태 계산을 위해 들어 있다. 없거나 끝난 지 하루가 지났으면 `null` |
+| `photos` | 배열 | 아니오 | 매장 사진(3.6과 같다). 첫 사진이 대표 사진이다. 없으면 `[]`이며, 프론트엔드는 기본 이미지를 보여 준다 |
 | `menuBoardId` | UUID 문자열 | 예 | 현재 메뉴판. 반영된 메뉴가 없으면 `null` |
-| `publishedAt` | RFC 3339 문자열 | 예 | 현재 메뉴판이 마지막으로 반영된 시각. 반영된 메뉴가 없으면 `null` |
+| `menuVersion` | 정수 | 예 | 메뉴판 버전. 검수 반영(8)이나 직접 편집(3.14)으로 메뉴판이 바뀔 때마다 1씩 오른다. 직접 편집 요청에 그대로 보낸다. 메뉴판이 없으면 `null` |
+| `publishedAt` | RFC 3339 문자열 | 예 | 현재 메뉴판이 검수 반영이나 직접 편집으로 마지막으로 바뀐 시각. 반영된 메뉴가 없으면 `null` |
 | `items` | 배열 | 아니오 | 현재 메뉴판의 상품 항목. 없으면 `[]` |
 | `items[].menuBoardEntryId` | UUID 문자열 | 아니오 | |
 | `items[].barMenuItemId` | UUID 문자열 | 아니오 | |
 | `items[].productId` | UUID 문자열 | 아니오 | 정규 상품 ID |
+| `items[].productName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`, 7.2의 `displayName`) |
+| `items[].brandId`, `items[].brandName` | UUID 문자열, 문자열 | 아니오 | 상품의 브랜드와 대표 브랜드명 |
+| `items[].category` | 문자열 | 아니오 | 상품 분류. 예: `whisky`. 프론트엔드는 이 값과 브랜드로 메뉴를 묶어 보여 줄 수 있다 |
 | `items[].displayName` | 문자열 | 아니오 | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`). 정규 상품명이 아니다 |
 | `items[].sortOrder` | 정수 | 아니오 | 메뉴판 표시 순서 |
+| `items[].soldOut` | 불리언 | 아니오 | 품절이면 `true`(3.14.8). 품절 항목은 operator와 해당 업장의 업주에게만 제자리에 온다. 비로그인 사용자와 customer에게는 품절 항목이 빠지므로 항상 `false`다 |
 | `items[].options` | 배열 | 아니오 | 가격·용량 옵션. 최소 1개 |
 | `items[].options[].menuEntryOptionId` | UUID 문자열 | 아니오 | |
 | `items[].options[].optionLabel` | 문자열 | 예 | 메뉴판의 `잔`, `병` 같은 표기. 없으면 `null` |
 | `items[].options[].pourMl` | 정수 | 예 | 용량(ml). 메뉴판에 없으면 `null` |
-| `items[].options[].priceKrw` | 정수 | 아니오 | 가격(원) |
+| `items[].options[].priceKrw` | 정수 | 아니오 | 정가(원). 할인 중이어도 정가다 |
+| `items[].options[].discount` | 객체 | 예 | 기간 할인(3.14.2). 끝나지 않은 할인만 오며, 할인이 없거나 끝났으면 `null`. 아직 시작하지 않은 할인도 온다 |
+| `items[].options[].discount.discountedPriceKrw` | 정수 | 아니오 | 할인가(원). `priceKrw`보다 낮다 |
+| `items[].options[].discount.startsAt`, `items[].options[].discount.endsAt` | RFC 3339 문자열 | 아니오 | 할인 기간. `startsAt` 이상 `endsAt` 미만인 동안 할인가로 판다 |
 | `items[].options[].sortOrder` | 정수 | 아니오 | 옵션 표시 순서 |
+
+할인 중인지는 서버가 보내지 않는다. 프론트엔드가 기기의 현재 시각으로 `startsAt ≤ 현재 < endsAt`이면 할인가와 할인 표시를, 아니면 정가를 보여 주며, 화면을 띄워 둔 동안 다시 계산한다(3.15.5의 영업 상태와 같은 방식). 고객 검색(3.10)에도 같은 `discount`가 오므로 검색 결과와 업장 상세의 가격이 같다.
 
 정렬 기준: `items`는 `sortOrder` 오름차순이고, 각 항목의 `options`도 `sortOrder` 오름차순이다. 프론트엔드는 받은 순서대로 표시한다.
 
-`items`에는 상품으로 확정되어 현재 메뉴판에 반영된 항목만 있다. 섹션 제목, 설명 등 비상품 줄은 포함하지 않는다. 검색 결과에서 진입한 경우 프론트엔드는 검색한 `productId`와 같은 항목을 강조해 표시할 수 있다.
+영업 상태(영업 중, 영업 종료, 임시 휴무 등)는 응답에 없다. 프론트엔드가 `weeklyHours`와 `operatingException`으로 계산한다(3.15.5).
+
+품절 항목(3.14.8)은 비로그인 사용자와 customer의 응답에서 빠진다. 손님에게 지금 팔지 않는 상품을 보여 주지 않기 위해서다. operator와 해당 업장의 업주에게는 품절을 풀 수 있도록 `soldOut = true`로 제자리에 온다. 업주 화면의 고객 미리보기는 `soldOut = true`인 항목을 빼고 보여 준다. 서버가 token을 확인할 수 없어 비로그인 사용자로 처리할 때(3.1.5)는 operator와 업주에게도 품절 항목이 빠진다.
+
+`items`에는 상품으로 확정되어 현재 메뉴판에 반영된 항목과 직접 추가한 항목만 있다. 섹션 제목, 설명 등 비상품 줄은 포함하지 않는다. 검색 결과에서 진입한 경우 프론트엔드는 검색한 `productId`와 같은 항목을 강조해 표시할 수 있다.
 
 #### 3.9.1 게시된 메뉴가 없을 때
 
 모두 `200 OK`이며 업장 기본 정보는 그대로 반환한다.
 
-반영된 메뉴가 한 번도 없으면 `menuBoardId`, `publishedAt`이 `null`이고 `items`가 `[]`다. 프론트엔드는 "등록된 메뉴가 없습니다"를 표시한다.
+반영된 메뉴가 한 번도 없으면 `menuBoardId`, `menuVersion`, `publishedAt`이 `null`이고 `items`가 `[]`다. 프론트엔드는 "등록된 메뉴가 없습니다"를 표시한다.
 
 ```json
 {
@@ -781,19 +905,25 @@ GET /api/bars/{barId}/menu
   "latitude": 37.478321,
   "longitude": 126.951234,
   "phone": null,
+  "description": null,
+  "tags": [],
+  "weeklyHours": [],
+  "operatingException": null,
+  "photos": [],
   "menuBoardId": null,
+  "menuVersion": null,
   "publishedAt": null,
   "items": []
 }
 ```
 
-메뉴판은 있지만 검수에서 모든 항목을 내렸으면 `menuBoardId`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
+메뉴판은 있지만 검수에서 모든 항목을 내렸거나 직접 편집으로 모두 지웠으면(3.14.5, 3.14.6), 또는 손님이 볼 때 모든 항목이 품절이면(3.14.8) `menuBoardId`, `menuVersion`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
 
-그 밖에 값이 없을 수 있는 필드는 `phone`, `options[].optionLabel`, `options[].pourMl`뿐이며 모두 `null`로 온다. 프론트엔드는 해당 표시만 생략한다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
+그 밖에 값이 없을 수 있는 필드는 `phone`, `description`, `operatingException`, `options[].optionLabel`, `options[].pourMl`, `options[].discount`뿐이며 모두 `null`로 온다. `tags`, `weeklyHours`, `photos`는 없으면 `[]`다. 프론트엔드는 해당 표시만 생략하고, 사진이 없으면 기본 이미지를 보여 준다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
 
 #### 3.9.2 메뉴 등록이 진행 중일 때
 
-이 API는 메뉴 등록 작업의 상태를 반영하지 않는다. 등록 작업이 처리 중(`uploaded`, `processing`)이거나 검수 대기(`ready_for_review`)이거나 실패(`failed`)여도 현재 게시된 메뉴를 그대로 반환하며, 진행 중이라는 표시도 하지 않는다. 고객은 검수를 마치고 `review-and-apply`로 반영된 메뉴만 본다. operator와 업주가 진행 중인 작업을 확인할 때는 3.6의 `activeMenuImport`를 사용한다.
+이 API는 메뉴 등록 작업의 상태를 반영하지 않는다. 등록 작업이 처리 중(`uploaded`, `processing`)이거나 검수 대기(`ready_for_review`)이거나 실패(`failed`)여도 현재 게시된 메뉴를 그대로 반환하며, 진행 중이라는 표시도 하지 않는다. 고객은 검수를 마치고 `review-and-apply`로 반영된 메뉴와 직접 편집(3.14)한 메뉴만 본다. operator와 업주가 진행 중인 작업을 확인할 때는 3.6의 `activeMenuImport`를 사용한다.
 
 #### 3.9.3 오류와 프론트엔드 처리
 
@@ -813,7 +943,7 @@ GET /api/bars/{barId}/menu
 
 ### 3.10 고객 상품 검색
 
-고객이 위스키 이름을 입력하면 해당 상품을 현재 게시 메뉴에 포함한 업장 목록을 반환한다. 로그인 없이 호출할 수 있는 공개 API이며, `Authorization` 헤더를 보내도 사용하지 않는다.
+고객이 위스키 이름을 입력하거나 홈 화면의 카드(3.17)에서 상품을 고르면 해당 상품을 현재 게시 메뉴에 포함한 업장 목록을 반환한다. 로그인 없이 호출할 수 있는 공개 API이며, `Authorization` 헤더를 보내도 사용하지 않는다.
 
 ```http
 GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=126.951
@@ -821,12 +951,14 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 
 | Query | 필수 | 기본값 | 설명 |
 |---|---|---|---|
-| `query` | 예 | 없음 | 검색어. 앞뒤 공백을 지운 뒤 1~100자 |
+| `query` | `productId`가 없으면 예 | 없음 | 검색어. 앞뒤 공백을 지운 뒤 1~100자 |
+| `productId` | 아니오 | 없음 | 상품 하나만 검색할 때의 상품 ID(UUID). 홈 화면의 카드를 누를 때 쓴다(3.17.1). `query`와 함께 보낼 수 없다 |
 | `lat` | 아니오 | 없음 | 고객 위치 위도. -90~90. `lng`와 함께 보내야 한다 |
 | `lng` | 아니오 | 없음 | 고객 위치 경도. -180~180. `lat`과 함께 보내야 한다 |
 | `limit` | 아니오 | `50` | 반환할 결과 행(`items`)의 최대 개수. 1~100 |
+| `source` | 아니오 | `input` | 검색을 시작한 곳. `input`(검색창에 직접 입력), `recent`(최근 검색을 다시 누름), `popular`(요즘 많이 찾는 위스키 카드를 누름, 3.17). 검색 집계(3.10.6)에만 쓰며 결과에는 영향이 없다 |
 
-고객 위치는 거리 계산에만 사용하며 서버에 저장하지 않는다. 서버 접근 로그에서도 `lat`, `lng`를 지우고 나머지 query(검색어 등)만 남긴다.
+고객 위치는 거리 계산에만 사용하며 서버에 저장하지 않는다. 서버 접근 로그에서도 `lat`, `lng`를 지우고 나머지 query(검색어 등)만 남긴다. 인기 위스키 순위를 위한 검색 집계(3.10.6)에도 위치는 남기지 않는다.
 
 #### 3.10.1 검색어 해석
 
@@ -850,6 +982,8 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 4. none
    일치하는 상품 없음
 ```
+
+`productId`로 검색하면 위 단계를 거치지 않는다. 그 상품이 활성 상품이면 `matchType = product`이고 `matchedProducts`는 그 상품 하나다. 없는 상품이거나 비활성 상품이면 `matchType = none`, `matchedProducts = []`다. 홈 화면을 띄운 뒤 상품이 비활성화될 수 있으므로 `404`가 아니라 결과 없음(3.10.4)으로 응답한다. 상품명으로 검색하지 않는 이유는 상품명이 브랜드 별칭이기도 하면(예: `Knob Creek`) 1단계에서 브랜드 전체가 나오기 때문이다.
 
 브랜드 단계를 먼저 시도하는 이유: 대표 상품이 브랜드 이름을 별칭으로 갖는 경우가 많다(예: Royal Brackla 12의 별칭 `Royal Brackla`). 상품 별칭을 먼저 보면 `Royal Brackla`는 12년만, `로얄브라클라`는 그 브랜드의 상품 전체를 돌려주어 고객이 입력한 표기에 따라 결과가 달라진다. 브랜드 이름의 어떤 표기로 찾든 같은 결과를 주기 위해 브랜드 별칭과 정확히 같은 검색어는 브랜드 결과로 해석한다. `로얄브라클라 12년`처럼 브랜드 이름보다 긴 검색어는 브랜드 별칭과 같지 않으므로 상품 별칭 단계에서 그 상품을 찾는다. 브랜드에 활성 상품이 없으면 다음 단계로 넘어간다.
 
@@ -882,6 +1016,7 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 | 비상품 항목 | 섹션 제목, 설명 등 상품이 아닌 줄은 상품과 연결된 메뉴 항목이 되지 않는다 |
 | 비활성 상품 | `products.is_active = false`인 상품은 어느 단계에서도 일치하지 않는다 |
 | 검색 제외 별칭 | `is_searchable = false`인 상품 별칭으로는 `alias_exact`와 `partial`에서 일치하지 않는다 |
+| 품절 항목 | `soldOut`인 항목(3.14.8). 이 API는 공개 API라 호출자와 관계없이 빠지며, 판매 중으로 되돌리면 바로 다시 검색된다 |
 
 정렬 기준:
 
@@ -895,6 +1030,7 @@ items
 
 matchedProducts
   alias_exact  displayName 오름차순
+  product      그 상품 하나
   brand        정확 일치 상품 먼저, 그다음 나머지. 각 묶음 안에서 displayName 오름차순
   partial      일치한 별칭이 짧은 상품부터, 같으면 displayName 오름차순
 
@@ -942,6 +1078,7 @@ options
       "latitude": 37.478321,
       "longitude": 126.951234,
       "distanceMeters": 41,
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "productId": "44444444-4444-4444-8444-444444444444",
       "productDisplayName": "Glenfiddich 12",
       "menuDisplayName": "글렌피딕 12년",
@@ -950,12 +1087,18 @@ options
           "optionLabel": "잔",
           "pourMl": 30,
           "priceKrw": 17000,
+          "discount": {
+            "discountedPriceKrw": 14000,
+            "startsAt": "2026-11-01T09:00:00Z",
+            "endsAt": "2026-11-15T15:00:00Z"
+          },
           "sortOrder": 1
         },
         {
           "optionLabel": "병",
           "pourMl": null,
           "priceKrw": 160000,
+          "discount": null,
           "sortOrder": 2
         }
       ],
@@ -968,6 +1111,7 @@ options
       "latitude": 37.484102,
       "longitude": 126.929815,
       "distanceMeters": 1989,
+      "coverThumbnailUrl": null,
       "productId": "44444444-4444-4444-8444-444444444444",
       "productDisplayName": "Glenfiddich 12",
       "menuDisplayName": "Glenfiddich 12Y",
@@ -976,6 +1120,7 @@ options
           "optionLabel": null,
           "pourMl": 15,
           "priceKrw": 9000,
+          "discount": null,
           "sortOrder": 1
         }
       ],
@@ -988,8 +1133,8 @@ options
 
 | 필드 | 타입 | null 가능 | 설명 |
 |---|---|---|---|
-| `query` | 문자열 | 아니오 | 앞뒤 공백을 지운 검색어. 정규화한 값이 아니다 |
-| `matchType` | `alias_exact` \| `brand` \| `partial` \| `none` | 아니오 | 검색어를 해석한 단계(3.10.1) |
+| `query` | 문자열 | 예 | 앞뒤 공백을 지운 검색어. 정규화한 값이 아니다. `productId`로 검색했으면 `null` |
+| `matchType` | `alias_exact` \| `brand` \| `partial` \| `product` \| `none` | 아니오 | 검색어를 해석한 단계(3.10.1). `product`는 `productId`로 검색해 그 상품을 찾은 경우다 |
 | `matchedProducts` | 배열 | 아니오 | 검색어로 해석된 상품 전체. 판매 업장이 없는 상품도 포함한다. 없으면 `[]` |
 | `matchedProducts[].productId` | UUID 문자열 | 아니오 | |
 | `matchedProducts[].displayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`) |
@@ -1003,13 +1148,15 @@ options
 | `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `items[].distanceMeters` | 정수 | 예 | 고객 위치와 업장 사이의 직선 거리(미터). 위치를 보내지 않으면 `null` |
+| `items[].coverThumbnailUrl` | 문자열 | 예 | 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 썸네일 URL(`thumbnailUrl`). 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다 |
 | `items[].productId` | UUID 문자열 | 아니오 | `matchedProducts`의 상품 중 하나 |
 | `items[].productDisplayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`) |
 | `items[].menuDisplayName` | 문자열 | 아니오 | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`) |
 | `items[].options` | 배열 | 아니오 | 해당 항목의 가격·용량 옵션 전체. 최소 1개. 결과 카드에 어떤 옵션을 표시할지는 프론트엔드가 정한다 |
 | `items[].options[].optionLabel` | 문자열 | 예 | 메뉴판의 `잔`, `병` 같은 표기. 없으면 `null` |
 | `items[].options[].pourMl` | 정수 | 예 | 용량(ml). 메뉴판에 없으면 `null` |
-| `items[].options[].priceKrw` | 정수 | 아니오 | 가격(원) |
+| `items[].options[].priceKrw` | 정수 | 아니오 | 정가(원) |
+| `items[].options[].discount` | 객체 | 예 | 기간 할인. 3.9의 `options[].discount`와 같으며, 할인 중인지는 프론트엔드가 계산한다. 없거나 끝났으면 `null` |
 | `items[].options[].sortOrder` | 정수 | 아니오 | 옵션 표시 순서 |
 | `items[].menuUpdatedAt` | RFC 3339 문자열 | 아니오 | 업장 현재 메뉴판의 `menu_boards.published_at` |
 | `truncated` | 불리언 | 아니오 | `limit`보다 많은 행이 일치했으면 `true` |
@@ -1033,24 +1180,51 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 }
 ```
 
+`productId`로 검색해 `matchType = none`이면 그 상품을 더 찾을 수 없다는 뜻이다. 프론트엔드는 "상품 정보를 찾을 수 없음"을 보여 주고, 홈 화면으로 돌아가면 3.17을 다시 불러온다.
+
 #### 3.10.5 검증 오류와 프론트엔드 처리
 
 입력이 잘못되면 `422 VALIDATION_FAILED`를 반환한다(9.1, 9.3).
 
 | 상황 | `fieldErrors[].path` | `fieldErrors[].code` | 프론트엔드 처리 |
 |---|---|---|---|
-| `query` 파라미터 없음 | `query` | `MISSING` | 앱 버그. 일반 오류와 재시도 |
+| `query`와 `productId`를 둘 다 보내거나 둘 다 빠뜨림 | `productId` | `EXACTLY_ONE_REQUIRED` | 앱 버그. 일반 오류와 재시도 |
+| `productId`가 UUID가 아님 | `productId` | `UUID_PARSING` | 앱 버그. 일반 오류와 재시도 |
 | 빈 문자열이거나 공백뿐 | `query` | `BLANK` | 검색창 아래에 검색어 입력 안내 |
 | 앞뒤 공백을 지운 뒤 100자 초과 | `query` | `STRING_TOO_LONG` | 검색창 아래에 100자 제한 안내 |
 | 정규화하면 남는 문자가 없음 (예: `!!!`) | `query` | `NOT_SEARCHABLE` | 검색창 아래에 검색할 수 있는 문자가 없다는 안내 |
 | `lat`과 `lng` 중 하나만 보냄 | 빠진 쪽 (`lat` 또는 `lng`) | `LAT_LNG_REQUIRED_TOGETHER` | 앱 버그. 일반 오류와 재시도 |
 | `lat`, `lng`, `limit`이 범위를 벗어남 | 해당 파라미터 | `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL` | 앱 버그. 일반 오류와 재시도 |
 | `lat`, `lng`, `limit`이 숫자가 아님 | 해당 파라미터 | `FLOAT_PARSING`(`lat`, `lng`), `INT_PARSING`(`limit`) | 앱 버그. 일반 오류와 재시도 |
+| `source`가 `input`, `recent`, `popular`가 아님 | `source` | `LITERAL_ERROR` | 앱 버그. 일반 오류와 재시도 |
 
-- 파라미터 누락, 범위, 숫자 형식 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `BLANK`, `STRING_TOO_LONG`, `LAT_LNG_REQUIRED_TOGETHER`, `NOT_SEARCHABLE`을 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
+- 범위, 숫자 형식, UUID 형식, 허용 값 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `EXACTLY_ONE_REQUIRED`, `BLANK`, `STRING_TOO_LONG`, `LAT_LNG_REQUIRED_TOGETHER`, `NOT_SEARCHABLE`을 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
 - 프론트엔드는 요청 전에 검색어의 앞뒤 공백을 지우고, 빈 검색어면 API를 호출하지 않는다. 검색 입력 칸은 100자로 제한한다. 그래도 서버가 `query` 오류를 반환하면 위 표대로 `code`를 기준으로 문구를 보여 준다.
 - 위치 권한이 없거나 위치를 얻지 못하면 `lat`과 `lng`를 둘 다 빼고 요청한다. 결과는 `menuUpdatedAt` 순으로 정렬되고 `distanceMeters`는 `null`이다.
 - 네트워크 오류와 `5xx`(`500 INTERNAL_ERROR`, `503`, 프록시의 `502`·`504` 포함)는 오류 상태와 재시도 버튼을 보여 준다(9.6).
+
+#### 3.10.6 검색 집계
+
+"요즘 많이 찾는 위스키"(3.17)의 순위를 정하고 카탈로그에 빠진 상품을 찾기 위해, 서버는 이 API가 `200 OK`로 응답한 검색을 서울 날짜(`YYYY-MM-DD`)별로 센다. 검색 한 번을 한 행으로 남기지 않으며, 검색어 원문과 검색 시각도 남기지 않는다.
+
+| 집계 | 키 | 1을 더하는 검색 |
+|---|---|---|
+| 상품별 검색 수 | 서울 날짜, `productId`, `source` | `matchType = product`인 검색, 또는 `matchType = alias_exact`이고 `matchedProducts`가 정확히 하나인 검색 |
+| 인식하지 못한 검색어 | 서울 날짜, 정규화한 검색어 | `query`로 검색해 `matchType = none`인 검색. 아래 보호 규칙에 걸리면 세지 않는다 |
+
+- 브랜드(`brand`), 부분 일치(`partial`), 여러 상품이 일치한 `alias_exact`는 어느 집계에도 넣지 않는다. 한 번의 검색이 여러 상품의 수를 올리면 순위가 부풀려지기 때문이다. `productId`로 검색했는데 `none`인 검색도 넣지 않는다.
+- 판매 업장이 없는 상품도 센다. 순위 후보에서만 빠진다(3.17.2).
+- `source`는 요청의 값이며, 보내지 않았으면 `input`이다.
+- **인식하지 못한 검색어의 보호 규칙**: 고객이 검색창에 이름이나 연락처를 잘못 넣을 수 있으므로 다음을 지킨다.
+  - 앞뒤 공백을 지운 원문에 `@`가 있으면 세지 않는다. 정규화한 검색어에서 `-`와 `.`을 뺀 값에 숫자가 7개 이상 이어져도 세지 않는다. 이메일과 전화번호를 거르기 위해서다. 숙성 연수나 빈티지(예: `1990`)는 7자리가 되지 않는다.
+  - 한 날짜에 새로 만드는 검색어 행은 1,000개까지다. 그 뒤로는 이미 있는 검색어만 센다.
+  - 30일이 지난 행은 지운다.
+  - 조회 API는 두지 않는다. 팀원이 데이터베이스에서 직접 보고 카탈로그에 별칭이나 상품을 더하는 데만 쓴다.
+- 상품별 검색 수는 90일이 지난 행을 지운다.
+- **집계에 남기지 않는 값**: 검색어 원문, 검색 시각(날짜만 남긴다), 위치(`lat`, `lng`), 사용자 ID, IP 주소, 기기 정보, token. 이 API는 `Authorization` 헤더를 읽지 않으므로 누가 검색했는지 알 수 없다. 서버 접근 로그에는 위의 규칙대로 `lat`, `lng`를 뺀 검색어가 남는다.
+- 검증 오류(`422`)와 서버 오류로 끝난 요청은 세지 않는다. 집계를 쓰다 실패해도 검색 응답은 그대로 `200 OK`로 보낸다. 실패는 서버 로그에만 남긴다.
+- 집계 행은 키마다 하나뿐이므로 검색이 많아져도 행 수에는 상한이 있다. 같은 검색을 반복하면 숫자는 계속 오른다. 요청 수 제한은 이 명세의 범위 밖이다.
+- 같은 검색을 다시 불러와도 한 번 더 센다. 프론트엔드는 결과 화면에서 뒤로 갔다가 돌아오는 경우처럼 같은 검색을 다시 보여 줄 때는 이미 받은 결과를 쓰고 3.10을 다시 호출하지 않는다. 사용자가 새로 검색하거나 재시도를 누를 때만 호출한다.
 
 ### 3.11 업주 신청과 승인
 
@@ -1061,6 +1235,7 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 - 한 업장에는 현재 업주가 최대 한 명이다. 한 사용자는 여러 업장의 업주가 될 수 있다.
 - 신청은 두 종류다. `existing_bar`는 이미 등록된 업장의 업주 신청이고, `new_bar`는 아직 없는 업장을 등록하면서 업주가 되는 신청이다.
 - 신청자는 사업자등록번호, 대표자명, 개업일자와 연락처를 제출한다. 사업자등록증 사진을 올리면 앞의 세 값을 읽어 입력란을 미리 채울 수 있다(3.11.12).
+- 신청을 만든 뒤 메뉴판 사진을 올린다(3.11.15). 승인하면 백엔드가 이 사진으로 메뉴 등록 작업을 만들어 AI 분석을 미리 시작하므로, 업주는 처음 업장 관리에 들어갔을 때 바로 검수할 수 있다(3.11.7).
 - 백엔드는 신청을 받을 때 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자가 서로 맞는지 1차 검증한다(3.11.2). 맞지 않으면 신청을 만들지 않고 신청자가 입력을 고치게 한다. 검증 서비스에 연결하지 못하면 신청은 받고 결과를 `unavailable`로 남긴다.
 - 외부 API를 부르는 두 요청은 사용자마다 하루 5회로 제한한다: 신청할 때의 국세청 진위확인(3.11.2)과 사업자등록증 OCR(3.11.12). 남의 사업자등록번호로 대표자명과 개업일자를 맞춰 보는 시도와 외부 API 호출 한도 소진을 막기 위해서다. 규칙은 3.11.14에 있다.
 - operator는 웹 대시보드에서 신청과 검증 결과를 보고, 실제 매장이 있는지 확인한 뒤 승인하거나 거절한다.
@@ -1075,6 +1250,7 @@ POST /api/owner-applications/business-certificate-ocr
                                              (선택. 사업자등록증 사진으로 입력란 채우기, 3.11.12)
 POST /api/owner-applications                 → 1차 검증 후 pending
                                                (정보가 맞지 않으면 422, 입력을 고쳐 다시 신청)
+PUT /api/owner-applications/{id}/menu-photos → 메뉴판 사진 저장 (pending일 때 전체 교체, 3.11.15)
 GET /api/me/owner-applications               → 상태 확인
 POST /api/owner-applications/{id}/cancel     → canceled (pending일 때만)
 
@@ -1084,10 +1260,12 @@ POST /api/owner-applications/{id}/verify-business
                                              (검증 결과가 unavailable이면 다시 검증, 3.11.13)
 실제 매장이 있는지 확인
 POST /api/owner-applications/{id}/approve    → approved, 업주 관계 생성 (new_bar는 업장도 생성)
-POST /api/owner-applications/{id}/reject     → rejected
+                                               신청 메뉴판 사진이 있으면 메뉴 등록 작업을 만들고 AI 분석 시작
+POST /api/owner-applications/{id}/reject     → rejected, 신청 메뉴판 사진 삭제
 
 [승인 후 업주]
 GET /api/me/bars                             → 내가 관리하는 업장
+GET /api/bars/{barId}                        → activeMenuImport가 있으면 그 작업의 검수로 이동 (5장)
 업장 정보 수정(3.7), 메뉴 등록·검수·반영(3.8, 4~8장)
 ```
 
@@ -1152,6 +1330,13 @@ closed      폐업자
   },
   "contactPhone": "010-1234-5678",
   "applicantNote": "대표 본인입니다",
+  "menuPhotos": [
+    {
+      "imageOrder": 1,
+      "imageUrl": "https://storage.example.com/signed/owner-application-menu-1.jpg",
+      "imageUrlExpiresAt": "2026-10-14T03:15:00Z"
+    }
+  ],
   "rejectionReason": null,
   "reviewedAt": null,
   "createdAt": "2026-10-14T03:00:00Z",
@@ -1181,6 +1366,10 @@ closed      폐업자
 | `businessVerification.checkedAt` | RFC 3339 문자열 | 아니오 | `result`를 얻은 시각. 신청할 때 `unavailable`이 되었으면 그 시도 시각이다. 다시 검증(3.11.13)이 실패하면 `result`와 함께 바뀌지 않는다 |
 | `contactPhone` | 문자열 | 아니오 | 운영자가 확인을 위해 연락할 번호 |
 | `applicantNote` | 문자열 | 예 | 신청자 메모 |
+| `menuPhotos` | 배열 | 아니오 | 신청에 올린 메뉴판 사진(3.11.15). `imageOrder` 순서이며, 올리지 않았거나 거절·취소로 삭제되었으면 `[]` |
+| `menuPhotos[].imageOrder` | 정수 | 아니오 | 1부터 시작하는 순서 |
+| `menuPhotos[].imageUrl` | 문자열 | 아니오 | 짧은 만료 시간을 가진 서명 URL. 신청자 본인과 operator만 받는다. 만료되었거나 이미지 로딩이 `403`으로 실패하면 신청 상세(3.11.4)를 다시 조회해 새 URL을 받는다 |
+| `menuPhotos[].imageUrlExpiresAt` | RFC 3339 문자열 | 예 | `imageUrl` 만료 시각. 만료되지 않는 URL(로컬 저장소)이면 `null` |
 | `rejectionReason` | 문자열 | 예 | `rejected`일 때만 값이 있다 |
 | `reviewedAt` | RFC 3339 문자열 | 예 | 승인 또는 거절 시각. 그 전에는 `null` |
 | `createdAt`, `updatedAt` | RFC 3339 문자열 | 아니오 | |
@@ -1303,7 +1492,7 @@ POST /api/owner-applications/{applicationId}/cancel
 Authorization: Bearer <access-token>
 ```
 
-신청자 본인만 호출할 수 있다. 요청 본문은 없다. `pending`이면 `canceled`로 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다.
+신청자 본인만 호출할 수 있다. 요청 본문은 없다. `pending`이면 `canceled`로 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다. 신청의 메뉴판 사진(3.11.15)은 삭제되므로 응답의 `menuPhotos`는 `[]`다.
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
@@ -1356,7 +1545,7 @@ Content-Type: application/json
 operator만 호출할 수 있다. 사업자등록 정보 검증 결과가 `matched`가 아니어도 승인할 수 있다. 판단은 operator가 하며, 대시보드는 `unavailable`인 신청을 먼저 다시 검증(3.11.13)하도록 안내한다.
 
 - `existing_bar`: 요청 본문이 없거나 `{}`다.
-- `new_bar`: operator가 확인한 업장 정보를 보낸다. 프론트엔드는 `proposedBar`를 초기값으로 채우고, operator가 주소를 확인해 좌표를 입력한다. 필드 규칙은 3.5와 같다.
+- `new_bar`: operator가 확인한 업장 정보를 보낸다. 프론트엔드는 `proposedBar`를 초기값으로 채우고, operator가 주소를 확인해 좌표를 입력한다. 필드 규칙은 3.5와 같다. `description`, `defaultPourMl`, `tags`, `weeklyHours`는 받지 않으며(`EXTRA_FORBIDDEN`, 3.7), 만든 업장은 `description`과 `defaultPourMl`이 `null`, `tags`와 `weeklyHours`가 `[]`다. 업주가 승인 뒤 3.7로 정한다. 임시 휴무와 매장 사진도 승인 뒤 3.15, 3.16으로 정한다.
 
 ```json
 {
@@ -1374,12 +1563,24 @@ operator만 호출할 수 있다. 사업자등록 정보 검증 결과가 `match
 
 - `existing_bar`: 업장 행을 잠그고 현재 업주가 없는지 다시 확인한 뒤 업주 관계를 만든다. 신청 뒤 업장이 비활성화되었어도 승인할 수 있다.
 - `new_bar`: `bar`로 `status = active`인 업장을 만들고 업주 관계를 만든다. 만든 업장은 응답의 `bar`에 담긴다. 메뉴가 없으므로 상품 검색에는 메뉴를 반영한 뒤부터 나온다.
+- 공통: 신청에 메뉴판 사진(3.11.15)이 있고 업장에 미완료 메뉴 등록 작업(4.3)이 없으면, 같은 트랜잭션에서 그 사진들로 메뉴 등록 작업을 만든다. 사진 순서가 `imageOrder`이고, `mode`는 업장에 현재 메뉴판이 없으면 `full_replace`, 있으면 `partial_update`이며, `ownerNote`는 `null`이다. 트랜잭션을 커밋한 뒤 4장의 업로드와 같은 AI 처리를 시작한다. 검수에서 확정하기 전에는 메뉴가 게시되지 않는다(8장).
+- 사진이 없거나 업장에 이미 미완료 작업이 있으면 작업을 만들지 않고 승인만 한다. 미완료 작업은 operator가 업장에 먼저 올린 작업이나 해제된 이전 업주의 작업처럼 드문 경우에만 있으며, 새 업주가 그 작업을 이어서 처리하거나 취소(5.7)한 뒤 다시 올린다.
 
-`200 OK`, 본문은 `OwnerApplication`(`status = approved`)이다. 신청자는 다음 요청부터 업주 권한을 가진다.
+`200 OK`, 본문은 `OwnerApplication`(`status = approved`)이다. 신청자는 다음 요청부터 업주 권한을 가진다. 응답에는 만든 작업이 들어 있지 않다. 업주 화면은 업장 상세(3.6)의 `activeMenuImport`로 작업을 찾아 처리 상태나 검수(5장)를 보여 준다. AI 처리가 실패하면 작업은 `failed`가 되며, 업주가 사진을 다시 올린다(4장).
+
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다.
+
+1. 호출자가 operator인지 (`403 FORBIDDEN`, 2.2)
+2. 요청 형식과 `bar` 필드 규칙 (`422 VALIDATION_FAILED`)
+3. 호출자의 `users` 행 (`404 USER_NOT_FOUND`). 승인한 operator를 기록해야 하기 때문이다. `users` 행이 없는 operator는 임시 로그인(3.1.3)으로만 생기며, `GET /api/me`를 먼저 호출하면 된다
+4. 신청 (`404 OWNER_APPLICATION_NOT_FOUND`)과 상태 (`409 INVALID_APPLICATION_STATE`)
+5. 신청 종류에 맞는 본문 (`422 VALIDATION_FAILED`, `bar` 없음은 `MISSING`, `existing_bar`에 `bar`는 `EXTRA_FORBIDDEN`)
+6. 업장의 현재 업주 (`409 BAR_OWNER_EXISTS`)
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `404` | `USER_NOT_FOUND` | 호출한 operator의 `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없음 | 신청 목록 재조회 |
 | `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회 |
 | `409` | `BAR_OWNER_EXISTS` | 업장에 이미 현재 업주가 있음. 같은 업장의 다른 신청이 먼저 승인된 경우 | 이 신청은 거절 처리 |
@@ -1399,7 +1600,7 @@ Content-Type: application/json
 }
 ```
 
-operator만 호출할 수 있다. `reason`은 필수이며 앞뒤 공백을 지운 뒤 1~500자다. 신청자에게 그대로 보여 준다. 사업자등록 정보 검증 결과와 관계없이 거절할 수 있다. `200 OK`, 본문은 `OwnerApplication`(`status = rejected`)이다. 오류는 3.11.7의 `403`, `404`, `409 INVALID_APPLICATION_STATE`와 같고, `422 VALIDATION_FAILED`는 `reason`이 없거나(`MISSING`), 공백뿐이거나(`BLANK`), 500자를 넘을 때(`STRING_TOO_LONG`)다.
+operator만 호출할 수 있다. `reason`은 필수이며 앞뒤 공백을 지운 뒤 1~500자다. 신청자에게 그대로 보여 준다. 사업자등록 정보 검증 결과와 관계없이 거절할 수 있다. 신청의 메뉴판 사진(3.11.15)은 삭제한다. `200 OK`, 본문은 `OwnerApplication`(`status = rejected`, `menuPhotos = []`)이다. 오류는 3.11.7의 `403`, `404`(`USER_NOT_FOUND` 포함), `409 INVALID_APPLICATION_STATE`와 같고, `422 VALIDATION_FAILED`는 `reason`이 없거나(`MISSING`), 공백뿐이거나(`BLANK`), 500자를 넘을 때(`STRING_TOO_LONG`)다.
 
 #### 3.11.9 내가 관리하는 업장 목록
 
@@ -1420,11 +1621,19 @@ Authorization: Bearer <access-token>
       "latitude": 37.478321,
       "longitude": 126.951234,
       "phone": "02-000-0000",
+      "description": null,
+      "defaultPourMl": null,
+      "tags": [],
+      "weeklyHours": [],
+      "operatingException": null,
+      "photos": [],
       "status": "active",
       "activeMenuImport": null,
       "currentMenu": {
         "menuBoardId": "66666666-6666-4666-8666-666666666666",
-        "publishedAt": "2026-10-04T09:15:00Z"
+        "menuVersion": 4,
+        "publishedAt": "2026-10-04T09:15:00Z",
+        "confirmedAt": null
       },
       "owner": {
         "userId": "11111111-1111-4111-8111-111111111111",
@@ -1465,7 +1674,7 @@ operator만 호출할 수 있다. 업장의 현재 업주 관계를 해제하고
 GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
 ```
 
-로그인 없이 호출할 수 있는 공개 API이며 `Authorization` 헤더를 사용하지 않는다. 반환하는 값은 활성 업장의 공개 정보(3.9에서도 볼 수 있는 이름, 주소, 좌표)와 업주 등록 여부뿐이다.
+로그인 없이 호출할 수 있는 공개 API이며 `Authorization` 헤더를 사용하지 않는다. 반환하는 값은 활성 업장의 공개 정보(3.9에서도 볼 수 있는 이름, 주소, 좌표, 대표 사진)와 업주 등록 여부뿐이다.
 
 | Query | 필수 | 기본값 | 설명 |
 |---|---|---|---|
@@ -1483,6 +1692,7 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
       "address": "서울특별시 관악구 관악로 1 2층",
       "latitude": 37.478321,
       "longitude": 126.951234,
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "hasOwner": true
     }
   ],
@@ -1495,6 +1705,7 @@ GET /api/search/bar-names?query=%EA%B4%80%EC%95%85&limit=20
 | `items[].barId` | UUID 문자열 | 아니오 | |
 | `items[].name`, `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4. 고객 지도 검색에서 지도를 옮길 위치 |
+| `items[].coverThumbnailUrl` | 문자열 | 예 | 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 썸네일 URL(`thumbnailUrl`). 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다. 업주 신청에서 자기 업장을 알아보는 데도 쓴다 |
 | `items[].hasOwner` | 불리언 | 아니오 | 현재 업주가 있으면 `true`. 이 업장에 신청하면 `409 BAR_OWNER_EXISTS`다 |
 | `truncated` | 불리언 | 아니오 | `limit`보다 많이 일치했으면 `true` |
 
@@ -1581,7 +1792,7 @@ operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 �
 | 사업자등록증 OCR (3.11.12) | 사용자마다 하루 5회 | `413`, `415`, `422` 검사를 통과해 CLOVA OCR을 실제로 호출한 요청. 읽은 항목이 없어도, 호출이 실패해 `503`이 되어도 센다. 서버에 OCR 설정이 없어 호출하지 않은 요청은 세지 않는다 |
 
 - 사용자는 token의 `sub`(3.1.2)로 구분한다. OCR은 `users` 행이 없어도 호출할 수 있으므로 `users.id`가 아니라 `sub`로 센다.
-- 임시 로그인(3.1.3) 토큰은 모두 `sub`가 같으므로 한도 하나를 함께 쓴다. 임시 로그인은 로컬 개발과 Google 로그인 전환 전의 데모 서버에서만 쓰므로 이 한계를 받아들인다.
+- 임시 로그인(3.1.3) 토큰은 모두 `sub`가 같으므로 한도 하나를 함께 쓴다. 임시 로그인은 로컬 개발에서만 쓰므로 이 한계를 받아들인다.
 - 두 한도는 따로 센다. operator의 다시 검증(3.11.13)은 제한하지 않는다.
 - 하루는 한국 시간(KST) 자정에 초기화된다.
 - 한도를 넘으면 외부 API를 호출하지 않고 `429 RATE_LIMITED`를 반환한다. `details.retryAfter`에 다음 초기화 시각(RFC 3339, UTC)을 담는다.
@@ -1600,6 +1811,47 @@ operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 �
 ```
 
 - 횟수는 서버 메모리에 저장한다. 서버가 재시작되면 횟수가 초기화되며, 이 한계는 받아들인다. API 프로세스가 하나(worker 1개)일 때만 한도가 정확하다.
+
+#### 3.11.15 업주 신청 메뉴판 사진
+
+```http
+PUT /api/owner-applications/{applicationId}/menu-photos
+Authorization: Bearer <access-token>
+Content-Type: multipart/form-data
+```
+
+신청자 본인만 호출할 수 있다. 업주 신청(3.11.2)이 `201`로 만들어진 뒤 그 신청의 메뉴판 사진을 저장한다. 사진은 승인할 때 메뉴 등록 작업의 사진이 되어 AI 분석에 쓰이고(3.11.7), operator가 실제 매장인지 확인할 때도 본다.
+
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `images` | 이미지 파일 배열 | 예 | 표시 순서대로 전송한 메뉴판 사진. 배열 순서가 `imageOrder`가 된다 |
+
+- 호출할 때마다 신청의 사진 전체를 이번 요청의 사진으로 바꾼다. 같은 요청을 다시 보내도 결과가 같으므로 `Idempotency-Key`는 받지 않는다. 사진을 추가하거나 순서를 바꾸려면 전체 목록을 다시 보낸다.
+- `pending`일 때만 올릴 수 있다. 승인·거절·취소와 동시에 들어오면 신청 행을 잠가 둘 중 하나만 성공한다.
+- 업로드 제한과 형식 판별은 메뉴 등록 요청(4.1)과 같다: JPEG·PNG, 최대 15장, 사진당 10MB, 전체 60MB.
+- 백엔드는 사진을 메뉴 등록 사진과 같은 비공개 저장소에 둔다. 공개 API에는 나오지 않으며 신청자 본인과 operator만 `menuPhotos`(3.11.1)의 서명 URL로 볼 수 있다.
+- 신청이 거절되거나 취소되면 사진을 삭제한다(3.11.5, 3.11.8). 승인되면 메뉴 등록 작업의 사진으로 남는다.
+- 신청할 때 사진을 꼭 올려야 하는 것은 아니다. 사진 없이 승인된 업주는 승인 뒤 4장으로 메뉴를 올린다.
+
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다.
+
+1. 요청 형식 (`422 VALIDATION_FAILED`, `images` 없음은 `MISSING`)
+2. 신청과 신청자 (`404 OWNER_APPLICATION_NOT_FOUND`)
+3. 신청 상태 (`409 INVALID_APPLICATION_STATE`)
+4. 사진 (4.1과 같다): 개수를 확인하고(`413 UPLOAD_TOO_LARGE`), 사진을 순서대로 읽으며 크기(`413`)와 형식(`415 UNSUPPORTED_IMAGE_TYPE`)을 확인한다
+
+`200 OK`, 본문은 `OwnerApplication`(3.11.1)이며 `menuPhotos`에 저장한 사진이 들어 있다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없거나, 본인의 신청이 아니거나, `applicationId`가 UUID 형식이 아님 | 신청 목록 재조회 |
+| `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회. 승인되었으면 사진은 4장으로 올린다 |
+| `413` | `UPLOAD_TOO_LARGE` | 4.4와 같다 | 사진 수를 줄이거나 다시 압축 |
+| `415` | `UNSUPPORTED_IMAGE_TYPE` | 4.4와 같다 | 해당 사진을 JPEG로 바꿔 다시 올림 |
+| `422` | `VALIDATION_FAILED` | `images`가 없음 | `fieldErrors` 표시 |
+
+신청은 만들어졌지만 사진 업로드가 실패하면, 프론트엔드는 신청을 다시 만들지 않고 같은 `applicationId`로 이 API만 다시 호출한다. 다시 신청하면 `409 OWNER_APPLICATION_EXISTS`(3.11.2)가 되며 `details.applicationId`로 기존 신청을 찾을 수 있다.
 
 ### 3.12 내 주변 업장 조회
 
@@ -1641,6 +1893,7 @@ GET /api/search/nearby-bars?lat=37.478&lng=126.951&radiusMeters=500
       "latitude": 37.478321,
       "longitude": 126.951234,
       "distanceMeters": 41,
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "menuUpdatedAt": "2026-10-02T11:00:00Z"
     },
     {
@@ -1650,6 +1903,7 @@ GET /api/search/nearby-bars?lat=37.478&lng=126.951&radiusMeters=500
       "latitude": 37.479874,
       "longitude": 126.954512,
       "distanceMeters": 373,
+      "coverThumbnailUrl": null,
       "menuUpdatedAt": null
     }
   ]
@@ -1663,6 +1917,7 @@ GET /api/search/nearby-bars?lat=37.478&lng=126.951&radiusMeters=500
 | `items[].name`, `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
 | `items[].distanceMeters` | 정수 | 아니오 | 고객 위치와 업장 사이의 직선 거리(미터). `radiusMeters` 이하 |
+| `items[].coverThumbnailUrl` | 문자열 | 예 | 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 썸네일 URL(`thumbnailUrl`). 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다 |
 | `items[].menuUpdatedAt` | RFC 3339 문자열 | 예 | 업장 현재 메뉴판의 `menu_boards.published_at`(3.9의 `publishedAt`과 같은 값). 게시된 메뉴가 한 번도 없으면 `null`이다. 메뉴판은 있지만 항목이 0개이면 값이 있다(3.9.1과 같은 규칙) |
 
 근처에 업장이 없으면 `200 OK`와 `items = []`를 반환한다. 프론트엔드는 반경 안에 업장이 없다는 빈 상태를 표시한다.
@@ -1742,6 +1997,7 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
       "address": "서울특별시 관악구 관악로 1 2층",
       "latitude": 37.478321,
       "longitude": 126.951234,
+      "coverThumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail",
       "menuUpdatedAt": "2026-10-02T11:00:00Z"
     },
     {
@@ -1750,6 +2006,7 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
       "address": "서울특별시 관악구 관악로14길 10",
       "latitude": 37.479874,
       "longitude": 126.954512,
+      "coverThumbnailUrl": null,
       "menuUpdatedAt": null
     }
   ]
@@ -1762,6 +2019,7 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 | `items[].barId` | UUID 문자열 | 아니오 | |
 | `items[].name`, `items[].address` | 문자열 | 아니오 | |
 | `items[].latitude`, `items[].longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
+| `items[].coverThumbnailUrl` | 문자열 | 예 | 3.12의 `coverThumbnailUrl`과 같다. 업장 대표 사진(`photos`의 첫 사진, 3.16.1)의 썸네일 URL(`thumbnailUrl`). 3.16.5와 같은 고정 URL이다. 사진이 없으면 `null`이며 프론트엔드는 기본 이미지를 보여 준다 |
 | `items[].menuUpdatedAt` | RFC 3339 문자열 | 예 | 3.12의 `menuUpdatedAt`과 같다. 게시된 메뉴가 한 번도 없으면 `null`이고, 메뉴판은 있지만 항목이 0개이면 값이 있다 |
 
 영역 안에 업장이 없으면 `200 OK`와 `items = []`를 반환한다. 프론트엔드는 이 영역에 업장이 없다는 빈 상태를 표시한다.
@@ -1787,6 +2045,610 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 - 빠진 값, 범위, 숫자 형식 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `BOUNDS_INVERTED`(남북 먼저), `BOUNDS_TOO_LARGE`(남북 먼저)를 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
 - 네트워크 오류와 `5xx`(`500 INTERNAL_ERROR`, 프록시의 `502`·`504` 포함)는 오류 상태와 재시도 버튼을 보여 준다(9.6).
 - 이 API는 `401`, `403`, `404`를 반환하지 않으며, 요청 수 제한(`429`)도 없다. 지도를 움직일 때마다 호출하므로 프론트엔드는 카메라 이동이 멈춘 뒤에 호출하고, 늦게 도착한 이전 영역의 응답은 버린다.
+
+### 3.14 메뉴 직접 편집
+
+메뉴판 사진 등록과 검수(이 문서의 4~8) 없이 현재 메뉴판의 항목 하나를 추가, 수정, 삭제하거나 메뉴판 전체를 비우는 API다. 검수 단계가 없으므로 요청이 성공하면 그 결과가 바로 게시되어 업장 메뉴(3.9)와 고객 검색(3.10)에 나온다.
+
+| 메서드 | 경로 | 용도 |
+|---|---|---|
+| `POST` | `/api/bars/{barId}/menu/items` | 항목 추가 (3.14.3) |
+| `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}` | 항목 수정 (3.14.4) |
+| `DELETE` | `/api/bars/{barId}/menu/items/{barMenuItemId}?menuVersion=<n>` | 항목 삭제 (3.14.5) |
+| `POST` | `/api/bars/{barId}/menu/reset` | 메뉴판 초기화 (3.14.6) |
+| `PUT` | `/api/bars/{barId}/menu/items/{barMenuItemId}/sold-out` | 품절 표시와 해제 (3.14.8) |
+| `POST` | `/api/bars/{barId}/menu/confirm` | 판매 정보 확인 (3.14.9) |
+
+#### 3.14.1 공통 규칙
+
+- **권한**: operator와 해당 업장의 현재 업주가 호출할 수 있다(2.2). 비활성 업장은 메뉴를 바꾸지 않으며 `404 BAR_NOT_FOUND`다(4.4와 같다).
+- **항목 식별자**: 항목은 `barMenuItemId`로 가리킨다. 업장과 상품의 조합마다 하나이며 메뉴판에서 빠져도 바뀌지 않는다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀔 때마다(검수 반영과 직접 편집 모두) 새로 만들어질 수 있으므로 편집 요청에 쓰지 않는다.
+- **미완료 작업이 있을 때**: 업장에 미완료 메뉴 등록 작업(`uploaded`, `processing`, `ready_for_review`)이 있으면 추가, 수정, 삭제, 초기화는 모두 `409 ACTIVE_IMPORT_EXISTS`(`details.menuImportId`, `details.status`)다. 따라서 이 상황에서는 메뉴 편집이 불가능하고, 작업이 `applied`, `failed`, `canceled`가 되면 다시 편집할 수 있다. 검수 중에 메뉴판이 바뀌면 검수자가 오래된 메뉴판을 보고 결정하게 되기 때문이다.
+- **메뉴판 버전**: 모든 편집 요청은 3.9에서 받은 `menuVersion`을 보낸다. 메뉴판이 없으면 `null`이다. 서버의 현재 값과 다르면 아무것도 바꾸지 않고 `409 MENU_OUTDATED`(`details.submittedMenuVersion`, `details.currentMenuVersion`)다. 성공한 편집은 `menuVersion`을 1 올리고, 메뉴판이 없을 때의 첫 추가는 메뉴판을 만들고 `menuVersion = 1`이 된다. 검수 반영(8)도 `menuVersion`을 올린다.
+- **게시 시각**: 성공하면 `publishedAt`을 업장 행을 잠근 뒤의 현재 시각으로 바꾼다. 트랜잭션이나 요청이 시작한 시각이 아니다(PostgreSQL `now()`가 아니라 `clock_timestamp()`). 잠금을 기다리는 동안 먼저 끝난 판매 정보 확인(3.14.9)보다 이른 시각이 찍히면, 확인하지 않은 새 메뉴가 확인된 것처럼 보이기 때문이다. 검수 반영(8.7)과 판매 정보 확인의 `confirmedAt`도 같은 방식으로 찍는다. `menuBoardId`는 그대로다.
+- **응답**: 성공 응답의 본문은 3.9와 같은 형식(업장 정보와 메뉴 전체)이다. 추가는 `201 Created`, 나머지는 `200 OK`다. 프론트엔드는 이 응답으로 화면을 바꾸고 따로 다시 조회하지 않아도 된다.
+- **원자성**: 요청 하나는 하나의 트랜잭션이다. 신규 상품 생성(3.14.3)을 포함해 어느 단계에서든 실패하면 아무것도 바뀌지 않는다.
+- **동시 요청은 업장 행 잠금으로 차례로 처리한다**: 메뉴판이나 메뉴 항목에 영향을 주는 요청은 모두, 무엇을 확인하기 전에 먼저 같은 업장 행(`bars`)을 `FOR UPDATE`로 잠그고 트랜잭션이 끝날 때까지 잡는다. 업장이 활성인지(비활성이면 `404 BAR_NOT_FOUND`)와 업주 권한처럼 업장 상태에 따라 달라지는 확인은 잠금을 잡은 뒤에 한다(잠그기 전에 이미 확인했다면 잠근 뒤 다시 확인한다). 그래야 확인과 잠금 사이에 업장이 비활성이 되어도 메뉴가 바뀌지 않는다. 대상은 다음과 같다.
+  - 메뉴 등록 작업 생성: 사진 업로드(4.1)와 신청 승인의 첫 등록 작업(3.11.7)
+  - 검수 반영(8)
+  - 직접 편집: 추가, 수정, 삭제, 초기화(3.14.3~3.14.6)
+  - 품절 표시(3.14.8)와 판매 정보 확인(3.14.9)
+
+  그래서 같은 업장에 이런 요청이 동시에 와도 하나가 끝난 뒤에 다음 것이 처리되고, 각 요청은 앞 요청이 커밋한 결과를 보고 확인한다. 예를 들어 편집이 먼저면 등록 작업은 바뀐 메뉴판을 기준으로 만들어지고, 등록 작업이 먼저면 편집은 `409 ACTIVE_IMPORT_EXISTS`다. 검수가 항목을 내린 뒤에 온 품절 표시는 `404 MENU_ITEM_NOT_FOUND`이고, 검수 반영으로 버전이 오른 뒤에 온 판매 정보 확인은 `409 MENU_OUTDATED`다. 잠금은 업장마다 따로이므로 다른 업장의 요청은 기다리지 않는다.
+- **재시도**: `Idempotency-Key`는 쓰지 않는다. 응답을 받지 못해 같은 요청을 다시 보내면, 앞 요청이 성공했다면 `menuVersion`이 이미 올라 `409 MENU_OUTDATED`를 받는다. 프론트엔드는 3.9를 다시 조회해 변경이 반영되었는지 확인한다.
+- **변경 기록**: 누가 언제 메뉴를 바꿨는지는 남기지 않는다. 메뉴 변경 이력은 운영 대시보드의 추가 기능으로 나중에 구현할 예정이다. 직접 추가로 만든 상품과 브랜드에는 만든 사용자를 기록한다(3.14.3).
+- **다른 항목은 그대로**: 추가, 수정, 삭제는 요청한 항목만 바꾼다. 다른 항목의 옵션, 할인(3.14.2), 품절(3.14.8)은 그대로 남는다. 서버가 메뉴판을 다시 쓰는 방식으로 구현하더라도 다른 항목의 할인은 같은 옵션에 옮겨야 한다. 초기화(3.14.6)는 모든 항목을 빼므로 할인과 품절도 함께 사라진다.
+- **품절과 판매 정보 확인**: 3.14.8과 3.14.9는 메뉴 내용을 바꾸지 않으므로 미완료 작업 규칙과 `menuVersion` 증가, 게시 시각 변경을 적용하지 않는다. 자세한 차이는 각 절에 적었다.
+- **검사 순서**: 인증(`401`, 3.1.5) → 요청 형식(`422`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 업장 행 잠금 → 업장 상태(비활성이면 `404 BAR_NOT_FOUND`) → 미완료 작업(`409 ACTIVE_IMPORT_EXISTS`) → 메뉴판 버전(`409 MENU_OUTDATED`) → 각 API의 항목 확인과 업무 규칙. 형식 오류는 한 응답에 여러 개 올 수 있다. 요청 본문만으로 판단하는 규칙(`EXACTLY_ONE_REQUIRED`, `DUPLICATE_OPTION_VALUES`, `DISCOUNT_NOT_LOWER`, `END_BEFORE_START`, `DISCOUNT_ENDED`, `NOT_NORMALIZABLE`)은 요청 형식(`422`) 단계에서 함께 확인하고, DB를 봐야 하는 규칙(`PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`)은 마지막 단계에서 확인한다.
+
+#### 3.14.2 옵션
+
+추가와 수정의 `options[]`는 항목의 용량과 가격 줄이다. 3.9의 `items[].options[]`와 같으며 배열 순서가 표시 순서(`sortOrder`)가 된다.
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `optionLabel` | 문자열 | 아니오 | 메뉴판의 `잔`, `병` 같은 표기. 앞뒤 공백을 지운 뒤 1~100자. 없거나 `null`이면 표기 없음 |
+| `pourMl` | 정수 | 아니오 | 용량(ml). 1~32767. 없거나 `null`이면 용량 없음 |
+| `priceKrw` | 정수 | 예 | 가격(원). 1~99,999,999 (1억 원 미만, 최대 8자리) |
+| `discount` | 객체 | 아니오 | 기간 할인. 옵션마다 하나다. 없거나 `null`이면 할인 없음 |
+| `discount.discountedPriceKrw` | 정수 | `discount`를 보내면 예 | 할인가(원). 1 이상이고 `priceKrw`보다 낮아야 한다. 같거나 높으면 `DISCOUNT_NOT_LOWER` |
+| `discount.startsAt` | RFC 3339 문자열 | `discount`를 보내면 예 | 할인 시작 시각. 시간대를 포함한다(없으면 `TIMEZONE_AWARE`). 이미 지난 시각이어도 된다 |
+| `discount.endsAt` | RFC 3339 문자열 | `discount`를 보내면 예 | 할인 종료 시각. 이 시각부터 정가다. `startsAt`보다 늦어야 하고(`END_BEFORE_START`), 요청 시각보다 늦어야 한다(`DISCOUNT_ENDED`) |
+
+
+- 옵션은 1~3개다. 빈 배열이면 `fieldErrors[].code = TOO_SHORT`, 3개를 넘으면 `TOO_LONG`이다. 현재 메뉴판 UI의 표시 칸 크기에 맞춘 제한이다. 검수(8)로 이미 게시된 항목에 옵션이 4개 이상 있으면, 직접 수정하기 전에 옵션을 명시적으로 3개 이하로 정리해야 한다. 프론트엔드는 기존 옵션을 자동으로 잘라서 저장하지 않는다.
+- `optionLabel`과 `pourMl`이 모두 같은 옵션이 둘 이상이면 `DUPLICATE_OPTION_VALUES`다(8과 같다).
+- 서버는 `pourMl`을 받은 그대로 저장한다. 매장 기본 잔 용량(3.6의 `defaultPourMl`)을 서버가 채우지 않는다. 프론트엔드는 잔 옵션의 입력 칸을 `defaultPourMl`로 미리 채울 수 있다. 병 옵션에는 채우지 않는다.
+- **할인**: 기간은 특정 순간이므로 다른 시각처럼 UTC RFC 3339다(3.15의 현지 시각과 다르다). 할인가로 파는 기간은 `startsAt` 이상 `endsAt` 미만이다. 수정(3.14.4)은 옵션 전체를 바꾸므로, 할인을 유지하려면 3.9에서 받은 `discount`를 그대로 다시 보낸다. 빼고 보내면 할인이 지워진다. 화면을 연 뒤 할인이 끝나 `DISCOUNT_ENDED`를 받으면, 그 할인을 빼고 다시 보낸다. 끝난 할인은 응답에서 `null`이 되며, 서버는 끝난 할인을 지우는 별도 작업을 두지 않는다.
+- **품절**은 이 API가 아니라 3.14.8로 바꾼다. 추가와 수정은 품절 여부를 바꾸지 않으며, 새로 추가한 항목은 판매 중이다.
+
+#### 3.14.3 항목 추가
+
+```http
+POST /api/bars/{barId}/menu/items
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+기존 상품을 추가할 때:
+
+```json
+{
+  "menuVersion": 4,
+  "productId": "44444444-4444-4444-8444-444444444444",
+  "displayName": "글렌피딕 12년",
+  "options": [
+    { "optionLabel": "잔", "pourMl": 30, "priceKrw": 17000 },
+    { "optionLabel": "병", "pourMl": null, "priceKrw": 160000 }
+  ]
+}
+```
+
+카탈로그에 없는 상품을 만들어 추가할 때:
+
+```json
+{
+  "menuVersion": 4,
+  "newProduct": {
+    "brand": { "type": "existing", "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1" },
+    "product": {
+      "category": "whisky",
+      "displayName": "Deanston Virgin Oak",
+      "ageYears": null,
+      "editionName": "Virgin Oak",
+      "abv": 46.3
+    },
+    "aliases": [
+      { "aliasText": "딘스톤 버진 오크", "languageCode": "ko", "isSearchable": true }
+    ]
+  },
+  "displayName": "딘스톤 버진 오크",
+  "options": [
+    { "optionLabel": null, "pourMl": 30, "priceKrw": 18000 }
+  ]
+}
+```
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `menuVersion` | 정수 | 예 (`null` 가능) | 3.14.1. 메뉴판이 없으면 `null` |
+| `productId` | UUID 문자열 | `productId`와 `newProduct` 중 하나 | 활성 상품. 없으면 `PRODUCT_NOT_FOUND`, 비활성이면 `PRODUCT_INACTIVE` |
+| `newProduct.brand` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `brand`와 같다. 없는 `brandId`는 `BRAND_NOT_FOUND` |
+| `newProduct.product` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `product`와 같다 |
+| `newProduct.aliases` | 배열 | 아니오 | 8.1 `create_product`의 `aliases`와 같다. 기본 `[]` |
+| `displayName` | 문자열 | 아니오 | 메뉴판에 보일 이름. 앞뒤 공백을 지운 뒤 1~200자. 없거나 `null`이면 상품의 `displayName` |
+| `options` | 배열 | 예 | 3.14.2 |
+
+- `productId`와 `newProduct`를 둘 다 보내거나 둘 다 빠뜨리면 `422`이고 `fieldErrors[].path = productId`, `code = EXACTLY_ONE_REQUIRED`다.
+- 같은 상품이 이미 현재 메뉴판에 있으면 `409 MENU_ITEM_EXISTS`(`details.barMenuItemId`)다. 한 상품은 메뉴판에 한 번만 있고, 용량이나 가격을 더하려면 그 항목을 수정한다(3.14.4).
+- 새 항목은 메뉴판의 맨 끝에 붙는다. 이 업장이 예전에 판매했던 상품이면 그때의 `barMenuItemId`를 다시 쓴다.
+- `newProduct`를 보내면 같은 트랜잭션 안에서 검수의 신규 생성(8.5, 8.6)과 같은 규칙으로 브랜드와 상품의 중복을 검사한다. 같은 브랜드나 상품이 있으면 아무것도 만들지 않고 `409 DUPLICATE_BRAND_FOUND` 또는 `409 DUPLICATE_PRODUCT_FOUND`다. `details`는 9.5와 같되 `extractedItemId`와 `reviewUrl`이 없다. 프론트엔드는 `details.existingProduct`(또는 `existingBrand`)를 보여 주고, 맞으면 그 `productId`(또는 `brandId`)로 다시 요청한다. `existingProduct.isActive = false`이면 그 상품으로는 추가할 수 없으므로(`PRODUCT_INACTIVE`) 다시 요청하지 않고, 상품 검색(7)에서 고르도록 안내한다(9.5).
+- 만든 상품과 브랜드에는 요청한 사용자를 기록한다. 만든 상품과 별칭은 바로 모든 업장의 고객 검색과 메뉴 매칭에 쓰인다.
+- 응답 본문에서 추가한 항목은 `productId`로 찾는다.
+
+#### 3.14.4 항목 수정
+
+```http
+PUT /api/bars/{barId}/menu/items/{barMenuItemId}
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "menuVersion": 5,
+  "displayName": "글렌피딕 12년",
+  "options": [
+    {
+      "optionLabel": "잔", "pourMl": 30, "priceKrw": 18000,
+      "discount": { "discountedPriceKrw": 15000, "startsAt": "2026-11-01T09:00:00Z", "endsAt": "2026-11-15T15:00:00Z" }
+    },
+    { "optionLabel": "병", "pourMl": null, "priceKrw": 170000, "discount": null }
+  ]
+}
+```
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `menuVersion` | 정수 | 예 | 3.14.1 |
+| `displayName` | 문자열 | 예 | 앞뒤 공백을 지운 뒤 1~200자 |
+| `options` | 배열 | 예 | 3.14.2. 기존 옵션 전체를 이 배열로 바꾼다 |
+
+- `barMenuItemId`가 이 업장의 현재 메뉴판에 없거나 UUID 형식이 아니면 `404 MENU_ITEM_NOT_FOUND`(`details.barMenuItemId`)다.
+- 연결된 상품은 바꿀 수 없다. 다른 상품으로 바꾸려면 삭제한 뒤 추가한다.
+- 메뉴판에서의 위치는 그대로다.
+
+#### 3.14.5 항목 삭제
+
+```http
+DELETE /api/bars/{barId}/menu/items/{barMenuItemId}?menuVersion=5
+Authorization: Bearer <access-token>
+```
+
+- `menuVersion` 쿼리는 필수다(3.14.1). 요청 본문은 없다.
+- `barMenuItemId`가 이 업장의 현재 메뉴판에 없거나 UUID 형식이 아니면 `404 MENU_ITEM_NOT_FOUND`다.
+- 항목은 메뉴판에서만 빠진다. `barMenuItemId`는 남아 같은 상품을 다시 추가할 때 쓰인다.
+- 마지막 항목을 지워도 메뉴판은 남는다(3.9.1의 `items = []`).
+
+#### 3.14.6 메뉴판 초기화
+
+```http
+POST /api/bars/{barId}/menu/reset
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{ "menuVersion": 6 }
+```
+
+- 메뉴판의 항목을 모두 뺀다. 메뉴판은 남으므로 응답은 `menuBoardId`, `publishedAt`이 있고 `items = []`다(3.9.1). 고객 화면은 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
+- 메뉴판이 없으면(`menuVersion = null`) 아무것도 바꾸지 않고 `200 OK`다.
+- 되돌리는 API는 없다. 프론트엔드는 초기화 전에 확인을 받는다.
+
+#### 3.14.7 오류와 프론트엔드 처리
+
+프론트엔드는 오류를 기다리지 않고 편집을 미리 막는다. 메뉴 관리 화면에 들어올 때 3.6(또는 3.11.9)을 다시 불러와 `activeMenuImport`가 있으면 추가, 수정, 삭제, 초기화 버튼을 비활성화하고(품절 표시와 판매 정보 확인은 막지 않는다), 검수 중에는 메뉴를 고칠 수 없다는 안내와 함께 그 작업으로 가는 버튼을 보여 준다. 작업을 반영하거나 취소한 뒤 돌아오면 다시 불러와 편집을 푼다. 아래 `409 ACTIVE_IMPORT_EXISTS`는 화면에 보인 상태가 오래된 경우의 안전장치다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님, 비활성 업장 | 업장 목록으로 이동 |
+| `404` | `MENU_ITEM_NOT_FOUND` | 수정, 삭제할 항목이 현재 메뉴판에 없음 | 3.9를 다시 불러와 목록 갱신 |
+| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 메뉴 등록 작업이 있음. `details.menuImportId`, `details.status` | 3.6을 다시 불러와 편집을 막은 화면으로 전환 |
+| `409` | `MENU_OUTDATED` | 보낸 `menuVersion`이 현재 값과 다름. 다른 기기나 operator의 편집, 검수 반영, 성공한 요청의 재전송 | 3.9를 다시 불러오고, 입력 중이던 값은 유지한 채 다시 저장하게 함 |
+| `409` | `MENU_ITEM_EXISTS` | 추가하려는 상품이 이미 메뉴판에 있음. `details.barMenuItemId` | 그 항목의 수정 화면으로 안내 |
+| `409` | `DUPLICATE_BRAND_FOUND`, `DUPLICATE_PRODUCT_FOUND` | 신규 브랜드나 상품과 같은 것이 이미 있음 (3.14.3, 9.5) | 기존 브랜드나 상품을 보여 주고 고르게 함. `existingProduct.isActive = false`이면 상품 검색으로 안내 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `END_BEFORE_START`, `EXACTLY_ONE_REQUIRED`, `NOT_NORMALIZABLE`(신규 브랜드·상품 이름이나 별칭에 쓸 수 있는 글자가 없음, 8.7과 같다), `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
+| `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 같은 요청 재시도 |
+
+#### 3.14.8 품절 표시
+
+```http
+PUT /api/bars/{barId}/menu/items/{barMenuItemId}/sold-out
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{ "soldOut": true }
+```
+
+메뉴 항목 하나를 품절로 표시하거나 판매 중으로 되돌린다. 품절은 옵션이 아니라 항목 단위다. 권한은 3.14.1과 같다(operator와 해당 업장의 현재 업주, 비활성 업장은 `404 BAR_NOT_FOUND`).
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `soldOut` | 불리언 | 예 | `true`이면 품절, `false`이면 판매 중 |
+
+- 품절은 메뉴 내용이 아니라 재고 상태이므로 3.14.1의 다음 규칙을 적용하지 않는다.
+  - **미완료 작업**: 검수 중에도 바꿀 수 있다. 검수 반영(8)의 "검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었는지" 검사에서도 품절 변경은 메뉴판 변경으로 보지 않는다.
+  - **메뉴판 버전**: `menuVersion`을 받지 않고 올리지도 않는다. `publishedAt`도 바뀌지 않는다. 품절은 재고 상태이지 판매 정보(상품과 가격)를 바꾸거나 확인한 것이 아니고, `publishedAt`은 고객 검색의 `menuUpdatedAt`으로도 쓰이기 때문이다. 따라서 업주 화면의 "최근 갱신"(3.6의 `publishedAt`과 `confirmedAt` 중 늦은 시각)도 품절 변경으로는 바뀌지 않는다.
+- 값을 정하는 요청이므로 같은 요청을 다시 보내도 결과가 같다. 이미 그 값이어도 `200 OK`다.
+- 품절은 항목이 현재 메뉴판에 있는 동안 유지된다. 검수 반영(8)이나 항목 수정(3.14.4)으로 옵션이 바뀌어도 그대로다. 항목이 메뉴판에서 빠지면(검수의 `remove`, 3.14.5 삭제, 3.14.6 초기화) 품절이 풀리므로, 같은 상품을 다시 추가하면 판매 중으로 시작한다.
+- 품절 항목은 손님에게 보이지 않는다. 비로그인 사용자와 customer의 3.9 응답과 고객 검색(3.10)에서 빠지고, operator와 해당 업장의 업주의 3.9 응답에만 `soldOut = true`로 나온다. 판매 중으로 되돌리면 바로 다시 보인다.
+- `barMenuItemId`가 이 업장의 현재 메뉴판에 없거나 UUID 형식이 아니면 `404 MENU_ITEM_NOT_FOUND`다.
+- 서버는 업장 행을 잠근 뒤(3.14.1) 항목이 현재 메뉴판에 있는지 확인하고 품절 값을 쓴다. 그래서 같은 항목을 내리는 검수 반영이나 삭제와 동시에 와도, 메뉴판에서 빠진 항목에 품절이 남지 않는다.
+
+`200 OK`, 본문은 3.9와 같은 형식이다. 프론트엔드는 메뉴 관리 화면에 `activeMenuImport`가 있어도 품절 버튼은 막지 않는다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님, 비활성 업장 | 업장 목록으로 이동 |
+| `404` | `MENU_ITEM_NOT_FOUND` | 항목이 현재 메뉴판에 없음 | 3.9를 다시 불러와 목록 갱신 |
+| `422` | `VALIDATION_FAILED` | `soldOut` 없음(`MISSING`)이나 불리언이 아님(`BOOL_TYPE`). 문자열 `"true"`, 숫자 `1`, `null`도 불리언이 아니다 | `fieldErrors` 표시 |
+
+#### 3.14.9 판매 정보 확인
+
+```http
+POST /api/bars/{barId}/menu/confirm
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{ "menuVersion": 6 }
+```
+
+업주가 관리 홈의 "지금도 맞아요"로 현재 메뉴판의 상품과 가격이 지금도 맞다고 확인한 시각을 남긴다. 메뉴는 바꾸지 않는다. 권한은 3.14.1과 같다.
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `menuVersion` | 정수 | 예 (`null` 가능) | 확인한 화면에서 받은 `menuVersion`(3.9). 메뉴판이 없으면 `null`이다(3.9.1). 서버의 현재 값과 다르면 `409 MENU_OUTDATED`다. 업주가 본 것과 다른 메뉴를 맞다고 확인하지 않게 하기 위해서다 |
+
+- 메뉴판이 없거나 항목이 하나도 없으면 `409 NO_PUBLISHED_MENU`다. 품절 항목도 항목으로 센다. 이 검사는 `menuVersion` 비교보다 먼저 한다. 그래서 메뉴판이 없는 업장에서 `menuVersion = null`을 보내면 `NO_PUBLISHED_MENU`를 받는다. 메뉴판이 있는데 `null`을 보내면 현재 값과 다르므로 `MENU_OUTDATED`다.
+- 검사 순서: 인증(`401`, 3.1.5) → 요청 형식(`422`, `menuVersion` 필드가 없으면 `MISSING`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 업장 행 잠금(3.14.1) → 업장 상태(비활성이면 `404 BAR_NOT_FOUND`) → 메뉴판과 항목(`409 NO_PUBLISHED_MENU`) → 메뉴판 버전(`409 MENU_OUTDATED`) → 확인 시각 기록. 잠금 안에서 버전을 확인하고 기록하므로, 검수 반영과 동시에 와도 반영 전의 메뉴를 반영 뒤의 시각으로 확인한 것처럼 남지 않는다.
+- 메뉴를 바꾸지 않으므로 검수 중에도 할 수 있다(`ACTIVE_IMPORT_EXISTS` 없음). `menuVersion`과 `publishedAt`은 그대로다.
+- 확인 시각과 확인한 사용자를 메뉴판에 기록한다. 다시 확인하면 시각을 새로 바꾼다. 같은 요청을 다시 보내도 확인 시각만 조금 늦어질 뿐 결과가 같다.
+- 확인 시각은 3.6과 3.11.9의 `currentMenu.confirmedAt`에 나온다. 고객 화면(3.9)과 검색의 `menuUpdatedAt`은 지금처럼 메뉴판을 마지막으로 바꾼 시각(`publishedAt`)이다.
+- 검수 반영이나 직접 편집으로 메뉴판이 바뀌어도 `confirmedAt`은 그대로 남는다. 업주 화면의 "최근 갱신"은 프론트엔드가 `publishedAt`과 `confirmedAt` 중 늦은 시각으로 계산한다.
+
+`200 OK`, 본문은 3.6과 같은 형식이다.
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님, 비활성 업장 | 업장 목록으로 이동 |
+| `409` | `MENU_OUTDATED` | 보낸 `menuVersion`이 현재 값과 다름 | 3.9를 다시 불러와 바뀐 메뉴를 보여 주고 다시 확인하게 함 |
+| `409` | `NO_PUBLISHED_MENU` | 메뉴판이 없거나 항목이 없음 | "지금도 맞아요" 버튼을 숨기고 메뉴 등록으로 안내 |
+| `422` | `VALIDATION_FAILED` | `menuVersion` 필드가 없음(`MISSING`)이나 정수도 `null`도 아님 | `fieldErrors` 표시 |
+
+### 3.15 영업시간과 임시 휴무
+
+업장의 정규 영업시간과 임시 휴무(오늘 휴무, 오늘만 영업시간 변경, 기간 휴업)를 정한다. 정규 영업시간은 매장 정보 화면에서 다른 정보와 함께 저장하므로 업장 수정(3.7)의 `weeklyHours`로 바꾼다. 임시 휴무는 관리 홈에서 바로 적용하고 취소하므로 따로 3.15.2와 3.15.3으로 바꾼다. 둘 다 3.6, 3.11.9, 3.9 응답에 나온다.
+
+영업시간의 시각과 날짜는 모두 서울 시간(`Asia/Seoul`) 기준의 현지 값이다. 한국에는 서머타임이 없으므로 UTC로 바꾸지 않고 `"HH:MM"`과 `"YYYY-MM-DD"` 문자열로 주고받는다. `createdAt` 같은 순간 시각은 지금처럼 UTC RFC 3339다.
+
+#### 3.15.1 정규 영업시간
+
+`weeklyHours`는 요일별 영업시간 배열이다. 요일마다 영업 구간은 하나이며 브레이크 타임은 없다.
+
+```json
+[
+  { "dayOfWeek": 1, "closed": true, "openTime": null, "closeTime": null },
+  { "dayOfWeek": 5, "closed": false, "openTime": "18:00", "closeTime": "02:00" },
+  { "dayOfWeek": 6, "closed": false, "openTime": "17:00", "closeTime": "23:30" }
+]
+```
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `dayOfWeek` | 정수 | 예 | 1(월)~7(일). ISO 8601 요일 번호다. 배열 안에서 중복되면 `DUPLICATE_DAY` |
+| `closed` | 불리언 | 예 | `true`이면 정기 휴무일 |
+| `openTime` | `"HH:MM"` 문자열 | `closed = false`이면 예 | 영업 시작. `00:00`~`23:55`, 5분 단위. 형식이나 단위가 틀리면 `INVALID_TIME` |
+| `closeTime` | `"HH:MM"` 문자열 | `closed = false`이면 예 | 영업 종료. 규칙은 `openTime`과 같다 |
+
+- 배열에 없는 요일은 "영업시간 정보 없음"이며 정기 휴무와 다르다.
+- `closed = true`이면 `openTime`과 `closeTime`을 보내지 않거나 `null`로 보낸다. 값이 있으면 `TIME_ON_CLOSED_DAY`다. `closed = false`인데 둘 중 하나라도 없으면 `MISSING`이다.
+- `closeTime`이 `openTime`보다 이르면 다음 날 그 시각에 끝난다(자정 넘김). 예를 들어 금요일 `18:00`~`02:00`은 금요일 18시부터 토요일 2시까지다. 자정에 끝나면 `closeTime = "00:00"`이다. "다음 날" 표시는 따로 보내지 않으며, 프론트엔드는 `closeTime < openTime`이면 "익일"로 표시한다.
+- `openTime`과 `closeTime`이 같으면 `SAME_OPEN_CLOSE`다. 24시간 영업은 표현하지 않는다.
+- 응답은 `dayOfWeek` 오름차순이고 형식은 요청과 같다. `closed = true`인 요일은 `openTime`, `closeTime`이 `null`이다.
+- 평일에 같은 시간 복사 같은 입력 편의 기능은 프론트엔드에서만 처리한다.
+
+#### 3.15.2 임시 휴무 적용
+
+```http
+PUT /api/bars/{barId}/operating-exception
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+operator와 해당 업장의 현재 업주가 호출할 수 있다(2.2). 비활성 업장도 바꿀 수 있다(3.7과 같다). 업장마다 임시 휴무는 하나만 있으며, 이 요청은 기존 임시 휴무(아직 시작하지 않은 기간 휴업 포함)를 이 요청의 내용으로 바꾼다. 같은 요청을 다시 보내도 결과가 같으므로(아래 "재시도") `Idempotency-Key`는 받지 않는다.
+
+`kind`에 따라 보내는 필드가 다르다.
+
+| `kind` | 뜻 | 날짜 | 시간 |
+|---|---|---|---|
+| `closed_today` | 오늘 하루 임시 휴무 | `date` 필수(`"YYYY-MM-DD"`). 서버의 오늘 날짜와 다르면 `DATE_NOT_TODAY` | 보내지 않는다 |
+| `custom_hours` | 오늘만 영업시간 변경 | `date` 필수. 규칙은 `closed_today`와 같다 | `openTime`, `closeTime` 필수. 규칙은 3.15.1과 같으며 자정을 넘길 수 있다 |
+| `vacation` | 기간 임시 휴업 | `startDate`, `endDate` 필수(`"YYYY-MM-DD"`). `startDate`가 오늘보다 이르면 `DATE_IN_PAST`, `endDate`가 `startDate`보다 이르면 `END_BEFORE_START`. 하루만 지정해도 된다 | 보내지 않는다 |
+
+- "오늘"은 서버가 요청을 받은 시각의 서울 날짜다. 프론트엔드는 화면을 연 시각이 아니라 적용 버튼을 누른 시각의 서울 날짜를 `date`로 보낸다. 서버가 날짜를 정하지 않는 이유는, 자정 직전에 보낸 요청을 자정이 지나 다시 보냈을 때 다른 날에 적용되지 않게 하기 위해서다.
+- `date`가 서버의 오늘과 다르면(기기 시계가 틀렸거나, 자정 무렵에 보낸 요청이 자정이 지나 도착함) `422`이고 `fieldErrors[].code = DATE_NOT_TODAY`다. 프론트엔드는 날짜가 바뀌었다고 안내하고 다시 적용하게 한다.
+- **재시도**: 요청의 내용(`kind`, 날짜, 시각, 앞뒤 공백을 지운 `note`)이 현재 임시 휴무와 모두 같으면, 날짜 검사(`DATE_NOT_TODAY`, `DATE_IN_PAST`) 없이 아무것도 바꾸지 않고 `200 OK`로 현재 상태를 돌려준다. 그래서 응답을 받지 못해 자정이 지난 뒤 같은 요청을 다시 보내도 오류 없이 같은 결과를 받는다.
+- 공통 필드 `note`는 고객 안내 문구로 선택이다. 앞뒤 공백을 지운 뒤 100자 이하이고, 없거나 공백뿐이면 `null`로 저장한다. 한 줄 문구이므로 줄바꿈과 제어 문자는 받지 않는다(`INVALID_CHARACTER`).
+- `kind`에 맞지 않는 필드(예: `closed_today`의 `openTime`)를 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. `kind`가 없거나 다른 값이면 `UNION_TAG_NOT_FOUND`나 `UNION_TAG_INVALID`다.
+
+```json
+{ "kind": "custom_hours", "date": "2026-11-06", "openTime": "20:00", "closeTime": "01:00", "note": "내부 사정으로 늦게 엽니다" }
+```
+
+```json
+{ "kind": "vacation", "startDate": "2026-11-10", "endDate": "2026-11-12", "note": null }
+```
+
+`200 OK`, 본문은 3.6과 같은 형식이며 `operatingException`에 적용한 내용이 들어 있다.
+
+#### 3.15.3 임시 휴무 취소
+
+```http
+DELETE /api/bars/{barId}/operating-exception
+Authorization: Bearer <access-token>
+```
+
+임시 휴무를 지우고 정규 영업시간으로 돌아간다. 권한은 3.15.2와 같다. 임시 휴무가 없거나 이미 끝났어도 `200 OK`이므로 다시 보내도 된다. 본문은 3.6과 같은 형식이며 `operatingException = null`이다.
+
+#### 3.15.4 유효 기간과 응답
+
+3.6, 3.11.9, 3.9의 `operatingException`:
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `kind` | `closed_today` \| `custom_hours` \| `vacation` | 아니오 | |
+| `startDate`, `endDate` | `"YYYY-MM-DD"` 문자열 | 아니오 | 적용 날짜. `closed_today`와 `custom_hours`는 적용한 날로 둘이 같다 |
+| `openTime`, `closeTime` | `"HH:MM"` 문자열 | 예 | `custom_hours`일 때만 값이 있다. `closeTime < openTime`이면 다음 날 끝난다 |
+| `note` | 문자열 | 예 | 고객 안내 문구. 없으면 `null` |
+
+- 임시 휴무는 `endDate` 다음 날 0시에 끝난다. 단, 자정을 넘기는 `custom_hours`는 다음 날 `closeTime`까지 유효하다.
+- **응답에는 `endDate` 다음 날이 끝날 때까지 남는다.** 끝난 뒤에도 하루 더 보내는 이유는, 그날 새벽의 영업 상태를 계산할 때 전날의 정규 영업이 넘어오지 않게 막아야 하기 때문이다(3.15.5의 2). 예를 들어 금요일 정규 영업시간이 `18:00`~`02:00`이고 금요일에 `custom_hours` `18:00`~`22:00`을 적용했다면, 토요일 0시 30분에는 금요일 정규 영업이 아니라 이 임시 휴무로 계산해야 영업 종료가 된다.
+- 그 다음 날부터 서버는 `operatingException = null`로 보낸다. 끝난 행을 지우는 별도 작업은 두지 않으며, 다음 적용(3.15.2)이나 취소(3.15.3) 때 바뀌거나 지워진다.
+- 그래서 응답에 `operatingException`이 있어도 지금 적용 중이라는 뜻은 아니다. 프론트엔드는 아래 기준으로 지금 적용 중인지 판단해 업주 화면의 "오늘 임시 휴무" 같은 표시와 고객 안내 문구에 쓴다. 화면을 띄워 둔 동안에도 바뀔 수 있으므로 3.15.5처럼 다시 계산한다.
+  - 적용 중: 오늘이 `startDate`~`endDate` 안이거나, 자정을 넘기는 `custom_hours`의 `endDate` 다음 날이고 현재 시각이 `closeTime`보다 이를 때
+  - 예정: `startDate`가 오늘보다 뒤일 때
+  - 끝남: 그 밖의 경우. 화면에는 정상 영업으로 보여 준다
+- `endDate` 다음 날 새로 임시 휴무를 적용하면 전날 것은 바뀌어 응답에서 빠진다. 그날 새벽에는 전날 정규 영업이 넘어온 것으로 계산될 수 있지만, 드문 경우라 따로 막지 않는다.
+- 아직 시작하지 않은 `vacation`(`startDate`가 오늘보다 뒤)도 응답에 나온다. 업주 화면은 "임시 휴업 예정"으로 보여 줄 수 있고, 고객 영업 상태에는 `startDate`부터 반영한다(3.15.5).
+
+#### 3.15.5 고객 영업 상태 계산
+
+서버는 "영업 중" 같은 영업 상태를 보내지 않는다. 프론트엔드가 `weeklyHours`, `operatingException`과 기기의 현재 시각(서울 시간으로 바꾼 값)으로 계산하고, 화면을 띄워 둔 동안 30초마다 다시 계산한다. 서버가 계산하면 응답을 받은 순간에만 맞고, 화면에 머무는 동안에는 결국 프론트엔드가 다시 계산해야 하기 때문이다. 대신 기기 시계가 틀리면 상태도 틀릴 수 있다.
+
+오늘 날짜를 D, 현재 시각을 t라고 할 때 아래 순서로 처음 맞는 결과를 쓴다. "임시 휴무가 D를 덮는다"는 `startDate ≤ D ≤ endDate`라는 뜻이다.
+
+1. 임시 휴무가 D를 덮고 `kind`가 `closed_today`나 `vacation`이면 **임시 휴무**다. D의 0시부터 다음 날 0시까지 휴무이므로, 전날 밤부터 이어지던 영업도 0시에 끝난 것으로 본다.
+2. 전날(D-1)에서 넘어온 영업:
+   - 임시 휴무가 D-1을 덮으면, 그것이 자정을 넘기는 `custom_hours`이고 t < `closeTime`일 때만 **영업 중**이다. 임시 휴무는 그날의 정규 영업시간을 대신하므로 D-1의 정규 영업은 넘어오지 않는다.
+   - 임시 휴무가 D-1을 덮지 않으면, D-1 요일의 정규 영업시간이 자정을 넘기고 t < `closeTime`일 때 **영업 중**이다.
+3. 오늘의 영업 구간은 임시 휴무가 D를 덮는 `custom_hours`이면 그 시간이고, 아니면 D 요일의 정규 영업시간(`closed = false`)이다. `openTime ≤ t`이고, 자정을 넘기는 구간이거나 t < `closeTime`이면 **영업 중**이다.
+4. 그 밖에는, 오늘 `custom_hours`가 없고 D 요일이 `weeklyHours`에 없으면 **영업시간 정보 없음**, 아니면 **영업 종료**다. 다른 요일이 있어도 오늘 요일이 없으면 정보 없음이다(3.15.1). 정기 휴무(`closed = true`)인 요일은 영업 종료다.
+
+- 고객 안내 문구(`note`)는 임시 휴무가 적용 중인 동안(3.15.4) 영업 상태와 함께 보여 줄 수 있다. 비어 있으면 표시하지 않는다.
+- 이 상태는 메뉴 게시 여부(3.6의 `currentMenu`)와 따로 계산한다.
+- 업주 화면의 미리보기와 관리 홈도 같은 규칙을 쓴다.
+
+#### 3.15.6 오류와 프론트엔드 처리
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
+| `422` | `VALIDATION_FAILED` | 위 규칙 위반: `MISSING`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `INVALID_CHARACTER`, `EXTRA_FORBIDDEN` | `fieldErrors` 표시. `DATE_IN_PAST`이면 날짜를 다시 고르게 하고, `DATE_NOT_TODAY`이면 날짜가 바뀌었다고 안내한 뒤 다시 적용하게 함 |
+
+### 3.16 매장 사진
+
+고객 업장 상세와 업주 매장 정보 화면에 보여 줄 매장 사진이다. 메뉴판 사진(4장)이나 업주 신청 메뉴판 사진(3.11.15)과는 따로 저장하며, 메뉴판 사진은 고객에게 보이지 않는다.
+
+| 메서드 | 경로 | 용도 |
+|---|---|---|
+| `POST` | `/api/bars/{barId}/photos` | 사진 한 장 추가 (3.16.2) |
+| `DELETE` | `/api/bars/{barId}/photos/{photoId}` | 사진 삭제 (3.16.3) |
+| `PUT` | `/api/bars/{barId}/photos/order` | 순서 변경과 대표 사진 지정 (3.16.4) |
+| `GET` | `/api/bar-photos/{photoId}` | 사진 파일 (3.16.5, 공개) |
+| `GET` | `/api/bar-photos/{photoId}/thumbnail` | 썸네일 파일 (3.16.5, 공개) |
+
+#### 3.16.1 공통 규칙
+
+- **권한**: 추가, 삭제, 순서 변경은 operator와 해당 업장의 현재 업주가 호출할 수 있다(2.2). 비활성 업장도 바꿀 수 있다(3.7과 같다). 사진 파일 조회(3.16.5)는 공개다.
+- **장수**: 업장당 최대 15장이다. 메뉴판 사진의 15장(4.1)과는 따로 센다.
+- **대표 사진**: 표시 순서의 첫 사진이 대표 사진이다. 대표 여부를 따로 저장하지 않으며, 대표 사진을 바꾸려면 그 사진을 맨 앞으로 옮긴다(3.16.4). 대표 사진을 지우면 다음 사진이 대표가 된다. 업장 목록 API(3.4, 3.10, 3.11.11, 3.12, 3.13)는 업장마다 대표 사진의 썸네일 URL만 `coverThumbnailUrl`로 준다. 목록은 업장이 많아(지도는 1,000곳이 넘을 수 있다) 원본을 쓰면 내려받는 양과 메모리가 너무 크기 때문이다.
+- **사진이 없을 때**: 0장도 허용하며 마지막 사진도 지울 수 있다. 프론트엔드는 `photos = []`이면 기본 이미지를 보여 준다.
+- **응답**: 추가, 삭제, 순서 변경의 성공 응답 본문은 `{ "photos": [...] }`이며 3.6의 `photos`와 같은 형식이다. 프론트엔드는 이 응답으로 화면을 바꾸고 따로 다시 조회하지 않아도 된다.
+- **동시 요청**: 추가, 삭제, 순서 변경은 업장 행을 잠그고 처리하므로 한 업장에서는 하나씩 차례로 반영된다.
+- **저장소**: 메뉴판 사진과 같은 저장소(개발 환경은 로컬 파일, 배포 서버는 비공개 S3 버킷)에 사진마다 다시 인코딩한 사진과 썸네일 두 파일을 둔다(3.16.2). 버킷은 공개하지 않으며, 서버가 파일을 읽어 3.16.5로 전달한다.
+
+#### 3.16.2 사진 추가
+
+```http
+POST /api/bars/{barId}/photos
+Authorization: Bearer <access-token>
+Content-Type: multipart/form-data
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|---|---|---|---|
+| `image` | 이미지 파일 | 예 | 사진 한 장. 여러 장은 한 장씩 차례로 올린다 |
+
+- JPEG와 PNG만 받으며 형식은 메뉴판 사진(4.1)처럼 파일 내용으로 판별한다. 사진당 **2MB 이하**다. 메뉴판 사진(사진당 10MB)보다 작은 이유는 고객 화면이 업장마다 최대 15장을 내려받기 때문이다.
+- 안드로이드 앱은 올리기 전에 **반드시** 사진의 긴 변을 2048px 이하로 줄이고 JPEG로 압축한다. 압축한 뒤에도 2MB를 넘으면 품질을 낮춰 다시 압축한다. PNG나 다른 형식의 사진도 JPEG로 바꿔 올린다.
+- **가로세로 크기**: 서버도 긴 변이 2048px 이하인지 확인한다. 2MB 안에도 픽셀 수가 매우 큰 이미지를 담을 수 있어, 고객 기기가 사진을 열다가 메모리가 부족해질 수 있기 때문이다. 넘으면 `422`이고 `fieldErrors[].path = image`, `code = IMAGE_DIMENSIONS_TOO_LARGE`다. 서버는 파일 헤더의 가로세로를 먼저 확인한 뒤 끝까지 디코딩되는지 확인하며, 디코딩되지 않는 파일은 `415 UNSUPPORTED_IMAGE_TYPE`이다.
+- **다시 인코딩**: 서버는 받은 파일을 그대로 공개하지 않는다. 검사를 통과한 사진을 디코딩해 EXIF 방향을 적용하고, 메타데이터(EXIF, XMP, 위치, 촬영 시각, 기기 정보 등)를 모두 뺀 JPEG(품질 약 85)로 다시 저장한다. GPS 좌표 같은 정보가 공개 URL로 새어 나가지 않게 하기 위해서다. PNG도 JPEG로 바뀌며, 투명한 부분은 흰색으로 채운다. PNG는 앱이 아닌 클라이언트를 위해 계속 받는다.
+- **썸네일**: 같은 단계에서 긴 변 480px(원본이 더 작으면 원본 크기)의 메타데이터 없는 JPEG 썸네일을 함께 만든다. 목록과 격자 화면은 썸네일(`thumbnailUrl`, `coverThumbnailUrl`)을, 전체 화면과 상세 갤러리는 `imageUrl`을 쓴다.
+- 새 사진은 맨 뒤에 붙는다. 업장에 사진이 없었다면 대표 사진이 된다.
+- **같은 사진**: 같은 업장에 내용이 같은 파일(업로드한 원본 바이트의 SHA-256이 같음. 다시 인코딩한 파일이 아니다)이 이미 있으면 저장하지 않고 `409 PHOTO_EXISTS`이며, `details.photoId`에 기존 사진 ID를 담는다. 응답을 받지 못해 다시 보낸 요청도 이 오류를 받아 사진이 두 장 생기지 않으므로 `Idempotency-Key`는 받지 않는다.
+- 검사 순서: 요청 형식(`422`, `image`가 없으면 `MISSING`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 크기(`413 UPLOAD_TOO_LARGE`)와 형식(`415 UNSUPPORTED_IMAGE_TYPE`) → 가로세로(`422 IMAGE_DIMENSIONS_TOO_LARGE`) → 같은 사진(`409 PHOTO_EXISTS`) → 장수(`409 PHOTO_LIMIT_REACHED`). 같은 사진을 장수보다 먼저 확인하므로, 15번째 사진을 올린 요청을 다시 보내도 `PHOTO_EXISTS`를 받는다.
+- 두 파일을 저장한 뒤 DB에 기록한다. 하나라도 저장에 실패하거나 DB 기록이 실패하면 저장한 파일을 지운다. 받은 원본 파일은 저장하지 않는다.
+
+`201 Created`, 본문은 `{ "photos": [...] }`다.
+
+```json
+{
+  "photos": [
+    { "photoId": "12121212-1212-4212-8212-121212121211", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121211/thumbnail" },
+    { "photoId": "12121212-1212-4212-8212-121212121212", "imageUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212", "thumbnailUrl": "https://bottlemap.o-r.kr/api/bar-photos/12121212-1212-4212-8212-121212121212/thumbnail" }
+  ]
+}
+```
+
+#### 3.16.3 사진 삭제
+
+```http
+DELETE /api/bars/{barId}/photos/{photoId}
+Authorization: Bearer <access-token>
+```
+
+- 사진을 지우고 뒤의 사진을 한 칸씩 앞으로 당긴다. 되돌리는 API는 없으므로 프론트엔드는 지우기 전에 확인을 받는다.
+- 이 업장의 사진이 아니거나 이미 지운 사진, `photoId`가 UUID 형식이 아니면 `404 PHOTO_NOT_FOUND`다. 응답을 받지 못해 다시 보낸 요청도 이 오류를 받으므로, 프론트엔드는 3.6을 다시 불러와 확인한다.
+- 저장소의 두 파일(사진과 썸네일)은 DB 커밋 뒤에 지운다. 파일 삭제가 실패하면 로그만 남긴다. 지운 사진의 `imageUrl`과 `thumbnailUrl`은 서버에서 바로 `404`가 되지만, 이미 받아 간 기기나 중간 캐시에는 최대 1일 남을 수 있다(3.16.5).
+
+`200 OK`, 본문은 `{ "photos": [...] }`다.
+
+#### 3.16.4 순서 변경
+
+```http
+PUT /api/bars/{barId}/photos/order
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{ "photoIds": ["12121212-1212-4212-8212-121212121212", "12121212-1212-4212-8212-121212121211"] }
+```
+
+- 업장의 사진 전체를 원하는 순서로 보낸다. 첫 사진이 대표 사진이 된다.
+- 같은 ID가 두 번 있으면 `422`이고 `fieldErrors[].code = DUPLICATE_ITEM`이다.
+- 보낸 ID의 집합이 현재 사진과 다르면(다른 기기에서 추가하거나 지운 경우) 아무것도 바꾸지 않고 `409 PHOTOS_OUTDATED`다. `details.photos`에 현재 사진 목록(3.6의 `photos`와 같은 형식)을 담는다.
+- 같은 요청을 다시 보내도 결과가 같다.
+
+`200 OK`, 본문은 `{ "photos": [...] }`다.
+
+#### 3.16.5 사진 파일 조회
+
+```http
+GET /api/bar-photos/{photoId}
+GET /api/bar-photos/{photoId}/thumbnail
+```
+
+앞의 것은 사진, 뒤의 것은 썸네일(3.16.2)을 돌려준다. 아래 규칙은 둘 다 같다.
+
+
+- 공개 API이며 인증하지 않는다. `Authorization` 헤더를 보내도 확인하지 않는다.
+- 응답 본문은 파일 자체다. 서버가 다시 인코딩해 저장하므로 `Content-Type`은 항상 `image/jpeg`이고, `Cache-Control: public, max-age=86400`(1일)을 붙인다. 같은 `photoId`의 내용은 바뀌지 않으므로 프론트엔드의 이미지 캐시는 URL을 키로 써도 된다. 캐시를 1일로 둔 이유는 지운 사진이 기기와 중간 캐시에 오래 남지 않게 하기 위해서다. 지운 사진은 1일 안에 사라지며, 프론트엔드는 업장 응답의 `photos`에 없는 사진을 캐시에 있어도 보여 주지 않는다.
+- 업장 응답의 `photos[].imageUrl`, `photos[].thumbnailUrl`, `coverThumbnailUrl`은 이 경로의 절대 URL이다(예: `https://bottlemap.o-r.kr/api/bar-photos/{photoId}/thumbnail`). 서버가 요청을 받은 주소로 만들므로 에뮬레이터(`10.0.2.2`)와 기기에서도 그대로 열린다. 프론트엔드는 URL을 직접 만들지 않고 응답의 URL을 쓴다.
+- 메뉴판 사진의 서명 URL(5.4)과 달리 만료되지 않는다.
+- 비활성 업장의 사진도 반환한다. 사진 ID는 업장 응답으로만 알 수 있다.
+- 지운 사진이나 없는 `photoId`는 `404 PHOTO_NOT_FOUND`이며 본문은 공통 오류 형식(9.1)이다.
+
+#### 3.16.6 오류와 프론트엔드 처리
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5. 사진 파일 조회(3.16.5)에는 없다 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
+| `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
+| `404` | `PHOTO_NOT_FOUND` | 지우거나 조회할 사진이 없음. `details.photoId` | 업주 화면은 3.6을 다시 불러와 목록 갱신. 고객 화면은 그 사진 자리에 기본 이미지 |
+| `409` | `PHOTO_EXISTS` | 내용이 같은 사진이 이미 있음. `details.photoId` | 이미 등록된 사진이라고 안내하고 3.6을 다시 불러옴. 응답을 받지 못해 다시 보낸 요청이었다면 이미 올라간 것이다 |
+| `409` | `PHOTO_LIMIT_REACHED` | 이미 15장. `details.maxPhotos = 15` | 사진을 지운 뒤 추가하라고 안내 |
+| `409` | `PHOTOS_OUTDATED` | 순서 변경의 ID 목록이 현재 사진과 다름. `details.photos` | `details.photos`로 화면을 바꾸고 다시 정렬하게 함 |
+| `413` | `UPLOAD_TOO_LARGE` | 사진이 2MB를 넘음. `details.maxImageBytes = 2097152` | 품질을 낮춰 다시 압축해 올림 |
+| `415` | `UNSUPPORTED_IMAGE_TYPE` | JPEG나 PNG가 아니거나, 선언한 형식과 내용이 다르거나, 끝까지 디코딩되지 않음 | JPEG로 바꿔 다시 올림 |
+| `422` | `VALIDATION_FAILED` | `image` 없음, 긴 변이 2048px 초과(`IMAGE_DIMENSIONS_TOO_LARGE`), `photoIds` 형식 오류, `DUPLICATE_ITEM` | `fieldErrors` 표시. `IMAGE_DIMENSIONS_TOO_LARGE`이면 줄여서 다시 올림 |
+
+### 3.17 요즘 많이 찾는 위스키
+
+고객 홈 화면의 "요즘 많이 찾는 위스키" 카드에 쓸 상품 목록을 반환한다. 순위는 고객 검색(3.10)의 검색 집계(3.10.6)로 정한다.
+
+```http
+GET /api/search/popular-products?limit=10
+```
+
+로그인 없이 호출할 수 있는 공개 API이며, 다른 검색 API처럼 `Authorization` 헤더를 읽지 않는다(3.1.5). 결과는 호출자와 관계없이 같다.
+
+| Query | 필수 | 기본값 | 설명 |
+|---|---|---|---|
+| `limit` | 아니오 | `10` | 반환할 상품의 최대 개수. 1~20 |
+
+#### 3.17.1 홈 화면 구성
+
+고객 홈 화면은 위에서부터 다음으로 구성한다.
+
+| 영역 | 내용 | 데이터 |
+|---|---|---|
+| 검색창 | 위스키 이름 입력. 검색하면 3.10 결과 화면으로 간다 | 3.10 |
+| 최근 검색 | 이 기기에서 검색한 검색어 | 최근 검색 목록은 앱이 기기에만 저장하며 서버로 보내지 않는다. 누르면 그 검색어로 3.10을 `source=recent`로 호출하고, 이 검색은 다른 검색처럼 3.10.6의 집계에만 들어간다 |
+| 요즘 많이 찾는 위스키 | 카드마다 상품명과 "바 N곳". 최대 10개를 가로로 넘겨 본다 | 이 API(`limit = 10`) |
+| 지도로 보기 | 지도 화면으로 간다 | 3.13 |
+
+- 카드를 누르면 앱은 3.10을 `productId`와 `source=popular`로 호출한다(`query`는 보내지 않는다). 결과에는 그 상품을 파는 업장만 나온다. 상품명으로 검색하면 상품명이 브랜드 별칭이기도 한 경우 브랜드 전체가 나오므로 `productId`를 쓴다(3.10.1). 검색창에서 직접 검색할 때는 `source`를 보내지 않거나 `input`으로 보낸다.
+- `items = []`이면 "요즘 많이 찾는 위스키" 영역을 숨긴다. 이 API가 실패해도 홈 화면의 다른 영역은 그대로 보여 주고, 이 영역만 숨기거나 재시도 버튼을 보여 준다.
+
+#### 3.17.2 순위 기준
+
+서버는 요청을 받을 때마다 다음 순서로 상품을 고른다.
+
+1. **후보**: 활성 상품 중 "바 N곳"(`barCount`)이 1 이상인 상품만 후보다. 판매 업장이 0곳인 상품은 눌러도 결과가 없으므로 보여 주지 않는다.
+2. **검색 수**: 최근 30일(오늘을 포함한 서울 날짜 30일)의 상품별 검색 수(3.10.6)를 더한다. 집계는 상품 하나로 해석된 검색만 세므로 브랜드 검색이나 부분 일치로 여러 상품이 함께 올라가지 않는다. 검색 출처(`source`)는 지금은 구분하지 않고 `input`, `recent`, `popular`를 모두 더한다. 카드를 누른 검색(`popular`)도 세므로 위에 보이는 상품이 계속 위에 남기 쉽다. 이 효과가 커지면 집계는 그대로 두고 `popular`를 빼고 더하도록 이 기준만 바꾼다.
+3. **인기 상품**: 검색 수가 3 이상인 후보를 검색 수 내림차순으로 놓는다. 동점이면 `barCount` 내림차순, `displayName` 오름차순, `productId` 오름차순이다. 1~2번 검색된 상품이 상위에 뜨지 않게 하려고 3번 이상으로 정했다.
+4. **대체 기준**: 3의 상품이 `limit`보다 적으면, 아직 넣지 않은 후보를 `barCount` 내림차순, `displayName` 오름차순, `productId` 오름차순으로 채운다. 검색 수가 적은 서비스 초기에도 카드가 비지 않게 하기 위해서다.
+5. 앞에서부터 `limit`개를 반환한다.
+
+`barCount`는 고객 검색(3.10.2)에 그 상품의 결과로 나오는 업장 수와 같다. 활성 업장이고, 그 상품이 업장의 현재 메뉴판에 있고, 품절(3.14.8)이 아닌 업장만 센다. 그래서 카드를 눌러 3.10을 `productId`로 검색하면 "바 N곳"과 같은 수의 업장이 나온다. 다만 3.10은 `limit`까지만 반환하므로 `barCount`가 `limit`보다 크면 결과가 잘리고 `truncated = true`다. 이 API의 응답을 받은 뒤 품절이나 메뉴판이 바뀌어도 달라질 수 있다.
+
+홈 화면의 카드를 눌러 한 검색(3.17.1)도 다른 검색과 똑같이 집계되고 순위에 들어간다. 카드를 고른 것도 그 상품에 대한 관심으로 본다.
+
+같은 사람이 여러 번 검색해도 따로 거르지 않는다. 검색 집계에 사용자나 기기를 남기지 않으므로 구분할 수 없기 때문이다.
+
+#### 3.17.3 응답
+
+`200 OK`
+
+```json
+{
+  "items": [
+    {
+      "productId": "44444444-4444-4444-8444-444444444444",
+      "displayName": "Glenfiddich 12",
+      "brandName": "Glenfiddich",
+      "ageYears": 12,
+      "editionName": null,
+      "barCount": 7
+    },
+    {
+      "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+      "displayName": "Deanston 12",
+      "brandName": "Deanston",
+      "ageYears": 12,
+      "editionName": null,
+      "barCount": 2
+    }
+  ]
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `items` | 배열 | 아니오 | 순위대로 정렬한 상품. 최대 `limit`개. 판매 업장이 있는 상품이 하나도 없으면 `[]` |
+| `items[].productId` | UUID 문자열 | 아니오 | |
+| `items[].displayName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`). 카드의 상품명이다. 카드를 누르면 `productId`로 3.10을 검색한다 |
+| `items[].brandName` | 문자열 | 아니오 | 브랜드 대표명(`brands.canonical_name`) |
+| `items[].ageYears` | 정수 | 예 | 숙성 연수. 표기가 없는 상품은 `null` |
+| `items[].editionName` | 문자열 | 예 | 에디션명. 없으면 `null` |
+| `items[].barCount` | 정수 | 아니오 | 지금 이 상품을 파는 업장 수(3.17.2). 1 이상. 카드에 "바 N곳"으로 표시한다 |
+
+- 검색 수는 응답에 넣지 않는다. 운영 정보이고, 숫자를 보여 주면 순위를 올리려고 검색을 반복할 동기가 생기기 때문이다.
+- 응답에는 `Cache-Control: public, max-age=600`(10분)을 붙인다. 순위는 천천히 바뀌므로 앱은 10분 안에 홈 화면으로 돌아오면 다시 받지 않아도 된다.
+
+#### 3.17.4 오류와 프론트엔드 처리
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `422` | `VALIDATION_FAILED` | `limit`이 1~20 밖(`GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`)이거나 정수가 아님(`INT_PARSING`) | 앱 버그. 이 영역을 숨긴다 |
+| 네트워크 오류, `5xx` | | | 이 영역만 숨기거나 재시도 버튼을 보여 준다. 홈 화면의 다른 영역은 그대로 쓴다 |
+
+이 API는 공개 API이므로 `401`과 `403`을 반환하지 않는다.
 
 ## 4. 메뉴 등록 요청
 
@@ -1823,10 +2685,12 @@ MVP 업로드 제한:
 
 ```text
 허용 형식       JPEG, PNG
-사진 최대 개수  5장
+사진 최대 개수  15장
 사진당 최대 크기 10MB
-전체 최대 크기  30MB
+전체 최대 크기  60MB
 ```
+
+업주 신청의 메뉴판 사진(3.11.15)에도 같은 제한을 쓴다. 안드로이드 앱은 전체 크기가 넘으면 사진을 다시 압축해 올린다. 사진이 많을수록 AI 처리가 오래 걸린다(사진을 한 장씩 차례로 처리한다).
 
 파일 형식은 확장자가 아니라 파일 내용으로 판별하며, 선언한 MIME 형식과 다르면 거절한다(`415 UNSUPPORTED_IMAGE_TYPE`). AI 추출 모듈이 JPEG와 PNG만 모델에 보내므로 HEIC 같은 다른 형식은 받지 않는다. 안드로이드 앱은 다른 형식의 사진을 JPEG로 바꿔 올린다.
 
@@ -1993,6 +2857,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
           "extractedItemId": "10000000-0000-4000-8000-000000000007",
           "itemOrder": 7,
           "rawText": "딘스톤 12년 15ml 8.0 / 30ml 15.0",
+          "sourceBox": [62, 418, 931, 447],
           "extractedLineType": "product",
           "correctedLineType": null,
           "effectiveLineType": "product",
@@ -2087,6 +2952,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 응답 규칙:
 
 - `rawText`는 해당 항목의 OCR 원문 블록이다.
+- `sourceBox`는 이 항목이 사진의 어디에 있는지다. `[x0, y0, x1, y1]`이고, 각 값은 사진(EXIF 회전을 적용한 뒤)의 가로·세로를 0–1000으로 본 좌표다. x는 왼쪽→오른쪽, y는 위→아래다. 이름과 가격을 읽은 OCR 줄을 모두 감싸는 상자이므로, 검수 화면은 `imageUrl`에서 이 영역을 잘라 메뉴판의 그 줄을 보여 줄 수 있다. OCR+LLM(hybrid) 추출에서만 값이 있고, Gemini 단독·mock 추출, OCR 실패로 Gemini 단독으로 넘어간 사진, OCR 줄 없이 사진에서만 읽은 항목은 `null`이다. `null`이면 `rawText`로 줄을 보여 준다.
 - `imageUrl`은 짧은 만료 시간을 가진 서명 URL이다. `imageUrlExpiresAt`이 만료 시각이며, 만료되지 않는 URL(로컬 저장소)이면 `null`이다. 만료되었거나 이미지 로딩이 `403`으로 실패하면 프론트엔드는 같은 `GET /api/menu-imports/{menuImportId}`를 다시 호출해 새 URL을 받는다. 다시 호출해도 `reviewVersion`이 같으면 검수 데이터는 바뀌지 않으므로 사용자가 입력 중인 결정을 유지한다.
 - `extractedLineType`은 AI의 최초 분류이며 검수 후에도 변경되지 않는다.
 - `correctedLineType`은 운영자가 최초 분류를 바꾼 경우에만 값이 있고, 그대로 승인한 경우 `null`이다.
@@ -2275,8 +3141,10 @@ Content-Type: application/json
 | `optionDecisions` | 아니오 | 고칠 옵션만 보낸다. 보내지 않은 옵션은 추출값 그대로 반영한다. 기본 `[]` |
 | `optionDecisions[].extractedOptionId` | 예 | 그 항목의 옵션 ID |
 | `optionDecisions[].correctedOptionLabel` | 아니오 | 1~100자. 없거나 `null`이면 추출값 유지 |
-| `optionDecisions[].correctedPriceKrw` | 아니오 | 1 이상 정수. 없거나 `null`이면 추출값 유지 |
+| `optionDecisions[].correctedPriceKrw` | 아니오 | 1~2,147,483,647 정수. 없거나 `null`이면 추출값 유지 |
 | `optionDecisions[].correctedPourMl` | 아니오 | 1~32767 정수. 없거나 `null`이면 추출값 유지 |
+
+검수에서는 할인(3.14.2)을 정하지 않는다. `optionDecisions`에 할인 필드는 없으며, 보내면 `EXTRA_FORBIDDEN`이다. 할인은 메뉴를 반영한 뒤 직접 편집(3.14.4)으로 정한다. 메뉴판 사진에 할인이 적힌 경우가 드물고, 할인은 기간이 있어 사진에서 읽을 수 없기 때문이다. 반영할 때 기존 할인이 이어지는 규칙은 8.7을 따른다.
 
 `optionDecisions`의 필드는 "없음 또는 `null` = 고치지 않음"이다. 따라서 추출된 값을 지워 `null`로 만들 수는 없다. 가격이 없는 옵션은 게시하지 않으며, 게시할 상품에는 가격 있는 옵션이 최소 하나 있어야 한다(`NO_PRICED_OPTION`).
 
@@ -2502,6 +3370,9 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - 백엔드는 운영자가 제출한 결정으로 최종 변경을 계산해 반영한다. 다른 후보를 고르거나 가격을 고쳐서 임시 diff와 달라진 변경도 운영자의 결정이므로 그대로 반영한다.
 - 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다.
 - 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면(다른 작업이 먼저 게시된 경우 등) 반영하지 않는다. 백엔드는 임시 diff를 다시 만들고 `reviewVersion`을 올린 뒤 `REVIEW_OUTDATED`를 반환한다.
+- 반영은 메뉴 등록 작업을 잠그기 전에 업장 행을 먼저 잠근다(3.14.1). 같은 업장의 직접 편집, 품절 표시, 판매 정보 확인, 새 등록 작업과 차례로 처리하기 위해서다. 잠근 뒤 업장이 비활성이면 아무것도 반영하지 않고 `404 BAR_NOT_FOUND`(`details.barId`)다. 비활성 업장은 메뉴를 바꾸지 않기 때문이다(3.14.1, 4.4). 이미 반영된 작업을 다시 보낸 경우에도 같다.
+- 반영할 때 품절과 할인은 다음처럼 이어진다. 품절(3.14.8)은 메뉴판에 남는 항목에서 그대로 유지되고, `remove`로 빠진 항목에서는 풀린다. 할인(3.14.2)은 반영 뒤에도 표기(`optionLabel`), 용량(`pourMl`), 정가(`priceKrw`)가 모두 같은 옵션이 남으면 그 옵션에 그대로 유지된다. 정가가 바뀌거나 옵션이 없어지면 할인이 지워진다. 정가가 바뀌면 원래 할인가가 맞는지 알 수 없기 때문이다. 품절 변경과 판매 정보 확인은 "검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었는지" 검사에서 메뉴판 변경으로 보지 않는다.
+- 반영에 성공하면 메뉴판 버전(3.9의 `menuVersion`)을 1 올리고, `publishedAt`을 업장 행을 잠근 뒤의 현재 시각으로 바꾼다(3.14.1의 게시 시각). 미완료 작업이 있는 동안에는 메뉴 직접 편집(3.14)을 받지 않으므로, 검수 중에 직접 편집으로 메뉴판이 바뀌는 일은 없다.
 
 ### 8.8 성공 응답
 
@@ -2566,18 +3437,26 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `404` | `OWNER_APPLICATION_NOT_FOUND` | 업주 신청이 없거나 조회 권한이 없음 (3.11) | 신청 목록 재조회 |
 | `404` | `BAR_OWNER_NOT_FOUND` | 업주 해제 대상 업장에 현재 업주가 없음 (3.11.10) | 업장 상세 재조회 |
 | `404` | `MENU_IMPORT_NOT_FOUND` | 등록 작업이 없음 | 작업 목록 이동 |
-| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me` 또는 `POST /api/owner-applications` 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
+| `404` | `MENU_ITEM_NOT_FOUND` | 직접 수정, 삭제할 항목이 현재 메뉴판에 없음. `details.barMenuItemId` (3.14) | 메뉴 다시 조회 |
+| `404` | `PHOTO_NOT_FOUND` | 삭제하거나 조회할 매장 사진이 없음. `details.photoId` (3.16) | 업장 상세 다시 조회 |
+| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인·거절(3.11.7, 3.11.8) 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
 | `405` | `METHOD_NOT_ALLOWED` | 경로는 있지만 허용하지 않는 HTTP 메서드 | 요청 메서드 확인 |
 | `409` | `BAR_OWNER_EXISTS` | 이미 현재 업주가 있는 업장에 신청 또는 승인 (3.11) | 안내. operator는 해당 신청을 거절 |
 | `409` | `OWNER_APPLICATION_EXISTS` | 같은 업장, 또는 같은 사업자등록번호의 `new_bar`에 본인의 대기 중 신청이 있음 (3.11.2) | `details.applicationId`의 신청으로 이동 |
 | `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소·다시 검증 (3.11) | 신청 상세 재조회 |
 | `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 키에 다른 요청 내용 | 새 키로 명시적 재요청 |
-| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있음. `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 재업로드 |
+| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있는데 새 작업을 올리거나(4.4) 메뉴를 직접 편집함(3.14). `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 다시 요청 |
+| `409` | `MENU_OUTDATED` | 직접 편집이나 판매 정보 확인(3.14.9) 요청의 `menuVersion`이 현재 메뉴판 버전과 다름. `details.submittedMenuVersion`, `details.currentMenuVersion` (3.14) | 메뉴 다시 조회 후 다시 저장 |
+| `409` | `NO_PUBLISHED_MENU` | 판매 정보 확인(3.14.9)을 했는데 메뉴판이 없거나 항목이 없음 | 메뉴 등록으로 안내 |
+| `409` | `MENU_ITEM_EXISTS` | 직접 추가하려는 상품이 이미 현재 메뉴판에 있음. `details.barMenuItemId` (3.14.3) | 그 항목 수정으로 안내 |
+| `409` | `PHOTO_EXISTS` | 내용이 같은 매장 사진이 이미 있음. `details.photoId` (3.16.2) | 이미 등록된 사진이라고 안내하고 사진 목록 다시 조회 |
+| `409` | `PHOTO_LIMIT_REACHED` | 매장 사진이 이미 15장. `details.maxPhotos` (3.16.2) | 사진을 지운 뒤 추가하라고 안내 |
+| `409` | `PHOTOS_OUTDATED` | 순서 변경에 보낸 사진 ID가 현재 사진과 다름. `details.photos` (3.16.4) | `details.photos`로 화면을 바꾸고 다시 정렬하게 함 |
 | `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가. 예: `ready_for_review`가 아닌 작업의 검수 제출, `applied`·`failed` 작업의 취소. `details.status`에 현재 상태 | 상태 재조회 |
 | `409` | `REVIEW_OUTDATED` | `reviewVersion` 불일치, 또는 검수 데이터를 만든 뒤 현재 메뉴판이 바뀜 | `details.reviewUrl`로 최신 검수 데이터 재조회 |
-| `409` | `DUPLICATE_BRAND_FOUND` | 신규 브랜드와 동일할 수 있는 브랜드 발견 | 기존 브랜드 선택 화면 표시 |
-| `409` | `DUPLICATE_PRODUCT_FOUND` | 신규 상품과 동일한 상품 발견, 또는 제출한 이름·별칭이 기존 상품의 별칭과 일치 | 기존 상품 선택 화면 표시. 다른 상품이면 겹치는 별칭을 빼고 다시 제출 |
+| `409` | `DUPLICATE_BRAND_FOUND` | 신규 브랜드와 동일할 수 있는 브랜드 발견 (검수 또는 직접 추가) | 기존 브랜드 선택 화면 표시 |
+| `409` | `DUPLICATE_PRODUCT_FOUND` | 신규 상품과 동일한 상품 발견, 또는 제출한 이름·별칭이 기존 상품의 별칭과 일치 | 기존 상품 선택 화면 표시. 다른 상품이면 겹치는 별칭을 빼고 다시 제출. `existingProduct.isActive = false`이면 상품 검색으로 안내 (9.5) |
 | `413` | `UPLOAD_TOO_LARGE` | 파일 개수 또는 크기 초과 | 이미지 축소 또는 개수 조정 |
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | 지원하지 않는 이미지 형식 | 지원 형식 안내 |
 | `422` | `VALIDATION_FAILED` | 필드 값이나 옵션 구성이 잘못됨 | `fieldErrors` 표시 |
@@ -2585,7 +3464,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `429` | `RATE_LIMITED` | 업주 신청의 진위확인 또는 사업자등록증 OCR을 오늘 5회 했음. `details.retryAfter`에 다음 초기화 시각 (3.11.14) | 내일 다시 시도 안내. OCR은 직접 입력 안내 |
 | `503` | `OCR_UNAVAILABLE` | 사업자등록증 사진을 읽는 OCR 설정이 없거나 호출 실패 (3.11.12) | 직접 입력 안내 |
 | `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | operator의 다시 검증에서 국세청 API에 연결하지 못함 (3.11.13) | 잠시 후 재시도 안내 |
-| `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 동일 검수 요청 재시도 |
+| `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 (검수 제출, 메뉴 직접 편집) | 잠시 후 같은 요청 재시도 |
 | `500` | `INTERNAL_ERROR` | 예상하지 못한 서버 오류(DB 연결 실패, 코드 오류 등). 모든 API에서 생길 수 있다. 원인은 응답에 담지 않고 서버 로그에만 남긴다 | 잠시 후 재시도 안내 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버의 인증 설정 누락 또는 오류, Supabase JWKS 조회 실패 (3.1.5) | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않음 |
 
@@ -2614,14 +3493,14 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
-- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`.
+- **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `BOOL_TYPE`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`, `TIMEZONE_AWARE`. `message`는 Pydantic의 영어 기본 문구다.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`.
 
 ### 9.4 검수 버전 충돌
 
 `REVIEW_OUTDATED`가 발생하면 최종 반영은 전부 롤백된다. 프론트엔드는 사용자의 로컬 입력을 즉시 버리지 말고 최신 검수 응답을 받은 뒤 항목 ID 기준으로 재적용 가능한 수정값을 보여줄 수 있다. 사용자는 바뀐 diff를 확인하고 다시 제출해야 한다.
 
-### 9.5 신규 상품 중복 발견
+### 9.5 신규 브랜드와 상품 중복 발견
 
 ```json
 {
@@ -2637,7 +3516,8 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
         "brandName": "Deanston",
         "category": "whisky",
         "ageYears": null,
-        "editionName": "Virgin Oak"
+        "editionName": "Virgin Oak",
+        "isActive": true
       },
       "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777777"
     },
@@ -2646,7 +3526,50 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 }
 ```
 
-이 경우 신규 상품은 생성되지 않고 `menuImport`는 `ready_for_review`를 유지한다.
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `extractedItemId` | UUID 문자열 | 아니오 | 중복이 난 검수 항목. 직접 추가(3.14.3)에는 없다 |
+| `existingProduct.productId`, `displayName`, `brandId`, `brandName`, `category` | 7.2와 같다 | 아니오 | 이미 있는 상품 |
+| `existingProduct.ageYears`, `editionName` | 7.2와 같다 | 예 | |
+| `existingProduct.isActive` | 불리언 | 아니오 | 활성 상품인지. `false`이면 그 상품을 고를 수 없다(`PRODUCT_INACTIVE`) |
+| `reviewUrl` | 문자열 | 아니오 | 검수 데이터 경로. 직접 추가에는 없다 |
+
+중복 검사는 비활성 상품도 대상으로 한다(같은 상품을 다시 만들지 않기 위해서다). 제출한 이름이나 별칭이 여러 상품에 걸리면 활성 상품을 먼저 돌려준다. 비활성 상품은 대부분 잘못 만들어져 정리된 중복이고, 실제 상품은 따로 활성 상태로 있기 때문이다.
+
+프론트엔드 처리:
+
+- `isActive = true`: 기존 상품을 보여 주고, 맞으면 그 상품을 선택해(검수는 `select_existing_product`, 직접 추가는 `productId`) 다시 제출한다. 다른 상품이면 겹치는 별칭을 빼고 다시 제출한다.
+- `isActive = false`: 그 상품으로 다시 제출하지 않는다. 이미 정리된 상품과 이름이 겹친다고 안내하고 상품 검색(7)에서 고르게 한다. 검색에도 없으면 operator 문의를 안내한다(7.2).
+
+신규 브랜드가 기존 브랜드와 같으면 `409 DUPLICATE_BRAND_FOUND`다.
+
+```json
+{
+  "error": {
+    "code": "DUPLICATE_BRAND_FOUND",
+    "message": "같은 브랜드가 이미 등록되어 있습니다. 기존 브랜드를 선택해 주세요.",
+    "details": {
+      "extractedItemId": "10000000-0000-4000-8000-000000000009",
+      "existingBrand": {
+        "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
+        "canonicalName": "Deanston"
+      },
+      "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777777"
+    },
+    "fieldErrors": []
+  }
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `extractedItemId`, `reviewUrl` | | 아니오 | 상품 중복과 같다. 직접 추가에는 없다 |
+| `existingBrand.brandId` | UUID 문자열 | 아니오 | 이미 있는 브랜드 |
+| `existingBrand.canonicalName` | 문자열 | 아니오 | 대표 브랜드명 |
+
+프론트엔드는 기존 브랜드를 보여 주고, 맞으면 `brand`를 `{"type": "existing", "brandId": ...}`로 바꿔 다시 제출한다. 브랜드에는 비활성 상태가 없다.
+
+두 오류 모두 아무것도 만들지 않는다. 검수에서는 `menuImport`가 `ready_for_review`를 유지하고, 직접 추가에서는 메뉴판이 바뀌지 않는다.
 
 ### 9.6 API가 만들지 않은 오류
 
@@ -2656,7 +3579,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 |---|---|---|
 | 기기가 오프라인이거나, 연결·응답 시간이 초과됨 | 응답 없음 | 네트워크 연결 확인 안내와 재시도 |
 | API 프로세스가 멈췄거나 다시 시작하는 중 | 프록시(Caddy)의 `502` 또는 `504`. 본문이 비어 있거나 JSON이 아니다 | 서버 오류로 보고 잠시 후 재시도 안내 |
-| 요청 본문이 프록시 한도(35MB)를 넘음 | 프록시의 `413`. JSON이 아니다 | `413 UPLOAD_TOO_LARGE`(4.4)와 같게 사진 수나 크기를 줄이도록 안내. 정상적인 업로드는 API의 한도(전체 30MB)에 먼저 걸린다 |
+| 요청 본문이 프록시 한도(65MB)를 넘음 | 프록시의 `413`. JSON이 아니다 | `413 UPLOAD_TOO_LARGE`(4.4)와 같게 사진 수나 크기를 줄이도록 안내. 정상적인 업로드는 API의 한도(전체 60MB)에 먼저 걸린다 |
 | 응답 본문이 기대한 JSON이 아님 | `2xx`이지만 해석할 수 없는 본문 | 네트워크 오류가 아니라 서버 응답 오류로 보고 재시도 안내 |
 
 서버 오류 문구에는 서버가 보낸 원문이나 HTTP 상태 번호를 그대로 노출하지 않는다.
@@ -2700,4 +3623,14 @@ canceled
 - `review-and-apply` 성공 전에는 카탈로그와 현재 메뉴판이 변경되지 않는다.
 - 최종 요청에서 AI를 다시 호출하지 않는다.
 - 최종 요청은 부분 성공하지 않는다. 하나라도 실패하면 전체 롤백한다.
+- 메뉴 직접 편집(3.14)은 항목을 `barMenuItemId`로만 가리킨다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀌면 달라질 수 있다.
+- 메뉴 직접 편집 요청은 모두 조회한 `menuVersion`을 포함하며, 업장에 미완료 메뉴 등록 작업이 있으면 받지 않는다. 품절 표시(3.14.8)와 판매 정보 확인(3.14.9)은 예외로 검수 중에도 받는다.
+- 고객 검색은 서울 날짜별 집계(3.10.6)로만 센다. 집계에는 검색어 원문, 검색 시각, 위치, 사용자, IP, 기기 정보를 남기지 않으며(서버 접근 로그에는 위치를 뺀 검색어가 남는다), 인식하지 못한 검색어만 보호 규칙을 거쳐 정규화한 형태로 30일 동안 남긴다. 최근 검색 목록은 앱이 기기에만 저장한다.
+- 홈 화면의 카드는 3.10을 `productId`로 검색한다. `query`와 `productId`는 함께 보낼 수 없다.
+- "요즘 많이 찾는 위스키"(3.17)의 `barCount`는 고객 검색(3.10)에 나오는 업장 수와 같은 규칙으로 센다. 검색 수는 응답에 넣지 않는다.
+- 품절 항목은 손님(비로그인 사용자와 customer)의 3.9와 고객 검색(3.10)에서 빠진다. operator와 해당 업장의 업주만 3.9에서 `soldOut = true`로 받는다.
+- 할인 중인지는 프론트엔드가 `discount.startsAt`, `endsAt`과 현재 시각으로 계산한다. `priceKrw`는 항상 정가다.
 - `summary`나 사용자 표시 문자열을 서버 검증 기준으로 사용하지 않는다.
+- 매장 태그와 정규 영업시간은 업장 수정(3.7)에서 배열 전체를 바꾼다. 일부만 바꾸는 요청은 없다.
+- 영업 상태는 서버가 계산하지 않는다. 프론트엔드가 3.15.5의 규칙으로 계산한다. `operatingException`은 `endDate` 다음 날까지 응답에 남으므로, 지금 적용 중인지도 프론트엔드가 판단한다(3.15.4).
+- 매장 사진의 `imageUrl`과 `thumbnailUrl`은 만료되지 않는 고정 URL이며, 프론트엔드는 URL을 직접 만들지 않는다. 대표 사진은 `photos`의 첫 항목이며, 업장 목록 API에서는 `coverThumbnailUrl`(사진이 없으면 `null`)이다.

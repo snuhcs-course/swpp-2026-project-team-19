@@ -1,6 +1,6 @@
 """SQLAlchemy model package. Import models here for Alembic autogeneration."""
 
-from app.models.bar import Bar, BarStatus
+from app.models.bar import Bar, BarOperatingException, BarPhoto, BarStatus, BarWeeklyHours, OperatingExceptionKind
 from app.models.catalog import Brand, BrandAlias, Product, ProductAlias
 from app.models.menu import BarMenuItem, MenuBoard, MenuBoardEntry, MenuEntryOption
 from app.models.menu_import import (
@@ -25,19 +25,25 @@ from app.models.menu_import import (
 from app.models.owner import (
     BarOwner,
     BarOwnerApplication,
+    BarOwnerApplicationMenuImage,
     BusinessStatus,
     BusinessVerificationResult,
     OwnerApplicationStatus,
     OwnerApplicationType,
 )
+from app.models.search_count import ProductSearchCount, SearchSource, UnmatchedSearchQuery
 from app.models.user import User, UserType
 
 __all__ = [
     "Bar",
     "BarMenuItem",
+    "BarOperatingException",
     "BarOwner",
     "BarOwnerApplication",
+    "BarOwnerApplicationMenuImage",
+    "BarPhoto",
     "BarStatus",
+    "BarWeeklyHours",
     "Brand",
     "BrandAlias",
     "BusinessStatus",
@@ -58,14 +64,18 @@ __all__ = [
     "MenuImage",
     "MenuImport",
     "MenuImportChange",
+    "OperatingExceptionKind",
     "OwnerApplicationStatus",
     "OwnerApplicationType",
     "PipelineStatus",
     "Product",
+    "ProductSearchCount",
     "ProductAlias",
     "ResolutionCandidate",
     "ResolutionStatus",
     "ReviewStatus",
+    "SearchSource",
+    "UnmatchedSearchQuery",
     "User",
     "UserType",
 ]

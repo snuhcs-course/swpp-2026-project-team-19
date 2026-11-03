@@ -9,6 +9,8 @@ import android.graphics.Path
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.MotionEvent
+import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,6 +66,19 @@ private sealed interface NearbyMapStatus {
     data object Error : NearbyMapStatus
 }
 
+/**
+ * Observes native map down events even if an SDK child view consumes the gesture.
+ * Does not intercept or consume touches: native panning, pin clicks and zoom remain intact.
+ */
+internal class MapTouchImeDismissLayout(
+    context: android.content.Context, private val onDown: () -> Unit,
+) : FrameLayout(context) {
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) onDown()
+        return super.dispatchTouchEvent(event)
+    }
+}
+
 @Composable
 fun NearbyKakaoMap(
     origin: NearbyCoordinate,
@@ -85,6 +100,7 @@ fun NearbyKakaoMap(
     onViewportChanged: (MapViewport) -> Unit,
     recenterToken: Int,
     onMapViewChanged: (MapView?) -> Unit,
+    onMapTouch: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (BuildConfig.KAKAO_NATIVE_APP_KEY.isBlank()) {
@@ -105,6 +121,7 @@ fun NearbyKakaoMap(
         val currentViewport = rememberUpdatedState(onViewportChanged)
         val currentCameraChanged = rememberUpdatedState(onCameraChanged)
         val currentNativeMap = rememberUpdatedState(nativeMap)
+        val currentMapTouch = rememberUpdatedState(onMapTouch)
         val currentCovered = rememberUpdatedState(listCovered)
         val ctx = LocalContext.current
         val owner = LocalLifecycleOwner.current
@@ -219,7 +236,18 @@ fun NearbyKakaoMap(
 
         Box(modifier = modifier) {
             if (view != null) {
-                AndroidView(factory = { view }, modifier = Modifier.fillMaxSize())
+                // Native Kakao MapView handles touch events outside Compose's gesture
+                // hierarchy. Observe ACTION_DOWN in the Android View parent without
+                // intercepting or consuming the gesture, preserving pan/zoom/markers.
+                AndroidView(factory = { context ->
+                    MapTouchImeDismissLayout(context) {
+                        currentMapTouch.value.invoke()
+                    }.apply {
+                        addView(view, FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.MATCH_PARENT))
+                    }
+                }, modifier = Modifier.fillMaxSize())
                 DisposableEffect(view, owner) {
                     onMapViewChanged(view)
                     val disposed = AtomicBoolean(false)
