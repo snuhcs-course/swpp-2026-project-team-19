@@ -78,6 +78,18 @@ private fun dateInput(raw:String):String {
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
+/** Only local fixture onboarding should bypass the Owner dashboard automatically. */
+internal fun shouldAutoOpenOwnerRegistrationIntro(
+    usesProductionOwnerApi: Boolean,
+    startRegistration: Boolean,
+    barCount: Int,
+    applicationCount: Int,
+    hasDraft: Boolean,
+): Boolean =
+    !usesProductionOwnerApi && !startRegistration &&
+        barCount==0 && applicationCount==0 && !hasDraft
+
 fun OwnerOnboardingScreen(
     viewModel: OwnerMockViewModel,
     onBack: () -> Unit,
@@ -286,11 +298,25 @@ fun OwnerOnboardingScreen(
     }
 
     LaunchedEffect(snapshot?.bars?.size,snapshot?.applications?.size,startRegistration) {
-        if(!startRegistration && snapshot!=null &&
-            snapshot.bars.isEmpty() && snapshot.applications.isEmpty() &&
-            snapshot.registrationDraft==null && screen==RegPage.HOME){
-            // HTML v4: no redundant entry page before the registration introduction.
+        if(snapshot!=null && screen==RegPage.HOME &&
+            shouldAutoOpenOwnerRegistrationIntro(
+                usesProductionOwnerApi=viewModel.usesProductionOwnerApi(),
+                startRegistration=startRegistration,
+                barCount=snapshot.bars.size,
+                applicationCount=snapshot.applications.size,
+                hasDraft=snapshot.registrationDraft!=null,
+            )){
+            // Local fixture only. A production Owner may briefly have 0 cached bars
+            // while GET /api/me/bars is still loading; never navigate on that state.
             screen=RegPage.INTRO
+        }
+    }
+    LaunchedEffect(snapshot?.bars?.size,snapshot?.registrationDraft,startRegistration) {
+        if(viewModel.usesProductionOwnerApi() && !startRegistration &&
+            snapshot?.bars?.isNotEmpty()==true && snapshot.registrationDraft==null &&
+            screen==RegPage.INTRO && history.isEmpty()){
+            // Recover a previously saved transient Intro once owned bars arrive.
+            screen=RegPage.HOME
         }
     }
 
