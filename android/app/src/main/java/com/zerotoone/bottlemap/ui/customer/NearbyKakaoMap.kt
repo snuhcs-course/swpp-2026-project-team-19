@@ -107,6 +107,12 @@ fun NearbyKakaoMap(
     /** No blue "current location" for a default map center or bar coordinate. */
     showOriginMarker: Boolean = true,
     p18MarkerSubtitle: (String) -> String? = { null },
+    /** Browse-only: title immediately above map pin, no information bubble. */
+    p18SimplePins: Boolean = false,
+    /** Explicit user's GPS coordinate, independent of the initial map camera. */
+    userLocation: NearbyCoordinate? = null,
+    /** A deliberate selected-card tap may zoom; normal pin selection never moves the camera. */
+    focusZoomLevel: Int? = null,
 ) {
     if (BuildConfig.KAKAO_NATIVE_APP_KEY.isBlank()) {
         Text("Kakao Native App Key 설정이 필요합니다.", modifier = modifier.padding(16.dp))
@@ -119,6 +125,7 @@ fun NearbyKakaoMap(
         var nativeMap by remember { mutableStateOf<KakaoMap?>(null) }
         val markers = remember { linkedMapOf<String, Pair<NearbyCoordinate, Label>>() }
         var placeLabel by remember { mutableStateOf<Label?>(null) }
+        var userLabel by remember { mutableStateOf<Label?>(null) }
         var requestViewportSnapshot by remember { mutableStateOf<(() -> Unit)?>(null) }
         val currentSelect = rememberUpdatedState(onSelectBar)
         val currentMoving = rememberUpdatedState(onMapCameraMoving)
@@ -160,25 +167,49 @@ fun NearbyKakaoMap(
                     val label = layer.addLabel(
                         LabelOptions.from(id,
                             LatLng.from(bar.location.latitude, bar.location.longitude))
-                            .setStyles(if(p18Markers)
-                                p18CardMarkerStyle(id == selectedBarId,bar.name,
+                            .setStyles(when {
+                                p18SimplePins -> p18SimpleMarkerStyle(id == selectedBarId,
+                                    bar.name,markerDensity)
+                                p18Markers -> p18CardMarkerStyle(id == selectedBarId,bar.name,
                                     p18MarkerSubtitle(id),markerDensity)
-                                else nearbyMarkerStyle(id == selectedBarId))
+                                else -> nearbyMarkerStyle(id == selectedBarId)
+                            })
                             .setClickable(true)
                             .setTag(id)
                             .apply {
-                                if(!p18Markers)setTexts(LabelTextBuilder().setTexts(bar.name))
+                                if(!p18Markers && !p18SimplePins)
+                                    setTexts(LabelTextBuilder().setTexts(bar.name))
                             },
                     )
                     if (label != null) markers[id] = bar.location to label
                 }
             }
             markers.forEach { (id, stored) ->
-                stored.second.setStyles(if(p18Markers)
-                    p18CardMarkerStyle(id == selectedBarId,
+                stored.second.setStyles(when {
+                    p18SimplePins -> p18SimpleMarkerStyle(id == selectedBarId,
+                        current[id]?.name ?: id,markerDensity)
+                    p18Markers -> p18CardMarkerStyle(id == selectedBarId,
                         current[id]?.name ?: id,p18MarkerSubtitle(id),markerDensity)
-                    else nearbyMarkerStyle(id == selectedBarId))
+                    else -> nearbyMarkerStyle(id == selectedBarId)
+                })
                 stored.second.invalidate()
+            }
+        }
+
+        // GPS permission may be granted after native map initialization.
+        // Keep blue dot in sync with GPS and remove it promptly if permission is revoked.
+        LaunchedEffect(nativeMap, showOriginMarker, userLocation, origin) {
+            userLabel?.remove()
+            userLabel = null
+            val map = nativeMap ?: return@LaunchedEffect
+            val point = if(showOriginMarker) (userLocation ?: origin) else null
+            if(point != null && point.isValid()) {
+                userLabel = map.labelManager?.layer?.addLabel(
+                    LabelOptions.from("__user_location__",
+                        LatLng.from(point.latitude,point.longitude))
+                        .setStyles(userLocationStyle())
+                        .setClickable(false),
+                )
             }
         }
 
@@ -215,11 +246,14 @@ fun NearbyKakaoMap(
         // new nearby HTTP result.
         LaunchedEffect(nativeMap, selectedBarId) {
             if (nativeMap != null) markers.forEach { (id, pair) ->
-                pair.second.setStyles(if(p18Markers)
-                    p18CardMarkerStyle(id == selectedBarId,
+                pair.second.setStyles(when {
+                    p18SimplePins -> p18SimpleMarkerStyle(id == selectedBarId,
+                        bars.firstOrNull{it.barId==id}?.name ?: id,markerDensity)
+                    p18Markers -> p18CardMarkerStyle(id == selectedBarId,
                         bars.firstOrNull{it.barId==id}?.name ?: id,
                         p18MarkerSubtitle(id),markerDensity)
-                    else nearbyMarkerStyle(id == selectedBarId))
+                    else -> nearbyMarkerStyle(id == selectedBarId)
+                })
                 pair.second.invalidate()
             }
         }
@@ -233,6 +267,7 @@ fun NearbyKakaoMap(
             currentMoving.value()
             map.moveCamera(CameraUpdateFactory.newCenterPosition(
                 LatLng.from(target.location.latitude, target.location.longitude),
+                focusZoomLevel?.coerceIn(6,21) ?: map.zoomLevel,
             ))
             requestViewportSnapshot?.invoke()
             onFocusApplied()
@@ -373,12 +408,6 @@ fun NearbyKakaoMap(
                                     try {
                                         val layer = map.labelManager?.layer
                                             ?: throw IllegalStateException("No Kakao label layer")
-                                        if(showOriginMarker) layer.addLabel(
-                                            LabelOptions.from("__user_location__",
-                                                LatLng.from(origin.latitude, origin.longitude))
-                                                .setStyles(userLocationStyle())
-                                                .setClickable(false),
-                                        )
                                         map.setOnLabelClickListener(
                                             object : KakaoMap.OnLabelClickListener {
                                                 override fun onLabelClicked(
@@ -598,4 +627,50 @@ private fun p18CardMarkerStyle(
         canvas.drawText(trim(secondary,101f*d,sub),43f*d,35f*d,sub)
     }
     return LabelStyle.from(image).setAnchorPoint(.5f,1f)
+}
+
+/** Browse markers show a pin and a title above it, not a rectangular card. */
+private fun p18SimpleMarkerStyle(selected: Boolean,name: String,density: Float): LabelStyle {
+    val d=density.coerceAtLeast(.5f)
+    val title=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(242,237,232)
+        textAlign=Paint.Align.CENTER
+        textSize=12f*d
+        isFakeBoldText=true
+    }
+    val displayName=name.take(18)+(if(name.length>18)"…" else "")
+    val width=(kotlin.math.max(48f,title.measureText(displayName)/d+12f)*d)
+        .toInt().coerceAtLeast(1)
+    val height=(65f*d).toInt().coerceAtLeast(1)
+    val bitmap=Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888)
+    val canvas=Canvas(bitmap)
+    val cx=width/2f
+    val halo=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(33,30,27)
+        style=Paint.Style.STROKE
+        strokeWidth=3f*d
+        strokeJoin=Paint.Join.ROUND
+    }
+    canvas.drawText(displayName,cx,13f*d,halo)
+    canvas.drawText(displayName,cx,13f*d,title)
+    val fill=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=if(selected)Color.rgb(201,157,107) else Color.rgb(64,56,50)
+    }
+    val border=Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color=Color.rgb(201,157,107)
+        style=Paint.Style.STROKE
+        strokeWidth=1.8f*d
+    }
+    val pin=Path().apply {
+        moveTo(cx,61f*d)
+        cubicTo(cx-4f*d,52f*d,cx-15f*d,45f*d,cx-15f*d,35f*d)
+        cubicTo(cx-15f*d,15f*d,cx+15f*d,15f*d,cx+15f*d,35f*d)
+        cubicTo(cx+15f*d,45f*d,cx+4f*d,52f*d,cx,61f*d)
+        close()
+    }
+    canvas.drawPath(pin,fill)
+    canvas.drawPath(pin,border)
+    canvas.drawCircle(cx,35f*d,5f*d,
+        Paint(Paint.ANTI_ALIAS_FLAG).apply { color=Color.WHITE })
+    return LabelStyle.from(bitmap).setAnchorPoint(.5f,1f)
 }
