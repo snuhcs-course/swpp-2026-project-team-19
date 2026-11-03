@@ -394,7 +394,7 @@ internal fun CustomerP18Results(
                             else selectedBarId=id},
                         onOpenBar={onOpenBar(it,product?.productId)})
                 } else {
-                    Row(Modifier.fillMaxWidth().height(56.dp)
+                    Row(Modifier.fillMaxWidth().height(72.dp)
                         .padding(start=8.dp,end=12.dp),verticalAlignment=Alignment.CenterVertically){
                         P18Back(::navigateBack)
                         Text(if(initialProductId!=null)"" else "‘${initialQuery.orEmpty()}’ 검색",
