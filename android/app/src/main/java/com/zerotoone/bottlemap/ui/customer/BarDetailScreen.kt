@@ -43,24 +43,16 @@ fun BarDetailScreen(
             is BarDetailUiState.Empty -> CustomerP18BarDetail(
                 bar=current.bar, empty=current.reason, onBack=onBack,
                 highlightProductId=highlightProductId)
-            else -> Column(Modifier.fillMaxSize().background(P18Bg)) {
-                Row(Modifier.fillMaxWidth().height(72.dp).padding(start=8.dp),
-                    verticalAlignment=Alignment.CenterVertically) {
-                    P18Back(effectiveBack)
-                }
-                when(current) {
-                    BarDetailUiState.Loading ->
-                        P18LoadingBody("매장 찾는 중",Modifier.weight(1f))
-                    is BarDetailUiState.Error ->
-                        P18FailureBody("매장을 불러오지 못했어요",
-                            current.message,
-                            if(current.canRetry)"다시 시도" else "검색 결과로 돌아가기",
-                            BmIconId.ERROR,
-                            if(current.canRetry)viewModel::retry else effectiveBack,
-                            modifier=Modifier.weight(1f),primary=current.canRetry,
-                            topInset=120)
-                    else -> Unit
-                }
+            BarDetailUiState.Loading -> P18LoadingScene("매장 찾는 중",effectiveBack)
+            is BarDetailUiState.Error -> Column(Modifier.fillMaxSize().background(P18Bg)) {
+                Row(Modifier.fillMaxWidth().height(56.dp).padding(start=8.dp),
+                    verticalAlignment=Alignment.CenterVertically) { P18Back(effectiveBack) }
+                P18FailureBody("매장을 불러오지 못했어요",
+                    current.message,
+                    if(current.canRetry)"다시 시도" else "검색 결과로 돌아가기",
+                    BmIconId.ERROR,
+                    if(current.canRetry)viewModel::retry else effectiveBack,
+                    modifier=Modifier.weight(1f),primary=current.canRetry,topInset=120)
             }
         }
     }
