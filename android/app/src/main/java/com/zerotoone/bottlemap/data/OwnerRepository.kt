@@ -90,6 +90,26 @@ class OwnerRepository {
         com.zerotoone.bottlemap.network.OwnerApplicationDto =
         withOwnerAuth { OwnerEndpoint.api.applyForBar(it, body) }
 
+    suspend fun uploadApplicationMenuPhotos(
+        applicationId: String, images: List<PreparedMenuImage>,
+    ): com.zerotoone.bottlemap.network.OwnerApplicationDto =
+        withOwnerAuth { authorization ->
+            require(images.isNotEmpty()) { "메뉴 사진을 선택해 주세요." }
+            val parts = images.map { image ->
+                MultipartBody.Part.createFormData("images", image.filename,
+                    image.bytes.toRequestBody(image.mimeType.toMediaType()))
+            }
+            OwnerEndpoint.api.uploadApplicationMenuPhotos(authorization, applicationId, parts)
+        }
+
+    suspend fun readBusinessCertificate(image: PreparedMenuImage):
+        com.zerotoone.bottlemap.network.OwnerCertificateOcrDto =
+        withOwnerAuth { authorization ->
+            val part = MultipartBody.Part.createFormData(
+                "image", image.filename, image.bytes.toRequestBody(image.mimeType.toMediaType()))
+            OwnerEndpoint.api.readBusinessCertificate(authorization, part)
+        }
+
     suspend fun cancelOwnerApplication(applicationId: String):
         com.zerotoone.bottlemap.network.OwnerApplicationDto =
         withOwnerAuth { OwnerEndpoint.api.cancelApplication(it, applicationId) }
