@@ -178,12 +178,13 @@ CATALOG = [
     Route("get", "/api/catalog/brands", {"params": {"query": "glen"}}, (200, None)),
     Route("get", "/api/catalog/products", {"params": {"query": "glen"}}, (200, None)),
 ]
-# Any signed-in user, with or without a users row; tested in test_users_api.py, test_auth_api.py,
-# test_business_certificate_api.py, test_my_bars_api.py, test_owner_applications_api.py (which also covers the
-# applicant-or-operator rule of GET /api/owner-applications/{applicationId}) and
-# test_owner_application_menu_photos_api.py.
+# Any signed-in user, with or without a users row; tested in test_users_api.py, test_me_update_api.py
+# (PATCH /api/me answers USER_NOT_FOUND without a row), test_auth_api.py, test_business_certificate_api.py,
+# test_my_bars_api.py, test_owner_applications_api.py (which also covers the applicant-or-operator rule of
+# GET /api/owner-applications/{applicationId}) and test_owner_application_menu_photos_api.py.
 SIGNED_IN = {
     ("get", "/api/me"),
+    ("patch", "/api/me"),
     ("post", "/api/owner-applications/business-certificate-ocr"),
     ("post", "/api/owner-applications"),
     ("get", "/api/me/owner-applications"),

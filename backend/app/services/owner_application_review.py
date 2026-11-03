@@ -50,8 +50,8 @@ from app.services.owner_applications import (
     delete_menu_photo_rows,
     delete_stored_files,
     invalid_application_state,
-    user_not_found,
 )
+from app.services.users import user_not_found
 
 StatusFilter = Literal["pending", "approved", "rejected", "canceled", "all"]
 TypeFilter = Literal["existing_bar", "new_bar"]
