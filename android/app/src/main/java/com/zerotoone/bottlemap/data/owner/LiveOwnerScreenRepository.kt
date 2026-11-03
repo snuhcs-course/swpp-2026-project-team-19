@@ -18,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -31,6 +32,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val local = LocalOwnerMockRepository(InMemoryMockOwnerStateStore())
     private var pendingApplicationId: String? = null
     private val remote = OwnerRepository()
+    private val pendingCoverStore = PendingOwnerCoverStore(app.noBackupFilesDir)
+    @Volatile var pendingCoverWarning: String? = null
+        private set
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val writeMutex = Mutex()
     @Volatile var lastPublishWarning: String? = null
@@ -172,6 +176,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private suspend fun refresh() {
         val token = AppAuth.gateway.currentAccessTokenOrNull()
         if(token == null) {
+            pendingCoverWarning = null
             sessionSubject = null
             pendingPhotoRetry = null
             pendingPhotoRetryBarId = null
@@ -182,6 +187,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
         val subject = sessionKey(token)
         if(subject != sessionSubject) {
+            pendingCoverWarning = null
             // The singleton is shared across sign-in sessions. Never retain another
             // Owner's bars, imports, registration photos or unsent decisions.
             sessionSubject = subject
@@ -199,10 +205,59 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             }.getOrDefault(bar) else bar
         }
         val applications = remote.getMyApplications()
-        val importHistory = bars.associate { bar ->
+        // A freshly approved application now has barId, but its selected cover
+        // was not accepted by POST /api/owner-applications. Upload to the first
+        // available photo slot using the existing bar photo API, once.
+        val coverApplications = applications.filter {
+            it.applicationType == "new_bar" && !it.businessRegistrationNumber.isNullOrBlank()
+        }
+        withContext(Dispatchers.IO) {
+            for(application in coverApplications) {
+                val businessNumber = requireNotNull(application.businessRegistrationNumber)
+                pendingCoverStore.attach(subject, businessNumber, application.applicationId)
+                if(application.status == "canceled" || application.status == "rejected")
+                    pendingCoverStore.remove(subject, application.applicationId, businessNumber)
+            }
+        }
+        var coverWarning: String? = null
+        val barsWithCovers = bars.map { bar ->
+            val approvedApplication = coverApplications.firstOrNull {
+                it.status == "approved" && it.bar?.barId == bar.barId
+            }
+            val jpeg = approvedApplication?.let { application ->
+                withContext(Dispatchers.IO) {
+                    pendingCoverStore.read(subject, application.applicationId)
+                }
+            }
+            if(jpeg == null) bar
+            else if(bar.photos.isNotEmpty()) {
+                // A successful upload can lose its HTTP response. Do not upload
+                // again on refresh and risk adding the same cover twice.
+                coverWarning = "매장 사진이 이미 등록되어 있어 대표 사진을 확인해 주세요."
+                bar
+            } else try {
+                if(AppAuth.gateway.currentAccessTokenOrNull()?.let(::sessionKey) != subject)
+                    return
+                val photo = remote.addBarPhoto(bar.barId,
+                    com.zerotoone.bottlemap.data.PreparedMenuImage(
+                        "owner-representative.jpg", "image/jpeg", jpeg))
+                withContext(Dispatchers.IO) {
+                    pendingCoverStore.remove(subject, approvedApplication.applicationId,
+                        approvedApplication.businessRegistrationNumber)
+                }
+                bar.copy(photos = photo.photos)
+            } catch(cancelled: CancellationException) {
+                throw cancelled
+            } catch(error: Exception) {
+                coverWarning = "대표 사진 업로드를 완료하지 못했어요. 매장 사진에서 다시 확인해 주세요."
+                bar
+            }
+        }
+        pendingCoverWarning = coverWarning
+        val importHistory = barsWithCovers.associate { bar ->
             bar.barId to remote.getMenuImports(bar.barId).items
         }
-        val menus = bars.associate { bar ->
+        val menus = barsWithCovers.associate { bar ->
             bar.barId to remote.getOwnedMenu(bar.barId)
         }
         versionByBar.clear()
@@ -219,13 +274,13 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 category = item.category,
             )
         }.distinctBy { it.productId }
-        val mappedBars = bars.map(::toBar)
+        val mappedBars = barsWithCovers.map(::toBar)
         val selected = old.selectedBarId?.takeIf { id -> mappedBars.any { it.barId == id } }
             ?: mappedBars.firstOrNull()?.barId
         // Restore the complete latest import history after process recreation, including
         // failed and ready_for_review jobs. The server list is newest first; the
         // existing screens select the last job, so reverse it into chronological order.
-        val importedJobs = bars.flatMap { bar ->
+        val importedJobs = barsWithCovers.flatMap { bar ->
             val histories = importHistory[bar.barId].orEmpty().asReversed().toMutableList()
             val active = bar.activeMenuImport
             if(active != null && histories.none { it.menuImportId == active.menuImportId }) {
@@ -536,7 +591,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
 
     /** Called asynchronously by the existing registration form; never show success before HTTP 201 + photo PUT. */
     suspend fun cancelOwnerApplicationLive(applicationId: String) {
-        remote.cancelOwnerApplication(applicationId)
+        val subject = AppAuth.gateway.currentAccessTokenOrNull()?.let(::sessionKey)
+        val application = remote.cancelOwnerApplication(applicationId)
+        if(subject != null) withContext(Dispatchers.IO) {
+            pendingCoverStore.remove(subject, applicationId,
+                application.businessRegistrationNumber)
+        }
         refresh()
     }
 
@@ -562,6 +622,18 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             )
         }
         // If POST succeeded but the image PUT failed, retry the same pending application.
+        val ownerSubject = AppAuth.gateway.currentAccessTokenOrNull()?.let(::sessionKey)
+            ?: error("로그인 후 신청해 주세요.")
+        if(draft.kind == MockApplicationKind.NEW_BAR) {
+            val coverUri = draft.applicantGallery.firstOrNull()?.uri
+                ?: error("대표 사진을 선택해 주세요.")
+            // Stage before POST: if Android is terminated after a server-side
+            // success, GET /me/owner-applications can recover the association.
+            withContext(Dispatchers.IO) {
+                val cover = prepareGalleryPhoto(coverUri)
+                pendingCoverStore.stage(ownerSubject, draft.businessNumberDigits, cover.bytes)
+            }
+        }
         val existing = remote.getMyApplications().firstOrNull {
             it.status == "pending" &&
                 it.businessRegistrationNumber == draft.businessNumberDigits &&
@@ -570,6 +642,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val applicationId = pendingApplicationId ?: existing?.applicationId
             ?: remote.submitOwnerApplication(body).applicationId
         pendingApplicationId = applicationId
+        if(draft.kind == MockApplicationKind.NEW_BAR) withContext(Dispatchers.IO) {
+            pendingCoverStore.attach(ownerSubject, draft.businessNumberDigits, applicationId)
+        }
         if(draft.initialMenuPhotos.isNotEmpty()) {
             val preparer = ImageUploadPreparer(app.contentResolver)
             val images = draft.initialMenuPhotos.map { photo ->
