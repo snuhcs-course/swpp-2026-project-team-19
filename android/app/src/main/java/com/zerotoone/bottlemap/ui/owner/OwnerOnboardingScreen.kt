@@ -37,7 +37,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.ui.common.*
 import kotlinx.coroutines.Dispatchers
@@ -48,8 +47,7 @@ import java.util.UUID
 /** ACTION_FIRST v4 mock form; no real OCR, NTS, operator approval or upload API. */
 private enum class RegPage {
     HOME, INTRO, METHOD, READING, BN, REP, DATE, BIZCHECK, VERIFYING, VERIFIED,
-    BARNAME, BARPHOTO, ADDRESS, BARPHONE, MENUS, CONTACT, REVIEW, DONE, VIEW_APPLICATION,
-    QA_LIST, QA_PREVIEW
+    BARNAME, BARPHOTO, ADDRESS, BARPHONE, MENUS, CONTACT, REVIEW, DONE, VIEW_APPLICATION
 }
 private enum class VerifyFixture { MATCHED, FAILED, UNAVAILABLE, LIMITED }
 private fun regStage(page: RegPage): Int = when(page) {
@@ -84,8 +82,6 @@ fun OwnerOnboardingScreen(
     onFirstReview: (MockImportStatus?) -> Unit,
     onManagerPreview: () -> Unit,
     startRegistration: Boolean = false,
-    onComponents: (() -> Unit)? = null,
-    onLegacyDebugUpload: (() -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsState()
     val snapshot = when(val s=state) {
@@ -101,7 +97,6 @@ fun OwnerOnboardingScreen(
     var history by rememberSaveable { mutableStateOf(listOf<String>()) }
     var inputMethod by rememberSaveable { mutableStateOf("manual") }
     var verify by rememberSaveable { mutableStateOf(VerifyFixture.MATCHED) }
-    var qaPage by rememberSaveable { mutableIntStateOf(21) }
     var showCertificateSheet by remember { mutableStateOf(false) }
     var certificateCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
     var showAddressSheet by remember { mutableStateOf(false) }
@@ -429,31 +424,13 @@ fun OwnerOnboardingScreen(
         },
         confirmButton={TextButton(onClick={showAddressSheet=false}){Text("닫기")}})
 
-    // Visible entry is strictly Debug-only, never a real Owner API/bypass.
-    if(screen==RegPage.QA_LIST && BuildConfig.DEBUG) {
-        Column(Modifier.fillMaxSize().background(RegistrationV4.bg)) {
-            RegistrationBackBar(::back)
-            OwnerRegistrationQaCatalog { page ->
-                qaPage=page
-                go(RegPage.QA_PREVIEW)
-            }
-        }
-        return
-    }
-    if(screen==RegPage.QA_PREVIEW && BuildConfig.DEBUG) {
-        OwnerRegistrationQaPreview(qaPage,onBack=::back,onAction={
-            // Preview controls never submit a fixture or overwrite a genuine Draft.
-            back()
-        })
-        return
-    }
     Column(Modifier.fillMaxSize().background(RegistrationV4.bg).imePadding()) {
         if(screen!=RegPage.DONE) {
             if(screen==RegPage.HOME || screen==RegPage.VIEW_APPLICATION)
                 OwnerHeader("내 매장 관리",if(screen==RegPage.HOME)onBack else ::back)
             else RegistrationBackBar(::back)
         }
-        if(stage!=0) RegistrationProgress(stage,onDebugQa={go(RegPage.QA_LIST)})
+        if(stage!=0) RegistrationProgress(stage)
         val centered=screen in listOf(RegPage.READING,RegPage.VERIFYING,
             RegPage.VERIFIED,RegPage.DONE)
         Column(Modifier.fillMaxWidth().weight(1f)
@@ -474,7 +451,7 @@ fun OwnerOnboardingScreen(
                 else -> when(screen){
                     RegPage.HOME -> {
                         OwnerRegistrationDashboard(
-                            snapshot=requireNotNull(snapshot), debug=false,
+                            snapshot=requireNotNull(snapshot),
                             onRegister={
                                 val saved=snapshot?.registrationDraft
                                 if(saved!=null) {
@@ -503,32 +480,8 @@ fun OwnerOnboardingScreen(
                                 history=emptyList()
                                 go(RegPage.INTRO)
                             },
-                            onReject={id->viewModel.closeApplicationForFixture(id,MockApplicationStatus.REJECTED)},
-                            onApprove={app->
-                                try{
-                                    val barId=app.barId?:"mock-bar-"+app.applicationId
-                                    val bar=(bars+candidates).firstOrNull{it.barId==barId}
-                                        ?:MockBar(barId,app.proposedBarName,app.proposedBarAddress?:"Mock 주소",
-                                            phone=app.storePhone,
-                                            gallery=app.registrationPhotos.filter{it.kind==MockPhotoKind.BAR_GALLERY})
-                                    viewModel.approveForFixture(app.applicationId,bar)
-                                    val uris=app.registrationPhotos.filter{it.kind==MockPhotoKind.MENU_CAPTURE}.map{it.uri}
-                                    if(uris.isNotEmpty())viewModel.importPhotos(barId,uris,OwnerMockFixtures.imageFixtures(emptyMap()))
-                                }catch(e:Exception){error=e.message}
-                            }
+
                         )
-                        if(BuildConfig.DEBUG) {
-                            Text("신청·예외 화면 QA (Mock)",
-                                modifier=Modifier.fillMaxWidth().heightIn(min=48.dp)
-                                    .ownerQuietClick{go(RegPage.QA_LIST)}
-                                    .testTag("registration-qa-entry")
-                                    .padding(vertical=12.dp),
-                                color=RegistrationV4.primary,fontSize=14.sp)
-                        }
-                        if(onComponents!=null)OwnerActionButton("공통 컴포넌트 점검",onComponents,
-                            Modifier.fillMaxWidth(),secondary=true)
-                        if(onLegacyDebugUpload!=null)OwnerActionButton("개발자 도구 · 기존 메뉴 업로드 테스트",
-                            onLegacyDebugUpload,Modifier.fillMaxWidth(),secondary=true)
                     }
                     RegPage.INTRO -> RegistrationIntro()
                     RegPage.METHOD -> {
@@ -846,7 +799,6 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.DONE -> RegistrationCenterContent("신청을 마쳤어요",
                         "운영팀이 실제 매장인지 확인한 뒤 승인해요.\n진행 상황은 마이페이지의 내 매장 관리에서 볼 수 있어요.")
-                    RegPage.QA_LIST,RegPage.QA_PREVIEW -> Unit
                     RegPage.VIEW_APPLICATION -> {
                         OwnerV4Question("신청한 내용","검토 중에는 내용을 수정할 수 없어요.")
                         val application=snapshot?.applications?.firstOrNull {
