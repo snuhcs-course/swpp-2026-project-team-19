@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -127,6 +128,7 @@ internal fun P18InlineBarMap(
         longitude?.let { lng -> NearbyCoordinate(lat,lng) }
     }?.takeIf { it.isValid() }
     Box(Modifier.fillMaxWidth().height(190.dp)
+        .clip(RoundedCornerShape(9.dp))
         .background(P18Soft,RoundedCornerShape(9.dp))
         .testTag("customer-detail-native-map"),
         contentAlignment=Alignment.Center) {
