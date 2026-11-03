@@ -356,43 +356,51 @@ internal fun CustomerP18Explore(
                         Modifier.align(Alignment.BottomCenter).padding(16.dp),
                         error=false)
                 }
-                else {
-                    LazyRow(Modifier.align(Alignment.BottomCenter)
-                        .fillMaxWidth().padding(bottom=24.dp),
-                        horizontalArrangement=Arrangement.spacedBy(8.dp),
-                        contentPadding=PaddingValues(horizontal=16.dp)) {
-                        items(ordered,key={it.barId}){bar->
-                            Row(Modifier.width(265.dp).heightIn(min=88.dp)
-                                .background(P18Bg,RoundedCornerShape(12.dp))
-                                .clickable {
-                                    if(selectedId==bar.barId)onOpenBar(bar.barId)
-                                    else selectedId=bar.barId
-                                }.padding(horizontal=10.dp,vertical=8.dp),
-                                verticalAlignment=Alignment.CenterVertically,
-                                horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                                if(!bar.coverThumbnailUrl.isNullOrBlank())
-                                    P18RemoteBarPhoto(bar.coverThumbnailUrl,Modifier.size(54.dp))
-                                else P18Photo(size=54.dp)
-                                Column(Modifier.weight(1f)) {
-                                    Text(bar.name,color=P18Text,fontSize=16.sp,
-                                        fontWeight=FontWeight.SemiBold,maxLines=1,
-                                        overflow=TextOverflow.Ellipsis)
-                                    if(location!=null)Text(p18Distance(
-                                        distanceMeters(location!!,bar.location).toInt()),
-                                        color=P18Text,fontSize=13.sp)
-                                    Text(bar.menuUpdatedAt?.let{
-                                        "메뉴 ${p18MenuUpdated(it)} 기준"} ?:"메뉴 정보 없음",
-                                        color=P18Muted,fontSize=12.sp)
-                                }
+                else Unit
+                else -> Unit
+            }
+            // A selected marker reveals a compact card; no card before first pin tap.
+            if(chosen!=null) {
+                Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                    .padding(start=12.dp,end=12.dp,bottom=8.dp)
+                    .background(P18Bg,RoundedCornerShape(14.dp))
+                    .border(1.dp,P18Line,RoundedCornerShape(14.dp))
+                    .clickable { zoomTarget=chosen.barId }
+                    .padding(horizontal=12.dp,vertical=9.dp),
+                    verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+                    if(!chosen.coverThumbnailUrl.isNullOrBlank())
+                        P18RemoteBarPhoto(chosen.coverThumbnailUrl,Modifier.size(60.dp))
+                    else P18Photo(size=60.dp)
+                    Column(Modifier.weight(1f),
+                        verticalArrangement=Arrangement.spacedBy(6.dp)) {
+                        Text(chosen.name,color=P18Text,fontSize=16.sp,
+                            fontWeight=FontWeight.SemiBold,maxLines=1,
+                            overflow=TextOverflow.Ellipsis)
+                        Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                            tags[chosen.barId].orEmpty().take(2).forEach { tag ->
+                                P18BrowseTag(tag)
                             }
                         }
                     }
+                    Box(Modifier.size(width=56.dp,height=44.dp)
+                        .clickable{onOpenBar(chosen.barId)},contentAlignment=Alignment.Center) {
+                        Text("매장 보기",fontSize=12.sp,color=P18Gold,
+                            fontWeight=FontWeight.SemiBold)
+                    }
                 }
-                else -> Unit
             }
+            val noticeVisible=state is P18ExploreState.Error ||
+                state is P18ExploreState.Ready && bars.isEmpty()
             Box(Modifier.align(Alignment.BottomEnd)
-                .padding(bottom=126.dp,end=16.dp)
+                .padding(bottom=when {
+                    noticeVisible -> 164.dp
+                    chosen!=null -> 102.dp
+                    else -> 12.dp
+                },end=12.dp)
                 .size(48.dp)
+                .background(androidx.compose.ui.graphics.Color.White,CircleShape)
+                .border(1.5.dp,P18Gold,CircleShape)
                 .clickable(onClick=::requestCurrentLocation)
                 .testTag("customer-map-recenter"),contentAlignment=Alignment.Center) {
                 BmIcon(BmIconId.LOCATION,"내 위치로",Modifier.size(23.dp),tint=P18Gold)
@@ -486,7 +494,8 @@ internal fun CustomerP18Explore(
 }
 
 @Composable
-private fun P18BrowseRow(bar:MapBar,origin:NearbyCoordinate?,onClick:()->Unit) {
+private fun P18BrowseRow(bar:MapBar,origin:NearbyCoordinate?,tags:List<String>,
+    onClick:()->Unit) {
     Row(Modifier.fillMaxWidth().heightIn(min=96.dp)
         .clickable(onClick=onClick).padding(vertical=12.dp),
         verticalAlignment=Alignment.CenterVertically,
@@ -500,10 +509,9 @@ private fun P18BrowseRow(bar:MapBar,origin:NearbyCoordinate?,onClick:()->Unit) {
                     distanceMeters(it,bar.location).toInt()),
                     fontSize=12.sp,color=P18Muted)}
             }
-            Text(bar.address,color=P18Text,fontSize=13.sp,
-                maxLines=1,overflow=TextOverflow.Ellipsis)
-            Text(bar.menuUpdatedAt?.let{"메뉴 ${p18MenuUpdated(it)} 기준"}
-                ?:"메뉴 정보 없음",fontSize=12.sp,color=P18Muted)
+            Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                tags.take(2).forEach { tag -> P18BrowseTag(tag) }
+            }
         }
         if(!bar.coverThumbnailUrl.isNullOrBlank())
             P18RemoteBarPhoto(bar.coverThumbnailUrl,Modifier.size(64.dp))
@@ -532,5 +540,15 @@ private fun P18MapErrorCard(
         }
         P18Action(action,onAction,primary=true,
             modifier=Modifier.fillMaxWidth().height(48.dp))
+    }
+}
+
+@Composable
+private fun P18BrowseTag(tag:String) {
+    Box(Modifier.background(P18Elevated,RoundedCornerShape(50))
+        .border(1.dp,P18Line,RoundedCornerShape(50))
+        .padding(horizontal=8.dp,vertical=3.dp)) {
+        Text(tag,color=P18Text,fontSize=11.sp,maxLines=1,
+            overflow=TextOverflow.Ellipsis)
     }
 }
