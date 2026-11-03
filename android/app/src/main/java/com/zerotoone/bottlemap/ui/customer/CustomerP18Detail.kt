@@ -254,7 +254,7 @@ internal fun CustomerP18BarDetail(
                         fontSize=14.sp,fontWeight=FontWeight.Bold)
                     open.next?.let {Text(it,fontSize=11.sp,color=P18Muted)}
                     Canvas(Modifier.size(22.dp)
-                        .clickable { expanded=if(expanded=="hours")"" else "hours" }
+                        .clickable { expanded=p18NextExpandedPanel(expanded,"hours") }
                         .testTag("customer-hours-toggle")) {
                         val leftY=if(expanded=="hours") .65f else .35f
                         val centerY=if(expanded=="hours") .35f else .65f
@@ -270,11 +270,11 @@ internal fun CustomerP18BarDetail(
                     }
                 }
                 P18PreviewSmallButton("지도","location") {
-                    expanded=if(expanded=="address")"" else "address"
+                    expanded=p18NextExpandedPanel(expanded,"address")
                 }
                 Spacer(Modifier.width(6.dp))
                 P18PreviewSmallButton("전화","phone") {
-                    expanded=if(expanded=="phone")"" else "phone"
+                    expanded=p18NextExpandedPanel(expanded,"phone")
                 }
             }
             open.note?.let {Text(it,color=P18Muted,fontSize=12.sp)}
@@ -412,3 +412,7 @@ internal fun CustomerP18BarDetail(
     }
 }
 
+
+/** Exactly one of Owner preview's hours/address/phone panels can be open. */
+internal fun p18NextExpandedPanel(current:String,tapped:String):String =
+    if(current==tapped)"" else tapped
