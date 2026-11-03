@@ -299,12 +299,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
     }
 
-    override fun saveManualMenuItem(
-        item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
+    private suspend fun sendManualItemToServer(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct?,
+        newBrand: MockBrand?, before: MockOwnerSnapshot,
     ) {
-        val before = snapshot()
         val old = before.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
-        local.saveManualMenuItem(item, newProduct, newBrand)
         val optionBodies = item.options.map { option ->
             mapOf(
                 "optionLabel" to option.label, "pourMl" to option.pourMl,
@@ -316,7 +315,6 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 },
             )
         }
-        write {
             val version = versionByBar[item.barId]
             val display = item.displayNameOverride
                 ?: (newProduct ?: before.products.firstOrNull { it.productId == item.productId })?.displayName
@@ -333,9 +331,15 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 if(newProduct == null) {
                     body["productId"] = item.productId
                 } else {
-                    val brand = if(newBrand != null)
-                        mapOf("type" to "new", "canonicalName" to newBrand.name, "aliases" to emptyList<Any>())
-                    else mapOf("type" to "existing", "brandId" to newProduct.brandId)
+                    val knownBrandId = before.brands.firstOrNull {
+                    it.brandId == newProduct.brandId &&
+                        runCatching { java.util.UUID.fromString(it.brandId) }.isSuccess
+                }?.brandId
+                val brand = if(knownBrandId != null)
+                    mapOf("type" to "existing", "brandId" to knownBrandId)
+                else mapOf("type" to "new",
+                    "canonicalName" to (newBrand?.name ?: error("브랜드 이름이 없어요.")),
+                    "aliases" to emptyList<Any>())
                     body["newProduct"] = mapOf(
                         "brand" to brand,
                         "product" to mapOf(
@@ -349,8 +353,31 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     )
                 }
                 remote.addMenuItem(item.barId, body)
+            }    }
+
+    /** Manual menu screen awaits the HTTP response before claiming success or closing the editor. */
+    suspend fun saveManualMenuItemLive(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
+    ) {
+        writeMutex.withLock {
+            try {
+                sendManualItemToServer(item, newProduct, newBrand, snapshot())
+                refresh()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                runCatching { refresh() }
+                throw error
             }
         }
+    }
+
+    override fun saveManualMenuItem(
+        item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
+    ) {
+        val before = snapshot()
+        local.saveManualMenuItem(item, newProduct, newBrand)
+        write { sendManualItemToServer(item, newProduct, newBrand, before) }
     }
 
     override fun saveMenuItem(item: MockBarMenuItem) = saveManualMenuItem(item, null, null)
