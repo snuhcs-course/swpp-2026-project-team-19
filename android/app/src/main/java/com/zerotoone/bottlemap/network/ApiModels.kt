@@ -65,6 +65,7 @@ data class SearchOptionDto(
     val pourMl: Int? = null,
     val priceKrw: Int,
     val sortOrder: Int,
+    val discount: BarMenuDiscountDto? = null,
 )
 
 data class SearchResultDto(
@@ -79,10 +80,11 @@ data class SearchResultDto(
     val menuDisplayName: String,
     val options: List<SearchOptionDto> = emptyList(),
     val menuUpdatedAt: String,
+    val coverThumbnailUrl: String? = null,
 )
 
 data class SearchBarsResponseDto(
-    val query: String,
+    val query: String?,
     val matchType: String,
     val matchedProducts: List<MatchedProductDto> = emptyList(),
     val items: List<SearchResultDto> = emptyList(),
@@ -173,6 +175,7 @@ data class MapBarItemDto(
     val latitude: Double,
     val longitude: Double,
     val menuUpdatedAt: String?,
+    val coverThumbnailUrl: String? = null,
 )
 
 data class MapBarsResponseDto(
