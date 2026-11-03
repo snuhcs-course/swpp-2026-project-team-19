@@ -67,6 +67,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import java.time.Instant
 import java.time.ZoneId
@@ -211,14 +212,15 @@ internal fun p18DisplayDistance(row:SearchResultDto,location:NearbyCoordinate?):
 }
 
 internal fun p18Sorted(
-    rows: List<SearchResultDto>, sort: P18Sort, hasLocation: Boolean
+    rows: List<SearchResultDto>, sort: P18Sort, hasLocation: Boolean,
+    at:Instant=Instant.now(),
 ): List<SearchResultDto> = when(sort) {
     P18Sort.DISTANCE -> if(hasLocation)
         rows.sortedWith(compareBy<SearchResultDto> {it.distanceMeters ?: Int.MAX_VALUE}
             .thenBy {it.barName}) else rows
     P18Sort.PRICE -> rows.sortedWith(compareBy<SearchResultDto> {
         p18Representative(it.options)?.let { option ->
-            p18EffectivePrice(option.priceKrw,option.discount)
+            p18EffectivePrice(option.priceKrw,option.discount,at)
         } ?: Int.MAX_VALUE
     }.thenBy{it.barName})
     P18Sort.UPDATED -> rows.sortedWith(compareByDescending<SearchResultDto> {
@@ -234,7 +236,7 @@ internal fun p18MenuUpdated(date: String): String =
 @Composable
 internal fun P18BarRow(
     row: SearchResultDto, showDistance: Boolean, onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,at:Instant=Instant.now(),
 ) {
     val serving=p18Representative(row.options)
     Row(modifier.fillMaxWidth().heightIn(min=104.dp)
@@ -255,7 +257,7 @@ internal fun P18BarRow(
             Row(verticalAlignment=Alignment.CenterVertically,
                 horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                 if(serving!=null) {
-                    Text(p18Price(p18EffectivePrice(serving.priceKrw,serving.discount)),
+                    Text(p18Price(p18EffectivePrice(serving.priceKrw,serving.discount,at)),
                         color=P18Text,
                         fontWeight=FontWeight.SemiBold,fontSize=16.sp)
                     Text(servingDisplayLabel(serving.pourMl,serving.optionLabel),
@@ -318,6 +320,12 @@ internal fun CustomerP18Results(
     val suggestions by viewModel.suggestions.collectAsStateWithLifecycle()
     val knownTags by viewModel.barTags.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // Keep visible discounts and price sorting current at contract boundaries,
+    // mirroring the existing 30-second clock in the detail screen.
+    var priceClock by remember {mutableStateOf(Instant.now())}
+    LaunchedEffect(Unit) {
+        while(true) {delay(30_000L);priceClock=Instant.now()}
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     val locationPermissionGranted = ContextCompat.checkSelfPermission(context,
         Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
@@ -534,7 +542,7 @@ internal fun CustomerP18Results(
                 val distanceRows=result.items.map{row->
                     row.copy(distanceMeters=p18DisplayDistance(row,userLocation))
                 }
-                val items=p18Sorted(distanceRows,sort,userLocation!=null)
+                val items=p18Sorted(distanceRows,sort,userLocation!=null,priceClock)
                 if(mapMode) {
                     val focusedBarId=selectedBarId ?: items.firstOrNull()?.barId
                     LaunchedEffect(focusedBarId) {
@@ -545,7 +553,7 @@ internal fun CustomerP18Results(
                         knownTags[focusedBarId].orEmpty(),mapCamera,{mapCamera=it},
                         onSelect={id->if(selectedBarId==id)onOpenBar(id,product?.productId)
                             else selectedBarId=id},
-                        onOpenBar={onOpenBar(it,product?.productId)})
+                        onOpenBar={onOpenBar(it,product?.productId)},at=priceClock)
                 } else {
                     Row(Modifier.fillMaxWidth().height(72.dp)
                         .padding(start=8.dp,end=12.dp),verticalAlignment=Alignment.CenterVertically){
@@ -579,7 +587,8 @@ internal fun CustomerP18Results(
                     LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
                         items(items,key={it.barId+it.productId}) {row->
                             P18BarRow(row,userLocation!=null,
-                                onClick={onOpenBar(row.barId,product?.productId)})
+                                onClick={onOpenBar(row.barId,product?.productId)},
+                                at=priceClock)
                             Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
                         }
                     }
@@ -597,7 +606,7 @@ private fun P18ResultsMap(
     response:SearchBarsResponseDto, items:List<SearchResultDto>,name:String,
     onBack:()->Unit,onList:()->Unit,selected:String?,userLocation:NearbyCoordinate?,
     selectedTags:List<String>,initialCamera:DiscoveryCamera?,onCamera:(DiscoveryCamera)->Unit,
-    onSelect:(String)->Unit,onOpenBar:(String)->Unit,
+    onSelect:(String)->Unit,onOpenBar:(String)->Unit,at:Instant,
 ) {
     val selectedItem=items.firstOrNull{it.barId==selected} ?: items.firstOrNull()
     val pins=items.mapNotNull { item ->
@@ -624,7 +633,7 @@ private fun P18ResultsMap(
             p18MarkerSubtitle={id->
                 items.firstOrNull{it.barId==id}?.let{row->
                     p18Representative(row.options)?.let{ option->
-                        p18Price(p18EffectivePrice(option.priceKrw,option.discount))+" · "+
+                        p18Price(p18EffectivePrice(option.priceKrw,option.discount,at))+" · "+
                             (servingDisplayLabel(option.pourMl,option.optionLabel))
                     }
                 }
@@ -685,7 +694,7 @@ private fun P18ResultsMap(
                         if(serving!=null) Row(
                             horizontalArrangement=Arrangement.spacedBy(6.dp),
                             verticalAlignment=Alignment.CenterVertically) {
-                            Text(p18Price(p18EffectivePrice(serving.priceKrw,serving.discount)),
+                            Text(p18Price(p18EffectivePrice(serving.priceKrw,serving.discount,at)),
                                 color=P18Text,fontSize=16.sp,fontWeight=FontWeight.SemiBold)
                             Text(servingDisplayLabel(serving.pourMl,serving.optionLabel),
                                 color=P18Muted,fontSize=13.sp)
