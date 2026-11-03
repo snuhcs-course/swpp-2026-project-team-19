@@ -110,10 +110,12 @@ def field_errors(response) -> list[tuple[str, str]]:
 
 
 class FailingStorage:
-    """Delegates to real storage but fails on the given save call, or on every delete."""
+    """Delegates to real storage but fails on the given save call (after writing the file when
+    `write_before_failing`), or on every delete."""
 
-    def __init__(self, storage, *, fail_on_save=None, fail_deletes=False):
+    def __init__(self, storage, *, fail_on_save=None, fail_deletes=False, write_before_failing=False):
         self.storage, self.fail_on_save, self.fail_deletes, self.saves = storage, fail_on_save, fail_deletes, 0
+        self.write_before_failing = write_before_failing
 
     def __getattr__(self, name):
         return getattr(self.storage, name)
@@ -121,6 +123,8 @@ class FailingStorage:
     def save(self, key, data, content_type):
         self.saves += 1
         if self.saves == self.fail_on_save:
+            if self.write_before_failing:
+                self.storage.save(key, data, content_type)
             raise OSError("disk full")
         self.storage.save(key, data, content_type)
 
@@ -275,6 +279,20 @@ def test_an_owner_revoked_before_the_lock_is_forbidden(db_session, image_storage
 
 def test_a_storage_failure_removes_the_stored_file(client, db_session, image_storage, operator, bar, use_storage):
     use_storage(FailingStorage(image_storage, fail_on_save=2))
+
+    with pytest.raises(OSError, match="disk full"):
+        add(client, operator, bar.id)
+
+    assert stored_files(image_storage) == set()
+    assert positions(db_session, bar) == []
+
+
+@pytest.mark.parametrize("fail_on_save", [1, 2])
+def test_a_save_that_fails_after_writing_leaves_no_file(
+    client, db_session, image_storage, operator, bar, use_storage, fail_on_save
+):
+    """A disk filling up mid-write, or an S3 timeout after the upload was accepted."""
+    use_storage(FailingStorage(image_storage, fail_on_save=fail_on_save, write_before_failing=True))
 
     with pytest.raises(OSError, match="disk full"):
         add(client, operator, bar.id)

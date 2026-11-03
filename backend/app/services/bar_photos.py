@@ -76,8 +76,9 @@ def add_photo(
     saved: list[str] = []
     try:
         for key, data in ((image_key, processed.image), (thumbnail_key, processed.thumbnail)):
-            storage.save(key, data, PHOTO_CONTENT_TYPE)
+            # Before the save: a save that fails may still have written the file.
             saved.append(key)
+            storage.save(key, data, PHOTO_CONTENT_TYPE)
         session.add(
             BarPhoto(
                 id=photo_id,
