@@ -284,6 +284,15 @@ fun OwnerOnboardingScreen(
         }
     }
 
+    LaunchedEffect(screen, draft.proposedBarName) {
+        if(screen==RegPage.BARNAME && draft.proposedBarName.trim().length>=2 &&
+            viewModel.usesProductionOwnerApi()) {
+            delay(300)
+            runCatching {
+                viewModel.searchExistingBarCandidatesLive(draft.proposedBarName)
+            }.onFailure { error=it.message ?: "기존 매장을 검색하지 못했어요." }
+        }
+    }
     val exactMatches=candidates.filter{
         draft.proposedBarName.isNotBlank() &&
             it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
