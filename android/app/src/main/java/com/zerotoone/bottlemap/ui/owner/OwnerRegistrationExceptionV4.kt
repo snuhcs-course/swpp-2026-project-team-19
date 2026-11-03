@@ -80,6 +80,7 @@ internal fun RegistrationVerifyException(outcome:OwnerVerifyOutcome) {
 internal fun RegistrationOcrPartialReview(
     business:String,representative:String,openingDate:String="",onEdit:(String)->Unit
 ) {
+    Spacer(Modifier.height(28.dp))
     RegistrationHeading("읽은 내용이\n맞는지 확인해 주세요",
         "사진과 한 글자씩 비교해 주세요. 하나라도 다르면 확인에 실패해요.")
     Spacer(Modifier.height(16.dp))
