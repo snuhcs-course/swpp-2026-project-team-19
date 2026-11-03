@@ -146,7 +146,8 @@ internal fun CustomerP18Explore(
     val focusPlace by searchViewModel.focus.collectAsStateWithLifecycle()
     var listVisible by rememberSaveable {mutableStateOf(false)}
     var searchVisible by rememberSaveable {mutableStateOf(false)}
-    var searchText by rememberSaveable {mutableStateOf("")}
+    var searchText by rememberSaveable {mutableStateOf("") }
+    var searchFocusRequest by remember { mutableIntStateOf(0) }
     var selectedId by rememberSaveable {mutableStateOf<String?>(null)}
     var showSort by remember {mutableStateOf(false)}
     var sort by rememberSaveable {mutableStateOf(P18Sort.UPDATED)}
@@ -156,7 +157,11 @@ internal fun CustomerP18Explore(
     var goToGwanak by remember {mutableStateOf(false)}
     var errorLocation by remember {mutableStateOf(false)}
     var mapView by remember {mutableStateOf<com.kakao.vectormap.MapView?>(null)}
-    val bars=(state as? P18ExploreState.Ready)?.bars.orEmpty()
+    // Preserve markers/cards while viewport requests are in flight.
+    var lastVisibleBars by remember(viewModel) { mutableStateOf<List<MapBar>>(emptyList()) }
+    val freshBars=(state as? P18ExploreState.Ready)?.bars
+    if(freshBars != null) lastVisibleBars = freshBars
+    val bars=freshBars ?: lastVisibleBars
     val ordered=p18BrowseOrdered(bars,sort,location)
     val chosen=bars.firstOrNull{it.barId==selectedId}
     val launcher=rememberLauncherForActivityResult(
@@ -265,7 +270,8 @@ internal fun CustomerP18Explore(
                             "지금은 관악구 매장부터 모으고 있어요.",
                             "관악구로 이동",BmIconId.BAR_PIN,
                             {listVisible=false;goToGwanak=true;recenterToken++},
-                            modifier=Modifier.weight(1f))
+                            modifier=Modifier.weight(1f),
+                    focusRequestToken=searchFocusRequest)
                         else LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
                             items(ordered,key={it.barId}){bar->
                                 P18BrowseRow(bar,location,
@@ -361,12 +367,12 @@ internal fun CustomerP18Explore(
                         "그 장소를 찾지 못했어요",
                         "역 이름, 매장 이름, 주소로\n다시 찾아보세요.",
                         "검색어 고치기",BmIconId.BAR_PIN,
-                        {searchText="";searchViewModel.dismissResults()})
+                        {searchViewModel.dismissResults();searchFocusRequest++})
                     is MapPlaceSearchState.Results -> {
                         if(result.places.isEmpty())P18FailureBody("그 장소를 찾지 못했어요",
                             "역 이름, 매장 이름, 주소로\n다시 찾아보세요.",
                             "검색어 고치기",BmIconId.BAR_PIN,
-                            {searchText="";searchViewModel.dismissResults()})
+                            {searchViewModel.dismissResults();searchFocusRequest++})
                         else LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
                             val registered=result.places.filter{it.barId!=null}
                             val locations=result.places.filter{it.barId==null}
