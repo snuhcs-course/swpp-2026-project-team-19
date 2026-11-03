@@ -367,8 +367,15 @@ internal fun RegistrationRow(label:String,value:String,onEdit:(()->Unit)?=null) 
         Text(value,modifier=Modifier.weight(1f),fontSize=15.sp,
             color=RegistrationV4.text,lineHeight=22.sp,textAlign=TextAlign.End)
         if(onEdit!=null) Box(Modifier.size(width=48.dp,height=48.dp)
-            .ownerQuietClick(onClick=onEdit),contentAlignment=Alignment.Center) {
-            Text("수정",fontSize=14.sp,color=RegistrationV4.primary)
+            .ownerQuietClick(onClick=onEdit)
+            .testTag("registration-review-edit"),contentAlignment=Alignment.Center) {
+            Box(
+                Modifier.border(1.dp,RegistrationV4.primary,RoundedCornerShape(6.dp))
+                    .padding(horizontal=6.dp,vertical=3.dp),
+                contentAlignment=Alignment.Center
+            ) {
+                Text("수정",fontSize=14.sp,lineHeight=20.sp,color=RegistrationV4.primary)
+            }
         }
     }
     Box(Modifier.fillMaxWidth().height(1.dp).background(RegistrationV4.border))
