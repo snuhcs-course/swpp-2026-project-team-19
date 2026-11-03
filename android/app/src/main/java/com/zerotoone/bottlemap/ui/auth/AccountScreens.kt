@@ -1,37 +1,52 @@
+
 package com.zerotoone.bottlemap.ui.auth
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zerotoone.bottlemap.data.owner.OwnerMockRuntime
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.MockApplicationStatus
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.zerotoone.bottlemap.ui.customer.I2CustomerSearchTheme
-import com.zerotoone.bottlemap.ui.common.DelayedLoading
+import com.zerotoone.bottlemap.ui.common.BmIcon
+import com.zerotoone.bottlemap.ui.common.BmIconId
+import com.zerotoone.bottlemap.ui.customer.P18Bg
+import com.zerotoone.bottlemap.ui.customer.P18Surface
+import com.zerotoone.bottlemap.ui.customer.P18Elevated
+import com.zerotoone.bottlemap.ui.customer.P18Line
+import com.zerotoone.bottlemap.ui.customer.P18Muted
+import com.zerotoone.bottlemap.ui.customer.P18Gold
+import com.zerotoone.bottlemap.ui.customer.P18Text
+import com.zerotoone.bottlemap.ui.customer.P18Back
+import com.zerotoone.bottlemap.ui.customer.P18Action
 
-/** Figma P1 guest / P2 member account surface, available without signing in. */
+/**
+ * ACTION_FIRST P18 HTML pp.23-27. Back button on My Page is an explicit
+ * user-approved correction to the source PDF (both guest and signed-in states).
+ * Google auth remains owned by AuthViewModel and Credential Manager.
+ */
 @Composable
 fun AccountScreen(
     state: AuthUiState,
@@ -41,117 +56,121 @@ fun AccountScreen(
     onRetryAccount: () -> Unit,
     onOpenOwner: () -> Unit = {},
 ) {
-    // Local Mock state is only for the v4 entry label. No Owner API is called here.
     val ownerState by OwnerMockRuntime.repository(LocalContext.current).state.collectAsState()
-    val owned = when (val current = ownerState) {
-        is MockOwnerLoadState.Ready -> current.snapshot
-        is MockOwnerLoadState.Empty -> current.snapshot
+    val owned=when(val s=ownerState) {
+        is MockOwnerLoadState.Ready -> s.snapshot
+        is MockOwnerLoadState.Empty -> s.snapshot
         else -> null
     }
-    // v4: guest must use existing Google sign-in before entering Owner UI.
-    val openOwnerFromAccount = if (state is AuthUiState.SignedIn) onOpenOwner else onOpenLogin
-    val hasOwnerArea = owned?.let { snapshot ->
-        snapshot.bars.isNotEmpty() || snapshot.applications.any { app ->
-            app.applicationId !in snapshot.dismissedApplicationIds &&
-                app.status in listOf(MockApplicationStatus.PENDING, MockApplicationStatus.REJECTED)
-        }
-    } == true
-    I2CustomerSearchTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-        ) {
-            AccountHeader("마이페이지", onBack)
-            Column(
-                modifier = Modifier.fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
-            ) {
-                Text(
-                    "내 계정",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                when (state) {
-                    AuthUiState.Initializing -> DelayedLoading {
-                        AccountPanel(
-                            "세션을 확인하고 있습니다.",
-                            "기존 Guest 검색은 로그인 없이 사용할 수 있습니다.",
-                        ) { CircularProgressIndicator() }
+    val hasArea=owned?.let{s-> s.bars.isNotEmpty() || s.applications.any {
+        it.applicationId !in s.dismissedApplicationIds &&
+            it.status in listOf(MockApplicationStatus.PENDING,MockApplicationStatus.REJECTED)
+    }}==true
+    val subtitle=when {
+        owned?.bars?.isNotEmpty()==true->"매장을 관리해 주세요"
+        owned?.applications?.any{it.status==MockApplicationStatus.PENDING}==true->
+            "검토 중인 신청이 있어요"
+        else->"매장 등록 상태를 확인하세요"
+    }
+    var infoDialog by remember {mutableStateOf<String?>(null)}
+    if(infoDialog!=null) AlertDialog(onDismissRequest={infoDialog=null},
+        title={Text(infoDialog.orEmpty())},
+        text={Text("이 기능은 준비 중이에요.")},
+        confirmButton={TextButton(onClick={infoDialog=null}) {Text("확인")}})
+    Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-my-page")) {
+        AccountHeader("마이페이지",onBack)
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(start=20.dp,end=20.dp,top=16.dp,bottom=24.dp),
+            verticalArrangement=Arrangement.spacedBy(0.dp)) {
+            val user=(state as? AuthUiState.SignedIn)?.user
+            Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
+                .then(if(user==null)Modifier.clickable(onClick=onOpenLogin) else Modifier),
+                verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(14.dp)) {
+                Box(Modifier.size(48.dp).background(P18Elevated,CircleShape),
+                    contentAlignment=Alignment.Center) {
+                    BmIcon(BmIconId.ACCOUNT,null,Modifier.size(26.dp),tint=P18Text)
+                }
+                Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(2.dp)) {
+                    Text(user?.displayName?.takeIf{it.isNotBlank()}
+                        ?:user?.email?.substringBefore('@')?.takeIf{it.isNotBlank()}
+                        ?: "로그인하기",
+                        fontSize=22.sp,lineHeight=30.sp,fontWeight=FontWeight.Bold,color=P18Text)
+                    Text(user?.email ?: "Google 계정으로 로그인",
+                        fontSize=14.sp,lineHeight=20.sp,color=P18Muted)
+                }
+                if(user==null) Text("›",color=P18Muted,fontSize=22.sp)
+            }
+            if(user!=null && hasArea) {
+                Row(Modifier.fillMaxWidth().padding(top=28.dp).heightIn(min=96.dp)
+                    .background(androidx.compose.ui.graphics.Color(0xFF2A2521),
+                        RoundedCornerShape(16.dp))
+                    .border(1.dp,androidx.compose.ui.graphics.Color(0xFF8C6C4A),
+                        RoundedCornerShape(16.dp))
+                    .clickable(onClick=onOpenOwner).testTag("customer-owner-entry")
+                    .padding(horizontal=16.dp,vertical=18.dp),
+                    verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(14.dp)) {
+                    Box(Modifier.size(40.dp)
+                        .background(androidx.compose.ui.graphics.Color(0xFF5C4329),
+                            RoundedCornerShape(10.dp)),contentAlignment=Alignment.Center) {
+                        BmIcon(BmIconId.MANAGE_BAR,null,Modifier.size(23.dp),tint=P18Gold)
                     }
-                    AuthUiState.Guest -> {
-                        AccountPanel(
-                            "Guest로 이용 중",
-                            "로그인 없이 위스키를 검색할 수 있어요.",
-                        )
-                        Button(onClick = onOpenLogin, modifier = Modifier.fillMaxWidth()) {
-                            Text("Google 계정으로 로그인")
-                        }
+                    Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                        Text("내 매장 관리",color=P18Text,fontSize=17.sp,
+                            lineHeight=24.sp,fontWeight=FontWeight.Bold)
+                        Text(subtitle,color=P18Muted,fontSize=14.sp)
                     }
-                    AuthUiState.SigningIn -> AccountPanel("로그인 중", "Google 계정 연결을 확인 중입니다.") {
-                        CircularProgressIndicator()
-                    }
-                    is AuthUiState.SignedIn -> {
-                        val name = state.user.displayName?.takeIf { it.isNotBlank() }
-                            ?: state.user.email?.takeIf { it.isNotBlank() }
-                            ?: "BottleMap 사용자"
-                        AccountPanel(name, "Google 계정이 연결되어 있습니다.") {
-                            state.user.email?.let {
-                                Text(
-                                    it,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                            Text(
-                                "로그인 상태 · " + state.user.userType,
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        }
-                        OutlinedButton(onClick = onLogout, modifier = Modifier.fillMaxWidth()) {
-                            Text("로그아웃")
-                        }
-                    }
-                    is AuthUiState.SignInError -> {
-                        AccountPanel("계정 확인이 필요해요", state.message)
-                        if (state.canRetryProfile) {
-                            Button(onClick = onRetryAccount, modifier = Modifier.fillMaxWidth()) {
-                                Text("계정 확인 다시 시도")
-                            }
-                        } else {
-                            Button(onClick = onOpenLogin, modifier = Modifier.fillMaxWidth()) {
-                                Text("Google 계정으로 로그인")
-                            }
-                        }
-                        OutlinedButton(onClick = onLogout, modifier = Modifier.fillMaxWidth()) {
-                            Text("Guest로 계속")
-                        }
+                    Text("›",color=P18Muted,fontSize=21.sp)
+                }
+            }
+            Column(Modifier.fillMaxWidth().padding(top=28.dp)) {
+                AccountNavRow("공지사항"){infoDialog="공지사항"}
+                AccountNavRow("문의하기"){infoDialog="문의하기"}
+                if(user!=null) AccountNavRow("로그아웃",onLogout)
+                if(state is AuthUiState.SignInError) AccountNavRow(
+                    "다시 로그인하기",if(state.canRetryProfile)onRetryAccount else onOpenLogin)
+            }
+            if(!hasArea) {
+                Row(Modifier.fillMaxWidth().padding(top=32.dp),
+                    horizontalArrangement=Arrangement.Center,
+                    verticalAlignment=Alignment.CenterVertically) {
+                    Text("매장 사장님이신가요?",color=P18Muted,fontSize=15.sp)
+                    Spacer(Modifier.width(6.dp))
+                    Row(Modifier.heightIn(min=48.dp)
+                        .clickable(onClick=if(user==null)onOpenLogin else onOpenOwner),
+                        verticalAlignment=Alignment.CenterVertically) {
+                        Text("매장 등록하기",fontSize=15.sp,color=P18Gold,
+                            fontWeight=FontWeight.Bold,
+                            textDecoration=androidx.compose.ui.text.style.TextDecoration.Underline)
+                        Text("›",color=P18Gold)
                     }
                 }
-                if (hasOwnerArea) {
-                    OutlinedButton(onClick = openOwnerFromAccount, modifier = Modifier.fillMaxWidth()) {
-                        Text("내 매장 관리")
-                    }
-                } else {
-                    TextButton(onClick = openOwnerFromAccount, modifier = Modifier.fillMaxWidth()) {
-                        Text("매장 사장님이신가요?  매장 등록하기")
-                    }
-                }
-                Text(
-                    "위스키 검색·바 상세·지도는 로그인 없이 이용할 수 있습니다.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            }
+            if(state is AuthUiState.Initializing || state is AuthUiState.SigningIn) {
+                Spacer(Modifier.height(24.dp))
+                CircularProgressIndicator(color=P18Gold)
             }
         }
     }
 }
 
-/** Figma A1 / A2 login, reached only when the user explicitly requests it. */
+@Composable
+private fun AccountNavRow(label:String,onClick:()->Unit) {
+    Row(Modifier.fillMaxWidth().height(56.dp).clickable(onClick=onClick)
+        .testTag("customer-account-${label}")
+        .border(width=0.dp,color=P18Line)
+        .padding(horizontal=0.dp),
+        verticalAlignment=Alignment.CenterVertically,
+        horizontalArrangement=Arrangement.SpaceBetween) {
+        Text(label,color=P18Text,fontSize=16.sp)
+        Text("›",color=P18Muted,fontSize=22.sp)
+    }
+    Box(Modifier.fillMaxWidth().height(1.dp)
+        .background(androidx.compose.ui.graphics.Color(0xFF3F3732)))
+}
+
+/** Existing Google credential exchange; this only changes visual presentation. */
 @Composable
 fun GoogleLoginScreen(
     state: AuthUiState,
@@ -159,105 +178,47 @@ fun GoogleLoginScreen(
     onBack: () -> Unit,
     onContinueGuest: () -> Unit,
 ) {
-    I2CustomerSearchTheme {
-        Column(
-            modifier = Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-        ) {
-            AccountHeader("로그인", onBack)
-            Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-            ) {
-                Text(
-                    "Google 계정으로 선택적으로 로그인해요.",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    "로그인하지 않아도 BottleMap의 검색, 바 상세, 지도를 사용할 수 있어요.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                when (state) {
-                    AuthUiState.Initializing -> DelayedLoading {
-                        CircularProgressIndicator()
-                        Text("로그인을 처리하고 있습니다.")
+    Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-google-login")) {
+        AccountHeader("로그인",onBack)
+        Column(Modifier.fillMaxSize().padding(horizontal=20.dp,vertical=24.dp),
+            verticalArrangement=Arrangement.spacedBy(20.dp)) {
+            Text("Google 계정으로\n로그인해 주세요",
+                style=MaterialTheme.typography.headlineSmall,fontSize=24.sp,
+                lineHeight=32.sp,color=P18Text)
+            Text("로그인하지 않아도 위스키 검색과 지도를 이용할 수 있어요.",
+                fontSize=14.sp,lineHeight=21.sp,color=P18Muted)
+            when(state) {
+                AuthUiState.Initializing, AuthUiState.SigningIn -> {
+                    Row(verticalAlignment=Alignment.CenterVertically,
+                        horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                        CircularProgressIndicator(Modifier.size(24.dp),color=P18Gold)
+                        Text("로그인 중이에요",color=P18Muted)
                     }
-                    // Explicit user-initiated sign-in needs immediate feedback.
-                    AuthUiState.SigningIn -> {
-                        CircularProgressIndicator()
-                        Text("로그인을 처리하고 있습니다.")
-                    }
-                    is AuthUiState.SignInError -> {
-                        Text(state.message, color = MaterialTheme.colorScheme.error)
-                    }
-                    is AuthUiState.SignedIn -> Text("Google 로그인 성공", color = MaterialTheme.colorScheme.primary)
-                    AuthUiState.Guest -> Unit
                 }
-                GoogleSignInButton(
-                    viewModel = authViewModel,
-                    enabled = state is AuthUiState.Guest || state is AuthUiState.SignInError,
-                )
-                OutlinedButton(
-                    onClick = onContinueGuest,
-                    enabled = state != AuthUiState.SigningIn,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text("취소하고 Guest로 계속") }
-                Text(
-                    "로그인 취소/실패 후에도 검색할 수 있습니다.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                is AuthUiState.SignInError -> {
+                    Text("로그인하지 못했어요",color=P18Text,fontSize=18.sp,
+                        fontWeight=FontWeight.Bold)
+                    Text(state.message,color=P18Muted,fontSize=14.sp)
+                }
+                else -> Unit
             }
+            GoogleSignInButton(viewModel=authViewModel,
+                enabled=state is AuthUiState.Guest || state is AuthUiState.SignInError)
+            P18Action("나중에 할게요",onContinueGuest,
+                modifier=Modifier.fillMaxWidth())
         }
     }
 }
 
+/** Explicit P18 correction: back icon consumes 48dp at the exact original x=8. */
 @Composable
-private fun AccountHeader(title: String, onBack: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TextButton(onClick = onBack) { Text("←") }
-        Text(
-            title,
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-        )
-    }
-}
-
-@Composable
-private fun AccountPanel(
-    title: String,
-    message: String,
-    additional: @Composable () -> Unit = {},
-) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = title,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = message,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            additional()
-        }
+private fun AccountHeader(title:String,onBack:()->Unit) {
+    Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
+        .padding(start=8.dp,end=20.dp,top=8.dp),
+        verticalAlignment=Alignment.CenterVertically,
+        horizontalArrangement=Arrangement.spacedBy(4.dp)) {
+        P18Back(onBack)
+        Text(title,color=P18Text,fontSize=18.sp,lineHeight=26.sp,
+            fontWeight=FontWeight.Bold)
     }
 }
