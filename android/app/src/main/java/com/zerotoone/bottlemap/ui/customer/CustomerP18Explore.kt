@@ -187,8 +187,9 @@ internal fun CustomerP18Explore(
     var searchFocusRequest by remember { mutableIntStateOf(0) }
     var selectedId by rememberSaveable {mutableStateOf<String?>(null)}
     var showSort by remember {mutableStateOf(false)}
-    var sort by rememberSaveable {mutableStateOf(P18Sort.UPDATED)}
+    var userSelectedSort by rememberSaveable {mutableStateOf<P18Sort?>(null)}
     val location by viewModel.location.collectAsStateWithLifecycle()
+    val sort=userSelectedSort ?: if(location!=null)P18Sort.DISTANCE else P18Sort.UPDATED
     val tags by viewModel.tags.collectAsStateWithLifecycle()
     var zoomTarget by remember {mutableStateOf<String?>(null)}
     var locationDenied by remember {mutableStateOf(false)}
@@ -266,11 +267,12 @@ internal fun CustomerP18Explore(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION))
     }
-    LaunchedEffect(location) {if(location!=null)sort=P18Sort.DISTANCE}
     if(showSort) P18SortPicker(sort,hasLocation=true,allowPrice=false,
         onChoose={choice->
-            if(choice==P18Sort.DISTANCE && location==null) requestCurrentLocation()
-            else sort=choice
+            if(choice==P18Sort.DISTANCE && location==null) {
+                userSelectedSort=P18Sort.DISTANCE
+                requestCurrentLocation()
+            } else userSelectedSort=choice
             showSort=false
         },onClose={showSort=false})
     if(locationDenied || errorLocation) ModalBottomSheet(
@@ -349,7 +351,7 @@ internal fun CustomerP18Explore(
                     verticalAlignment=Alignment.CenterVertically) {
                     Text("이 지도 영역의 매장 ${ordered.size}곳",fontSize=18.sp,
                         fontWeight=FontWeight.SemiBold,color=P18Text)
-                    P18SortTrigger((if(location==null)P18Sort.UPDATED else sort).label,
+                    P18SortTrigger(sort.label,
                         {showSort=true})
                 }
                 when(state) {
