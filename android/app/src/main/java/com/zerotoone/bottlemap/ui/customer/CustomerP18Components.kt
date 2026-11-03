@@ -167,6 +167,15 @@ internal fun P18Bottle(name: String, width: Dp = 40.dp, height: Dp = 64.dp) {
 internal fun p18Price(price: Int): String =
     NumberFormat.getIntegerInstance(Locale.KOREA).format(price) + "원"
 
+/** API §3.9: temporary discount applies only at startsAt <= now < endsAt. */
+internal fun p18EffectivePrice(price: Int,
+    discount: com.zerotoone.bottlemap.network.BarMenuDiscountDto?,
+    at: java.time.Instant = java.time.Instant.now()): Int =
+    if (discount!=null && runCatching {
+        at >= java.time.Instant.parse(discount.startsAt) &&
+            at < java.time.Instant.parse(discount.endsAt)
+    }.getOrDefault(false)) discount.discountedPriceKrw else price
+
 /** 30ml, else nearest volume; ties prefer the larger serving, never price/ml. */
 internal fun p18Representative(options: List<com.zerotoone.bottlemap.network.SearchOptionDto>)
     : com.zerotoone.bottlemap.network.SearchOptionDto? =
