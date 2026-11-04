@@ -145,6 +145,13 @@ internal fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+internal fun p18InitiallyCollapsedCategories(highlightCategory: String?): Set<String> {
+    val defaults = setOf("cocktail","food","snack","brandy","gin","rum","wine",
+        "beer","otheralcohol","other")
+    return if(highlightCategory==null) defaults
+        else defaults - highlightCategory.lowercase(Locale.ROOT)
+}
+
 @Composable
 internal fun CustomerP18BarDetail(
     bar:BarDetailUiModel,
@@ -168,9 +175,13 @@ internal fun CustomerP18BarDetail(
     // Owner customer-preview uses one exclusive panel: hours | address | phone.
     var expanded by rememberSaveable(bar.barId) {mutableStateOf("")}
     var menuQuery by rememberSaveable(bar.barId) {mutableStateOf("")}
-    var collapsed by rememberSaveable(bar.barId) {
-        mutableStateOf(setOf("cocktail","food","snack","brandy","gin","rum","wine",
-            "beer","otheralcohol","other"))
+    // Product-search navigation opens only the matching category. Once opened,
+    // the regular category accordion still closes and reopens on user taps.
+    val highlightedCategory = bar.items.firstOrNull {
+        it.productId == highlightProductId
+    }?.category
+    var collapsed by rememberSaveable(bar.barId, highlightProductId) {
+        mutableStateOf(p18InitiallyCollapsedCategories(highlightedCategory))
     }
     var at by remember {mutableStateOf(ZonedDateTime.now(KST))}
     LaunchedEffect(bar.barId) { while(true) { at=ZonedDateTime.now(KST);delay(30000) } }
