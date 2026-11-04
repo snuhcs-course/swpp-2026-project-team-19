@@ -648,6 +648,44 @@ internal fun OwnerMenuPhotoJobScreen(
     fixture: MockPhotoExtractionSource = MockPhotoExtractionSource { emptyList() },
 ) {
     val job = latestImport(state)
+    // A failed repository read is not an OCR extraction failure. Keep Stage 7's
+    // existing layout, but do not manufacture a processing job while data loads.
+    if(state is MockOwnerLoadState.Loading ||
+        state is MockOwnerLoadState.Error || job == null) {
+        val loading = state is MockOwnerLoadState.Loading
+        val failedToRead = state is MockOwnerLoadState.Error
+        Column(Modifier.fillMaxSize().background(V4Color.background)
+            .testTag("stage7-job-state")) {
+            V4Toolbar(null, onHome)
+            Column(Modifier.weight(1f).padding(horizontal = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                MenuPhotoSteps(1)
+                Text(when {
+                    loading -> "메뉴판 작업 불러오는 중"
+                    failedToRead -> "메뉴판 작업을 불러오지 못했어요"
+                    else -> "진행 중인 메뉴판 작업이 없어요"
+                }, color = V4Color.text, fontFamily = FontFamily.Serif,
+                    fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(when(state) {
+                    is MockOwnerLoadState.Error -> state.message
+                    MockOwnerLoadState.Loading -> "저장된 메뉴판 작업을 확인하고 있어요."
+                    else -> "새 메뉴판 사진을 선택하거나 매장 관리로 돌아가 주세요."
+                }, color = V4Color.sub, fontSize = 14.sp)
+            }
+            Column(Modifier.fillMaxWidth().navigationBarsPadding()
+                .padding(horizontal = 18.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                when {
+                    failedToRead -> MenuPhotoPrimary("다시 시도",
+                        tag="stage7-job-repository-retry",onClick=viewModel::retry)
+                    !loading -> MenuPhotoPrimary("새 메뉴판 사진 올리기",
+                        tag="stage7-job-new-photos",onClick=onRetryPhotos)
+                }
+                MenuPhotoSecondary("내 매장으로 돌아가기", onHome)
+            }
+        }
+        return
+    }
     val active = activeImport(job)
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     // Poll server imports until ready. Only direct Mock tests use extraction fixtures.
