@@ -38,6 +38,8 @@ class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource, Custom
             query=query?.takeIf(String::isNotBlank),
             productId=productId?.takeIf(String::isNotBlank),
             latitude=latitude,longitude=longitude,source=source,
+            // Contract §3.10 allows up to 100. Cover 51+ rows while MVP has ~20.
+            limit=100,
         )
     }
 
