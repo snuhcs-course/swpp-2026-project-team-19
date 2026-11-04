@@ -196,7 +196,7 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 
 | 파일 | 내용 | 적재 |
 |---|---|---|
-| `catalog_v2_service_i3_additions.json` | 서비스 카탈로그에 없는 I3 정답 새 상품 61개(새 브랜드 30개). 평가 `--catalog full`이 더하는 상품과 같고, 별칭은 표준 영문명 하나(새 브랜드는 영문 브랜드명 하나). id는 8장 규칙 | O (`seed_catalog.py` 기본값) |
+| `catalog_v2_service_i3_additions.json` | 서비스 카탈로그에 없는 I3 정답 새 상품 61개(새 브랜드 30개). 평가 `--catalog full`이 더하는 상품과 같고, 별칭은 표준 영문명과 한국어 별칭(메뉴판 표기와 통상 음역, `i3_additions_ko_aliases.json` → `add_ko_aliases_i3.py`, 2026-11-04). 새 브랜드도 영문 브랜드명과 한국어 브랜드명. id는 8장 규칙 | O (`seed_catalog.py` 기본값) |
 | `bars_v3.json` | `bars`: v2 7곳 + 좌표를 확인한 I3 바 2곳(테일오브테일스, 연림 서울대입구역점). `pending_bars`: 좌표를 확인하지 못한 6곳 (좌표 null, 적재 안 함) | O (`bars`만) |
 | `menu_seed_<bar>_demo_v1.json` | 적재 가능한 I3 바 2곳의 게시 메뉴 | O (Seed catalog `demo-menus-*`) |
 | `pending_i3/menu_seed_<bar>_demo_v1.json` | 보류 6곳의 게시 메뉴. `demo-menus-*`의 glob에 걸리지 않는 위치 | X |
