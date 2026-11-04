@@ -58,3 +58,29 @@ internal fun sampledBitmapSize(width: Int, height: Int, maxEdge: Int = 2400): In
     while(width / sample > maxEdge || height / sample > maxEdge) sample *= 2
     return sample
 }
+
+/**
+ * Stage and upload replacements before deleting existing server photos. The server
+ * may reject an upload at its gallery capacity; in that case the old photo survives.
+ * A caller must reload after a partial server failure rather than repeat deletions.
+ */
+internal suspend fun <T> replaceOwnerGallerySafely(
+    old: List<MockPhoto>, now: List<MockPhoto>,
+    prepare: suspend (MockPhoto) -> T,
+    upload: suspend (T) -> String,
+    delete: suspend (String) -> Unit,
+    reorder: suspend (List<String>) -> Unit,
+) {
+    val oldIds = old.mapTo(mutableSetOf()) { it.photoId }
+    val additions = now.filter { it.photoId !in oldIds }
+    val prepared = additions.associate { it.photoId to prepare(it) }
+    val mapped = old.associate { it.photoId to it.photoId }.toMutableMap()
+
+    for (photo in additions) {
+        mapped[photo.photoId] = upload(prepared.getValue(photo.photoId))
+    }
+    for (photo in old) {
+        if (now.none { it.photoId == photo.photoId }) delete(photo.photoId)
+    }
+    reorder(now.map { mapped.getValue(it.photoId) })
+}
