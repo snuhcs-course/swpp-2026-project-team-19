@@ -68,6 +68,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.roundToInt
 import java.time.Instant
 import java.time.ZoneId
@@ -81,6 +83,13 @@ internal fun p18QueryValidationCode(error:Exception):String? =
             it.path=="query" && it.code in setOf(
                 "MISSING","BLANK","STRING_TOO_LONG","NOT_SEARCHABLE")
         }?.code
+
+/** Only one location-aware query per selection. Never re-query on late GPS. */
+internal fun p18InitialSearchCoordinate(
+    permissionGranted: Boolean, cached: NearbyCoordinate?,
+): NearbyCoordinate? = cached?.takeIf { permissionGranted && it.isValid() }
+
+internal const val P18_FIRST_GPS_WAIT_MS = 1_250L
 
 internal sealed interface P18SearchState {
     data object Loading : P18SearchState
@@ -392,7 +401,8 @@ internal fun CustomerP18Results(
     fun reload() {
         viewModel.load(if(chosenId==null)initialQuery else null,
             chosenId ?: initialProductId,source,
-            location=null,force=true)
+            location=p18InitialSearchCoordinate(
+                locationPermissionGranted,viewModel.location.value),force=true)
     }
     // BAR_NOT_FOUND on the detail destination explicitly invalidates the
     // retained results, but ordinary Back continues to preserve UI state.
@@ -416,13 +426,19 @@ internal fun CustomerP18Results(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION))
     }
-    // Search once per QUERY/PRODUCT selection, not once per GPS update.
-    // Newly obtained GPS drives a local haversine distance for rendered bars.
-    // This prevents a second Loading state, sort flip and stale 03-e1.
+    // One request per selection. When permission already exists, briefly wait
+    // for the first coordinate so the server can rank *before* its result limit.
+    // Late GPS updates displayed distance only; never rerun the search/count.
     LaunchedEffect(initialQuery,initialProductId,chosenId,source) {
+        val cached = p18InitialSearchCoordinate(
+            locationPermissionGranted,viewModel.location.value)
+        val forServer = cached ?: if(locationPermissionGranted)
+            withTimeoutOrNull(P18_FIRST_GPS_WAIT_MS) {
+                viewModel.location.first { it?.isValid() == true }
+            } else null
         viewModel.load(if(chosenId==null)initialQuery else null,
             chosenId ?: initialProductId,
-            source,location=null)
+            source,location=forServer)
     }
     val ready=(state as? P18SearchState.Ready)?.response
     val original=p18OriginalResponse(initialQuery,initialProductId,suggestions,ready)
