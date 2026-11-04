@@ -92,6 +92,8 @@ data class OwnerCatalogProductDto(
     val editionName: String? = null,
     val abv: Double? = null,
     val isActive: Boolean = true,
+    // Server-selected alias that matched the current owner's catalogue query.
+    val matchedAlias: String? = null,
 )
 data class OwnerCatalogProductsDto(val items: List<OwnerCatalogProductDto> = emptyList())
 
