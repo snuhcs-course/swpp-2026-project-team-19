@@ -35,6 +35,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val pendingCoverStore = PendingOwnerCoverStore(app.noBackupFilesDir)
     @Volatile var pendingCoverWarning: String? = null
         private set
+    @Volatile var lastRefreshWarning: String? = null
+        private set
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val writeMutex = Mutex()
     @Volatile var lastPublishWarning: String? = null
@@ -370,19 +372,32 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
     }
 
-    /** Apply on server before replacing the menu model. Retrying after failure reloads its version. */
+    /** A committed write is not a failed write just because the subsequent GET times out. */
+    private suspend fun refreshAfterWrite() {
+        try {
+            refresh()
+            lastRefreshWarning = null
+        } catch(cancelled: CancellationException) {
+            throw cancelled
+        } catch(error: Exception) {
+            lastRefreshWarning = "저장은 완료됐지만 목록을 새로고침하지 못했어요. 다시 불러와 주세요."
+            local.serverError(requireNotNull(lastRefreshWarning))
+        }
+    }
+
     private fun write(op: suspend () -> Unit) {
         scope.launch {
             writeMutex.withLock {
                 try {
                     op()
-                    refresh()
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (error: Exception) {
                     runCatching { refresh() }
                     local.serverError(error.message ?: "저장하지 못했어요. 다시 시도해 주세요.")
+                    return@withLock
                 }
+                refreshAfterWrite()
             }
         }
     }
@@ -560,13 +575,13 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         writeMutex.withLock {
             try {
                 sendManualItemToServer(item, newProduct, newBrand, snapshot())
-                refresh()
-            } catch (cancelled: CancellationException) {
+            } catch(cancelled: CancellationException) {
                 throw cancelled
-            } catch (error: Exception) {
+            } catch(error: Exception) {
                 runCatching { refresh() }
                 throw error
             }
+            refreshAfterWrite()
         }
     }
 
@@ -584,13 +599,13 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         writeMutex.withLock {
             try {
                 operation()
-                refresh()
-            } catch (cancelled: CancellationException) {
+            } catch(cancelled: CancellationException) {
                 throw cancelled
             } catch(error: Exception) {
                 runCatching { refresh() }
                 throw error
             }
+            refreshAfterWrite()
         }
     }
 
@@ -650,7 +665,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             pendingCoverStore.remove(subject, applicationId,
                 application.businessRegistrationNumber)
         }
-        refresh()
+        refreshAfterWrite()
     }
 
     suspend fun verifyBusinessBeforeApplicationLive(
@@ -734,7 +749,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
         pendingApplicationId = null
         local.saveRegistrationDraft(null)
-        refresh()
+        refreshAfterWrite()
     }
 
     suspend fun readBusinessCertificateLive(uri: String):
