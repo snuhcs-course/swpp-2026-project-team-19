@@ -1057,11 +1057,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             var changed = false
             for(scanned in priced) {
                 val matchIndex = options.indexOfFirst { entry ->
-                    if(scanned.pourMl != null)
-                        entry["pourMl"] == scanned.pourMl
-                    else entry["pourMl"] == null &&
-                        (entry["optionLabel"] as? String).orEmpty().trim()
-                            .equals(scanned.label.orEmpty().trim(), ignoreCase = true)
+                    reviewServingKey(entry["pourMl"] as? Int,
+                        entry["optionLabel"] as? String) ==
+                        reviewServingKey(scanned.pourMl, scanned.label)
                 }
                 if(matchIndex >= 0) {
                     val oldOption = existingOptions.getOrNull(matchIndex)
