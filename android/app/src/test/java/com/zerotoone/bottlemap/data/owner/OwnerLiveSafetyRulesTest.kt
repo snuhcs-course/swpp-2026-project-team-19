@@ -90,6 +90,30 @@ class OwnerLiveSafetyRulesTest {
         assertTrue(reviewedServingsByProduct(job, setOf("other")).isEmpty())
     }
 
+    @Test fun canonicalBottleLabelsAreDeduplicatedAcrossImages() {
+        fun line(id: String, label: String, price: Int): MockExtractedLine {
+            val option = MockMenuOption("option-$id", label = label, pourMl = null,
+                priceKrw = price)
+            return MockExtractedLine(
+                extractedItemId = id, sourceText = "Lagavulin Bottle",
+                kind = MockLineKind.PRODUCT, options = listOf(option),
+                decision = MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                    productId = "lagavulin", correctedOptions = listOf(option)))
+        }
+        val job = MockMenuImport("job", "bar", MockImportStatus.READY_FOR_REVIEW, 1,
+            listOf(
+                MockPhotoExtraction("first", "content://first", 1,
+                    listOf(line("bottle-ko", "병", 150000))),
+                MockPhotoExtraction("second", "content://second", 2,
+                    listOf(line("bottle-en", "Bottle", 150000)))))
+        val priced = reviewedServingsByProduct(job, setOf("lagavulin"))
+        assertEquals(1, priced.getValue("lagavulin").size)
+        assertEquals("bottle", reviewServingKey(null, priced.getValue("lagavulin").single().label))
+        assertEquals("bottle", reviewServingKey(null, "  BOTTLE  "))
+        assertEquals("ml:30", reviewServingKey(30, "잔"))
+        assertEquals("ml:30", reviewServingKey(30, "Double"))
+    }
+
     @Test fun failedReplacementNeverDeletesExistingPhoto() {
         val existing = MockPhoto("old", "https://server/old", MockPhotoKind.BAR_GALLERY)
         val replacement = MockPhoto("new", "content://new", MockPhotoKind.BAR_GALLERY)
