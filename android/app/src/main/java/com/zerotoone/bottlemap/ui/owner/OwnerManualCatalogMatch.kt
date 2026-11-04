@@ -34,6 +34,17 @@ internal fun manualBrandProposal(
         }.maxByOrNull { normalizeOwnerCatalogName(it.matchedAlias ?: it.name).length }
 }
 
+/** An inactive server catalogue match stays visible but cannot be selected. */
+internal fun inactiveOwnerCatalogMatch(
+    products: List<MockCatalogProduct>, menuName: String,
+): MockCatalogProduct? {
+    val normalized = normalizeOwnerCatalogName(menuName)
+    if(normalized.isEmpty()) return null
+    return products.firstOrNull { it.catalogMatched && !it.isActive &&
+        (normalizeOwnerCatalogName(it.displayName) == normalized ||
+            normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) == normalized) }
+}
+
 /** After brand confirmation, propose the single catalog product with matching age. */
 internal fun manualProductProposal(
     products: List<MockCatalogProduct>, menuName: String, category: String,
@@ -41,8 +52,12 @@ internal fun manualProductProposal(
 ): MockCatalogProduct? {
     val name=normalizeOwnerCatalogName(menuName)
     if(name.isEmpty()) return null
+    // Local unverified products (including deleted menu rows) must be offered for
+    // explicit re-linking, otherwise the screen silently creates a second product.
+    // Production candidates are catalogMatched and still require isActive.
     val available=products.filter {
-        it.isActive && it.catalogMatched && it.productId!=rejectedProductId &&
+        (it.catalogMatched && it.isActive || !it.catalogMatched) &&
+            it.productId!=rejectedProductId &&
             manualMenuCategoryLabel(it.category)==category
     }
     val exact=available.firstOrNull {

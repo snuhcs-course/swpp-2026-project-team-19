@@ -17,6 +17,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
+import kotlinx.coroutines.CancellationException
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +48,12 @@ import com.zerotoone.bottlemap.ui.customer.P18Action
  * user-approved correction to the source PDF (both guest and signed-in states).
  * Google auth remains owned by AuthViewModel and Credential Manager.
  */
+private sealed interface OwnerAreaLoad {
+    data object Loading : OwnerAreaLoad
+    data class Ready(val hasBars: Boolean, val hasApplication: Boolean) : OwnerAreaLoad
+    data class Error(val message: String) : OwnerAreaLoad
+}
+
 @Composable
 fun AccountScreen(
     state: AuthUiState,
@@ -58,23 +65,33 @@ fun AccountScreen(
 ) {
     // Owner access is based on the authenticated server account, never demo fixture data.
     val signedInUser=(state as? AuthUiState.SignedIn)?.user
-    val ownerStatus by produceState<Pair<Boolean, Boolean>?>(
-        initialValue=null, key1=signedInUser?.userId,
+    var ownerRetryNonce by remember(signedInUser?.userId) { mutableStateOf(0) }
+    val ownerStatus by produceState<OwnerAreaLoad>(
+        initialValue=OwnerAreaLoad.Loading,
+        key1=signedInUser?.userId, key2=ownerRetryNonce,
     ) {
-        value=null
-        if(signedInUser!=null) {
-            value=runCatching {
-                val owner=OwnerRepository()
-                val bars=owner.getOwnedBars()
-                val applications=owner.getMyApplications()
-                bars.isNotEmpty() to applications.any { it.status=="pending" || it.status=="rejected" }
-            }.getOrNull()
+        value=OwnerAreaLoad.Loading
+        if(signedInUser==null) {
+            value=OwnerAreaLoad.Ready(false,false)
+        } else try {
+            val owner=OwnerRepository()
+            val bars=owner.getOwnedBars()
+            val applications=owner.getMyApplications()
+            value=OwnerAreaLoad.Ready(
+                bars.isNotEmpty(), applications.any {
+                    it.status=="pending" || it.status=="rejected"
+                })
+        } catch(cancelled: CancellationException) {
+            throw cancelled
+        } catch(error: Exception) {
+            value=OwnerAreaLoad.Error(error.message ?: "매장 상태를 확인하지 못했어요.")
         }
     }
-    val hasArea=ownerStatus?.let { it.first || it.second } == true
+    val area=(ownerStatus as? OwnerAreaLoad.Ready)
+    val hasArea=area?.let { it.hasBars || it.hasApplication } == true
     val subtitle=when {
-        ownerStatus?.first==true -> "매장을 관리해 주세요"
-        ownerStatus?.second==true -> "매장 등록 신청 상태를 확인하세요"
+        area?.hasBars==true -> "매장을 관리해 주세요"
+        area?.hasApplication==true -> "매장 등록 신청 상태를 확인하세요"
         else -> "매장 등록 상태를 확인하세요"
     }
     var infoDialog by remember {mutableStateOf<String?>(null)}
@@ -106,6 +123,23 @@ fun AccountScreen(
                 }
                 if(user==null) Text("›",color=P18Muted,fontSize=22.sp)
             }
+            if(user!=null && ownerStatus is OwnerAreaLoad.Loading) {
+                Row(Modifier.fillMaxWidth().padding(top=28.dp),
+                    verticalAlignment=Alignment.CenterVertically) {
+                    CircularProgressIndicator(Modifier.size(20.dp))
+                    Spacer(Modifier.width(12.dp))
+                    Text("매장 상태를 확인하고 있어요.", color=P18Muted)
+                }
+            }
+            if(user!=null && ownerStatus is OwnerAreaLoad.Error) {
+                Column(Modifier.fillMaxWidth().padding(top=28.dp),
+                    verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                    Text("매장 상태를 불러오지 못했어요.", color=P18Text)
+                    Text((ownerStatus as OwnerAreaLoad.Error).message,
+                        color=P18Muted, fontSize=13.sp)
+                    TextButton(onClick={ ownerRetryNonce++ }) { Text("다시 시도") }
+                }
+            }
             if(user!=null && hasArea) {
                 Row(Modifier.fillMaxWidth().padding(top=28.dp).heightIn(min=96.dp)
                     .background(androidx.compose.ui.graphics.Color(0xFF2A2521),
@@ -136,7 +170,7 @@ fun AccountScreen(
                 if(state is AuthUiState.SignInError) AccountNavRow(
                     "다시 로그인하기",if(state.canRetryProfile)onRetryAccount else onOpenLogin)
             }
-            if(!hasArea) {
+            if(!hasArea && (user==null || ownerStatus is OwnerAreaLoad.Ready)) {
                 Row(Modifier.fillMaxWidth().padding(top=32.dp),
                     horizontalArrangement=Arrangement.Center,
                     verticalAlignment=Alignment.CenterVertically) {

@@ -35,6 +35,19 @@ class OwnerRegistrationReapplicationTest {
         assertEquals(MockApplicationStatus.REJECTED,input.status)
     }
 
+    @Test fun rejectedServerMenuPhotosAreReadOnlyNotUploaderPickerUris() {
+        val serverPhoto=MockPhoto("server-menu-1",
+            "https://storage.example.com/signed/menu.jpg",MockPhotoKind.MENU_CAPTURE)
+        val serverCover=MockPhoto("server-pending-cover",
+            "https://storage.example.com/signed/cover.jpg",MockPhotoKind.BAR_GALLERY)
+        val old=rejected().copy(registrationPhotos=listOf(serverPhoto,serverCover))
+        val draft=reapplicationDraftFromRejected(old)
+        assertTrue(draft.initialMenuPhotos.isEmpty())
+        assertTrue(draft.applicantGallery.isEmpty())
+        // The source rejected application still holds its server-side photo preview.
+        assertEquals(listOf(serverPhoto,serverCover),old.registrationPhotos)
+    }
+
     @Test fun rejectedExistingBarRetainsBarIdentityAndSkipsNewBarRequirements() {
         val rejected=rejected().copy(kind=MockApplicationKind.EXISTING_BAR,barId="saved-bar")
         val draft=reapplicationDraftFromRejected(rejected)

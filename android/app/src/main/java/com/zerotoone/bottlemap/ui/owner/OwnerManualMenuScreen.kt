@@ -205,7 +205,7 @@ internal fun OwnerManualMenuScreen(
     val activeLocalCandidates = products.filter { product ->
         !product.catalogMatched && items.any { it.productId == product.productId }
     }
-    val candidates = (products.filter { it.catalogMatched && it.isActive } +
+    val candidates = (products.filter { it.catalogMatched } +
         (if(viewModel.usesProductionOwnerApi()) emptyList() else htmlCatalog) +
         deletedLocalCandidates + activeLocalCandidates).distinctBy { it.productId }
 
@@ -298,6 +298,11 @@ internal fun OwnerManualMenuScreen(
     fun save() {
         if (bar == null || saving) return
         try {
+            if(editId == null) {
+                require(inactiveOwnerCatalogMatch(candidates, itemName) == null) {
+                    "운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요."
+                }
+            }
             require(!activePhotoImport) { "ACTIVE_IMPORT_EXISTS" }
             val name = itemName.trim()
             val old = items.firstOrNull { it.barMenuItemId == editId }
@@ -743,7 +748,14 @@ internal fun OwnerManualMenuScreen(
                     if (editId == null) {
                         val suggested=manualProductProposal(
                             candidates,itemName,category,confirmedBrandId,rejectedId)
-                        if (suggested != null && linkedId != suggested.productId) {
+                        val inactiveMatch = inactiveOwnerCatalogMatch(candidates, itemName)
+                        if(inactiveMatch != null) {
+                            Text("“" + inactiveMatch.displayName +
+                                "”은 현재 비활성 상품이에요. 선택하거나 새로 만들 수 없어요. 운영자에게 문의해 주세요.",
+                                color=V4Color.sub, fontSize=13.sp)
+                        }
+                        if (suggested != null && inactiveMatch==null &&
+                            linkedId != suggested.productId) {
                             Text("“" + suggested.displayName + "”이 맞나요?", color = V4Color.text)
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 ManualButton("맞아요", {
@@ -767,7 +779,9 @@ internal fun OwnerManualMenuScreen(
                             },placeholder="예: 글렌피딕",testTag="manual-menu-brand")
                             val suggestedBrand=manualBrandProposal(
                                 brands,itemName,brandName,rejectedBrandId)
-                            if(suggestedBrand!=null &&
+                            // A confirmed product suggestion already includes its brand:
+                            // never display two indistinguishable '맞아요' buttons.
+                            if(suggestedBrand!=null && (suggested==null || inactiveMatch!=null) &&
                                 confirmedBrandId!=suggestedBrand.brandId) {
                                 Text("“" + suggestedBrand.name + "” 브랜드가 맞나요?",
                                     color=V4Color.text)

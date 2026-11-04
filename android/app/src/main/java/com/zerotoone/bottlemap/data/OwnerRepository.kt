@@ -30,7 +30,15 @@ class OwnerRepository {
                     code = "NETWORK_ERROR",
                     message = "로그인 세션을 갱신하지 못했어요. 연결을 확인해 주세요.",
                 )
-            return ApiClient.call { block("Bearer $refreshed") }
+            try {
+                return ApiClient.call { block("Bearer $refreshed") }
+            } catch (retryError: BottleMapApiException) {
+                if (retryError.code == "UNAUTHENTICATED") {
+                    // A second Owner 401 means the new Supabase token was rejected.
+                    gateway.logout()
+                }
+                throw retryError
+            }
         }
     }
 

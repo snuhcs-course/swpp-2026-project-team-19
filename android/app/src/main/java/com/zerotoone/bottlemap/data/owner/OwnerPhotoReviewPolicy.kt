@@ -27,12 +27,16 @@ private fun sameReviewProduct(a: MockExtractedLine, b: MockExtractedLine): Boole
     return name!=null && name==photoProductName(b)
 }
 
-private fun reviewServing(option: MockMenuOption): String {
-    val ml=option.pourMl
-    if(ml!=null) return "ml:$ml"
-    val label=option.label.orEmpty().trim().lowercase()
-    return if(label=="bottle" || label=="병") "bottle" else "label:$label"
+/** Stable serving identity across OCR lines, reviewed options and saved menu rows. */
+internal fun reviewServingKey(pourMl: Int?, label: String?): String {
+    if(pourMl != null) return "ml:$pourMl"
+    val normalized = label.orEmpty().trim().lowercase()
+    return if(normalized == "bottle" || normalized == "병") "bottle"
+        else "label:$normalized"
 }
+
+private fun reviewServing(option: MockMenuOption): String =
+    reviewServingKey(option.pourMl, option.label)
 
 /**
  * Exclude a *product* from the whole upload (all its serving rows/photos), not
