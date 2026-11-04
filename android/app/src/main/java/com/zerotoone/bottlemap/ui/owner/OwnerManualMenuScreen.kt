@@ -779,7 +779,9 @@ internal fun OwnerManualMenuScreen(
                             },placeholder="예: 글렌피딕",testTag="manual-menu-brand")
                             val suggestedBrand=manualBrandProposal(
                                 brands,itemName,brandName,rejectedBrandId)
-                            if(suggestedBrand!=null &&
+                            // A confirmed product suggestion already includes its brand:
+                            // never display two indistinguishable '맞아요' buttons.
+                            if(suggestedBrand!=null && (suggested==null || inactiveMatch!=null) &&
                                 confirmedBrandId!=suggestedBrand.brandId) {
                                 Text("“" + suggestedBrand.name + "” 브랜드가 맞나요?",
                                     color=V4Color.text)
