@@ -49,7 +49,7 @@ internal fun reviewedServingsByProduct(
         .groupBy { requireNotNull(it.decision?.productId) }
         .mapValues { (_, lines) ->
             lines.flatMap { it.decision?.correctedOptions ?: it.options }
-                .distinctBy { it.pourMl to it.label?.trim()?.lowercase() }
+                .distinctBy { reviewServingKey(it.pourMl, it.label) }
         }
 
 internal fun sampledBitmapSize(width: Int, height: Int, maxEdge: Int = 2400): Int {
