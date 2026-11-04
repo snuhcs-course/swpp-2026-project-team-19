@@ -87,7 +87,9 @@ internal fun p18QueryValidationCode(error:Exception):String? =
 /** Only one location-aware query per selection. Never re-query on late GPS. */
 internal fun p18InitialSearchCoordinate(
     permissionGranted: Boolean, cached: NearbyCoordinate?,
-): NearbyCoordinate? = cached?.takeIf { permissionGranted && it.isValid() }
+): NearbyCoordinate? = cached?.takeIf {
+    permissionGranted && it.isValid() && (it.latitude != 0.0 || it.longitude != 0.0)
+}
 
 internal const val P18_FIRST_GPS_WAIT_MS = 1_250L
 
@@ -434,7 +436,9 @@ internal fun CustomerP18Results(
             locationPermissionGranted,viewModel.location.value)
         val forServer = cached ?: if(locationPermissionGranted)
             withTimeoutOrNull(P18_FIRST_GPS_WAIT_MS) {
-                viewModel.location.first { it?.isValid() == true }
+                viewModel.location.first {
+                    p18InitialSearchCoordinate(true,it) != null
+                }
             } else null
         viewModel.load(if(chosenId==null)initialQuery else null,
             chosenId ?: initialProductId,
