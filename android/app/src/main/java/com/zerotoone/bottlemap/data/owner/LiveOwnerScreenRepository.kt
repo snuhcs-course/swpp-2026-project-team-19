@@ -451,25 +451,17 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     }
 
     private suspend fun syncGallery(barId: String, old: List<MockPhoto>, now: List<MockPhoto>) {
-        val oldIds = old.map { it.photoId }.toSet()
-        val newIds = now.map { it.photoId }.toSet()
-        val additions = now.filter { it.photoId !in oldIds }
-        // Validate and decode every picker URI before any irreversible server mutation.
-        val prepared = additions.associate { it.photoId to prepareGalleryPhoto(it.uri) }
-        val mappedIds = old.associate { it.photoId to it.photoId }.toMutableMap()
-        // Upload first: failure must not delete the owner's existing gallery.
-        for(photo in additions) {
-            val result = remote.addBarPhoto(barId, prepared.getValue(photo.photoId))
-            mappedIds[photo.photoId] = result.photos.lastOrNull()?.photoId
-                ?: error("사진은 업로드됐지만 ID 확인에 실패했어요. 새로고침 후 확인해 주세요.")
-        }
-        // No remaining operations can fail because of an unreadable local picker URI.
-        for(photo in old) {
-            if(now.none { it.photoId == photo.photoId }) {
-                remote.deleteBarPhoto(barId, photo.photoId)
-            }
-        }
-        remote.reorderBarPhotos(barId, now.map { mappedIds.getValue(it.photoId) })
+        replaceOwnerGallerySafely(
+            old = old, now = now,
+            prepare = { prepareGalleryPhoto(it.uri) },
+            upload = { prepared ->
+                val result = remote.addBarPhoto(barId, prepared)
+                result.photos.lastOrNull()?.photoId
+                    ?: error("사진은 업로드됐지만 ID 확인에 실패했어요. 새로고침 후 확인해 주세요.")
+            },
+            delete = { photoId -> remote.deleteBarPhoto(barId, photoId); Unit },
+            reorder = { ids -> remote.reorderBarPhotos(barId, ids); Unit },
+        )
     }
 
     private suspend fun persistBar(old: MockBar, bar: MockBar) {
