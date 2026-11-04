@@ -15,6 +15,52 @@ class OwnerPhotoStage8Test {
         catch (_: IllegalStateException) {}
     }
 
+    @Test fun retainedPriceMismatchCountsEveryMatchingServingOncePerProduct() {
+        val existing = MockBarMenuItem(
+            "menu-row", "fixture-bar", "whisky-one", listOf(
+                MockMenuOption("bar-30", pourMl=30, priceKrw=18000),
+                MockMenuOption("bar-bottle", label="Bottle", priceKrw=180000),
+            ))
+        val snapshot = OwnerMockFixtures.registeredBar().copy(
+            menuItems = listOf(existing))
+        fun priceJob(
+            options: List<MockMenuOption>,
+            kind: MockLineKind = MockLineKind.PRODUCT,
+        ): MockMenuImport {
+            val line = MockExtractedLine(
+                "line-1", "Whisky one", kind,
+                options=options, decision=MockReviewDecision(
+                    MockDecisionKind.SELECT_PRODUCT, productId="whisky-one",
+                    correctedOptions=options))
+            return MockMenuImport("import-1", "fixture-bar",
+                MockImportStatus.READY_FOR_REVIEW, 1,
+                listOf(MockPhotoExtraction("photo-1", "file:///mock/1.jpg", 1, listOf(line))))
+        }
+        val unchanged = listOf(
+            MockMenuOption("new-bottle", label="병", priceKrw=180000),
+            MockMenuOption("new-30", pourMl=30, priceKrw=18000),
+        )
+        assertEquals(0, stage8RetainedPriceMismatchCount(priceJob(unchanged), snapshot))
+        assertEquals(0, stage8RetainedPriceMismatchCount(
+            priceJob(unchanged.reversed()), snapshot))
+        val secondDifferent = unchanged.map {
+            if(it.pourMl==30)it.copy(priceKrw=19000) else it
+        }
+        assertEquals(1,stage8RetainedPriceMismatchCount(
+            priceJob(secondDifferent),snapshot))
+        assertEquals(1,stage8RetainedPriceMismatchCount(
+            priceJob(secondDifferent.reversed()),snapshot))
+        // The owner's final SELECT_PRODUCT overrides the original OCR UNKNOWN kind.
+        assertEquals(1,stage8RetainedPriceMismatchCount(
+            priceJob(secondDifferent,MockLineKind.UNKNOWN),snapshot))
+        assertEquals(0,stage8RetainedPriceMismatchCount(
+            priceJob(unchanged,MockLineKind.UNKNOWN),snapshot))
+        assertEquals(1,stage8ConfirmedExistingLines(
+            priceJob(secondDifferent,MockLineKind.UNKNOWN),snapshot).size)
+        val extra = unchanged + MockMenuOption("new-60", pourMl=60, priceKrw=29000)
+        assertEquals(0,stage8RetainedPriceMismatchCount(priceJob(extra),snapshot))
+    }
+
     @Test fun twoPhotosDynamicCountsAndDecisionsSurviveRepositoryRecreation() {
         val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
         val r = LocalOwnerMockRepository(store)

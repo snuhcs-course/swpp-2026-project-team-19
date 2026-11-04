@@ -145,6 +145,16 @@ internal fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+internal fun p18InitiallyCollapsedCategories(highlightCategory: String?): Set<String> {
+    val defaults = setOf("cocktail","food","snack","brandy","gin","rum","wine",
+        "beer","otheralcohol","other")
+    if(highlightCategory == null) return defaults
+    val key = highlightCategory.trim().lowercase(Locale.ROOT)
+    // Product search opens exactly its category. Normally-open whisky must
+    // close when the highlighted product belongs to a different category.
+    return (defaults + setOf("whisky","whiskey")) - key
+}
+
 @Composable
 internal fun CustomerP18BarDetail(
     bar:BarDetailUiModel,
@@ -168,9 +178,13 @@ internal fun CustomerP18BarDetail(
     // Owner customer-preview uses one exclusive panel: hours | address | phone.
     var expanded by rememberSaveable(bar.barId) {mutableStateOf("")}
     var menuQuery by rememberSaveable(bar.barId) {mutableStateOf("")}
-    var collapsed by rememberSaveable(bar.barId) {
-        mutableStateOf(setOf("cocktail","food","snack","brandy","gin","rum","wine",
-            "beer","otheralcohol","other"))
+    // Product-search navigation opens only the matching category. Once opened,
+    // the regular category accordion still closes and reopens on user taps.
+    val highlightedCategory = bar.items.firstOrNull {
+        it.productId == highlightProductId
+    }?.category
+    var collapsed by rememberSaveable(bar.barId, highlightProductId) {
+        mutableStateOf(p18InitiallyCollapsedCategories(highlightedCategory))
     }
     var at by remember {mutableStateOf(ZonedDateTime.now(KST))}
     LaunchedEffect(bar.barId) { while(true) { at=ZonedDateTime.now(KST);delay(30000) } }
@@ -372,12 +386,12 @@ internal fun CustomerP18BarDetail(
                     "other"->"기타"
                     else->category
                 }
-                val open=menuQuery.isNotBlank() || category !in collapsed
+                val open=menuQuery.isNotBlank() || key !in collapsed
                 Row(Modifier.fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .background(P18Surface)
                     .clickable {
-                        collapsed=if(open)collapsed+category else collapsed-category
+                        collapsed=if(open)collapsed+key else collapsed-key
                     }.padding(horizontal=12.dp,vertical=10.dp),
                     verticalAlignment=Alignment.CenterVertically) {
                     Text(title,color=P18Text,fontSize=14.sp,fontWeight=FontWeight.Bold,

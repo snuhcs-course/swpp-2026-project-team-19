@@ -97,24 +97,33 @@ internal fun stage8ConfirmedExistingLines(
     val existingIds = snapshot.menuItems.filter { it.barId == job.barId }
         .map { it.productId }.toSet()
     return job.images.flatMap { it.lines }.filter { line ->
-        line.kind == MockLineKind.PRODUCT &&
-            line.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
+        line.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
             line.decision.productId in existingIds
     }
 }
 
-/** Completed import compares the final owner-entered price with the retained bar price. */
+/** Count existing *products* with a reviewed price mismatch across any matching serving.
+ * Missing or extra servings are not price mismatches: Stage 8 publication remains add-only.
+ */
 internal fun stage8RetainedPriceMismatchCount(
     job: MockMenuImport, snapshot: MockOwnerSnapshot,
-): Int = job.images.flatMap { it.lines }.count { line ->
-    val decision = line.decision
-    if (decision?.kind != MockDecisionKind.SELECT_PRODUCT) return@count false
-    val barPrice = snapshot.menuItems.firstOrNull {
-        it.barId == job.barId && it.productId == decision.productId
-    }?.options?.firstOrNull()?.priceKrw
-    val imported = (decision.correctedOptions ?: line.options)
-        .firstOrNull()?.priceKrw
-    barPrice != null && imported != null && imported > 0 && barPrice != imported
+): Int {
+    val published = snapshot.menuItems.filter { it.barId == job.barId }
+        .associateBy { it.productId }
+    val chosen = job.images.flatMap { it.lines }
+        .filter { it.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
+            it.decision?.productId?.let(published::containsKey) == true }
+        .groupBy { requireNotNull(it.decision?.productId) }
+    return chosen.count { (productId, lines) ->
+        val retained = published.getValue(productId).options.associateBy {
+            reviewServingKey(it.pourMl, it.label)
+        }
+        lines.flatMap { it.decision?.correctedOptions ?: it.options }.any { reviewed ->
+            val price = retained[reviewServingKey(reviewed.pourMl, reviewed.label)]
+                ?.priceKrw
+            price != null && reviewed.priceKrw > 0 && reviewed.priceKrw != price
+        }
+    }
 }
 
 /** Match the repository's add-only product grouping for pre-publish counts.
