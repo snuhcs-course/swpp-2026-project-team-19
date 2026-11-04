@@ -383,12 +383,12 @@ internal fun CustomerP18BarDetail(
                     "other"->"기타"
                     else->category
                 }
-                val open=menuQuery.isNotBlank() || category !in collapsed
+                val open=menuQuery.isNotBlank() || key !in collapsed
                 Row(Modifier.fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .background(P18Surface)
                     .clickable {
-                        collapsed=if(open)collapsed+category else collapsed-category
+                        collapsed=if(open)collapsed+key else collapsed-key
                     }.padding(horizontal=12.dp,vertical=10.dp),
                     verticalAlignment=Alignment.CenterVertically) {
                     Text(title,color=P18Text,fontSize=14.sp,fontWeight=FontWeight.Bold,
