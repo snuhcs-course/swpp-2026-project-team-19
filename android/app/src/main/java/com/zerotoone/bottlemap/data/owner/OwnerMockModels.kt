@@ -103,6 +103,8 @@ data class MockCatalogProduct(
     val otherAlcoholKind: String? = null,
     val abvPercent: Double? = null, // local review draft; not a backend DTO
     val isActive: Boolean = true,
+    // From live product lookup; local manual fixtures may have no matched alias.
+    val matchedAlias: String? = null,
 )
 
 data class MockDiscount(
