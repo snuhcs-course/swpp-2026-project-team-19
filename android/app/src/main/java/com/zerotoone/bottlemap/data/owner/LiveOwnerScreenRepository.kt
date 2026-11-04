@@ -319,7 +319,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 // not show a 0-line publish screen after process recreation.
                 val changedReviewVersion = previous != null &&
                     previous.reviewVersion != maxOf(1, historical.reviewVersion)
-                val requiresDetails = previous?.images.isNullOrEmpty() || changedReviewVersion
+                val requiresDetails = needsReviewDetailReload(
+                    previous, maxOf(1, historical.reviewVersion))
                 val displayStatus = if(serverStatus == MockImportStatus.READY_FOR_REVIEW &&
                     requiresDetails) MockImportStatus.PROCESSING
                     else serverStatus
@@ -417,10 +418,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         require(bounds.outWidth > 0 && bounds.outHeight > 0) {
             "매장 사진을 읽을 수 없어요."
         }
-        var sample = 1
-        while(bounds.outWidth / sample > 2400 || bounds.outHeight / sample > 2400) {
-            sample *= 2
-        }
+        val sample = sampledBitmapSize(bounds.outWidth, bounds.outHeight)
         val decoded = android.graphics.BitmapFactory.decodeByteArray(
             prepared.bytes, 0, prepared.bytes.size,
             android.graphics.BitmapFactory.Options().apply { inSampleSize = sample })
@@ -476,14 +474,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private suspend fun persistBar(old: MockBar, bar: MockBar) {
         val changes = mutableMapOf<String, Any?>()
         if(old.name != bar.name) changes["name"] = bar.name
-        if(old.address != bar.address) {
-            require(bar.latitude != null && bar.longitude != null &&
-                (bar.latitude != old.latitude || bar.longitude != old.longitude)) {
-                "주소 변경에는 새로운 지도 위치 확인이 필요해요. 현재 주소는 저장되지 않았어요."
-            }
+        requireMovedBarCoordinates(old, bar)?.let { (latitude, longitude) ->
             changes["address"] = bar.address
-            changes["latitude"] = bar.latitude
-            changes["longitude"] = bar.longitude
+            changes["latitude"] = latitude
+            changes["longitude"] = longitude
         }
         if(old.phone != bar.phone) changes["phone"] = bar.phone
         if(old.description != bar.description) changes["description"] = bar.description
@@ -709,11 +703,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             }
         }
         val existing = remote.getMyApplications().firstOrNull {
-            it.status == "pending" &&
-                it.businessRegistrationNumber == draft.businessNumberDigits &&
-                it.applicationType == body["applicationType"] &&
-                (draft.kind != MockApplicationKind.EXISTING_BAR ||
-                    it.bar?.barId == draft.existingBarId)
+            matchesPendingOwnerApplication(it, draft)
         }
         // Never reuse a retry ID belonging to another bar or another draft.
         val cachedId = pendingApplicationId?.takeIf { it == existing?.applicationId }
@@ -860,10 +850,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             val prior = old?.images?.firstOrNull { it.imageOrder == image.imageOrder }
             MockPhotoExtraction(
                 imageId = image.imageId,
-                sourceUri = prior?.sourceUri?.takeUnless {
-                    it.startsWith("http://", ignoreCase = true) ||
-                        it.startsWith("https://", ignoreCase = true)
-                } ?: image.imageUrl,
+                sourceUri = currentReviewImageUri(prior?.sourceUri, image.imageUrl),
                 imageOrder = image.imageOrder,
                 lines = image.items.map { item ->
                     val kind = when(item.effectiveLineType) {
@@ -939,12 +926,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             val edits = mutableMapOf<String, Any?>("extractedOptionId" to option.optionId)
             if(option.priceKrw != extracted.extractedPriceKrw)
                 edits["correctedPriceKrw"] = option.priceKrw
-            require(option.pourMl != null || extracted.extractedPourMl == null) {
-                "추출된 용량은 비울 수 없어요. 숫자로 수정해 주세요."
-            }
-            require(option.label != null || extracted.extractedOptionLabel == null) {
-                "추출된 옵션 이름은 비울 수 없어요."
-            }
+            validateReviewOptionClearing(option,
+                MockMenuOption(extracted.extractedOptionId,
+                    label = extracted.extractedOptionLabel,
+                    pourMl = extracted.extractedPourMl, priceKrw = extracted.extractedPriceKrw ?: 0))
             if(option.pourMl != extracted.extractedPourMl && option.pourMl != null)
                 edits["correctedPourMl"] = option.pourMl
             if(option.label != extracted.extractedOptionLabel && option.label != null)
@@ -1050,24 +1035,18 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     ): List<String> {
         val previouslyListed = original.menuItems.filter { it.barId == job.barId }
             .associateBy { it.productId }
-        val selected = job.images.flatMap { it.lines }.filter { line ->
-            val selectedProduct = line.decision?.productId
-            line.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
-                selectedProduct != null && selectedProduct in previouslyListed
-        }.groupBy { requireNotNull(it.decision?.productId) }
+        val selected = reviewedServingsByProduct(job, previouslyListed.keys)
         if(selected.isEmpty()) return emptyList()
         val warnings = mutableListOf<String>()
         var menu = remote.getOwnedMenu(job.barId)
-        for((productId, lines) in selected) {
+        for((productId, priced) in selected) {
             val listed = menu.items.firstOrNull { it.productId == productId } ?: continue
-            // Different OCR lines can contain different servings of the same product.
-            val priced = lines.flatMap { it.decision?.correctedOptions ?: it.options }
-                .distinctBy { it.pourMl to it.label?.trim()?.lowercase() }
             if(priced.isEmpty() || priced.any { it.priceKrw <= 0 }) {
                 warnings += "${listed.displayName}: 가격을 확인하고 직접 수정해 주세요."
                 continue
             }
-            val options = listed.options.sortedBy { it.sortOrder }.map { entry ->
+            val existingOptions = listed.options.sortedBy { it.sortOrder }
+            val options = existingOptions.map { entry ->
                 mutableMapOf<String, Any?>(
                     "optionLabel" to entry.optionLabel,
                     "pourMl" to entry.pourMl,
@@ -1083,13 +1062,17 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             }.toMutableList()
             var changed = false
             for(scanned in priced) {
-                val matchIndex = listed.options.sortedBy { it.sortOrder }.indexOfFirst {
-                    sameServing(it, scanned)
+                val matchIndex = options.indexOfFirst { entry ->
+                    if(scanned.pourMl != null)
+                        entry["pourMl"] == scanned.pourMl
+                    else entry["pourMl"] == null &&
+                        (entry["optionLabel"] as? String).orEmpty().trim()
+                            .equals(scanned.label.orEmpty().trim(), ignoreCase = true)
                 }
                 if(matchIndex >= 0) {
-                    val oldOption = listed.options.sortedBy { it.sortOrder }[matchIndex]
-                    if(oldOption.priceKrw == scanned.priceKrw) continue
-                    if(oldOption.discount != null &&
+                    val oldOption = existingOptions.getOrNull(matchIndex)
+                    if(options[matchIndex]["priceKrw"] == scanned.priceKrw) continue
+                    if(oldOption?.discount != null &&
                         scanned.priceKrw <= oldOption.discount.discountedPriceKrw) {
                         warnings += "${listed.displayName}: 기존 할인가보다 정가가 낮아 가격 확인이 필요해요."
                         continue
@@ -1371,12 +1354,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         decision.correctedOptions?.forEach { edited ->
             val extracted = originalLine.options.firstOrNull { it.optionId == edited.optionId }
             if(extracted != null) {
-                require(edited.pourMl != null || extracted.pourMl == null) {
-                    "추출된 용량은 비울 수 없어요."
-                }
-                require(edited.label != null || extracted.label == null) {
-                    "추출된 옵션 이름은 비울 수 없어요."
-                }
+                validateReviewOptionClearing(edited, extracted)
             }
         }
         val targets=if(decision.kind==MockDecisionKind.EXCLUDE)
