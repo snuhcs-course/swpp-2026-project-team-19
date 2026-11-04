@@ -81,7 +81,8 @@ class OwnerPhotoStage8ComposeTest {
             options=listOf(MockMenuOption("o",label="30ml",pourMl=30,priceKrw=0))))
         compose.onNodeWithText("가격을 못 읽었어요").assertExists()
         compose.onNodeWithText("저장").assertExists()
-        compose.onNodeWithText("이번 줄 제외").assertExists()
+        // The current Stage 8 header exposes a whole-product exclusion action.
+        compose.onNodeWithText("메뉴 전체 제외").assertExists()
     }
 
     @Test fun emptyExistingMenuCardShowsActualZeroInsteadOfFixtureExample() {
