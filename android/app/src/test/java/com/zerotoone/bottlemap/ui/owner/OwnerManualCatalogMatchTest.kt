@@ -35,6 +35,16 @@ class OwnerManualCatalogMatchTest {
             "글렌피딕 12년","위스키","brand-gf",null))
     }
 
+    @Test fun inactiveCatalogProductIsVisibleButNotSelectable() {
+        val inactive = twelve.copy(isActive = false)
+        assertEquals(inactive, inactiveOwnerCatalogMatch(
+            listOf(inactive), "Glenfiddich 12 Year Old"))
+        assertNull(manualProductProposal(listOf(inactive),
+            "Glenfiddich 12 Year Old", "위스키", "brand-gf", null))
+        assertNull(inactiveOwnerCatalogMatch(listOf(twelve),
+            "Glenfiddich 12 Year Old"))
+    }
+
     @Test fun missingBrandConfirmationDoesNotInferEnglishProductId() {
         assertNull(manualProductProposal(listOf(twelve),
             "글렌피딕12년","위스키",null,null))
