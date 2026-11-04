@@ -149,8 +149,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         submittedAtEpochMs = timestamp(app.createdAt) ?: 0L,
         reviewedAtEpochMs = timestamp(app.reviewedAt),
         registrationPhotos = listOfNotNull(app.coverPhoto?.let { photo ->
-            MockPhoto("server-pending-cover",photo.imageUrl,MockPhotoKind.BAR_GALLERY)
-        }),
+            MockPhoto("server-pending-cover", photo.imageUrl, MockPhotoKind.BAR_GALLERY)
+        }) + app.menuPhotos.sortedBy { it.imageOrder }.map { photo ->
+            MockPhoto("server-menu-${photo.imageOrder}", photo.imageUrl,
+                MockPhotoKind.MENU_CAPTURE)
+        },
     )
 
     private fun menuRows(barId: String, menu: BarMenuResponseDto): List<MockBarMenuItem> =
@@ -176,7 +179,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             )
         }
 
-    private suspend fun refresh() {
+    private suspend fun refresh(expectedGeneration: Int? = null) {
         val token = AppAuth.gateway.currentAccessTokenOrNull()
         if(token == null) {
             pendingCoverWarning = null
@@ -271,6 +274,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val menus = barsWithCovers.associate { bar ->
             bar.barId to remote.getOwnedMenu(bar.barId)
         }
+        // Do not let an older in-flight Owner entry request publish after a newer one.
+        if (expectedGeneration != null && expectedGeneration != generation.get()) return
         versionByBar.clear()
         menus.forEach { (id, menu) -> versionByBar[id] = menu.menuVersion }
         val rows = menus.flatMap { (id, menu) -> menuRows(id, menu) }
@@ -310,8 +315,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 // List responses omit extracted items. A recovered ready import must
                 // open the polling screen once to fetch complete Stage 8 review data,
                 // not show a 0-line publish screen after process recreation.
+                val changedReviewVersion = previous != null &&
+                    previous.reviewVersion != maxOf(1, historical.reviewVersion)
+                val requiresDetails = previous?.images.isNullOrEmpty() || changedReviewVersion
                 val displayStatus = if(serverStatus == MockImportStatus.READY_FOR_REVIEW &&
-                    previous?.images.isNullOrEmpty()) MockImportStatus.PROCESSING
+                    requiresDetails) MockImportStatus.PROCESSING
                     else serverStatus
                 (previous ?: MockMenuImport(
                     menuImportId = historical.menuImportId, barId = bar.barId,
@@ -320,6 +328,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     images = emptyList(),
                 )).copy(
                     status = displayStatus,
+                    // Never retain decisions made against a stale server review diff.
+                    images = if(changedReviewVersion) emptyList() else previous?.images.orEmpty(),
                     reviewVersion = maxOf(1,historical.reviewVersion),
                     imageCount = maxOf(historical.imageCount,previous?.imageCount ?: 0),
                     completedImages = previous?.completedImages ?: 0,
@@ -327,13 +337,15 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             }
         }
         // Never publish a response from a former session after account switch.
-        if(AppAuth.gateway.currentAccessTokenOrNull()?.let(::sessionKey) != subject) return
+        if(AppAuth.gateway.currentAccessTokenOrNull()?.let(::sessionKey) != subject ||
+            (expectedGeneration != null && expectedGeneration != generation.get())) return
         publishSnapshot(old.copy(
             bars = mappedBars, applications = applications.map { application ->
                 val mapped = toApplication(application)
                 if(application.applicationId in locallyStagedCoverIds)
-                    mapped.copy(registrationPhotos = listOf(MockPhoto(
-                        "local-pending-cover", "", MockPhotoKind.BAR_GALLERY)))
+                    mapped.copy(registrationPhotos = mapped.registrationPhotos.filterNot {
+                        it.kind == MockPhotoKind.BAR_GALLERY
+                    } + MockPhoto("local-pending-cover", "", MockPhotoKind.BAR_GALLERY))
                 else mapped
             },
             menuItems = rows, brands = brands, products = products,
@@ -348,7 +360,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         local.serverLoading()
         scope.launch {
             try {
-                if(requested == generation.get()) refresh()
+                if(requested == generation.get()) refresh(requested)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -381,8 +393,22 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private suspend fun prepareGalleryPhoto(uri: String):
         com.zerotoone.bottlemap.data.PreparedMenuImage {
         val prepared = ImageUploadPreparer(app.contentResolver).prepare(Uri.parse(uri))
+        // A compressed 8K photo can still allocate >150 MB when decoded at full size.
+        val bounds = android.graphics.BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+        android.graphics.BitmapFactory.decodeByteArray(
+            prepared.bytes, 0, prepared.bytes.size, bounds)
+        require(bounds.outWidth > 0 && bounds.outHeight > 0) {
+            "매장 사진을 읽을 수 없어요."
+        }
+        var sample = 1
+        while(bounds.outWidth / sample > 2400 || bounds.outHeight / sample > 2400) {
+            sample *= 2
+        }
         val decoded = android.graphics.BitmapFactory.decodeByteArray(
-            prepared.bytes, 0, prepared.bytes.size)
+            prepared.bytes, 0, prepared.bytes.size,
+            android.graphics.BitmapFactory.Options().apply { inSampleSize = sample })
             ?: error("매장 사진을 읽을 수 없어요.")
         val maxEdge = maxOf(decoded.width, decoded.height)
         val finalBitmap = if(maxEdge > 2048) {
@@ -413,16 +439,20 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private suspend fun syncGallery(barId: String, old: List<MockPhoto>, now: List<MockPhoto>) {
         val oldIds = old.map { it.photoId }.toSet()
         val newIds = now.map { it.photoId }.toSet()
-        for(photo in old) {
-            if(photo.photoId !in newIds) remote.deleteBarPhoto(barId, photo.photoId)
+        val additions = now.filter { it.photoId !in oldIds }
+        // Validate and decode every picker URI before any irreversible server mutation.
+        val prepared = additions.associate { it.photoId to prepareGalleryPhoto(it.uri) }
+        val mappedIds = old.associate { it.photoId to it.photoId }.toMutableMap()
+        // Upload first: failure must not delete the owner's existing gallery.
+        for(photo in additions) {
+            val result = remote.addBarPhoto(barId, prepared.getValue(photo.photoId))
+            mappedIds[photo.photoId] = result.photos.lastOrNull()?.photoId
+                ?: error("사진은 업로드됐지만 ID 확인에 실패했어요. 새로고침 후 확인해 주세요.")
         }
-        val mappedIds = mutableMapOf<String, String>()
-        for(photo in now) {
-            if(photo.photoId in oldIds) mappedIds[photo.photoId] = photo.photoId
-            else {
-                val result = remote.addBarPhoto(barId, prepareGalleryPhoto(photo.uri))
-                mappedIds[photo.photoId] = result.photos.lastOrNull()?.photoId
-                    ?: error("업로드한 사진의 ID를 확인하지 못했어요.")
+        // No remaining operations can fail because of an unreadable local picker URI.
+        for(photo in old) {
+            if(now.none { it.photoId == photo.photoId }) {
+                remote.deleteBarPhoto(barId, photo.photoId)
             }
         }
         remote.reorderBarPhotos(barId, now.map { mappedIds.getValue(it.photoId) })
@@ -432,9 +462,13 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val changes = mutableMapOf<String, Any?>()
         if(old.name != bar.name) changes["name"] = bar.name
         if(old.address != bar.address) {
+            require(bar.latitude != null && bar.longitude != null &&
+                (bar.latitude != old.latitude || bar.longitude != old.longitude)) {
+                "주소 변경에는 새로운 지도 위치 확인이 필요해요. 현재 주소는 저장되지 않았어요."
+            }
             changes["address"] = bar.address
-            changes["latitude"] = bar.latitude ?: old.latitude
-            changes["longitude"] = bar.longitude ?: old.longitude
+            changes["latitude"] = bar.latitude
+            changes["longitude"] = bar.longitude
         }
         if(old.phone != bar.phone) changes["phone"] = bar.phone
         if(old.description != bar.description) changes["description"] = bar.description
@@ -662,9 +696,13 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val existing = remote.getMyApplications().firstOrNull {
             it.status == "pending" &&
                 it.businessRegistrationNumber == draft.businessNumberDigits &&
-                it.applicationType == body["applicationType"]
+                it.applicationType == body["applicationType"] &&
+                (draft.kind != MockApplicationKind.EXISTING_BAR ||
+                    it.bar?.barId == draft.existingBarId)
         }
-        val applicationId = pendingApplicationId ?: existing?.applicationId
+        // Never reuse a retry ID belonging to another bar or another draft.
+        val cachedId = pendingApplicationId?.takeIf { it == existing?.applicationId }
+        val applicationId = cachedId ?: existing?.applicationId
             ?: remote.submitOwnerApplication(body).applicationId
         pendingApplicationId = applicationId
         if(draft.kind == MockApplicationKind.NEW_BAR) {
@@ -807,7 +845,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             val prior = old?.images?.firstOrNull { it.imageOrder == image.imageOrder }
             MockPhotoExtraction(
                 imageId = image.imageId,
-                sourceUri = prior?.sourceUri ?: image.imageUrl,
+                sourceUri = prior?.sourceUri?.takeUnless {
+                    it.startsWith("http://", ignoreCase = true) ||
+                        it.startsWith("https://", ignoreCase = true)
+                } ?: image.imageUrl,
                 imageOrder = image.imageOrder,
                 lines = image.items.map { item ->
                     val kind = when(item.effectiveLineType) {
@@ -883,6 +924,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             val edits = mutableMapOf<String, Any?>("extractedOptionId" to option.optionId)
             if(option.priceKrw != extracted.extractedPriceKrw)
                 edits["correctedPriceKrw"] = option.priceKrw
+            require(option.pourMl != null || extracted.extractedPourMl == null) {
+                "추출된 용량은 비울 수 없어요. 숫자로 수정해 주세요."
+            }
+            require(option.label != null || extracted.extractedOptionLabel == null) {
+                "추출된 옵션 이름은 비울 수 없어요."
+            }
             if(option.pourMl != extracted.extractedPourMl && option.pourMl != null)
                 edits["correctedPourMl"] = option.pourMl
             if(option.label != extracted.extractedOptionLabel && option.label != null)
@@ -992,14 +1039,15 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             val selectedProduct = line.decision?.productId
             line.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
                 selectedProduct != null && selectedProduct in previouslyListed
-        }.distinctBy { it.decision?.productId }
+        }.groupBy { requireNotNull(it.decision?.productId) }
         if(selected.isEmpty()) return emptyList()
         val warnings = mutableListOf<String>()
         var menu = remote.getOwnedMenu(job.barId)
-        for(line in selected) {
-            val productId = requireNotNull(line.decision?.productId)
+        for((productId, lines) in selected) {
             val listed = menu.items.firstOrNull { it.productId == productId } ?: continue
-            val priced = line.decision?.correctedOptions ?: line.options
+            // Different OCR lines can contain different servings of the same product.
+            val priced = lines.flatMap { it.decision?.correctedOptions ?: it.options }
+                .distinctBy { it.pourMl to it.label?.trim()?.lowercase() }
             if(priced.isEmpty() || priced.any { it.priceKrw <= 0 }) {
                 warnings += "${listed.displayName}: 가격을 확인하고 직접 수정해 주세요."
                 continue
@@ -1302,6 +1350,20 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         // The server accepts the complete set of decisions at review-and-apply.
         val job=snapshot().imports.firstOrNull { it.menuImportId==importId }
             ?: error("메뉴판 작업이 없어요.")
+        val originalLine = job.images.flatMap { it.lines }.firstOrNull {
+            it.extractedItemId == extractedItemId
+        } ?: error("검수 항목을 찾지 못했어요.")
+        decision.correctedOptions?.forEach { edited ->
+            val extracted = originalLine.options.firstOrNull { it.optionId == edited.optionId }
+            if(extracted != null) {
+                require(edited.pourMl != null || extracted.pourMl == null) {
+                    "추출된 용량은 비울 수 없어요."
+                }
+                require(edited.label != null || extracted.label == null) {
+                    "추출된 옵션 이름은 비울 수 없어요."
+                }
+            }
+        }
         val targets=if(decision.kind==MockDecisionKind.EXCLUDE)
             relatedPhotoProductLineIds(job,extractedItemId)
         else listOf(extractedItemId)
