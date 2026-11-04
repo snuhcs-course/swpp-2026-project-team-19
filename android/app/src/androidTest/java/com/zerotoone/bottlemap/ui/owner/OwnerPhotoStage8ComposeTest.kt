@@ -263,9 +263,9 @@ class OwnerPhotoStage8ComposeTest {
         showLine(MockExtractedLine("raw", "하쿠슈DR", MockLineKind.PRODUCT,
             suggestedProductId="demo-canonical",
             options=listOf(MockMenuOption("o",label="잔",pourMl=30,priceKrw=19000))))
-        compose.onNodeWithText("이번 줄 제외").assertExists()
+        compose.onNodeWithText("메뉴 전체 제외").assertExists()
         compose.onNodeWithText("다른 메뉴예요").performClick()
-        compose.onNodeWithText("이번 줄 제외").assertDoesNotExist()
+        compose.onNodeWithText("메뉴 전체 제외").assertDoesNotExist()
     }
 
     @Test fun priceAndNewReviewPagesOfferHeaderHomeWithoutPaging() {
