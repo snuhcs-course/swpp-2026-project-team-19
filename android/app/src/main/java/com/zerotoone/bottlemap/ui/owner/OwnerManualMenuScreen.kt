@@ -298,11 +298,11 @@ internal fun OwnerManualMenuScreen(
     fun save() {
         if (bar == null || saving) return
         try {
-            require(candidates.none {
-                it.catalogMatched && !it.isActive &&
-                    normalizeOwnerCatalogName(it.displayName) ==
-                        normalizeOwnerCatalogName(itemName)
-            }) { "운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요." }
+            if(editId == null) {
+                require(inactiveOwnerCatalogMatch(candidates, itemName) == null) {
+                    "운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요."
+                }
+            }
             require(!activePhotoImport) { "ACTIVE_IMPORT_EXISTS" }
             val name = itemName.trim()
             val old = items.firstOrNull { it.barMenuItemId == editId }
@@ -748,11 +748,7 @@ internal fun OwnerManualMenuScreen(
                     if (editId == null) {
                         val suggested=manualProductProposal(
                             candidates,itemName,category,confirmedBrandId,rejectedId)
-                        val inactiveMatch = candidates.firstOrNull {
-                            it.catalogMatched && !it.isActive &&
-                                normalizeOwnerCatalogName(it.displayName) ==
-                                    normalizeOwnerCatalogName(itemName)
-                        }
+                        val inactiveMatch = inactiveOwnerCatalogMatch(candidates, itemName)
                         if(inactiveMatch != null) {
                             Text("“" + inactiveMatch.displayName +
                                 "”은 현재 비활성 상품이에요. 선택하거나 새로 만들 수 없어요. 운영자에게 문의해 주세요.",
