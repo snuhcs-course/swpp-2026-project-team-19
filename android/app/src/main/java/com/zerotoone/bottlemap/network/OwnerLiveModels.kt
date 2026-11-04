@@ -34,6 +34,12 @@ data class OwnerApplicationProposedBarDto(
 )
 data class OwnerBusinessVerificationDto(val result: String)
 
+data class OwnerApplicationMenuPhotoDto(
+    val imageOrder: Int,
+    val imageUrl: String,
+    val imageUrlExpiresAt: String? = null,
+)
+
 data class OwnerApplicationCoverPhotoDto(
     val imageUrl: String,
     val thumbnailUrl: String,
@@ -55,6 +61,7 @@ data class OwnerApplicationDto(
     val contactPhone: String? = null,
     val applicantNote: String? = null,
     val coverPhoto: OwnerApplicationCoverPhotoDto? = null,
+    val menuPhotos: List<OwnerApplicationMenuPhotoDto> = emptyList(),
 )
 data class MyOwnerApplicationsDto(val items: List<OwnerApplicationDto> = emptyList())
 
