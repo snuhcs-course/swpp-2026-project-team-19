@@ -54,6 +54,14 @@ internal sealed interface P18PopularState {
     data object Error: P18PopularState
 }
 
+/** Missing popular data is not equivalent to hiding the entire home section. */
+internal fun p18PopularPlaceholder(state: P18PopularState): String? = when(state) {
+    P18PopularState.Loading -> "인기 위스키를 불러오고 있어요."
+    is P18PopularState.Ready -> if(state.items.isEmpty())
+        "아직 표시할 인기 위스키가 없어요." else null
+    P18PopularState.Error -> null // Retry is already rendered separately.
+}
+
 /** Live §3.17 popular API, isolated failure cannot block the home screen. */
 internal class P18PopularViewModel(
     private val repository:CustomerDiscoverySource=Repositories.customer,
@@ -231,6 +239,14 @@ internal fun CustomerP18Home(
                             Text("다시 시도",color=P18Gold)
                         }
                     }
+                } else {
+                    // Loading/empty only: preserve the accepted successful cards.
+                    Text("요즘 많이 찾는 위스키",Modifier.padding(horizontal=20.dp),
+                        color=P18Muted,fontSize=16.sp)
+                    Text(requireNotNull(p18PopularPlaceholder(popular)),
+                        Modifier.padding(horizontal=20.dp)
+                            .testTag("customer-popular-placeholder"),
+                        color=P18Muted,fontSize=13.sp)
                 }
             }
             Row(Modifier.fillMaxWidth().padding(horizontal=20.dp)
