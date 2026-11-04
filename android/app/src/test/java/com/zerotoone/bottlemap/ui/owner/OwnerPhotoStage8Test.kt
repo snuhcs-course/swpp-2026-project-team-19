@@ -23,9 +23,12 @@ class OwnerPhotoStage8Test {
             ))
         val snapshot = OwnerMockFixtures.registeredBar().copy(
             menuItems = listOf(existing))
-        fun priceJob(options: List<MockMenuOption>): MockMenuImport {
+        fun priceJob(
+            options: List<MockMenuOption>,
+            kind: MockLineKind = MockLineKind.PRODUCT,
+        ): MockMenuImport {
             val line = MockExtractedLine(
-                "line-1", "Whisky one", MockLineKind.PRODUCT,
+                "line-1", "Whisky one", kind,
                 options=options, decision=MockReviewDecision(
                     MockDecisionKind.SELECT_PRODUCT, productId="whisky-one",
                     correctedOptions=options))
@@ -47,6 +50,13 @@ class OwnerPhotoStage8Test {
             priceJob(secondDifferent),snapshot))
         assertEquals(1,stage8RetainedPriceMismatchCount(
             priceJob(secondDifferent.reversed()),snapshot))
+        // The owner's final SELECT_PRODUCT overrides the original OCR UNKNOWN kind.
+        assertEquals(1,stage8RetainedPriceMismatchCount(
+            priceJob(secondDifferent,MockLineKind.UNKNOWN),snapshot))
+        assertEquals(0,stage8RetainedPriceMismatchCount(
+            priceJob(unchanged,MockLineKind.UNKNOWN),snapshot))
+        assertEquals(1,stage8ConfirmedExistingLines(
+            priceJob(secondDifferent,MockLineKind.UNKNOWN),snapshot).size)
         val extra = unchanged + MockMenuOption("new-60", pourMl=60, priceKrw=29000)
         assertEquals(0,stage8RetainedPriceMismatchCount(priceJob(extra),snapshot))
     }

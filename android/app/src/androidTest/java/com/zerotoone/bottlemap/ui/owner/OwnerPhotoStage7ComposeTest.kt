@@ -105,6 +105,33 @@ class OwnerPhotoStage7ComposeTest {
         compose.runOnIdle { assertTrue(newPhotos) }
     }
 
+    @Test fun completedImportOnRestoredScreenOffersFreshSelection() {
+        val snapshot=OwnerMockFixtures.registeredBar().copy(imports=listOf(
+            MockMenuImport("applied-job","fixture-bar",MockImportStatus.APPLIED,
+                1,emptyList())))
+        val vm=OwnerMockViewModel(LocalOwnerMockRepository(InMemoryMockOwnerStateStore(snapshot)))
+        var opened=false
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoJobScreen(MockOwnerLoadState.Ready(snapshot),vm,{}, {opened=true})
+        } }
+        compose.onNodeWithText("진행 중인 메뉴판 작업이 없어요").assertExists()
+        compose.onNodeWithText("메뉴판 분석 중").assertDoesNotExist()
+        compose.onNodeWithTag("stage7-job-new-photos").performClick()
+        compose.runOnIdle { assertTrue(opened) }
+    }
+
+    @Test fun canceledImportOnRestoredScreenIsNotBlank() {
+        val snapshot=OwnerMockFixtures.registeredBar().copy(imports=listOf(
+            MockMenuImport("canceled-job","fixture-bar",MockImportStatus.CANCELED,
+                1,emptyList())))
+        val vm=OwnerMockViewModel(LocalOwnerMockRepository(InMemoryMockOwnerStateStore(snapshot)))
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoJobScreen(MockOwnerLoadState.Ready(snapshot),vm,{}, {})
+        } }
+        compose.onNodeWithText("진행 중인 메뉴판 작업이 없어요").assertExists()
+        compose.onNodeWithTag("stage7-job-new-photos").assertExists()
+    }
+
     @Test fun failedImportMatchesActionFirstV4ErrorCopyWithoutExtraDiagnostics() {
         val repository = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
