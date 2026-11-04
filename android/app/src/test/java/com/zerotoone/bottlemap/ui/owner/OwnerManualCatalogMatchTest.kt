@@ -45,6 +45,20 @@ class OwnerManualCatalogMatchTest {
             "Glenfiddich 12 Year Old"))
     }
 
+    @Test fun inactiveProductMatchedByKoreanAliasCannotBeAddedAsNew() {
+        val product = MockCatalogProduct(
+            productId = "inactive-deanston", brandId = "brand-deanston",
+            displayName = "Deanston 12", isActive = false,
+            matchedAlias = "딘스톤 12년")
+        assertEquals(product, inactiveOwnerCatalogMatch(listOf(product), "딘스톤 12년"))
+        assertEquals(product, inactiveOwnerCatalogMatch(listOf(product), "딘스톤12년"))
+        assertNull(manualProductProposal(listOf(product), "딘스톤 12년",
+            "위스키", null, null))
+        assertNull(inactiveOwnerCatalogMatch(listOf(product), "딘스톤 18년"))
+        assertNull(inactiveOwnerCatalogMatch(listOf(product.copy(isActive=true)),
+            "딘스톤 12년"))
+    }
+
     @Test fun missingBrandConfirmationDoesNotInferEnglishProductId() {
         assertNull(manualProductProposal(listOf(twelve),
             "글렌피딕12년","위스키",null,null))
