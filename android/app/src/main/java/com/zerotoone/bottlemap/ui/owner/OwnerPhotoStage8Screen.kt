@@ -97,8 +97,7 @@ internal fun stage8ConfirmedExistingLines(
     val existingIds = snapshot.menuItems.filter { it.barId == job.barId }
         .map { it.productId }.toSet()
     return job.images.flatMap { it.lines }.filter { line ->
-        line.kind == MockLineKind.PRODUCT &&
-            line.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
+        line.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
             line.decision.productId in existingIds
     }
 }
@@ -112,8 +111,7 @@ internal fun stage8RetainedPriceMismatchCount(
     val published = snapshot.menuItems.filter { it.barId == job.barId }
         .associateBy { it.productId }
     val chosen = job.images.flatMap { it.lines }
-        .filter { it.kind == MockLineKind.PRODUCT &&
-            it.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
+        .filter { it.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
             it.decision?.productId?.let(published::containsKey) == true }
         .groupBy { requireNotNull(it.decision?.productId) }
     return chosen.count { (productId, lines) ->
