@@ -113,6 +113,11 @@ private fun activeImport(job: MockMenuImport?) = job?.status in listOf(
     MockImportStatus.READY_FOR_REVIEW
 )
 
+/** Stage 7 may show an unfinished import, never a terminal historical record. */
+internal fun stage7CurrentJob(state: MockOwnerLoadState): MockMenuImport? =
+    latestImport(state)?.takeUnless { it.status in setOf(
+        MockImportStatus.APPLIED, MockImportStatus.CANCELED) }
+
 @Composable
 private fun MenuPhotoSteps(step: Int, failed: Boolean = false) {
     val labels = listOf("사진 올리기", "읽기", "확인", "더하기")
@@ -647,7 +652,7 @@ internal fun OwnerMenuPhotoJobScreen(
     onReview: () -> Unit = {},
     fixture: MockPhotoExtractionSource = MockPhotoExtractionSource { emptyList() },
 ) {
-    val job = latestImport(state)
+    val job = stage7CurrentJob(state)
     // A failed repository read is not an OCR extraction failure. Keep Stage 7's
     // existing layout, but do not manufacture a processing job while data loads.
     if(state is MockOwnerLoadState.Loading ||
