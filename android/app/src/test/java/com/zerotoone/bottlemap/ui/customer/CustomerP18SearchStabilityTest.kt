@@ -60,6 +60,28 @@ class CustomerP18SearchStabilityTest {
             p18AvailableSorts(hasLocation=false,allowPrice=false))
     }
 
+    @Test fun onlyGrantedValidCachedGpsCanBeSentToServerBeforeSearch() {
+        val valid=NearbyCoordinate(37.480,126.950)
+        assertEquals(valid,p18InitialSearchCoordinate(true,valid))
+        assertNull(p18InitialSearchCoordinate(false,valid))
+        assertNull(p18InitialSearchCoordinate(true,null))
+        assertNull(p18InitialSearchCoordinate(true,NearbyCoordinate(0.0,0.0)))
+        assertTrue(P18_FIRST_GPS_WAIT_MS in 500L..2_500L)
+    }
+
+    @Test fun fiftyOneResultsRemainDistinctWhenSortedByGps() {
+        val current=NearbyCoordinate(37.480,126.950)
+        val rows=(0..50).map { index ->
+            item.copy(barId="bar-$index",barName="Bar $index",
+                latitude=37.480+index*0.001,longitude=126.950)
+        }.map { it.copy(distanceMeters=p18DisplayDistance(it,current)) }
+        val ordered=p18Sorted(rows.reversed(),P18Sort.DISTANCE,true)
+        assertEquals(51,ordered.size)
+        assertEquals("bar-0",ordered.first().barId)
+        assertEquals("bar-50",ordered.last().barId)
+        assertEquals(51,ordered.map{it.barId}.distinct().size)
+    }
+
     @Test fun aLateGpsFixCanSupplyDistanceWithoutChangingQueryResult() {
         val exact=search("glenfiddich 12","alias_exact")
         assertNull(p18DisplayDistance(item,null))
