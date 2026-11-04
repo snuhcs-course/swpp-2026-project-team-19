@@ -780,7 +780,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             products = (results.map { item ->
                 MockCatalogProduct(item.productId, item.brandId, item.displayName,
                     item.category, item.ageYears, item.editionName,
-                    abvPercent = item.abv, isActive = item.isActive)
+                    abvPercent = item.abv, isActive = item.isActive,
+                    matchedAlias = item.matchedAlias)
             } + before.products).distinctBy { it.productId },
             brands = (before.brands + results.map {
                 MockBrand(it.brandId, it.brandName)
