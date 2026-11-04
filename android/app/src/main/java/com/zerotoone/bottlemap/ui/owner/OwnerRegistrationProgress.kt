@@ -101,8 +101,14 @@ internal fun reapplicationDraftFromRejected(
         certificatePhoto=app.registrationPhotos.firstOrNull {
             it.kind==MockPhotoKind.REGISTRATION_ATTACHMENT
         },
-        applicantGallery=app.registrationPhotos.filter {it.kind==MockPhotoKind.BAR_GALLERY},
-        initialMenuPhotos=app.registrationPhotos.filter {it.kind==MockPhotoKind.MENU_CAPTURE},
+        // A signed server image URL is for read-only display only. A new application
+        // needs fresh picker URI grants, not an attempt to upload remote HTTP URLs.
+        applicantGallery=app.registrationPhotos.filter {
+            it.kind==MockPhotoKind.BAR_GALLERY && !it.uri.startsWith("http", ignoreCase=true)
+        },
+        initialMenuPhotos=app.registrationPhotos.filter {
+            it.kind==MockPhotoKind.MENU_CAPTURE && !it.uri.startsWith("http", ignoreCase=true)
+        },
         resumePageKey="INTRO",
     )
 }
