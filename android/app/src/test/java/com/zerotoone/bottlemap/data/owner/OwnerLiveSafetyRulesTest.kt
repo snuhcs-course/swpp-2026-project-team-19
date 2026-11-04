@@ -90,6 +90,43 @@ class OwnerLiveSafetyRulesTest {
         assertTrue(reviewedServingsByProduct(job, setOf("other")).isEmpty())
     }
 
+    @Test fun failedReplacementNeverDeletesExistingPhoto() {
+        val existing = MockPhoto("old", "https://server/old", MockPhotoKind.BAR_GALLERY)
+        val replacement = MockPhoto("new", "content://new", MockPhotoKind.BAR_GALLERY)
+        val calls = mutableListOf<String>()
+        try {
+            kotlinx.coroutines.runBlocking {
+                replaceOwnerGallerySafely(
+                    old = listOf(existing), now = listOf(replacement),
+                    prepare = { photo -> calls += "prepare:${photo.photoId}"; photo.uri },
+                    upload = { calls += "upload"; error("upload offline") },
+                    delete = { calls += "delete:$it" },
+                    reorder = { calls += "reorder" },
+                )
+            }
+            fail("Upload must fail")
+        } catch (_: IllegalStateException) {
+            assertEquals(listOf("prepare:new", "upload"), calls)
+        }
+    }
+
+    @Test fun replacementUploadPrecedesDestructiveDeleteAndReorder() {
+        val existing = MockPhoto("old", "https://server/old", MockPhotoKind.BAR_GALLERY)
+        val replacement = MockPhoto("new", "content://new", MockPhotoKind.BAR_GALLERY)
+        val calls = mutableListOf<String>()
+        kotlinx.coroutines.runBlocking {
+            replaceOwnerGallerySafely(
+                old = listOf(existing), now = listOf(replacement),
+                prepare = { calls += "prepare"; it.uri },
+                upload = { calls += "upload"; "server-new" },
+                delete = { calls += "delete:$it" },
+                reorder = { calls += "reorder:${it.joinToString(",")}" },
+            )
+        }
+        assertEquals(listOf("prepare", "upload", "delete:old",
+            "reorder:server-new"), calls)
+    }
+
     @Test fun largeCompressedGalleryUsesSampledDecode() {
         assertEquals(4, sampledBitmapSize(8000, 6000))
         assertEquals(1, sampledBitmapSize(2048, 1536))
