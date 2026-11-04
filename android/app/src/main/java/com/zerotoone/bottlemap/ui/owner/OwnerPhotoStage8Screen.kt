@@ -114,7 +114,7 @@ internal fun stage8RetainedPriceMismatchCount(
     val chosen = job.images.flatMap { it.lines }
         .filter { it.kind == MockLineKind.PRODUCT &&
             it.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
-            it.decision?.productId in published.keys }
+            it.decision?.productId?.let(published::containsKey) == true }
         .groupBy { requireNotNull(it.decision?.productId) }
     return chosen.count { (productId, lines) ->
         val retained = published.getValue(productId).options.associateBy {
