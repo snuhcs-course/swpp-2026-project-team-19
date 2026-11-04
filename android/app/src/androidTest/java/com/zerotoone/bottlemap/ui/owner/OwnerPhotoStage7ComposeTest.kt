@@ -62,6 +62,49 @@ class OwnerPhotoStage7ComposeTest {
         compose.onNodeWithTag("stage7-photo-submit").assertIsNotEnabled()
     }
 
+    @Test fun processingJobStateIsDistinctFromRepositoryLoading() {
+        val repository=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            OwnerMockFixtures.registeredBar()))
+        val vm=OwnerMockViewModel(repository)
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoJobScreen(MockOwnerLoadState.Loading,vm,{}, {})
+        } }
+        compose.onNodeWithText("메뉴판 작업 불러오는 중").assertExists()
+        compose.onNodeWithText("저장된 메뉴판 작업을 확인하고 있어요.").assertExists()
+        compose.onNodeWithText("메뉴판을 읽고 있어요").assertDoesNotExist()
+        compose.onNodeWithTag("stage7-job-new-photos").assertDoesNotExist()
+    }
+
+    @Test fun repositoryErrorShowsRetryWithoutPresentingOcrFailure() {
+        val repository=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            OwnerMockFixtures.registeredBar()))
+        val vm=OwnerMockViewModel(repository)
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoJobScreen(MockOwnerLoadState.Error("스토리지 연결 실패"),
+                vm,{}, {})
+        } }
+        compose.onNodeWithText("메뉴판 작업을 불러오지 못했어요").assertExists()
+        compose.onNodeWithText("스토리지 연결 실패").assertExists()
+        compose.onNodeWithTag("stage7-job-repository-retry").assertExists()
+        compose.onNodeWithTag("stage7-failed-retry").assertDoesNotExist()
+        compose.onNodeWithText("메뉴판을 읽지 못했어요").assertDoesNotExist()
+        compose.onNodeWithTag("stage7-job-repository-retry").performClick()
+    }
+
+    @Test fun readyStateWithoutAnyImportOffersFreshPhotoSelection() {
+        val repository=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            OwnerMockFixtures.registeredBar()))
+        val vm=OwnerMockViewModel(repository)
+        var newPhotos=false
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoJobScreen(MockOwnerLoadState.Ready(
+                OwnerMockFixtures.registeredBar()),vm,{}, {newPhotos=true})
+        } }
+        compose.onNodeWithText("진행 중인 메뉴판 작업이 없어요").assertExists()
+        compose.onNodeWithTag("stage7-job-new-photos").performClick()
+        compose.runOnIdle { assertTrue(newPhotos) }
+    }
+
     @Test fun failedImportMatchesActionFirstV4ErrorCopyWithoutExtraDiagnostics() {
         val repository = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
