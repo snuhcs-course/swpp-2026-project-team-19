@@ -34,6 +34,16 @@ internal fun manualBrandProposal(
         }.maxByOrNull { normalizeOwnerCatalogName(it.matchedAlias ?: it.name).length }
 }
 
+/** An inactive server catalogue match stays visible but cannot be selected. */
+internal fun inactiveOwnerCatalogMatch(
+    products: List<MockCatalogProduct>, menuName: String,
+): MockCatalogProduct? {
+    val normalized = normalizeOwnerCatalogName(menuName)
+    if(normalized.isEmpty()) return null
+    return products.firstOrNull { it.catalogMatched && !it.isActive &&
+        normalizeOwnerCatalogName(it.displayName) == normalized }
+}
+
 /** After brand confirmation, propose the single catalog product with matching age. */
 internal fun manualProductProposal(
     products: List<MockCatalogProduct>, menuName: String, category: String,
