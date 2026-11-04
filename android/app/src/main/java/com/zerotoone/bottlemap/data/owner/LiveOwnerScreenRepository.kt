@@ -182,6 +182,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
 
     private suspend fun refresh(expectedGeneration: Int? = null) {
+        val refreshGeneration = expectedGeneration ?: generation.get()
         val token = AppAuth.gateway.currentAccessTokenOrNull()
         if(token == null) {
             pendingCoverWarning = null
@@ -277,7 +278,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             bar.barId to remote.getOwnedMenu(bar.barId)
         }
         // Do not let an older in-flight Owner entry request publish after a newer one.
-        if (expectedGeneration != null && expectedGeneration != generation.get()) return
+        if (refreshGeneration != generation.get()) return
         versionByBar.clear()
         menus.forEach { (id, menu) -> versionByBar[id] = menu.menuVersion }
         val rows = menus.flatMap { (id, menu) -> menuRows(id, menu) }
@@ -341,7 +342,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
         // Never publish a response from a former session after account switch.
         if(AppAuth.gateway.currentAccessTokenOrNull()?.let(::sessionKey) != subject ||
-            (expectedGeneration != null && expectedGeneration != generation.get())) return
+            refreshGeneration != generation.get()) return
         publishSnapshot(old.copy(
             bars = mappedBars, applications = applications.map { application ->
                 val mapped = toApplication(application)
@@ -783,11 +784,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val results = remote.searchCatalogProducts(trimmed)
         val before = snapshot()
         publishSnapshot(before.copy(
-            products = (before.products + results.map { item ->
+            // New catalogue responses override cached activation flags.
+            products = (results.map { item ->
                 MockCatalogProduct(item.productId, item.brandId, item.displayName,
                     item.category, item.ageYears, item.editionName,
                     abvPercent = item.abv, isActive = item.isActive)
-            }).distinctBy { it.productId },
+            } + before.products).distinctBy { it.productId },
             brands = (before.brands + results.map {
                 MockBrand(it.brandId, it.brandName)
             }).distinctBy { it.brandId },
