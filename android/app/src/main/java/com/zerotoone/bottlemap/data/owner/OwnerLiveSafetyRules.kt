@@ -45,7 +45,7 @@ internal fun reviewedServingsByProduct(
 ): Map<String, List<MockMenuOption>> =
     job.images.flatMap { it.lines }
         .filter { it.decision?.kind == MockDecisionKind.SELECT_PRODUCT &&
-            it.decision?.productId in existingProductIds }
+            it.decision?.productId?.let(existingProductIds::contains) == true }
         .groupBy { requireNotNull(it.decision?.productId) }
         .mapValues { (_, lines) ->
             lines.flatMap { it.decision?.correctedOptions ?: it.options }
