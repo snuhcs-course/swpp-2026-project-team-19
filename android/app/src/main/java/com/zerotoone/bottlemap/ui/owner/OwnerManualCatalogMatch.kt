@@ -41,7 +41,8 @@ internal fun inactiveOwnerCatalogMatch(
     val normalized = normalizeOwnerCatalogName(menuName)
     if(normalized.isEmpty()) return null
     return products.firstOrNull { it.catalogMatched && !it.isActive &&
-        normalizeOwnerCatalogName(it.displayName) == normalized }
+        (normalizeOwnerCatalogName(it.displayName) == normalized ||
+            normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) == normalized) }
 }
 
 /** After brand confirmation, propose the single catalog product with matching age. */
