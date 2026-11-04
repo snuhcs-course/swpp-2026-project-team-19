@@ -148,8 +148,11 @@ internal fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier,
 internal fun p18InitiallyCollapsedCategories(highlightCategory: String?): Set<String> {
     val defaults = setOf("cocktail","food","snack","brandy","gin","rum","wine",
         "beer","otheralcohol","other")
-    return if(highlightCategory==null) defaults
-        else defaults - highlightCategory.lowercase(Locale.ROOT)
+    if(highlightCategory == null) return defaults
+    val key = highlightCategory.trim().lowercase(Locale.ROOT)
+    // Product search opens exactly its category. Normally-open whisky must
+    // close when the highlighted product belongs to a different category.
+    return (defaults + setOf("whisky","whiskey")) - key
 }
 
 @Composable
