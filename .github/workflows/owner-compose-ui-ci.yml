@@ -78,7 +78,7 @@ jobs:
           python3 -m unittest discover -s android/ci -p 'test_*.py'
           python3 android/ci/check_test_report.py instrumentation
       - name: Validate and summarize Compose instrumentation coverage
-        run: python3 android/ci/report_coverage.py android/app/build/reports/coverage/androidTest/debug/connected
+        run: python3 android/ci/report_coverage.py --kind instrumentation android/app/build/reports/coverage/androidTest/debug/connected
       - name: Upload Compose instrumentation coverage
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
