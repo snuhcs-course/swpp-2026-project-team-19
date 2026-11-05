@@ -4,8 +4,10 @@ AI-assisted with ChatGPT (2026-11-05). Human review required.
 """
 
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
-from report_coverage import class_group, coverage_totals, percent, table_rows
+from report_coverage import class_group, coverage_totals, percent, summarize, table_rows
 
 
 class CoverageReportParserTest(unittest.TestCase):
@@ -35,6 +37,59 @@ class CoverageReportParserTest(unittest.TestCase):
         self.assertEqual(class_group("BarDto"), "Mapper/DTO-related")
         self.assertEqual(class_group("BackendSearchRepository"), "Repository/Source-related")
         self.assertIsNone(class_group("CustomerScreenKt"))
+
+
+    @staticmethod
+    def _write_report_index(report_dir: Path, missed_lines: int = 2) -> None:
+        # JaCoCo's footer uses 13 cells; overall line coverage is nonzero.
+        cells = [
+            "Total", "2 of 10", "80%", "1 of 4", "75%",
+            "2", "4", str(missed_lines), "8", "1", "1", "1", "1",
+        ]
+        report_dir.joinpath("index.html").write_text(
+            "<table><tfoot><tr>" + "".join(f"<td>{c}</td>" for c in cells)
+            + "</tr></tfoot></table>", encoding="utf-8"
+        )
+
+    def test_exploratory_groups_can_all_be_empty(self):
+        # No matching package/class names must not fail a valid overall report.
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_report_index(root)
+            result = summarize(root)
+            self.assertEqual(result["overall"]["covered_lines"], 6)
+            self.assertEqual(len(result["groups"]), 3)
+            for metrics in result["groups"].values():
+                self.assertEqual(metrics["classes"], 0)
+                self.assertEqual(metrics["total_lines"], 0)
+                self.assertEqual(percent(metrics["covered_lines"], metrics["total_lines"]), "N/A")
+
+    def test_only_some_exploratory_groups_present(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_report_index(root)
+            package = root / "com.zerotoone.bottlemap.ui.customer"
+            package.mkdir()
+            cells = [
+                "SearchViewModel", "2 of 10", "80%", "1 of 4", "75%",
+                "2", "4", "2", "8", "1", "1", "1", "1",
+            ]
+            package.joinpath("index.html").write_text(
+                "<table><tbody><tr>" + "".join(f"<td>{c}</td>" for c in cells)
+                + "</tr></tbody></table>", encoding="utf-8"
+            )
+            result = summarize(root)
+            self.assertEqual(result["groups"]["ViewModel-related"]["covered_lines"], 6)
+            self.assertEqual(result["groups"]["ViewModel-related"]["classes"], 1)
+            self.assertEqual(result["groups"]["Mapper/DTO-related"]["total_lines"], 0)
+            self.assertEqual(result["groups"]["Repository/Source-related"]["total_lines"], 0)
+
+    def test_zero_covered_lines_still_fail_ci(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_report_index(root, missed_lines=8)
+            with self.assertRaisesRegex(ValueError, "zero executable or covered"):
+                summarize(root)
 
 
 if __name__ == "__main__":
