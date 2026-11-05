@@ -381,7 +381,7 @@ class OwnerPhotoStage8ComposeTest {
             val snapshot = (vm.state.value as MockOwnerLoadState.Ready).snapshot
             assertEquals(1, snapshot.menuItems.count { it.barId == "fixture-bar" })
             assertEquals(1, snapshot.imports.last().publishedAddedCount)
-            assertEquals(1, vm.preview("fixture-bar", 0)!!.menuItems.size)
+            assertEquals(1, vm.preview("fixture-bar", 0)!!.visibleMenu.size)
         }
     }
 }
