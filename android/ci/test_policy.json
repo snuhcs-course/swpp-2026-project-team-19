@@ -1,11 +1,11 @@
 {
-  "_comment": "Baseline observed on 2026-11-05 (PR #144): 396 JVM tests and 93 API 35 instrumentation tests, with zero skips. Human-reviewed changes to test inventory require an explicit policy update.",
+  "_comment": "Baseline: 396 JVM tests from PR #144 and 94 API 35 instrumentation tests after I3-P47 Owner publish confirmation regression (previous baseline 93). Update only after evidence and human review.",
   "jvm": {
     "min_tests": 396,
     "allowed_skips": {}
   },
   "instrumentation": {
-    "min_tests": 93,
+    "min_tests": 94,
     "allowed_skips": {}
   }
 }

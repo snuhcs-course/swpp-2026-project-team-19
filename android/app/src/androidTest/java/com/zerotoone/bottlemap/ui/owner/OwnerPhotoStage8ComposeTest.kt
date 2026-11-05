@@ -332,4 +332,56 @@ class OwnerPhotoStage8ComposeTest {
         compose.onNodeWithText("찾는 메뉴가 없어요, 새로 등록").assertExists()
     }
 
+
+    /**
+     * P47 OW-20/OW-21: review completion must never publish by itself.
+     * The owner's explicit publish action commits the menu and shows success.
+     */
+    @Test fun ownerFlowRequiresExplicitPublishBeforeShowingSavedSuccess() {
+        val repository = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        repository.saveBrand(MockBrand("flow-brand", "Suntory"))
+        repository.saveCatalogProduct(
+            MockCatalogProduct("flow-product", "flow-brand", "Hakushu Distiller's Reserve"))
+        val importId = repository.queuePhotoImport("fixture-bar", listOf(
+            MockPhoto("flow-photo", "file:///mock/owner-flow.jpg", MockPhotoKind.MENU_CAPTURE)))
+        repository.finishPhotoImport(importId, MockPhotoExtractionSource {
+            listOf(MockExtractedLine("flow-line", "하쿠슈DR", MockLineKind.PRODUCT,
+                suggestedProductId = "flow-product",
+                options = listOf(MockMenuOption("flow-option", label = "30ml",
+                    pourMl = 30, priceKrw = 19000))))
+        })
+        val vm = OwnerMockViewModel(repository)
+        compose.setContent { MaterialTheme {
+            OwnerPhotoStage8Screen(vm.state.collectAsState().value, vm, {}, {})
+        } }
+
+        compose.onNodeWithText("1줄 확인 시작").performClick()
+        compose.onNodeWithText("맞아요").performClick()
+        compose.onNodeWithText("메뉴 게시").assertExists()
+        compose.onNodeWithText("+  메뉴 1개 게시").assertExists()
+
+        // OW-20: reviewing alone cannot change the customer's published menu.
+        compose.runOnIdle {
+            val snapshot = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(0, snapshot.menuItems.count { it.barId == "fixture-bar" })
+            assertEquals(null, snapshot.imports.last().publishedAddedCount)
+        }
+
+        // OW-21: only this explicit owner action commits and shows the done screen.
+        compose.onNodeWithText("+  메뉴 1개 게시").performClick()
+        compose.waitUntil(timeoutMillis = 10_000) {
+            val state = vm.state.value
+            state is MockOwnerLoadState.Ready &&
+                state.snapshot.imports.last().publishedAddedCount == 1
+        }
+        compose.onNodeWithText("메뉴에 1개를 더했어요").assertExists()
+        compose.onNodeWithText("메뉴 게시 완료", substring = true).assertExists()
+        compose.runOnIdle {
+            val snapshot = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals(1, snapshot.menuItems.count { it.barId == "fixture-bar" })
+            assertEquals(1, snapshot.imports.last().publishedAddedCount)
+            assertEquals(1, vm.preview("fixture-bar", 0)!!.visibleMenu.size)
+        }
+    }
 }
