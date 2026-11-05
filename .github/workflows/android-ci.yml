@@ -97,10 +97,10 @@ jobs:
       - name: Run JUnit 4 local tests and generate JaCoCo coverage
         id: unit_test
         run: ./gradlew :app:createDebugUnitTestCoverageReport --no-daemon
-      - name: Verify coverage report exists
+      - name: Validate JaCoCo report and publish coverage summary
         run: |
-          test -s android/app/build/reports/coverage/test/debug/index.html
-          grep -q 'Total' android/app/build/reports/coverage/test/debug/index.html
+          python3 -m unittest discover -s android/ci -p 'test_*.py'
+          python3 android/ci/report_coverage.py android/app/build/reports/coverage/test/debug
       - name: Summarize JUnit results and reject empty test runs
         if: always()
         shell: bash
