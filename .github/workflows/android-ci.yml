@@ -94,9 +94,13 @@ jobs:
           packages: 'platform-tools'
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v5
-      - name: Run JUnit 4 local tests
+      - name: Run JUnit 4 local tests and generate JaCoCo coverage
         id: unit_test
-        run: ./gradlew :app:testDebugUnitTest --no-daemon
+        run: ./gradlew :app:createDebugUnitTestCoverageReport --no-daemon
+      - name: Verify coverage report exists
+        run: |
+          test -s android/app/build/reports/coverage/test/debug/index.html
+          grep -q 'Total' android/app/build/reports/coverage/test/debug/index.html
       - name: Summarize JUnit results and reject empty test runs
         if: always()
         shell: bash
@@ -127,6 +131,13 @@ jobs:
           PY
         env:
           CI_TESTS_RAN: ${{ steps.unit_test.outcome == 'success' }}
+      - name: Upload Android JVM coverage HTML
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-jvm-coverage
+          path: android/app/build/reports/coverage/test/debug/**
+          if-no-files-found: error
       - name: Upload unit-test XML and HTML reports
         if: always()
         uses: actions/upload-artifact@v7
