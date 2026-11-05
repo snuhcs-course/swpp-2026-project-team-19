@@ -109,12 +109,17 @@ def summarize(report_dir: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("report_dir", type=Path)
+    parser.add_argument("--kind", choices=("jvm", "instrumentation"), default="jvm",
+                        help="Identify which Android test suite produced the coverage")
     args = parser.parse_args()
     results = summarize(args.report_dir)
+    results["coverage_kind"] = args.kind
     overall = results["overall"]
 
     report = [
-        "## Android JVM unit-test coverage (JaCoCo)",
+        ("## Android JVM unit-test coverage (JaCoCo)"
+         if args.kind == "jvm"
+         else "## Android instrumentation / Compose coverage (JaCoCo, API 35 emulator)"),
         "",
         "| Metric | Covered | Total | Coverage |",
         "|---|---:|---:|---:|",
@@ -134,10 +139,20 @@ def main() -> None:
             f"| {layer} | {metrics['covered_lines']:,} | {metrics['total_lines']:,} | "
             f"{percent(metrics['covered_lines'], metrics['total_lines'])} |"
         )
+    if args.kind == "jvm":
+        provenance = (
+            "JVM tests do not render Compose UI or validate on-device SDK behavior. "
+            "Compiled Compose/UI classes still contribute to the coverage denominator."
+        )
+    else:
+        provenance = (
+            "Instrumentation tests execute on the API 35 emulator, including Compose UI; "
+            "they use local fakes and do not validate production service integrations or pixel parity."
+        )
     report += [
         "",
-        "JVM coverage includes compiled Compose/UI classes in the overall denominator; "
-        "it does not establish on-device or SDK behavior. "
+        provenance,
+        "JVM and instrumentation coverage are reported separately, not combined or averaged. "
         "This CI check validates report integrity and nonzero coverage only; "
         "no team-approved numerical percentage gate is applied.",
         "",
