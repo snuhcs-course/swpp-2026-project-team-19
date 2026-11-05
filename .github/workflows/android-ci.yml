@@ -101,36 +101,9 @@ jobs:
         run: |
           python3 -m unittest discover -s android/ci -p 'test_*.py'
           python3 android/ci/report_coverage.py android/app/build/reports/coverage/test/debug
-      - name: Summarize JUnit results and reject empty test runs
-        if: always()
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import glob
-          import os
-          import xml.etree.ElementTree as ET
-          variants = ("Debug",)
-          files = []
-          for variant in variants:
-              variant_files = glob.glob(f"android/app/build/test-results/test{variant}UnitTest/TEST-*.xml")
-              if not variant_files and os.environ.get("CI_TESTS_RAN") == "true":
-                  raise SystemExit(f"No {variant} JUnit XML files; refusing an empty test run")
-              files.extend(variant_files)
-          counts = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
-          for file in files:
-              suite = ET.parse(file).getroot()
-              for key in counts:
-                  counts[key] += int(suite.attrib.get(key, "0"))
-          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as out:
-              out.write("## Android JUnit 4 local tests\n\n")
-              out.write("| Tests | Failures | Errors | Skipped |\n")
-              out.write("|---:|---:|---:|---:|\n")
-              out.write("| {tests} | {failures} | {errors} | {skipped} |\n".format(**counts))
-          if counts["tests"] == 0 and os.environ.get("CI_TESTS_RAN") == "true":
-              raise SystemExit("No JUnit tests executed; failing rather than accepting an empty test run")
-          PY
-        env:
-          CI_TESTS_RAN: ${{ steps.unit_test.outcome == 'success' }}
+      - name: Enforce JVM test inventory and approved skip policy
+        if: ${{ !cancelled() }}
+        run: python3 android/ci/check_test_report.py jvm
       - name: Upload Android JVM coverage HTML
         if: success()
         uses: actions/upload-artifact@v7
