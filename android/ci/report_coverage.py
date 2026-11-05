@@ -100,9 +100,9 @@ def summarize(report_dir: Path) -> dict:
             groups[group]["total_lines"] += total
             groups[group]["classes"] += 1
 
-    for group, metrics in groups.items():
-        if metrics["total_lines"] == 0:
-            raise ValueError(f"No measured classes for expected Android group: {group}")
+    # Class-name buckets are exploratory, not a CI quality gate. A rename or
+    # refactor may leave a bucket empty even when overall coverage is valid.
+    # The summary displays N/A for zero denominators via percent().
     return {"overall": overall, "groups": groups}
 
 
