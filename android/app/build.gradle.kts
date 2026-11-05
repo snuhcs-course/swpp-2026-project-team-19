@@ -42,6 +42,9 @@ android {
     // One APK for customer and owner flows.
     buildTypes {
         debug {
+            // I3 Android JVM coverage: AGP 9.3 uses built-in JaCoCo for local unit tests.
+            // Instrumented/device coverage is intentionally not included.
+            enableUnitTestCoverage = true
             buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
         }
         release {
