@@ -42,6 +42,12 @@ android {
     // One APK for customer and owner flows.
     buildTypes {
         debug {
+            // AGP's built-in JaCoCo collects local JVM coverage.
+            enableUnitTestCoverage = true
+            // Instrument Compose tests only when explicitly requested by the emulator CI.
+            // Default debug APKs (including the deployed-server APK) stay uninstrumented.
+            enableAndroidTestCoverage = providers.gradleProperty("BOTTLEMAP_ANDROID_TEST_COVERAGE")
+                .orNull == "true"
             buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
         }
         release {

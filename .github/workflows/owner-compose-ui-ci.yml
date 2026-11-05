@@ -69,7 +69,23 @@ jobs:
           profile: pixel_2
           disable-animations: true
           emulator-boot-timeout: 600
-          script: ./gradlew :app:connectedDebugAndroidTest --no-daemon
+          # AGP's coverage task runs the same connected tests and generates JaCoCo HTML.
+          # Explicit property keeps regular debug/deployed APKs free of instrumentation.
+          script: ./gradlew :app:createDebugAndroidTestCoverageReport -PBOTTLEMAP_ANDROID_TEST_COVERAGE=true --no-daemon
+      - name: Check Android instrumentation test inventory and skips
+        if: ${{ !cancelled() }}
+        run: |
+          python3 -m unittest discover -s android/ci -p 'test_*.py'
+          python3 android/ci/check_test_report.py instrumentation
+      - name: Validate and summarize Compose instrumentation coverage
+        run: python3 android/ci/report_coverage.py --kind instrumentation android/app/build/reports/coverage/androidTest/debug/connected
+      - name: Upload Compose instrumentation coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-compose-coverage
+          path: android/app/build/reports/coverage/androidTest/debug/connected/**
+          if-no-files-found: warn
       - name: Upload Compose instrumentation results
         if: always()
         uses: actions/upload-artifact@v7
