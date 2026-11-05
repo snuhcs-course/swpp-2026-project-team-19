@@ -4,6 +4,10 @@ AI-assisted with ChatGPT (2026-11-05). Human review required.
 """
 
 import unittest
+import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -90,6 +94,39 @@ class CoverageReportParserTest(unittest.TestCase):
             self._write_report_index(root, missed_lines=8)
             with self.assertRaisesRegex(ValueError, "zero executable or covered"):
                 summarize(root)
+
+
+    def test_instrumentation_cli_labels_and_records_coverage_provenance(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_report_index(root)
+            command = [
+                sys.executable, str(Path(__file__).with_name("report_coverage.py")),
+                "--kind", "instrumentation", directory,
+            ]
+            env = {k: v for k, v in os.environ.items() if k != "GITHUB_STEP_SUMMARY"}
+            result = subprocess.run(command, check=True, capture_output=True, text=True, env=env)
+            self.assertIn("Android instrumentation / Compose coverage", result.stdout)
+            self.assertNotIn("## Android JVM unit-test coverage", result.stdout)
+            self.assertIn("API 35 emulator", result.stdout)
+            self.assertEqual(
+                json.loads((root / "coverage-summary.json").read_text())["coverage_kind"],
+                "instrumentation"
+            )
+
+    def test_jvm_cli_retains_distinct_unit_test_label(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_report_index(root)
+            env = {k: v for k, v in os.environ.items() if k != "GITHUB_STEP_SUMMARY"}
+            result = subprocess.run([
+                sys.executable, str(Path(__file__).with_name("report_coverage.py")), directory,
+            ], check=True, capture_output=True, text=True, env=env)
+            self.assertIn("Android JVM unit-test coverage", result.stdout)
+            self.assertNotIn("## Android instrumentation / Compose coverage", result.stdout)
+            self.assertEqual(
+                json.loads((root / "coverage-summary.json").read_text())["coverage_kind"], "jvm"
+            )
 
 
 if __name__ == "__main__":
