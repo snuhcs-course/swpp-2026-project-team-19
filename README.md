@@ -68,7 +68,8 @@ Demo order:
 
 ### AI / Data
 - Hybrid menu extraction: CLOVA OCR lines and the photo go to Gemini together
-- Staged matching rules (exact alias, then S1 to S3); an LLM matching layer and an embedding candidate step are implemented behind settings
+- Staged matching rules (exact alias, then S1 to S3), then an LLM matching layer (Gemini) for the lines the rules leave unconfirmed, and an embedding candidate step that suggests catalog products for the owner to check; both are on in the deployed server
+- Similar-product suggestions in customer search: implemented but off in the deployed server
 - Business certificate reading
 - Catalog additions for Iteration 3 with Korean aliases
 
@@ -81,7 +82,7 @@ Demo order:
 
 **Android:** Kotlin, Jetpack Compose, Material 3, Navigation Compose, ViewModel, Retrofit, OkHttp, Moshi, Kakao Maps SDK, Supabase Auth (Google sign-in)  
 **Backend:** FastAPI, PostgreSQL, SQLAlchemy, Alembic  
-**AI:** CLOVA OCR + Gemini (hybrid extraction), catalog aliases with staged matching rules  
+**AI:** CLOVA OCR + Gemini (hybrid extraction), catalog aliases with staged matching rules, Gemini LLM matching, embedding candidates  
 **Deployment:** AWS EC2, RDS, S3, Caddy/HTTPS, GitHub Actions
 
 ## Repository Structure
