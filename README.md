@@ -39,7 +39,7 @@ Customer (guest or Google sign-in)
 
 ### Demo Video
 
-[Iteration 3 demo video link](https://drive.google.com/file/d/1JVYDqwHtjMStlmXJknWy8VI7wWZI1q8O/view?usp=drive_link)
+[Iteration 3 demo video link](https://drive.google.com/file/d/1IzBaMz8qPaT66ZUSlP6Px6qHxt2Fm-cQ/view?usp=sharing)
 
 Demo order:
 - **Owner:** apply to register a bar (business certificate OCR, bar info, menu photos) → check the application status → AI reads the menu photos → match items to the catalog and review → publish the menu → manage the menu (prices per volume, sold out) → manage bar info (hours, tags, closures)
@@ -97,6 +97,24 @@ Demo order:
 ├── .github/     CI/CD workflows
 └── README.md
 ```
+
+## Running the Demo
+
+The demo runs the app against the deployed server; no local backend is needed.
+
+1. **Install the app.** Download the latest `bottlemap-prod-debug-apk` artifact from an Android CI run on `main` in GitHub Actions (sign in to GitHub; artifacts expire after the retention period), unzip it, and install the APK on an Android 8.0 (API 26) or later device. To build it yourself, see [Build](#build); a self-built APK needs the team's keys, and Kakao Map works only with a signing key registered in Kakao Developers.
+2. **Customer flow.** Open BottleMap. Customer search is the first screen and needs no sign-in: search for a whisky, compare the serving bars, open a bar, and browse bars on the map.
+3. **Owner flow.** Sign in with Google from My Page and open the Owner entry. Apply to own an existing bar or register a new one (business certificate photo, bar info, menu photos). An operator must approve the application before the menu import and bar management screens open; operators are team members, so ask the team to approve it.
+4. **After approval.** Wait for the AI to read the menu photos (about 50 seconds per photo), review and match the items, publish the menu, then edit prices, sold-out items, hours, tags, and closures. The published menu appears in customer search.
+
+### Environment Used for the Demo
+
+| | |
+|---|---|
+| Device | Samsung Galaxy S22, Android 13 |
+| App | Debug APK from Android CI (`bottlemap-prod-debug-apk`), built against the deployed server |
+| Server | Deployed backend `https://bottlemap.o-r.kr/` on AWS Seoul (EC2, RDS PostgreSQL, S3) |
+| Development | Android Studio, JDK 17, Android SDK 37 (minimum SDK 26); backend Python 3.12+ with `uv`, PostgreSQL |
 
 ## Getting Started
 
