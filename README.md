@@ -64,7 +64,7 @@ Demo order:
 
 ### Backend
 - APIs for owner applications and approval, business certificate reading and verification, menu edits, opening hours, bar photos, and popular whiskies
-- Permissions checked on the server for every route: operator, the bar's approved owner, or public
+- Permissions checked on the server for every route (public, signed-in user, applicant, approved owner, or operator; spec 2.2)
 
 ### AI / Data
 - Hybrid menu extraction: CLOVA OCR lines and the photo go to Gemini together
@@ -74,7 +74,7 @@ Demo order:
 
 ### CI/CD
 - **Backend CI/CD:** tests on PostgreSQL; fails below 98% line + branch coverage, below the minimum test count, or on an unlisted skip. `main` is deployed to the server after the tests pass
-- **Android CI:** lint, JVM unit tests with a JaCoCo coverage report, and the debug APK build; Owner Compose UI tests with coverage on an API 35 emulator. A merge to `main` builds `bottlemap-prod-debug-apk` against the deployed server
+- **Android CI:** lint, JVM unit tests with a JaCoCo coverage report, and the debug APK build; instrumentation tests, including Compose UI tests, with coverage on an API 35 emulator. A merge to `main` builds `bottlemap-prod-debug-apk` against the deployed server
 - **AI CI:** AI unit tests with per-module coverage and a check that fails when tests are deleted or skipped
 
 ## Tech Stack
@@ -168,7 +168,7 @@ uv run --env-file .env uvicorn app.main:app --reload    # http://127.0.0.1:8000
 # Android
 ./gradlew :app:lintDebug
 ./gradlew :app:createDebugUnitTestCoverageReport                 # JVM unit tests + JaCoCo report
-./gradlew :app:connectedDebugAndroidTest                         # Compose UI tests (emulator or device)
+./gradlew :app:connectedDebugAndroidTest                         # instrumentation tests, including Compose UI (emulator or device)
 ./gradlew :app:assembleDebug
 
 # Backend (PostgreSQL test database, see backend/README.md)
@@ -181,13 +181,12 @@ pytest ai
 Iteration 3 results (details in the Testing Documentation):
 - **Backend:** 2,503 tests passed, 99.62% line + branch coverage
 - **AI:** 253 tests (252 passed, 1 allowed skip that needs live CLOVA keys); coverage targets met for all four modules
-- **Android:** 396 JVM unit tests (JaCoCo: 15.00% line, 17.97% branch; reported, not enforced) and 94 Compose UI tests on an API 35 emulator (JaCoCo: 28.57% line, 22.21% branch). The two reports are measured separately and not combined
+- **Android:** 396 JVM unit tests (JaCoCo: 15.00% line, 17.97% branch; reported, not enforced) and 94 instrumentation tests, including Compose UI tests, on an API 35 emulator (JaCoCo: 28.57% line, 22.21% branch). The two reports are measured separately and not combined
 
 ## Known Limitations and TODOs
 
 - **Processing time:** reading one menu photo takes about 50 seconds. Processing runs inside the API process, so a server restart during processing can leave an import in `processing`.
 - **Menu coverage:** only whisky items are imported; cocktails and food are left out. Menus that exist only as a web page (for example, a QR-code menu) cannot be imported yet.
-- **Several volumes:** how to show one menu item sold in several volumes is not settled yet.
 - **Matching:** Menus written in Korean transliteration are still often left for the owner to match.
 - **Usability:** UI tests cover the key flows, but real-device testing with users is still needed.
 
