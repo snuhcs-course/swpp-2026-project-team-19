@@ -204,6 +204,43 @@ apply
 ignore
 ```
 
+### 2.4 실제 응답 예시
+
+3.11.18, 3.14.10, 3.15.7, 3.16.7, 5.8, 8.9의 예시는 2026-11-09에 로컬 서버(`uvicorn`, PostgreSQL, mock 메뉴 추출기)를 띄우고 HTTP로 호출해 받은 응답이다. 다른 절의 예시는 설명을 위해 손으로 쓴 값이다.
+
+- 바꾼 값은 다음뿐이다. 나머지(필드, 순서, 시각, 문구, 숫자)는 받은 그대로다.
+  - **ID**: 문서의 자리표시 ID로 바꾸었다. 첫 글자로 종류를 나눈다: 사용자 `1111…`, 업장 `2222…`, 상품 `4444…`, 메뉴 항목 `5555…`, 메뉴판 `6666…`, 메뉴 등록 작업 `7777…`, 업주 신청 `cccc…`, 브랜드 `dddd…`, 매장 사진 `aaaa…`, 추출 항목 `1000…`, 추출 옵션 `2000…`, 변경 `3000…`, 저장소 경로에만 나오는 ID `ffff…`. 같은 ID는 문서 전체에서 같은 값이다.
+  - **호스트**: `http://127.0.0.1:8000/`을 `https://bottlemap.o-r.kr/`로 바꾸었다.
+  - **비공개 사진 URL**: 로컬 저장소의 `http://127.0.0.1:8000/media/...`을 `https://storage.example.com/signed/...`로 바꾸었다. 로컬 저장소는 만료되지 않는 URL을 주므로 `imageUrlExpiresAt`이 `null`이다. 배포 서버(S3)에서는 만료 시각이 들어 있다.
+- 국세청 진위확인(3.11.2, 3.11.13, 3.11.16)만 가짜 검증기로 바꾸어 `matched`, `not_matched`, 연결 실패를 만들었다. 사업자등록증 OCR(3.11.12)은 서버에 설정이 없는 상태의 응답이다.
+- 호출자별 결과 표의 열은 다음 사용자다. 칸의 값은 실제로 받은 HTTP 상태 코드다.
+  - **비로그인**: `Authorization` 헤더 없음
+  - **customer**: 어느 업장의 업주도 아닌 `customer`
+  - **다른 업장의 업주**: 대상이 아닌 업장(신림 몰트 하우스)의 업주
+  - **해당 업장의 업주**: 대상 업장(관악 위스키 바, `22222222-2222-4222-8222-222222222222`)의 업주
+  - **operator**: 업주가 아닌 `operator`
+- 모든 API에서 같은 `401`과 `403` 본문은 아래에 한 번만 싣는다.
+
+`401 UNAUTHENTICATED` (3.1.5). `code`와 형식은 같고 `message`만 다르다.
+
+토큰 없음
+
+```json
+{"error": {"code": "UNAUTHENTICATED", "message": "로그인이 필요합니다.", "details": null, "fieldErrors": []}}
+```
+
+토큰 만료, 서명 오류 등 토큰을 받아들일 수 없음
+
+```json
+{"error": {"code": "UNAUTHENTICATED", "message": "로그인 정보가 만료되었거나 올바르지 않습니다. 다시 로그인해 주세요.", "details": null, "fieldErrors": []}}
+```
+
+`403 FORBIDDEN` (operator 전용 API, 또는 operator도 대상 업장의 업주도 아님)
+
+```json
+{"error": {"code": "FORBIDDEN", "message": "이 작업을 할 권한이 없습니다.", "details": null, "fieldErrors": []}}
+```
+
 ## 3. API 요약
 
 | 메서드 | 경로 | 용도 |
@@ -1398,7 +1435,7 @@ closed      폐업자
 | `representativeName` | 문자열 | 아니오 | 사업자등록증의 대표자 성명 |
 | `openingDate` | `YYYY-MM-DD` 문자열 | 아니오 | 사업자등록증의 개업연월일 |
 | `businessStatus` | `BusinessStatus` | 예 | 마지막 검증에서 국세청이 알려 준 사업자 상태. 검증 결과가 `matched`가 아니거나 국세청이 상태를 알려 주지 않으면 `null`. 신청자에게도 보여 준다 |
-| `businessVerification` | 객체 | 예 | operator에게만 값이 있고, 신청자 본인이 조회하면 `null` |
+| `businessVerification` | 객체 | 예 | operator에게만 값이 있고, 신청자 본인이 조회하면 `null`. operator가 자기 신청을 신청(3.11.2), 상세 조회(3.11.4), 취소(3.11.5), 사진 변경(3.11.15, 3.11.17)하면 응답에 값이 있다. 내 신청 목록(3.11.3)에서는 operator도 `null`이다 |
 | `businessVerification.result` | `BusinessVerificationResult` | 아니오 | 마지막 검증 결과 |
 | `businessVerification.checkedAt` | RFC 3339 문자열 | 아니오 | `result`를 얻은 시각. 신청할 때 `unavailable`이 되었으면 그 시도 시각이다. 다시 검증(3.11.13)이 실패하면 `result`와 함께 바뀌지 않는다 |
 | `contactPhone` | 문자열 | 아니오 | 운영자가 확인을 위해 연락할 번호 |
@@ -1982,7 +2019,7 @@ Authorization: Bearer <access-token>
 2. 신청과 신청자 (`404 OWNER_APPLICATION_NOT_FOUND`)
 3. 신청 종류 (`409 INVALID_APPLICATION_TYPE`)
 4. 신청 상태 (`409 INVALID_APPLICATION_STATE`)
-5. 사진 (3.16.2와 같다): 크기(`413 UPLOAD_TOO_LARGE`), 형식(`415 UNSUPPORTED_IMAGE_TYPE`), 가로세로(`422 IMAGE_DIMENSIONS_TOO_LARGE`)
+5. 사진 (3.16.2와 같다): 크기(`413 UPLOAD_TOO_LARGE`), 형식(`415 UNSUPPORTED_IMAGE_TYPE`), 가로세로(`422 VALIDATION_FAILED`, `fieldErrors[].code = IMAGE_DIMENSIONS_TOO_LARGE`)
 
 `200 OK`, 본문은 `OwnerApplication`(3.11.1)이며 `coverPhoto`에 저장한 사진이 들어 있다(`DELETE`는 `null`).
 
@@ -1997,6 +2034,234 @@ Authorization: Bearer <access-token>
 | `422` | `VALIDATION_FAILED` | `image` 없음이나 두 개 이상, 긴 변 2048px 초과(`IMAGE_DIMENSIONS_TOO_LARGE`) | `fieldErrors` 표시. `IMAGE_DIMENSIONS_TOO_LARGE`이면 줄여서 다시 올림 |
 
 신청 순서는 3.11.2로 신청을 만든 뒤 이 API와 3.11.15를 호출하는 것이다. 신청은 만들어졌지만 사진 업로드가 실패하면, 신청을 다시 만들지 않고 같은 `applicationId`로 이 API만 다시 호출한다.
+
+#### 3.11.18 실제 응답 예시와 호출자별 결과
+
+2.4의 방법으로 받은 응답이다. 김사장이 `new_bar` 신청으로 관악 위스키 바를 등록하는 흐름을 따른다.
+
+**신청 (3.11.2)**. 신청 전 확인(3.11.16)에서 `{"result": "matched"}`를 받은 뒤 같은 세 값으로 신청했으므로 국세청을 다시 부르지 않았다.
+
+```json
+{
+  "applicationType": "new_bar",
+  "proposedBar": {
+    "name": "관악 위스키 바",
+    "address": "서울특별시 관악구 관악로 1 2층",
+    "phone": "02-000-0000"
+  },
+  "businessRegistrationNumber": "123-45-67891",
+  "representativeName": "김사장",
+  "openingDate": "2020-03-02",
+  "contactPhone": "010-1234-5678",
+  "applicantNote": "대표 본인입니다"
+}
+```
+
+```http
+HTTP/1.1 201 Created
+Location: /api/owner-applications/cccccccc-cccc-4ccc-8ccc-ccccccccccc1
+```
+
+**사진 올리기 (3.11.15, 3.11.17)**. 두 API 모두 multipart이며, 메뉴판 사진은 같은 필드 이름(`images`)을 보낼 순서대로 반복한다.
+
+```sh
+curl -X PUT https://bottlemap.o-r.kr/api/owner-applications/cccccccc-cccc-4ccc-8ccc-ccccccccccc1/menu-photos \
+  -H "Authorization: Bearer <access-token>" \
+  -F "images=@menu-1.jpg;type=image/jpeg" \
+  -F "images=@menu-2.jpg;type=image/jpeg"
+
+curl -X PUT https://bottlemap.o-r.kr/api/owner-applications/cccccccc-cccc-4ccc-8ccc-ccccccccccc1/cover-photo \
+  -H "Authorization: Bearer <access-token>" \
+  -F "image=@storefront.jpg;type=image/jpeg"
+```
+
+**사진을 올린 뒤 신청자 본인이 본 신청 (3.11.4)**. 신청자 본인에게는 `businessVerification`이 `null`이고 `businessStatus`만 보인다.
+
+```json
+{
+  "applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+  "applicationType": "new_bar",
+  "status": "pending",
+  "applicant": {
+    "userId": "11111111-1111-4111-8111-111111111111",
+    "email": "owner@example.com",
+    "displayName": "김사장"
+  },
+  "bar": null,
+  "proposedBar": {
+    "name": "관악 위스키 바",
+    "address": "서울특별시 관악구 관악로 1 2층",
+    "phone": "02-000-0000"
+  },
+  "businessRegistrationNumber": "1234567891",
+  "representativeName": "김사장",
+  "openingDate": "2020-03-02",
+  "businessStatus": "active",
+  "businessVerification": null,
+  "contactPhone": "010-1234-5678",
+  "applicantNote": "대표 본인입니다",
+  "menuPhotos": [
+    {
+      "imageOrder": 1,
+      "imageUrl": "https://storage.example.com/signed/owner-applications/cccccccc-cccc-4ccc-8ccc-ccccccccccc1/ffffffff-ffff-4fff-8fff-fffffffffff2/page-1.jpg",
+      "imageUrlExpiresAt": null
+    },
+    {
+      "imageOrder": 2,
+      "imageUrl": "https://storage.example.com/signed/owner-applications/cccccccc-cccc-4ccc-8ccc-ccccccccccc1/ffffffff-ffff-4fff-8fff-fffffffffff2/page-2.jpg",
+      "imageUrlExpiresAt": null
+    }
+  ],
+  "coverPhoto": {
+    "imageUrl": "https://storage.example.com/signed/owner-applications/cccccccc-cccc-4ccc-8ccc-ccccccccccc1/cover/ffffffff-ffff-4fff-8fff-fffffffffff1.jpg",
+    "thumbnailUrl": "https://storage.example.com/signed/owner-applications/cccccccc-cccc-4ccc-8ccc-ccccccccccc1/cover/ffffffff-ffff-4fff-8fff-fffffffffff1-thumb.jpg",
+    "imageUrlExpiresAt": null
+  },
+  "rejectionReason": null,
+  "reviewedAt": null,
+  "createdAt": "2026-11-09T12:44:47.655775Z",
+  "updatedAt": "2026-11-09T12:44:47.770402Z"
+}
+```
+
+**operator의 목록 (3.11.6)**. `GET /api/owner-applications?limit=1`. 각 신청은 위와 같고 `businessVerification`만 채워져 있다. 다음 페이지가 있으므로 `nextCursor`가 있다.
+
+```json
+{
+  "items": [
+    {
+      "applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+      "status": "pending",
+      "businessVerification": {
+        "result": "matched",
+        "checkedAt": "2026-11-09T12:44:47.636619Z"
+      },
+      "...": "나머지는 위 신청과 같다"
+    }
+  ],
+  "nextCursor": "WyJwZW5kaW5nIixudWxsLG51bGwsIjIwMjYtMTEtMDlUMjE6NDQ6NDcuNjU1Nzc1KzA5OjAwIiwiY2NjY2NjY2MtY2NjYy00Y2NjLThjY2MtY2NjY2NjY2NjY2MxIl0"
+}
+```
+
+**승인 (3.11.7)**. 3.11.7의 요청 예시와 같은 형식으로 좌표를 보냈다. 응답에서 바뀐 필드는 다음과 같다. 대표 사진은 업장의 첫 매장 사진으로 옮겨져 `coverPhoto`가 `null`이 되고, 메뉴판 사진은 메뉴 등록 작업의 사진으로 남는다.
+
+```json
+{
+  "applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1",
+  "status": "approved",
+  "bar": {
+    "barId": "22222222-2222-4222-8222-222222222222",
+    "name": "관악 위스키 바",
+    "address": "서울특별시 관악구 관악로 1 2층"
+  },
+  "coverPhoto": null,
+  "reviewedAt": "2026-11-09T12:44:47.928467Z",
+  "updatedAt": "2026-11-09T12:44:47.926513Z",
+  "...": "나머지는 승인 전과 같다"
+}
+```
+
+**거절 (3.11.8)**. 다른 사용자의 `new_bar` 신청을 `{"reason": "사업장 주소에서 매장을 확인할 수 없습니다."}`로 거절했다. 취소(3.11.5)도 `status = canceled`이고 `rejectionReason`이 `null`인 것 말고는 같은 모양이다.
+
+```json
+{
+  "applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc5",
+  "status": "rejected",
+  "bar": null,
+  "menuPhotos": [],
+  "coverPhoto": null,
+  "rejectionReason": "사업장 주소에서 매장을 확인할 수 없습니다.",
+  "reviewedAt": "2026-11-09T12:44:48.259912Z",
+  "...": "나머지는 거절 전과 같다"
+}
+```
+
+**대표 오류**
+
+같은 신청을 다시 냈을 때 (`409`, 3.11.2). `details.applicationId`의 신청으로 이동한다.
+
+```json
+{"error": {"code": "OWNER_APPLICATION_EXISTS", "message": "이미 처리 중인 업주 신청이 있습니다.", "details": {"applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc1"}, "fieldErrors": []}}
+```
+
+이미 업주가 있는 업장에 `existing_bar`로 신청했을 때 (`409`, 3.11.2)
+
+```json
+{"error": {"code": "BAR_OWNER_EXISTS", "message": "이미 업주가 등록된 업장입니다.", "details": null, "fieldErrors": []}}
+```
+
+세 값이 국세청 정보와 맞지 않을 때 (`422`, 3.11.2). 신청은 만들어지지 않는다.
+
+```json
+{"error": {"code": "BUSINESS_VERIFICATION_FAILED", "message": "사업자등록번호, 대표자명, 개업일자가 사업자등록증과 같은지 확인해 주세요.", "details": null, "fieldErrors": []}}
+```
+
+사업자등록번호의 검증번호가 틀렸을 때와 `applicationType`이 없을 때 (`422`, 3.11.2). 두 경우 모두 `VALIDATION_FAILED`이며 `fieldErrors`만 다르다. `applicationType`이 없으면 `path`가 빈 문자열이다.
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "입력값을 확인해 주세요.",
+    "details": null,
+    "fieldErrors": [
+      {
+        "path": "businessRegistrationNumber",
+        "code": "INVALID_BUSINESS_NUMBER",
+        "message": "사업자등록번호를 확인해 주세요."
+      }
+    ]
+  }
+}
+```
+
+```json
+{
+  "fieldErrors": [
+    {
+      "path": "",
+      "code": "UNION_TAG_NOT_FOUND",
+      "message": "Unable to extract tag using discriminator 'applicationType'"
+    }
+  ]
+}
+```
+
+이미 승인한 신청을 다시 승인했을 때 (`409`, 3.11.7). 거절, 취소, 사진 변경, 다시 검증도 `pending`이 아니면 같다.
+
+```json
+{"error": {"code": "INVALID_APPLICATION_STATE", "message": "이미 처리된 업주 신청입니다.", "details": {"status": "approved"}, "fieldErrors": []}}
+```
+
+`existing_bar` 신청에 대표 사진을 올렸을 때 (`409`, 3.11.17)
+
+```json
+{"error": {"code": "INVALID_APPLICATION_TYPE", "message": "새 업장 신청에만 대표 사진을 올릴 수 있습니다.", "details": {"applicationType": "existing_bar"}, "fieldErrors": []}}
+```
+
+서버에 OCR 설정이 없을 때 (`503`, 3.11.12)
+
+```json
+{"error": {"code": "OCR_UNAVAILABLE", "message": "지금은 사업자등록증 사진을 읽을 수 없습니다. 값을 직접 입력해 주세요.", "details": null, "fieldErrors": []}}
+```
+
+**호출자별 결과**. 대상은 customer의 `pending` 신청이다(`existing_bar` 신청, 대표 사진 행은 `new_bar` 신청). 업주 신청은 업장이 아니라 신청자 기준이므로 2.4의 열 대신 아래 열을 쓴다. "다른 로그인 사용자"는 두 업주(대상 업장의 업주와 다른 업장의 업주)로 호출했으며 결과가 같았다.
+
+| API | 비로그인 | 신청자 본인 (customer) | 다른 로그인 사용자 | operator |
+|---|---|---|---|---|
+| `POST /api/owner-applications` | `401` | `201` | `201` | `201` |
+| `GET /api/me/owner-applications` | `401` | `200` | `200` (본인 신청만) | `200` (본인 신청만) |
+| `GET /api/owner-applications/{applicationId}` | `401` | `200` | `404` | `200` |
+| `POST .../cancel` | `401` | `200` | `404` | `404` |
+| `PUT .../menu-photos` | `401` | `200` | `404` | `404` |
+| `PUT .../cover-photo`, `DELETE .../cover-photo` | `401` | `200` | `404` | `404` |
+| `GET /api/owner-applications` | `401` | `403` | `403` | `200` |
+| `POST .../approve`, `POST .../verify-business` | `401` | `403` | `403` | `200` |
+| `POST .../reject` (이미 거절한 신청) | `401` | `403` | `403` | `409` |
+| `DELETE /api/bars/{barId}/owner` (업주가 없는 업장) | `401` | `403` | `403` | `404` |
+| `GET /api/me/bars` | `401` | `200` (`items = []`) | `200` (본인 업장만) | `200` (`items = []`) |
+
+`POST /api/owner-applications`의 `201`은 각자 자기 신청을 만든 결과다. operator가 아닌 호출자는 대상이 없거나 끝난 신청에도 `403`을 받는다(2.2의 검사 순서).
 
 ### 3.12 내 주변 업장 조회
 
@@ -2461,6 +2726,201 @@ Content-Type: application/json
 | `409` | `NO_PUBLISHED_MENU` | 메뉴판이 없거나 항목이 없음 | "지금도 맞아요" 버튼을 숨기고 메뉴 등록으로 안내 |
 | `422` | `VALIDATION_FAILED` | `menuVersion` 필드가 없음(`MISSING`)이나 정수도 `null`도 아님 | `fieldErrors` 표시 |
 
+#### 3.14.10 실제 응답 예시와 호출자별 결과
+
+2.4의 방법으로 받은 응답이다. 관악 위스키 바는 검수 반영(8.9)으로 글렌피딕 12년 한 항목이 게시된 상태(`menuVersion = 1`)에서 시작한다. 성공 응답은 3.9와 같은 형식이므로 바뀐 부분만 싣는다.
+
+**항목 추가 (3.14.3)**
+
+```json
+{
+  "menuVersion": 1,
+  "productId": "44444444-4444-4444-8444-444444444442",
+  "displayName": "맥캘란 12년 더블캐스크",
+  "options": [
+    { "optionLabel": "잔", "pourMl": 30, "priceKrw": 22000 },
+    { "optionLabel": "병", "pourMl": null, "priceKrw": 210000 }
+  ]
+}
+```
+
+`201 Created`. `menuVersion`이 1 오르고 새 항목이 맨 끝에 붙는다.
+
+```json
+{
+  "barId": "22222222-2222-4222-8222-222222222222",
+  "menuBoardId": "66666666-6666-4666-8666-666666666661",
+  "menuVersion": 2,
+  "publishedAt": "2026-11-09T12:47:30.129760Z",
+  "items": [
+    { "barMenuItemId": "55555555-5555-4555-8555-555555555551", "displayName": "글렌피딕 12년", "...": "그대로" },
+    {
+      "menuBoardEntryId": "88888888-8888-4888-8888-888888888882",
+      "barMenuItemId": "55555555-5555-4555-8555-555555555552",
+      "productId": "44444444-4444-4444-8444-444444444442",
+      "productName": "The Macallan 12 Double Cask",
+      "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd2",
+      "brandName": "The Macallan",
+      "category": "whisky",
+      "displayName": "맥캘란 12년 더블캐스크",
+      "sortOrder": 2,
+      "soldOut": false,
+      "options": [
+        {
+          "menuEntryOptionId": "99999999-9999-4999-8999-999999999993",
+          "optionLabel": "잔",
+          "pourMl": 30,
+          "priceKrw": 22000,
+          "discount": null,
+          "sortOrder": 1
+        },
+        {
+          "menuEntryOptionId": "99999999-9999-4999-8999-999999999994",
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 210000,
+          "discount": null,
+          "sortOrder": 2
+        }
+      ]
+    }
+  ],
+  "...": "업장 정보는 3.9와 같다"
+}
+```
+
+**항목 수정 (3.14.4)**. 잔 옵션에 할인을 넣고 병 옵션은 `"discount": null`로 보냈다(`menuVersion: 2`). 응답의 그 항목이다. 옵션 전체가 바뀌므로 `menuEntryOptionId`도 새로 만들어졌다.
+
+```json
+{
+  "barMenuItemId": "55555555-5555-4555-8555-555555555552",
+  "displayName": "맥캘란 12년 더블캐스크",
+  "options": [
+    {
+      "menuEntryOptionId": "99999999-9999-4999-8999-999999999995",
+      "optionLabel": "잔",
+      "pourMl": 30,
+      "priceKrw": 22000,
+      "discount": {
+        "discountedPriceKrw": 19000,
+        "startsAt": "2026-11-09T09:00:00Z",
+        "endsAt": "2026-11-30T15:00:00Z"
+      },
+      "sortOrder": 1
+    },
+    {
+      "menuEntryOptionId": "99999999-9999-4999-8999-999999999996",
+      "optionLabel": "병",
+      "pourMl": null,
+      "priceKrw": 210000,
+      "discount": null,
+      "sortOrder": 2
+    }
+  ],
+  "...": "나머지는 위와 같다"
+}
+```
+
+**품절 표시 (3.14.8)**. 글렌피딕 12년에 `{"soldOut": true}`를 보냈다. 업주가 받는 응답에는 항목이 그대로 있고 `soldOut`만 바뀐다. `menuVersion`(`3`)과 `publishedAt`은 그대로다. 같은 시점에 customer가 3.9를 조회하면 `items`에 맥캘란 12년 더블캐스크 한 항목만 있다.
+
+```json
+{
+  "menuVersion": 3,
+  "publishedAt": "2026-11-09T12:47:30.340339Z",
+  "items": [
+    { "barMenuItemId": "55555555-5555-4555-8555-555555555551", "displayName": "글렌피딕 12년", "soldOut": true, "...": "그대로" },
+    { "barMenuItemId": "55555555-5555-4555-8555-555555555552", "displayName": "맥캘란 12년 더블캐스크", "soldOut": false, "...": "그대로" }
+  ],
+  "...": "나머지는 3.9와 같다"
+}
+```
+
+**판매 정보 확인 (3.14.9)**. `{"menuVersion": 3}`. 응답은 3.6 형식이며 `currentMenu.confirmedAt`이 바뀐다.
+
+```json
+{
+  "barId": "22222222-2222-4222-8222-222222222222",
+  "currentMenu": {
+    "menuBoardId": "66666666-6666-4666-8666-666666666661",
+    "menuVersion": 3,
+    "publishedAt": "2026-11-09T12:47:30.340339Z",
+    "confirmedAt": "2026-11-09T12:47:30.531179Z"
+  },
+  "...": "나머지는 3.6과 같다"
+}
+```
+
+**메뉴판 초기화 (3.14.6)**. 메뉴판이 있으면 남고 항목만 빠진다(첫 번째). 메뉴판이 없는 업장에 `{"menuVersion": null}`을 보내면 아무것도 바뀌지 않는다(두 번째).
+
+```json
+{ "menuBoardId": "66666666-6666-4666-8666-666666666661", "menuVersion": 10, "publishedAt": "2026-11-09T12:47:32.323833Z", "items": [] }
+```
+
+```json
+{ "menuBoardId": null, "menuVersion": null, "publishedAt": null, "items": [] }
+```
+
+**대표 오류**
+
+오래된 `menuVersion`을 보냈을 때 (`409`). 판매 정보 확인(3.14.9)도 같은 형식이다.
+
+```json
+{"error": {"code": "MENU_OUTDATED", "message": "메뉴가 다른 곳에서 바뀌었습니다. 최신 메뉴를 다시 불러온 뒤 저장해 주세요.", "details": {"submittedMenuVersion": 1, "currentMenuVersion": 2}, "fieldErrors": []}}
+```
+
+검수 중인 작업이 있을 때 편집했을 때 (`409`)
+
+```json
+{"error": {"code": "ACTIVE_IMPORT_EXISTS", "message": "이 업장에 진행 중인 메뉴 등록 작업이 있습니다.", "details": {"menuImportId": "77777777-7777-4777-8777-777777777771", "status": "ready_for_review"}, "fieldErrors": []}}
+```
+
+이미 메뉴판에 있는 상품을 추가했을 때 (`409`)와 현재 메뉴판에 없는 항목을 수정했을 때 (`404`). 둘 다 `details.barMenuItemId`가 있다.
+
+```json
+{"error": {"code": "MENU_ITEM_EXISTS", "message": "이 상품은 이미 메뉴에 있습니다. 그 항목을 수정해 주세요.", "details": {"barMenuItemId": "55555555-5555-4555-8555-555555555552"}, "fieldErrors": []}}
+```
+
+```json
+{"error": {"code": "MENU_ITEM_NOT_FOUND", "message": "메뉴 항목을 찾을 수 없습니다.", "details": {"barMenuItemId": "55555555-5555-4555-8555-555555555553"}, "fieldErrors": []}}
+```
+
+`newProduct`로 이미 있는 상품을 만들려 했을 때 (`409`). 검수(9.5)와 달리 `extractedItemId`와 `reviewUrl`이 없다.
+
+```json
+{"error": {"code": "DUPLICATE_PRODUCT_FOUND", "message": "같은 상품이 이미 등록되어 있습니다. 기존 상품을 선택해 주세요.", "details": {"existingProduct": {"productId": "44444444-4444-4444-8444-444444444443", "displayName": "Laphroaig 10", "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd3", "brandName": "Laphroaig", "category": "whisky", "ageYears": 10, "editionName": null, "isActive": true}}, "fieldErrors": []}}
+```
+
+메뉴판이나 항목이 없는데 판매 정보를 확인했을 때 (`409`, 3.14.9)
+
+```json
+{"error": {"code": "NO_PUBLISHED_MENU", "message": "확인할 메뉴가 없습니다. 먼저 메뉴를 등록해 주세요.", "details": null, "fieldErrors": []}}
+```
+
+`422 VALIDATION_FAILED`의 `fieldErrors` (본문의 나머지는 9.3과 같다)
+
+| 요청 | `path` | `code` | `message` |
+|---|---|---|---|
+| 추가에서 `productId`와 `newProduct`를 둘 다 빠뜨림 | `productId` | `EXACTLY_ONE_REQUIRED` | productId와 newProduct 중 하나만 보내야 합니다. |
+| 수정에서 이미 끝난 할인을 보냄 | `options[0].discount.endsAt` | `DISCOUNT_ENDED` | 이미 끝난 할인입니다. |
+| 품절에 `"soldOut": "true"`(문자열)를 보냄 | `soldOut` | `BOOL_TYPE` | Input should be a valid boolean |
+| 메뉴판이 없는 업장의 추가나 초기화에서 `menuVersion` 필드를 뺌 | `menuVersion` | `MISSING` | Field required |
+
+마지막 행처럼 `menuVersion`은 메뉴판이 없을 때도 `null` 값으로 보내야 하며, 필드를 빼면 `422`다(3.14.1).
+
+**호출자별 결과**. 대상은 관악 위스키 바와 그 메뉴 항목이며, 요청은 모두 형식에 맞는 본문과 현재 `menuVersion`으로 보냈다.
+
+| API | 비로그인 | customer | 다른 업장의 업주 | 해당 업장의 업주 | operator |
+|---|---|---|---|---|---|
+| `POST /api/bars/{barId}/menu/items` | `401` | `403` | `403` | `201` | `201` |
+| `PUT .../menu/items/{barMenuItemId}` | `401` | `403` | `403` | `200` | `200` |
+| `DELETE .../menu/items/{barMenuItemId}` | `401` | `403` | `403` | `200` | `200` |
+| `POST .../menu/reset` | `401` | `403` | `403` | `200` | `200` |
+| `PUT .../menu/items/{barMenuItemId}/sold-out` | `401` | `403` | `403` | `200` | `200` |
+| `POST .../menu/confirm` | `401` | `403` | `403` | `200` | `200` |
+
+- 없는 `barId`로 보내면 로그인한 호출자는 모두 `404 BAR_NOT_FOUND`다(2.2).
+- 요청 형식이 권한보다 먼저다(3.14.1). customer가 `{"menuVersion": "x"}`로 항목을 추가하면 `403`이 아니라 `422`(`menuVersion` `INT_PARSING`, `options` `MISSING`)를 받는다.
+
 ### 3.15 영업시간과 임시 휴무
 
 업장의 정규 영업시간과 임시 휴무(오늘 휴무, 오늘만 영업시간 변경, 기간 휴업)를 정한다. 정규 영업시간은 매장 정보 화면에서 다른 정보와 함께 저장하므로 업장 수정(3.7)의 `weeklyHours`로 바꾼다. 임시 휴무는 관리 홈에서 바로 적용하고 취소하므로 따로 3.15.2와 3.15.3으로 바꾼다. 둘 다 3.6, 3.11.9, 3.9 응답에 나온다.
@@ -2576,12 +3036,96 @@ Authorization: Bearer <access-token>
 
 #### 3.15.6 오류와 프론트엔드 처리
 
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다. 메뉴 직접 편집(3.14.1)과 달리 권한을 요청 형식보다 먼저 확인하므로, operator도 해당 업장의 업주도 아닌 호출자는 본문이 잘못되어도 `422`가 아니라 `403`을 받는다.
+
+1. 인증 (`401`, 3.1.5)
+2. 업장 (`404 BAR_NOT_FOUND`)
+3. 권한 (`403 FORBIDDEN`)
+4. 요청 형식과 3.15.2의 필드 규칙 (`422 VALIDATION_FAILED`). `SAME_OPEN_CLOSE`와 `END_BEFORE_START`도 이 단계다
+5. 업장 행을 잠근 뒤 권한 다시 확인 (`403 FORBIDDEN`, 3.11.10). 비활성 업장도 바꿀 수 있으므로 업장 상태는 확인하지 않는다
+6. 날짜 (`422`, `DATE_NOT_TODAY`, `DATE_IN_PAST`). 요청이 현재 임시 휴무와 같으면 건너뛴다(3.15.2의 "재시도")
+
+`DELETE`(3.15.3)는 4단계와 6단계가 없다.
+
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
 | `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
-| `422` | `VALIDATION_FAILED` | 위 규칙 위반: `MISSING`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `INVALID_CHARACTER`, `EXTRA_FORBIDDEN` | `fieldErrors` 표시. `DATE_IN_PAST`이면 날짜를 다시 고르게 하고, `DATE_NOT_TODAY`이면 날짜가 바뀌었다고 안내한 뒤 다시 적용하게 함 |
+| `422` | `VALIDATION_FAILED` | 위 규칙 위반: `MISSING`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `INVALID_CHARACTER`, `EXTRA_FORBIDDEN`, `STRING_TOO_LONG`(`note` 100자 초과), `UNION_TAG_NOT_FOUND`와 `UNION_TAG_INVALID`(`kind`가 없거나 다른 값, `path`는 빈 문자열) | `fieldErrors` 표시. `DATE_IN_PAST`이면 날짜를 다시 고르게 하고, `DATE_NOT_TODAY`이면 날짜가 바뀌었다고 안내한 뒤 다시 적용하게 함 |
+
+#### 3.15.7 실제 응답 예시와 호출자별 결과
+
+2.4의 방법으로 받은 응답이다. 서울 날짜로 2026-11-09에 관악 위스키 바에 적용했다. 응답은 3.6 형식이므로 `operatingException`만 싣는다.
+
+**오늘 휴무 (`closed_today`)**
+
+```json
+{ "kind": "closed_today", "date": "2026-11-09", "note": "내부 공사로 하루 쉽니다" }
+```
+
+```json
+{
+  "operatingException": {
+    "kind": "closed_today",
+    "startDate": "2026-11-09",
+    "endDate": "2026-11-09",
+    "openTime": null,
+    "closeTime": null,
+    "note": "내부 공사로 하루 쉽니다"
+  },
+  "...": "나머지는 3.6과 같다"
+}
+```
+
+같은 요청을 다시 보내도 `200`과 같은 응답이다. 3.15.2의 `custom_hours`와 `vacation` 요청 예시(날짜만 2026-11-09, 2026-11-12~14로 바꿈)에 대한 응답의 `operatingException` 값은 다음과 같다. 응답 전체는 위 `closed_today`처럼 3.6 형식이다. `custom_hours`도 `startDate`와 `endDate`가 같다.
+
+```json
+{ "kind": "custom_hours", "startDate": "2026-11-09", "endDate": "2026-11-09", "openTime": "20:00", "closeTime": "01:00", "note": "내부 사정으로 늦게 엽니다" }
+```
+
+```json
+{ "kind": "vacation", "startDate": "2026-11-12", "endDate": "2026-11-14", "openTime": null, "closeTime": null, "note": null }
+```
+
+취소(3.15.3)의 응답은 `"operatingException": null`이다.
+
+**대표 오류**
+
+어제 날짜(`"date": "2026-11-08"`)로 `closed_today`를 보냈을 때 (`422`)
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "입력값을 확인해 주세요.",
+    "details": null,
+    "fieldErrors": [
+      {
+        "path": "date",
+        "code": "DATE_NOT_TODAY",
+        "message": "날짜가 바뀌었습니다. 다시 적용해 주세요."
+      }
+    ]
+  }
+}
+```
+
+나머지 `422`의 `fieldErrors`
+
+| 요청 | `path` | `code` | `message` |
+|---|---|---|---|
+| `closed_today`에 `"openTime": "18:00"` | `openTime` | `EXTRA_FORBIDDEN` | Extra inputs are not permitted |
+| `vacation`의 `startDate`가 어제 | `startDate` | `DATE_IN_PAST` | 지난 날짜부터 시작할 수 없습니다. |
+| `"kind": "holiday"` | 빈 문자열 | `UNION_TAG_INVALID` | Input tag 'holiday' found using 'kind' does not match any of the expected tags: 'closed_today', 'custom_hours', 'vacation' |
+| `note`가 101자 | `note` | `STRING_TOO_LONG` | String should have at most 100 characters |
+
+**호출자별 결과**. 대상은 관악 위스키 바다.
+
+| API | 비로그인 | customer | 다른 업장의 업주 | 해당 업장의 업주 | operator |
+|---|---|---|---|---|---|
+| `PUT /api/bars/{barId}/operating-exception` | `401` | `403` | `403` | `200` | `200` |
+| `DELETE /api/bars/{barId}/operating-exception` | `401` | `403` | `403` | `200` | `200` |
 
 ### 3.16 매장 사진
 
@@ -2625,7 +3169,7 @@ Content-Type: multipart/form-data
 - **썸네일**: 같은 단계에서 긴 변 480px(원본이 더 작으면 원본 크기)의 메타데이터 없는 JPEG 썸네일을 함께 만든다. 목록과 격자 화면은 썸네일(`thumbnailUrl`, `coverThumbnailUrl`)을, 전체 화면과 상세 갤러리는 `imageUrl`을 쓴다.
 - 새 사진은 맨 뒤에 붙는다. 업장에 사진이 없었다면 대표 사진이 된다.
 - **같은 사진**: 같은 업장에 내용이 같은 파일(업로드한 원본 바이트의 SHA-256이 같음. 다시 인코딩한 파일이 아니다)이 이미 있으면 저장하지 않고 `409 PHOTO_EXISTS`이며, `details.photoId`에 기존 사진 ID를 담는다. 응답을 받지 못해 다시 보낸 요청도 이 오류를 받아 사진이 두 장 생기지 않으므로 `Idempotency-Key`는 받지 않는다.
-- 검사 순서: 요청 형식(`422`, `image`가 없으면 `MISSING`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 크기(`413 UPLOAD_TOO_LARGE`)와 형식(`415 UNSUPPORTED_IMAGE_TYPE`) → 가로세로(`422 IMAGE_DIMENSIONS_TOO_LARGE`) → 같은 사진(`409 PHOTO_EXISTS`) → 장수(`409 PHOTO_LIMIT_REACHED`). 같은 사진을 장수보다 먼저 확인하므로, 15번째 사진을 올린 요청을 다시 보내도 `PHOTO_EXISTS`를 받는다.
+- 검사 순서: 요청 형식(`422`, `image`가 없으면 `MISSING`) → 업장(`404 BAR_NOT_FOUND`) → 권한(`403`) → 크기(`413 UPLOAD_TOO_LARGE`)와 형식(`415 UNSUPPORTED_IMAGE_TYPE`) → 가로세로(`422 VALIDATION_FAILED`, `fieldErrors[].code = IMAGE_DIMENSIONS_TOO_LARGE`) → 같은 사진(`409 PHOTO_EXISTS`) → 장수(`409 PHOTO_LIMIT_REACHED`). 같은 사진을 장수보다 먼저 확인하므로, 15번째 사진을 올린 요청을 다시 보내도 `PHOTO_EXISTS`를 받는다.
 - 두 파일을 저장한 뒤 DB에 기록한다. 하나라도 저장에 실패하거나 DB 기록이 실패하면 저장한 파일을 지운다. 받은 원본 파일은 저장하지 않는다.
 
 `201 Created`, 본문은 `{ "photos": [...] }`다.
@@ -2702,6 +3246,41 @@ GET /api/bar-photos/{photoId}/thumbnail
 | `413` | `UPLOAD_TOO_LARGE` | 사진이 2MB를 넘음. `details.maxImageBytes = 2097152` | 품질을 낮춰 다시 압축해 올림 |
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | JPEG나 PNG가 아니거나, 선언한 형식과 내용이 다르거나, 끝까지 디코딩되지 않음 | JPEG로 바꿔 다시 올림 |
 | `422` | `VALIDATION_FAILED` | `image` 없음, 긴 변이 2048px 초과(`IMAGE_DIMENSIONS_TOO_LARGE`), `photoIds` 형식 오류, `DUPLICATE_ITEM` | `fieldErrors` 표시. `IMAGE_DIMENSIONS_TOO_LARGE`이면 줄여서 다시 올림 |
+
+#### 3.16.7 실제 응답 예시와 호출자별 결과
+
+2.4의 방법으로 받은 응답이다. 사진 삭제(3.16.3)의 성공 응답은 3.16.2와 같은 `{ "photos": [...] }`이며 지운 사진만 빠진다.
+
+이미 지운 사진을 다시 지웠을 때 (`404`). 응답을 받지 못해 다시 보낸 삭제도 이 응답을 받는다.
+
+```json
+{"error": {"code": "PHOTO_NOT_FOUND", "message": "사진을 찾을 수 없습니다.", "details": {"photoId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa5"}, "fieldErrors": []}}
+```
+
+긴 변이 3000px인 사진을 올렸을 때 (`422`, 3.16.2). 최상위 `code`는 `VALIDATION_FAILED`이고 `IMAGE_DIMENSIONS_TOO_LARGE`는 `fieldErrors[].code`에 있다. 업주 신청 대표 사진(3.11.17)도 같다.
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "입력값을 확인해 주세요.",
+    "details": null,
+    "fieldErrors": [
+      {
+        "path": "image",
+        "code": "IMAGE_DIMENSIONS_TOO_LARGE",
+        "message": "사진의 긴 변은 2048px 이하여야 합니다."
+      }
+    ]
+  }
+}
+```
+
+**호출자별 결과**. 대상은 관악 위스키 바의 사진이며, 호출자마다 새 사진을 하나 올린 뒤 지웠다.
+
+| API | 비로그인 | customer | 다른 업장의 업주 | 해당 업장의 업주 | operator |
+|---|---|---|---|---|---|
+| `DELETE /api/bars/{barId}/photos/{photoId}` | `401` | `403` | `403` | `200` | `200` |
 
 ### 3.17 요즘 많이 찾는 위스키
 
@@ -3111,6 +3690,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - `newProductDraft`는 화면 입력을 돕는 계산값이며 실제 카탈로그 행이 아니다.
 - `evidence`는 설명용 보조 정보다. 프론트엔드는 알 수 없는 키를 무시해야 한다.
 - `before`와 `after`가 최종 diff 비교의 구조화된 값이다.
+- 제안 상품이 없는 줄(`proposedProductId = null`, 보통 `unmatched`)의 `add`는 `after.productId`가 `null`이다. 검수자가 그 줄에서 기존 상품을 고르거나 새 상품을 만들면 그 상품으로 반영된다(8.1). 그 줄을 비상품으로 확정하거나 제외하면 이 변경은 `ignore`로 보낸다(8.7의 `CHANGE_WITHOUT_PRODUCT`).
 - `summary`는 표시용 문구이며 검증이나 반영 기준으로 사용하지 않는다.
 
 `before`와 `after` 규칙:
@@ -3169,9 +3749,216 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
 | `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
 | `403` | `FORBIDDEN` | operator도 작업 대상 업장의 업주도 아님 | 3.1.5 |
 | `404` | `MENU_IMPORT_NOT_FOUND` | 작업이 없거나 `menuImportId`가 UUID 형식이 아님 | 작업 목록으로 이동 |
-| `409` | `INVALID_IMPORT_STATE` | `applied` 또는 `failed`인 작업. `details.status`에 현재 상태 | 작업 상세 재조회 |
+| `409` | `INVALID_IMPORT_STATE` | `applied` 또는 `failed`인 작업. `details.menuImportId`, `details.status`에 현재 상태 | 작업 상세 재조회 |
 
 프론트엔드는 취소 전에 확인을 받는다. `ready_for_review`에서 취소하면 검수 중 입력한 결정은 모두 사라진다.
+
+### 5.8 실제 응답 예시와 호출자별 결과
+
+2.4의 방법으로 받은 응답이다. 5.4의 예시는 필드 설명을 위해 손으로 쓴 값이고, 이 절은 mock 추출기로 처리한 실제 작업이다.
+
+**통합 검수 응답 (5.4)**. 관악 위스키 바의 업주 신청을 승인할 때(3.11.7) 신청 메뉴판 사진 두 장으로 만들어진 작업이다. 그래서 `imageUrl`이 신청 사진의 경로이고, mock 추출이라 `sourceBox`가 `null`이다. 두 사진의 추출 결과가 같으므로 둘째 사진(`images[1]`)과 첫째 사진의 설명 줄(`itemOrder = 5`), 둘째 사진의 변경 하나를 생략했다.
+
+- 2번 줄은 별칭이 정확히 맞아 `exact_match`다.
+- 3번 줄은 같은 상품 후보가 있지만 연수가 달라(`evidence.ageConflict`) `ambiguous`다. 같은 상품을 2번 줄이 먼저 제안했으므로 이 줄의 변경은 없다.
+- 4번 줄은 후보가 없어 `unmatched`이며, 그 변경의 `after.productId`가 `null`이다. 이 줄을 `reject`하고 그 변경을 `apply`로 보내면 `CHANGE_WITHOUT_PRODUCT`다(8.9).
+
+```json
+{
+  "menuImportId": "77777777-7777-4777-8777-777777777771",
+  "barId": "22222222-2222-4222-8222-222222222222",
+  "mode": "full_replace",
+  "status": "ready_for_review",
+  "reviewVersion": 1,
+  "images": [
+    {
+      "imageId": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1",
+      "imageOrder": 1,
+      "imageUrl": "https://storage.example.com/signed/owner-applications/cccccccc-cccc-4ccc-8ccc-ccccccccccc1/ffffffff-ffff-4fff-8fff-fffffffffff2/page-1.jpg",
+      "imageUrlExpiresAt": null,
+      "items": [
+        {
+          "extractedItemId": "10000000-0000-4000-8000-000000000001",
+          "itemOrder": 1,
+          "rawText": "SINGLE MALT",
+          "sourceBox": null,
+          "extractedLineType": "section_header",
+          "correctedLineType": null,
+          "effectiveLineType": "section_header",
+          "initialResolutionStatus": null,
+          "extractedProductName": null,
+          "extractedBrandName": null,
+          "extractedAgeYears": null,
+          "extractedEditionName": null,
+          "extractedAbv": null,
+          "extractionConfidence": 0.99,
+          "proposedProductId": null,
+          "options": [],
+          "candidates": [],
+          "newProductDraft": null
+        },
+        {
+          "extractedItemId": "10000000-0000-4000-8000-000000000002",
+          "itemOrder": 2,
+          "rawText": "글렌피딕 12년 15ml 9.0 / 30ml 17.0",
+          "sourceBox": null,
+          "extractedLineType": "product",
+          "correctedLineType": null,
+          "effectiveLineType": "product",
+          "initialResolutionStatus": "exact_match",
+          "extractedProductName": "글렌피딕 12년",
+          "extractedBrandName": "글렌피딕",
+          "extractedAgeYears": 12,
+          "extractedEditionName": null,
+          "extractedAbv": null,
+          "extractionConfidence": 0.93,
+          "proposedProductId": "44444444-4444-4444-8444-444444444441",
+          "options": [
+            { "extractedOptionId": "20000000-0000-4000-8000-000000000001", "optionOrder": 1, "extractedOptionLabel": null, "extractedPourMl": 15, "extractedPriceKrw": 9000 },
+            { "extractedOptionId": "20000000-0000-4000-8000-000000000002", "optionOrder": 2, "extractedOptionLabel": null, "extractedPourMl": 30, "extractedPriceKrw": 17000 }
+          ],
+          "candidates": [
+            {
+              "productId": "44444444-4444-4444-8444-444444444441",
+              "candidateRank": 1,
+              "displayName": "Glenfiddich 12",
+              "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
+              "brandName": "Glenfiddich",
+              "category": "whisky",
+              "ageYears": 12,
+              "editionName": null,
+              "abv": null,
+              "matchMethod": "alias",
+              "score": 1.0,
+              "evidence": { "aliasExact": true, "matchedAlias": "글렌피딕12", "ageExact": true, "rule": "alias" }
+            }
+          ],
+          "newProductDraft": { "brandText": "글렌피딕", "category": "whisky", "displayName": "글렌피딕 12년", "ageYears": 12, "editionName": null, "abv": null }
+        },
+        {
+          "extractedItemId": "10000000-0000-4000-8000-000000000003",
+          "itemOrder": 3,
+          "rawText": "Glenfiddich 12 (15yo) 30ml 21.0",
+          "sourceBox": null,
+          "extractedLineType": "product",
+          "correctedLineType": null,
+          "effectiveLineType": "product",
+          "initialResolutionStatus": "ambiguous",
+          "extractedProductName": "Glenfiddich 12",
+          "extractedBrandName": "Glenfiddich",
+          "extractedAgeYears": 15,
+          "extractedEditionName": null,
+          "extractedAbv": null,
+          "extractionConfidence": 0.71,
+          "proposedProductId": "44444444-4444-4444-8444-444444444441",
+          "options": [
+            { "extractedOptionId": "20000000-0000-4000-8000-000000000003", "optionOrder": 1, "extractedOptionLabel": null, "extractedPourMl": 30, "extractedPriceKrw": 21000 }
+          ],
+          "candidates": [
+            {
+              "productId": "44444444-4444-4444-8444-444444444441",
+              "candidateRank": 1,
+              "displayName": "Glenfiddich 12",
+              "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
+              "brandName": "Glenfiddich",
+              "category": "whisky",
+              "ageYears": 12,
+              "editionName": null,
+              "abv": null,
+              "matchMethod": "alias",
+              "score": 1.0,
+              "evidence": { "aliasExact": true, "matchedAlias": "glenfiddich12", "ageConflict": true, "rule": "alias" }
+            }
+          ],
+          "newProductDraft": { "brandText": "Glenfiddich", "category": "whisky", "displayName": "Glenfiddich 12", "ageYears": 15, "editionName": null, "abv": null }
+        },
+        {
+          "extractedItemId": "10000000-0000-4000-8000-000000000004",
+          "itemOrder": 4,
+          "rawText": "Unknown Distillery 25yo 잔 45,000",
+          "sourceBox": null,
+          "extractedLineType": "product",
+          "correctedLineType": null,
+          "effectiveLineType": "product",
+          "initialResolutionStatus": "unmatched",
+          "extractedProductName": "Unknown Distillery 25",
+          "extractedBrandName": "Unknown Distillery",
+          "extractedAgeYears": 25,
+          "extractedEditionName": null,
+          "extractedAbv": 48.0,
+          "extractionConfidence": 0.88,
+          "proposedProductId": null,
+          "options": [
+            { "extractedOptionId": "20000000-0000-4000-8000-000000000004", "optionOrder": 1, "extractedOptionLabel": "잔", "extractedPourMl": null, "extractedPriceKrw": 45000 }
+          ],
+          "candidates": [],
+          "newProductDraft": { "brandText": "Unknown Distillery", "category": "whisky", "displayName": "Unknown Distillery 25", "ageYears": 25, "editionName": null, "abv": 48.0 }
+        }
+      ]
+    }
+  ],
+  "proposedChanges": [
+    {
+      "changeId": "30000000-0000-4000-8000-000000000001",
+      "changeType": "add",
+      "barMenuItemId": null,
+      "extractedItemId": "10000000-0000-4000-8000-000000000002",
+      "before": null,
+      "after": {
+        "productId": "44444444-4444-4444-8444-444444444441",
+        "displayName": "Glenfiddich 12",
+        "options": [
+          { "extractedOptionId": "20000000-0000-4000-8000-000000000001", "optionLabel": null, "pourMl": 15, "priceKrw": 9000 },
+          { "extractedOptionId": "20000000-0000-4000-8000-000000000002", "optionLabel": null, "pourMl": 30, "priceKrw": 17000 }
+        ]
+      },
+      "summary": "Glenfiddich 12 추가 (가격 옵션 2개)",
+      "decision": "pending"
+    },
+    {
+      "changeId": "30000000-0000-4000-8000-000000000002",
+      "changeType": "add",
+      "barMenuItemId": null,
+      "extractedItemId": "10000000-0000-4000-8000-000000000004",
+      "before": null,
+      "after": {
+        "productId": null,
+        "displayName": "Unknown Distillery 25",
+        "options": [
+          { "extractedOptionId": "20000000-0000-4000-8000-000000000004", "optionLabel": "잔", "pourMl": null, "priceKrw": 45000 }
+        ]
+      },
+      "summary": "Unknown Distillery 25 추가 (가격 옵션 1개)",
+      "decision": "pending"
+    }
+  ]
+}
+```
+
+**취소 (5.7)**. 위 작업을 취소한 응답이다.
+
+```json
+{
+  "menuImportId": "77777777-7777-4777-8777-777777777771",
+  "barId": "22222222-2222-4222-8222-222222222222",
+  "status": "canceled",
+  "canceledAt": "2026-11-09T12:46:03.982990Z"
+}
+```
+
+반영이 끝난 작업을 취소했을 때 (`409`)
+
+```json
+{"error": {"code": "INVALID_IMPORT_STATE", "message": "이미 끝난 메뉴 등록 작업은 취소할 수 없습니다.", "details": {"menuImportId": "77777777-7777-4777-8777-777777777773", "status": "applied"}, "fieldErrors": []}}
+```
+
+**호출자별 결과**. 대상은 관악 위스키 바의 메뉴 등록 작업이다. 취소 행은 `ready_for_review` 작업에 차례로 보냈으므로 operator의 `200`은 이미 취소된 작업의 같은 응답이다(5.7).
+
+| API | 비로그인 | customer | 다른 업장의 업주 | 해당 업장의 업주 | operator |
+|---|---|---|---|---|---|
+| `GET /api/menu-imports/{menuImportId}` | `401` | `403` | `403` | `200` | `200` |
+| `GET /api/menu-imports/{menuImportId}` (없는 ID) | `401` | `404` | `404` | `404` | `404` |
+| `POST /api/menu-imports/{menuImportId}/cancel` | `401` | `403` | `403` | `200` | `200` |
 
 ## 6. 검수 보조 브랜드 검색
 
@@ -3320,7 +4107,7 @@ Content-Type: application/json
 | `product.abv` | 아니오 | 0 초과 100 이하 |
 | `aliases` | 아니오 | `aliasesToAdd`와 같은 형식. 기본 `[]` |
 
-`changeDecisions[]`는 `changeId`(필수)와 `decision`(`apply` 또는 `ignore`, 필수)이다. `reviewVersion`은 1 이상 정수다.
+`changeDecisions[]`는 `changeId`(필수)와 `decision`(`apply` 또는 `ignore`, 필수)이다. `reviewVersion`은 1 이상 정수다. 추출 항목에 연결된 변경(`extractedItemId`가 있는 변경)은 그 항목을 상품으로 확정했을 때(`select_existing_product`, `create_product`)만 `apply`할 수 있다(8.7).
 
 ### 8.2 기존 상품 선택 예시
 
@@ -3509,6 +4296,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - 요청의 `reviewVersion`은 현재 값과 같아야 한다.
 - `itemDecisions`는 검수 대상 항목을 빠짐없이 한 번씩 포함해야 한다.
 - `changeDecisions`는 현재 `pending` 변경을 빠짐없이 한 번씩 포함해야 한다.
+- 변경의 `extractedItemId` 항목을 `confirm_non_product`나 `reject`로 결정했으면 그 변경은 `ignore`여야 한다. `apply`이면 `fieldErrors[].path = changeDecisions[i].decision`, `code = CHANGE_WITHOUT_PRODUCT`다. `extractedItemId`가 없는 변경(`remove`)에는 이 규칙이 없다.
 - `finalLineType = product`이면 `select_existing_product` 또는 `create_product`여야 한다.
 - 게시할 상품 항목에는 가격이 있는 유효 옵션이 최소 하나 있어야 한다.
 - 기존 상품은 존재하고 연결 가능한 상태여야 한다.
@@ -3548,6 +4336,94 @@ HTTP/1.1 200 OK
 최종 확정과 메뉴판 반영은 하나의 `SERIALIZABLE` 트랜잭션이다. 성공하면 상태가 `ready_for_review`에서 `applied`로 바로 바뀐다.
 
 네트워크 타임아웃 후 같은 요청이 다시 들어왔는데 이미 `applied`라면 변경을 다시 적용하지 않고 현재 적용 결과를 반환한다.
+
+### 8.9 실제 응답 예시와 호출자별 결과
+
+2.4의 방법으로 받은 응답이다. 5.8의 작업을 취소한 뒤 메뉴판 사진 한 장을 다시 올려(4장) 만든 작업으로, mock 추출 결과는 5.8의 첫째 사진과 같다.
+
+**요청**. 머리말과 설명 줄은 비상품으로 확정하고, 2번과 3번 줄은 같은 상품(Glenfiddich 12)에 연결하고, 후보가 없는 4번 줄은 제외했다. 변경은 2번 줄의 `add`를 적용하고 4번 줄의 `add`는 무시했다.
+
+```json
+{
+  "reviewVersion": 1,
+  "itemDecisions": [
+    { "extractedItemId": "10000000-0000-4000-8000-000000000011", "finalLineType": "section_header", "action": "confirm_non_product" },
+    { "extractedItemId": "10000000-0000-4000-8000-000000000012", "finalLineType": "product", "action": "select_existing_product", "productId": "44444444-4444-4444-8444-444444444441" },
+    { "extractedItemId": "10000000-0000-4000-8000-000000000013", "finalLineType": "product", "action": "select_existing_product", "productId": "44444444-4444-4444-8444-444444444441" },
+    { "extractedItemId": "10000000-0000-4000-8000-000000000014", "finalLineType": "product", "action": "reject" },
+    { "extractedItemId": "10000000-0000-4000-8000-000000000015", "finalLineType": "description", "action": "confirm_non_product" }
+  ],
+  "changeDecisions": [
+    { "changeId": "30000000-0000-4000-8000-000000000004", "decision": "apply" },
+    { "changeId": "30000000-0000-4000-8000-000000000005", "decision": "ignore" }
+  ]
+}
+```
+
+**성공 응답**. 같은 상품의 두 줄 중 첫 줄만 게시되어 `added = 1`이다. 같은 요청을 다시 보내도 같은 응답이다.
+
+```json
+{
+  "menuImportId": "77777777-7777-4777-8777-777777777773",
+  "status": "applied",
+  "reviewVersion": 1,
+  "appliedAt": "2026-11-09T12:46:34.781545Z",
+  "menuBoardId": "66666666-6666-4666-8666-666666666661",
+  "result": {
+    "added": 1,
+    "updated": 0,
+    "removed": 0,
+    "ignored": 1,
+    "createdBrands": 0,
+    "createdProducts": 0
+  }
+}
+```
+
+**대표 오류**
+
+첫 항목의 결정을 빼고, 제외한 4번 줄의 변경(과 둘째 사진의 같은 변경)을 `apply`로 보냈을 때 (`422`). 문제가 모두 한 응답에 온다.
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "입력값을 확인해 주세요.",
+    "details": null,
+    "fieldErrors": [
+      {
+        "path": "itemDecisions",
+        "code": "MISSING_ITEM",
+        "message": "결정하지 않은 항목이 1개 있습니다."
+      },
+      {
+        "path": "changeDecisions[1].decision",
+        "code": "CHANGE_WITHOUT_PRODUCT",
+        "message": "상품으로 확정하지 않은 항목의 변경은 적용할 수 없습니다."
+      },
+      {
+        "path": "changeDecisions[2].decision",
+        "code": "CHANGE_WITHOUT_PRODUCT",
+        "message": "상품으로 확정하지 않은 항목의 변경은 적용할 수 없습니다."
+      }
+    ]
+  }
+}
+```
+
+검수 중에 operator가 업장을 비활성화한 뒤 제출했을 때 (`404`, 8.7). 아무것도 반영되지 않는다.
+
+```json
+{"error": {"code": "BAR_NOT_FOUND", "message": "업장을 찾을 수 없습니다.", "details": {"barId": "22222222-2222-4222-8222-222222222223"}, "fieldErrors": []}}
+```
+
+`reviewVersion`이 다를 때의 `409 REVIEW_OUTDATED`는 9.1의 예시와 같은 형식이다.
+
+**호출자별 결과**. 대상은 `ready_for_review`인 위 작업이며, 표의 왼쪽 열부터 차례로 위 요청 본문을 그대로 보냈다. 해당 업장의 업주가 반영했고, 그 뒤 operator의 `200`은 이미 반영된 작업의 같은 결과다(8.8).
+
+| API | 비로그인 | customer | 다른 업장의 업주 | 해당 업장의 업주 | operator |
+|---|---|---|---|---|---|
+| `POST /api/menu-imports/{menuImportId}/review-and-apply` | `401` | `403` | `403` | `200` | `200` |
 
 ## 9. 오류 응답
 
@@ -3601,7 +4477,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `409` | `PHOTO_EXISTS` | 내용이 같은 매장 사진이 이미 있음. `details.photoId` (3.16.2) | 이미 등록된 사진이라고 안내하고 사진 목록 다시 조회 |
 | `409` | `PHOTO_LIMIT_REACHED` | 매장 사진이 이미 15장. `details.maxPhotos` (3.16.2) | 사진을 지운 뒤 추가하라고 안내 |
 | `409` | `PHOTOS_OUTDATED` | 순서 변경에 보낸 사진 ID가 현재 사진과 다름. `details.photos` (3.16.4) | `details.photos`로 화면을 바꾸고 다시 정렬하게 함 |
-| `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가. 예: `ready_for_review`가 아닌 작업의 검수 제출, `applied`·`failed` 작업의 취소. `details.status`에 현재 상태 | 상태 재조회 |
+| `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가. 예: `ready_for_review`가 아닌 작업의 검수 제출, `applied`·`failed` 작업의 취소. `details.menuImportId`, `details.status`에 현재 상태 | 상태 재조회 |
 | `409` | `REVIEW_OUTDATED` | `reviewVersion` 불일치, 또는 검수 데이터를 만든 뒤 현재 메뉴판이 바뀜 | `details.reviewUrl`로 최신 검수 데이터 재조회 |
 | `409` | `DUPLICATE_BRAND_FOUND` | 신규 브랜드와 동일할 수 있는 브랜드 발견 (검수 또는 직접 추가) | 기존 브랜드 선택 화면 표시 |
 | `409` | `DUPLICATE_PRODUCT_FOUND` | 신규 상품과 동일한 상품 발견, 또는 제출한 이름·별칭이 기존 상품의 별칭과 일치 | 기존 상품 선택 화면 표시. 다른 상품이면 겹치는 별칭을 빼고 다시 제출. `existingProduct.isActive = false`이면 상품 검색으로 안내 (9.5) |
