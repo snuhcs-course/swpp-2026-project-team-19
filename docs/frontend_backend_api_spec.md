@@ -221,10 +221,18 @@ ignore
   - **operator**: 업주가 아닌 `operator`
 - 모든 API에서 같은 `401`과 `403` 본문은 아래에 한 번만 싣는다.
 
-`401 UNAUTHENTICATED` (토큰 없음. 만료, 서명 오류도 같은 형식이다. 3.1.5)
+`401 UNAUTHENTICATED` (3.1.5). `code`와 형식은 같고 `message`만 다르다.
+
+토큰 없음
 
 ```json
 {"error": {"code": "UNAUTHENTICATED", "message": "로그인이 필요합니다.", "details": null, "fieldErrors": []}}
+```
+
+토큰 만료, 서명 오류 등 토큰을 받아들일 수 없음
+
+```json
+{"error": {"code": "UNAUTHENTICATED", "message": "로그인 정보가 만료되었거나 올바르지 않습니다. 다시 로그인해 주세요.", "details": null, "fieldErrors": []}}
 ```
 
 `403 FORBIDDEN` (operator 전용 API, 또는 operator도 대상 업장의 업주도 아님)
@@ -3070,7 +3078,7 @@ Authorization: Bearer <access-token>
 }
 ```
 
-같은 요청을 다시 보내도 `200`과 같은 응답이다. 3.15.2의 `custom_hours`와 `vacation` 요청 예시(날짜만 2026-11-09, 2026-11-12~14로 바꿈)의 응답은 다음과 같다. `custom_hours`도 `startDate`와 `endDate`가 같다.
+같은 요청을 다시 보내도 `200`과 같은 응답이다. 3.15.2의 `custom_hours`와 `vacation` 요청 예시(날짜만 2026-11-09, 2026-11-12~14로 바꿈)에 대한 응답의 `operatingException` 값은 다음과 같다. 응답 전체는 위 `closed_today`처럼 3.6 형식이다. `custom_hours`도 `startDate`와 `endDate`가 같다.
 
 ```json
 { "kind": "custom_hours", "startDate": "2026-11-09", "endDate": "2026-11-09", "openTime": "20:00", "closeTime": "01:00", "note": "내부 사정으로 늦게 엽니다" }
