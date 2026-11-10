@@ -259,3 +259,87 @@ def test_review_responses_carry_the_warnings(client, db_session, supabase, opera
 
     assert approved.status_code == 200, approved.text
     assert len(shared(approved.json())) == 1
+
+
+# ---- a stored number the server's keys cannot decrypt ----
+
+
+def unreadable(db_session, application):
+    """Store the number as if encrypted with a key the server no longer has; the lookup value stays."""
+    from cryptography.fernet import Fernet
+
+    from tests.crypto_support import TEST_BUSINESS_NUMBER_NEXT_KEY
+
+    application.business_registration_number_ciphertext = Fernet(TEST_BUSINESS_NUMBER_NEXT_KEY).encrypt(
+        BUSINESS_NUMBER.encode()
+    )
+    db_session.flush()
+    return application
+
+
+def test_an_unreadable_number_does_not_fail_the_operator_list(
+    client, db_session, supabase, operator, applicant, other, caplog
+):
+    broken = unreadable(db_session, created(db_session, make_application(db_session, applicant), 0))
+    readable = created(db_session, make_application(db_session, other, make_bar(db_session, "Claimed Bar")), 1)
+
+    with caplog.at_level("ERROR", logger="app.services.owner_applications"):
+        response = client.get("/api/owner-applications", headers=headers(supabase, OPERATOR_SUBJECT))
+
+    assert response.status_code == 200, response.text
+    items = {item["applicationId"]: item for item in response.json()["items"]}
+    assert items[str(broken.id)]["businessRegistrationNumber"] is None
+    # The lookup value still finds the shared number; the unreadable warning comes first.
+    assert [(w["code"], w["details"]) for w in items[str(broken.id)]["warnings"]] == [
+        ("BUSINESS_NUMBER_UNREADABLE", {}),
+        (
+            "BUSINESS_NUMBER_SHARED",
+            {
+                "applications": [
+                    {
+                        "applicationId": str(readable.id),
+                        "status": "pending",
+                        "applicationType": "existing_bar",
+                        "barName": "Claimed Bar",
+                        "sameApplicant": False,
+                    }
+                ]
+            },
+        ),
+    ]
+    assert items[str(broken.id)]["warnings"][0]["message"] == (
+        "저장된 사업자등록번호를 읽을 수 없습니다. 서버의 키 설정을 확인해 주세요."
+    )
+    assert items[str(readable.id)]["businessRegistrationNumber"] == BUSINESS_NUMBER
+    # Logged with the application id, never the number.
+    [record] = [r for r in caplog.records if "cannot be decrypted" in r.getMessage()]
+    assert str(broken.id) in record.getMessage()
+    assert BUSINESS_NUMBER not in record.getMessage()
+
+
+def test_the_applicant_gets_a_null_number_without_warnings(client, db_session, supabase, applicant):
+    broken = unreadable(db_session, make_application(db_session, applicant))
+
+    body = detail(client, supabase, broken.id, subject=APPLICANT_SUBJECT)
+
+    assert (body["businessRegistrationNumber"], body["warnings"]) == (None, None)
+
+
+@pytest.mark.parametrize("nts_key", [True, False])
+def test_the_nts_recheck_refuses_an_unreadable_number(client, db_session, supabase, operator, applicant, nts_key):
+    broken = unreadable(db_session, make_application(db_session, applicant))
+    verifier = FakeVerifier()
+    app.dependency_overrides[deps.get_business_verifier] = lambda: verifier if nts_key else None
+    try:
+        response = client.post(
+            f"/api/owner-applications/{broken.id}/verify-business", headers=headers(supabase, OPERATOR_SUBJECT)
+        )
+    finally:
+        app.dependency_overrides.pop(deps.get_business_verifier, None)
+
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "BUSINESS_NUMBER_UNREADABLE"
+    # NTS was not called, and the stored result stays.
+    assert verifier.calls == []
+    db_session.refresh(broken)
+    assert broken.business_verification_result.value == "unavailable"

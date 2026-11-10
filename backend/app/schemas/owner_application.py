@@ -7,7 +7,7 @@ rejected (`EXTRA_FORBIDDEN`), e.g. `proposedBar` on an `existing_bar` applicatio
 
 import re
 from datetime import date
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -181,8 +181,23 @@ class BusinessNumberSharedWarning(BaseModel):
     details: SharedNumberDetails
 
 
+class NoDetails(BaseModel):
+    """`details` of a warning that has nothing more to say: `{}`."""
+
+
+class BusinessNumberUnreadableWarning(BaseModel):
+    """The stored business number cannot be decrypted with the server's keys (a lost key, or a damaged row).
+    `businessRegistrationNumber` is null, and the NTS recheck answers `500 BUSINESS_NUMBER_UNREADABLE`."""
+
+    code: Literal["BUSINESS_NUMBER_UNREADABLE"]
+    message: str = Field(description="Korean text to show as is")
+    details: NoDetails
+
+
 # One shape per `code`; more warnings are added to this union. Clients show `message` for a code they do not know.
-ApplicationWarning = BusinessNumberSharedWarning
+ApplicationWarning = Annotated[
+    BusinessNumberUnreadableWarning | BusinessNumberSharedWarning, Field(discriminator="code")
+]
 
 
 class OwnerApplicationResponse(BaseModel):
@@ -194,7 +209,10 @@ class OwnerApplicationResponse(BaseModel):
         description="existing_bar: the claimed bar. new_bar: the bar its approval created; null before that"
     )
     proposedBar: ProposedBar | None = Field(description="new_bar only")
-    businessRegistrationNumber: str = Field(description="10 digits without hyphens")
+    businessRegistrationNumber: str | None = Field(
+        description="10 digits without hyphens. Null only when the stored number cannot be decrypted (a lost "
+        "key or a damaged row); operators then get the warning BUSINESS_NUMBER_UNREADABLE"
+    )
     representativeName: str
     openingDate: date
     businessStatus: BusinessStatusValue | None = Field(

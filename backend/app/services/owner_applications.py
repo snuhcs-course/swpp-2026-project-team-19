@@ -25,7 +25,7 @@ from sqlalchemy.orm import Session
 
 from app.adapters.business_verification import BusinessVerifier
 from app.adapters.storage import ImageStorage
-from app.core.business_number_crypto import get_business_number_cipher
+from app.core.business_number_crypto import BusinessNumberDecryptError, get_business_number_cipher
 from app.core.errors import ApiError
 from app.core.security import Principal, user_type_of
 from app.models import (
@@ -47,8 +47,10 @@ from app.schemas.owner_application import (
     ApplicationMenuPhoto,
     ApplicationWarning,
     BusinessNumberSharedWarning,
+    BusinessNumberUnreadableWarning,
     BusinessVerification,
     ExistingBarApplicationInput,
+    NoDetails,
     OwnerApplicationInput,
     OwnerApplicationResponse,
     ProposedBar,
@@ -347,18 +349,41 @@ def application_responses(
     by_number: dict[bytes, list[BarOwnerApplication]] = defaultdict(list)
     for other in sharing:
         by_number[bytes(other.business_registration_number_hmac)].append(other)
-    return [
-        _response(
-            application,
-            users,
-            bars,
-            photos[application.id],
-            links,
-            show_verification,
-            warnings=_warnings(application, by_number, bars) if show_verification else None,
+    responses = []
+    for application in applications:
+        number = readable_business_number(application)
+        warnings = None
+        if show_verification:
+            unreadable = [] if number is not None else [_unreadable_warning()]
+            warnings = unreadable + _warnings(application, by_number, bars)
+        responses.append(
+            _response(
+                application, number, users, bars, photos[application.id], links, show_verification, warnings=warnings
+            )
         )
-        for application in applications
-    ]
+    return responses
+
+
+def readable_business_number(application: BarOwnerApplication) -> str | None:
+    """The application's business number, or None when the server's keys cannot decrypt it (a lost key,
+    or a damaged row). Logged with the application id only, so one such row does not fail a whole list."""
+    try:
+        return application.business_registration_number
+    except BusinessNumberDecryptError:
+        logger.error(
+            "The business registration number of owner application %s cannot be decrypted with the configured "
+            "keys",
+            application.id,
+        )
+        return None
+
+
+def _unreadable_warning() -> BusinessNumberUnreadableWarning:
+    return BusinessNumberUnreadableWarning(
+        code="BUSINESS_NUMBER_UNREADABLE",
+        message="저장된 사업자등록번호를 읽을 수 없습니다. 서버의 키 설정을 확인해 주세요.",
+        details=NoDetails(),
+    )
 
 
 SHARED_STATUSES = (OwnerApplicationStatus.PENDING, OwnerApplicationStatus.APPROVED)
@@ -420,6 +445,7 @@ def _warnings(
 
 def _response(
     application: BarOwnerApplication,
+    number: str | None,
     users: dict[UUID, User],
     bars: dict[UUID, Bar],
     photos: list[ApplicationMenuPhoto],
@@ -445,7 +471,7 @@ def _response(
             if application.application_type == OwnerApplicationType.NEW_BAR
             else None
         ),
-        businessRegistrationNumber=application.business_registration_number,
+        businessRegistrationNumber=number,
         representativeName=application.representative_name,
         openingDate=application.opening_date,
         businessStatus=application.business_status.value if application.business_status is not None else None,

@@ -1434,7 +1434,7 @@ closed      폐업자
 | `proposedBar` | 객체 | 예 | `new_bar`에서 신청자가 적은 업장 정보. `existing_bar`는 `null` |
 | `proposedBar.name`, `proposedBar.address` | 문자열 | 아니오 | |
 | `proposedBar.phone` | 문자열 | 예 | |
-| `businessRegistrationNumber` | 문자열 | 아니오 | 하이픈을 뺀 숫자 10자리 |
+| `businessRegistrationNumber` | 문자열 | 예 | 하이픈을 뺀 숫자 10자리. 저장된 번호를 서버의 키로 복호화하지 못할 때(키를 잃었거나 행이 손상됨)만 `null`이다. 이때 operator에게는 `BUSINESS_NUMBER_UNREADABLE` 경고가 붙는다 |
 | `representativeName` | 문자열 | 아니오 | 사업자등록증의 대표자 성명 |
 | `openingDate` | `YYYY-MM-DD` 문자열 | 아니오 | 사업자등록증의 개업연월일 |
 | `businessStatus` | `BusinessStatus` | 예 | 마지막 검증에서 국세청이 알려 준 사업자 상태. 검증 결과가 `matched`가 아니거나 국세청이 상태를 알려 주지 않으면 `null`. 신청자에게도 보여 준다 |
@@ -1461,13 +1461,23 @@ closed      폐업자
 
 | 필드 | 타입 | null 가능 | 설명 |
 |---|---|---|---|
-| `code` | 문자열 | 아니오 | 경고 종류. 지금은 `BUSINESS_NUMBER_SHARED` 하나이며, 앞으로 늘어날 수 있다 |
+| `code` | 문자열 | 아니오 | 경고 종류. 지금은 `BUSINESS_NUMBER_UNREADABLE`과 `BUSINESS_NUMBER_SHARED`이며, 앞으로 늘어날 수 있다. 둘 다 있으면 이 순서다 |
 | `message` | 문자열 | 아니오 | 그대로 보여 줄 한국어 문구 |
 | `details` | 객체 | 아니오 | `code`마다 다른 형식 |
 
 프론트엔드는 모르는 `code`의 경고를 무시하지 않고 `message`만 보여 준다.
 
-`BUSINESS_NUMBER_SHARED`: 사업자등록번호가 같은 다른 신청이 있다.
+`BUSINESS_NUMBER_UNREADABLE`: 저장된 사업자등록번호를 서버의 키로 복호화하지 못했다. `businessRegistrationNumber`는 `null`이고, `details`는 `{}`이다. 다시 검증(3.11.13)은 `500 BUSINESS_NUMBER_UNREADABLE`이다. 서버의 키 설정을 고쳐야 하며(`backend/DEPLOY.md`의 "Business number keys"), 신청자에게는 경고 없이 `businessRegistrationNumber = null`만 보인다. 한 신청을 읽지 못해도 목록의 다른 신청은 그대로 나온다.
+
+```json
+{
+  "code": "BUSINESS_NUMBER_UNREADABLE",
+  "message": "저장된 사업자등록번호를 읽을 수 없습니다. 서버의 키 설정을 확인해 주세요.",
+  "details": {}
+}
+```
+
+`BUSINESS_NUMBER_SHARED`: 사업자등록번호가 같은 다른 신청이 있다. 번호를 복호화하지 못한 신청도 검색용 값으로 찾는다.
 
 - 대상은 상태가 `pending`이나 `approved`인 신청이다. 신청자와 신청 종류는 가리지 않으며, 같은 신청자의 다른 신청도 포함한다. 지금 보는 신청 자신만 뺀다. `rejected`와 `canceled`는 대상이 아니다.
 - 업주가 해제된(3.11.10) 업장의 신청도 `approved`로 남아 있으므로 대상이다.
@@ -1923,12 +1933,14 @@ operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 �
 
 - 검증 서비스가 응답하면 `businessVerification.result`(`matched` 또는 `not_matched`), `businessStatus`, `businessVerification.checkedAt`을 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다. 신청 상태(`status`)는 바뀌지 않는다. `not_matched`이면 operator가 거절한다.
 - 검증 서비스에 연결하지 못하면 저장된 결과와 `checkedAt`을 바꾸지 않고 `503 BUSINESS_VERIFICATION_UNAVAILABLE`을 반환한다. 실패한 시도는 기록하지 않는다.
+- 저장된 사업자등록번호를 서버의 키로 복호화하지 못하면(3.11.1의 `BUSINESS_NUMBER_UNREADABLE`) 국세청을 부르지 않고 `500 BUSINESS_NUMBER_UNREADABLE`을 반환한다. 저장된 결과는 바뀌지 않는다. 다시 시도해도 해결되지 않으므로 검증 설정보다 먼저 확인한다(서버에 검증 설정이 없어도 이 오류다).
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
 | `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없거나 `applicationId`가 UUID 형식이 아님 | 신청 목록 재조회 |
 | `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회 |
+| `500` | `BUSINESS_NUMBER_UNREADABLE` | 저장된 사업자등록번호를 복호화하지 못함 | 서버 키 설정 문제라고 안내. 다시 시도해도 해결되지 않는다 |
 | `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | 검증 서비스 오류, 시간 초과, 호출 한도 초과, 또는 서버에 검증 설정이 없음 | 잠시 후 다시 시도 안내 |
 
 #### 3.11.14 진위확인과 OCR 요청 수 제한
@@ -4547,6 +4559,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `429` | `RATE_LIMITED` | 진위확인(업주 신청과 신청 전 확인 합산) 또는 사업자등록증 OCR을 오늘 5회 했음. `details.retryAfter`에 다음 초기화 시각 (3.11.14) | 내일 다시 시도 안내. OCR은 직접 입력 안내 |
 | `503` | `OCR_UNAVAILABLE` | 사업자등록증 사진을 읽는 OCR 설정이 없거나 호출 실패 (3.11.12) | 직접 입력 안내 |
 | `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | operator의 다시 검증에서 국세청 API에 연결하지 못함 (3.11.13) | 잠시 후 재시도 안내 |
+| `500` | `BUSINESS_NUMBER_UNREADABLE` | operator의 다시 검증에서 저장된 사업자등록번호를 복호화하지 못함 (3.11.13) | 서버 키 설정 문제라고 안내. 재시도하지 않음 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 (검수 제출, 메뉴 직접 편집) | 잠시 후 같은 요청 재시도 |
 | `500` | `INTERNAL_ERROR` | 예상하지 못한 서버 오류(DB 연결 실패, 코드 오류 등). 모든 API에서 생길 수 있다. 원인은 응답에 담지 않고 서버 로그에만 남긴다 | 잠시 후 재시도 안내 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버의 인증 설정 누락 또는 오류, Supabase JWKS 조회 실패 (3.1.5) | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않음 |
