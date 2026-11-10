@@ -16,6 +16,7 @@ from sqlalchemy import (
     Enum as SQLAlchemyEnum,
     ForeignKey,
     Index,
+    LargeBinary,
     SmallInteger,
     String,
     UniqueConstraint,
@@ -25,6 +26,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Uuid
 
+from app.core.business_number_crypto import get_business_number_cipher
 from app.db.base import Base
 
 
@@ -70,9 +72,10 @@ class BarOwnerApplication(Base):
             " AND (bar_id IS NOT NULL) = (status = 'approved'))",
             name="ck_bar_owner_applications_type_fields",
         ),
+        # The lookup value is an HMAC-SHA256 (app/core/business_number_crypto.py).
         CheckConstraint(
-            "business_registration_number ~ '^[0-9]{10}$'",
-            name="ck_bar_owner_applications_business_registration_number",
+            "octet_length(business_registration_number_hmac) = 32",
+            name="ck_bar_owner_applications_business_registration_number_hmac",
         ),
         CheckConstraint(
             "(rejection_reason IS NOT NULL) = (status = 'rejected')",
@@ -101,8 +104,10 @@ class BarOwnerApplication(Base):
         Index("ix_bar_owner_applications_status_created_at", "status", "created_at"),
         Index("ix_bar_owner_applications_applicant_user_id_created_at", "applicant_user_id", "created_at"),
         Index("ix_bar_owner_applications_bar_id", "bar_id"),
-        # One pending application per user and bar, or per user and business number for new bars;
-        # enforced here too so concurrent submissions cannot both pass the service check.
+        # Finds the applications that share a business number.
+        Index("ix_bar_owner_applications_business_registration_number_hmac", "business_registration_number_hmac"),
+        # One pending application per user and bar, or per user and business number for new bars (compared
+        # by its lookup value); enforced here too so concurrent submissions cannot both pass the service check.
         Index(
             "uq_bar_owner_applications_pending_existing_bar",
             "applicant_user_id",
@@ -113,7 +118,7 @@ class BarOwnerApplication(Base):
         Index(
             "uq_bar_owner_applications_pending_new_bar",
             "applicant_user_id",
-            "business_registration_number",
+            "business_registration_number_hmac",
             unique=True,
             postgresql_where=text("status = 'pending' AND application_type = 'new_bar'"),
         ),
@@ -128,7 +133,10 @@ class BarOwnerApplication(Base):
     proposed_bar_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
     proposed_address: Mapped[str | None] = mapped_column(String(500), nullable=True)
     proposed_phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
-    business_registration_number: Mapped[str] = mapped_column(CHAR(10), nullable=False)
+    # The business registration number is stored only encrypted, with a lookup value to compare it by;
+    # read and set it through `business_registration_number` below.
+    business_registration_number_ciphertext: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    business_registration_number_hmac: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     representative_name: Mapped[str] = mapped_column(String(100), nullable=False)
     opening_date: Mapped[date] = mapped_column(Date, nullable=False)
     business_verification_result: Mapped[BusinessVerificationResult] = mapped_column(
@@ -166,6 +174,17 @@ class BarOwnerApplication(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+
+    @property
+    def business_registration_number(self) -> str:
+        """The 10-digit number, decrypted."""
+        return get_business_number_cipher().decrypt(self.business_registration_number_ciphertext)
+
+    @business_registration_number.setter
+    def business_registration_number(self, number: str) -> None:
+        cipher = get_business_number_cipher()
+        self.business_registration_number_ciphertext = cipher.encrypt(number)
+        self.business_registration_number_hmac = cipher.lookup(number)
 
 
 class BarOwner(Base):

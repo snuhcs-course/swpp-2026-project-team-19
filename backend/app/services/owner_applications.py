@@ -25,6 +25,7 @@ from sqlalchemy.orm import Session
 
 from app.adapters.business_verification import BusinessVerifier
 from app.adapters.storage import ImageStorage
+from app.core.business_number_crypto import get_business_number_cipher
 from app.core.errors import ApiError
 from app.core.security import Principal, user_type_of
 from app.models import (
@@ -472,7 +473,8 @@ def _pending_duplicate(
     if bar_id is not None:
         stmt = stmt.where(BarOwnerApplication.bar_id == bar_id)
     else:
-        stmt = stmt.where(BarOwnerApplication.business_registration_number == request.businessRegistrationNumber)
+        lookup = get_business_number_cipher().lookup(request.businessRegistrationNumber)
+        stmt = stmt.where(BarOwnerApplication.business_registration_number_hmac == lookup)
     return session.scalar(stmt)
 
 
