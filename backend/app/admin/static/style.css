@@ -112,6 +112,7 @@ table.applications { width: 100%; border-collapse: collapse; }
 .badge.matched, .badge.approved { color: var(--ok); border-color: var(--ok); }
 .badge.unavailable, .badge.pending { color: var(--warn-text); border-color: var(--warn-text); background: var(--warn-bg); }
 .badge.not_matched, .badge.rejected { color: var(--danger); border-color: var(--danger); }
+.badge.warning { color: var(--warn-text); border-color: var(--warn-text); background: var(--warn-bg); }
 
 .detail-pane h2 { font-size: 16px; margin: 0 0 4px; }
 .detail-pane h3 { font-size: 14px; margin: 18px 0 6px; color: var(--muted); }
@@ -125,6 +126,18 @@ dl.fields dd { margin: 0; overflow-wrap: anywhere; }
 .notice.warn { background: var(--warn-bg); color: var(--warn-text); }
 .notice.error { background: #fdecea; color: var(--danger); }
 .notice.ok { background: #e7f5ec; color: var(--ok); }
+.notice.warnings p { margin: 0 0 4px; }
+.notice.warnings ul { margin: 0; padding-left: 18px; }
+.notice.warnings li { margin: 2px 0; }
+button.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+}
 
 .message.error { color: var(--danger); }
 
