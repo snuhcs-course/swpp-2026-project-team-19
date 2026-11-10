@@ -10,6 +10,7 @@ from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_ext
 from app.api.router import api_router
 from app.core.access_log import strip_location_from_access_log
 from app.core.auth_config import load_supabase_auth_settings
+from app.core.business_number_crypto import get_business_number_cipher
 from app.core.errors import register_error_handlers
 from app.core.security import warn_if_temporary_login_is_on
 from app.core.version import get_version
@@ -65,6 +66,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     get_similar_products()
     # Invalid Supabase auth settings (e.g. HS256 allowed) stop the server; an unset SUPABASE_URL does not.
     load_supabase_auth_settings()
+    # Missing or invalid business number keys stop the server, instead of failing every owner application.
+    get_business_number_cipher()
     # Leave a trace in the server log while anyone can get a token from POST /api/auth/temp-login.
     warn_if_temporary_login_is_on()
     # Pin the reported version to the code this process loaded.
