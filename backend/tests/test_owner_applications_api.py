@@ -565,6 +565,39 @@ def test_can_apply_again_after_canceling(client, db_session, auth, applicant, ve
     assert apply(client, auth, existing_bar_body(bar)).status_code == 201
 
 
+@pytest.mark.parametrize("ending", ["canceled", "rejected"])
+@pytest.mark.parametrize("application_type", ["existing_bar", "new_bar"])
+def test_can_apply_again_once_the_pending_application_ends(
+    client, db_session, supabase, auth, applicant, verifier, limiter, application_type, ending
+):
+    body = existing_bar_body(make_bar(db_session)) if application_type == "existing_bar" else new_bar_body()
+    first = apply(client, auth, body)
+    assert first.status_code == 201
+    first_id = first.json()["applicationId"]
+    # While it is pending, the same application is refused (3.11.2).
+    assert error_of(apply(client, auth, body)) == (409, "OWNER_APPLICATION_EXISTS")
+
+    if ending == "canceled":
+        ended = cancel(client, auth, first_id)
+    else:
+        make_user(db_session, "operator-subject", user_type=UserType.OPERATOR)
+        ended = client.post(
+            f"/api/owner-applications/{first_id}/reject",
+            headers=bearer(supabase, "operator-subject"),
+            json={"reason": "확인할 수 없습니다."},
+        )
+    assert ended.json()["status"] == ending
+
+    again = apply(client, auth, body)
+
+    assert again.status_code == 201
+    assert again.json()["applicationId"] != first_id
+    statuses = db_session.scalars(
+        select(BarOwnerApplication.status).where(BarOwnerApplication.applicant_user_id == applicant.id)
+    ).all()
+    assert sorted(status.value for status in statuses) == sorted([ending, "pending"])
+
+
 @pytest.mark.parametrize(
     "status", [OwnerApplicationStatus.CANCELED, OwnerApplicationStatus.REJECTED, OwnerApplicationStatus.APPROVED]
 )
