@@ -4,6 +4,7 @@ The migration tests move the test database's schema down one revision and back u
 so they use their own connections instead of `db_session`, and always leave the schema at head.
 """
 
+import importlib.util
 import os
 from pathlib import Path
 
@@ -14,9 +15,20 @@ from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.business_number_crypto import ENCRYPTION_KEYS_ENV, HMAC_KEY_ENV, get_business_number_cipher
+from app.core.business_number_crypto import (
+    ENCRYPTION_KEYS_ENV,
+    HMAC_KEY_ENV,
+    BusinessNumberKeyError,
+    get_business_number_cipher,
+    load_business_number_cipher,
+)
 from app.models import BarOwnerApplication, User
-from tests.crypto_support import TEST_BUSINESS_NUMBER_ENCRYPTION_KEY, TEST_BUSINESS_NUMBER_HMAC_KEY
+from tests.crypto_support import (
+    INVALID_KEY_SETTINGS,
+    TEST_BUSINESS_NUMBER_ENCRYPTION_KEY,
+    TEST_BUSINESS_NUMBER_HMAC_KEY,
+    TEST_BUSINESS_NUMBER_NEXT_KEY,
+)
 from tests.factories import make_application, make_user
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -203,3 +215,56 @@ def test_an_empty_table_migrates_without_the_keys(db_engine, migrations, monkeyp
     migrations.up()
 
     assert "business_registration_number_hmac" in columns(db_engine)
+
+
+# ---- the migration checks the keys as the server does ----
+
+MIGRATION_FILE = BACKEND_DIR / "alembic" / "versions" / "bec46a7503af_encrypt_business_registration_numbers.py"
+
+
+def migration_module():
+    spec = importlib.util.spec_from_file_location("migration_bec46a7503af", MIGRATION_FILE)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize(("encryption_keys", "hmac_key", "message"), INVALID_KEY_SETTINGS)
+def test_the_migration_refuses_the_keys_the_server_refuses(monkeypatch, encryption_keys, hmac_key, message):
+    monkeypatch.setenv(ENCRYPTION_KEYS_ENV, encryption_keys)
+    monkeypatch.setenv(HMAC_KEY_ENV, hmac_key)
+
+    with pytest.raises(BusinessNumberKeyError) as server:
+        load_business_number_cipher()
+    with pytest.raises(RuntimeError) as migration:
+        migration_module()._keys()
+
+    assert str(migration.value) == str(server.value)
+    assert message in str(migration.value)
+
+
+def test_the_migration_makes_what_the_server_reads(monkeypatch):
+    # Two keys with spaces around them, as a rotation in progress would list them.
+    keys = f" {TEST_BUSINESS_NUMBER_ENCRYPTION_KEY} , {TEST_BUSINESS_NUMBER_NEXT_KEY} "
+    monkeypatch.setenv(ENCRYPTION_KEYS_ENV, keys)
+    monkeypatch.setenv(HMAC_KEY_ENV, f" {TEST_BUSINESS_NUMBER_HMAC_KEY} ")
+    module = migration_module()
+    fernet, lookup_key = module._keys()
+    server = load_business_number_cipher()
+
+    assert server.decrypt(fernet.encrypt(NUMBER.encode())) == NUMBER
+    assert module._lookup(lookup_key, NUMBER) == server.lookup(NUMBER)
+
+
+def test_rows_are_not_migrated_with_keys_the_server_would_refuse(db_engine, migrations, monkeypatch):
+    migrations.down()
+    insert_plaintext(db_engine, migrations.applicant_id, NUMBER)
+    # The lookup key reuses the encryption key: the server would not start with these.
+    monkeypatch.setenv(HMAC_KEY_ENV, TEST_BUSINESS_NUMBER_ENCRYPTION_KEY)
+
+    with pytest.raises(RuntimeError, match="must differ"):
+        migrations.up()
+
+    assert "business_registration_number" in columns(db_engine)
+    with db_engine.connect() as conn:
+        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == BEFORE

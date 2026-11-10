@@ -14,6 +14,7 @@ token and lookup formats are written out here instead of imported from app/core/
 so this migration keeps producing the same values if that module changes later.
 """
 import base64
+import binascii
 import hashlib
 import hmac
 import os
@@ -33,22 +34,49 @@ LOOKUP_CONTEXT = b"bottlemap.business_registration_number:"
 PENDING_NEW_BAR = "status = 'pending' AND application_type = 'new_bar'"
 
 
+ENCRYPTION_KEYS_ENV = "BUSINESS_NUMBER_ENCRYPTION_KEYS"
+HMAC_KEY_ENV = "BUSINESS_NUMBER_HMAC_KEY"
+KEY_BYTES = 32
+GENERATE_KEY_COMMAND = (
+    'uv run python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"'
+)
+
+
+def _decode_key(value: str, setting: str) -> bytes:
+    try:
+        key = base64.urlsafe_b64decode(value.encode("ascii"))
+    except (binascii.Error, UnicodeEncodeError, ValueError):
+        key = b""
+    if len(key) != KEY_BYTES:
+        raise RuntimeError(
+            f"{setting} must be base64url of {KEY_BYTES} random bytes; generate one with: {GENERATE_KEY_COMMAND}"
+        )
+    return key
+
+
 def _keys():
-    """(MultiFernet of the encryption keys, HMAC key); RuntimeError naming the setting when one is missing."""
+    """(MultiFernet of the encryption keys, HMAC key).
+
+    The same checks, in the same order and with the same messages, as load_business_number_cipher() in
+    app/core/business_number_crypto.py, so the migration never converts rows with keys the server would then
+    refuse to start with (tests/test_business_number_storage.py compares the two). RuntimeError names the
+    setting, never a key.
+    """
     from cryptography.fernet import Fernet, MultiFernet
 
-    raw_keys = os.getenv("BUSINESS_NUMBER_ENCRYPTION_KEYS", "").split(",")
-    encryption = [value.strip() for value in raw_keys if value.strip()]
-    lookup = os.getenv("BUSINESS_NUMBER_HMAC_KEY", "").strip()
-    if not encryption or not lookup:
-        raise RuntimeError(
-            "BUSINESS_NUMBER_ENCRYPTION_KEYS and BUSINESS_NUMBER_HMAC_KEY must be set to migrate the stored "
-            "business registration numbers (see backend/.env.example)"
-        )
-    lookup_key = base64.urlsafe_b64decode(lookup.encode("ascii"))
-    if len(lookup_key) != 32:
-        raise RuntimeError("BUSINESS_NUMBER_HMAC_KEY must be base64url of 32 bytes")
-    return MultiFernet([Fernet(key) for key in encryption]), lookup_key
+    raw_keys = [value.strip() for value in os.getenv(ENCRYPTION_KEYS_ENV, "").split(",") if value.strip()]
+    if not raw_keys:
+        raise RuntimeError(f"{ENCRYPTION_KEYS_ENV} is not set; generate a key with: {GENERATE_KEY_COMMAND}")
+    raw_hmac_key = os.getenv(HMAC_KEY_ENV, "").strip()
+    if not raw_hmac_key:
+        raise RuntimeError(f"{HMAC_KEY_ENV} is not set; generate a key with: {GENERATE_KEY_COMMAND}")
+    encryption_keys = [_decode_key(value, ENCRYPTION_KEYS_ENV) for value in raw_keys]
+    hmac_key = _decode_key(raw_hmac_key, HMAC_KEY_ENV)
+    if len(set(encryption_keys)) != len(encryption_keys):
+        raise RuntimeError(f"{ENCRYPTION_KEYS_ENV} lists the same key twice")
+    if hmac_key in encryption_keys:
+        raise RuntimeError(f"{HMAC_KEY_ENV} must differ from the keys in {ENCRYPTION_KEYS_ENV}")
+    return MultiFernet([Fernet(base64.urlsafe_b64encode(key)) for key in encryption_keys]), hmac_key
 
 
 def _lookup(key: bytes, number: str) -> bytes:

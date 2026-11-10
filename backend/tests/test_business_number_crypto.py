@@ -12,6 +12,7 @@ from app.core.business_number_crypto import (
     load_business_number_cipher,
 )
 from tests.crypto_support import (
+    INVALID_KEY_SETTINGS,
     TEST_BUSINESS_NUMBER_ENCRYPTION_KEY,
     TEST_BUSINESS_NUMBER_HMAC_KEY,
     TEST_BUSINESS_NUMBER_NEXT_KEY,
@@ -100,30 +101,7 @@ def test_a_changed_token_cannot_be_read():
         cipher.decrypt(bytes(token))
 
 
-@pytest.mark.parametrize(
-    ("encryption_keys", "hmac_key", "message"),
-    [
-        pytest.param("", TEST_BUSINESS_NUMBER_HMAC_KEY, f"{ENCRYPTION_KEYS_ENV} is not set", id="no encryption key"),
-        pytest.param(" , ", TEST_BUSINESS_NUMBER_HMAC_KEY, f"{ENCRYPTION_KEYS_ENV} is not set", id="only commas"),
-        pytest.param(TEST_BUSINESS_NUMBER_ENCRYPTION_KEY, "", f"{HMAC_KEY_ENV} is not set", id="no hmac key"),
-        pytest.param("not-a-key", TEST_BUSINESS_NUMBER_HMAC_KEY, ENCRYPTION_KEYS_ENV, id="not base64"),
-        pytest.param("c2hvcnQ=", TEST_BUSINESS_NUMBER_HMAC_KEY, ENCRYPTION_KEYS_ENV, id="too short"),
-        pytest.param("키", TEST_BUSINESS_NUMBER_HMAC_KEY, ENCRYPTION_KEYS_ENV, id="not ascii"),
-        pytest.param(TEST_BUSINESS_NUMBER_ENCRYPTION_KEY, "c2hvcnQ=", HMAC_KEY_ENV, id="short hmac key"),
-        pytest.param(
-            f"{TEST_BUSINESS_NUMBER_ENCRYPTION_KEY},{TEST_BUSINESS_NUMBER_ENCRYPTION_KEY}",
-            TEST_BUSINESS_NUMBER_HMAC_KEY,
-            "the same key twice",
-            id="repeated key",
-        ),
-        pytest.param(
-            f"{TEST_BUSINESS_NUMBER_NEXT_KEY},{TEST_BUSINESS_NUMBER_ENCRYPTION_KEY}",
-            TEST_BUSINESS_NUMBER_ENCRYPTION_KEY,
-            "must differ",
-            id="hmac key reused",
-        ),
-    ],
-)
+@pytest.mark.parametrize(("encryption_keys", "hmac_key", "message"), INVALID_KEY_SETTINGS)
 def test_invalid_keys_are_refused_without_showing_them(monkeypatch, encryption_keys, hmac_key, message):
     with pytest.raises(BusinessNumberKeyError, match=message) as raised:
         cipher_with(monkeypatch, encryption_keys, hmac_key)
