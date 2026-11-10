@@ -160,6 +160,31 @@ class ApplicationCoverPhoto(BaseModel):
     )
 
 
+class SharedNumberApplication(BaseModel):
+    applicationId: UUID
+    status: Literal["pending", "approved"]
+    applicationType: ApplicationType
+    barName: str = Field(description="The bar's name, or the proposed name of a new_bar application not approved yet")
+    sameApplicant: bool = Field(description="Whether the same user made it")
+
+
+class SharedNumberDetails(BaseModel):
+    applications: list[SharedNumberApplication] = Field(description="Newest first")
+
+
+class BusinessNumberSharedWarning(BaseModel):
+    """Other pending or approved applications, of any user and either type, give the same business number.
+    Only a warning: a business registered for several shops (사업자 단위 과세) shares one number."""
+
+    code: Literal["BUSINESS_NUMBER_SHARED"]
+    message: str = Field(description="Korean text to show as is")
+    details: SharedNumberDetails
+
+
+# One shape per `code`; more warnings are added to this union. Clients show `message` for a code they do not know.
+ApplicationWarning = BusinessNumberSharedWarning
+
+
 class OwnerApplicationResponse(BaseModel):
     applicationId: UUID
     applicationType: ApplicationType
@@ -177,6 +202,10 @@ class OwnerApplicationResponse(BaseModel):
     )
     businessVerification: BusinessVerification | None = Field(
         description="Operators only; null for the applicant"
+    )
+    warnings: list[ApplicationWarning] | None = Field(
+        description="What an operator should check before approving; empty when nothing. Operators only, null "
+        "for the applicant, so an applicant cannot learn whether someone else gave the same number"
     )
     contactPhone: str
     applicantNote: str | None
