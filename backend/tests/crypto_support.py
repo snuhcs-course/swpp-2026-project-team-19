@@ -7,3 +7,5 @@ TEST_BUSINESS_NUMBER_ENCRYPTION_KEY = "BPv6wXLkyKmt-7A7qXDXqK-BsT8HEjb5QS2K4qw_F
 TEST_BUSINESS_NUMBER_HMAC_KEY = "vClA_8_T6P9JDDo4iiSzfQV6u0Xm9499ueOCMmEAtkg="
 # A second encryption key, for key rotation tests.
 TEST_BUSINESS_NUMBER_NEXT_KEY = "4PhNxB6zQEewbcKE5bsSXuLd_Wp0Yo-4hlDlgLgDVl4="
+# Another lookup key, for lookup key rotation tests.
+TEST_BUSINESS_NUMBER_NEXT_HMAC_KEY = "GbEltWSZnS24HDtXbenXvNOfshRfph-eJV4YSY89NtA="

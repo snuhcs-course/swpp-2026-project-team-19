@@ -23,7 +23,7 @@ import binascii
 import hashlib
 import hmac
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 
 from cryptography.fernet import Fernet, InvalidToken, MultiFernet
@@ -50,6 +50,8 @@ class BusinessNumberDecryptError(RuntimeError):
 class BusinessNumberCipher:
     fernet: MultiFernet
     hmac_key: bytes
+    # The raw encryption keys, newest first; kept only to check a new lookup key against them.
+    encryption_keys: tuple[bytes, ...] = ()
 
     def encrypt(self, number: str) -> bytes:
         """A Fernet token for the 10-digit number, made with the first key."""
@@ -72,6 +74,16 @@ class BusinessNumberCipher:
     def lookup(self, number: str) -> bytes:
         """The 32-byte lookup value: equal numbers give equal values."""
         return hmac.new(self.hmac_key, LOOKUP_CONTEXT + _digits(number).encode("ascii"), hashlib.sha256).digest()
+
+    def with_lookup_key(self, raw_key: str, setting: str) -> "BusinessNumberCipher":
+        """The same encryption keys with a new lookup key (scripts/rotate_business_number_keys.py). `setting`
+        names where the key came from, for the error message."""
+        key = _decode_key(raw_key.strip(), setting)
+        if key == self.hmac_key:
+            raise BusinessNumberKeyError(f"{setting} is the current {HMAC_KEY_ENV}; generate a new key")
+        if key in self.encryption_keys:
+            raise BusinessNumberKeyError(f"{setting} must differ from the keys in {ENCRYPTION_KEYS_ENV}")
+        return replace(self, hmac_key=key)
 
 
 def _undecryptable() -> BusinessNumberDecryptError:
@@ -112,7 +124,9 @@ def load_business_number_cipher() -> BusinessNumberCipher:
     if hmac_key in encryption_keys:
         raise BusinessNumberKeyError(f"{HMAC_KEY_ENV} must differ from the keys in {ENCRYPTION_KEYS_ENV}")
     return BusinessNumberCipher(
-        fernet=MultiFernet([Fernet(base64.urlsafe_b64encode(key)) for key in encryption_keys]), hmac_key=hmac_key
+        fernet=MultiFernet([Fernet(base64.urlsafe_b64encode(key)) for key in encryption_keys]),
+        hmac_key=hmac_key,
+        encryption_keys=tuple(encryption_keys),
     )
 
 
