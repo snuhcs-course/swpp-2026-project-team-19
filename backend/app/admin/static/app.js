@@ -110,6 +110,15 @@ function barOf(application) {
   return application.bar || application.proposedBar || { name: "-", address: "-" };
 }
 
+// Warnings for the operator (3.11.1); a code this page does not know is shown by its message only.
+function warningsOf(application) {
+  return application.warnings || [];
+}
+
+function sharedNumberWarning(application) {
+  return warningsOf(application).find((warning) => warning.code === "BUSINESS_NUMBER_SHARED") || null;
+}
+
 // ---------- API ----------
 
 class ApiError extends Error {
@@ -347,7 +356,7 @@ function renderRows() {
       },
       el("td", {}, formatTime(item.createdAt)),
       el("td", {}, label("applicationType", item.applicationType)),
-      el("td", {}, barOf(item).name),
+      el("td", {}, barOf(item).name, sharedNumberBadge(item)),
       el("td", {}, item.applicant.displayName || item.applicant.email || "-"),
       el("td", {}, badge("status", item.status)),
       el("td", {}, item.businessVerification ? badge("verification", item.businessVerification.result) : "-"),
@@ -426,6 +435,44 @@ function mapSearchLink(address) {
   );
 }
 
+function sharedNumberBadge(application) {
+  const warning = sharedNumberWarning(application);
+  if (!warning) return null;
+  // The count is in the detail's warning; the badge only flags the row.
+  return [" ", el("span", { class: "badge warning", title: warning.message }, "번호 중복")];
+}
+
+// Each warning as a notice; a shared number also lists the other applications, which open on click.
+function renderWarnings(app) {
+  return warningsOf(app).map((warning) => {
+    const box = el("div", { class: "notice warn warnings" }, el("p", {}, warning.message));
+    if (warning.code === "BUSINESS_NUMBER_SHARED") {
+      box.append(
+        el(
+          "ul",
+          {},
+          warning.details.applications.map((other) =>
+            el(
+              "li",
+              {},
+              el(
+                "button",
+                { type: "button", class: "link", onclick: () => selectApplication(other.applicationId) },
+                other.barName,
+              ),
+              " ",
+              badge("status", other.status),
+              ` ${label("applicationType", other.applicationType)}`,
+              other.sameApplicant ? ", 같은 신청자" : ", 다른 신청자",
+            ),
+          ),
+        ),
+      );
+    }
+    return box;
+  });
+}
+
 function renderDetail() {
   const app = state.detail;
   if (!app) return;
@@ -438,6 +485,7 @@ function renderDetail() {
     el("div", { class: "action-row" }, badge("status", app.status), label("applicationType", app.applicationType)),
   ];
   if (state.notice) children.push(el("p", { class: `notice ${state.notice.kind}` }, state.notice.text));
+  children.push(...renderWarnings(app));
 
   children.push(el("h3", {}, "신청 정보"));
   children.push(
@@ -893,6 +941,7 @@ function confirmApproval(app) {
   if (app.businessStatus && app.businessStatus !== "active") {
     lines.push("", `사업자 상태가 ${label("businessStatus", app.businessStatus)}입니다.`);
   }
+  for (const warning of warningsOf(app)) lines.push("", warning.message);
   return window.confirm(lines.join("\n"));
 }
 

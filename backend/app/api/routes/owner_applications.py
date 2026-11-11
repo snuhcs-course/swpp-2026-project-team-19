@@ -503,13 +503,21 @@ def reject_owner_application(
         "the daily limit.\n\n"
         "- When NTS answers, `businessVerification.result` (`matched` or `not_matched`), `businessStatus` and "
         "`businessVerification.checkedAt` are updated; `status` does not change. Reject a `not_matched` one.\n"
-        "- When NTS cannot be reached, nothing is stored (`503`)."
+        "- When NTS cannot be reached, nothing is stored (`503`).\n"
+        "- When the stored number cannot be decrypted with the server's keys, NTS is not called and nothing is "
+        "stored (`500 BUSINESS_NUMBER_UNREADABLE`)."
     ),
     responses=error_responses(
         _UNAUTHENTICATED,
         _FORBIDDEN,
         (404, "`OWNER_APPLICATION_NOT_FOUND`: no such application, or `applicationId` is not a UUID."),
         (409, _NOT_PENDING),
+        (
+            500,
+            "`BUSINESS_NUMBER_UNREADABLE`: the stored business number cannot be decrypted (a lost key or a damaged "
+            "row). Trying again does not help; the server's keys must be fixed. `INTERNAL_ERROR`: an unexpected "
+            "server error.",
+        ),
         (
             503,
             "`BUSINESS_VERIFICATION_UNAVAILABLE`: NTS failed, timed out or hit its quota, or the server has no "

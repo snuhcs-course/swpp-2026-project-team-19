@@ -7,7 +7,7 @@ rejected (`EXTRA_FORBIDDEN`), e.g. `proposedBar` on an `existing_bar` applicatio
 
 import re
 from datetime import date
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -160,6 +160,46 @@ class ApplicationCoverPhoto(BaseModel):
     )
 
 
+class SharedNumberApplication(BaseModel):
+    applicationId: UUID
+    status: Literal["pending", "approved"]
+    applicationType: ApplicationType
+    barName: str = Field(description="The bar's name, or the proposed name of a new_bar application not approved yet")
+    sameApplicant: bool = Field(description="Whether the same user made it")
+
+
+class SharedNumberDetails(BaseModel):
+    applications: list[SharedNumberApplication] = Field(description="Newest first")
+
+
+class BusinessNumberSharedWarning(BaseModel):
+    """Other pending or approved applications, of any user and either type, give the same business number.
+    Only a warning: a business registered for several shops (사업자 단위 과세) shares one number."""
+
+    code: Literal["BUSINESS_NUMBER_SHARED"]
+    message: str = Field(description="Korean text to show as is")
+    details: SharedNumberDetails
+
+
+class NoDetails(BaseModel):
+    """`details` of a warning that has nothing more to say: `{}`."""
+
+
+class BusinessNumberUnreadableWarning(BaseModel):
+    """The stored business number cannot be decrypted with the server's keys (a lost key, or a damaged row).
+    `businessRegistrationNumber` is null, and the NTS recheck answers `500 BUSINESS_NUMBER_UNREADABLE`."""
+
+    code: Literal["BUSINESS_NUMBER_UNREADABLE"]
+    message: str = Field(description="Korean text to show as is")
+    details: NoDetails
+
+
+# One shape per `code`; more warnings are added to this union. Clients show `message` for a code they do not know.
+ApplicationWarning = Annotated[
+    BusinessNumberUnreadableWarning | BusinessNumberSharedWarning, Field(discriminator="code")
+]
+
+
 class OwnerApplicationResponse(BaseModel):
     applicationId: UUID
     applicationType: ApplicationType
@@ -169,7 +209,10 @@ class OwnerApplicationResponse(BaseModel):
         description="existing_bar: the claimed bar. new_bar: the bar its approval created; null before that"
     )
     proposedBar: ProposedBar | None = Field(description="new_bar only")
-    businessRegistrationNumber: str = Field(description="10 digits without hyphens")
+    businessRegistrationNumber: str | None = Field(
+        description="10 digits without hyphens. Null only when the stored number cannot be decrypted (a lost "
+        "key or a damaged row); operators then get the warning BUSINESS_NUMBER_UNREADABLE"
+    )
     representativeName: str
     openingDate: date
     businessStatus: BusinessStatusValue | None = Field(
@@ -177,6 +220,10 @@ class OwnerApplicationResponse(BaseModel):
     )
     businessVerification: BusinessVerification | None = Field(
         description="Operators only; null for the applicant"
+    )
+    warnings: list[ApplicationWarning] | None = Field(
+        description="What an operator should check before approving; empty when nothing. Operators only, null "
+        "for the applicant, so an applicant cannot learn whether someone else gave the same number"
     )
     contactPhone: str
     applicantNote: str | None

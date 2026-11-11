@@ -53,6 +53,7 @@ from app.services.owner_applications import (
     delete_menu_photo_rows,
     delete_stored_files,
     invalid_application_state,
+    readable_business_number,
 )
 from app.services.users import user_not_found
 
@@ -64,6 +65,14 @@ CURRENT_OWNER_INDEX = "uq_bar_owners_current_bar_id"
 
 def bar_owner_exists() -> ApiError:
     return ApiError(409, "BAR_OWNER_EXISTS", "이미 업주가 등록된 업장입니다.")
+
+
+def business_number_unreadable() -> ApiError:
+    return ApiError(
+        500,
+        "BUSINESS_NUMBER_UNREADABLE",
+        "저장된 사업자등록번호를 읽을 수 없어 다시 확인할 수 없습니다. 서버의 키 설정을 확인해 주세요.",
+    )
 
 
 def business_verification_unavailable() -> ApiError:
@@ -206,13 +215,13 @@ def recheck_business(
     the application's status stays. Not counted against the daily limit of 3.11.14. When NTS cannot
     answer, or the server has no NTS key, the stored result and `checkedAt` stay as they were."""
     application = _pending_application(session, application_id, lock=False)
+    # Before the NTS key check: an unreadable number does not get better by trying again later.
+    number = readable_business_number(application)
+    if number is None:
+        raise business_number_unreadable()
     if verifier is None:
         raise business_verification_unavailable()
-    number, name, opened = (
-        application.business_registration_number,
-        application.representative_name,
-        application.opening_date,
-    )
+    name, opened = application.representative_name, application.opening_date
     # End the read transaction so the connection goes back to the pool while NTS answers (up to two
     # 5 s tries). The row is locked and checked again afterwards: an approval, rejection or cancel
     # made meanwhile answers 409 and the result is not stored.

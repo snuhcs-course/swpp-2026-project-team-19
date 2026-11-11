@@ -192,7 +192,8 @@ Table bar_owner_applications {
   proposed_bar_name varchar(150) [note: 'new_bar only']
   proposed_address varchar(500) [note: 'new_bar only']
   proposed_phone varchar(30) [note: 'new_bar only; optional']
-  business_registration_number char(10) [not null, note: 'Ten digits without hyphens (CHECK); the API also checks the check digit']
+  business_registration_number_ciphertext bytea [not null, note: 'The ten-digit number (the API checks the check digit) as a Fernet token; the server decrypts it with BUSINESS_NUMBER_ENCRYPTION_KEYS. Never stored in plaintext']
+  business_registration_number_hmac bytea [not null, note: 'HMAC-SHA256 of the number with BUSINESS_NUMBER_HMAC_KEY, 32 bytes (CHECK); equal numbers have equal values, so it is what applications are compared by']
   representative_name varchar(100) [not null, note: 'As on the business registration certificate']
   opening_date date [not null, note: 'Business opening date on the certificate']
   business_verification_result business_verification_result [not null, note: 'Latest NTS check. Never not_matched at submission, because such an application is not created']
@@ -215,7 +216,8 @@ Table bar_owner_applications {
     (applicant_user_id, created_at)
     (bar_id)
     (applicant_user_id, bar_id) [note: "Unique where status = 'pending' and application_type = 'existing_bar'"]
-    (applicant_user_id, business_registration_number) [note: "Unique where status = 'pending' and application_type = 'new_bar'"]
+    (business_registration_number_hmac) [note: 'Finds the applications that share a number (operator warnings)']
+    (applicant_user_id, business_registration_number_hmac) [note: "Unique where status = 'pending' and application_type = 'new_bar'"]
   }
 
   Note: '''
@@ -234,6 +236,10 @@ Table bar_owner_applications {
   with a new row. Business registration numbers, representative names, opening dates and contact
   phones are visible only to the applicant and operators; the applicant sees only business_status
   of the check result. Certificate photos read by OCR are not stored.
+  The business registration number is stored only encrypted, with an HMAC lookup value to compare it by
+  (app/core/business_number_crypto.py). Operators are warned about other pending or approved
+  applications, of any user and either type, with the same lookup value; it is only a warning, because a
+  business registered for several shops uses one number.
   The applicant may attach menu photos (bar_owner_application_menu_images). On approval, if there are
   photos and the bar has no unfinished menu import, the same transaction creates a menu import from them
   and AI processing starts after the commit.

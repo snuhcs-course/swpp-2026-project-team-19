@@ -301,7 +301,8 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `proposed_bar_name` | `varchar(150)`, nullable | `신림 몰트 하우스` | `new_bar`에서만 쓰며 필수다. 승인할 때 운영자가 고칠 수 있다. |
 | `proposed_address` | `varchar(500)`, nullable | `서울특별시 관악구 신림로 2 3층` | `new_bar`에서만 쓰며 필수다. |
 | `proposed_phone` | `varchar(30)`, nullable | `02-1234-5678` | `new_bar`에서만 쓰며 선택이다. |
-| `business_registration_number` | `char(10)`, NOT NULL | `1234567891` | 하이픈을 뺀 사업자등록번호 10자리이며 검증번호가 맞아야 한다. 운영자가 실제 사업자인지 확인하는 근거다. |
+| `business_registration_number_ciphertext` | `bytea`, NOT NULL | Fernet 토큰 | 하이픈을 뺀 사업자등록번호 10자리(검증번호가 맞아야 한다)를 암호화한 값이다. 운영자가 실제 사업자인지 확인하는 근거이며, 운영자 화면과 국세청 재검증 때 서버가 `BUSINESS_NUMBER_ENCRYPTION_KEYS`로 복호화한다. 평문은 저장하지 않는다. |
+| `business_registration_number_hmac` | `bytea`, NOT NULL | 32바이트 | 사업자등록번호의 HMAC-SHA256 값이다(키 `BUSINESS_NUMBER_HMAC_KEY`). 같은 번호는 같은 값이 되므로, 대기 중 중복과 같은 번호를 쓰는 다른 신청을 이 값으로 찾는다. 암호문은 같은 번호도 매번 달라 비교할 수 없기 때문에 따로 둔다. |
 | `representative_name` | `varchar(100)`, NOT NULL | `김사장` | 사업자등록증의 대표자 성명이다. 국세청 진위확인에 필요하다. |
 | `opening_date` | `date`, NOT NULL | `2020-03-02` | 사업자등록증의 개업연월일이다. 국세청 진위확인에 필요하다. |
 | `business_verification_result` | `business_verification_result`, NOT NULL | `matched` | 마지막 국세청 진위확인 결과다. 운영자가 승인 전에 판단 근거로 본다. |
@@ -324,7 +325,9 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 - `existing_bar`는 `bar_id`가 필수이고 `proposed_*`가 모두 `null`이다. `new_bar`는 `proposed_bar_name`과 `proposed_address`가 필수이고, `bar_id`는 `approved`일 때만 값이 있다.
 - 한 사용자는 같은 기존 업장에 `pending` 신청을 하나만 가질 수 있고, 같은 사업자등록번호로 `new_bar` `pending` 신청을 하나만 가질 수 있다. 동시에 들어온 신청도 막도록 두 규칙 모두 PostgreSQL 부분 unique 인덱스로 보장한다(아래 무결성 규칙). 서로 다른 사용자가 같은 업장에 동시에 신청할 수는 있지만, 하나가 승인되면 나머지는 승인할 수 없고 운영자가 거절한다.
 - `rejection_reason`은 `rejected`일 때만, 그리고 반드시 값이 있다. `reviewed_by_user_id`와 `reviewed_at`은 `approved`와 `rejected`일 때만 함께 값이 있고, `pending`과 `canceled`에서는 둘 다 `null`이다.
-- `business_registration_number`는 숫자 10자리다. 검증번호(마지막 자리) 계산은 API가 확인한다.
+- 사업자등록번호 형식(숫자 10자리와 검증번호)은 API가 확인한다. DB에는 암호문과 검색용 값만 있으므로, DB는 검색용 값이 32바이트인지만 확인한다(CHECK).
+- 사업자등록번호가 같은 다른 `pending`, `approved` 신청(모든 사용자, 두 종류 모두, 그 신청 자신만 제외)이 있으면 운영자 응답에 경고가 나온다(API 명세 3.11.1의 `warnings`). 사업자 단위 과세 사업자는 여러 매장이 한 번호를 쓰므로 막지 않고 경고만 한다.
+- 두 키를 잃었을 때의 영향과 교체 방법은 `backend/DEPLOY.md`의 "Business number keys"에 있다. 암호화 키를 잃으면 번호를 복구할 수 없다.
 - `business_status`는 `business_verification_result = matched`일 때만 값이 있을 수 있다.
 - 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자와 운영자에게만 보여 주며 공개 API에 포함하지 않고 로그에도 남기지 않는다. 검증 결과 중 신청자에게는 `business_status`만 보여 준다. 실제 값은 저장소에 커밋하지 않는다.
 - 사업자등록증 사진과 OCR로 읽은 값은 저장하지 않는다. 신청자가 확인한 값만 신청으로 저장된다. 메뉴판 사진은 5.5에 따로 저장한다.
@@ -954,8 +957,8 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - 한 업장에는 `uploaded`, `processing`, `ready_for_review` 상태의 `menu_imports`가 동시에 하나만 존재해야 한다. PostgreSQL 부분 unique 인덱스와 업장 행 잠금·트랜잭션 검사를 함께 사용해 보장한다.
 - 한 업장에는 `revoked_at IS NULL`인 `bar_owners`가 최대 하나여야 한다. PostgreSQL 부분 unique 인덱스로 보장한다.
 - 한 사용자는 같은 업장에 `status = pending`인 `existing_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `bar_id` WHERE `status = 'pending' AND application_type = 'existing_bar'`)로 보장한다.
-- 한 사용자는 같은 사업자등록번호로 `status = pending`인 `new_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `business_registration_number` WHERE `status = 'pending' AND application_type = 'new_bar'`)로 보장한다.
-- `bar_owner_applications.business_registration_number`는 숫자 10자리여야 한다.
+- 한 사용자는 같은 사업자등록번호로 `status = pending`인 `new_bar` 신청을 하나만 가져야 한다. PostgreSQL 부분 unique 인덱스(`applicant_user_id`, `business_registration_number_hmac` WHERE `status = 'pending' AND application_type = 'new_bar'`)로 보장한다. 번호는 암호화되어 있으므로 검색용 값으로 비교한다.
+- `bar_owner_applications.business_registration_number_hmac`은 32바이트여야 한다(`octet_length(...) = 32`).
 - `bar_owner_applications`의 `cover_photo_storage_key`, `cover_photo_thumbnail_storage_key`, `cover_photo_sha256`은 함께 값이 있거나 함께 `null`이고, 값이 있으면 `application_type = 'new_bar' AND status = 'pending'`이어야 한다. 두 CHECK 제약으로 보장한다.
 - `bars.tags`는 5개 이하여야 한다(`cardinality(tags) <= 5`).
 - `bar_weekly_hours.day_of_week`는 1부터 7이고, `is_closed`이면 두 시각이 `null`, 아니면 둘 다 값이 있고 서로 달라야 한다.

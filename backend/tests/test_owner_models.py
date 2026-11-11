@@ -54,7 +54,7 @@ def test_defaults_and_both_application_types(db_session):
     [
         pytest.param({"bar_id": None}, id="existing_bar without a bar"),
         pytest.param({"proposed_bar_name": "Proposed"}, id="existing_bar with a proposed bar"),
-        pytest.param({"business_registration_number": "12345-6789"}, id="business number not 10 digits"),
+        pytest.param({"business_registration_number_hmac": b"short"}, id="business number lookup not 32 bytes"),
         pytest.param({"rejection_reason": "No"}, id="rejection reason while pending"),
         pytest.param({"reviewed_at": NOW}, id="reviewed while pending"),
         pytest.param({"business_status": BusinessStatus.ACTIVE}, id="business status without a match"),

@@ -235,6 +235,29 @@ The seed upserts by id: rows in the seed overwrite changes made to the same rows
 - **Temporary login** is off on the server since 2026-11-02 (`TEMP_AUTH_ENABLED=false`); everyone signs in with Google. Keep it off: while it is on, anyone who reaches the server gets an operator token. `curl -i -X POST $BASE/api/auth/temp-login` must return `404`, and the start log must not show `Temporary login is on` (`journalctl -u bottlemap-api | grep "Temporary login is on"`).
 - **Known limitation:** an import that is `processing` when the service restarts stays there; delete it with `reset_menu_imports.py` and upload again.
 - **Cost:** stop the EC2 and RDS instances when idle. A stopped RDS instance starts again by itself after 7 days, and the Elastic IP is billed while the instance is stopped.
+- **Business number keys:** `BUSINESS_NUMBER_ENCRYPTION_KEYS` and `BUSINESS_NUMBER_HMAC_KEY` are required; see [Business number keys](#business-number-keys).
+
+### Business number keys
+
+The business registration numbers of owner applications are stored only encrypted (`app/core/business_number_crypto.py`). Two keys in `.env` protect them:
+
+- `BUSINESS_NUMBER_ENCRYPTION_KEYS`: encrypts the numbers, which the server decrypts for the operator dashboard and the NTS recheck. A comma-separated list: the first key encrypts, every key decrypts.
+- `BUSINESS_NUMBER_HMAC_KEY`: makes the lookup values that find equal numbers (pending duplicates, and numbers shared between applications). Not used for encryption, and it must differ from the encryption keys.
+
+Each key is base64url of 32 random bytes:
+
+```sh
+uv run python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+- **Start-up:** the service does not start without valid keys (`journalctl -u bottlemap-api` names the setting). The migration that encrypted the existing numbers (`bec46a7503af`) also needs them, so set them before deploying it.
+- **Keep a copy:** store both keys in the team password manager as well as in `.env`. Never commit them or paste them into chat or logs.
+- **Losing the encryption key:** the stored numbers cannot be recovered. The dashboard shows no number, and the NTS recheck fails for those applications; database backups and snapshots do not help, as they hold only the encrypted values. Duplicate checks keep working with the lookup key.
+- **Losing the lookup key:** older applications are no longer found as duplicates. With the encryption key still there, generate a new lookup key and recompute the values (below).
+- **Changing a key** (when a key may have leaked, or someone who had it leaves) uses `scripts/rotate_business_number_keys.py`. Without `--apply` it runs and rolls back, printing only the number of rows.
+  - Encryption key, while the service runs: put the new key first in `BUSINESS_NUMBER_ENCRYPTION_KEYS` with the old one after it, restart, run `uv run --env-file .env python scripts/rotate_business_number_keys.py --apply`, then remove the old key and restart again.
+  - Lookup key, with the service stopped (a request in between would compare numbers under the wrong key): `sudo systemctl stop bottlemap-api`, type the new key without echoing it (`read -rs NEW_BUSINESS_NUMBER_HMAC_KEY && export NEW_BUSINESS_NUMBER_HMAC_KEY`), run `uv run --env-file .env python scripts/rotate_business_number_keys.py --hmac --apply`, put the new key in `BUSINESS_NUMBER_HMAC_KEY`, `unset NEW_BUSINESS_NUMBER_HMAC_KEY`, and `sudo systemctl start bottlemap-api`. The script reads the new key from that environment variable, not from an argument, so it stays out of the shell history and the process list.
+  - Update the copy in the password manager after either change.
 
 ### Adding an operator
 

@@ -1309,6 +1309,8 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 - 외부 API를 부르는 요청은 사용자마다 하루 5회로 제한한다: 국세청 진위확인(신청할 때 3.11.2와 신청 전 확인 3.11.16을 합쳐서)과 사업자등록증 OCR(3.11.12). 남의 사업자등록번호로 대표자명과 개업일자를 맞춰 보는 시도와 외부 API 호출 한도 소진을 막기 위해서다. 규칙은 3.11.14에 있다.
 - operator는 웹 대시보드에서 신청과 검증 결과를 보고, 실제 매장이 있는지 확인한 뒤 승인하거나 거절한다.
 - 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자 본인과 operator에게만 보여 준다. 검증 결과 중 신청자에게는 사업자 상태(`businessStatus`)만 보여 준다. 백엔드는 이 값들을 로그에 남기지 않는다.
+- 사업자등록번호는 DB에 암호화해 저장한다(`docs/schema_guide.md` 5.3). API 응답에는 지금처럼 원래 번호가 나오며, 클라이언트가 할 일은 없다.
+- 같은 사업자등록번호로 낸 다른 대기 중이거나 승인된 신청이 있으면 operator 응답에 경고(`warnings`)가 붙는다(3.11.1). 막지는 않는다.
 - 신청 결과는 알림으로 보내지 않는다. 신청자는 3.11.3으로 상태를 확인한다.
 
 ```text
@@ -1401,6 +1403,7 @@ closed      폐업자
     "result": "matched",
     "checkedAt": "2026-10-14T03:00:00Z"
   },
+  "warnings": [],
   "contactPhone": "010-1234-5678",
   "applicantNote": "대표 본인입니다",
   "menuPhotos": [
@@ -1431,13 +1434,14 @@ closed      폐업자
 | `proposedBar` | 객체 | 예 | `new_bar`에서 신청자가 적은 업장 정보. `existing_bar`는 `null` |
 | `proposedBar.name`, `proposedBar.address` | 문자열 | 아니오 | |
 | `proposedBar.phone` | 문자열 | 예 | |
-| `businessRegistrationNumber` | 문자열 | 아니오 | 하이픈을 뺀 숫자 10자리 |
+| `businessRegistrationNumber` | 문자열 | 예 | 하이픈을 뺀 숫자 10자리. 저장된 번호를 서버의 키로 복호화하지 못할 때(키를 잃었거나 행이 손상됨)만 `null`이다. 이때 operator에게는 `BUSINESS_NUMBER_UNREADABLE` 경고가 붙는다 |
 | `representativeName` | 문자열 | 아니오 | 사업자등록증의 대표자 성명 |
 | `openingDate` | `YYYY-MM-DD` 문자열 | 아니오 | 사업자등록증의 개업연월일 |
 | `businessStatus` | `BusinessStatus` | 예 | 마지막 검증에서 국세청이 알려 준 사업자 상태. 검증 결과가 `matched`가 아니거나 국세청이 상태를 알려 주지 않으면 `null`. 신청자에게도 보여 준다 |
 | `businessVerification` | 객체 | 예 | operator에게만 값이 있고, 신청자 본인이 조회하면 `null`. operator가 자기 신청을 신청(3.11.2), 상세 조회(3.11.4), 취소(3.11.5), 사진 변경(3.11.15, 3.11.17)하면 응답에 값이 있다. 내 신청 목록(3.11.3)에서는 operator도 `null`이다 |
 | `businessVerification.result` | `BusinessVerificationResult` | 아니오 | 마지막 검증 결과 |
 | `businessVerification.checkedAt` | RFC 3339 문자열 | 아니오 | `result`를 얻은 시각. 신청할 때 `unavailable`이 되었으면 그 시도 시각이다. 다시 검증(3.11.13)이 실패하면 `result`와 함께 바뀌지 않는다 |
+| `warnings` | 배열 | 예 | operator가 승인 전에 확인할 경고(아래 "경고"). 경고가 없으면 `[]`. `businessVerification`과 같은 규칙으로 operator에게만 값이 있고 신청자 본인에게는 `null`이다. operator가 자기 신청을 볼 때도 값이 있다 |
 | `contactPhone` | 문자열 | 아니오 | 운영자가 확인을 위해 연락할 번호 |
 | `applicantNote` | 문자열 | 예 | 신청자 메모 |
 | `menuPhotos` | 배열 | 아니오 | 신청에 올린 메뉴판 사진(3.11.15). `imageOrder` 순서이며, 올리지 않았거나 거절·취소로 삭제되었으면 `[]` |
@@ -1450,6 +1454,69 @@ closed      폐업자
 | `rejectionReason` | 문자열 | 예 | `rejected`일 때만 값이 있다 |
 | `reviewedAt` | RFC 3339 문자열 | 예 | 승인 또는 거절 시각. 그 전에는 `null` |
 | `createdAt`, `updatedAt` | RFC 3339 문자열 | 아니오 | |
+
+**경고**
+
+`warnings[]`는 operator가 승인하기 전에 확인할 내용이다. 경고는 승인과 거절을 막지 않는다. 각 경고는 다음 공통 형식이다.
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `code` | 문자열 | 아니오 | 경고 종류. 지금은 `BUSINESS_NUMBER_UNREADABLE`과 `BUSINESS_NUMBER_SHARED`이며, 앞으로 늘어날 수 있다. 둘 다 있으면 이 순서다 |
+| `message` | 문자열 | 아니오 | 그대로 보여 줄 한국어 문구 |
+| `details` | 객체 | 아니오 | `code`마다 다른 형식 |
+
+프론트엔드는 모르는 `code`의 경고를 무시하지 않고 `message`만 보여 준다.
+
+`BUSINESS_NUMBER_UNREADABLE`: 저장된 사업자등록번호를 서버의 키로 복호화하지 못했다. `businessRegistrationNumber`는 `null`이고, `details`는 `{}`이다. 다시 검증(3.11.13)은 `500 BUSINESS_NUMBER_UNREADABLE`이다. 서버의 키 설정을 고쳐야 하며(`backend/DEPLOY.md`의 "Business number keys"), 신청자에게는 경고 없이 `businessRegistrationNumber = null`만 보인다. 한 신청을 읽지 못해도 목록의 다른 신청은 그대로 나온다.
+
+```json
+{
+  "code": "BUSINESS_NUMBER_UNREADABLE",
+  "message": "저장된 사업자등록번호를 읽을 수 없습니다. 서버의 키 설정을 확인해 주세요.",
+  "details": {}
+}
+```
+
+`BUSINESS_NUMBER_SHARED`: 사업자등록번호가 같은 다른 신청이 있다. 번호를 복호화하지 못한 신청도 검색용 값으로 찾는다.
+
+- 대상은 상태가 `pending`이나 `approved`인 신청이다. 신청자와 신청 종류는 가리지 않으며, 같은 신청자의 다른 신청도 포함한다. 지금 보는 신청 자신만 뺀다. `rejected`와 `canceled`는 대상이 아니다.
+- 업주가 해제된(3.11.10) 업장의 신청도 `approved`로 남아 있으므로 대상이다.
+- 사업자 단위 과세 사업자는 여러 매장이 한 번호를 쓰므로 막지 않고 경고만 한다. operator는 같은 사업자의 다른 매장인지 확인한다.
+- 신청자에게는 보여 주지 않는다. 다른 사람이 그 번호로 신청했는지 알아낼 수 있게 되기 때문이다.
+
+```json
+{
+  "code": "BUSINESS_NUMBER_SHARED",
+  "message": "같은 사업자등록번호로 낸 다른 신청이 2건 있습니다. 같은 사업자의 다른 매장인지 확인해 주세요.",
+  "details": {
+    "applications": [
+      {
+        "applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc2",
+        "status": "approved",
+        "applicationType": "existing_bar",
+        "barName": "관악 위스키 바",
+        "sameApplicant": true
+      },
+      {
+        "applicationId": "cccccccc-cccc-4ccc-8ccc-ccccccccccc3",
+        "status": "pending",
+        "applicationType": "new_bar",
+        "barName": "신림 몰트 2호점",
+        "sameApplicant": false
+      }
+    ]
+  }
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `details.applications` | 배열 | 아니오 | 번호가 같은 다른 신청. 최근 신청부터 |
+| `details.applications[].applicationId` | UUID 문자열 | 아니오 | operator는 상세(3.11.4)로 열 수 있다 |
+| `details.applications[].status` | `pending` \| `approved` | 아니오 | |
+| `details.applications[].applicationType` | `existing_bar` \| `new_bar` | 아니오 | |
+| `details.applications[].barName` | 문자열 | 아니오 | 업장 이름. 승인되지 않은 `new_bar`는 신청한 업장 이름(`proposedBar.name`) |
+| `details.applications[].sameApplicant` | 불리언 | 아니오 | 지금 보는 신청과 신청자가 같으면 `true` |
 
 #### 3.11.2 업주 신청
 
@@ -1544,7 +1611,7 @@ GET /api/me/owner-applications
 Authorization: Bearer <access-token>
 ```
 
-호출자 본인의 신청을 모든 상태에 대해 최근 신청부터 반환한다. 페이지네이션은 두지 않는다. 신청이 없거나 `users` 행이 아직 없으면 `items = []`다. 신청자 본인의 조회이므로 각 신청의 `businessVerification`은 `null`이고 `businessStatus`만 보여 준다(3.11.1). operator가 호출해도 본인의 신청만 나온다.
+호출자 본인의 신청을 모든 상태에 대해 최근 신청부터 반환한다. 페이지네이션은 두지 않는다. 신청이 없거나 `users` 행이 아직 없으면 `items = []`다. 신청자 본인의 조회이므로 각 신청의 `businessVerification`과 `warnings`는 `null`이고 `businessStatus`만 보여 준다(3.11.1). operator가 호출해도 본인의 신청만 나온다.
 
 ```json
 {
@@ -1561,7 +1628,7 @@ GET /api/owner-applications/{applicationId}
 Authorization: Bearer <access-token>
 ```
 
-신청자 본인과 operator만 조회할 수 있다. 응답은 `OwnerApplication`이다. 신청이 없거나, 다른 사람의 신청이거나, `applicationId`가 UUID 형식이 아니면 `404 OWNER_APPLICATION_NOT_FOUND`다. 다른 사람의 신청이 있는지는 알려 주지 않는다.
+신청자 본인과 operator만 조회할 수 있다. 응답은 `OwnerApplication`이다. operator가 조회하면 `businessVerification`과 `warnings`(3.11.1)에 값이 있다. 신청이 없거나, 다른 사람의 신청이거나, `applicationId`가 UUID 형식이 아니면 `404 OWNER_APPLICATION_NOT_FOUND`다. 다른 사람의 신청이 있는지는 알려 주지 않는다.
 
 #### 3.11.5 업주 신청 취소
 
@@ -1594,7 +1661,7 @@ operator만 호출할 수 있다.
 | `limit` | 아니오 | `20` | 1~100 |
 | `cursor` | 아니오 | 없음 | 이전 응답의 `nextCursor`. 형식은 정하지 않으며, 같은 필터로만 쓸 수 있다 |
 
-정렬은 `status = pending`이면 오래된 신청부터(처리 순서), 그 외에는 최근 신청부터다. 응답의 각 신청에는 `businessVerification`이 들어 있다.
+정렬은 `status = pending`이면 오래된 신청부터(처리 순서), 그 외에는 최근 신청부터다. 응답의 각 신청에는 `businessVerification`과 `warnings`(3.11.1)가 들어 있다.
 
 ```json
 {
@@ -1866,12 +1933,14 @@ operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 �
 
 - 검증 서비스가 응답하면 `businessVerification.result`(`matched` 또는 `not_matched`), `businessStatus`, `businessVerification.checkedAt`을 바꾸고 `200 OK`로 `OwnerApplication`을 반환한다. 신청 상태(`status`)는 바뀌지 않는다. `not_matched`이면 operator가 거절한다.
 - 검증 서비스에 연결하지 못하면 저장된 결과와 `checkedAt`을 바꾸지 않고 `503 BUSINESS_VERIFICATION_UNAVAILABLE`을 반환한다. 실패한 시도는 기록하지 않는다.
+- 저장된 사업자등록번호를 서버의 키로 복호화하지 못하면(3.11.1의 `BUSINESS_NUMBER_UNREADABLE`) 국세청을 부르지 않고 `500 BUSINESS_NUMBER_UNREADABLE`을 반환한다. 저장된 결과는 바뀌지 않는다. 다시 시도해도 해결되지 않으므로 검증 설정보다 먼저 확인한다(서버에 검증 설정이 없어도 이 오류다).
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
 | `404` | `OWNER_APPLICATION_NOT_FOUND` | 신청이 없거나 `applicationId`가 UUID 형식이 아님 | 신청 목록 재조회 |
 | `409` | `INVALID_APPLICATION_STATE` | `pending`이 아님. `details.status`에 현재 상태 | 신청 상세 재조회 |
+| `500` | `BUSINESS_NUMBER_UNREADABLE` | 저장된 사업자등록번호를 복호화하지 못함 | 서버 키 설정 문제라고 안내. 다시 시도해도 해결되지 않는다 |
 | `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | 검증 서비스 오류, 시간 초과, 호출 한도 초과, 또는 서버에 검증 설정이 없음 | 잠시 후 다시 시도 안내 |
 
 #### 3.11.14 진위확인과 OCR 요청 수 제한
@@ -2075,7 +2144,7 @@ curl -X PUT https://bottlemap.o-r.kr/api/owner-applications/cccccccc-cccc-4ccc-8
   -F "image=@storefront.jpg;type=image/jpeg"
 ```
 
-**사진을 올린 뒤 신청자 본인이 본 신청 (3.11.4)**. 신청자 본인에게는 `businessVerification`이 `null`이고 `businessStatus`만 보인다.
+**사진을 올린 뒤 신청자 본인이 본 신청 (3.11.4)**. 신청자 본인에게는 `businessVerification`과 `warnings`가 `null`이고 `businessStatus`만 보인다.
 
 ```json
 {
@@ -2098,6 +2167,7 @@ curl -X PUT https://bottlemap.o-r.kr/api/owner-applications/cccccccc-cccc-4ccc-8
   "openingDate": "2020-03-02",
   "businessStatus": "active",
   "businessVerification": null,
+  "warnings": null,
   "contactPhone": "010-1234-5678",
   "applicantNote": "대표 본인입니다",
   "menuPhotos": [
@@ -2124,7 +2194,7 @@ curl -X PUT https://bottlemap.o-r.kr/api/owner-applications/cccccccc-cccc-4ccc-8
 }
 ```
 
-**operator의 목록 (3.11.6)**. `GET /api/owner-applications?limit=1`. 각 신청은 위와 같고 `businessVerification`만 채워져 있다. 다음 페이지가 있으므로 `nextCursor`가 있다.
+**operator의 목록 (3.11.6)**. `GET /api/owner-applications?limit=1`. 각 신청은 위와 같고 `businessVerification`과 `warnings`만 채워져 있다. 다음 페이지가 있으므로 `nextCursor`가 있다.
 
 ```json
 {
@@ -2136,6 +2206,7 @@ curl -X PUT https://bottlemap.o-r.kr/api/owner-applications/cccccccc-cccc-4ccc-8
         "result": "matched",
         "checkedAt": "2026-11-09T12:44:47.636619Z"
       },
+      "warnings": [],
       "...": "나머지는 위 신청과 같다"
     }
   ],
@@ -4488,6 +4559,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `429` | `RATE_LIMITED` | 진위확인(업주 신청과 신청 전 확인 합산) 또는 사업자등록증 OCR을 오늘 5회 했음. `details.retryAfter`에 다음 초기화 시각 (3.11.14) | 내일 다시 시도 안내. OCR은 직접 입력 안내 |
 | `503` | `OCR_UNAVAILABLE` | 사업자등록증 사진을 읽는 OCR 설정이 없거나 호출 실패 (3.11.12) | 직접 입력 안내 |
 | `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | operator의 다시 검증에서 국세청 API에 연결하지 못함 (3.11.13) | 잠시 후 재시도 안내 |
+| `500` | `BUSINESS_NUMBER_UNREADABLE` | operator의 다시 검증에서 저장된 사업자등록번호를 복호화하지 못함 (3.11.13) | 서버 키 설정 문제라고 안내. 재시도하지 않음 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 (검수 제출, 메뉴 직접 편집) | 잠시 후 같은 요청 재시도 |
 | `500` | `INTERNAL_ERROR` | 예상하지 못한 서버 오류(DB 연결 실패, 코드 오류 등). 모든 API에서 생길 수 있다. 원인은 응답에 담지 않고 서버 로그에만 남긴다 | 잠시 후 재시도 안내 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버의 인증 설정 누락 또는 오류, Supabase JWKS 조회 실패 (3.1.5) | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않음 |

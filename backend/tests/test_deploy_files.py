@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.adapters.storage import S3ImageStorage
 from app.api import deps
+from tests.crypto_support import TEST_BUSINESS_NUMBER_ENCRYPTION_KEY, TEST_BUSINESS_NUMBER_HMAC_KEY
 
 DEPLOY_DIR = Path(__file__).resolve().parents[1] / "deploy"
 LINE = re.compile(r"^[A-Z][A-Z0-9_]*=[^\s#'\"]*$")
@@ -48,6 +49,9 @@ def test_the_app_starts_with_the_production_settings(monkeypatch, clean_caches):
     for key, value in production_env().items():
         monkeypatch.setenv(key, value)
     monkeypatch.setenv("TEMP_AUTH_JWT_SECRET", "x" * 64)
+    # The template leaves the keys empty, as they are secrets; the server would not start without them.
+    monkeypatch.setenv("BUSINESS_NUMBER_ENCRYPTION_KEYS", TEST_BUSINESS_NUMBER_ENCRYPTION_KEY)
+    monkeypatch.setenv("BUSINESS_NUMBER_HMAC_KEY", TEST_BUSINESS_NUMBER_HMAC_KEY)
 
     with TestClient(app) as client:
         assert client.get("/health").json()["status"] == "ok"

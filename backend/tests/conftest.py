@@ -64,6 +64,19 @@ def no_startup_recovery(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture(autouse=True)
+def business_number_keys(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """The test keys for stored business numbers, whatever .env sets. Tests that change them clear the cache."""
+    from app.core.business_number_crypto import ENCRYPTION_KEYS_ENV, HMAC_KEY_ENV, get_business_number_cipher
+    from tests.crypto_support import TEST_BUSINESS_NUMBER_ENCRYPTION_KEY, TEST_BUSINESS_NUMBER_HMAC_KEY
+
+    monkeypatch.setenv(ENCRYPTION_KEYS_ENV, TEST_BUSINESS_NUMBER_ENCRYPTION_KEY)
+    monkeypatch.setenv(HMAC_KEY_ENV, TEST_BUSINESS_NUMBER_HMAC_KEY)
+    get_business_number_cipher.cache_clear()
+    yield
+    get_business_number_cipher.cache_clear()
+
+
+@pytest.fixture(autouse=True)
 def no_nts_key(monkeypatch: pytest.MonkeyPatch) -> None:
     """Never call the NTS business check, even when .env has its key; tests fake the verifier."""
     monkeypatch.delenv("NTS_SERVICE_KEY", raising=False)

@@ -25,6 +25,7 @@ from sqlalchemy.orm import Session
 
 from app.adapters.business_verification import BusinessVerifier
 from app.adapters.storage import ImageStorage
+from app.core.business_number_crypto import BusinessNumberDecryptError, get_business_number_cipher
 from app.core.errors import ApiError
 from app.core.security import Principal, user_type_of
 from app.models import (
@@ -44,11 +45,17 @@ from app.schemas.owner_application import (
     ApplicationBar,
     ApplicationCoverPhoto,
     ApplicationMenuPhoto,
+    ApplicationWarning,
+    BusinessNumberSharedWarning,
+    BusinessNumberUnreadableWarning,
     BusinessVerification,
     ExistingBarApplicationInput,
+    NoDetails,
     OwnerApplicationInput,
     OwnerApplicationResponse,
     ProposedBar,
+    SharedNumberApplication,
+    SharedNumberDetails,
 )
 from app.services.bar_menu import bar_not_found
 from app.services.bar_photo_image import process_photo
@@ -319,11 +326,13 @@ def invalid_application_state(application: BarOwnerApplication) -> ApiError:
 def application_responses(
     session: Session, applications: Iterable[BarOwnerApplication], links: ImageLinks, *, show_verification: bool
 ) -> list[OwnerApplicationResponse]:
-    """`OwnerApplication` bodies, loading the applicants, bars and menu photos in one query each."""
+    """`OwnerApplication` bodies, loading the applicants, bars and menu photos in one query each. The operator
+    view (`show_verification`) also gets the warnings, with one more query for the shared business numbers."""
     applications = list(applications)
     application_ids = [application.id for application in applications]
     user_ids = {application.applicant_user_id for application in applications}
-    bar_ids = {application.bar_id for application in applications if application.bar_id is not None}
+    sharing = _sharing_applications(session, applications) if show_verification else []
+    bar_ids = {application.bar_id for application in [*applications, *sharing] if application.bar_id is not None}
     users = {user.id: user for user in session.scalars(select(User).where(User.id.in_(user_ids)))} if user_ids else {}
     bars = {bar.id: bar for bar in session.scalars(select(Bar).where(Bar.id.in_(bar_ids)))} if bar_ids else {}
     photos: dict[UUID, list[ApplicationMenuPhoto]] = defaultdict(list)
@@ -337,19 +346,113 @@ def application_responses(
             photos[image.application_id].append(
                 ApplicationMenuPhoto(imageOrder=image.image_order, imageUrl=url, imageUrlExpiresAt=expires_at)
             )
+    by_number: dict[bytes, list[BarOwnerApplication]] = defaultdict(list)
+    for other in sharing:
+        by_number[bytes(other.business_registration_number_hmac)].append(other)
+    responses = []
+    for application in applications:
+        number = readable_business_number(application)
+        warnings = None
+        if show_verification:
+            unreadable = [] if number is not None else [_unreadable_warning()]
+            warnings = unreadable + _warnings(application, by_number, bars)
+        responses.append(
+            _response(
+                application, number, users, bars, photos[application.id], links, show_verification, warnings=warnings
+            )
+        )
+    return responses
+
+
+def readable_business_number(application: BarOwnerApplication) -> str | None:
+    """The application's business number, or None when the server's keys cannot decrypt it (a lost key,
+    or a damaged row). Logged with the application id only, so one such row does not fail a whole list."""
+    try:
+        return application.business_registration_number
+    except BusinessNumberDecryptError:
+        logger.error(
+            "The business registration number of owner application %s cannot be decrypted with the configured "
+            "keys",
+            application.id,
+        )
+        return None
+
+
+def _unreadable_warning() -> BusinessNumberUnreadableWarning:
+    return BusinessNumberUnreadableWarning(
+        code="BUSINESS_NUMBER_UNREADABLE",
+        message="저장된 사업자등록번호를 읽을 수 없습니다. 서버의 키 설정을 확인해 주세요.",
+        details=NoDetails(),
+    )
+
+
+SHARED_STATUSES = (OwnerApplicationStatus.PENDING, OwnerApplicationStatus.APPROVED)
+
+
+def _sharing_applications(session: Session, applications: list[BarOwnerApplication]) -> list[BarOwnerApplication]:
+    """The pending and approved applications, of any user and type, whose business number one of
+    `applications` also has (the applications themselves included), newest first."""
+    lookups = {bytes(application.business_registration_number_hmac) for application in applications}
+    if not lookups:
+        return []
+    return list(
+        session.scalars(
+            select(BarOwnerApplication)
+            .where(
+                BarOwnerApplication.business_registration_number_hmac.in_(lookups),
+                BarOwnerApplication.status.in_(SHARED_STATUSES),
+            )
+            .order_by(BarOwnerApplication.created_at.desc(), BarOwnerApplication.id.desc())
+        )
+    )
+
+
+def _warnings(
+    application: BarOwnerApplication, by_number: dict[bytes, list[BarOwnerApplication]], bars: dict[UUID, Bar]
+) -> list[ApplicationWarning]:
+    """BUSINESS_NUMBER_SHARED when other pending or approved applications give the same number. Only the
+    application itself is left out: the applicant's other applications count too. A bar whose owner was
+    removed later (3.11.10) still counts, since its application stays approved."""
+    others = [
+        other
+        for other in by_number.get(bytes(application.business_registration_number_hmac), [])
+        if other.id != application.id
+    ]
+    if not others:
+        return []
     return [
-        _response(application, users, bars, photos[application.id], links, show_verification)
-        for application in applications
+        BusinessNumberSharedWarning(
+            code="BUSINESS_NUMBER_SHARED",
+            message=(
+                f"같은 사업자등록번호로 낸 다른 신청이 {len(others)}건 있습니다. "
+                "같은 사업자의 다른 매장인지 확인해 주세요."
+            ),
+            details=SharedNumberDetails(
+                applications=[
+                    SharedNumberApplication(
+                        applicationId=other.id,
+                        status=other.status.value,
+                        applicationType=other.application_type.value,
+                        barName=bars[other.bar_id].name if other.bar_id is not None else other.proposed_bar_name,
+                        sameApplicant=other.applicant_user_id == application.applicant_user_id,
+                    )
+                    for other in others
+                ]
+            ),
+        )
     ]
 
 
 def _response(
     application: BarOwnerApplication,
+    number: str | None,
     users: dict[UUID, User],
     bars: dict[UUID, Bar],
     photos: list[ApplicationMenuPhoto],
     links: ImageLinks,
     show_verification: bool,
+    *,
+    warnings: list[ApplicationWarning] | None,
 ) -> OwnerApplicationResponse:
     applicant = users[application.applicant_user_id]
     bar = bars.get(application.bar_id) if application.bar_id is not None else None
@@ -368,7 +471,7 @@ def _response(
             if application.application_type == OwnerApplicationType.NEW_BAR
             else None
         ),
-        businessRegistrationNumber=application.business_registration_number,
+        businessRegistrationNumber=number,
         representativeName=application.representative_name,
         openingDate=application.opening_date,
         businessStatus=application.business_status.value if application.business_status is not None else None,
@@ -379,6 +482,7 @@ def _response(
             if show_verification
             else None
         ),
+        warnings=warnings,
         contactPhone=application.contact_phone,
         applicantNote=application.applicant_note,
         menuPhotos=photos,
@@ -472,7 +576,8 @@ def _pending_duplicate(
     if bar_id is not None:
         stmt = stmt.where(BarOwnerApplication.bar_id == bar_id)
     else:
-        stmt = stmt.where(BarOwnerApplication.business_registration_number == request.businessRegistrationNumber)
+        lookup = get_business_number_cipher().lookup(request.businessRegistrationNumber)
+        stmt = stmt.where(BarOwnerApplication.business_registration_number_hmac == lookup)
     return session.scalar(stmt)
 
 
