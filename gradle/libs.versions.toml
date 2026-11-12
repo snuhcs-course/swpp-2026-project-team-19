@@ -12,6 +12,7 @@ moshi = "1.15.2"
 exifInterface = "1.4.1"
 junit4 = "4.13.2"
 coroutinesTest = "1.10.2"
+robolectric = "4.17"
 kakaoMaps = "2.15.2"
 credentials = "1.5.0"
 googleId = "1.1.1"
@@ -46,6 +47,8 @@ google-id = { module = "com.google.android.libraries.identity.googleid:googleid"
 supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase" }
 supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 google-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }

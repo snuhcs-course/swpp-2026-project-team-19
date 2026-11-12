@@ -112,7 +112,8 @@ internal fun clearP18Recents(context: Context) {
 internal fun CustomerP18Home(
     onSearch: (String, String) -> Unit,
     onPopular: (String) -> Unit,
-    onAccount: () -> Unit,
+    // Null when the 내 정보 bottom tab replaces the header account entry (UX v18).
+    onAccount: (() -> Unit)?,
     onMap: () -> Unit,
     refreshAfterMissingProduct:Boolean=false,
     onMissingProductRefreshConsumed:()->Unit={},
@@ -152,7 +153,7 @@ internal fun CustomerP18Home(
             horizontalArrangement = Arrangement.SpaceBetween) {
             Text("BottleMap",style=MaterialTheme.typography.titleMedium,
                 fontSize = 18.sp,fontWeight=FontWeight.Bold,color=P18Gold)
-            Box(Modifier.size(48.dp).clickable(onClick=onAccount)
+            if (onAccount != null) Box(Modifier.size(48.dp).clickable(onClick=onAccount)
                 .testTag("customer-account-entry"), contentAlignment=Alignment.Center) {
                 BmIcon(BmIconId.ACCOUNT,"마이페이지",Modifier.size(24.dp),tint=P18Text)
             }

@@ -65,6 +65,17 @@ android {
         compose = true
         buildConfig = true
     }
+
+    // Robolectric renders Compose screens on the JVM for the opt-in UX screenshot test.
+    // The screenshot test is skipped unless -PbmUxScreenshots=true is passed.
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            it.systemProperty("bm.ux.screenshots",
+                providers.gradleProperty("bmUxScreenshots").orNull ?: "false")
+            it.systemProperty("bm.ux.screenshotDir", layout.buildDirectory.dir("ux-screenshots").get().asFile.path)
+        }
+    }
 }
 
 dependencies {
@@ -98,6 +109,9 @@ dependencies {
 
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
