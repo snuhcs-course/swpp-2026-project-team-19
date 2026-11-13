@@ -70,7 +70,8 @@ internal fun manualProductProposal(
     // explicit re-linking, otherwise the screen silently creates a second product.
     // Production candidates are catalogMatched and still require isActive.
     val available=products.filter {
-        (it.catalogMatched && it.isActive || !it.catalogMatched) &&
+        ((it.catalogMatched && it.isActive && it.category == "whisky") ||
+            !it.catalogMatched) &&
             it.productId!=rejectedProductId &&
             manualEditorCategory(it)==category
     }
