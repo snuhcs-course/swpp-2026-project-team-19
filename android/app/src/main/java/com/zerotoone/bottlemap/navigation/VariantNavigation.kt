@@ -4,6 +4,17 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,7 +84,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(
             }
         }
         OwnerPage.entries.forEach { page ->
-            composable(page.route) {
+            composable(page.route) { reviewEntry ->
                 val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                     OwnerRuntime.repository(LocalContext.current)))
                 val mockState = data.state.collectAsStateWithLifecycle().value
@@ -173,21 +184,33 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                         val latestJob = snapshot?.imports?.lastOrNull {
                             it.barId == activeBar && it.status == MockImportStatus.READY_FOR_REVIEW
                         }
-                        // Owner review always loads the authenticated import.
-                        // Debug/mock scenarios belong to src/debug and cannot
-                        // be substituted into a real publishable route.
-                        val repository = LivePhotoReviewRepository(
-                            owner = data,
-                            importId = latestJob?.menuImportId,
-                            context = LocalContext.current.applicationContext,
-                        )
-                        val reviewVm: PhotoReviewViewModel = viewModel(
-                            key = "owner-review-${latestJob?.menuImportId ?: "fixture"}",
-                            factory = PhotoReviewViewModel.Factory(repository),
-                        )
-                        PhotoReviewScreen(
-                            vm = reviewVm,
-                            onLeave = {
+                        // Keep the import ID tied to this navigation entry.
+                        // After review-and-apply commits, the import leaves
+                        // READY_FOR_REVIEW; recomposing must NOT create a new
+                        // "owner-review-fixture" ViewModel that fails to load.
+                        var capturedImportId by rememberSaveable(reviewEntry.id) {
+                            mutableStateOf<String?>(null)
+                        }
+                        val selectedImportId = capturedImportId ?: latestJob?.menuImportId
+                        if (capturedImportId == null && latestJob != null) {
+                            SideEffect {
+                                if (capturedImportId == null)
+                                    capturedImportId = latestJob.menuImportId
+                            }
+                        }
+                        when {
+                            selectedImportId != null -> {
+                                val repository = LivePhotoReviewRepository(
+                                    owner = data, importId = selectedImportId,
+                                    context = LocalContext.current.applicationContext,
+                                )
+                                val reviewVm: PhotoReviewViewModel = viewModel(
+                                    key = "owner-review-$selectedImportId",
+                                    factory = PhotoReviewViewModel.Factory(repository),
+                                )
+                                PhotoReviewScreen(
+                                    vm = reviewVm,
+                                    onLeave = {
                                 // A successful publish can require operator linking
                                 // before whisky search. Show this only once via
                                 // the same app-level top notice as other Owner actions.
@@ -202,8 +225,30 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                                         launchSingleTop = true
                                     }
                                 }
-                            },
-                        )
+                                    },
+                                )
+                            }
+                            mockState == MockOwnerLoadState.Loading -> {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                            else -> {
+                                // No pending import: there is nothing to retry.
+                                // Leave the dead-end instead of spinning forever.
+                                LaunchedEffect(reviewEntry.id) {
+                                    if (!navController.popBackStack(OwnerPage.MGR_MENU.route, false))
+                                        navController.navigate(OwnerPage.MGR_MENU.route) {
+                                            popUpTo(OwnerPage.MGR_REVIEW.route) { inclusive = true }
+                                            launchSingleTop = true
+                                        }
+                                    onNotice("검수할 메뉴판 작업이 없어요. 메뉴 관리에서 새로 시작해 주세요.")
+                                }
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Text("메뉴 관리로 돌아가는 중이에요.")
+                                }
+                            }
+                        }
                     }
                     else -> OwnerSkeletonScreen(
                         page = page,
