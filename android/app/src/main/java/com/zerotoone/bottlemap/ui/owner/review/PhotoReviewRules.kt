@@ -14,7 +14,40 @@ object PhotoReviewRules {
 
     fun countOptions(x: ReviewItem): Int = (if (x.primaryHasOption) 1 else 0) + x.options.size
 
-    fun problems(x: ReviewItem): List<ReviewIssue> {
+    /**
+     * The Backend #164 post-review preflight disallows two selected catalog
+     * lines with different prices for the same product and serving. Detect the
+     * problem BEFORE enabling Publish, without guessing identities from names.
+     * Returns the conflicting serving labels for each OCR line (including a
+     * separate photo). No server model or catalog data is modified.
+     */
+    fun duplicatePhotoPriceConflicts(state: PhotoReviewState): Map<String, Set<String>> {
+        data class Entry(val itemId: String, val price: Double, val servingLabel: String)
+        val buckets = mutableMapOf<String, MutableList<Entry>>()
+        state.items.filter { !it.excluded &&
+            it.type == ReviewItemType.WHISKY && it.linkedProductId != null
+        }.forEach { item ->
+            optionSummary(item).forEach { option ->
+                if (!validPrice(option.price) ||
+                    (!option.bottle && !validVolume(option.volume))) return@forEach
+                val serving = if (option.bottle) "Bottle" else "${option.volume.toInt()}ml"
+                val key = "${item.linkedProductId}|$serving"
+                buckets.getOrPut(key) { mutableListOf() }
+                    .add(Entry(item.id, option.price, serving))
+            }
+        }
+        val conflicts = mutableMapOf<String, MutableSet<String>>()
+        buckets.values.forEach { values ->
+            if (values.map { it.itemId }.distinct().size > 1 &&
+                values.map { it.price }.distinct().size > 1
+            ) values.forEach { item ->
+                conflicts.getOrPut(item.itemId) { mutableSetOf() }.add(item.servingLabel)
+            }
+        }
+        return conflicts
+    }
+
+    fun problems(x: ReviewItem, state: PhotoReviewState? = null): List<ReviewIssue> {
         if (x.excluded) return emptyList()
         val p = mutableListOf<ReviewIssue>()
         if (x.detailNameEditing) p += ReviewIssue.DETAIL_NAME
@@ -48,25 +81,27 @@ object PhotoReviewRules {
         }
         if (x.typo && !x.nameSaved) p += ReviewIssue.NAME
         if (x.name.isBlank() && ReviewIssue.NAME !in p) p += ReviewIssue.NAME
+        if (state != null && x.id in duplicatePhotoPriceConflicts(state))
+            p += ReviewIssue.DUPLICATE_PRICE
         return p.distinct()
     }
 
-    fun itemGroup(x: ReviewItem): ReviewGroup = when {
+    fun itemGroup(x: ReviewItem, state: PhotoReviewState? = null): ReviewGroup = when {
         x.excluded -> ReviewGroup.EXCLUDED
-        problems(x).isNotEmpty() -> ReviewGroup.PENDING
+        problems(x, state).isNotEmpty() -> ReviewGroup.PENDING
         x.type == ReviewItemType.OTHER -> ReviewGroup.OTHER
         else -> ReviewGroup.READY
     }
 
     /** The group a card is drawn in: frozen while one of its fields is being typed in. */
     fun displayGroup(state: PhotoReviewState, x: ReviewItem): ReviewGroup =
-        itemGroup(state.typingSnapshots[x.id] ?: x)
+        itemGroup(state.typingSnapshots[x.id] ?: x, state)
 
     fun stats(state: PhotoReviewState): ReviewStats {
         val all = state.items
         val byGroup = all.groupBy { displayGroup(state, it) }
-        val required = all.filter { it.required || problems(it).isNotEmpty() }
-        val done = required.count { it.excluded || problems(it).isEmpty() }
+        val required = all.filter { it.required || problems(it, state).isNotEmpty() }
+        val done = required.count { it.excluded || problems(it, state).isEmpty() }
         val total = required.size
         val noDefault = !validVolume(state.defaultPour)
         val pending = byGroup[ReviewGroup.PENDING].orEmpty()
