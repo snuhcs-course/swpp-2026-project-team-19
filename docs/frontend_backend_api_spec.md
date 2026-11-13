@@ -4149,8 +4149,8 @@ Content-Type: application/json
 
 | `action` | 용도 | `finalLineType` | 필드 |
 |---|---|---|---|
-| `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId` 필수. `correctedProductName`, `optionDecisions`, `excludedOptionIds`, `aliasesToAdd` 선택 |
-| `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product` 필수. `correctedProductName`, `optionDecisions`, `excludedOptionIds`, `aliases` 선택 |
+| `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId` 필수. `correctedProductName`, `optionDecisions`, `excludedOptionIds`, `addedOptions`, `aliasesToAdd` 선택 |
+| `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product` 필수. `correctedProductName`, `optionDecisions`, `excludedOptionIds`, `addedOptions`, `aliases` 선택 |
 | `confirm_non_product` | 비상품 줄로 확정 | `section_header`, `description`, `unknown` | `extractedItemId`만 |
 | `reject` | 잡음·중복 등으로 제외 | 어떤 값이든 | `extractedItemId`만 |
 
@@ -4162,12 +4162,16 @@ Content-Type: application/json
 | `correctedProductName` | 아니오 | 메뉴판에 보일 이름. 1~200자. 없거나 `null`이면 추출한 이름을 쓴다 |
 | `optionDecisions` | 아니오 | 고칠 옵션만 보낸다. 보내지 않은 옵션은 추출값 그대로 반영한다. 기본 `[]` |
 | `excludedOptionIds` | 아니오 | 게시에서 제외할 **원본 추출 옵션 ID**의 배열. 기본 `[]`. 해당 항목에 있는 ID만 허용; 중복 및 `optionDecisions`와 동시 지정 불가. 추출 기록은 삭제하지 않으며, 게시할 가격 옵션은 최대 3개여야 한다. |
+| `addedOptions` | 아니오 | OCR에서 추출되지 않은 새 용량·가격 옵션 배열. 원본 옵션 ID를 임의 생성하지 않는다. 기본 `[]`; 추출 옵션에서 제외되지 않은 가격 옵션과 합쳐 최대 3개. | 
+| `addedOptions[].optionLabel` | 아니오 | 1~100자 또는 `null` |
+| `addedOptions[].pourMl` | 아니오 | 1~32767 정수 또는 `null` |
+| `addedOptions[].priceKrw` | 예 | 1~2,147,483,647 정수 |
 | `optionDecisions[].extractedOptionId` | 예 | 그 항목의 옵션 ID |
 | `optionDecisions[].correctedOptionLabel` | 아니오 | 1~100자. 없거나 `null`이면 추출값 유지 |
 | `optionDecisions[].correctedPriceKrw` | 아니오 | 1~2,147,483,647 정수. 없거나 `null`이면 추출값 유지 |
 | `optionDecisions[].correctedPourMl` | 아니오 | 1~32767 정수. 없거나 `null`이면 추출값 유지 |
 
-검수에서는 할인(3.14.2)을 정하지 않는다. `optionDecisions`에 할인 필드는 없으며, 보내면 `EXTRA_FORBIDDEN`이다. 할인은 메뉴를 반영한 뒤 직접 편집(3.14.4)으로 정한다. 메뉴판 사진에 할인이 적힌 경우가 드물고, 할인은 기간이 있어 사진에서 읽을 수 없기 때문이다. 반영할 때 기존 할인이 이어지는 규칙은 8.7을 따른다.
+검수에서는 할인(3.14.2)을 정하지 않는다. `optionDecisions`와 `addedOptions`에 할인 필드는 없으며, 보내면 `EXTRA_FORBIDDEN`이다. 할인은 메뉴를 반영한 뒤 직접 편집(3.14.4)으로 정한다. 메뉴판 사진에 할인이 적힌 경우가 드물고, 할인은 기간이 있어 사진에서 읽을 수 없기 때문이다. 반영할 때 기존 할인이 이어지는 규칙은 8.7을 따른다.
 
 `optionDecisions`의 필드는 "없음 또는 `null` = 고치지 않음"이다. 따라서 추출된 값을 지워 `null`로 만들 수는 없다. **메뉴판에서 추출된 옵션이 4개 이상이면** 통합 검수 화면에는 모두 표시하되, 게시 전 불필요한 옵션을 선택해 `excludedOptionIds`로 제외하여 게시 대상은 **최대 3개**로 줄여야 한다(`TOO_MANY_OPTIONS`). 원본 추출 기록은 보존한다. 가격이 없는 옵션은 게시하지 않으며, 게시할 상품에는 가격 있는 옵션이 최소 하나 있어야 한다(`NO_PRICED_OPTION`).
 
