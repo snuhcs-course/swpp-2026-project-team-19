@@ -113,7 +113,7 @@ private fun toOption(d: DraftOption, whisky: Boolean,
     require(price in 1..MAX_OWNER_MENU_PRICE_KRW || original?.priceKrw == price) {
         "가격은 1원 이상, 1억 원 미만이어야 해요."
     }
-    val ml = if (!d.bottle) d.ml.toIntOrNull() else null
+    val ml = if (whisky && !d.bottle) d.ml.toIntOrNull() else null
     val unchangedLegacyNullPour = preserveOriginalServing && original != null &&
         original.pourMl == null && d.ml.isBlank() &&
         original.label?.trim()?.lowercase() !in listOf("bottle", "병")
@@ -369,12 +369,10 @@ internal fun OwnerManualMenuScreen(
                     // Preserve imported serving labels/identity when editing a
                     // single-price category without switching its category.
                     if (!whisky) {
+                        // Non-whisky UI edits price only; keep old serving metadata
+                        // without exposing or silently changing its volume.
                         old?.options?.firstOrNull { it.optionId == draft.id }?.let { original ->
-                            if (draft.ml.isBlank()) parsed.copy(
-                                label = original.label, pourMl = original.pourMl)
-                            else parsed.copy(label = original.label?.takeUnless {
-                                it.equals("Bottle", true) || it == "병"
-                            })
+                            parsed.copy(label = original.label, pourMl = original.pourMl)
                         } ?: parsed
                     } else parsed
                 }
@@ -918,25 +916,15 @@ internal fun OwnerManualMenuScreen(
                                             setOptions(draftOptions.filterIndexed { j, _ -> j != i })
                                         }, color = V4Color.primary, fontSize = 11.sp)
                                     }
-                                    Row(Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.Bottom) {
-                                        V4FormField("용량 (ml, 선택)", d.ml, { v ->
-                                            changeOption(i) { it.copy(ml = v.filter(Char::isDigit)) }
-                                        }, modifier = Modifier.weight(1f),
-                                            keyboardType = KeyboardType.Number,
-                                            testTag = "manual-menu-ml-" + i)
-                                        V4FormField("판매 가격 (원)", d.price, { v ->
-                                            changeOption(i) { it.copy(price = ownerPriceInput(it.price, v)) }
-                                        }, modifier = Modifier.weight(1f),
-                                            keyboardType = KeyboardType.Number,
-                                            testTag = "manual-menu-price-" + i)
-                                    }
+                                    V4FormField("판매 가격 (원)", d.price, { v ->
+                                        changeOption(i) { it.copy(price = ownerPriceInput(it.price, v)) }
+                                    }, keyboardType = KeyboardType.Number,
+                                        testTag = "manual-menu-price-" + i)
                                 }
 
                             }
                         }
-                    run {
+                    if (category == "위스키") {
                         if (draftOptions.size < MANUAL_MENU_MAX_OPTIONS)
                             Box(Modifier.fillMaxWidth().height(40.dp)
                                 .background(V4Color.elevated, RoundedCornerShape(8.dp))
@@ -944,7 +932,7 @@ internal fun OwnerManualMenuScreen(
                                 .manualTap { setOptions(draftOptions + freshOption()) }
                                 .testTag("manual-menu-option-add"),
                                 contentAlignment = Alignment.Center) {
-                                Text("+ 가격·용량 옵션 추가", color = V4Color.text, fontSize = 12.sp)
+                                Text("+ 용량 옵션 추가", color = V4Color.text, fontSize = 12.sp)
                             }
                         else Text("가격 옵션은 최대 3개까지 등록할 수 있어요.",
                             color = V4Color.sub, fontSize = 11.sp)
