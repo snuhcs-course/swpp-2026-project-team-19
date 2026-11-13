@@ -289,3 +289,46 @@ def test_an_applied_removal_closes_the_check(client, db_session, sample, operato
 
     assert menu_items(client, sample.bar) == []
     assert checks_of(db_session, published.id)[0][0] == CheckStatus.DISMISSED
+
+
+# ---- the review data (spec 5.4) ----
+
+
+def test_the_review_shows_kinds_and_an_unlinked_item_before_the_change(
+    client, db_session, sample, operator, glenfiddich, published
+):
+    # Another photo, so the full replace proposes removing the unlinked item: a change with only `before`.
+    menu_import, items, _ = upload_again(client, db_session, sample.bar, operator, filename="other.jpg")
+
+    review = client.get(f"/api/menu-imports/{menu_import.id}", headers=operator).json()
+
+    lines = [line for image in review["images"] for line in image["items"]]
+    assert {(line["effectiveLineType"], line["extractedKind"]) for line in lines} <= {
+        ("product", "whisky"),
+        ("section_header", None),
+        ("description", None),
+        ("unknown", None),
+    }
+    assert db_session.get(ExtractedItem, items[0].id).extracted_kind in (MenuItemKind.WHISKY, None)
+    removal = next(c for c in review["proposedChanges"] if c["barMenuItemId"] == str(published.id))
+    assert (removal["changeType"], removal["after"]) == ("remove", None)
+    assert removal["before"] == {
+        "productId": None,
+        "kind": "whisky",
+        "displayName": "Unknown Distillery 25",
+        "options": [
+            {"menuEntryOptionId": removal["before"]["options"][0]["menuEntryOptionId"], "optionLabel": "잔", "pourMl": None, "priceKrw": 45000}
+        ],
+    }
+    assert all(c["after"]["kind"] == "whisky" for c in review["proposedChanges"] if c["after"])
+
+
+def test_extracted_product_lines_are_stored_as_whisky(db_session, sample):
+    db_session.expire_all()
+    kinds = {(item.extracted_line_type.value, item.extracted_kind) for item in sample.items}
+
+    assert kinds == {
+        ("section_header", None),
+        ("product", MenuItemKind.WHISKY),
+        ("description", None),
+    }
