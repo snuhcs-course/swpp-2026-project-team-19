@@ -770,9 +770,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         ))
     }
 
-    suspend fun searchCatalogLive(query: String) {
+    suspend fun searchCatalogLive(query: String):
+        List<com.zerotoone.bottlemap.network.OwnerCatalogProductDto> {
         val trimmed = query.trim()
-        if(trimmed.isEmpty() || trimmed.length > 100) return
+        if(trimmed.isEmpty() || trimmed.length > 100) return emptyList()
         val results = remote.searchCatalogProducts(trimmed)
         val before = snapshot()
         publishSnapshot(before.copy(
@@ -787,6 +788,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 MockBrand(it.brandId, it.brandName)
             }).distinctBy { it.brandId },
         ))
+        return results
     }
 
     /** Uploads actual Stage 7 image bytes before navigation; no local fixture job. */
