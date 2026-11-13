@@ -181,9 +181,10 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                         val latestJob = snapshot?.imports?.lastOrNull {
                             it.barId == activeBar && it.status == MockImportStatus.READY_FOR_REVIEW
                         }
-                        // Show every OCR option in the same v20 UI. More than
-                        // three stays pending until the owner removes extras;
-                        // final 8.1 request sends excludedOptionIds explicitly.
+                        // Show every OCR option in the v20 UI. The visual
+                        // workflow currently limits editing to 3 even though
+                        // server PR #164 accepts 1-10 final options; no OCR
+                        // option is silently removed from a request.
                         val repository = if (data.usesProductionOwnerApi()) {
                             LivePhotoReviewRepository(
                                 owner = data,
@@ -200,6 +201,10 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                         PhotoReviewScreen(
                             vm = reviewVm,
                             onLeave = {
+                                // A successful publish can require operator linking
+                                // before whisky search. Show this only once via
+                                // the same app-level top notice as other Owner actions.
+                                data.consumePhotoPublishWarning()?.let(onNotice)
                                 if (!navController.popBackStack(
                                         OwnerPage.MGR_MENU.route, inclusive = false
                                     )) {
