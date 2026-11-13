@@ -148,11 +148,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             try {
                 repository.saveDefaultPour(n.toInt())
                 mutate { s ->
-                    s.copy(defaultPour = n, draftDefaultPourText = "", items = s.items.map {
-                        if (it.type == ReviewItemType.WHISKY && !it.bottle &&
-                            it.volumeSource == VolumeSource.DEFAULT && !(it.volume > 0)
-                        ) it.copy(volume = n) else it
-                    })
+                    s.copy(defaultPour = n, draftDefaultPourText = "",
+                        items = s.items.map { PhotoReviewRules.applyDefaultPour(it, n) })
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -267,8 +264,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
 
     fun editReviewName(id: String) {
         setItem(id) {
-            it.copy(nameEditMode = true, reviewNameDraft = it.reviewNameDraft
-                ?: if (it.match == ReviewMatch.NEW) it.newProductName ?: it.name else it.name)
+            // The latest owner-visible name wins over a stale OCR draft.
+            it.copy(nameEditMode = true,
+                reviewNameDraft = it.reviewNameDraft ?: it.name)
         }
         review?.let(::saveDraft)
         _events.trySend(PhotoReviewEvent.FocusReviewName(id))
