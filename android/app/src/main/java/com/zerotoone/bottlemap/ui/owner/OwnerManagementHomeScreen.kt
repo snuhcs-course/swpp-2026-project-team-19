@@ -109,7 +109,8 @@ private fun OwnerQuickCard(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 OwnerManagerIcon(icon)
-                Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall,
+                Text(title, modifier = Modifier.weight(1f).testTag("owner-home-info-title"),
+                    style = MaterialTheme.typography.titleSmall,
                     fontSize = ownerHomeCardTitleSize,
                     fontWeight = FontWeight.Bold, softWrap = true)
             }
@@ -205,11 +206,13 @@ fun OwnerManagementHomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(9.dp)
                         ) {
                             OwnerQuickCard(
-                                Modifier.weight(1f).heightIn(min = equalHeight),
+                                Modifier.weight(1f).heightIn(min = equalHeight)
+                                    .testTag("owner-home-info-card"),
                                 BmIconId.MANAGE_BAR, "매장 정보 관리", "사진 · 소개 · 영업시간", onInfo
                             )
                             Surface(
-                                modifier = Modifier.weight(1f).heightIn(min = equalHeight),
+                                modifier = Modifier.weight(1f).heightIn(min = equalHeight)
+                                    .testTag("owner-home-status-card"),
                                 shape = RoundedCornerShape(12.dp),
                                 color = MaterialTheme.colorScheme.surface
                             ) {
@@ -233,7 +236,8 @@ fun OwnerManagementHomeScreen(
                                                     if (exception?.kind == MockExceptionKind.VACATION) "임시 휴무"
                                                     else homeExceptionHeading(exception),
                                                     modifier = Modifier.align(Alignment.CenterStart)
-                                                        .padding(end = if (exception == null) 0.dp else 36.dp),
+                                                        .padding(end = if (exception == null) 0.dp else 36.dp)
+                                                        .testTag("owner-home-status-title"),
                                                     style = MaterialTheme.typography.titleSmall,
                                                     fontSize = ownerHomeCardTitleSize,
                                                     fontWeight = FontWeight.Bold,

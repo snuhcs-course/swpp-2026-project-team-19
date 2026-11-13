@@ -156,6 +156,20 @@ class OwnerUxConsistencyComposeTest {
         } }
         compose.onNodeWithText("매장 정보 관리").assertIsDisplayed()
         compose.onNodeWithText("영업 상태 변경").assertIsDisplayed()
+        val infoCard = compose.onNodeWithTag("owner-home-info-card",
+            useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val infoTitle = compose.onNodeWithTag("owner-home-info-title",
+            useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val statusCard = compose.onNodeWithTag("owner-home-status-card",
+            useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val statusTitle = compose.onNodeWithTag("owner-home-status-title",
+            useUnmergedTree = true).getUnclippedBoundsInRoot()
+        for ((label, card) in listOf(infoTitle to infoCard, statusTitle to statusCard)) {
+            org.junit.Assert.assertTrue(label.top.value >= card.top.value - 1f)
+            org.junit.Assert.assertTrue(label.bottom.value <= card.bottom.value + 1f)
+            org.junit.Assert.assertTrue(label.left.value >= card.left.value - 1f)
+            org.junit.Assert.assertTrue(label.right.value <= card.right.value + 1f)
+        }
     }
 
     @Test fun hourButtonKeepsTouchTargetButDrawsCompactFrame() {
@@ -164,7 +178,8 @@ class OwnerUxConsistencyComposeTest {
                 modifier = androidx.compose.ui.Modifier.testTag("owner-hour-touch"))
         } }
         val touch = compose.onNodeWithTag("owner-hour-touch").getUnclippedBoundsInRoot()
-        val visible = compose.onNodeWithTag("owner-hour-visual").getUnclippedBoundsInRoot()
+        val visible = compose.onNodeWithTag("owner-hour-visual",
+            useUnmergedTree = true).getUnclippedBoundsInRoot()
         org.junit.Assert.assertTrue(touch.height.value >= 47.5f)
         org.junit.Assert.assertTrue(touch.width.value >= 47.5f)
         org.junit.Assert.assertTrue(visible.height < touch.height)
