@@ -89,4 +89,54 @@ class OwnerReviewOptionContractTest {
             ownerFinalReviewOptions(item(), tooMany, 30, whisky = true)
         }
     }
+    @Test fun glassLabelsAreIgnoredInFinalServerOptionsButOcrIdsRemain() {
+        val decision = MockReviewDecision(
+            kind = MockDecisionKind.SELECT_PRODUCT,
+            correctedOptions = listOf(
+                MockMenuOption(firstId, "샷", 30, 20_000),
+                MockMenuOption(secondId, "잔", 60, 35_000),
+            ),
+        )
+        val options = ownerFinalReviewOptions(item(), decision, 35, whisky = true)
+        assertEquals(listOf(firstId, secondId), options.map { it["extractedOptionId"] })
+        assertEquals(listOf(30, 60), options.map { it["pourMl"] })
+        assertEquals(listOf(null, null), options.map { it["optionLabel"] })
+    }
+
+    @Test fun sameMlWithDifferentLabelsCannotBePublishedTwice() {
+        val decision = MockReviewDecision(
+            kind = MockDecisionKind.SELECT_PRODUCT,
+            correctedOptions = listOf(
+                MockMenuOption(firstId, "잔", 30, 20_000),
+                MockMenuOption(secondId, "샷", 30, 25_000),
+            ),
+        )
+        assertThrows(IllegalArgumentException::class.java) {
+            ownerFinalReviewOptions(item(), decision, 30, whisky = true)
+        }
+        val onePour = decision.copy(correctedOptions = listOf(
+            MockMenuOption(firstId, "샷", 30, 20_000),
+            MockMenuOption(secondId, "병", null, 180_000),
+        ))
+        val options = ownerFinalReviewOptions(item(), onePour, 30, whisky = true)
+        assertNull(options[0]["optionLabel"])
+        assertEquals("Bottle", options[1]["optionLabel"])
+        assertNull(options[1]["pourMl"])
+    }
+
+    @Test fun manualMenuValidationAlsoRejectsDuplicateVolumeLabels() {
+        val sameVolume = listOf(
+            MockMenuOption("glass-a", "잔", 30, 20_000),
+            MockMenuOption("glass-b", "샷", 30, 24_000),
+        )
+        assertEquals(
+            "같은 제품에 동일한 용량 옵션을 중복 등록할 수 없어요.",
+            manualMenuOptionError(sameVolume, "whisky"),
+        )
+        assertNull(manualMenuOptionError(
+            sameVolume.mapIndexed { i, o -> if (i == 1) o.copy(pourMl = 60) else o },
+            "whisky",
+        ))
+    }
+
 }
