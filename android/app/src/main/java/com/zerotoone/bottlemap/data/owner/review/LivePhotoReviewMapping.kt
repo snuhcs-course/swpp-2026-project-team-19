@@ -51,11 +51,8 @@ private fun mapServerReviewItem(
     snapshot: MockOwnerSnapshot, defaultPour: Int,
 ): ReviewItem {
     val recognized = dto.options.sortedBy { it.optionOrder }
-    // The existing one-page HTML controls at most three options. Fail visibly
-    // instead of silently dropping prices from a larger server response.
-    require(recognized.size <= PhotoReviewRules.MAX_OPTIONS) {
-        "용량 옵션이 3개를 초과해요. 기존 메뉴 관리 화면에서 확인해 주세요."
-    }
+    // Keep ALL OCR options visible for owner review, including 4+.
+    // PhotoReviewRules.problems() prevents publication until at most 3 remain.
     val selectedCandidate = dto.candidates.firstOrNull {
         it.productId == dto.proposedProductId
     }
@@ -82,6 +79,7 @@ private fun mapServerReviewItem(
                 else (option.extractedPourMl ?: defaultPour).toDouble(),
             price = (option.extractedPriceKrw ?: 0).toDouble(),
             bottle = bottle,
+            sourceOptionId = option.extractedOptionId,
         )
     }
     val first = options.firstOrNull()
