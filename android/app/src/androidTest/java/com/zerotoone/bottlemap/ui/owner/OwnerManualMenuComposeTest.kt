@@ -505,11 +505,15 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
         compose.runOnIdle {
             val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
-            assertEquals(null, snap.products.single().otherAlcoholKind)
-            assertEquals("otherAlcohol", snap.products.single().category)
+            val canonical = snap.products.single { it.catalogMatched }
+            val local = snap.products.single { !it.catalogMatched }
+            assertEquals(null, canonical.otherAlcoholKind)
+            assertEquals("otherAlcohol", canonical.category)
+            assertEquals("수제 주류", canonical.displayName)
+            assertEquals("수제 주류 수정", local.displayName)
             assertEquals("병", snap.menuItems.single().options.single().label)
             assertEquals(19000, snap.menuItems.single().options.single().priceKrw)
-            assertEquals("수제 주류 수정", snap.menuItems.single().displayNameOverride)
+            assertEquals(local.productId, snap.menuItems.single().productId)
         }
     }
 
@@ -542,7 +546,7 @@ class OwnerManualMenuComposeTest {
         }
     }
 
-    @Test fun localWhiskyToCocktailClearsHiddenWhiskyPour() {
+    @Test fun localWhiskyToCocktailPreservesEnteredPour() {
         val r = LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
         val product = MockCatalogProduct("local-unverified-whisky", "local-brand-type",
@@ -562,7 +566,7 @@ class OwnerManualMenuComposeTest {
         compose.runOnIdle {
             val snap = (vm.state.value as MockOwnerLoadState.Ready).snapshot
             assertEquals("cocktail", snap.products.single().category)
-            assertEquals(null, snap.menuItems.single().options.single().pourMl)
+            assertEquals(30, snap.menuItems.single().options.single().pourMl)
             assertEquals(null, snap.menuItems.single().options.single().label)
             assertEquals("one-serving", snap.menuItems.single().options.single().optionId)
         }
