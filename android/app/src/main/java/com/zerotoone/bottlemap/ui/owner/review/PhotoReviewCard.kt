@@ -356,7 +356,13 @@ private fun GroupedServingPriceChoices(x: ReviewItem, vm: PhotoReviewViewModel) 
                             horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.heightIn(min = 19.dp), contentAlignment = Alignment.Center) {
                                 if (!candidate.existing) {
-                                    Text("New", style = uxText(10f, 800, UxColor.gold))
+                                    Box(
+                                        Modifier.background(UxColor.gold, RoundedCornerShape(6.dp))
+                                            .padding(horizontal = 7.dp, vertical = 2.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text("New", style = uxText(9.5f, 800, UxColor.goldOn))
+                                    }
                                 }
                             }
                             val label = if (candidate.existing) "기존 가격"
