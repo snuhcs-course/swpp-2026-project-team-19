@@ -199,58 +199,37 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         val latestJob = snapshot?.imports?.lastOrNull {
                             it.barId == activeBar && it.status == MockImportStatus.READY_FOR_REVIEW
                         }
-                        // Existing Stage 8 can still handle the API's 4+ option
-                        // case; never truncate such a photo to the HTML's three
-                        // editable options or silently change any price.
-                        val exceedsV20OptionLimit = latestJob?.images?.any { image ->
-                            image.lines.any { it.options.size > 3 }
-                        } == true
-                        if (data.usesProductionOwnerApi() && exceedsV20OptionLimit) {
-                            OwnerPhotoStage8Screen(
-                                state = mockState, vm = data,
-                                resumeFromMenu = navController.previousBackStackEntry
-                                    ?.savedStateHandle?.get<Boolean>("resumeOwnerImport") == true,
-                                onBack = { navController.popBackStack() },
-                                onHome = { navController.navigate(OwnerPage.MGR_MENU.route) {
-                                    popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
-                                    launchSingleTop = true
-                                } },
+                        // Show every OCR option in the same v20 UI. More than
+                        // three stays pending until the owner removes extras;
+                        // final 8.1 request sends excludedOptionIds explicitly.
+                        val repository = if (data.usesProductionOwnerApi()) {
+                            LivePhotoReviewRepository(
+                                owner = data,
+                                importId = latestJob?.menuImportId,
+                                context = LocalContext.current.applicationContext,
                             )
                         } else {
-                            val repository = if (data.usesProductionOwnerApi()) {
-                                // Real backend and authenticated owner data for
-                                // both Debug and Release. No BASIC fixture.
-                                LivePhotoReviewRepository(
-                                    owner = data,
-                                    importId = latestJob?.menuImportId,
-                                )
-                            } else {
-                                // Offline fixture mode is intentionally preview
-                                // only, not a fake server publication.
-                                PreviewOnlyPhotoReviewRepository(
-                                    MockPhotoReviewScenario.BASIC,
-                                )
-                            }
-                            val reviewVm: PhotoReviewViewModel = viewModel(
-                                key = "owner-review-${latestJob?.menuImportId ?: "fixture"}",
-                                factory = PhotoReviewViewModel.Factory(repository),
-                            )
-                            PhotoReviewScreen(
-                                vm = reviewVm,
-                                onLeave = {
-                                    if (!navController.popBackStack(
-                                            OwnerPage.MGR_MENU.route, inclusive = false
-                                        )) {
-                                        navController.navigate(OwnerPage.MGR_MENU.route) {
-                                            popUpTo(OwnerPage.MGR_REVIEW.route) {
-                                                inclusive = true
-                                            }
-                                            launchSingleTop = true
-                                        }
-                                    }
-                                },
-                            )
+                            PreviewOnlyPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
                         }
+                        val reviewVm: PhotoReviewViewModel = viewModel(
+                            key = "owner-review-${latestJob?.menuImportId ?: "fixture"}",
+                            factory = PhotoReviewViewModel.Factory(repository),
+                        )
+                        PhotoReviewScreen(
+                            vm = reviewVm,
+                            onLeave = {
+                                if (!navController.popBackStack(
+                                        OwnerPage.MGR_MENU.route, inclusive = false
+                                    )) {
+                                    navController.navigate(OwnerPage.MGR_MENU.route) {
+                                        popUpTo(OwnerPage.MGR_REVIEW.route) {
+                                            inclusive = true
+                                        }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            },
+                        )
                     }
                     else -> OwnerSkeletonScreen(
                         page = page,
