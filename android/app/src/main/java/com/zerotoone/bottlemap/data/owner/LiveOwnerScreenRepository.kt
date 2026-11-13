@@ -41,6 +41,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val writeMutex = Mutex()
     @Volatile var lastPublishWarning: String? = null
         private set
+
+    /** One-shot notice shown after navigating back from a successful review. */
+    fun consumePhotoPublishWarning(): String? = lastPublishWarning.also {
+        lastPublishWarning = null
+    }
     private val generation = AtomicInteger(0)
     private val versionByBar = mutableMapOf<String, Int?>()
     private var sessionSubject: String? = null
