@@ -392,8 +392,12 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             return
         }
         mutateItem(id) {
-            val base = if (it.type == ReviewItemType.WHISKY && !it.primaryHasOption && it.options.isEmpty()) {
-                it.copy(primaryHasOption = true, bottle = false, volume = pour, volumeSource = VolumeSource.DEFAULT)
+            val base = if (!it.primaryHasOption && it.options.isEmpty()) {
+                // Zero-option OCR lines need a real first final option. For
+                // non-whisky, pourMl remains optional (not the bar default).
+                if (it.type == ReviewItemType.WHISKY) it.copy(primaryHasOption = true,
+                    bottle = false, volume = pour, volumeSource = VolumeSource.DEFAULT)
+                else it.copy(primaryHasOption = true, bottle = false, volume = Double.NaN)
             } else it
             base.copy(price = n, priceChoice = PriceChoice.MANUAL, draftPriceText = "")
         }
