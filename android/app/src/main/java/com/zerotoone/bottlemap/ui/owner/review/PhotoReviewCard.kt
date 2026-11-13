@@ -138,21 +138,35 @@ private fun SourceCrop(state: PhotoReviewState, x: ReviewItem, vm: PhotoReviewVi
                 .testTag("review-source-${x.id}"),
         )
         x.mergeSources.forEachIndexed { i, source ->
-            Column(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Text("${source.photoIndex}번째 장 1번째 줄", style = uxText(11f, 400, UxColor.sub))
-                Box(
-                    Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                        .background(ReviewColor.mergeButtonBg, RoundedCornerShape(8.dp))
-                        .border(1.dp, UxColor.outline, RoundedCornerShape(8.dp))
-                        .quietClick { vm.openSourcePhoto(x.id, i) }
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                    contentAlignment = Alignment.CenterStart,
-                ) {
-                    Text(source.raw, style = uxText(11f, 400), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
+            val sourceLocation = if (source.hasSourceBox)
+                "${source.photoIndex}번째 장 ${source.sourceLine}번째 줄"
+                else "${source.photoIndex}번째 장 · 위치 정보 없음"
+            Column(Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(sourceLocation, style = uxText(11f, 400, UxColor.muted, lineHeight = 1.4f))
+                SourceVisual(
+                    raw = source.raw,
+                    hasBox = source.hasSourceBox,
+                    height = if (source.hasSourceBox) 70.dp else 90.dp,
+                    sourcePhotoUrl = source.sourcePhotoUrl,
+                    sourceBox = source.sourceBox,
+                    refreshSourceUrl = { vm.refreshSourcePhotoUrl(source.sourceItemId ?: x.id) },
+                    modifier = Modifier.quietClick { vm.openSourcePhoto(x.id, i) }
+                        .semantics { contentDescription = "$sourceLocation 원본 사진 크게 보기" }
+                        .testTag("review-source-${x.id}-merged-$i"),
+                )
             }
         }
-        OcrSummary(x)
+        if (x.mergeSources.isNotEmpty()) {
+            Column(Modifier.fillMaxWidth().padding(start = 2.dp, end = 2.dp, top = 9.dp, bottom = 2.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(x.recognizedName.ifBlank { x.name.ifBlank { "이름 미인식" } },
+                    style = uxText(12f, 730))
+                PhotoReviewRules.mergedNotice(x)?.let { notice ->
+                    Text(notice, style = uxText(10.5f, 630, ReviewColor.mergeNotice, lineHeight = 1.45f))
+                }
+            }
+        } else OcrSummary(x)
     }
 }
 
@@ -345,31 +359,37 @@ private fun GroupedServingPriceChoices(x: ReviewItem, vm: PhotoReviewViewModel) 
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         unresolved.forEach { serving ->
             val candidates = x.priceCandidates.filter { it.servingKey == serving }
+                .sortedByDescending { it.existing }
             val size = if (candidates.any { it.bottle }) "Bottle"
                 else candidates.firstOrNull()?.volumeMl?.let { "${it}ml" } ?: "용량 미인식"
             Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                Text("$size 가격을 선택해 주세요",
-                    style = uxText(11f, 680, UxColor.sub))
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                    Text("가격을 선택해 주세요", style = uxText(11f, 680, UxColor.sub))
+                    Box(Modifier.background(ReviewColor.selectedBg, RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)) {
+                        Text(size, style = uxText(10f, 760, ReviewColor.selectedText))
+                    }
+                }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                     candidates.forEachIndexed { index, candidate ->
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp),
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp),
                             horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.heightIn(min = 19.dp), contentAlignment = Alignment.Center) {
-                                if (!candidate.existing) {
-                                    Box(
-                                        Modifier.background(UxColor.gold, RoundedCornerShape(6.dp))
-                                            .padding(horizontal = 7.dp, vertical = 2.dp),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        Text("New", style = uxText(9.5f, 800, UxColor.goldOn))
-                                    }
+                                Box(
+                                    Modifier.background(if (candidate.existing) UxColor.elevated else UxColor.gold,
+                                        RoundedCornerShape(6.dp))
+                                        .border(if (candidate.existing) 1.dp else 0.dp,
+                                            if (candidate.existing) UxColor.outline else UxColor.gold,
+                                            RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 7.dp, vertical = 2.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(if (candidate.existing) "기존" else "New",
+                                        style = uxText(9.5f, 800,
+                                            if (candidate.existing) UxColor.sub else UxColor.goldOn))
                                 }
                             }
-                            val label = if (candidate.existing) "기존 가격"
-                                else "${candidate.label?.trim()?.takeIf { it.isNotEmpty() }
-                                    ?: size} 표시 가격"
-                            Text(label, style = uxText(9.5f, 560, UxColor.sub),
-                                maxLines = 2, textAlign = TextAlign.Center)
                             ReviewChoice(
                                 won(candidate.priceKrw.toDouble()),
                                 { vm.chooseServingPrice(x.id, serving, candidate.priceKrw) },

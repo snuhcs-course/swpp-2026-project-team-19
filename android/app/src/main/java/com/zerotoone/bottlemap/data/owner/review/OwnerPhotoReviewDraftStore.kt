@@ -89,6 +89,7 @@ internal class OwnerPhotoReviewDraftStore(
             items = state.items.map { item ->
                 item.copy(
                     sourcePhotoUrl = null,
+                    mergeSources = item.mergeSources.map { it.copy(sourcePhotoUrl = null) },
                     price = item.price.takeIf { it.isFinite() } ?: 0.0,
                     volume = item.volume.takeIf { it.isFinite() } ?: 0.0,
                     options = item.options.map { option ->

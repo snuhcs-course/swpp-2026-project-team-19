@@ -40,9 +40,9 @@ internal fun mapServerPhotoReview(
         ?: error("검수할 매장 정보를 불러오지 못했어요.")
     val defaultPour = bar.defaultPourMl ?: 30
     val extracted = response.images.sortedBy { it.imageOrder }.flatMap { image ->
-        image.items.sortedBy { it.itemOrder }.map { dto ->
+        image.items.sortedBy { it.itemOrder }.mapIndexed { index, dto ->
             dto to mapServerReviewItem(
-                dto, image.imageOrder, image.imageUrl, bar, snapshot, defaultPour
+                dto, image.imageOrder, index + 1, image.imageUrl, bar, snapshot, defaultPour
             )
         }
     }
@@ -65,7 +65,7 @@ private fun isGlass(label: String?): Boolean {
 }
 
 private fun mapServerReviewItem(
-    dto: ReviewItemDto, photoOrder: Int, photoUrl: String, bar: MockBar,
+    dto: ReviewItemDto, photoOrder: Int, sourceLine: Int, photoUrl: String, bar: MockBar,
     snapshot: MockOwnerSnapshot, defaultPour: Int,
 ): ReviewItem {
     val recognized = dto.options.sortedBy { it.optionOrder }
@@ -170,6 +170,7 @@ private fun mapServerReviewItem(
         excluded = nonProduct,
         raw = dto.rawText,
         photoIndex = photoOrder,
+        sourceLine = sourceLine,
         hasSourceBox = dto.sourceBox?.size == 4,
         required = !nonProduct,
         recognizedName = displayName,

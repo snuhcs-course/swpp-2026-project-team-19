@@ -444,8 +444,8 @@ private fun SourcePhotoModal(s: PhotoReviewState, modal: ReviewModal, vm: PhotoR
     val original = s.items.firstOrNull { it.id == modal.itemId } ?: return
     val merged = modal.mergeIndex?.let { original.mergeSources.getOrNull(it) }
     val photo = merged?.photoIndex ?: original.photoIndex
-    val hasBox = merged != null || original.hasSourceBox
-    val line = if (merged != null) 1 else PhotoReviewRules.photoLine(s, original)
+    val hasBox = merged?.hasSourceBox ?: original.hasSourceBox
+    val line = merged?.sourceLine ?: PhotoReviewRules.photoLine(s, original)
     val raw = merged?.raw ?: original.raw
     BoxWithConstraints(Modifier.fillMaxSize().testTag("review-photo-modal"), contentAlignment = Alignment.Center) {
         val maxDialogHeight = maxHeight - 18.dp - 30.dp
@@ -472,9 +472,9 @@ private fun SourcePhotoModal(s: PhotoReviewState, modal: ReviewModal, vm: PhotoR
             }
             Spacer(Modifier.height(12.dp))
             SourceVisual(raw, hasBox = false, height = photoHeight, large = true,
-                sourcePhotoUrl = original.sourcePhotoUrl,
-                sourceBox = original.sourceBox,
-                refreshSourceUrl = { vm.refreshSourcePhotoUrl(original.id) })
+                sourcePhotoUrl = merged?.sourcePhotoUrl ?: original.sourcePhotoUrl,
+                sourceBox = merged?.sourceBox ?: original.sourceBox,
+                refreshSourceUrl = { vm.refreshSourcePhotoUrl(merged?.sourceItemId ?: original.id) })
             if (!hasBox) Text("사진에서 메뉴 위치를 특정하지 못했어요.", style = uxText(11f, 400, UxColor.sub),
                 modifier = Modifier.padding(top = 10.dp))
         }

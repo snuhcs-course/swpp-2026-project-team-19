@@ -120,6 +120,11 @@ internal fun groupLiveWhiskyReview(
                     recognizedName = other.recognizedName,
                     raw = other.raw,
                     offers = other.recognizedOffers,
+                    sourceItemId = other.id,
+                    sourcePhotoUrl = other.sourcePhotoUrl,
+                    sourceBox = other.sourceBox,
+                    hasSourceBox = other.hasSourceBox,
+                    sourceLine = other.sourceLine.takeIf { it > 0 } ?: 1,
                 )
             },
         )

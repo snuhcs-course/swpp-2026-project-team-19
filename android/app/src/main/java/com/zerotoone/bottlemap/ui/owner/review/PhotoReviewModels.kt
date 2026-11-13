@@ -44,6 +44,11 @@ data class MergedLine(
     val recognizedName: String,
     val raw: String,
     val offers: List<RecognizedOffer>,
+    val sourceItemId: String? = null,
+    val sourcePhotoUrl: String? = null,
+    val sourceBox: List<Int>? = null,
+    val hasSourceBox: Boolean = true,
+    val sourceLine: Int = 1,
 )
 
 /** Competing OCR and existing-bar prices for one canonical serving size. */
@@ -131,6 +136,7 @@ data class ReviewItem(
     val draftVolumeText: String = "",
     val raw: String = "",
     val photoIndex: Int = 1,
+    val sourceLine: Int = 0,
     val hasSourceBox: Boolean = true,
     val mergeSources: List<MergedLine> = emptyList(),
     val operatorPending: Boolean = false,
