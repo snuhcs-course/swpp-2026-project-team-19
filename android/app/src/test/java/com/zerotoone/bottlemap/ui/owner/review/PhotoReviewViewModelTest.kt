@@ -640,4 +640,84 @@ class PhotoReviewViewModelTest {
             classifyPublishFailure(ReviewVersionConflictException()))
     }
 
+
+    @Test fun correctedUnlinkedWhiskyNameRebindsSavedPriceBeforePublish() = runTest(dispatcher) {
+        val initial = ReviewItem(
+            id = "renamed-whisky", name = "OCR 잘못된 이름",
+            type = ReviewItemType.WHISKY, linkedProductId = null,
+            match = ReviewMatch.NEW, newConfirmed = true, nameSaved = true,
+            primaryOptionLabel = "잔", volume = 30.0, price = 14000.0,
+        )
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun loadReview() = PhotoReviewState(items = listOf(initial))
+            override suspend fun exactMatches(name: String) = emptyList<CatalogProduct>()
+            override fun existingUnlinkedServingPrices(name: String) =
+                if (name == "글렌피딕 12년") listOf(ReviewPriceCandidate(
+                    servingKey = "ml:30", volumeMl = 30, label = "잔",
+                    priceKrw = 12000, existing = true,
+                )) else emptyList()
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.editDetailName("renamed-whisky")
+        vm.typeDetailName("renamed-whisky", "글렌피딕 12년")
+        vm.saveDetailName("renamed-whisky")
+        assertEquals("글렌피딕 12년", vm.item("renamed-whisky").name)
+        assertEquals(setOf("ml:30"), PhotoReviewRules.pendingPriceServings(
+            vm.item("renamed-whisky")))
+        assertEquals(setOf(12000, 14000), PhotoReviewRules.priceCandidatesForServing(
+            vm.item("renamed-whisky"), "ml:30").map { it.priceKrw }.toSet())
+        vm.chooseServingPrice("renamed-whisky", "ml:30", 12000)
+        assertTrue(PhotoReviewRules.pendingPriceServings(vm.item("renamed-whisky")).isEmpty())
+        assertEquals(12000.0, vm.item("renamed-whisky").price, 0.0)
+    }
+
+    @Test fun correctedOtherNameAlsoRebindsSavedPriceWithoutCatalogSearch() = runTest(dispatcher) {
+        val initial = ReviewItem(id = "renamed-other", name = "콜라 OCR",
+            type = ReviewItemType.OTHER, linkedProductId = null,
+            primaryOptionLabel = "잔", volume = 30.0, price = 14000.0,
+        )
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun loadReview() = PhotoReviewState(items = listOf(initial))
+            override fun existingUnlinkedServingPrices(name: String) =
+                if (name == "콜라") listOf(ReviewPriceCandidate(
+                    servingKey = "ml:30", volumeMl = 30, label = "잔",
+                    priceKrw = 12000, existing = true,
+                )) else emptyList()
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.editDetailName("renamed-other")
+        vm.typeDetailName("renamed-other", "콜라")
+        vm.saveDetailName("renamed-other")
+        assertTrue(ReviewIssue.PRICE_CHOICE in PhotoReviewRules.problems(
+            vm.item("renamed-other")))
+        assertFalse(PhotoReviewRules.stats(vm.state).canPublish)
+        vm.chooseServingPrice("renamed-other", "ml:30", 12000)
+        assertFalse(ReviewIssue.PRICE_CHOICE in PhotoReviewRules.problems(
+            vm.item("renamed-other")))
+    }
+
+    @Test fun renamedUnlinkedMenuDiscardsSavedCandidatesOfPreviousName() = runTest(dispatcher) {
+        val initial = ReviewItem(id = "row", name = "구 메뉴",
+            type = ReviewItemType.OTHER, linkedProductId = null,
+            volume = 30.0, price = 14000.0,
+            priceCandidates = listOf(
+                ReviewPriceCandidate("ml:30", volumeMl = 30, priceKrw = 12000, existing = true),
+                ReviewPriceCandidate("ml:30", volumeMl = 30, priceKrw = 14000),
+            ),
+        )
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun loadReview() = PhotoReviewState(items = listOf(initial))
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.editDetailName("row")
+        vm.typeDetailName("row", "새 메뉴")
+        vm.saveDetailName("row")
+        assertTrue(vm.item("row").priceCandidates.none { it.existing })
+        assertTrue(PhotoReviewRules.pendingPriceServings(vm.item("row")).isEmpty())
+    }
+
+
 }
