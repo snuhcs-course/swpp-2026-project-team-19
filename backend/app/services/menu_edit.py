@@ -88,6 +88,9 @@ def check_request(body: MenuItemAddRequest | MenuItemUpdateRequest, now: datetim
                 _check_normalizable(errors, "displayName", body.displayName)
         new = body.newProduct
         if new is not None:
+            if new.product.category != "whisky":
+                errors.add("newProduct.product.category", "WHISKY_ONLY",
+                    "공용 카탈로그에는 승인된 위스키만 등록할 수 있어요.")
             if new.brand.type == "new":
                 _check_normalizable(errors, "newProduct.brand.canonicalName", new.brand.canonicalName)
                 for index, alias in enumerate(new.brand.aliases):
@@ -226,7 +229,7 @@ def _product_for(session: Session, body: MenuItemAddRequest, principal: Principa
             errors.add("productId", "PRODUCT_NOT_FOUND", "상품을 찾을 수 없습니다.")
         elif not product.is_active:
             errors.add("productId", "PRODUCT_INACTIVE", "비활성 상품은 메뉴에 연결할 수 없습니다.")
-        elif product.category != "whisky" and not is_operator(session, principal):
+        elif product.category != "whisky":
             errors.add("productId", "PRODUCT_NOT_APPROVED",
                 "비위스키 상품은 공용 카탈로그와 연결할 수 없어요. 매장 메뉴로 등록해 주세요.")
         errors.raise_any()
