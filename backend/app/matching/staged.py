@@ -497,6 +497,22 @@ def _resolve_by_brand(
     return _narrow_brand(brand_ids, {"brandMatch": brand_alias}, rest, item, catalog, default_product)
 
 
+def _fits_any(token: str, products: list[ProductInfo], catalog: CatalogLookup) -> bool:
+    """Whether the token, as written or in English (vocab_ko_en.json), fits any of the products."""
+    spellings = {token}
+    if _VOCABULARY is not None:
+        english = normalize(to_english(token, _VOCABULARY))
+        if english:
+            spellings.add(english)
+    for product in products:
+        targets = [*catalog.get_normalized_aliases(product.product_id)]
+        if product.edition_name:
+            targets.append(normalize(product.edition_name))
+        if any(_token_fits(spelling, targets) for spelling in spellings):
+            return True
+    return False
+
+
 def _narrow_brand(
     brand_ids: list[UUID],
     brand_evidence: dict[str, Any],
@@ -519,6 +535,7 @@ def _narrow_brand(
             product = catalog.get_product(product_id)
             if product is not None:
                 products.append(product)
+    brand_products = list(products)
     if age is not None:
         products = [product for product in products if product.age_years == age]
     # A number on the line other than the age (year, batch, "#2", "16.1") rules out a product
@@ -566,8 +583,12 @@ def _narrow_brand(
     confirm = (
         default_product and not exact and not tokens and len(chosen) == 1 and chosen[0].edition_name is not None
     )
-    # Generic words that fit no product are left out; what the rest picks is recommended, never exact.
-    generic = [token for token in tokens if token in _GENERIC_TOKENS and token not in fitted_somewhere]
+    # Generic words that fit no product of the brand are left out; what the rest picks is
+    # recommended, never exact. "No product" means any age and any number, and the word in
+    # English too: "Glenfiddich 12 Bourbon" keeps "bourbon" (the 14-year Bourbon Barrel Reserve
+    # has it) and "라프로익 10년 캐스크" keeps "캐스크" (cask, of Cask Strength).
+    generic = [token for token in tokens if token in _GENERIC_TOKENS and token not in fitted_somewhere
+               and not _fits_any(token, brand_products, catalog)]
     ignored: list[str] = []
     if default_product and not exact and generic:
         kept = [token for token in tokens if token not in generic]

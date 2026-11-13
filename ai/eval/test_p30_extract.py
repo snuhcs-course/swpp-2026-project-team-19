@@ -713,3 +713,11 @@ def test_runs_in_order_in_one_command_and_after_earlier_runs_finished(setup):
     assert code == p30.EXIT_OK
     code, gemini, _ = run(setup, "--runs", "3")
     assert code == p30.EXIT_OK and len(gemini.requests) == 3
+
+
+def test_the_runbook_does_not_send_the_released_matcher_into_the_i3_matching_steps():
+    # the matching section of the runbook must say where the frozen matcher is (Codex on #158)
+    text = (p30.REPO_ROOT / "ai/docs/p30_run_commands.md").read_text(encoding="utf-8")
+    section = text[text.index("## 4. 종단 매칭"):text.index("## 5.")]
+    assert "이 체크아웃에서 그대로 돌리지 않는다" in section and "git worktree add" in section
+    assert p30.FROZEN_MATCHING["backend/app/matching/staged.py"][:8] in section

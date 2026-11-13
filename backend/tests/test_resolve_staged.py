@@ -806,3 +806,23 @@ def test_whisky_words_are_neutral_and_other_generic_words_only_recommend(two_bra
         result = staged(name, two_brands, "S2b")
         assert result.status == "exact_match" and result.proposed_product_id == FIDDICH_12, name
     _one_recommended(staged("Glenfiddich 12 Scotch", two_brands, "S2b"), FIDDICH_12, ["scotch"])
+
+
+def test_a_generic_word_another_product_of_the_brand_has_is_kept(two_brands, glenfiddich):
+    # "bourbon" names an edition of the brand at another age (Bourbon Barrel Reserve 14): the word
+    # is not generic for this brand, so the plain 12 is not recommended
+    bbr = ProductInfo(_id(399), "Glenfiddich 14 Bourbon Barrel Reserve", 14, "Bourbon Barrel Reserve", brand_id=FIDDICH)
+    products = [two_brands.get_product(pid) for pid in (FIDDICH_12, FIDDICH_12_SHERRY, FIDDICH_15_SOLERA)] + [bbr]
+    catalog = InMemoryCatalog(products, [(p.product_id, p.display_name) for p in products],
+                              [(FIDDICH, "Glenfiddich"), (FIDDICH, "글렌피딕")])
+    result = staged("Glenfiddich 12 Bourbon", catalog, "S2b")
+    assert not any(c.evidence.get("confirmRecommended") for c in result.candidates)
+    assert all(c.evidence.get("editionUnmatched") == ["bourbon"] for c in result.candidates)
+
+
+def test_a_korean_generic_word_that_fits_in_english_is_kept(two_brands):
+    # 캐스크 is cask in the vocabulary, and Laphroaig 10 Cask Strength has it: not ignored, so
+    # the plain 10 is not recommended over the Cask Strength
+    result = staged("라프로익 10년 캐스크", two_brands, "S2b")
+    assert not any(c.evidence.get("ignoredWords") for c in result.candidates)
+    assert result.proposed_product_id != LAPHROAIG_10 or not result.candidates[0].evidence.get("confirmRecommended")
