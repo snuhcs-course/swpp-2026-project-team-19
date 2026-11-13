@@ -137,14 +137,16 @@ class OwnerPhotoReviewPolicyTest {
         assertTrue(revised.flatMap { it.lines }.all { it.needsPriceEntry })
     }
 
-    @Test fun conflictingPricesDetectedAcrossDifferentOptionLabels() {
+    @Test fun distinctServingLabelsWithSamePourKeepIndependentPrices() {
         val one=exact("one",17000).copy(options=listOf(
             MockMenuOption("opt1",label="잔 30ml",pourMl=30,priceKrw=17000)))
         val two=exact("two",19000).copy(options=listOf(
             MockMenuOption("opt2",label="Whisky",pourMl=30,priceKrw=19000)))
         val revised=requirePhotoPriceReviewOnConflict(listOf(image(1,one),image(2,two)))
-        assertEquals(0,revised[0].lines[0].options[0].priceKrw)
-        assertEquals(0,revised[1].lines[0].options[0].priceKrw)
+        // Merged #164 identifies a serving by (label, pour), not pour alone.
+        assertEquals(17000,revised[0].lines[0].options[0].priceKrw)
+        assertEquals(19000,revised[1].lines[0].options[0].priceKrw)
+        assertTrue(revised.flatMap { it.lines }.none { it.priceConflict })
     }
 
     @Test fun photoProcessingUsesServerCompletedCountNotHardcodedZero() {
