@@ -46,6 +46,17 @@ data class MergedLine(
     val offers: List<RecognizedOffer>,
 )
 
+/** Competing OCR and existing-bar prices for one canonical serving size. */
+data class ReviewPriceCandidate(
+    val servingKey: String,
+    val volumeMl: Int? = null,
+    val bottle: Boolean = false,
+    val label: String? = null,
+    val priceKrw: Int,
+    val existing: Boolean = false,
+    val sourceItemId: String? = null,
+)
+
 /** One serving option the owner will publish. */
 data class ReviewOption(
     val volume: Double = 0.0, val price: Double = 0.0, val bottle: Boolean = false,
@@ -139,6 +150,16 @@ data class ReviewItem(
     val primaryOptionLabel: String? = null,
     /** Current bar prices for matching the first photographed serving. */
     val existingPriceByProductId: Map<String, Double> = emptyMap(),
+    /** When multiple OCR rows refer to one product, only the master card
+     * is shown; child rows are submitted as reject, never silently published.
+     */
+    val mergedInto: String? = null,
+    val priceCandidates: List<ReviewPriceCandidate> = emptyList(),
+    val chosenServingPrices: Map<String, Int> = emptyMap(),
+    /** More than three detected servings: explicitly select up to three. */
+    val volumeChoices: List<ReviewOption> = emptyList(),
+    val chosenVolumeKeys: Set<String> = emptySet(),
+    val volumeChoicesConfirmed: Boolean = true,
 )
 
 enum class ReviewModalType { SOURCE_PHOTO, PUBLISH, EXCLUDE }
