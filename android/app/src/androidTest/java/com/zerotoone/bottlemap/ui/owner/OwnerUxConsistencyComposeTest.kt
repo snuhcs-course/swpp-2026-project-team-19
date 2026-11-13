@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -16,6 +17,7 @@ import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.data.owner.MockMenuImport
 import com.zerotoone.bottlemap.data.owner.OwnerMockFixtures
 import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
+import com.zerotoone.bottlemap.ui.auth.WelcomeScreen
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +37,19 @@ class OwnerUxConsistencyComposeTest {
         return OwnerMockViewModel(LocalOwnerMockRepository(
             InMemoryMockOwnerStateStore(original.copy(imports = listOf(job))),
         ))
+    }
+
+    @Test fun welcomePinIsQuarterSizeAndCenteredAtQuarterOfScreenWidth() {
+        compose.setContent { MaterialTheme {
+            WelcomeScreen(onBrowseAsGuest = {}, onGoogle = {}, onOwner = {})
+        } }
+        val root = compose.onNodeWithTag("welcome-screen").getUnclippedBoundsInRoot()
+        val pin = compose.onNodeWithTag("welcome-pin").getUnclippedBoundsInRoot()
+        val horizontalCenter = (pin.left + pin.right) / 2
+        val expectedCenter = root.left + root.width / 4
+        org.junit.Assert.assertTrue(
+            kotlin.math.abs((horizontalCenter - expectedCenter).value) <= 1.5f)
+        org.junit.Assert.assertTrue(pin.width.value <= 40f)
     }
 
     @Test fun readyImportWithNoCachedOcrLinesShowsReviewImmediately() {
