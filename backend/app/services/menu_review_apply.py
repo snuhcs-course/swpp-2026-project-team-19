@@ -46,6 +46,7 @@ from app.models import (
     ReviewStatus,
 )
 from app.schemas.menu_review import (
+    CreateProduct,
     ConfirmNonProduct,
     Reject,
     ReviewAndApplyRequest,
