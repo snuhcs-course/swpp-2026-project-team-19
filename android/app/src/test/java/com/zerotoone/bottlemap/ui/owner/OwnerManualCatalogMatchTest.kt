@@ -80,6 +80,19 @@ class OwnerManualCatalogMatchTest {
         assertEquals("맥주", ownerV4Category(beer))
     }
 
+    @Test fun freshSaveMustNeverOfferLegacyBeerOrCocktailAsGlobalProduct() {
+        val beer = MockCatalogProduct("beer-1", "beer-brand", "맥주 1", category = "맥주")
+        val cocktail = MockCatalogProduct("cocktail-1", "bar", "진토닉", category = "cocktail")
+        val approved = twelve.copy(matchedAlias = "글렌피딕 12년")
+        assertNull(manualFreshCatalogExactMatch(listOf(beer), "맥주 1", "기타 주류", null))
+        assertNull(manualFreshCatalogExactMatch(listOf(beer), "맥주 1", "위스키", null))
+        assertNull(manualFreshCatalogExactMatch(listOf(cocktail), "진토닉", "칵테일", null))
+        assertEquals(approved, manualFreshCatalogExactMatch(listOf(approved),
+            "글렌피딕 12년", "위스키", null))
+        assertNull(manualFreshCatalogExactMatch(listOf(approved),
+            "글렌피딕 12년", "위스키", approved.productId))
+    }
+
     @Test fun missingBrandConfirmationDoesNotInferEnglishProductId() {
         assertNull(manualProductProposal(listOf(twelve),
             "글렌피딕12년","위스키",null,null))
