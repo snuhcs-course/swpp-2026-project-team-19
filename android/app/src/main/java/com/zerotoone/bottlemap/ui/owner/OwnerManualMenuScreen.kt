@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zerotoone.bottlemap.network.menuWriteErrorText
 import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
@@ -488,7 +489,7 @@ internal fun OwnerManualMenuScreen(
                     } catch(cancelled: CancellationException) {
                         throw cancelled
                     } catch(e: Exception) {
-                        error = e.message ?: "메뉴를 저장하지 못했어요. 다시 시도해 주세요."
+                        error = menuWriteErrorText(e)
                     } finally { saving = false }
                 }
             } else {
