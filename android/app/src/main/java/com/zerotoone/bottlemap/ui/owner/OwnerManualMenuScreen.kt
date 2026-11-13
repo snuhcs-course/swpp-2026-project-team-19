@@ -471,17 +471,8 @@ internal fun OwnerManualMenuScreen(
                             // A deleted menu is NOT a deleted catalog product: offer
                             // the original product again with "맞아요 / 아니에요".
                             val fresh = viewModel.searchCatalogLive(name)
-                            val exact = fresh.firstOrNull {
-                                // Approved whisky only: do not force a beer or
-                                // other local item into the old global-catalog match.
-                                category == "위스키" && it.catalogMatched &&
-                                    it.category == "whisky" && it.isActive &&
-                                    it.productId != rejectedId &&
-                                    (normalizeOwnerCatalogName(it.displayName) ==
-                                        normalizeOwnerCatalogName(name) ||
-                                     normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) ==
-                                        normalizeOwnerCatalogName(name))
-                            }
+                            val exact = manualFreshCatalogExactMatch(
+                                fresh, name, category, rejectedId)
                             if (exact != null) {
                                 error = "“${exact.displayName}”이 맞나요? 맞아요 또는 아니에요를 선택해 주세요."
                                 return@launch
