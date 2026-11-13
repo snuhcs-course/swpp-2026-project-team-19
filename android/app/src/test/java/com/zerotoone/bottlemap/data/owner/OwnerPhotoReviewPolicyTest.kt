@@ -149,6 +149,23 @@ class OwnerPhotoReviewPolicyTest {
         assertTrue(revised.flatMap { it.lines }.none { it.priceConflict })
     }
 
+    @Test fun koreanBottleAndEnglishBottlePriceDifferenceIsOneConflict() {
+        val korean=exact("ko",120000).copy(options=listOf(
+            MockMenuOption("ko-bottle",label="병",pourMl=null,priceKrw=120000)))
+        val english=exact("en",145000).copy(options=listOf(
+            MockMenuOption("en-bottle",label="Bottle",pourMl=null,priceKrw=145000)))
+        val original=listOf(image(1,korean),image(2,english))
+        val reviewed=requirePhotoPriceReviewOnConflict(original)
+        assertTrue(reviewed.flatMap { it.lines }.all { it.priceConflict })
+        assertTrue(reviewed.flatMap { it.lines }.all {
+            it.options.single().priceKrw == 0
+        })
+        assertEquals(reviewServingKey(null,"병"),reviewServingKey(null,"Bottle"))
+        val job=MockMenuImport("job","bar",MockImportStatus.READY_FOR_REVIEW,1,original)
+        assertEquals(setOf("product-glenfiddich"),
+            conflictingReviewedPhotoPrices(job))
+    }
+
     @Test fun photoProcessingUsesServerCompletedCountNotHardcodedZero() {
         val job=MockMenuImport("job","bar",MockImportStatus.PROCESSING,1,
             images=emptyList(),imageCount=3,completedImages=2)
