@@ -232,26 +232,39 @@ def test_missing_and_inactive_products_and_brands_are_rejected(client, operator,
     assert field_errors(add_with(newProduct=missing_brand)) == [("newProduct.brand.brandId", "BRAND_NOT_FOUND")]
 
 
-def test_a_new_product_is_created_searchable_and_records_its_creator(client, db_session, supabase, bar):
+def test_bar_owner_cannot_create_globally_searchable_product(client, db_session, supabase, bar):
     owner = owner_of(db_session, supabase, bar)
     new_product = {
         "brand": {"type": "new", "canonicalName": "Deanston"},
         "product": {"displayName": "Deanston Virgin Oak", "editionName": "Virgin Oak", "abv": 46.3},
         "aliases": [{"aliasText": "딘스톤 버진 오크", "languageCode": "ko"}],
     }
-
     response = add(
-        client,
-        bar.id,
-        {"menuVersion": 4, "newProduct": new_product, "displayName": "딘스톤 버진 오크", "options": [option(pour=None)]},
+        client, bar.id,
+        {"menuVersion": 4, "newProduct": new_product,
+         "displayName": "딘스톤 버진 오크", "options": [option(pour=None)]},
         owner,
     )
+    assert error(response) == (403, "CATALOG_APPROVAL_REQUIRED")
+    assert db_session.scalar(select(Product).where(Product.display_name == "Deanston Virgin Oak")) is None
+    assert menu_of(client, bar, owner)["menuVersion"] == 4
 
+
+def test_operator_can_create_new_product(client, db_session, operator, bar):
+    new_product = {
+        "brand": {"type": "new", "canonicalName": "Deanston"},
+        "product": {"displayName": "Deanston Virgin Oak", "editionName": "Virgin Oak", "abv": 46.3},
+        "aliases": [{"aliasText": "딘스톤 버진 오크", "languageCode": "ko"}],
+    }
+    response = add(
+        client, bar.id,
+        {"menuVersion": 4, "newProduct": new_product,
+         "displayName": "딘스톤 버진 오크", "options": [option(pour=None)]},
+        operator,
+    )
     assert response.status_code == 201, response.text
     product = db_session.scalar(select(Product).where(Product.display_name == "Deanston Virgin Oak"))
-    owner_id = db_session.scalar(select(User.id).where(User.auth_subject == OWNER_SUBJECT))
-    assert (product.created_by_user_id, product.brand.created_by_user_id) == (owner_id, owner_id)
-    assert product.created_from_extracted_item_id is None
+    assert product is not None
     assert item_of(response.json(), product)["brandName"] == "Deanston"
     found = client.get("/api/search/bars", params={"query": "딘스톤 버진 오크"}).json()
     assert [i["productId"] for i in found["items"]] == [str(product.id)]
