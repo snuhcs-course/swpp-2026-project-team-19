@@ -19,6 +19,7 @@
       "priced": 77,
       "price_correct": 77,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -36,6 +37,7 @@
       "priced": 77,
       "price_correct": 76,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": [
         {
@@ -59,6 +61,7 @@
       "priced": 16,
       "price_correct": 16,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -76,6 +79,7 @@
       "priced": 16,
       "price_correct": 16,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -93,6 +97,7 @@
       "priced": 0,
       "price_correct": 0,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": [
         {
@@ -121,6 +126,7 @@
       "priced": 0,
       "price_correct": 0,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -138,6 +144,7 @@
       "priced": 20,
       "price_correct": 20,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -155,6 +162,7 @@
       "priced": 20,
       "price_correct": 20,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -172,6 +180,7 @@
       "priced": 44,
       "price_correct": 44,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -189,6 +198,7 @@
       "priced": 44,
       "price_correct": 44,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -206,6 +216,7 @@
       "priced": 42,
       "price_correct": 42,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": [
         {
@@ -244,6 +255,7 @@
       "priced": 60,
       "price_correct": 60,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -261,6 +273,7 @@
       "priced": 60,
       "price_correct": 60,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -278,6 +291,7 @@
       "priced": 60,
       "price_correct": 60,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -295,6 +309,7 @@
       "priced": 52,
       "price_correct": 52,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -312,6 +327,7 @@
       "priced": 52,
       "price_correct": 51,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": [
         {
@@ -335,6 +351,7 @@
       "priced": 52,
       "price_correct": 52,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -352,6 +369,7 @@
       "priced": 54,
       "price_correct": 54,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -369,6 +387,7 @@
       "priced": 54,
       "price_correct": 54,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -386,6 +405,7 @@
       "priced": 54,
       "price_correct": 54,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -403,6 +423,7 @@
       "priced": 31,
       "price_correct": 31,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -420,6 +441,7 @@
       "priced": 30,
       "price_correct": 30,
       "unit_confusion": 1,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": [
         {
@@ -443,6 +465,7 @@
       "priced": 31,
       "price_correct": 31,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -460,6 +483,7 @@
       "priced": 0,
       "price_correct": 0,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -477,6 +501,7 @@
       "priced": 20,
       "price_correct": 20,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     },
@@ -494,6 +519,7 @@
       "priced": 15,
       "price_correct": 15,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": [
         {
@@ -532,6 +558,7 @@
       "priced": 33,
       "price_correct": 33,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": [
         {
@@ -560,6 +587,7 @@
       "priced": 28,
       "price_correct": 28,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": [
         {
@@ -638,6 +666,7 @@
       "priced": 17,
       "price_correct": 17,
       "unit_confusion": 0,
+      "pour_wrong": 0,
       "duplicates": 0,
       "errors": []
     }
