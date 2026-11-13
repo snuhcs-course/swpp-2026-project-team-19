@@ -43,6 +43,35 @@ class OwnerManualMenuComposeTest {
         return OwnerMockViewModel(repo)
     }
 
+    @Test fun debugReviewPreviewEntryIsExplicitAndDoesNotReplacePhotoUpload() {
+        val vm = fixture()
+        var openedMock = 0
+        var openedLivePhoto = 0
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(
+                    vm.state.collectAsState().value, vm, {}, { openedLivePhoto++ }, {},
+                    onReviewPreview = { openedMock++ },
+                )
+            }
+        }
+        compose.onNodeWithTag("owner-review-v20-preview").performClick()
+        compose.runOnIdle {
+            assertEquals(1, openedMock)
+            assertEquals(0, openedLivePhoto)
+        }
+    }
+
+    @Test fun productionMenuDoesNotShowMockReviewEntry() {
+        val vm = fixture()
+        compose.setContent {
+            MaterialTheme {
+                OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+            }
+        }
+        compose.onNodeWithTag("owner-review-v20-preview").assertDoesNotExist()
+    }
+
     @Test fun selectedRowKeepsFixedHeightAndEditReturnsToUnselectedList() {
         val vm = fixture()
         compose.setContent {
