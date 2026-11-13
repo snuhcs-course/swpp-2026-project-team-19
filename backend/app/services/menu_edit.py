@@ -319,7 +319,10 @@ def _update_once(
         local.options = _local_options(body.options)
         return _publish(session, board, base_url)
     entry = board_entry(board, bar_menu_item_id)
-    if body.category is not None and body.category != entry.bar_menu_item.product.category:
+    if body.category is not None and (
+        body.category != entry.bar_menu_item.product.category
+        or entry.bar_menu_item.product.category != "whisky"
+    ):
         # Detach only this bar's listing. The shared catalog row and other bars stay untouched.
         session.add(BarLocalMenuItem(
             bar_id=bar_id, display_name=body.displayName, category=body.category,
