@@ -171,7 +171,8 @@ private fun OcrSummary(x: ReviewItem) {
                 verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 PhotoReviewRules.recognizedOffers(x).forEach { o ->
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp), verticalAlignment = Alignment.Bottom) {
-                        val volume = PhotoReviewRules.offerVolumeLabel(o)
+                        val volume = PhotoReviewRules.offerVolumeLabel(
+                            o, if (x.volumeSource == VolumeSource.DEFAULT) x.volume else null)
                         if (volume.isNotEmpty()) Text(volume, style = uxText(11f, 400, UxColor.muted, lineHeight = 1.5f))
                         PhotoReviewRules.offerPriceLabel(x, o)?.let {
                             Text(it, style = uxText(11.5f, 750, lineHeight = 1.5f), maxLines = 1)
@@ -385,10 +386,7 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
                                 Text("New", style = uxText(10f, 800, UxColor.goldOn, lineHeight = 1f))
                             }
                         } else Spacer(Modifier.height(20.dp))
-                        // The first OCR serving uses the bar's configured default pour
-                        // when no size is printed on the photo. Show it beside both
-                        // prices so owners know which serving they are choosing.
-                        ReviewChoice(reviewPriceChoiceLabel(x, price), { vm.choosePrice(id, choice) }, Modifier.fillMaxWidth(),
+                        ReviewChoice(won(price), { vm.choosePrice(id, choice) }, Modifier.fillMaxWidth(),
                             selected = x.priceChoice == choice, minHeight = 50.dp, horizontalPadding = 5.dp,
                             verticalPadding = 8.dp, testTag = "review-price-${choice.name.lowercase()}-$id")
                     }
