@@ -50,7 +50,7 @@ internal fun mapServerPhotoReview(
         "서버에서 중복된 메뉴 검수 항목을 받았어요."
     }
     return PhotoReviewState(
-        items = groupLiveWhiskyReview(extracted, snapshot, response.barId),
+        items = groupLiveWhiskyReview(extracted, snapshot, bar.barId),
         defaultPour = defaultPour.toDouble(),
     )
 }
