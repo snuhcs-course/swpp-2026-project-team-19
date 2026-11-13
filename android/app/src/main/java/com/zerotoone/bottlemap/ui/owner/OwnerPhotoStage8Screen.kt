@@ -991,8 +991,15 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 var labels by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(originals.map{it.label.orEmpty()})
                 }
+                val configuredPour=s.bars.firstOrNull{it.barId==barId}?.defaultPourMl
+                    ?.takeIf{it in 1..999} ?: DEFAULT_OWNER_POUR_ML
                 var pours by rememberSaveable(line.extractedItemId) {
-                    mutableStateOf(originals.map{it.pourMl?.toString().orEmpty()})
+                    mutableStateOf(originals.map{ option ->
+                        option.pourMl?.toString()
+                            ?: configuredPour.takeUnless {
+                                option.label?.trim()?.lowercase() in listOf("병","bottle")
+                            }?.toString().orEmpty()
+                    })
                 }
                 var prices by rememberSaveable(line.extractedItemId) {
                     mutableStateOf(originals.map{if(it.priceKrw>0)it.priceKrw.toString() else ""})
