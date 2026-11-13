@@ -82,16 +82,17 @@ fun WelcomeScreen(
     BoxWithConstraints(Modifier.fillMaxSize().background(UxColor.bg).testTag("welcome-screen")) {
         // CSS: .welcome { height:100%; min-height:630px; padding:0 20px }
         val contentHeight = maxOf(maxHeight, 630.dp)
-        // Scale the artwork uniformly to 25%. Keep its previous vertical center.
-        val originalPinHeight = minOf(194.dp, contentHeight * 0.33f)
-        val pinHeight = originalPinHeight / 4
-        val pinWidth = 158.dp / 4
+        // Double the previous artwork size (now 50% of original), preserve
+        // aspect ratio and x-center at one-quarter screen width.
+        // The bottom of the pin meets the top of the "Find the bottle" headline.
+        val pinHeight = minOf(194.dp, contentHeight * 0.33f) / 2
+        val pinWidth = 158.dp / 2
         val pinCenterX = maxWidth / 4
-        val pinTop = contentHeight / 2 - 22.dp - originalPinHeight +
-            (originalPinHeight - pinHeight) / 2
+        val pinTop = contentHeight / 2 - pinHeight
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             Box(Modifier.fillMaxWidth().height(contentHeight)) {
-                // Center the scaled image at one-quarter screen width, unchanged Y center.
+                // Keep the image center at one-quarter screen width; its bottom
+                // meets the headline's top, including on taller screens.
                 Image(
                     painter = painterResource(R.drawable.bottlemap_welcome_pin),
                     contentDescription = "위스키 잔이 담긴 지도 핀",
