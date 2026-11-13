@@ -78,14 +78,14 @@ class PhotoReviewRulesTest {
         assertEquals(listOf(ReviewIssue.OPTION), PhotoReviewRules.problems(eleven))
     }
 
-    @Test fun samePourWithDifferentOcrLabelsIsNotAnOptionCollision() {
+    @Test fun samePourWithDifferentOcrLabelsIsStillADuplicateOption() {
         val first=ReviewItem(id="labelled",name="위스키",
             volume=30.0,price=14000.0,
             primaryOptionLabel="잔",
             options=listOf(ReviewOption(30.0,16000.0,label="샷")))
-        assertTrue(PhotoReviewRules.problems(first).isEmpty())
-        val duplicate=first.copy(options=listOf(ReviewOption(30.0,16000.0,label="잔")))
-        assertTrue(ReviewIssue.OPTION in PhotoReviewRules.problems(duplicate))
+        assertTrue(ReviewIssue.OPTION in PhotoReviewRules.problems(first))
+        val different=first.copy(options=listOf(ReviewOption(60.0,16000.0,label="샷")))
+        assertTrue(PhotoReviewRules.problems(different).isEmpty())
     }
 
     @Test fun otherToWhiskyRetainsSourceIdsPricesAndLabels() {
@@ -367,13 +367,14 @@ class PhotoReviewRulesTest {
         assertEquals(40.0,PhotoReviewRules.applyDefaultPour(editedPrimary,50.0).volume,0.0)
     }
 
-    @Test fun priceConflictUsesBothOcrOptionLabelAndPour() {
+    @Test fun priceConflictUsesPourOnlyRegardlessOfOcrLabel() {
         val a=ReviewItem(id="photo-a",name="같은 위스키",
             linkedProductId="shared-product",volume=30.0,price=18000.0,
             primaryOptionLabel="잔")
         val b=a.copy(id="photo-b",price=22000.0,primaryOptionLabel="샷")
-        assertTrue(PhotoReviewRules.duplicatePhotoPriceConflicts(
-            PhotoReviewState(items=listOf(a,b))).isEmpty())
+        assertEquals(setOf("photo-a","photo-b"),
+            PhotoReviewRules.duplicatePhotoPriceConflicts(
+                PhotoReviewState(items=listOf(a,b))).keys)
         val sameLabel=b.copy(primaryOptionLabel="잔")
         assertEquals(setOf("photo-a","photo-b"),
             PhotoReviewRules.duplicatePhotoPriceConflicts(
