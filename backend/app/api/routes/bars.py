@@ -18,6 +18,7 @@ from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, e
 from app.schemas.menu import BarMenuResponse
 from app.schemas.menu_edit import (
     MenuConfirmRequest,
+    LocalMenuApprovalRequest,
     MenuItemAddRequest,
     MenuItemUpdateRequest,
     MenuResetRequest,
@@ -31,7 +32,10 @@ from app.services.bar_menu import get_bar_menu
 from app.services.bar_owner_removal import remove_owner
 from app.services.bar_photo_image import MAX_LONG_EDGE, MAX_PHOTO_BYTES, THUMBNAIL_LONG_EDGE, single_upload
 from app.services.bar_photos import MAX_PHOTOS, add_photo, check_photo_order, delete_photo, reorder_photos
-from app.services.menu_edit import add_menu_item, check_request, delete_menu_item, reset_menu, update_menu_item
+from app.services.menu_edit import (
+    add_menu_item, approve_local_menu_item, check_request, delete_menu_item,
+    reset_menu, update_menu_item,
+)
 from app.services.menu_import_upload import ImageUpload
 from app.services.menu_status import confirm_menu, set_sold_out
 from app.services.operating_exception import apply_operating_exception, cancel_operating_exception
@@ -424,6 +428,40 @@ def add_bar_menu_item(
     check_request(body, datetime.now(timezone.utc))
     bar = managed_bar(session, principal, bar_id)
     return add_menu_item(session_factory, principal, bar.id, body, base_url=base_url)
+
+
+@router.post(
+    "/{barId}/menu/local-items/{localItemId}/approve",
+    response_model=BarMenuResponse,
+    summary="Operator-only: approve a bar-local pending whisky",
+    description=(
+        "Only an operator can turn a pending local whisky into an approved canonical "
+        "catalog product. Send exactly one of productId (existing approved whisky) or "
+        "newProduct (operator-reviewed new whisky with brand). An atomic operation "
+        "creates or links the catalog product and replaces the local bar entry; "
+        "customer whisky search begins to show the approved product only after commit. "
+        "Non-whisky items cannot be approved. Requires current menuVersion."
+    ),
+    responses=error_responses(
+        *_EDIT_COMMON_ERRORS,
+        (404, "BAR_NOT_FOUND or MENU_ITEM_NOT_FOUND"),
+        (409, "MENU_OUTDATED, ACTIVE_IMPORT_EXISTS, MENU_ITEM_EXISTS, NOT_PENDING_WHISKY"),
+        (422, "EXACTLY_ONE_REQUIRED and product/option validation errors"),
+    ),
+)
+def approve_bar_local_menu(
+    bar_id: BarId,
+    local_id: Annotated[str, Path(alias="localItemId")],
+    body: LocalMenuApprovalRequest,
+    operator: Principal = Depends(require_operator),
+    session: Session = Depends(get_session),
+    session_factory: SessionFactory = Depends(get_serializable_session_factory),
+    base_url: str = Depends(get_base_url),
+) -> BarMenuResponse:
+    bar = managed_bar(session, operator, bar_id)
+    return approve_local_menu_item(
+        session_factory, operator, bar.id, local_id, body, base_url=base_url,
+    )
 
 
 @router.put(
