@@ -155,7 +155,10 @@ fun BottleMapNavHost(devReviewScenario: String? = null, resetWelcome: Boolean = 
                         }
                         val state = authViewModel.state.collectAsStateWithLifecycle().value
                         WelcomeScreen(
-                            onBrowseAsGuest = { enterTabs(MainTab.SEARCH) },
+                            onBrowseAsGuest = {
+                                authViewModel.continueAsGuest()
+                                enterTabs(MainTab.SEARCH)
+                            },
                             onGoogle = {
                                 ownerIntent = false
                                 signIn()
