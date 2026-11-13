@@ -201,7 +201,7 @@ fun PhotoReviewScreen(
             }
         }
         toast?.let { (_, message) ->
-            UxToast(message, Modifier.align(Alignment.BottomCenter))
+            UxToast(message, Modifier.align(Alignment.TopCenter))
         }
     }
 }
