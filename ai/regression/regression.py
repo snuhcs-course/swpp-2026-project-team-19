@@ -15,7 +15,8 @@ Two things are checked against baseline.json.
 
 Extraction replay. The model's recorded answers for these photos (ai/runs/.../<stem>_r<k>.json,
 `raw_text`) go through the server's own code after the model call (HybridExtraction ->
-to_flow_items -> ExtractionItems, backend/app/extraction), are flattened back to one row per
+to_flow_items -> ExtractionItems, backend/app/extraction; hybrid_v2.convert_output for a prompt
+v2 record, whose non-whisky lines are counted as other_items), are flattened back to one row per
 price option, and are scored against the fixture with ai/eval/score.py. The number of items
 the server makes is kept too, since it shows how glass and bottle rows were grouped. The input is fixed, so
 the score must equal the baseline exactly: a difference means the schema, the conversion or the
@@ -116,16 +117,34 @@ def load_fixtures() -> list[dict]:
 
 # ---- extraction replay ----------------------------------------------------------------------
 
-def server_items(raw_text: str) -> list[dict]:
-    """A recorded model answer through the server code that follows the model call (hybrid.py)."""
+def server_output(record: dict) -> dict:
+    """A recorded model answer through the server code that follows the model call.
+
+    Returns {"items": flow items sent to matching, "otherItems": non-whisky lines kept aside}.
+    A prompt v2 record (prompt_version "hybrid-v2") goes through hybrid_v2.convert_output; any
+    other record is prompt v1 output, which has no non-whisky lines.
+    """
     sys.path.insert(0, str(REPO_ROOT / "backend"))
+    from app.extraction import hybrid_v2
     from app.extraction.convert import to_flow_items
     from app.extraction.hybrid import HybridExtraction
     from app.extraction.schema import ExtractionItems
 
+    raw_text = record.get("raw_text") or ""
+    if record.get("prompt_version") == hybrid_v2.PROMPT_VERSION:
+        out = hybrid_v2.convert_output(raw_text, record.get("ocr_lines") or [])
+        return {"items": out["items"], "otherItems": out["otherItems"]}
     hybrid = HybridExtraction.model_validate_json(raw_text).model_dump()
     v1_items = [{k: v for k, v in item.items() if k != "source_lines"} for item in hybrid["items"]]
-    return ExtractionItems.model_validate({"items": to_flow_items(v1_items)}).model_dump(mode="json")["items"]
+    items = ExtractionItems.model_validate({"items": to_flow_items(v1_items)}).model_dump(mode="json")["items"]
+    return {"items": items, "otherItems": []}
+
+
+def match_items(be, flow_items: list[dict], catalog) -> list[tuple[str, object]]:
+    """What the import does after extraction (menu_import_processing._resolve_and_draft): every
+    product line, and nothing else, goes to the rule matcher. Returns (name, result) per line."""
+    return [(item["productName"], be.resolve(item["productName"], catalog))
+            for item in flow_items if item["lineType"] == "product"]
 
 
 def flatten(flow_items: list[dict]) -> list[dict]:
@@ -159,11 +178,11 @@ def score_rows(fixture: dict, rows: list[dict]) -> dict:
     return {**{k: s[k] for k in SCORE_KEYS}, "duplicates": duplicates(rows), "errors": errors}
 
 
-def record_items(record: dict) -> list[dict] | None:
-    """Flow items of one run record, or None when the server would reject the answer."""
+def record_output(record: dict) -> dict | None:
+    """server_output of one run record, or None when the server would reject the answer."""
     from pydantic import ValidationError
     try:
-        return server_items(record.get("raw_text") or "")
+        return server_output(record)
     except ValidationError:
         return None
 
@@ -179,11 +198,13 @@ def replay(fixtures: list[dict], run_dirs: dict[str, tuple[str, ...]] | None = N
                 m = RUN_FILE.match(f.name)
                 if not m or m["stem"] != stem or (run is not None and int(m["run"]) != run):
                     continue
-                items = record_items(json.loads(f.read_text(encoding="utf-8")))
+                output = record_output(json.loads(f.read_text(encoding="utf-8")))
+                items = output["items"] if output else []
                 # flow_items pins the glass/bottle grouping, which flatten() undoes
                 out[f"{Path(run_dir).as_posix()}/{f.name}"] = {
-                    "photo_id": fx["photo_id"], "rejected": items is None, "flow_items": len(items or []),
-                    **score_rows(fx, flatten(items or []))}
+                    "photo_id": fx["photo_id"], "rejected": output is None, "flow_items": len(items),
+                    "other_items": len(output["otherItems"]) if output else 0,
+                    **score_rows(fx, flatten(items))}
     return out
 
 
@@ -333,7 +354,8 @@ def main(argv=None) -> int:
         for path, s in scores.items():
             print(f"{s['photo_id']:18} {Path(path).name:28} out {s['n_out']:3d} correct {s['correct']:3d}/{s['n_gt']:<3d} "
                   f"extra {s['fp']:2d} missed {s['fn']:2d} price {s['priced'] - s['price_correct']:2d} "
-                  f"unit {s['unit_confusion']:2d} dup {s['duplicates']:2d}{'  REJECTED' if s['rejected'] else ''}")
+                  f"unit {s['unit_confusion']:2d} dup {s['duplicates']:2d} other {s['other_items']:2d}"
+                  f"{'  REJECTED' if s['rejected'] else ''}")
         found = {s["photo_id"] for s in scores.values()}
         missing = [fx["photo_id"] for fx in fixtures if fx["photo_id"] not in found]
         if missing:

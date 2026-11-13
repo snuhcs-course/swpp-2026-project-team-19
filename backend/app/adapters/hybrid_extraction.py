@@ -1,13 +1,17 @@
-"""Hybrid menu extraction (CLOVA OCR + Gemini, frozen hybrid prompt v1) behind `MenuExtractor`.
+"""Hybrid menu extraction (CLOVA OCR + Gemini, hybrid prompt v1 or v2) behind `MenuExtractor`.
 
 Selected with MENU_EXTRACTOR=gemini and EXTRACTION_MODE=hybrid (default EXTRACTION_MODE=gemini
 keeps the Gemini-only extractor). When the OCR step fails, the photo goes through the
 Gemini-only extractor instead and the fallback is logged and recorded in raw_output
 (`hybridFallback`). Errors after a successful OCR (Gemini call, invalid output) are not
 retried on the other path: they fail the run like the Gemini-only extractor does.
+
+EXTRACTION_HYBRID_PROMPT picks the prompt: v1 (default, the frozen prompt) or v2 (I4-P12), which
+also reads non-whisky lines and keeps them out of the extracted items, in raw_output `otherItems`.
 """
 
 import logging
+import os
 from typing import Any
 
 from app import extraction
@@ -15,9 +19,13 @@ from app.adapters.extraction import ExtractionError, ExtractionResult, parse_ext
 from app.adapters.gemini_extraction import GeminiMenuExtractor, _message
 from app.extraction.clova import ClovaOCRError, ClovaSettings, load_clova_settings
 from app.extraction.hybrid import PROMPT_VERSION, extract_menu_hybrid
+from app.extraction.hybrid_v2 import PROMPT_VERSION as PROMPT_VERSION_V2
+from app.extraction.hybrid_v2 import extract_menu_hybrid_v2
 from app.models import ExtractionApproach
 
 logger = logging.getLogger(__name__)
+
+PROMPT_VERSIONS = {"v1": PROMPT_VERSION, "v2": PROMPT_VERSION_V2}
 
 
 class HybridMenuExtractor:
@@ -31,17 +39,25 @@ class HybridMenuExtractor:
     provider = "naver-clova+google"
 
     def __init__(self, settings: extraction.ExtractionSettings | None = None,
-                 clova: ClovaSettings | None = None) -> None:
+                 clova: ClovaSettings | None = None, prompt: str | None = None) -> None:
         # Raise extraction.ExtractionConfigError when a variable is missing or invalid.
         self.settings = settings or extraction.load_settings()
         self.clova = clova or load_clova_settings()
+        self.prompt = prompt or os.getenv("EXTRACTION_HYBRID_PROMPT") or "v1"
+        if self.prompt not in PROMPT_VERSIONS:
+            raise extraction.ExtractionConfigError(
+                f"EXTRACTION_HYBRID_PROMPT must be one of {', '.join(PROMPT_VERSIONS)}, got {self.prompt!r}"
+            )
         self.model_name = self.settings.model
-        self.pipeline_version = f"bottlemap-menu-hybrid-prompt{PROMPT_VERSION}-thinking-{self.settings.thinking_level}"
+        self.pipeline_version = (
+            f"bottlemap-menu-hybrid-prompt{PROMPT_VERSIONS[self.prompt]}-thinking-{self.settings.thinking_level}"
+        )
         self.fallback = GeminiMenuExtractor(self.settings)
 
     def extract(self, image: bytes, content_type: str, filename: str | None) -> ExtractionResult:
+        extract = extract_menu_hybrid_v2 if self.prompt == "v2" else extract_menu_hybrid
         try:
-            result = extract_menu_hybrid(image, content_type, self.clova, settings=self.settings)
+            result = extract(image, content_type, self.clova, settings=self.settings)
         except ClovaOCRError as error:
             logger.warning("hybrid extraction: CLOVA OCR failed, falling back to Gemini only: %s", error)
             fallback = self.fallback.extract(image, content_type, filename)
