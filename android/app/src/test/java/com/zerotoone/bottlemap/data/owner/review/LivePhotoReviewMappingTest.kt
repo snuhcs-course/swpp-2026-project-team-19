@@ -103,6 +103,55 @@ class LivePhotoReviewMappingTest {
             matched.priceCandidates.map { it.priceKrw }.sorted())
     }
 
+    @Test fun sameWhiskyOcrLinesBecomeOneCardWithOne30mlChoice() {
+        val a=item(options=listOf(
+            ReviewOptionDto("ocr-glass-30",1,"잔",30,12000),
+            ReviewOptionDto("ocr-60",2,"잔",60,22000),
+            ReviewOptionDto("ocr-bottle",3,"병",null,130000)))
+        val b=item(options=listOf(
+            ReviewOptionDto("ocr-shot-30",1,"샷",30,15000)))
+            .copy(extractedItemId="line-2",itemOrder=2,rawText="Whisky 샷 30ml 15,000")
+        val state=mapServerPhotoReview(response(a,b),fixture())
+        assertEquals(2,state.items.size)
+        assertEquals(1,PhotoReviewRules.stats(state).pending.size)
+        assertEquals(0,PhotoReviewRules.stats(state).excluded.size)
+        val master=state.items.first()
+        assertEquals("line-1",state.items[1].mergedInto)
+        assertEquals(3,PhotoReviewRules.countOptions(master))
+        assertEquals(listOf(12000,12000,15000),
+            master.priceCandidates.filter { it.servingKey=="ml:30" }
+                .map { it.priceKrw }.sorted())
+        assertEquals(setOf("ml:30"),PhotoReviewRules.pendingPriceServings(master))
+        assertTrue(master.options.any { it.bottle })
+        assertTrue(master.options.any { it.volume == 60.0 })
+        val chosen=PhotoReviewRules.chooseServingPrice(master,"ml:30",15000)
+        assertTrue(PhotoReviewRules.pendingPriceServings(chosen).isEmpty())
+        assertEquals(15000.0,chosen.price,0.0)
+        val parent=mapConfirmedReviewDecision(chosen,a,30.0,emptyMap())
+        assertEquals(3,parent.correctedOptions!!.size)
+        assertEquals(listOf("ocr-glass-30","ocr-60","ocr-bottle"),
+            parent.correctedOptions!!.map { it.optionId })
+        val child=mapConfirmedReviewDecision(state.items[1],b,30.0,emptyMap())
+        assertEquals(MockDecisionKind.EXCLUDE,child.kind)
+    }
+
+    @Test fun newServingFromAnotherOcrLineNeverUsesForeignExtractedOptionId() {
+        val parent=item(options=listOf(
+            ReviewOptionDto("ocr-main",1,"잔",30,15000)))
+        val second=item(options=listOf(
+            ReviewOptionDto("ocr-child",1,"잔",60,26000)))
+            .copy(extractedItemId="line-child",itemOrder=2)
+        val state=mapServerPhotoReview(response(parent,second),fixture())
+        val review=state.items.first()
+        assertEquals(2,PhotoReviewRules.countOptions(review))
+        val decision=mapConfirmedReviewDecision(review,parent,30.0,emptyMap())
+        assertEquals(listOf("ocr-main",null),
+            decision.correctedOptions!!.map {
+                it.optionId.takeIf { id -> id=="ocr-main" }
+            })
+        assertTrue(decision.correctedOptions!![1].optionId.startsWith("manual-"))
+    }
+
     @Test fun firstOcrOptionIdentitySurvivesReviewAndCanPublishWithoutFalseNewOptionError() {
         val dto = item()
         val card = mapServerPhotoReview(response(dto), fixture()).items.single()
