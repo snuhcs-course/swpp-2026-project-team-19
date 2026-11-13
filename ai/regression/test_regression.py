@@ -89,7 +89,8 @@ def test_deployed_catalog_resolves_every_known_line_without_a_false_merge():
 # ---- the checker ----------------------------------------------------------------------------
 
 def row(outcome, kind="known", name="맥캘란 12", rank1="macallan-12"):
-    return {"name": name, "gold": "macallan-12", "kind": kind, "outcome": outcome, "status": "x", "rank1": rank1}
+    return {"name": name, "gold": "macallan-12", "kind": kind, "outcome": outcome, "status": "x", "state": "x",
+            "rank1": rank1}
 
 
 @pytest.mark.parametrize("before, after", [("correct", "unmatched"), ("correct", "ambiguous_ok"),
