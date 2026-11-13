@@ -295,8 +295,9 @@ class PhotoReviewRulesTest {
 
     @Test fun otherMultiPriceLineRequiresEveryPriceAndSupportsPerOptionEdit() {
         val other=ReviewItem(id="beer",name="맥주",type=ReviewItemType.OTHER,
-            price=8000.0,volume=Double.NaN,
-            options=listOf(ReviewOption(volume=Double.NaN,price=0.0,sourceOptionId="ocr-2")))
+            price=8000.0,volume=Double.NaN,primaryOptionLabel="잔",
+            options=listOf(ReviewOption(volume=Double.NaN,price=0.0,
+                sourceOptionId="ocr-2",label="병")))
         assertTrue(ReviewIssue.PRICE in PhotoReviewRules.problems(other))
         val fixed=PhotoReviewRules.editOption(other,PhotoReviewRules.OptionField.PRICE,0,"12000")
         assertEquals(12000.0,fixed.options.single().price,0.0)
