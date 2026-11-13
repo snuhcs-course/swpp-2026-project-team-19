@@ -323,7 +323,7 @@ object PhotoReviewRules {
         val first = optionSummary(x).firstOrNull()
         val serving = first?.let(::servingKey)
         val existingCandidate = if (x.priceCandidates.isNotEmpty() &&
-            old != null && serving != null &&
+            old != null && serving != null && first != null &&
             x.priceCandidates.none { it.existing && it.servingKey == serving }) {
             ReviewPriceCandidate(
                 servingKey = serving,
