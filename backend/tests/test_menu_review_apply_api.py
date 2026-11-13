@@ -510,8 +510,13 @@ def test_operators_only(client, sample, token_for, glenfiddich):
 
 
 
+@pytest.mark.parametrize("category,review_status", [
+    ("whisky", "pending"),
+    ("맥주", None),
+    ("cocktail", None),
+])
 def test_owner_photo_review_publishes_bar_local_without_creating_catalog(
-    client, db_session, sample, operator, supabase
+    client, db_session, sample, operator, supabase, category, review_status
 ):
     from app.models import BarLocalMenuItem
     reviewer = make_user(db_session, "reviewer-for-local-photo", user_type=UserType.OPERATOR)
@@ -526,7 +531,7 @@ def test_owner_photo_review_publishes_bar_local_without_creating_catalog(
     local.pop("brand")
     local.pop("product")
     local["action"] = "create_local_menu_item"
-    local["category"] = "whisky"
+    local["category"] = category
     result = submit(client, sample.menu_import.id, body, owner)
     assert result.status_code == 200, result.text
     assert result.json()["result"]["createdProducts"] == 0
@@ -536,11 +541,11 @@ def test_owner_photo_review_publishes_bar_local_without_creating_catalog(
     ).all()
     assert len(rows) == 1
     assert rows[0].display_name == "Unknown Distillery 25"
-    assert rows[0].category == "whisky"
+    assert rows[0].category == category
     menu = client.get(f"/api/bars/{sample.bar.id}/menu", headers=owner).json()
     pending = next(i for i in menu["items"] if i["displayName"] == "Unknown Distillery 25")
     assert pending["catalogMatched"] is False
-    assert pending["catalogReviewStatus"] == "pending"
+    assert pending["catalogReviewStatus"] == review_status
     assert client.get("/api/search/bars", params={
         "productId": pending["productId"]
     }).json()["items"] == []
