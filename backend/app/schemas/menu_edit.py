@@ -69,6 +69,13 @@ class MenuItemAddRequest(_Strict):
     options: Options
 
 
+class LocalMenuApprovalRequest(_Strict):
+    """Operator approval: turn this bar's pending whisky into an approved catalog link."""
+    menuVersion: int
+    productId: UUID | None = None
+    newProduct: NewMenuProduct | None = None
+
+
 class MenuItemUpdateRequest(_Strict):
     menuVersion: int = Field(description="`menuVersion` of the menu the edit was made on")
     displayName: str = Field(min_length=1, max_length=200, description="Name on the menu")
