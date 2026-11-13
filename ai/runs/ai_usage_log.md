@@ -570,3 +570,23 @@
 
 ### 결과
 - `ai/docs/p47_result.md`: 추출 0.945(가격 1.000), 종단 Top-1 0.604 / 라벨 0.614 (수이 0.781 / 0.788, 오드비 0.403 / 0.418), false merge 0.003(overconfident 1), 사진당 (a) 5.9 (b)+(c)+(d) 3.8, 지연 평균 29.5초
+
+## 2026-11-13: I4-P12 프롬프트 v2 실측 (Claude Code)
+
+### 맡긴 일
+- 번들에서 `feature/i4-p12-line-categories`(5ab4013) 불러오기, 오프라인 테스트
+- `run_extraction.py`로 회귀 사진 15장을 프롬프트 v1, v2로 각 1회 추출(Gemini 30회, CLOVA 0회), `regression.py --extraction`으로 비교
+- 사용 시간 약 40분(추출 대기 포함). Gemini 토큰: v1 150,583 / v2 209,280
+
+### 검증
+- `ai/regression` 테스트 65 passed
+- 전체 실행 전 수이_04 1장을 v2로 먼저 보내 확인(위스키 28/28, other 12)
+- 30건 모두 1회 시도로 완료, 거부 0, 버린 비위스키 항목 0, OCR 캐시와 같은 바이트
+
+### 사용 중 있었던 문제
+- Git Bash에 `python`이 없어 `.venv/Scripts/python` 사용, pytest 임시 폴더 권한 오류 → `--basetemp`
+
+### 결과 (`ai/runs/2026-11-13_p12/`, 조건당 1회)
+- 수이_04 extra 12 → 0 (other 12), 복춘_04 other 33(전부 cocktail), 오드비_02 other 15, 오드비_09 병맥주 4줄 other(missed 4 그대로)
+- v2에서 달라진 위스키 줄: 수이_05 헤네시 VSOP(병)가 other로 가서 missed 1, 수이_02 이름에 가격이 붙은 1줄(extra 1, missed 1). 복춘_01·미라보_07은 v1에서 틀리고 v2에서 맞음
+- 출력 토큰 37,900 → 58,887(+55%), thinking 18,238 → 46,468, 지연 합 250.6초 → 456.8초(사진당 16.7초 → 30.5초)
