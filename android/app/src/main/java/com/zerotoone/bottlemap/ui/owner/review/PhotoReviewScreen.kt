@@ -468,7 +468,8 @@ private fun SourcePhotoModal(s: PhotoReviewState, modal: ReviewModal, vm: PhotoR
             Spacer(Modifier.height(12.dp))
             SourceVisual(raw, hasBox = false, height = photoHeight, large = true,
                 sourcePhotoUrl = original.sourcePhotoUrl,
-                sourceBox = original.sourceBox)
+                sourceBox = original.sourceBox,
+                refreshSourceUrl = { vm.refreshSourcePhotoUrl(original.id) })
             if (!hasBox) Text("사진에서 메뉴 위치를 특정하지 못했어요.", style = uxText(11f, 400, UxColor.sub),
                 modifier = Modifier.padding(top = 10.dp))
         }
