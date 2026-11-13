@@ -450,6 +450,15 @@ internal fun OwnerManualMenuScreen(
                     name != p.displayName) name else null)
             val stagedProduct = if (products.none { it.productId == p.productId } ||
                 (linked != null && !linked.catalogMatched && !sharedLocal)) p else null
+            // The current API's newProduct path writes directly to the global
+            // catalog. Keep the draft onscreen instead of accidentally submitting
+            // a beer or unapproved whisky as a shared canonical product.
+            // Per-bar pending entries are tracked separately in issue #152.
+            if (viewModel.usesProductionOwnerApi() && old == null && stagedProduct != null) {
+                error = "새 상품은 관리자 승인 후 등록할 수 있어요. " +
+                    "현재는 기존 카탈로그 상품만 매장 메뉴에 추가할 수 있어요."
+                return
+            }
             if(viewModel.usesProductionOwnerApi()) {
                 saving = true
                 saveScope.launch {
