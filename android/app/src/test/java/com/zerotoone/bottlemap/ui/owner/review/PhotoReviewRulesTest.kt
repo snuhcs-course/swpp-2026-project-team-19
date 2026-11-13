@@ -381,4 +381,19 @@ class PhotoReviewRulesTest {
     }
 
 
+    @Test fun unlinkedNameKeyMatchesBackendAgeAndPunctuationRules() {
+        assertEquals(
+            PhotoReviewRules.normalizedUnlinkedMenuName(" 글렌피딕 12년 "),
+            PhotoReviewRules.normalizedUnlinkedMenuName("글렌피딕12")
+        )
+        assertEquals(
+            PhotoReviewRules.normalizedUnlinkedMenuName("맥주 1"),
+            PhotoReviewRules.normalizedUnlinkedMenuName("맥주1")
+        )
+        assertTrue(PhotoReviewRules.normalizedUnlinkedMenuName("맥주-1") !=
+            PhotoReviewRules.normalizedUnlinkedMenuName("맥주1"))
+        assertTrue(PhotoReviewRules.normalizedUnlinkedMenuName("맥주 16.1") !=
+            PhotoReviewRules.normalizedUnlinkedMenuName("맥주 161"))
+    }
+
 }
