@@ -249,6 +249,46 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `recent` | 기기에 저장된 최근 검색을 다시 누름 |
 | `popular` | 홈 화면의 요즘 많이 찾는 위스키 카드를 누름 |
 
+### 4.20 menu_item_kind
+
+업장 메뉴 항목의 종류다(API 명세 2.3의 `MenuItemKind`).
+
+| 값 | 의미 |
+|---|---|
+| `whisky` | 위스키 메뉴. 상품에 연결되어 있거나, 카탈로그에 매칭되지 않아 운영자의 연결을 기다린다. 기본값 |
+| `other` | 진토닉, 콜라 같은 위스키가 아닌 메뉴. 상품에 연결하지 않고 그 업장 메뉴에만 보인다 |
+
+### 4.21 menu_item_check_reason
+
+운영자가 메뉴 항목을 확인해야 하는 이유다(API 명세 3.18.1).
+
+| 값 | 의미 |
+|---|---|
+| `unlinked` | 상품 없이 게시하거나 추가한 위스키. 상품에 연결해야 고객 검색에 나온다 |
+| `relinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 다른 상품에 연결됨. 상품 없던 항목이 연결된 경우도 같다 |
+| `unlinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 연결이 풀림 |
+| `attribute_conflict` | 검수에서 고른 상품의 연수나 에디션이 사진에서 읽은 값과 다름. 제출한 사람이 operator여도 같다 |
+| `price_conflict` | 다시 매칭이나 운영자의 연결로 같은 상품의 줄이 여럿이 되거나, 상품 없는 위스키 줄이 같은 이름 키로 합쳐져 같은 용량의 가격이 부딪쳐 서버가 한 가격을 골랐음 |
+
+### 4.22 menu_item_check_status
+
+| 값 | 의미 |
+|---|---|
+| `open` | 운영자가 아직 처리하지 않음 |
+| `resolved` | 운영자가 처리함 |
+| `dismissed` | 처리하기 전에 항목이 메뉴판에서 빠져 닫힘 |
+
+### 4.23 menu_item_check_resolution
+
+운영자의 처리 방식이다(API 명세 3.18.3).
+
+| 값 | 의미 |
+|---|---|
+| `link_existing` | 기존 상품에 연결하거나 연결을 바꿈 |
+| `create_and_link` | 새 상품(필요하면 새 브랜드)을 만들어 연결함 |
+| `keep` | 지금 연결이 맞다고 확인함 |
+| `mark_as_other` | 위스키가 아닌 메뉴로 바꿈(`bar_menu_items.kind = other`) |
+
 ## 5 Accounts and Bars
 
 ### 5.1 users
@@ -478,7 +518,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 **핵심 제약:** 같은 브랜드 안에서 같은 `normalized_alias`를 중복 저장하지 않는다. 브랜드를 만들 때 `canonical_name`도 기본 별칭으로 함께 저장하여 모든 브랜드명 검색이 `brand_aliases.normalized_alias`만 사용하게 한다. `normalized_alias` 인덱스는 브랜드 후보 탐색을 빠르게 한다.
 
-**정규화 규칙 변경:** 별칭 행마다 정규화 버전을 저장하지 않는다. 백엔드 정규화 함수를 변경할 때는 `backend/scripts/renormalize_aliases.py`로 `brand_aliases`와 `product_aliases`의 모든 `normalized_alias`를 새 함수로 일괄 재계산한다. 인자 없이 실행해 바뀔 내역과 서로 다른 상품·브랜드가 같은 값을 갖게 되는 경우를 먼저 확인하고, `--apply`로 반영한 뒤 `seed_catalog.py`를 다시 실행해 예전 규칙에서 겹쳐 빠졌던 시드 별칭을 추가한다. 같은 상품·브랜드 안에서 값이 같아진 별칭은 하나만 남긴다. 재계산과 중복 검사를 성공한 뒤에만 새 정규화 함수를 사용하는 백엔드를 활성화한다. 정규화 함수가 Python 코드이므로 마이그레이션이 아니라 그 함수를 그대로 쓰는 스크립트로 재계산한다. 일부 행만 새 규칙으로 바뀐 혼합 상태에서는 검색을 시작하지 않는다.
+**정규화 규칙 변경:** 별칭 행마다 정규화 버전을 저장하지 않는다. 백엔드 정규화 함수를 변경할 때는 `backend/scripts/renormalize_aliases.py`로 `brand_aliases`와 `product_aliases`의 모든 `normalized_alias`를 새 함수로 일괄 재계산한다. 인자 없이 실행해 바뀔 내역과 서로 다른 상품·브랜드가 같은 값을 갖게 되는 경우를 먼저 확인하고, `--apply`로 반영한 뒤 `seed_catalog.py`를 다시 실행해 예전 규칙에서 겹쳐 빠졌던 시드 별칭을 추가한다. 같은 상품·브랜드 안에서 값이 같아진 별칭은 하나만 남긴다. 재계산과 중복 검사를 성공한 뒤에만 새 정규화 함수를 사용하는 백엔드를 활성화한다. 정규화 함수가 Python 코드이므로 마이그레이션이 아니라 그 함수를 그대로 쓰는 스크립트로 재계산한다. 일부 행만 새 규칙으로 바뀐 혼합 상태에서는 검색을 시작하지 않는다. 같은 정규화 함수로 만든 `bar_menu_items.name_key`(7.1)도 이때 함께 다시 계산한다. 현재 메뉴판에 있는 상품 없는 항목은 그 메뉴판 줄의 이름(`menu_board_entries.display_name`)으로 다시 계산한다. 메뉴판에서 빠진 상품 없는 행은 다시 쓰이지 않으므로 그대로 둔다. 시험 실행에서 한 업장의 현재 메뉴판 안에 이름 키가 같아지는 상품 없는 항목이 생기면 보고하고, 운영자가 직접 편집(API 명세 3.14)으로 하나를 정리한 뒤 반영한다. 옛 규칙의 `name_key`가 남으면 다음 업로드에서 같은 미연결 메뉴를 알아보지 못해 두 줄로 게시되기 때문이다.
 
 ### 6.3 products
 
@@ -523,19 +563,23 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 ### 7.1 bar_menu_items
 
-**역할:** 특정 업장이 특정 정규 상품을 취급한 적이 있다는 지속적인 연결을 저장한다.
+**역할:** 특정 업장이 특정 메뉴를 취급한 적이 있다는 지속적인 연결을 저장한다. 대부분은 정규 상품과 연결된 항목이고, 상품 없이 그 업장 메뉴에만 있는 항목도 있다.
 
 | 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
 |---|---|---|---|
-| `id` | `uuid`, PK | A바의 Deanston 12 항목 ID | 업장과 상품 조합을 다른 테이블에서 안정적으로 참조한다. |
+| `id` | `uuid`, PK | A바의 Deanston 12 항목 ID | 업장 메뉴 항목을 다른 테이블에서 안정적으로 참조한다. |
 | `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | 어느 업장의 항목인지 나타낸다. |
-| `product_id` | `uuid`, NOT NULL, FK → `products.id` | Deanston 12 상품 ID | 어떤 정규 상품인지 나타낸다. |
+| `product_id` | `uuid`, nullable, FK → `products.id` | Deanston 12 상품 ID | 어떤 정규 상품인지 나타낸다. 카탈로그에 매칭되지 않아 운영자의 연결을 기다리는 위스키와 위스키가 아닌 메뉴는 `null`이다(API 명세 3.9). |
+| `kind` | `menu_item_kind`, NOT NULL, 기본 `whisky` | `other` | 위스키 메뉴인지, 위스키가 아닌 메뉴인지다(4.20). 상품에 연결된 항목은 항상 `whisky`이고, `other`는 상품에 연결하지 않는다. |
+| `name_key` | `text`, nullable | `진토닉` | 상품이 없는 항목의 메뉴판 이름을 공통 정규화 함수(별칭과 같은 함수)로 정규화한 값이다. 메뉴판 이름은 200자까지지만 NFKC 정규화로 길어질 수 있어 길이 제한을 두지 않는다. 상품이 없는 항목을 업장 안에서 구분하는 키이며, 다음 메뉴판을 올렸을 때 같은 메뉴를 알아보는 데 쓴다. 상품에 연결된 항목은 `null`이다. |
 | `sold_out_at` | `timestamptz`, nullable | `2026-11-02T12:00:00Z` | 품절로 표시한 시각이다. `null`이면 판매 중이다(API 명세 3.14.8). 품절 항목은 메뉴판에 남지만 손님의 업장 메뉴와 고객 검색에서는 빠지고, 업주와 운영자에게만 품절로 보인다. 항목이 현재 메뉴판에서 빠지면 `null`로 되돌려, 다시 추가했을 때 판매 중으로 시작한다. 메뉴판을 다시 써도 이 행은 남으므로 품절을 여기에 저장한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T04:30:00Z` | 업장 메뉴 항목 최초 생성 시점이다. |
 
-**핵심 원칙:** `(bar_id, product_id)`는 unique다. 현재 메뉴판에서 빠져도 행은 삭제하지 않는다. 현재 `menu_board_entries`에 연결되면 메뉴판에 있는 것이고, 연결되지 않으면 보관된 상태로 본다. 메뉴판에 있는 항목도 품절(`sold_out_at`)이면 손님에게는 보이지 않고 업주와 운영자에게만 보인다(API 명세 3.14.8).
+**핵심 원칙:** `(bar_id, product_id)`는 unique다. `product_id`가 `null`인 행끼리는 PostgreSQL이 서로 다른 값으로 보므로 이 제약에 걸리지 않는다. 상품이 없는 행은 `name_key`가 있어야 하고 상품이 있는 행은 `name_key`가 없어야 하며(`(product_id IS NULL) = (name_key IS NOT NULL)`), `kind = other`이면 `product_id`는 `null`이다(CHECK 제약). 현재 메뉴판에서 빠져도 행은 삭제하지 않는다. 현재 `menu_board_entries`에 연결되면 메뉴판에 있는 것이고, 연결되지 않으면 보관된 상태로 본다. 메뉴판에 있는 항목도 품절(`sold_out_at`)이면 손님에게는 보이지 않고 업주와 운영자에게만 보인다(API 명세 3.14.8).
 
-**필요한 이유:** 메뉴판을 교체할 때마다 같은 업장 상품 행을 새로 만들지 않고 과거에 취급했던 항목을 재사용한다.
+**상품이 없는 항목:** 현재 메뉴판 안에서 상품이 없는 항목끼리는 `name_key`가 겹치지 않는다. 메뉴판에서 빠진 예전 행과는 겹칠 수 있으므로 DB의 unique 제약이 아니라, 메뉴를 바꾸는 요청이 업장 행을 잠근 상태에서 백엔드가 확인한다(API 명세 3.14.1). 그래서 `(bar_id, name_key)` 인덱스는 unique가 아니다. 상품이 없는 항목은 메뉴판에서 빠지면 다시 쓰지 않고, 같은 이름을 다시 올리면 새 행을 만든다. 운영자가 `kind = whisky`인 항목을 상품에 연결하면 `product_id`를 채우고 `name_key`를 `null`로 바꾼다. 이때부터 고객 검색에 나온다. 정규화 규칙이 바뀌면 현재 메뉴판의 `name_key`를 별칭과 함께 다시 계산한다(6.1의 정규화 규칙 변경).
+
+**필요한 이유:** 메뉴판을 교체할 때마다 같은 업장 상품 행을 새로 만들지 않고 과거에 취급했던 항목을 재사용한다. 카탈로그에 없는 메뉴도 업주가 바로 게시할 수 있게, 상품 연결은 나중에 운영자가 하거나(위스키) 하지 않는다(위스키가 아닌 메뉴).
 
 ### 7.2 menu_boards
 
@@ -631,6 +675,45 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 **필요한 이유:** 고객이 찾았지만 카탈로그에 없는 위스키를 알아야 별칭과 상품을 보완할 수 있다. 검색어는 개인정보가 섞일 수 있는 유일한 값이므로 거르는 규칙, 행 수 상한, 짧은 보관 기간을 함께 둔다.
 
+### 7.7 menu_item_checks
+
+**역할:** 운영자가 확인해야 할 업장 메뉴 항목을 저장한다(API 명세 3.18). 상품 없이 게시된 위스키를 상품에 연결하거나, 업주의 검수로 바뀐 연결이 맞는지 확인하는 작업 목록이다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 확인 ID | 관리자 웹이 처리할 확인을 가리킨다. |
+| `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | 업장별로 목록을 거르기 위해 항목의 업장을 함께 저장한다. |
+| `bar_menu_item_id` | `uuid`, NOT NULL, FK → `bar_menu_items.id` | 글렌알라키 항목 ID | 확인 대상 항목이다. 열려 있는 동안은 메뉴판의 줄을 따라간다. 이름 수정이나 다시 매칭으로 줄이 다른 항목으로 옮겨 가면 열린 확인도 그 항목으로 옮기거나 합친다(API 명세 3.14.1, 3.18.1). 운영자가 처리해 닫은 확인은, 처리하면서 줄이 다른 항목으로 옮겨 갔어도 처리한 항목을 가리킨 채 남는다. |
+| `display_name` | `varchar(200)`, NOT NULL | `글렌알라키 10년 CS 배치 11` | 항목이 메뉴판에 보이던 이름이다. 메뉴판의 줄(`menu_board_entries`)은 빠지면 지워지므로, 확인을 만들 때와 그 줄의 이름이 바뀌거나 줄이 다른 항목으로 옮겨 갈 때 함께 저장해, 닫힌 확인에서도 이름을 보여 준다(API 명세 3.18.2). |
+| `status` | `menu_item_check_status`, NOT NULL, 기본 `open` | `open` | 4.22 |
+| `discarded_options` | `jsonb`, NOT NULL, 기본 `[]` | `[{"optionLabel": null, "pourMl": 30, "priceKrw": 28000, "displayName": "글렌피딕 12", "extractedItemId": "…"}]` | 같은 항목으로 합치면서 가격이 부딪쳐 서버가 버린 옵션이다(이유 `price_conflict`, API 명세 8.12, 3.14.1). 운영자가 메뉴판에 남은 가격과 비교해, 버린 가격이 맞으면 직접 수정으로 고친다(API 명세 3.18.3). 버린 가격은 이곳 말고는 남지 않는다. |
+| `created_at` | `timestamptz`, NOT NULL | `2026-11-13T09:15:00Z` | 확인이 처음 생긴 시각이다. 열린 확인은 오래된 것부터 처리한다. |
+| `resolution` | `menu_item_check_resolution`, nullable | `link_existing` | `resolved`일 때 처리 방식(4.23)이다. |
+| `resolved_product_id` | `uuid`, nullable, FK → `products.id` | GlenAllachie 10 CS 상품 ID | 처리한 결과 연결된 상품이다. `mark_as_other`면 `null`이다. |
+| `resolved_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 처리한 운영자다. `users` 행이 없는 임시 로그인 운영자와 `dismissed`는 `null`이다. |
+| `resolved_at` | `timestamptz`, nullable | `2026-11-13T15:00:00Z` | `resolved` 또는 `dismissed`가 된 시각이다. |
+
+**핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 이유의 열린 확인이 있다. 항목이 현재 메뉴판에서 빠지거나 `kind = other`가 되면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. 상품 없는 위스키가 운영자 처리 없이 상품에 연결되면, 다른 이유가 있으면 `unlinked`, `unlinked_by_name` 이유만 빼고, 없으면 이유는 그대로 두고 `dismissed`로 바꾼다. 그래서 `reasons`는 닫힌 뒤에도 비지 않는다. 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면 그 줄의 열린 확인도 새 항목으로 옮기고, 새 항목에 이미 열린 확인이 있으면 이유와 버린 옵션을 그 확인에 더한 뒤 옮겨 온 확인은 `dismissed`로 바꾼다(API 명세 3.14.1, 3.18.1). `kind = other`인 항목에는 확인을 만들지 않는다. 열린 확인의 `bar_menu_item_id`에는 partial unique index(`WHERE status = 'open'`)를 두며, 처리하거나 닫힌 확인은 같은 항목에 여러 개 있을 수 있다.
+
+**필요한 이유:** 업주가 카탈로그를 몰라도 메뉴를 바로 게시하게 하면서, 상품 연결과 카탈로그 품질은 운영자가 하루 안에 한 줄씩 책임지게 한다. 확인 기록은 처리한 뒤에도 남겨 매칭이 어디서 틀렸는지 볼 수 있게 한다.
+
+### 7.8 menu_item_check_reasons
+
+**역할:** 메뉴 항목 확인(7.7)의 이유를 하나씩, 그 이유를 만든 검수 줄과 함께 저장한다(API 명세 3.18.2의 `reasons[]`).
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 이유 행 ID | |
+| `check_id` | `uuid`, NOT NULL, FK → `menu_item_checks.id` | 확인 ID | 어느 확인의 이유인지 나타낸다. |
+| `reason` | `menu_item_check_reason`, NOT NULL | `attribute_conflict` | 확인이 필요한 이유(4.21)다. |
+| `source_menu_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 등록 작업 ID | 이 이유를 만든 검수 줄의 작업이다. 관리자 웹이 그 메뉴판 사진을 보여 준다. 직접 추가나 직접 수정으로 생긴 이유는 `null`이다. |
+| `source_extracted_item_id` | `uuid`, nullable, FK → `extracted_items.id` | 추출 항목 ID | 그 검수 줄이다. 원문, `source_box`, 추출한 연수와 에디션을 보여 준다. `source_menu_import_id`와 함께 있거나 함께 `null`이다. |
+| `added_at` | `timestamptz`, NOT NULL | `2026-11-13T09:15:00Z` | 이유가 더해진 시각이다. 확인의 이유는 이 순서로 보여 준다. |
+
+**핵심 제약:** 확인 하나에 이유는 최소 하나이며, 확인이 닫힌 뒤에도 비지 않는다. 이유를 더해도 앞선 이유의 출처는 바뀌지 않는다. 같은 이유가 다른 줄에서 다시 생기면 행을 하나 더 만들고, 이유와 출처가 모두 같으면 더하지 않는다. 열린 확인 둘을 합치면 닫히는 확인의 이유 행을 남는 확인에 복사한다(API 명세 3.18.1). 옮기지 않고 복사하므로 닫힌 확인도 자기 이유를 그대로 갖는다.
+
+**필요한 이유:** 한 항목에 여러 이유가 쌓일 수 있고, 운영자는 이유마다 다른 근거를 봐야 한다. 예를 들어 `attribute_conflict`는 그 이유를 만든 줄의 연수와 에디션과 비교해야 하므로, 다른 줄 때문에 `price_conflict`가 더해져도 그 근거가 바뀌면 안 된다.
+
 ## 8 AI Menu Import
 
 ### 8.1 menu_imports
@@ -648,6 +731,10 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `review_version` | `integer`, NOT NULL, 기본 `0` | `3` | 통합 검수 응답을 다시 생성할 때 증가한다. 운영자가 본 버전과 제출 시점의 버전을 비교해 오래된 화면에서의 반영을 막는다. |
 | `owner_note` | `text`, nullable | `업장 허가 후 9월 메뉴 촬영` | 업장 허가 출처 특이사항 등의 운영 메모다. 현재 이름은 향후 업주 흐름을 고려한 표현이다. |
 | `review_confirmed_at` | `timestamptz`, nullable | `2026-09-28T04:30:00Z` | 항목·옵션·상품 매칭·신규 등록 제안·메뉴 diff를 한 번에 최종 승인한 시점이다. |
+| `review_draft` | `jsonb`, nullable | `{"itemDecisions": [...], "changeDecisions": [...], "clientState": {...}}` | 제출 전까지 검수 화면에서 입력한 내용(API 명세 5.9)이다. 다른 기기나 운영자 웹에서 같은 검수를 이어 하기 위해 저장한다. 서버는 내용을 해석하지 않고 크기(256KB)만 제한한다. 반영이나 취소에 성공하면 `null`로 지운다. |
+| `review_draft_version` | `integer`, NOT NULL, 기본 `0` | `4` | 초안을 저장할 때마다 1씩 올린다. 저장 요청은 읽은 버전을 보내고, 다르면 거부해 두 사람이 서로의 입력을 덮어쓰지 않게 한다. 초안을 지워도 되돌리지 않는다. |
+| `review_draft_saved_at` | `timestamptz`, nullable | `2026-10-04T09:06:00Z` | 초안을 마지막으로 저장한 시각이다. |
+| `review_draft_saved_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 초안을 마지막으로 저장한 사용자다. 다른 사람이 먼저 저장했다고 안내할 때 쓴다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
 | `recovery_count` | `smallint`, NOT NULL, 기본 `0` | `1` | 서버 재시작으로 끊긴 처리를 이어서 처리한 횟수다. 3번을 넘으면 더 이어서 처리하지 않고 `failed`로 바꾼다. 특정 사진 때문에 재시작이 반복되는 것을 막는다. 0 이상이어야 한다(CHECK). |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T03:40:00Z` | 등록 작업 시작 시점이다. |
 | `completed_at` | `timestamptz`, nullable | `2026-09-28T04:31:00Z` | 작업이 최종 상태(`applied`, `failed`, `canceled`)가 된 시점이다. 진행 중이면 null이다. |
@@ -710,6 +797,8 @@ MVP에서는 한 업장에 `uploaded`, `processing`, `ready_for_review` 상태�
 | `item_order` | `smallint`, NOT NULL | `7` | 같은 실행 안에서 AI가 인식한 항목의 원본 표시 순서를 보존한다. |
 | `raw_text` | `text`, NOT NULL | `딘스톤 12년 15ml 8.0 / 30ml 15.0` | AI 구조화 전의 상품과 옵션 전체 원문을 보존한다. |
 | `extracted_line_type` | `extracted_line_type`, NOT NULL, 기본 `unknown` | `product` | AI가 1차 판별한 역할이다. 평가를 위해 운영자 검수 후에도 변경하지 않는다. |
+| `extracted_kind` | `menu_item_kind`, nullable | `other` | AI가 1차 판별한 메뉴 종류(4.20)다. `extracted_line_type = product`인 줄은 `whisky` 또는 `other`이고(AI가 돌려주지 않으면 `whisky`), 비상품 줄은 `null`이다. `whisky`인 줄만 상품 매칭을 한다. 검수 후에도 변경하지 않는다. |
+| `corrected_kind` | `menu_item_kind`, nullable | `whisky` | 검수자가 게시한 종류가 `extracted_kind`와 다를 때만 그 값을 저장하고, 같으면 `null`이다(`corrected_line_type`과 같은 규칙). 상품에 연결해 게시한 줄은 `whisky`로 본다. 게시된 `bar_menu_items.kind`는 다음 검수나 운영자 처리로 바뀌므로, AI 종류 분류의 정확도는 이 컬럼으로 평가한다. |
 | `corrected_line_type` | `extracted_line_type`, nullable | `product` | 운영자가 최초 역할을 바꾼 경우에만 교정값을 저장한다. 그대로 승인하면 null이다. |
 | `extracted_product_name` | `varchar(200)`, nullable | `딘스톤 12년` | AI가 구조화한 상품명이다. |
 | `extracted_brand_name` | `varchar(120)`, nullable | `딘스톤` | AI가 분리한 브랜드 표기다. 브랜드 별칭 조회에 사용한다. |
@@ -780,7 +869,7 @@ MVP에서는 한 업장에 `uploaded`, `processing`, `ready_for_review` 상태�
 | `decision` | `menu_change_decision`, NOT NULL, 기본 `pending` | `apply` | 운영자가 변경을 적용할지 무시할지 기록한다. |
 | `reviewed_at` | `timestamptz`, nullable | `2026-09-28T04:25:00Z` | 개별 변경 결정 시점이다. |
 
-**필요한 이유:** 운영자가 항목 역할, 옵션 또는 상품 연결을 수정하면 diff도 달라질 수 있다. 최종 제출 시 백엔드는 수정된 결정을 기준으로 최종 변경을 계산해 반영한다. 운영자의 결정은 최종이므로 임시 diff와 달라진 변경도 반영한다. 다만 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면 반영하지 않고, 임시 diff를 다시 만들어 `review_version`을 올린 뒤 최신 검수 데이터를 다시 조회하게 한다. 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다. AI 누락 때문에 판매 중인 술이 자동으로 사라지는 것을 막고 전체 교체와 일부 수정 모두에서 사람이 최종 결과를 통제한다.
+**필요한 이유:** 운영자가 항목 역할, 옵션 또는 상품 연결을 수정하면 diff도 달라질 수 있다. 최종 제출 시 백엔드는 수정된 결정을 기준으로 최종 변경을 계산해 반영한다. 운영자의 결정은 최종이므로 임시 diff와 달라진 변경도 반영한다. 다만 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면 반영하지 않고, 임시 diff를 다시 만들어 `review_version`을 올린 뒤 최신 검수 데이터를 다시 조회하게 한다. 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다. 예외는 한 줄이 원래 항목을 대신하는 경우(이름을 고친 줄의 다시 매칭, 미연결 항목과 비교된 줄을 상품에 연결, API 명세 8.11, 3.14.1)뿐이며, 이때도 메뉴판의 줄 수는 그대로다. AI 누락 때문에 판매 중인 술이 자동으로 사라지는 것을 막고 전체 교체와 일부 수정 모두에서 사람이 최종 결과를 통제한다.
 
 **최신 diff 유지 규칙:** 과거 임시 diff 이력은 보존하지 않는다. 최종 확정 전에 검수 데이터를 재생성하면 백엔드는 해당 `menu_import_id`의 기존 `menu_import_changes`를 삭제하고 새 `pending` 행들을 저장한 뒤 `menu_imports.review_version`을 증가시킨다. 이 세 작업은 하나의 트랜잭션으로 처리한다. 이전 화면의 `changeId`와 `reviewVersion`으로 제출된 요청은 거부한다. 최종 반영 때는 실제로 일어난 일이 남도록 행을 갱신한다. `ignore`한 행은 결정만 기록하고, `apply`한 행은 운영자 결정 때문에 최종 변경이 달라졌으면 그 종류와 대상으로 바꾸며(예: `add`가 `update`가 됨), 결과적으로 아무것도 바꾸지 않았으면 삭제한다. 임시 diff에 없던 변경은 `apply` 행으로 추가한다. 따라서 `applied`가 된 작업의 행은 AI가 처음 제안한 초안이 아니라 실제 반영된 변경과 무시한 제안의 기록이며, 이후에는 교체하지 않는다. 반영 응답의 `added`·`updated`·`removed`·`ignored` 개수도 이 행으로 센다. AI의 최초 판단은 `extracted_items`와 `resolution_candidates`에 남는다.
 
@@ -928,7 +1017,7 @@ A와 C는 사진에 없어도 remove 후보가 되지 않으며 현재 메뉴판
 | `extracted_options` | `menu_entry_options` | 1:N 출처 연결 | 게시된 가격·용량 옵션이 어떤 AI 추출 옵션에서 만들어졌는지 추적한다. |
 | `brands` | `products` | 1:N | 브랜드 하나에 여러 연수와 에디션 상품이 있다. |
 | `products` | `product_aliases` | 1:N | 상품 하나에 여러 전체 이름 표기가 있다. |
-| `bars` + `products` | `bar_menu_items` | N:M 해소 | 같은 상품을 여러 업장이 취급하고 한 업장은 여러 상품을 취급한다. |
+| `bars` + `products` | `bar_menu_items` | N:M 해소 | 같은 상품을 여러 업장이 취급하고 한 업장은 여러 상품을 취급한다. 상품이 없는 항목은 업장에만 속한다. |
 | `bars` | `menu_boards` | 1:0..1 | 업장에는 현재 메뉴판이 없거나 하나만 있다. |
 | `menu_boards` | `menu_board_entries` | 1:N | 현재 메뉴판은 여러 술 항목을 포함한다. |
 | `menu_board_entries` | `menu_entry_options` | 1:N | 한 술에 여러 용량과 가격 옵션이 있다. |
@@ -974,7 +1063,7 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 > - 가격·용량·연수·신뢰도·점수 범위: 요청 스키마와 추출 어댑터가 검사한다.
 > - `corrected_line_type`: 최초 분류와 같으면 백엔드가 `null`로 저장한다. `completed_at`은 백엔드가 항상 나중 시각으로 기록한다.
 > - 최종 제출 전 `pending` 변경: 모든 변경에 결정이 없으면 `422 MISSING_CHANGE`로 거부한다.
-> - 메뉴판 항목의 업장 일치와 옵션 최소 1개: 게시 코드가 해당 업장의 항목만 쓰고, 가격 있는 옵션이 없으면 `NO_PRICED_OPTION`으로 거부한다.
+> - 메뉴판 항목의 업장 일치와 옵션 최소 1개: 게시 코드가 해당 업장의 항목만 쓰고, 검수 제출은 줄마다 가격 있는 옵션을 1~10개 받는다(API 명세 8.1). 빈 목록은 `TOO_SHORT`로 거부한다.
 > - 업장당 미완료 작업 하나: 업장 행 잠금과 확인만 있고 부분 unique 인덱스는 없다.
 > - 삭제 정책: 외래키에 cascade가 없어(PostgreSQL 기본 `NO ACTION`) 이력이 참조하는 행은 삭제되지 않는다.
 
@@ -986,8 +1075,8 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - enum을 DB enum으로 구현할지 문자열과 CHECK 제약으로 구현할지
 - 가격이 반드시 존재해야 하는지, `가격 문의` 같은 값을 허용할지
 - 상품 `category`를 자유 문자열로 유지할지 별도 Enum 또는 테이블로 분리할지
-- 한 메뉴 이미지에 동일 상품이 여러 줄 등장할 때 하나의 메뉴 항목과 여러 옵션으로 합치는 기준
-- 같은 상품이 서로 다른 메뉴 섹션에 중복 노출되는 것을 허용할지
+
+같은 상품이 여러 줄에 나올 때 합치는 기준과 섹션별 중복 노출 여부는 정해졌다. 최종 상품이 같은 줄(상품이 없으면 같은 이름 키)은 사진과 섹션에 관계없이 한 메뉴 항목으로 합치고 옵션을 모두 모으며, 같은 상품을 메뉴판에 두 번 보이지 않는다(7.1, API 명세 8.12).
 
 ## 14 현재 MVP 범위 밖 기능
 
