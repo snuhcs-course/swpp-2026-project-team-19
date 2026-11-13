@@ -54,6 +54,13 @@ def test_states_and_stored_status(result, state, status):
     (exact(candidate(B), candidate(A, 2)), ReviewState.CHOOSE_CANDIDATE),              # proposes another product than rank 1
     (exact(candidate(), proposed=None), ReviewState.CHOOSE_CANDIDATE),
     (exact(), ReviewState.NO_CANDIDATE),
+    # one product, but another candidate too: not one settled product
+    (exact(candidate(), candidate(B, 2)), ReviewState.CHOOSE_CANDIDATE),
+    # evidence that blocks an exact match
+    (exact(candidate(ageConflict=True)), ReviewState.CHOOSE_CANDIDATE),
+    (exact(candidate(editionConflict=True)), ReviewState.CHOOSE_CANDIDATE),
+    (exact(candidate(editionOnlyInExtracted=["oak"])), ReviewState.CHOOSE_CANDIDATE),
+    (exact(candidate(editionUnmatched=["px"])), ReviewState.CHOOSE_CANDIDATE),
 ])
 def test_a_contradictory_exact_match_needs_review(result, state):
     assert not can_auto_confirm(result) and review_state(result) is state

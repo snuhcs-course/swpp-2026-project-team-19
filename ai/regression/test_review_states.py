@@ -58,3 +58,15 @@ def test_a_recommended_candidate_can_be_wrong_which_is_why_it_is_not_confirmed()
 def test_several_candidates_without_the_right_one_stay_with_the_owner():
     bad = [r for _, r in rows("heldout") if r["outcome"] == "ambiguous_bad"]
     assert len(bad) == 5 and all(r["state"] in REVIEW_REQUIRED for r in bad)
+
+
+def test_a_changed_review_state_of_one_line_is_reported():
+    # swapping two lines' states leaves the counts equal; the per-line check still sees it
+    rows = [{"name": "A", "gold": "a", "kind": "known", "outcome": "ambiguous_ok", "status": "ambiguous", "rank1": "a",
+             "state": "confirm_recommended"},
+            {"name": "B", "gold": "b", "kind": "known", "outcome": "ambiguous_ok", "status": "ambiguous", "rank1": "b",
+             "state": "choose_candidate"}]
+    swapped = [dict(rows[0], state="choose_candidate"), dict(rows[1], state="confirm_recommended")]
+    worse, better = reg.compare_matching({"heldout": {"p": rows}}, {"heldout": {"p": swapped}})
+    assert len(worse) == 2 and all("review state" in line for line in worse) and not better
+    assert reg.compare_matching({"heldout": {"p": rows}}, {"heldout": {"p": [dict(r) for r in rows]}}) == ([], [])
