@@ -822,8 +822,9 @@ Table menu_item_checks {
   A menu item an operator should look at: a whisky published without a product, or a link the owner's review
   changed in a way a person should confirm (API spec 3.18). An operator resolves it by linking a product,
   creating one and linking it, keeping the current link, or marking the item as non-whisky.
-  A current-board whisky item without a product always has one open check. Removing the item from the board
-  dismisses its open check in the same transaction. kind = other items never get a check.
+  A current-board whisky item without a product always has one open check (reason unlinked or unlinked_by_name).
+  Removing the item from the board dismisses its open check in the same transaction; when a rename moves the
+  board line to another item (API spec 3.14.1), the open check moves with it. kind = other items never get a check.
   bar_menu_item_id keeps the original item even when linking moves the board entry to another item of the bar.
   '''
 }

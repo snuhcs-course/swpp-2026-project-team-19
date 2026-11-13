@@ -265,10 +265,10 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | 값 | 의미 |
 |---|---|
 | `unlinked` | 상품 없이 게시하거나 추가한 위스키. 상품에 연결해야 고객 검색에 나온다 |
-| `relinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 다른 상품에 연결됨 |
+| `relinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 다른 상품에 연결됨. 상품 없던 항목이 연결된 경우도 같다 |
 | `unlinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 연결이 풀림 |
 | `attribute_conflict` | 업주가 고른 상품의 연수나 에디션이 사진에서 읽은 값과 다름 |
-| `price_conflict` | 같은 상품의 여러 줄에서 같은 용량의 가격이 부딪쳐 서버가 하나를 골랐음 |
+| `price_conflict` | 다시 매칭으로 같은 상품의 줄이 여럿이 되어 같은 용량의 가격이 부딪쳤음 |
 
 ### 4.22 menu_item_check_status
 
@@ -694,7 +694,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `resolved_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 처리한 운영자다. `users` 행이 없는 임시 로그인 운영자와 `dismissed`는 `null`이다. |
 | `resolved_at` | `timestamptz`, nullable | `2026-11-13T15:00:00Z` | `resolved` 또는 `dismissed`가 된 시각이다. |
 
-**핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 이유의 열린 확인이 있다. 항목이 현재 메뉴판에서 빠지면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. `kind = other`인 항목에는 확인을 만들지 않는다.
+**핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 이유의 열린 확인이 있다. 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면 그 줄의 열린 확인도 새 항목으로 옮긴다(API 명세 3.14.1). 항목이 현재 메뉴판에서 빠지면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. `kind = other`인 항목에는 확인을 만들지 않는다.
 
 **필요한 이유:** 업주가 카탈로그를 몰라도 메뉴를 바로 게시하게 하면서, 상품 연결과 카탈로그 품질은 운영자가 하루 안에 한 줄씩 책임지게 한다. 확인 기록은 처리한 뒤에도 남겨 매칭이 어디서 틀렸는지 볼 수 있게 한다.
 
