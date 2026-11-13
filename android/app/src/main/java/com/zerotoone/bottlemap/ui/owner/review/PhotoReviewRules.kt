@@ -121,9 +121,12 @@ object PhotoReviewRules {
         return entries.ifEmpty { listOf(RecognizedOffer()) }
     }
 
-    fun offerVolumeLabel(o: RecognizedOffer): String = when {
+    /** Show the configured bar pour beside the OCR price when the photo omits size. */
+    fun offerVolumeLabel(o: RecognizedOffer, defaultPourMl: Double? = null): String = when {
         o.bottle -> "Bottle"
         (o.volumeMl ?: 0) > 0 -> "${o.volumeMl}ml"
+        defaultPourMl != null && validVolume(defaultPourMl) ->
+            "${defaultPourMl.toInt()}ml"
         else -> ""
     }
 
