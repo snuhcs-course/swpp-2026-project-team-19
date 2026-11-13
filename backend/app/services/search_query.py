@@ -47,7 +47,7 @@ class QueryResolution:
 
 
 def _active_products() -> Select[tuple[Product]]:
-    return select(Product).where(Product.is_active).options(joinedload(Product.brand))
+    return select(Product).where(Product.is_active, Product.category == "whisky").options(joinedload(Product.brand))
 
 
 def _alias_exact(session: Session, normalized: str) -> list[Product]:
@@ -110,7 +110,8 @@ def _similar(session: Session, query: str) -> list[Product]:
     if finder is None:
         return []
     try:
-        return finder.find(session, query)
+        return [product for product in finder.find(session, query)
+                if product.is_active and product.category == "whisky"]
     except Exception:
         logger.exception("Similar-products search failed; answering none")
         return []
