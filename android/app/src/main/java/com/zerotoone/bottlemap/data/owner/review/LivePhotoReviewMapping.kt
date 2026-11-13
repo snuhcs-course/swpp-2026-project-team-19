@@ -88,26 +88,29 @@ private fun mapServerReviewItem(
     val firstScanned = recognized.firstOrNull()
     val existingPrices = snapshot.menuItems.filter { it.barId == bar.barId }
         .mapNotNull { row ->
-            val match = row.options.firstOrNull { saved ->
-                val ocrLabel = firstScanned?.extractedOptionLabel?.trim()?.lowercase()
-                val savedLabel = saved.label?.trim()?.lowercase()
-                // Match the exact serving identity, not merely pourMl: an
-                // existing "잔 30ml" is not the photographed "샷 30ml".
+            val matches = row.options.filter { saved ->
                 when {
                     firstScanned == null -> false
-                    // "Bottle" and "병" are equivalent bottle servings in
-                    // BottleMap Android. Original OCR IDs remain unchanged.
-                    isBottle(saved.label) && isBottle(ocrLabel) -> true
-                    isBottle(saved.label) || isBottle(ocrLabel) -> false
-                    ocrLabel != null && savedLabel != ocrLabel -> false
+                    // Bottle has its own identity; for all other servings
+                    // only pourMl matters (잔 30ml == 샷 30ml).
+                    isBottle(firstScanned.extractedOptionLabel) ->
+                        isBottle(saved.label)
+                    isBottle(saved.label) -> false
                     else -> saved.pourMl != null &&
                         saved.pourMl == (firstScanned.extractedPourMl ?: defaultPour)
                 }
-            } ?: row.options.singleOrNull().takeIf {
-                firstScanned?.extractedPourMl == null &&
-                    firstScanned?.extractedOptionLabel == null &&
-                    it != null && !isBottle(it.label)
             }
+            // Pre-#168 persisted rows can contain two labels for the same ml.
+            // Never silently select one of their DIFFERENT prices.
+            val match = matches.singleOrNull()
+                ?: matches.firstOrNull().takeIf {
+                    matches.isNotEmpty() &&
+                        matches.map { it.priceKrw }.distinct().size == 1
+                } ?: row.options.singleOrNull().takeIf {
+                    firstScanned?.extractedPourMl == null &&
+                        firstScanned?.extractedOptionLabel == null &&
+                        it != null && !isBottle(it.label)
+                }
             match?.let { row.productId to it.priceKrw.toDouble() }
         }.toMap()
     val options = recognized.map { option ->
