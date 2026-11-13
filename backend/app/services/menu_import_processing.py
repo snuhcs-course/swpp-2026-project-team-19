@@ -42,6 +42,8 @@ from app.matching import ExtractedProduct, ResolutionResult
 from app.matching.db_catalog import CatalogSnapshot, DbCatalog
 from app.matching.embedding import EmbeddingStep, get_embedding_step, summarize
 from app.matching.llm_layer import CONFIRMED, M3Engine
+from app.matching.linking_guards import apply_linking_guards
+from app.matching.product_draft import draft_from_name
 from app.matching.review_state import stored_status
 from app.matching.staged import resolve_product_staged
 from app.matching.tool_config import CappedToolLLM, MatchingLayerConfig, ToolLayerConfig
@@ -312,11 +314,14 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: Mat
     if embedding is not None:
         results = _apply_embedding(session, menu_import.id, items, results, embedding)
     for item in items:
-        result = results[item.id]
+        # Last step: a confirmed match to an unchecked product becomes a recommendation (I4-P18).
+        result = apply_linking_guards(item.extracted_product_name, results[item.id], catalog)
         # exact_match only for a line that needs no review (I4-P24, app.matching.review_state).
         # "multi" (one line naming two products) has no stored status: the line stays ambiguous
         # with both products as candidates (evidence "multiProduct"), and the reviewer decides.
         item.initial_resolution_status = ResolutionStatus(stored_status(result))
+        if item.initial_resolution_status is not ResolutionStatus.EXACT_MATCH:
+            _fill_product_parts(item, catalog)
         for candidate in result.candidates:
             session.add(
                 ResolutionCandidate(
@@ -330,6 +335,21 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: Mat
             )
     session.flush()
     replace_draft(session, menu_import)
+
+
+def _fill_product_parts(item: ExtractedItem, catalog: DbCatalog) -> None:
+    """Brand, age and edition read from the name of a line that has no confirmed product (I4-P18),
+    so the new-product form (`newProductDraft`) opens filled in. Extraction leaves these fields
+    empty; a line that already has one of them is left as it is."""
+    if (item.extracted_brand_name, item.extracted_age_years, item.extracted_edition_name) != (None, None, None):
+        return
+    draft = draft_from_name(item.extracted_product_name, catalog)
+    if draft is None:
+        return
+    edition = draft.edition_english or draft.edition_text
+    item.extracted_brand_name = draft.brand_text[:120] if draft.brand_text else None
+    item.extracted_age_years = draft.age_years
+    item.extracted_edition_name = edition[:150] if edition else None
 
 
 def _apply_llm_layer(

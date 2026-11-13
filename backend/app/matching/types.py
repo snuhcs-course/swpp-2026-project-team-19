@@ -36,6 +36,8 @@ class ProductInfo:
     age_years: int | None = None
     edition_name: str | None = None
     brand_id: UUID | None = None
+    # False for a product nobody has checked yet; a match to it is not confirmed (linking_guards).
+    verified: bool = True
 
 
 @dataclass(frozen=True)
