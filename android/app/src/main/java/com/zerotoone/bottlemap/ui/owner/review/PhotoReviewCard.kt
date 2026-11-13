@@ -414,7 +414,11 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
                 onImeAction = { vm.commitInlineVolume(id) })
             SaveButton({ vm.commitInlineVolume(id) }, "review-volume-save-$id")
         }
-        ReviewIssue.OPTION -> IssueRow("용량 옵션을 확인해 주세요") {
+        ReviewIssue.OPTION -> IssueRow(
+            if (PhotoReviewRules.countOptions(x) > PhotoReviewRules.MAX_OPTIONS)
+                "옵션은 최대 3개까지만 게시할 수 있어요. 남길 옵션 3개를 선택해 주세요."
+            else "용량 옵션을 확인해 주세요"
+        ) {
             ReviewChoice("옵션 수정", { vm.toggleExpanded(id) }, testTag = "review-option-edit-$id")
         }
     }
