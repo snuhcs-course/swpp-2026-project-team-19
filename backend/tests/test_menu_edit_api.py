@@ -2,7 +2,7 @@
 
 from contextlib import nullcontext
 from datetime import datetime, timedelta, timezone
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import func, select
@@ -805,7 +805,7 @@ def test_owner_beer_is_bar_local_and_never_catalog_searchable(client, db_session
         "맥주", False, None
     )
     assert str(added["productId"]) == added["barMenuItemId"]
-    assert db_session.get(BarLocalMenuItem, added["barMenuItemId"]) is not None
+    assert db_session.get(BarLocalMenuItem, UUID(added["barMenuItemId"])) is not None
     assert db_session.scalar(select(func.count()).select_from(Product)) == before_count
     public = menu_of(client, bar, {})
     assert any(row["barMenuItemId"] == added["barMenuItemId"] for row in public["items"])
