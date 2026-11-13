@@ -87,12 +87,22 @@ private fun mapServerReviewItem(
     val existingPrices = snapshot.menuItems.filter { it.barId == bar.barId }
         .mapNotNull { row ->
             val match = row.options.firstOrNull { saved ->
-                (isBottle(saved.label) && isBottle(firstScanned?.extractedOptionLabel)) ||
-                    (!isBottle(saved.label) && !isBottle(firstScanned?.extractedOptionLabel) &&
-                        saved.pourMl != null &&
-                        saved.pourMl == (firstScanned?.extractedPourMl ?: defaultPour))
+                val ocrLabel = firstScanned?.extractedOptionLabel?.trim()?.lowercase()
+                val savedLabel = saved.label?.trim()?.lowercase()
+                // Match the exact serving identity, not merely pourMl: an
+                // existing "잔 30ml" is not the photographed "샷 30ml".
+                when {
+                    firstScanned == null -> false
+                    isBottle(saved.label) && isBottle(ocrLabel) -> true
+                    isBottle(saved.label) || isBottle(ocrLabel) -> false
+                    ocrLabel != null && savedLabel != ocrLabel -> false
+                    else -> saved.pourMl != null &&
+                        saved.pourMl == (firstScanned.extractedPourMl ?: defaultPour)
+                }
             } ?: row.options.singleOrNull().takeIf {
-                firstScanned?.extractedPourMl == null && it != null && !isBottle(it.label)
+                firstScanned?.extractedPourMl == null &&
+                    firstScanned?.extractedOptionLabel == null &&
+                    it != null && !isBottle(it.label)
             }
             match?.let { row.productId to it.priceKrw.toDouble() }
         }.toMap()
