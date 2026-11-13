@@ -25,7 +25,8 @@ Project BottleMap {
   PostgreSQL is the selected database engine. Supabase Auth with the Google provider is the selected
   authentication provider. ID strategy is not final.
   Accessory features such as reviews, recommendations, feeds, alerts, stale-menu reports,
-  natural-language search, and non-whisky categories are outside the current MVP schema.
+  natural-language search, and a non-whisky catalog are outside the current MVP schema.
+  Non-whisky menu lines are stored only as bar menu items without a product (bar_menu_items.kind = other).
   '''
 }
 
@@ -90,6 +91,11 @@ Enum match_method {
   embedding
   llm
   manual
+}
+
+Enum menu_item_kind {
+  whisky
+  other
 }
 
 Enum menu_change_type {
@@ -672,18 +678,28 @@ Table menu_import_changes {
 Table bar_menu_items {
   id uuid [pk]
   bar_id uuid [not null, ref: > bars.id]
-  product_id uuid [not null, ref: > products.id]
+  product_id uuid [ref: > products.id, note: 'Null for a whisky waiting for an operator to link it, and always null for kind = other']
+  kind menu_item_kind [not null, default: 'whisky']
+  name_key varchar(200) [note: 'Normalized menu name; set exactly when product_id is null. Identifies an unlinked item within the bar']
   sold_out_at timestamptz [note: 'Set while the item is sold out; null when on sale. Cleared when the item leaves the current board']
   created_at timestamptz [not null]
 
   indexes {
     (bar_id, product_id) [unique]
+    (bar_id, name_key)
     product_id
   }
 
   Note: '''
-  A row is one bar-specific menu item backed by a shared canonical product. It is not deleted merely
+  A row is one bar-specific menu item. Usually it is backed by a shared canonical product; it is not deleted merely
   because a later menu board omits it, and it can be reused if the product returns later.
+  An item without a product (product_id null) is either a whisky the catalog does not match yet, published as is
+  and waiting for an operator to link it (kind = whisky), or a non-whisky menu that is never linked (kind = other).
+  Such an item is shown on the bar's menu but not in product search. It is identified within the bar by name_key;
+  the backend keeps name_key unique among the current board's unlinked items while holding the bar row lock,
+  so the index on (bar_id, name_key) is not unique. An unlinked item that leaves the board is not reused.
+  Checks: (product_id IS NULL) = (name_key IS NOT NULL); kind = 'other' implies product_id IS NULL.
+  PostgreSQL treats null product_id values as distinct, so the (bar_id, product_id) unique index still holds.
   Membership in the bar's current menu board decides whether the item is on the menu: linked means on the board;
   unlinked means retained but not on the board. Customers see a linked item only while it is not sold out.
   No separate visibility status is stored.

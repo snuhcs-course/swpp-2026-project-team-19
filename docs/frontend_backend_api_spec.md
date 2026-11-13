@@ -189,6 +189,15 @@ llm
 manual
 ```
 
+`MenuItemKind`
+
+```text
+whisky
+other
+```
+
+메뉴 항목의 종류다. `whisky`는 위스키 메뉴로, 상품에 연결되어 있거나 운영자의 연결을 기다린다. `other`는 진토닉, 콜라 같은 위스키가 아닌 메뉴로, 상품에 연결하지 않는다. 상품에 연결된 항목은 항상 `whisky`다.
+
 `ChangeType`
 
 ```text
@@ -848,6 +857,7 @@ GET /api/bars/{barId}/menu
       "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd2",
       "brandName": "Glenfiddich",
       "category": "whisky",
+      "kind": "whisky",
       "displayName": "글렌피딕 12년",
       "sortOrder": 1,
       "soldOut": false,
@@ -882,6 +892,7 @@ GET /api/bars/{barId}/menu
       "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
       "brandName": "Deanston",
       "category": "whisky",
+      "kind": "whisky",
       "displayName": "Deanston 12",
       "sortOrder": 2,
       "soldOut": false,
@@ -891,6 +902,52 @@ GET /api/bars/{barId}/menu
           "optionLabel": null,
           "pourMl": 15,
           "priceKrw": 8000,
+          "discount": null,
+          "sortOrder": 1
+        }
+      ]
+    },
+    {
+      "menuBoardEntryId": "88888888-8888-4888-8888-888888888883",
+      "barMenuItemId": "99999999-9999-4999-8999-999999999993",
+      "productId": null,
+      "productName": null,
+      "brandId": null,
+      "brandName": null,
+      "category": null,
+      "kind": "whisky",
+      "displayName": "글렌알라키 10년 CS 배치 11",
+      "sortOrder": 3,
+      "soldOut": false,
+      "options": [
+        {
+          "menuEntryOptionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4",
+          "optionLabel": null,
+          "pourMl": 30,
+          "priceKrw": 26000,
+          "discount": null,
+          "sortOrder": 1
+        }
+      ]
+    },
+    {
+      "menuBoardEntryId": "88888888-8888-4888-8888-888888888884",
+      "barMenuItemId": "99999999-9999-4999-8999-999999999994",
+      "productId": null,
+      "productName": null,
+      "brandId": null,
+      "brandName": null,
+      "category": null,
+      "kind": "other",
+      "displayName": "진토닉",
+      "sortOrder": 4,
+      "soldOut": false,
+      "options": [
+        {
+          "menuEntryOptionId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa5",
+          "optionLabel": null,
+          "pourMl": null,
+          "priceKrw": 12000,
           "discount": null,
           "sortOrder": 1
         }
@@ -915,14 +972,15 @@ GET /api/bars/{barId}/menu
 | `menuBoardId` | UUID 문자열 | 예 | 현재 메뉴판. 반영된 메뉴가 없으면 `null` |
 | `menuVersion` | 정수 | 예 | 메뉴판 버전. 검수 반영(8)이나 직접 편집(3.14)으로 메뉴판이 바뀔 때마다 1씩 오른다. 직접 편집 요청에 그대로 보낸다. 메뉴판이 없으면 `null` |
 | `publishedAt` | RFC 3339 문자열 | 예 | 현재 메뉴판이 검수 반영이나 직접 편집으로 마지막으로 바뀐 시각. 반영된 메뉴가 없으면 `null` |
-| `items` | 배열 | 아니오 | 현재 메뉴판의 상품 항목. 없으면 `[]` |
+| `items` | 배열 | 아니오 | 현재 메뉴판의 항목. 없으면 `[]` |
 | `items[].menuBoardEntryId` | UUID 문자열 | 아니오 | |
 | `items[].barMenuItemId` | UUID 문자열 | 아니오 | |
-| `items[].productId` | UUID 문자열 | 아니오 | 정규 상품 ID |
-| `items[].productName` | 문자열 | 아니오 | 정규 상품명(`products.display_name`, 7.2의 `displayName`) |
-| `items[].brandId`, `items[].brandName` | UUID 문자열, 문자열 | 아니오 | 상품의 브랜드와 대표 브랜드명 |
-| `items[].category` | 문자열 | 아니오 | 상품 분류. 예: `whisky`. 프론트엔드는 이 값과 브랜드로 메뉴를 묶어 보여 줄 수 있다 |
-| `items[].displayName` | 문자열 | 아니오 | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`). 정규 상품명이 아니다 |
+| `items[].productId` | UUID 문자열 | 예 | 정규 상품 ID. 상품에 연결되지 않은 항목이면 `null` |
+| `items[].productName` | 문자열 | 예 | 정규 상품명(`products.display_name`, 7.2의 `displayName`). 연결되지 않은 항목이면 `null` |
+| `items[].brandId`, `items[].brandName` | UUID 문자열, 문자열 | 예 | 상품의 브랜드와 대표 브랜드명. 연결되지 않은 항목이면 `null` |
+| `items[].category` | 문자열 | 예 | 상품 분류. 예: `whisky`. 프론트엔드는 이 값과 브랜드로 메뉴를 묶어 보여 줄 수 있다. 연결되지 않은 항목이면 `null` |
+| `items[].kind` | `MenuItemKind` | 아니오 | 메뉴 항목의 종류(2.3). `whisky` 또는 `other` |
+| `items[].displayName` | 문자열 | 아니오 | 업장 메뉴판에 적힌 표기(`menu_board_entries.display_name`). 정규 상품명이 아니다. 연결되지 않은 항목은 이 이름으로만 보여 준다 |
 | `items[].sortOrder` | 정수 | 아니오 | 메뉴판 표시 순서 |
 | `items[].soldOut` | 불리언 | 아니오 | 품절이면 `true`(3.14.8). 품절 항목은 operator와 해당 업장의 업주에게만 제자리에 온다. 비로그인 사용자와 customer에게는 품절 항목이 빠지므로 항상 `false`다 |
 | `items[].options` | 배열 | 아니오 | 가격·용량 옵션. 최소 1개 |
@@ -943,7 +1001,17 @@ GET /api/bars/{barId}/menu
 
 품절 항목(3.14.8)은 비로그인 사용자와 customer의 응답에서 빠진다. 손님에게 지금 팔지 않는 상품을 보여 주지 않기 위해서다. operator와 해당 업장의 업주에게는 품절을 풀 수 있도록 `soldOut = true`로 제자리에 온다. 업주 화면의 고객 미리보기는 `soldOut = true`인 항목을 빼고 보여 준다. 서버가 token을 확인할 수 없어 비로그인 사용자로 처리할 때(3.1.5)는 operator와 업주에게도 품절 항목이 빠진다.
 
-`items`에는 상품으로 확정되어 현재 메뉴판에 반영된 항목과 직접 추가한 항목만 있다. 섹션 제목, 설명 등 비상품 줄은 포함하지 않는다. 검색 결과에서 진입한 경우 프론트엔드는 검색한 `productId`와 같은 항목을 강조해 표시할 수 있다.
+`items`에는 검수(8)로 현재 메뉴판에 반영된 메뉴 항목과 직접 추가(3.14.3)한 항목만 있다. 섹션 제목, 설명 등 비상품 줄은 포함하지 않는다. 검색 결과에서 진입한 경우 프론트엔드는 검색한 `productId`와 같은 항목을 강조해 표시할 수 있다.
+
+메뉴 항목은 상품 연결과 종류에 따라 세 가지다. 셋 모두 메뉴판에 바로 보인다.
+
+| 항목 | `productId` | `kind` | 고객 검색(3.10)과 인기 위스키(3.17) |
+|---|---|---|---|
+| 상품에 연결된 위스키 | 값 있음 | `whisky` | 나온다 |
+| 연결을 기다리는 위스키 | `null` | `whisky` | 나오지 않는다. 운영자가 상품에 연결하면 그때부터 나온다 |
+| 위스키가 아닌 메뉴 | `null` | `other` | 나오지 않는다. 상품에 연결하지 않는다 |
+
+연결을 기다리는 위스키는 카탈로그에서 매칭되지 않은 줄을 업주가 상품 없이 게시한 항목이다(8.10, 3.14.3). 운영자가 확인한 뒤 기존 상품에 연결하거나 카탈로그에 새로 등록해 연결한다. 연결된 뒤에도 `barMenuItemId`와 `displayName`은 그대로다. 프론트엔드는 `productId`가 `null`인 항목을 연결 여부로 구분해 보여 주지 않아도 된다. 고객에게는 셋 모두 메뉴판의 한 줄이다.
 
 #### 3.9.1 게시된 메뉴가 없을 때
 
@@ -973,7 +1041,7 @@ GET /api/bars/{barId}/menu
 
 메뉴판은 있지만 검수에서 모든 항목을 내렸거나 직접 편집으로 모두 지웠으면(3.14.5, 3.14.6), 또는 손님이 볼 때 모든 항목이 품절이면(3.14.8) `menuBoardId`, `menuVersion`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
 
-그 밖에 값이 없을 수 있는 필드는 `phone`, `description`, `operatingException`, `options[].optionLabel`, `options[].pourMl`, `options[].discount`뿐이며 모두 `null`로 온다. `tags`, `weeklyHours`, `photos`는 없으면 `[]`다. 프론트엔드는 해당 표시만 생략하고, 사진이 없으면 기본 이미지를 보여 준다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
+그 밖에 값이 없을 수 있는 필드는 `phone`, `description`, `operatingException`, 상품에 연결되지 않은 항목의 `productId`, `productName`, `brandId`, `brandName`, `category`, 그리고 `options[].optionLabel`, `options[].pourMl`, `options[].discount`뿐이며 모두 `null`로 온다. `tags`, `weeklyHours`, `photos`는 없으면 `[]`다. 프론트엔드는 해당 표시만 생략하고, 사진이 없으면 기본 이미지를 보여 준다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
 
 #### 3.9.2 메뉴 등록이 진행 중일 때
 
@@ -1078,6 +1146,7 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 | 비활성 업장 | `bars.status = inactive` |
 | 메뉴판이 없는 업장 | 반영된 메뉴가 아직 없다 |
 | 비상품 항목 | 섹션 제목, 설명 등 상품이 아닌 줄은 상품과 연결된 메뉴 항목이 되지 않는다 |
+| 상품에 연결되지 않은 메뉴 항목 | 연결을 기다리는 위스키와 위스키가 아닌 메뉴(3.9의 `productId = null`). 업장 메뉴(3.9)에는 보이지만 상품이 없어 검색어와 일치할 수 없다. 운영자가 위스키 항목을 상품에 연결하면 그때부터 검색된다. 인기 위스키(3.17)의 `barCount`에도 세지 않는다 |
 | 비활성 상품 | `products.is_active = false`인 상품은 어느 단계에서도 일치하지 않는다 |
 | 검색 제외 별칭 | `is_searchable = false`인 상품 별칭으로는 `alias_exact`와 `partial`에서 일치하지 않고, `similar`에서도 비교하지 않는다 |
 | 품절 항목 | `soldOut`인 항목(3.14.8). 이 API는 공개 API라 호출자와 관계없이 빠지며, 판매 중으로 되돌리면 바로 다시 검색된다 |
@@ -2543,7 +2612,7 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 #### 3.14.1 공통 규칙
 
 - **권한**: operator와 해당 업장의 현재 업주가 호출할 수 있다(2.2). 비활성 업장은 메뉴를 바꾸지 않으며 `404 BAR_NOT_FOUND`다(4.4와 같다).
-- **항목 식별자**: 항목은 `barMenuItemId`로 가리킨다. 업장과 상품의 조합마다 하나이며 메뉴판에서 빠져도 바뀌지 않는다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀔 때마다(검수 반영과 직접 편집 모두) 새로 만들어질 수 있으므로 편집 요청에 쓰지 않는다.
+- **항목 식별자**: 항목은 `barMenuItemId`로 가리킨다. 상품에 연결된 항목은 업장과 상품의 조합마다 하나이며 메뉴판에서 빠져도 바뀌지 않는다. 상품에 연결되지 않은 항목(3.9)은 업장 안에서 메뉴판 이름으로 구분한다. 이름 키(메뉴판 이름을 백엔드의 공통 정규화 함수로 정규화한 값, 별칭과 같은 함수)가 같으면 같은 항목이다. 현재 메뉴판에서 빠진 미연결 항목은 다시 쓰지 않으며, 같은 이름을 다시 추가하면 새 `barMenuItemId`가 생긴다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀔 때마다(검수 반영과 직접 편집 모두) 새로 만들어질 수 있으므로 편집 요청에 쓰지 않는다.
 - **미완료 작업이 있을 때**: 업장에 미완료 메뉴 등록 작업(`uploaded`, `processing`, `ready_for_review`)이 있으면 추가, 수정, 삭제, 초기화는 모두 `409 ACTIVE_IMPORT_EXISTS`(`details.menuImportId`, `details.status`)다. 따라서 이 상황에서는 메뉴 편집이 불가능하고, 작업이 `applied`, `failed`, `canceled`가 되면 다시 편집할 수 있다. 검수 중에 메뉴판이 바뀌면 검수자가 오래된 메뉴판을 보고 결정하게 되기 때문이다.
 - **메뉴판 버전**: 모든 편집 요청은 3.9에서 받은 `menuVersion`을 보낸다. 메뉴판이 없으면 `null`이다. 서버의 현재 값과 다르면 아무것도 바꾸지 않고 `409 MENU_OUTDATED`(`details.submittedMenuVersion`, `details.currentMenuVersion`)다. 성공한 편집은 `menuVersion`을 1 올리고, 메뉴판이 없을 때의 첫 추가는 메뉴판을 만들고 `menuVersion = 1`이 된다. 검수 반영(8)도 `menuVersion`을 올린다.
 - **게시 시각**: 성공하면 `publishedAt`을 업장 행을 잠근 뒤의 현재 시각으로 바꾼다. 트랜잭션이나 요청이 시작한 시각이 아니다(PostgreSQL `now()`가 아니라 `clock_timestamp()`). 잠금을 기다리는 동안 먼저 끝난 판매 정보 확인(3.14.9)보다 이른 시각이 찍히면, 확인하지 않은 새 메뉴가 확인된 것처럼 보이기 때문이다. 검수 반영(8.7)과 판매 정보 확인의 `confirmedAt`도 같은 방식으로 찍는다. `menuBoardId`는 그대로다.
@@ -2632,20 +2701,38 @@ Content-Type: application/json
 
 | 필드 | 타입 | 필수 | 규칙 |
 |---|---|---|---|
+상품 없이 추가할 때(연결을 기다리는 위스키 또는 위스키가 아닌 메뉴, 3.9):
+
+```json
+{
+  "menuVersion": 4,
+  "kind": "other",
+  "displayName": "진토닉",
+  "options": [
+    { "optionLabel": null, "pourMl": null, "priceKrw": 12000 }
+  ]
+}
+```
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
 | `menuVersion` | 정수 | 예 (`null` 가능) | 3.14.1. 메뉴판이 없으면 `null` |
-| `productId` | UUID 문자열 | `productId`와 `newProduct` 중 하나 | 활성 상품. 없으면 `PRODUCT_NOT_FOUND`, 비활성이면 `PRODUCT_INACTIVE` |
+| `productId` | UUID 문자열 | `productId`, `newProduct`, `kind` 중 하나 | 활성 상품. 없으면 `PRODUCT_NOT_FOUND`, 비활성이면 `PRODUCT_INACTIVE` |
 | `newProduct.brand` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `brand`와 같다. 없는 `brandId`는 `BRAND_NOT_FOUND` |
 | `newProduct.product` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `product`와 같다 |
 | `newProduct.aliases` | 배열 | 아니오 | 8.1 `create_product`의 `aliases`와 같다. 기본 `[]` |
-| `displayName` | 문자열 | 아니오 | 메뉴판에 보일 이름. 앞뒤 공백을 지운 뒤 1~200자. 없거나 `null`이면 상품의 `displayName` |
+| `kind` | `MenuItemKind` | `productId`, `newProduct`, `kind` 중 하나 | 상품 없이 추가할 항목의 종류(2.3). `whisky`이면 운영자의 연결을 기다리는 위스키, `other`이면 위스키가 아닌 메뉴다 |
+| `displayName` | 문자열 | `kind`를 보내면 예, 아니면 아니오 | 메뉴판에 보일 이름. 앞뒤 공백을 지운 뒤 1~200자. 상품을 보낼 때 없거나 `null`이면 상품의 `displayName` |
 | `options` | 배열 | 예 | 3.14.2 |
 
-- `productId`와 `newProduct`를 둘 다 보내거나 둘 다 빠뜨리면 `422`이고 `fieldErrors[].path = productId`, `code = EXACTLY_ONE_REQUIRED`다.
-- 같은 상품이 이미 현재 메뉴판에 있으면 `409 MENU_ITEM_EXISTS`(`details.barMenuItemId`)다. 한 상품은 메뉴판에 한 번만 있고, 용량이나 가격을 더하려면 그 항목을 수정한다(3.14.4).
-- 새 항목은 메뉴판의 맨 끝에 붙는다. 이 업장이 예전에 판매했던 상품이면 그때의 `barMenuItemId`를 다시 쓴다.
+- `productId`, `newProduct`, `kind` 중 둘 이상을 보내거나 하나도 보내지 않으면 `422`이고 `fieldErrors[].path = productId`, `code = EXACTLY_ONE_REQUIRED`다.
+- `kind`를 보냈는데 `displayName`이 없거나 `null`이면 `422`이고 `fieldErrors[].path = displayName`, `code = MISSING`이다. `displayName`을 정규화한 이름 키(3.14.1)가 빈 값이면 `NOT_NORMALIZABLE`이다.
+- 같은 상품이 이미 현재 메뉴판에 있으면 `409 MENU_ITEM_EXISTS`(`details.barMenuItemId`)다. 한 상품은 메뉴판에 한 번만 있고, 용량이나 가격을 더하려면 그 항목을 수정한다(3.14.4). 상품 없이 추가할 때는 이름 키가 같은 미연결 항목이 현재 메뉴판에 있으면 같은 오류다. 종류(`kind`)가 달라도 이름 키가 같으면 같은 항목으로 본다.
+- 새 항목은 메뉴판의 맨 끝에 붙는다. 이 업장이 예전에 판매했던 상품이면 그때의 `barMenuItemId`를 다시 쓴다. 상품 없이 추가한 항목은 항상 새 `barMenuItemId`를 받는다(3.14.1).
+- `kind = whisky`로 추가한 항목은 운영자가 상품에 연결하기 전까지 고객 검색에 나오지 않는다(3.9, 3.10.2). 업주가 상품을 고를 수 있으면 `productId`로 추가하는 편이 바로 검색에 나온다.
 - `newProduct`를 보내면 같은 트랜잭션 안에서 검수의 신규 생성(8.5, 8.6)과 같은 규칙으로 브랜드와 상품의 중복을 검사한다. 같은 브랜드나 상품이 있으면 아무것도 만들지 않고 `409 DUPLICATE_BRAND_FOUND` 또는 `409 DUPLICATE_PRODUCT_FOUND`다. `details`는 9.5와 같되 `extractedItemId`와 `reviewUrl`이 없다. 프론트엔드는 `details.existingProduct`(또는 `existingBrand`)를 보여 주고, 맞으면 그 `productId`(또는 `brandId`)로 다시 요청한다. `existingProduct.isActive = false`이면 그 상품으로는 추가할 수 없으므로(`PRODUCT_INACTIVE`) 다시 요청하지 않고, 상품 검색(7)에서 고르도록 안내한다(9.5).
 - 만든 상품과 브랜드에는 요청한 사용자를 기록한다. 만든 상품과 별칭은 바로 모든 업장의 고객 검색과 메뉴 매칭에 쓰인다.
-- 응답 본문에서 추가한 항목은 `productId`로 찾는다.
+- 응답 본문에서 추가한 항목은 `productId`로 찾는다. 상품 없이 추가한 항목은 응답 `items`의 마지막 항목이다.
 
 #### 3.14.4 항목 수정
 
@@ -2676,7 +2763,8 @@ Content-Type: application/json
 | `options` | 배열 | 예 | 3.14.2. 기존 옵션 전체를 이 배열로 바꾼다 |
 
 - `barMenuItemId`가 이 업장의 현재 메뉴판에 없거나 UUID 형식이 아니면 `404 MENU_ITEM_NOT_FOUND`(`details.barMenuItemId`)다.
-- 연결된 상품은 바꿀 수 없다. 다른 상품으로 바꾸려면 삭제한 뒤 추가한다.
+- 연결된 상품은 바꿀 수 없다. 다른 상품으로 바꾸려면 삭제한 뒤 추가한다. 항목의 종류(`kind`)도 바꿀 수 없다. 종류를 잘못 골랐으면 삭제한 뒤 다시 추가한다.
+- 상품에 연결되지 않은 항목은 `displayName`을 바꾸면 이름 키(3.14.1)도 바뀐다. 바뀐 이름 키가 현재 메뉴판의 다른 미연결 항목과 같으면 `409 MENU_ITEM_EXISTS`(`details.barMenuItemId`에 그 항목)이고, 정규화한 값이 빈 값이면 `422 NOT_NORMALIZABLE`이다. `barMenuItemId`와 품절 상태는 그대로다.
 - 메뉴판에서의 위치는 그대로다.
 
 #### 3.14.5 항목 삭제
@@ -2719,9 +2807,9 @@ Content-Type: application/json
 | `404` | `MENU_ITEM_NOT_FOUND` | 수정, 삭제할 항목이 현재 메뉴판에 없음 | 3.9를 다시 불러와 목록 갱신 |
 | `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 메뉴 등록 작업이 있음. `details.menuImportId`, `details.status` | 3.6을 다시 불러와 편집을 막은 화면으로 전환 |
 | `409` | `MENU_OUTDATED` | 보낸 `menuVersion`이 현재 값과 다름. 다른 기기나 operator의 편집, 검수 반영, 성공한 요청의 재전송 | 3.9를 다시 불러오고, 입력 중이던 값은 유지한 채 다시 저장하게 함 |
-| `409` | `MENU_ITEM_EXISTS` | 추가하려는 상품이 이미 메뉴판에 있음. `details.barMenuItemId` | 그 항목의 수정 화면으로 안내 |
+| `409` | `MENU_ITEM_EXISTS` | 추가하려는 상품, 또는 같은 이름 키의 미연결 항목이 이미 메뉴판에 있음(3.14.3). 미연결 항목의 이름을 다른 미연결 항목과 같게 바꿈(3.14.4). `details.barMenuItemId` | 그 항목의 수정 화면으로 안내 |
 | `409` | `DUPLICATE_BRAND_FOUND`, `DUPLICATE_PRODUCT_FOUND` | 신규 브랜드나 상품과 같은 것이 이미 있음 (3.14.3, 9.5) | 기존 브랜드나 상품을 보여 주고 고르게 함. `existingProduct.isActive = false`이면 상품 검색으로 안내 |
-| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `END_BEFORE_START`, `EXACTLY_ONE_REQUIRED`, `NOT_NORMALIZABLE`(신규 브랜드·상품 이름이나 별칭에 쓸 수 있는 글자가 없음, 8.7과 같다), `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `END_BEFORE_START`, `EXACTLY_ONE_REQUIRED`, `NOT_NORMALIZABLE`(신규 브랜드·상품 이름이나 별칭, 또는 미연결 항목의 `displayName`에 쓸 수 있는 글자가 없음, 8.7과 같다), `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 같은 요청 재시도 |
 
 #### 3.14.8 품절 표시
@@ -3722,6 +3810,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
       "before": null,
       "after": {
         "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+        "kind": "whisky",
         "displayName": "Deanston 12",
         "options": [
           {
@@ -3761,7 +3850,9 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - `newProductDraft`는 화면 입력을 돕는 계산값이며 실제 카탈로그 행이 아니다.
 - `evidence`는 설명용 보조 정보다. 프론트엔드는 알 수 없는 키를 무시해야 한다.
 - `before`와 `after`가 최종 diff 비교의 구조화된 값이다.
-- 제안 상품이 없는 줄(`proposedProductId = null`, 보통 `unmatched`)의 `add`는 `after.productId`가 `null`이다. 검수자가 그 줄에서 기존 상품을 고르거나 새 상품을 만들면 그 상품으로 반영된다(8.1). 그 줄을 비상품으로 확정하거나 제외하면 이 변경은 `ignore`로 보낸다(8.7의 `CHANGE_WITHOUT_PRODUCT`).
+- `before`와 `after`의 `kind`는 그 메뉴 항목의 종류(2.3)다. `before`는 현재 항목의 값이고, `after`는 AI가 추출한 상품 줄이므로 `whisky`다. 검수자가 그 줄을 위스키가 아닌 메뉴로 게시하면(8.10) 반영 결과는 `other`가 된다.
+- 제안 상품이 없는 줄(`proposedProductId = null`, 보통 `unmatched`)은 상품 없이 게시하는 것으로 보고 비교한다. 현재 메뉴판에 이름 키(3.14.1)가 같은 미연결 항목이 있으면 그 항목과 비교해 `update`이거나 변경 없음이고, 없으면 `add`다. 이 변경의 `after.productId`는 `null`이다. 검수자가 그 줄에서 기존 상품을 고르거나 새 상품을 만들면 그 상품으로, 상품 없이 게시하면(8.10) 미연결 항목으로 반영된다. 그 줄을 비상품으로 확정하거나 제외하면 이 변경은 `ignore`로 보낸다(8.7의 `CHANGE_WITHOUT_PRODUCT`).
+- 현재 메뉴판의 미연결 항목(3.9의 `productId = null`)도 다른 항목처럼 비교한다. `before.productId`는 `null`이고, 전체 교체(`full_replace`)에서 새 사진에 이름 키가 같은 줄이 없으면 `remove`가 된다.
 - `summary`는 표시용 문구이며 검증이나 반영 기준으로 사용하지 않는다.
 
 `before`와 `after` 규칙:
@@ -4134,10 +4225,13 @@ Content-Type: application/json
 |---|---|---|---|
 | `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId` 필수. `correctedProductName`, `optionDecisions`, `aliasesToAdd` 선택 |
 | `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product` 필수. `correctedProductName`, `optionDecisions`, `aliases` 선택 |
+| `publish_without_product` | 상품 없이 메뉴 항목으로 게시 (8.10) | `product` | `extractedItemId`, `kind` 필수. `correctedProductName`, `optionDecisions` 선택 |
 | `confirm_non_product` | 비상품 줄로 확정 | `section_header`, `description`, `unknown` | `extractedItemId`만 |
 | `reject` | 잡음·중복 등으로 제외 | 어떤 값이든 | `extractedItemId`만 |
 
-상품 결정(`select_existing_product`, `create_product`)의 공통 필드:
+업주 화면은 카탈로그에서 찾지 못한 줄을 `create_product`가 아니라 `publish_without_product`로 보낸다. 브랜드와 상품 정보는 업주가 아니라 운영자가 정하기 때문이다(8.10). `create_product`는 그대로 두며, operator가 검수할 때 쓸 수 있다.
+
+메뉴 항목으로 게시하는 결정(`select_existing_product`, `create_product`, `publish_without_product`)의 공통 필드:
 
 | 필드 | 필수 | 규칙 |
 |---|---|---|
@@ -4178,7 +4272,13 @@ Content-Type: application/json
 | `product.abv` | 아니오 | 0 초과 100 이하 |
 | `aliases` | 아니오 | `aliasesToAdd`와 같은 형식. 기본 `[]` |
 
-`changeDecisions[]`는 `changeId`(필수)와 `decision`(`apply` 또는 `ignore`, 필수)이다. `reviewVersion`은 1 이상 정수다. 추출 항목에 연결된 변경(`extractedItemId`가 있는 변경)은 그 항목을 상품으로 확정했을 때(`select_existing_product`, `create_product`)만 `apply`할 수 있다(8.7).
+`publish_without_product`의 추가 필드:
+
+| 필드 | 필수 | 규칙 |
+|---|---|---|
+| `kind` | 예 | `MenuItemKind`(2.3). `whisky`이면 운영자의 연결을 기다리는 위스키, `other`이면 위스키가 아닌 메뉴다 |
+
+`changeDecisions[]`는 `changeId`(필수)와 `decision`(`apply` 또는 `ignore`, 필수)이다. `reviewVersion`은 1 이상 정수다. 추출 항목에 연결된 변경(`extractedItemId`가 있는 변경)은 그 항목을 메뉴 항목으로 게시할 때(`select_existing_product`, `create_product`, `publish_without_product`)만 `apply`할 수 있다(8.7).
 
 ### 8.2 기존 상품 선택 예시
 
@@ -4368,8 +4468,9 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - `itemDecisions`는 검수 대상 항목을 빠짐없이 한 번씩 포함해야 한다.
 - `changeDecisions`는 현재 `pending` 변경을 빠짐없이 한 번씩 포함해야 한다.
 - 변경의 `extractedItemId` 항목을 `confirm_non_product`나 `reject`로 결정했으면 그 변경은 `ignore`여야 한다. `apply`이면 `fieldErrors[].path = changeDecisions[i].decision`, `code = CHANGE_WITHOUT_PRODUCT`다. `extractedItemId`가 없는 변경(`remove`)에는 이 규칙이 없다.
-- `finalLineType = product`이면 `select_existing_product` 또는 `create_product`여야 한다.
-- 게시할 상품 항목에는 가격이 있는 유효 옵션이 최소 하나 있어야 한다.
+- `finalLineType = product`이면 `select_existing_product`, `create_product`, `publish_without_product` 중 하나여야 한다.
+- 게시할 메뉴 항목에는 가격이 있는 유효 옵션이 최소 하나 있어야 한다. 상품 없이 게시하는 항목도 같다.
+- `publish_without_product`의 메뉴판 이름(`correctedProductName ?? extractedProductName`)이 없거나, 정규화한 이름 키(3.14.1)가 빈 값이면 `fieldErrors[].path = itemDecisions[i].correctedProductName`, `code = NOT_NORMALIZABLE`이다.
 - 기존 상품은 존재하고 연결 가능한 상태여야 한다.
 - 선택한 상품의 연수·에디션이 추출값과 충돌해도 거부하지 않는다. AI가 잘못 읽은 값을 운영자가 바로잡을 수 있어야 하기 때문이다. 프론트엔드는 이런 선택을 제출하기 전에 운영자에게 한 번 확인을 받는다(후보 `evidence`의 `ageConflict`, `editionConflict`, `editionOnlyInExtracted`, 또는 검색으로 고른 상품의 `ageYears`·`editionName`과 추출값 비교).
 - 신규 브랜드·상품은 트랜잭션 안에서 중복을 다시 검사한다.
@@ -4496,6 +4597,31 @@ HTTP/1.1 200 OK
 |---|---|---|---|---|---|
 | `POST /api/menu-imports/{menuImportId}/review-and-apply` | `401` | `403` | `403` | `200` | `200` |
 
+### 8.10 상품 없이 게시
+
+카탈로그에서 찾지 못한 위스키 줄과 위스키가 아닌 메뉴 줄은 상품에 연결하지 않고 그 업장의 메뉴에만 게시한다. 업주는 카탈로그에 상품이 있는지 알 수 없고, 브랜드, 연수, 중복 여부는 운영자가 더 정확하게 판단하기 때문이다.
+
+```json
+{
+  "extractedItemId": "10000000-0000-4000-8000-000000000004",
+  "finalLineType": "product",
+  "action": "publish_without_product",
+  "kind": "whisky",
+  "correctedProductName": "Unknown Distillery 25년"
+}
+```
+
+반영 규칙:
+
+- 메뉴판 이름은 `correctedProductName ?? extractedProductName`이다.
+- 현재 메뉴판에 이름 키(3.14.1)가 같은 미연결 항목이 있으면 그 항목을 갱신한다. `barMenuItemId`와 품절 상태는 그대로이고, 종류는 이번에 보낸 `kind`로 바뀐다. 없으면 새 미연결 항목을 만든다. 현재 메뉴판에서 빠진 예전 미연결 항목은 다시 쓰지 않는다.
+- 같은 제출에서 이름 키가 같은 줄이 여럿이면 같은 항목으로 본다. 같은 상품에 연결한 줄이 여럿일 때와 같은 규칙을 따른다(8.9).
+- `kind = whisky`인 항목은 메뉴판에 바로 보이지만, 운영자가 상품에 연결하기 전까지 고객 검색과 인기 위스키에 나오지 않는다(3.9, 3.10.2). `kind = other`인 항목은 상품에 연결하지 않으며 메뉴판에만 보인다.
+- 추출 항목에는 `selected_product_id = null`로 저장한다. `finalLineType`이 `product`이므로 `confirm_non_product`와 구분된다. `selectedMatchMethod`와 `matchConfidence`도 `null`이다.
+- 반영 응답의 `result`는 다른 항목과 같이 센다. `createdProducts`에는 세지 않는다.
+
+프론트엔드 처리: 게시 완료 화면에서 `kind = whisky`로 상품 없이 게시한 줄이 하나라도 있으면 "새로 등록한 메뉴는 다음 날부터 위스키 검색에 나와요"를 한 번 보여 준다. 상품에 연결해 게시한 줄과 `kind = other`인 줄만 있으면 보여 주지 않는다.
+
 ## 9. 오류 응답
 
 ### 9.1 공통 형식
@@ -4544,7 +4670,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있는데 새 작업을 올리거나(4.4) 메뉴를 직접 편집함(3.14). `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 다시 요청 |
 | `409` | `MENU_OUTDATED` | 직접 편집이나 판매 정보 확인(3.14.9) 요청의 `menuVersion`이 현재 메뉴판 버전과 다름. `details.submittedMenuVersion`, `details.currentMenuVersion` (3.14) | 메뉴 다시 조회 후 다시 저장 |
 | `409` | `NO_PUBLISHED_MENU` | 판매 정보 확인(3.14.9)을 했는데 메뉴판이 없거나 항목이 없음 | 메뉴 등록으로 안내 |
-| `409` | `MENU_ITEM_EXISTS` | 직접 추가하려는 상품이 이미 현재 메뉴판에 있음. `details.barMenuItemId` (3.14.3) | 그 항목 수정으로 안내 |
+| `409` | `MENU_ITEM_EXISTS` | 직접 추가하려는 상품, 또는 이름 키가 같은 미연결 항목이 이미 현재 메뉴판에 있음(3.14.3). 미연결 항목의 이름을 다른 미연결 항목과 같게 바꿈(3.14.4). `details.barMenuItemId` | 그 항목 수정으로 안내 |
 | `409` | `PHOTO_EXISTS` | 내용이 같은 매장 사진이 이미 있음. `details.photoId` (3.16.2) | 이미 등록된 사진이라고 안내하고 사진 목록 다시 조회 |
 | `409` | `PHOTO_LIMIT_REACHED` | 매장 사진이 이미 15장. `details.maxPhotos` (3.16.2) | 사진을 지운 뒤 추가하라고 안내 |
 | `409` | `PHOTOS_OUTDATED` | 순서 변경에 보낸 사진 ID가 현재 사진과 다름. `details.photos` (3.16.4) | `details.photos`로 화면을 바꾸고 다시 정렬하게 함 |
@@ -4723,6 +4849,7 @@ canceled
 - 고객 검색은 서울 날짜별 집계(3.10.6)로만 센다. 집계에는 검색어 원문, 검색 시각, 위치, 사용자, IP, 기기 정보를 남기지 않으며(서버 접근 로그에는 위치를 뺀 검색어가 남는다), 인식하지 못한 검색어만 보호 규칙을 거쳐 정규화한 형태로 30일 동안 남긴다. 최근 검색 목록은 앱이 기기에만 저장한다.
 - 홈 화면의 카드는 3.10을 `productId`로 검색한다. `query`와 `productId`는 함께 보낼 수 없다.
 - "요즘 많이 찾는 위스키"(3.17)의 `barCount`는 고객 검색(3.10)에 나오는 업장 수와 같은 규칙으로 센다. 검색 수는 응답에 넣지 않는다.
+- 메뉴 항목은 상품에 연결되지 않을 수 있다(3.9). 이때 `productId`, `productName`, `brandId`, `brandName`, `category`는 `null`이고, 프론트엔드는 `displayName`으로 보여 준다. 상품에 연결되지 않은 항목은 고객 검색(3.10)과 인기 위스키(3.17)에 나오지 않는다.
 - 품절 항목은 손님(비로그인 사용자와 customer)의 3.9와 고객 검색(3.10)에서 빠진다. operator와 해당 업장의 업주만 3.9에서 `soldOut = true`로 받는다.
 - 할인 중인지는 프론트엔드가 `discount.startsAt`, `endsAt`과 현재 시각으로 계산한다. `priceKrw`는 항상 정가다.
 - `summary`나 사용자 표시 문자열을 서버 검증 기준으로 사용하지 않는다.

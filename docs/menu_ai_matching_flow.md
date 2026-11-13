@@ -1126,6 +1126,13 @@ LLM 응답:
 - `remove`: 현재 메뉴판에는 있지만 전체 교체 초안에는 없는 상품이다. 일부 수정 모드에서는 사진에 없다는 이유만으로 제거하지 않는다.
 - 변경 없음: 상품과 옵션 구성이 같으면 `menu_import_changes`를 만들지 않는다.
 
+상품이 없는 줄과 항목은 상품 ID 대신 이름 키로 비교한다(API 명세 3.14.1, 8.10). 이름 키는 메뉴판 이름을 7장의 정규화 함수로 정규화한 값이다.
+
+- 제안 상품이 없는 줄(`unmatched`)은 상품 없이 게시하는 것으로 보고, 추출한 상품명의 이름 키로 현재 메뉴판의 미연결 항목(`bar_menu_items.product_id IS NULL`)과 비교한다. 같은 이름 키의 항목이 있으면 `update`이거나 변경 없음이고, 없으면 `add`다.
+- 현재 메뉴판의 미연결 항목은 이름 키가 같은 줄이 없으면 전체 교체 초안에서 `remove`다.
+- 이름 키가 같은 줄이 여럿이면 같은 상품의 여러 줄과 같은 규칙을 따른다.
+- 이름 키를 만들 수 없는 줄(정규화한 값이 빈 값)은 비교하지 않고 `add`로 둔다. 검수자가 이름을 고치지 않고 상품 없이 게시하면 제출에서 거부된다(API 명세 8.7).
+
 변경 대상마다 `menu_import_changes` 행을 만들고 `menu_import_id`, `change_type`, 기존 항목인 `bar_menu_item_id`, 새 추출 항목인 `extracted_item_id`를 연결한다. 검수 전 `decision`은 `pending`이다. 백엔드는 가격과 용량의 변경 내용을 만들기 위해 연결된 `extracted_options`와 현재 `menu_entry_options`를 함께 조회하고, 그 결과를 14장의 통합 검수 응답에 포함한다. 프론트엔드는 응답받은 변경 내용을 통합 검수 화면에 표시한다.
 
 과거 임시 diff 이력은 보존하지 않는다. 최종 확정 전에 후보·항목·옵션 변경으로 검수 데이터를 다시 만들면, 하나의 트랜잭션에서 해당 `menu_import_id`의 기존 `menu_import_changes`를 삭제하고 새 `pending` 행들로 교체한 뒤 `menu_imports.review_version`을 증가시킨다. 이전 화면의 `changeId`와 `reviewVersion`으로 제출된 요청은 거부한다.
@@ -1141,6 +1148,8 @@ resolution_candidates[candidate_rank = 1].product_id
 extracted_options
 → menu_entry_options.source_extracted_option_id
 ```
+
+검수자가 상품 없이 게시하면(API 명세 8.10의 `publish_without_product`) 17장의 반영에서 그 줄의 메뉴판 이름으로 이름 키를 계산해, 현재 메뉴판에 같은 이름 키의 미연결 항목이 있으면 그 행을 쓰고 없으면 `product_id = null`, `kind`는 제출값, `name_key`는 계산값인 새 `bar_menu_items` 행을 만든다. 메뉴판에서 빠진 예전 미연결 행은 다시 쓰지 않는다. 추출 항목의 `selected_product_id`, `selected_match_method`, `match_confidence`는 `null`로 둔다.
 
 운영자가 기존 상품을 최종 선택하면 그 `productId`를 `extracted_items.selected_product_id`에 저장한다. 제안된 1순위를 그대로 승인하면 두 값이 같고, 다른 후보를 선택하면 `selected_product_id`는 `proposedProductId`와 달라진다. 1순위를 그대로 확정한 경우에는 그 후보의 `method`를 `selected_match_method`에 복사하고, 다른 후보 선택·직접 검색·신규 등록은 `manual`로 기록한다. 신규 상품을 선택하면 생성된 새 `products.id`를 저장하며, 비상품 또는 제외 항목은 두 필드를 모두 null로 유지한다. 실제 게시 반영은 17장에서 `selected_product_id`를 기준으로 수행한다.
 
@@ -1533,7 +1542,7 @@ products
 1. bars 행 잠금(FOR UPDATE), 그다음 menu_import 잠금, 상태와 reviewVersion 검증
 2. 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었는지 검사
 3. 모든 finalLineType과 추출값 교정 검증
-4. 기존 상품 선택 검증
+4. 기존 상품 선택 검증, 상품 없이 게시하는 줄의 이름 키 계산
 5. 신규 브랜드·상품 중복 재검사와 필요한 행 생성
 6. extracted_items와 extracted_options 최종 갱신
 7. 확정된 결과를 기준으로 최종 변경 계산
