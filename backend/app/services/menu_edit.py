@@ -14,7 +14,7 @@ A successful edit raises the board version and stamps `published_at` with the ti
 the lock. Nothing is retried on the caller's behalf except a write conflict (app.services.serializable).
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
@@ -25,7 +25,10 @@ from app.core.normalize import normalize
 from app.core.security import Principal
 from app.models import Bar, BarMenuItem, BarLocalMenuItem, BarStatus, Brand, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
 from app.schemas.menu import BarMenuResponse
-from app.schemas.menu_edit import MenuItemAddRequest, MenuItemUpdateRequest, MenuOptionInput, MenuResetRequest
+from app.schemas.menu_edit import (
+    LocalMenuApprovalRequest, MenuItemAddRequest, MenuItemUpdateRequest,
+    MenuOptionInput, MenuResetRequest,
+)
 from app.services.bar_access import can_manage_bar, forbidden, is_operator
 from app.services.bar_menu import bar_not_found, get_bar_menu
 from app.services.menu_import_upload import check_no_unfinished_import
@@ -305,6 +308,62 @@ def _add_once(
     return _publish(session, board, base_url, created=created)
 
 
+def _approve_local_once(
+    session: Session, principal: Principal, bar_id: UUID, local_id: str,
+    body: LocalMenuApprovalRequest, base_url: str,
+) -> BarMenuResponse:
+    if not is_operator(session, principal):
+        raise forbidden()
+    board = _open_board(session, principal, bar_id, body.menuVersion)
+    local = _local_for(session, bar_id, local_id)
+    if local is None:
+        raise _item_not_found(local_id)
+    if local.category != "whisky":
+        raise ApiError(409, "NOT_PENDING_WHISKY",
+            "위스키 승인 대기 항목만 카탈로그에 연결할 수 있어요.")
+    if (body.productId is None) == (body.newProduct is None):
+        raise validation_failed_fields([{
+            "path": "productId", "code": "EXACTLY_ONE_REQUIRED",
+            "message": "productId 또는 newProduct 중 하나가 필요합니다.",
+        }])
+    price_options = [
+        MenuOptionInput.model_validate({
+            "optionLabel": o.get("optionLabel"), "pourMl": o.get("pourMl"),
+            "priceKrw": o["priceKrw"], "discount": o.get("discount"),
+        }) for o in local.options
+    ]
+    add_body = MenuItemAddRequest(
+        menuVersion=body.menuVersion, productId=body.productId,
+        newProduct=body.newProduct,
+        displayName=local.display_name, options=price_options,
+    )
+    check_request(add_body, datetime.now(timezone.utc))
+    product = _product_for(session, add_body, principal)
+    if product.category != "whisky":
+        raise ApiError(409, "NOT_APPROVED_WHISKY",
+            "승인할 카탈로그 상품은 위스키여야 합니다.")
+    if board is None:
+        raise _item_not_found(local_id)
+    if any(entry.bar_menu_item.product_id == product.id for entry in board.entries):
+        raise ApiError(409, "MENU_ITEM_EXISTS",
+            "이미 같은 상품이 매장 메뉴에 등록되어 있어요.")
+    item = session.scalar(select(BarMenuItem).where(
+        BarMenuItem.bar_id == bar_id, BarMenuItem.product_id == product.id,
+    ))
+    if item is None:
+        item = BarMenuItem(bar_id=bar_id, product_id=product.id)
+        session.add(item)
+        session.flush()
+    board.entries.append(MenuBoardEntry(
+        bar_menu_item_id=item.id, display_name=local.display_name,
+        sort_order=max((entry.sort_order for entry in board.entries), default=0) + 1,
+        options=_options(price_options),
+    ))
+    item.sold_out_at = local.sold_out_at
+    session.delete(local)
+    return _publish(session, board, base_url)
+
+
 def _update_once(
     session: Session,
     principal: Principal,
@@ -380,6 +439,16 @@ def _run(session_factory: SessionFactory, bar_id: UUID, label: str, work) -> Bar
         work,
         label=f"{label} {bar_id}",
         conflict=write_conflict("다른 요청과 동시에 처리되어 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."),
+    )
+
+
+def approve_local_menu_item(
+    session_factory: SessionFactory, principal: Principal, bar_id: UUID,
+    local_id: str, body: LocalMenuApprovalRequest, *, base_url: str,
+) -> BarMenuResponse:
+    return _run(
+        session_factory, bar_id, "approve local menu",
+        lambda session: _approve_local_once(session, principal, bar_id, local_id, body, base_url),
     )
 
 
