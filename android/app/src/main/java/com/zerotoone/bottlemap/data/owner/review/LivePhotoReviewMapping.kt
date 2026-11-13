@@ -219,8 +219,9 @@ internal fun mapConfirmedReviewDecision(
     // Brand metadata is optional and never sent to the server for owner adds.
     val category = if (card.type == ReviewItemType.WHISKY) "whisky" else "other"
     val brandId = existingBrands[brandText.lowercase()]
-    val finalName = card.newProductName?.trim()?.takeIf { it.isNotBlank() }
-        ?: card.name.trim()
+    // The owner-confirmed on-screen name is authoritative. newProductName
+    // can be a stale OCR draft after editing the detail name.
+    val finalName = card.name.trim()
     require(finalName.isNotBlank()) { "게시할 메뉴 이름을 입력해 주세요." }
     return MockReviewDecision(
         MockDecisionKind.CREATE_PRODUCT,
