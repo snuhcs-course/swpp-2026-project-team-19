@@ -49,8 +49,9 @@ data class MergedLine(
 /** One serving option the owner will publish. */
 data class ReviewOption(
     val volume: Double = 0.0, val price: Double = 0.0, val bottle: Boolean = false,
-    // Real extracted option identity survives edits/removal; fixtures leave it null.
+    // Real extracted option identity and label survive edits/reclassification.
     val sourceOptionId: String? = null,
+    val label: String? = null,
 )
 
 /** The fields that "분류 변경" stores so that changing back restores the original options. */
@@ -71,6 +72,7 @@ data class ClassificationSnapshot(
     val candidates: List<CatalogProduct>,
     val rawOptionEdits: Map<String, String>,
     val primarySourceOptionId: String? = null,
+    val primaryOptionLabel: String? = null,
 )
 
 data class ReviewItem(
@@ -132,6 +134,7 @@ data class ReviewItem(
     val sourceBox: List<Int>? = null,
     /** First OCR option identity, kept separate from displayed price/volume. */
     val primarySourceOptionId: String? = null,
+    val primaryOptionLabel: String? = null,
     /** Current bar prices for matching the first photographed serving. */
     val existingPriceByProductId: Map<String, Double> = emptyMap(),
 )
