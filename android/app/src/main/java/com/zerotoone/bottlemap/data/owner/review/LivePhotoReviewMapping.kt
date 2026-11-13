@@ -120,7 +120,7 @@ private fun mapServerReviewItem(
         primaryHasOption = first != null,
         primarySourceOptionId = first?.sourceOptionId,
         existingPriceByProductId = existingPrices,
-        options = if (other) emptyList() else options.drop(1),
+        options = options.drop(1),
         oldPrice = oldPrice,
         photoPrice = photoPrice,
         priceChoice = if (oldPrice != null && photoPrice != null &&
@@ -155,23 +155,14 @@ internal fun mapConfirmedReviewDecision(
 ): MockReviewDecision {
     if (card.excluded) return MockReviewDecision(MockDecisionKind.EXCLUDE)
     val raw = extracted.options.sortedBy { it.optionOrder }
-    val choices = if (card.type == ReviewItemType.OTHER) {
-        // The non-whisky UI edits the first price only. Do not silently discard
-        // additional OCR prices: the server's final options[] is authoritative.
-        listOf(ReviewOption(price = card.price,
-            sourceOptionId = raw.firstOrNull()?.extractedOptionId)) +
-            raw.drop(1).map { source ->
-                ReviewOption(
-                    price = (source.extractedPriceKrw ?: 0).toDouble(),
-                    sourceOptionId = source.extractedOptionId,
-                )
-            }
-    } else PhotoReviewRules.optionSummary(card)
+    // Both whisky and other preserve every reviewer-edited OCR option, not
+    // a hidden, uneditable reconstruction from the initial server response.
+    val choices = PhotoReviewRules.optionSummary(card)
     require(choices.isNotEmpty() && choices.all {
         validPrice(it.price) &&
             (it.bottle || (card.type == ReviewItemType.OTHER || validVolume(it.volume)))
     }) { "${card.name}: 가격과 용량을 확인해 주세요." }
-    require(choices.size <= (if (card.type == ReviewItemType.OTHER) 10 else PhotoReviewRules.MAX_OPTIONS)) {
+    require(choices.size <= PhotoReviewRules.MAX_OPTIONS) {
         "${card.name}: 검수 옵션 개수를 확인해 주세요."
     }
     val byId = raw.associateBy { it.extractedOptionId }
