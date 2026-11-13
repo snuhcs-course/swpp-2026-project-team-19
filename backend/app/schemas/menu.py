@@ -40,6 +40,8 @@ class MenuItemResponse(BaseModel):
         "everyone else gets them left out, so for them this is always false"
     )
     options: list[MenuOptionResponse] = Field(description="Price and pour-size choices")
+    catalogMatched: bool = Field(default=True, description="False for a bar-only item; productId is its local UUID, not a catalog ID")
+    catalogReviewStatus: str | None = Field(default=None, description="pending for a whisky item awaiting operator approval")
 
 
 class BarMenuResponse(BaseModel):
