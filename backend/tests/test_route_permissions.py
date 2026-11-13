@@ -42,7 +42,7 @@ class Route:
 
     @property
     def url(self) -> str:
-        return self.path.format(barId=MISSING_ID, menuImportId=MISSING_ID, applicationId=MISSING_ID)
+        return self.path.format(barId=MISSING_ID, menuImportId=MISSING_ID, applicationId=MISSING_ID, checkId=MISSING_ID)
 
 
 @dataclass(frozen=True)
@@ -90,6 +90,8 @@ OPERATOR_ONLY = [
     Route("post", "/api/owner-applications/{applicationId}/verify-business", {}, (404, "OWNER_APPLICATION_NOT_FOUND")),
     # Records who revoked the ownership, so a temporary-login operator needs a users row first.
     Route("delete", "/api/bars/{barId}/owner", {}, (404, "BAR_NOT_FOUND"), (404, "USER_NOT_FOUND")),
+    Route("get", "/api/menu-item-checks", {}, (200, None)),
+    Route("post", "/api/menu-item-checks/{checkId}/resolve", {"json": {"resolution": "keep"}}, (404, "MENU_ITEM_CHECK_NOT_FOUND")),
 ]
 BAR_MANAGER = [
     ManagerRoute("get", "/api/bars/{barId}", {}, (404, "BAR_NOT_FOUND"), (200, None)),
