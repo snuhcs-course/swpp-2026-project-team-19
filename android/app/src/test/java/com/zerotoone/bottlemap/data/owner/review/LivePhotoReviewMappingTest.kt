@@ -150,10 +150,11 @@ class LivePhotoReviewMappingTest {
         assertEquals("위스키 새 상품",decision.newProduct?.name)
         val missing=dto.copy(extractedBrandName=null,
             newProductDraft=dto.newProductDraft?.copy(brandText=null))
-        try {
-            mapConfirmedReviewDecision(card,missing,30.0,emptyMap())
-            fail("Must not invent a missing catalog brand")
-        } catch (_: IllegalArgumentException) { }
+        // Unverified products are now bar-only until operator approval.
+        // No fabricated global brand is necessary to publish the bar menu.
+        val local = mapConfirmedReviewDecision(card,missing,30.0,emptyMap())
+        assertNull(local.newProduct?.brandId)
+        assertNull(local.newProduct?.brandName)
     }
 
     @Test fun ownerAddedOptionHasNoExtractedIdAndIsSentSeparately() {
@@ -175,6 +176,19 @@ class LivePhotoReviewMappingTest {
         assertTrue(card.excluded)
         val decision=mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
         assertEquals(MockDecisionKind.EXCLUDE,decision.kind)
+    }
+
+    @Test fun ownerCanRestoreExcludedNonWhiskyPhotoLineForBarOnlyPublication() {
+        val dto = item(lineType = "description", proposedId = null).copy(
+            newProductDraft = null, extractedBrandName = null,
+        )
+        val card = mapServerPhotoReview(response(dto), fixture()).items.single()
+        assertTrue(card.excluded)
+        val restored = card.copy(excluded = false, price = 8000.0)
+        val decision = mapConfirmedReviewDecision(restored, dto, 30.0, emptyMap())
+        assertEquals(MockDecisionKind.CREATE_PRODUCT, decision.kind)
+        assertEquals("otherAlcohol", decision.newProduct?.category)
+        assertNull(decision.newProduct?.brandName)
     }
 
     @Test fun staleOrIncompleteStatusCannotMasqueradeAsReadyReview() {
