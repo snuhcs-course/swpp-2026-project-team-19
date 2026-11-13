@@ -110,6 +110,7 @@ private fun mapServerReviewItem(
         volumeSource = if (firstServerOption?.extractedPourMl == null)
             VolumeSource.DEFAULT else VolumeSource.PHOTO,
         primaryHasOption = first != null,
+        primarySourceOptionId = first?.sourceOptionId,
         options = if (other) emptyList() else options.drop(1),
         oldPrice = oldPrice,
         photoPrice = photoPrice,
