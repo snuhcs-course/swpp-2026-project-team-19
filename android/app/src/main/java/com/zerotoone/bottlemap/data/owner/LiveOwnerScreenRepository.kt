@@ -291,6 +291,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 brandId = item.brandId ?: "",
                 displayName = item.productName ?: item.displayName,
                 category = item.category,
+                catalogMatched = item.catalogMatched,
             )
         }.distinctBy { it.productId }
         val mappedBars = barsWithCovers.map(::toBar)
