@@ -30,8 +30,8 @@ class MenuItemResponse(BaseModel):
     barMenuItemId: UUID = Field(description="Stable id of the item; manual edits address items by it")
     productId: UUID = Field(description="Canonical catalog product")
     productName: str = Field(description="Canonical product name (products.display_name)")
-    brandId: UUID
-    brandName: str = Field(description="The brand's canonical name")
+    brandId: UUID | None
+    brandName: str | None = Field(description="The brand's canonical name")
     category: str = Field(description='Product category, e.g. "whisky"')
     displayName: str = Field(description="Name as written on the bar's menu, not the canonical product name")
     sortOrder: int = Field(description="Items are returned in this order")
