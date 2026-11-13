@@ -940,7 +940,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     "finalLineType" to "product",
                     "productId" to requireNotNull(chosen.productId),
                     "correctedProductName" to chosen.displayNameOverride,
-                    "options" to ownerFinalReviewOptions(item,chosen,defaultPour,true),
+                    "options" to ownerFinalReviewOptions(
+                        item, chosen, defaultPour, true,
+                        current.menuItems.firstOrNull { saved ->
+                            saved.barId == job.barId && saved.productId == chosen.productId
+                        }?.options.orEmpty(),
+                    ),
                 )
                 MockDecisionKind.CREATE_PRODUCT -> {
                     // Internal legacy enum means an owner-confirmed unlinked item.
