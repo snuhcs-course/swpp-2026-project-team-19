@@ -323,4 +323,22 @@ class PhotoReviewRulesTest {
         assertEquals(2,PhotoReviewRules.countOptions(manuallyCombined))
     }
 
+    @Test fun repeatedBarOnlyPhotoNamesDoNotSilentlyDiscardASecondLine() {
+        val first=ReviewItem(id="unlinked-a",name=" 맥주 1 ",
+            type=ReviewItemType.OTHER,linkedProductId=null,price=8000.0)
+        val second=ReviewItem(id="unlinked-b",name="맥주1",
+            type=ReviewItemType.OTHER,linkedProductId=null,price=10000.0)
+        val duplicate=PhotoReviewState(items=listOf(first,second))
+        assertEquals(setOf("unlinked-a","unlinked-b"),
+            PhotoReviewRules.duplicateUnlinkedNames(duplicate))
+        assertTrue(ReviewIssue.DUPLICATE_MENU_NAME in
+            PhotoReviewRules.problems(first,duplicate))
+        assertFalse(PhotoReviewRules.stats(duplicate).canPublish)
+        val renamed=duplicate.copy(items=listOf(first,second.copy(name="맥주 2")))
+        assertTrue(PhotoReviewRules.duplicateUnlinkedNames(renamed).isEmpty())
+        assertTrue(PhotoReviewRules.stats(renamed).canPublish)
+        val excluded=duplicate.copy(items=listOf(first,second.copy(excluded=true)))
+        assertTrue(PhotoReviewRules.stats(excluded).canPublish)
+    }
+
 }
