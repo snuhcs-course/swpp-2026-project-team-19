@@ -70,6 +70,7 @@ data class ClassificationSnapshot(
     val newProductName: String?,
     val candidates: List<CatalogProduct>,
     val rawOptionEdits: Map<String, String>,
+    val primarySourceOptionId: String? = null,
 )
 
 data class ReviewItem(
@@ -129,6 +130,8 @@ data class ReviewItem(
     // Mock scenarios leave them null, retaining their exact visual fixtures.
     val sourcePhotoUrl: String? = null,
     val sourceBox: List<Int>? = null,
+    /** First OCR option identity, kept separate from displayed price/volume. */
+    val primarySourceOptionId: String? = null,
 )
 
 enum class ReviewModalType { SOURCE_PHOTO, PUBLISH, EXCLUDE }
