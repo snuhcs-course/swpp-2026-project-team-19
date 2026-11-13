@@ -301,10 +301,12 @@ internal fun OwnerManualMenuScreen(
     fun save() {
         if (bar == null || saving) return
         try {
-            if(editId == null) {
-                require(inactiveOwnerCatalogMatch(candidates, itemName) == null) {
-                    "운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요."
-                }
+            // Only whisky uses the approved canonical catalog. A legacy
+            // non-whisky catalog row must never block a local beer/cocktail add.
+            if (editId == null && category == "위스키") {
+                require(inactiveOwnerCatalogMatch(
+                    candidates.filter { it.category == "whisky" }, itemName) == null
+                ) { "운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요." }
             }
             require(!activePhotoImport) { "ACTIVE_IMPORT_EXISTS" }
             val name = itemName.trim()
@@ -470,10 +472,11 @@ internal fun OwnerManualMenuScreen(
                             // the original product again with "맞아요 / 아니에요".
                             val fresh = viewModel.searchCatalogLive(name)
                             val exact = fresh.firstOrNull {
-                                it.isActive && it.productId != rejectedId &&
-                                    (manualMenuCategoryLabel(it.category).takeIf { label ->
-                                        label in MANUAL_MENU_CATEGORIES
-                                    } ?: "기타 주류") == category &&
+                                // Approved whisky only: do not force a beer or
+                                // other local item into the old global-catalog match.
+                                category == "위스키" && it.catalogMatched &&
+                                    it.category == "whisky" && it.isActive &&
+                                    it.productId != rejectedId &&
                                     (normalizeOwnerCatalogName(it.displayName) ==
                                         normalizeOwnerCatalogName(name) ||
                                      normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) ==
