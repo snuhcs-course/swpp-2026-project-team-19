@@ -3,6 +3,7 @@
 from app.models.bar import Bar, BarOperatingException, BarPhoto, BarStatus, BarWeeklyHours, OperatingExceptionKind
 from app.models.catalog import Brand, BrandAlias, Product, ProductAlias
 from app.models.menu import BarMenuItem, MenuBoard, MenuBoardEntry, MenuEntryOption
+from app.models.local_menu import BarLocalMenuItem
 from app.models.menu_import import (
     ExtractedItem,
     ExtractedOption,
@@ -37,6 +38,7 @@ from app.models.user import User, UserType
 __all__ = [
     "Bar",
     "BarMenuItem",
+    "BarLocalMenuItem",
     "BarOperatingException",
     "BarOwner",
     "BarOwnerApplication",
