@@ -30,6 +30,7 @@ from app.models import (
     Product,
 )
 from app.schemas.menu_review import (
+    CreateLocalMenuItem,
     CreateProduct,
     ItemDecision,
     ProductAliasInput,
@@ -60,7 +61,7 @@ class ReviewedItem:
 
     @property
     def is_product(self) -> bool:
-        return isinstance(self.decision, (SelectExistingProduct, CreateProduct))
+        return isinstance(self.decision, (SelectExistingProduct, CreateProduct, CreateLocalMenuItem))
 
     @property
     def priced_options(self) -> tuple[FinalOption, ...]:
@@ -226,7 +227,7 @@ def validate_review(session: Session, menu_import: MenuImport, request: ReviewAn
             continue
         index, decision = decided[item.id]
         path = f"itemDecisions[{index}]"
-        if not isinstance(decision, (SelectExistingProduct, CreateProduct)):
+        if not isinstance(decision, (SelectExistingProduct, CreateProduct, CreateLocalMenuItem)):
             reviewed.append(ReviewedItem(item=item, decision=decision, index=index))
             continue
 
@@ -252,6 +253,9 @@ def validate_review(session: Session, menu_import: MenuImport, request: ReviewAn
             elif not product.is_active:
                 errors.add(f"{path}.productId", "PRODUCT_INACTIVE", "비활성 상품은 메뉴에 연결할 수 없습니다.")
             _check_aliases(errors, f"{path}.aliasesToAdd", decision.aliasesToAdd)
+        elif isinstance(decision, CreateLocalMenuItem):
+            _check_normalizable(errors, f"{path}.correctedProductName",
+                decision.correctedProductName or item.extracted_product_name or item.raw_text)
         else:
             if decision.brand.type == "existing":
                 if decision.brand.brandId not in known_brands:
