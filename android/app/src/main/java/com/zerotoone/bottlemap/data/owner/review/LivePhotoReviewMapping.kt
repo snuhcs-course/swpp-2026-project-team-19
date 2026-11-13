@@ -93,7 +93,10 @@ private fun mapServerReviewItem(
                 // existing "잔 30ml" is not the photographed "샷 30ml".
                 when {
                     firstScanned == null -> false
-                    isBottle(saved.label) && isBottle(ocrLabel) -> true
+                    // "Bottle" and "병" are distinct optionLabel values in
+                    // merged Backend #164; never reuse one label's old price
+                    // as the price of the other.
+                    isBottle(saved.label) && isBottle(ocrLabel) -> savedLabel == ocrLabel
                     isBottle(saved.label) || isBottle(ocrLabel) -> false
                     ocrLabel != null && savedLabel != ocrLabel -> false
                     else -> saved.pourMl != null &&
