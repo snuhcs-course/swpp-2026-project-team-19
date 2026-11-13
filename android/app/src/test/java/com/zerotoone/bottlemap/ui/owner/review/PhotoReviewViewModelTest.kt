@@ -228,17 +228,21 @@ class PhotoReviewViewModelTest {
     @Test fun optionAddRemoveAndLimit() = runTest(dispatcher) {
         val vm = vm(MockPhotoReviewScenario.WHISKY_OPTIONS)
         val events = vm.collectEvents(backgroundScope)
+        // A photo review supports up to ten options, not the manual form's three.
         vm.addOption("glen12")
-        assertTrue(PhotoReviewEvent.Toast("용량 옵션은 최대 3개까지 등록해요.") in events)
+        assertEquals(3, vm.item("glen12").options.size)
         vm.removeOption("glen12", 1)
-        assertEquals(1, vm.item("glen12").options.size)
-        vm.addOption("glen12")
         assertEquals(2, vm.item("glen12").options.size)
+        vm.addOption("glen12")
+        assertEquals(3, vm.item("glen12").options.size)
         assertEquals(ReviewGroup.PENDING, vm.group("glen12"))
         vm.removeOption("glen12", null)
         assertFalse(vm.item("glen12").primaryHasOption)
         vm.addOption("gin")
-        assertTrue(PhotoReviewEvent.Toast("그 외 메뉴에는 용량 옵션을 사용하지 않아요.") in events)
+        assertTrue(PhotoReviewRules.countOptions(vm.item("gin")) >= 2)
+        repeat(10) { vm.addOption("gin") }
+        assertEquals(10, PhotoReviewRules.countOptions(vm.item("gin")))
+        assertTrue(PhotoReviewEvent.Toast("검수 옵션은 최대 10개까지 등록할 수 있어요.") in events)
     }
 
     @Test fun reclassifyMovesToOtherAndBackRestoringOptions() = runTest(dispatcher) {
