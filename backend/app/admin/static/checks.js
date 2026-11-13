@@ -102,7 +102,8 @@ function setCheckListStatus(text, retry) {
   $("checks-retry").onclick = retry || null;
 }
 
-async function loadChecks(reset) {
+// `keepDetail` leaves the detail pane as it is, e.g. showing a check just resolved that left the list.
+async function loadChecks(reset, { keepDetail = false } = {}) {
   if (reset) {
     checks.items = [];
     checks.nextCursor = null;
@@ -124,7 +125,7 @@ async function loadChecks(reset) {
     checks.nextCursor = page.nextCursor;
     renderCheckRows();
     showCheckListSummary();
-    if (reset && checks.selectedId) {
+    if (reset && checks.selectedId && !keepDetail) {
       // A fresh load also hands out fresh photo URLs; a check that left the list closes.
       const fresh = checks.items.find((check) => check.checkId === checks.selectedId);
       if (fresh) renderCheckDetail(fresh);
@@ -143,7 +144,7 @@ async function loadChecks(reset) {
       showMessage("operator 권한이 없는 계정입니다.");
       return;
     }
-    setCheckListStatus(error.message, () => loadChecks(reset));
+    setCheckListStatus(error.message, () => loadChecks(reset, { keepDetail }));
   }
 }
 
@@ -787,17 +788,22 @@ async function resolveCheck(check, body, form) {
   if (checks.busy) return;
   setCheckBusy(true);
   setCheckNotice("warn", "처리하는 중...");
+  let linked = false;
   try {
     const resolved = await api("POST", `/api/menu-item-checks/${encodeURIComponent(check.checkId)}/resolve`, body);
     replaceCheck(resolved);
     renderCheckDetail(resolved);
     setCheckNotice("ok", RESOLVED_TEXT[body.resolution]);
+    linked = body.resolution === "link_existing" || body.resolution === "create_and_link";
   } catch (error) {
     if (error.status === 401) return;
     handleResolveError(check, error, form);
   } finally {
     setCheckBusy(false);
   }
+  // A link may move or merge the line, which can open or extend a price_conflict check on another
+  // item (3.14.1); the answer has only this check, so the list is loaded again.
+  if (linked) loadChecks(true, { keepDetail: true });
 }
 
 function handleResolveError(check, error, form) {
@@ -821,6 +827,15 @@ function handleResolveError(check, error, form) {
       return;
     case "DUPLICATE_PRODUCT_FOUND": {
       const existing = error.details && error.details.existingProduct;
+      if (existing && !existing.isActive) {
+        // An inactive product cannot be linked (PRODUCT_INACTIVE), so no link button is offered.
+        setCheckNotice(
+          "error",
+          el("p", {}, `같은 상품이 비활성 상태로 등록되어 있습니다: ${existing.displayName}`),
+          el("p", {}, "상품을 다시 활성화한 뒤 연결하거나, 위에서 다른 활성 상품을 검색해 연결하세요."),
+        );
+        return;
+      }
       setCheckNotice(
         "error",
         el("p", {}, error.message),
