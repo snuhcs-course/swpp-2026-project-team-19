@@ -125,8 +125,11 @@ object PhotoReviewRules {
                 // Backend validates a serving by (optionLabel, pourMl), not
                 // pourMl alone: '잔 30ml' and '샷 30ml' are distinct.
                 val keys = entries.map {
-                    if (it.bottle) "Bottle" else
-                        "${it.label.orEmpty().trim().lowercase()}:${numberText(it.volume)}ml"
+                    // For bottle pours, the original OCR label (병 vs Bottle)
+                    // is part of the same backend serving identity.
+                    val label = (it.label ?: if (it.bottle) "Bottle" else "")
+                        .trim().lowercase()
+                    "$label:${if (it.bottle) "none" else numberText(it.volume)}"
                 }
                 if (keys.size != keys.toSet().size) p += ReviewIssue.OPTION
             }
