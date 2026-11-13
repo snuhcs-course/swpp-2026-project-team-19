@@ -144,8 +144,8 @@ def test_confirmed_lines_are_unchanged_and_unmatched_lines_get_embedding_candida
 def test_single_candidate_ambiguous_line_gets_nothing_added(
     client, db_session, image_storage, operator, glenfiddich, menu_lines, use_embedding
 ):
-    menu_lines("글렌피딕 12년 싱글몰트")  # S2: ambiguous with Glenfiddich 12 only
-    use_embedding({("글렌피딕 12년 싱글몰트", "Glenfiddich 15"): 0.99})
+    menu_lines("글렌피딕 12년 한정판")  # S2: ambiguous with Glenfiddich 12 only
+    use_embedding({("글렌피딕 12년 한정판", "Glenfiddich 15"): 0.99})
 
     [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
 
@@ -160,10 +160,10 @@ def test_ambiguous_line_is_reordered_but_not_extended(
 ):
     sherry = make_product(db_session, glenfiddich[12].brand, "Glenfiddich 12 Sherry Cask", age_years=12,
                           edition_name="Sherry Cask")
-    menu_lines("글렌피딕 12년 싱글몰트")  # S2: brand + age, two products of that age
-    use_embedding({("글렌피딕 12년 싱글몰트", "Glenfiddich 12 Sherry Cask"): 0.7,
-                   ("글렌피딕 12년 싱글몰트", "Glenfiddich 12"): 0.5,
-                   ("글렌피딕 12년 싱글몰트", "Glenfiddich 15"): 0.9})
+    menu_lines("글렌피딕 12년 한정판")  # S2: brand + age, two products of that age
+    use_embedding({("글렌피딕 12년 한정판", "Glenfiddich 12 Sherry Cask"): 0.7,
+                   ("글렌피딕 12년 한정판", "Glenfiddich 12"): 0.5,
+                   ("글렌피딕 12년 한정판", "Glenfiddich 15"): 0.9})
 
     [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
 
@@ -189,7 +189,7 @@ def test_unmatched_line_stays_unmatched_below_the_floor(
 def test_failure_in_the_step_keeps_the_earlier_results(
     client, db_session, image_storage, operator, glenfiddich, menu_lines, use_embedding, caplog, fail_on
 ):
-    menu_lines("글렌피딕 12년", "글렌피딕 12년 싱글몰트", "글렌피딕 십이년")
+    menu_lines("글렌피딕 12년", "글렌피딕 12년 한정판", "글렌피딕 십이년")
     use_embedding({("글렌피딕 십이년", "글렌피딕 12년"): 0.9}, fail=RuntimeError("embedder down"), fail_on=fail_on)
 
     menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))

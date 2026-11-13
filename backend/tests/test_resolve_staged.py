@@ -712,3 +712,97 @@ def test_line_numbers_leave_out_measures():
 
     assert _line_numbers("Glenfarclas 105 60% 700 ml 2잔 16,000원") == ["105"]
     assert _line_numbers("옥토모어 14.1 59.1도") == ["14.1"]
+
+
+# --- I4: generic words and short letter tokens ---------------------------------------
+
+LAPHROAIG = _id(300)
+LAPHROAIG_10, LAPHROAIG_10_CS, LAPHROAIG_PX, LAPHROAIG_QUARTER = (_id(n) for n in range(301, 305))
+
+
+@pytest.fixture
+def two_brands(glenfiddich):
+    products = [
+        ProductInfo(FIDDICH_12, "Glenfiddich 12", age_years=12, brand_id=FIDDICH),
+        ProductInfo(FIDDICH_12_SHERRY, "Glenfiddich 12 Sherry Cask Finish", 12, "Sherry Cask Finish", brand_id=FIDDICH),
+        ProductInfo(FIDDICH_15_SOLERA, "Glenfiddich 15 Solera", 15, "Solera", brand_id=FIDDICH),
+        ProductInfo(LAPHROAIG_10, "Laphroaig 10", age_years=10, brand_id=LAPHROAIG),
+        ProductInfo(LAPHROAIG_10_CS, "Laphroaig 10 Cask Strength", 10, "Cask Strength", brand_id=LAPHROAIG),
+        ProductInfo(LAPHROAIG_PX, "Laphroaig PX Cask", None, "PX Cask", brand_id=LAPHROAIG),
+        ProductInfo(LAPHROAIG_QUARTER, "Laphroaig Quarter Cask", None, "Quarter Cask", brand_id=LAPHROAIG),
+    ]
+    aliases = [(product.product_id, product.display_name) for product in products]
+    brands = [(FIDDICH, "Glenfiddich"), (FIDDICH, "글렌피딕"), (LAPHROAIG, "Laphroaig"), (LAPHROAIG, "라프로익")]
+    return InMemoryCatalog(products, aliases, brands)
+
+
+def _one_recommended(result, product_id, ignored):
+    assert result.status == "ambiguous"  # recommended to the owner, never auto-confirmed
+    [candidate] = result.candidates
+    assert candidate.product_id == product_id
+    assert candidate.evidence["confirmRecommended"] is True
+    assert candidate.evidence["ignoredWords"] == ignored
+    assert "editionUnmatched" not in candidate.evidence
+
+
+@pytest.mark.parametrize(("name", "ignored"), [
+    ("글렌피딕 12년 싱글몰트", ["싱글몰트"]),
+    ("Glenfiddich 12 Single Malt Scotch Whisky", ["single", "malt", "scotch"]),
+])
+def test_generic_words_that_fit_no_product_recommend_the_plain_product(two_brands, name, ignored):
+    # S2 alone keeps both 12 year products with the words as editionUnmatched
+    alone = staged(name, two_brands)
+    assert {c.product_id for c in alone.candidates} == {FIDDICH_12, FIDDICH_12_SHERRY}
+    assert alone.candidates[0].evidence["editionUnmatched"] == ignored
+
+    _one_recommended(staged(name, two_brands, "S2b"), FIDDICH_12, ignored)
+
+
+def test_a_generic_word_beside_a_specific_one_is_left_out(two_brands):
+    _one_recommended(staged("Glenfiddich 12yo Sherry Oak", two_brands, "S2b"), FIDDICH_12_SHERRY, ["oak"])
+    _one_recommended(staged("Laphroaig PX Oak", two_brands, "S2b"), LAPHROAIG_PX, ["oak"])
+
+
+def test_generic_words_alone_pick_nothing_without_an_age(two_brands):
+    # no age and no specific word: nothing says which Laphroaig it is
+    result = staged("Laphroaig Single Malt", two_brands, "S2b")
+    assert result.status != "exact_match"
+    assert not any(c.evidence.get("confirmRecommended") for c in result.candidates)
+
+
+def test_a_generic_word_that_fits_a_product_is_not_left_out(two_brands):
+    # "Cask" is a word of three Laphroaig editions: it stays an edition token
+    result = staged("Laphroaig 10 Cask", two_brands, "S2b")
+    [candidate] = result.candidates
+    assert candidate.product_id == LAPHROAIG_10_CS and candidate.evidence["editionMatch"] == ["cask"]
+    assert candidate.evidence["editionOnlyInProduct"] == ["strength"]  # so the owner confirms it
+    assert "ignoredWords" not in candidate.evidence
+
+
+def test_a_specific_word_that_fits_nothing_still_blocks(two_brands):
+    result = staged("글렌피딕 12년 한정판", two_brands, "S2b")
+    assert {c.product_id for c in result.candidates} == {FIDDICH_12, FIDDICH_12_SHERRY}
+    assert not any(c.evidence.get("confirmRecommended") for c in result.candidates)
+
+
+@pytest.mark.parametrize("name", ["Laphroaig 10 CS", "라프로익 10년 CS", "Laphroaig CS"])
+def test_cs_is_cask_strength(two_brands, name):
+    result = staged(name, two_brands, "S2b")
+    assert result.status == "exact_match" and result.proposed_product_id == LAPHROAIG_10_CS
+    assert result.candidates[0].evidence["editionMatch"] == ["cs"]
+
+
+def test_a_short_token_fits_only_a_whole_word_of_the_product(two_brands):
+    assert staged("Laphroaig PX", two_brands, "S2b").proposed_product_id == LAPHROAIG_PX
+    # "DR" (Distillers Reserve) is in no Laphroaig 10 product: both stay, unconfirmed
+    result = staged("Laphroaig 10 DR", two_brands, "S2b")
+    assert {c.product_id for c in result.candidates} == {LAPHROAIG_10, LAPHROAIG_10_CS}
+    assert result.candidates[0].evidence["editionUnmatched"] == ["dr"]
+
+
+def test_whisky_words_are_neutral_and_other_generic_words_only_recommend(two_brands):
+    # 위스키/whisky are dropped before edition tokens are made (I3), so the default product is confirmed
+    for name in ("글렌피딕 12년 위스키", "Glenfiddich 12 Whisky", "Glenfiddich 12 Whiskey"):
+        result = staged(name, two_brands, "S2b")
+        assert result.status == "exact_match" and result.proposed_product_id == FIDDICH_12, name
+    _one_recommended(staged("Glenfiddich 12 Scotch", two_brands, "S2b"), FIDDICH_12, ["scotch"])
