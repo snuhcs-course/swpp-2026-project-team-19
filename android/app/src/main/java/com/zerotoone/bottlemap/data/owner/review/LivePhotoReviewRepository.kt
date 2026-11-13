@@ -174,24 +174,10 @@ class LivePhotoReviewRepository(
             rawItems.all { cards.containsKey(it.extractedItemId) }) {
             "검수 항목이 서버 내용과 달라졌어요. 다시 불러와 주세요."
         }
-        val brands = snapshot().brands.associate {
-            normalized(it.name) to it.brandId
-        }.toMutableMap()
-        // Resolve an existing catalog brand by exact canonical name before a
-        // create_product request. Do not invent brand IDs or new API fields.
-        for (item in rawItems) {
-            val card = cards.getValue(item.extractedItemId)
-            if (card.excluded || card.linkedProductId != null) continue
-            val brand = (item.extractedBrandName ?: item.newProductDraft?.brandText)
-                ?.trim().orEmpty()
-            if (brand.isNotBlank() && normalized(brand) !in brands) {
-                owner.searchCatalogBrandsLive(brand)
-                val match = snapshot().brands.firstOrNull {
-                    normalized(it.name) == normalized(brand)
-                }
-                if (match != null) brands[normalized(brand)] = match.brandId
-            }
-        }
+        // Unlinked whisky and non-whisky lines are bar-only. PR #164 does not
+        // require a catalog brand, so publishing must not depend on brand search
+        // or accidentally create a global brand before review-and-apply.
+        val brands = emptyMap<String, String>()
         // Preflight the COMPLETE batch before mutating local decisions. This
         // prevents unsupported option operations from being silently dropped.
         val decisions = rawItems.map { item ->
