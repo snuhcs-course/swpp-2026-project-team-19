@@ -36,6 +36,7 @@ sealed interface PublishOutcome {
         val summary: ReviewStats,
         val newWhisky: Boolean,
         val reason: PublishFailure,
+        val detail: String? = null,
     ) : PublishOutcome
 }
 
@@ -44,7 +45,8 @@ internal fun classifyPublishFailure(error: Throwable): PublishFailure {
     return when {
         api?.httpStatus == 401 || api?.code == "UNAUTHORIZED" -> PublishFailure.AUTH
         api?.httpStatus == 403 -> PublishFailure.FORBIDDEN
-        api?.httpStatus == 409 -> PublishFailure.CONFLICT
+        api?.httpStatus == 409 || error.message == "REVIEW_OUTDATED" ->
+            PublishFailure.CONFLICT
         api?.httpStatus == 422 || error is IllegalArgumentException ->
             PublishFailure.VALIDATION
         api?.code == "NETWORK_ERROR" -> PublishFailure.NETWORK
@@ -77,6 +79,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     private val draftSaveMutex = Mutex()
     private var latestDraftRevision = 0L
     private var leaving = false
+    private val latestRematchRequest = mutableMapOf<String, Int>()
 
     private val _events = Channel<PhotoReviewEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -262,8 +265,12 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
+                val reason = classifyPublishFailure(error)
                 _publishOutcome.value = PublishOutcome.Failed(
-                    summary, newWhisky, classifyPublishFailure(error))
+                    summary, newWhisky, reason,
+                    detail = if (reason == PublishFailure.VALIDATION)
+                        menuWriteErrorText(error) else null,
+                )
             } finally {
                 _publishing.value = false
             }
@@ -318,8 +325,14 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     fun returnToReview() {
         if (_publishing.value) return
         when ((_publishOutcome.value as? PublishOutcome.Failed)?.reason) {
-            PublishFailure.NETWORK, PublishFailure.VALIDATION, PublishFailure.CONFLICT,
-            PublishFailure.AUTH -> {
+            PublishFailure.CONFLICT -> {
+                _publishOutcome.value = null
+                // Current reviewVersion is stale. The repository will restore a
+                // compatible draft only when server IDs and version still match.
+                reload()
+                toast("메뉴 정보가 변경돼 최신 검수 내용을 불러와요. 이전 버전의 입력은 자동 적용되지 않아요.")
+            }
+            PublishFailure.NETWORK, PublishFailure.VALIDATION, PublishFailure.AUTH -> {
                 _publishOutcome.value = null
                 review?.let { set(it.copy(modal = null)) }
             }
@@ -512,17 +525,25 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             mutateItem(id, rename)
             return
         }
+        val sequence = (latestRematchRequest[id] ?: 0) + 1
+        latestRematchRequest[id] = sequence
         viewModelScope.launch {
             val matches = try {
                 repository.exactMatches(name)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                // A failed search is NOT evidence that the product no longer
-                // exists. Keep the linked ID and unfinished owner edit intact.
-                toast("위스키 검색에 실패했어요. 연결을 유지하고 다시 시도해 주세요.")
+                // A failed search is not a zero-match result. Keep the saved link.
+                if (latestRematchRequest[id] == sequence)
+                    toast("위스키 검색에 실패했어요. 연결을 유지하고 다시 시도해 주세요.")
                 return@launch
             }
+            // Responses may arrive out of order (A then B, but A finishes last).
+            // An edit still being typed is newer than the submitted request.
+            if (latestRematchRequest[id] != sequence) return@launch
+            val current = item(id) ?: return@launch
+            if (current.reviewNameDraft?.trim()?.let { it != name } == true ||
+                current.detailNameDraft?.trim()?.let { it != name } == true) return@launch
             var outcome = RematchOutcome.OTHER
             mutateItem(id) {
                 val (rematched, result) = PhotoReviewRules.applyRematch(rename(it), matches)

@@ -617,6 +617,10 @@ private fun PublicationResultScreen(
                     textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                 Text(description, style = uxText(14f, 400, UxColor.sub, lineHeight = 1.7f),
                     modifier = Modifier.fillMaxWidth())
+                (result as? PublishOutcome.Failed)?.detail?.let { message ->
+                    Text(message, style = uxText(12f, 500, UxColor.error, lineHeight = 1.55f),
+                        modifier = Modifier.fillMaxWidth().testTag("review-result-validation-detail"))
+                }
                 if (success) {
                     val names = listOf("위스키", "그 외 메뉴", "합계")
                     val values = listOf(summary.ready.size, summary.other.size,
@@ -634,7 +638,7 @@ private fun PublicationResultScreen(
                         }
                     }
                     if (newWhisky) PublicationNote("새로운 위스키 안내",
-                        "새로 등록한 위스키는 다음 날부터 검색에 나와요.", critical = false)
+                        "새로 등록한 위스키는 운영자가 확인한 뒤부터 검색에 나와요.", critical = false)
                 }
                 if (busy) androidx.compose.material3.LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
