@@ -574,6 +574,7 @@ Table extracted_items {
   item_order smallint [not null]
   raw_text text [not null]
   extracted_line_type extracted_line_type [not null, default: 'unknown']
+  extracted_kind menu_item_kind [note: 'AI menu kind for product lines (whisky or other); null for non-product lines. Only whisky lines are matched']
   corrected_line_type extracted_line_type
   extracted_product_name varchar(200)
   extracted_brand_name varchar(120)

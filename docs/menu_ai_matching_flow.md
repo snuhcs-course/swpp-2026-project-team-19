@@ -507,6 +507,8 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
 
 이 판단은 최종 확정이 아니다. AI가 헤더나 설명을 `product`로 잘못 분류하거나 실제 상품을 다른 유형으로 분류할 수 있으므로 운영자 검수가 끝날 때까지 `lineType`은 1차 분류로만 취급한다.
 
+`lineType = product`인 줄에는 메뉴 종류 `kind`도 함께 반환한다. 위스키면 `whisky`, 칵테일, 하이볼, 맥주, 와인, 음료, 안주처럼 위스키가 아닌 메뉴면 `other`다. 비상품 줄은 `null`이다. `kind`가 없으면 백엔드는 `whisky`로 본다. 업주가 위스키가 아닌 메뉴도 메뉴판에 올릴 수 있게 하기 위해서다(API 명세 2.3, 8.10). `lineType`과 마찬가지로 1차 판단이며, 업주가 검수에서 바꿀 수 있다.
+
 ```json
 {
   "items": [
@@ -526,6 +528,7 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
       "itemOrder": 7,
       "rawText": "딘스톤 12년 15ml 8.0 / 30ml 15.0",
       "lineType": "product",
+      "kind": "whisky",
       "productName": "딘스톤 12년",
       "brandText": "딘스톤",
       "ageYears": 12,
@@ -562,11 +565,12 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
 - 섹션 제목, 열 제목, 설명, 세트 메뉴, 비위스키 섹션(칵테일·와인·맥주·음식 등)은 프롬프트가 반환하지 않게 한다.
 - 한 줄에 잔·병 가격이 모두 있으면 두 항목으로 나눠 반환한다. 어댑터(`backend/app/extraction/convert.py`)는 이름이 같은 인접한 잔·병 항목을 옵션 두 개(`잔`, `병`)를 가진 한 항목으로 묶어 4.3 형식으로 바꾼다.
 - 따라서 현재 모든 항목의 `lineType`은 `product`이고, `brandText`, `ageYears`, `editionName`, `abv`, `confidence`는 항상 `null`이다. 이름에 적힌 연수(예: `12년`)는 7장 정규화로 별칭 조회 키에 반영되지만, 10장의 연수·에디션 비교는 추출값이 없어 동작하지 않는다.
+- prompt v1은 위스키 줄만 반환하므로 어댑터는 모든 항목을 `kind = whisky`로 둔다. 위스키가 아닌 메뉴 줄도 `kind = other`로 반환하게 하는 것은 추출 프롬프트의 후속 작업이다(AI 담당). 백엔드의 저장, 매칭 생략, 검수 응답과 게시는 그 전에도 4.3 형식의 `kind`를 받으면 동작한다.
 - 4.3 형식 전체를 채우는 prompt v2는 후속 과제다. v1과 결과가 달라지므로 새 평가 실행으로 정확도를 확인한 뒤 v1을 대체한다.
 
 ## 5 extracted_items와 extracted_options 저장
 
-백엔드는 4.3 응답의 `items`를 각각 하나의 `extracted_items` 행으로 저장한다. `extracted_line_type`에는 AI의 1차 분류를 넣고 `corrected_line_type = null`, `review_status = pending`으로 저장한다. `section_header`, `description`, `unknown`도 원문과 함께 보존하지만 `extracted_line_type = product`인 항목만 최초 상품 매칭 단계로 보낸다.
+백엔드는 4.3 응답의 `items`를 각각 하나의 `extracted_items` 행으로 저장한다. `extracted_line_type`에는 AI의 1차 분류를 넣고 `corrected_line_type = null`, `review_status = pending`으로 저장한다. `section_header`, `description`, `unknown`도 원문과 함께 보존하지만 `extracted_line_type = product`이고 `extracted_kind = whisky`인 항목만 최초 상품 매칭 단계로 보낸다. AI가 위스키가 아닌 메뉴로 판단한 줄(`extracted_kind = other`)은 매칭하지 않고 `initial_resolution_status = null`로 두며, 검수에서 상품 없는 메뉴 항목으로 게시된다(API 명세 8.10).
 
 섹션 제목은 옵션 없이 항목만 저장한다.
 
@@ -1128,7 +1132,7 @@ LLM 응답:
 
 상품이 없는 줄과 항목은 상품 ID 대신 이름 키로 비교한다(API 명세 3.14.1, 8.10). 이름 키는 메뉴판 이름을 7장의 정규화 함수로 정규화한 값이다.
 
-- 제안 상품이 없는 줄(`unmatched`)은 상품 없이 게시하는 것으로 보고, 추출한 상품명의 이름 키로 현재 메뉴판의 미연결 항목(`bar_menu_items.product_id IS NULL`)과 비교한다. 같은 이름 키의 항목이 있으면 `update`이거나 변경 없음이고, 없으면 `add`다.
+- 제안 상품이 없는 줄(`unmatched`, 또는 매칭하지 않은 `extracted_kind = other` 줄)은 상품 없이 게시하는 것으로 보고, 변경의 `after.kind`를 그 줄의 `extracted_kind`로 하여 추출한 상품명의 이름 키로 현재 메뉴판의 미연결 항목(`bar_menu_items.product_id IS NULL`)과 비교한다. 같은 이름 키의 항목이 있으면 `update`이거나 변경 없음이고, 없으면 `add`다.
 - 현재 메뉴판의 미연결 항목은 이름 키가 같은 줄이 없으면 전체 교체 초안에서 `remove`다.
 - 이름 키가 같은 줄이 여럿이면 같은 상품의 여러 줄과 같은 규칙을 따른다(아래).
 - 이름 키를 만들 수 없는 줄(정규화한 값이 빈 값)은 비교하지 않고 `add`로 둔다. 검수자가 이름을 고치지 않고 상품 없이 게시하면 제출에서 거부된다(API 명세 8.7).
@@ -1580,7 +1584,7 @@ products
 
 운영자의 결정은 최종이다. 다른 후보를 고르거나 가격을 고쳐서 최종 변경이 임시 diff와 달라져도 그대로 반영한다.
 
-7단계의 최종 변경도 같은 상품의 줄을 합쳐 계산한다(API 명세 8.12). 업주가 제출한 대로 같은 상품인 줄끼리 표기와 용량이 같은 옵션의 가격이 다르면 3단계에서 `OPTION_PRICE_CONFLICT`로 거부한다. 다시 매칭 때문에 같은 상품이 된 줄의 가격 충돌은 거부하지 않고, 이름을 고치지 않은 줄의 가격을 쓴 뒤 `price_conflict`로 운영자 확인에 올린다.
+7단계의 최종 변경도 같은 상품의 줄을 합쳐 계산한다(API 명세 8.12). 같은 `productId`로 제출한 줄끼리 표기와 용량이 같은 옵션의 가격이 다르면 3단계에서 `OPTION_PRICE_CONFLICT`로 거부한다. 다시 매칭 때문에 같은 상품이 된 줄의 가격 충돌은 거부하지 않고, 이름을 고치지 않은 줄의 가격을 쓴 뒤 `price_conflict`로 운영자 확인에 올린다. 상품 없는 줄이 같은 이름 키로 합쳐져 생긴 충돌도 거부하지 않고 메뉴 순서가 앞선 줄의 가격을 쓰며, `kind = whisky`이면 `price_conflict`를 더한다. 이름 키는 서버만 계산하므로 업주가 미리 알 수 없기 때문이다.
 
 4단계의 다시 매칭은 업주가 메뉴판 이름을 고친 위스키 줄(`correctedProductName`의 정규화값이 추출한 상품명의 정규화값과 다름)에만 한다. 처리 단계와 같은 규칙 매처를 고친 이름 하나로 실행하고, LLM 층과 임베딩 후보 단계는 쓰지 않는다. 결과가 제출한 상품과 같으면 그대로, 다른 상품 하나로 확정되면 그 상품으로 바꾸고, 확정되지 않으면 상품 없는 위스키로 게시한다. 바뀌거나 풀린 줄은 `menu_item_checks`(스키마 가이드 7.7)에 올린다. 그 줄이 임시 diff에서 현재 메뉴판의 항목과 비교되었다면, 다시 매칭으로 달라진 새 항목이 그 항목의 자리를 대신하고 그 항목은 `remove` 변경 없이도 메뉴판에서 빠진다. 업주가 고친 카드 하나가 메뉴판의 두 줄로 남지 않게 하기 위해서다. 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다. 다만 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면(다른 작업이 먼저 게시된 경우 등) 운영자는 오래된 메뉴판을 보고 결정한 것이므로 반영하지 않는다. 이때 백엔드는 임시 diff를 다시 만들고 `review_version`을 올린 뒤 `REVIEW_OUTDATED`를 반환하며, 작업은 `ready_for_review` 상태를 유지한다.
 

@@ -268,7 +268,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `relinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 다른 상품에 연결됨. 상품 없던 항목이 연결된 경우도 같다 |
 | `unlinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 연결이 풀림 |
 | `attribute_conflict` | 검수에서 고른 상품의 연수나 에디션이 사진에서 읽은 값과 다름. 제출한 사람이 operator여도 같다 |
-| `price_conflict` | 다시 매칭으로 같은 상품의 줄이 여럿이 되어 같은 용량의 가격이 부딪쳤음 |
+| `price_conflict` | 다시 매칭으로 같은 상품의 줄이 여럿이 되거나, 상품 없는 위스키 줄이 같은 이름 키로 합쳐져 같은 용량의 가격이 부딪쳐 서버가 한 가격을 골랐음 |
 
 ### 4.22 menu_item_check_status
 
@@ -781,6 +781,7 @@ MVP에서는 한 업장에 `uploaded`, `processing`, `ready_for_review` 상태�
 | `item_order` | `smallint`, NOT NULL | `7` | 같은 실행 안에서 AI가 인식한 항목의 원본 표시 순서를 보존한다. |
 | `raw_text` | `text`, NOT NULL | `딘스톤 12년 15ml 8.0 / 30ml 15.0` | AI 구조화 전의 상품과 옵션 전체 원문을 보존한다. |
 | `extracted_line_type` | `extracted_line_type`, NOT NULL, 기본 `unknown` | `product` | AI가 1차 판별한 역할이다. 평가를 위해 운영자 검수 후에도 변경하지 않는다. |
+| `extracted_kind` | `menu_item_kind`, nullable | `other` | AI가 1차 판별한 메뉴 종류(4.20)다. `extracted_line_type = product`인 줄은 `whisky` 또는 `other`이고(AI가 돌려주지 않으면 `whisky`), 비상품 줄은 `null`이다. `whisky`인 줄만 상품 매칭을 한다. 검수 후에도 변경하지 않는다. 최종 종류는 게시된 `bar_menu_items.kind`에 있다. |
 | `corrected_line_type` | `extracted_line_type`, nullable | `product` | 운영자가 최초 역할을 바꾼 경우에만 교정값을 저장한다. 그대로 승인하면 null이다. |
 | `extracted_product_name` | `varchar(200)`, nullable | `딘스톤 12년` | AI가 구조화한 상품명이다. |
 | `extracted_brand_name` | `varchar(120)`, nullable | `딘스톤` | AI가 분리한 브랜드 표기다. 브랜드 별칭 조회에 사용한다. |

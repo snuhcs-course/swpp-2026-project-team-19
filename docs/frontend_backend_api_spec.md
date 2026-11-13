@@ -198,7 +198,7 @@ whisky
 other
 ```
 
-메뉴 항목의 종류다. `whisky`는 위스키 메뉴로, 상품에 연결되어 있거나 운영자의 연결을 기다린다. `other`는 진토닉, 콜라 같은 위스키가 아닌 메뉴로, 상품에 연결하지 않는다. 상품에 연결된 항목은 항상 `whisky`다.
+메뉴 항목의 종류다. `whisky`는 위스키 메뉴로, 상품에 연결되어 있거나 운영자의 연결을 기다린다. `other`는 진토닉, 콜라 같은 위스키가 아닌 메뉴로, 상품에 연결하지 않는다. 상품에 연결된 항목은 항상 `whisky`다. AI가 메뉴판 줄마다 1차로 판단한 종류(5.4의 `extractedKind`)도 같은 값을 쓴다.
 
 `ChangeType`
 
@@ -1016,7 +1016,7 @@ GET /api/bars/{barId}/menu
 | 연결을 기다리는 위스키 | `null` | `whisky` | 나오지 않는다. 운영자가 상품에 연결하면 그때부터 나온다 |
 | 위스키가 아닌 메뉴 | `null` | `other` | 나오지 않는다. 상품에 연결하지 않는다 |
 
-연결을 기다리는 위스키는 카탈로그에서 매칭되지 않은 줄을 업주가 상품 없이 게시한 항목이다(8.10, 3.14.3). 운영자가 확인한 뒤 기존 상품에 연결하거나 카탈로그에 새로 등록해 연결한다(3.18). 연결된 뒤에도 `barMenuItemId`와 `displayName`은 그대로다. 프론트엔드는 `productId`가 `null`인 항목을 연결 여부로 구분해 보여 주지 않아도 된다. 고객에게는 셋 모두 메뉴판의 한 줄이다.
+연결을 기다리는 위스키는 카탈로그에서 매칭되지 않은 줄을 업주가 상품 없이 게시한 항목이다(8.10, 3.14.3). 운영자가 확인한 뒤 기존 상품에 연결하거나 카탈로그에 새로 등록해 연결한다(3.18). 연결된 뒤에도 `displayName`, 메뉴판의 위치, 옵션은 그대로다. `barMenuItemId`는 보통 그대로지만, 이 업장이 예전에 판매했던 상품이거나 이미 메뉴판에 있는 상품에 연결하면 그 상품의 항목으로 줄이 옮겨 가 바뀐다(3.14.1의 연결 바꾸기). 프론트엔드는 `productId`가 `null`인 항목을 연결 여부로 구분해 보여 주지 않아도 된다. 고객에게는 셋 모두 메뉴판의 한 줄이다.
 
 #### 3.9.1 게시된 메뉴가 없을 때
 
@@ -3566,12 +3566,13 @@ GET /api/search/popular-products?limit=10
 | `relinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 다른 상품에 연결됨. 상품 없던 항목이 연결된 경우도 같다 | 나온다 | 검수 제출(8.11), 직접 수정(3.14.4) |
 | `unlinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 연결이 풀림 | 나오지 않는다 | 검수 제출(8.11), 직접 수정(3.14.4) |
 | `attribute_conflict` | 고른 상품의 연수나 에디션이 사진에서 읽은 값과 다름 | 나온다 | 검수 제출(8.7) |
-| `price_conflict` | 다시 매칭으로 같은 상품의 줄이 여럿이 되어 같은 용량의 가격이 부딪침 | 나온다 | 검수 제출(8.11, 8.12), 직접 수정의 다시 매칭(3.14.1, 3.14.4) |
+| `price_conflict` | 다시 매칭으로 같은 상품의 줄이 여럿이 되거나, 상품 없는 줄이 같은 이름 키로 합쳐져 같은 용량의 가격이 부딪침. 서버가 한 가격을 골랐다 | 상품이 있으면 나온다 | 검수 제출(8.11, 8.12), 직접 수정의 다시 매칭(3.14.1, 3.14.4) |
 
 - 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 사유의 열린 확인이 있다. 검수 반영이나 직접 추가로 그런 항목이 생기거나, 위스키가 아닌 메뉴가 다음 검수에서 `kind = whisky`로 바뀌면 같은 트랜잭션에서 확인을 만든다.
 - `kind = other`인 항목에는 확인을 만들지 않는다.
 - 항목이 현재 메뉴판에서 빠지면(검수의 `remove`, 3.14.5 삭제, 3.14.6 초기화) 그 항목의 열린 확인은 같은 트랜잭션에서 `dismissed`가 된다.
-- 확인의 출처(`source`)는 사유를 만든 검수 줄이다. 사유를 더할 때 출처도 그 줄로 바꾼다. 직접 추가로 생긴 확인은 출처가 `null`이다.
+- 확인의 출처(`source`)는 사유를 만든 검수 줄이다. 검수 제출로 사유를 더할 때는 출처도 그 줄로 바꾼다. 직접 추가(3.14.3)로 생긴 확인은 출처가 `null`이다. 직접 수정(3.14.4)으로 사유를 더할 때는 출처를 바꾸지 않는다(없으면 `null`로 둔다). 운영자가 처음 게시된 메뉴판 사진의 그 줄을 계속 볼 수 있게 하기 위해서다.
+- 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면(3.14.1의 연결 바꾸기, 8.11의 원래 항목 대신하기) 그 줄의 열린 확인은 `dismissed`가 되지 않고 새 항목으로 옮겨 간다.
 
 #### 3.18.2 확인 목록 조회
 
@@ -3949,6 +3950,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
           "rawText": "딘스톤 12년 15ml 8.0 / 30ml 15.0",
           "sourceBox": [62, 418, 931, 447],
           "extractedLineType": "product",
+          "extractedKind": "whisky",
           "correctedLineType": null,
           "effectiveLineType": "product",
           "initialResolutionStatus": "exact_match",
@@ -4064,9 +4066,11 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - `sourceBox`는 이 항목이 사진의 어디에 있는지다. `[x0, y0, x1, y1]`이고, 각 값은 사진(EXIF 회전을 적용한 뒤)의 가로·세로를 0–1000으로 본 좌표다. x는 왼쪽→오른쪽, y는 위→아래다. 이름과 가격을 읽은 OCR 줄을 모두 감싸는 상자이므로, 검수 화면은 `imageUrl`에서 이 영역을 잘라 메뉴판의 그 줄을 보여 줄 수 있다. OCR+LLM(hybrid) 추출에서만 값이 있고, Gemini 단독·mock 추출, OCR 실패로 Gemini 단독으로 넘어간 사진, OCR 줄 없이 사진에서만 읽은 항목은 `null`이다. `null`이면 `rawText`로 줄을 보여 준다.
 - `imageUrl`은 짧은 만료 시간을 가진 서명 URL이다. `imageUrlExpiresAt`이 만료 시각이며, 만료되지 않는 URL(로컬 저장소)이면 `null`이다. 만료되었거나 이미지 로딩이 `403`으로 실패하면 프론트엔드는 같은 `GET /api/menu-imports/{menuImportId}`를 다시 호출해 새 URL을 받는다. 다시 호출해도 `reviewVersion`이 같으면 검수 데이터는 바뀌지 않으므로 사용자가 입력 중인 결정을 유지한다.
 - `extractedLineType`은 AI의 최초 분류이며 검수 후에도 변경되지 않는다.
+- `extractedKind`는 AI가 판단한 메뉴 종류(2.3의 `MenuItemKind`)다. `extractedLineType = product`인 줄은 `whisky` 또는 `other`이고, 비상품 줄은 `null`이다. AI가 종류를 돌려주지 않으면 `whisky`로 본다. 검수 후에도 변경되지 않는다.
+- `extractedKind = other`인 줄(진토닉, 콜라, 안주 등)은 상품 매칭을 하지 않는다. `initialResolutionStatus`, `proposedProductId`, `newProductDraft`는 `null`이고 `candidates`는 `[]`다. 프론트엔드는 이 줄을 "그 외 메뉴"로 묶어 보여 주고, 기본 결정을 `publish_without_product`(`kind = other`, 8.10)로 둔다. 업주가 위스키로 다시 분류하면 상품 검색(7)으로 고르거나 `kind = whisky`로 상품 없이 게시한다. 이때 서버가 그 이름으로 매칭한다(8.11).
 - `correctedLineType`은 운영자가 최초 분류를 바꾼 경우에만 값이 있고, 그대로 승인한 경우 `null`이다.
 - `effectiveLineType`은 `correctedLineType ?? extractedLineType`으로 계산한 현재 검수 기준 역할이다.
-- `initialResolutionStatus`는 최초 상품 매칭 결과다. `exact_match`는 매칭 규칙(상품 별칭 정확 일치 또는 단계 규칙 S1·S2·S2b·S3)이 충돌 없이 상품 하나를 확정한 상태, `ambiguous`는 검토할 후보가 있으나 하나로 확정하지 못한 상태, `unmatched`는 유효 후보가 없는 상태다. 어느 규칙이 후보를 찾았는지는 후보 `evidence.rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)에 있다. 최초 분류가 비상품이라 매칭하지 않은 항목은 `null`이다.
+- `initialResolutionStatus`는 최초 상품 매칭 결과다. `exact_match`는 매칭 규칙(상품 별칭 정확 일치 또는 단계 규칙 S1·S2·S2b·S3)이 충돌 없이 상품 하나를 확정한 상태, `ambiguous`는 검토할 후보가 있으나 하나로 확정하지 못한 상태, `unmatched`는 유효 후보가 없는 상태다. 어느 규칙이 후보를 찾았는지는 후보 `evidence.rule`(`alias`, `S1`, `S2`, `S2b`, `S3`)에 있다. 최초 분류가 비상품이거나 위스키가 아닌 메뉴(`extractedKind = other`)라 매칭하지 않은 항목은 `null`이다.
 - 서버에서 LLM 매칭 층(M3, 기본 꺼짐)을 켜면 S1~S3가 확정하지 못한 줄에 LLM 후보가 붙을 수 있다. LLM 후보는 `matchMethod = llm`, `evidence.rule`이 `M3a` 또는 `M3b`(서버를 `MATCHING_LLM_MODE=tools`로 켜면 `TOOLS`)이고 그 줄의 다른 후보보다 앞 순위다. LLM이 후보를 낸 줄은 항상 `ambiguous`이며 `exact_match`가 되지 않는다. 1순위 후보 `evidence.confirmRecommended`가 `true`이면 그 후보 하나를 확인만 하면 되는 "확인 권장" 줄이다(S2b·S3 후보에도 붙는다). LLM 후보의 그 밖의 `evidence` 키(`via`, `englishName`, `vetoed`, `shortUnverified`, tools 모드의 `sure`, `editionUnverified`)는 디버깅용이다. 규칙은 `docs/menu_ai_matching_flow.md` 6장 "현재 구현"에 있다.
 - 서버에서 임베딩 후보 단계(I3-P40, 기본 꺼짐)를 켜면 규칙과 LLM 층 뒤에도 `unmatched`인 줄에 `matchMethod = embedding` 후보가 최대 5개 붙고 그 줄은 `ambiguous`가 된다. 임베딩 후보에는 `confirmRecommended`가 붙지 않으며 `exact_match`가 되지 않는다. `evidence.rule`은 `embedding`이고 `embeddingSimilarity`(0~1), `matchedText`, `model`은 설명·디버깅용이다. `confirmRecommended`가 없는 `ambiguous` 줄은 후보가 더해지지 않고 순서만 바뀔 수 있으며, 그 후보들의 `evidence`에 `rerankedBy: "embedding"`이 붙는다. 프론트엔드가 할 일은 없다(`matchMethod`의 `embedding`은 위 `MatchMethod` 값에 이미 있다).
 - `candidates`는 같은 상품을 중복하지 않으며 `candidateRank` 오름차순이다.
@@ -4074,9 +4078,9 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - `newProductDraft`는 화면 입력을 돕는 계산값이며 실제 카탈로그 행이 아니다.
 - `evidence`는 설명용 보조 정보다. 프론트엔드는 알 수 없는 키를 무시해야 한다.
 - `before`와 `after`가 최종 diff 비교의 구조화된 값이다.
-- `extractedItemIds`는 이 변경에 합쳐진 모든 추출 항목이다. 같은 상품(상품이 없으면 같은 이름 키)을 제안받은 줄이 여럿이면 옵션을 합쳐 변경 하나로 만들며(8.12), 메뉴 순서대로 담는다. `extractedItemId`는 그 첫 줄이다. 추출 항목이 없는 변경(`remove`)은 `[]`다. 이 변경을 `ignore`하면 담긴 줄 모두 메뉴판을 바꾸지 않는다.
-- `before`와 `after`의 `kind`는 그 메뉴 항목의 종류(2.3)다. `before`는 현재 항목의 값이고, `after`는 AI가 추출한 상품 줄이므로 `whisky`다. 검수자가 그 줄을 위스키가 아닌 메뉴로 게시하면(8.10) 반영 결과는 `other`가 된다.
-- 제안 상품이 없는 줄(`proposedProductId = null`, 보통 `unmatched`)은 상품 없이 게시하는 것으로 보고 비교한다. 현재 메뉴판에 이름 키(3.14.1)가 같은 미연결 항목이 있으면 그 항목과 비교해 `update`이거나 변경 없음이고, 없으면 `add`다. 이 변경의 `after.productId`는 `null`이다. 검수자가 그 줄에서 기존 상품을 고르거나 새 상품을 만들면 그 상품으로, 상품 없이 게시하면(8.10) 미연결 항목으로 반영된다. 그 줄을 비상품으로 확정하거나 제외하면 이 변경은 `ignore`로 보낸다(8.7의 `CHANGE_WITHOUT_PRODUCT`).
+- `extractedItemIds`는 이 변경에 합쳐진 모든 추출 항목이다. 같은 상품(상품이 없으면 같은 이름 키)을 제안받은 줄이 여럿이면 옵션을 합쳐 변경 하나로 만들며(8.12), 메뉴 순서대로 담는다. `extractedItemId`는 그 첫 줄이다. 추출 항목이 없는 변경(`remove`)은 `[]`다. 이 변경을 `ignore`하면 담긴 줄 중 최종 결정이 여전히 이 변경의 대상(같은 상품, 상품이 없으면 같은 이름 키)인 줄은 메뉴판을 바꾸지 않는다. 검수자가 다른 상품을 고르거나 이름을 고쳐 대상이 달라진 줄은 그 결정대로 반영한다(8.7).
+- `before`와 `after`의 `kind`는 그 메뉴 항목의 종류(2.3)다. `before`는 현재 항목의 값이고, `after`는 그 줄의 `extractedKind`다. 검수자가 다른 종류로 게시하면(8.10) 반영 결과는 그 종류가 된다.
+- 제안 상품이 없는 줄(`proposedProductId = null`, 보통 `unmatched`이거나 `extractedKind = other`)은 상품 없이 게시하는 것으로 보고 비교한다. 현재 메뉴판에 이름 키(3.14.1)가 같은 미연결 항목이 있으면 그 항목과 비교해 `update`이거나 변경 없음이고, 없으면 `add`다. 이 변경의 `after.productId`는 `null`이다. 검수자가 그 줄에서 기존 상품을 고르거나 새 상품을 만들면 그 상품으로, 상품 없이 게시하면(8.10) 미연결 항목으로 반영된다. 그 줄을 비상품으로 확정하거나 제외하고 이 변경에 담긴 다른 줄도 게시하지 않으면 이 변경은 `ignore`로 보낸다(8.7의 `CHANGE_WITHOUT_PRODUCT`).
 - 현재 메뉴판의 미연결 항목(3.9의 `productId = null`)도 다른 항목처럼 비교한다. `before.productId`는 `null`이고, 전체 교체(`full_replace`)에서 새 사진에 이름 키가 같은 줄이 없으면 `remove`가 된다.
 - `summary`는 표시용 문구이며 검증이나 반영 기준으로 사용하지 않는다.
 - `reviewDraft`는 이 작업에 저장된 검수 초안(5.9)이다. 저장된 초안이 없으면 `null`이다. 프론트엔드는 검수 화면을 열 때 이 초안의 결정을 화면에 다시 채운다. 초안의 `reviewVersion`이 응답의 `reviewVersion`과 다르면 검수 데이터가 다시 만들어진 것이므로, `extractedItemId`와 `extractedOptionId`가 지금 응답에 있는 결정만 다시 적용하고 `changeDecisions`는 버린다(9.4). 초안의 `draftVersion`은 다음 저장(5.9)에 그대로 보낸다.
@@ -4148,7 +4152,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
 **통합 검수 응답 (5.4)**. 관악 위스키 바의 업주 신청을 승인할 때(3.11.7) 신청 메뉴판 사진 두 장으로 만들어진 작업이다. 그래서 `imageUrl`이 신청 사진의 경로이고, mock 추출이라 `sourceBox`가 `null`이다. 두 사진의 추출 결과가 같으므로 둘째 사진(`images[1]`)과 첫째 사진의 설명 줄(`itemOrder = 5`), 둘째 사진의 변경 하나를 생략했다.
 
 - 2번 줄은 별칭이 정확히 맞아 `exact_match`다.
-- 3번 줄은 같은 상품 후보가 있지만 연수가 달라(`evidence.ageConflict`) `ambiguous`다. 같은 상품을 2번 줄이 먼저 제안했으므로 이 줄의 변경은 없다. 이 예시는 옵션 합치기(8.12) 전에 받은 응답이며, 지금 규칙에서는 2번 줄의 변경에 3번 줄이 합쳐진다(`extractedItemIds`). 구현한 뒤 다시 받아 바꾼다.
+- 3번 줄은 같은 상품 후보가 있지만 연수가 달라(`evidence.ageConflict`) `ambiguous`다. 같은 상품을 2번 줄이 먼저 제안했으므로 이 줄의 변경은 없다. 이 예시는 옵션 합치기(8.12) 전에 받은 응답이며, 지금 규칙에서는 2번 줄의 변경에 3번 줄이 합쳐진다(`extractedItemIds`). 이 예시를 받은 뒤에 더한 필드(`extractedKind`, 변경의 `kind`와 `extractedItemIds`, `reviewDraft`)도 아직 없다. 구현한 뒤 다시 받아 바꾼다.
 - 4번 줄은 후보가 없어 `unmatched`이며, 그 변경의 `after.productId`가 `null`이다. 이 줄을 `reject`하고 그 변경을 `apply`로 보내면 `CHANGE_WITHOUT_PRODUCT`다(8.9).
 
 ```json
@@ -4612,7 +4616,7 @@ Content-Type: application/json
 |---|---|---|
 | `kind` | 예 | `MenuItemKind`(2.3). `whisky`이면 운영자의 연결을 기다리는 위스키, `other`이면 위스키가 아닌 메뉴다 |
 
-`changeDecisions[]`는 `changeId`(필수)와 `decision`(`apply` 또는 `ignore`, 필수)이다. `reviewVersion`은 1 이상 정수다. 추출 항목에 연결된 변경(`extractedItemId`가 있는 변경)은 그 항목을 메뉴 항목으로 게시할 때(`select_existing_product`, `create_product`, `publish_without_product`)만 `apply`할 수 있다(8.7).
+`changeDecisions[]`는 `changeId`(필수)와 `decision`(`apply` 또는 `ignore`, 필수)이다. `reviewVersion`은 1 이상 정수다. 추출 항목에 연결된 변경(`extractedItemIds`가 빈 배열이 아닌 변경)은 그 줄 중 하나라도 메뉴 항목으로 게시할 때(`select_existing_product`, `create_product`, `publish_without_product`)만 `apply`할 수 있다(8.7).
 
 ### 8.2 기존 상품 선택 예시
 
@@ -4809,10 +4813,11 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - 요청의 `reviewVersion`은 현재 값과 같아야 한다.
 - `itemDecisions`는 검수 대상 항목을 빠짐없이 한 번씩 포함해야 한다.
 - `changeDecisions`는 현재 `pending` 변경을 빠짐없이 한 번씩 포함해야 한다.
-- 변경의 `extractedItemId` 항목을 `confirm_non_product`나 `reject`로 결정했으면 그 변경은 `ignore`여야 한다. `apply`이면 `fieldErrors[].path = changeDecisions[i].decision`, `code = CHANGE_WITHOUT_PRODUCT`다. `extractedItemId`가 없는 변경(`remove`)에는 이 규칙이 없다.
+- 변경의 `extractedItemIds`에 담긴 줄을 모두 `confirm_non_product`나 `reject`로 결정했으면 그 변경은 `ignore`여야 한다. `apply`이면 `fieldErrors[].path = changeDecisions[i].decision`, `code = CHANGE_WITHOUT_PRODUCT`다. 담긴 줄 중 하나라도 메뉴 항목으로 게시하면 `apply`할 수 있다. 예: 잔 줄과 병 줄이 합쳐진 변경에서 잔 줄만 제외하고 병 줄을 게시하려면 `apply`로 보낸다. 추출 항목이 없는 변경(`remove`)에는 이 규칙이 없다.
+- 변경을 `ignore`하면 그 변경에 담긴 줄 중 최종 결정이 여전히 그 변경의 대상(같은 상품, 상품이 없으면 같은 이름 키)인 줄은 메뉴판을 바꾸지 않는다. 대상이 달라진 줄은 그 결정대로 반영한다.
 - `finalLineType = product`이면 `select_existing_product`, `create_product`, `publish_without_product` 중 하나여야 한다.
 - 메뉴 항목으로 게시하는 줄은 `options`가 1~10개이고 모든 옵션에 가격이 있어야 한다(8.1). 상품 없이 게시하는 줄도 같다. `extractedOptionId`는 그 줄의 추출 옵션이어야 하고 한 줄에서 겹치지 않아야 한다.
-- 같은 상품(상품 없는 줄은 같은 이름 키)으로 게시하는 줄이 여럿이면 옵션을 합쳐 한 항목으로 게시한다(8.12). 업주가 제출한 대로 같은 상품인 줄끼리 표기와 용량이 같은 옵션의 가격이 다르면 `fieldErrors[].code = OPTION_PRICE_CONFLICT`다(8.12).
+- 같은 상품(상품 없는 줄은 같은 이름 키)으로 게시하는 줄이 여럿이면 옵션을 합쳐 한 항목으로 게시한다(8.12). 같은 `productId`로 제출한 줄끼리(다시 매칭으로 상품이 바뀐 줄 제외) 표기와 용량이 같은 옵션의 가격이 다르면 `fieldErrors[].code = OPTION_PRICE_CONFLICT`다. 다시 매칭이나 이름 키 때문에 합쳐진 줄의 충돌은 거부하지 않는다(8.12).
 - `publish_without_product`의 메뉴판 이름(`correctedProductName ?? extractedProductName`)이 없거나, 정규화한 이름 키(3.14.1)가 빈 값이면 `fieldErrors[].path = itemDecisions[i].correctedProductName`, `code = NOT_NORMALIZABLE`이다.
 - 기존 상품은 존재하고 연결 가능한 상태여야 한다.
 - 이름을 고친 위스키 줄은 이 이름으로 다시 매칭하고, 그 결과로 연결할 상품을 정한다(8.11). 제출한 `productId`와 달라져도 거부하지 않는다.
@@ -4855,7 +4860,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-`result.unlinkedWhisky`는 이번 반영으로 메뉴판에 올라간 줄 중 상품 없는 위스키 항목(`kind = whisky`, `productId = null`)의 수다. 상품 없이 게시한 줄(8.10)과 다시 매칭으로 연결이 풀린 줄(8.11)을 모두 센다. 메뉴판에 원래 있던 미연결 항목이 바뀌지 않고 남은 경우는 세지 않는다.
+`result.unlinkedWhisky`는 이번 반영으로 메뉴판에 추가되거나 바뀐 항목 중 상품 없는 위스키 항목(`kind = whisky`, `productId = null`)의 수다. 줄이 아니라 항목을 세므로, 이름 키가 같아 합쳐진 줄들(8.12)은 하나로 센다. 상품 없이 게시한 줄(8.10)과 다시 매칭으로 연결이 풀린 줄(8.11)을 모두 센다. 메뉴판에 원래 있던 미연결 항목이 바뀌지 않고 남은 경우는 세지 않는다.
 
 최종 확정과 메뉴판 반영은 하나의 `SERIALIZABLE` 트랜잭션이다. 성공하면 상태가 `ready_for_review`에서 `applied`로 바로 바뀐다.
 
@@ -4972,6 +4977,8 @@ HTTP/1.1 200 OK
 - 추출 항목에는 `selected_product_id = null`로 저장한다. `finalLineType`이 `product`이므로 `confirm_non_product`와 구분된다. `selectedMatchMethod`와 `matchConfidence`도 `null`이다.
 - 반영 응답의 `result`는 다른 항목과 같이 센다. `createdProducts`에는 세지 않는다.
 
+AI가 위스키가 아닌 메뉴로 분류한 줄(5.4의 `extractedKind = other`)은 보통 `kind = other`로 이 결정을 보낸다. 반대로 AI가 위스키로 분류한 줄도 업주가 위스키가 아닌 메뉴로 바꿔 `kind = other`로 보낼 수 있다.
+
 프론트엔드 처리: 게시 완료 화면에서 반영 응답의 `result.unlinkedWhisky`(8.8)가 1 이상이면 "새로 등록한 메뉴는 다음 날부터 위스키 검색에 나와요"를 한 번 보여 준다. 다시 매칭으로 연결이 풀린 줄(8.11)도 여기에 들어가므로, 프론트엔드가 제출한 결정만으로 판단하지 않는다.
 
 ### 8.11 이름을 고친 줄의 다시 매칭
@@ -4984,6 +4991,7 @@ HTTP/1.1 200 OK
 |---|---|
 | `select_existing_product` | 한다. 업주가 후보나 검색에서 직접 고른 상품도 같다 |
 | `publish_without_product`, `kind = whisky` | 한다 |
+| `publish_without_product`, `kind = whisky`, 그 줄의 `extractedKind = other` | 이름을 고치지 않아도 한다. AI가 위스키가 아닌 메뉴로 보아 처리 단계에서 매칭하지 않았기 때문이다 |
 | `publish_without_product`, `kind = other` | 하지 않는다 |
 | `create_product` | 하지 않는다. 새 상품의 이름과 별칭을 이 요청이 정하기 때문이다 |
 
@@ -5026,17 +5034,18 @@ HTTP/1.1 200 OK
 
 | 언제 | 처리 |
 |---|---|
-| 업주가 제출한 대로 같은 상품인 줄끼리 부딪침 | 거부한다. `422 VALIDATION_FAILED`이고, 부딪친 옵션마다 `fieldErrors[].path`가 뒤에 오는 줄의 그 옵션(`itemDecisions[i].options[j]`), `code = OPTION_PRICE_CONFLICT`다. 아무것도 반영하지 않는다 |
+| 업주가 같은 `productId`로 제출한 줄끼리 부딪침(다시 매칭으로 상품이 바뀌지 않은 줄) | 거부한다. `422 VALIDATION_FAILED`이고, 부딪친 옵션마다 `fieldErrors[].path`가 뒤에 오는 줄의 그 옵션(`itemDecisions[i].options[j]`), `code = OPTION_PRICE_CONFLICT`다. 아무것도 반영하지 않는다. 프론트엔드가 `productId`로 미리 묶어 막을 수 있는 충돌이다 |
 | 다시 매칭(8.11) 때문에 같은 상품이 된 줄끼리 부딪침 | 거부하지 않는다. 업주는 이 충돌을 화면에서 볼 수 없었기 때문이다. 이름을 고치지 않은 줄의 가격을 쓰고, 둘 다 고쳤으면 메뉴 순서가 앞선 줄의 가격을 쓴다. 합친 항목을 운영자 확인(3.18, 사유 `price_conflict`)에 올린다 |
+| 상품 없이 게시하는 줄끼리 이름 키가 같아 부딪침 | 거부하지 않는다. 이름 키는 서버의 정규화 함수로 계산하므로 프론트엔드가 같은 묶음을 미리 알 수 없기 때문이다(예: "글렌알라키 10 CS"와 "글렌알라키10CS"). 메뉴 순서가 앞선 줄의 가격을 쓴다. `kind = whisky`이면 합친 항목의 열린 확인(3.18)에 사유 `price_conflict`를 더하고, `kind = other`이면 확인을 만들지 않는다 |
 
-**프론트엔드 처리**: 업주가 제출한 충돌은 프론트엔드가 제출 전에 막는다는 전제다. 서버의 `OPTION_PRICE_CONFLICT`는 그 전제가 깨졌을 때의 안전장치다.
+**프론트엔드 처리**: 같은 `productId`로 제출하는 줄의 충돌은 프론트엔드가 제출 전에 막는다는 전제다. 서버의 `OPTION_PRICE_CONFLICT`는 그 전제가 깨졌을 때의 안전장치다.
 
-- 검수 화면은 같은 상품(상품 없이 게시하는 줄은 같은 메뉴판 이름)으로 정해진 카드를 "같은 위스키가 두 줄 있어 하나로 합쳤어요"로 묶고, 합친 옵션을 보여 준다. 같은 상품의 줄은 임시 diff 변경의 `extractedItemIds`(5.4)로도 알 수 있다. 업주가 후보나 검색에서 상품을 고르면 그 결과로 다시 묶는다.
+- 검수 화면은 같은 상품으로 정해진 카드를 "같은 위스키가 두 줄 있어 하나로 합쳤어요"로 묶고, 합친 옵션을 보여 준다. 상품 없이 게시하는 줄은 메뉴판 이름이 똑같은 카드만 묶어 보여 줄 수 있으며, 서버는 정규화한 이름 키로 더 넓게 합칠 수 있다(위 표의 셋째 줄). 같은 상품의 줄은 임시 diff 변경의 `extractedItemIds`(5.4)로도 알 수 있다. 업주가 후보나 검색에서 상품을 고르면 그 결과로 다시 묶는다.
 - 같은 표기와 용량에 가격이 다른 옵션이 있으면 업주가 하나를 고르게 하고, 고르기 전에는 게시 버튼을 막는다. 고르지 않은 옵션은 그 줄의 `options`에서 빼고 제출한다(8.1).
 - 묶인 카드는 서로 다른 위스키가 같은 상품으로 잘못 매칭된 것을 업주가 알아챌 기회이기도 하다. 업주가 한 줄의 상품을 바꾸면 묶음에서 빠진다.
 - 그래도 `OPTION_PRICE_CONFLICT`를 받으면 해당 카드의 묶음을 열어 다시 고르게 한다.
 
-**임시 diff와 검수 응답**: 처리 단계의 임시 diff(5.4)도 같은 상품을 제안받은 줄을 합쳐 변경 하나로 만든다. 변경의 `after.options`는 합친 옵션이고, `extractedItemIds`는 합친 모든 줄이다. 그 변경을 `ignore`하면 합친 줄 모두 메뉴판을 바꾸지 않는다.
+**임시 diff와 검수 응답**: 처리 단계의 임시 diff(5.4)도 같은 상품을 제안받은 줄을 합쳐 변경 하나로 만든다. 변경의 `after.options`는 합친 옵션이고, `extractedItemIds`는 합친 모든 줄이다. `apply`는 담긴 줄 중 하나라도 메뉴 항목으로 게시하면 할 수 있다(8.7). 그 변경을 `ignore`하면 담긴 줄 중 최종 결정이 여전히 이 변경의 대상(같은 상품, 상품이 없으면 같은 이름 키)인 줄은 메뉴판을 바꾸지 않는다. 검수자가 다른 상품을 고르거나 이름을 고쳐 대상이 달라진 줄은 그 결정대로 반영한다(8.7).
 
 ## 9. 오류 응답
 
