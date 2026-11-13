@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner.review
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -303,4 +304,45 @@ class PhotoReviewViewModelTest {
         assertEquals(PriceChoice.OLD, repo.savedDraft?.items?.first { it.id == "glendronach" }?.priceChoice)
         assertEquals(PriceChoice.OLD, PhotoReviewViewModel(repo).item("glendronach").priceChoice)
     }
+    @Test fun doublePublishTapSubmitsExactlyOnceAndDisablesWhileSaving() = runTest(dispatcher) {
+        val gate = CompletableDeferred<Unit>()
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var submits = 0
+        val source = object : PhotoReviewRepository by base {
+            override suspend fun publish(state: PhotoReviewState) {
+                submits++
+                gate.await()
+            }
+        }
+        val vm = PhotoReviewViewModel(source)
+        vm.requestPublish()
+        vm.confirmPublish()
+        vm.confirmPublish()
+        assertEquals(1, submits)
+        assertTrue(vm.publishing.value)
+        vm.dismissModal()
+        assertNotNull(vm.state.modal)
+        gate.complete(Unit)
+        assertFalse(vm.publishing.value)
+    }
+
+    @Test fun failedPublishUnlocksRetryWithoutLosingReview() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var attempts = 0
+        val source = object : PhotoReviewRepository by base {
+            override suspend fun publish(state: PhotoReviewState) {
+                attempts++
+                if (attempts == 1) error("테스트 네트워크 실패")
+            }
+        }
+        val vm = PhotoReviewViewModel(source)
+        vm.requestPublish()
+        vm.confirmPublish()
+        assertFalse(vm.publishing.value)
+        assertNotNull(vm.state)
+        vm.requestPublish()
+        vm.confirmPublish()
+        assertEquals(2, attempts)
+    }
+
 }
