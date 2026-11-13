@@ -52,13 +52,24 @@ object PhotoReviewRules {
      * normalized name collisions on the client rather than silently losing
      * a second line's unique price options. Do not guess a catalog product.
      */
+    /** Mirrors Backend #164's app.core.normalize.normalize name key for
+     * preflight ONLY; the server remains the authority on unique names.
+     */
+    internal fun normalizedUnlinkedMenuName(value: String): String =
+        java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFKC)
+            .replace(Regex("[‐-‒–—―−]"), "-")
+            .lowercase(java.util.Locale.ROOT)
+            .replace(Regex("""\s+"""), " ").trim()
+            .replace(Regex("""(?<=\d) ?(?:years? old|years?|yo|y|년|年)(?![a-z])"""), "")
+            .replace(Regex("""[^\p{L}\p{N}\s.\-]|_"""), "")
+            .replace(Regex("""(?<!\d)\.|\.(?!\d)"""), "")
+            .replace(Regex("""\s+"""), "")
+
     fun duplicateUnlinkedNames(state: PhotoReviewState): Set<String> =
         state.items.filter { !it.excluded && it.linkedProductId == null &&
             it.name.isNotBlank()
-        }.groupBy { item ->
-            java.text.Normalizer.normalize(item.name, java.text.Normalizer.Form.NFKC)
-                .lowercase().filter(Char::isLetterOrDigit)
-        }.filterKeys { it.isNotBlank() }.values.filter { it.size > 1 }
+        }.groupBy { normalizedUnlinkedMenuName(it.name) }
+            .filterKeys { it.isNotBlank() }.values.filter { it.size > 1 }
             .flatMap { group -> group.map { it.id } }.toSet()
 
     fun duplicatePhotoPriceConflicts(state: PhotoReviewState): Map<String, Set<String>> {
