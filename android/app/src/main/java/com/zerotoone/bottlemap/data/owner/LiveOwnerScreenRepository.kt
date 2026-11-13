@@ -1170,24 +1170,14 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         )
                     } else {
                     val draft = requireNotNull(chosen.newProduct)
-                    val brand = if(draft.brandId != null)
-                        mapOf("type" to "existing", "brandId" to draft.brandId)
-                    else mapOf("type" to "new",
-                        "canonicalName" to requireNotNull(draft.brandName),
-                        "aliases" to emptyList<Any>())
+                    // Owner photo review publishes to the bar-local menu first.
+                    // Canonical approval is a separate operator-only action.
                     mapOf(
-                        "action" to "create_product",
+                        "action" to "create_local_menu_item",
                         "extractedItemId" to item.extractedItemId,
                         "finalLineType" to "product",
-                        "brand" to brand,
-                        "correctedProductName" to chosen.displayNameOverride,
-                        "product" to mapOf(
-                            "category" to draft.category,
-                            "displayName" to draft.name,
-                            "ageYears" to draft.ageYears,
-                            "editionName" to draft.editionName,
-                            "abv" to draft.abvPercent,
-                        ),
+                        "category" to draft.category,
+                        "correctedProductName" to (chosen.displayNameOverride ?: draft.name),
                         "optionDecisions" to reviewOptions(item, chosen),
                         "excludedOptionIds" to chosen.excludedOptionIds,
                         "addedOptions" to addedReviewOptions(item, chosen),
