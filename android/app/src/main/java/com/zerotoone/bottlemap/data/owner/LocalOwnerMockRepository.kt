@@ -477,8 +477,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             // Photo-imported rows can predate the direct editor's three-option cap.
             // Keep their original overflow untouched when editing the first three.
             val oldRow = state.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
-            val editableLimit = if (manualMenuCategoryLabel(proposedProduct.category) == "위스키")
-                MANUAL_MENU_MAX_OPTIONS else 1
+            val editableLimit = MANUAL_MENU_MAX_OPTIONS
             val legacyTail = oldRow?.options?.drop(editableLimit).orEmpty()
             val preservesLegacyTail = oldRow != null && legacyTail.isNotEmpty() &&
                 item.options.size == oldRow.options.size &&
