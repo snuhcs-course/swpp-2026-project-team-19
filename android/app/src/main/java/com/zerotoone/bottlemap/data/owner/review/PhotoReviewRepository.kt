@@ -38,6 +38,11 @@ interface PhotoReviewRepository {
     /** Saves the in-progress review (decision 9). Mock only: no draft API exists yet. */
     suspend fun saveDraft(state: PhotoReviewState)
 
-    /** Publishes the reviewed menu. Mock only in this step. */
+    /** Refresh a short-lived signed photo URL after expiry/403 (contract §5.4).
+     * Mock scenarios do not have remote image URLs.
+     */
+    suspend fun refreshSourcePhotoUrl(itemId: String): String? = null
+
+    /** Publishes reviewed decisions through the backend's single 8.1 submit. */
     suspend fun publish(state: PhotoReviewState)
 }
