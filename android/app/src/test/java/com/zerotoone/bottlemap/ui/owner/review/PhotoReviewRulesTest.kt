@@ -189,16 +189,15 @@ class PhotoReviewRulesTest {
         assertTrue(PhotoReviewRules.problems(linked).isEmpty())
     }
 
-    @Test fun priceChoicesShowBarDefaultVolumeWhenPhotoOmitsSize() {
-        val card = ReviewItem(
-            id = "ob14", name = "오반 14", volume = 30.0,
-            volumeSource = VolumeSource.DEFAULT, oldPrice = 19000.0,
-            photoPrice = 18000.0,
-        )
-        assertEquals("30ml · 19,000원", reviewPriceChoiceLabel(card, card.oldPrice))
-        assertEquals("30ml · 18,000원", reviewPriceChoiceLabel(card, card.photoPrice))
-        assertEquals("Bottle · 18,000원", reviewPriceChoiceLabel(
-            card.copy(bottle = true), card.photoPrice))
+    @Test fun ocrPriceSummaryUsesDefaultPourOnlyWhenPhotoHasNoSize() {
+        val noSize = RecognizedOffer(priceKrw = 18000)
+        assertEquals("30ml", PhotoReviewRules.offerVolumeLabel(noSize, 30.0))
+        assertEquals("45ml", PhotoReviewRules.offerVolumeLabel(
+            RecognizedOffer(volumeMl = 45, priceKrw = 18000), 30.0))
+        assertEquals("Bottle", PhotoReviewRules.offerVolumeLabel(
+            RecognizedOffer(bottle = true, priceKrw = 18000), 30.0))
+        assertEquals("", PhotoReviewRules.offerVolumeLabel(noSize))
+        assertEquals("18,000원", won(18000.0))
     }
 
     @Test fun everyScenarioLoads() {
