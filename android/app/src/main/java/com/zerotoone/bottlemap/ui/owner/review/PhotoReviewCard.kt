@@ -53,7 +53,7 @@ internal fun ReviewCard(
 ) {
     // While a detail field is typed in, the header and issues stay as they were (v18 renders on change).
     val x = state.typingSnapshots[live.id]?.copy(expanded = live.expanded) ?: live
-    val issues = PhotoReviewRules.problems(x)
+    val issues = PhotoReviewRules.problems(x, state)
     val showSource = group == ReviewGroup.PENDING && issues.isNotEmpty() && !x.excluded
     val shape = RoundedCornerShape(13.dp)
     Column(
@@ -426,6 +426,10 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
             else "용량 옵션을 확인해 주세요"
         ) {
             ReviewChoice("옵션 수정", { vm.toggleExpanded(id) }, testTag = "review-option-edit-$id")
+        }
+        ReviewIssue.DUPLICATE_PRICE -> IssueRow("같은 위스키·용량의 사진별 가격이 달라요") {
+            ReviewChoice("가격 수정", { vm.toggleExpanded(id) },
+                testTag = "review-duplicate-price-edit-$id")
         }
     }
 }
