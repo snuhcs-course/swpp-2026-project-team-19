@@ -28,12 +28,8 @@ private fun sameReviewProduct(a: MockExtractedLine, b: MockExtractedLine): Boole
 }
 
 /** Stable serving identity across OCR lines, reviewed options and saved menu rows. */
-internal fun reviewServingKey(pourMl: Int?, label: String?): String {
-    // Backend #164 option identity is (optionLabel, pourMl). A 30ml "잔"
-    // and 30ml "샷" are distinct even if their prices differ.
-    val normalized = label.orEmpty().trim().lowercase()
-    return "label:$normalized|ml:${pourMl ?: "none"}"
-}
+internal fun reviewServingKey(pourMl: Int?, label: String?): String =
+    servingIdentityKey(pourMl, label)
 
 private fun reviewServing(option: MockMenuOption): String =
     reviewServingKey(option.pourMl, option.label)
