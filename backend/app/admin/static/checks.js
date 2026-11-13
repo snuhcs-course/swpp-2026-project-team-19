@@ -38,8 +38,13 @@ const checks = {
   listRequest: 0,
   listLoading: false,
   selectedId: null,
+  pages: 0,
   busy: false,
   imagesRefreshed: false,
+  // Bumped on sign-out, so a response that arrives afterwards is dropped instead of shown.
+  session: 0,
+  // checkId -> the product a link in this session resolved it to; see movedLink().
+  resolvedProducts: new Map(),
 };
 
 function checkLabel(group, value) {
@@ -80,6 +85,10 @@ function selectTab(name) {
 // Checks hold signed photo URLs, so nothing of them stays after sign-out (like clearDashboard).
 function clearChecks() {
   checks.listRequest++;
+  checks.session++;
+  checks.resolvedProducts.clear();
+  // A resolve still in flight is dropped (resolveCheck), so its controls are enabled here.
+  setCheckBusy(false);
   checks.started = false;
   checks.filters = { status: "open", barId: "", barName: "" };
   checks.items = [];
@@ -103,26 +112,33 @@ function setCheckListStatus(text, retry) {
 }
 
 // `keepDetail` leaves the detail pane as it is, e.g. showing a check just resolved that left the list.
-async function loadChecks(reset, { keepDetail = false } = {}) {
+// `keepPages` loads again as many pages as are shown, so a check from a later page stays in the list.
+async function loadChecks(reset, { keepDetail = false, keepPages = false } = {}) {
+  const pages = reset && keepPages ? Math.max(1, checks.pages) : 1;
   if (reset) {
     checks.items = [];
     checks.nextCursor = null;
+    checks.pages = 0;
     renderCheckRows();
   }
   const request = ++checks.listRequest;
   checks.listLoading = true;
   setCheckListStatus("불러오는 중...");
   $("checks-load-more").hidden = true;
-  const params = new URLSearchParams({ status: checks.filters.status, limit: String(CHECK_PAGE_SIZE) });
-  if (checks.filters.barId) params.set("barId", checks.filters.barId);
-  if (checks.nextCursor) params.set("cursor", checks.nextCursor);
   try {
-    const page = await api("GET", `/api/menu-item-checks?${params}`);
-    if (request !== checks.listRequest) return;
+    for (let loaded = 0; loaded < pages; loaded++) {
+      const params = new URLSearchParams({ status: checks.filters.status, limit: String(CHECK_PAGE_SIZE) });
+      if (checks.filters.barId) params.set("barId", checks.filters.barId);
+      if (checks.nextCursor) params.set("cursor", checks.nextCursor);
+      const page = await api("GET", `/api/menu-item-checks?${params}`);
+      if (request !== checks.listRequest) return;
+      const known = new Set(checks.items.map((check) => check.checkId));
+      checks.items = [...checks.items, ...page.items.filter((check) => !known.has(check.checkId))];
+      checks.nextCursor = page.nextCursor;
+      checks.pages++;
+      if (!checks.nextCursor) break;
+    }
     checks.listLoading = false;
-    const known = new Set(checks.items.map((check) => check.checkId));
-    checks.items = [...checks.items, ...page.items.filter((check) => !known.has(check.checkId))];
-    checks.nextCursor = page.nextCursor;
     renderCheckRows();
     showCheckListSummary();
     if (reset && checks.selectedId && !keepDetail) {
@@ -144,7 +160,7 @@ async function loadChecks(reset, { keepDetail = false } = {}) {
       showMessage("operator 권한이 없는 계정입니다.");
       return;
     }
-    setCheckListStatus(error.message, () => loadChecks(reset, { keepDetail }));
+    setCheckListStatus(error.message, () => loadChecks(reset, { keepDetail, keepPages }));
   }
 }
 
@@ -187,7 +203,7 @@ function renderCheckRows() {
       ),
       el("td", {}, check.item.displayName),
       el("td", { class: "badges" }, reasonBadges(check)),
-      el("td", {}, check.item.product ? check.item.product.displayName : "없음"),
+      el("td", {}, movedLink(check) ? resolvedProductText(check) : check.item.product ? check.item.product.displayName : "없음"),
       el(
         "td",
         {},
@@ -237,8 +253,10 @@ async function findBars(query) {
     return;
   }
   results.replaceChildren(el("p", { class: "hint" }, "찾는 중..."));
+  const session = checks.session;
   try {
     const found = await api("GET", `/api/search/bar-names?${new URLSearchParams({ query: query.trim(), limit: "10" })}`);
+    if (session !== checks.session) return;
     results.replaceChildren(
       ...(found.items.length
         ? found.items.map((bar) =>
@@ -251,7 +269,9 @@ async function findBars(query) {
         : [el("p", { class: "hint" }, "맞는 업장이 없습니다.")]),
     );
   } catch (error) {
-    if (error.status !== 401) results.replaceChildren(el("p", { class: "error-text" }, error.message));
+    if (error.status !== 401 && session === checks.session) {
+      results.replaceChildren(el("p", { class: "error-text" }, error.message));
+    }
   }
 }
 
@@ -281,6 +301,21 @@ function setCheckNotice(kind, ...content) {
   box.scrollIntoView({ block: "nearest" });
 }
 
+// A link can move the line to another item of the bar while the check stays on its own item (3.18.3),
+// so the product the check was resolved to can differ from the item's product.
+function movedLink(check) {
+  return (
+    check.status === "resolved" &&
+    check.resolvedProductId !== null &&
+    (!check.item.product || check.item.product.productId !== check.resolvedProductId)
+  );
+}
+
+// The answer has only the product's id; its name is known only for a link made on this page.
+function resolvedProductText(check) {
+  return checks.resolvedProducts.get(check.checkId) || "다른 항목으로 옮겨 연결함";
+}
+
 function renderCheckDetail(check) {
   const open = check.status === "open";
   const item = check.item;
@@ -305,7 +340,17 @@ function renderCheckDetail(check) {
     fields([
       ["종류", checkLabel("kind", item.kind)],
       ["연결 상품", productText(item.product)],
-      ["메뉴판", item.onBoard ? (item.soldOut ? "있음 (품절)" : "있음") : "없음 (메뉴판에서 빠짐)"],
+      ...(movedLink(check) ? [["처리 결과 상품", resolvedProductText(check)]] : []),
+      [
+        "메뉴판",
+        item.onBoard
+          ? item.soldOut
+            ? "있음 (품절)"
+            : "있음"
+          : movedLink(check)
+            ? "없음 (줄이 다른 항목으로 옮겨짐)"
+            : "없음 (메뉴판에서 빠짐)",
+      ],
       ["현재 옵션", item.options.length ? item.options.map(optionText).join(", ") : "-"],
       ["생긴 시각", formatTime(check.createdAt)],
       ...(open
@@ -380,7 +425,7 @@ function lineCrop(source, check) {
     onerror: () => {
       if (checks.imagesRefreshed || checks.selectedId !== check.checkId) return;
       checks.imagesRefreshed = true;
-      loadChecks(true);
+      loadChecks(true, { keepPages: true });
     },
   });
   link.append(img);
@@ -593,7 +638,7 @@ function linkForm(check) {
         clearCheckFieldErrors(form);
         const body = { resolution: "link_existing", productId: selected.productId, aliasesToAdd: readAliases(form, "aliasesToAdd") };
         if (window.confirm(`'${check.item.displayName}'을 ${productText(selected)}에 연결할까요?`)) {
-          resolveCheck(check, body, form);
+          resolveCheck(check, body, form, productText(selected));
         }
       },
     },
@@ -663,6 +708,7 @@ function createForm(check) {
   const pickBrand = (id, name) => {
     form.elements.brandType.value = "existing";
     brandId.value = id;
+    form.brandName = name;
     brandChosen.replaceChildren("브랜드: ", el("strong", {}, name));
     brandResults.replaceChildren();
     toggleBrand();
@@ -708,7 +754,8 @@ function createForm(check) {
     const body = readCreateForm(form);
     if (!body) return;
     if (window.confirm(`'${body.product.displayName}'을 카탈로그에 등록하고 '${check.item.displayName}'에 연결할까요?`)) {
-      resolveCheck(check, body, form);
+      const brandName = body.brand.type === "new" ? body.brand.canonicalName : form.brandName;
+      resolveCheck(check, body, form, productText({ ...body.product, brandName }));
     }
   });
   return el("div", { class: "check-form" }, form);
@@ -784,26 +831,30 @@ function setCheckBusy(busy) {
   $("checks-retry").disabled = busy;
 }
 
-async function resolveCheck(check, body, form) {
+// `productLabel` names the product a link resolves to, shown when the line moved (movedLink).
+async function resolveCheck(check, body, form, productLabel = null) {
   if (checks.busy) return;
   setCheckBusy(true);
   setCheckNotice("warn", "처리하는 중...");
+  const session = checks.session;
   let linked = false;
   try {
     const resolved = await api("POST", `/api/menu-item-checks/${encodeURIComponent(check.checkId)}/resolve`, body);
+    if (session !== checks.session) return; // signed out meanwhile: show nothing of the old session
+    if (productLabel) checks.resolvedProducts.set(resolved.checkId, productLabel);
     replaceCheck(resolved);
     renderCheckDetail(resolved);
     setCheckNotice("ok", RESOLVED_TEXT[body.resolution]);
     linked = body.resolution === "link_existing" || body.resolution === "create_and_link";
   } catch (error) {
-    if (error.status === 401) return;
+    if (error.status === 401 || session !== checks.session) return;
     handleResolveError(check, error, form);
   } finally {
-    setCheckBusy(false);
+    if (session === checks.session) setCheckBusy(false);
   }
   // A link may move or merge the line, which can open or extend a price_conflict check on another
   // item (3.14.1); the answer has only this check, so the list is loaded again.
-  if (linked) loadChecks(true, { keepDetail: true });
+  if (linked) loadChecks(true, { keepDetail: true, keepPages: true });
 }
 
 function handleResolveError(check, error, form) {
@@ -847,7 +898,12 @@ function handleResolveError(check, error, form) {
                 onclick: () => {
                   const aliasesToAdd = form ? readAliases(form, "aliases") : [];
                   if (window.confirm(`'${check.item.displayName}'을 기존 상품 '${existing.displayName}'에 연결할까요?`)) {
-                    resolveCheck(check, { resolution: "link_existing", productId: existing.productId, aliasesToAdd }, form);
+                    resolveCheck(
+                      check,
+                      { resolution: "link_existing", productId: existing.productId, aliasesToAdd },
+                      form,
+                      productText(existing),
+                    );
                   }
                 },
               },
