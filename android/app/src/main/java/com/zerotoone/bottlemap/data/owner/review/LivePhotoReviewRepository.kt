@@ -114,6 +114,7 @@ class LivePhotoReviewRepository(
                 // Candidate prices and OCR identities always come from the current
                 // server snapshot; a saved draft must not mask a price conflict.
                 existingPriceByProductId = fresh.existingPriceByProductId,
+                existingServingPricesByProductId = fresh.existingServingPricesByProductId,
                 mergeSources = fresh.mergeSources,
                 // A removed OCR primary must not regain its extractedOptionId
                 // when an owner later adds a manual replacement with null ID.

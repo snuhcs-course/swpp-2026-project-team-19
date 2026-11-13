@@ -358,7 +358,7 @@ private fun GroupedServingPriceChoices(x: ReviewItem, vm: PhotoReviewViewModel) 
     val unresolved = PhotoReviewRules.pendingPriceServings(x)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         unresolved.forEach { serving ->
-            val candidates = x.priceCandidates.filter { it.servingKey == serving }
+            val candidates = PhotoReviewRules.priceCandidatesForServing(x, serving)
                 .sortedByDescending { it.existing }
             val size = if (candidates.any { it.bottle }) "Bottle"
                 else candidates.firstOrNull()?.volumeMl?.let { "${it}ml" } ?: "용량 미인식"

@@ -156,6 +156,8 @@ data class ReviewItem(
     val primaryOptionLabel: String? = null,
     /** Current bar prices for matching the first photographed serving. */
     val existingPriceByProductId: Map<String, Double> = emptyMap(),
+    /** Every saved serving of each catalog product, not just the first OCR ml. */
+    val existingServingPricesByProductId: Map<String, List<ReviewPriceCandidate>> = emptyMap(),
     /** When multiple OCR rows refer to one product, only the master card
      * is shown; child rows are submitted as reject, never silently published.
      */

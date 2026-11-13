@@ -10,6 +10,7 @@ import com.zerotoone.bottlemap.data.owner.MockOwnerSnapshot
 import com.zerotoone.bottlemap.data.owner.MockReviewDecision
 import com.zerotoone.bottlemap.data.owner.MockDecisionKind
 import com.zerotoone.bottlemap.data.owner.reviewServingKey
+import com.zerotoone.bottlemap.data.owner.servingIdentityKey
 import com.zerotoone.bottlemap.network.MenuImportStatusDto
 import com.zerotoone.bottlemap.network.ReviewItemDto
 import com.zerotoone.bottlemap.ui.owner.review.CatalogProduct
@@ -21,6 +22,7 @@ import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItemType
 import com.zerotoone.bottlemap.ui.owner.review.ReviewMatch
 import com.zerotoone.bottlemap.ui.owner.review.ReviewOption
+import com.zerotoone.bottlemap.ui.owner.review.ReviewPriceCandidate
 import com.zerotoone.bottlemap.ui.owner.review.VolumeSource
 import com.zerotoone.bottlemap.ui.owner.review.validPrice
 import com.zerotoone.bottlemap.ui.owner.review.validVolume
@@ -118,6 +120,21 @@ private fun mapServerReviewItem(
                 }
             match?.let { row.productId to it.priceKrw.toDouble() }
         }.toMap()
+    val existingServingPrices = snapshot.menuItems.filter { it.barId == bar.barId &&
+        it.productId.isNotBlank() }.groupBy { it.productId }.mapValues { (_, rows) ->
+        rows.flatMap { row ->
+            row.options.map { saved ->
+                ReviewPriceCandidate(
+                    servingKey = servingIdentityKey(saved.pourMl, saved.label),
+                    volumeMl = saved.pourMl,
+                    bottle = isBottle(saved.label),
+                    label = saved.label,
+                    priceKrw = saved.priceKrw,
+                    existing = true,
+                )
+            }
+        }
+    }
     val options = recognized.map { option ->
         val bottle = isBottle(option.extractedOptionLabel)
         ReviewOption(
@@ -161,6 +178,7 @@ private fun mapServerReviewItem(
         primarySourceOptionId = first?.sourceOptionId,
         primaryOptionLabel = first?.label,
         existingPriceByProductId = existingPrices,
+        existingServingPricesByProductId = existingServingPrices,
         options = options.drop(1),
         oldPrice = oldPrice,
         photoPrice = photoPrice,

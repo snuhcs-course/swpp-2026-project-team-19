@@ -28,17 +28,49 @@ object PhotoReviewRules {
         if (option.bottle) "Bottle" else option.label,
     )
 
+    /** Reconcile live OCR choices with the full saved menu for the currently
+     * selected product. A manual volume/Bottle edit changes the serving key;
+     * the current edited price remains a New choice at that new key.
+     */
+    fun priceCandidatesForServing(x: ReviewItem, key: String): List<ReviewPriceCandidate> {
+        val options = optionSummary(x)
+        val current = options.firstOrNull { servingKey(it) == key }
+        val candidates = x.priceCandidates.filter { it.servingKey == key }.toMutableList()
+        val product = x.linkedProductId
+        if (product != null) {
+            x.existingServingPricesByProductId[product].orEmpty()
+                .filter { it.servingKey == key }
+                .forEach { saved ->
+                    if (candidates.none { it.existing && it.priceKrw == saved.priceKrw })
+                        candidates += saved
+                }
+        }
+        if (current != null && validPrice(current.price) &&
+            candidates.none { !it.existing && it.priceKrw == current.price.toInt() }) {
+            candidates += ReviewPriceCandidate(
+                servingKey = key,
+                volumeMl = current.volume.takeIf(::validVolume)?.toInt(),
+                bottle = current.bottle,
+                label = current.label,
+                priceKrw = current.price.toInt(),
+                sourceItemId = x.id,
+            )
+        }
+        return candidates
+    }
+
     fun pendingPriceServings(x: ReviewItem): Set<String> {
         if (!x.volumeChoicesConfirmed) return emptySet()
-        val active = optionSummary(x).map(::servingKey).toSet()
-        return x.priceCandidates.groupBy { it.servingKey }.filter { (key, prices) ->
-            key in active && prices.map { it.priceKrw }.distinct().size > 1 &&
-                key !in x.chosenServingPrices
-        }.keys
+        return optionSummary(x).map(::servingKey).toSet().filter { key ->
+            val candidates = priceCandidatesForServing(x, key)
+            val current = optionSummary(x).firstOrNull { servingKey(it) == key }
+            candidates.map { it.priceKrw }.distinct().size > 1 &&
+                x.chosenServingPrices[key] != current?.price?.toInt()
+        }.toSet()
     }
 
     fun chooseServingPrice(x: ReviewItem, key: String, price: Int): ReviewItem {
-        require(x.priceCandidates.any { it.servingKey == key && it.priceKrw == price })
+        require(priceCandidatesForServing(x,key).any { it.priceKrw == price })
         val primary = x.copy(chosenServingPrices = x.chosenServingPrices + (key to price))
         return if (x.primaryHasOption && servingKey(optionSummary(x).first()) == key)
             primary.copy(price = price.toDouble(), priceChoice = PriceChoice.MANUAL)
@@ -158,7 +190,8 @@ object PhotoReviewRules {
                 x.match == ReviewMatch.CANDIDATE && !x.matchConfirmed -> p += ReviewIssue.CANDIDATE
                 x.match == ReviewMatch.NEW && !x.nameSaved -> p += ReviewIssue.NEW
             }
-            if (x.priceCandidates.isNotEmpty()) {
+            if (x.priceCandidates.isNotEmpty() ||
+                x.existingServingPricesByProductId[x.linkedProductId].orEmpty().isNotEmpty()) {
                 if (pendingPriceServings(x).isNotEmpty()) p += ReviewIssue.PRICE_CHOICE
             } else {
                 if (x.oldPrice != null && x.photoPrice != null && x.oldPrice != x.photoPrice &&
@@ -201,7 +234,9 @@ object PhotoReviewRules {
             if (keys.distinct().size != keys.size) p += ReviewIssue.OPTION
         }
         if (x.typo && !x.nameSaved) p += ReviewIssue.NAME
-        if (x.name.trim().length !in 1..200 && ReviewIssue.NAME !in p) p += ReviewIssue.NAME
+        if ((x.name.trim().length !in 1..200 ||
+            normalizedUnlinkedMenuName(x.name).isBlank()) &&
+            ReviewIssue.NAME !in p) p += ReviewIssue.NAME
         if (state != null) {
             if (x.id in duplicatePhotoPriceConflicts(state))
                 p += ReviewIssue.DUPLICATE_PRICE
@@ -320,24 +355,17 @@ object PhotoReviewRules {
         // The grouped Live review has candidate prices rather than the old
         // two-button PriceChoice. Add the chosen catalog product's stored 30ml
         // price to that SAME serving's inline chooser after manual linking.
-        val first = optionSummary(x).firstOrNull()
-        val serving = first?.let(::servingKey)
-        val existingCandidate = if (x.priceCandidates.isNotEmpty() &&
-            old != null && serving != null && first != null &&
-            x.priceCandidates.none { it.existing && it.servingKey == serving }) {
-            ReviewPriceCandidate(
-                servingKey = serving,
-                volumeMl = first.volume.takeIf(::validVolume)?.toInt(),
-                bottle = first.bottle,
-                priceKrw = old.toInt(),
-                existing = true,
-            )
-        } else null
+        val active = optionSummary(x).map(::servingKey).toSet()
+        val photoCandidates = x.priceCandidates.filterNot { it.existing }
+        val savedCandidates = x.existingServingPricesByProductId[product.productId].orEmpty()
+            .filter { it.servingKey in active }
+        val combined = photoCandidates + savedCandidates
         return x.copy(
-        priceCandidates = x.priceCandidates + listOfNotNull(existingCandidate),
+        priceCandidates = combined,
+        chosenServingPrices = emptyMap(),
         oldPrice = old,
         priceChoice = if (x.priceChoice == PriceChoice.MANUAL) PriceChoice.MANUAL
-            else if (x.priceCandidates.isNotEmpty()) PriceChoice.PHOTO
+            else if (combined.isNotEmpty()) PriceChoice.PHOTO
             else if (changed) PriceChoice.NONE else PriceChoice.PHOTO,
         price = if (x.priceChoice == PriceChoice.MANUAL) x.price else photo ?: x.price,
         linkedProductId = product.productId,

@@ -381,8 +381,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     fun saveReviewName(id: String) {
         val x = item(id) ?: return
         val proposed = (x.reviewNameDraft ?: x.name).trim()
-        if (proposed.isEmpty()) {
-            toast("이름을 입력해 주세요.")
+        if (proposed.isEmpty() || proposed.length > 200 ||
+            PhotoReviewRules.normalizedUnlinkedMenuName(proposed).isBlank()) {
+            toast("메뉴 이름을 다시 확인해 주세요.")
             _events.trySend(PhotoReviewEvent.FocusReviewName(id))
             return
         }
@@ -394,7 +395,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
 
     fun confirmName(id: String) {
         val x = item(id) ?: return
-        if (x.name.isBlank()) {
+        if (x.name.isBlank() ||
+            PhotoReviewRules.normalizedUnlinkedMenuName(x.name).isBlank()) {
             toast("메뉴 이름을 확인해 주세요.")
             return
         }
@@ -411,8 +413,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     fun saveDetailName(id: String) {
         val x = item(id) ?: return
         val proposed = (x.detailNameDraft ?: x.name).trim()
-        if (proposed.isEmpty()) {
-            toast("메뉴 이름을 입력해 주세요.")
+        if (proposed.isEmpty() || proposed.length > 200 ||
+            PhotoReviewRules.normalizedUnlinkedMenuName(proposed).isBlank()) {
+            toast("메뉴 이름을 다시 확인해 주세요.")
             _events.trySend(PhotoReviewEvent.FocusDetailName(id))
             return
         }

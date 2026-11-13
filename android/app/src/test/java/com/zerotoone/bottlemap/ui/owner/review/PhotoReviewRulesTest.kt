@@ -397,4 +397,51 @@ class PhotoReviewRulesTest {
             PhotoReviewRules.normalizedUnlinkedMenuName("맥주 161"))
     }
 
+    @Test fun lateLinkingChecksEverySavedServingNotOnlyFirstOcrPrice() {
+        val photo = ReviewItem(id = "late-link", name = "글렌피딕 12년",
+            linkedProductId = null, match = ReviewMatch.CANDIDATE,
+            volume = 30.0, price = 15000.0,
+            options = listOf(ReviewOption(volume = 60.0, price = 26000.0)),
+            priceCandidates = listOf(
+                ReviewPriceCandidate("ml:30", volumeMl = 30, priceKrw = 15000),
+                ReviewPriceCandidate("ml:60", volumeMl = 60, priceKrw = 26000),
+            ),
+            existingServingPricesByProductId = mapOf("product" to listOf(
+                ReviewPriceCandidate("ml:30", volumeMl = 30, priceKrw = 12000, existing = true),
+                ReviewPriceCandidate("ml:60", volumeMl = 60, priceKrw = 23000, existing = true),
+            )))
+        val linked = PhotoReviewRules.markLinked(photo,CatalogProduct("product","글렌피딕 12년"))
+        assertEquals(2, PhotoReviewRules.pendingPriceServings(linked).size)
+        val first = PhotoReviewRules.chooseServingPrice(linked,"ml:30",15000)
+        assertEquals(setOf("ml:60"),PhotoReviewRules.pendingPriceServings(first))
+        val second = PhotoReviewRules.chooseServingPrice(first,"ml:60",23000)
+        assertTrue(PhotoReviewRules.pendingPriceServings(second).isEmpty())
+        assertEquals(23000.0,second.options.single().price,0.0)
+    }
+
+    @Test fun changingGlassToBottleRechecksSavedBottlePrice() {
+        val original = ReviewItem(id="changed-serving",name="위스키",
+            linkedProductId="product",volume=30.0,price=15000.0,
+            priceCandidates=listOf(ReviewPriceCandidate("ml:30",volumeMl=30,
+                priceKrw=15000)),
+            existingServingPricesByProductId=mapOf("product" to listOf(
+                ReviewPriceCandidate("Bottle",bottle=true,priceKrw=130000,
+                    existing=true))),
+        )
+        val bottle=PhotoReviewRules.toggleBottle(original,null,30.0)
+        val currentKey=PhotoReviewRules.servingKey(PhotoReviewRules.optionSummary(bottle).single())
+        assertEquals(1,PhotoReviewRules.pendingPriceServings(bottle).size)
+        assertEquals(setOf(15000,130000),
+            PhotoReviewRules.priceCandidatesForServing(bottle,currentKey)
+                .map { it.priceKrw }.toSet())
+        val selected=PhotoReviewRules.chooseServingPrice(bottle,currentKey,130000)
+        assertTrue(PhotoReviewRules.pendingPriceServings(selected).isEmpty())
+    }
+
+    @Test fun punctuationOnlyProductNameDoesNotUnlockPublish() {
+        val bad=ReviewItem(id="bad-name",name="!!!",price=10000.0)
+        assertTrue(ReviewIssue.NAME in PhotoReviewRules.problems(bad))
+        assertFalse(PhotoReviewRules.stats(PhotoReviewState(items=listOf(bad))).canPublish)
+    }
+
 }
