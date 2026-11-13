@@ -1,0 +1,291 @@
+{
+  "photo_id": "010_수이_02",
+  "bar": "수이",
+  "photo": {
+    "file": "010_sui_02.jpeg",
+    "photo_dir": "eval_photos_final",
+    "sha256": "17a89e136838acb0ecfd7e4dc416fa1bdce48f96afd6d114ed83a96443da4bdd"
+  },
+  "labels": "eval/labels_final_v1.json",
+  "gold": "eval/match_gold_final_v1.json",
+  "why": [
+    "omission",
+    "name_with_price",
+    "wrong_match"
+  ],
+  "history": "The recorded run put the price into one name (\"... (프렌치 오크) 39,000\"), which counts as one omission and one extra line.",
+  "expected_items": [
+    {
+      "raw_name": "Balvenie 12y (발베니)",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-12-doublewood"
+    },
+    {
+      "raw_name": "Balvenie American Oak (아메리칸 오크)",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-12-american-oak"
+    },
+    {
+      "raw_name": "Balvenie 14y (럼 캐스크)",
+      "price_krw": 24000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-14-caribbean"
+    },
+    {
+      "raw_name": "Balvenie Single Barrel (싱글배럴)",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-12-single-barrel"
+    },
+    {
+      "raw_name": "Balvenie 16y French Oak (프렌치 오크)",
+      "price_krw": 39000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-16-french-oak"
+    },
+    {
+      "raw_name": "Glenfiddich 12y (글렌피딕)",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-12"
+    },
+    {
+      "raw_name": "Glenfiddich 12y Sherry",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-12-sherry-cask-finish"
+    },
+    {
+      "raw_name": "Glenfiddich 15y",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-15"
+    },
+    {
+      "raw_name": "Glenfiddich 18y",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-18"
+    },
+    {
+      "raw_name": "The Glenlivet 12y (더 글렌리벳)",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenlivet-12"
+    },
+    {
+      "raw_name": "The Glenlivet 15y",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenlivet-15"
+    },
+    {
+      "raw_name": "The Glenlivet 18y",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenlivet-18"
+    },
+    {
+      "raw_name": "Macallan 12y Double Cask (맥캘란 더블)",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-12-double-cask"
+    },
+    {
+      "raw_name": "Macallan 12y Sherry Cask (쉐리)",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-12-sherry-oak"
+    },
+    {
+      "raw_name": "Macallan 15y Double cask",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-15-double-cask"
+    },
+    {
+      "raw_name": "Macallan 18y Double cask",
+      "price_krw": 49000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-18-double-cask"
+    },
+    {
+      "raw_name": "Macallan 18y Sherry cask",
+      "price_krw": 55000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-18-sherry-oak"
+    },
+    {
+      "raw_name": "Cragganmore 12y (크라겐모어)",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "cragganmore-12"
+    },
+    {
+      "raw_name": "Tormore Tempranillo Cask (토모어)",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:dl-tormore-13-tempranillo"
+    },
+    {
+      "raw_name": "Glenrothes 12y (글렌로시스)",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenrothes-12"
+    },
+    {
+      "raw_name": "Glenallachie 8y (글렌알라키)",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-8"
+    },
+    {
+      "raw_name": "Glenallachie 12y",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-12"
+    },
+    {
+      "raw_name": "Glenallachie 15y",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-15"
+    },
+    {
+      "raw_name": "Glenallachie 2014 Sinteis",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenallachie-2014-sinteis"
+    },
+    {
+      "raw_name": "Glenfarclas 105 (글렌파클라스)",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfarclas-105"
+    },
+    {
+      "raw_name": "Glenfarclas 10y",
+      "price_krw": 14000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfarclas-10"
+    },
+    {
+      "raw_name": "Glenfarclas 15y",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfarclas-15"
+    },
+    {
+      "raw_name": "Tamdhu 12y (탐듀)",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "tamdhu-12"
+    },
+    {
+      "raw_name": "Tamdhu 15y",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "tamdhu-15"
+    },
+    {
+      "raw_name": "Benriach 12y (벤리악)",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "benriach-12"
+    },
+    {
+      "raw_name": "Aberlour 12y (아벨라워)",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "aberlour-12"
+    },
+    {
+      "raw_name": "Aberlour 14y (아벨라워)",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "aberlour-14"
+    },
+    {
+      "raw_name": "Aberlour A'Bunadh (아부나흐)",
+      "price_krw": 26000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "aberlour-abunadh"
+    },
+    {
+      "raw_name": "Royal Brackla",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "royal-brackla-12"
+    }
+  ]
+}

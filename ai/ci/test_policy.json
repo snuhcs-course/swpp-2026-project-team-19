@@ -8,6 +8,7 @@
     "ai/match_llm": 90,
     "ai/ocr": 55,
     "ai/eval": 55,
-    "ai/extract": 55
+    "ai/extract": 55,
+    "ai/regression": 90
   }
 }

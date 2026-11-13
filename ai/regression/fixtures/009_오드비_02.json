@@ -1,0 +1,16 @@
+{
+  "photo_id": "009_오드비_02",
+  "bar": "오드비",
+  "photo": {
+    "file": "009_odbi_02.png",
+    "photo_dir": "eval_photos_final",
+    "sha256": "176866205a687557bf7eae1d6cb512404ced860ac6df4aa2ed432e4dfbe7e04b"
+  },
+  "labels": "eval/labels_final_v1.json",
+  "gold": "eval/match_gold_final_v1.json",
+  "why": [
+    "non_whisky_page"
+  ],
+  "history": "Page without whisky: the expected output is empty, and the recorded run returned nothing.",
+  "expected_items": []
+}

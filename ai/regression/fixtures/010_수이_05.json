@@ -1,0 +1,154 @@
+{
+  "photo_id": "010_수이_05",
+  "bar": "수이",
+  "photo": {
+    "file": "010_sui_05.jpeg",
+    "photo_dir": "eval_photos_final",
+    "sha256": "80319ab3154801d0ce6cf45f38baf0b8fe593298f5bcab8f842f0c40d3e5942f"
+  },
+  "labels": "eval/labels_final_v1.json",
+  "gold": "eval/match_gold_final_v1.json",
+  "why": [
+    "bottle_only",
+    "clean_baseline"
+  ],
+  "history": "Bottle-only page (17 items). No extraction error in the recorded run.",
+  "expected_items": [
+    {
+      "raw_name": "메이커스마크",
+      "price_krw": 150000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "makers-mark"
+    },
+    {
+      "raw_name": "듀어스12년",
+      "price_krw": 150000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "new:dewars-12"
+    },
+    {
+      "raw_name": "몽키숄더",
+      "price_krw": 150000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "monkey-shoulder"
+    },
+    {
+      "raw_name": "라프로윅 10년",
+      "price_krw": 220000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "laphroaig-10"
+    },
+    {
+      "raw_name": "탈리스커 10년",
+      "price_krw": 220000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "talisker-10"
+    },
+    {
+      "raw_name": "글렌모렌지 오리지널",
+      "price_krw": 230000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenmorangie-original"
+    },
+    {
+      "raw_name": "글렌드로낙 12년",
+      "price_krw": 230000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glendronach-12"
+    },
+    {
+      "raw_name": "헤네시 VSOP",
+      "price_krw": 240000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "non_whisky"
+    },
+    {
+      "raw_name": "글렌피딕12년",
+      "price_krw": 250000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenfiddich-12"
+    },
+    {
+      "raw_name": "탐듀 12년",
+      "price_krw": 250000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "tamdhu-12"
+    },
+    {
+      "raw_name": "달모어 12년",
+      "price_krw": 270000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "dalmore-12"
+    },
+    {
+      "raw_name": "맥캘란 12년 더블",
+      "price_krw": 270000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "macallan-12-double-cask"
+    },
+    {
+      "raw_name": "맥캘란 12년 쉐리",
+      "price_krw": 320000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "macallan-12-sherry-oak"
+    },
+    {
+      "raw_name": "발베니 12년",
+      "price_krw": 280000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "balvenie-12-doublewood"
+    },
+    {
+      "raw_name": "글렌알라키 12년",
+      "price_krw": 280000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenallachie-12"
+    },
+    {
+      "raw_name": "조니블루",
+      "price_krw": 700000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "johnnie-walker-blue"
+    },
+    {
+      "raw_name": "글렌모렌지 시그넷",
+      "price_krw": 700000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenmorangie-signet"
+    }
+  ]
+}

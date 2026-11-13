@@ -1,0 +1,634 @@
+{
+  "photo_id": "007_위스키복춘_01",
+  "bar": "위스키복춘",
+  "photo": {
+    "file": "007_bokchun_01.jpg",
+    "photo_dir": "eval_photos",
+    "sha256": "1e5e195f4fad857bfae474b05067aaa996752854e5022614fc898f6a859befec"
+  },
+  "labels": "eval/labels_v1_1.json",
+  "gold": "eval/match_gold_v1_1.json",
+  "why": [
+    "price",
+    "glass_bottle_pairs"
+  ],
+  "history": "77 items in glass/bottle columns (38 same-name pairs). One recorded run read a glass price ten times too high (33,000 as 330,000).",
+  "expected_items": [
+    {
+      "raw_name": "글렌그란트 15Y",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glen-grant-15"
+    },
+    {
+      "raw_name": "글렌그란트 15Y",
+      "price_krw": 360000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glen-grant-15"
+    },
+    {
+      "raw_name": "글렌드로낙 12Y",
+      "price_krw": 13000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glendronach-12"
+    },
+    {
+      "raw_name": "글렌드로낙 12Y",
+      "price_krw": 260000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glendronach-12"
+    },
+    {
+      "raw_name": "글렌드로낙 15Y",
+      "price_krw": 26000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glendronach-15"
+    },
+    {
+      "raw_name": "글렌드로낙 15Y",
+      "price_krw": 500000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glendronach-15"
+    },
+    {
+      "raw_name": "글렌리벳 12Y",
+      "price_krw": 13000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenlivet-12"
+    },
+    {
+      "raw_name": "글렌리벳 12Y",
+      "price_krw": 260000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenlivet-12"
+    },
+    {
+      "raw_name": "글렌모렌지 오리지널",
+      "price_krw": 11000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenmorangie-original"
+    },
+    {
+      "raw_name": "글렌모렌지 오리지널",
+      "price_krw": 220000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenmorangie-original"
+    },
+    {
+      "raw_name": "글렌모렌지 넥타도르",
+      "price_krw": 19000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenmorangie-nectar-dor"
+    },
+    {
+      "raw_name": "글렌모렌지 넥타도르",
+      "price_krw": 380000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenmorangie-nectar-dor"
+    },
+    {
+      "raw_name": "글렌모렌지 라산타",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenmorangie-lasanta"
+    },
+    {
+      "raw_name": "글렌모렌지 라산타",
+      "price_krw": 340000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenmorangie-lasanta"
+    },
+    {
+      "raw_name": "글렌모렌지 퀀타루반",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenmorangie-quinta-ruban"
+    },
+    {
+      "raw_name": "글렌모렌지 퀀타루반",
+      "price_krw": 310000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenmorangie-quinta-ruban"
+    },
+    {
+      "raw_name": "글렌모렌지 시그넷",
+      "price_krw": 41000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenmorangie-signet"
+    },
+    {
+      "raw_name": "글렌모렌지 시그넷",
+      "price_krw": 830000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenmorangie-signet"
+    },
+    {
+      "raw_name": "글렌모렌지 18Y",
+      "price_krw": 35000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenmorangie-18"
+    },
+    {
+      "raw_name": "글렌모렌지 18Y",
+      "price_krw": 690000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenmorangie-18"
+    },
+    {
+      "raw_name": "글렌알라키 12Y",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-12"
+    },
+    {
+      "raw_name": "글렌알라키 12Y",
+      "price_krw": 320000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenallachie-12"
+    },
+    {
+      "raw_name": "글렌알라키 15Y",
+      "price_krw": 26000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-15"
+    },
+    {
+      "raw_name": "글렌알라키 15Y",
+      "price_krw": 520000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenallachie-15"
+    },
+    {
+      "raw_name": "글렌파클라스 105",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfarclas-105"
+    },
+    {
+      "raw_name": "글렌파클라스 105",
+      "price_krw": 300000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenfarclas-105"
+    },
+    {
+      "raw_name": "글렌피딕 12Y",
+      "price_krw": 13000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-12"
+    },
+    {
+      "raw_name": "글렌피딕 12Y",
+      "price_krw": 260000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenfiddich-12"
+    },
+    {
+      "raw_name": "글렌피딕 15Y",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-15"
+    },
+    {
+      "raw_name": "글렌피딕 15Y",
+      "price_krw": 330000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "glenfiddich-15"
+    },
+    {
+      "raw_name": "달모어 12Y",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-12"
+    },
+    {
+      "raw_name": "달모어 12Y",
+      "price_krw": 300000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "dalmore-12"
+    },
+    {
+      "raw_name": "달모어 12Y 쉐리",
+      "price_krw": 24000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-12-sherry-cask-select"
+    },
+    {
+      "raw_name": "달모어 12Y 쉐리",
+      "price_krw": 480000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "dalmore-12-sherry-cask-select"
+    },
+    {
+      "raw_name": "달모어 15Y",
+      "price_krw": 30000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-15"
+    },
+    {
+      "raw_name": "달모어 15Y",
+      "price_krw": 600000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "dalmore-15"
+    },
+    {
+      "raw_name": "달모어 포트우드 리저브",
+      "price_krw": 24000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-port-wood"
+    },
+    {
+      "raw_name": "달모어 포트우드 리저브",
+      "price_krw": 480000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "dalmore-port-wood"
+    },
+    {
+      "raw_name": "달모어 시가몰트 리저브",
+      "price_krw": 36000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-cigar-malt"
+    },
+    {
+      "raw_name": "달모어 시가몰트 리저브",
+      "price_krw": 720000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "dalmore-cigar-malt"
+    },
+    {
+      "raw_name": "로얄브라클라 12Y",
+      "price_krw": 14000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "royal-brackla-12"
+    },
+    {
+      "raw_name": "로얄브라클라 12Y",
+      "price_krw": 280000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "royal-brackla-12"
+    },
+    {
+      "raw_name": "로얄브라클라 18Y",
+      "price_krw": 34000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "royal-brackla-18"
+    },
+    {
+      "raw_name": "로얄브라클라 18Y",
+      "price_krw": 680000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "royal-brackla-18"
+    },
+    {
+      "raw_name": "맥캘란 더블캐스크 12Y",
+      "price_krw": 13000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-12-double-cask"
+    },
+    {
+      "raw_name": "맥캘란 더블캐스크 12Y",
+      "price_krw": 270000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "macallan-12-double-cask"
+    },
+    {
+      "raw_name": "맥캘란 더블캐스크 15Y",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-15-double-cask"
+    },
+    {
+      "raw_name": "맥캘란 더블캐스크 15Y",
+      "price_krw": 550000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "macallan-15-double-cask"
+    },
+    {
+      "raw_name": "부나하벤 12Y",
+      "price_krw": 13000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "bunnahabhain-12"
+    },
+    {
+      "raw_name": "부나하벤 12Y",
+      "price_krw": 270000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "bunnahabhain-12"
+    },
+    {
+      "raw_name": "아란 10Y",
+      "price_krw": 13000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "arran-10"
+    },
+    {
+      "raw_name": "아란 10Y",
+      "price_krw": 270000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "arran-10"
+    },
+    {
+      "raw_name": "아란 보데가 셰리 캐스크",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "arran-sherry-cask"
+    },
+    {
+      "raw_name": "아란 보데가 셰리 캐스크",
+      "price_krw": 440000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "arran-sherry-cask"
+    },
+    {
+      "raw_name": "아벨라워 아부나흐",
+      "price_krw": 30000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "aberlour-abunadh"
+    },
+    {
+      "raw_name": "아벨라워 아부나흐",
+      "price_krw": 600000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "aberlour-abunadh"
+    },
+    {
+      "raw_name": "오반 14Y",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "oban-14"
+    },
+    {
+      "raw_name": "오반 14Y",
+      "price_krw": 360000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "oban-14"
+    },
+    {
+      "raw_name": "카발란 솔리스트 셰리 오크",
+      "price_krw": 33000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "kavalan-solist-sherry"
+    },
+    {
+      "raw_name": "카발란 솔리스트 셰리 오크",
+      "price_krw": 660000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "kavalan-solist-sherry"
+    },
+    {
+      "raw_name": "카발란 솔리스트 비노 바리끄",
+      "price_krw": 46000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "kavalan-solist-vinho-barrique"
+    },
+    {
+      "raw_name": "카발란 솔리스트 비노 바리끄",
+      "price_krw": 920000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "kavalan-solist-vinho-barrique"
+    },
+    {
+      "raw_name": "카발란 트리플 셰리",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "kavalan-triple-sherry"
+    },
+    {
+      "raw_name": "카발란 트리플 셰리",
+      "price_krw": 500000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "kavalan-triple-sherry"
+    },
+    {
+      "raw_name": "클라이넬리쉬 14Y",
+      "price_krw": 12000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "clynelish-14"
+    },
+    {
+      "raw_name": "클라이넬리쉬 14Y",
+      "price_krw": 240000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "clynelish-14"
+    },
+    {
+      "raw_name": "발베니 12Y",
+      "price_krw": 14000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-12-doublewood"
+    },
+    {
+      "raw_name": "발베니 12Y",
+      "price_krw": 280000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "balvenie-12-doublewood"
+    },
+    {
+      "raw_name": "발베니 14Y",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-14-caribbean"
+    },
+    {
+      "raw_name": "발베니 14Y",
+      "price_krw": 450000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "balvenie-14-caribbean"
+    },
+    {
+      "raw_name": "츠누키 에디션 2025",
+      "price_krw": 24000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "tsunuki-the-edition-2025"
+    },
+    {
+      "raw_name": "츠누키 에디션 2025",
+      "price_krw": 490000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "tsunuki-the-edition-2025"
+    },
+    {
+      "raw_name": "요이치 싱글몰트",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "yoichi-single-malt"
+    },
+    {
+      "raw_name": "요이치 싱글몰트",
+      "price_krw": 330000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "yoichi-single-malt"
+    },
+    {
+      "raw_name": "에드라두어 10Y",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "edradour-10"
+    },
+    {
+      "raw_name": "노마드",
+      "price_krw": 10000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "nomad-outland"
+    },
+    {
+      "raw_name": "노마드",
+      "price_krw": 200000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "nomad-outland"
+    }
+  ]
+}

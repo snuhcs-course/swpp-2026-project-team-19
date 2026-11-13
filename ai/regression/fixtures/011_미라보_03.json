@@ -1,0 +1,498 @@
+{
+  "photo_id": "011_미라보_03",
+  "bar": "미라보",
+  "photo": {
+    "file": "011_mirabeau_03.jpeg",
+    "photo_dir": "eval_photos_test",
+    "sha256": "21452197f463c3ca1dc1edc520ddb08d8c8f2798771aad2a713929e84ba7cf02"
+  },
+  "labels": "eval/labels_heldout_v1_1.json",
+  "gold": "eval/match_gold_v1_1.json",
+  "why": [
+    "wrong_match",
+    "independent_bottlers"
+  ],
+  "history": "60 lines, many independent bottlings. With the I2 catalog 8 lines got candidates that did not include the right product.",
+  "expected_items": [
+    {
+      "raw_name": "라가불린(Lagavulin) 8년",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "lagavulin-8"
+    },
+    {
+      "raw_name": "라가불린(Lagavulin) 11년 스위트 피트",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:lagavulin-11-sweet-peat"
+    },
+    {
+      "raw_name": "라가불린(Lagavulin) 디스틸러리 에디션 2023",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:lagavulin-de-2023"
+    },
+    {
+      "raw_name": "라가불린(Lagavulin) 16년",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "lagavulin-16"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 마키어 베이",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-machir-bay"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 사닉",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-sanaig"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트랭스",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-machir-bay-cs"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 코리아 스몰배치",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-korea-small-batch"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 배치 스트랭스",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-batch-strength"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 사닉 캐스크 스트랭스",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-sanaig-cs"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 피노 셰리 캐스크",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-fino-sherry"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 꼬냑 캐스크",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-cognac-cask"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) PX 셰리 캐스크",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-px-sherry"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 로크곰",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-loch-gorm"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 100% 아일라",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-100-islay"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 포트 싱글 캐스크 피니시",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-port-single-cask"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 소테른 캐스크",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-sauternes-cask"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 포트 캐스크",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-port-cask"
+    },
+    {
+      "raw_name": "킬호만(Kilchoman) 16년",
+      "price_krw": 54000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilchoman-16"
+    },
+    {
+      "raw_name": "브룩라디(Bruichladdich) 스코티시 발리",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bruichladdich-classic-laddie"
+    },
+    {
+      "raw_name": "브룩라디(Bruichladdich) 아일라 발리",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bruichladdich-islay-barley"
+    },
+    {
+      "raw_name": "브룩라디(Bruichladdich) 18년",
+      "price_krw": 60000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bruichladdich-18"
+    },
+    {
+      "raw_name": "브룩라디(Bruichladdich) 블랙아트 에디션 11",
+      "price_krw": 140000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bruichladdich-black-art-11"
+    },
+    {
+      "raw_name": "포트샬롯(Port Charllotte) 10년",
+      "price_krw": 19000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "port-charlotte-10"
+    },
+    {
+      "raw_name": "포트샬롯(Port Charllotte) 아일라 발리 2014",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:port-charlotte-islay-barley-2014"
+    },
+    {
+      "raw_name": "포트샬롯(Port Charllotte) PMC:01",
+      "price_krw": 33000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:port-charlotte-pmc-01"
+    },
+    {
+      "raw_name": "옥토모어(Octomore) 14.1",
+      "price_krw": 43000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:octomore-14-1"
+    },
+    {
+      "raw_name": "옥토모어(Octomore) 14.2",
+      "price_krw": 47000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:octomore-14-2"
+    },
+    {
+      "raw_name": "옥토모어(Octomore) 15.1",
+      "price_krw": 47000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:octomore-15-1"
+    },
+    {
+      "raw_name": "옥토모어(Octomore) 15.2",
+      "price_krw": 49000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:octomore-15-2"
+    },
+    {
+      "raw_name": "옥토모어(Octomore) 15.3",
+      "price_krw": 60000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:octomore-15-3"
+    },
+    {
+      "raw_name": "쿨일라(Caol Ila) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:caol-ila-12"
+    },
+    {
+      "raw_name": "쿨일라(Caol Ila) 18년",
+      "price_krw": 42000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:caol-ila-18"
+    },
+    {
+      "raw_name": "부나하벤(Bunnahabhain) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "bunnahabhain-12"
+    },
+    {
+      "raw_name": "부나하벤(Bunnahabhain) 크루아 모나",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bunnahabhain-cruach-mhona"
+    },
+    {
+      "raw_name": "부나하벤(Bunnahabhain) 안클라닥",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bunnahabhain-an-cladach"
+    },
+    {
+      "raw_name": "부나하벤(Bunnahabhain) 토흐카흐",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bunnahabhain-toiteach-a-dha"
+    },
+    {
+      "raw_name": "부나하벤(Bunnahabhain) 에리네 그레이뉴",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bunnahabhain-eirigh-na-greine"
+    },
+    {
+      "raw_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트랭스",
+      "price_krw": 33000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bunnahabhain-12-cs"
+    },
+    {
+      "raw_name": "부나하벤(Bunnahabhain) 14년 루비포트 캐스크 피니시",
+      "price_krw": 37000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bunnahabhain-14-ruby-port"
+    },
+    {
+      "raw_name": "부나하벤(Bunnahabhain) 18년",
+      "price_krw": 48000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bunnahabhain-18"
+    },
+    {
+      "raw_name": "아란(Arran) 10년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "arran-10"
+    },
+    {
+      "raw_name": "아란(Arran) 쿼터 캐스크",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-quarter-cask"
+    },
+    {
+      "raw_name": "아란(Arran) 포트 캐스크",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-port-cask"
+    },
+    {
+      "raw_name": "아란(Arran) 아마로네 캐스크",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-amarone-cask"
+    },
+    {
+      "raw_name": "아란(Arran) 소테른 캐스크",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-sauternes-cask"
+    },
+    {
+      "raw_name": "아란(Arran) 셰리 캐스크 캐스크 스트랭스",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "arran-sherry-cask"
+    },
+    {
+      "raw_name": "아란(Arran) 마크리무어 캐스크 스트랭스",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-machrie-moor-cs"
+    },
+    {
+      "raw_name": "아란(Arran) 마크리무어 10년",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-machrie-moor-10"
+    },
+    {
+      "raw_name": "아란(Arran) 시그니처 시리즈",
+      "price_krw": 32000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "아란(Arran) 프라이빗 캐스크 No.2",
+      "price_krw": 32000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-private-cask-2"
+    },
+    {
+      "raw_name": "아란(Arran) 18년",
+      "price_krw": 50000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-18"
+    },
+    {
+      "raw_name": "아란(Arran) 21년",
+      "price_krw": 68000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-21"
+    },
+    {
+      "raw_name": "아란(Arran) 25년",
+      "price_krw": 140000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:arran-25"
+    },
+    {
+      "raw_name": "탈리스커(Talisker) 스카이",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:talisker-skye"
+    },
+    {
+      "raw_name": "탈리스커(Talisker) 10년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "talisker-10"
+    },
+    {
+      "raw_name": "탈리스커(Talisker) 더 와일드 블루",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:talisker-wild-blue"
+    },
+    {
+      "raw_name": "탈리스커(Talisker) 스톰",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:talisker-storm"
+    },
+    {
+      "raw_name": "탈리스커(Talisker) 18년",
+      "price_krw": 45000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:talisker-18"
+    },
+    {
+      "raw_name": "탈리스커(Talisker) 25년",
+      "price_krw": 95000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:talisker-25"
+    }
+  ]
+}

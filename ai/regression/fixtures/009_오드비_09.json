@@ -1,0 +1,171 @@
+{
+  "photo_id": "009_오드비_09",
+  "bar": "오드비",
+  "photo": {
+    "file": "009_odbi_09.jpeg",
+    "photo_dir": "eval_photos_final",
+    "sha256": "d1a3d3712c7f9988014d49dadf184e2f4624d0ed56bf3738e1f52a97a258549f"
+  },
+  "labels": "eval/labels_final_v1.json",
+  "gold": "eval/match_gold_final_v1.json",
+  "why": [
+    "omission",
+    "non_whisky_lines",
+    "glass_bottle_mix"
+  ],
+  "history": "Whisky by the glass followed by four bottled beers. The recorded run left the four beers out; the label keeps them (gold non_whisky).",
+  "expected_items": [
+    {
+      "raw_name": "몰트맨 싱글몰트 페터캐른37 / 행사",
+      "price_krw": 70000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:maltman-fettercairn-37"
+    },
+    {
+      "raw_name": "와일드터키 아카이브 골드포일16 / 행사",
+      "price_krw": 50000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "글렌알라키19 엑스 솔레라 / 한정파 행사",
+      "price_krw": 60000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenallachie-19-ex-solera"
+    },
+    {
+      "raw_name": "시그나토리 노스 브리티쉬 싱글그레인34 / 행사",
+      "price_krw": 50000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:signatory-north-british-34"
+    },
+    {
+      "raw_name": "아일라 싱글몰트 보모어21 셰리 / 행사",
+      "price_krw": 40000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "믹터스 토스티드 배럴 피니쉬 / 행사",
+      "price_krw": 60000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "더 노스스타 아드모어26 / 행사",
+      "price_krw": 50000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:north-star-ardmore-26"
+    },
+    {
+      "raw_name": "카발란 증류소 킹 카 위스키 올드보틀",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "하이랜드파크CS R.4",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "highland-park-cs-batch-4"
+    },
+    {
+      "raw_name": "발베니12 골드캐스크",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:balvenie-12-golden-cask"
+    },
+    {
+      "raw_name": "벤리악 쿼터캐스크",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:benriach-quarter-cask"
+    },
+    {
+      "raw_name": "로크로몬드12",
+      "price_krw": 14000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "loch-lomond-12"
+    },
+    {
+      "raw_name": "로크로몬드18",
+      "price_krw": 31000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "loch-lomond-18"
+    },
+    {
+      "raw_name": "신도 더 블렌디드",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:shindo-the-blended"
+    },
+    {
+      "raw_name": "라프로익15",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:laphroaig-15"
+    },
+    {
+      "raw_name": "기네스 병",
+      "price_krw": 12000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "non_whisky"
+    },
+    {
+      "raw_name": "산미구엘 병",
+      "price_krw": 9000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "non_whisky"
+    },
+    {
+      "raw_name": "아사히 병",
+      "price_krw": 8000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "non_whisky"
+    },
+    {
+      "raw_name": "코로나 병 + 라임(선택)",
+      "price_krw": 7000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "non_whisky"
+    }
+  ]
+}

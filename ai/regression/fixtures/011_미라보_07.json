@@ -1,0 +1,266 @@
+{
+  "photo_id": "011_미라보_07",
+  "bar": "미라보",
+  "photo": {
+    "file": "011_mirabeau_07.jpeg",
+    "photo_dir": "eval_photos_test",
+    "sha256": "2f3cdf5c75fa1f1f92de4da214a69c8842877658be2179a9fcaa02938663f4a8"
+  },
+  "labels": "eval/labels_heldout_v1_1.json",
+  "gold": "eval/match_gold_v1_1.json",
+  "why": [
+    "glass_bottle_confusion",
+    "price"
+  ],
+  "history": "One recorded run turned a 42,000 glass into a 420,000 bottle.",
+  "expected_items": [
+    {
+      "raw_name": "메이커스 마크(Maker's Mark) 버번",
+      "price_krw": 12000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "makers-mark"
+    },
+    {
+      "raw_name": "메이커스 마크(Maker's Mark) 46",
+      "price_krw": 14000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:makers-mark-46"
+    },
+    {
+      "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트랭스",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:makers-mark-cask-strength"
+    },
+    {
+      "raw_name": "리뎀션(Redemption) 라이",
+      "price_krw": 12000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:redemption-rye"
+    },
+    {
+      "raw_name": "놉 크릭(Knob Creek) 버번",
+      "price_krw": 12000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "knob-creek"
+    },
+    {
+      "raw_name": "놉 크릭(Knob Creek) 라이",
+      "price_krw": 13000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:knob-creek-rye"
+    },
+    {
+      "raw_name": "이글레어(Eagle Rare) 10년",
+      "price_krw": 14000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "eagle-rare-10"
+    },
+    {
+      "raw_name": "포로지스(Four Roses) 싱글 배럴",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:four-roses-single-barrel"
+    },
+    {
+      "raw_name": "러셀(Russel's) 10년 버번",
+      "price_krw": 13000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:russells-reserve-10"
+    },
+    {
+      "raw_name": "러셀(Russel's) 버번 싱글 배럴",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "russells-reserve-single-barrel"
+    },
+    {
+      "raw_name": "러셀(Russel's) 라이 싱글 배럴",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:russells-reserve-rye-single-barrel"
+    },
+    {
+      "raw_name": "1776 제임스 E.페퍼(1776 James E. Pepper) 버번",
+      "price_krw": 14000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:james-e-pepper-1776-bourbon"
+    },
+    {
+      "raw_name": "1776 제임스 E.페퍼(1776 James E. Pepper) 라이",
+      "price_krw": 14000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:james-e-pepper-1776-rye"
+    },
+    {
+      "raw_name": "믹터스(Michter's) 버번",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:michters-us1-bourbon"
+    },
+    {
+      "raw_name": "믹터스(Michter's) 라이",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:michters-us1-rye"
+    },
+    {
+      "raw_name": "사제락(Sazerac) 라이",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:sazerac-rye"
+    },
+    {
+      "raw_name": "브로큰 배럴(Broken Barrel) 버번 포트 캐스크",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:broken-barrel-port-cask"
+    },
+    {
+      "raw_name": "베이커스(Baker's) 버번",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:bakers-7"
+    },
+    {
+      "raw_name": "바톤 1792(Barton 1792) 1792 풀 프루프",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:1792-full-proof"
+    },
+    {
+      "raw_name": "우드포드 리저브(Woodford Reserve) 버번",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "woodford-reserve"
+    },
+    {
+      "raw_name": "우드포드 리저브(Woodford Reserve) 더블오크",
+      "price_krw": 19000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "woodford-reserve-double-oaked"
+    },
+    {
+      "raw_name": "우드포드 리저브(Woodford Reserve) 더블 X.O",
+      "price_krw": 42000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:woodford-reserve-double-xo-blend"
+    },
+    {
+      "raw_name": "윌렛(Willet) 로완스크릭",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "rowans-creek"
+    },
+    {
+      "raw_name": "윌렛(Willet) 팟 스틸 리저브",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:willett-pot-still-reserve"
+    },
+    {
+      "raw_name": "윌렛(Willet) 노아스밀",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "noahs-mill"
+    },
+    {
+      "raw_name": "윌렛(Willet) 위티드 버번 8년",
+      "price_krw": 70000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:willett-family-estate-bourbon-8"
+    },
+    {
+      "raw_name": "배럴(Barrel) 라이 씨그라스",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:barrell-seagrass"
+    },
+    {
+      "raw_name": "블랑톤(Blanton) 버번 싱글배럴",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:blantons-original"
+    },
+    {
+      "raw_name": "블랑톤(Blanton) SFTB",
+      "price_krw": 62000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:blantons-sftb"
+    },
+    {
+      "raw_name": "부커스(Booker's) 버번",
+      "price_krw": 35000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "bookers"
+    },
+    {
+      "raw_name": "일라이저 크레이그(Elijah Craig) 버번 배럴 프루프",
+      "price_krw": 37000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:elijah-craig-barrel-proof"
+    }
+  ]
+}

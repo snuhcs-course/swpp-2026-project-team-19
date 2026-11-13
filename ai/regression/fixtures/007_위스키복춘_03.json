@@ -1,0 +1,146 @@
+{
+  "photo_id": "007_위스키복춘_03",
+  "bar": "위스키복춘",
+  "photo": {
+    "file": "007_bokchun_03.jpg",
+    "photo_dir": "eval_photos",
+    "sha256": "d2a474b754a6302c748bf4eded51c72fbde1be27b1cc09ab20b24181528fa0b9"
+  },
+  "labels": "eval/labels_v1_1.json",
+  "gold": "eval/match_gold_v1_1.json",
+  "why": [
+    "clean_baseline",
+    "glass_bottle_pairs"
+  ],
+  "history": "Short page where some lines have a glass price only. No error in the recorded runs.",
+  "expected_items": [
+    {
+      "raw_name": "로얄살루트 21Y",
+      "price_krw": 39000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "royal-salute-21"
+    },
+    {
+      "raw_name": "로얄살루트 21Y",
+      "price_krw": 790000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "royal-salute-21"
+    },
+    {
+      "raw_name": "몽키숄더",
+      "price_krw": 8000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "monkey-shoulder"
+    },
+    {
+      "raw_name": "몽키숄더",
+      "price_krw": 140000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "monkey-shoulder"
+    },
+    {
+      "raw_name": "조니워커 블랙",
+      "price_krw": 8000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "johnnie-walker-black"
+    },
+    {
+      "raw_name": "조니워커 블랙",
+      "price_krw": 140000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "johnnie-walker-black"
+    },
+    {
+      "raw_name": "조니워커 블루",
+      "price_krw": 41000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "johnnie-walker-blue"
+    },
+    {
+      "raw_name": "조니워커 블루",
+      "price_krw": 830000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "johnnie-walker-blue"
+    },
+    {
+      "raw_name": "폴존 올로로소 셀렉트 캐스크",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "paul-john-oloroso"
+    },
+    {
+      "raw_name": "폴존 올로로소 셀렉트 캐스크",
+      "price_krw": 450000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "paul-john-oloroso"
+    },
+    {
+      "raw_name": "폴존 피티드 셀렉트 캐스크",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "paul-john-peated"
+    },
+    {
+      "raw_name": "폴존 피티드 셀렉트 캐스크",
+      "price_krw": 360000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "paul-john-peated"
+    },
+    {
+      "raw_name": "시그나토리 벤리악 12Y",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "signatory-benriach-12"
+    },
+    {
+      "raw_name": "시그나토리 맥더프 13Y",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "signatory-macduff-13"
+    },
+    {
+      "raw_name": "올트모어 디스틸러리 12Y",
+      "price_krw": 38000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "aultmore-12"
+    },
+    {
+      "raw_name": "시그나토리 스페이사이드 GL",
+      "price_krw": 33000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "signatory-speyside-gl"
+    }
+  ]
+}

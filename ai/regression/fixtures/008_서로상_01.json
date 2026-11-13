@@ -1,0 +1,178 @@
+{
+  "photo_id": "008_서로상_01",
+  "bar": "서로상",
+  "photo": {
+    "file": "008_seorosang_01.png",
+    "photo_dir": "eval_photos",
+    "sha256": "c1c304b23f92853ef046d2e3862410110533806fedb1a8dce3685b106f0bfffa"
+  },
+  "labels": "eval/labels_v1_1.json",
+  "gold": "eval/match_gold_v1_1.json",
+  "why": [
+    "clean_baseline",
+    "screen_capture"
+  ],
+  "history": "Screen capture (PNG) with glass and bottle prices. No error in the recorded runs.",
+  "expected_items": [
+    {
+      "raw_name": "헤네시vsop / Hennessy vsop",
+      "price_krw": 13000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "non_whisky"
+    },
+    {
+      "raw_name": "헤네시vsop / Hennessy vsop",
+      "price_krw": 210000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "non_whisky"
+    },
+    {
+      "raw_name": "레미마틴vsop / Remy Martin vsop",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "non_whisky"
+    },
+    {
+      "raw_name": "레미마틴vsop / Remy Martin vsop",
+      "price_krw": 240000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "non_whisky"
+    },
+    {
+      "raw_name": "조니워커 블랙 / Jonnie walker black",
+      "price_krw": 11000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "johnnie-walker-black"
+    },
+    {
+      "raw_name": "조니워커 블랙 / Jonnie walker black",
+      "price_krw": 150000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "johnnie-walker-black"
+    },
+    {
+      "raw_name": "조니워커 블루 / Jonnie walker blue",
+      "price_krw": 36000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "johnnie-walker-blue"
+    },
+    {
+      "raw_name": "조니워커 블루 / Jonnie walker blue",
+      "price_krw": 590000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "johnnie-walker-blue"
+    },
+    {
+      "raw_name": "몽키숄더 / Monkey Shoulder",
+      "price_krw": 11000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "monkey-shoulder"
+    },
+    {
+      "raw_name": "몽키숄더 / Monkey Shoulder",
+      "price_krw": 150000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "monkey-shoulder"
+    },
+    {
+      "raw_name": "제임슨 / Jameson",
+      "price_krw": 10000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "jameson"
+    },
+    {
+      "raw_name": "제임슨 / Jameson",
+      "price_krw": 110000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "jameson"
+    },
+    {
+      "raw_name": "잭 다니엘스 / Jack Daniel's",
+      "price_krw": 11000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "jack-daniels-old-no7"
+    },
+    {
+      "raw_name": "잭 다니엘스 / Jack Daniel's",
+      "price_krw": 140000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "jack-daniels-old-no7"
+    },
+    {
+      "raw_name": "1792 스몰배치 / 1792 Small Batch",
+      "price_krw": 12000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "1792-small-batch"
+    },
+    {
+      "raw_name": "1792 스몰배치 / 1792 Small Batch",
+      "price_krw": 160000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "1792-small-batch"
+    },
+    {
+      "raw_name": "우드포트리저브 / Woodford Reserve",
+      "price_krw": 14000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "woodford-reserve"
+    },
+    {
+      "raw_name": "우드포트리저브 / Woodford Reserve",
+      "price_krw": 210000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "woodford-reserve"
+    },
+    {
+      "raw_name": "노아스밀 / Noahsmill",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "noahs-mill"
+    },
+    {
+      "raw_name": "노아스밀 / Noahsmill",
+      "price_krw": 370000,
+      "pour_ml": null,
+      "unit": "bottle",
+      "note": null,
+      "gold": "noahs-mill"
+    }
+  ]
+}

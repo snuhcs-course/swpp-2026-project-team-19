@@ -10,6 +10,7 @@ source =
     ai/extract
     ai/match_llm
     ai/ocr
+    ai/regression
 omit =
     */test_*.py
     ai/eval/build_match_gold.py
