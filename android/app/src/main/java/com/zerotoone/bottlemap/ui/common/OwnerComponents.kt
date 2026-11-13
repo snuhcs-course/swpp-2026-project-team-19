@@ -53,22 +53,9 @@ import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
  */
 @Composable
 fun OwnerHeader(title: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = BottleMapSizes.minTouchTarget)
-            .padding(horizontal = BottleMapSpacing.sm, vertical = BottleMapSpacing.xs),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = onBack) {
-            BmIcon(BmIconId.BACK, contentDescription = "뒤로가기")
-        }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f).padding(end = BottleMapSpacing.md),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+    // Same exact hit area, left inset, baseline and type as the My Info tab.
+    androidx.compose.foundation.layout.Box(modifier) {
+        AccountHeader(title, onBack)
     }
 }
 
