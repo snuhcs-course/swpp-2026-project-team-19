@@ -117,7 +117,7 @@ class LivePhotoReviewMappingTest {
         assertFalse(PhotoReviewRules.stats(review).canPublish)
         assertTrue(com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.OPTION in
             PhotoReviewRules.problems(card))
-        val trimmed = PhotoReviewRules.removeOption(card,1)
+        val trimmed = PhotoReviewRules.removeOption(card,0)
         assertEquals(3,PhotoReviewRules.countOptions(trimmed))
         val decision = mapConfirmedReviewDecision(
             trimmed.copy(priceChoice=PriceChoice.PHOTO),dto,30.0,emptyMap())
