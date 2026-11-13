@@ -145,6 +145,17 @@ def test_product_info_is_verified_unless_said_otherwise():
     ("모히토", ProductDraft("모히토")),
     # a trailing parenthesis is not a whole name, so it is not offered as a spelling
     ("Balvenie 12y DoubleWood (발베니)", ProductDraft("Balvenie 12y DoubleWood (발베니)", (), BALVENIE, "Balvenie", 12, "DoubleWood")),
+    # brackets in the same script are part of the name, not a second spelling: the edition is kept
+    ("Balvenie 12 (Sherry Oak)", ProductDraft("Balvenie 12 (Sherry Oak)", (), BALVENIE, "Balvenie", 12, "Sherry Oak")),
+    ("Balvenie (Sherry Oak) 12 Years", ProductDraft(
+        "Balvenie (Sherry Oak) 12 Years", (), BALVENIE, "Balvenie", 12, "Sherry Oak")),
+    ("발베니 (12년) 셰리 오크", ProductDraft("발베니 (12년) 셰리 오크", (), BALVENIE, "발베니", 12, "셰리 오크", "sherry oak")),
+    # of two spellings of one line, the one that says more is read
+    ("발베니 16년 / Balvenie 16 French Oak", ProductDraft(
+        "발베니 16년 / Balvenie 16 French Oak", ("발베니 16년", "Balvenie 16 French Oak"), BALVENIE, "Balvenie", 16,
+        "French Oak")),
+    # OCR text with double spaces: the brand is the brand, not "Balvenie  2"
+    ("Balvenie  21  Portwood", ProductDraft("Balvenie 21 Portwood", (), BALVENIE, "Balvenie", 21, "Portwood")),
 ])
 def test_draft_from_name(catalog, name, expected):
     assert draft_from_name(name, catalog) == expected
@@ -161,6 +172,11 @@ def test_draft_needs_a_name(catalog):
     ("글렌그란트 18년 / Glen Grant 15Y", ()),           # different numbers: two products
     ("라가불린(Lagavulin) 8년", ("라가불린 8년", "Lagavulin 8년")),
     ("Blair Athol Sangiovese Cask (블레어 아쏠)", ()),
+    ("Yamazaki Dr (야마자키 Dr) 12", ("Yamazaki Dr 12", "야마자키 Dr 12")),  # the brackets hold the other script
+    # brackets in the same script are not a second spelling: "12년 셰리 오크" must never become an alias
+    ("맥캘란 (12년) 셰리 오크", ()),
+    ("Macallan (Sherry Oak) 12 Years", ()),
+    ("맥캘란 Macallan (12년) 셰리 오크", ()),          # the text before the brackets mixes scripts
 ])
 def test_whole_spellings(name, spellings):
     assert whole_spellings(name) == spellings

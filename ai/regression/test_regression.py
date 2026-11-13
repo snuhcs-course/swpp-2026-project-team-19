@@ -190,3 +190,38 @@ def test_update_rewrites_the_same_files(tmp_path, monkeypatch, capsys):
         assert len(list((tmp_path / "fixtures").glob("*.json"))) == 15
     finally:
         reg.BASELINE.unlink(missing_ok=True)
+
+
+def test_a_known_product_that_leaves_the_catalog_is_a_regression():
+    # known/correct and absent/unmatched have the same severity; the kind change must still fail
+    before = {"deployed": {"p": [{"name": "A 12", "gold": "a-12", "kind": "known", "outcome": "correct", "rank1": "a-12"}]}}
+    after = {"deployed": {"p": [{"name": "A 12", "gold": "a-12", "kind": "absent", "outcome": "unmatched", "rank1": None}]}}
+    assert reg.severity(before["deployed"]["p"][0]) == reg.severity(after["deployed"]["p"][0])
+    worse, better = reg.compare_matching(before, after)
+    assert len(worse) == 1 and "was known and is absent now" in worse[0] and not better
+
+
+def test_removing_a_product_from_the_catalog_fails_the_matching_check():
+    seed = reg.load_seed()
+    fx = FIXTURES[0]
+    gone = next(i["gold"] for i in fx["expected_items"] if i["gold"] in {p["key"] for p in seed["products"]})
+    smaller = {**seed, "products": [p for p in seed["products"] if p["key"] != gone]}
+    now = reg.match_lines([fx], smaller)
+    worse, _ = reg.compare_matching({c: {fx["photo_id"]: BASELINE["matching"][c][fx["photo_id"]]} for c in reg.CONDITIONS}, now)
+    assert len(worse) >= 2 and all("was known and is absent now" in line and gone in line for line in worse)
+
+
+def test_replay_compares_pour_sizes():
+    fx = next(f for f in FIXTURES if any(i["pour_ml"] for i in f["expected_items"]))
+    rows = [{k: i[k] for k in ("raw_name", "price_krw", "pour_ml", "unit")} for i in fx["expected_items"]]
+    assert reg.score_rows(fx, rows)["pour_wrong"] == 0
+    target = next(r for r in rows if r["pour_ml"])
+    target["pour_ml"] *= 2
+    score = reg.score_rows(fx, rows)
+    assert score["pour_wrong"] == 1 and score["correct"] == len(rows)  # score.py alone sees nothing
+    assert [e["type"] for e in score["errors"]] == ["pour size"]
+    # a pour size the menu does not print must not be made up either
+    fx = next(f for f in FIXTURES if any(i["pour_ml"] is None for i in f["expected_items"]))
+    rows = [{k: i[k] for k in ("raw_name", "price_krw", "pour_ml", "unit")} for i in fx["expected_items"]]
+    next(r for r in rows if r["pour_ml"] is None)["pour_ml"] = 30
+    assert reg.score_rows(fx, rows)["pour_wrong"] == 1
