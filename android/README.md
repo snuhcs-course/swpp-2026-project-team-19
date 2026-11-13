@@ -33,20 +33,22 @@ on the deployed server.
   whisky sends `kind: "whisky"`; cocktails/beer/other non-whisky menus send
   `kind: "other"`. Send exactly one; never `newProduct` from Owner. Unlinked
   items are bar-only and their fake UI IDs must never be sent as catalog IDs.
-- **Edit:** the published API permits `displayName` and `options`. It does not
-  permit changing `kind` or per-bar detailed categories. A category change is
-  rejected visibly; it is **not** reported as a successful save. Preserve any
-  previously imported serving options, including those beyond the direct UI's
-  three-option editing limit.
+- **Edit:** the published API permits `displayName` and 1–3 `options`
+  (full replacement). It does not permit changing `kind` or per-bar detailed
+  categories. A category change is rejected visibly, not reported as saved.
+  Photo-imported menu items with 4–10 options are **read-only** in the direct
+  edit screen until the server offers a safe edit contract; do not truncate
+  options or send an invalid 4–10-option PUT.
 - **Photo review:** send exactly one decision per OCR line and per proposed
   change to `POST /api/menu-imports/{id}/review-and-apply`. Unmatched lines
   use `publish_without_product` and `kind`. Every published decision sends its
   entire **final** `options[]` (1–10 per server), retaining the original
   `extractedOptionId` where applicable and using null only for reviewer-added
   options. Do **not** send `optionDecisions`, `addedOptions`,
-  `excludedOptionIds`, or Owner `create_product`. The approved review UI
-  currently edits up to three whisky servings and never silently drops a
-  fourth OCR option.
+  `excludedOptionIds`, or Owner `create_product`. Photo review can edit all
+  1–10 whisky and non-whisky price options. A duplicate catalog whisky +
+  serving across photos with inconsistent prices blocks Publish and lets
+  the owner edit the individual options; do not silently choose one.
 - **Read:** `GET /api/bars/{barId}/menu` can return `productId: null`,
   `category: null`, `kind: "whisky" | "other"`. Show these items in Owner
   and Customer bar menus without inventing catalog identity. Unlinked whiskies
