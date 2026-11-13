@@ -13,6 +13,7 @@ from app.core.security import Principal
 from app.models import (
     BarMenuItem,
     BarStatus,
+    Brand,
     ImportMode,
     ImportStatus,
     MenuBoard,
@@ -254,6 +255,34 @@ def test_a_new_product_is_created_searchable_and_records_its_creator(client, db_
     assert item_of(response.json(), product)["brandName"] == "Deanston"
     found = client.get("/api/search/bars", params={"query": "딘스톤 버진 오크"}).json()
     assert [i["productId"] for i in found["items"]] == [str(product.id)]
+
+
+def test_manual_add_reuses_existing_canonical_brand_without_creating_duplicate(
+    client, db_session, operator, bar, glenfiddich
+):
+    canonical = glenfiddich[12].brand
+    initial_brand_count = db_session.scalar(select(func.count()).select_from(Brand))
+    body = {
+        "menuVersion": 4,
+        "newProduct": {
+            "brand": {"type": "new", "canonicalName": canonical.canonical_name},
+            "product": {
+                "displayName": "Glenfiddich BottleMap Exclusive 84",
+                "category": "whisky",
+                "ageYears": 84,
+                "editionName": "BottleMap Exclusive",
+            },
+        },
+        "options": [option()],
+    }
+    response = add(client, bar.id, body, operator)
+    assert response.status_code == 201, response.text
+    created = db_session.scalar(
+        select(Product).where(Product.display_name == "Glenfiddich BottleMap Exclusive 84")
+    )
+    assert created is not None
+    assert created.brand_id == canonical.id
+    assert db_session.scalar(select(func.count()).select_from(Brand)) == initial_brand_count
 
 
 def test_a_new_product_that_exists_is_a_conflict_and_nothing_is_created(client, db_session, operator, bar, glenfiddich):
