@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner
 import com.zerotoone.bottlemap.data.owner.MockBrand
 import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
 import com.zerotoone.bottlemap.data.owner.manualMenuCategoryLabel
+import com.zerotoone.bottlemap.network.OwnerCatalogProductDto
 
 internal fun normalizeOwnerCatalogName(name: String): String =
     name.filter(Char::isLetterOrDigit).lowercase()
@@ -69,6 +70,25 @@ internal fun manualFreshCatalogExactMatch(
     if (normalized.isBlank()) return null
     return products.firstOrNull {
         it.isActive && it.catalogMatched && it.category == "whisky" &&
+            it.productId != rejectedProductId &&
+            (normalizeOwnerCatalogName(it.displayName) == normalized ||
+                normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) == normalized)
+    }
+}
+
+/** Fresh HTTP catalog results are DTOs, not MockCatalogProduct.
+ * Server catalog search has no catalogMatched field; whisky category alone
+ * determines if the item can be linked as an approved whisky here.
+ */
+internal fun manualFreshServerCatalogExactMatch(
+    products: List<OwnerCatalogProductDto>, name: String,
+    category: String, rejectedProductId: String?,
+): OwnerCatalogProductDto? {
+    if (category != "위스키") return null
+    val normalized = normalizeOwnerCatalogName(name)
+    if (normalized.isBlank()) return null
+    return products.firstOrNull {
+        it.isActive && it.category == "whisky" &&
             it.productId != rejectedProductId &&
             (normalizeOwnerCatalogName(it.displayName) == normalized ||
                 normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) == normalized)
