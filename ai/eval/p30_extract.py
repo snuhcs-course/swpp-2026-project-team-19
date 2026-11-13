@@ -156,6 +156,11 @@ FROZEN_MATCHING = {
     "ai/eval/i3_match_eval.py": "ae53dadd542691b921d5868f01ca5772ea82a968fbd81a7055663966208b8a0c",
     "ai/eval/match_eval.py": "6f4347d9451e1d0cd7aec689e16fd79be84bc9e9e57a9836de4859e1fcb7e892",
 }
+# Released from the freeze on 2026-11-13 (Jinwoo Park): the I3 evaluation is finished and I4 changes
+# the matching rules. The I3 hashes above stay as the record of what P30 ran with. The check skips
+# the released files and every command says so, since a run on this checkout no longer measures
+# the I3 configuration.
+RELEASED_MATCHING = ("backend/app/matching/staged.py",)
 RUNS = (1, 2, 3)  # freeze 3장: r1-r3
 PHOTO_HASHES = REPO_ROOT / "ai" / "eval" / "i3_photo_sha256.json"
 # SHA-256 (CRLF read as LF) of ai/eval/i3_photo_sha256.json as frozen in 15b1eff (#69). The photo
@@ -344,7 +349,10 @@ def check_frozen_code(repo: Path) -> dict[str, str]:
     if diff:
         raise Stop(f"frozen scoring files changed (no API call made): {', '.join(diff)}")
     check_raw_files(repo, FROZEN_RAW, "frozen label/gold/hash files")
-    check_raw_files(repo, FROZEN_MATCHING, "frozen matching files (i3_eval_freeze.md 4.5)")
+    check_raw_files(repo, {rel: pin for rel, pin in FROZEN_MATCHING.items() if rel not in RELEASED_MATCHING},
+                    "frozen matching files (i3_eval_freeze.md 4.5)")
+    if RELEASED_MATCHING:
+        print(f"NOTE: not the I3 configuration: released from the freeze: {', '.join(RELEASED_MATCHING)}")
     prompt_sha = sha256_bytes(server_hybrid.load_prompt().encode("utf-8"))
     if server_hybrid.PROMPT_VERSION != PROMPT_VERSION or prompt_sha != PROMPT_SHA256:
         raise Stop(f"prompt {server_hybrid.PROMPT_VERSION} {prompt_sha[:12]}... is not the frozen {PROMPT_VERSION}")

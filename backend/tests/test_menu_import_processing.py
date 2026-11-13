@@ -369,7 +369,7 @@ def menu_lines(use_extractor):
     [
         # Each line is unmatched by the Iteration 1 alias lookup alone.
         ("글렌피딕(Glenfiddich) 12년", ResolutionStatus.EXACT_MATCH, 12, "parenExpanded", "S1"),  # name variant
-        ("글렌피딕 12년 싱글몰트", ResolutionStatus.AMBIGUOUS, 12, "ageMatch", "S2"),  # brand + age
+        ("글렌피딕 12년 한정판", ResolutionStatus.AMBIGUOUS, 12, "ageMatch", "S2"),  # brand + age
         ("글렌피닥 15년", ResolutionStatus.EXACT_MATCH, 15, "editDistance", "S3"),  # one-letter typo
     ],
 )
@@ -558,8 +558,8 @@ def test_llm_candidates_come_before_the_rule_candidates(
 ):
     sherry = make_product(db_session, glenfiddich[12].brand, "Glenfiddich 12 Sherry Cask", age_years=12,
                           edition_name="Sherry Cask")
-    menu_lines("글렌피딕 12년 싱글몰트")  # S2: brand + age, two products of that age
-    use_llm_layer(FakeMatchingLLM({"글렌피딕 12년 싱글몰트": translation(brand_en="Glenfiddich", age=12)}))
+    menu_lines("글렌피딕 12년 한정판")  # S2: brand + age, two products of that age
+    use_llm_layer(FakeMatchingLLM({"글렌피딕 12년 한정판": translation(brand_en="Glenfiddich", age=12)}))
 
     [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
 
@@ -592,7 +592,7 @@ def test_call_cap_leaves_the_remaining_lines_with_their_rule_result(
 def test_llm_failure_keeps_the_rule_results(
     client, db_session, image_storage, operator, glenfiddich, menu_lines, use_llm_layer, answer
 ):
-    menu_lines("글렌피딕 12년 싱글몰트", "글렌피딕 18년")
+    menu_lines("글렌피딕 12년 한정판", "글렌피딕 18년")
     llm = use_llm_layer(FakeMatchingLLM(answer=answer))
 
     menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
@@ -778,8 +778,8 @@ def test_tool_candidates_come_before_the_rule_candidates(
 ):
     sherry = make_product(db_session, glenfiddich[12].brand, "Glenfiddich 12 Sherry Cask", age_years=12,
                           edition_name="Sherry Cask")
-    menu_lines("글렌피딕 12년 싱글몰트")  # S2: brand + age, two products of that age
-    use_tool_layer(FakeToolLLM({"글렌피딕 12년 싱글몰트": {"query": "Glenfiddich 12", "brand_en": "Glenfiddich",
+    menu_lines("글렌피딕 12년 한정판")  # S2: brand + age, two products of that age
+    use_tool_layer(FakeToolLLM({"글렌피딕 12년 한정판": {"query": "Glenfiddich 12", "brand_en": "Glenfiddich",
                                                          "age": 12}}))
 
     [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
@@ -815,7 +815,7 @@ def test_call_cap_bounds_the_conversation_turns(
 def test_tool_failure_keeps_the_rule_results(
     client, db_session, image_storage, operator, glenfiddich, menu_lines, use_tool_layer, answer, turns
 ):
-    menu_lines("글렌피딕 12년 싱글몰트", "글렌피딕 18년")
+    menu_lines("글렌피딕 12년 한정판", "글렌피딕 18년")
     llm = use_tool_layer(FakeToolLLM(answer=answer))
 
     menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))

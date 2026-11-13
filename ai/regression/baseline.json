@@ -4897,7 +4897,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
-          "state": "choose_candidate",
+          "state": "confirm_recommended",
           "rank1": "aultmore-12"
         },
         {
@@ -5426,7 +5426,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
-          "state": "choose_candidate",
+          "state": "confirm_recommended",
           "rank1": "lagavulin-de-2023"
         },
         {
@@ -5514,10 +5514,10 @@
           "name": "킬호만(Kilchoman) PX 셰리 캐스크",
           "gold": "kilchoman-px-sherry",
           "kind": "known",
-          "outcome": "ambiguous_ok",
-          "status": "ambiguous",
-          "state": "choose_candidate",
-          "rank1": "kilchoman-fino-sherry"
+          "outcome": "correct",
+          "status": "exact_match",
+          "state": "confirmed",
+          "rank1": "kilchoman-px-sherry"
         },
         {
           "name": "킬호만(Kilchoman) 로크곰",
@@ -6157,7 +6157,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
-          "state": "choose_candidate",
+          "state": "confirm_recommended",
           "rank1": "clynelish-de"
         },
         {
@@ -6807,7 +6807,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
-          "state": "choose_candidate",
+          "state": "confirm_recommended",
           "rank1": "glenallachie-12-moscatel"
         },
         {
@@ -6841,9 +6841,9 @@
           "name": "글렌알라키(Glenallachie) 18년 PX 펀천",
           "gold": "glenallachie-18-px-puncheon",
           "kind": "known",
-          "outcome": "ambiguous_ok",
-          "status": "ambiguous",
-          "state": "choose_candidate",
+          "outcome": "correct",
+          "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-18-px-puncheon"
         },
         {
@@ -7098,7 +7098,7 @@
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
           "state": "choose_candidate",
-          "rank1": "woodford-reserve-double-oaked"
+          "rank1": "woodford-reserve-double-xo-blend"
         },
         {
           "name": "윌렛(Willet) 로완스크릭",
@@ -7151,7 +7151,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
-          "state": "choose_candidate",
+          "state": "confirm_recommended",
           "rank1": "blantons-original"
         },
         {
@@ -7178,7 +7178,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
-          "state": "choose_candidate",
+          "state": "confirm_recommended",
           "rank1": "elijah-craig-barrel-proof"
         }
       ],
@@ -7860,10 +7860,10 @@
           "name": "Yamazaki Dr (야마자키 Dr)",
           "gold": "yamazaki-distillers-reserve",
           "kind": "known",
-          "outcome": "ambiguous_ok",
-          "status": "ambiguous",
-          "state": "choose_candidate",
-          "rank1": "yamazaki-12"
+          "outcome": "correct",
+          "status": "exact_match",
+          "state": "confirmed",
+          "rank1": "yamazaki-distillers-reserve"
         },
         {
           "name": "Hakushu Dr (하쿠슈 Dr)",

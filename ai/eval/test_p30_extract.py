@@ -633,14 +633,25 @@ def test_crlf_label_file_stops_check_before_any_call(setup, capsys, monkeypatch)
 @pytest.mark.parametrize("change", ["changed", "missing"])
 def test_matching_component_change_stops_check(setup, capsys, monkeypatch, change):
     if change == "changed":
-        monkeypatch.setitem(p30.FROZEN_MATCHING, "backend/app/matching/staged.py", "0" * 64)
+        monkeypatch.setitem(p30.FROZEN_MATCHING, "backend/app/matching/vocab_ko_en.json", "0" * 64)
     else:
         monkeypatch.setitem(p30.FROZEN_MATCHING, "backend/app/matching/not_here.py", "0" * 64)
     code, gemini, _ = run(setup, "--check")
     assert code == p30.EXIT_PREFLIGHT and gemini.requests == []
     printed = capsys.readouterr().out
     assert "frozen matching files (i3_eval_freeze.md 4.5)" in printed
-    assert ("staged.py" if change == "changed" else "missing (the run needs them") in printed
+    assert ("vocab_ko_en.json" if change == "changed" else "missing (the run needs them") in printed
+
+
+def test_a_released_matching_file_is_not_checked_and_the_command_says_so(setup, capsys):
+    # staged.py was released from the I3 freeze on 2026-11-13; its I3 hash stays as the record
+    assert p30.RELEASED_MATCHING == ("backend/app/matching/staged.py",)
+    assert set(p30.RELEASED_MATCHING) <= set(p30.FROZEN_MATCHING)
+    with pytest.raises(p30.Stop, match="staged.py"):
+        p30.check_raw_files(p30.REPO_ROOT, p30.FROZEN_MATCHING, "matching")
+    code, gemini, _ = run(setup, "--check")
+    assert code == 0 and gemini.requests == []
+    assert "NOTE: not the I3 configuration: released from the freeze: backend/app/matching/staged.py" in capsys.readouterr().out
 
 
 def test_frozen_pins_agree_with_the_scripts_and_the_checkout():
@@ -651,7 +662,8 @@ def test_frozen_pins_agree_with_the_scripts_and_the_checkout():
                               "ai/eval/i3_photo_sha256.json": p30.PHOTO_HASHES_SHA256}
     # hashes of the checkout's files only (their content is not read by the test)
     p30.check_raw_files(p30.REPO_ROOT, p30.FROZEN_RAW, "raw")
-    p30.check_raw_files(p30.REPO_ROOT, p30.FROZEN_MATCHING, "matching")
+    p30.check_raw_files(p30.REPO_ROOT, {rel: pin for rel, pin in p30.FROZEN_MATCHING.items()
+                                        if rel not in p30.RELEASED_MATCHING}, "matching")
     rules = {}
     for line in (p30.REPO_ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines():
         if line.strip() and not line.startswith("#"):
