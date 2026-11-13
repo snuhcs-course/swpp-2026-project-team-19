@@ -808,7 +808,7 @@ internal fun OwnerManualMenuScreen(
                             val old = existingBarProductMenu(items, bar.barId, requireNotNull(linkedId))
                             if (old != null) ManualButton("기존 메뉴에서 용량·가격 수정", {
                                 edit(old)
-                            }, secondary = true)
+                            }, secondary = false)
                         }
                     }
                     Text("종류", color = V4Color.text, fontSize = 13.sp)
