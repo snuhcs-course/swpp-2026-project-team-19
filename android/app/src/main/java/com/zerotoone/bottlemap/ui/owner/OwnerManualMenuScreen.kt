@@ -638,14 +638,11 @@ internal fun OwnerManualMenuScreen(
                         Text("현재 게시 메뉴", color = V4Color.text, fontWeight = FontWeight.Bold,
                             fontSize = 16.sp)
                         Text("+ 직접 추가", Modifier.manualTap {
-                            if (activePhotoImport) error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                            if (activePhotoImport) onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                             else edit(null)
                         }
                             .testTag("manual-menu-add"), color = V4Color.primary, fontSize = 12.sp)
                     }
-                    if (activePhotoImport) Text(
-                        "메뉴판 사진 등록 작업 중에는 메뉴를 수정할 수 없어요.",
-                        color = V4Color.primary, fontSize = 12.sp)
                     error?.let { Text(it, color = Color(0xFFFFB4AB), fontSize = 12.sp) }
                     V4SearchField(query, { query = it }, "manual-menu-search", "메뉴명·브랜드 검색")
                     val entries = items.map { item ->
@@ -711,12 +708,12 @@ internal fun OwnerManualMenuScreen(
                                                     null else item.barMenuItemId },
                                                 onEdit = {
                                                      if (activePhotoImport)
-                                                         error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                                         onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                                                      else edit(item)
                                                  },
                                                 onStock = {
                                                      if (activePhotoImport)
-                                                         error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                                         onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                                                      else confirm = "stock:" + item.barMenuItemId
                                                  })
                                             if (index < entry.value.lastIndex)
@@ -737,7 +734,7 @@ internal fun OwnerManualMenuScreen(
                         .background(Color(0xFF693630),RoundedCornerShape(7.dp))
                         .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(7.dp))
                         .manualTap {
-                            if (activePhotoImport) error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                            if (activePhotoImport) onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                             else confirm = "reset"
                         }
                         .testTag("manual-menu-reset"), contentAlignment = Alignment.Center) {
