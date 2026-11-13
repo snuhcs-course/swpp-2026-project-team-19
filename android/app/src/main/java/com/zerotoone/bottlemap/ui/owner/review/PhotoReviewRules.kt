@@ -70,8 +70,10 @@ object PhotoReviewRules {
             optionSummary(item).forEach { option ->
                 if (!validPrice(option.price) ||
                     (!option.bottle && !validVolume(option.volume))) return@forEach
-                val serving = if (option.bottle) "Bottle" else "${option.volume.toInt()}ml"
-                val key = "${item.linkedProductId}|$serving"
+                val normalizedLabel = (option.label ?: if (option.bottle) "Bottle" else "")
+                    .trim().lowercase()
+                val serving = if (option.bottle) normalizedLabel else "${option.volume.toInt()}ml"
+                val key = "${item.linkedProductId}|$normalizedLabel|${if (option.bottle) "none" else option.volume.toInt()}"
                 buckets.getOrPut(key) { mutableListOf() }
                     .add(Entry(item.id, option.price, serving))
             }
