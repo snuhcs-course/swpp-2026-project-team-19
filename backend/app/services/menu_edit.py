@@ -14,8 +14,8 @@ A successful edit raises the board version and stamps `published_at` with the ti
 the lock. Nothing is retried on the caller's behalf except a write conflict (app.services.serializable).
 """
 
-from datetime import datetime
-from uuid import UUID
+from datetime import datetime, timezone
+from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
@@ -23,9 +23,12 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.errors import ApiError, validation_failed_fields
 from app.core.normalize import normalize
 from app.core.security import Principal
-from app.models import Bar, BarMenuItem, BarStatus, Brand, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
+from app.models import Bar, BarMenuItem, BarLocalMenuItem, BarStatus, Brand, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
 from app.schemas.menu import BarMenuResponse
-from app.schemas.menu_edit import MenuItemAddRequest, MenuItemUpdateRequest, MenuOptionInput, MenuResetRequest
+from app.schemas.menu_edit import (
+    LocalMenuApprovalRequest, MenuItemAddRequest, MenuItemUpdateRequest,
+    MenuOptionInput, MenuResetRequest,
+)
 from app.services.bar_access import can_manage_bar, forbidden, is_operator
 from app.services.bar_menu import bar_not_found, get_bar_menu
 from app.services.menu_import_upload import check_no_unfinished_import
@@ -75,8 +78,14 @@ def check_request(body: MenuItemAddRequest | MenuItemUpdateRequest, now: datetim
     """The rules a request breaks on its own, all reported together as one 422. `now` is the request time."""
     errors = _Errors()
     if isinstance(body, MenuItemAddRequest):
-        if (body.productId is None) == (body.newProduct is None):
-            errors.add("productId", "EXACTLY_ONE_REQUIRED", "productId와 newProduct 중 하나만 보내야 합니다.")
+        if sum(value is not None for value in (body.productId, body.newProduct, body.localItem)) != 1:
+            errors.add("productId", "EXACTLY_ONE_REQUIRED",
+                "productId, newProduct, localItem 중 하나만 보내야 합니다.")
+        if body.localItem is not None:
+            if body.displayName is None:
+                errors.add("displayName", "MISSING", "매장 전용 메뉴 이름이 필요합니다.")
+            else:
+                _check_normalizable(errors, "displayName", body.displayName)
         new = body.newProduct
         if new is not None:
             if new.brand.type == "new":
@@ -174,6 +183,26 @@ def _options(options: list[MenuOptionInput]) -> list[MenuEntryOption]:
     ]
 
 
+def _local_options(options: list[MenuOptionInput]) -> list[dict]:
+    return [
+        {
+            **option.model_dump(mode="json"),
+            "menuEntryOptionId": str(uuid4()),
+            "sortOrder": index,
+        }
+        for index, option in enumerate(options, start=1)
+    ]
+
+
+def _local_for(session: Session, bar_id: UUID, raw_id: str) -> BarLocalMenuItem | None:
+    try:
+        item_id = UUID(raw_id)
+    except ValueError:
+        return None
+    item = session.get(BarLocalMenuItem, item_id)
+    return item if item is not None and item.bar_id == bar_id else None
+
+
 def _publish(session: Session, board: MenuBoard, base_url: str, *, created: bool = False) -> BarMenuResponse:
     """Raise the version (a board created by this edit starts at 1), stamp the time, and answer the
     whole menu (spec 3.9) as it now is."""
@@ -197,6 +226,9 @@ def _product_for(session: Session, body: MenuItemAddRequest, principal: Principa
             errors.add("productId", "PRODUCT_NOT_FOUND", "상품을 찾을 수 없습니다.")
         elif not product.is_active:
             errors.add("productId", "PRODUCT_INACTIVE", "비활성 상품은 메뉴에 연결할 수 없습니다.")
+        elif product.category != "whisky" and not is_operator(session, principal):
+            errors.add("productId", "PRODUCT_NOT_APPROVED",
+                "비위스키 상품은 공용 카탈로그와 연결할 수 없어요. 매장 메뉴로 등록해 주세요.")
         errors.raise_any()
         return product
     # A bar owner may publish an existing, approved catalog product, but not
@@ -223,6 +255,26 @@ def _add_once(
     session: Session, principal: Principal, bar_id: UUID, body: MenuItemAddRequest, base_url: str
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
+    if body.localItem is not None:
+        existing_local = session.scalars(
+            select(BarLocalMenuItem).where(BarLocalMenuItem.bar_id == bar_id)
+        ).all()
+        for previous in existing_local:
+            if normalize(previous.display_name) == normalize(body.displayName):
+                raise ApiError(409, "MENU_ITEM_EXISTS",
+                    "이미 등록한 메뉴예요. 기존 메뉴를 수정해 주세요.",
+                    details={"barMenuItemId": str(previous.id)})
+        created = board is None
+        if created:
+            board = MenuBoard(bar_id=bar_id, published_at=func.now(), version=1)
+            session.add(board)
+        session.add(BarLocalMenuItem(
+            bar_id=bar_id,
+            display_name=body.displayName,
+            category=body.localItem.category,
+            options=_local_options(body.options),
+        ))
+        return _publish(session, board, base_url, created=created)
     product = _product_for(session, body, principal)
     entries = board.entries if board is not None else []
     on_board = next((e for e in entries if e.bar_menu_item.product_id == product.id), None)
@@ -256,6 +308,62 @@ def _add_once(
     return _publish(session, board, base_url, created=created)
 
 
+def _approve_local_once(
+    session: Session, principal: Principal, bar_id: UUID, local_id: str,
+    body: LocalMenuApprovalRequest, base_url: str,
+) -> BarMenuResponse:
+    if not is_operator(session, principal):
+        raise forbidden()
+    board = _open_board(session, principal, bar_id, body.menuVersion)
+    local = _local_for(session, bar_id, local_id)
+    if local is None:
+        raise _item_not_found(local_id)
+    if local.category != "whisky":
+        raise ApiError(409, "NOT_PENDING_WHISKY",
+            "위스키 승인 대기 항목만 카탈로그에 연결할 수 있어요.")
+    if (body.productId is None) == (body.newProduct is None):
+        raise validation_failed_fields([{
+            "path": "productId", "code": "EXACTLY_ONE_REQUIRED",
+            "message": "productId 또는 newProduct 중 하나가 필요합니다.",
+        }])
+    price_options = [
+        MenuOptionInput.model_validate({
+            "optionLabel": o.get("optionLabel"), "pourMl": o.get("pourMl"),
+            "priceKrw": o["priceKrw"], "discount": o.get("discount"),
+        }) for o in local.options
+    ]
+    add_body = MenuItemAddRequest(
+        menuVersion=body.menuVersion, productId=body.productId,
+        newProduct=body.newProduct,
+        displayName=local.display_name, options=price_options,
+    )
+    check_request(add_body, datetime.now(timezone.utc))
+    product = _product_for(session, add_body, principal)
+    if product.category != "whisky":
+        raise ApiError(409, "NOT_APPROVED_WHISKY",
+            "승인할 카탈로그 상품은 위스키여야 합니다.")
+    if board is None:
+        raise _item_not_found(local_id)
+    if any(entry.bar_menu_item.product_id == product.id for entry in board.entries):
+        raise ApiError(409, "MENU_ITEM_EXISTS",
+            "이미 같은 상품이 매장 메뉴에 등록되어 있어요.")
+    item = session.scalar(select(BarMenuItem).where(
+        BarMenuItem.bar_id == bar_id, BarMenuItem.product_id == product.id,
+    ))
+    if item is None:
+        item = BarMenuItem(bar_id=bar_id, product_id=product.id)
+        session.add(item)
+        session.flush()
+    board.entries.append(MenuBoardEntry(
+        bar_menu_item_id=item.id, display_name=local.display_name,
+        sort_order=max((entry.sort_order for entry in board.entries), default=0) + 1,
+        options=_options(price_options),
+    ))
+    item.sold_out_at = local.sold_out_at
+    session.delete(local)
+    return _publish(session, board, base_url)
+
+
 def _update_once(
     session: Session,
     principal: Principal,
@@ -265,7 +373,26 @@ def _update_once(
     base_url: str,
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
+    local = _local_for(session, bar_id, bar_menu_item_id)
+    if local is not None:
+        local.display_name = body.displayName
+        if body.category is not None:
+            local.category = body.category
+        local.options = _local_options(body.options)
+        return _publish(session, board, base_url)
     entry = board_entry(board, bar_menu_item_id)
+    if body.category is not None and (
+        body.category != entry.bar_menu_item.product.category
+        or entry.bar_menu_item.product.category != "whisky"
+    ):
+        # Detach only this bar's listing. The shared catalog row and other bars stay untouched.
+        session.add(BarLocalMenuItem(
+            bar_id=bar_id, display_name=body.displayName, category=body.category,
+            options=_local_options(body.options), sold_out_at=entry.bar_menu_item.sold_out_at,
+        ))
+        board.entries.remove(entry)
+        clear_sold_out(session, {entry.bar_menu_item_id})
+        return _publish(session, board, base_url)
     entry.display_name = body.displayName
     # Delete the old options before inserting the new ones, which reuse their sort orders.
     entry.options.clear()
@@ -278,6 +405,10 @@ def _delete_once(
     session: Session, principal: Principal, bar_id: UUID, bar_menu_item_id: str, menu_version: int, base_url: str
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, menu_version)
+    local = _local_for(session, bar_id, bar_menu_item_id)
+    if local is not None:
+        session.delete(local)
+        return _publish(session, board, base_url)
     # The entry and its options go; the bar menu item stays for a later add of the same product, back
     # on sale. The other entries keep their sort orders, so the order may have a gap.
     entry = board_entry(board, bar_menu_item_id)
@@ -290,6 +421,10 @@ def _reset_once(
     session: Session, principal: Principal, bar_id: UUID, body: MenuResetRequest, base_url: str
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
+    for local in session.scalars(
+        select(BarLocalMenuItem).where(BarLocalMenuItem.bar_id == bar_id)
+    ).all():
+        session.delete(local)
     if board is None:
         # Nothing to empty: the answer is the menu as it is, with nothing changed.
         return get_bar_menu(session, str(bar_id), can_manage=lambda bar: True, base_url=base_url)
@@ -304,6 +439,16 @@ def _run(session_factory: SessionFactory, bar_id: UUID, label: str, work) -> Bar
         work,
         label=f"{label} {bar_id}",
         conflict=write_conflict("다른 요청과 동시에 처리되어 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."),
+    )
+
+
+def approve_local_menu_item(
+    session_factory: SessionFactory, principal: Principal, bar_id: UUID,
+    local_id: str, body: LocalMenuApprovalRequest, *, base_url: str,
+) -> BarMenuResponse:
+    return _run(
+        session_factory, bar_id, "approve local menu",
+        lambda session: _approve_local_once(session, principal, bar_id, local_id, body, base_url),
     )
 
 
