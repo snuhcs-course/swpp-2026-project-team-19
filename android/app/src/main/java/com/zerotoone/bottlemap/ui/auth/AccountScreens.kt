@@ -100,7 +100,7 @@ fun AccountScreen(
         text={Text("이 기능은 준비 중이에요.")},
         confirmButton={TextButton(onClick={infoDialog=null}) {Text("확인")}})
     Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-my-page")) {
-        AccountHeader("마이페이지",onBack)
+        AccountHeader("내 정보",onBack)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start=20.dp,end=20.dp,top=16.dp,bottom=24.dp),
             verticalArrangement=Arrangement.spacedBy(0.dp)) {
@@ -251,7 +251,7 @@ fun GoogleLoginScreen(
 
 /** Explicit P18 correction: back icon consumes 48dp at the exact original x=8. */
 @Composable
-private fun AccountHeader(title:String,onBack:()->Unit) {
+internal fun AccountHeader(title:String,onBack:()->Unit) {
     Row(Modifier.fillMaxWidth().height(72.dp)
         .padding(start=8.dp,end=20.dp,top=8.dp,bottom=8.dp),
         verticalAlignment=Alignment.CenterVertically,
