@@ -275,7 +275,7 @@ internal fun OwnerManualMenuScreen(
         alcoholKind = p?.let(::manualEditorAlcoholKind).orEmpty()
         // Photo-imported listings may contain more than three options. Allow editing
         // the first three without silently dropping any additional persisted ones.
-        val editableLimit = if (category == "위스키") MANUAL_MENU_MAX_OPTIONS else 1
+        val editableLimit = MANUAL_MENU_MAX_OPTIONS
         setOptions(item?.options?.take(editableLimit)?.map(::fromSaved)
             ?: listOf(freshOption()))
         beforePromoOptions = null
@@ -356,18 +356,17 @@ internal fun OwnerManualMenuScreen(
                     persisted.category
                 }
             }
-            require(old == null || sameCategory || old.options.size <= 1) {
-                "기존 용량 옵션을 삭제하지 않고 종류를 바꿀 수 없어요."
-            }
-            val editedOptions = (if (whisky) draftOptions else draftOptions.take(1))
+            // Keep all existing servings during per-bar category transitions.
+            // Changing category must never silently discard another price.
+            val editedOptions = draftOptions
                 .mapIndexed { index, draft ->
                     val parsed = toOption(draft, whisky,
                         old?.options?.firstOrNull { it.optionId == draft.id },
-                        preserveOriginalServing = sameCategory)
+                        preserveOriginalServing = sameCategory || !whisky)
                     // Preserve imported serving labels/identity when editing a
                     // single-price category without switching its category.
-                    if (!whisky && sameCategory) {
-                        old?.options?.getOrNull(index)?.let { original ->
+                    if (!whisky) {
+                        old?.options?.firstOrNull { it.optionId == draft.id }?.let { original ->
                             parsed.copy(label = original.label, pourMl = original.pourMl)
                         } ?: parsed
                     } else parsed
@@ -375,7 +374,7 @@ internal fun OwnerManualMenuScreen(
             manualMenuOptionError(editedOptions, effectiveCategoryCode, old?.options.orEmpty())?.let {
                 throw IllegalArgumentException(it)
             }
-            val editableLimit = if (whisky) MANUAL_MENU_MAX_OPTIONS else 1
+            val editableLimit = MANUAL_MENU_MAX_OPTIONS
             val legacyTail = if (old != null && old.options.size > editableLimit) {
                 require(persisted?.let(::manualEditorCategory) == category) {
                     "기존 추가 옵션을 보존하려면 원래 종류로 수정해 주세요."
@@ -852,8 +851,7 @@ internal fun OwnerManualMenuScreen(
                                 fontSize = 11.sp)
                         }
                     }
-                    (if (category == "위스키") draftOptions else draftOptions.take(1))
-                        .forEachIndexed { i, d ->
+                    draftOptions.forEachIndexed { i, d ->
                             Column(Modifier.fillMaxWidth().background(V4Color.surface,
                                 RoundedCornerShape(9.dp))
                                 .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
@@ -912,6 +910,15 @@ internal fun OwnerManualMenuScreen(
                                             testTag = "manual-menu-price-" + i)
                                     }
                                 } else {
+                                    if (draftOptions.size > 1) Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                    ) {
+                                        Text("${i + 1}번 가격", color = V4Color.sub, fontSize = 11.sp)
+                                        Text("제거", Modifier.manualTap {
+                                            setOptions(draftOptions.filterIndexed { j, _ -> j != i })
+                                        }, color = V4Color.primary, fontSize = 11.sp)
+                                    }
                                     V4FormField("판매 가격 (원)", d.price, { v ->
                                         changeOption(i) { it.copy(price = ownerPriceInput(it.price, v)) }
                                     }, keyboardType = KeyboardType.Number,
