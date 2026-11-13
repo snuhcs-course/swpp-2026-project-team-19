@@ -535,10 +535,27 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     it.brandId == newProduct.brandId &&
                         runCatching { java.util.UUID.fromString(it.brandId) }.isSuccess
                 }?.brandId
-                val brand = if(knownBrandId != null)
-                    mapOf("type" to "existing", "brandId" to knownBrandId)
+                // Deleted menu rows keep their canonical catalog identities.
+                // Before creating a new brand, resolve an existing canonical
+                // name/alias from the *server* to avoid DUPLICATE_BRAND_FOUND.
+                val brandLabel = newBrand?.name?.trim().orEmpty()
+                val existingBrandId = knownBrandId ?: brandLabel.takeIf {
+                    it.length in 2..100
+                }?.let { requested ->
+                    fun norm(value: String) =
+                        java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFKC)
+                            .filter(Char::isLetterOrDigit).lowercase()
+                    remote.searchCatalogBrands(requested).firstOrNull { found ->
+                        norm(found.canonicalName) == norm(requested) ||
+                            norm(found.matchedAlias) == norm(requested)
+                    }?.brandId
+                }
+                val brand = if(existingBrandId != null)
+                    mapOf("type" to "existing", "brandId" to existingBrandId)
                 else mapOf("type" to "new",
-                    "canonicalName" to (newBrand?.name ?: error("브랜드 이름이 없어요.")),
+                    "canonicalName" to (brandLabel.ifBlank {
+                        error("상품 이름으로 브랜드를 확인하지 못했어요.")
+                    }),
                     "aliases" to emptyList<Any>())
                     body["newProduct"] = mapOf(
                         "brand" to brand,
