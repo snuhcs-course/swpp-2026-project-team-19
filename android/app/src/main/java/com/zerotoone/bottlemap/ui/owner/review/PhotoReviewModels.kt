@@ -132,6 +132,8 @@ data class ReviewItem(
     val sourceBox: List<Int>? = null,
     /** First OCR option identity, kept separate from displayed price/volume. */
     val primarySourceOptionId: String? = null,
+    /** Current bar prices for matching the first photographed serving. */
+    val existingPriceByProductId: Map<String, Double> = emptyMap(),
 )
 
 enum class ReviewModalType { SOURCE_PHOTO, PUBLISH, EXCLUDE }
