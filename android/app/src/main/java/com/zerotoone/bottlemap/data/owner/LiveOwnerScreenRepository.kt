@@ -910,39 +910,6 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         return status
     }
 
-    /** PR #164 requires every option's final values, not separate correction arrays. */
-    private fun finalReviewOptions(
-        item: com.zerotoone.bottlemap.network.ReviewItemDto,
-        decision: MockReviewDecision,
-        defaultPourMl: Int,
-        whisky: Boolean,
-    ): List<Map<String, Any?>> {
-        val rawIds = item.options.mapTo(mutableSetOf()) { it.extractedOptionId }
-        val selected = decision.correctedOptions ?: item.options.map { option ->
-            MockMenuOption(
-                optionId = option.extractedOptionId,
-                label = option.extractedOptionLabel,
-                pourMl = option.extractedPourMl,
-                priceKrw = option.extractedPriceKrw ?: 0,
-            )
-        }
-        require(selected.size in 1..10) { "검수 메뉴의 가격 옵션은 1~10개여야 해요." }
-        val retained = selected.mapNotNull { it.optionId.takeIf(rawIds::contains) }
-        require(retained.distinct().size == retained.size) {
-            "동일한 OCR 옵션을 두 번 게시할 수 없어요."
-        }
-        return selected.map { option ->
-            require(option.priceKrw in 1..99_999_999) { "가격을 확인해 주세요." }
-            val isBottle = option.label?.lowercase() in listOf("bottle", "병")
-            mapOf(
-                "extractedOptionId" to option.optionId.takeIf(rawIds::contains),
-                "optionLabel" to option.label,
-                "pourMl" to (option.pourMl ?: if (whisky && !isBottle) defaultPourMl else null),
-                "priceKrw" to option.priceKrw,
-            )
-        }
-    }
-
     /** Apply all item decisions in one backend transaction, and never accept removals. */
     suspend fun publishPhotoImportLive(importId: String, version: Int): Int {
         val current = snapshot()
@@ -968,7 +935,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     "finalLineType" to "product",
                     "productId" to requireNotNull(chosen.productId),
                     "correctedProductName" to chosen.displayNameOverride,
-                    "options" to finalReviewOptions(item,chosen,defaultPour,true),
+                    "options" to ownerFinalReviewOptions(item,chosen,defaultPour,true),
                 )
                 MockDecisionKind.CREATE_PRODUCT -> {
                     // Internal legacy enum means an owner-confirmed unlinked item.
@@ -982,7 +949,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         "finalLineType" to "product",
                         "kind" to kind,
                         "correctedProductName" to name.trim().take(200),
-                        "options" to finalReviewOptions(item,chosen,defaultPour,kind == "whisky"),
+                        "options" to ownerFinalReviewOptions(item,chosen,defaultPour,kind == "whisky"),
                     )
                 }
                 MockDecisionKind.CONFIRM_NON_PRODUCT -> mapOf(
