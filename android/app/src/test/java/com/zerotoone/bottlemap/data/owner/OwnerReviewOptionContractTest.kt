@@ -139,4 +139,45 @@ class OwnerReviewOptionContractTest {
         ))
     }
 
+    @Test fun existingServerOptionIsUpdatedByMlWithoutChangingItsStoredLabel() {
+        val decision = MockReviewDecision(
+            MockDecisionKind.SELECT_PRODUCT,
+            correctedOptions = listOf(MockMenuOption(firstId, "잔", 30, 22_000)),
+        )
+        val saved = listOf(MockMenuOption("server-option", "샷", 30, 19_000))
+        val result = ownerFinalReviewOptions(item(), decision, 30, whisky = true,
+            existingOptions = saved)
+        assertEquals("샷", result.single()["optionLabel"])
+        assertEquals(30, result.single()["pourMl"])
+        assertEquals(firstId, result.single()["extractedOptionId"])
+        assertEquals(22_000, result.single()["priceKrw"])
+    }
+
+    @Test fun ambiguousLegacySameMlOptionsCannotBeSilentlyOverwritten() {
+        val decision = MockReviewDecision(
+            MockDecisionKind.SELECT_PRODUCT,
+            correctedOptions = listOf(MockMenuOption(firstId, "잔", 30, 22_000)),
+        )
+        val saved = listOf(
+            MockMenuOption("saved-one", "잔", 30, 18_000),
+            MockMenuOption("saved-two", "샷", 30, 19_000),
+        )
+        assertThrows(IllegalArgumentException::class.java) {
+            ownerFinalReviewOptions(item(), decision, 30, whisky = true,
+                existingOptions = saved)
+        }
+    }
+
+    @Test fun existingLegacySizedBottleKeepsItsServerKey() {
+        val decision = MockReviewDecision(
+            MockDecisionKind.SELECT_PRODUCT,
+            correctedOptions = listOf(MockMenuOption(secondId, "Bottle", null, 130_000)),
+        )
+        val saved = listOf(MockMenuOption("saved-bottle", "병", 700, 100_000))
+        val result = ownerFinalReviewOptions(item(), decision, 30, whisky = true,
+            existingOptions = saved)
+        assertEquals("병", result.single()["optionLabel"])
+        assertEquals(700, result.single()["pourMl"])
+    }
+
 }
