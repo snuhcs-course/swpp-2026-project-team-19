@@ -388,10 +388,7 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
                         // The first OCR serving uses the bar's configured default pour
                         // when no size is printed on the photo. Show it beside both
                         // prices so owners know which serving they are choosing.
-                        val serving = if (x.bottle) "Bottle"
-                            else if (validVolume(x.volume)) "${x.volume.toInt()}ml" else null
-                        val choiceLabel = listOfNotNull(serving, won(price)).joinToString(" · ")
-                        ReviewChoice(choiceLabel, { vm.choosePrice(id, choice) }, Modifier.fillMaxWidth(),
+                        ReviewChoice(reviewPriceChoiceLabel(x, price), { vm.choosePrice(id, choice) }, Modifier.fillMaxWidth(),
                             selected = x.priceChoice == choice, minHeight = 50.dp, horizontalPadding = 5.dp,
                             verticalPadding = 8.dp, testTag = "review-price-${choice.name.lowercase()}-$id")
                     }
