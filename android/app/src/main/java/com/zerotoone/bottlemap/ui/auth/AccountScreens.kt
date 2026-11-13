@@ -174,7 +174,7 @@ fun AccountScreen(
                 Row(Modifier.fillMaxWidth().padding(top=32.dp),
                     horizontalArrangement=Arrangement.Center,
                     verticalAlignment=Alignment.CenterVertically) {
-                    Text("매장 사장님이신가요?",color=P18Muted,fontSize=15.sp)
+                    Text("사장님이신가요?",color=P18Muted,fontSize=15.sp)
                     Spacer(Modifier.width(6.dp))
                     Row(Modifier.heightIn(min=48.dp)
                         .clickable(onClick=if(user==null)onOpenLogin else onOpenOwner),
@@ -186,10 +186,8 @@ fun AccountScreen(
                     }
                 }
             }
-            if(state is AuthUiState.Initializing || state is AuthUiState.SigningIn) {
-                Spacer(Modifier.height(24.dp))
-                CircularProgressIndicator(color=P18Gold)
-            }
+            // Google Credential Manager owns the account picker. No auth
+            // progress animation is shown behind the system dialog (v20).
         }
     }
 }
@@ -233,11 +231,8 @@ fun GoogleLoginScreen(
                 }
             }
             if(state is AuthUiState.Initializing || state is AuthUiState.SigningIn) {
-                Row(verticalAlignment=Alignment.CenterVertically,
-                    horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-                    CircularProgressIndicator(Modifier.size(24.dp),color=P18Gold)
-                    Text("로그인 중이에요",color=P18Muted)
-                }
+                // Static state copy only; never animate a spinner under Google picker.
+                Text("로그인 중이에요",color=P18Muted)
             }
             Column(verticalArrangement=Arrangement.spacedBy(12.dp)) {
                 GoogleSignInButton(viewModel=authViewModel,
