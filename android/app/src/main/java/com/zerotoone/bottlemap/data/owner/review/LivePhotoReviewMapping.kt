@@ -69,9 +69,21 @@ private fun mapServerReviewItem(
     val linkedId = dto.proposedProductId.takeIf {
         match == ReviewMatch.EXACT && !nonProduct
     }
-    val existing = snapshot.menuItems.firstOrNull {
-        it.barId == bar.barId && it.productId == linkedId
-    }
+    // Keep the current bar price for each matching catalog product.
+    // A candidate linked after initial review still needs a price-choice prompt.
+    val firstScanned = recognized.firstOrNull()
+    val existingPrices = snapshot.menuItems.filter { it.barId == bar.barId }
+        .mapNotNull { row ->
+            val match = row.options.firstOrNull { saved ->
+                (isBottle(saved.label) && isBottle(firstScanned?.extractedOptionLabel)) ||
+                    (!isBottle(saved.label) && !isBottle(firstScanned?.extractedOptionLabel) &&
+                        saved.pourMl != null &&
+                        saved.pourMl == (firstScanned?.extractedPourMl ?: defaultPour))
+            } ?: row.options.singleOrNull().takeIf {
+                firstScanned?.extractedPourMl == null && it != null && !isBottle(it.label)
+            }
+            match?.let { row.productId to it.priceKrw.toDouble() }
+        }.toMap()
     val options = recognized.map { option ->
         val bottle = isBottle(option.extractedOptionLabel)
         ReviewOption(
@@ -84,12 +96,7 @@ private fun mapServerReviewItem(
     }
     val first = options.firstOrNull()
     val firstServerOption = recognized.firstOrNull()
-    val retained = existing?.options?.firstOrNull { saved ->
-        reviewServingKey(saved.pourMl, saved.label) ==
-            reviewServingKey(firstServerOption?.extractedPourMl,
-                firstServerOption?.extractedOptionLabel)
-    }
-    val oldPrice = retained?.priceKrw?.toDouble()
+    val oldPrice = linkedId?.let(existingPrices::get)
     val photoPrice = firstServerOption?.extractedPriceKrw?.toDouble()
     val displayName = dto.extractedProductName?.trim()?.ifBlank { null }
         ?: dto.newProductDraft?.displayName?.trim()?.ifBlank { null }
@@ -111,6 +118,7 @@ private fun mapServerReviewItem(
             VolumeSource.DEFAULT else VolumeSource.PHOTO,
         primaryHasOption = first != null,
         primarySourceOptionId = first?.sourceOptionId,
+        existingPriceByProductId = existingPrices,
         options = if (other) emptyList() else options.drop(1),
         oldPrice = oldPrice,
         photoPrice = photoPrice,
