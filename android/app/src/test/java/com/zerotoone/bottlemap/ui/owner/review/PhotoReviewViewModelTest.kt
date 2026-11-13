@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.ui.owner.review
 
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
+import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -195,6 +196,21 @@ class PhotoReviewViewModelTest {
         assertEquals(45.0, vm.item("glen12").volume, 0.0)
         assertFalse(PhotoReviewRules.stats(vm.state).noDefault)
         assertEquals(45, repo.savedDefaultPour)
+    }
+
+    @Test fun failedLiveDefaultPourSaveDoesNotUnlockPublish() = runTest(dispatcher) {
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.NO_DEFAULT)
+        val failing = object : PhotoReviewRepository by mock {
+            override suspend fun saveDefaultPour(ml: Int) {
+                error("서버 저장 실패")
+            }
+        }
+        val vm = PhotoReviewViewModel(failing)
+        val events = vm.collectEvents(backgroundScope)
+        assertTrue(PhotoReviewRules.stats(vm.state).noDefault)
+        vm.saveDefaultPour("45")
+        assertTrue(PhotoReviewRules.stats(vm.state).noDefault)
+        assertTrue(PhotoReviewEvent.Toast("서버 저장 실패") in events)
     }
 
     @Test fun typingKeepsTheCardInPlaceUntilTheFieldIsLeft() = runTest(dispatcher) {
