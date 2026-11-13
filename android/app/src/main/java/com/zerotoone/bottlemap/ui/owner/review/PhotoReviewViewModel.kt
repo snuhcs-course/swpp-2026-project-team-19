@@ -371,6 +371,38 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         _events.trySend(PhotoReviewEvent.FocusReviewName(id))
     }
 
+    fun chooseServingPrice(id: String, servingKey: String, price: Int) {
+        val x = item(id) ?: return
+        if (x.priceCandidates.none {
+            it.servingKey == servingKey && it.priceKrw == price
+        }) return
+        mutateItem(id) { PhotoReviewRules.chooseServingPrice(it, servingKey, price) }
+    }
+
+    fun toggleVolumeChoice(id: String, servingKey: String) {
+        val x = item(id) ?: return
+        val exists = x.volumeChoices.any { PhotoReviewRules.servingKey(it) == servingKey }
+        if (!exists || x.volumeChoicesConfirmed) return
+        val selected = x.chosenVolumeKeys
+        if (servingKey !in selected &&
+            selected.size >= PhotoReviewRules.MAX_PICKED_VOLUMES) {
+            toast("용량은 최대 3가지까지 설정 가능해요.")
+            return
+        }
+        mutateItem(id) { it.copy(chosenVolumeKeys =
+            if (servingKey in selected) selected - servingKey else selected + servingKey
+        ) }
+    }
+
+    fun confirmVolumeChoices(id: String) {
+        val x = item(id) ?: return
+        if (x.chosenVolumeKeys.isEmpty()) {
+            toast("등록할 용량을 선택해 주세요.")
+            return
+        }
+        mutateItem(id, PhotoReviewRules::confirmVolumeChoices)
+    }
+
     fun choosePrice(id: String, choice: PriceChoice) = mutateItem(id) {
         it.copy(priceChoice = choice, price = (if (choice == PriceChoice.OLD) it.oldPrice else it.photoPrice) ?: it.price)
     }
