@@ -149,24 +149,10 @@ internal fun V4HourButton(text: String, onClick: ()->Unit, modifier: Modifier = 
 /** HTML top bar: small section caption next to a standalone back arrow. */
 @Composable
 internal fun V4Toolbar(title: String?, onBack: () -> Unit) {
-    Row(Modifier.fillMaxWidth().height(52.dp).background(V4Color.background)
-        .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        val focus = LocalFocusManager.current
-        val keyboard = LocalSoftwareKeyboardController.current
-        val backInteraction = remember { MutableInteractionSource() }
-        Box(Modifier.size(40.dp).clickable(interactionSource = backInteraction,
-            indication = null) {
-                focus.clearFocus()
-                keyboard?.hide()
-                onBack()
-            }.semantics { contentDescription = "뒤로가기" },
-            contentAlignment = Alignment.Center) {
-            Text("←", color = V4Color.text, fontSize = 26.sp, lineHeight = 28.sp)
-        }
-        if (title != null) Text(title, color = V4Color.sub,
-            fontSize = 12.sp, fontWeight = FontWeight.Medium)
+    // All owner back arrows use the same x/y, 48dp touch target and title style
+    // as the account '내 정보' header. A blank title preserves back-only screens.
+    Box(Modifier.fillMaxWidth().background(V4Color.background)) {
+        AccountHeader(title.orEmpty(), onBack)
     }
 }
 
