@@ -212,9 +212,8 @@ internal fun mapConfirmedReviewDecision(
     val sourceDraft = extracted.newProductDraft
     val brandText = (extracted.extractedBrandName
         ?: sourceDraft?.brandText)?.trim().orEmpty()
-    require(brandText.isNotBlank()) {
-        "${card.name}: 브랜드 정보가 없어 자동 등록할 수 없어요."
-    }
+    // Brand metadata can be absent for beer/other menus. The owner review
+    // submits a bar-only item, not a globally canonical Product.
     val category = sourceDraft?.category?.takeIf { it.isNotBlank() }
         ?: if (card.type == ReviewItemType.WHISKY) "whisky" else
             error("${card.name}: 상품 분류를 확인해 주세요.")
@@ -227,7 +226,7 @@ internal fun mapConfirmedReviewDecision(
         newProduct = MockNewProductDraft(
             name = card.newProductName?.trim()?.ifBlank { null } ?: card.name.trim(),
             brandId = brandId,
-            brandName = if (brandId == null) brandText else null,
+            brandName = if (brandId == null) brandText.takeIf { it.isNotBlank() } else null,
             category = category,
             ageYears = sourceDraft?.ageYears,
             editionName = sourceDraft?.editionName,
