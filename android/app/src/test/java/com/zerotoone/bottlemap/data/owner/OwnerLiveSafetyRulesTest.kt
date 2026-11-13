@@ -90,7 +90,7 @@ class OwnerLiveSafetyRulesTest {
         assertTrue(reviewedServingsByProduct(job, setOf("other")).isEmpty())
     }
 
-    @Test fun canonicalBottleLabelsAreDeduplicatedAcrossImages() {
+    @Test fun reviewedServingIdentityRetainsDifferentBottleLabelsAndGlasses() {
         fun line(id: String, label: String, price: Int): MockExtractedLine {
             val option = MockMenuOption("option-$id", label = label, pourMl = null,
                 priceKrw = price)
@@ -107,11 +107,13 @@ class OwnerLiveSafetyRulesTest {
                 MockPhotoExtraction("second", "content://second", 2,
                     listOf(line("bottle-en", "Bottle", 150000)))))
         val priced = reviewedServingsByProduct(job, setOf("lagavulin"))
-        assertEquals(1, priced.getValue("lagavulin").size)
-        assertEquals("bottle", reviewServingKey(null, priced.getValue("lagavulin").single().label))
-        assertEquals("bottle", reviewServingKey(null, "  BOTTLE  "))
-        assertEquals("ml:30", reviewServingKey(30, "잔"))
-        assertEquals("ml:30", reviewServingKey(30, "Double"))
+        // Merged #164 uses (optionLabel, pourMl). The English and Korean
+        // OCR bottle labels are distinct unless the reviewer explicitly edits them.
+        assertEquals(2, priced.getValue("lagavulin").size)
+        assertEquals("label:병|ml:none", reviewServingKey(null, priced.getValue("lagavulin")[0].label))
+        assertEquals("label:bottle|ml:none", reviewServingKey(null, "  BOTTLE  "))
+        assertEquals("label:잔|ml:30", reviewServingKey(30, "잔"))
+        assertEquals("label:double|ml:30", reviewServingKey(30, "Double"))
     }
 
     @Test fun failedReplacementNeverDeletesExistingPhoto() {
