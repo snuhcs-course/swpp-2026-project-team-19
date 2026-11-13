@@ -86,7 +86,8 @@ class NewProductDraft(BaseModel):
             "`aliasesToAdd` of select_existing_product) once the reviewer has confirmed the product. A line that "
             "writes the whole name in two scripts gives one per script: '글렌알라키(Glenallachie) 15년' gives "
             "'글렌알라키 15년' and 'Glenallachie 15년'. Otherwise the name as written. Empty when the line has no "
-            "name, names two products (`evidence.multiProduct`), or has nothing an alias can be made of. "
+            "name, names two products (`evidence.multiProduct`), has two spellings that matched different products "
+            "(`evidence.splitBilingual`), or has nothing an alias can be made of. "
             "Suggestions only: nothing is saved unless the client sends it"
         ),
     )

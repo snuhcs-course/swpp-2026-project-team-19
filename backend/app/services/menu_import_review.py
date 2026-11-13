@@ -140,10 +140,15 @@ def source_boxes(raw_output: Any) -> dict[int, list[int]]:
 
 
 def _alias_suggestions(item: ExtractedItem) -> list[str]:
-    """Nothing for a line naming two products (`evidence.multiProduct`): saved as an alias of the
-    product the reviewer picks, the whole line would resolve to that one product on the next
-    import and the other product would be lost."""
-    if any((candidate.evidence or {}).get("multiProduct") for candidate in item.candidates):
+    """Nothing for a line whose parts name different products: two products on one line
+    (`evidence.multiProduct`), or a bilingual line whose two sides matched different products
+    ("딘스톤 12년 / Glenfiddich 12", `evidence.splitBilingual` on candidates of different
+    products). Saved on the product the reviewer picks, one side would become an alias of the
+    wrong product and resolve to it on the next import."""
+    evidences = [(candidate.product_id, candidate.evidence or {}) for candidate in item.candidates]
+    if any(evidence.get("multiProduct") for _, evidence in evidences):
+        return []
+    if len({product for product, evidence in evidences if evidence.get("splitBilingual")}) > 1:
         return []
     return alias_suggestions(item.extracted_product_name)
 
