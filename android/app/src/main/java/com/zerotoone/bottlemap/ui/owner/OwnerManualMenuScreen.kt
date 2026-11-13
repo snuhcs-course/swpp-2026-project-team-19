@@ -411,7 +411,7 @@ internal fun OwnerManualMenuScreen(
                     MockCatalogProduct(
                         manualId("local-unverified-"), linked.brandId, name,
                         category = effectiveCategoryCode, catalogMatched = false,
-                        otherAlcoholKind = alcoholKind.trim().ifEmpty { null },
+                        otherAlcoholKind = alcoholKind.trim().takeIf { it.isNotEmpty() },
                     )
                 linked != null -> linked
                 else -> {
