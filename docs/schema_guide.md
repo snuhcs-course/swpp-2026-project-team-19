@@ -267,7 +267,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `unlinked` | 상품 없이 게시하거나 추가한 위스키. 상품에 연결해야 고객 검색에 나온다 |
 | `relinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 다른 상품에 연결됨. 상품 없던 항목이 연결된 경우도 같다 |
 | `unlinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 연결이 풀림 |
-| `attribute_conflict` | 업주가 고른 상품의 연수나 에디션이 사진에서 읽은 값과 다름 |
+| `attribute_conflict` | 검수에서 고른 상품의 연수나 에디션이 사진에서 읽은 값과 다름. 제출한 사람이 operator여도 같다 |
 | `price_conflict` | 다시 매칭으로 같은 상품의 줄이 여럿이 되어 같은 용량의 가격이 부딪쳤음 |
 
 ### 4.22 menu_item_check_status

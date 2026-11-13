@@ -1342,7 +1342,7 @@ POST /api/menu-imports/import-001/review-and-apply
 
 기존 상품 선택은 14장의 통합 최종 요청에 포함한다. 백엔드는 상품 존재 여부, 활성 상태, 각 옵션의 가격과 용량 범위를 다시 검증한 뒤 최종 반영 트랜잭션에서 `extracted_items`와 `extracted_options`를 갱신한다.
 
-브랜드·연수·에디션 충돌은 거부 사유가 아니다. AI가 연수나 에디션을 잘못 읽었을 때 운영자가 올바른 상품을 골라 바로잡을 수 있어야 하기 때문이다. 대신 프론트엔드는 운영자가 고른 상품이 추출값과 충돌하면(후보의 `evidence`에 `ageConflict`, `editionConflict`, `editionOnlyInExtracted`가 있거나, 상품 검색으로 고른 상품의 `ageYears`·`editionName`이 추출값과 다르면) 제출 전에 한 번 확인을 받는다. 예: "추출된 연수(12)와 다른 상품(15)입니다. 계속할까요?"
+브랜드·연수·에디션 충돌은 거부 사유가 아니다. AI가 연수나 에디션을 잘못 읽었을 때 운영자가 올바른 상품을 골라 바로잡을 수 있어야 하기 때문이다. 제출 전에 업주에게 확인을 묻지도 않는다. 대신 최종 반영 트랜잭션에서 백엔드가 고른 상품과 그 줄의 추출 연수와 에디션을 10장의 규칙으로 다시 비교하고, `ageConflict`, `editionConflict`, `editionOnlyInExtracted` 중 하나라도 해당하면 그 상품에 연결해 게시한 뒤 `menu_item_checks`(스키마 가이드 7.7)에 사유 `attribute_conflict`로 올린다. 후보에서 고른 상품과 검색에서 고른 상품 모두 같고, 제출한 사람이 operator여도 같다. 메뉴판 이름을 고친 줄은 추출값이 예전 이름에서 나온 값이므로 비교하지 않고 17장의 다시 매칭을 따른다(API 명세 8.7, 8.11).
 
 ```text
 selected_product_id    = product-deanston-12
