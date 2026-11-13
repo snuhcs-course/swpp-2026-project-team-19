@@ -26,7 +26,7 @@ from app.core.security import Principal
 from app.models import Bar, BarMenuItem, BarStatus, Brand, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
 from app.schemas.menu import BarMenuResponse
 from app.schemas.menu_edit import MenuItemAddRequest, MenuItemUpdateRequest, MenuOptionInput, MenuResetRequest
-from app.services.bar_access import can_manage_bar, forbidden
+from app.services.bar_access import can_manage_bar, forbidden, is_operator
 from app.services.bar_menu import bar_not_found, get_bar_menu
 from app.services.menu_import_upload import check_no_unfinished_import
 from app.services.menu_publish import clear_sold_out
@@ -199,6 +199,16 @@ def _product_for(session: Session, body: MenuItemAddRequest, principal: Principa
             errors.add("productId", "PRODUCT_INACTIVE", "비활성 상품은 메뉴에 연결할 수 없습니다.")
         errors.raise_any()
         return product
+    # A bar owner may publish an existing, approved catalog product, but not
+    # create a globally searchable brand/product as a side effect of manual add.
+    # Bar-local/pending menu items need a separate persistence model and operator
+    # approval flow (tracked in issue #152). Fail closed until that exists.
+    if not is_operator(session, principal):
+        raise ApiError(
+            403,
+            "CATALOG_APPROVAL_REQUIRED",
+            "새 상품은 관리자 승인 후 카탈로그에 등록할 수 있어요. 현재 직접 등록은 지원하지 않아요.",
+        )
     new = body.newProduct
     if new.brand.type == "existing" and session.get(Brand, new.brand.brandId) is None:
         errors.add("newProduct.brand.brandId", "BRAND_NOT_FOUND", "브랜드를 찾을 수 없습니다.")
