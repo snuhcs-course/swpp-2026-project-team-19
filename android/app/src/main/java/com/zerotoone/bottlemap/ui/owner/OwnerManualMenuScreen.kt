@@ -302,7 +302,7 @@ internal fun OwnerManualMenuScreen(
     fun save() {
         if (bar == null || saving) return
         try {
-            if(editId == null) {
+            if(editId == null && category == "위스키") {
                 require(inactiveOwnerCatalogMatch(candidates, itemName) == null) {
                     "운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요."
                 }
@@ -325,6 +325,11 @@ internal fun OwnerManualMenuScreen(
                 "메뉴 이름을 확인해 주세요."
             }
             val sameCategory = linked?.let { manualEditorCategory(it) } == category
+            // §3.14.4 has no kind/category field; silently allowing a category
+            // change would leave the server item unchanged while the UI claims success.
+            require(old == null || sameCategory) {
+                "종류를 바꾸려면 기존 메뉴를 삭제한 뒤 새 종류로 추가해 주세요."
+            }
             val sharedLocal = linked?.takeIf { !it.catalogMatched }?.let { product ->
                 snapshot?.menuItems.orEmpty().any {
                     it.barId != bar.barId && it.productId == product.productId
@@ -452,15 +457,8 @@ internal fun OwnerManualMenuScreen(
                     name != p.displayName) name else null)
             val stagedProduct = if (products.none { it.productId == p.productId } ||
                 (linked != null && !linked.catalogMatched && !sharedLocal)) p else null
-            // The current API's newProduct path writes directly to the global
-            // catalog. Keep the draft onscreen instead of accidentally submitting
-            // a beer or unapproved whisky as a shared canonical product.
-            // Per-bar pending entries are tracked separately in issue #152.
-            if (viewModel.usesProductionOwnerApi() && old == null && stagedProduct != null) {
-                error = "새 상품은 관리자 승인 후 등록할 수 있어요. " +
-                    "현재는 기존 카탈로그 상품만 매장 메뉴에 추가할 수 있어요."
-                return
-            }
+            // Unmatched items now publish to this bar only via kind (PR #164).
+            // The production adapter must never send an owner's newProduct.
             if(viewModel.usesProductionOwnerApi()) {
                 saving = true
                 saveScope.launch {
@@ -844,10 +842,15 @@ internal fun OwnerManualMenuScreen(
                             }
                         }
                     }
-                    if (category == "기타 주류")
+                    if (category == "기타 주류") {
                         V4FormField("주류 종류", alcoholKind, { alcoholKind = it.take(30) },
                             placeholder = "예: 하이볼, 맥주",
                             testTag = "manual-menu-alcohol-kind")
+                        if (viewModel.usesProductionOwnerApi()) {
+                            Text("현재 서버는 세부 주류 종류를 저장하지 않아요. '기타 주류'로 게시됩니다.",
+                                color = V4Color.sub, fontSize = 12.sp)
+                        }
+                    }
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     if (category == "위스키") {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement =
