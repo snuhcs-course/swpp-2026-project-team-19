@@ -137,16 +137,16 @@ class OwnerPhotoReviewPolicyTest {
         assertTrue(revised.flatMap { it.lines }.all { it.needsPriceEntry })
     }
 
-    @Test fun distinctServingLabelsWithSamePourKeepIndependentPrices() {
+    @Test fun differentLabelsWithSamePourAreOneConflictingPrice() {
         val one=exact("one",17000).copy(options=listOf(
             MockMenuOption("opt1",label="잔 30ml",pourMl=30,priceKrw=17000)))
         val two=exact("two",19000).copy(options=listOf(
             MockMenuOption("opt2",label="Whisky",pourMl=30,priceKrw=19000)))
         val revised=requirePhotoPriceReviewOnConflict(listOf(image(1,one),image(2,two)))
-        // Merged #164 identifies a serving by (label, pour), not pour alone.
-        assertEquals(17000,revised[0].lines[0].options[0].priceKrw)
-        assertEquals(19000,revised[1].lines[0].options[0].priceKrw)
-        assertTrue(revised.flatMap { it.lines }.none { it.priceConflict })
+        // Owner treats both 30ml pours as the SAME option, regardless of text.
+        assertEquals(0,revised[0].lines[0].options[0].priceKrw)
+        assertEquals(0,revised[1].lines[0].options[0].priceKrw)
+        assertTrue(revised.flatMap { it.lines }.all { it.priceConflict })
     }
 
     @Test fun koreanBottleAndEnglishBottlePriceDifferenceIsOneConflict() {
@@ -175,7 +175,7 @@ class OwnerPhotoReviewPolicyTest {
         assertEquals(0,importCompletedPhotoCount(job.copy(completedImages=0)))
     }
 
-    @Test fun finalPreflightAcceptsDifferentLabelsOnTheSamePourAndDoesNotCompareOneLineToItself() {
+    @Test fun finalPreflightRejectsDifferentPricesAtSameMlAcrossLines() {
         val base=exact("one",17000)
         val twoLabels=base.copy(options=listOf(
             MockMenuOption("label-a",label="잔",pourMl=30,priceKrw=17000),
@@ -195,9 +195,10 @@ class OwnerPhotoReviewPolicyTest {
             )))
         val job=MockMenuImport("job","bar",MockImportStatus.READY_FOR_REVIEW,1,
             listOf(image(1,twoLabels),image(2,second)))
-        assertTrue(conflictingReviewedPhotoPrices(job).isEmpty())
+        assertEquals(setOf("product-glenfiddich"),conflictingReviewedPhotoPrices(job))
+        // Same-line duplicate ml is caught by option validation, not a cross-line check.
         assertTrue(conflictingReviewedPhotoPrices(job.copy(images=listOf(image(1,twoLabels)))).isEmpty())
-        assertTrue(reviewServingKey(30,"잔") != reviewServingKey(30,"샷"))
+        assertEquals(reviewServingKey(30,"잔"),reviewServingKey(30,"샷"))
     }
 
 }
