@@ -3707,7 +3707,8 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
             "displayName": "딘스톤 12년",
             "ageYears": 12,
             "editionName": null,
-            "abv": null
+            "abv": null,
+            "aliasSuggestions": ["딘스톤 12년"]
           }
         }
       ]
@@ -3759,6 +3760,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - `candidates`는 같은 상품을 중복하지 않으며 `candidateRank` 오름차순이다.
 - `proposedProductId`는 `candidateRank = 1`의 상품이거나 후보가 없으면 `null`이다.
 - `newProductDraft`는 화면 입력을 돕는 계산값이며 실제 카탈로그 행이 아니다.
+- `newProductDraft.aliasSuggestions`(I4)는 그 줄의 표기 가운데 상품 별칭으로 저장할 만한 것이다. 메뉴가 이름 전체를 두 문자로 적은 줄은 문자별로 하나씩(`글렌알라키(Glenallachie) 15년` → `글렌알라키 15년`, `Glenallachie 15년`), 그 밖의 줄은 적힌 이름 그대로 하나다. 이름이 없는 줄은 빈 배열이다. 이름 일부만 다른 문자로 적은 표기(`Blair Athol Sangiovese Cask (블레어 아쏠)`의 `블레어 아쏠`)는 같은 브랜드의 다른 상품에 걸리므로 제안하지 않는다. 제안일 뿐이며 서버는 저장하지 않는다. 검수자가 상품을 확정한 줄에서 클라이언트가 8.1의 `create_product.aliases` 또는 `select_existing_product.aliasesToAdd`에 `{"aliasText": ...}`로 넣어 보내면 저장되고, 다음부터 같은 표기는 그 상품으로 바로 연결된다. 추가 필드이므로 이 키를 모르는 클라이언트는 무시하면 된다.
 - `evidence`는 설명용 보조 정보다. 프론트엔드는 알 수 없는 키를 무시해야 한다.
 - `before`와 `after`가 최종 diff 비교의 구조화된 값이다.
 - 제안 상품이 없는 줄(`proposedProductId = null`, 보통 `unmatched`)의 `add`는 `after.productId`가 `null`이다. 검수자가 그 줄에서 기존 상품을 고르거나 새 상품을 만들면 그 상품으로 반영된다(8.1). 그 줄을 비상품으로 확정하거나 제외하면 이 변경은 `ignore`로 보낸다(8.7의 `CHANGE_WITHOUT_PRODUCT`).
@@ -3904,7 +3906,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
               "evidence": { "aliasExact": true, "matchedAlias": "글렌피딕12", "ageExact": true, "rule": "alias" }
             }
           ],
-          "newProductDraft": { "brandText": "글렌피딕", "category": "whisky", "displayName": "글렌피딕 12년", "ageYears": 12, "editionName": null, "abv": null }
+          "newProductDraft": { "brandText": "글렌피딕", "category": "whisky", "displayName": "글렌피딕 12년", "ageYears": 12, "editionName": null, "abv": null, "aliasSuggestions": ["글렌피딕 12년"] }
         },
         {
           "extractedItemId": "10000000-0000-4000-8000-000000000003",
@@ -3941,7 +3943,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
               "evidence": { "aliasExact": true, "matchedAlias": "glenfiddich12", "ageConflict": true, "rule": "alias" }
             }
           ],
-          "newProductDraft": { "brandText": "Glenfiddich", "category": "whisky", "displayName": "Glenfiddich 12", "ageYears": 15, "editionName": null, "abv": null }
+          "newProductDraft": { "brandText": "Glenfiddich", "category": "whisky", "displayName": "Glenfiddich 12", "ageYears": 15, "editionName": null, "abv": null, "aliasSuggestions": ["Glenfiddich 12"] }
         },
         {
           "extractedItemId": "10000000-0000-4000-8000-000000000004",
@@ -3963,7 +3965,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
             { "extractedOptionId": "20000000-0000-4000-8000-000000000004", "optionOrder": 1, "extractedOptionLabel": "잔", "extractedPourMl": null, "extractedPriceKrw": 45000 }
           ],
           "candidates": [],
-          "newProductDraft": { "brandText": "Unknown Distillery", "category": "whisky", "displayName": "Unknown Distillery 25", "ageYears": 25, "editionName": null, "abv": 48.0 }
+          "newProductDraft": { "brandText": "Unknown Distillery", "category": "whisky", "displayName": "Unknown Distillery 25", "ageYears": 25, "editionName": null, "abv": 48.0, "aliasSuggestions": ["Unknown Distillery 25"] }
         }
       ]
     }

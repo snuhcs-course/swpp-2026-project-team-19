@@ -79,6 +79,16 @@ class NewProductDraft(BaseModel):
     ageYears: int | None
     editionName: str | None
     abv: float | None
+    aliasSuggestions: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Spellings of this menu line that can be saved as product aliases (`aliases` of create_product, "
+            "`aliasesToAdd` of select_existing_product) once the reviewer has confirmed the product. A line that "
+            "writes the whole name in two scripts gives one per script: '글렌알라키(Glenallachie) 15년' gives "
+            "'글렌알라키 15년' and 'Glenallachie 15년'. Otherwise the name as written. Empty when the line has no "
+            "name. Suggestions only: nothing is saved unless the client sends it"
+        ),
+    )
 
 
 class ReviewItem(BaseModel):

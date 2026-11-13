@@ -22,6 +22,7 @@ from app.models import (
     PipelineStatus,
     Product,
 )
+from app.matching.product_draft import alias_suggestions
 from app.schemas.menu_import import (
     ChangeAfter,
     ChangeAfterOption,
@@ -175,6 +176,7 @@ def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict
                 ageYears=item.extracted_age_years,
                 editionName=item.extracted_edition_name,
                 abv=_float(item.extracted_abv),
+                aliasSuggestions=alias_suggestions(item.extracted_product_name),
             )
             if effective == LineType.PRODUCT
             else None

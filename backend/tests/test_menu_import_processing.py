@@ -428,6 +428,7 @@ def test_unconfirmed_lines_get_brand_age_and_edition_and_confirmed_lines_do_not(
     assert items[1]["newProductDraft"] == {
         "brandText": "글렌피딕", "category": "whisky", "displayName": "글렌피딕(Glenfiddich) 21년 그란 레제르바",
         "ageYears": 21, "editionName": "그란 레제르바", "abv": None,
+        "aliasSuggestions": ["글렌피딕 21년 그란 레제르바", "Glenfiddich 21년 그란 레제르바"],
     }
     assert items[0]["newProductDraft"]["brandText"] is None and items[0]["initialResolutionStatus"] == "exact_match"
 

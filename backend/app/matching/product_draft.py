@@ -86,6 +86,19 @@ def whole_spellings(source: str) -> tuple[str, ...]:
     return tuple(dict.fromkeys(out))
 
 
+MAX_ALIAS_LENGTH = 200  # ProductAliasInput.aliasText
+
+
+def alias_suggestions(name: str | None) -> list[str]:
+    """Spellings of a menu line worth saving as aliases of its product: one per script when the
+    line writes the whole name twice, otherwise the name as written. A partial spelling is never
+    suggested (see `spellings` above)."""
+    source = _SPACES.sub(" ", name or "").strip()
+    if not source:
+        return []
+    return [text for text in (whole_spellings(source) or (source,)) if len(text) <= MAX_ALIAS_LENGTH]
+
+
 def draft_from_name(name: str | None, catalog: CatalogLookup) -> ProductDraft | None:
     """The draft for a menu line, or None for a line without a name."""
     source = (name or "").strip()

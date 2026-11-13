@@ -173,3 +173,17 @@ def test_a_draft_never_confirms_a_line(catalog):
     assert draft.brand_id == BALVENIE and draft.age_years == 16
     _, result = resolve(name, catalog)
     assert review_state(result) is not ReviewState.CONFIRMED and stored_status(result) != "exact_match"
+
+
+@pytest.mark.parametrize("name, suggestions", [
+    ("라가불린(Lagavulin) 8년", ["라가불린 8년", "Lagavulin 8년"]),
+    ("글렌그란트 18년 / Glen Grant 18Y", ["글렌그란트 18년", "Glen Grant 18Y"]),
+    ("  라프로익   10년 CS ", ["라프로익 10년 CS"]),                                  # one script: the name as written
+    ("Blair Athol Sangiovese Cask (블레어 아쏠)", ["Blair Athol Sangiovese Cask (블레어 아쏠)"]),  # never the partial
+    ("글렌그란트 18년 / Glen Grant 15Y", ["글렌그란트 18년 / Glen Grant 15Y"]),
+    (None, []), ("   ", []), ("가" * 201, []),
+])
+def test_alias_suggestions(name, suggestions):
+    from app.matching.product_draft import alias_suggestions
+
+    assert alias_suggestions(name) == suggestions
