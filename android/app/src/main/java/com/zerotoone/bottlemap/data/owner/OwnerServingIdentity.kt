@@ -13,8 +13,15 @@ import java.util.Locale
  * review requests canonicalize bottle to "Bottle" without changing OCR
  * extractedOptionId or editing existing persisted rows behind the Owner's back.
  */
-internal fun isBottleServingLabel(label: String?): Boolean =
-    label?.trim()?.lowercase(Locale.ROOT) in setOf("병", "bottle")
+private val bottleWithSize = Regex(
+    """^(?:병|bottle)\\s*\\(?\\s*\\d{1,4}(?:\\.\\d+)?\\s*(?:ml|l)\\s*\\)?$""",
+    RegexOption.IGNORE_CASE,
+)
+
+internal fun isBottleServingLabel(label: String?): Boolean {
+    val normalized = label?.trim()?.lowercase(Locale.ROOT) ?: return false
+    return normalized in setOf("병", "bottle") || bottleWithSize.matches(normalized)
+}
 
 internal fun canonicalServingLabel(label: String?): String? {
     val trimmed = label?.trim() ?: return null
