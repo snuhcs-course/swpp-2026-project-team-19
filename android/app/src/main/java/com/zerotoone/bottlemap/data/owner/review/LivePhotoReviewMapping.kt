@@ -46,6 +46,13 @@ internal fun mapServerPhotoReview(
 private fun isBottle(label: String?): Boolean =
     label?.trim()?.lowercase() in setOf("bottle", "병")
 
+/** A missing OCR pour only inherits the bar default for an explicit glass. */
+private fun isGlass(label: String?): Boolean {
+    val text = label?.trim()?.lowercase().orEmpty()
+    return text.startsWith("잔") || text.startsWith("샷") ||
+        text.startsWith("glass") || text.startsWith("shot")
+}
+
 private fun mapServerReviewItem(
     dto: ReviewItemDto, photoOrder: Int, photoUrl: String, bar: MockBar,
     snapshot: MockOwnerSnapshot, defaultPour: Int,
@@ -89,11 +96,15 @@ private fun mapServerReviewItem(
         val bottle = isBottle(option.extractedOptionLabel)
         ReviewOption(
             volume = if (bottle) 0.0
-                else (option.extractedPourMl ?: defaultPour).toDouble(),
+                else (option.extractedPourMl
+                    ?: defaultPour.takeIf { !other || isGlass(option.extractedOptionLabel) })
+                    ?.toDouble() ?: Double.NaN,
             price = (option.extractedPriceKrw ?: 0).toDouble(),
             bottle = bottle,
             sourceOptionId = option.extractedOptionId,
             label = option.extractedOptionLabel,
+            volumeFromDefault = option.extractedPourMl == null && !bottle &&
+                (!other || isGlass(option.extractedOptionLabel)),
         )
     }
     val first = options.firstOrNull()
@@ -118,7 +129,7 @@ private fun mapServerReviewItem(
         price = first?.price ?: 0.0,
         volume = first?.volume ?: defaultPour.toDouble(),
         bottle = first?.bottle ?: false,
-        volumeSource = if (firstServerOption?.extractedPourMl == null)
+        volumeSource = if (first?.volumeFromDefault == true)
             VolumeSource.DEFAULT else VolumeSource.PHOTO,
         primaryHasOption = first != null,
         primarySourceOptionId = first?.sourceOptionId,
@@ -185,17 +196,27 @@ internal fun mapConfirmedReviewDecision(
     val mapped = choices.mapIndexed { index, chosen ->
         // An owner-added option must never borrow a different OCR option ID.
         val source = chosen.sourceOptionId?.let(byId::get)
-        val bottle = card.type == ReviewItemType.WHISKY && chosen.bottle
-        val label = if (bottle) "Bottle" else source?.extractedOptionLabel
-        require(source?.extractedOptionLabel == null || label != null) {
-            "${card.name}: 기존 옵션 이름은 삭제할 수 없어요."
+        // Preserve original Korean OCR labels (including "병"). A reviewer
+        // switching an OCR glass to bottle explicitly changes it to "Bottle";
+        // switching an OCR bottle back to glass clears its bottle-only label.
+        val originalLabel = source?.extractedOptionLabel
+        val bottle = chosen.bottle ||
+            (card.type == ReviewItemType.OTHER && isBottle(originalLabel))
+        val label = when {
+            bottle -> originalLabel?.takeIf(::isBottle) ?: "Bottle"
+            isBottle(originalLabel) -> null
+            else -> chosen.label ?: originalLabel
         }
         MockMenuOption(
             optionId = source?.extractedOptionId ?: "manual-${card.id}-$index",
             label = label,
-            pourMl = if (bottle) null else if (card.type == ReviewItemType.OTHER)
-                source?.extractedPourMl
-            else chosen.volume.toInt(),
+            pourMl = when {
+                bottle -> null
+                card.type == ReviewItemType.WHISKY -> chosen.volume.toInt()
+                source?.extractedPourMl != null -> source.extractedPourMl
+                isGlass(label) -> chosen.volume.takeIf(::validVolume)?.toInt()
+                else -> null
+            },
             priceKrw = chosen.price.toInt(),
         )
     }
