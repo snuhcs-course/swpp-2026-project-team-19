@@ -306,7 +306,7 @@ private fun NavGraphBuilder.accountGraph(
                 },
             )
         }
-        registerVariantRoutes(navController)
+        registerVariantRoutes(navController, showToast)
         if (BuildConfig.DEBUG) {
             // MOCK ONLY: v18 photo-review scenarios, opened from MainActivity's debug extra.
             composable(
