@@ -121,10 +121,24 @@ def test_rows_apart_stay_apart_without_the_same_name_line():
         (item("A", "whisky", 9000, "glass", name_lines=["L002"]), item("A", "whisky", 90000, "bottle", name_lines=["L004"])),
         (item("A", "whisky", 9000, "glass"), item("A", "whisky", 90000, "bottle")),
         (item("A", "whisky", 9000, "glass", name_lines=["L002"]), item("A", "other", 90000, "bottle", name_lines=["L002"])),
+        # the same option twice is not one line's two prices
         (item("A", "whisky", 9000, "glass", name_lines=["L002"]), item("A", "whisky", 9500, "glass", name_lines=["L002"])),
     ):
         out = convert({"items": [first, item("B", "food", 5000, None), second]})
         assert len(out["items"]) + len(out["otherItems"]) == 3  # A, B, A: nothing joined
+
+
+def test_a_line_with_three_prices_is_one_item():
+    # "Glass 20ml / 40ml / Bottle": group_items pairs only the 40ml glass with the bottle
+    rows = [item("글렌드로낙 12년", "whisky", 12000, "glass", name_lines=["L002"]),
+            item("글렌드로낙 12년", "whisky", 22000, "glass", name_lines=["L002"]),
+            item("글렌드로낙 12년", "whisky", 180000, "bottle", name_lines=["L002"])]
+    rows[0]["pour_ml"], rows[1]["pour_ml"] = 20, 40
+    out = convert({"items": rows})
+    [only] = out["items"]
+    assert [(o["optionLabel"], o["pourMl"], o["priceKrw"]) for o in only["options"]] == [
+        ("잔", 20, 12000), ("잔", 40, 22000), ("병", None, 180000)]
+    assert out["itemSources"][0]["nameLines"] == ["L002"]
 
 
 def test_adjacent_glass_and_bottle_rows_are_still_one_line():

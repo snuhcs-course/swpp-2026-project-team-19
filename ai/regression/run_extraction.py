@@ -8,12 +8,15 @@ One Gemini call per photo (15 for the whole set) through the server code: extrac
 (prompt v1) or extract_menu_hybrid_v2 (prompt v2), model and thinking level as deployed. CLOVA is
 not called: the OCR answer comes from <data_dir>/ocr_cache/<stem>__table-off.json, and a photo
 without a cache stops the command. Photos are read from <data_dir> (BOTTLEMAP_DATA_DIR, default
-../bottlemap-p14/data) and must have the SHA-256 listed in the fixture.
+../bottlemap-p14/data) and must have the SHA-256 listed in the fixture. Before any call, the bytes
+the server would send to OCR for the photo must have the SHA-256 the cache records (`meta.sent_sha256`):
+a cache made from another image, or one without that hash, stops the command.
 
 Each photo gives <out>/<stem>_r<run>.json in the format regression.py --extraction and
 ai/eval/score.py read: `raw_text` (the model's answer), `prompt_version`, `ocr_lines`, tokens and
 latency, and for prompt v2 `other_items`. An existing record is kept, so a stopped command can
-be run again. An answer the server rejects is recorded with "output": null. A call that gets no
+be run again; a kept record made with another prompt, model, thinking level, photo or run number
+stops the command instead of standing in for the requested one. An answer the server rejects is recorded with "output": null. A call that gets no
 answer (quota, network) stops the command; nothing is written for that photo.
 
 GEMINI_API_KEY is read from the repo .env and is never printed or written.
@@ -35,7 +38,8 @@ sys.path.insert(0, str(REPO_ROOT / "backend"))
 
 import regression  # noqa: E402
 from app.extraction import ExtractionSettings, InvalidModelOutputError, ModelCallError  # noqa: E402
-from app.extraction.clova import ClovaSettings  # noqa: E402
+from app.extraction.clova import ClovaSettings, ocr_image  # noqa: E402
+from app.extraction.image import prepare_image  # noqa: E402
 from app.extraction.hybrid import extract_menu_hybrid  # noqa: E402
 from app.extraction.hybrid_v2 import extract_menu_hybrid_v2  # noqa: E402
 
@@ -43,6 +47,7 @@ MODEL = "gemini-3.5-flash-lite"   # backend/deploy/env.production.example
 THINKING_LEVEL = "medium"
 MAX_ATTEMPTS = 2                  # the server retries 6 times; a test run should not spend the daily quota on retries
 EXTRACTORS = {"v1": extract_menu_hybrid, "v2": extract_menu_hybrid_v2}
+PROMPT_VERSIONS = {"v1": "hybrid-v1", "v2": "hybrid-v2"}
 MIME_TYPES = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"}
 REPLAY_CLOVA = ClovaSettings(invoke_url="replay://ocr-cache/general", secret="")
 
@@ -76,6 +81,11 @@ def run_photo(fixture: dict, data_dir: Path, prompt: str, settings: ExtractionSe
     if not cache_path.is_file():
         raise SystemExit(f"{fixture['photo_id']}: no OCR cache at {cache_path}")
     cache = json.loads(cache_path.read_text(encoding="utf-8"))
+    expected = cache.get("meta", {}).get("sent_sha256")
+    sent = hashlib.sha256(ocr_image(*prepare_image(path.read_bytes(), MIME_TYPES[path.suffix.lower()]))[0]).hexdigest()
+    if not expected or sent != expected:
+        raise SystemExit(f"{fixture['photo_id']}: the OCR cache {cache_path.name} was not made from this photo "
+                         f"(the server would send {sent[:12]}, the cache records {str(expected)[:12]}); nothing was sent")
     ocr = ReplayOcr(cache)
     record = {"condition": "hybrid", "model": settings.model, "thinking_level": settings.thinking_level,
               "source_image": photo["file"], "photo_id": fixture["photo_id"]}
@@ -98,11 +108,19 @@ def run_photo(fixture: dict, data_dir: Path, prompt: str, settings: ExtractionSe
         "output": None if rows is None else {"items": rows},
         "other_items": meta.get("otherItems"), "other_items_dropped": meta.get("otherItemsDropped"),
         "raw_text": raw_text, "ocr_lines": meta["ocr"]["lines"],
-        # False when this machine re-encodes the photo to other bytes than the cache was made from;
-        # the OCR boxes are relative to the image size, so the lines still apply
-        "ocr_cache_same_bytes": ocr.sent_sha256 == cache.get("meta", {}).get("sent_sha256"),
+        "ocr_cache_same_bytes": ocr.sent_sha256 == expected,  # checked before the call
     })
     return record
+
+
+def check_kept(record: dict, fixture: dict, prompt: str, run: int, target: Path) -> None:
+    """A kept record must be the requested configuration, or it would be scored as one."""
+    want = {"prompt_version": PROMPT_VERSIONS[prompt], "model": MODEL, "thinking_level": THINKING_LEVEL,
+            "photo_id": fixture["photo_id"], "source_image": fixture["photo"]["file"], "run": run}
+    wrong = {key: record.get(key) for key, value in want.items() if record.get(key) != value}
+    if wrong:
+        raise SystemExit(f"{target} was made with {wrong}, not {({k: want[k] for k in wrong})}: "
+                         f"use another --out or --run")
 
 
 def main(argv=None) -> int:
@@ -127,6 +145,7 @@ def main(argv=None) -> int:
     for fx in fixtures:
         target = args.out / f"{Path(fx['photo']['file']).stem}_r{args.run}.json"
         if target.exists():
+            check_kept(json.loads(target.read_text(encoding="utf-8")), fx, args.prompt, args.run, target)
             print(f"{fx['photo_id']:18} kept {target.name}")
             continue
         if calls >= args.max_calls:

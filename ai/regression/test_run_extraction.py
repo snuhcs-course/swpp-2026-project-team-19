@@ -48,7 +48,9 @@ def setup(tmp_path, monkeypatch):
         photo.write_bytes(out.getvalue())
         cache = tmp_path / "ocr_cache" / f"00{n}_bar_01__table-off.json"
         cache.parent.mkdir(exist_ok=True)
-        cache.write_text(json.dumps({"meta": {"sent_sha256": "x"}, "response": OCR}), encoding="utf-8")
+        sent = runner.ocr_image(*runner.prepare_image(out.getvalue(), "image/jpeg"))[0]
+        cache.write_text(json.dumps({"meta": {"sent_sha256": hashlib.sha256(sent).hexdigest()}, "response": OCR}),
+                         encoding="utf-8")
         fixtures.append({"photo_id": f"00{n}_바_01", "photo": {
             "file": photo.name, "photo_dir": "eval_photos", "sha256": hashlib.sha256(out.getvalue()).hexdigest()}})
     monkeypatch.setattr(reg, "load_fixtures", lambda: fixtures)
@@ -75,7 +77,7 @@ def test_v2_run_writes_records_that_regression_can_replay(setup, capsys):
     record = json.loads((tmp_path / "out" / "001_bar_01_r1.json").read_text(encoding="utf-8"))
     assert record["prompt_version"] == "hybrid-v2" and record["model"] == runner.MODEL and record["run"] == 1
     assert record["output"] == {"items": [{"raw_name": "페른홀로우 12년", "price_krw": 15000, "pour_ml": None, "unit": "glass"}]}
-    assert [o["rawText"] for o in record["other_items"]] == ["모히토"] and record["ocr_cache_same_bytes"] is False
+    assert [o["rawText"] for o in record["other_items"]] == ["모히토"] and record["ocr_cache_same_bytes"] is True
     assert [row["id"] for row in record["ocr_lines"]] == ["L001", "L002"]
     assert "secret-test-key" not in json.dumps(record)
     output = reg.server_output(record)
@@ -129,3 +131,36 @@ def test_api_key_comes_from_the_repo_env_file(tmp_path, monkeypatch):
     assert runner.api_key() == ""
     (tmp_path / ".env").write_text("GEMINI_API_KEY= abc \n", encoding="utf-8")
     assert runner.api_key() == "abc"
+
+
+def test_a_cache_not_made_from_the_photo_stops_before_any_call(setup, capsys):
+    fixtures, tmp_path, answer = setup
+    client = answer(json.dumps(ANSWERS["v2"]))
+    cache = tmp_path / "ocr_cache" / "002_bar_01__table-off.json"
+    for meta in ({"sent_sha256": "0" * 64}, {}):
+        cache.write_text(json.dumps({"meta": meta, "response": OCR}), encoding="utf-8")
+        with pytest.raises(SystemExit, match="was not made from this photo"):
+            runner.main(args(tmp_path, "v2"))
+    # the first photo was answered; the second never reached Gemini
+    assert client.calls == 1
+    assert not (tmp_path / "out" / "002_bar_01_r1.json").exists()
+    assert json.loads((tmp_path / "out" / "001_bar_01_r1.json").read_text(encoding="utf-8"))["ocr_cache_same_bytes"]
+
+
+def test_a_kept_record_of_another_configuration_stops_the_command(setup):
+    fixtures, tmp_path, answer = setup
+    answer(json.dumps(ANSWERS["v1"]))
+    assert runner.main(args(tmp_path, "v1")) == 0
+    client = answer(json.dumps(ANSWERS["v2"]))
+    # v1 records in the directory do not count as a v2 run
+    with pytest.raises(SystemExit, match="prompt_version"):
+        runner.main(args(tmp_path, "v2"))
+    assert client.calls == 0
+    # the same configuration is kept as before
+    assert runner.main(args(tmp_path, "v1")) == 0 and client.calls == 0
+    # another run number in the same file name cannot happen, but a record edited by hand is caught too
+    record_path = tmp_path / "out" / "001_bar_01_r1.json"
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    record_path.write_text(json.dumps({**record, "model": "other-model"}), encoding="utf-8")
+    with pytest.raises(SystemExit, match="model"):
+        runner.main(args(tmp_path, "v1"))
