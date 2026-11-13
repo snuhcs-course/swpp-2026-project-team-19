@@ -228,6 +228,7 @@ internal fun OwnerManualMenuScreen(
     var linkedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var rejectedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var itemName by rememberSaveable(bar?.barId) { mutableStateOf("") }
+    var category by rememberSaveable(bar?.barId) { mutableStateOf("위스키") }
     LaunchedEffect(screen, itemName, category) {
         if(screen=="item" && category=="위스키" && itemName.trim().length>=2 &&
             viewModel.usesProductionOwnerApi()) {
@@ -250,7 +251,6 @@ internal fun OwnerManualMenuScreen(
             }
         }
     }
-    var category by rememberSaveable(bar?.barId) { mutableStateOf("위스키") }
     var alcoholKind by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var categoryMenuExpanded by rememberSaveable(bar?.barId) { mutableStateOf(false) }
     var optionText by rememberSaveable(bar?.barId) {
