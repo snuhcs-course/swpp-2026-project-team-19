@@ -107,7 +107,7 @@ private fun mapServerReviewItem(
         type = if (other) ReviewItemType.OTHER else ReviewItemType.WHISKY,
         match = match,
         matchConfirmed = linkedId != null,
-        newConfirmed = linkedId != null,
+        newConfirmed = linkedId != null || other,
         linkedProductId = linkedId,
         linkedProductName = selectedCandidate?.displayName.takeIf { linkedId != null },
         newProductName = dto.newProductDraft?.displayName ?: displayName,
@@ -124,7 +124,7 @@ private fun mapServerReviewItem(
         photoPrice = photoPrice,
         priceChoice = if (oldPrice != null && photoPrice != null &&
             oldPrice != photoPrice) PriceChoice.NONE else PriceChoice.PHOTO,
-        nameSaved = linkedId != null || nonProduct,
+        nameSaved = linkedId != null || other,
         excluded = nonProduct,
         raw = dto.rawText,
         photoIndex = photoOrder,
@@ -206,18 +206,18 @@ internal fun mapConfirmedReviewDecision(
             excludedOptionIds = excludedOptionIds,
         )
     }
-    require(card.newConfirmed && card.nameSaved) {
+    if (card.type == ReviewItemType.WHISKY) require(card.newConfirmed && card.nameSaved) {
         "${card.name}: 신규 상품 정보를 확인해 주세요."
     }
     val sourceDraft = extracted.newProductDraft
     val brandText = (extracted.extractedBrandName
         ?: sourceDraft?.brandText)?.trim().orEmpty()
-    require(brandText.isNotBlank()) {
-        "${card.name}: 브랜드 정보가 없어 자동 등록할 수 없어요."
-    }
-    val category = sourceDraft?.category?.takeIf { it.isNotBlank() }
-        ?: if (card.type == ReviewItemType.WHISKY) "whisky" else
-            error("${card.name}: 상품 분류를 확인해 주세요.")
+    // Brand metadata can be absent for beer/other menus. The owner review
+    // submits a bar-only item, not a globally canonical Product.
+    val category = if (card.type == ReviewItemType.WHISKY) "whisky"
+        else sourceDraft?.category?.takeIf {
+            it.isNotBlank() && !it.equals("whisky", ignoreCase = true)
+        } ?: "otherAlcohol"
     val brandId = existingBrands[brandText.lowercase()]
     return MockReviewDecision(
         MockDecisionKind.CREATE_PRODUCT,
@@ -227,7 +227,7 @@ internal fun mapConfirmedReviewDecision(
         newProduct = MockNewProductDraft(
             name = card.newProductName?.trim()?.ifBlank { null } ?: card.name.trim(),
             brandId = brandId,
-            brandName = if (brandId == null) brandText else null,
+            brandName = if (brandId == null) brandText.takeIf { it.isNotBlank() } else null,
             category = category,
             ageYears = sourceDraft?.ageYears,
             editionName = sourceDraft?.editionName,
