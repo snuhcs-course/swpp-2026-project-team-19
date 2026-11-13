@@ -20,15 +20,28 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.core.errors import ApiError, validation_failed_fields
+from app.core.errors import ApiError, validation_failed, validation_failed_fields
 from app.core.normalize import normalize
 from app.core.security import Principal
-from app.models import Bar, BarMenuItem, BarStatus, Brand, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
+from app.models import (
+    Bar,
+    BarMenuItem,
+    BarStatus,
+    Brand,
+    CheckReason,
+    MenuBoard,
+    MenuBoardEntry,
+    MenuEntryOption,
+    MenuItemKind,
+    Product,
+)
 from app.schemas.menu import BarMenuResponse
 from app.schemas.menu_edit import MenuItemAddRequest, MenuItemUpdateRequest, MenuOptionInput, MenuResetRequest
-from app.services.bar_access import can_manage_bar, forbidden
+from app.services.bar_access import can_manage_bar, forbidden, is_operator
 from app.services.bar_menu import bar_not_found, get_bar_menu
+from app.services.menu_checks import dismiss_open_checks, raise_check, rename_open_check
 from app.services.menu_import_upload import check_no_unfinished_import
+from app.services.menu_items import name_key, unlinked_entry_with_key
 from app.services.menu_publish import clear_sold_out
 from app.services.menu_review_catalog import create_new_product
 from app.services.serializable import SessionFactory, run_serializable, write_conflict
@@ -75,8 +88,14 @@ def check_request(body: MenuItemAddRequest | MenuItemUpdateRequest, now: datetim
     """The rules a request breaks on its own, all reported together as one 422. `now` is the request time."""
     errors = _Errors()
     if isinstance(body, MenuItemAddRequest):
-        if (body.productId is None) == (body.newProduct is None):
-            errors.add("productId", "EXACTLY_ONE_REQUIRED", "productId와 newProduct 중 하나만 보내야 합니다.")
+        if [body.productId, body.newProduct, body.kind].count(None) != 2:
+            errors.add("productId", "EXACTLY_ONE_REQUIRED", "productId, newProduct, kind 중 하나만 보내야 합니다.")
+        if body.kind is not None:
+            # An item without a product is known only by its menu name (spec 3.14.3).
+            if body.displayName is None:
+                errors.add("displayName", "MISSING", "상품 없이 추가하려면 메뉴 이름이 필요합니다.")
+            else:
+                _check_normalizable(errors, "displayName", body.displayName)
         new = body.newProduct
         if new is not None:
             if new.brand.type == "new":
@@ -100,6 +119,15 @@ def menu_outdated(submitted: int | None, current: int | None) -> ApiError:
         "메뉴가 다른 곳에서 바뀌었습니다. 최신 메뉴를 다시 불러온 뒤 저장해 주세요.",
         details={"submittedMenuVersion": submitted, "currentMenuVersion": current},
     )
+
+
+def _item_exists(bar_menu_item_id: UUID, *, unlinked: bool = False) -> ApiError:
+    message = (
+        "같은 이름의 메뉴가 이미 있습니다. 그 항목을 수정해 주세요."
+        if unlinked
+        else "이 상품은 이미 메뉴에 있습니다. 그 항목을 수정해 주세요."
+    )
+    return ApiError(409, "MENU_ITEM_EXISTS", message, details={"barMenuItemId": str(bar_menu_item_id)})
 
 
 def _item_not_found(bar_menu_item_id: str) -> ApiError:
@@ -213,37 +241,62 @@ def _add_once(
     session: Session, principal: Principal, bar_id: UUID, body: MenuItemAddRequest, base_url: str
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
-    product = _product_for(session, body, principal)
     entries = board.entries if board is not None else []
-    on_board = next((e for e in entries if e.bar_menu_item.product_id == product.id), None)
-    if on_board is not None:
-        raise ApiError(
-            409,
-            "MENU_ITEM_EXISTS",
-            "이 상품은 이미 메뉴에 있습니다. 그 항목을 수정해 주세요.",
-            details={"barMenuItemId": str(on_board.bar_menu_item_id)},
-        )
+    if body.kind is not None:
+        item, display_name = _unlinked_item(session, bar_id, entries, body.kind, body.displayName)
+    else:
+        if body.newProduct is not None and not is_operator(session, principal):
+            # Checked after the caller may manage the bar: an owner may add, but not grow the shared catalog.
+            raise validation_failed("newProduct", "OPERATOR_ONLY", "새 상품은 운영자만 만들 수 있습니다.")
+        item, display_name = _linked_item(session, bar_id, entries, body, principal)
 
     created = board is None
     if created:
         # The first add creates the board at version 1; _publish sets the time.
         board = MenuBoard(bar_id=bar_id, published_at=func.now(), version=1)
         session.add(board)
+    board.entries.append(
+        MenuBoardEntry(
+            bar_menu_item_id=item.id,
+            display_name=display_name,
+            sort_order=max((e.sort_order for e in entries), default=0) + 1,
+            options=_options(body.options),
+        )
+    )
+    if item.product_id is None and item.kind == MenuItemKind.WHISKY:
+        # It waits for an operator to link it, and only then appears in search (spec 3.18.1).
+        raise_check(session, item, display_name, CheckReason.UNLINKED)
+    return _publish(session, board, base_url, created=created)
+
+
+def _unlinked_item(
+    session: Session, bar_id: UUID, entries: list[MenuBoardEntry], kind: MenuItemKind, display_name: str
+) -> tuple[BarMenuItem, str]:
+    """A new item without a product (spec 3.14.3). One with the same name key already on the board is the
+    same item; one that left the board is not reused."""
+    key = name_key(display_name)
+    if (same := unlinked_entry_with_key(entries, key)) is not None:
+        raise _item_exists(same.bar_menu_item_id, unlinked=True)
+    item = BarMenuItem(bar_id=bar_id, kind=kind, name_key=key)
+    session.add(item)
+    session.flush()
+    return item, display_name
+
+
+def _linked_item(
+    session: Session, bar_id: UUID, entries: list[MenuBoardEntry], body: MenuItemAddRequest, principal: Principal
+) -> tuple[BarMenuItem, str]:
+    product = _product_for(session, body, principal)
+    on_board = next((e for e in entries if e.bar_menu_item.product_id == product.id), None)
+    if on_board is not None:
+        raise _item_exists(on_board.bar_menu_item_id)
     # A product the bar sold before keeps its bar menu item, and with it its barMenuItemId.
     item = session.scalar(select(BarMenuItem).where(BarMenuItem.bar_id == bar_id, BarMenuItem.product_id == product.id))
     if item is None:
         item = BarMenuItem(bar_id=bar_id, product_id=product.id)
         session.add(item)
         session.flush()
-    board.entries.append(
-        MenuBoardEntry(
-            bar_menu_item_id=item.id,
-            display_name=body.displayName or product.display_name,
-            sort_order=max((e.sort_order for e in entries), default=0) + 1,
-            options=_options(body.options),
-        )
-    )
-    return _publish(session, board, base_url, created=created)
+    return item, body.displayName or product.display_name
 
 
 def _update_once(
@@ -256,6 +309,16 @@ def _update_once(
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
     entry = board_entry(board, bar_menu_item_id)
+    item = entry.bar_menu_item
+    if item.product_id is None:
+        # An unlinked item is known by its name, so a new name is a new key (spec 3.14.4).
+        key = name_key(body.displayName)
+        if not key:
+            raise validation_failed("displayName", "NOT_NORMALIZABLE", "이름으로 쓸 수 있는 글자가 없습니다.")
+        if (same := unlinked_entry_with_key(board.entries, key, except_item_id=item.id)) is not None:
+            raise _item_exists(same.bar_menu_item_id, unlinked=True)
+        item.name_key = key
+    rename_open_check(session, item.id, body.displayName)
     entry.display_name = body.displayName
     # Delete the old options before inserting the new ones, which reuse their sort orders.
     entry.options.clear()
@@ -273,6 +336,7 @@ def _delete_once(
     entry = board_entry(board, bar_menu_item_id)
     board.entries.remove(entry)
     clear_sold_out(session, {entry.bar_menu_item_id})
+    dismiss_open_checks(session, {entry.bar_menu_item_id})
     return _publish(session, board, base_url)
 
 
@@ -284,6 +348,7 @@ def _reset_once(
         # Nothing to empty: the answer is the menu as it is, with nothing changed.
         return get_bar_menu(session, str(bar_id), can_manage=lambda bar: True, base_url=base_url)
     clear_sold_out(session, {entry.bar_menu_item_id for entry in board.entries})
+    dismiss_open_checks(session, {entry.bar_menu_item_id for entry in board.entries})
     board.entries.clear()
     return _publish(session, board, base_url)
 

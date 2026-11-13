@@ -60,7 +60,8 @@ BrandDecision = Annotated[ExistingBrand | NewBrand, Field(discriminator="type")]
 
 
 class NewProduct(_Strict):
-    category: str = Field(default="whisky", min_length=1, max_length=30)
+    # The shared catalog holds whiskies only (spec 8.1); a non-whisky menu is published without a product.
+    category: Literal["whisky"] = Field(default="whisky", description="Only whisky")
     displayName: str = Field(min_length=1, max_length=200, description="Canonical name; also added as an alias")
     ageYears: int | None = Field(default=None, ge=0, le=200)
     editionName: str | None = Field(default=None, min_length=1, max_length=150)
