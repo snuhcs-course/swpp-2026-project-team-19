@@ -55,6 +55,9 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithText("기타 주류", substring = false).performClick()
         compose.onNodeWithTag("manual-menu-name").performTextReplacement("수제 맥주")
         compose.onNodeWithTag("manual-menu-alcohol-kind").performTextReplacement("맥주")
+        // Beer is a price-only menu: no unwanted pour field or option editor.
+        compose.onNodeWithTag("manual-menu-ml-0").assertDoesNotExist()
+        compose.onNodeWithTag("manual-menu-option-add").assertDoesNotExist()
         compose.onNodeWithTag("manual-menu-price-0").performScrollTo()
             .performTextReplacement("9000")
         compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
