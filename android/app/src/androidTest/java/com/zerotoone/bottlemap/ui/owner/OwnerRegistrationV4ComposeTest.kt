@@ -26,7 +26,7 @@ class OwnerRegistrationV4ComposeTest {
         val vm=OwnerMockViewModel(LocalOwnerMockRepository(InMemoryMockOwnerStateStore(snapshot)))
         compose.setContent {
             MaterialTheme {
-                OwnerOnboardingScreen(vm, onBack={}, onFirstReview={},
+                OwnerOnboardingScreen(vm, onBack={},
                     onManagerPreview={}, startRegistration=true)
             }
         }
