@@ -299,6 +299,51 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
 
     fun toggleExpanded(id: String) = mutateItem(id) { it.copy(expanded = !it.expanded) }
 
+    /** OCR grouping is advisory: if two lines are NOT the same whisky the owner
+     * can undo the inferred grouping without losing either source line.
+     * Already-confirmed prices are intentionally restored to their OCR values.
+     */
+    fun splitMerged(id: String) = mutate { state ->
+        val master = state.items.firstOrNull { it.id == id } ?: return@mutate state
+        if (master.mergeSources.isEmpty()) return@mutate state
+        val original = master.preMergeOptions
+        val first = original.firstOrNull()
+        val allChildren = state.items.filter { it.mergedInto == id }.map { it.id }.toSet()
+        if (allChildren.isEmpty()) return@mutate state
+        state.copy(
+            show = state.show.copy(pending = true, ready = true),
+            items = state.items.map { item ->
+                when {
+                    item.id == id -> item.copy(
+                        mergeSources = emptyList(),
+                        manuallySplitGroup = true,
+                        preMergeOptions = emptyList(),
+                        primaryHasOption = first != null,
+                        price = first?.price ?: 0.0,
+                        volume = first?.volume ?: item.volume,
+                        bottle = first?.bottle ?: false,
+                        primarySourceOptionId = first?.sourceOptionId,
+                        primaryOptionLabel = first?.label,
+                        options = original.drop(1),
+                        priceCandidates = item.priceCandidates.filter { candidate ->
+                            !candidate.existing && candidate.sourceItemId == id
+                        },
+                        chosenServingPrices = emptyMap(),
+                        volumeChoices = emptyList(),
+                        chosenVolumeKeys = emptySet(),
+                        volumeChoicesConfirmed = true,
+                        expanded = false,
+                    )
+                    item.id in allChildren -> item.copy(
+                        mergedInto = null, excluded = false, required = true,
+                        manuallySplitGroup = true, expanded = false,
+                    )
+                    else -> item
+                }
+            },
+        )
+    }
+
     fun toggleBottle(id: String, index: Int?) {
         val pour = review?.defaultPour ?: return
         mutateItem(id) { PhotoReviewRules.toggleBottle(it, index, pour) }

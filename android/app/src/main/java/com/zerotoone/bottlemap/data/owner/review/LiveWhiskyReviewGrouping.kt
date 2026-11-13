@@ -114,6 +114,8 @@ internal fun groupLiveWhiskyReview(
             volumeChoices = if (tooMany) unique else emptyList(),
             chosenVolumeKeys = emptySet(),
             volumeChoicesConfirmed = !tooMany,
+            preMergeOptions = if (batch.size > 1) PhotoReviewRules.optionSummary(head)
+                else emptyList(),
             mergeSources = batch.drop(1).map { (_, other) ->
                 MergedLine(
                     photoIndex = other.photoIndex,

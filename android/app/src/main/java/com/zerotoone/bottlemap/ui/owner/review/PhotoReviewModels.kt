@@ -162,6 +162,10 @@ data class ReviewItem(
      * is shown; child rows are submitted as reject, never silently published.
      */
     val mergedInto: String? = null,
+    /** Exact master OCR options before automatic multi-line grouping. */
+    val preMergeOptions: List<ReviewOption> = emptyList(),
+    /** Persist an explicit owner split across process death. */
+    val manuallySplitGroup: Boolean = false,
     val priceCandidates: List<ReviewPriceCandidate> = emptyList(),
     val chosenServingPrices: Map<String, Int> = emptyMap(),
     /** More than three detected servings: explicitly select up to three. */

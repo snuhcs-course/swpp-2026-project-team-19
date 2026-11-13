@@ -712,6 +712,11 @@ private fun ReviewDetails(state: PhotoReviewState, x: ReviewItem, vm: PhotoRevie
         } else {
             OptionEditor(state, x, vm)
         }
+        if (x.mergeSources.isNotEmpty()) {
+            ReviewChoice("서로 다른 위스키예요 · 원본 줄 분리",
+                { vm.splitMerged(x.id) }, modifier = Modifier.fillMaxWidth(),
+                testTag = "review-unmerge-${x.id}")
+        }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             DetailAction(if (other) "위스키로 분류" else "그 외 메뉴로 분류", BmLineIconId.RETRY,
                 Modifier.weight(1f), UxColor.elevated, ReviewColor.categoryBorder, UxColor.text,

@@ -97,8 +97,9 @@ class LivePhotoReviewRepository(
             candidate != null &&
                 candidate.items.map { it.id } == state.items.map { it.id } &&
                 candidate.items.zip(state.items).all { (saved, fresh) ->
-                    saved.mergedInto == fresh.mergedInto &&
-                        saved.priceCandidates == fresh.priceCandidates &&
+                    if (saved.manuallySplitGroup)
+                        (fresh.mergedInto != null || fresh.mergeSources.isNotEmpty())
+                    else saved.mergedInto == fresh.mergedInto &&
                         saved.volumeChoices == fresh.volumeChoices
                 }
         val chosen = inMemoryDraft.takeIf {
@@ -115,7 +116,14 @@ class LivePhotoReviewRepository(
                 // server snapshot; a saved draft must not mask a price conflict.
                 existingPriceByProductId = fresh.existingPriceByProductId,
                 existingServingPricesByProductId = fresh.existingServingPricesByProductId,
-                mergeSources = fresh.mergeSources,
+                mergeSources = if (old.manuallySplitGroup) old.mergeSources
+                    else fresh.mergeSources,
+                // Existing prices are refreshed from the server; the OCR
+                // candidates are retained even after a late product relink.
+                priceCandidates = old.priceCandidates.filterNot { it.existing },
+                chosenServingPrices = if (old.existingServingPricesByProductId ==
+                    fresh.existingServingPricesByProductId) old.chosenServingPrices
+                    else emptyMap(),
                 // A removed OCR primary must not regain its extractedOptionId
                 // when an owner later adds a manual replacement with null ID.
                 primarySourceOptionId = old.primarySourceOptionId)

@@ -461,4 +461,35 @@ class PhotoReviewViewModelTest {
         assertEquals(PhotoReviewLoad.Applied, vm.load.value)
     }
 
+    @Test fun ownerCanSplitFalsePositiveGroupingWithoutLosingRawLines() = runTest(dispatcher) {
+        val original = ReviewOption(30.0, 12000.0, sourceOptionId = "ocr-main")
+        val master = ReviewItem(id = "main-line", name = "위스키 12년",
+            price = 15000.0, volume = 30.0,
+            primarySourceOptionId = "ocr-main",
+            linkedProductId = "shared",
+            mergeSources = listOf(MergedLine(1, "위스키 15년",
+                "위스키 15년 60ml", emptyList(), sourceItemId = "child-line")),
+            preMergeOptions = listOf(original),
+            options = listOf(ReviewOption(60.0, 22000.0)),
+            required = true)
+        val child = ReviewItem(id = "child-line", name = "위스키 15년",
+            price = 22000.0, volume = 60.0, linkedProductId = "shared",
+            excluded = true, required = false, mergedInto = "main-line")
+        val fake = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        val repo = object : PhotoReviewRepository by fake {
+            override suspend fun loadReview(): PhotoReviewState =
+                PhotoReviewState(items = listOf(master, child))
+        }
+        val vm = PhotoReviewViewModel(repo)
+        assertEquals(1, PhotoReviewRules.stats(vm.state).ready.size)
+        vm.splitMerged("main-line")
+        assertEquals(2, vm.state.items.count { it.mergedInto == null })
+        assertTrue(vm.state.items.all { !it.excluded && it.manuallySplitGroup })
+        assertEquals(12000.0, vm.item("main-line").price,0.0)
+        assertEquals("ocr-main", vm.item("main-line").primarySourceOptionId)
+        assertTrue(vm.item("main-line").options.isEmpty())
+        assertEquals(60.0, vm.item("child-line").volume,0.0)
+        assertFalse(PhotoReviewRules.stats(vm.state).canPublish) // same catalog product must be relinked
+    }
+
 }
