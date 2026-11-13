@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.errors import ApiError
-from app.models import Bar, BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
+from app.models import Bar, BarLocalMenuItem, BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
 from app.schemas.menu import BarMenuResponse, DiscountResponse, MenuItemResponse, MenuOptionResponse
 from app.services.bar_hours import operating_exceptions_by_bar, seoul_today, weekly_hours_by_bar
 from app.services.bar_photo_links import photos_by_bar
@@ -91,6 +91,43 @@ def get_bar_menu(
         )
         for entry in entries
     ]
+    # Local items are never joined to Product and cannot enter customer whisky
+    # search. They are nonetheless public on this bar's own posted menu.
+    local_rows = session.scalars(
+        select(BarLocalMenuItem).where(BarLocalMenuItem.bar_id == bar.id)
+        .order_by(BarLocalMenuItem.created_at, BarLocalMenuItem.id)
+    ).all()
+    for local in local_rows:
+        if local.sold_out_at is not None and not is_manager():
+            continue
+        prices = []
+        for index, opt in enumerate(local.options, start=1):
+            discount = opt.get("discount")
+            if discount is not None:
+                try:
+                    expiry = datetime.fromisoformat(discount["endsAt"].replace("Z", "+00:00"))
+                    if expiry <= now:
+                        discount = None
+                except (ValueError, KeyError, TypeError):
+                    discount = None
+            prices.append(MenuOptionResponse(
+                menuEntryOptionId=UUID(opt["menuEntryOptionId"]),
+                optionLabel=opt.get("optionLabel"),
+                pourMl=opt.get("pourMl"),
+                priceKrw=opt["priceKrw"],
+                discount=DiscountResponse.model_validate(discount) if discount else None,
+                sortOrder=index,
+            ))
+        items.append(MenuItemResponse(
+            menuBoardEntryId=local.id, barMenuItemId=local.id,
+            # The id is an opaque local identity, never a catalog Product row.
+            productId=local.id, productName=local.display_name,
+            brandId=None, brandName=None, category=local.category,
+            displayName=local.display_name, sortOrder=len(items) + 1,
+            soldOut=local.sold_out_at is not None, options=prices,
+            catalogMatched=False,
+            catalogReviewStatus="pending" if local.category == "whisky" else None,
+        ))
     return BarMenuResponse(
         barId=bar.id,
         name=bar.name,
