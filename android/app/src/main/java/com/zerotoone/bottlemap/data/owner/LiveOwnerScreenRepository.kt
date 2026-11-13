@@ -1118,12 +1118,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 validateReviewOptionClearing(edited, extracted)
             }
         }
-        val targets=if(decision.kind==MockDecisionKind.EXCLUDE)
-            relatedPhotoProductLineIds(job,extractedItemId)
-        else listOf(extractedItemId)
-        targets.forEach { id ->
-            local.decideLine(importId,id,expectedVersion,decision)
-        }
+        // Each itemDecisions[] is per extractedItemId (§8.1). The legacy
+        // mock implementation expands EXCLUDE to related product lines and
+        // requires a catalog brand for CREATE_PRODUCT. Neither rule applies
+        // to the merged #164 owner bar-only review contract.
+        local.stageLiveReviewDecision(importId, extractedItemId, expectedVersion, decision)
         lastReadySnapshot = snapshot()
     }
     override fun publishAddOnly(importId: String, expectedVersion: Int): Int =
