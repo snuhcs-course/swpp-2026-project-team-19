@@ -156,4 +156,29 @@ class OwnerPhotoReviewPolicyTest {
         assertEquals(0,importCompletedPhotoCount(job.copy(completedImages=0)))
     }
 
+    @Test fun finalPreflightAcceptsDifferentLabelsOnTheSamePourAndDoesNotCompareOneLineToItself() {
+        val base=exact("one",17000)
+        val twoLabels=base.copy(options=listOf(
+            MockMenuOption("label-a",label="잔",pourMl=30,priceKrw=17000),
+            MockMenuOption("label-b",label="샷",pourMl=30,priceKrw=19000),
+        ),decision=MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+            productId="product-glenfiddich",
+            correctedOptions=listOf(
+                MockMenuOption("label-a",label="잔",pourMl=30,priceKrw=17000),
+                MockMenuOption("label-b",label="샷",pourMl=30,priceKrw=19000),
+            )))
+        val second=exact("two",20000).copy(options=listOf(
+            MockMenuOption("label-c",label="샷",pourMl=30,priceKrw=19000),
+        ),decision=MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+            productId="product-glenfiddich",
+            correctedOptions=listOf(
+                MockMenuOption("label-c",label="샷",pourMl=30,priceKrw=19000),
+            )))
+        val job=MockMenuImport("job","bar",MockImportStatus.READY_FOR_REVIEW,1,
+            listOf(image(1,twoLabels),image(2,second)))
+        assertTrue(conflictingReviewedPhotoPrices(job).isEmpty())
+        assertTrue(conflictingReviewedPhotoPrices(job.copy(images=listOf(image(1,twoLabels)))).isEmpty())
+        assertTrue(reviewServingKey(30,"잔") != reviewServingKey(30,"샷"))
+    }
+
 }
