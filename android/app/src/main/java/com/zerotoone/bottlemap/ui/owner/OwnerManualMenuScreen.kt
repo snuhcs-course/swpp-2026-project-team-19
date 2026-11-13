@@ -207,7 +207,11 @@ internal fun OwnerManualMenuScreen(
     val activeLocalCandidates = products.filter { product ->
         !product.catalogMatched && items.any { it.productId == product.productId }
     }
-    val candidates = (products.filter { it.catalogMatched } +
+    // The shared canonical catalog is whisky-only in PR #164. Legacy catalog
+    // beer rows are not valid link targets for new owner additions.
+    val candidates = (products.filter {
+        it.catalogMatched && (!viewModel.usesProductionOwnerApi() || it.category == "whisky")
+    } +
         (if(viewModel.usesProductionOwnerApi()) emptyList() else htmlCatalog) +
         deletedLocalCandidates + activeLocalCandidates).distinctBy { it.productId }
 
@@ -846,10 +850,10 @@ internal fun OwnerManualMenuScreen(
                         V4FormField("주류 종류", alcoholKind, { alcoholKind = it.take(30) },
                             placeholder = "예: 하이볼, 맥주",
                             testTag = "manual-menu-alcohol-kind")
-                        if (viewModel.usesProductionOwnerApi()) {
-                            Text("현재 서버는 세부 주류 종류를 저장하지 않아요. '기타 주류'로 게시됩니다.",
-                                color = V4Color.sub, fontSize = 12.sp)
-                        }
+                    }
+                    if (category != "위스키" && viewModel.usesProductionOwnerApi()) {
+                        Text("현재 서버는 위스키/그 외 메뉴만 구분해요. 세부 종류(맥주·안주 등)는 저장되지 않아요.",
+                            color = V4Color.sub, fontSize = 12.sp)
                     }
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     if (category == "위스키") {
