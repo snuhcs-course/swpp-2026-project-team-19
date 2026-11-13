@@ -244,7 +244,14 @@ class PhotoReviewRulesTest {
         val chosen=PhotoReviewRules.editOption(second,PhotoReviewRules.OptionField.PRICE,null,"18000")
         val resolved=review.copy(items=listOf(first,chosen))
         assertTrue(PhotoReviewRules.duplicatePhotoPriceConflicts(resolved).isEmpty())
-        assertTrue(PhotoReviewRules.stats(resolved).canPublish)
+        // Even with equal prices, merged #164 would keep only the first OCR
+        // line's option list. One duplicate line must explicitly be excluded.
+        assertEquals(setOf("photo1","photo2"),
+            PhotoReviewRules.duplicateCatalogProductLines(resolved))
+        assertFalse(PhotoReviewRules.stats(resolved).canPublish)
+        val consolidated=resolved.copy(items=listOf(first,chosen.copy(excluded=true)))
+        assertTrue(PhotoReviewRules.duplicateCatalogProductLines(consolidated).isEmpty())
+        assertTrue(PhotoReviewRules.stats(consolidated).canPublish)
     }
 
     @Test fun differentProductOrDifferentServingDoesNotCauseFalsePhotoPriceConflict() {
@@ -268,6 +275,22 @@ class PhotoReviewRulesTest {
         val removed=PhotoReviewRules.removeOption(fixed,0)
         assertEquals(1,PhotoReviewRules.countOptions(removed))
         assertTrue(PhotoReviewRules.problems(removed).isEmpty())
+    }
+
+    @Test fun sameProductDifferentServingStillNeedsOwnerConsolidationBeforePublish() {
+        val first=ReviewItem(id="first-photo",name="동일 위스키",
+            linkedProductId="prod",volume=30.0,price=15000.0)
+        val second=ReviewItem(id="second-photo",name="동일 위스키",
+            linkedProductId="prod",volume=60.0,price=27000.0)
+        val state=PhotoReviewState(items=listOf(first,second))
+        assertTrue(PhotoReviewRules.duplicatePhotoPriceConflicts(state).isEmpty())
+        assertEquals(setOf("first-photo","second-photo"),
+            PhotoReviewRules.duplicateCatalogProductLines(state))
+        assertFalse(PhotoReviewRules.stats(state).canPublish)
+        val manuallyCombined=first.copy(options=listOf(ReviewOption(60.0,27000.0)))
+        val resolved=state.copy(items=listOf(manuallyCombined,second.copy(excluded=true)))
+        assertTrue(PhotoReviewRules.stats(resolved).canPublish)
+        assertEquals(2,PhotoReviewRules.countOptions(manuallyCombined))
     }
 
 }
