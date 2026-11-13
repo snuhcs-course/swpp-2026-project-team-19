@@ -1146,6 +1146,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         "productId" to chosen.productId,
                         "correctedProductName" to chosen.displayNameOverride,
                         "optionDecisions" to reviewOptions(item, chosen),
+                        "excludedOptionIds" to chosen.excludedOptionIds,
                     )
                 }
                 MockDecisionKind.CREATE_PRODUCT -> {
@@ -1176,6 +1177,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                             "abv" to draft.abvPercent,
                         ),
                         "optionDecisions" to reviewOptions(item, chosen),
+                        "excludedOptionIds" to chosen.excludedOptionIds,
                     )
                     }
                 }
