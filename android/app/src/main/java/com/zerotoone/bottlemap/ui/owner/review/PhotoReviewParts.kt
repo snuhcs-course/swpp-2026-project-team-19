@@ -209,7 +209,9 @@ internal fun SourceVisual(
     sourceBox: List<Int>? = null,
     refreshSourceUrl: (suspend () -> String?)? = null,
 ) {
-    if (!sourcePhotoUrl.isNullOrBlank()) {
+    // Without a normalized OCR sourceBox the server cannot identify a
+    // precise portion; use the OCR text fallback rather than the whole photo.
+    if (!sourcePhotoUrl.isNullOrBlank() && sourceBox?.size == 4) {
         RealReviewSourceVisual(sourcePhotoUrl, sourceBox, height, large, modifier,
             refreshSourceUrl)
         return
