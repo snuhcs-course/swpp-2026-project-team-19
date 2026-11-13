@@ -38,16 +38,28 @@ def test_the_owner_uploads_reviews_and_publishes_the_menu(client, db_session, su
     brands = client.get("/api/catalog/brands", params={"query": "글렌피딕"}, headers=owner)
     assert [brand["canonicalName"] for brand in brands.json()["items"]] == ["Glenfiddich"]
 
+    body = valid_body(sample, glenfiddich)
+    for decision in body["itemDecisions"]:
+        if decision["action"] == "create_product":
+            decision.pop("brand")
+            decision.pop("product")
+            decision["action"] = "create_local_menu_item"
+            decision["category"] = "whisky"
     response = client.post(
-        f"/api/menu-imports/{sample.menu_import.id}/review-and-apply", headers=owner, json=valid_body(sample, glenfiddich)
+        f"/api/menu-imports/{sample.menu_import.id}/review-and-apply", headers=owner, json=body,
     )
 
-    # Without bar-local support (#152), owners must not create an unapproved
-    # globally searchable product as a side effect of photo review.
-    assert response.status_code == 403, response.text
-    assert response.json()["error"]["code"] == "CATALOG_APPROVAL_REQUIRED"
+    assert response.status_code == 200, response.text
     db_session.expire_all()
-    assert sample.menu_import.status == ImportStatus.READY_FOR_REVIEW
+    assert sample.menu_import.status == ImportStatus.APPLIED
+    board = db_session.get(MenuBoard, sample.board.id)
+    assert board.last_import_id == sample.menu_import.id
+    listed = client.get(f"/api/bars/{bar.id}/menu-imports", headers=owner).json()["items"]
+    assert [item["status"] for item in listed] == ["applied"]
+    # A bar-only whisky has no globally searchable Product row before approval.
+    from app.models import BarLocalMenuItem
+    local = db_session.scalar(select(BarLocalMenuItem).where(BarLocalMenuItem.bar_id == bar.id))
+    assert local is not None and local.category == "whisky"
     assert db_session.scalar(select(Product).where(
         Product.created_from_extracted_item_id == sample.items[3].id,
     )) is None
