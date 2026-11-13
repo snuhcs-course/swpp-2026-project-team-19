@@ -176,6 +176,17 @@ class LivePhotoReviewMappingTest {
         assertNull(unlinked.newProduct?.brandName)
     }
 
+    @Test fun ownerEditedOtherNameOverridesStaleNewProductDraft() {
+        val dto=item(status="unmatched",proposedId=null)
+            .copy(extractedKind="other",candidates=emptyList(),newProductDraft=null)
+        val original=mapServerPhotoReview(response(dto),fixture()).items.single()
+        val ownerEdited=original.copy(name="사장님이 수정한 맥주 이름",
+            newProductName="OCR 이전 이름",nameSaved=true)
+        val decision=mapConfirmedReviewDecision(ownerEdited,dto,30.0,emptyMap())
+        assertEquals("사장님이 수정한 맥주 이름",decision.displayNameOverride)
+        assertEquals("사장님이 수정한 맥주 이름",decision.newProduct?.name)
+    }
+
     @Test fun nonWhiskyOcrMenuCanPublishWithoutCatalogConfirmationOrBrand() {
         val dto=item(
             options=listOf(ReviewOptionDto("beer-1",1,"잔",null,8000)),
