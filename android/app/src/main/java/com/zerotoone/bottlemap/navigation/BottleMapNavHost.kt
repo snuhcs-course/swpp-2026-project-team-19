@@ -258,7 +258,7 @@ fun BottleMapNavHost(devReviewScenario: String? = null, resetWelcome: Boolean = 
                 BottomTabs(selectedTab(destination)) { tab -> navController.selectTab(tab) }
             }
         }
-        toast?.let { (_, message) -> UxToast(message, Modifier.align(Alignment.BottomCenter)) }
+        toast?.let { (_, message) -> UxToast(message, Modifier.align(Alignment.TopCenter)) }
     }
 }
 
