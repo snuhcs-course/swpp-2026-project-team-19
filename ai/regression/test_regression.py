@@ -136,14 +136,14 @@ def test_duplicates_counts_repeated_rows_only():
     assert reg.duplicates([a, {**a, "raw_name": "a  12"}, {**a, "unit": "bottle"}, {**a, "price_krw": 1}]) == 1
 
 
-def test_server_items_groups_a_glass_and_bottle_pair_and_record_rows_handles_a_rejected_answer():
+def test_server_output_groups_a_glass_and_bottle_pair_and_a_rejected_answer_is_none():
     item = {"raw_name": "A", "price_krw": 9000, "pour_ml": None, "unit": "glass", "source_lines": {"name": [], "price": []}}
     text = json.dumps({"items": [item, {**item, "unit": "bottle", "price_krw": 90000}]})
-    assert [len(i["options"]) for i in reg.server_items(text)] == [2]
-    assert len(reg.flatten(reg.record_items({"raw_text": text}))) == 2
-    assert reg.record_items({"raw_text": "not json"}) is None
-    assert reg.record_items({"raw_text": json.dumps({"items": [{**item, "price_krw": -1}]})}) is None
-    assert reg.record_items({}) is None
+    assert [len(i["options"]) for i in reg.server_output({"raw_text": text})["items"]] == [2]
+    assert len(reg.flatten(reg.record_output({"raw_text": text})["items"])) == 2
+    assert reg.record_output({"raw_text": "not json"}) is None
+    assert reg.record_output({"raw_text": json.dumps({"items": [{**item, "price_krw": -1}]})}) is None
+    assert reg.record_output({}) is None
 
 
 def test_check_passes_on_the_baseline_and_reports_a_changed_score(capsys):

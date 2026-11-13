@@ -1,0 +1,922 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "010_sui_02.jpeg",
+  "photo_id": "010_수이_02",
+  "prompt_version": "hybrid-v1",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "started_at": "2026-11-13T05:19:24.787570+00:00",
+  "latency_ms": 19011,
+  "attempts": 2,
+  "status": "completed",
+  "input_tokens": 6216,
+  "output_tokens": 3090,
+  "thought_tokens": 3035,
+  "total_tokens": 12341,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Balvenie 12y (발베니)",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Balvenie American Oak (아메리칸 오크)",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Balvenie 14y (럼 캐스크)",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Balvenie Single Barrel (싱글배럴)",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Balvenie 16y French Oak (프렌치 오크)",
+        "price_krw": 39000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfiddich 12y (글렌피딕)",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfiddich 12y Sherry",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfiddich 15y",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfiddich 18y",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "The Glenlivet 12y (더 글렌리벳)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "The Glenlivet 15y",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "The Glenlivet 18y",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan 12y Double Cask (맥캘란 더블)",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan 12y Sherry Cask (쉐리)",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan 15y Double cask",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan 18y Double cask",
+        "price_krw": 49000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Macallan 18y Sherry cask",
+        "price_krw": 55000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Cragganmore 12y (크라겐모어)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Tormore Tempranillo Cask (토모어)",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenrothes 12y (글렌로시스)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenallachie 8y (글렌알라키)",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenallachie 12y",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenallachie 15y",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenallachie 2014 Sinteis",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfarclas 105(글렌파클라스)",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfarclas 10y",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Glenfarclas 15y",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Tamdhu 12y (탐듀)",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Tamdhu 15y",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Benriach 12y (벤리악)",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Aberlour 12y (아벨라워)",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Aberlour 14y (아벨라워)",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Aberlour A'Bunadh (아부나흐)",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Royal Brackla",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "other_items": null,
+  "other_items_dropped": null,
+  "raw_text": "{\"items\": [{\"raw_name\": \"Balvenie 12y (발베니)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L003\"], \"price\": [\"L004\"]}}, {\"raw_name\": \"Balvenie American Oak (아메리칸 오크)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L005\"], \"price\": [\"L006\"]}}, {\"raw_name\": \"Balvenie 14y (럼 캐스크)\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L008\"]}}, {\"raw_name\": \"Balvenie Single Barrel (싱글배럴)\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L009\"], \"price\": [\"L010\"]}}, {\"raw_name\": \"Balvenie 16y French Oak (프렌치 오크)\", \"price_krw\": 39000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L011\"], \"price\": [\"L011\"]}}, {\"raw_name\": \"Glenfiddich 12y (글렌피딕)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L012\"], \"price\": [\"L013\"]}}, {\"raw_name\": \"Glenfiddich 12y Sherry\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\"], \"price\": [\"L015\"]}}, {\"raw_name\": \"Glenfiddich 15y\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L016\"], \"price\": [\"L017\"]}}, {\"raw_name\": \"Glenfiddich 18y\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L018\"], \"price\": [\"L019\"]}}, {\"raw_name\": \"The Glenlivet 12y (더 글렌리벳)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L021\"]}}, {\"raw_name\": \"The Glenlivet 15y\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L023\"]}}, {\"raw_name\": \"The Glenlivet 18y\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L025\"]}}, {\"raw_name\": \"Macallan 12y Double Cask (맥캘란 더블)\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L026\"], \"price\": [\"L027\"]}}, {\"raw_name\": \"Macallan 12y Sherry Cask (쉐리)\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\"], \"price\": [\"L029\"]}}, {\"raw_name\": \"Macallan 15y Double cask\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L030\"], \"price\": [\"L031\"]}}, {\"raw_name\": \"Macallan 18y Double cask\", \"price_krw\": 49000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L032\"], \"price\": [\"L033\"]}}, {\"raw_name\": \"Macallan 18y Sherry cask\", \"price_krw\": 55000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L034\"], \"price\": [\"L035\"]}}, {\"raw_name\": \"Cragganmore 12y (크라겐모어)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L036\"], \"price\": [\"L053\"]}}, {\"raw_name\": \"Tormore Tempranillo Cask (토모어)\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L037\"], \"price\": [\"L054\"]}}, {\"raw_name\": \"Glenrothes 12y (글렌로시스)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L038\"], \"price\": [\"L055\"]}}, {\"raw_name\": \"Glenallachie 8y (글렌알라키)\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\"], \"price\": [\"L056\"]}}, {\"raw_name\": \"Glenallachie 12y\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L040\"], \"price\": [\"L057\"]}}, {\"raw_name\": \"Glenallachie 15y\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L041\"], \"price\": [\"L058\"]}}, {\"raw_name\": \"Glenallachie 2014 Sinteis\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L042\"], \"price\": [\"L059\"]}}, {\"raw_name\": \"Glenfarclas 105(글렌파클라스)\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L043\"], \"price\": [\"L060\"]}}, {\"raw_name\": \"Glenfarclas 10y\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L044\"], \"price\": [\"L061\"]}}, {\"raw_name\": \"Glenfarclas 15y\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L045\"], \"price\": [\"L062\"]}}, {\"raw_name\": \"Tamdhu 12y (탐듀)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\"], \"price\": [\"L063\"]}}, {\"raw_name\": \"Tamdhu 15y\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L047\"], \"price\": [\"L064\"]}}, {\"raw_name\": \"Benriach 12y (벤리악)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L048\"], \"price\": [\"L065\"]}}, {\"raw_name\": \"Aberlour 12y (아벨라워)\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L049\"], \"price\": [\"L066\"]}}, {\"raw_name\": \"Aberlour 14y (아벨라워)\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L050\"], \"price\": [\"L067\"]}}, {\"raw_name\": \"Aberlour A'Bunadh (아부나흐)\", \"price_krw\": 26000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L051\"], \"price\": [\"L068\"]}}, {\"raw_name\": \"Royal Brackla\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L052\"], \"price\": [\"L069\"]}}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        333,
+        175,
+        703,
+        201
+      ],
+      "text": "SPEYSIDE WHISKY"
+    },
+    {
+      "id": "L002",
+      "box": [
+        408,
+        215,
+        634,
+        233
+      ],
+      "text": "스페이사이드 싱글몰트 리스트"
+    },
+    {
+      "id": "L003",
+      "box": [
+        90,
+        277,
+        264,
+        295
+      ],
+      "text": "Balvenie 12y(발베니)"
+    },
+    {
+      "id": "L004",
+      "box": [
+        446,
+        276,
+        505,
+        292
+      ],
+      "text": "18,000"
+    },
+    {
+      "id": "L005",
+      "box": [
+        92,
+        302,
+        406,
+        320
+      ],
+      "text": "Balvenie American Oak (아메리칸 오크)"
+    },
+    {
+      "id": "L006",
+      "box": [
+        448,
+        301,
+        503,
+        318
+      ],
+      "text": "18,000"
+    },
+    {
+      "id": "L007",
+      "box": [
+        90,
+        328,
+        285,
+        346
+      ],
+      "text": "Balvenie 14y (럼 캐스크)"
+    },
+    {
+      "id": "L008",
+      "box": [
+        446,
+        327,
+        503,
+        342
+      ],
+      "text": "24,000"
+    },
+    {
+      "id": "L009",
+      "box": [
+        92,
+        351,
+        357,
+        370
+      ],
+      "text": "Balvenie Single Barrel (싱글배럴)"
+    },
+    {
+      "id": "L010",
+      "box": [
+        448,
+        351,
+        502,
+        366
+      ],
+      "text": "18,000"
+    },
+    {
+      "id": "L011",
+      "box": [
+        92,
+        377,
+        502,
+        397
+      ],
+      "text": "Balvenie 16y French Oak (프렌치 오크) 39,000"
+    },
+    {
+      "id": "L012",
+      "box": [
+        92,
+        402,
+        307,
+        420
+      ],
+      "text": "Glenfiddich 12y (글렌피딕)"
+    },
+    {
+      "id": "L013",
+      "box": [
+        448,
+        402,
+        503,
+        415
+      ],
+      "text": "16,000"
+    },
+    {
+      "id": "L014",
+      "box": [
+        92,
+        427,
+        281,
+        445
+      ],
+      "text": "Glenfiddich 12y Sherry"
+    },
+    {
+      "id": "L015",
+      "box": [
+        448,
+        427,
+        503,
+        441
+      ],
+      "text": "17,000"
+    },
+    {
+      "id": "L016",
+      "box": [
+        92,
+        451,
+        219,
+        467
+      ],
+      "text": "Glenfiddich 15y"
+    },
+    {
+      "id": "L017",
+      "box": [
+        448,
+        450,
+        505,
+        466
+      ],
+      "text": "20,000"
+    },
+    {
+      "id": "L018",
+      "box": [
+        92,
+        475,
+        220,
+        492
+      ],
+      "text": "Glenfiddich 18y"
+    },
+    {
+      "id": "L019",
+      "box": [
+        448,
+        475,
+        503,
+        488
+      ],
+      "text": "25,000"
+    },
+    {
+      "id": "L020",
+      "box": [
+        90,
+        498,
+        342,
+        516
+      ],
+      "text": "The Glenlivet 12y (더 글렌리벳)"
+    },
+    {
+      "id": "L021",
+      "box": [
+        448,
+        499,
+        503,
+        513
+      ],
+      "text": "15,000"
+    },
+    {
+      "id": "L022",
+      "box": [
+        90,
+        524,
+        234,
+        540
+      ],
+      "text": "The Glenlivet 15y"
+    },
+    {
+      "id": "L023",
+      "box": [
+        448,
+        523,
+        505,
+        539
+      ],
+      "text": "20,000"
+    },
+    {
+      "id": "L024",
+      "box": [
+        90,
+        548,
+        234,
+        564
+      ],
+      "text": "The Glenlivet 18y"
+    },
+    {
+      "id": "L025",
+      "box": [
+        448,
+        548,
+        503,
+        561
+      ],
+      "text": "25,000"
+    },
+    {
+      "id": "L026",
+      "box": [
+        92,
+        570,
+        415,
+        590
+      ],
+      "text": "Macallan 12y Double Cask (맥캘란 더블)"
+    },
+    {
+      "id": "L027",
+      "box": [
+        448,
+        570,
+        505,
+        587
+      ],
+      "text": "17,000"
+    },
+    {
+      "id": "L028",
+      "box": [
+        92,
+        596,
+        357,
+        615
+      ],
+      "text": "Macallan 12y Sherry Cask (쉐리)"
+    },
+    {
+      "id": "L029",
+      "box": [
+        448,
+        596,
+        505,
+        612
+      ],
+      "text": "20,000"
+    },
+    {
+      "id": "L030",
+      "box": [
+        90,
+        621,
+        302,
+        639
+      ],
+      "text": "Macallan 15y Double cask"
+    },
+    {
+      "id": "L031",
+      "box": [
+        448,
+        621,
+        505,
+        638
+      ],
+      "text": "28,000"
+    },
+    {
+      "id": "L032",
+      "box": [
+        90,
+        646,
+        300,
+        663
+      ],
+      "text": "Macallan 18y Double cask"
+    },
+    {
+      "id": "L033",
+      "box": [
+        448,
+        646,
+        505,
+        661
+      ],
+      "text": "49,000"
+    },
+    {
+      "id": "L034",
+      "box": [
+        90,
+        669,
+        299,
+        688
+      ],
+      "text": "Macallan 18y Sherry cask"
+    },
+    {
+      "id": "L035",
+      "box": [
+        448,
+        669,
+        503,
+        684
+      ],
+      "text": "55,000"
+    },
+    {
+      "id": "L036",
+      "box": [
+        538,
+        274,
+        790,
+        294
+      ],
+      "text": "Cragganmore 12y (크라겐모어)"
+    },
+    {
+      "id": "L037",
+      "box": [
+        538,
+        301,
+        828,
+        319
+      ],
+      "text": "Tormore Tempranillo Cask (토모어)"
+    },
+    {
+      "id": "L038",
+      "box": [
+        540,
+        325,
+        766,
+        344
+      ],
+      "text": "Glenrothes 12y (글렌로시스)"
+    },
+    {
+      "id": "L039",
+      "box": [
+        540,
+        350,
+        769,
+        370
+      ],
+      "text": "Glenallachie 8y (글렌알라키)"
+    },
+    {
+      "id": "L040",
+      "box": [
+        539,
+        376,
+        674,
+        393
+      ],
+      "text": "Glenallachie 12y"
+    },
+    {
+      "id": "L041",
+      "box": [
+        539,
+        399,
+        675,
+        417
+      ],
+      "text": "Glenallachie 15y"
+    },
+    {
+      "id": "L042",
+      "box": [
+        540,
+        423,
+        739,
+        436
+      ],
+      "text": "Glenallachie 2014 Sinteis"
+    },
+    {
+      "id": "L043",
+      "box": [
+        540,
+        446,
+        788,
+        465
+      ],
+      "text": "Glenfarclas 105(글렌파클라스)"
+    },
+    {
+      "id": "L044",
+      "box": [
+        539,
+        472,
+        667,
+        490
+      ],
+      "text": "Glenfarclas 10y"
+    },
+    {
+      "id": "L045",
+      "box": [
+        539,
+        496,
+        667,
+        513
+      ],
+      "text": "Glenfarclas 15y"
+    },
+    {
+      "id": "L046",
+      "box": [
+        540,
+        521,
+        694,
+        539
+      ],
+      "text": "Tamdhu 12y (탐듀)"
+    },
+    {
+      "id": "L047",
+      "box": [
+        539,
+        545,
+        641,
+        561
+      ],
+      "text": "Tamdhu 15y"
+    },
+    {
+      "id": "L048",
+      "box": [
+        540,
+        569,
+        719,
+        589
+      ],
+      "text": "Benriach 12y (벤리악)"
+    },
+    {
+      "id": "L049",
+      "box": [
+        541,
+        593,
+        736,
+        613
+      ],
+      "text": "Aberlour 12y (아벨라워)"
+    },
+    {
+      "id": "L050",
+      "box": [
+        541,
+        620,
+        736,
+        638
+      ],
+      "text": "Aberlour 14y (아벨라워)"
+    },
+    {
+      "id": "L051",
+      "box": [
+        541,
+        644,
+        788,
+        663
+      ],
+      "text": "Aberlour A'Bunadh (아부나흐)"
+    },
+    {
+      "id": "L052",
+      "box": [
+        540,
+        666,
+        675,
+        686
+      ],
+      "text": "Royal Brackla"
+    },
+    {
+      "id": "L053",
+      "box": [
+        897,
+        275,
+        956,
+        290
+      ],
+      "text": "15,000"
+    },
+    {
+      "id": "L054",
+      "box": [
+        897,
+        299,
+        955,
+        315
+      ],
+      "text": "28,000"
+    },
+    {
+      "id": "L055",
+      "box": [
+        899,
+        325,
+        956,
+        341
+      ],
+      "text": "15,000"
+    },
+    {
+      "id": "L056",
+      "box": [
+        897,
+        351,
+        953,
+        366
+      ],
+      "text": "15,000"
+    },
+    {
+      "id": "L057",
+      "box": [
+        897,
+        376,
+        955,
+        392
+      ],
+      "text": "18,000"
+    },
+    {
+      "id": "L058",
+      "box": [
+        897,
+        400,
+        956,
+        415
+      ],
+      "text": "23,000"
+    },
+    {
+      "id": "L059",
+      "box": [
+        897,
+        423,
+        955,
+        438
+      ],
+      "text": "25,000"
+    },
+    {
+      "id": "L060",
+      "box": [
+        897,
+        448,
+        953,
+        461
+      ],
+      "text": "25,000"
+    },
+    {
+      "id": "L061",
+      "box": [
+        897,
+        472,
+        955,
+        488
+      ],
+      "text": "14,000"
+    },
+    {
+      "id": "L062",
+      "box": [
+        897,
+        496,
+        953,
+        512
+      ],
+      "text": "17,000"
+    },
+    {
+      "id": "L063",
+      "box": [
+        897,
+        519,
+        955,
+        536
+      ],
+      "text": "16,000"
+    },
+    {
+      "id": "L064",
+      "box": [
+        897,
+        545,
+        955,
+        561
+      ],
+      "text": "25,000"
+    },
+    {
+      "id": "L065",
+      "box": [
+        897,
+        569,
+        955,
+        585
+      ],
+      "text": "16,000"
+    },
+    {
+      "id": "L066",
+      "box": [
+        897,
+        594,
+        953,
+        608
+      ],
+      "text": "16,000"
+    },
+    {
+      "id": "L067",
+      "box": [
+        897,
+        620,
+        956,
+        635
+      ],
+      "text": "23,000"
+    },
+    {
+      "id": "L068",
+      "box": [
+        897,
+        644,
+        955,
+        659
+      ],
+      "text": "26,000"
+    },
+    {
+      "id": "L069",
+      "box": [
+        896,
+        664,
+        963,
+        682
+      ],
+      "text": "15,000"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 2
+}
