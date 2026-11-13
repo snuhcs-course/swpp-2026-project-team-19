@@ -47,7 +47,11 @@ data class MergedLine(
 )
 
 /** One serving option the owner will publish. */
-data class ReviewOption(val volume: Double = 0.0, val price: Double = 0.0, val bottle: Boolean = false)
+data class ReviewOption(
+    val volume: Double = 0.0, val price: Double = 0.0, val bottle: Boolean = false,
+    // Real extracted option identity survives edits/removal; fixtures leave it null.
+    val sourceOptionId: String? = null,
+)
 
 /** The fields that "분류 변경" stores so that changing back restores the original options. */
 data class ClassificationSnapshot(
