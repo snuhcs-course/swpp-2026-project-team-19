@@ -2,7 +2,7 @@
 
 from contextlib import nullcontext
 from datetime import datetime, timedelta, timezone
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import func, select
@@ -782,3 +782,125 @@ def test_repeated_conflicts_are_503_and_roll_everything_back(client, db_session,
     assert error(response) == (503, "TEMPORARY_WRITE_CONFLICT")
     assert db_session.scalar(select(func.count()).select_from(Product)) == count
     assert menu_of(client, bar, operator)["menuVersion"] == 4
+
+
+# ---- Bar-only entries / operator moderation (#152) ----
+
+
+def test_owner_beer_is_bar_local_and_never_catalog_searchable(client, db_session, supabase, bar):
+    from app.models import BarLocalMenuItem
+    owner = owner_of(db_session, supabase, bar)
+    before_count = db_session.scalar(select(func.count()).select_from(Product))
+    body = {
+        "menuVersion": 4,
+        "localItem": {"category": "맥주"},
+        "displayName": "맥주 1",
+        "options": [option(price=8000, label=None, pour=None)],
+    }
+    response = add(client, bar.id, body, owner)
+    assert response.status_code == 201, response.text
+    menu = response.json()
+    added = next(i for i in menu["items"] if i["displayName"] == "맥주 1")
+    assert (added["category"], added["catalogMatched"], added["catalogReviewStatus"]) == (
+        "맥주", False, None
+    )
+    assert str(added["productId"]) == added["barMenuItemId"]
+    assert db_session.get(BarLocalMenuItem, UUID(added["barMenuItemId"])) is not None
+    assert db_session.scalar(select(func.count()).select_from(Product)) == before_count
+    public = menu_of(client, bar, {})
+    assert any(row["barMenuItemId"] == added["barMenuItemId"] for row in public["items"])
+    result = client.get("/api/search/bars", params={"productId": added["productId"]})
+    assert result.status_code == 200
+    assert result.json()["items"] == []
+
+
+def test_owner_can_change_catalog_entry_category_on_only_this_bar(
+    client, db_session, supabase, bar, glenfiddich
+):
+    owner = owner_of(db_session, supabase, bar)
+    before = menu_of(client, bar, owner)
+    old = item_of(before, glenfiddich[12])
+    response = edit(client, bar.id, old["barMenuItemId"], {
+        "menuVersion": 4, "displayName": "맥주로 표기 변경",
+        "category": "맥주",
+        "options": [option(price=18000)],
+    }, owner)
+    assert response.status_code == 200, response.text
+    changed = next(i for i in response.json()["items"] if i["displayName"] == "맥주로 표기 변경")
+    assert (changed["category"], changed["catalogMatched"]) == ("맥주", False)
+    db_session.refresh(glenfiddich[12])
+    assert glenfiddich[12].category == "whisky"
+    assert all(i["productId"] != str(glenfiddich[12].id) for i in response.json()["items"])
+    assert item_of(response.json(), glenfiddich[15])["barMenuItemId"] == (
+        item_of(before, glenfiddich[15])["barMenuItemId"]
+    )
+    res = edit(client, bar.id, changed["barMenuItemId"], {
+        "menuVersion": 5, "displayName": "새 위스키",
+        "category": "whisky", "options": [option(price=22000)],
+    }, owner)
+    assert res.status_code == 200, res.text
+    new_row = next(i for i in res.json()["items"] if i["displayName"] == "새 위스키")
+    assert (new_row["catalogMatched"], new_row["catalogReviewStatus"]) == (False, "pending")
+    assert client.get("/api/search/bars", params={
+        "productId": new_row["productId"],
+    }).json()["items"] == []
+
+
+def test_owner_local_item_delete_readd_and_reset(client, db_session, supabase, bar):
+    owner = owner_of(db_session, supabase, bar)
+    new = {"menuVersion": 4, "localItem": {"category": "맥주"},
+           "displayName": "맥주 1", "options": [option(price=8000, pour=None)]}
+    result = add(client, bar.id, new, owner)
+    assert result.status_code == 201, result.text
+    first_id = next(i["barMenuItemId"] for i in result.json()["items"] if i["displayName"] == "맥주 1")
+    duplicate = add(client, bar.id, {**new, "menuVersion": 5}, owner)
+    assert error(duplicate) == (409, "MENU_ITEM_EXISTS")
+    assert delete(client, bar.id, first_id, 5, owner).status_code == 200
+    second = add(client, bar.id, {**new, "menuVersion": 6}, owner)
+    assert second.status_code == 201, second.text
+    assert any(i["displayName"] == "맥주 1" for i in second.json()["items"])
+    cleared = reset(client, bar.id, {"menuVersion": 7}, owner)
+    assert cleared.status_code == 200, cleared.text
+    assert cleared.json()["items"] == []
+
+
+def test_pending_whisky_operator_approval_and_nonwhisky_rejection(
+    client, db_session, operator, supabase, bar, glenfiddich
+):
+    owner = owner_of(db_session, supabase, bar)
+    pending = add(client, bar.id, {
+        "menuVersion": 4, "localItem": {"category": "whisky"},
+        "displayName": "미등록 위스키",
+        "options": [option(price=28000)],
+    }, owner)
+    assert pending.status_code == 201, pending.text
+    item = next(i for i in pending.json()["items"] if i["displayName"] == "미등록 위스키")
+    target = f"/api/bars/{bar.id}/menu/local-items/{item['barMenuItemId']}/approve"
+    approval = {"menuVersion": 5, "productId": str(glenfiddich[15].id)}
+    assert client.post(target, json=approval, headers=owner).status_code == 403
+    assert error(client.post(target, json=approval, headers=operator)) == (409, "MENU_ITEM_EXISTS")
+    product = make_glenfiddich_18(db_session, glenfiddich)
+    db_session.commit()
+    approved = client.post(target, json={
+        "menuVersion": 5, "productId": str(product.id),
+    }, headers=operator)
+    assert approved.status_code == 200, approved.text
+    new_item = item_of(approved.json(), product)
+    assert (new_item["catalogMatched"], new_item["category"]) == (True, "whisky")
+    assert all(x["displayName"] != "미등록 위스키" or x["catalogMatched"]
+               for x in approved.json()["items"])
+    found = client.get("/api/search/bars", params={"productId": str(product.id)}).json()
+    assert any(x["barId"] == str(bar.id) for x in found["items"])
+
+    beer = add(client, bar.id, {
+        "menuVersion": 6, "localItem": {"category": "맥주"},
+        "displayName": "승인 불가 맥주",
+        "options": [option(price=7000, pour=None)],
+    }, owner)
+    assert beer.status_code == 201, beer.text
+    beer_id = next(i["barMenuItemId"] for i in beer.json()["items"]
+                   if i["displayName"] == "승인 불가 맥주")
+    assert error(client.post(
+        f"/api/bars/{bar.id}/menu/local-items/{beer_id}/approve",
+        json={"menuVersion": 7, "productId": str(product.id)}, headers=operator,
+    )) == (409, "NOT_PENDING_WHISKY")
