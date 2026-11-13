@@ -54,19 +54,33 @@ class NewMenuProduct(_Strict):
     aliases: list[ProductAliasInput] = Field(default_factory=list)
 
 
+class LocalMenuInput(_Strict):
+    category: str = Field(min_length=1, max_length=30, description="Store-only category; whisky requests operator approval")
+
+
 class MenuItemAddRequest(_Strict):
     menuVersion: int | None = Field(description="`menuVersion` of the menu the edit was made on; null without one")
     productId: UUID | None = Field(default=None, description="An active catalog product; or send `newProduct`")
     newProduct: NewMenuProduct | None = None
+    localItem: LocalMenuInput | None = None
     displayName: str | None = Field(
         default=None, min_length=1, max_length=200, description="Name on the menu; null for the product's name"
     )
     options: Options
 
 
+class LocalMenuApprovalRequest(_Strict):
+    """Operator approval: turn this bar's pending whisky into an approved catalog link."""
+    menuVersion: int
+    productId: UUID | None = None
+    newProduct: NewMenuProduct | None = None
+
+
 class MenuItemUpdateRequest(_Strict):
     menuVersion: int = Field(description="`menuVersion` of the menu the edit was made on")
     displayName: str = Field(min_length=1, max_length=200, description="Name on the menu")
+    category: str | None = Field(default=None, min_length=1, max_length=30,
+        description="Category for this bar only; changing canonical item type detaches it into a local menu item")
     options: Options
 
 
