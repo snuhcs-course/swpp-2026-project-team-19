@@ -92,7 +92,11 @@ class LivePhotoReviewRepository(
         val restored = chosen.copy(items = chosen.items.map { old ->
             val fresh = currentItems.getValue(old.id)
             old.copy(sourcePhotoUrl = fresh.sourcePhotoUrl, sourceBox = fresh.sourceBox,
-                raw = fresh.raw, recognizedOffers = fresh.recognizedOffers)
+                raw = fresh.raw, recognizedOffers = fresh.recognizedOffers,
+                // Candidate prices and OCR identities always come from the current
+                // server snapshot; a saved draft must not mask a price conflict.
+                existingPriceByProductId = fresh.existingPriceByProductId,
+                primarySourceOptionId = old.primarySourceOptionId ?: fresh.primarySourceOptionId)
         }, modal = null, typingSnapshots = emptyMap())
         loaded = response
         return restored
