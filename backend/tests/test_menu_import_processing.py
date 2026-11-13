@@ -402,6 +402,9 @@ def test_line_naming_two_products_is_stored_as_ambiguous(client, db_session, ima
         (1, buffalo.id, "Buffalo Trace", "S1"),
         (2, makers.id, "Maker's Mark", "S1"),
     ]
+    # I4-P18: no brand, age or edition is read from a line of two products ("Buffalo Trace" with the
+    # edition "/ Maker's Mark" would be a draft that fuses them)
+    assert (item.extracted_brand_name, item.extracted_age_years, item.extracted_edition_name) == (None, None, None)
 
 
 # ---- I4-P18: product parts read from an unconfirmed line fill the new-product form ----

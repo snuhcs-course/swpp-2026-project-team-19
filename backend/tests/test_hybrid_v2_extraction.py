@@ -81,6 +81,33 @@ def test_other_lines_keep_name_category_options_and_box_in_output_order():
                                     {"optionLabel": "병", "pourMl": None, "priceKrw": 45000}]
 
 
+def test_rows_that_are_neighbours_only_after_filtering_are_not_merged():
+    # glass row, a line of another category, bottle row of the same name: two menu lines, not one
+    out = convert({"items": [
+        item("페른홀로우 12년", "whisky", 15000, "glass", name_lines=["L002"]),
+        item("페른홀로우 하이볼", "cocktail", 12000, "glass", name_lines=["L004"]),
+        item("페른홀로우 12년", "whisky", 150000, "bottle", name_lines=["L003"]),
+        item("하우스 와인", "other", 9000, "glass"),
+        item("페른홀로우 하이볼", "cocktail", 90000, "bottle", name_lines=["L005"]),
+    ]})
+    assert [(i["itemOrder"], i["rawText"], [o["optionLabel"] for o in i["options"]]) for i in out["items"]] == [
+        (1, "페른홀로우 12년", ["잔"]), (2, "페른홀로우 12년", ["병"])]
+    assert [(s["itemOrder"], s["nameLines"]) for s in out["itemSources"]] == [(1, ["L002"]), (2, ["L003"])]
+    assert [(o["itemOrder"], o["rawText"], [x["optionLabel"] for x in o["options"]], o["nameLines"])
+            for o in out["otherItems"]] == [
+        (1, "페른홀로우 하이볼", ["잔"], ["L004"]), (2, "하우스 와인", ["잔"], []), (3, "페른홀로우 하이볼", ["병"], ["L005"])]
+
+
+def test_adjacent_glass_and_bottle_rows_are_still_one_line():
+    out = convert(V2_OUTPUT)
+    assert [[o["optionLabel"] for o in i["options"]] for i in out["items"]] == [["잔", "병"]]
+    wine = next(o for o in out["otherItems"] if o["rawText"] == "하우스 와인")
+    assert [o["optionLabel"] for o in wine["options"]] == ["잔", "병"]
+    # a whisky row and a non-whisky row of the same name are never one line
+    out = convert({"items": [item("A", "whisky", 9000, "glass"), item("A", "other", 90000, "bottle")]})
+    assert len(out["items"]) == 1 and len(out["otherItems"]) == 1
+
+
 def test_a_cocktail_named_like_a_whisky_is_not_an_item():
     result = convert({"items": [item("페른홀로우 12년", "cocktail")]})
     assert result["items"] == [] and [o["rawText"] for o in result["otherItems"]] == ["페른홀로우 12년"]

@@ -659,7 +659,9 @@ extracted_options #2
 > - **실패:** 임베딩 단계의 예외는 로그만 남기고 그 앞 단계 결과를 그대로 저장한다. 등록 작업은 실패하지 않는다.
 > - **고객 검색에서의 재사용:** 고객 검색(API 명세 3.10.1)의 5단계 `similar`(`SEARCH_SIMILAR_ENABLED`, 기본 꺼짐, `backend/app/services/search_similar.py`)도 같은 `tfidf` 계산과 인덱스 캐시(`CatalogIndexCache`)를 쓴다. `EMBEDDING_ENABLED`와는 따로 켜고 끈다. 고객 검색은 검색용 별칭만 쓰므로 그 인덱스는 활성 상품의 표시명과 `is_searchable = true` 별칭 원문만 담고(버전도 검색용 별칭만 센다), 정규화하지 않은 검색어(앞뒤 공백만 지운 원문)와 비교한다. brand·alias_exact·partial이 아무것도 찾지 못한 검색에만 실행되며, 하한 `SEARCH_SIMILAR_MIN_SIMILARITY`(기본 0.38) 이상인 상품을 최대 5개 돌려준다.
 
-> **안전 규칙과 위스키 용어 사전 (I3-A4):** (1) S3는 숫자 앞 이름(앞의 `더`/`The`와 문장부호 제외)이 3음절 이하 한글일 때 1음절 차이로 확정하지 않고 후보도 내지 않는다(`달모어 18` ≠ `보모어 18`, `더 달무어 18`, `아드백-10`). (2) S2가 에디션 토큰으로 상품 하나를 골랐어도 그 상품의 `edition_name`에 줄에 없는 단어가 있으면(cask·oak·finish 같은 중립어 제외) 확정하지 않고 그 상품 하나를 확인 권장(`confirmRecommended`)으로 남기며, 빠진 단어를 evidence `editionOnlyInProduct`에 적는다(`anCnoc Sherry` → anCnoc Peated Sherry Cask). 줄에 사전이 모르는 한글 단어가 있으면(`비노 바리끄`) 사전에 있는 영어 단어만 빠진 것으로 센다. 줄에 연수가 아닌 숫자(연도, `#2`, `16.2`. 도수·용량·잔·가격 표기인 `46%`, `700 ml`, `16,000원`은 제외)가 있으면, 이름에 숫자가 있는데 줄의 숫자가 하나도 없는 상품은 후보에서 뺀다(`클래식컷 2025` ≠ Classic Cut 2020). (3) 줄에 다시 쓴 브랜드명(`Aberlour 12 (아벨라워)`, `(컴파스 박스)`처럼 두 토큰에 걸쳐도)은 에디션 토큰이 아니고, 브랜드명뿐인 이름 변형은 다른 이름이 아무것도 못 찾을 때만 쓴다. 연수가 없을 때 확인할 수 없는 짧은 영문자 토큰(`DR`)은 상품을 지우지 않는다(숫자는 지운다). (4) S1–S3가 확정하지 못한 줄은 `backend/app/matching/vocab_ko_en.json`의 한글 위스키 용어를 영어로 바꿔(셰리 캐스크 → sherry cask, 더블우드 → double wood) 한 번 더 찾고, 확정되거나, 후보가 없던 줄에 후보가 생기고 1순위 후보에 맞는 에디션 토큰이 있을 때만(브랜드+연수만 맞는 목록은 버림) 그 결과를 쓴다. 이때 후보 evidence `vocabulary`에 바꾼 이름이 들어가고 `rule`은 그 후보를 찾은 단계 그대로다. 사전의 영어 단어는 카탈로그 에디션·표준명에서만 골랐고, 한글 표기를 만든 경위와 한계는 파일의 `about`에 있다.
+> **안전 규칙과 위스키 용어 사전 (I3-A4):** (1) S3는 숫자 앞 이름(앞의 `더`/`The`와 문장부호 제외)이 3음절 이하 한글일 때 1음절 차이로 확정하지 않고 후보도 내지 않는다(`달모어 18` ≠ `보모어 18`, `더 달무어 18`, `아드백-10`). (2) S2가 에디션 토큰으로 상품 하나를 골랐어도 그 상품의 `edition_name`에 줄에 없는 단어가 있으면(cask·oak·finish 같은 중립어 제외) 확정하지 않고 그 상품 하나를 확인 권장(`confirmRecommended`)으로 남기며, 빠진 단어를 evidence `editionOnlyInProduct`에 적는다(`anCnoc Sherry` → anCnoc Peated Sherry Cask). 줄에 사전이 모르는 한글 단어가 있으면(`비노 바리끄`) 사전에 있는 영어 단어만 빠진 것으로 센다. 줄에 연수가 아닌 숫자(연도, `#2`, `16.2`. 도수·용량·잔·가격 표기인 `46%`, `700 ml`, `16,000원`은 제외)가 있으면, 이름에 숫자가 있는데 줄의 숫자가 하나도 없는 상품은 후보에서 뺀다(`클래식컷 2025` ≠ Classic Cut 2020). (3) 줄에 다시 쓴 브랜드명(`Aberlour 12 (아벨라워)`, `(컴파스 박스)`처럼 두 토큰에 걸쳐도)은 에디션 토큰이 아니고, 브랜드명뿐인 이름 변형은 다른 이름이 아무것도 못 찾을 때만 쓴다. 연수가 없을 때 어느 상품에도 맞지 않는 짧은 영문자 토큰(`DR`)은 상품을 지우지 않는다(숫자는 지운다). 어느 상품에 맞으면 다른 토큰처럼 상품을 가른다(아래 I4 규칙). (4) S1–S3가 확정하지 못한 줄은 `backend/app/matching/vocab_ko_en.json`의 한글 위스키 용어를 영어로 바꿔(셰리 캐스크 → sherry cask, 더블우드 → double wood) 한 번 더 찾고, 확정되거나, 후보가 없던 줄에 후보가 생기고 1순위 후보에 맞는 에디션 토큰이 있을 때만(브랜드+연수만 맞는 목록은 버림) 그 결과를 쓴다. 이때 후보 evidence `vocabulary`에 바꾼 이름이 들어가고 `rule`은 그 후보를 찾은 단계 그대로다. 사전의 영어 단어는 카탈로그 에디션·표준명에서만 골랐고, 한글 표기를 만든 경위와 한계는 파일의 `about`에 있다.
+
+> **일반 단어와 짧은 영문자 토큰 (I4):** S2·S2b의 에디션 토큰 규칙 두 가지. (1) 한두 글자 영문자 토큰(`PX`, `CS`, `DR`)은 별칭 안 어디에 들어 있는지로 맞추지 않고, 상품 표준명의 온전한 단어일 때만 그 상품에 맞는다. `CS`는 Cask Strength, `DR`은 Distillers Reserve로 읽는다(`라프로익 10년 CS` → Laphroaig 10 Cask Strength 확정, `Yamazaki Dr` → Yamazaki Distillers Reserve 확정). 풀어 쓴 단어는 `editionOnlyInProduct` 계산에서도 줄에 있는 것으로 센다. (2) 어느 위스키에나 붙는 단어(`싱글몰트`, `스카치`, `위스키`, `버번`, `캐스크`, `오크`, `피니시`, `single malt`, `the` 등, `staged.py`의 `_GENERIC_TOKENS`)가 그 브랜드의 어떤 상품에도 맞지 않으면 빼고 본다. S2b가 켜져 있고 줄이 확정되지 않았을 때만 적용한다. 남은 토큰에 일반 단어가 아닌 것이 있고 그 토큰들이 상품 하나에 모두 맞으면 그 상품을, 남은 토큰이 없고 연수가 있으면 그 연수의 에디션 없는 상품 하나를 확인 권장(`confirmRecommended`)으로 남기고 뺀 단어를 evidence `ignoredWords`에 적는다(`글렌피딕 12년 싱글몰트` → Glenfiddich 12 권장). 자동 확정(`exact_match`)은 하지 않는다. 다른 메뉴에서는 그 단어가 에디션일 수 있기 때문이다. 연수 없이 일반 단어만 있는 줄은 아무것도 고르지 않고, 어느 상품에 맞는 일반 단어(`Cask Strength`의 `cask`)는 빼지 않는다. 측정(규칙만, LLM 층 없음): dev 836줄 정답 618 → 623, I3 675줄 470 → 472(as-is), 오매칭과 틀린 권장은 그대로.
 
 ```text
 for each extracted_item:
@@ -1633,9 +1635,9 @@ products
 | `extracted_line_type` | AI가 1차 분류한 값을 저장하며 검수 후에도 변경하지 않음 |
 | `corrected_line_type` | 운영자가 최초 역할을 바꾼 경우에만 저장, 그대로 승인하면 null |
 | `extracted_product_name` | AI 추출 직후 |
-| `extracted_brand_name` | AI가 브랜드 표기를 추출한 경우 |
-| `extracted_age_years` | AI가 연수를 추출한 경우, NAS 또는 미인식이면 null |
-| `extracted_edition_name` | AI가 에디션 표기를 추출한 경우 |
+| `extracted_brand_name` | AI가 브랜드 표기를 추출한 경우. 추출이 세 칸(브랜드·연수·에디션)을 모두 비웠고 최초 매칭이 `exact_match`가 아닌 상품 줄은, 최초 후보 생성 때 서버가 `extracted_product_name`에서 읽은 값으로 채운다(I4-P18, 아래 참고) |
+| `extracted_age_years` | AI가 연수를 추출한 경우, NAS 또는 미인식이면 null. 위와 같은 줄은 서버가 이름에서 읽은 연수 |
+| `extracted_edition_name` | AI가 에디션 표기를 추출한 경우. 위와 같은 줄은 서버가 이름에서 읽은 에디션(어휘집이 모두 옮길 수 있으면 영문) |
 | `extracted_abv` | AI가 도수를 추출한 경우 |
 | `extraction_confidence` | AI 추출 직후 |
 | `initial_resolution_status` | 최초 후보 생성 완료 시 `exact_match`, `ambiguous`, `unmatched` 중 하나를 저장하고 검수 후에도 변경하지 않음. `exact_match`를 확정한 규칙은 후보 `evidence.rule`에 남음. 매칭 미실행 항목은 null |
@@ -1645,6 +1647,8 @@ products
 | `review_status` | 초기 `pending`, 검수 후 변경 |
 | `corrected_product_name` | 운영자가 상품명을 수정한 경우 |
 | `reviewed_at` | 검수 완료 시 |
+
+이름에서 읽은 값(I4-P18): 지금 추출(하이브리드 프롬프트)은 브랜드·연수·에디션을 따로 내지 않으므로 세 칸이 비어 있다. 확정되지 않은 상품 줄은 검수에서 새 상품 등록으로 갈 수 있어, 서버가 규칙 매칭과 같은 방식으로 줄 이름을 읽어 세 칸을 채운다(`app/matching/product_draft.py`). 카탈로그 브랜드로 시작하는 이름이면 그 브랜드 표기, 단위가 붙은 연수(또는 브랜드 바로 뒤의 8 이상 숫자), 나머지가 에디션이다. 추출이 한 칸이라도 채운 줄, `exact_match` 줄, 두 상품이 한 줄에 적힌 줄(`evidence.multiProduct`)은 건드리지 않는다. 이 값은 모델이 읽은 값이 아니라 이름을 규칙으로 나눈 값이므로 틀릴 수 있고, 매칭 결과(`initial_resolution_status`, 후보)에는 쓰이지 않는다. 검수 응답의 `extractedBrandName`·`extractedAgeYears`·`extractedEditionName`과 `newProductDraft`가 이 칸을 그대로 보여 준다.
 
 ### 18.6 extracted_options
 
