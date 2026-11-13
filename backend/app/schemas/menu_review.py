@@ -105,6 +105,12 @@ class CreateProduct(_ProductDecision):
     aliases: list[ProductAliasInput] = Field(default_factory=list)
 
 
+class CreateLocalMenuItem(_ProductDecision):
+    """Publish an owner-reviewed item only on this bar, never as a catalog product."""
+    action: Literal["create_local_menu_item"]
+    category: str = Field(min_length=1, max_length=30)
+
+
 class ConfirmNonProduct(_Strict):
     action: Literal["confirm_non_product"]
     extractedItemId: UUID
@@ -118,9 +124,10 @@ class Reject(_Strict):
 
 
 ItemDecision = Annotated[
-    SelectExistingProduct | CreateProduct | ConfirmNonProduct | Reject, Field(discriminator="action")
+    SelectExistingProduct | CreateProduct | CreateLocalMenuItem | ConfirmNonProduct | Reject,
+    Field(discriminator="action")
 ]
-ProductDecision = SelectExistingProduct | CreateProduct
+ProductDecision = SelectExistingProduct | CreateProduct | CreateLocalMenuItem
 
 
 class ChangeDecision(_Strict):
@@ -134,7 +141,7 @@ class ReviewAndApplyRequest(_Strict):
     changeDecisions: list[ChangeDecision] = Field(description="Exactly one decision for every proposed change")
 
 
-register_union_tags("select_existing_product", "create_product", "confirm_non_product", "reject", "existing", "new")
+register_union_tags("select_existing_product", "create_product", "create_local_menu_item", "confirm_non_product", "reject", "existing", "new")
 
 
 # ---- Response ----
