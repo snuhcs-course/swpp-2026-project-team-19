@@ -39,15 +39,20 @@ internal fun mapServerPhotoReview(
     val bar = snapshot.bars.firstOrNull { it.barId == response.barId }
         ?: error("검수할 매장 정보를 불러오지 못했어요.")
     val defaultPour = bar.defaultPourMl ?: 30
-    val lines = response.images.sortedBy { it.imageOrder }.flatMap { image ->
+    val extracted = response.images.sortedBy { it.imageOrder }.flatMap { image ->
         image.items.sortedBy { it.itemOrder }.map { dto ->
-            mapServerReviewItem(dto, image.imageOrder, image.imageUrl, bar, snapshot, defaultPour)
+            dto to mapServerReviewItem(
+                dto, image.imageOrder, image.imageUrl, bar, snapshot, defaultPour
+            )
         }
     }
-    require(lines.map { it.id }.distinct().size == lines.size) {
+    require(extracted.map { it.second.id }.distinct().size == extracted.size) {
         "서버에서 중복된 메뉴 검수 항목을 받았어요."
     }
-    return PhotoReviewState(items = lines, defaultPour = defaultPour.toDouble())
+    return PhotoReviewState(
+        items = groupLiveWhiskyReview(extracted, snapshot, response.barId),
+        defaultPour = defaultPour.toDouble(),
+    )
 }
 
 private fun isBottle(label: String?): Boolean = isBottleServingLabel(label)
