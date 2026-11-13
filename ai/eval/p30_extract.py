@@ -359,6 +359,16 @@ def check_frozen_code(repo: Path) -> dict[str, str]:
     return actual
 
 
+def released_matching(repo: Path) -> dict[str, dict[str, str | None]]:
+    """The released files with their I3 pin and the SHA-256 they have now (None when missing)."""
+    out = {}
+    for rel in RELEASED_MATCHING:
+        path = repo / rel
+        out[rel] = {"i3_sha256": FROZEN_MATCHING[rel],
+                    "sha256": sha256_bytes(path.read_bytes()) if path.is_file() else None}
+    return out
+
+
 def check_raw_files(repo: Path, pins: dict[str, str], what: str) -> None:
     """SHA-256 of the raw file bytes against `pins`. Raises Stop on a missing or changed file, and
     says so when the only change is CRLF line ends (a Windows checkout with core.autocrlf=true)."""
@@ -697,8 +707,11 @@ def load_manifest(out: Path, config: dict, frozen: dict, photos: list[Photo]) ->
                 "frozen_code_reference": "5d49c8a (clova.py: 1e149d4, deadline_s path only)",
                 "frozen_code_equivalent": FROZEN_CODE_EQUIVALENT,
                 "frozen_eval": FROZEN_EVAL, "frozen_eval_reference": "score.py: 15b1eff, e2e_match.py: 5d49c8a",
-                "frozen_raw": FROZEN_RAW, "frozen_matching": FROZEN_MATCHING,
+                "frozen_raw": FROZEN_RAW,
+                "frozen_matching": {rel: pin for rel, pin in FROZEN_MATCHING.items() if rel not in RELEASED_MATCHING},
                 "frozen_matching_reference": "ai/docs/i3_eval_freeze.md 4.5 (file SHA-256, raw bytes)",
+                # not checked: the I3 pin and what the file is in this checkout
+                "released_matching": released_matching(REPO_ROOT),
                 "photo_hashes_file": "ai/eval/i3_photo_sha256.json",
                 "photo_hashes_file_sha256": None, "photos": inputs, "ocr_caches": {}, "commands": []}
     manifest = json.loads(path.read_text(encoding="utf-8"))
@@ -770,7 +783,8 @@ def run_command(args: argparse.Namespace, secrets: Secrets, clients: Clients | N
 
     todo = plan(photos, args.runs, out, data_dir)
     print(f"photos verified: {len(photos)} (SHA-256 = {args.hashes.name}); frozen code and prompt {PROMPT_VERSION}, "
-          f"scoring code, label/gold/hash files (raw bytes) and matching files (4.5) OK")
+          f"scoring code, label/gold/hash files (raw bytes) and matching files (4.5) OK"
+          + (f", except {', '.join(RELEASED_MATCHING)}: released from the freeze, NOT checked" if RELEASED_MATCHING else ""))
     print(f"OCR caches: {len(photos) - len(todo['no_ocr_cache'])}/{len(photos)} present"
           + (f"; CLOVA calls needed: {todo['clova_calls']}" if todo["no_ocr_cache"] else ""))
     for k, files in todo["todo"].items():
